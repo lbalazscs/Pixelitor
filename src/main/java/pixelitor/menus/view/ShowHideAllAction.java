@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,17 +20,16 @@ package pixelitor.menus.view;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.StatusBar;
+import pixelitor.gui.WorkSpace;
 import pixelitor.layers.LayersContainer;
 
 import javax.swing.*;
 
 /**
- * An either "Show Hidden" or "Hide All" {@link Action},
- * depending on the current visibility
+ * The {@link Action} that toggles the visibility of the
+ * histograms, layers, status bar, and tools at the same time.
  */
 public class ShowHideAllAction extends ShowHideAction {
-    public static final Action INSTANCE = new ShowHideAllAction();
-
     private boolean histogramsWereShown = false;
     private boolean layersWereShown = false;
     private boolean statusBarWasShown = false;
@@ -38,8 +37,8 @@ public class ShowHideAllAction extends ShowHideAction {
 
     private boolean allHidden = false;
 
-    private ShowHideAllAction() {
-        super("Show Hidden", "Hide All");
+    public ShowHideAllAction(WorkSpace workSpace) {
+        super("Show Hidden", "Hide All", workSpace);
     }
 
     @Override
@@ -77,23 +76,23 @@ public class ShowHideAllAction extends ShowHideAction {
         boolean showTools = show && (toolsWereShown || toolsAreShown);
 
         if (histogramsAreShown != showHistograms) {
-            ShowHideHistogramsAction.INSTANCE.updateText(show);
-            pw.setHistogramsVisibility(showHistograms, false);
+            workSpace.getHistogramsAction().updateText(show);
+            pw.setHistogramsVisible(showHistograms, false);
         }
 
         if (layersAreShown != showLayers) {
-            ShowHideLayersAction.INSTANCE.updateText(show);
-            pw.setLayersVisibility(showLayers, false);
+            workSpace.getLayersAction().updateText(show);
+            pw.setLayersVisible(showLayers, false);
         }
 
         if (statusBarIsShown != showStatusBar) {
-            ShowHideStatusBarAction.INSTANCE.updateText(show);
-            pw.setStatusBarVisibility(showStatusBar, false);
+            workSpace.getStatusBarAction().updateText(show);
+            pw.setStatusBarVisible(showStatusBar, false);
         }
 
         if (toolsAreShown != showTools) {
-            ShowHideToolsAction.INSTANCE.updateText(show);
-            pw.setToolsVisibility(showTools, false);
+            workSpace.getToolsAction().updateText(show);
+            pw.setToolsVisible(showTools, false);
         }
 
         pw.getContentPane().revalidate();

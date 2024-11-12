@@ -97,7 +97,7 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
      * Indicates whether this parameter should be randomized when
      * the "Randomize" button is clicked.
      */
-    boolean canRandomize();
+    boolean shouldRandomize();
 
     /**
      * Sets the randomization policy for this parameter.

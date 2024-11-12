@@ -74,7 +74,7 @@ public class PenTool extends Tool {
     private final JCheckBox rubberBandCB = new JCheckBox("", true);
 
     private PenToolMode mode = BUILD;
-    private boolean ignoreModeChooser = false;
+    private boolean suppressModeChangeEvents = false;
 
     public static Path path;
 
@@ -87,7 +87,7 @@ public class PenTool extends Tool {
     private static final Action traceWithSmudgeAction = new TraceAction(
         "Stroke with Smudge", Tools.SMUDGE);
 
-    private static final Action deletePath = new PAction(
+    private static final Action deletePathAction = new PAction(
         "Delete Path", PenTool::deletePath);
 
     public PenTool() {
@@ -99,15 +99,15 @@ public class PenTool extends Tool {
         toSelectionAction = new PAction("Convert to Selection", this::convertToSelection);
         exportSVGAction = new PAction("Export SVG...", PenTool::exportSVG);
 
-        enableActions(false);
+        setActionsEnabled(false);
     }
 
     @Override
     public void initSettingsPanel(ResourceBundle resources) {
-        JComboBox<PenToolMode> modeChooser = new JComboBox<>(modeModel);
+        JComboBox<PenToolMode> modeSelector = new JComboBox<>(modeModel);
 
-        modeChooser.addActionListener(e -> onModeChooserAction());
-        settingsPanel.addComboBox("Mode:", modeChooser, "modeChooser");
+        modeSelector.addActionListener(e -> handleUIModeChange());
+        settingsPanel.addComboBox("Mode:", modeSelector, "modeSelector");
 
         settingsPanel.add(rubberBandLabel);
         settingsPanel.add(rubberBandCB);
@@ -120,12 +120,12 @@ public class PenTool extends Tool {
         settingsPanel.addButton(exportSVGAction, "exportSVGButton",
             "Export the path to an SVG file");
         settingsPanel.addButton(traceWithBrushAction, "traceWithBrush",
-            "Stroke the path using the current settings of the Brush Tool");
+            "Stroke the path using the current Brush Tool settings");
         settingsPanel.addButton(traceWithEraserAction, "traceWithEraser",
-            "Stroke the path using the current settings of the Eraser Tool");
+            "Stroke the path using the current Eraser Tool settings");
         settingsPanel.addButton(traceWithSmudgeAction, "traceWithSmudge",
-            "Stroke the path using the current settings of the Smudge Tool");
-        settingsPanel.addButton(deletePath, "deletePath",
+            "Stroke the path using the current Smudge Tool settings");
+        settingsPanel.addButton(deletePathAction, "deletePath",
             "Delete the path");
     }
 
@@ -135,72 +135,69 @@ public class PenTool extends Tool {
 
     // TODO should be private and startMode should be always called instead?
     //   also see changeMode
-    public void setModeChooserCombo(PenToolMode mode) {
+    public void setModeInUI(PenToolMode mode) {
         modeModel.setSelectedItem(mode);
     }
 
-    private void onModeChooserAction() {
-        if (ignoreModeChooser) {
+    private void handleUIModeChange() {
+        if (suppressModeChangeEvents) {
             return;
         }
 
         assert Views.activePathIs(path) :
             "path = " + path + ", active path = " + Views.getActivePath();
 
-        PenToolMode selectedMode = getSelectedMode();
-        if (selectedMode == BUILD) {
-            startBuilding(true);
-        } else {
-            startMode(selectedMode, true);
-        }
+        activateMode(getSelectedMode(), true);
     }
 
-    public void startBuilding(boolean calledFromModeChooser) {
-        startMode(BUILD, calledFromModeChooser);
-    }
-
-    public void startMode(PenToolMode mode, boolean calledFromModeChooser) {
-        if (path == null && mode != BUILD) {
-            if (AppMode.isUnitTesting()) {
-                throw new IllegalStateException("start restricted mode with null path");
-            }
-            if (RandomGUITest.isRunning()) {
-                // can happen when randomizing the tool settings
-                return;
-            }
-            EventQueue.invokeLater(() -> {
-                String requestedAction = mode == EDIT ? "edit" : "transform";
-                Dialogs.showInfoDialog("No Path",
-                    "<html>There is no path to " + requestedAction + ". " +
-                        "You can create a path<ul>" +
-                        "<li>in build mode</li>" +
-                        "<li>by converting a selection into a path</li>" +
-                        "</ul>");
-                setModeChooserCombo(BUILD);
-            });
+    public void activateMode(PenToolMode newMode, boolean userInitiated) {
+        if (path == null && newMode.requiresExistingPath()) {
+            handleInvalidModeChange(newMode);
             return;
         }
 
-        if (!calledFromModeChooser) {
-            ignoreModeChooser = true;
-            setModeChooserCombo(mode);
-            ignoreModeChooser = false;
+        // update the mode combo box if this wasn't trieggered by it
+        if (!userInitiated) {
+            suppressModeChangeEvents = true;
+            setModeInUI(newMode);
+            suppressModeChangeEvents = false;
         }
 
-        if (this.mode != mode) {
-            this.mode.modeEnded(Views.getActiveComp());
-            mode.modeStarted(this.mode);
+        // switch the mode
+        if (this.mode != newMode) {
+            this.mode.modeDeactivated(Views.getActiveComp());
+            newMode.modeActivated(this.mode);
         }
-        this.mode = mode;
+        this.mode = newMode;
 
-        rubberBandLabel.setEnabled(mode == BUILD);
-        rubberBandCB.setEnabled(mode == BUILD);
-
-        Messages.showStatusMessage(mode.getToolMessage());
-        enableActions(hasPath());
+        // additional state updates
+        rubberBandLabel.setEnabled(newMode == BUILD);
+        rubberBandCB.setEnabled(newMode == BUILD);
+        Messages.showStatusMessage(newMode.getToolMessage());
+        setActionsEnabled(hasPath());
         Views.repaintActive();
 
         assert checkPathConsistency();
+    }
+
+    private void handleInvalidModeChange(PenToolMode mode) {
+        if (AppMode.isUnitTesting()) {
+            throw new IllegalStateException("start restricted mode with null path");
+        }
+        if (RandomGUITest.isRunning()) {
+            // can happen when randomizing the tool settings
+            return;
+        }
+        EventQueue.invokeLater(() -> {
+            String action = mode == EDIT ? "edit" : "transform";
+            Dialogs.showInfoDialog("No Path",
+                "<html>There is no path to " + action + ". " +
+                    "You can create a path<ul>" +
+                    "<li>in build mode</li>" +
+                    "<li>by converting a selection into a path</li>" +
+                    "</ul>");
+            setModeInUI(BUILD);
+        });
     }
 
     public PenToolMode getMode() {
@@ -241,10 +238,6 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
 
         Tools.SELECTION.activate();
-    }
-
-    private static void exportSVG() {
-        IO.saveSVG(path.toImageSpaceShape(), null, "path.svg");
     }
 
     @Override
@@ -319,14 +312,14 @@ public class PenTool extends Tool {
             restartMode = true;
             // Even if the mode doesn't change, end it with the
             // old composition and start it with the new one.
-            mode.modeEnded(oldComp);
+            mode.modeDeactivated(oldComp);
         }
 
         super.viewActivated(oldView, newView);
         path = newView.getComp().getActivePath();
 
         if (restartMode) {
-            mode.modeStarted(mode);
+            mode.modeActivated(mode);
         }
 
         assert Views.getActive() == newView;
@@ -351,8 +344,8 @@ public class PenTool extends Tool {
     }
 
     @Override
-    protected void toolStarted() {
-        super.toolStarted();
+    protected void toolActivated() {
+        super.toolActivated();
 
         View view = Views.getActive();
         if (view != null) {
@@ -365,7 +358,7 @@ public class PenTool extends Tool {
             assert path == null;
         }
 
-        mode.modeStarted(null);
+        mode.modeActivated(null);
 
         assert checkPathConsistency();
     }
@@ -401,12 +394,12 @@ public class PenTool extends Tool {
                 path = compPath;
                 PenToolMode preferredMode = compPath.getPreferredPenToolMode();
                 if (preferredMode != null && preferredMode != mode) {
-                    preferredMode.start();
+                    activateMode(preferredMode, false);
                 }
             }
             comp.repaint();
         }
-        enableActions(path != null);
+        setActionsEnabled(path != null);
     }
 
     private static void deletePath() {
@@ -418,13 +411,13 @@ public class PenTool extends Tool {
     public void removePath() {
         Views.setActivePath(null);
         clearToolPath();
-        enableActions(false);
+        setActionsEnabled(false);
     }
 
     private void clearToolPath() {
         path = null;
         if (mode.requiresExistingPath()) {
-            startBuilding(false);
+            activateMode(BUILD, false);
         }
     }
 
@@ -443,14 +436,14 @@ public class PenTool extends Tool {
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
-        mode.modeEnded(Views.getActiveComp());
+    protected void toolDeactivated() {
+        super.toolDeactivated();
+        mode.modeDeactivated(Views.getActiveComp());
 
         assert checkPathConsistency();
     }
 
-    public void enableActions(boolean b) {
+    public void setActionsEnabled(boolean b) {
         toSelectionAction.setEnabled(b);
         exportSVGAction.setEnabled(b);
 
@@ -458,14 +451,14 @@ public class PenTool extends Tool {
         traceWithEraserAction.setEnabled(b);
         traceWithSmudgeAction.setEnabled(b);
 
-        deletePath.setEnabled(b);
+        deletePathAction.setEnabled(b);
     }
 
     public boolean arePathActionsEnabled() {
         return toSelectionAction.isEnabled();
     }
 
-    public boolean showRubberBand() {
+    public boolean showPathPreview() {
         return rubberBand && mode == BUILD;
     }
 
@@ -499,7 +492,7 @@ public class PenTool extends Tool {
         String modeString = preset.get("Mode");
         for (PenToolMode toolMode : MODES) {
             if (toolMode.toString().equals(modeString)) {
-                startMode(toolMode, false);
+                activateMode(toolMode, false);
                 break;
             }
         }
@@ -519,6 +512,10 @@ public class PenTool extends Tool {
     @Override
     public String getStateInfo() {
         return mode + ", hasPath=" + hasPath();
+    }
+
+    private static void exportSVG() {
+        IO.saveSVG(path.toImageSpaceShape(), null, "path.svg");
     }
 
     @Override

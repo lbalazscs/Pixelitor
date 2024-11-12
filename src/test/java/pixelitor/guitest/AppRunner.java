@@ -133,8 +133,8 @@ public class AppRunner {
         if (Language.getCurrent() != Language.ENGLISH) {
             throw new IllegalStateException("language is " + Language.getCurrent());
         }
-        if (EDT.call(() -> ImageArea.currentModeIs(ImageArea.Mode.FRAMES))) {
-            throw new IllegalStateException("frames");
+        if (EDT.call(() -> ImageArea.isCurrentMode(ImageArea.Mode.FRAMES))) {
+            EDT.run(ImageArea::toggleUI);
         }
 
         // initialize the AWT native picker here, if it is used
@@ -893,7 +893,7 @@ public class AppRunner {
         pw.comboBox("typeCB").selectItem(gradientType.toString());
         pw.checkBox("revertCB").check();
 
-        if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
+        if (EDT.getZoomLevelOfActive() != ZoomLevel.ACTUAL_SIZE) {
             // otherwise location on screen can lead to crazy results
             runMenuCommand("Actual Pixels");
         }

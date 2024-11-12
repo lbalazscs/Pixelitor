@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,62 +33,68 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import static java.awt.Cursor.*;
+import static java.awt.Cursor.E_RESIZE_CURSOR;
+import static java.awt.Cursor.NE_RESIZE_CURSOR;
+import static java.awt.Cursor.NW_RESIZE_CURSOR;
+import static java.awt.Cursor.N_RESIZE_CURSOR;
+import static java.awt.Cursor.SE_RESIZE_CURSOR;
+import static java.awt.Cursor.SW_RESIZE_CURSOR;
+import static java.awt.Cursor.S_RESIZE_CURSOR;
+import static java.awt.Cursor.W_RESIZE_CURSOR;
 
 /**
- * The cropping rectangle
+ * The cropping widget with draggable handles for resizing it.
  */
 public class CropBox implements ToolWidget {
+    // transformation modes for user interactions
     private static final int MODE_NONE = 0;
     private static final int MODE_MOVE = 1;
     private static final int MODE_RESIZE = 2;
+    private int transformMode = MODE_NONE;
 
-    private final CropHandle upperLeft;
-    private final CropHandle upper;
-    private final CropHandle upperRight;
+    // crop handles for resizing the crop box
+    private final CropHandle topLeft;
+    private final CropHandle top;
+    private final CropHandle topRight;
     private final CropHandle right;
     private final CropHandle left;
-    private final CropHandle lowerLeft;
-    private final CropHandle lower;
-    private final CropHandle lowerRight;
-
+    private final CropHandle bottomLeft;
+    private final CropHandle bottom;
+    private final CropHandle bottomRight;
     private final List<CropHandle> handles;
 
-    private final PRectangle rect;
+    private final PRectangle cropRect;
     private int dragStartCursor;
     private Rectangle dragStartRect;
-    private Point dragStart;
-
-    // type of user transform
-    private int transformMode = MODE_NONE;
+    private Point dragStartPos;
 
     // the width/height ratio of the selected area
     private double aspectRatio = 0;
 
-    public CropBox(PRectangle rect, View view) {
-        this.rect = rect;
+    public CropBox(PRectangle cropRect, View view) {
+        this.cropRect = cropRect;
 
-        upperLeft = new CropHandle("NW", NW_RESIZE_CURSOR, view);
-        upper = new CropHandle("N", N_RESIZE_CURSOR, view);
-        upperRight = new CropHandle("NE", NE_RESIZE_CURSOR, view);
+        topLeft = new CropHandle("NW", NW_RESIZE_CURSOR, view);
+        top = new CropHandle("N", N_RESIZE_CURSOR, view);
+        topRight = new CropHandle("NE", NE_RESIZE_CURSOR, view);
         right = new CropHandle("E", E_RESIZE_CURSOR, view);
         left = new CropHandle("W", W_RESIZE_CURSOR, view);
-        lowerLeft = new CropHandle("SW", SW_RESIZE_CURSOR, view);
-        lower = new CropHandle("S", S_RESIZE_CURSOR, view);
-        lowerRight = new CropHandle("SE", SE_RESIZE_CURSOR, view);
+        bottomLeft = new CropHandle("SW", SW_RESIZE_CURSOR, view);
+        bottom = new CropHandle("S", S_RESIZE_CURSOR, view);
+        bottomRight = new CropHandle("SE", SE_RESIZE_CURSOR, view);
 
-        handles = List.of(upperLeft, upperRight, lowerRight, lowerLeft,
-                right, upper, lower, left);
-        updateHandleLocations();
+        handles = List.of(topLeft, topRight, bottomRight, bottomLeft,
+            right, top, bottom, left);
+        updateHandlePositions();
     }
 
     @Override
     public void paint(Graphics2D g) {
-        drawRect(g);
+        drawCropRect(g);
         drawHandles(g);
     }
 
-    private void drawRect(Graphics2D g) {
+    private void drawCropRect(Graphics2D g) {
         Shapes.drawVisibly(g, getSelectedCoRect());
     }
 
@@ -99,19 +105,17 @@ public class CropBox implements ToolWidget {
     }
 
     private Rectangle getSelectedCoRect() {
-        int upperLeftX = (int) upperLeft.getX();
-        int upperRightX = (int) upperRight.getX();
-        int upperLeftY = (int) upperLeft.getY();
-        int lowerLeftY = (int) lowerLeft.getY();
-
-        return Shapes.toPositiveRect(upperLeftX, upperRightX, upperLeftY, lowerLeftY);
+        int x1 = (int) topLeft.getX();
+        int x2 = (int) topRight.getX();
+        int y1 = (int) topLeft.getY();
+        int y2 = (int) bottomLeft.getY();
+        return Shapes.toPositiveRect(x1, x2, y1, y2);
     }
 
     /**
-     * Iterates over all the handles and if it finds one that is
-     * under the given mouse coordinates, sets the cursor accordingly.
+     * Sets the cursor to the appropriate type if the mouse is over a handle.
      *
-     * @return true if the cursor was set on any handle, false otherwise
+     * @return true if the cursor was set, false otherwise
      */
     private boolean setCursorForPoint(double x, double y, View view) {
         CropHandle handle = findHandleAt(x, y);
@@ -119,7 +123,6 @@ public class CropBox implements ToolWidget {
             view.setCursor(handle.getCursor());
             return true;
         }
-
         return false;
     }
 
@@ -133,34 +136,34 @@ public class CropBox implements ToolWidget {
         return null;
     }
 
-    private void updateHandleLocations() {
-        Rectangle r = rect.getCo();
-        int horMidX = r.x + r.width / 2;
-        int verMidY = r.y + r.height / 2;
-        int horEndX = r.x + r.width;
-        int verEndY = r.y + r.height;
+    private void updateHandlePositions() {
+        Rectangle bounds = cropRect.getCo();
+        int centerX = bounds.x + bounds.width / 2;
+        int centerY = bounds.y + bounds.height / 2;
+        int rightX = bounds.x + bounds.width;
+        int bottomY = bounds.y + bounds.height;
 
-        upperLeft.setLocation(r.x, r.y);
-        upper.setLocation(horMidX, r.y);
-        upperRight.setLocation(horEndX, r.y);
-        right.setLocation(horEndX, verMidY);
-        left.setLocation(r.x, verMidY);
-        lowerLeft.setLocation(r.x, verEndY);
-        lower.setLocation(horMidX, verEndY);
-        lowerRight.setLocation(horEndX, verEndY);
+        topLeft.setLocation(bounds.x, bounds.y);
+        top.setLocation(centerX, bounds.y);
+        topRight.setLocation(rightX, bounds.y);
+        right.setLocation(rightX, centerY);
+        left.setLocation(bounds.x, centerY);
+        bottomLeft.setLocation(bounds.x, bottomY);
+        bottom.setLocation(centerX, bottomY);
+        bottomRight.setLocation(rightX, bottomY);
     }
 
     public void mousePressed(PMouseEvent e) {
         View view = e.getView();
-        dragStart = new Point((int) e.getCoX(), (int) e.getCoY()); // snapped
-        dragStartRect = new Rectangle(rect.getCo());
+        dragStartPos = new Point((int) e.getCoX(), (int) e.getCoY()); // snapped
+        dragStartRect = new Rectangle(cropRect.getCo());
         dragStartCursor = view.getCursor().getType();
-        aspectRatio = calcAspectRatio(rect.getCo());
+        aspectRatio = calcAspectRatio(cropRect.getCo());
 
-        if (isResizing(dragStartCursor)) {
+        if (isResizeCursor(dragStartCursor)) {
             // if the user clicked on the handle, allow resizing
             transformMode = MODE_RESIZE;
-        } else if (rect.containsCo(e.getPoint())) {
+        } else if (cropRect.containsCo(e.getPoint())) {
             // if the user clicked inside the rectangle, allow moving
             transformMode = MODE_MOVE;
         } else {
@@ -173,11 +176,12 @@ public class CropBox implements ToolWidget {
             return;
         }
 
-        Rectangle coRect = rect.getCo();
+        Rectangle coRect = cropRect.getCo();
         coRect.setRect(dragStartRect);
+
         Point mouseOffset = new Point(
-            (int) (e.getCoX() - dragStart.x),
-            (int) (e.getCoY() - dragStart.y));
+            (int) (e.getCoX() - dragStartPos.x),
+            (int) (e.getCoY() - dragStartPos.y));
 
         if (transformMode == MODE_RESIZE) {
             resize(coRect, dragStartCursor, mouseOffset);
@@ -189,27 +193,26 @@ public class CropBox implements ToolWidget {
             coRect.translate(mouseOffset.x, mouseOffset.y);
         }
 
-        updateHandleLocations();
-
-        rect.makeCoPositive();
-        rect.recalcIm(e.getView());
+        updateHandlePositions();
+        cropRect.ensureCoPositive();
+        cropRect.recalcIm(e.getView());
     }
 
     public void mouseReleased(PMouseEvent e) {
         // ensure that after resize rectangle has positive
         // width and height (required for Rectangle.contain testing)
-        rect.makeCoPositive();
+        cropRect.ensureCoPositive();
 
-        updateHandleLocations();
+        updateHandlePositions();
         setCursorForPoint(e.getCoX(), e.getCoY(), e.getView());
 
         transformMode = MODE_NONE;
     }
 
     public void mouseMoved(MouseEvent e, View view) {
-        boolean isCursorSet = setCursorForPoint(e.getX(), e.getY(), view);
-        if (!isCursorSet) {
-            if (rect.containsCo(e.getX(), e.getY())) {
+        boolean cursorSet = setCursorForPoint(e.getX(), e.getY(), view);
+        if (!cursorSet) {
+            if (cropRect.containsCo(e.getX(), e.getY())) {
                 view.setCursor(Cursors.MOVE);
             } else {
                 view.setCursor(Cursors.DEFAULT);
@@ -217,37 +220,37 @@ public class CropBox implements ToolWidget {
         }
     }
 
-    public PRectangle getRect() {
-        return rect;
+    public PRectangle getCropRect() {
+        return cropRect;
     }
 
     @Override
     public void coCoordsChanged(View view) {
-        rect.coCoordsChanged(view);
-        updateHandleLocations();
+        cropRect.coCoordsChanged(view);
+        updateHandlePositions();
     }
 
     @Override
     public void imCoordsChanged(AffineTransform at, View view) {
-        rect.imCoordsChanged(at, view);
-        updateHandleLocations();
+        cropRect.imCoordsChanged(at, view);
+        updateHandlePositions();
     }
 
     /**
      * Sets the size of the crop box in image space.
      */
     public void setImSize(int width, int height, View view) {
-        Rectangle2D imRect = rect.getIm();
+        Rectangle2D imRect = cropRect.getIm();
         imRect.setRect(imRect.getX(), imRect.getY(), width, height);
 
-        rect.recalcCo(view);
+        cropRect.recalcCo(view);
 
-        updateHandleLocations();
+        updateHandlePositions();
         view.repaint();
     }
 
     /**
-     * Returns true while the user is adjusting the handles.
+     * Returns true if the crop box is being adjusted by the user.
      */
     public boolean isAdjusting() {
         return transformMode != MODE_NONE;
@@ -262,7 +265,7 @@ public class CropBox implements ToolWidget {
         double viewScale = view.getZoomLevel().getViewScale();
         int moveScale = viewScale >= 1 ? 1 : (int) Math.ceil(1 / viewScale);
 
-        Rectangle2D im = rect.getIm();
+        Rectangle2D im = cropRect.getIm();
         im.setRect(
             im.getX() + key.getMoveX() * moveScale,
             im.getY() + key.getMoveY() * moveScale,
@@ -270,20 +273,16 @@ public class CropBox implements ToolWidget {
             im.getHeight()
         );
 
-        rect.recalcCo(view);
-        updateHandleLocations();
+        cropRect.recalcCo(view);
+        updateHandlePositions();
         view.repaint();
     }
 
     public static double calcAspectRatio(Rectangle rect) {
-        if (rect.height > 0) {
-            return (double) rect.width / rect.height;
-        } else {
-            return 0;
-        }
+        return (rect.height > 0) ? (double) rect.width / rect.height : 0;
     }
 
-    private static boolean isResizing(int cursor) {
+    private static boolean isResizeCursor(int cursor) {
         return switch (cursor) {
             case NW_RESIZE_CURSOR, SE_RESIZE_CURSOR,
                     SW_RESIZE_CURSOR, NE_RESIZE_CURSOR,
@@ -294,57 +293,47 @@ public class CropBox implements ToolWidget {
     }
 
     /**
-     * Recalculates the box position and size, according to the mouse offset and direction
-     *
-     * @param rect       rectangle to adjust
-     * @param cursor     user modification direction (N,S,W,E,NW,NE,SE,SW)
-     * @param moveOffset the offset calculated as: mousePos - mouseStartPos
+     * Resizes the rectangle based on the cursor position and mouse offset.
      */
-    public static void resize(Rectangle rect, int cursor, Point moveOffset) {
-        int offsetX = moveOffset.x;
-        int offsetY = moveOffset.y;
+    public static void resize(Rectangle rect, int cursor, Point offset) {
+        int dx = offset.x;
+        int dy = offset.y;
         switch (cursor) {
             case NW_RESIZE_CURSOR -> {
-                rect.width -= offsetX;
-                rect.height -= offsetY;
-                rect.x += offsetX;
-                rect.y += offsetY;
+                rect.width -= dx;
+                rect.height -= dy;
+                rect.x += dx;
+                rect.y += dy;
             }
             case SE_RESIZE_CURSOR -> {
-                rect.width += offsetX;
-                rect.height += offsetY;
+                rect.width += dx;
+                rect.height += dy;
             }
             case SW_RESIZE_CURSOR -> {
-                rect.width -= offsetX;
-                rect.height += offsetY;
-                rect.x += offsetX;
+                rect.width -= dx;
+                rect.height += dy;
+                rect.x += dx;
             }
             case NE_RESIZE_CURSOR -> {
-                rect.width += offsetX;
-                rect.height -= offsetY;
-                rect.y += offsetY;
+                rect.width += dx;
+                rect.height -= dy;
+                rect.y += dy;
             }
             case N_RESIZE_CURSOR -> {
-                rect.height -= offsetY;
-                rect.y += offsetY;
+                rect.height -= dy;
+                rect.y += dy;
             }
-            case S_RESIZE_CURSOR -> rect.height += offsetY;
-            case E_RESIZE_CURSOR -> rect.width += offsetX;
+            case S_RESIZE_CURSOR -> rect.height += dy;
+            case E_RESIZE_CURSOR -> rect.width += dx;
             case W_RESIZE_CURSOR -> {
-                rect.width -= offsetX;
-                rect.x += offsetX;
+                rect.width -= dx;
+                rect.x += dx;
             }
         }
     }
 
     /**
-     * Adjusts the given rectangle to keep the aspect ratio.
-     * Recalculates the x,y according to the drag direction.
-     *
-     * @param rect        rectangle to adjust
-     * @param cursor      user modification direction (N,S,W,E,NW,NE,SE,SW)
-     * @param aspectRatio aspect ratio of original rectangle. Required > 0
-     * @param view
+     * Adjusts the rectangle to maintain the aspect ratio based on the drag direction.
      */
     public static void keepAspectRatio(Rectangle rect, int cursor, double aspectRatio, View view) {
         switch (cursor) {
@@ -352,21 +341,20 @@ public class CropBox implements ToolWidget {
                     SE_RESIZE_CURSOR, SW_RESIZE_CURSOR -> {
                 // To find out whether to adjust the width
                 // or the height, compare the rectangle ratios.
-                double newAspectRatio = calcAspectRatio(rect);
-                if (newAspectRatio > aspectRatio) {
-                    int height = (int) (rect.width / aspectRatio);
+                double currentAspectRatio = calcAspectRatio(rect);
+                if (currentAspectRatio > aspectRatio) {
+                    int adjustedHeight = (int) (rect.width / aspectRatio);
                     if (cursor == NW_RESIZE_CURSOR || cursor == NE_RESIZE_CURSOR) {
-                        rect.y -= (height - rect.height);
+                        rect.y -= (adjustedHeight - rect.height);
                     }
-
-                    rect.height = height;
+                    rect.height = adjustedHeight;
                 } else {
-                    int width = (int) (rect.height * aspectRatio);
+                    int adjustedWidth = (int) (rect.height * aspectRatio);
                     if (cursor == NW_RESIZE_CURSOR || cursor == SW_RESIZE_CURSOR) {
-                        rect.x -= (width - rect.width);
+                        rect.x -= (adjustedWidth - rect.width);
                     }
 
-                    rect.width = width;
+                    rect.width = adjustedWidth;
                 }
             }
             case N_RESIZE_CURSOR, S_RESIZE_CURSOR -> {
@@ -393,9 +381,9 @@ public class CropBox implements ToolWidget {
 
     @Override
     public String toString() {
-        return "CropBox{ upperLeft=" + upperLeft +
-            ", lowerRight=" + lowerRight +
-            ", rect=" + rect +
+        return "CropBox{ topLeft=" + topLeft +
+            ", bottomRight=" + bottomRight +
+            ", cropRect=" + cropRect +
             ", adjusting=" + isAdjusting() +
             ", transformMode=" + transformMode +
             ", aspectRatio=" + aspectRatio +

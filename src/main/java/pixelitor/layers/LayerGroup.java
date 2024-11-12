@@ -289,12 +289,12 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public boolean containsLayerWithClass(Class<? extends Layer> clazz) {
-        if (getClass() == clazz) {
+    public boolean containsLayerOfType(Class<? extends Layer> type) {
+        if (getClass() == type) {
             return true;
         }
         for (Layer layer : layers) {
-            if (layer.containsLayerWithClass(clazz)) {
+            if (layer.containsLayerOfType(type)) {
                 return true;
             }
         }
@@ -394,7 +394,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public boolean allowsZeroLayers() {
+    public boolean canBeEmpty() {
         return true;
     }
 

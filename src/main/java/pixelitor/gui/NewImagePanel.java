@@ -35,38 +35,36 @@ import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.utils.MemoryInfo.NUM_BYTES_IN_MEGABYTE;
 
 /**
- * The GUI of the "New Image" dialog
+ * The panel in the "New Image" dialog
  */
 public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
+    private static final int PANEL_PADDING = 5;
+
+    private final JTextField nameTF;
     private final JTextField widthTF;
     private final JTextField heightTF;
-
-    private static final int BORDER_WIDTH = 5;
     private final JComboBox<FillType> fillSelector;
-    private final JTextField nameTF;
 
     public NewImagePanel() {
         super(new GridBagLayout());
         var gbh = new GridBagHelper(this);
 
-        //noinspection SuspiciousNameCombination
-        setBorder(createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
+        setBorder(createEmptyBorder(PANEL_PADDING, PANEL_PADDING, PANEL_PADDING, PANEL_PADDING));
 
         nameTF = new JTextField(NewImage.generateTitle());
         nameTF.setName("nameTF");
         gbh.addLabelAndLastControl("Name", nameTF);
 
-        widthTF = addTextField("widthTF", "Width:", NewImage.lastSize.width, gbh);
-        heightTF = addTextField("heightTF", "Height:", NewImage.lastSize.height, gbh);
+        widthTF = addDimensionField("widthTF", "Width:", NewImage.lastSize.width, gbh);
+        heightTF = addDimensionField("heightTF", "Height:", NewImage.lastSize.height, gbh);
 
         fillSelector = new JComboBox<>(FillType.values());
         fillSelector.setSelectedIndex(NewImage.lastFillTypeIndex);
-
         gbh.addLabelAndLastControl("Fill:", fillSelector);
     }
 
-    private static JTextField addTextField(String name, String label,
-                                           int value, GridBagHelper gbh) {
+    private static JTextField addDimensionField(String name, String label,
+                                                int value, GridBagHelper gbh) {
         var tf = new JTextField(String.valueOf(value));
         tf.setName(name);
         gbh.addLabelAndTwoControls(label,
@@ -77,51 +75,56 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
 
     @Override
     public ValidationResult validateSettings() {
-        var retVal = ValidationResult.valid();
+        var result = ValidationResult.valid();
+
+        // validate width
         int width = 0;
         try {
             width = getSelectedWidth();
-            retVal = retVal.validateNonZero(width, "Width");
-            retVal = retVal.validatePositive(width, "Width");
+            result = result.validateNonZero(width, "Width");
+            result = result.validatePositive(width, "Width");
         } catch (NumberFormatException e) {
-            retVal = retVal.withError("The width must be an integer.");
+            result = result.withError("The width must be an integer.");
         }
+
+        // validate height
         int height = 0;
         try {
             height = getSelectedHeight();
-            retVal = retVal.validateNonZero(height, "Height");
-            retVal = retVal.validatePositive(height, "Height");
+            result = result.validateNonZero(height, "Height");
+            result = result.validatePositive(height, "Height");
         } catch (NumberFormatException e) {
-            retVal = retVal.withError("The height must be an integer.");
+            result = result.withError("The height must be an integer.");
         }
 
-        if (retVal.isValid()) {
-            // issue #49: check approximately whether the image
-            // would even fit into the available memory
-            long numPixels = ((long) width) * height;
-            if (numPixels > Integer.MAX_VALUE) {
-                // theoretical limit, as the pixels ultimately will be stored in an array
-                return retVal.withError(format(
-                    "Pixelitor doesn't support images with more than %d pixels." +
-                        "<br>%dx%d would be %d pixels.",
-                    Integer.MAX_VALUE, width, height, numPixels));
-            } else if (numPixels > 1_000_000) { // don't check for smaller images
-                Runtime rt = Runtime.getRuntime();
-                long allocatedMemory = rt.totalMemory() - rt.freeMemory();
-                long availableMemory = rt.maxMemory() - allocatedMemory;
-                if (numPixels * 4 > availableMemory) {
-                    return retVal.withError(format(
-                        "The image would not fit into memory." +
-                            "<br>An image of %dx%d pixels needs at least %d megabytes." +
-                            "<br>Available memory is at most %d megabytes.",
-                        width, height,
-                        numPixels * 4 / NUM_BYTES_IN_MEGABYTE,
-                        availableMemory / NUM_BYTES_IN_MEGABYTE));
-                }
+        if (!result.isValid()) {
+            return result;
+        }
+        // issue #49: check approximately whether the image
+        // would even fit into the available memory
+        long numPixels = ((long) width) * height;
+        if (numPixels > Integer.MAX_VALUE) {
+            // theoretical limit, as the pixels ultimately will be stored in an array
+            return result.withError(format(
+                "Pixelitor doesn't support images with more than %d pixels." +
+                    "<br>%dx%d would be %d pixels.",
+                Integer.MAX_VALUE, width, height, numPixels));
+        } else if (numPixels > 1_000_000) { // don't check for smaller images
+            Runtime rt = Runtime.getRuntime();
+            long allocatedMemory = rt.totalMemory() - rt.freeMemory();
+            long availableMemory = rt.maxMemory() - allocatedMemory;
+            if (numPixels * 4 > availableMemory) {
+                return result.withError(format(
+                    "The image would not fit into memory." +
+                        "<br>An image of %dx%d pixels needs at least %d megabytes." +
+                        "<br>Available memory is at most %d megabytes.",
+                    width, height,
+                    numPixels * 4 / NUM_BYTES_IN_MEGABYTE,
+                    availableMemory / NUM_BYTES_IN_MEGABYTE));
             }
         }
 
-        return retVal;
+        return result;
     }
 
     public void okPressedInDialog() {

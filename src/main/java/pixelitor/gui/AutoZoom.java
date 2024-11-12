@@ -23,35 +23,35 @@ import pixelitor.menus.view.ZoomMenu;
 import javax.swing.*;
 
 /**
- * Ways to calculate zoom levels automatically, based on the available space
+ * Automatic zoom modes for fitting content within the available space.
  */
 public enum AutoZoom {
     FIT_SPACE("Fit Space", ZoomMenu.FIT_SPACE_TOOLTIP) {
         @Override
-        public double selectRatio(double hor, double ver) {
-            return Math.max(hor, ver);
+        public double calcRatio(double horRatio, double verRatio) {
+            return Math.max(horRatio, verRatio);
         }
     }, FIT_WIDTH("Fit Width", "Fit the width of the image to the available horizontal space") {
         @Override
-        public double selectRatio(double hor, double ver) {
-            return hor;
+        public double calcRatio(double horRatio, double verRatio) {
+            return horRatio;
         }
     }, FIT_HEIGHT("Fit Height", "Fit the height of the image to the available vertical space") {
         @Override
-        public double selectRatio(double hor, double ver) {
-            return ver;
+        public double calcRatio(double horRatio, double verRatio) {
+            return verRatio;
         }
     }, ACTUAL_PIXELS("Actual Pixels", ZoomMenu.ACTUAL_PIXELS_TOOLTIP) {
         @Override
-        public double selectRatio(double hor, double ver) {
+        public double calcRatio(double horRatio, double verRatio) {
             throw new IllegalStateException("should not be called");
         }
     };
 
-    public static final Action ACTUAL_PIXELS_ACTION = ACTUAL_PIXELS.asAction();
-    public static final Action FIT_HEIGHT_ACTION = FIT_HEIGHT.asAction();
-    public static final Action FIT_WIDTH_ACTION = FIT_WIDTH.asAction();
-    public static final Action FIT_SPACE_ACTION = FIT_SPACE.asAction();
+    public static final Action ACTUAL_PIXELS_ACTION = ACTUAL_PIXELS.toAction();
+    public static final Action FIT_HEIGHT_ACTION = FIT_HEIGHT.toAction();
+    public static final Action FIT_WIDTH_ACTION = FIT_WIDTH.toAction();
+    public static final Action FIT_SPACE_ACTION = FIT_SPACE.toAction();
 
     private final String displayName;
     private final String toolTip;
@@ -65,9 +65,9 @@ public enum AutoZoom {
      * Selects the image-to-available-area ratio that
      * will be used for the auto zoom calculations
      */
-    public abstract double selectRatio(double hor, double ver);
+    public abstract double calcRatio(double horRatio, double verRatio);
 
-    private Action asAction() {
+    private Action toAction() {
         var action = new OpenViewEnabledAction(displayName,
             comp -> comp.getView().setZoom(this));
         action.setToolTip(toolTip);

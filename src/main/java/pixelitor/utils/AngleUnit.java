@@ -106,6 +106,9 @@ public enum AngleUnit {
         @Override
         public double toRadians(double angle) {
             assert angle >= 0 && angle <= 360 : "a = " + angle;
+            if (angle == 0) {
+                return 0;
+            }
             return Math.toRadians(360 - angle);
         }
 

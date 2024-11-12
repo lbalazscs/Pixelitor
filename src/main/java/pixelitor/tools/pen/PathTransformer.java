@@ -18,7 +18,6 @@
 package pixelitor.tools.pen;
 
 import pixelitor.gui.View;
-import pixelitor.tools.Tools;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -100,23 +99,23 @@ public final class PathTransformer implements PenToolMode {
 
         // First, check all boxes for a handle hit so that handles
         // can be manipulated even when the boxes overlap.
-        boolean handleWasHit = false;
+        boolean handleFound = false;
         for (TransformBox box : boxes) {
-            DraggablePoint hit = box.findHandleAt(x, y);
-            if (hit != null) {
-                handleWasHit = true;
+            DraggablePoint handle = box.findHandleAt(x, y);
+            if (handle != null) {
+                handleFound = true;
                 draggedBox = box;
                 lastActiveBox = box;
-                box.mousePressedOn(hit, x, y);
+                box.mousePressedOn(handle, x, y);
                 break;
             }
         }
-        if (handleWasHit) {
+        if (handleFound) {
             return;
         }
         activePoint = null;
 
-        // if no handle was hit, then check for whole-box movements
+        // if no handle was hit, check for a whole-box drag
         for (TransformBox box : boxes) {
             if (box.contains(x, y)) {
                 box.startWholeBoxDrag(x, y);
@@ -157,18 +156,22 @@ public final class PathTransformer implements PenToolMode {
                 activePoint = null;
                 view.repaint();
             }
-            int x = e.getX();
-            int y = e.getY();
-            boolean contained = false;
-            for (TransformBox box : boxes) {
-                if (box.contains(x, y)) {
-                    contained = true;
-                    break;
-                }
-            }
-            view.setCursor(contained ? MOVE : DEFAULT);
+            updateMoveCursor(e, view);
         }
         return false;
+    }
+
+    private void updateMoveCursor(MouseEvent e, View view) {
+        int x = e.getX();
+        int y = e.getY();
+        boolean insideBox = false;
+        for (TransformBox box : boxes) {
+            if (box.contains(x, y)) {
+                insideBox = true;
+                break;
+            }
+        }
+        view.setCursor(insideBox ? MOVE : DEFAULT);
     }
 
     @Override
@@ -186,13 +189,8 @@ public final class PathTransformer implements PenToolMode {
     }
 
     @Override
-    public void start() {
-        Tools.PEN.startMode(TRANSFORM, false);
-    }
-
-    @Override
-    public void modeStarted(PenToolMode prevMode) {
-        PenToolMode.super.modeStarted(prevMode);
+    public void modeActivated(PenToolMode prevMode) {
+        PenToolMode.super.modeActivated(prevMode);
         initBoxes();
     }
 

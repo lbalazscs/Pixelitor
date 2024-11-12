@@ -46,16 +46,16 @@ import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.Tools.SMUDGE;
 
 /**
- * Tests the functionality common to all AbstractBrush subclasses
+ * Tests the functionality common to all {@link AbstractBrushTool} subclasses.
  */
 @RunWith(Parameterized.class)
 public class AbstractBrushToolTest {
+    // the tool being tested in each parameterized run
     @Parameter
     public AbstractBrushTool tool;
 
-    private Brush brushSpy;
+    private Brush spyBrush;
     private Brush origBrush;
-
     private Drawable dr;
 
     @BeforeClass
@@ -68,18 +68,16 @@ public class AbstractBrushToolTest {
         // this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
-        Tool[] tools = {BRUSH, ERASER, CLONE, SMUDGE};
+        AbstractBrushTool[] brushTools = {BRUSH, ERASER, CLONE, SMUDGE};
         ResourceBundle resources = Texts.getResources();
-        for (Tool tool : tools) {
+
+        for (AbstractBrushTool tool : brushTools) {
             TestHelper.initTool(tool, resources);
         }
 
-        return Arrays.asList(new Object[][]{
-            {BRUSH},
-            {ERASER},
-            {CLONE},
-            {SMUDGE},
-        });
+        return Arrays.stream(brushTools)
+            .map(tool -> new Object[]{tool})
+            .toList();
     }
 
     @Before
@@ -89,15 +87,15 @@ public class AbstractBrushToolTest {
         dr = comp.getActiveDrawableOrThrow();
 
         origBrush = tool.getBrush();
-        brushSpy = spy(origBrush);
-        tool.setBrush(brushSpy);
+        spyBrush = spy(origBrush);
+        tool.setBrush(spyBrush);
 
-        tool.toolStarted();
+        tool.toolActivated();
     }
 
     @After
     public void afterEachTest() {
-        tool.toolEnded();
+        tool.toolDeactivated();
 
         // restore it so that next time we don't spy on a spy...
         tool.setBrush(origBrush);
@@ -107,8 +105,8 @@ public class AbstractBrushToolTest {
     public void trace() {
         tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
-        verify(brushSpy).setTarget(any(), any());
-        verify(brushSpy).startAt(any());
-        verify(brushSpy, times(5)).continueTo(any());
+        verify(spyBrush).setTarget(any(), any());
+        verify(spyBrush).startAt(any());
+        verify(spyBrush, times(5)).continueTo(any());
     }
 }

@@ -102,7 +102,7 @@ import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.selection.SelectionType.RECTANGLE;
 import static pixelitor.selection.ShapeCombinator.ADD;
 import static pixelitor.selection.ShapeCombinator.REPLACE;
-import static pixelitor.tools.DragToolState.NO_INTERACTION;
+import static pixelitor.tools.DragToolState.IDLE;
 import static pixelitor.tools.DragToolState.TRANSFORM;
 
 /**
@@ -826,7 +826,7 @@ public class MainGuiTest {
 
     private static void testPreferencesUIChooser(DialogFixture dialog) {
         var uiChooser = dialog.comboBox("uiChooser");
-        if (EDT.call(() -> ImageArea.currentModeIs(FRAMES))) {
+        if (EDT.call(() -> ImageArea.isCurrentMode(FRAMES))) {
             uiChooser.requireSelection("Internal Windows");
             uiChooser.selectItem("Tabs");
             uiChooser.selectItem("Internal Windows");
@@ -1444,7 +1444,7 @@ public class MainGuiTest {
 
         testGuides();
 
-        if (ImageArea.currentModeIs(FRAMES)) {
+        if (ImageArea.isCurrentMode(FRAMES)) {
             runMenuCommand("Cascade");
             runMenuCommand("Tile");
         }
@@ -1467,7 +1467,7 @@ public class MainGuiTest {
         runMenuCommand("Fit Height");
 
         runMenuCommand("Actual Pixels");
-        EDT.assertZoomOfActiveIs(ZoomLevel.Z100);
+        EDT.assertZoomOfActiveIs(ZoomLevel.ACTUAL_SIZE);
     }
 
     private void testGuides() {
@@ -1962,7 +1962,7 @@ public class MainGuiTest {
         pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.RADIAL_GRADIENT.toString());
         pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.NONE.toString());
 
-        EDT.assertShapesToolStateIs(NO_INTERACTION);
+        EDT.assertShapesToolStateIs(IDLE);
         pw.button("convertToSelection").requireDisabled();
 
         mouse.randomCtrlClick();
@@ -2011,7 +2011,7 @@ public class MainGuiTest {
 
         mouse.clickCanvas(50, 300);
 
-        EDT.assertShapesToolStateIs(NO_INTERACTION);
+        EDT.assertShapesToolStateIs(IDLE);
         pw.button("convertToSelection").requireDisabled();
 
         keyboard.undoRedoUndo("Rasterize Shape");
@@ -2092,7 +2092,7 @@ public class MainGuiTest {
     }
 
     private void testPenToolBuildMode() {
-        pw.comboBox("modeChooser").selectItem("Build");
+        pw.comboBox("modeSelector").selectItem("Build");
 
         pw.button("toSelectionButton").requireDisabled();
 
@@ -2135,7 +2135,7 @@ public class MainGuiTest {
     }
 
     private void testPenToolEditMode() {
-        pw.comboBox("modeChooser").selectItem("Edit");
+        pw.comboBox("modeSelector").selectItem("Edit");
         mouse.moveToCanvas(600, 300);
         mouse.dragToCanvas(500, 400);
         keyboard.undoRedo("Move Anchor Point");
@@ -2192,7 +2192,7 @@ public class MainGuiTest {
     }
 
     private void testPenToolTransformMode() {
-        pw.comboBox("modeChooser").selectItem("Transform");
+        pw.comboBox("modeSelector").selectItem("Transform");
 
         Point nw = EDT.getPenToolBoxPos(0, TransformBox::getNW);
         mouse.moveToScreen(nw.x, nw.y);
@@ -2690,7 +2690,7 @@ public class MainGuiTest {
 
             if (mode.movesLayer()) {
                 // The translations will have these values only if we are at 100% zoom!
-                assert view.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + view.getZoomLevel();
+                assert view.getZoomLevel() == ZoomLevel.ACTUAL_SIZE : "zoom is " + view.getZoomLevel();
                 assert dr.getTx() == -200 : "tx = " + dr.getTx();
                 assert dr.getTy() == -100 : "ty = " + dr.getTy();
             } else {
@@ -2755,7 +2755,7 @@ public class MainGuiTest {
         EDT.assertZoomOfActiveIs(zoomLevels[0]);
 
         findButtonByText(pw, "100%").click();
-        EDT.assertZoomOfActiveIs(ZoomLevel.Z100);
+        EDT.assertZoomOfActiveIs(ZoomLevel.ACTUAL_SIZE);
 
         slider.slideToMaximum();
         EDT.assertZoomOfActiveIs(zoomLevels[zoomLevels.length - 1]);

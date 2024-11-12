@@ -69,7 +69,7 @@ import pixelitor.menus.edit.PasteDestination;
 import pixelitor.menus.file.*;
 import pixelitor.menus.help.AboutDialog;
 import pixelitor.menus.help.UpdatesCheck;
-import pixelitor.menus.view.*;
+import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.brushes.CopyBrush;
 import pixelitor.utils.*;
@@ -1162,14 +1162,14 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.addSeparator();
 
-        viewMenu.add(ShowHideStatusBarAction.INSTANCE);
-        viewMenu.add(ShowHideHistogramsAction.INSTANCE, F6);
-        viewMenu.add(ShowHideLayersAction.INSTANCE, F7);
-        viewMenu.add(ShowHideToolsAction.INSTANCE);
-        viewMenu.add(ShowHideAllAction.INSTANCE, F8);
+        WorkSpace workSpace = pw.getWorkSpace();
+        viewMenu.add(workSpace.getStatusBarAction());
+        viewMenu.add(workSpace.getHistogramsAction(), F6);
+        viewMenu.add(workSpace.getLayersAction(), F7);
+        viewMenu.add(workSpace.getToolsAction());
+        viewMenu.add(workSpace.getAllAction(), F8);
 
-        viewMenu.add(new PAction("Set Default Workspace", () ->
-            WorkSpace.resetDefaults(pw)));
+        viewMenu.add(new PAction("Set Default Workspace", pw::resetDefaultWorkspace));
 
 //        if (!JVM.isLinux) { // see https://github.com/lbalazscs/Pixelitor/issues/140
         var showPixelGridMI = new OpenViewEnabledCheckBoxMenuItem("Show Pixel Grid");
@@ -1227,11 +1227,11 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Arrange Windows");
 
         var cascadeAction = new PAction("Cascade", ImageArea::cascadeWindows);
-        cascadeAction.setEnabled(ImageArea.currentModeIs(FRAMES));
+        cascadeAction.setEnabled(ImageArea.isCurrentMode(FRAMES));
         sub.add(cascadeAction);
 
         var tileAction = new PAction("Tile", ImageArea::tileWindows);
-        tileAction.setEnabled(ImageArea.currentModeIs(FRAMES));
+        tileAction.setEnabled(ImageArea.isCurrentMode(FRAMES));
         sub.add(tileAction);
 
         // make sure that "Cascade" and "Tile" are grayed out in TABS mode
@@ -1395,7 +1395,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.add(new PAction("Change UI", ImageArea::changeUI));
+        sub.add(new PAction("Change UI", ImageArea::toggleUI));
 
         sub.add(new OpenViewEnabledAction("Export with ImageMagick",
             comp -> {

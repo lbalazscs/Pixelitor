@@ -500,11 +500,11 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     public boolean processMouseMoved(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        DraggablePoint hit = findHandleAt(x, y);
-        if (hit != null) {
-            hit.setActive(true);
+        DraggablePoint handle = findHandleAt(x, y);
+        if (handle != null) {
+            handle.setActive(true);
             view.repaint();
-            view.setCursor(hit.getCursor());
+            view.setCursor(handle.getCursor());
             return true;
         }
         return false;
@@ -664,7 +664,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
      * and the rotation handle are in sync!
      */
     public void recalcAngle() {
-        rot.reCalcAngle(rot.x, rot.y, true);
+        rot.recalcAngle(rot.x, rot.y, true);
     }
 
     public CornerHandle getNW() {
@@ -757,7 +757,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     public void moveWhileDragging(double relImX, double relImY) {
         // Since these are deltas, they can't use the normal
         // image space => component space methods.
-        double scaling = view.getScaling();
+        double scaling = view.getZoomScale();
         dragBox(scaling * relImX, scaling * relImY);
     }
 

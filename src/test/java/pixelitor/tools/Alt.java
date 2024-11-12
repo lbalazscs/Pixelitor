@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,26 +17,25 @@
 
 package pixelitor.tools;
 
-import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
 
 /**
- * Whether the pressing of the Alt key is simulated
+ * Represents the state of the Alt key during a {@link KeyEvent}.
  */
 public enum Alt implements EventMaskModifier {
-    YES {
+    PRESSED {
         @Override
-        public int modify(int in) {
-            in |= MouseEvent.ALT_DOWN_MASK;
-            return in;
+        public int modify(int currentMask) {
+            return currentMask | KeyEvent.ALT_DOWN_MASK;
         }
-    }, NO {
+    }, RELEASED {
         @Override
-        public int modify(int in) {
-            return in;
+        public int modify(int currentMask) {
+            return currentMask;
         }
     };
 
-    public boolean isDown() {
-        return this == YES;
+    public boolean isPressed() {
+        return this == PRESSED;
     }
 }

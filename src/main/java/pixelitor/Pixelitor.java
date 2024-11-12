@@ -134,8 +134,8 @@ public class Pixelitor {
 
         TipsOfTheDay.showTips(pw, false);
 
-        MouseZoomMethod.load();
-        PanMethod.load();
+        MouseZoomMethod.loadFromPreferences();
+        PanMethod.loadFromPreferences();
 
         // The IO-intensive preloading of fonts is scheduled
         // to run after all the files have been opened,

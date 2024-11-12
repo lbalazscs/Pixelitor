@@ -59,7 +59,7 @@ import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
-import static pixelitor.tools.DragToolState.NO_INTERACTION;
+import static pixelitor.tools.DragToolState.IDLE;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
 /**
@@ -91,7 +91,7 @@ public class GradientTool extends DragTool {
                 "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
             Cursors.DEFAULT, true);
         spaceDragStartPoint = true;
-        state = NO_INTERACTION;
+        state = IDLE;
         pixelSnapping = true;
     }
 
@@ -501,8 +501,8 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    protected void toolStarted() {
-        super.toolStarted();
+    protected void toolActivated() {
+        super.toolActivated();
 
         Layer activeLayer = Views.getActiveLayer();
         if (activeLayer != null) {
@@ -511,8 +511,8 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
+    protected void toolDeactivated() {
+        super.toolDeactivated();
 
         resetInitialState();
     }

@@ -35,11 +35,13 @@ import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.io.DropListener.DropAction.OPEN_AS_NEW_IMAGES;
 
 /**
- * Represents the area of the app where the edited images are.
- * The GUI is either a JDesktopPane (for internal windows)
- * or a JTabbedPane (for tabs).
+ * Manages the main image editing area, supporting both tabbed
+ * (JTabbedPane) and internal frame (JDesktopPane) layouts.
  */
 public class ImageArea {
+    /**
+     * The available UI modes for displaying images.
+     */
     public enum Mode {
         TABS("Tabs") {
             @Override
@@ -68,29 +70,30 @@ public class ImageArea {
     }
 
     private static Mode mode;
-    private static final List<Consumer<Mode>> uiChangeListeners = new ArrayList<>();
     private static ImageAreaUI ui;
+    private static final List<Consumer<Mode>> modeChangeListeners = new ArrayList<>();
 
     private static int tabPlacement;
 
     static {
+        // initialize at startup from the saved preferences
         ImageAreaConfig config = AppPreferences.loadDesktopMode();
         mode = config.mode();
         tabPlacement = config.tabPlacement();
 
         updateUI();
-        setupDnD();
+        setupDragAndDrop();
     }
 
     private ImageArea() {
-        // static utility methods, do not instantiate
+        // utility class - prevent instantiation
     }
 
     private static void updateUI() {
         ui = mode.createUI();
     }
 
-    private static void setupDnD() {
+    private static void setupDragAndDrop() {
         new DropTarget(getUI(), new DropListener(OPEN_AS_NEW_IMAGES));
     }
 
@@ -102,11 +105,11 @@ public class ImageArea {
         return mode;
     }
 
-    public static boolean currentModeIs(Mode m) {
+    public static boolean isCurrentMode(Mode m) {
         return getMode() == m;
     }
 
-    public static void changeUI() {
+    public static void toggleUI() {
         changeUI(mode == TABS ? FRAMES : TABS);
     }
 
@@ -125,7 +128,7 @@ public class ImageArea {
         // is set correctly => the size of the internal frames can be set
         pw.revalidate();
 
-        setupDnD();
+        setupDragAndDrop();
         if (mode == FRAMES) {
             // make sure that the internal frames start
             // in the top-left corner when they are re-added
@@ -133,11 +136,11 @@ public class ImageArea {
         }
         Views.forEachView(ImageArea::addView);
 
-        uiChangeListeners.forEach(listener -> listener.accept(mode));
+        modeChangeListeners.forEach(listener -> listener.accept(mode));
     }
 
     public static void addUIChangeListener(Consumer<Mode> listener) {
-        uiChangeListeners.add(listener);
+        modeChangeListeners.add(listener);
     }
 
     public static void activateView(View view) {
@@ -180,11 +183,11 @@ public class ImageArea {
 
     public static void pixelGridEnabled() {
         // the global pixel grid switch was turned on
-        if (currentModeIs(FRAMES)) {
+        if (isCurrentMode(FRAMES)) {
             if (Views.isAnyPixelGridAllowed()) {
                 Views.repaintAll();
             } else {
-                showNoPixelGridMsg();
+                showNoPixelGridMessage();
             }
         } else { // Tabs: check only the current view
             View view = Views.getActive();
@@ -192,13 +195,13 @@ public class ImageArea {
                 if (view.allowPixelGrid()) {
                     view.repaint();
                 } else {
-                    showNoPixelGridMsg();
+                    showNoPixelGridMessage();
                 }
             }
         }
     }
 
-    private static void showNoPixelGridMsg() {
+    private static void showNoPixelGridMessage() {
         String msg = """
             The pixel grid consists of lines between the pixels,
             and is shown only if the zoom is at least 1600%.""";

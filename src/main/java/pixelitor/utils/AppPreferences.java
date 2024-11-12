@@ -401,7 +401,7 @@ public final class AppPreferences {
         saveLastSaveDir();
         saveLastSaveFormat();
         saveFgBgColors();
-        WorkSpace.saveVisibility();
+        PixelitorWindow.get().getWorkSpace().savePreferences();
         saveUndoLevels();
         saveThumbSize();
         TipsOfTheDay.saveNextTipNr();

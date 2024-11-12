@@ -38,7 +38,7 @@ public abstract class DragTool extends Tool {
 
     // Declared here, but the state transitions are
     // managed by the concrete tool subclasses.
-    protected DragToolState state = DragToolState.NO_INTERACTION;
+    protected DragToolState state = DragToolState.IDLE;
 
     private boolean endPointInitialized = false;
     protected boolean spaceDragStartPoint = false;

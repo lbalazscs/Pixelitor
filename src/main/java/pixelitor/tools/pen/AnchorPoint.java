@@ -40,18 +40,25 @@ import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
 /**
- * A point on a {@link SubPath}
+ * An anchor point on a {@link SubPath}.
  */
 public class AnchorPoint extends DraggablePoint {
     // compatible with Pixelitor 4.2.3
     @Serial
     private static final long serialVersionUID = -7001569188242665053L;
 
+    private static final double SYMMETRY_THRESHOLD = 2.0;
+    private static final double COLLINEARITY_THRESHOLD = 0.1;
+    private static final double RETRACTION_TOLERANCE = 1.0;
+
+    // an anchor point has two associated control points that define
+    // the curvature of the path segments connected to this point
     public final ControlPoint ctrlIn;
     public final ControlPoint ctrlOut;
+
     private final SubPath subPath;
 
-    private static long debugCounter = 0;
+    private static long idCounter = 0;
 
     private AnchorPointType type = SYMMETRIC;
 
@@ -63,7 +70,7 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public AnchorPoint(PPoint p, View view, SubPath subPath) {
-        super("AP" + debugCounter++, p, view);
+        super("AP" + idCounter++, p, view);
 
         this.subPath = subPath;
 
@@ -77,13 +84,16 @@ public class AnchorPoint extends DraggablePoint {
         this(p, p.getView(), subPath);
     }
 
-    public AnchorPoint(AnchorPoint other, SubPath subPath,
+    /**
+     * Creates a copy of an existing anchor point.
+     */
+    public AnchorPoint(AnchorPoint source, SubPath newParent,
                        boolean copyControlPositions) {
-        this(other.x, other.y, other.view, subPath);
-        type = other.type;
+        this(source.x, source.y, source.view, newParent);
+        type = source.type;
         if (copyControlPositions) {
-            ctrlIn.copyPositionFrom(other.ctrlIn);
-            ctrlOut.copyPositionFrom(other.ctrlOut);
+            ctrlIn.copyPositionFrom(source.ctrlIn);
+            ctrlOut.copyPositionFrom(source.ctrlOut);
         }
     }
 
@@ -91,11 +101,12 @@ public class AnchorPoint extends DraggablePoint {
         boolean ctrlOutActive = ctrlOut.isActive();
         boolean ctrlInActive = ctrlIn.isActive();
 
+        // paint non-active handles first
         if (paintIn && !ctrlIn.isRetracted()) {
-            paintControlHandle(ctrlIn, ctrlInActive, g);
+            paintControlPoint(ctrlIn, ctrlInActive, g);
         }
         if (paintOut && !ctrlOut.isRetracted()) {
-            paintControlHandle(ctrlOut, ctrlOutActive, g);
+            paintControlPoint(ctrlOut, ctrlOutActive, g);
         }
 
         paintHandle(g);
@@ -109,9 +120,9 @@ public class AnchorPoint extends DraggablePoint {
         }
     }
 
-    private void paintControlHandle(ControlPoint controlPoint,
-                                    boolean ctrlActive,
-                                    Graphics2D g) {
+    private void paintControlPoint(ControlPoint controlPoint,
+                                   boolean ctrlActive,
+                                   Graphics2D g) {
         Shapes.drawVisibly(g, new Line2D.Double(x, y, controlPoint.x, controlPoint.y));
         if (!ctrlActive) {
             controlPoint.paintHandle(g);
@@ -125,6 +136,7 @@ public class AnchorPoint extends DraggablePoint {
 
         super.setLocation(x, y);
 
+        // move the control points along with the anchor
         ctrlOut.translateOnlyThis(dx, dy);
         ctrlIn.translateOnlyThis(dx, dy);
     }
@@ -150,8 +162,12 @@ public class AnchorPoint extends DraggablePoint {
         ctrlOut.imTranslate(dx, dy);
     }
 
-    public DraggablePoint handleOrCtrlHandleWasHit(double x, double y,
-                                                   boolean altDown) {
+    /**
+     * Tries to locate a handle (anchor or control) at the given coordinates.
+     * When Alt is pressed, it prioritizes finding control handles over the anchor point.
+     */
+    public DraggablePoint findHandleAt(double x, double y,
+                                       boolean altDown) {
         if (altDown) {
             // check the control handles first, so that
             // retracted handles can be dragged out with Alt-drag
@@ -193,9 +209,12 @@ public class AnchorPoint extends DraggablePoint {
         }
     }
 
+    /**
+     * Determines the appropriate handle type based on control point positions.
+     */
     public void setHeuristicType() {
-        boolean inRetracted = ctrlIn.isRetracted(1.0);
-        boolean outRetracted = ctrlOut.isRetracted(1.0);
+        boolean inRetracted = ctrlIn.isRetracted(RETRACTION_TOLERANCE);
+        boolean outRetracted = ctrlOut.isRetracted(RETRACTION_TOLERANCE);
 
         if (inRetracted && outRetracted) {
             // so that they can be easily dragged out
@@ -208,23 +227,21 @@ public class AnchorPoint extends DraggablePoint {
         }
     }
 
-    // tries to determine a type based on the current
-    // positions of control points
     private AnchorPointType calcHeuristicType() {
         double dOutX = ctrlOut.x - x;
         double dOutY = ctrlOut.y - y;
         double dInX = ctrlIn.x - x;
         double dInY = ctrlIn.y - y;
 
-        double symThreshold = 2.0;
-        if (Math.abs(dOutX + dInX) < symThreshold
-            && Math.abs(dOutY + dInY) < symThreshold) {
+        // Are they symmetric?
+        if (Math.abs(dOutX + dInX) < SYMMETRY_THRESHOLD
+            && Math.abs(dOutY + dInY) < SYMMETRY_THRESHOLD) {
             return SYMMETRIC;
         }
 
         // Are they at least collinear?
         // Checks the slope equality while avoids dividing by 0
-        if (Math.abs(dOutY * dInX - dOutX * dInY) < 0.1) {
+        if (Math.abs(dOutY * dInX - dOutX * dInY) < COLLINEARITY_THRESHOLD) {
             return SMOOTH;
         }
 

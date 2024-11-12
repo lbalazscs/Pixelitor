@@ -113,12 +113,12 @@ public class Tools {
         }
 
         if (previousTool != null) {
-            previousTool.toolEnded();
+            previousTool.toolDeactivated();
             EventDispatcher.toolChanged(previousTool, newTool);
         }
 
         setActiveTool(newTool);
-        newTool.toolStarted();
+        newTool.toolActivated();
         ToolSettingsPanelContainer.get().showSettingsOf(newTool);
     }
 

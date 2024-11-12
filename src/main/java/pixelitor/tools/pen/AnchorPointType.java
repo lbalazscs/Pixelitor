@@ -22,69 +22,74 @@ import pixelitor.gui.utils.PAction;
 import javax.swing.*;
 
 /**
- * The type of an anchor point determines how its control
- * handles behave relative to each other.
+ * Defines how control handles of an anchor point behave relative
+ * to each other when moved. Each type implements different constraints
+ * between the incoming and outgoing control handles.
  */
 public enum AnchorPointType {
     /**
-     * The control handles are both collinear and equidistant.
+     * Keeps the control handles both collinear and equidistant.
+     * This creates the smoothest possible curve transition through the anchor point.
      */
-    SYMMETRIC("Symmetric", true) {
+    SYMMETRIC("Symmetric") {
         @Override
-        void setLocationOfOtherControl(double x, double y,
-                                       AnchorPoint anchor,
-                                       ControlPoint other) {
-            double dx = x - anchor.x;
-            double dy = y - anchor.y;
+        void updateSibling(ControlPoint moved,
+                           AnchorPoint anchor,
+                           ControlPoint opposite) {
+            double dx = moved.x - anchor.x;
+            double dy = moved.y - anchor.y;
 
-            other.setLocationOnlyForThis(anchor.x - dx, anchor.y - dy);
+            opposite.setLocationOnlyForThis(anchor.x - dx, anchor.y - dy);
         }
     },
     /**
-     * Collinear, but the handles don't necessarily have the same length
+     * Maintains collinearity between the control points but allows different distances.
      */
-    SMOOTH("Smooth", true) {
+    SMOOTH("Smooth") {
         @Override
-        void setLocationOfOtherControl(double x, double y,
-                                       AnchorPoint anchor,
-                                       ControlPoint other) {
-            // keep the distance, but adjust the angle to the new angle
-            double dist = other.getRememberedDistFromAnchor();
-            double newAngle = Math.PI + Math.atan2(y - anchor.y, x - anchor.x);
+        void updateSibling(ControlPoint moved,
+                           AnchorPoint anchor,
+                           ControlPoint opposite) {
+            // preserve the distance, but adjust the angle to the new angle
+            double dist = opposite.getRememberedDistFromAnchor();
+            double newAngle = Math.PI + Math.atan2(
+                moved.y - anchor.y,
+                moved.x - anchor.x);
 
             double newX = anchor.x + dist * Math.cos(newAngle);
             double newY = anchor.y + dist * Math.sin(newAngle);
-            other.setLocationOnlyForThis(newX, newY);
+            opposite.setLocationOnlyForThis(newX, newY);
         }
     },
     /**
-     * The two control handles are totally independent.
+     * Allows independent movement of the control handles with no constraints.
      */
-    CUSP("Cusp (free handles)", false) {
+    CUSP("Cusp (free handles)") {
         @Override
-        void setLocationOfOtherControl(double x, double y,
-                                       AnchorPoint anchor,
-                                       ControlPoint other) {
+        void updateSibling(ControlPoint moved,
+                           AnchorPoint anchor,
+                           ControlPoint opposite) {
             // do nothing: the control points are independent
         }
     };
 
     private final String displayName;
-    private final boolean dependent;
 
-    AnchorPointType(String displayName, boolean dependent) {
+    AnchorPointType(String displayName) {
         this.displayName = displayName;
-        this.dependent = dependent;
     }
 
-    public boolean isDependent() {
-        return dependent;
-    }
+    /**
+     * Updates the position of the opposite control handle based
+     * on the type's constraints when one control handle is moved.
+     */
+    abstract void updateSibling(ControlPoint moved,
+                                AnchorPoint anchor,
+                                ControlPoint opposite);
 
-    abstract void setLocationOfOtherControl(double x, double y,
-                                            AnchorPoint anchor,
-                                            ControlPoint other);
-
+    /**
+     * Creates a radio button menu item for switching to this handle type.
+     */
     public JRadioButtonMenuItem createConvertMenuItem(AnchorPoint ap) {
         return new AnchorPointTypeMenuItem(ap, this);
     }
@@ -94,6 +99,9 @@ public enum AnchorPointType {
         return displayName;
     }
 
+    /**
+     * Menu item for changing an anchor point's type.
+     */
     static class AnchorPointTypeMenuItem extends JRadioButtonMenuItem {
         public AnchorPointTypeMenuItem(AnchorPoint ap, AnchorPointType type) {
             super(new PAction(type.toString(), () -> ap.setType(type)));
@@ -102,5 +110,4 @@ public enum AnchorPointType {
             }
         }
     }
-
 }

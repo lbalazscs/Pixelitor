@@ -187,7 +187,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
             filter = lastFilter;
 
             // when the filter was copied, then it wasn't adjusted to the image size
-            updateOptions();
+            adaptToContext();
 
             holder.update();
         }
@@ -201,9 +201,9 @@ public class AdjustmentLayer extends Layer implements Filterable {
         return !filter.equals(lastFilter);
     }
 
-    public void updateOptions() {
+    public void adaptToContext() {
         if (filter instanceof ParametrizedFilter pf) {
-            pf.getParamSet().updateOptions(this, false);
+            pf.getParamSet().adaptToContext(this, false);
         }
     }
 

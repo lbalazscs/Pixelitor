@@ -327,12 +327,10 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             // the painting thread already calculated it
             return;
         }
-//        if (!first) { // prevent the filter from running twice
-            GUIUtils.runWithBusyCursor(() ->
-                    createCachedImage(imageSource.getImage()),
-                busyCursorTarget);
-            holder.update();
-//        }
+        GUIUtils.runWithBusyCursor(() ->
+                createCachedImage(imageSource.getImage()),
+            busyCursorTarget);
+        holder.update();
     }
 
     @Override
@@ -353,13 +351,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             popup.add(new PAction("Add Layer Mask", () -> addMask(false)));
         }
 
-        popup.add(new PAction("Change Filter Type...", this::replaceFilter));
+        popup.add(new PAction("Change Filter...", this::replaceFilter));
 
         if (smartObject.getNumSmartFilters() > 1) {
             popup.addSeparator();
-            popup.add(new PAction("Move Up", Icons.getNorthArrowIcon(), () ->
+            popup.add(new PAction("Move Up", Icons.getUpArrowIcon(), () ->
                 smartObject.moveUp(this)));
-            popup.add(new PAction("Move Down", Icons.getSouthArrowIcon(), () ->
+            popup.add(new PAction("Move Down", Icons.getDownArrowIcon(), () ->
                 smartObject.moveDown(this)));
         }
 
@@ -372,19 +370,20 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     private void replaceFilter() {
         FilterAction action = FilterSearchPanel.showInDialog("Replace " + filter.getName());
-        if (action != null) {
-            Filter oldFilter = filter;
-            String oldName = getName();
-
-            filter = action.createNewFilterInstance();
-            setName(filter.getName(), false);
-
-            History.add(new FilterChangedEdit(this, oldFilter, oldName));
-
-            invalidateAll();
-            holder.update();
-            edit();
+        if (action == null) {
+            return; // dialog canceled
         }
+        Filter oldFilter = filter;
+        String oldName = getName();
+
+        filter = action.createNewFilterInstance();
+        setName(filter.getName(), false);
+
+        History.add(new FilterChangedEdit(this, oldFilter, oldName));
+
+        invalidateAll();
+        holder.update();
+        edit();
     }
 
     public BufferedImage getCachedImage() {

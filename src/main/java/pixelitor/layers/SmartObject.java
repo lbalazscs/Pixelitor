@@ -128,7 +128,7 @@ public class SmartObject extends CompositeLayer {
         newContent.createDebugName();
         setContent(newContent);
 
-        copyLayerLevelPropertiesFrom(layer);
+        layer.copyCommonPropertiesTo(this);
 
         assert checkInvariants();
     }
@@ -237,7 +237,7 @@ public class SmartObject extends CompositeLayer {
 
         // has to be done after the migration
         for (SmartFilter filter : filters) {
-            filter.updateOptions();
+            filter.adaptToContext();
         }
 
         recalculateImage();
@@ -304,12 +304,9 @@ public class SmartObject extends CompositeLayer {
     }
 
     private void recalculateImage() {
-        int numFilters = filters.size();
-        if (numFilters > 0) {
-            image = filters.get(numFilters - 1).getImage();
-        } else {
-            image = baseSource.getImage();
-        }
+        image = filters.isEmpty()
+            ? baseSource.getImage()
+            : filters.getLast().getImage();
         imageNeedsRefresh = false;
     }
 
@@ -810,7 +807,7 @@ public class SmartObject extends CompositeLayer {
 
     public SmartObject shallowDuplicate() {
         SmartObject d = new SmartObject(this, CopyType.CLONE_SMART_OBJECT, comp);
-        duplicateMask(d, CopyType.CLONE_SMART_OBJECT, comp);
+        copyMaskTo(d, CopyType.CLONE_SMART_OBJECT, comp);
         return d;
     }
 
@@ -1087,7 +1084,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public boolean allowsZeroLayers() {
+    public boolean canBeEmpty() {
         return true;
     }
 

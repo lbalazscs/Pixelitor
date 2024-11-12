@@ -467,7 +467,7 @@ class CompositionTest {
     }
 
     @Test
-    void generateNewLayerName() {
+    void generateLayerName() {
         assertThat(comp.generateLayerName()).isEqualTo("layer 1");
         assertThat(comp.generateLayerName()).isEqualTo("layer 2");
         assertThat(comp.generateLayerName()).isEqualTo("layer 3");

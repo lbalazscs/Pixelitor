@@ -20,15 +20,26 @@ package pixelitor.gui;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.AppPreferences;
 
+/**
+ * Different methods for panning (scrolling) the view.
+ */
 public enum PanMethod {
+    /**
+     * Pan by holding space and dragging with any mouse button.
+     */
     SPACE_DRAG("Space-drag", "sd") {
         @Override
-        public boolean initPan(PMouseEvent e) {
+        public boolean shouldStartPan(PMouseEvent e) {
             return GlobalEvents.isSpaceDown();
         }
-    }, MIDDLE_MOUSE("Middle-mouse Drag", "mmd") {
+    },
+
+    /**
+     * Pan by dragging with the middle mouse button.
+     */
+    MIDDLE_MOUSE("Middle-mouse Drag", "mmd") {
         @Override
-        public boolean initPan(PMouseEvent e) {
+        public boolean shouldStartPan(PMouseEvent e) {
             return e.isMiddle();
         }
     };
@@ -41,15 +52,21 @@ public enum PanMethod {
         this.saveCode = saveCode;
     }
 
-    public static boolean ignoreSpace() {
+    /**
+     * Whether space key events should be ignored for panning.
+     */
+    public static boolean shouldIgnoreSpace() {
         return CURRENT != SPACE_DRAG;
     }
 
-    public abstract boolean initPan(PMouseEvent e);
+    /**
+     * Whether panning should be started based on the current event.
+     */
+    public abstract boolean shouldStartPan(PMouseEvent e);
 
     public static PanMethod CURRENT = SPACE_DRAG;
 
-    public static void load() {
+    public static void loadFromPreferences() {
         String loadedCode = AppPreferences.loadPan();
 
         for (PanMethod method : values()) {

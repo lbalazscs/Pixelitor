@@ -59,7 +59,7 @@ import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.layers.MaskViewMode.RUBYLITH;
 import static pixelitor.layers.MaskViewMode.SHOW_MASK;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
-import static pixelitor.tools.DragToolState.NO_INTERACTION;
+import static pixelitor.tools.DragToolState.IDLE;
 import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
 import static pixelitor.tools.gradient.GradientType.LINEAR;
 import static pixelitor.tools.gradient.GradientType.RADIAL;
@@ -692,7 +692,7 @@ public class WorkflowTest {
         pw.comboBox("shapeTypeCB").selectItem(RECTANGLE.toString());
         pw.comboBox("fillPaintCB").selectItem(NONE.toString());
         pw.comboBox("strokePaintCB").selectItem(TRANSPARENT.toString());
-        EDT.assertShapesToolStateIs(NO_INTERACTION);
+        EDT.assertShapesToolStateIs(IDLE);
         pw.button("convertToSelection").requireDisabled();
 
         findButtonByText(pw, "Stroke Settings...")

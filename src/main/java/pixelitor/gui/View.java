@@ -66,8 +66,8 @@ import static pixelitor.utils.Threads.threadInfo;
 public class View extends JComponent implements MouseListener, MouseMotionListener, Debuggable {
     private Composition comp;
     private Canvas canvas;
-    private ZoomLevel zoomLevel = ZoomLevel.Z100;
-    private double scaling = 1.0f;
+    private ZoomLevel zoomLevel = ZoomLevel.ACTUAL_SIZE;
+    private double zoomScale = 1.0f;
 
     private ViewContainer viewContainer = null;
     private final LayersPanel layersPanel;
@@ -98,7 +98,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         setComp(comp);
 
-        setZoom(ZoomLevel.calcBestFor(canvas, null, false));
+        setZoom(ZoomLevel.calcBestZoom(canvas, null, false));
 
         layersPanel = new LayersPanel();
 
@@ -109,6 +109,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return comp.checkForAutoReload();
     }
 
+    /**
+     * Attempts to reload the composition from its source file.
+     */
     public CompletableFuture<Composition> reloadAsync() {
         assert isActive();
 
@@ -319,10 +322,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         LayersContainer.showLayersOf(this);
     }
 
-    public double getScaling() {
-        return scaling;
-    }
-
     public void updateTitle() {
         if (viewContainer != null) {
             viewContainer.updateTitle(this);
@@ -332,10 +331,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     // used only for the frames ui
     public String createTitleWithZoom() {
         return comp.getName() + " - " + zoomLevel;
-    }
-
-    public ZoomLevel getZoomLevel() {
-        return zoomLevel;
     }
 
     public void removeLayerUI(LayerUI ui) {
@@ -386,7 +381,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
                 canvas.getCoWidth(), canvas.getCoHeight());
         }
 
-        g2.scale(scaling, scaling);
+        g2.scale(zoomScale, zoomScale);
         // after the translation and scaling, we are in "image space"
 
         if (showMask) {
@@ -432,7 +427,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         g2.setXORMode(BLACK);
         double pixelSize = zoomLevel.getViewScale();
 
-        Rectangle scrolledRect = getVisiblePart();
+        Rectangle scrolledRect = getVisibleRegion();
 
         double startX = canvasStartX;
         if (scrolledRect.x > 0) {
@@ -496,7 +491,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         // the thickness is derived from the brush radius, therefore
         // it still needs to be converted into component space
-        thickness = scaling * thickness;
+        thickness = zoomScale * thickness;
 
         startX = startX - thickness;
         endX = endX + thickness;
@@ -568,37 +563,49 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return canvasStartY;
     }
 
-    public void setZoom(AutoZoom autoZoom) {
-        setZoom(ZoomLevel.calcBestFor(canvas, autoZoom, true));
+    public double getZoomScale() {
+        return zoomScale;
     }
 
+    public ZoomLevel getZoomLevel() {
+        return zoomLevel;
+    }
+
+    /**
+     * Sets the zoom level using automatic zoom calculation.
+     */
+    public void setZoom(AutoZoom autoZoom) {
+        setZoom(ZoomLevel.calcBestZoom(canvas, autoZoom, true));
+    }
+
+    /**
+     * Sets the zoom level, maintaining the current view center.
+     */
     public void setZoom(ZoomLevel newZoom) {
         setZoom(newZoom, null);
     }
 
     /**
-     * Sets the new zoom level
+     * Sets the zoom level while maintaining focus on a specific point.
      */
-    public void setZoom(ZoomLevel newZoom, Point mousePos) {
-        ZoomLevel oldZoom = zoomLevel;
-        if (oldZoom == newZoom) {
+    public void setZoom(ZoomLevel newZoom, Point focusPoint) {
+        ZoomLevel prevZoom = zoomLevel;
+        if (prevZoom == newZoom) {
             return;
         }
 
         this.zoomLevel = newZoom;
-        scaling = newZoom.getViewScale();
+        zoomScale = newZoom.getViewScale();
         canvas.recalcCoSize(this, true);
 
-        if (ImageArea.currentModeIs(ImageArea.Mode.FRAMES)) {
+        if (ImageArea.isCurrentMode(ImageArea.Mode.FRAMES)) {
             updateTitle();
         } else {
-            // otherwise the scrollbars don't appear
-            // when using the tabbed UI
-            revalidate();
+            revalidate(); // ensure scrollbars update in tabbed UI
         }
 
         if (viewContainer != null) {
-            moveScrollbarsAfterZoom(oldZoom, newZoom, mousePos);
+            moveScrollbarsAfterZoom(prevZoom, newZoom, focusPoint);
         }
 
         if (isActive()) {
@@ -606,44 +613,48 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
     }
 
-    private void moveScrollbarsAfterZoom(ZoomLevel oldZoom,
+    private void moveScrollbarsAfterZoom(ZoomLevel prevZoom,
                                          ZoomLevel newZoom,
-                                         Point mousePos) {
-        Rectangle visiblePart = getVisiblePart();
-        Point zoomOrigin;
-        if (mousePos != null) { // started from a mouse event
-            zoomOrigin = mousePos;
+                                         Point focusPoint) {
+        Rectangle visibleRegion = getVisibleRegion();
+        Point zoomCenter;
+        if (focusPoint != null) { // started from a mouse event
+            zoomCenter = focusPoint;
         } else {
-            int cx = visiblePart.x + visiblePart.width / 2;
-            int cy = visiblePart.y + visiblePart.height / 2;
-
-            zoomOrigin = new Point(cx, cy);
+            zoomCenter = new Point(
+                visibleRegion.x + visibleRegion.width / 2,
+                visibleRegion.y + visibleRegion.height / 2);
         }
-        // the x, y coordinates were generated BEFORE the zooming,
+        // the center coordinates were generated BEFORE the zooming,
         // now find the corresponding coordinates after zooming
-        Point imOrigin = fromComponentToImageSpace(zoomOrigin, oldZoom);
-        zoomOrigin = fromImageToComponentSpace(imOrigin, newZoom);
+        Point imCenter = fromComponentToImageSpace(zoomCenter, prevZoom);
+        zoomCenter = fromImageToComponentSpace(imCenter, newZoom);
 
-        Rectangle areaThatShouldBeVisible = new Rectangle(
-            zoomOrigin.x - visiblePart.width / 2,
-            zoomOrigin.y - visiblePart.height / 2,
-            visiblePart.width,
-            visiblePart.height
+        Rectangle targetRegion = new Rectangle(
+            zoomCenter.x - visibleRegion.width / 2,
+            zoomCenter.y - visibleRegion.height / 2,
+            visibleRegion.width,
+            visibleRegion.height
         );
+        scrollRectToVisible(targetRegion);
 
-        scrollRectToVisible(areaThatShouldBeVisible);
         repaint();
     }
 
-    public void zoomToRect(PRectangle rect) {
+    /**
+     * Zooms the view to fit a specific rectangle.
+     */
+    public void zoomToRegion(PRectangle rect) {
         Rectangle2D zoomRect = rect.getIm();
         if (zoomRect.isEmpty()) {
             return;
         }
 
-        Canvas tmpCanvas = new Canvas((int) zoomRect.getWidth(), (int) zoomRect.getHeight());
+        Canvas tmpCanvas = new Canvas(
+            (int) zoomRect.getWidth(),
+            (int) zoomRect.getHeight());
 
-        setZoom(ZoomLevel.calcBestFor(tmpCanvas, AutoZoom.FIT_SPACE, true));
+        setZoom(ZoomLevel.calcBestZoom(tmpCanvas, AutoZoom.FIT_SPACE, true));
         scrollRectToVisible(imageToComponentSpace(zoomRect));
     }
 
@@ -651,16 +662,16 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         zoomIn(null);
     }
 
-    public void zoomIn(Point mousePos) {
-        setZoom(zoomLevel.zoomIn(), mousePos);
+    public void zoomIn(Point focusPoint) {
+        setZoom(zoomLevel.zoomIn(), focusPoint);
     }
 
     public void zoomOut() {
         zoomOut(null);
     }
 
-    public void zoomOut(Point mousePos) {
-        setZoom(zoomLevel.zoomOut(), mousePos);
+    public void zoomOut(Point focusPoint) {
+        setZoom(zoomLevel.zoomOut(), focusPoint);
     }
 
     // It seems that all Swing resizing goes through this method, so we don't
@@ -727,26 +738,26 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     public double componentXToImageSpace(double coX) {
         if (pixelSnapping) {
-            return (int) (((coX - canvasStartX) / scaling) + 0.5);
+            return (int) (((coX - canvasStartX) / zoomScale) + 0.5);
         } else {
-            return ((coX - canvasStartX) / scaling);
+            return ((coX - canvasStartX) / zoomScale);
         }
     }
 
     public double componentYToImageSpace(double coY) {
         if (pixelSnapping) {
-            return (int) (((coY - canvasStartY) / scaling) + 0.5);
+            return (int) (((coY - canvasStartY) / zoomScale) + 0.5);
         } else {
-            return ((coY - canvasStartY) / scaling);
+            return ((coY - canvasStartY) / zoomScale);
         }
     }
 
     public double imageXToComponentSpace(double imX) {
-        return canvasStartX + imX * scaling;
+        return canvasStartX + imX * zoomScale;
     }
 
     public double imageYToComponentSpace(double imY) {
-        return canvasStartY + imY * scaling;
+        return canvasStartY + imY * zoomScale;
     }
 
     public Point2D componentToImageSpace(Point2D co) {
@@ -782,11 +793,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         double imY = componentYToImageSpace(co.getY());
         double imWidth, imHeight;
         if (pixelSnapping) {
-            imWidth = (int) ((co.getWidth() / scaling) + 0.5);
-            imHeight = (int) ((co.getHeight() / scaling) + 0.5);
+            imWidth = (int) ((co.getWidth() / zoomScale) + 0.5);
+            imHeight = (int) ((co.getHeight() / zoomScale) + 0.5);
         } else {
-            imWidth = co.getWidth() / scaling;
-            imHeight = co.getHeight() / scaling;
+            imWidth = co.getWidth() / zoomScale;
+            imHeight = co.getHeight() / zoomScale;
         }
         return new Rectangle2D.Double(imX, imY, imWidth, imHeight);
     }
@@ -795,8 +806,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return new Rectangle(
             (int) imageXToComponentSpace(im.getX()),
             (int) imageYToComponentSpace(im.getY()),
-            (int) (im.getWidth() * scaling),
-            (int) (im.getHeight() * scaling)
+            (int) (im.getWidth() * zoomScale),
+            (int) (im.getHeight() * zoomScale)
         );
     }
 
@@ -807,7 +818,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private AffineTransform createImToCoTransform() {
         var at = new AffineTransform();
         at.translate(canvasStartX, canvasStartY);
-        at.scale(scaling, scaling);
+        at.scale(zoomScale, zoomScale);
         return at;
     }
 
@@ -817,7 +828,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     private AffineTransform createCoToImTransform() {
         var at = new AffineTransform();
-        double s = 1.0 / scaling;
+        double s = 1.0 / zoomScale;
         at.scale(s, s);
         at.translate(-canvasStartX, -canvasStartY);
         return at;
@@ -828,7 +839,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * visible considering that the JScrollPane might show
      * only a part of it
      */
-    public Rectangle getVisiblePart() {
+    public Rectangle getVisibleRegion() {
         return viewContainer.getScrollPane().getViewport().getViewRect();
     }
 
@@ -853,7 +864,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     /**
-     * The return value is changed only in unit tests
+     * The return value is changed only in the unit tests using mocked views
      */
     @SuppressWarnings({"MethodMayBeStatic", "SameReturnValue"})
     public boolean isMock() {
@@ -884,7 +895,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
                 }
             });
         } else {
-            // call here, painting calls will be coalesced anyway
+            // call now, repainting calls will be coalesced anyway
             navigator.repaint();
         }
     }
@@ -897,15 +908,15 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         Rectangle canvasRelativeToView = canvas.getCoBounds(this);
 
         // take scrollbars into account
-        Rectangle retVal = canvasRelativeToView.intersection(getVisiblePart());
-        if (retVal.isEmpty()) {
+        Rectangle visibleCanvas = canvasRelativeToView.intersection(getVisibleRegion());
+        if (visibleCanvas.isEmpty()) {
             throw new IllegalStateException("canvas not visible");
         }
 
         // transform into screen coordinates
-        Point onScreen = getLocationOnScreen();
-        retVal.translate(onScreen.x, onScreen.y);
-        return retVal;
+        Point offset = getLocationOnScreen();
+        visibleCanvas.translate(offset.x, offset.y);
+        return visibleCanvas;
     }
 
     /**

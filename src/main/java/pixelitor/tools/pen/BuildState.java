@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,20 +18,20 @@
 package pixelitor.tools.pen;
 
 /**
- * The state of a path while building it.
+ * The various states in the process of building a path.
  */
 public enum BuildState {
-    // The state after a subpath is finished, but another is not started yet.
-    // Also the starting state of a subpath
-    NO_INTERACTION(false),
+    // The starting empty state when there is no interaction.
+    // Also the state after a subpath is finished, but another is not started yet.
+    IDLE(false),
 
-    // The two basic operations of building a path:
-    DRAGGING_THE_CONTROL_OF_LAST(true), // the out control of last anchor is dragged out
-    MOVING_TO_NEXT_ANCHOR(false), // there is a moving point
+    // States during the two primary path-building operations:
+    DRAGGING_LAST_CONTROL(true), // Dragging out the out-control of the last anchor.
+    MOVING_TO_NEXT_ANCHOR(false), // Moving to position the next anchor point.
 
-    // Drag and move events when the Ctrl or Alt key is down:
-    DRAG_EDITING_PREVIOUS(true),  // a previous (anchor or control) point is dragged
-    MOVE_EDITING_PREVIOUS(false); // moving, but the rubber band is not shown
+    // States while editing with modifier keys (Ctrl or Alt):
+    DRAG_EDITING_PREVIOUS(true),  // A previous anchor or control point is being dragged.
+    MOVE_EDITING_PREVIOUS(false); // Moving without showing the rubber band.
 
     private final boolean dragging;
 

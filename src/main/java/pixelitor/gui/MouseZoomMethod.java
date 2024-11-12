@@ -21,38 +21,22 @@ import pixelitor.Views;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
+import java.awt.event.MouseWheelEvent;
 
 /**
- * The configurable ways to zoom with the mouse
+ * Methods for zooming with the mouse wheel: with or without holding the Ctrl key.
  */
 public enum MouseZoomMethod {
     WHEEL("Mouse Wheel", "wheel") {
         @Override
         public void installOnView(View view) {
             removeExistingListeners(view);
-            view.addMouseWheelListener(e -> {
-                if (e.getWheelRotation() < 0) { // up, away from the user
-                    view.zoomIn(e.getPoint());
-                } else {  // down, towards the user
-                    view.zoomOut(e.getPoint());
-                }
-            });
+            view.addMouseWheelListener(e -> viewZoomed(view, e));
         }
 
         @Override
-        public void installOnJComponent(JComponent component, View view) {
-            component.addMouseWheelListener(e -> {
-                if (e.getWheelRotation() < 0) { // up, away from the user
-                    // this.view will be always the active image...
-                    if (view != null) { // ...and it is null if all images are closed
-                        view.zoomIn();
-                    }
-                } else {  // down, towards the user
-                    if (view != null) {
-                        view.zoomOut();
-                    }
-                }
-            });
+        public void installOnOther(JComponent component, View view) {
+            component.addMouseWheelListener(e -> otherZoomed(view, e));
         }
     }, CTRL_WHEEL("Ctrl + Mouse Wheel", "ctrl-wheel") {
         @Override
@@ -61,29 +45,16 @@ public enum MouseZoomMethod {
 
             view.addMouseWheelListener(e -> {
                 if (e.isControlDown()) {
-                    if (e.getWheelRotation() < 0) { // up, away from the user
-                        view.zoomIn(e.getPoint());
-                    } else {  // down, towards the user
-                        view.zoomOut(e.getPoint());
-                    }
+                    viewZoomed(view, e);
                 }
             });
         }
 
         @Override
-        public void installOnJComponent(JComponent component, View view) {
+        public void installOnOther(JComponent component, View view) {
             component.addMouseWheelListener(e -> {
                 if (e.isControlDown()) {
-                    if (e.getWheelRotation() < 0) { // up, away from the user
-                        // this.view will be always the active image...
-                        if (view != null) { // ...and it is null if all images are closed
-                            view.zoomIn();
-                        }
-                    } else {  // down, towards the user
-                        if (view != null) {
-                            view.zoomOut();
-                        }
-                    }
+                    otherZoomed(view, e);
                 }
             });
         }
@@ -101,7 +72,28 @@ public enum MouseZoomMethod {
 
     public abstract void installOnView(View view);
 
-    public abstract void installOnJComponent(JComponent component, View view);
+    // used on other components, like the Navigator, where the
+    // exact mouse position doesn't matter
+    public abstract void installOnOther(JComponent component, View view);
+
+    private static void viewZoomed(View view, MouseWheelEvent e) {
+        if (e.getWheelRotation() < 0) { // up, away from the user
+            view.zoomIn(e.getPoint());
+        } else {  // down, towards the user
+            view.zoomOut(e.getPoint());
+        }
+    }
+
+    private static void otherZoomed(View view, MouseWheelEvent e) {
+        if (view == null) {
+            return; // all images are closed
+        }
+        if (e.getWheelRotation() < 0) { // up, away from the user
+            view.zoomIn();
+        } else {  // down, towards the user
+            view.zoomOut();
+        }
+    }
 
     private static void removeExistingListeners(JComponent c) {
         var existingListeners = c.getMouseWheelListeners();
@@ -111,7 +103,7 @@ public enum MouseZoomMethod {
         }
     }
 
-    public static void load() {
+    public static void loadFromPreferences() {
         String loadedCode = AppPreferences.loadMouseZoom();
 
         for (MouseZoomMethod method : values()) {

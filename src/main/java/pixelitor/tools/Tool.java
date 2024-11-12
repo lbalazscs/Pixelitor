@@ -85,63 +85,15 @@ public abstract class Tool implements PresetOwner, Debuggable {
         eventHandlerChain = new ToolHandlerChain(this, cursor);
     }
 
-    public boolean hasHandToolForwarding() {
-        // all tools behave like the hand tool if space is pressed,
-        // but the hand tool itself doesn't need the forwarding
-        return true;
-    }
-
-    public boolean allowOnlyDrawables() {
-        return false;
-    }
-
-    public boolean hasColorPickerForwarding() {
-        return false;
-    }
-
-    public String getStatusBarMessage() {
-        return name + ": " + toolMessage;
-    }
-
-    public void mouseClicked(PMouseEvent e) {
-        // empty by default
-    }
-
-    public void setButton(ToolButton toolButton) {
-        this.toolButton = toolButton;
-    }
-
     public abstract void initSettingsPanel(ResourceBundle resources);
 
-    public String getName() {
-        return name;
-    }
-
-    public String getShortName() {
-        return shortName;
-    }
-
-    /**
-     * Creates the tool's icon. Tools create their icon using
-     * vector graphics so that is looks good on HiDPI screens.
-     */
-    public abstract VectorIcon createIcon();
-
-    public char getActivationKey() {
-        return activationKey;
-    }
-
-    public boolean hasPixelSnapping() {
-        return pixelSnapping;
-    }
-
-    protected void toolStarted() {
+    protected void toolActivated() {
         GlobalEvents.setActiveTool(this);
         Views.setCursorForAll(cursor);
         View.toolSnappingChanged(pixelSnapping, this == Tools.CROP);
     }
 
-    protected void toolEnded() {
+    protected void toolDeactivated() {
         DraggablePoint.activePoint = null;
         closeToolDialogs();
     }
@@ -150,9 +102,11 @@ public abstract class Tool implements PresetOwner, Debuggable {
         // empty by default
     }
 
-    public Cursor getStartingCursor() {
-        return cursor;
-    }
+    /**
+     * Creates the tool's icon. Tools create their icon using
+     * vector graphics so that is looks good on HiDPI screens.
+     */
+    public abstract VectorIcon createIcon();
 
     /**
      * Paint over the given {@link Composition} after all the layers have been painted.
@@ -180,12 +134,8 @@ public abstract class Tool implements PresetOwner, Debuggable {
 
     public abstract void mouseReleased(PMouseEvent e);
 
-    public void setSettingsPanel(ToolSettingsPanel settingsPanel) {
-        this.settingsPanel = settingsPanel;
-    }
-
-    public boolean hasSettingsPanel() {
-        return settingsPanel != null;
+    public void mouseClicked(PMouseEvent e) {
+        // empty by default
     }
 
     public void randomize() {
@@ -328,6 +278,58 @@ public abstract class Tool implements PresetOwner, Debuggable {
 
     public boolean isActive() {
         return Tools.activeIs(this);
+    }
+
+    public boolean hasHandToolForwarding() {
+        // all tools behave like the hand tool if space is pressed,
+        // but the hand tool itself doesn't need the forwarding
+        return true;
+    }
+
+    // whether this tool can only be used with layers implementing Drawable
+    public boolean allowOnlyDrawables() {
+        return false;
+    }
+
+    // whether this tool works like a color picker when Alt is pressed
+    public boolean hasColorPickerForwarding() {
+        return false;
+    }
+
+    public String getStatusBarMessage() {
+        return name + ": " + toolMessage;
+    }
+
+    public void setButton(ToolButton toolButton) {
+        this.toolButton = toolButton;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public char getActivationKey() {
+        return activationKey;
+    }
+
+    public boolean hasPixelSnapping() {
+        return pixelSnapping;
+    }
+
+    public Cursor getStartingCursor() {
+        return cursor;
+    }
+
+    public void setSettingsPanel(ToolSettingsPanel settingsPanel) {
+        this.settingsPanel = settingsPanel;
+    }
+
+    public boolean hasSettingsPanel() {
+        return settingsPanel != null;
     }
 
     /**

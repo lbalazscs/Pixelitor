@@ -171,7 +171,7 @@ public class ParamSet implements Debuggable {
         }
     }
 
-    public void updateOptions(Filterable layer, boolean changeValue) {
+    public void adaptToContext(Filterable layer, boolean changeValue) {
         for (FilterParam param : paramList) {
             param.adaptToContext(layer, changeValue);
         }

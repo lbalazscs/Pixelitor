@@ -32,7 +32,7 @@ import static pixelitor.utils.Keys.CTRL_TAB;
  */
 public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     private final Lazy<JMenu> cachedPlacementMenu = Lazy.of(this::createTabPlacementMenu);
-    private boolean userInitiated = true;
+    private boolean userInitiatedChange = true;
 
     public TabsUI() {
         setTabPlacement(ImageArea.getTabPlacement());
@@ -44,14 +44,14 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     private void tabsChanged() {
-        if (!userInitiated) {
+        if (!userInitiatedChange) {
             return;
         }
 
         int selectedIndex = getSelectedIndex();
         if (selectedIndex != -1) { // it is -1 if all tabs have been closed
-            TabViewContainer tab = (TabViewContainer) getComponentAt(selectedIndex);
-            tab.activated();
+            TabViewContainer selectedTab = (TabViewContainer) getComponentAt(selectedIndex);
+            selectedTab.activated();
         }
     }
 
@@ -63,21 +63,21 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
 
     @Override
     public void addView(View view) {
-        TabViewContainer tab = new TabViewContainer(view, this);
-        view.setViewContainer(tab);
+        TabViewContainer newTab = new TabViewContainer(view, this);
+        view.setViewContainer(newTab);
 
-        int myIndex = getTabCount();
+        int newTabIndex = getTabCount();
 
         try {
-            userInitiated = false;
-            addTab(view.getName(), tab);
+            userInitiatedChange = false;
+            addTab(view.getName(), newTab);
         } finally {
-            userInitiated = true;
+            userInitiatedChange = true;
         }
 
-        setTabComponentAt(myIndex, new TabTitleRenderer(view.getName(), tab));
-        setSelectedIndex(myIndex);
-        tab.activated();
+        setTabComponentAt(newTabIndex, new TabTitleRenderer(view.getName(), newTab));
+        setSelectedIndex(newTabIndex);
+        newTab.activated();
     }
 
     public static void warnAndCloseTab(TabViewContainer tab) {
@@ -87,8 +87,7 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
 
     public void closeTab(TabViewContainer tab) {
         remove(indexOfComponent(tab));
-        View view = tab.getView();
-        Views.viewClosed(view);
+        Views.viewClosed(tab.getView());
     }
 
     public void selectTab(TabViewContainer tab) {
@@ -123,6 +122,7 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
         menu.add(bottomMI);
         menu.add(leftMI);
         menu.add(rightMI);
+
         return menu;
     }
 

@@ -153,6 +153,11 @@ public class FilterButtonModel implements FilterSetting {
     }
 
     @Override
+    public boolean isEnabled() {
+        return enabledByFilterLogic && enabledByAnimationSetting;
+    }
+
+    @Override
     public String toString() {
         return format("%s[name = '%s']", getClass().getSimpleName(), getName());
     }

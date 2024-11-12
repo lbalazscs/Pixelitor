@@ -19,7 +19,6 @@ package pixelitor.tools.pen;
 
 import pixelitor.AppMode;
 import pixelitor.gui.View;
-import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
@@ -42,8 +41,8 @@ public final class PathEditor implements PenToolMode {
     public static final PathEditor INSTANCE = new PathEditor();
     private static final String EDIT_HELP_MESSAGE =
         "Pen Tool Edit Mode: " +
-            "<b>drag</b> the anchor and control points. " +
-            "<b>Right-click</b> the anchor points for options. " +
+            "<b>drag</b> anchor and control points. " +
+            "<b>Right-click</b> anchor points for options. " +
             "<b>Alt-drag</b> pulls out or breaks handles, " +
             "<b>Shift</b> constrains angles.";
 
@@ -71,41 +70,37 @@ public final class PathEditor implements PenToolMode {
     public void mousePressed(PMouseEvent e) {
         double x = e.getCoX();
         double y = e.getCoY();
-
         boolean altDown = e.isAltDown();
-        DraggablePoint hit = path.handleWasHit(x, y, altDown);
-        if (hit != null) {
-            if (e.isPopupTrigger() && hit instanceof AnchorPoint ap) {
+
+        DraggablePoint handle = path.findHandleAt(x, y, altDown);
+        if (handle != null) {
+            if (e.isPopupTrigger() && handle instanceof AnchorPoint ap) {
                 ap.showPopup((int) x, (int) y);
             } else if (altDown) {
-                altMousePressedHit(hit, x, y);
+                altMousePressedOn(handle, x, y);
             } else {
                 // Alt is not down, normal editing
-                hit.setActive(true);
-                hit.mousePressed(x, y);
+                handle.setActive(true);
+                handle.mousePressed(x, y);
             }
         }
     }
 
-    private static void altMousePressedHit(DraggablePoint hit, double x, double y) {
-        if (hit instanceof ControlPoint cp) {
-            altMousePressedHitControl(cp, x, y);
-        } else if (hit instanceof AnchorPoint ap) {
-            altMousePressedHitAnchor(ap, x, y);
+    private static void altMousePressedOn(DraggablePoint handle, double x, double y) {
+        if (handle instanceof ControlPoint cp) {
+            altMousePressedOnControl(cp, x, y);
+        } else if (handle instanceof AnchorPoint ap) {
+            altMousePressedOnAnchor(ap, x, y);
         }
     }
 
-    private static void altMousePressedHitControl(ControlPoint cp, double x, double y) {
-        if (cp.isRetracted()) {
-            cp.getAnchor().setType(SYMMETRIC);
-        } else {
-            cp.getAnchor().setType(CUSP);
-        }
+    private static void altMousePressedOnControl(ControlPoint cp, double x, double y) {
+        cp.getAnchor().setType(cp.isRetracted() ? SYMMETRIC : CUSP);
         cp.setActive(true);
         cp.mousePressed(x, y);
     }
 
-    private static void altMousePressedHitAnchor(AnchorPoint ap, double x, double y) {
+    private static void altMousePressedOnAnchor(AnchorPoint ap, double x, double y) {
         ap.retractHandles();
         ap.setType(SYMMETRIC);
         ap.ctrlOut.setActive(true);
@@ -114,26 +109,24 @@ public final class PathEditor implements PenToolMode {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        double x = e.getCoX();
-        double y = e.getCoY();
-
         if (activePoint != null) {
-            activePoint.mouseDragged(x, y, e.isShiftDown());
+            activePoint.mouseDragged(e.getCoX(), e.getCoY(), e.isShiftDown());
         }
     }
 
     @Override
     public void mouseReleased(PMouseEvent e) {
+        if (activePoint == null) {
+            return;
+        }
+
         double x = e.getCoX();
         double y = e.getCoY();
-
-        if (activePoint != null) {
-            if (e.isPopupTrigger() && activePoint instanceof AnchorPoint ap) {
-                ap.showPopup((int) x, (int) y);
-            } else {
-                activePoint.mouseReleased(x, y, e.isShiftDown());
-                activePoint.createMovedEdit(e.getComp()).ifPresent(path::handleMoved);
-            }
+        if (e.isPopupTrigger() && activePoint instanceof AnchorPoint ap) {
+            ap.showPopup((int) x, (int) y);
+        } else {
+            activePoint.mouseReleased(x, y, e.isShiftDown());
+            activePoint.createMovedEdit(e.getComp()).ifPresent(path::handleMoved);
         }
     }
 
@@ -148,15 +141,14 @@ public final class PathEditor implements PenToolMode {
             return false;
         }
 
-        DraggablePoint hit = path.handleWasHit(e.getX(), e.getY(), e.isAltDown());
-        if (hit != null) {
-            hit.setActive(true);
+        // highlights the point under the mouse if present
+        DraggablePoint handle = path.findHandleAt(e.getX(), e.getY(), e.isAltDown());
+        if (handle != null) {
+            handle.setActive(true);
             return true;
-        } else {
-            if (activePoint != null) {
-                activePoint.setActive(false);
-                return true;
-            }
+        } else if (activePoint != null) {
+            activePoint.setActive(false);
+            return true;
         }
 
         return false;
@@ -179,11 +171,6 @@ public final class PathEditor implements PenToolMode {
     @Override
     public String getToolMessage() {
         return EDIT_HELP_MESSAGE;
-    }
-
-    @Override
-    public void start() {
-        Tools.PEN.startMode(EDIT, false);
     }
 
     @Override

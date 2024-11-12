@@ -61,8 +61,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
+import static pixelitor.tools.DragToolState.IDLE;
 import static pixelitor.tools.DragToolState.INITIAL_DRAG;
-import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.DragToolState.TRANSFORM;
 import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
@@ -318,7 +318,7 @@ public class ShapesTool extends DragTool {
         } else {
             startNewShape();
         }
-        assert state != NO_INTERACTION : "state = " + state;
+        assert state != IDLE : "state = " + state;
     }
 
     private void startNewShape() {
@@ -462,7 +462,7 @@ public class ShapesTool extends DragTool {
         transformBox = null;
         styledShape = null;
 
-        setState(NO_INTERACTION);
+        setState(IDLE);
     }
 
     private void setState(DragToolState newState) {
@@ -770,7 +770,7 @@ public class ShapesTool extends DragTool {
 
     @Override
     public boolean isDirectDrawing() {
-        return state == NO_INTERACTION;
+        return state == IDLE;
     }
 
     @Override
@@ -809,8 +809,8 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    protected void toolStarted() {
-        super.toolStarted();
+    protected void toolActivated() {
+        super.toolActivated();
 
         Layer activeLayer = Views.getActiveLayer();
         if (activeLayer != null) {
@@ -819,8 +819,8 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
+    protected void toolDeactivated() {
+        super.toolDeactivated();
 
         rasterizeBox();
 

@@ -105,7 +105,7 @@ public class Selection implements Debuggable {
         }
 
         marchingAntsTimer = new Timer(100, e -> {
-            dashPhase += 1.0f / (float) view.getScaling();
+            dashPhase += 1.0f / (float) view.getZoomScale();
             repaint();
         });
         marchingAntsTimer.start();
@@ -134,7 +134,7 @@ public class Selection implements Debuggable {
         // As the selection coordinates are in image space, this is
         // called with a Graphics2D transformed into image space.
         // The line width has to be scaled to compensate.
-        double viewScale = view.getScaling();
+        double viewScale = view.getZoomScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
         float[] dash;

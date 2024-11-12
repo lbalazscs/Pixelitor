@@ -27,7 +27,7 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
+import static pixelitor.tools.pen.BuildState.IDLE;
 
 /**
  * Represents the starting of a new subpath within a path.
@@ -56,7 +56,7 @@ public class SubPathStartEdit extends PixelitorEdit {
         if (noMoreLeft) {
             Tools.PEN.removePath();
         }
-        path.setBuildState(NO_INTERACTION);
+        path.setBuildState(IDLE);
         comp.repaint();
     }
 

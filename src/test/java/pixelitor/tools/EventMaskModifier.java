@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,15 @@
 
 package pixelitor.tools;
 
+import java.awt.event.InputEvent;
+
+/**
+ * An object that can modify event mask flags when creating {@link InputEvent}s.
+ * These flags indicate which modifier keys or mouse buttons are pressed during an event.
+ */
 public interface EventMaskModifier {
     /**
-     * Modify a modifier mask describing the modifier keys
-     * and mouse buttons that are down during an event.
+     * Applies this modifier to an existing event mask.
      */
-    int modify(int in);
+    int modify(int currentMask);
 }

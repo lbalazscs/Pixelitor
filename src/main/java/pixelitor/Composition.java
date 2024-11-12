@@ -745,7 +745,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public boolean allowsZeroLayers() {
+    public boolean canBeEmpty() {
         return false;
     }
 
@@ -1559,9 +1559,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public boolean containsLayerWithClass(Class<? extends Layer> clazz) {
+    public boolean containsLayerOfType(Class<? extends Layer> type) {
         for (Layer layer : layerList) {
-            if (layer.containsLayerWithClass(clazz)) {
+            if (layer.containsLayerOfType(type)) {
                 return true;
             }
         }
@@ -1745,13 +1745,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         forEachNestedLayer(TextLayer.class, textLayer -> textLayer.pathChanged(deleted));
     }
 
-    public void createPathFromShape(Shape shape, boolean addToHistory, boolean startEditMode) {
+    public void createPathFromShape(Shape shape, boolean addToHistory, boolean startEditing) {
         Path oldActivePath = getActivePath();
         Path newPath = Shapes.shapeToPath(shape, getView());
         setActivePath(newPath);
         Tools.PEN.setPath(newPath);
-        if (startEditMode) {
-            Tools.PEN.startMode(EDIT, false);
+        if (startEditing) {
+            Tools.PEN.activateMode(EDIT, false);
         }
         Tools.PEN.activate();
 

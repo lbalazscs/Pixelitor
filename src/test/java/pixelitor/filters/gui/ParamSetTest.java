@@ -18,12 +18,14 @@
 package pixelitor.filters.gui;
 
 import org.junit.jupiter.api.*;
+import org.mockito.verification.VerificationMode;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.ParamTest;
 import pixelitor.layers.ImageLayer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -33,7 +35,7 @@ import static org.mockito.Mockito.verify;
 @TestMethodOrder(MethodOrderer.Random.class)
 class ParamSetTest {
     private ParamSet params;
-    private ParamAdjustmentListener adjustmentListener;
+    private ParamAdjustmentListener mockAdjustmentListener;
     private RangeParam extraParam;
 
     @BeforeAll
@@ -48,66 +50,129 @@ class ParamSetTest {
         params.withReseedAction();
         params.addCommonActions(true);
 
-        adjustmentListener = mock(ParamAdjustmentListener.class);
-        params.setAdjustmentListener(adjustmentListener);
+        mockAdjustmentListener = mock(ParamAdjustmentListener.class);
+        params.setAdjustmentListener(mockAdjustmentListener);
 
+        // add an extra parameter that uses the adjustment listener defined here
         extraParam = new RangeParam("Extra Param", 0, 0, 200);
-        extraParam.setAdjustmentListener(adjustmentListener);
+        extraParam.setAdjustmentListener(mockAdjustmentListener);
         params.insertParam(extraParam, 3);
 
         Composition comp = TestHelper.createRealComp("ParamSetTest", ImageLayer.class);
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
-        params.updateOptions(layer, true);
+        params.adaptToContext(layer, true);
     }
 
     @Test
-    void reset() {
+    void resetShouldNotTriggerFilter() {
         params.reset();
-        verify(adjustmentListener, never()).paramAdjusted();
+        verifyFilterNotExecuted();
     }
 
     @Test
-    void randomize() {
+    void randomizeShouldNotTriggerFilter() {
         params.randomize();
-        verify(adjustmentListener, never()).paramAdjusted();
+        verifyFilterNotExecuted();
     }
 
     @Test
     void filterTriggering() {
         extraParam.setValue(42, false);
-        verify(adjustmentListener, never()).paramAdjusted();
+        verifyFilterNotExecuted();
 
         extraParam.setValue(43, true);
-        verify(adjustmentListener, times(1)).paramAdjusted();
+        verifyFilterExecuted(times(1));
 
         params.runFilter();
-        verify(adjustmentListener, times(2)).paramAdjusted();
+        verifyFilterExecuted(times(2));
     }
 
     @Test
     @DisplayName("copyState()/setState()")
     void copyState_setState() {
-        FilterState state = params.copyState(true);
-        params.setState(state, true);
+        // Set initial test value
+        extraParam.setValue(75, false);
 
-        verify(adjustmentListener, never()).paramAdjusted();
+        // Copy state and modify current values
+        FilterState savedState = params.copyState(true);
+        extraParam.setValue(100, false);
+
+        // Restore state and verify
+        params.setState(savedState, true);
+        assertThat(extraParam.getValue()).isEqualTo(75);
+        verifyFilterNotExecuted();
     }
 
     @Test
-    void canBeAnimated() {
+    void isAnimatable() {
         assertThat(params.isAnimatable()).isTrue();
     }
 
     @Test
-    void setFinalAnimationSettingMode() {
+    void setFinalAnimationMode() {
         params.setFinalAnimationMode(false);
         params.setFinalAnimationMode(true);
 
-        verify(adjustmentListener, never()).paramAdjusted();
+        verifyFilterNotExecuted();
     }
 
     @Test
     void hasGradient() {
         assertThat(params.hasGradient()).isTrue();
+    }
+
+    @Test
+    void setShouldHandleInvalidNames() {
+        assertThatThrownBy(() -> params.set("NonexistentParam", "value"))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("No param called NonexistentParam");
+    }
+
+    @Test
+    void afterResetActionShouldBeExecuted() {
+        // Set up a mock after reset action
+        Runnable mockAfterResetAction = mock(Runnable.class);
+        params.setAfterResetAllAction(mockAfterResetAction);
+
+        // Perform reset and verify action was executed
+        params.reset();
+        verify(mockAfterResetAction, times(1)).run();
+    }
+
+    @Test
+    void shouldSaveAndRestoreUserPreset() {
+        UserPreset preset = new UserPreset("ParamSetTest");
+        extraParam.setValue(36, false);
+
+        params.saveStateTo(preset);
+        extraParam.setValue(72, false);
+        verifyFilterNotExecuted();
+
+        params.loadUserPreset(preset);
+        assertThat(extraParam.getValue()).isEqualTo(36);
+        verifyFilterExecuted(times(1));
+    }
+
+    @Test
+    void shouldSaveAndRestoreFilterState() {
+        extraParam.setValue(36, false);
+
+        // save an animation state so that it doesn't
+        // try to update the gui when restoring it
+        FilterState filterState = params.copyState(true);
+        extraParam.setValue(72, false);
+        verifyFilterNotExecuted();
+
+        params.setState(filterState, true);
+        assertThat(extraParam.getValue()).isEqualTo(36);
+        verifyFilterNotExecuted();
+    }
+
+    private void verifyFilterExecuted(VerificationMode times) {
+        verify(mockAdjustmentListener, times).paramAdjusted();
+    }
+
+    private void verifyFilterNotExecuted() {
+        verifyFilterExecuted(never());
     }
 }

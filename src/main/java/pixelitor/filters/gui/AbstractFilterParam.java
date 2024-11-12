@@ -113,18 +113,19 @@ public abstract class AbstractFilterParam implements FilterParam {
         paramGUI.setEnabled(isEnabled());
     }
 
+    @Override
     public boolean isEnabled() {
         return enabledByAppLogic && enabledByAnimation;
     }
 
     @Override
-    public boolean canRandomize() {
+    public boolean shouldRandomize() {
         return randomizePolicy == ALLOW_RANDOMIZE && enabledByAppLogic;
     }
 
     @Override
     public void randomize() {
-        if (canRandomize()) {
+        if (shouldRandomize()) {
             doRandomize();
         }
     }

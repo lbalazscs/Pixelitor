@@ -18,7 +18,6 @@
 package pixelitor.tools.shapes;
 
 import com.jhlabs.awt.WobbleStroke;
-import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.ParamState;
@@ -146,22 +145,16 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     /**
-     * Renders the shape with its current style and transformations.
-     * The given Graphics2D must be in image space.
+     * Renders this object on the given Graphics2D, which is expected to be in image space.
      */
     public void paint(Graphics2D g) {
-        if (transformedDrag == null) {
-            // this object is created when the mouse is pressed, but
-            // it can be painted only after the first drag events arrive
+        if (!hasShape()) {
             return;
         }
+
         if (transformedDrag.isImClick()) {
-            return;
-        }
-        if (shape == null) { // should not happen
-            if (AppMode.isDevelopment()) {
-                throw new IllegalStateException();
-            }
+            // if the mouse dragging comes back exactly to the starting
+            // point, then there is a shape object, but it's empty.
             return;
         }
 
@@ -619,10 +612,15 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return shape;
     }
 
+    // this object is created when the mouse is pressed, but
+    // it has a shape only after the first drag events arrive
     public boolean hasShape() {
         boolean hasShape = state != State.CREATED;
-        assert hasShape == (origDrag != null);
+
         assert hasShape == (shape != null);
+        assert hasShape == (origDrag != null);
+        assert hasShape == (transformedDrag != null);
+
         return hasShape;
     }
 

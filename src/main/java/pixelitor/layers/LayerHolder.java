@@ -46,7 +46,7 @@ public interface LayerHolder extends Debuggable {
 
     boolean containsLayer(Layer layer);
 
-    boolean containsLayerWithClass(Class<? extends Layer> clazz);
+    boolean containsLayerOfType(Class<? extends Layer> type);
 
     default void addLayerNoUI(Layer newLayer) {
         adder().noUI().add(newLayer);
@@ -67,7 +67,7 @@ public interface LayerHolder extends Debuggable {
 
         int index = indexOf(activeLayer);
         // if the layer is already at the edge of its current holder,
-        // and that holder is a group, then get it out of the group
+        // and the holder is a group, then move it out of the group
         if ((up && index == getNumLayers() - 1) || (!up && index == 0)) {
             if (this instanceof LayerGroup group) {
                 LayerHolder groupHolder = group.getHolder();
@@ -92,7 +92,10 @@ public interface LayerHolder extends Debuggable {
         }
     }
 
-    // moves the given layer from this holder into the given holder
+    /**
+     * Transfers the given layer from this holder to the given target
+     * holder at the given index.
+     */
     default void moveLayerInto(Layer layer, LayerHolder targetHolder, int targetIndex, String editName) {
         assert targetHolder != this;
         assert containsLayer(layer);
@@ -174,7 +177,11 @@ public interface LayerHolder extends Debuggable {
      */
     void deleteTemporarily(Layer layer);
 
-    boolean allowsZeroLayers();
+    /**
+     * Returns whether this holder can be empty
+     * (is it allowed to contain no layers).
+     */
+    boolean canBeEmpty();
 
     /**
      * Replaces a layer with another, while keeping its position, mask, ui

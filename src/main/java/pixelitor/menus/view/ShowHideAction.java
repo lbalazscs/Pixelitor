@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,21 +17,23 @@
 
 package pixelitor.menus.view;
 
+import pixelitor.gui.WorkSpace;
 import pixelitor.gui.utils.NamedAction;
 
 import javax.swing.*;
 
 /**
- * An abstract {@link Action} that either shows or hides something,
- * depending on the current visibility
+ * An abstract {@link Action} that toggles the visibility of something.
  */
 public abstract class ShowHideAction extends NamedAction.Checked {
     private final String showText;
     private final String hideText;
+    protected final WorkSpace workSpace;
 
-    protected ShowHideAction(String showText, String hideText) {
+    protected ShowHideAction(String showText, String hideText, WorkSpace workSpace) {
         this.showText = showText;
         this.hideText = hideText;
+        this.workSpace = workSpace;
 
         //noinspection AbstractMethodCallInConstructor
         updateText(getStartupVisibility());

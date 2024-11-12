@@ -54,7 +54,6 @@ public class ToolsPanel extends JPanel {
         Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
             ToolButton toolButton = new ToolButton(tool);
-//            toolButton.setAlignmentX(CENTER_ALIGNMENT);
             toolsPanel.add(toolButton);
             group.add(toolButton);
             setupKeyboardShortcut(tool);
@@ -64,7 +63,6 @@ public class ToolsPanel extends JPanel {
     private void addColorSelector(PixelitorWindow pw) {
         FgBgColorSelector colorSelector = new FgBgColorSelector(pw);
         FgBgColors.setUI(colorSelector);
-        colorSelector.setAlignmentX(CENTER_ALIGNMENT);
         add(colorSelector, BorderLayout.SOUTH);
     }
 

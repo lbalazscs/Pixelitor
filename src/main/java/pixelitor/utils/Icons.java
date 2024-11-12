@@ -36,11 +36,11 @@ public final class Icons {
     private static final Shape ADJ_LAYER_ICON_SHAPE = Shapes.createAdjLayerIconShape();
     private static final Shape SMART_FILTER_ICON_SHAPE = Shapes.createSmartFilterIconShape();
 
-    private static final Icon westArrowIcon = loadThemed("west_arrow.gif", ThemedImageIcon.BLUE);
-    private static final Icon diceIcon = load("dice.png");
-    private static final Icon dice2Icon = load("dice2.png");
-    private static final Icon northArrowIcon = loadThemed("north_arrow.gif", ThemedImageIcon.BLUE);
-    private static final Icon southArrowIcon = loadThemed("south_arrow.gif", ThemedImageIcon.BLUE);
+    private static final Icon resetIcon = loadThemed("west_arrow.gif", ThemedImageIcon.BLUE);
+    private static final Icon randomizeIcon = load("dice.png");
+    private static final Icon reseedIcon = load("dice2.png");
+    private static final Icon upArrowIcon = loadThemed("north_arrow.gif", ThemedImageIcon.BLUE);
+    private static final Icon downArrowIcon = loadThemed("south_arrow.gif", ThemedImageIcon.BLUE);
 
     private static final Icon textLayerIcon = VectorIcon.createNonTransparentThemed(TEXT_LAYER_ICON_SHAPE);
     private static final Icon adjLayerIcon = VectorIcon.createNonTransparentThemed(ADJ_LAYER_ICON_SHAPE);
@@ -53,15 +53,15 @@ public final class Icons {
     }
 
     public static Icon getResetIcon() {
-        return westArrowIcon;
+        return resetIcon;
     }
 
     public static Icon getRandomizeIcon() {
-        return diceIcon;
+        return randomizeIcon;
     }
 
     public static Icon getReseedIcon() {
-        return dice2Icon;
+        return reseedIcon;
     }
 
     public static Icon loadThemed(String iconFileName, int newPixelColor) {
@@ -94,12 +94,12 @@ public final class Icons {
         }
     }
 
-    public static Icon getNorthArrowIcon() {
-        return northArrowIcon;
+    public static Icon getUpArrowIcon() {
+        return upArrowIcon;
     }
 
-    public static Icon getSouthArrowIcon() {
-        return southArrowIcon;
+    public static Icon getDownArrowIcon() {
+        return downArrowIcon;
     }
 
     public static Icon getTextLayerIcon() {

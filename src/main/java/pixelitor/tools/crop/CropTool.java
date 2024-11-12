@@ -17,7 +17,6 @@
 
 package pixelitor.tools.crop;
 
-import pixelitor.AppMode;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
@@ -53,8 +52,8 @@ import java.util.ResourceBundle;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
+import static pixelitor.tools.DragToolState.IDLE;
 import static pixelitor.tools.DragToolState.INITIAL_DRAG;
-import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.DragToolState.TRANSFORM;
 
 /**
@@ -65,8 +64,7 @@ public class CropTool extends DragTool {
 
     private final RangeParam maskOpacity = new RangeParam(
         "Mask Opacity (%)", 0, 75, 100, false, WEST);
-    private Composite maskComposite = AlphaComposite.getInstance(
-        SRC_OVER, (float) maskOpacity.getPercentage());
+    private Composite maskComposite;
 
     private final JButton cancelButton = new JButton(GUIText.CANCEL);
     private JButton cropButton;
@@ -87,15 +85,15 @@ public class CropTool extends DragTool {
     public CropTool() {
         super("Crop", 'C',
             "<b>drag</b> to start or <b>Alt-drag</b> to start form the center. " +
-                "After the handles appear: " +
-                "<b>Shift-drag</b> keeps the aspect ratio, " +
-                "<b>Double-click</b> crops, <b>Esc</b> cancels.",
+                "After handles appear: " +
+                "<b>Shift-drag</b> to keep aspect ratio, " +
+                "<b>Double-click</b> to crop, <b>Esc</b> to cancel.",
             Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
 
-        GuidesRenderer renderer = GuidesRenderer.CROP_GUIDES_INSTANCE.get();
-        compositionGuide = new CompositionGuide(renderer);
+        compositionGuide = new CompositionGuide(GuidesRenderer.CROP_GUIDES_INSTANCE.get());
         pixelSnapping = true;
+        updateMaskopacity(false);
     }
 
     /**
@@ -103,7 +101,7 @@ public class CropTool extends DragTool {
      */
     @Override
     public void initSettingsPanel(ResourceBundle resources) {
-        addMaskOpacitySelector();
+        addMaskOpacitySlider();
 
         settingsPanel.addSeparator();
         addGuidesSelector();
@@ -116,36 +114,24 @@ public class CropTool extends DragTool {
         addCancelButton();
 
         settingsPanel.addSeparator();
-        addCropControlCheckboxes();
+        addCropOptionsCheckBoxes();
 
-        enableCropActions(false);
+        setCropEnabled(false);
     }
 
-    private void addMaskOpacitySelector() {
+    private void addMaskOpacitySlider() {
         // use a change listener so that the mask is
         // continuously updated while the slider is dragged
-        maskOpacity.addChangeListener(e -> maskOpacityChanged());
+        maskOpacity.addChangeListener(e -> updateMaskopacity(true));
         settingsPanel.add(maskOpacity.createGUI());
     }
 
-    private void maskOpacityChanged() {
+    private void updateMaskopacity(boolean repaint) {
         float alpha = (float) maskOpacity.getPercentage();
-        // can the slider get out of range?
-        if (alpha < 0.0f) {
-            if (AppMode.isDevelopment()) {
-                throw new IllegalStateException("alpha = " + alpha);
-            }
-            alpha = 0.0f;
-            maskOpacity.setValue(0);
-        } else if (alpha > 1.0f) {
-            if (AppMode.isDevelopment()) {
-                throw new IllegalStateException("alpha = " + alpha);
-            }
-            alpha = 1.0f;
-            maskOpacity.setValue(100);
-        }
         maskComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
-        Views.repaintActive();
+        if (repaint) {
+            Views.repaintActive();
+        }
     }
 
     private void addGuidesSelector() {
@@ -158,7 +144,7 @@ public class CropTool extends DragTool {
     }
 
     private void addCropSizeControls() {
-        ChangeListener whChangeListener = e -> {
+        ChangeListener sizeChangeListener = e -> {
             if (state == TRANSFORM && !cropBox.isAdjusting()) {
                 cropBox.setImSize(
                     (int) widthSpinner.getValue(),
@@ -169,22 +155,22 @@ public class CropTool extends DragTool {
         };
 
         // add crop width spinner
-        widthSpinner = createSpinner(whChangeListener, Canvas.MAX_WIDTH,
+        widthSpinner = createSpinner(sizeChangeListener, Canvas.MAX_WIDTH,
             "Width of the cropped image (px)");
         settingsPanel.add(widthLabel);
         settingsPanel.add(widthSpinner);
 
         // add crop height spinner
-        heightSpinner = createSpinner(whChangeListener, Canvas.MAX_HEIGHT,
+        heightSpinner = createSpinner(sizeChangeListener, Canvas.MAX_HEIGHT,
             "Height of the cropped image (px)");
         settingsPanel.add(heightLabel);
         settingsPanel.add(heightSpinner);
     }
 
-    private static JSpinner createSpinner(ChangeListener whChangeListener, int max, String toolTip) {
+    private static JSpinner createSpinner(ChangeListener listener, int max, String toolTip) {
         JSpinner spinner = new JSpinner(new SpinnerNumberModel(
             0, 0, max, 1));
-        spinner.addChangeListener(whChangeListener);
+        spinner.addChangeListener(listener);
         spinner.setToolTipText(toolTip);
         // Setting it to 3 columns seems enough
         // for the range 1-9999, but leave it as 4 for safety
@@ -192,14 +178,14 @@ public class CropTool extends DragTool {
         return spinner;
     }
 
-    private void addCropControlCheckboxes() {
+    private void addCropOptionsCheckBoxes() {
         deleteCroppedCB = settingsPanel.addCheckBox(
             DELETE_CROPPED_TEXT, true, "deleteCroppedCB",
-            "If not checked, only the canvas gets smaller");
+            "If unchecked, only the canvas size is reduced.");
 
         allowGrowingCB = settingsPanel.addCheckBox(
             ALLOW_GROWING_TEXT, false, "allowGrowingCB",
-            "Enables the enlargement of the canvas");
+            "Enables enlarging the canvas.");
     }
 
     private void addCropButton() {
@@ -225,7 +211,7 @@ public class CropTool extends DragTool {
             return;
         }
 
-        if (!cropBox.getRect().containsCo(e.getPoint())) {
+        if (!cropBox.getCropRect().containsCo(e.getPoint())) {
             // only double-clicking inside the crop box will execute the crop
             return;
         }
@@ -238,13 +224,13 @@ public class CropTool extends DragTool {
     @Override
     protected void dragStarted(PMouseEvent e) {
         assert state != INITIAL_DRAG;
-        if (state == NO_INTERACTION) {
+        if (state == IDLE) {
             setState(INITIAL_DRAG);
-            enableCropActions(true);
+            setCropEnabled(true);
         } else if (state == TRANSFORM) {
             assert cropBox != null;
             cropBox.mousePressed(e);
-            enableCropActions(true);
+            setCropEnabled(true);
         }
     }
 
@@ -280,7 +266,7 @@ public class CropTool extends DragTool {
         e.getComp().update(); // TODO is an update needed?
 
         switch (state) {
-            case NO_INTERACTION, AFTER_FIRST_MOUSE_PRESS:
+            case IDLE, AFTER_FIRST_MOUSE_PRESS:
                 break;
             case INITIAL_DRAG:
                 if (cropBox != null) {
@@ -305,7 +291,7 @@ public class CropTool extends DragTool {
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
-        if (state == NO_INTERACTION) {
+        if (state == IDLE) {
             return;
         }
         PRectangle cropRect = getCropRect(comp.getView());
@@ -340,7 +326,7 @@ public class CropTool extends DragTool {
         g2.setComposite(origComposite);
     }
 
-    // Paint the handles and the guides.
+    // Paint the handles and the composition guides.
     private void paintBox(Graphics2D g2, PRectangle cropRect) {
         compositionGuide.setType((CompositionGuideType) guidesCB.getSelectedItem());
         compositionGuide.draw(cropRect.getCo(), g2);
@@ -348,15 +334,15 @@ public class CropTool extends DragTool {
         cropBox.paint(g2);
     }
 
-    private void enableCropActions(boolean b) {
-        widthLabel.setEnabled(b);
-        heightSpinner.setEnabled(b);
+    private void setCropEnabled(boolean enabled) {
+        widthLabel.setEnabled(enabled);
+        heightSpinner.setEnabled(enabled);
 
-        heightLabel.setEnabled(b);
-        widthSpinner.setEnabled(b);
+        heightLabel.setEnabled(enabled);
+        widthSpinner.setEnabled(enabled);
 
-        cropButton.setEnabled(b);
-        cancelButton.setEnabled(b);
+        cropButton.setEnabled(enabled);
+        cancelButton.setEnabled(enabled);
     }
 
     /**
@@ -378,24 +364,24 @@ public class CropTool extends DragTool {
         if (state == INITIAL_DRAG) {
             return drag.toPosPRect(view);
         } else if (state == TRANSFORM) {
-            return cropBox.getRect();
+            return cropBox.getCropRect();
         }
         // initial state
         return null;
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
+    protected void toolDeactivated() {
+        super.toolDeactivated();
         resetInitialState();
     }
 
     @Override
     public void resetInitialState() {
         cropBox = null;
-        setState(NO_INTERACTION);
+        setState(IDLE);
 
-        enableCropActions(false);
+        setCropEnabled(false);
 
         heightSpinner.setValue(0);
         widthSpinner.setValue(0);

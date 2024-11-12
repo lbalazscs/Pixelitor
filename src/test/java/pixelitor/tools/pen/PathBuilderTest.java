@@ -32,11 +32,11 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
 import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 
 @DisplayName("Pen Tool/PathBuilder tests")
@@ -114,7 +114,7 @@ class PathBuilderTest {
     @Test
     @DisplayName("undo after mouse press")
     void undoAfterMousePressed() {
-        press(100, 100, DRAGGING_THE_CONTROL_OF_LAST);
+        press(100, 100, DRAGGING_LAST_CONTROL);
         Path path = PenTool.path;
         assertThat(path.getActiveSubpath()).numAnchorsIs(1);
 
@@ -124,7 +124,7 @@ class PathBuilderTest {
         drag(110, 100, null);
 
         // dragging state because the mouse is down
-        redo("Subpath Start", DRAGGING_THE_CONTROL_OF_LAST);
+        redo("Subpath Start", DRAGGING_LAST_CONTROL);
         assertThat(Tools.PEN)
             .pathIs(path)
             .isConsistent();
@@ -178,7 +178,7 @@ class PathBuilderTest {
         int p1x = 100;
         int p1y = 100;
         // press at the first anchor point
-        press(p1x, p1y, DRAGGING_THE_CONTROL_OF_LAST);
+        press(p1x, p1y, DRAGGING_LAST_CONTROL);
         Path path = PenTool.path;
         assertThat(path).isNotNull();
         SubPath sp = path.getActiveSubpath();
@@ -189,15 +189,15 @@ class PathBuilderTest {
             .isAt(p1x, p1y);
 
         // drag the "out" handle in the opposite direction of the desired "in" control
-        drag(p1x + 25, p1y + 25, DRAGGING_THE_CONTROL_OF_LAST);
-        drag(p1x + 50, p1y + 50, DRAGGING_THE_CONTROL_OF_LAST);
+        drag(p1x + 25, p1y + 25, DRAGGING_LAST_CONTROL);
+        drag(p1x + 50, p1y + 50, DRAGGING_LAST_CONTROL);
         assertThat(firstAnchor.ctrlOut).isAt(p1x + 50, p1y + 50);
         assertThat(firstAnchor.ctrlIn).isAt(p1x - 50, p1y - 50);
 
         // alt-drag the "out" handle to its place
-        altDrag(p1x + 50, p1y, DRAGGING_THE_CONTROL_OF_LAST);
+        altDrag(p1x + 50, p1y, DRAGGING_LAST_CONTROL);
         assertThat(firstAnchor).anchorPointTypeIs(CUSP);
-        altDrag(p1x + 50, p1y - 50, DRAGGING_THE_CONTROL_OF_LAST);
+        altDrag(p1x + 50, p1y - 50, DRAGGING_LAST_CONTROL);
         release(p1x + 50, p1y - 50, MOVING_TO_NEXT_ANCHOR);
         assertThat(firstAnchor.ctrlOut).isAt(p1x + 50, p1y - 50);
         // since alt breaks the handles, the "in" handle is not supposed to move
@@ -208,7 +208,7 @@ class PathBuilderTest {
         int p2y = 200;
         move(p2x, p2y, MOVING_TO_NEXT_ANCHOR);
         // press to fix the second anchor point
-        press(p2x, p2y, DRAGGING_THE_CONTROL_OF_LAST);
+        press(p2x, p2y, DRAGGING_LAST_CONTROL);
         assertThat(sp).numAnchorsIs(2);
         AnchorPoint secondAnchor = sp.getAnchor(1);
         assertThat(secondAnchor)
@@ -216,15 +216,15 @@ class PathBuilderTest {
             .isAt(p2x, p2y);
 
         // drag in the opposite direction of the desired "in" control
-        drag(p2x - 25, p2y + 25, DRAGGING_THE_CONTROL_OF_LAST);
-        drag(p2x - 50, p2y + 50, DRAGGING_THE_CONTROL_OF_LAST);
+        drag(p2x - 25, p2y + 25, DRAGGING_LAST_CONTROL);
+        drag(p2x - 50, p2y + 50, DRAGGING_LAST_CONTROL);
         assertThat(secondAnchor.ctrlOut).isAt(p2x - 50, p2y + 50);
         assertThat(secondAnchor.ctrlIn).isAt(p2x + 50, p2y - 50);
 
         // alt-drag the "out" handle to its place
-        altDrag(p2x - 50, p2y - 25, DRAGGING_THE_CONTROL_OF_LAST);
+        altDrag(p2x - 50, p2y - 25, DRAGGING_LAST_CONTROL);
         assertThat(secondAnchor).anchorPointTypeIs(CUSP);
-        altDrag(p2x - 50, p2y - 50, DRAGGING_THE_CONTROL_OF_LAST);
+        altDrag(p2x - 50, p2y - 50, DRAGGING_LAST_CONTROL);
         release(p2x - 50, p2y - 50, MOVING_TO_NEXT_ANCHOR);
         assertThat(secondAnchor.ctrlOut).isAt(p2x - 50, p2y - 50);
         // since alt breaks the handles, the "in" handle is not supposed to move
@@ -234,14 +234,14 @@ class PathBuilderTest {
         move(p1x, p1y, MOVING_TO_NEXT_ANCHOR);
 
         // press to close
-        press(p1x, p1y, NO_INTERACTION);
+        press(p1x, p1y, IDLE);
         assertThat(sp)
             .numAnchorsIs(2)
             .isClosed()
             .isFinished();
 
         // releasing should not change anything
-        release(p1x, p1y, NO_INTERACTION);
+        release(p1x, p1y, IDLE);
         assertThat(sp)
             .numAnchorsIs(2)
             .isClosed()
@@ -260,15 +260,15 @@ class PathBuilderTest {
     @DisplayName("breaking old handles with Alt")
     void breakingOldHandlesWithAlt() {
         // add the first anchor point
-        press(100, 100, DRAGGING_THE_CONTROL_OF_LAST);
+        press(100, 100, DRAGGING_LAST_CONTROL);
         Path path = PenTool.path;
         SubPath sp = path.getActiveSubpath();
         assertThat(sp).numAnchorsIs(1);
         AnchorPoint firstAnchor = sp.getAnchor(0);
 
         // drag out its handles
-        drag(120, 100, DRAGGING_THE_CONTROL_OF_LAST);
-        drag(140, 100, DRAGGING_THE_CONTROL_OF_LAST);
+        drag(120, 100, DRAGGING_LAST_CONTROL);
+        drag(140, 100, DRAGGING_LAST_CONTROL);
         release(150, 100, MOVING_TO_NEXT_ANCHOR);
         assertThat(firstAnchor.ctrlOut).isAt(150, 100);
         assertThat(firstAnchor.ctrlIn).isAt(50, 100);
@@ -327,7 +327,7 @@ class PathBuilderTest {
         SubPath sp = build3PointSubPath(true, true, 100, 100);
 
         // move the mouse away before undoing
-        move(142, 42, NO_INTERACTION);
+        move(142, 42, IDLE);
 
         undo("Close Subpath", MOVING_TO_NEXT_ANCHOR);
 
@@ -391,12 +391,12 @@ class PathBuilderTest {
     void constrainedCurvedPath() {
         // Start a new curve with shift-press.
         // As this is the first point on the subpath, it should not be constrained.
-        shiftPress(314, 314, DRAGGING_THE_CONTROL_OF_LAST);
+        shiftPress(314, 314, DRAGGING_LAST_CONTROL);
 
         // Shift-drag the out control to the right
         // The control should be constrained relative to the anchor.
-        shiftDrag(330, 317, DRAGGING_THE_CONTROL_OF_LAST);
-        shiftDrag(350, 318, DRAGGING_THE_CONTROL_OF_LAST);
+        shiftDrag(330, 317, DRAGGING_LAST_CONTROL);
+        shiftDrag(350, 318, DRAGGING_LAST_CONTROL);
         shiftRelease(350, 318, MOVING_TO_NEXT_ANCHOR);
 
         // Check the results so far
@@ -419,7 +419,7 @@ class PathBuilderTest {
         assertThat(sp).hasMovingPointAt(314, 500);
 
         // shift-press and check that the constraining is still OK
-        shiftPress(316, 510, DRAGGING_THE_CONTROL_OF_LAST);
+        shiftPress(316, 510, DRAGGING_LAST_CONTROL);
         assertThat(sp)
             .hasNoMovingPoint()
             .isNotFinished()
@@ -534,25 +534,25 @@ class PathBuilderTest {
         assertThat(secondAnchor.ctrlOut).isNotActive();
 
         // ctrl-click between the points for finish the curve without closing
-        ctrlPress(150, 100, NO_INTERACTION);
-        release(150, 100, NO_INTERACTION);
+        ctrlPress(150, 100, IDLE);
+        release(150, 100, IDLE);
         assertThat(sp)
             .numAnchorsIs(3)
             .isNotClosed()
             .isFinished();
 
-        move(120, 100, NO_INTERACTION);
+        move(120, 100, IDLE);
         // ctrl-click on the first point...
         ctrlPress(100, 100, DRAG_EDITING_PREVIOUS);
         // ...and drag it downwards
         drag(100, 150, DRAG_EDITING_PREVIOUS);
-        release(100, 200, NO_INTERACTION);
+        release(100, 200, IDLE);
         assertThat(firstAnchor).isAt(100, 200);
     }
 
     private SubPath build3PointSubPath(boolean closed, boolean curved, int startX, int startY) {
         // first anchor point
-        press(startX, startY, DRAGGING_THE_CONTROL_OF_LAST);
+        press(startX, startY, DRAGGING_LAST_CONTROL);
         Path path = PenTool.path;
         assertThat(path).isNotNull();
         SubPath sp = path.getActiveSubpath();
@@ -563,12 +563,12 @@ class PathBuilderTest {
             .isAtIm(startX, startY);
         if (curved) {
             // curved: drag out the control points before releasing
-            drag(startX + 10, startY - 10, DRAGGING_THE_CONTROL_OF_LAST);
+            drag(startX + 10, startY - 10, DRAGGING_LAST_CONTROL);
             assertThat(firstAnchor.ctrlOut)
                 .isAt(startX + 10, startY - 10)
                 .isAtIm(startX + 10, startY - 10);
-            drag(startX + 20, startY - 20, DRAGGING_THE_CONTROL_OF_LAST);
-            drag(startX + 30, startY - 30, DRAGGING_THE_CONTROL_OF_LAST);
+            drag(startX + 20, startY - 20, DRAGGING_LAST_CONTROL);
+            drag(startX + 30, startY - 30, DRAGGING_LAST_CONTROL);
             assertThat(sp).numAnchorsIs(1);
 
             // release to set the final value of the control point
@@ -592,7 +592,7 @@ class PathBuilderTest {
         // press to fix the second path point
         int p2x = startX + 100;
         int p2y = startY;
-        press(p2x, startY, DRAGGING_THE_CONTROL_OF_LAST);
+        press(p2x, startY, DRAGGING_LAST_CONTROL);
         assertThat(sp).numAnchorsIs(2);
         AnchorPoint secondAnchorPoint = sp.getAnchor(1);
         assertThat(secondAnchorPoint)
@@ -600,9 +600,9 @@ class PathBuilderTest {
             .isAtIm(p2x, p2y);
         if (curved) {
             // curved: drag out the control points before releasing
-            drag(p2x + 10, p2y + 10, DRAGGING_THE_CONTROL_OF_LAST);
-            drag(p2x + 20, p2y + 20, DRAGGING_THE_CONTROL_OF_LAST);
-            drag(p2x + 30, p2y + 30, DRAGGING_THE_CONTROL_OF_LAST);
+            drag(p2x + 10, p2y + 10, DRAGGING_LAST_CONTROL);
+            drag(p2x + 20, p2y + 20, DRAGGING_LAST_CONTROL);
+            drag(p2x + 30, p2y + 30, DRAGGING_LAST_CONTROL);
             // release to set the final value of the control point
             release(p2x + 30, p2y + 30, MOVING_TO_NEXT_ANCHOR);
             assertThat(secondAnchorPoint.ctrlIn).isNotRetracted();
@@ -620,14 +620,14 @@ class PathBuilderTest {
         // third anchor point
         int p3x = startX + 50;
         int p3y = startY + 100;
-        press(p3x, p3y, DRAGGING_THE_CONTROL_OF_LAST);
+        press(p3x, p3y, DRAGGING_LAST_CONTROL);
 
         if (!closed) {
             release(p3x + 1, p3y + 1, MOVING_TO_NEXT_ANCHOR);
 
             // if not closed, finish by ctrl-press somewhere
-            ctrlPress(p3x + 42, p3y + 42, NO_INTERACTION);
-            release(p3x + 42, p3y + 42, NO_INTERACTION);
+            ctrlPress(p3x + 42, p3y + 42, IDLE);
+            release(p3x + 42, p3y + 42, IDLE);
 
             assertThat(sp)
                 .isConsistent()
@@ -646,9 +646,9 @@ class PathBuilderTest {
             .isAtIm(p3x, p3y);
         if (curved) {
             // curved: drag out the control points before releasing
-            drag(p3x - 10, p3y, DRAGGING_THE_CONTROL_OF_LAST);
-            drag(p3x - 20, p3y, DRAGGING_THE_CONTROL_OF_LAST);
-            drag(p3x - 30, p3y, DRAGGING_THE_CONTROL_OF_LAST);
+            drag(p3x - 10, p3y, DRAGGING_LAST_CONTROL);
+            drag(p3x - 20, p3y, DRAGGING_LAST_CONTROL);
+            drag(p3x - 30, p3y, DRAGGING_LAST_CONTROL);
             // release to set the final value of the control point
             release(p3x - 40, p3y, MOVING_TO_NEXT_ANCHOR);
         } else {
@@ -668,14 +668,14 @@ class PathBuilderTest {
             .isNotFinished()
             .firstAnchorIsActive();
         // click to close
-        press(startX, startY, NO_INTERACTION);
+        press(startX, startY, IDLE);
         assertThat(sp)
             .isConsistent()
             .isClosed()
             .isFinished()
             .firstAnchorIsNotActive()
             .numAnchorsIs(3);
-        release(startX, startY, NO_INTERACTION);
+        release(startX, startY, IDLE);
 
         return sp;
     }
@@ -700,7 +700,7 @@ class PathBuilderTest {
                 "Add Anchor Point",
                 "Finish Subpath");
         }
-        move(0, 0, NO_INTERACTION);
+        move(0, 0, IDLE);
 
         // now undo until everything is undone
         if (closed) {
@@ -752,19 +752,19 @@ class PathBuilderTest {
         move(7, 7, MOVING_TO_NEXT_ANCHOR);
 
         if (closed) {
-            redo("Close Subpath", NO_INTERACTION);
+            redo("Close Subpath", IDLE);
             assertThat(sp)
                 .isClosed()
                 .isFinished()
                 .numAnchorsIs(3);
-            move(8, 8, NO_INTERACTION);
+            move(8, 8, IDLE);
         } else {
-            redo("Finish Subpath", NO_INTERACTION);
+            redo("Finish Subpath", IDLE);
             assertThat(sp)
                 .isNotClosed()
                 .isFinished()
                 .numAnchorsIs(3);
-            move(8, 8, NO_INTERACTION);
+            move(8, 8, IDLE);
         }
     }
 
@@ -790,8 +790,8 @@ class PathBuilderTest {
         undo("Add Anchor Point", MOVING_TO_NEXT_ANCHOR);
         move(3, 3, MOVING_TO_NEXT_ANCHOR);
 
-        undo("Subpath Start", NO_INTERACTION);
-        move(4, 4, NO_INTERACTION);
+        undo("Subpath Start", IDLE);
+        move(4, 4, IDLE);
 
         undo("Finish Subpath", MOVING_TO_NEXT_ANCHOR);
         move(5, 5, MOVING_TO_NEXT_ANCHOR);
@@ -815,8 +815,8 @@ class PathBuilderTest {
         redo("Add Anchor Point", MOVING_TO_NEXT_ANCHOR);
         move(11, 11, MOVING_TO_NEXT_ANCHOR);
 
-        redo("Finish Subpath", NO_INTERACTION);
-        move(12, 12, NO_INTERACTION);
+        redo("Finish Subpath", IDLE);
+        move(12, 12, IDLE);
 
         redo("Subpath Start", MOVING_TO_NEXT_ANCHOR);
         move(13, 13, MOVING_TO_NEXT_ANCHOR);
@@ -827,8 +827,8 @@ class PathBuilderTest {
         redo("Add Anchor Point", MOVING_TO_NEXT_ANCHOR);
         move(15, 15, MOVING_TO_NEXT_ANCHOR);
 
-        redo("Close Subpath", NO_INTERACTION);
-        move(16, 16, NO_INTERACTION);
+        redo("Close Subpath", IDLE);
+        move(16, 16, IDLE);
     }
 
     private void undo(String edit, BuildState state) {
@@ -870,22 +870,22 @@ class PathBuilderTest {
     }
 
     private void click(int x, int y) {
-        press(x, y, DRAGGING_THE_CONTROL_OF_LAST);
+        press(x, y, DRAGGING_LAST_CONTROL);
         release(x, y, MOVING_TO_NEXT_ANCHOR);
     }
 
     private void shiftClick(int x, int y) {
-        shiftPress(x, y, DRAGGING_THE_CONTROL_OF_LAST);
+        shiftPress(x, y, DRAGGING_LAST_CONTROL);
         shiftRelease(x, y, MOVING_TO_NEXT_ANCHOR);
     }
 
     private void ctrlClick(int x, int y, boolean isFirstInSubPath) {
         if (isFirstInSubPath) {
-            ctrlPress(x, y, DRAGGING_THE_CONTROL_OF_LAST);
+            ctrlPress(x, y, DRAGGING_LAST_CONTROL);
             ctrlRelease(x, y, MOVING_TO_NEXT_ANCHOR);
         } else {
-            ctrlPress(x, y, NO_INTERACTION);
-            ctrlRelease(x, y, NO_INTERACTION);
+            ctrlPress(x, y, IDLE);
+            ctrlRelease(x, y, IDLE);
         }
     }
 

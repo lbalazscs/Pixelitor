@@ -322,7 +322,7 @@ public class Debug {
         Path path = Shapes.shapeToPath(shape, Views.getActive());
 
         Tools.PEN.setPath(path);
-        Tools.PEN.startMode(EDIT, false);
+        Tools.PEN.activateMode(EDIT, false);
         Tools.PEN.activate();
     }
 

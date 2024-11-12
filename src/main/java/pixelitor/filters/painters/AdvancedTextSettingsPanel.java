@@ -99,6 +99,8 @@ public class AdvancedTextSettingsPanel extends JPanel {
 
     private void addTransformGUI(double scaleX, double scaleY,
                                  double shearX, double shearY) {
+        // use a change listener so that the text appearance is
+        // continuously updated while the slider is dragged
         ChangeListener changeListener = e -> actionListener.actionPerformed(null);
 
         scaleXParam = new RangeParam("Horizontal Scaling (%)",
@@ -122,7 +124,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
         gbh.addParam(shearYParam);
     }
 
-    public void saveStateTo(FontInfo fontInfo) {
+    public void configure(FontInfo fontInfo) {
         fontInfo.updateAdvanced(
             strikeThroughCB.isSelected(),
             kerningCB.isSelected(),
@@ -131,9 +133,9 @@ public class AdvancedTextSettingsPanel extends JPanel {
             trackingParam.getValue());
     }
 
-    public void updateFrom(FontInfo font, double lineHeightRatio,
-                           double scaleX, double scaleY,
-                           double shearX, double shearY) {
+    public void setUIValues(FontInfo font, double lineHeightRatio,
+                            double scaleX, double scaleY,
+                            double shearX, double shearY) {
         strikeThroughCB.setSelected(font.hasStrikeThrough());
         underlineCB.setSelected(font.hasUnderline());
 

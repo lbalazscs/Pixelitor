@@ -48,25 +48,25 @@ import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
- * Checks whether different FilterParam implementations implement
- * the FilterParam contract correctly
+ * Checks whether different {@link FilterParam} implementations
+ * implement the interface contract correctly.
  */
 @RunWith(Parameterized.class)
 public class FilterParamTest {
+    @Parameter
+    public FilterParam param;
+
+    private ParamAdjustmentListener mockAdjustmentListener;
+
     @BeforeClass
     public static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
     }
 
-    @Parameter
-    public FilterParam param;
-
-    private ParamAdjustmentListener adjustmentListener;
-
     @Before
     public void beforeEachTest() {
-        adjustmentListener = mock(ParamAdjustmentListener.class);
-        param.setAdjustmentListener(adjustmentListener);
+        mockAdjustmentListener = mock(ParamAdjustmentListener.class);
+        param.setAdjustmentListener(mockAdjustmentListener);
     }
 
     @Parameters(name = "{index}: param = {0}")
@@ -107,56 +107,71 @@ public class FilterParamTest {
     }
 
     @Test
-    public void GUI_test() {
+    public void shouldCreateWorkingGUI() {
         JComponent gui = param.createGUI();
-        assertThat(gui).isNotNull();
+        assertThat(gui)
+            .isNotNull()
+            .isInstanceOf(ParamGUI.class);
+
         assertThat(gui.isEnabled()).isTrue();
 
-        assertThat(gui).isInstanceOf(ParamGUI.class);
         ParamGUI paramGUI = (ParamGUI) gui;
 
+        // enable-disable via the GUI
         paramGUI.setEnabled(false);
         assertThat(gui.isEnabled()).isFalse();
         paramGUI.setEnabled(true);
         assertThat(gui.isEnabled()).isTrue();
 
+        // enable-disable via the param
+        param.setEnabled(false);
+        assertThat(gui.isEnabled()).isFalse();
+        param.setEnabled(true);
+        assertThat(gui.isEnabled()).isTrue();
+
         paramGUI.updateGUI();
 
-        checkThatFilterWasNotCalled();
+        verifyNoParamAdjustments();
     }
 
     @Test
-    public void getNumLayoutColumns() {
-        int cols = ((ParamGUI) param.createGUI()).getNumLayoutColumns();
-        assertThat(cols > 0 && cols < 3).isTrue();
-        checkThatFilterWasNotCalled();
+    public void shouldHaveValidLayoutColumnCount() {
+        int columnCount = ((ParamGUI) param.createGUI()).getNumLayoutColumns();
+
+        assertThat(columnCount)
+            .isGreaterThan(0)
+            .isLessThan(3);
+
+        verifyNoParamAdjustments();
     }
 
     @Test
-    public void randomize() {
+    public void shouldHandleRandomization() {
+        // Test allowed randomization
         param.setRandomizePolicy(RandomizePolicy.ALLOW_RANDOMIZE);
+        assertThat(param).shouldRandomize();
         param.randomize();
-        checkThatFilterWasNotCalled();
+        verifyNoParamAdjustments();
 
-        Object beforeValue = param.getParamValue();
+        // Test ignored randomization
+        Object origValue = param.getParamValue();
         param.setRandomizePolicy(RandomizePolicy.IGNORE_RANDOMIZE);
+        assertThat(param).shouldNotRandomize();
         param.randomize();
-        assertThat(param.getParamValue())
-            .isNotNull()
-            .isEqualTo(beforeValue);
-        checkThatFilterWasNotCalled();
+        assertThat(param).hasValue(origValue); // it didn't change
+        verifyNoParamAdjustments();
     }
 
     @Test
-    public void reset_false() {
+    public void shouldResetWithoutTriggering() {
         param.reset(false);
 
-        checkThatFilterWasNotCalled();
-        assertThat(param).isDefault();
+        verifyNoParamAdjustments();
+        assertThat(param).isAtDefaultValue();
     }
 
     @Test
-    public void reset_true() {
+    public void shouldResetWithTriggering() {
         // make sure that the value is set to the real default value,
         // otherwise (depending on the method execution order) the
         // copyState_setState test could change the value of the angle param
@@ -166,69 +181,81 @@ public class FilterParamTest {
         Object defaultValue = param.getParamValue();
         // we can change the value in a general way only
         // through randomize
-        if (!param.canRandomize()) {
+        if (!param.shouldRandomize()) {
             param.reset(true);
-            assertThat(param).isDefault();
+            assertThat(param).isAtDefaultValue();
             return;
         }
 
-        // wait until randomize changes the value to a non-default value
-        boolean changed = false;
-        while (!changed) {
+        // Randomize until we get a non-default value
+        while (param.hasDefault()) {
             param.randomize();
-            checkThatFilterWasNotCalled();
-            changed = !param.hasDefault();
+            verifyNoParamAdjustments();
         }
+
         assertThat(param.getParamValue())
             .isNotNull()
             .isNotEqualTo(defaultValue);
 
+        // finally we can test reset with triggering
         param.reset(true);
 
-        assertThat(param).isDefault();
-        assertThat(param.getParamValue())
-            .isNotNull()
-            .isEqualTo(defaultValue);
+        assertThat(param)
+            .isAtDefaultValue()
+            .hasValue(defaultValue);
 
-        verify(adjustmentListener, times(1)).paramAdjusted();
+        // check that it was triggered once
+        verify(mockAdjustmentListener, times(1)).paramAdjusted();
     }
 
     @Test
-    public void copyState_setState() {
+    public void shouldPreserveStateWhenCopiedAndRestored() {
+        Object origValue = param.getParamValue();
+
         ParamState<?> paramState = param.copyState();
         assertThat(paramState).isNotNull();
+
         param.loadStateFrom(paramState, false);
-        checkThatFilterWasNotCalled();
+        assertThat(param).hasValue(origValue);
+
+        verifyNoParamAdjustments();
     }
 
     @Test
-    public void simpleMethodsDontRunFilter() {
-        assertThat(param).nameIs("Param Name");
+    public void simpleMethodsShouldNotTriggerFilter() {
+        assertThat(param).hasName("Param Name");
 
         JComponent gui = param.createGUI();
 
         param.isAnimatable();
 
+        // Test APP_LOGIC disable/enable
         param.setEnabled(false, APP_LOGIC);
+        assertThat(param).isDisabled();
         assertThat(gui.isEnabled()).isFalse();
 
         param.setEnabled(true, APP_LOGIC);
+        assertThat(param).isEnabled();
         assertThat(gui.isEnabled()).isTrue();
 
+        // Test ANIMATION_ENDING_STATE disable/enable
         param.setEnabled(false, ANIMATION_ENDING_STATE);
         if (param.isAnimatable()) {
+            assertThat(param).isEnabled();
             assertThat(gui.isEnabled()).isTrue();
         } else {
+            assertThat(param).isDisabled();
             assertThat(gui.isEnabled()).isFalse();
         }
 
         param.setEnabled(true, ANIMATION_ENDING_STATE);
+        assertThat(param).isEnabled();
         assertThat(gui.isEnabled()).isTrue();
 
-        checkThatFilterWasNotCalled();
+        verifyNoParamAdjustments();
     }
 
-    private void checkThatFilterWasNotCalled() {
-        verify(adjustmentListener, never()).paramAdjusted();
+    private void verifyNoParamAdjustments() {
+        verify(mockAdjustmentListener, never()).paramAdjusted();
     }
 }

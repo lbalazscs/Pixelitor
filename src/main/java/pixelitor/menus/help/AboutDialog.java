@@ -111,8 +111,8 @@ public class AboutDialog {
         return linkButton;
     }
 
-    private static void addLabel(JComponent p, URL url) {
-        var imageIcon = new ImageIcon(url);
+    private static void addLabel(JComponent p, URL imageURL) {
+        var imageIcon = new ImageIcon(imageURL);
         var label = new JLabel(imageIcon, CENTER);
         label.setAlignmentX(CENTER_ALIGNMENT);
         p.add(label);

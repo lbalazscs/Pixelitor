@@ -29,7 +29,7 @@ import java.awt.geom.Point2D;
 import java.io.Serial;
 
 /**
- * A control point of an {@link AnchorPoint}
+ * A control point of an {@link AnchorPoint}.
  */
 public class ControlPoint extends DraggablePoint {
     // compatible with Pixelitor 4.2.3
@@ -37,9 +37,11 @@ public class ControlPoint extends DraggablePoint {
     private static final long serialVersionUID = 8776344572399099909L;
 
     private final AnchorPoint anchor;
+
+    // each control point has a sibling on the opposite side of their shared anchor point
     private ControlPoint sibling;
 
-    // this needs to be remembered because otherwise the distance keeps
+    // this needs to be cached because otherwise the distance keeps
     // drifting for smooth anchors as rounding errors accumulate
     private double rememberedDistFromAnchor;
 
@@ -48,25 +50,30 @@ public class ControlPoint extends DraggablePoint {
         this.anchor = anchor;
     }
 
-    @Override
-    protected Shape createShape(double startX, double startY) {
-        return new Ellipse2D.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
-    }
-
     public void setSibling(ControlPoint sibling) {
         this.sibling = sibling;
     }
 
     @Override
-    public void setLocation(double x, double y) {
-        anchor.getType().setLocationOfOtherControl(x, y, anchor, sibling);
-
-        super.setLocation(x, y);
+    protected Shape createShape(double startX, double startY) {
+        return new Ellipse2D.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
     }
 
     @Override
+    public void setLocation(double x, double y) {
+        super.setLocation(x, y);
+
+        // also update the sibling's position based on
+        // the anchor point's type constraints
+        anchor.getType().updateSibling(this, anchor, sibling);
+    }
+
+    /**
+     * Moves the control point while maintaining angle constraints.
+     * The point will snap to common angles relative to its anchor point.
+     */
+    @Override
     public void setConstrainedLocation(double mouseX, double mouseY) {
-        // constrain it relative to the anchor
         Point2D p = Utils.constrainToNearestAngle(anchor.x, anchor.y, mouseX, mouseY);
         setLocation(p.getX(), p.getY());
     }
@@ -74,8 +81,8 @@ public class ControlPoint extends DraggablePoint {
     @Override
     protected void afterMouseReleasedActions() {
         afterMovingActionsForThis();
-        if (anchor.getType().isDependent()) {
-            sibling.afterMovingActionsForThis();
+        if (anchor.getType() == AnchorPointType.SMOOTH) {
+            sibling.rememberDistFromAnchor();
         }
     }
 

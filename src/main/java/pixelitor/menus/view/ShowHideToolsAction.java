@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,14 +22,11 @@ import pixelitor.gui.WorkSpace;
 import javax.swing.*;
 
 /**
- * The {@link Action} that either shows or hides the tools,
- * depending on the current visibility
+ * The {@link Action} that toggles the visibility of the tools.
  */
 public class ShowHideToolsAction extends ShowHideAction {
-    public static final ShowHideAction INSTANCE = new ShowHideToolsAction();
-
-    private ShowHideToolsAction() {
-        super("Show Tools", "Hide Tools");
+    public ShowHideToolsAction(WorkSpace workSpace) {
+        super("Show Tools", "Hide Tools", workSpace);
     }
 
     @Override
@@ -39,11 +36,11 @@ public class ShowHideToolsAction extends ShowHideAction {
 
     @Override
     public boolean getStartupVisibility() {
-        return WorkSpace.getToolsVisibility();
+        return workSpace.areToolsVisible();
     }
 
     @Override
     public void setVisibility(boolean value) {
-        WorkSpace.setToolsVisibility(value, true);
+        workSpace.setToolsVisible(value, true);
     }
 }

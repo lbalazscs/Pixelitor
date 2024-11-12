@@ -383,8 +383,8 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
+    protected void toolDeactivated() {
+        super.toolDeactivated();
 
         // otherwise in polygonal mode half-built selections
         // remain visible after switching to another tool

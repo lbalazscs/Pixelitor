@@ -78,7 +78,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     /**
-     * Converts the relative position to absolute pixel coordinates for a given image.
+     * Returns the current position as absolute pixel coordinates for a given image.
      */
     public Point2D getAbsolutePoint(BufferedImage image) {
         return new Point2D.Double(

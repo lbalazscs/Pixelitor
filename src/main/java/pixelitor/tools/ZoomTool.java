@@ -38,8 +38,8 @@ import java.util.ResourceBundle;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
+import static pixelitor.tools.DragToolState.IDLE;
 import static pixelitor.tools.DragToolState.INITIAL_DRAG;
-import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.DragToolState.TRANSFORM;
 
 public class ZoomTool extends DragTool {
@@ -73,7 +73,7 @@ public class ZoomTool extends DragTool {
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        if (state == NO_INTERACTION) {
+        if (state == IDLE) {
             setState(INITIAL_DRAG);
         } else if (state == INITIAL_DRAG) {
             throw new IllegalStateException();
@@ -87,7 +87,7 @@ public class ZoomTool extends DragTool {
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        if (state == NO_INTERACTION) {
+        if (state == IDLE) {
             return;
         }
 
@@ -100,7 +100,7 @@ public class ZoomTool extends DragTool {
             box = PRectangle.positiveFromCo(drag.toCoRect(), view);
             setState(TRANSFORM);
 
-            view.zoomToRect(getZoomRect(view));
+            view.zoomToRegion(getZoomRect(view));
             resetInitialState();
 
             e.consume();
@@ -109,7 +109,7 @@ public class ZoomTool extends DragTool {
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
-        if (state == NO_INTERACTION) {
+        if (state == IDLE) {
             return;
         }
         PRectangle zoomRect = getZoomRect(comp.getView());
@@ -131,15 +131,15 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
+    protected void toolDeactivated() {
+        super.toolDeactivated();
         resetInitialState();
     }
 
     @Override
     public void resetInitialState() {
         box = null;
-        setState(NO_INTERACTION);
+        setState(IDLE);
 
         Views.repaintActive();
         Views.setCursorForAll(Cursors.HAND);

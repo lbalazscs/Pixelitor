@@ -67,8 +67,12 @@ public class PixelitorWindow extends JFrame {
     private Rectangle lastNormalBounds; // the last one before maximization
     private Rectangle savedNormalBounds; // the saved one
 
+    private final WorkSpace workSpace;
+
     private PixelitorWindow() {
         super(FIX_TITLE);
+
+        workSpace = new WorkSpace();
 
         Dimension screenSize = Screens.getMaxWindowSize();
 
@@ -94,6 +98,10 @@ public class PixelitorWindow extends JFrame {
         }
 
         setVisible(true);
+    }
+
+    public void resetDefaultWorkspace() {
+        workSpace.restoreDefaults(this);
     }
 
     private void setupWindowEvents() {
@@ -150,10 +158,10 @@ public class PixelitorWindow extends JFrame {
         HistogramsPanel histogramsPanel = HistogramsPanel.getInstance();
         Views.addActivationListener(histogramsPanel);
 
-        if (WorkSpace.getHistogramsVisibility()) {
+        if (workSpace.areHistogramsVisible()) {
             eastPanel.add(histogramsPanel, NORTH);
         }
-        if (WorkSpace.getLayersVisibility()) {
+        if (workSpace.areLayersVisible()) {
             eastPanel.add(LayersContainer.get(), CENTER);
         }
 
@@ -163,14 +171,14 @@ public class PixelitorWindow extends JFrame {
     private void addToolsPanel(Dimension screenSize) {
         toolsPanel = new ToolsPanel(this, screenSize);
 
-        if (WorkSpace.getToolsVisibility()) {
+        if (workSpace.areToolsVisible()) {
             add(ToolSettingsPanelContainer.get(), NORTH);
             add(toolsPanel, WEST);
         }
     }
 
     private void addStatusBar() {
-        if (WorkSpace.getStatusBarVisibility()) {
+        if (workSpace.isStatusBarVisible()) {
             add(StatusBar.get(), SOUTH);
         }
     }
@@ -215,7 +223,7 @@ public class PixelitorWindow extends JFrame {
         static final PixelitorWindow field = new PixelitorWindow();
     }
 
-    public void setStatusBarVisibility(boolean visible, boolean revalidate) {
+    public void setStatusBarVisible(boolean visible, boolean revalidate) {
         if (visible) {
             add(StatusBar.get(), SOUTH);
         } else {
@@ -227,7 +235,7 @@ public class PixelitorWindow extends JFrame {
         }
     }
 
-    public void setHistogramsVisibility(boolean visible, boolean revalidate) {
+    public void setHistogramsVisible(boolean visible, boolean revalidate) {
         HistogramsPanel histogramsPanel = HistogramsPanel.getInstance();
         if (visible) {
             assert !HistogramsPanel.isShown();
@@ -243,7 +251,7 @@ public class PixelitorWindow extends JFrame {
         }
     }
 
-    public void setLayersVisibility(boolean visible, boolean revalidate) {
+    public void setLayersVisible(boolean visible, boolean revalidate) {
         if (visible) {
             assert LayersContainer.parentIs(null);
             eastPanel.add(LayersContainer.get(), CENTER);
@@ -257,7 +265,7 @@ public class PixelitorWindow extends JFrame {
         }
     }
 
-    public void setToolsVisibility(boolean visible, boolean revalidate) {
+    public void setToolsVisible(boolean visible, boolean revalidate) {
         var toolSettingsPanel = ToolSettingsPanelContainer.get();
         if (visible) {
             assert toolsPanel.getParent() == null;
@@ -397,6 +405,10 @@ public class PixelitorWindow extends JFrame {
 
     public AffineTransform getHiDPIScaling() {
         return getGraphicsConfiguration().getDefaultTransform();
+    }
+
+    public WorkSpace getWorkSpace() {
+        return workSpace;
     }
 }
 

@@ -185,35 +185,51 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
-    public final Layer copy(CopyType copyType, boolean duplicateMask, Composition newComp) {
-        Layer d = createTypeSpecificCopy(copyType, newComp);
+    public final Layer copy(CopyType copyType, boolean copyMask, Composition newComp) {
+        Layer copy = createTypeSpecificCopy(copyType, newComp);
 
-        d.copyLayerLevelPropertiesFrom(this);
+        copyCommonPropertiesTo(copy);
 
-        d.comp = newComp;
+        copy.comp = newComp;
         if (newComp != comp && isActive()) {
-            newComp.setActiveLayerRef(d);
+            newComp.setActiveLayerRef(copy);
         }
 
-        if (duplicateMask) {
-            duplicateMask(d, copyType, newComp);
+        if (copyMask) {
+            copyMaskTo(copy, copyType, newComp);
         }
 
-        return d;
+        return copy;
     }
 
+    /**
+     * Creates a copy of the subclass-specific content,
+     * without handling the common layer properties or mask.
+     */
     protected abstract Layer createTypeSpecificCopy(CopyType copyType, Composition newComp);
 
-    // Duplicates the mask of a duplicated layer.
-    protected void duplicateMask(Layer duplicate, CopyType copyType, Composition newComp) {
+    /**
+     * Copies standard layer properties like opacity,
+     * blending mode, and visibility to the given layer.
+     */
+    protected void copyCommonPropertiesTo(Layer target) {
+        target.setVisible(isVisible());
+        target.setBlendingMode(getBlendingMode());
+        target.setOpacity(getOpacity());
+    }
+
+    /**
+     * Copies the mask into the given target layer.
+     */
+    protected void copyMaskTo(Layer target, CopyType copyType, Composition newComp) {
         if (hasMask()) {
-            LayerMask newMask = mask.duplicate(duplicate, newComp);
+            LayerMask newMask = mask.duplicate(target, newComp);
             if (copyType == CopyType.UNDO) {
                 // this could be running outside the EDT, and anyway it is
                 // not necessary to add the duplicate to the GUI
-                duplicate.mask = newMask;
+                target.mask = newMask;
             } else {
-                duplicate.addConfiguredMask(newMask);
+                target.addConfiguredMask(newMask);
             }
         }
     }
@@ -314,12 +330,6 @@ public abstract class Layer implements Serializable, Debuggable {
         if (addToHistory) {
             History.add(new LayerBlendingEdit(this, prevMode));
         }
-    }
-
-    protected void copyLayerLevelPropertiesFrom(Layer other) {
-        setVisible(other.isVisible());
-        setBlendingMode(other.getBlendingMode());
-        setOpacity(other.getOpacity());
     }
 
     public String getName() {
@@ -783,7 +793,7 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     protected boolean isNormalAndOpaque() {
         return blendingMode == BlendingMode.NORMAL
-            && opacity > BlendingModePanel.CRITICAL_OPACITY;
+            && opacity > BlendingModePanel.FULLY_OPAQUE_THRESHOLD;
     }
 
     /**
@@ -1010,7 +1020,7 @@ public abstract class Layer implements Serializable, Debuggable {
         var rasterizedImage = asImage(false, false);
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
         newImageLayer.setHolder(holder);
-        newImageLayer.copyLayerLevelPropertiesFrom(this);
+        copyCommonPropertiesTo(newImageLayer);
         holder.replaceLayer(this, newImageLayer);
         History.add(new ReplaceLayerEdit(this, newImageLayer, "Rasterize " + getTypeString()));
         Messages.showStatusMessage(format(
@@ -1040,8 +1050,8 @@ public abstract class Layer implements Serializable, Debuggable {
         return layer == this;
     }
 
-    public boolean containsLayerWithClass(Class<? extends Layer> clazz) {
-        return getClass() == clazz;
+    public boolean containsLayerOfType(Class<? extends Layer> type) {
+        return getClass() == type;
     }
 
     public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {

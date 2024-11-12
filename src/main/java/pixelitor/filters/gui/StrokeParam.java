@@ -65,7 +65,7 @@ public class StrokeParam extends AbstractFilterParam {
         strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
             strokeType -> strokeType == SHAPE);
 
-        // disable dashed option for complex stroke types
+        // disable dashed option for stroke types that don't support it
         strokeTypeParam.setupDisableOtherIf(dashedParam,
             strokeType -> strokeType != BASIC
                 && strokeType != ZIGZAG
@@ -113,7 +113,7 @@ public class StrokeParam extends AbstractFilterParam {
         assert randomness != 0.0f;
 
         float baseWidth = strokeWidthParam.getValueAsFloat();
-        // the value of the effective stroke will should be
+        // the value of the effective stroke will be
         // between 50% and 150% of the gui setting
         float randomWidth = baseWidth / 2.0f + baseWidth * random.nextFloat();
         float finalWidth = ImageMath.lerp(randomness, baseWidth, randomWidth);

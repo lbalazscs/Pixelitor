@@ -20,7 +20,6 @@ package pixelitor.tools.pen;
 import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.gui.View;
-import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
@@ -31,11 +30,11 @@ import java.awt.geom.AffineTransform;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
 import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 import static pixelitor.tools.pen.PenTool.hasPath;
 import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
@@ -43,10 +42,10 @@ import static pixelitor.tools.util.DraggablePoint.lastActive;
 
 /**
  * A pen tool interaction mode where a path can be built from scratch.
- * The path can also be edited, but only by using modifier keys
+ * The path can also be edited, but only by using modifier keys.
  */
 public final class PathBuilder implements PenToolMode {
-    // The last mouse positions. Important when the moving point
+    // The last mouse position. Important when the moving point
     // has to be restored after an undo
     private double lastX;
     private double lastY;
@@ -74,19 +73,19 @@ public final class PathBuilder implements PenToolMode {
         }
 
         BuildState state = path.getBuildState();
-
-        if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            state = recoverFromUnexpectedDragState("mousePressed", e.getView());
+        if (state == DRAGGING_LAST_CONTROL) {
+            state = handleUnexpectedDragState("mousePressed", e.getView());
         }
 
         double x = e.getCoX();
         double y = e.getCoY();
         lastX = x;
         lastY = y;
+
         boolean altDown = e.isAltDown();
         boolean controlDown = e.isControlDown();
 
-        if (state == NO_INTERACTION) {
+        if (state == IDLE) {
             if (controlDown) {
                 if (handleCtrlPressBeforeSubpath(altDown, x, y)) {
                     return;
@@ -98,7 +97,7 @@ public final class PathBuilder implements PenToolMode {
             }
 
             // only add a point directly if previously we were
-            // in the NO_INTERACTION state. Normally points
+            // in the IDLE state. Normally points
             // are added by finalizing (in mousePressed)
             // the moving point (created in mouseReleased)
             SubPath sp = path.startNewSubpath();
@@ -111,48 +110,53 @@ public final class PathBuilder implements PenToolMode {
             }
 
             if (controlDown) {
-                handleCtrlPressInMovingState(e, altDown, x, y);
+                handleCtrlPressWhileMoving(e, altDown, x, y);
                 return;
             }
 
-            boolean altDownNothingHit = false;
+            boolean altDownHitNothing = false;
             if (altDown) {
-                DraggablePoint hit = path.handleWasHit(x, y, altDown);
-                if (hit != null) {
-                    if (hit instanceof ControlPoint cp) {
+                DraggablePoint handle = path.findHandleAt(x, y, altDown);
+                if (handle != null) {
+                    if (handle instanceof ControlPoint cp) {
                         breakAndStartMoving(cp, x, y);
                         return;
-                    } else if (hit instanceof AnchorPoint ap) {
+                    } else if (handle instanceof AnchorPoint ap) {
                         startDraggingOutNewHandles(ap, x, y);
                         return;
                     }
                 } else {
-                    altDownNothingHit = true;
+                    altDownHitNothing = true;
                 }
             }
 
             if (path.tryClosing(x, y)) {
                 return;
-            } else {
-                // fix the final position of the moved curve point
-                path.getMovingPoint().mouseReleased(x, y, e.isShiftDown());
-                AnchorPoint ap = path.addMovingPointAsAnchor();
-                if (altDownNothingHit) {
-                    ap.setType(CUSP);
-                }
-                ap.ctrlOut.mousePressed(x, y);
             }
+            // if no special case was true, then create
+            // a new anchor from the moving point
+            finalizeMovingPoint(x, y, altDownHitNothing, e.isShiftDown());
         }
-        path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST);
+
+        path.setBuildState(DRAGGING_LAST_CONTROL);
         assert path.checkConsistency();
+    }
+
+    private static void finalizeMovingPoint(double x, double y, boolean altDownHitNothing, boolean shiftDown) {
+        path.getMovingPoint().mouseReleased(x, y, shiftDown);
+        AnchorPoint ap = path.addMovingPointAsAnchor();
+        if (altDownHitNothing) {
+            ap.setType(CUSP);
+        }
+        ap.ctrlOut.mousePressed(x, y);
     }
 
     private static boolean handleCtrlPressBeforeSubpath(boolean altDown,
                                                         double x, double y) {
         // if we are over an old point, just move it
-        DraggablePoint hit = path.handleWasHit(x, y, altDown);
-        if (hit != null) {
-            startMovingPrevious(hit, x, y);
+        DraggablePoint handle = path.findHandleAt(x, y, altDown);
+        if (handle != null) {
+            startMovingPrevious(handle, x, y);
             return true;
         }
         return false;
@@ -160,12 +164,12 @@ public final class PathBuilder implements PenToolMode {
 
     private static boolean handleAltPressBeforeSubpath(double x, double y) {
         // if only alt is down, then break the control points
-        DraggablePoint hit = path.handleWasHit(x, y, true);
-        if (hit != null) {
-            if (hit instanceof ControlPoint cp) {
+        DraggablePoint handle = path.findHandleAt(x, y, true);
+        if (handle != null) {
+            if (handle instanceof ControlPoint cp) {
                 breakAndStartMoving(cp, x, y);
                 return true;
-            } else if (hit instanceof AnchorPoint ap) {
+            } else if (handle instanceof AnchorPoint ap) {
                 startDraggingOutNewHandles(ap, x, y);
                 return true;
             }
@@ -173,11 +177,11 @@ public final class PathBuilder implements PenToolMode {
         return false;
     }
 
-    private static void handleCtrlPressInMovingState(PMouseEvent e, boolean altDown,
-                                                     double x, double y) {
-        DraggablePoint hit = path.handleWasHit(x, y, altDown);
-        if (hit != null) {
-            startMovingPrevious(hit, x, y);
+    private static void handleCtrlPressWhileMoving(PMouseEvent e, boolean altDown,
+                                                   double x, double y) {
+        DraggablePoint handle = path.findHandleAt(x, y, altDown);
+        if (handle != null) {
+            startMovingPrevious(handle, x, y);
         } else {
             // control is down, but nothing was hit
             path.finishByCtrlClick(e.getComp());
@@ -215,19 +219,18 @@ public final class PathBuilder implements PenToolMode {
             return;
         }
         BuildState state = path.getBuildState();
-        if (state == NO_INTERACTION) {
+        if (state == IDLE) {
             // normally it should not happen, but in some rare cases
             // a dragged event comes without a preceding pressed event
             return;
         }
 
         if (state.isMoving()) {
-            state = recoverFromUnexpectedMoveState("mouseDragged", e.getView(), state);
-            if (state == NO_INTERACTION) {
+            state = handleUnexpectedMoveState("mouseDragged", e.getView(), state);
+            if (state == IDLE) {
                 return;
             }
         }
-        assert state.isDragging() : "state = " + state;
 
         double x = e.getCoX();
         double y = e.getCoY();
@@ -249,7 +252,7 @@ public final class PathBuilder implements PenToolMode {
         }
         last.ctrlOut.mouseDragged(x, y, e.isShiftDown());
 
-        path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST);
+        path.setBuildState(DRAGGING_LAST_CONTROL);
     }
 
     @Override
@@ -258,13 +261,13 @@ public final class PathBuilder implements PenToolMode {
             return;
         }
         BuildState state = path.getBuildState();
-        if (state == NO_INTERACTION) {
+        if (state == IDLE) {
             return;
         }
 
         if (state.isMoving()) {
-            state = recoverFromUnexpectedMoveState("mouseReleased", e.getView(), state);
-            if (state == NO_INTERACTION) {
+            state = handleUnexpectedMoveState("mouseReleased", e.getView(), state);
+            if (state == IDLE) {
                 return;
             }
         }
@@ -279,8 +282,8 @@ public final class PathBuilder implements PenToolMode {
             activePoint.mouseReleased(x, y, e.isShiftDown());
             activePoint.createMovedEdit(e.getComp()).ifPresent(path::handleMoved);
             // after the dragging is finished, determine the next state
-            if (path.getPrevBuildState() == NO_INTERACTION) {
-                path.setBuildState(NO_INTERACTION);
+            if (path.getPrevBuildState() == IDLE) {
+                path.setBuildState(IDLE);
             } else {
                 if (e.isControlDown() || e.isAltDown()) {
                     path.setBuildState(MOVE_EDITING_PREVIOUS);
@@ -290,7 +293,7 @@ public final class PathBuilder implements PenToolMode {
             }
 
             return;
-        } else if (state == DRAGGING_THE_CONTROL_OF_LAST) {
+        } else if (state == DRAGGING_LAST_CONTROL) {
             // finalize the dragged out control of the last anchor
             AnchorPoint last = path.getLastAnchor();
             ControlPoint ctrlOut = last.ctrlOut;
@@ -321,8 +324,8 @@ public final class PathBuilder implements PenToolMode {
             return false;
         }
         BuildState state = path.getBuildState();
-        if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            state = recoverFromUnexpectedDragState("mouseMoved", view);
+        if (state == DRAGGING_LAST_CONTROL) {
+            state = handleUnexpectedDragState("mouseMoved", view);
         }
 
         int x = e.getX();
@@ -333,18 +336,18 @@ public final class PathBuilder implements PenToolMode {
         boolean altDown = e.isAltDown();
         boolean controlDown = e.isControlDown();
         if (controlDown || altDown) {
-            if (state != NO_INTERACTION) {
+            if (state != IDLE) {
                 path.setBuildState(MOVE_EDITING_PREVIOUS);
             }
 
-            DraggablePoint hit = path.handleWasHit(x, y, altDown);
-            if (hit != null) {
-                hit.setActive(true);
+            DraggablePoint handle = path.findHandleAt(x, y, altDown);
+            if (handle != null) {
+                handle.setActive(true);
             } else {
                 activePoint = null;
             }
         } else {
-            if (state == NO_INTERACTION) {
+            if (state == IDLE) {
                 return false;
             }
 
@@ -366,7 +369,7 @@ public final class PathBuilder implements PenToolMode {
 
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
-    private static BuildState recoverFromUnexpectedDragState(String where, View view) {
+    private static BuildState handleUnexpectedDragState(String where, View view) {
         if (AppMode.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
@@ -378,13 +381,13 @@ public final class PathBuilder implements PenToolMode {
 
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
-    private static BuildState recoverFromUnexpectedMoveState(String where, View view, BuildState state) {
+    private static BuildState handleUnexpectedMoveState(String where, View view, BuildState state) {
         if (AppMode.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
         }
 
-        BuildState dragState = NO_INTERACTION;
+        BuildState dragState = IDLE;
         if (state == MOVE_EDITING_PREVIOUS) {
             dragState = DRAG_EDITING_PREVIOUS;
         }
@@ -423,7 +426,7 @@ public final class PathBuilder implements PenToolMode {
         }
 
         BuildState state = path.getBuildState();
-        if (state == MOVING_TO_NEXT_ANCHOR || state == DRAGGING_THE_CONTROL_OF_LAST) {
+        if (state == MOVING_TO_NEXT_ANCHOR || state == DRAGGING_LAST_CONTROL) {
             // If a new subpath is being created,
             // move the most recently placed anchor point
             AnchorPoint last = path.getLastAnchor();
@@ -448,30 +451,25 @@ public final class PathBuilder implements PenToolMode {
     }
 
     @Override
-    public void start() {
-        Tools.PEN.startBuilding(false);
-    }
-
-    @Override
     public boolean requiresExistingPath() {
         return false;
     }
 
     @Override
-    public void modeEnded(Composition comp) {
+    public void modeDeactivated(Composition comp) {
         if (hasPath() && !path.getActiveSubpath().isFinished()) {
             // Adding something to the history at this point is risky,
             // because this code could be called while undoing something.
             path.finishActiveSubpath(false);
         } else {
-            assertStateIs(NO_INTERACTION);
+            assertStateIs(IDLE);
         }
-        PenToolMode.super.modeEnded(comp);
+        PenToolMode.super.modeDeactivated(comp);
     }
 
     private static void assertStateIs(BuildState s) {
         if (path == null) {
-            if (s != NO_INTERACTION) {
+            if (s != IDLE) {
                 throw new IllegalStateException("null path");
             }
         } else {

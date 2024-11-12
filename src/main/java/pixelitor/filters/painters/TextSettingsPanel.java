@@ -105,10 +105,10 @@ public class TextSettingsPanel extends FilterGUI
         createGUI(settings, comp);
 
         this.relLineHeight = settings.getRelLineHeight();
-        this.scaleX = settings.getSx();
-        this.scaleY = settings.getSy();
-        this.shearX = settings.getShx();
-        this.shearY = settings.getShy();
+        this.scaleX = settings.getScaleX();
+        this.scaleY = settings.getScaleY();
+        this.shearX = settings.getShearX();
+        this.shearY = settings.getShearY();
     }
 
     private void createGUI(TextSettings settings, Composition comp) {
@@ -274,7 +274,7 @@ public class TextSettingsPanel extends FilterGUI
         fontInfo.updateBasic(fontFamily, size, bold, italic);
 
         if (advancedSettingsDialog != null) {
-            advancedSettingsPanel.saveStateTo(fontInfo);
+            advancedSettingsPanel.configure(fontInfo);
         }
 
         return fontInfo.createFont();
@@ -391,7 +391,7 @@ public class TextSettingsPanel extends FilterGUI
     public void accept(TextSettings settings) {
         try {
             suppressGuiUpdates = true;
-            updateGUI(settings);
+            setUIValues(settings);
         } finally {
             suppressGuiUpdates = false;
         }
@@ -399,7 +399,7 @@ public class TextSettingsPanel extends FilterGUI
         updateApp(settings);
     }
 
-    private void updateGUI(TextSettings settings) {
+    private void setUIValues(TextSettings settings) {
         textArea.setText(settings.getText());
         color.setColor(settings.getColor(), false);
         rotationParam.setValue(settings.getRotation(), false);
@@ -414,8 +414,10 @@ public class TextSettingsPanel extends FilterGUI
         // this stores the advanced settings
         fontInfo = new FontInfo(font);
         if (advancedSettingsPanel != null) {
-            advancedSettingsPanel.updateFrom(fontInfo, settings.getRelLineHeight(),
-                settings.getSx(), settings.getSy(), settings.getShx(), settings.getShy());
+            advancedSettingsPanel.setUIValues(
+                fontInfo, settings.getRelLineHeight(),
+                settings.getScaleX(), settings.getScaleY(),
+                settings.getShearX(), settings.getShearY());
         }
 
         effectsPanel.setEffects(settings.getEffects());

@@ -50,9 +50,9 @@ import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
+import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 
 /**
  * A subpath within a {@link Path}.
@@ -67,16 +67,22 @@ public class SubPath implements Serializable, Transformable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static long nextId = 0;
-    private final String id; // for debugging
+    // unique identifier for debugging and equality comparisons
+    private final String id;
+    private static long idCounter = 0;
 
     private List<AnchorPoint> anchorPoints = new ArrayList<>();
+
+    // temporary point used during path construction
     private MovingPoint moving;
 
     private final Path path;
     private final Composition comp;
 
+    // true if last anchor connects back to first anchor
     private boolean closed = false;
+
+    // true if path construction is complete (no more points can be added)
     private boolean finished = false;
 
     // caching the transform box ensures that its
@@ -87,11 +93,11 @@ public class SubPath implements Serializable, Transformable {
         assert path != null;
         this.path = path;
         this.comp = comp;
-        id = "SP" + nextId++;
+        id = "SP" + idCounter++;
     }
 
-    public SubPath deepCopy(Path copyParent, Composition newComp) {
-        SubPath copy = new SubPath(copyParent, newComp);
+    public SubPath deepCopy(Path newParent, Composition newComp) {
+        SubPath copy = new SubPath(newParent, newComp);
         copy.closed = closed;
         copy.finished = finished;
 
@@ -164,14 +170,14 @@ public class SubPath implements Serializable, Transformable {
         return anchorPoints.size();
     }
 
-    public void addToComponentSpaceShape(GeneralPath path) {
-        addToShape(path, p -> p.x, p1 -> p1.y);
-    }
-
     public Shape toComponentSpaceShape() {
         GeneralPath gp = new GeneralPath();
         addToComponentSpaceShape(gp);
         return gp;
+    }
+
+    public void addToComponentSpaceShape(GeneralPath path) {
+        addToShape(path, p -> p.x, p1 -> p1.y);
     }
 
     public void addToImageSpaceShape(GeneralPath path) {
@@ -181,25 +187,28 @@ public class SubPath implements Serializable, Transformable {
     private void addToShape(GeneralPath gp,
                             ToDoubleFunction<DraggablePoint> toX,
                             ToDoubleFunction<DraggablePoint> toY) {
-
         if (anchorPoints.isEmpty()) {
             return;
         }
 
-        // moveTo is the beginning of a new subpath
         AnchorPoint first = getFirstAnchor();
+        // moveTo marks the beginning of a new subpath in GeneralPath
         gp.moveTo(toX.applyAsDouble(first), toY.applyAsDouble(first));
         AnchorPoint prev = first;
 
+        // add each curve segment
         for (int i = 1; i < anchorPoints.size(); i++) {
             AnchorPoint curr = anchorPoints.get(i);
             ControlPoint prevCtrlOut = prev.ctrlOut;
             ControlPoint currCtrlIn = curr.ctrlIn;
+
             if (prevCtrlOut.isRetracted() && currCtrlIn.isRetracted()) {
+                // both control points are retracted - use a straight line
                 gp.lineTo(
                     toX.applyAsDouble(curr),
                     toY.applyAsDouble(curr));
             } else {
+                // use a cubic Bézier curve with both control points
                 gp.curveTo(
                     toX.applyAsDouble(prevCtrlOut),
                     toY.applyAsDouble(prevCtrlOut),
@@ -212,7 +221,9 @@ public class SubPath implements Serializable, Transformable {
         }
 
         AnchorPoint last = getLastAnchor();
-        if (moving != null && path.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showRubberBand()) {
+
+        // handle the "rubber band "preview of the next point during path construction
+        if (moving != null && path.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
             double movingX = toX.applyAsDouble(moving);
             double movingY = toY.applyAsDouble(moving);
             gp.curveTo(
@@ -224,6 +235,7 @@ public class SubPath implements Serializable, Transformable {
                 movingY);
         }
 
+        // close the path if needed
         if (closed) {
             ControlPoint lastCtrlOut = last.ctrlOut;
             ControlPoint firstCtrlIn = first.ctrlIn;
@@ -246,34 +258,19 @@ public class SubPath implements Serializable, Transformable {
         }
     }
 
+    /**
+     * Renders the path handles during the building phase.
+     */
     public void paintHandlesForBuilding(Graphics2D g, BuildState state) {
         assert checkConsistency();
 
-        // paint first all anchor points, without the handles
+        // paints all anchor points, showing the handles
+        // only for recently edited points and their neighbors
         int numPoints = anchorPoints.size();
         for (int i = 0; i < numPoints; i++) {
             AnchorPoint point = anchorPoints.get(i);
             if (point.isRecentlyEdited()) {
-                // except when any of the anchor or its controls were recently edited
-                point.paintHandles(g, true, true);
-
-                // also paint the "out" handle of the previous point...
-                if (i > 0) {
-                    AnchorPoint prev = anchorPoints.get(i - 1);
-                    prev.paintHandles(g, false, true);
-                } else if (closed) {
-                    AnchorPoint prev = anchorPoints.get(numPoints - 1);
-                    prev.paintHandles(g, false, true);
-                }
-
-                // ...and the "in" handle of the next point
-                if (i < numPoints - 1) {
-                    AnchorPoint next = anchorPoints.get(i + 1);
-                    next.paintHandles(g, true, false);
-                } else if (closed) {
-                    AnchorPoint next = anchorPoints.getFirst();
-                    next.paintHandles(g, true, false);
-                }
+                paintRecentAnchor(g, point, i, numPoints);
             } else {
                 point.paintHandle(g);
             }
@@ -284,7 +281,7 @@ public class SubPath implements Serializable, Transformable {
         }
 
         // paint some extra handles if not finished
-        if (state == DRAGGING_THE_CONTROL_OF_LAST || state == MOVING_TO_NEXT_ANCHOR) {
+        if (state == DRAGGING_LAST_CONTROL || state == MOVING_TO_NEXT_ANCHOR) {
             getLastAnchor().paintHandles(g, true, true);
 
             if (numPoints >= 2) {
@@ -294,6 +291,34 @@ public class SubPath implements Serializable, Transformable {
         }
     }
 
+    private void paintRecentAnchor(Graphics2D g, AnchorPoint point, int i, int numPoints) {
+        // paint the handles when any of the anchor or
+        // its controls were recently edited
+        point.paintHandles(g, true, true);
+
+        // also paint the "out" handle of the previous point...
+        if (i > 0) {
+            AnchorPoint prev = anchorPoints.get(i - 1);
+            prev.paintHandles(g, false, true);
+        } else if (closed) {
+            AnchorPoint prev = anchorPoints.get(numPoints - 1);
+            prev.paintHandles(g, false, true);
+        }
+
+        // ...and the "in" handle of the next point
+        if (i < numPoints - 1) {
+            AnchorPoint next = anchorPoints.get(i + 1);
+            next.paintHandles(g, true, false);
+        } else if (closed) {
+            AnchorPoint next = anchorPoints.getFirst();
+            next.paintHandles(g, true, false);
+        }
+    }
+
+    /**
+     * Renders the path handles in Edit mode.
+     * Shows all control points for all anchors.
+     */
     public void paintHandlesForEditing(Graphics2D g) {
         assert checkConsistency();
 
@@ -302,17 +327,21 @@ public class SubPath implements Serializable, Transformable {
         }
     }
 
-    public DraggablePoint handleWasHit(double x, double y, boolean altDown) {
+    /**
+     * Checks if the given mouse coordinates intersect with any handle.
+     */
+    public DraggablePoint findHandleAt(double x, double y, boolean altDown) {
         for (AnchorPoint anchor : anchorPoints) {
-            DraggablePoint hit = anchor.handleOrCtrlHandleWasHit(x, y, altDown);
-            if (hit != null) {
-                return hit;
+            DraggablePoint handle = anchor.findHandleAt(x, y, altDown);
+            if (handle != null) {
+                return handle;
             }
         }
         return null;
     }
 
     /**
+     * Merges anchor points that are very close to each other.
      * This is a workaround for a JDK bug: when a path is created from shapes,
      * often two almost-overlapping anchors are created instead of one.
      */
@@ -321,10 +350,12 @@ public class SubPath implements Serializable, Transformable {
         int numPoints = anchorPoints.size();
         int index = 0;
         boolean mergedWithFirst = false;
+
         while (index < numPoints) {
             AnchorPoint current = anchorPoints.get(index);
             AnchorPoint next;
             boolean comparingWithFirst = false;
+
             if (index < numPoints - 1) {
                 next = anchorPoints.get(index + 1);
             } else if (closed) {
@@ -334,6 +365,7 @@ public class SubPath implements Serializable, Transformable {
                 // reached the last point, and it is not closed
                 break;
             }
+
             if (tryMerging(current, next)) {
                 if (comparingWithFirst) {
                     mergedWithFirst = true;
@@ -347,7 +379,7 @@ public class SubPath implements Serializable, Transformable {
             // We could simply remove the first point, but for some unit
             // tests it is important that the first point remains first
             // even if the shape is closed.
-            // Remove the last and set it as first
+            // Remove the last and set it as first.
             AnchorPoint removedLast = newPoints.removeLast();
             newPoints.set(0, removedLast);
         }
@@ -388,11 +420,19 @@ public class SubPath implements Serializable, Transformable {
         this.closed = closed;
     }
 
+    public boolean isClosed() {
+        return closed;
+    }
+
     public void setFinished(boolean finished) {
         this.finished = finished;
         if (finished) {
             setMovingPoint(null);
         }
+    }
+
+    public boolean isFinished() {
+        return finished;
     }
 
     public void undoClosing() {
@@ -405,10 +445,6 @@ public class SubPath implements Serializable, Transformable {
         assert finished : "was not finished";
         setFinished(false);
         path.setBuildingInProgressState();
-    }
-
-    public boolean isClosed() {
-        return closed;
     }
 
     public void coCoordsChanged(View view) {
@@ -432,28 +468,26 @@ public class SubPath implements Serializable, Transformable {
     private void checkWiring() {
         int numPoints = anchorPoints.size();
         for (int i = 0; i < numPoints; i++) {
-            AnchorPoint point = anchorPoints.get(i);
-            ControlPoint ctrlIn = point.ctrlIn;
-            ControlPoint ctrlOut = point.ctrlOut;
-            if (point.getSubPath() != this) {
-                throw new IllegalStateException("wrong subpath in point " + i
-                    + ": anchor subpath is " + point.getSubPath()
+            AnchorPoint anchor = anchorPoints.get(i);
+            if (anchor.getSubPath() != this) {
+                throw new IllegalStateException("wrong subpath in anchor " + i
+                    + ": anchor subpath is " + anchor.getSubPath()
                     + ", this is " + this);
             }
-            if (ctrlIn.getAnchor() != point) {
-                throw new IllegalStateException("ctrlIn problem in point " + i);
+            if (anchor.ctrlIn.getAnchor() != anchor) {
+                throw new IllegalStateException("ctrlIn problem in anchor " + i);
             }
-            if (ctrlIn.getSibling() != ctrlOut) {
-                throw new IllegalStateException("ctrlIn problem in point " + i);
+            if (anchor.ctrlIn.getSibling() != anchor.ctrlOut) {
+                throw new IllegalStateException("ctrlIn problem in anchor " + i);
             }
-            if (ctrlOut.getAnchor() != point) {
-                throw new IllegalStateException("ctrlOut problem in point " + i);
+            if (anchor.ctrlOut.getAnchor() != anchor) {
+                throw new IllegalStateException("ctrlOut problem in anchor " + i);
             }
-            if (ctrlOut.getSibling() != ctrlIn) {
-                throw new IllegalStateException("ctrlOut problem in point " + i);
+            if (anchor.ctrlOut.getSibling() != anchor.ctrlIn) {
+                throw new IllegalStateException("ctrlOut problem in anchor " + i);
             }
-            if (ctrlIn == ctrlOut) {
-                throw new IllegalStateException("same controls in point " + i);
+            if (anchor.ctrlIn == anchor.ctrlOut) {
+                throw new IllegalStateException("same controls in anchor " + i);
             }
         }
     }
@@ -473,7 +507,7 @@ public class SubPath implements Serializable, Transformable {
         return true;
     }
 
-    public void dump() {
+    public void printDebugInfo() {
         int numPoints = anchorPoints.size();
         PrintStream out = System.out;
         if (numPoints == 0) {
@@ -520,7 +554,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void deletePoint(AnchorPoint ap) {
-        // don't use List.remove, because it uses equals
+        // doesn't use List.remove, because it uses equals
         // and not reference equality
         int index = -1;
         for (int i = 0; i < anchorPoints.size(); i++) {
@@ -529,15 +563,13 @@ public class SubPath implements Serializable, Transformable {
                 break;
             }
         }
-
         anchorPoints.remove(index);
 
         comp.pathChanged();
     }
 
     public void deleteLast() {
-        int indexOfLast = anchorPoints.size() - 1;
-        anchorPoints.remove(indexOfLast);
+        anchorPoints.removeLast();
     }
 
     public void setView(View view) {
@@ -551,10 +583,6 @@ public class SubPath implements Serializable, Transformable {
 
     public boolean hasMovingPoint() {
         return moving != null;
-    }
-
-    public boolean isFinished() {
-        return finished;
     }
 
     /**
@@ -609,10 +637,10 @@ public class SubPath implements Serializable, Transformable {
         assert !finished;
 
         setFinished(true);
-        path.setBuildState(NO_INTERACTION);
+        path.setBuildState(IDLE);
         if (comp != null) {
             comp.setActivePath(path);
-            Tools.PEN.enableActions(true);
+            Tools.PEN.setActionsEnabled(true);
         }
 
         if (addToHistory) {

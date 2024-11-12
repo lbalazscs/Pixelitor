@@ -25,7 +25,7 @@ import pixelitor.tools.util.PMouseEvent;
 
 /**
  * Ensures that tools requiring a {@link Drawable} layer (like brushes)
- * are only used on appropriate layers.
+ * are only used on such layers.
  */
 public class DrawableCheckHandler extends ToolHandler {
     private final DrawableAction drawableAction;

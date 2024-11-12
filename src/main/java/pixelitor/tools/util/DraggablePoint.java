@@ -37,7 +37,7 @@ import static java.lang.String.format;
 
 /**
  * A point that can be dragged with the help of a handle.
- * All coordinates are in component space unless otherwise noted.
+ * It maintains both component-space and image-space coordinates.
  *
  * The x, y coordinates will be integers most of the time as they
  * originate from mouse events, but sometimes they can be
@@ -52,23 +52,24 @@ public class DraggablePoint extends Point2D.Double {
     protected static final double HANDLE_SIZE = 2.0 * HANDLE_RADIUS;
     private static final double SHADOW_OFFSET = 1.0;
 
+    private static final Color DEFAULT_HANDLE_COLOR = Color.WHITE;
+    private static final Color ACTIVE_HANDLE_COLOR = Color.RED;
+
     protected final String name; // used only for debugging
 
-    // Coordinates in image space
+    // Coordinates in image space (relative to the image, considering zooming).
+    // All other coordinates are in component space, relative to the view.
     public double imX;
     public double imY;
 
+    // helper variables used while dragging
     protected double dragStartX;
     protected double dragStartY;
-
     protected double origX;
     protected double origY;
 
-    private static final Color color = Color.WHITE;
-    private static final Color activeColor = Color.RED;
-
-    // since there can be only one active point at a
-    // time, it can be stored in this static variable
+    // since only one point can be active at a time,
+    // it is stored in this static variable
     public static DraggablePoint activePoint = null;
 
     // the point that was active the last time
@@ -78,22 +79,30 @@ public class DraggablePoint extends Point2D.Double {
     @SuppressWarnings("TransientFieldNotInitialized")
     protected transient View view;
 
+    protected Cursor cursor;
     private Shape shape;
     private Shape shadowShape;
-    private static final Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
+    private static final Composite SHADOW_COMPOSITE = AlphaComposite.SrcOver.derive(0.7f);
 
-    protected Cursor cursor;
-
-    // the original positions in image space, saved when
+    // the original position in image space, saved when
     // a transform box is created to serve as reference points
     private Point2D imTransformRefPoint;
 
     public DraggablePoint(String name, PPoint p, View view) {
         this.view = view;
+        this.name = name;
 
         setLocationOnlyForThis(p);
+    }
 
-        this.name = name;
+    public void copyPositionFrom(DraggablePoint that) {
+        x = that.x;
+        y = that.y;
+        imX = that.imX;
+        imY = that.imY;
+
+        assert !isNaN(imX);
+        assert !isNaN(imY);
     }
 
     @Override
@@ -101,8 +110,10 @@ public class DraggablePoint extends Point2D.Double {
         setLocationOnlyForThis(x, y);
     }
 
-    // setLocation is overridden in subclasses to also move related
-    // points. This (final) version only moves this point.
+    /**
+     * Sets the location of this point without affecting related points.
+     * (setLocation is overridden in subclasses to also move related points).
+     */
     public final void setLocationOnlyForThis(double coX, double coY) {
         assert !isNaN(coX) : this.x + " to NaN in " + this;
         assert !isNaN(coY) : this.y + " to NaN in " + this;
@@ -126,6 +137,60 @@ public class DraggablePoint extends Point2D.Double {
         this.imY = p.getImY();
 
         updateShapes();
+    }
+
+    public final void setLocationOnlyForThis(Point2D p) {
+        setLocationOnlyForThis(p.getX(), p.getY());
+    }
+
+    public void setImLocationOnlyForThis(Point2D p) {
+        imX = p.getX();
+        imY = p.getY();
+
+        assert !isNaN(imX);
+        assert !isNaN(imY);
+
+        restoreCoordsFromImSpace(view);
+    }
+
+    /**
+     * Recalculates component space coordinates from image space coordinates.
+     * This should be called when the view size or zooming changes.
+     */
+    public void restoreCoordsFromImSpace(View view) {
+        if (this.view != view) {
+            // this shouldn't happen, but it does very rarely in random GUI tests
+            assert this.view != null;
+            assert view != null;
+            this.view = view; // the new view must be correct
+        }
+
+        double newX = view.imageXToComponentSpace(imX);
+        double newY = view.imageYToComponentSpace(imY);
+        setLocationOnlyForThis(newX, newY);
+    }
+
+    /**
+     * This implementation constrains it relative to its former position.
+     * Subclasses can choose a different pivot point by overriding this method.
+     */
+    public void setConstrainedLocation(double mouseX, double mouseY) {
+        Point2D p = Utils.constrainToNearestAngle(dragStartX, dragStartY, mouseX, mouseY);
+        setLocation(p.getX(), p.getY());
+    }
+
+    public void translate(double dx, double dy) {
+        setLocation(x + dx, y + dy);
+    }
+
+    public final void translateOnlyThis(double dx, double dy) {
+        setLocationOnlyForThis(x + dx, y + dy);
+    }
+
+    public void imTranslate(double dx, double dy) {
+        // Only set the image-space coordinates because this should work without a view
+        imX += dx;
+        imY += dy;
     }
 
     /**
@@ -167,20 +232,6 @@ public class DraggablePoint extends Point2D.Double {
         setLocationOnlyForThis(transformed);
     }
 
-    public final void setLocationOnlyForThis(Point2D p) {
-        setLocationOnlyForThis(p.getX(), p.getY());
-    }
-
-    public void setImLocationOnlyForThis(Point2D p) {
-        imX = p.getX();
-        imY = p.getY();
-
-        assert !isNaN(imX);
-        assert !isNaN(imY);
-
-        restoreCoordsFromImSpace(view);
-    }
-
     private void updateShapes() {
         double shapeStartX = x - HANDLE_RADIUS;
         double shapeStartY = y - HANDLE_RADIUS;
@@ -191,31 +242,27 @@ public class DraggablePoint extends Point2D.Double {
         shadowShape = createShape(shadowStartX, shadowStartY);
     }
 
+    /**
+     * Creates the shape used to draw the handle. Returns a
+     * square by default, but it can be overriden to customize it.
+     */
     protected Shape createShape(double startX, double startY) {
         return new Rectangle2D.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
     }
 
-    /**
-     * This implementation constrains it relative to its former position.
-     * Subclasses can choose a different pivot point by overriding this method.
-     */
-    public void setConstrainedLocation(double mouseX, double mouseY) {
-        Point2D p = Utils.constrainToNearestAngle(dragStartX, dragStartY, mouseX, mouseY);
-        setLocation(p.getX(), p.getY());
-    }
+    public void paintHandle(Graphics2D g) {
+        Composite origComposite = g.getComposite();
 
-    public void translate(double dx, double dy) {
-        setLocation(x + dx, y + dy);
-    }
+        // paint the shadow first
+        g.setComposite(SHADOW_COMPOSITE);
+        g.setColor(Color.BLACK);
+        g.fill(shadowShape);
 
-    public final void translateOnlyThis(double dx, double dy) {
-        setLocationOnlyForThis(x + dx, y + dy);
-    }
-
-    public void imTranslate(double dx, double dy) {
-        // Only set the image-space coordinates because this should work without a view
-        imX += dx;
-        imY += dy;
+        // paint the handle
+        g.setComposite(origComposite);
+        Shapes.fillVisibly(g, shape, isActive()
+            ? ACTIVE_HANDLE_COLOR
+            : DEFAULT_HANDLE_COLOR);
     }
 
     public boolean handleContains(double x, double y) {
@@ -223,20 +270,6 @@ public class DraggablePoint extends Point2D.Double {
             && x < this.x + HANDLE_RADIUS
             && y > this.y - HANDLE_RADIUS
             && y < this.y + HANDLE_RADIUS;
-    }
-
-    public void paintHandle(Graphics2D g) {
-        Composite origComposite = g.getComposite();
-        g.setComposite(shadowComposite);
-        g.setColor(Color.BLACK);
-        g.fill(shadowShape);
-        g.setComposite(origComposite);
-
-        if (isActive()) {
-            Shapes.fillVisibly(g, shape, activeColor);
-        } else {
-            Shapes.fillVisibly(g, shape, color);
-        }
     }
 
     public void mousePressed(double x, double y) {
@@ -282,24 +315,6 @@ public class DraggablePoint extends Point2D.Double {
     protected void afterMouseReleasedActions() {
     }
 
-    /**
-     * This should be called when the view size or zooming changes: the
-     * component space coordinates are recalculated based on the
-     * image space coordinates so that they adapt to the view.
-     */
-    public void restoreCoordsFromImSpace(View view) {
-        if (this.view != view) {
-            // this shouldn't happen, but it does very rarely in random GUI tests
-            assert this.view != null;
-            assert view != null;
-            this.view = view; // the new view must be correct
-        }
-
-        double newX = view.imageXToComponentSpace(imX);
-        double newY = view.imageYToComponentSpace(imY);
-        setLocationOnlyForThis(newX, newY);
-    }
-
     public void arrowKeyPressed(ArrowKey key) {
         translate(key.getMoveX(), key.getMoveY());
     }
@@ -337,16 +352,6 @@ public class DraggablePoint extends Point2D.Double {
     public boolean sameImPositionAs(DraggablePoint that, double epsilon) {
         return Math.abs(imX - that.imX) < epsilon
             && Math.abs(imY - that.imY) < epsilon;
-    }
-
-    public void copyPositionFrom(DraggablePoint that) {
-        x = that.x;
-        y = that.y;
-        imX = that.imX;
-        imY = that.imY;
-
-        assert !isNaN(imX);
-        assert !isNaN(imY);
     }
 
     public Point2D getCoLocationCopy() {

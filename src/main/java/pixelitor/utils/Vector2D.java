@@ -55,6 +55,10 @@ public class Vector2D {
         return new Vector2D(length * FastMath.cos(angle), length * FastMath.sin(angle));
     }
 
+    public static Vector2D between(Point2D from, Point2D to) {
+        return new Vector2D(to.getX() - from.getX(), to.getY() - from.getY());
+    }
+
     public void set(double x, double y) {
         this.x = x;
         this.y = y;

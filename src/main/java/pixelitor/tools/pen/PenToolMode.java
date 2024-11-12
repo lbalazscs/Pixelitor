@@ -55,11 +55,9 @@ public sealed interface PenToolMode permits PathBuilder, PathEditor, PathTransfo
 
     String getToolMessage();
 
-    void start();
-
     boolean requiresExistingPath();
 
-    default void modeStarted(PenToolMode prevMode) {
+    default void modeActivated(PenToolMode prevMode) {
         if (path != null) {
             path.setPreferredPenToolMode(this);
         }
@@ -70,27 +68,25 @@ public sealed interface PenToolMode permits PathBuilder, PathEditor, PathTransfo
         }
     }
 
-    default void modeEnded(Composition comp) {
-        if (PenTool.hasPath()) {
-            if (comp != null) {
-                Path path = PenTool.getPath();
-                if (path.getComp() != comp) {
-                    if (AppMode.isDevelopment()) {
-                        throw new IllegalStateException(
-                            "path's comp is %s, active comp is %s".formatted(
-                                path.getComp().getName(), comp.getName()));
-                    }
-                    // the pen tool has a path, but it does not belong to the
-                    // active composition - happened in random gui tests
-                    // what can we do? at least avoid consistency errors
-                    // don't use removePath, because it also removes from the active comp
-                    PenTool.path = null;
-                } else {
-                    // should be already set
-                    assert comp.getActivePath() == path;
+    default void modeDeactivated(Composition comp) {
+        if (PenTool.hasPath() && comp != null) {
+            Path path = PenTool.getPath();
+            if (path.getComp() != comp) {
+                if (AppMode.isDevelopment()) {
+                    throw new IllegalStateException(
+                        "path's comp is %s, active comp is %s".formatted(
+                            path.getComp().getName(), comp.getName()));
                 }
-                comp.repaint();
+                // the pen tool has a path, but it does not belong to the
+                // active composition - happened in random gui tests
+                // what can we do? at least avoid consistency errors
+                // don't use removePath, because it also removes from the active comp
+                PenTool.path = null;
+            } else {
+                // should be already set
+                assert comp.getActivePath() == path;
             }
+            comp.repaint();
         }
         DraggablePoint.lastActive = null;
     }

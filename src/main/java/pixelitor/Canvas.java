@@ -94,7 +94,7 @@ public class Canvas implements Serializable, Debuggable {
      * Recalculates the component-space size.
      */
     public void recalcCoSize(View view, boolean updateView) {
-        double viewScale = view.getScaling();
+        double viewScale = view.getZoomScale();
 
         int oldCoWidth = coWidth;
         int oldCoHeight = coHeight;

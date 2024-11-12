@@ -40,7 +40,7 @@ import pixelitor.layers.*;
 import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
-import pixelitor.menus.view.*;
+import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -328,9 +328,9 @@ public class RandomGUITest {
     }
 
     private static void resetGUI() {
-        WorkSpace.resetDefaults(PixelitorWindow.get());
-        if (ImageArea.currentModeIs(FRAMES)) {
-            ImageArea.changeUI();
+        PixelitorWindow.get().resetDefaultWorkspace();
+        if (ImageArea.isCurrentMode(FRAMES)) {
+            ImageArea.toggleUI();
         }
         PixelitorWindow.get().setAlwaysOnTop(false);
     }
@@ -645,20 +645,20 @@ public class RandomGUITest {
         ZoomLevel level = null;
         while (percentValue < 49) {
             level = ZoomLevel.getRandomZoomLevel();
-            percentValue = level.asPercent();
+            percentValue = level.getPercent();
         }
         return level;
     }
 
     private static Point randomPointOn(View view) {
-        Rectangle vp = view.getVisiblePart();
-        int randX = vp.x;
-        if (vp.width >= 2) {
-            randX = Rnd.intInRange(vp.x, vp.x + vp.width);
+        Rectangle vr = view.getVisibleRegion();
+        int randX = vr.x;
+        if (vr.width >= 2) {
+            randX = Rnd.intInRange(vr.x, vr.x + vr.width);
         }
-        int randY = vp.y;
-        if (vp.height >= 2) {
-            randY = Rnd.intInRange(vp.y, vp.y + vp.height);
+        int randY = vr.y;
+        if (vr.height >= 2) {
+            randY = Rnd.intInRange(vr.y, vr.y + vr.height);
         }
         return new Point(randX, randY);
     }
@@ -732,7 +732,7 @@ public class RandomGUITest {
     }
 
     private void arrangeWindows() {
-        if (ImageArea.currentModeIs(TABS)) {
+        if (ImageArea.isCurrentMode(TABS)) {
             return;
         }
         double r = Math.random();
@@ -747,7 +747,7 @@ public class RandomGUITest {
 
     private void changeImageArea() {
         log("change image area from " + ImageArea.getMode());
-        ImageArea.changeUI();
+        ImageArea.toggleUI();
     }
 
     private void deselect() {
@@ -898,13 +898,14 @@ public class RandomGUITest {
             return;
         }
 
+        WorkSpace workSpace = PixelitorWindow.get().getWorkSpace();
         int r = rand.nextInt(5);
         switch (r) {
-            case 0 -> runAction(ShowHideHistogramsAction.INSTANCE);
-            case 1 -> runAction(ShowHideLayersAction.INSTANCE);
-            case 2 -> runAction(ShowHideToolsAction.INSTANCE);
-            case 4 -> runAction(ShowHideStatusBarAction.INSTANCE);
-            case 5 -> runAction(ShowHideAllAction.INSTANCE);
+            case 0 -> runAction(workSpace.getHistogramsAction());
+            case 1 -> runAction(workSpace.getLayersAction());
+            case 2 -> runAction(workSpace.getToolsAction());
+            case 4 -> runAction(workSpace.getStatusBarAction());
+            case 5 -> runAction(workSpace.getAllAction());
             default -> throw new IllegalStateException("r = " + r);
         }
     }

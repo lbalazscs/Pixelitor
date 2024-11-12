@@ -26,11 +26,10 @@ import java.awt.Dimension;
 import java.text.DecimalFormat;
 
 /**
- * The available zoom levels
+ * The available zoom levels, organized as a bidirectional chain of zoom steps.
  */
 public class ZoomLevel {
-    public static final ZoomLevel[] zoomLevels;
-    private static final double[] percentValues = {
+    private static final double[] ZOOM_PERCENTAGES = {
         6.25,
         7.432544468767007,
         8.838834764831844,
@@ -73,34 +72,41 @@ public class ZoomLevel {
         5381.737057623773,
         6400.0};
 
+    public static final ZoomLevel[] zoomLevels;
+
     static {
-        zoomLevels = new ZoomLevel[percentValues.length];
+        zoomLevels = new ZoomLevel[ZOOM_PERCENTAGES.length];
         for (int i = 0; i < zoomLevels.length; i++) {
-            zoomLevels[i] = new ZoomLevel(percentValues[i], i);
+            zoomLevels[i] = new ZoomLevel(ZOOM_PERCENTAGES[i], i);
         }
+
+        // link zoom levels in the chain
         for (int i = 0; i < zoomLevels.length; i++) {
             if (i == 0) {
-                zoomLevels[i].setOut(zoomLevels[0]);
-                zoomLevels[i].setIn(zoomLevels[i + 1]);
+                // lowest zoom level: can't zoom out further
+                zoomLevels[i].setNextOut(zoomLevels[0]);
+                zoomLevels[i].setNextIn(zoomLevels[i + 1]);
             } else if (i == zoomLevels.length - 1) {
-                zoomLevels[i].setOut(zoomLevels[i - 1]);
-                zoomLevels[i].setIn(zoomLevels[i]);
+                // highest zoom level: can't zoom in further
+                zoomLevels[i].setNextOut(zoomLevels[i - 1]);
+                zoomLevels[i].setNextIn(zoomLevels[i]);
             } else {
-                zoomLevels[i].setOut(zoomLevels[i - 1]);
-                zoomLevels[i].setIn(zoomLevels[i + 1]);
+                // middle levels: normal bidirectional linking
+                zoomLevels[i].setNextOut(zoomLevels[i - 1]);
+                zoomLevels[i].setNextIn(zoomLevels[i + 1]);
             }
         }
     }
 
-    public static final ZoomLevel Z100 = zoomLevels[16];
-    public static final ZoomLevel Z50 = zoomLevels[12];
-    public static final ZoomLevel Z25 = zoomLevels[8];
-    public static final ZoomLevel Z12 = zoomLevels[4];
+    public static final ZoomLevel ACTUAL_SIZE = zoomLevels[16]; // 100%
+    public static final ZoomLevel HALF_SIZE = zoomLevels[12];   // 50%
+    public static final ZoomLevel QUARTER_SIZE = zoomLevels[8]; // 25%
+    public static final ZoomLevel EIGHTH_SIZE = zoomLevels[4];  // 12.5%
 
-    private ZoomLevel in;
-    private ZoomLevel out;
+    private ZoomLevel nextIn;
+    private ZoomLevel nextOut;
     private final double percent;
-    private final String displayName;
+    private final String displayText;
     private final double scale;
     private final int sliderValue;
 
@@ -108,36 +114,30 @@ public class ZoomLevel {
         this.percent = percent;
         this.scale = percent / 100.0;
         this.sliderValue = sliderValue;
-        DecimalFormat format;
-        if (percent < 100) {
-            format = new DecimalFormat("0.##");
-        } else {
-            format = new DecimalFormat("0.#");
-        }
-        this.displayName = format.format(percent) + "%";
+
+        DecimalFormat formatter = percent < 100
+            ? new DecimalFormat("0.##")
+            : new DecimalFormat("0.#");
+        this.displayText = formatter.format(percent) + "%";
     }
 
-    public boolean isSpecial() {
-        return sliderValue % 4 == 0;
+    private void setNextIn(ZoomLevel nextIn) {
+        this.nextIn = nextIn;
     }
 
-    private void setIn(ZoomLevel in) {
-        this.in = in;
-    }
-
-    private void setOut(ZoomLevel out) {
-        this.out = out;
+    private void setNextOut(ZoomLevel nextOut) {
+        this.nextOut = nextOut;
     }
 
     public ZoomLevel zoomIn() {
-        return in;
+        return nextIn;
     }
 
     public ZoomLevel zoomOut() {
-        return out;
+        return nextOut;
     }
 
-    public double asPercent() {
+    public double getPercent() {
         return percent;
     }
 
@@ -153,23 +153,26 @@ public class ZoomLevel {
         return sliderValue;
     }
 
+    /**
+     * Returns whether the pixel grid should be displayed at this zoom level.
+     */
     public boolean allowPixelGrid() {
-        return asPercent() > 1500;
+        return getPercent() > 1500;
     }
 
     @Override
     public String toString() {
-        return displayName;
+        return displayText;
     }
 
     /**
      * Calculates the optimal zoom level for the given canvas,
      * and possibly for a given auto zoom.
      */
-    public static ZoomLevel calcBestFor(Canvas canvas, AutoZoom autoZoom,
-                                        boolean zoomInToFitSpace) {
+    public static ZoomLevel calcBestZoom(Canvas canvas, AutoZoom autoZoom,
+                                         boolean zoomInToFitSpace) {
         if (autoZoom == AutoZoom.ACTUAL_PIXELS) {
-            return Z100;
+            return ACTUAL_SIZE;
         }
         if (autoZoom == null) {
             // If this isn't an auto zoom, then the
@@ -177,27 +180,24 @@ public class ZoomLevel {
             autoZoom = AutoZoom.FIT_SPACE;
         }
 
-        double idealZoomPercent = 100.0 / calcSizeRatio(canvas, autoZoom);
+        double targetZoomPercent = 100.0 / calcSizeRatio(canvas, autoZoom);
 
         ZoomLevel maximallyZoomedOut = zoomLevels[0];
 
-        if (maximallyZoomedOut.asPercent() > idealZoomPercent) {
-            // The image is so big that it requires scroll
-            // bars even when it's maximally zoomed out.
+        // Can't avoid scrollbars if the canvas is too large for the viewport
+        if (maximallyZoomedOut.getPercent() > targetZoomPercent) {
             return maximallyZoomedOut;
         }
 
         ZoomLevel lastOK = maximallyZoomedOut;
         // iterate through all zoom levels from zoomed-out to zoomed-in
         for (ZoomLevel level : zoomLevels) {
-            if (level.asPercent() > idealZoomPercent) {
+            if (level.getPercent() > targetZoomPercent) {
                 // found one that is too much zoomed in
                 return lastOK;
             }
-            if (!zoomInToFitSpace) { // we don't want to zoom in more than 100%
-                if (lastOK == Z100) {
-                    return Z100;
-                }
+            if (!zoomInToFitSpace && lastOK == ACTUAL_SIZE) {
+                return ACTUAL_SIZE;
             }
             lastOK = level;
         }
@@ -211,14 +211,16 @@ public class ZoomLevel {
         Dimension availableArea = ImageArea.getSize();
         double availableWidth = availableArea.getWidth();
         double availableHeight = availableArea.getHeight();
-        if (ImageArea.currentModeIs(ImageArea.Mode.FRAMES)) {
-            int internalFrameHeight = 35; // Nimbus
-            availableHeight -= internalFrameHeight;
+
+        // Adjust for frame decoration height if in frames mode
+        if (ImageArea.isCurrentMode(ImageArea.Mode.FRAMES)) {
+            int frameDecorationHeight = 35; // Nimbus
+            availableHeight -= frameDecorationHeight;
         }
 
         double horRatio = canvas.getWidth() / availableWidth;
         double verRatio = canvas.getHeight() / availableHeight;
 
-        return autoZoom.selectRatio(horRatio, verRatio);
+        return autoZoom.calcRatio(horRatio, verRatio);
     }
 }

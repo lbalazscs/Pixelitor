@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,15 +19,14 @@ package pixelitor.menus.view;
 import pixelitor.gui.WorkSpace;
 import pixelitor.layers.LayersContainer;
 
+import javax.swing.*;
+
 /**
- * The action that either shows or hides the layers,
- * depending on the current visibility
+ * The {@link Action} that toggles the visibility of the layers.
  */
 public class ShowHideLayersAction extends ShowHideAction {
-    public static final ShowHideAction INSTANCE = new ShowHideLayersAction();
-
-    private ShowHideLayersAction() {
-        super("Show Layers", "Hide Layers");
+    public ShowHideLayersAction(WorkSpace workSpace) {
+        super("Show Layers", "Hide Layers", workSpace);
     }
 
     @Override
@@ -37,11 +36,11 @@ public class ShowHideLayersAction extends ShowHideAction {
 
     @Override
     public boolean getStartupVisibility() {
-        return WorkSpace.getLayersVisibility();
+        return workSpace.areLayersVisible();
     }
 
     @Override
     public void setVisibility(boolean value) {
-        WorkSpace.setLayersVisibility(value, true);
+        workSpace.setLayersVisible(value, true);
     }
 }

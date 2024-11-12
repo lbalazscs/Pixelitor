@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,132 +18,151 @@
 package pixelitor.gui;
 
 import pixelitor.layers.LayersContainer;
-import pixelitor.menus.view.ShowHideHistogramsAction;
-import pixelitor.menus.view.ShowHideLayersAction;
-import pixelitor.menus.view.ShowHideStatusBarAction;
-import pixelitor.menus.view.ShowHideToolsAction;
+import pixelitor.menus.view.*;
 
 import static pixelitor.utils.AppPreferences.mainNode;
 
 /**
- * Static utility methods for managing the visibility of
- * various UI areas
+ * Manages the visibility of various UI panels.
  */
 public class WorkSpace {
-    private static final String HISTOGRAMS_SHOWN_KEY = "histograms_shown";
-    private static final String LAYERS_SHOWN_KEY = "layers_shown";
-    private static final String TOOLS_SHOWN_KEY = "tools_shown";
-    private static final String STATUS_BAR_SHOWN_KEY = "status_bar_shown";
+    // preference keys for storing visibility states
+    private static final String KEY_HISTOGRAMS_SHOWN = "histograms_shown";
+    private static final String KEY_LAYERS_SHOWN = "layers_shown";
+    private static final String KEY_TOOLS_SHOWN = "tools_shown";
+    private static final String KEY_STATUS_BAR_SHOWN = "status_bar_shown";
 
-    private static final boolean DEFAULT_HISTOGRAMS_VISIBILITY = false;
-    private static final boolean DEFAULT_TOOLS_VISIBILITY = true;
-    private static final boolean DEFAULT_LAYERS_VISIBILITY = true;
-    private static final boolean DEFAULT_STATUS_BAR_VISIBILITY = true;
+    // default visibility states
+    private static final boolean DEFAULT_HISTOGRAMS_VISIBLE = false;
+    private static final boolean DEFAULT_TOOLS_VISIBLE = true;
+    private static final boolean DEFAULT_LAYERS_VISIBLE = true;
+    private static final boolean DEFAULT_STATUS_BAR_VISIBLE = true;
 
-    private static boolean histogramsVisibility;
-    private static boolean toolsVisibility;
-    private static boolean layersVisibility;
-    private static boolean statusBarVisibility;
+    // current visibility states
+    private boolean histogramsVisible;
+    private boolean toolsVisible;
+    private boolean layersVisible;
+    private boolean statusBarVisible;
 
-    private static boolean loaded = false;
+    // actions for toggling visibility
+    private final ShowHideHistogramsAction histogramsAction;
+    private final ShowHideToolsAction toolsAction;
+    private final ShowHideLayersAction layersAction;
+    private final ShowHideStatusBarAction statusBarAction;
+    private final ShowHideAllAction allAction;
 
-    private WorkSpace() {
+    public WorkSpace() {
+        // load visibility preferences
+        histogramsVisible = mainNode.getBoolean(KEY_HISTOGRAMS_SHOWN, DEFAULT_HISTOGRAMS_VISIBLE);
+        toolsVisible = mainNode.getBoolean(KEY_TOOLS_SHOWN, DEFAULT_TOOLS_VISIBLE);
+        layersVisible = mainNode.getBoolean(KEY_LAYERS_SHOWN, DEFAULT_LAYERS_VISIBLE);
+        statusBarVisible = mainNode.getBoolean(KEY_STATUS_BAR_SHOWN, DEFAULT_STATUS_BAR_VISIBLE);
+
+        // initialize toogle actions
+        histogramsAction = new ShowHideHistogramsAction(this);
+        toolsAction = new ShowHideToolsAction(this);
+        layersAction = new ShowHideLayersAction(this);
+        statusBarAction = new ShowHideStatusBarAction(this);
+        allAction = new ShowHideAllAction(this);
     }
 
-    private static void load() {
-        if (loaded) {
-            return;
-        }
-
-        histogramsVisibility = mainNode.getBoolean(HISTOGRAMS_SHOWN_KEY, DEFAULT_HISTOGRAMS_VISIBILITY);
-        toolsVisibility = mainNode.getBoolean(TOOLS_SHOWN_KEY, DEFAULT_TOOLS_VISIBILITY);
-        layersVisibility = mainNode.getBoolean(LAYERS_SHOWN_KEY, DEFAULT_LAYERS_VISIBILITY);
-        statusBarVisibility = mainNode.getBoolean(STATUS_BAR_SHOWN_KEY, DEFAULT_STATUS_BAR_VISIBILITY);
-
-        loaded = true;
-    }
-
-    public static void resetDefaults(PixelitorWindow pw) {
-        resetDefaultHistogramsVisibility();
-        resetDefaultToolsVisibility(pw);
-        resetDefaultLayersVisibility();
-        resetDefaultStatusBarVisibility();
+    public void restoreDefaults(PixelitorWindow pw) {
+        resetHistogramsVisibility();
+        resetToolsVisibility(pw);
+        resetLayersVisibility();
+        resetStatusBarVisibility();
 
         pw.getContentPane().revalidate();
     }
 
-    private static void resetDefaultHistogramsVisibility() {
-        if (HistogramsPanel.isShown() != DEFAULT_HISTOGRAMS_VISIBILITY) {
-            setHistogramsVisibility(DEFAULT_HISTOGRAMS_VISIBILITY, false);
-            ShowHideHistogramsAction.INSTANCE.updateText(DEFAULT_HISTOGRAMS_VISIBILITY);
+    private void resetHistogramsVisibility() {
+        if (HistogramsPanel.isShown() != DEFAULT_HISTOGRAMS_VISIBLE) {
+            setHistogramsVisible(DEFAULT_HISTOGRAMS_VISIBLE, false);
+            histogramsAction.updateText(DEFAULT_HISTOGRAMS_VISIBLE);
         }
     }
 
-    private static void resetDefaultToolsVisibility(PixelitorWindow pw) {
-        if (pw.areToolsShown() != DEFAULT_TOOLS_VISIBILITY) {
-            setToolsVisibility(DEFAULT_TOOLS_VISIBILITY, false);
-            ShowHideToolsAction.INSTANCE.updateText(DEFAULT_TOOLS_VISIBILITY);
+    private void resetToolsVisibility(PixelitorWindow pw) {
+        if (pw.areToolsShown() != DEFAULT_TOOLS_VISIBLE) {
+            setToolsVisible(DEFAULT_TOOLS_VISIBLE, false);
+            toolsAction.updateText(DEFAULT_TOOLS_VISIBLE);
         }
     }
 
-    private static void resetDefaultLayersVisibility() {
-        if (LayersContainer.areLayersShown() != DEFAULT_LAYERS_VISIBILITY) {
-            setLayersVisibility(DEFAULT_LAYERS_VISIBILITY, false);
-            ShowHideLayersAction.INSTANCE.updateText(DEFAULT_LAYERS_VISIBILITY);
+    private void resetLayersVisibility() {
+        if (LayersContainer.areLayersShown() != DEFAULT_LAYERS_VISIBLE) {
+            setLayersVisible(DEFAULT_LAYERS_VISIBLE, false);
+            layersAction.updateText(DEFAULT_LAYERS_VISIBLE);
         }
     }
 
-    private static void resetDefaultStatusBarVisibility() {
-        if (StatusBar.isShown() != DEFAULT_STATUS_BAR_VISIBILITY) {
-            setStatusBarVisibility(DEFAULT_STATUS_BAR_VISIBILITY, false);
-            ShowHideStatusBarAction.INSTANCE.updateText(DEFAULT_STATUS_BAR_VISIBILITY);
+    private void resetStatusBarVisibility() {
+        if (StatusBar.isShown() != DEFAULT_STATUS_BAR_VISIBLE) {
+            setStatusBarVisible(DEFAULT_STATUS_BAR_VISIBLE, false);
+            statusBarAction.updateText(DEFAULT_STATUS_BAR_VISIBLE);
         }
     }
 
-    public static boolean getHistogramsVisibility() {
-        load();
-        return histogramsVisibility;
+    public boolean areHistogramsVisible() {
+        return histogramsVisible;
     }
 
-    public static boolean getLayersVisibility() {
-        load();
-        return layersVisibility;
+    public boolean areLayersVisible() {
+        return layersVisible;
     }
 
-    public static boolean getStatusBarVisibility() {
-        load();
-        return statusBarVisibility;
+    public boolean isStatusBarVisible() {
+        return statusBarVisible;
     }
 
-    public static boolean getToolsVisibility() {
-        load();
-        return toolsVisibility;
+    public boolean areToolsVisible() {
+        return toolsVisible;
     }
 
-    public static void saveVisibility() {
-        mainNode.putBoolean(HISTOGRAMS_SHOWN_KEY, histogramsVisibility);
-        mainNode.putBoolean(LAYERS_SHOWN_KEY, layersVisibility);
-        mainNode.putBoolean(TOOLS_SHOWN_KEY, toolsVisibility);
-        mainNode.putBoolean(STATUS_BAR_SHOWN_KEY, statusBarVisibility);
+    public void savePreferences() {
+        mainNode.putBoolean(KEY_HISTOGRAMS_SHOWN, histogramsVisible);
+        mainNode.putBoolean(KEY_LAYERS_SHOWN, layersVisible);
+        mainNode.putBoolean(KEY_TOOLS_SHOWN, toolsVisible);
+        mainNode.putBoolean(KEY_STATUS_BAR_SHOWN, statusBarVisible);
     }
 
-    public static void setLayersVisibility(boolean v, boolean revalidate) {
-        layersVisibility = v;
-        PixelitorWindow.get().setLayersVisibility(v, revalidate);
+    public void setLayersVisible(boolean v, boolean revalidate) {
+        layersVisible = v;
+        PixelitorWindow.get().setLayersVisible(v, revalidate);
     }
 
-    public static void setHistogramsVisibility(boolean v, boolean revalidate) {
-        histogramsVisibility = v;
-        PixelitorWindow.get().setHistogramsVisibility(v, revalidate);
+    public void setHistogramsVisible(boolean v, boolean revalidate) {
+        histogramsVisible = v;
+        PixelitorWindow.get().setHistogramsVisible(v, revalidate);
     }
 
-    public static void setToolsVisibility(boolean v, boolean revalidate) {
-        toolsVisibility = v;
-        PixelitorWindow.get().setToolsVisibility(v, revalidate);
+    public void setToolsVisible(boolean v, boolean revalidate) {
+        toolsVisible = v;
+        PixelitorWindow.get().setToolsVisible(v, revalidate);
     }
 
-    public static void setStatusBarVisibility(boolean v, boolean revalidate) {
-        statusBarVisibility = v;
-        PixelitorWindow.get().setStatusBarVisibility(v, revalidate);
+    public void setStatusBarVisible(boolean v, boolean revalidate) {
+        statusBarVisible = v;
+        PixelitorWindow.get().setStatusBarVisible(v, revalidate);
+    }
+
+    public ShowHideHistogramsAction getHistogramsAction() {
+        return histogramsAction;
+    }
+
+    public ShowHideToolsAction getToolsAction() {
+        return toolsAction;
+    }
+
+    public ShowHideLayersAction getLayersAction() {
+        return layersAction;
+    }
+
+    public ShowHideStatusBarAction getStatusBarAction() {
+        return statusBarAction;
+    }
+
+    public ShowHideAllAction getAllAction() {
+        return allAction;
     }
 }

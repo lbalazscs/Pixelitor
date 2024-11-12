@@ -333,19 +333,19 @@ public class TextSettings implements Serializable, Debuggable {
         return relLineHeight;
     }
 
-    public double getSx() {
+    public double getScaleX() {
         return sx;
     }
 
-    public double getSy() {
+    public double getScaleY() {
         return sy;
     }
 
-    public double getShx() {
+    public double getShearX() {
         return shx;
     }
 
-    public double getShy() {
+    public double getShearY() {
         return shy;
     }
 

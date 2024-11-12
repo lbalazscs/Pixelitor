@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,6 +36,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import static pixelitor.menus.view.ZoomLevel.ACTUAL_SIZE;
+import static pixelitor.menus.view.ZoomLevel.EIGHTH_SIZE;
+import static pixelitor.menus.view.ZoomLevel.HALF_SIZE;
+import static pixelitor.menus.view.ZoomLevel.QUARTER_SIZE;
+
 /**
  * The navigator component that allows the user to pan a zoomed-in image
  * or to zoom to a specific area by ctrl-dragging.
@@ -43,7 +48,7 @@ import java.awt.event.*;
 public class Navigator extends JComponent
     implements MouseListener, MouseMotionListener, ViewActivationListener {
 
-    private static final int DEFAULT_NAVIGATOR_SIZE = 300;
+    private static final int DEFAULT_SIZE = 300;
     private static final BasicStroke VIEW_BOX_STROKE = new BasicStroke(3);
     private static final CheckerboardPainter checkerBoardPainter
         = ImageUtils.createCheckerboardPainter();
@@ -67,23 +72,23 @@ public class Navigator extends JComponent
     private int preferredWidth;
     private int preferredHeight;
 
-    private double imgScalingRatio;
+    private double thumbnailScale;
     private int thumbWidth;
     private int thumbHeight;
 
-    private final AdjustmentListener adjListener;
+    private final AdjustmentListener scrollSyncListener;
     private static JDialog dialog;
-    private JPopupMenu popup;
+    private JPopupMenu contextMenu;
 
     // if not null, the scaling factor is calculated based on this
     // explicitly given zoom level instead of the navigator size
-    private ZoomLevel exactZoom = null;
+    private ZoomLevel fixedZoom = null;
 
-    private static Navigator navigatorPanel;
+    private static Navigator instance;
 
     private Navigator(View view) {
-        adjListener = e ->
-            SwingUtilities.invokeLater(this::updateViewBoxPosition);
+        scrollSyncListener = e ->
+            SwingUtilities.invokeLater(this::syncViewBoxPosition);
 
         recalculateSize(view, true, true, true);
 
@@ -91,21 +96,21 @@ public class Navigator extends JComponent
         addMouseMotionListener(this);
         Views.addActivationListener(this);
 
-        addNavigatorResizedListener();
+        addResizeListener();
         addZoomingSupport();
 
-        addPopupMenu();
+        addContextMenu();
     }
 
-    private void addPopupMenu() {
-        popup = new JPopupMenu();
-        ZoomLevel[] levels = {ZoomLevel.Z100, ZoomLevel.Z50, ZoomLevel.Z25, ZoomLevel.Z12};
+    private void addContextMenu() {
+        contextMenu = new JPopupMenu();
+        ZoomLevel[] levels = {ACTUAL_SIZE, HALF_SIZE, QUARTER_SIZE, EIGHTH_SIZE};
         for (ZoomLevel level : levels) {
-            popup.add(new PAction("Navigator Zoom: " + level, () ->
+            contextMenu.add(new PAction("Navigator Zoom: " + level, () ->
                 setNavigatorSizeFromZoom(level)));
         }
-        popup.addSeparator();
-        popup.add(new PAction("View Box Color...", () ->
+        contextMenu.addSeparator();
+        contextMenu.add(new PAction("View Box Color...", () ->
             Colors.selectColorWithDialog(this,
                 "View Box Color", viewBoxColor, true,
                 this::setNewViewBoxColor)));
@@ -125,7 +130,7 @@ public class Navigator extends JComponent
         JDialog ancestor = GUIUtils.getDialogAncestor(this);
         ancestor.setTitle("Navigator - " + zoom);
 
-        exactZoom = zoom; // set the exact zoom only temporarily
+        fixedZoom = zoom; // set the exact zoom only temporarily
 
         // force pack() to use the current preferred
         // size instead of some cached value
@@ -135,10 +140,10 @@ public class Navigator extends JComponent
     }
 
     private void showPopup(MouseEvent e) {
-        popup.show(this, e.getX(), e.getY());
+        contextMenu.show(this, e.getX(), e.getY());
     }
 
-    private void addNavigatorResizedListener() {
+    private void addResizeListener() {
         // update size calculations if the navigator is resized
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -151,7 +156,7 @@ public class Navigator extends JComponent
     }
 
     private void addZoomingSupport() {
-        MouseZoomMethod.CURRENT.installOnJComponent(this, view);
+        MouseZoomMethod.CURRENT.installOnOther(this, view);
         ZoomMenu.setupZoomKeys(this);
     }
 
@@ -162,15 +167,15 @@ public class Navigator extends JComponent
         }
 
         assert view.isActive();
-        navigatorPanel = new Navigator(view);
+        instance = new Navigator(view);
 
         dialog = new DialogBuilder()
             .title("Navigator")
-            .content(navigatorPanel)
+            .content(instance)
             .notModal()
             .noOKButton()
             .noCancelButton()
-            .cancelAction(navigatorPanel::dispose) // when it's closed with X
+            .cancelAction(instance::dispose) // when it's closed with X
             .show()
             .getDialog();
     }
@@ -179,9 +184,9 @@ public class Navigator extends JComponent
         if (dialog == null || !dialog.isVisible()) {
             return;
         }
-        assert navigatorPanel != null;
-        assert navigatorPanel.view != null;
-        newZoomMethod.installOnJComponent(navigatorPanel, navigatorPanel.view);
+        assert instance != null;
+        assert instance.view != null;
+        newZoomMethod.installOnOther(instance, instance.view);
     }
 
     public void recalculateSize(View view,
@@ -199,7 +204,7 @@ public class Navigator extends JComponent
             scrollPane = view.getViewContainer().getScrollPane();
         }
 
-        if (exactZoom == null) {
+        if (fixedZoom == null) {
             JDialog ancestor = GUIUtils.getDialogAncestor(this);
             if (ancestor != null) { // is null during the initial construction
                 ancestor.setTitle("Navigator");
@@ -207,7 +212,7 @@ public class Navigator extends JComponent
         }
 
         if (newView) {
-            recalculateScaling(view, DEFAULT_NAVIGATOR_SIZE, DEFAULT_NAVIGATOR_SIZE);
+            recalculateScaling(view, DEFAULT_SIZE, DEFAULT_SIZE);
         } else if (viewSizeChanged || navigatorResized) {
             recalculateScaling(view, getWidth(), getHeight());
         } else {
@@ -217,12 +222,12 @@ public class Navigator extends JComponent
         preferredWidth = thumbWidth;
         preferredHeight = thumbHeight;
 
-        updateViewBoxPosition();
+        syncViewBoxPosition();
 
         if (newView) {
             view.setNavigator(this);
-            scrollPane.getHorizontalScrollBar().addAdjustmentListener(adjListener);
-            scrollPane.getVerticalScrollBar().addAdjustmentListener(adjListener);
+            scrollPane.getHorizontalScrollBar().addAdjustmentListener(scrollSyncListener);
+            scrollPane.getVerticalScrollBar().addAdjustmentListener(scrollSyncListener);
         }
 
         if (viewSizeChanged) {
@@ -237,14 +242,14 @@ public class Navigator extends JComponent
 
     private void releaseImage() {
         view.setNavigator(null);
-        scrollPane.getHorizontalScrollBar().removeAdjustmentListener(adjListener);
-        scrollPane.getVerticalScrollBar().removeAdjustmentListener(adjListener);
+        scrollPane.getHorizontalScrollBar().removeAdjustmentListener(scrollSyncListener);
+        scrollPane.getVerticalScrollBar().removeAdjustmentListener(scrollSyncListener);
 
         view = null;
     }
 
     // updates the view box rectangle position based on the view
-    private void updateViewBoxPosition() {
+    private void syncViewBoxPosition() {
         if (dragging) {
             // no need to update the rectangle if the change
             // was caused by this navigator
@@ -289,7 +294,7 @@ public class Navigator extends JComponent
 
     // zooms and scrolls the main composition view based on the target rect
     private void areaZoom() {
-        view.zoomToRect(PRectangle.fromCo(getScaledViewRect(), view));
+        view.zoomToRegion(PRectangle.fromCo(getScaledViewRect(), view));
     }
 
     @Override
@@ -299,17 +304,16 @@ public class Navigator extends JComponent
         }
 
         Graphics2D g2 = (Graphics2D) g;
-
-        checkerBoardPainter.paint(g2, null, thumbWidth, thumbHeight);
-
         var origTransform = g2.getTransform();
 
-        g2.scale(imgScalingRatio, imgScalingRatio);
+        // draw the thumbnail scaled down
+        checkerBoardPainter.paint(g2, null, thumbWidth, thumbHeight);
+        g2.scale(thumbnailScale, thumbnailScale);
         g2.drawImage(view.getComp().getCompositeImage(), 0, 0, null);
+
+        // draw the viewport indicator box with the original transform
         g2.setTransform(origTransform);
-
         g2.setStroke(VIEW_BOX_STROKE);
-
         g2.setColor(viewBoxColor);
         g2.draw(viewBoxRect);
 
@@ -340,26 +344,6 @@ public class Navigator extends JComponent
                 }
             }
         }
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        if (e.isPopupTrigger()) {
-            showPopup(e);
-        }
-        dragStartPoint = null;
-        dragging = false;
-
-        if (areaZooming) {
-            viewBoxRect = targetBoxRect;
-            targetBoxRect = null;
-            areaZoom();
-            updateViewBoxPosition();
-        } else {
-            repaint();
-        }
-
-        areaZooming = false;
     }
 
     @Override
@@ -414,6 +398,26 @@ public class Navigator extends JComponent
         }
     }
 
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            showPopup(e);
+        }
+        dragStartPoint = null;
+        dragging = false;
+
+        if (areaZooming) {
+            viewBoxRect = targetBoxRect;
+            targetBoxRect = null;
+            areaZoom();
+            syncViewBoxPosition();
+        } else {
+            repaint();
+        }
+
+        areaZooming = false;
+    }
+
     private void updateViewBoxLocation(int newBoxX, int newBoxY) {
         if (newBoxX != viewBoxRect.x || newBoxY != viewBoxRect.y) {
             viewBoxRect.setLocation(newBoxX, newBoxY);
@@ -432,19 +436,19 @@ public class Navigator extends JComponent
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        if (exactZoom != null) {
-            imgScalingRatio = exactZoom.getViewScale();
+        if (fixedZoom != null) {
+            thumbnailScale = fixedZoom.getViewScale();
 
-            exactZoom = null; // was set only temporarily
+            fixedZoom = null; // was set only temporarily
         } else {
             double xScaling = width / (double) canvasWidth;
             double yScaling = height / (double) canvasHeight;
 
-            imgScalingRatio = Math.min(xScaling, yScaling);
+            thumbnailScale = Math.min(xScaling, yScaling);
         }
 
-        thumbWidth = (int) (canvasWidth * imgScalingRatio);
-        thumbHeight = (int) (canvasHeight * imgScalingRatio);
+        thumbWidth = (int) (canvasWidth * thumbnailScale);
+        thumbHeight = (int) (canvasHeight * thumbnailScale);
     }
 
     @Override

@@ -221,7 +221,7 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public List<Object> getParamValue() {
+    public List<Color> getParamValue() {
         return List.of(colors);
     }
 

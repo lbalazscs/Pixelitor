@@ -47,10 +47,10 @@ import java.util.Random;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
+import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 
 /**
  * A path contains the same information as a {@link PathIterator},
@@ -65,10 +65,11 @@ public class Path implements Serializable, Debuggable {
 
     private final List<SubPath> subPaths = new ArrayList<>();
     private final Composition comp;
+
     private SubPath activeSubPath;
 
-    private static long nextId = 0;
-    private final String id; // for debugging
+    private final String id; // unique identifier for debugging
+    private static long idCounter = 0;
 
     private transient BuildState buildState;
     private transient BuildState prevBuildState;
@@ -79,16 +80,16 @@ public class Path implements Serializable, Debuggable {
         if (setAsActive) {
             comp.setActivePath(this);
         }
-        id = "P" + nextId++;
-        buildState = NO_INTERACTION;
+        id = "P" + idCounter++;
+        buildState = IDLE;
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        buildState = NO_INTERACTION;
-        prevBuildState = NO_INTERACTION;
+        buildState = IDLE;
+        prevBuildState = IDLE;
         preferredPenToolMode = PenToolMode.BUILD;
     }
 
@@ -105,22 +106,9 @@ public class Path implements Serializable, Debuggable {
         return copy;
     }
 
-    public PenToolMode getPreferredPenToolMode() {
-        return preferredPenToolMode;
-    }
-
-    public void setPreferredPenToolMode(PenToolMode preferredPenToolMode) {
-        this.preferredPenToolMode = preferredPenToolMode;
-    }
-
-    public SubPath getActiveSubpath() {
-        return activeSubPath;
-    }
-
-    public Composition getComp() {
-        return comp;
-    }
-
+    /**
+     * Renders the path in building mode.
+     */
     public void paintForBuilding(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
 
@@ -129,6 +117,9 @@ public class Path implements Serializable, Debuggable {
         }
     }
 
+    /**
+     * Renders the path in editing mode.
+     */
     public void paintForEditing(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
 
@@ -137,15 +128,18 @@ public class Path implements Serializable, Debuggable {
         }
     }
 
+    /**
+     * Renders the path in transform mode.
+     */
     public void paintForTransforming(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
     }
 
-    public DraggablePoint handleWasHit(double x, double y, boolean altDown) {
+    public DraggablePoint findHandleAt(double x, double y, boolean altDown) {
         for (SubPath sp : subPaths) {
-            DraggablePoint hit = sp.handleWasHit(x, y, altDown);
-            if (hit != null) {
-                return hit;
+            DraggablePoint handle = sp.findHandleAt(x, y, altDown);
+            if (handle != null) {
+                return handle;
             }
         }
         return null;
@@ -188,58 +182,6 @@ public class Path implements Serializable, Debuggable {
     public void addSubPath(SubPath subPath) {
         subPaths.add(subPath);
         activeSubPath = subPath;
-    }
-
-    public AnchorPoint getFirstAnchor() {
-        return activeSubPath.getFirstAnchor();
-    }
-
-    public AnchorPoint getLastAnchor() {
-        return activeSubPath.getLastAnchor();
-    }
-
-    public AnchorPoint addMovingPointAsAnchor() {
-        return activeSubPath.addMovingPointAsAnchor();
-    }
-
-    public MovingPoint getMovingPoint() {
-        return activeSubPath.getMovingPoint();
-    }
-
-    public void setMovingPointLocation(double x, double y, boolean nullOK) {
-        activeSubPath.setMovingPointLocation(x, y, nullOK);
-    }
-
-    public void dump() {
-        checkConsistency();
-        System.out.println("Path " + this);
-        for (SubPath sp : subPaths) {
-            if (sp.isClosed()) {
-                System.out.println("New closed subpath " + sp.getId());
-            } else {
-                System.out.println("New unclosed subpath" + sp.getId());
-            }
-
-            sp.dump();
-        }
-    }
-
-    /**
-     * Checks whether all the objects are wired together correctly
-     */
-    @SuppressWarnings("SameReturnValue")
-    public boolean checkConsistency() {
-        for (SubPath subPath : subPaths) {
-            if (subPath.getPath() != this) {
-                throw new IllegalStateException("wrong parent in subpath " + subPath);
-            }
-            if (subPath.getComp() != comp) {
-                throw new IllegalStateException("wrong comp in subpath " + subPath);
-            }
-
-            subPath.checkConsistency();
-        }
-        return true;
     }
 
     public void mergeOverlappingAnchors() {
@@ -290,18 +232,6 @@ public class Path implements Serializable, Debuggable {
         activeSubPath.finish(comp, addToHistory);
     }
 
-    public boolean hasMovingPoint() {
-        return activeSubPath.hasMovingPoint();
-    }
-
-    public int getNumSubpaths() {
-        return subPaths.size();
-    }
-
-    public SubPath getSubPath(int index) {
-        return subPaths.get(index);
-    }
-
     public void delete(SubPath subPath) {
         assert comp.getActivePath() == this;
 
@@ -340,17 +270,20 @@ public class Path implements Serializable, Debuggable {
         History.add(edit);
     }
 
-    public int indexOf(SubPath subPath) {
-        return subPaths.indexOf(subPath);
-    }
-
     public void replaceSubPath(int index, SubPath subPath) {
         subPaths.set(index, subPath);
         activeSubPath = subPath;
     }
 
-    public BuildState getBuildState() {
-        return buildState;
+    public List<TransformBox> createTransformBoxes() {
+        List<TransformBox> boxes = new ArrayList<>();
+        for (SubPath subPath : subPaths) {
+            TransformBox box = subPath.createTransformBox();
+            if (box != null) {
+                boxes.add(box);
+            }
+        }
+        return boxes;
     }
 
     public void setBuildState(BuildState newState) {
@@ -385,7 +318,7 @@ public class Path implements Serializable, Debuggable {
 
         boolean mouseDown = Tools.EventDispatcher.isMouseDown();
         if (mouseDown) {
-            setBuildState(DRAGGING_THE_CONTROL_OF_LAST);
+            setBuildState(DRAGGING_LAST_CONTROL);
         } else {
             setBuildState(MOVING_TO_NEXT_ANCHOR);
         }
@@ -397,6 +330,14 @@ public class Path implements Serializable, Debuggable {
             || state == MOVE_EDITING_PREVIOUS : "state = " + state;
 
         activeSubPath.finishByCtrlClick(comp);
+    }
+
+    public int indexOf(SubPath subPath) {
+        return subPaths.indexOf(subPath);
+    }
+
+    public BuildState getBuildState() {
+        return buildState;
     }
 
     // return true if it could be closed
@@ -414,27 +355,94 @@ public class Path implements Serializable, Debuggable {
         return id;
     }
 
-    public List<TransformBox> createTransformBoxes() {
-        List<TransformBox> boxes = new ArrayList<>();
-        for (SubPath subPath : subPaths) {
-            TransformBox box = subPath.createTransformBox();
-            if (box != null) {
-                boxes.add(box);
-            }
-        }
-        return boxes;
-    }
-
     public Rectangle getImBounds() {
-        Shape shape = toImageSpaceShape();
-        return shape.getBounds();
+        return toImageSpaceShape().getBounds();
     }
-
 
     public void randomize(Random rng, double amount) {
         for (SubPath subPath : subPaths) {
             subPath.randomize(rng, amount);
         }
+    }
+
+    public PenToolMode getPreferredPenToolMode() {
+        return preferredPenToolMode;
+    }
+
+    public void setPreferredPenToolMode(PenToolMode preferredPenToolMode) {
+        this.preferredPenToolMode = preferredPenToolMode;
+    }
+
+    public SubPath getActiveSubpath() {
+        return activeSubPath;
+    }
+
+    public Composition getComp() {
+        return comp;
+    }
+
+    public AnchorPoint getFirstAnchor() {
+        return activeSubPath.getFirstAnchor();
+    }
+
+    public AnchorPoint getLastAnchor() {
+        return activeSubPath.getLastAnchor();
+    }
+
+    public AnchorPoint addMovingPointAsAnchor() {
+        return activeSubPath.addMovingPointAsAnchor();
+    }
+
+    public MovingPoint getMovingPoint() {
+        return activeSubPath.getMovingPoint();
+    }
+
+    public void setMovingPointLocation(double x, double y, boolean nullOK) {
+        activeSubPath.setMovingPointLocation(x, y, nullOK);
+    }
+
+    public boolean hasMovingPoint() {
+        return activeSubPath.hasMovingPoint();
+    }
+
+    public int getNumSubpaths() {
+        return subPaths.size();
+    }
+
+    public SubPath getSubPath(int index) {
+        return subPaths.get(index);
+    }
+
+    public void printDebugInfo() {
+        checkConsistency();
+        System.out.println("Path " + this);
+        for (SubPath sp : subPaths) {
+            if (sp.isClosed()) {
+                System.out.println("New closed subpath " + sp.getId());
+            } else {
+                System.out.println("New unclosed subpath" + sp.getId());
+            }
+
+            sp.printDebugInfo();
+        }
+    }
+
+    /**
+     * Checks whether all the objects are wired together correctly
+     */
+    @SuppressWarnings("SameReturnValue")
+    public boolean checkConsistency() {
+        for (SubPath subPath : subPaths) {
+            if (subPath.getPath() != this) {
+                throw new IllegalStateException("wrong parent in subpath " + subPath);
+            }
+            if (subPath.getComp() != comp) {
+                throw new IllegalStateException("wrong comp in subpath " + subPath);
+            }
+
+            subPath.checkConsistency();
+        }
+        return true;
     }
 
     @Override

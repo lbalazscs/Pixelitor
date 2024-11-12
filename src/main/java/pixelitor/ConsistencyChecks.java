@@ -240,7 +240,7 @@ public final class ConsistencyChecks {
         int numLayers = parent.getNumLayers();
         if (enabled) {
             int minValue = 2;
-            if (parent.allowsZeroLayers()) {
+            if (parent.canBeEmpty()) {
                 minValue = 1;
             }
             if (numLayers < minValue) {
@@ -250,7 +250,7 @@ public final class ConsistencyChecks {
             }
         } else { // disabled
             int maxValue = 1;
-            if (parent.allowsZeroLayers()) {
+            if (parent.canBeEmpty()) {
                 maxValue = 0;
             }
             if (numLayers > maxValue) {

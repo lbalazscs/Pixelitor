@@ -230,16 +230,16 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    protected void toolStarted() {
-        super.toolStarted();
+    protected void toolActivated() {
+        super.toolActivated();
         if (freeTransformCheckBox.isSelected()) {
             createTransformBox();
         }
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
+    protected void toolDeactivated() {
+        super.toolDeactivated();
         transformBox = null;
     }
 

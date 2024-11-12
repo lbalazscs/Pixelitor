@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,10 @@ import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
@@ -55,7 +58,7 @@ class IntChoiceParamTest {
         var param = new IntChoiceParam("Test", new Item[]{v1, v2});
 
         assertThat(param)
-            .isDefault()
+            .isAtDefaultValue()
             .valueIs(1)
             .selectedAsStringIs("Item 1");
 
@@ -64,7 +67,7 @@ class IntChoiceParamTest {
 
         param.setSelectedItem(v1, true);
         assertThat(param)
-            .isDefault()
+            .isAtDefaultValue()
             .valueIs(1)
             .selectedAsStringIs("Item 1");
         // expect no triggering because the value didn't change
@@ -72,7 +75,7 @@ class IntChoiceParamTest {
 
         param.setSelectedItem(v2, true);
         assertThat(param)
-            .isNotSetToDefault()
+            .isNotAtDefaultValue()
             .valueIs(2)
             .selectedAsStringIs("Item 2");
         // expect one triggering
@@ -80,7 +83,7 @@ class IntChoiceParamTest {
 
         param.setSelectedItem(v1, false);
         assertThat(param)
-            .isDefault()
+            .isAtDefaultValue()
             .valueIs(1)
             .selectedAsStringIs("Item 1");
         // expect no new triggering, because triggering was set to false

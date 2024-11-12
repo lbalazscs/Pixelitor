@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,23 +20,24 @@ package pixelitor.tools;
 import java.awt.event.MouseEvent;
 
 /**
- * Whether we simulate the pressing of the
- * left or right mouse button during testing
+ * Represents which mouse button is being simulated in a {@link MouseEvent}.
  */
 public enum MouseButton implements EventMaskModifier {
-    LEFT {
-        @Override
-        public int modify(int in) {
-            in |= MouseEvent.BUTTON1_DOWN_MASK;
+    LEFT(MouseEvent.BUTTON1_DOWN_MASK),
+    RIGHT(MouseEvent.BUTTON3_DOWN_MASK);
 
-            return in;
-        }
-    }, RIGHT {
-        @Override
-        public int modify(int in) {
-            in |= MouseEvent.BUTTON3_DOWN_MASK;
+    private final int buttonMask;
 
-            return in;
-        }
+    MouseButton(int buttonMask) {
+        this.buttonMask = buttonMask;
+    }
+
+    @Override
+    public int modify(int currentMask) {
+        return currentMask | buttonMask;
+    }
+
+    public boolean isRightButton() {
+        return this == RIGHT;
     }
 }

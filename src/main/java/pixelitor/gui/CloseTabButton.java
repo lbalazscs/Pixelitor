@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,8 @@ import static javax.swing.BorderFactory.createEtchedBorder;
  * The close button of the tabs in {@link TabsUI}
  */
 class CloseTabButton extends JButton {
-    private static final MouseListener buttonMouseListener = new MouseAdapter() {
+    // shared mouse listener to handle hover effects for all instances
+    private static final MouseListener hoverMouseListener = new MouseAdapter() {
         @Override
         public void mouseEntered(MouseEvent e) {
             ((CloseTabButton) e.getComponent()).setBorderPainted(true);
@@ -45,8 +46,9 @@ class CloseTabButton extends JButton {
             ((CloseTabButton) e.getComponent()).setBorderPainted(false);
         }
     };
-    private static final int MARGIN = 5;
-    private static final int SIZE = 17;
+
+    private static final int MARGIN = 5; // margin around the 'X' symbol
+    private static final int SIZE = 17;  // button size (width & height)
 
     CloseTabButton(TabViewContainer tab) {
         setPreferredSize(new Dimension(SIZE, SIZE));
@@ -56,32 +58,36 @@ class CloseTabButton extends JButton {
         setFocusable(false);
         setBorder(createEtchedBorder());
         setBorderPainted(false);
-        addMouseListener(buttonMouseListener);
+        addMouseListener(hoverMouseListener);
         setRolloverEnabled(true);
         addActionListener(e -> TabsUI.warnAndCloseTab(tab));
     }
 
     @Override
     public void updateUI() {
+        // empty to prevent UI updates from resetting custom button styling
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g2.setStroke(new BasicStroke(2));
+
         if (getModel().isRollover()) {
-            g2.setColor(Color.RED);
+            g2.setColor(Color.RED); // highlighted color on hover
         } else {
-            if (Themes.getCurrent().isDark()) {
-                g2.setColor(Themes.LIGHT_ICON_COLOR);
-            } else {
-                g2.setColor(Color.BLACK);
-            }
+            g2.setColor(Themes.getCurrent().isDark()
+                ? Themes.LIGHT_ICON_COLOR
+                : Color.BLACK);
         }
+
+        // draw an x
         g2.drawLine(MARGIN, MARGIN, SIZE - MARGIN - 1, SIZE - MARGIN - 1);
         g2.drawLine(SIZE - MARGIN - 1, MARGIN, MARGIN, SIZE - MARGIN - 1);
+
         g2.dispose();
     }
 }

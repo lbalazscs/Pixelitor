@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,14 +23,11 @@ import pixelitor.gui.WorkSpace;
 import javax.swing.*;
 
 /**
- * The {@link Action} that either shows or hides the status bar,
- * depending on the current visibility
+ * The {@link Action} that toggles the visibility of the status bar.
  */
 public class ShowHideStatusBarAction extends ShowHideAction {
-    public static final ShowHideAction INSTANCE = new ShowHideStatusBarAction();
-
-    private ShowHideStatusBarAction() {
-        super("Show Status Bar", "Hide Status Bar");
+    public ShowHideStatusBarAction(WorkSpace workSpace) {
+        super("Show Status Bar", "Hide Status Bar", workSpace);
     }
 
     @Override
@@ -40,11 +37,11 @@ public class ShowHideStatusBarAction extends ShowHideAction {
 
     @Override
     public boolean getStartupVisibility() {
-        return WorkSpace.getStatusBarVisibility();
+        return workSpace.isStatusBarVisible();
     }
 
     @Override
     public void setVisibility(boolean value) {
-        WorkSpace.setStatusBarVisibility(value, true);
+        workSpace.setStatusBarVisible(value, true);
     }
 }

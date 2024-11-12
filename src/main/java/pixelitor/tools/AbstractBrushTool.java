@@ -323,9 +323,9 @@ public abstract class AbstractBrushTool extends Tool {
     private void startOutlinePainting(View view) {
         Point mousePos = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mousePos, view);
-        Rectangle visiblePart = view.getVisiblePart();
-        if (visiblePart != null) {
-            if (visiblePart.contains(mousePos)) {
+        Rectangle visibleRegion = view.getVisibleRegion();
+        if (visibleRegion != null) {
+            if (visibleRegion.contains(mousePos)) {
                 startOutlinePaintingAt(mousePos.x, mousePos.y, view);
             }
         } else if (!AppMode.isUnitTesting()) {
@@ -435,8 +435,8 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    protected void toolStarted() {
-        super.toolStarted();
+    protected void toolActivated() {
+        super.toolActivated();
         resetInitialState();
 
         View view = Views.getActive();
@@ -450,8 +450,8 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
+    protected void toolDeactivated() {
+        super.toolDeactivated();
 
         View view = Views.getActive();
         if (view != null) {
@@ -761,7 +761,7 @@ public abstract class AbstractBrushTool extends Tool {
                 return;
             }
             double radiusBefore = coRadius;
-            coRadius = view.getScaling() * imRadius;
+            coRadius = view.getZoomScale() * imRadius;
             if (radiusBefore != coRadius) {
                 coDiameter = 2 * coRadius;
                 invalidateCache();

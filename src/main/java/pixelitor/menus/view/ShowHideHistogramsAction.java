@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,14 +22,11 @@ import pixelitor.gui.WorkSpace;
 import javax.swing.*;
 
 /**
- * The {@link Action} that either shows or hides the histogram,
- * depending on the current visibility
+ * The {@link Action} that toggles the visibility of the histograms.
  */
 public class ShowHideHistogramsAction extends ShowHideAction {
-    public static final ShowHideAction INSTANCE = new ShowHideHistogramsAction();
-
-    private ShowHideHistogramsAction() {
-        super("Show Histograms", "Hide Histograms");
+    public ShowHideHistogramsAction(WorkSpace workSpace) {
+        super("Show Histograms", "Hide Histograms", workSpace);
     }
 
     @Override
@@ -39,11 +36,11 @@ public class ShowHideHistogramsAction extends ShowHideAction {
 
     @Override
     public boolean getStartupVisibility() {
-        return WorkSpace.getHistogramsVisibility();
+        return workSpace.areHistogramsVisible();
     }
 
     @Override
     public void setVisibility(boolean value) {
-        WorkSpace.setHistogramsVisibility(value, true);
+        workSpace.setHistogramsVisible(value, true);
     }
 }

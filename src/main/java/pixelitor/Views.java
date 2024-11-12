@@ -218,7 +218,7 @@ public class Views {
     }
 
     public static void repaintVisible() {
-        if (ImageArea.currentModeIs(FRAMES)) {
+        if (ImageArea.isCurrentMode(FRAMES)) {
             repaintAll();
         } else {
             activeView.repaint();

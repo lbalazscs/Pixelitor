@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,7 +69,7 @@ public class RotationHandle extends DraggablePoint {
     @Override
     public void mousePressed(double x, double y) {
         super.mousePressed(x, y); // sets dragStartX, dragStartY
-        recalcCenter();
+        updateCenter();
 
         // recalculate because a flipping might have occurred
         rotStartAngle = Math.atan2(this.y - cy, this.x - cx) + Math.PI / 2;
@@ -82,7 +82,7 @@ public class RotationHandle extends DraggablePoint {
         double newX = origX + dx;
         double newY = origY + dy;
 
-        double angle = reCalcAngle(newX, newY, false);
+        double angle = recalcAngle(newX, newY, false);
 
         box.coTransform(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
         box.setRotated(true);
@@ -95,16 +95,16 @@ public class RotationHandle extends DraggablePoint {
         box.updateDirections();
     }
 
-    public double reCalcAngle(double newX, double newY, boolean recalcCenter) {
-        if (recalcCenter) {
-            recalcCenter();
+    public double recalcAngle(double newX, double newY, boolean updateCenter) {
+        if (updateCenter) {
+            updateCenter();
         }
         double angle = Math.atan2(newY - cy, newX - cx) + Math.PI / 2;
         box.setAngle(angle);
         return angle;
     }
 
-    private void recalcCenter() {
+    private void updateCenter() {
         Point2D c = box.getCenter();
         cx = c.getX();
         cy = c.getY();
@@ -117,7 +117,7 @@ public class RotationHandle extends DraggablePoint {
             int displayBgWidth = DragDisplay.BG_WIDTH_ANGLE;
             DragDisplay dd = new DragDisplay(g, displayBgWidth);
             int dragAngle = box.getAngleDegrees();
-            String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
+            String angleInfo = "∡ = " + dragAngle + " °";
 
             double sin = box.getSin();
             double cos = box.getCos();

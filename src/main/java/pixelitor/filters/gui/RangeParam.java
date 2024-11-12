@@ -346,6 +346,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         // not used
     }
 
+    // using a ChangeListener instead of the ParamAdjustmentListener
+    // results in continuous updates while the slider is dragged
     @Override
     public void addChangeListener(ChangeListener x) {
         assert x != null;

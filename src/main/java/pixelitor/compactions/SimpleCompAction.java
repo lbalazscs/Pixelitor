@@ -54,7 +54,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
 
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
-        if (srcComp.containsLayerWithClass(SmartObject.class)) {
+        if (srcComp.containsLayerOfType(SmartObject.class)) {
             Messages.showSmartObjectUnsupportedWarning(getText());
             return CompletableFuture.completedFuture(srcComp);
         }

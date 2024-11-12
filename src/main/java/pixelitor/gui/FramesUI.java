@@ -30,8 +30,8 @@ import java.util.List;
  * where the edited images are in internal frames
  */
 public final class FramesUI extends JDesktopPane implements ImageAreaUI {
-    private static final int CASCADE_HORIZONTAL_SHIFT = 15;
-    private static final int CASCADE_VERTICAL_SHIFT = 25;
+    private static final int CASCADE_OFFSET_X = 15;
+    private static final int CASCADE_OFFSET_Y = 25;
 
     private static int cascadeCount = 0;
 
@@ -47,14 +47,14 @@ public final class FramesUI extends JDesktopPane implements ImageAreaUI {
 
     @Override
     public void addView(View view) {
-        int locX = CASCADE_HORIZONTAL_SHIFT * cascadeCount;
-        int locY = CASCADE_VERTICAL_SHIFT * cascadeCount;
-
-        int maxWidth = getWidth() - CASCADE_HORIZONTAL_SHIFT;
-        locX %= maxWidth;
-
-        int maxHeight = getHeight() - CASCADE_VERTICAL_SHIFT;
-        locY %= maxHeight;
+        // calculate the location of the next frame
+        int locX = CASCADE_OFFSET_X * cascadeCount;
+        int locY = CASCADE_OFFSET_Y * cascadeCount;
+        int availableWidth = getWidth() - CASCADE_OFFSET_X;
+        int availableHeight = getHeight() - CASCADE_OFFSET_Y;
+        // wrap coordinates to keep frames within visible area
+        locX %= availableWidth;
+        locY %= availableHeight;
 
         ImageFrame frame = new ImageFrame(view, locX, locY);
         view.setViewContainer(frame);
@@ -75,25 +75,25 @@ public final class FramesUI extends JDesktopPane implements ImageAreaUI {
 
     public void cascadeWindows() {
         if (Views.getNumViews() == 0) {
-            Dialogs.showInfoDialog(this, "No open windows",
-                "There are no open internal windows to cascade.");
+            showNoViewsDialog("cascade");
             return;
         }
         List<View> views = Views.getAll();
         int locX = 0;
         int locY = 0;
+
         for (View view : views) {
             ImageFrame frame = (ImageFrame) view.getViewContainer();
             frame.setLocation(locX, locY);
             frame.setToCanvasSize();
             ensureNormalDisplay(frame);
 
-            locX += CASCADE_HORIZONTAL_SHIFT;
-            locY += CASCADE_VERTICAL_SHIFT;
+            locX += CASCADE_OFFSET_X;
+            locY += CASCADE_OFFSET_Y;
 
             // wrap
-            int maxWidth = getWidth() - CASCADE_HORIZONTAL_SHIFT;
-            int maxHeight = getHeight() - CASCADE_VERTICAL_SHIFT;
+            int maxWidth = getWidth() - CASCADE_OFFSET_X;
+            int maxHeight = getHeight() - CASCADE_OFFSET_Y;
 
             if (locX > maxWidth) {
                 locX = 0;
@@ -107,8 +107,7 @@ public final class FramesUI extends JDesktopPane implements ImageAreaUI {
     public void tileWindows() {
         int numWindows = Views.getNumViews();
         if (numWindows == 0) {
-            Dialogs.showInfoDialog(this, "No open windows",
-                "There are no open internal windows to tile.");
+            showNoViewsDialog("tile");
             return;
         }
 
@@ -138,6 +137,11 @@ public final class FramesUI extends JDesktopPane implements ImageAreaUI {
                 }
             }
         }
+    }
+
+    private void showNoViewsDialog(String action) {
+        Dialogs.showInfoDialog(this, "No Open Images",
+            "There are no open images to " + action + ".");
     }
 
     // ensure that the given frame is neither iconified nor maximized

@@ -69,7 +69,7 @@ public class Crop implements CompAction {
 
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
-        if (srcComp.containsLayerWithClass(SmartObject.class)) {
+        if (srcComp.containsLayerOfType(SmartObject.class)) {
             Messages.showSmartObjectUnsupportedWarning("Cropping");
             return CompletableFuture.completedFuture(srcComp);
         }

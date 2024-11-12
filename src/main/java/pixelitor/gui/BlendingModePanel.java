@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,22 +32,24 @@ import static java.awt.FlowLayout.LEFT;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * A GUI for setting the opacity and blending mode.
+ * A panel for configuring opacity and blending mode settings.
  */
 public class BlendingModePanel extends JPanel {
     private static final String OPACITY_LABEL_TEXT = i18n("opacity") + ":";
 
-    // the value above which the opacity is considered fully opaque
-    public static final float CRITICAL_OPACITY = 0.999f;
+    // threshold above which opacity is considered fully opaque
+    public static final float FULLY_OPAQUE_THRESHOLD = 0.999f;
 
     protected final DropDownSlider opacityDDSlider;
     protected final JComboBox<BlendingMode> bmCombo;
     private final JLabel opacityLabel;
     private final JLabel bmLabel;
 
+    // the available blending modes when editing a layer (as opposed
+    // to a layer group, which has an extra "Pass Through" blending mode)
     protected final ComboBoxModel<BlendingMode> layerModel;
 
-    public BlendingModePanel(boolean longForm) {
+    public BlendingModePanel(boolean detailedLabel) {
         super(new FlowLayout(LEFT));
         opacityLabel = new JLabel(OPACITY_LABEL_TEXT);
         add(opacityLabel);
@@ -55,7 +57,7 @@ public class BlendingModePanel extends JPanel {
 
         add(opacityDDSlider);
 
-        if (longForm) {
+        if (detailedLabel) {
             bmLabel = new JLabel("%, Blending Mode:", SwingConstants.LEFT);
         } else {
             bmLabel = new JLabel("%", SwingConstants.LEFT);
@@ -122,7 +124,7 @@ public class BlendingModePanel extends JPanel {
 
     public boolean isNormalAndOpaque() {
         return getBlendingMode() == BlendingMode.NORMAL
-            && getOpacity() > CRITICAL_OPACITY;
+            && getOpacity() > FULLY_OPAQUE_THRESHOLD;
     }
 
     public void saveStateTo(UserPreset preset) {

@@ -329,7 +329,7 @@ public class TestHelper {
         when(view.componentYToImageSpace(anyDouble())).then(returnsFirstArg());
         when(view.imageXToComponentSpace(anyDouble())).then(returnsFirstArg());
         when(view.imageYToComponentSpace(anyDouble())).then(returnsFirstArg());
-        when(view.getScaling()).thenReturn(1.0);
+        when(view.getZoomScale()).thenReturn(1.0);
         when(view.getLocationOnScreen()).thenReturn(new Point(0, 0));
 
         Cursor cursor = Cursor.getDefaultCursor();

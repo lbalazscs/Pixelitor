@@ -68,8 +68,8 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void toolStarted() {
-        super.toolStarted();
+    protected void toolActivated() {
+        super.toolActivated();
 
         var activeLayer = Views.getActiveLayer();
         if (activeLayer != null) {

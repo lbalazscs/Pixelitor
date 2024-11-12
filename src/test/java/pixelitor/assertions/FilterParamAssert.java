@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,26 +30,82 @@ public class FilterParamAssert<S extends FilterParamAssert<S, T>, T extends Filt
         super(actual, selfType);
     }
 
-    public S nameIs(String name) {
+    public S hasName(String name) {
         isNotNull();
 
-        assertThat(actual.getName()).isEqualTo(name);
+        assertThat(actual.getName())
+            .as("name")
+            .isEqualTo(name);
 
         return myself;
     }
 
-    public S isDefault() {
+    public S isAtDefaultValue() {
         isNotNull();
 
-        assertThat(actual.hasDefault()).isTrue();
+        assertThat(actual.hasDefault())
+            .as("default state")
+            .isTrue();
 
         return myself;
     }
 
-    public S isNotSetToDefault() {
+    public S isNotAtDefaultValue() {
         isNotNull();
 
-        assertThat(actual.hasDefault()).isFalse();
+        assertThat(actual.hasDefault())
+            .as("non-default state")
+            .isFalse();
+
+        return myself;
+    }
+
+    public S shouldRandomize() {
+        isNotNull();
+
+        assertThat(actual.shouldRandomize())
+            .as("randomize")
+            .isTrue();
+
+        return myself;
+    }
+
+    public S shouldNotRandomize() {
+        isNotNull();
+
+        assertThat(actual.shouldRandomize())
+            .as("ignore randomize")
+            .isFalse();
+
+        return myself;
+    }
+
+    public S isEnabled() {
+        isNotNull();
+
+        assertThat(actual.isEnabled())
+            .as("enabled")
+            .isTrue();
+
+        return myself;
+    }
+
+    public S isDisabled() {
+        isNotNull();
+
+        assertThat(actual.isEnabled())
+            .as("disabled")
+            .isFalse();
+
+        return myself;
+    }
+
+    public S hasValue(Object expectedValue) {
+        isNotNull();
+
+        assertThat(actual.getParamValue())
+            .as("value")
+            .isEqualTo(expectedValue);
 
         return myself;
     }

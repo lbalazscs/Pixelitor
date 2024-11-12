@@ -53,7 +53,7 @@ import static pixelitor.utils.Texts.i18n;
  * The GUI for the preferences dialog
  */
 public class PreferencesPanel extends JTabbedPane {
-    private static final Border EMPTY_BORDER =
+    private static final Border PANEL_PADDING =
         BorderFactory.createEmptyBorder(5, 10, 5, 0);
     private static final String UNDO_LEVELS_LABEL = "Minimum Undo/Redo Levels";
     private static final String IMAGEMAGICK_FOLDER_LABEL = "ImageMagick 7 Folder";
@@ -69,8 +69,7 @@ public class PreferencesPanel extends JTabbedPane {
     private JCheckBox nativeChoosersCB;
     private JCheckBox experimentalCB;
 
-    // the panel is re-created every time, but the last selected tab
-    // should be selected automatically the next time
+    // persists the last selected tab between dialog instances
     private static int lastSelectedTabIndex = 0;
 
     private PreferencesPanel() {
@@ -94,7 +93,7 @@ public class PreferencesPanel extends JTabbedPane {
         addImageAreaChooser(gbh);
         addThumbSizeChooser(gbh);
 
-        uiPanel.setBorder(EMPTY_BORDER);
+        uiPanel.setBorder(PANEL_PADDING);
         return uiPanel;
     }
 
@@ -255,7 +254,7 @@ public class PreferencesPanel extends JTabbedPane {
         snapCB.setToolTipText("Snap vector tools to the pixel grid");
         gbh.addLabelAndControl("Snap Vector Tools to Pixels:", snapCB);
 
-        mousePanel.setBorder(EMPTY_BORDER);
+        mousePanel.setBorder(PANEL_PADDING);
         return mousePanel;
     }
 
@@ -264,7 +263,7 @@ public class PreferencesPanel extends JTabbedPane {
         var gbh = new GridBagHelper(guidesPanel);
         configureGuidesSettings(gbh);
         configureCropGuidesSettings(gbh);
-        guidesPanel.setBorder(EMPTY_BORDER);
+        guidesPanel.setBorder(PANEL_PADDING);
         return guidesPanel;
     }
 
@@ -322,7 +321,7 @@ public class PreferencesPanel extends JTabbedPane {
         addGmicDirField(gbh);
         addExperimentalCB(gbh);
 
-        advancedPanel.setBorder(EMPTY_BORDER);
+        advancedPanel.setBorder(PANEL_PADDING);
         return advancedPanel;
     }
 

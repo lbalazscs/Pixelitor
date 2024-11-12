@@ -56,7 +56,7 @@ class PenToolTest {
 
         view = comp.getView(); // a mock view
         PenTool.path = null;
-        Tools.PEN.startBuilding(false);
+        Tools.PEN.activateMode(BUILD, false);
         assertThat(Tools.PEN)
             .isActive()
             .hasNoPath()
@@ -93,7 +93,7 @@ class PenToolTest {
     @DisplayName("convert path to selection (edit mode)")
     void convertEditPathToSelection() {
         createSimpleClosedPathInBuildMode();
-        Tools.PEN.startMode(EDIT, false);
+        Tools.PEN.activateMode(EDIT, false);
         assertThat(Tools.PEN)
             .isActive()
             .isConsistent()
@@ -157,7 +157,7 @@ class PenToolTest {
     @DisplayName("undo an edit-mode change in build-mode")
     void undoEditModeChangeInBuildMode() {
         // create a 2-point path in build mode
-        Tools.PEN.startBuilding(false);
+        Tools.PEN.activateMode(BUILD, false);
         click(100, 100);
         click(200, 100);
 
@@ -168,7 +168,7 @@ class PenToolTest {
         assertThat(firstAnchor).isAt(100, 100);
 
         // switch to edit mode
-        Tools.PEN.startMode(EDIT, false);
+        Tools.PEN.activateMode(EDIT, false);
         assertThat(Tools.PEN)
             .hasPath()
             .isConsistent()
@@ -180,7 +180,7 @@ class PenToolTest {
         assertThat(firstAnchor).isAt(100, 200);
 
         // switch back to build mode
-        Tools.PEN.startBuilding(false);
+        Tools.PEN.activateMode(BUILD, false);
         assertThat(Tools.PEN)
             .hasPath()
             .isConsistent()
@@ -202,7 +202,7 @@ class PenToolTest {
         SubPath sp = createSimpleClosedPathInBuildMode();
 
         // switch to edit mode
-        Tools.PEN.startMode(EDIT, false);
+        Tools.PEN.activateMode(EDIT, false);
         assertThat(Tools.PEN)
             .hasPath()
             .isConsistent()
@@ -270,7 +270,7 @@ class PenToolTest {
         History.assertNumEditsIs(0);
 
         Tools.PEN.setPath(path);
-        Tools.PEN.startMode(EDIT, false);
+        Tools.PEN.activateMode(EDIT, false);
 
         assertThat(Tools.PEN)
             .pathIs(path)
@@ -290,8 +290,8 @@ class PenToolTest {
             .isConsistent();
 
         // go to build mode and back to edit - should have no effect
-        Tools.PEN.startBuilding(false);
-        Tools.PEN.startMode(EDIT, false);
+        Tools.PEN.activateMode(BUILD, false);
+        Tools.PEN.activateMode(EDIT, false);
 
         undo("Delete Subpath");
         assertThat(PenTool.path).numSubPathsIs(2);
@@ -331,7 +331,7 @@ class PenToolTest {
             .isConsistent()
             .pathActionAreNotEnabled();
 
-        Tools.PEN.startBuilding(false);
+        Tools.PEN.activateMode(BUILD, false);
 
         // add first anchor point
         click(100, 100);

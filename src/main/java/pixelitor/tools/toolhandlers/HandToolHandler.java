@@ -45,7 +45,7 @@ public class HandToolHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        if (PanMethod.CURRENT.initPan(e)) {
+        if (PanMethod.CURRENT.shouldStartPan(e)) {
             panning = true; // necessary in unit tests
 
             Tools.HAND.mousePressed(e);
@@ -89,7 +89,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     public void spacePressed() {
-        if (PanMethod.ignoreSpace()) {
+        if (PanMethod.shouldIgnoreSpace()) {
             return;
         }
         if (!panning) { // this is called all the time while the space is held down
@@ -101,7 +101,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     public void spaceReleased() {
-        if (PanMethod.ignoreSpace()) {
+        if (PanMethod.shouldIgnoreSpace()) {
             return;
         }
         panning = false;

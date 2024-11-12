@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.io.Serial;
 import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXEL;
 
 /**
- * The common functionality of corner and edge handles
+ * The common functionality of corner and edge handles in a {@link TransformBox}.
  */
 public abstract class PositionHandle extends DraggablePoint {
     @Serial
