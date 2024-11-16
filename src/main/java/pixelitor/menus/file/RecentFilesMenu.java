@@ -18,7 +18,6 @@
 package pixelitor.menus.file;
 
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.BoundedUniqueList;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;

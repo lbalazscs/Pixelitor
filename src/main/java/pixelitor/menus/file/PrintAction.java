@@ -41,96 +41,104 @@ import static pixelitor.utils.Threads.onIOThread;
 
 public class PrintAction extends OpenViewEnabledAction.Checked implements Printable {
     private static final float DPI = 72.0f;
-    private static final float MARGIN_INCHES = 0.25f;
-    private final ResourceBundle texts;
+    private static final float PAGE_MARGIN_INCHES = 0.25f;
+    private final ResourceBundle resourceBundle;
 
-    private BufferedImage img;
+    private BufferedImage printedImage;
     private String compName;
-    private PageFormat page;
+    private PageFormat pageFormat;
 
-    public PrintAction(ResourceBundle texts) {
-        super(texts.getString("print") + "...");
-        this.texts = texts;
+    public PrintAction(ResourceBundle resourceBundle) {
+        super(resourceBundle.getString("print") + "...");
+        this.resourceBundle = resourceBundle;
     }
 
     @Override
     protected void onClick(Composition comp) {
-        // The printed image will be the image at the start,
-        // although it is editable during the asynchronous printing
-        img = comp.getCompositeImage();
+        // Capture the current composition image and name.
+        // This image will be printed even if the composition is
+        // changed during the asynchronous printing.
+        printedImage = comp.getCompositeImage();
         compName = comp.getName();
 
-        showPreview();
+        showPrintPreview();
     }
 
-    private void showPreview() {
+    private void showPrintPreview() {
         PrinterJob job = PrinterJob.getPrinterJob();
-        page = createDefaultPageFormat(job, img);
+        pageFormat = createDefaultPageFormat(job, printedImage);
 
         JPanel previewContainer = createPreviewContainer(job);
 
         new DialogBuilder()
-            .title(texts.getString("print_preview"))
+            .title(resourceBundle.getString("print_preview"))
             .content(previewContainer)
-            .okText(texts.getString("print") + "...")
+            .okText(resourceBundle.getString("print") + "...")
             .okAction(() -> previewAccepted(job))
             .show();
     }
 
     private JPanel createPreviewContainer(PrinterJob job) {
         JPanel previewContainer = new JPanel(new BorderLayout());
-        PrintPreviewPanel previewPanel = new PrintPreviewPanel(page, this);
+        PrintPreviewPanel previewPanel = new PrintPreviewPanel(pageFormat, this);
+        
         JButton setupPageButton = new JButton("Setup Page...");
-        setupPageButton.addActionListener(e -> setupPageClicked(job, previewPanel));
+        setupPageButton.addActionListener(e -> showPageSetupDialog(job, previewPanel));
         JPanel northPanel = new JPanel();
         northPanel.add(setupPageButton);
+
         previewContainer.add(northPanel, BorderLayout.NORTH);
         previewContainer.add(previewPanel, BorderLayout.CENTER);
         return previewContainer;
     }
 
-    private void setupPageClicked(PrinterJob job, PrintPreviewPanel previewPanel) {
-        PageFormat newPage = job.pageDialog(pageToAttributes(page));
+    private void showPageSetupDialog(PrinterJob job, PrintPreviewPanel previewPanel) {
+        PageFormat newPage = job.pageDialog(pageToAttributes(pageFormat));
         if (newPage != null) { // null if the dialog is canceled
-            page = newPage;
-            previewPanel.updatePage(page);
+            pageFormat = newPage;
+            previewPanel.updatePage(pageFormat);
         }
     }
 
     private static PageFormat createDefaultPageFormat(PrinterJob job, BufferedImage img) {
-        PageFormat page = job.defaultPage();
-        if (img.getWidth() > img.getHeight()) {
-            page.setOrientation(PageFormat.LANDSCAPE);
-        } else {
-            page.setOrientation(PageFormat.PORTRAIT);
-        }
-        Paper paper = page.getPaper();
+        PageFormat format = job.defaultPage();
+        format.setOrientation(img.getWidth() > img.getHeight() ?
+            PageFormat.LANDSCAPE : PageFormat.PORTRAIT);
+        Paper paper = format.getPaper();
 
-        float margin = MARGIN_INCHES * DPI;
-        paper.setImageableArea(margin, margin,
-            paper.getWidth() - 2 * margin, paper.getHeight() - 2 * margin);
-        page.setPaper(paper);
+        float marginInDots = PAGE_MARGIN_INCHES * DPI;
+        paper.setImageableArea(
+            marginInDots,
+            marginInDots,
+            paper.getWidth() - 2 * marginInDots,
+            paper.getHeight() - 2 * marginInDots);
+        format.setPaper(paper);
 
-        return page;
+        return format;
     }
 
     private void previewAccepted(PrinterJob job) {
-        PrintRequestAttributeSet attributes = pageToAttributes(page);
+        PrintRequestAttributeSet attributes = pageToAttributes(pageFormat);
         attributes.add(new PageRanges(1, 1));
         attributes.add(new JobName("Pixelitor " + compName, Locale.ENGLISH));
 
-        boolean doPrint = job.printDialog(attributes);
-        if (doPrint) {
-            var progressHandler = Messages.startProgress(
-                "Printing " + compName, -1);
-            CompletableFuture.supplyAsync(() -> runPrintJob(job), onIOThread)
-                .thenAcceptAsync(printingFinished -> {
-                    progressHandler.stopProgress();
-                    if (!printingFinished) {
-                        Messages.showStatusMessage("Printing was cancelled.");
-                    }
-                }, onEDT);
+        boolean diagogAccepted = job.printDialog(attributes);
+        if (diagogAccepted) {
+            startAsyncPrinting(job);
         }
+    }
+
+    private void startAsyncPrinting(PrinterJob job) {
+        var progressHandler = Messages.startProgress(
+            "Printing " + compName, -1);
+
+        CompletableFuture.supplyAsync(() -> executePrintJob(job), onIOThread)
+            .thenAcceptAsync(printingCompleted -> {
+                progressHandler.stopProgress();
+                if (!printingCompleted) {
+                    Messages.showStatusMessage("Printing was cancelled.");
+                }
+            }, onEDT);
     }
 
     // Converts a PageFormat into a PrintRequestAttributeSet
@@ -162,14 +170,14 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
         return attributes;
     }
 
-    private boolean runPrintJob(PrinterJob job) {
+    private boolean executePrintJob(PrinterJob job) {
         try {
             Book book = new Book();
-            book.append(this, page);
+            book.append(this, pageFormat);
             job.setPageable(book);
             job.print();
         } catch (PrinterAbortException e) {
-            // This only means that the printing was aborted at the OS level.
+            // user cancelled printing at the OS level
             return false;
         } catch (PrinterException e) {
             Messages.showException(e);
@@ -179,8 +187,8 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
     }
 
     @Override
-    public int print(Graphics g, PageFormat pf, int page) {
-        if (page > 0) {
+    public int print(Graphics g, PageFormat pf, int pageIndex) {
+        if (pageIndex > 0) {
             return NO_SUCH_PAGE;
         }
 
@@ -191,15 +199,16 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
         // while maintaining the aspect ratio.
         double pageWidth = pf.getImageableWidth();
         double pageHeight = pf.getImageableHeight();
-        double imageWidth = img.getWidth();
-        double imageHeight = img.getHeight();
+        double imageWidth = printedImage.getWidth();
+        double imageHeight = printedImage.getHeight();
+
         double scaleX = pageWidth / imageWidth;
         double scaleY = pageHeight / imageHeight;
         double scale = Math.min(scaleX, scaleY);
-        int actualWidth = (int) (imageWidth * scale);
-        int actualHeight = (int) (imageHeight * scale);
+        int scaledWidth = (int) (imageWidth * scale);
+        int scaledHeight = (int) (imageHeight * scale);
 
-        g.drawImage(img, 0, 0, actualWidth, actualHeight, null);
+        g.drawImage(printedImage, 0, 0, scaledWidth, scaledHeight, null);
 
         return PAGE_EXISTS;
     }

@@ -76,11 +76,10 @@ public class DeleteActiveLayerAction extends PAction
     }
 
     private void enableDisable(LayerHolder holder, int layerCount) {
-        if (holder.canBeEmpty()) {
-            setEnabled(layerCount > 0);
-        } else {
-            setEnabled(layerCount > 1);
-        }
+        boolean shouldBeEnabled = holder.canBeEmpty()
+            ? layerCount > 0
+            : layerCount > 1;
+        setEnabled(shouldBeEnabled);
     }
 
     @Override

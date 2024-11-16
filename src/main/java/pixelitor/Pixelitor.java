@@ -42,6 +42,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -52,10 +53,10 @@ import static pixelitor.utils.Threads.onIOThread;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * The main class
+ * The main enty point for the app.
  */
 public class Pixelitor {
-    public static final String VERSION_NUMBER = "4.3.1";
+    public static final String VERSION = "4.3.1";
     public static Locale SYS_LOCALE;
 
     private Pixelitor() {
@@ -63,23 +64,43 @@ public class Pixelitor {
     }
 
     public static void main(String[] args) {
+        initExceptionHandling();
+        initAppMode();
+        configureLanguage();
+        setupSystemProperties();
+        launchGUI(args);
+        mainThreadInit();
+    }
+
+    // register a global exception handler
+    private static void initExceptionHandling() {
+        ExceptionHandler.INSTANCE.addHandler((thread, exception) ->
+            Messages.showException(exception, thread));
+    }
+
+    private static void initAppMode() {
         // the app can be put into development mode by
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
             Utils.ensureAssertionsEnabled();
             AppMode.CURRENT = AppMode.DEVELOPMENT_GUI;
         }
+    }
 
-        // Force using English locale, because using the default system
-        // settings leads to mixed-language problems (see issue #35),
-        // but keep the system locale for number formatting
+    private static void configureLanguage() {
+        // Store system locale for number formatting
         SYS_LOCALE = Locale.getDefault();
-        String sysLangCode = SYS_LOCALE.getLanguage();
-        if (!Language.isCodeSupported(sysLangCode)) { // except if supported
+
+        if (!Language.isSupported(SYS_LOCALE.getLanguage())) {
+            // if a language is not supported yet, then set English
+            // in order to avoid mixed-language problems (see issue #35)
             Locale.setDefault(Locale.US);
         }
-        Language.load();
 
+        Language.load(); // this also sets the locale for the language
+    }
+
+    private static void setupSystemProperties() {
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 
 //        System.setProperty("sun.java2d.uiScale", "1.5");
@@ -94,9 +115,9 @@ public class Pixelitor {
                 System.exit(1);
             }
         }
+    }
 
-        ExceptionHandler.INSTANCE.addHandler((t, e) -> Messages.showException(e, t));
-
+    private static void launchGUI(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
                 createAndShowGUI(args);
@@ -104,13 +125,6 @@ public class Pixelitor {
                 Dialogs.showExceptionDialog(e);
             }
         });
-
-        DragDisplay.initializeFont();
-
-        // Force the initialization of FastMath look-up tables now
-        // on the main thread, so that later no unexpected delays happen.
-        // This is OK because static initializers are thread safe.
-        FastMath.cos(0.1);
     }
 
     private static void createAndShowGUI(String[] args) {
@@ -124,7 +138,7 @@ public class Pixelitor {
         Themes.install(theme, false, true);
         loadUIFonts(theme);
 
-        var pw = PixelitorWindow.get();
+        PixelitorWindow mainWindow = PixelitorWindow.get();
         Dialogs.setMainWindowInitialized(true);
 
         // Make sure that at the end of GUI
@@ -132,7 +146,7 @@ public class Pixelitor {
         // a textfield and the keyboard shortcuts work properly
         FgBgColors.getGUI().requestFocus();
 
-        TipsOfTheDay.showTips(pw, false);
+        TipsOfTheDay.showTips(mainWindow, false);
 
         MouseZoomMethod.loadFromPreferences();
         PanMethod.loadFromPreferences();
@@ -140,18 +154,30 @@ public class Pixelitor {
         // The IO-intensive preloading of fonts is scheduled
         // to run after all the files have been opened,
         // and on the same IO thread
-        openCLFilesAsync(args)
+        openCommanLineFilesAsync(args)
             .exceptionally(throwable -> null) // recover
-            .thenAcceptAsync(v -> afterStartTestActions(), onEDT)
+            .thenAcceptAsync(v -> doPostStartupActions(), onEDT)
             .thenRunAsync(Utils::preloadFontNames, onIOThread)
             .exceptionally(Messages::showExceptionOnEDT);
+    }
+
+    // after launching the GUI on the EDT, do the less urgent
+    // initializations concurrently on the main thread
+    private static void mainThreadInit() {
+        DragDisplay.initializeFont();
+
+        // Force the initialization of FastMath look-up tables now
+        // on the main thread, so that later no unexpected delays happen.
+        // This is OK because static initializers are thread safe.
+        FastMath.cos(0.1);
     }
 
     private static void loadUIFonts(Theme theme) {
         int uiFontSize = AppPreferences.loadUIFontSize();
         String uiFontType = AppPreferences.loadUIFontType();
+
         if (uiFontSize == 0 || uiFontType.isEmpty()) {
-            // no saved settings found
+            // no saved settings found, use default font settings
             return;
         }
 
@@ -161,14 +187,15 @@ public class Pixelitor {
             return;
         }
 
-        Font newFont;
-        if (!uiFontType.isEmpty()) {
-            newFont = new Font(uiFontType, Font.PLAIN, uiFontSize);
-        } else {
-            newFont = defaultFont.deriveFont((float) uiFontSize);
-        }
+        Font customFont = uiFontType.isEmpty()
+            ? defaultFont.deriveFont((float) uiFontSize)
+            : new Font(uiFontType, Font.PLAIN, uiFontSize);
 
-        FontUIResource fontUIResource = new FontUIResource(newFont);
+        applyCustomFont(theme, customFont);
+    }
+
+    private static void applyCustomFont(Theme theme, Font customFont) {
+        FontUIResource fontUIResource = new FontUIResource(customFont);
         UIManager.put("defaultFont", fontUIResource);
 
         if (theme.isNimbus()) {
@@ -179,62 +206,84 @@ public class Pixelitor {
     /**
      * Schedules the opening of the files given as command-line arguments
      */
-    private static CompletableFuture<Void> openCLFilesAsync(String[] args) {
-        List<CompletableFuture<Composition>> openedFiles = new ArrayList<>();
+    private static CompletableFuture<Void> openCommanLineFilesAsync(String[] args) {
+        List<CompletableFuture<Composition>> fileOpeningTasks = new ArrayList<>();
 
         for (String fileName : args) {
             File file = new File(fileName);
             if (file.exists()) {
-                openedFiles.add(IO.openFileAsync(file, false));
+                fileOpeningTasks.add(IO.openFileAsync(file, false));
             } else {
-                Messages.showError("File not found",
-                    format("The file \"%s\" doesn't exist.", file.getAbsolutePath()));
+                Messages.showError("File Not Found",
+                    format("<html>Unable to locate file: <b>%s</b>", file.getAbsolutePath()));
             }
         }
 
-        return Utils.allOf(openedFiles);
+        return Utils.allOf(fileOpeningTasks);
     }
 
-    public static void warnAndExit(PixelitorWindow pw) {
+    public static void exitApp(PixelitorWindow mainWindow) {
         assert calledOnEDT() : threadInfo();
 
-        var paths = IOTasks.getCurrentWritePaths();
-        if (!paths.isEmpty()) {
-            String msg = "<html>The writing of the following files is not finished yet. Exit anyway?<br><ul>";
-            for (String path : paths) {
-                msg += "<li>" + path;
-            }
-
-            String[] options = {"Wait 10 seconds", "Exit now"};
-            boolean wait = Dialogs.showOKCancelWarningDialog(
-                msg, "Warning", options, 0);
-
-            if (wait && IOTasks.isBusyWriting()) {
-                // wait on another thread so that the status bar
-                // can be updated while waiting
-                new Thread(() -> {
-                    Utils.sleep(10, TimeUnit.SECONDS);
-                    EventQueue.invokeLater(() -> warnAndExit(pw));
-                }).start();
-
-                return;
-            }
+        if (hasOngoingWrite(mainWindow)) {
+            return;
         }
 
-        List<Composition> unsaved = Views.getUnsavedComps();
-        if (!unsaved.isEmpty()) {
-            boolean yesClicked = Dialogs.showYesNoWarningDialog(pw,
-                "Unsaved Changes", createUnsavedChangesMsg(unsaved));
-            if (yesClicked) {
-                exit(pw);
-            }
+        checkUnsavedChangesAndExit(mainWindow);
+    }
+
+    private static boolean hasOngoingWrite(PixelitorWindow mainWindow) {
+        var writePaths = IOTasks.getCurrentWritePaths();
+        if (writePaths.isEmpty()) {
+            return false;
+        }
+
+        boolean waitRequested = showOngoingWriteWarning(writePaths);
+        if (waitRequested && IOTasks.isBusyWriting()) {
+            scheduleExitRetry(mainWindow);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean showOngoingWriteWarning(Set<String> writePaths) {
+        StringBuilder msg = new StringBuilder(
+            "<html>The following files are still being written. Exit anyway?<br><ul>");
+        for (String path : writePaths) {
+            msg.append("<li>").append(path);
+        }
+
+        String warningMessage = msg.toString();
+        String[] options = {"Wait 10 seconds", "Exit now"};
+        return Dialogs.showOKCancelWarningDialog(
+            warningMessage, "Warning", options, 0);
+    }
+
+    private static void scheduleExitRetry(PixelitorWindow mainWindow) {
+        // wait on another thread so that the status bar
+        // can be updated while waiting
+        new Thread(() -> {
+            Utils.sleep(10, TimeUnit.SECONDS);
+            EventQueue.invokeLater(() -> exitApp(mainWindow));
+        }).start();
+    }
+
+    private static void checkUnsavedChangesAndExit(PixelitorWindow mainWindow) {
+        List<Composition> unsavedWork = Views.getUnsavedComps();
+        if (unsavedWork.isEmpty()) {
+            exit(mainWindow);
         } else {
-            exit(pw);
+            boolean proceedWithExit = Dialogs.showYesNoWarningDialog(mainWindow,
+                "Unsaved Changes", createUnsavedChangesMsg(unsavedWork));
+            if (proceedWithExit) {
+                exit(mainWindow);
+            }
         }
     }
 
-    private static void exit(PixelitorWindow pw) {
-        pw.setVisible(false);
+    private static void exit(PixelitorWindow mainWindow) {
+        mainWindow.setVisible(false);
         AppPreferences.savePreferences();
         System.exit(0);
     }
@@ -256,11 +305,10 @@ public class Pixelitor {
     }
 
     /**
-     * A possibility for automatic debugging or testing
+     * Executes development mode actions after application startup.
      */
-    private static void afterStartTestActions() {
+    private static void doPostStartupActions() {
         if (AppMode.isFinal()) {
-            // in the final builds nothing should run
             return;
         }
 
@@ -279,7 +327,6 @@ public class Pixelitor {
 //        GradientFillLayer.createNew();
 
 //        Views.onActiveLayer(Layer::replaceWithSmartObject);
-//        Debug.startFilter(ColorBalance.NAME);
 
 //        new Flip(HORIZONTAL).actionPerformed(null);
     }

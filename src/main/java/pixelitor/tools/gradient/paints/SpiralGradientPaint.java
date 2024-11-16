@@ -100,7 +100,7 @@ public record SpiralGradientPaint(boolean clockwise, Drag drag,
             this.cm = cm;
             drawAngle = drag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
 
-            dragDistance = drag.calcImDist();
+            dragDistance = drag.calcImLength();
         }
 
         @Override

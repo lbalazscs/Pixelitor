@@ -668,7 +668,7 @@ public class ShapesTool extends DragTool {
             // it assumes that the box remains unchanged
             assert hasBox();
             assert state == TRANSFORM : "state = " + state;
-            transformBox.setOwner(styledShape);
+            transformBox.setTarget(styledShape);
         } else {
             transformBox = box; // needed for the assertion in createBox
             setState(TRANSFORM);

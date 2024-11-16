@@ -652,9 +652,9 @@ public class GradientTool extends DragTool {
             Color startColor = Color.BLACK;
             Color endColor = Themes.getCurrent().isDark() ? color : Color.WHITE;
             Paint gradient = new GradientPaint(0, 0, startColor,
-                ToolButton.TOOL_ICON_SIZE, 0, endColor);
+                ToolButton.ICON_SIZE, 0, endColor);
             g.setPaint(gradient);
-            g.fillRect(0, 0, ToolButton.TOOL_ICON_SIZE, ToolButton.TOOL_ICON_SIZE);
+            g.fillRect(0, 0, ToolButton.ICON_SIZE, ToolButton.ICON_SIZE);
         }
     }
 }

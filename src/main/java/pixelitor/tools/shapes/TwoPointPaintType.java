@@ -83,7 +83,7 @@ public enum TwoPointPaintType {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             Point2D center = drag.getCenterPoint();
-            float distance = (float) drag.calcImDist();
+            float distance = (float) drag.calcImLength();
             Color[] gradientColors = {fgColor, bgColor};
 
             return new RadialGradientPaint(center, distance / 2, center, FRACTIONS,

@@ -23,7 +23,6 @@ import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
 
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
 
 /**
  * A helper class that encapsulates the logic of adding a
@@ -33,10 +32,10 @@ public class LayerAdder {
     private final LayerHolder holder;
     private final Composition comp;
     private String editName; // null if the add should not be added to history
-    private int targetIndex = -1;
-    private boolean update = true;
+    private int insertionIndex = -1;
+    private boolean shouldUpdateComp = true;
 
-    public enum Position {ABOVE_ACTIVE, BELLOW_ACTIVE}
+    public enum Position {ABOVE_ACTIVE, BELOW_ACTIVE}
 
     private Position position = ABOVE_ACTIVE;
     private boolean addToUI = true;
@@ -51,8 +50,19 @@ public class LayerAdder {
         return this;
     }
 
+    /**
+     * Sets the relative position where the layer should be inserted.
+     */
     public LayerAdder atPosition(Position position) {
         this.position = position;
+        return this;
+    }
+
+    /**
+     * Sets a specific index where the layer should be inserted.
+     */
+    public LayerAdder atIndex(int targetIndex) {
+        this.insertionIndex = targetIndex;
         return this;
     }
 
@@ -60,7 +70,7 @@ public class LayerAdder {
      * Means that this is part of the construction,
      * the layer is not added as a result of a user interaction
      */
-    public LayerAdder noUI() {
+    public LayerAdder skipUIAdd() {
         addToUI = false;
         return this;
     }
@@ -68,33 +78,27 @@ public class LayerAdder {
     /**
      * Used when the composite image doesn't change.
      */
-    public LayerAdder noUpdate() {
-        update = false;
+    public LayerAdder skipCompUpdate() {
+        shouldUpdateComp = false;
         return this;
     }
 
-    private void calcIndexBasedOnRelPosition() {
+    /**
+     * Calculates the insertion index based on the relative position setting.
+     */
+    private void calcIndexFromPosition() {
         int activeIndex = holder.getActiveLayerIndex();
         if (activeIndex == -1) { // no active layer
-            if (position == BELLOW_ACTIVE) {
-                targetIndex = 0;
-            } else {
-                targetIndex = holder.getNumLayers(); // add to the top
-            }
+            insertionIndex = switch (position) {
+                case ABOVE_ACTIVE -> holder.getNumLayers(); // add to the top
+                case BELOW_ACTIVE -> 0;
+            };
         } else {
-            if (position == ABOVE_ACTIVE) {
-                targetIndex = activeIndex + 1;
-            } else if (position == BELLOW_ACTIVE) {
-                targetIndex = activeIndex;
-            } else {
-                throw new IllegalStateException("position = " + position);
-            }
+            insertionIndex = switch (position) {
+                case ABOVE_ACTIVE -> activeIndex + 1;
+                case BELOW_ACTIVE -> activeIndex;
+            };
         }
-    }
-
-    public LayerAdder atIndex(int targetIndex) {
-        this.targetIndex = targetIndex;
-        return this;
     }
 
     /**
@@ -102,23 +106,25 @@ public class LayerAdder {
      */
     public void add(Layer layer) {
         layer.setHolder(holder);
+        Layer prevActiveLayer = null;
+        MaskViewMode prevMaskViewMode = null;
 
-        Layer previousActiveLayer = null;
-        MaskViewMode previousMaskViewMode = null;
-        if (needsHistory()) {
-            previousActiveLayer = comp.getActiveLayer();
-            previousMaskViewMode = comp.getView().getMaskViewMode();
+        // capture state for history if needed
+        if (isHistoryEnabled()) {
+            prevActiveLayer = comp.getActiveLayer();
+            prevMaskViewMode = comp.getView().getMaskViewMode();
         }
 
-        if (targetIndex == -1) { // no index was explicitly set
-            calcIndexBasedOnRelPosition();
+        if (insertionIndex == -1) { // no index was explicitly set
+            calcIndexFromPosition();
         }
-        holder.addLayerToList(targetIndex, layer);
+
+        holder.addLayerToList(insertionIndex, layer);
         comp.setActiveLayer(layer);
 
         if (addToUI) {
             if (holder == comp) {
-                comp.getView().addLayerToGUI(layer, targetIndex);
+                comp.getView().addLayerToGUI(layer, insertionIndex);
             } else {
                 ((CompositeLayer) holder).updateChildrenUI();
             }
@@ -127,19 +133,19 @@ public class LayerAdder {
             assert AppMode.isUnitTesting() || layer.hasUI();
 
             comp.setDirty(true);
-            if (update) {
+            if (shouldUpdateComp) {
                 holder.update();
             }
         }
 
-        if (needsHistory()) {
+        if (isHistoryEnabled()) {
             History.add(new NewLayerEdit(editName,
-                layer, previousActiveLayer, previousMaskViewMode));
+                layer, prevActiveLayer, prevMaskViewMode));
         }
         assert comp.checkInvariants();
     }
 
-    private boolean needsHistory() {
+    private boolean isHistoryEnabled() {
         return editName != null;
     }
 }

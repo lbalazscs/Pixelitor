@@ -29,7 +29,7 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
+import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
 
 @DisplayName("Composition tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -67,7 +67,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        // add new layer bellow the active layer
+        // add new layer below the active layer
         comp.addNewEmptyImageLayer("newLayer 1", true);
 
         comp.getActiveLayer().createUI();
@@ -155,10 +155,10 @@ class CompositionTest {
 
     @Test
     void layerAdder() {
-        // add bellow active
+        // add below active
         comp.adder()
-            .withHistory("bellow active")
-            .atPosition(BELLOW_ACTIVE)
+            .withHistory("below active")
+            .atPosition(BELOW_ACTIVE)
             .add(createEmptyImageLayer(comp, "layer A"));
 
         assertThat(comp)
@@ -204,7 +204,7 @@ class CompositionTest {
             .thirdLayerIsActive()
             .activeLayerNameIs("layer D");
         assertHistoryEditsAre(
-            "bellow active", "above active", "position 0", "position 2");
+            "below active", "above active", "position 0", "position 2");
 
         History.undo("position 2");
         assertThat(comp)
@@ -227,14 +227,14 @@ class CompositionTest {
             .secondLayerIsActive()
             .activeLayerNameIs("layer A");
 
-        History.undo("bellow active");
+        History.undo("below active");
         assertThat(comp)
             .numLayersIs(2)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive()
             .activeLayerNameIs("layer 2");
 
-        History.redo("bellow active");
+        History.redo("below active");
         assertThat(comp)
             .numLayersIs(3)
             .layerNamesAre("layer 1", "layer A", "layer 2")

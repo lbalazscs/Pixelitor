@@ -330,7 +330,7 @@ public class AppRunner {
         Utils.sleep(200, MILLISECONDS);
     }
 
-    public void selectLayerBellow() {
+    public void selectLayerBelow() {
         runMenuCommand("Lower Layer Selection");
         keyboard.undoRedo("Lower Layer Selection");
     }
@@ -784,14 +784,14 @@ public class AppRunner {
         checkNumLayersIs(numLayersBefore - 1);
     }
 
-    public void addEmptyImageLayer(boolean bellow) {
+    public void addEmptyImageLayer(boolean below) {
         int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
-        if (bellow) {
+        if (below) {
             keyboard.pressCtrl();
         }
         pw.button("addLayer").click();
-        if (bellow) {
+        if (below) {
             keyboard.releaseCtrl();
         }
 

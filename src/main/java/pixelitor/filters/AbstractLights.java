@@ -45,7 +45,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class AbstractLights extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
-    private static final float CRITICAL_ALPHA = 0.002f;
+    private static final float MIN_VISIBLE_ALPHA = 0.002f;
 
     public static final String NAME = "Abstract Lights";
 
@@ -66,7 +66,7 @@ public class AbstractLights extends ParametrizedFilter {
     private final RangeParam brightnessParam = new RangeParam("Brightness", 1, 6, 10);
     private final AngleParam hueParam = new AngleParam("Hue", 0);
     private final RangeParam hueRandomnessParam = new RangeParam("Hue Variability", 0, 25, 100);
-    private final RangeParam whiteParam = new RangeParam("Mix White", 0, 0, 100);
+    private final RangeParam whiteBlendParam = new RangeParam("Mix White", 0, 0, 100);
     private final RangeParam blurParam = new RangeParam("Blur", 0, 0, 7);
     private final RangeParam speedParam = new RangeParam("Particle Speed", 1, 1, 10);
     private final BooleanParam bounceParam = new BooleanParam("Edge Bounce", true);
@@ -74,20 +74,22 @@ public class AbstractLights extends ParametrizedFilter {
     public AbstractLights() {
         super(false);
 
-        // there can be no hue variation if the complexity is 1
+        // disable hue variation when complexity is 1 (single particle)
         complexityParam.setupDisableOtherIf(hueRandomnessParam, value -> value == 1);
 
-        // the hue doesn't matter if it's all white
-        whiteParam.setupDisableOtherIf(hueParam, value -> value == 100);
-        whiteParam.setupDisableOtherIf(hueRandomnessParam, value -> value == 100);
+        // disable hue controls when fully white blend is selected
+        whiteBlendParam.setupDisableOtherIf(hueParam, value -> value == 100);
+        whiteBlendParam.setupDisableOtherIf(hueRandomnessParam, value -> value == 100);
 
         DialogParam advancedParam = new DialogParam("Advanced",
-            hueRandomnessParam, whiteParam, blurParam, speedParam, bounceParam);
+            hueRandomnessParam, whiteBlendParam, blurParam, speedParam, bounceParam);
         advancedParam.setRandomizePolicy(IGNORE_RANDOMIZE);
 
         DialogParam starSettingsParam = new DialogParam("Star Settings",
             starSizeParam, starCenterParam);
+        // show star settings only for star type
         typeParam.setupEnableOtherIf(starSettingsParam, type -> type.valueIs(TYPE_STAR));
+        // disable bounce for frame type
         typeParam.setupDisableOtherIf(bounceParam, type -> type.valueIs(TYPE_FRAME));
 
         setParams(
@@ -107,6 +109,8 @@ public class AbstractLights extends ParametrizedFilter {
         int iterations = iterationsParam.getValue();
 
         var pt = new StatusBarProgressTracker(NAME, iterations);
+        int width = dest.getWidth();
+        int height = dest.getHeight();
 
         Graphics2D g2 = dest.createGraphics();
 
@@ -114,30 +118,28 @@ public class AbstractLights extends ParametrizedFilter {
         g2.setStroke(new BasicStroke((float) lineWidth));
 
         g2.setColor(Color.BLACK);
-        int width = dest.getWidth();
-        int height = dest.getHeight();
         g2.fillRect(0, 0, width, height);
 
         float darkening = 1.0f;
         // the sqrt is an attempt to use linear light calculations
         float alpha = (float) (brightnessParam.getValueAsDouble() / (200.0 * Math.sqrt(lineWidth)));
-        if (alpha < CRITICAL_ALPHA) {
+        if (alpha < MIN_VISIBLE_ALPHA) {
             // if a smaller alpha is used, nothing is drawn, therefore
             // use this alpha and compensate by darkening the color.
-            darkening = CRITICAL_ALPHA / alpha;
-            alpha = CRITICAL_ALPHA;
+            darkening = MIN_VISIBLE_ALPHA / alpha;
+            alpha = MIN_VISIBLE_ALPHA;
         }
 
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         float colorBri = 1.0f / darkening;
-        List<Particle> points = createPoints(width, height, random, colorBri);
+        List<Particle> particles = createParticles(width, height, random, colorBri);
 
         for (int i = 0; i < iterations; i++) {
-            for (Particle p : points) {
-                p.update(width, height);
-                p.draw(g2);
+            for (Particle particle : particles) {
+                particle.update(width, height);
+                particle.draw(g2);
             }
             pt.unitDone();
         }
@@ -146,8 +148,8 @@ public class AbstractLights extends ParametrizedFilter {
         return dest;
     }
 
-    private List<Particle> createPoints(int width, int height, Random random, float bri) {
-        int numPoints = complexityParam.getValue() + 1;
+    private List<Particle> createParticles(int width, int height, Random random, float bri) {
+        int numParticles = complexityParam.getValue() + 1;
         int baseHue = hueParam.getValueInNonIntuitiveDegrees();
         int hueRandomness = (int) (hueRandomnessParam.getValue() * 3.6);
 
@@ -155,61 +157,64 @@ public class AbstractLights extends ParametrizedFilter {
         double speed = speedParam.getValueAsDouble();
         int type = typeParam.getValue();
 
-        List<Particle> points = new ArrayList<>();
-        for (int i = 0; i < numPoints; i++) {
+        List<Particle> particles = new ArrayList<>();
+        for (int i = 0; i < numParticles; i++) {
             int x = random.nextInt(width);
             int y = random.nextInt(height);
-            Color color = createRandomColor(random, bri, baseHue, hueRandomness);
+            Color color = generateParticleColor(random, bri, baseHue, hueRandomness);
             double angle = 2 * random.nextDouble() * Math.PI;
 
             if (type == TYPE_FRAME) {
-                points.add(new FrameParticle(i % 4, speed, angle, color, bounce, x, y, width, height));
+                particles.add(new FrameParticle(i % 4, speed, angle, color, bounce, x, y, width, height));
             } else {
-                points.add(new Particle(x, y, speed, angle, color, bounce));
+                particles.add(new Particle(x, y, speed, angle, color, bounce));
             }
         }
 
-        connectParticles(width, height, numPoints, speed, points);
+        connectParticles(width, height, numParticles, speed, particles);
 
-        return points;
+        return particles;
     }
 
-    private void connectParticles(int width, int height, int numPoints, double speed, List<Particle> points) {
+    private void connectParticles(int width, int height, int numParticles, double speed, List<Particle> particles) {
         int connect = typeParam.getValue();
-        if (connect == TYPE_CHAOS || connect == TYPE_FRAME) {
-            for (int i = 0; i < numPoints; i++) {
-                int siblingIndex = i - 1;
-                if (i == 0) {
-                    siblingIndex = numPoints - 1;
-                }
-                points.get(i).sibling = points.get(siblingIndex);
-            }
-        } else if (connect == TYPE_STAR) {
-            // replace the first particle with a star particle
-            Color c = points.getFirst().color;
-            StarParticle starParticle = new StarParticle(0, 0, speed, c, starSizeParam, width, height, starCenterParam);
-            points.set(0, starParticle);
-
-            for (int i = 1; i < numPoints; i++) {
-                points.get(i).sibling = starParticle;
-            }
-        } else {
-            throw new IllegalStateException("connect = " + connect);
+        switch (connect) {
+            case TYPE_CHAOS, TYPE_FRAME -> connectInChain(particles, numParticles);
+            case TYPE_STAR -> connectToStar(particles, width, height, numParticles, speed);
+            default -> throw new IllegalStateException("connect = " + connect);
         }
     }
 
-    private Color createRandomColor(Random random, float bri, int baseHue, int hueRandomness) {
+    private static void connectInChain(List<Particle> particles, int numParticles) {
+        for (int i = 0; i < numParticles; i++) {
+            int siblingIndex = (i == 0) ? numParticles - 1 : i - 1;
+            particles.get(i).sibling = particles.get(siblingIndex);
+        }
+    }
+
+    private void connectToStar(List<Particle> particles, int width, int height, int numParticles, double speed) {
+        // replace the first particle with a star particle
+        Color c = particles.getFirst().color;
+        StarParticle centerStar = new StarParticle(0, 0, speed, c, starSizeParam, width, height, starCenterParam);
+        particles.set(0, centerStar);
+
+        for (int i = 1; i < numParticles; i++) {
+            particles.get(i).sibling = centerStar;
+        }
+    }
+
+    private Color generateParticleColor(Random random, float bri, int baseHue, int hueRandomness) {
         int hue;
         if (hueRandomness > 0) {
             hue = (baseHue + random.nextInt(hueRandomness) - hueRandomness / 2) % 360;
         } else {
             hue = baseHue;
-            random.nextInt(); // keep the same image
+            random.nextInt(); // maintain random sequence
         }
 
         Color color = Color.getHSBColor(hue / 360.0f, 1.0f, bri);
-        if (whiteParam.getValue() > 0) {
-            color = Colors.interpolateRGB(color, Color.WHITE, whiteParam.getPercentage());
+        if (whiteBlendParam.getValue() > 0) {
+            color = Colors.interpolateRGB(color, Color.WHITE, whiteBlendParam.getPercentage());
         }
         return color;
     }

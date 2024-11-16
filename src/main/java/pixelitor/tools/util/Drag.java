@@ -545,25 +545,25 @@ public class Drag implements Serializable {
         return new Rectangle2D.Double(x, y, width, height);
     }
 
-    public double calcCoDist() {
+    public double calcCoLength() {
         assert hasCoCoords;
         double dx = coEndX - coStartX;
         double dy = coEndY - coStartY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
+        double length = Math.sqrt(dx * dx + dy * dy);
         if (expandFromCenter) {
-            dist *= 2;
+            length *= 2;
         }
-        return dist;
+        return length;
     }
 
-    public double calcImDist() {
+    public double calcImLength() {
         double dx = imEndX - imStartX;
         double dy = imEndY - imStartY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
+        double length = Math.sqrt(dx * dx + dy * dy);
         if (expandFromCenter) {
-            dist *= 2.0;
+            length *= 2.0;
         }
-        return dist;
+        return length;
     }
 
     public double taxiCabMetric(int x, int y) {
@@ -610,7 +610,7 @@ public class Drag implements Serializable {
         // draw the width display
         float widthY;
         if (imHeight >= 0) {
-            // display the width info bellow the mouse
+            // display the width info below the mouse
             widthY = (float) (coEndY + MOUSE_DISPLAY_DISTANCE + DragDisplay.ONE_LINER_BG_HEIGHT);
         } else {
             // display the width info above the mouse
@@ -651,7 +651,7 @@ public class Drag implements Serializable {
                 // display the start info above the start
                 startInfoY = (float) (coStartY - mouseDist);
             } else {
-                // display the start info bellow the start
+                // display the start info below the start
                 startInfoY = (float) (coStartY + mouseDist + DragDisplay.TWO_LINER_BG_HEIGHT);
             }
 
@@ -705,7 +705,7 @@ public class Drag implements Serializable {
             // display it above the mouse
             y = coEndY - MOUSE_DISPLAY_DISTANCE;
         } else if (coDy >= yInterpolationLimit) {
-            // display it bellow the mouse
+            // display it below the mouse
             y = coEndY + MOUSE_DISPLAY_DISTANCE + DragDisplay.TWO_LINER_BG_HEIGHT;
         } else {
             // display it so that it has no sudden jumps
@@ -715,10 +715,10 @@ public class Drag implements Serializable {
         }
 
         int dragAngle = (int) Math.toDegrees(calcIntuitiveAngle());
-        int dragDistance = (int) calcImDist();
+        int dragLength = (int) calcImLength();
 
         String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
-        String distInfo = "d = " + dragDistance + " px";
+        String distInfo = "d = " + dragLength + " px";
         DragDisplay dd = new DragDisplay(g, displayBgWidth);
         dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
         dd.finish();

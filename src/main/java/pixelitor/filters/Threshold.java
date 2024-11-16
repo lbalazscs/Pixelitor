@@ -89,11 +89,11 @@ public class Threshold extends ParametrizedFilter {
                 if (i + 1 < length) {
                     addError(inputData, i + 1, (int) (error * 7.0 / 16));
                 }
-                int bellowIndex = i + width;
-                if (bellowIndex + 1 < length) {
-                    addError(inputData, bellowIndex - 1, (int) (error * 3.0 / 16));
-                    addError(inputData, bellowIndex, (int) (error * 5.0 / 16));
-                    addError(inputData, bellowIndex + 1, (int) (error / 16));
+                int belowIndex = i + width;
+                if (belowIndex + 1 < length) {
+                    addError(inputData, belowIndex - 1, (int) (error * 3.0 / 16));
+                    addError(inputData, belowIndex, (int) (error * 5.0 / 16));
+                    addError(inputData, belowIndex + 1, (int) (error / 16));
                 }
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -118,14 +118,14 @@ public class LayersPanel extends JLayeredPane {
         int deltaY = dragY - staticY;
         int draggedIndex = layerGUIs.indexOf(draggedGUI);
         if (deltaY > 0) {  // dragging downwards
-            int indexBellow = draggedIndex - 1;
-            if (indexBellow < 0) {
+            int indexBelow = draggedIndex - 1;
+            if (indexBelow < 0) {
                 return;
             }
-            int swapDistance = layerGUIs.get(indexBellow).getPreferredHeight() / 2;
+            int swapDistance = layerGUIs.get(indexBelow).getPreferredHeight() / 2;
             if (deltaY >= swapDistance) {
                 if (draggedIndex > 0) {
-                    Collections.swap(layerGUIs, indexBellow, draggedIndex);
+                    Collections.swap(layerGUIs, indexBelow, draggedIndex);
                 }
             }
         } else { // dragging upwards

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,9 +41,13 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     private static final ZoomControl INSTANCE = new ZoomControl();
 
     private static final int PREFERRED_HEIGHT = 17;
+    private static final int ZOOM_PERCENTAGE_WIDTH = 70;
+    private static final int ZOOM_SLIDER_WIDTH = 200;
+    private static final int BUTTON_WIDTH = 60;
+    
     private final JSlider zoomSlider;
-    private final JLabel zoomDisplay;
-    private final JLabel zoomLabel;
+    private final JLabel zoomPercentageLabel;
+    private final JLabel zoomTextLabel;
     private final JButton fitButton;
     private final JButton actualPixelsButton;
 
@@ -56,37 +60,30 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
 
         // Make sure that the status bar height doesn't increase because of this control.
         // Normally the JSlider vertical size in Nimbus would be 21.
-        zoomSlider.setPreferredSize(new Dimension(200, PREFERRED_HEIGHT));
+        zoomSlider.setPreferredSize(new Dimension(ZOOM_SLIDER_WIDTH, PREFERRED_HEIGHT));
 
-        zoomDisplay = new JLabel("100%");
-        double preferredHeight = zoomDisplay.getPreferredSize().getHeight();
-        Dimension preferredSize = new Dimension(70, (int) preferredHeight);
-        zoomDisplay.setPreferredSize(preferredSize);
+        zoomPercentageLabel = new JLabel("100%");
+        double preferredHeight = zoomPercentageLabel.getPreferredSize().getHeight();
+        Dimension preferredSize = new Dimension(ZOOM_PERCENTAGE_WIDTH, (int) preferredHeight);
+        zoomPercentageLabel.setPreferredSize(preferredSize);
 
         zoomSlider.addChangeListener(e ->
-            Views.onActiveView(this::zoomAccordingToTheSlider));
+            Views.onActiveView(this::updateZoomBasedOnSlider));
 
-        zoomLabel = new JLabel("  " + ZOOM + ": ");
+        zoomTextLabel = new JLabel("  " + ZOOM + ": ");
 
-        add(zoomLabel);
+        add(zoomTextLabel);
         add(zoomSlider);
-        add(zoomDisplay);
+        add(zoomPercentageLabel);
 
-        Dimension buttonSize = new Dimension(60, PREFERRED_HEIGHT);
+        Dimension buttonSize = new Dimension(BUTTON_WIDTH, PREFERRED_HEIGHT);
         fitButton = addZoomButton(buttonSize, "Fit",
             FIT_SPACE_ACTION, FIT_SPACE_TOOLTIP);
         actualPixelsButton = addZoomButton(buttonSize, "100%",
             ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
 
-        setLookIfNoImage();
+        updateUIForNoActiveImage();
         Views.addActivationListener(this);
-    }
-
-    private void zoomAccordingToTheSlider(View view) {
-        int sliderValue = zoomSlider.getValue();
-        ZoomLevel zoomLevel = zoomLevels[sliderValue];
-        view.setZoom(zoomLevel);
-        setZoomText(zoomLevel);
     }
 
     private JButton addZoomButton(Dimension buttonSize, String text,
@@ -119,13 +116,23 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         return b;
     }
 
-    private void setLookIfNoImage() {
+    private void updateUIForNoActiveImage() {
         setEnabled(false);
 
-        zoomDisplay.setText("");
+        zoomPercentageLabel.setText("");
     }
 
-    public void changeZoom(ZoomLevel newZoom) {
+    private void updateZoomBasedOnSlider(View view) {
+        int sliderValue = zoomSlider.getValue();
+        ZoomLevel zoomLevel = zoomLevels[sliderValue];
+        view.setZoom(zoomLevel);
+        setZoomText(zoomLevel);
+    }
+
+    /**
+     * Updates the UI when the zoom changes for external reasons.
+     */
+    public void updateZoom(ZoomLevel newZoom) {
         setEnabled(true);
 
         zoomSlider.setValue(newZoom.getSliderValue());
@@ -133,23 +140,23 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     }
 
     private void setZoomText(ZoomLevel zoomLevel) {
-        zoomDisplay.setText(" " + zoomLevel);
+        zoomPercentageLabel.setText(" " + zoomLevel);
     }
 
     @Override
     public void allViewsClosed() {
-        setLookIfNoImage();
+        updateUIForNoActiveImage();
     }
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        changeZoom(newView.getZoomLevel());
+        updateZoom(newView.getZoomLevel());
     }
 
     @Override
     public void setEnabled(boolean enabled) {
         if (this.enabled != enabled) {
-            zoomLabel.setEnabled(enabled);
+            zoomTextLabel.setEnabled(enabled);
             zoomSlider.setEnabled(enabled);
             fitButton.setEnabled(enabled);
             actualPixelsButton.setEnabled(enabled);

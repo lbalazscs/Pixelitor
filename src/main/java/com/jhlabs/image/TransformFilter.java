@@ -19,7 +19,7 @@ package com.jhlabs.image;
 import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.concurrent.Callable;
@@ -172,18 +172,14 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
         int[] inPixels = getRGB(src, 0, 0, srcWidth, srcHeight, null);
 
-        switch (interpolation) {
-            case BILINEAR:
-                return filterPixelsBilinear(dst, srcWidth, srcHeight, inPixels);
-            case NEAREST_NEIGHBOUR:
-                return filterPixelsNN(dst, srcWidth, srcHeight, inPixels);
-            case BILINEAR_OLD:
-                return filterPixelsBilinearOLD(dst, srcWidth, srcHeight, inPixels);
-            case NEAREST_NEIGHBOUR_OLD:
-                return filterPixelsNNOLD(dst, srcWidth, srcHeight, inPixels);
-        }
+        return switch (interpolation) {
+            case BILINEAR -> filterPixelsBilinear(dst, srcWidth, srcHeight, inPixels);
+            case NEAREST_NEIGHBOUR -> filterPixelsNN(dst, srcWidth, srcHeight, inPixels);
+            case BILINEAR_OLD -> filterPixelsBilinearOLD(dst, srcWidth, srcHeight, inPixels);
+            case NEAREST_NEIGHBOUR_OLD -> filterPixelsNNOLD(dst, srcWidth, srcHeight, inPixels);
+            default -> throw new IllegalStateException("should not get here");
+        };
 
-        throw new IllegalStateException("should not get here");
     }
 
     private BufferedImage filterPixelsBilinearOLD(BufferedImage dst, int width, int height, int[] inPixels) {

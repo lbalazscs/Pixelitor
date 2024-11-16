@@ -25,14 +25,20 @@ import java.io.File;
 public interface FilePicker {
     /**
      * Shows an "open" file picker that allows the selection of supported input files.
+     * Returns the selected file or null if the dialog was canceled.
      */
     File getSupportedOpenFile();
 
     /**
      * Shows an "open" file picker that allows the selection of any file.
+     * Returns the selected file or null if the dialog was canceled.
      */
     File getAnyOpenFile();
 
+    /**
+     * Shows a save file dialog and returns the selected file
+     * or null if the dialog was canceled.
+     */
     File showSaveDialog(FileChooserConfig config);
 
     String getSelectedSaveExtension(File selectedFile);

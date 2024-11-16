@@ -23,17 +23,24 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.io.JpegOutput.ImageWithSize;
 import pixelitor.tools.HandToolSupport;
 import pixelitor.utils.*;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
@@ -47,39 +54,38 @@ import static pixelitor.utils.Threads.onPool;
 /**
  * The panel shown in the "Export Optimized JPEG..." dialog
  */
-public class OptimizedJpegSavePanel extends JPanel {
-    private static final int GRID_HOR_GAP = 10;
-    private static final int GRID_VER_GAP = 10;
-    private final BufferedImage image;
+public class OptimizedJpegExportPanel extends JPanel {
+    private static final int GRID_GAP = 10;
+
+    private final BufferedImage sourceImage;
+
+    private ImagePanel original;
     private ImagePanel optimized;
+
     private RangeParam qualityParam;
     private JLabel sizeLabel;
-    private ImagePanel original;
     private JCheckBox progressiveCB;
     private ProgressPanel progressPanel;
 
-    private OptimizedJpegSavePanel(BufferedImage image) {
+    private OptimizedJpegExportPanel(BufferedImage image) {
         super(new BorderLayout(3, 3));
 
-        this.image = image;
+        this.sourceImage = image;
 
-        JPanel controlsPanel = createControlsPanel();
-        JPanel comparePanel = createComparePanel(image);
-
-        add(comparePanel, CENTER);
-        add(controlsPanel, SOUTH);
+        add(createComparePanel(image), CENTER);
+        add(createSettingsPanel(), SOUTH);
 
         updatePreviewAsync();
     }
 
     private JPanel createComparePanel(BufferedImage image) {
-        JPanel comparePanel = new JPanel(new GridLayout(1, 2, GRID_HOR_GAP, GRID_VER_GAP));
+        JPanel comparePanel = new JPanel(new GridLayout(1, 2, GRID_GAP, GRID_GAP));
         var imageSize = new Dimension(image.getWidth(), image.getHeight());
 
-        original = createViewPanel(imageSize);
+        original = createImagePanel(imageSize);
         original.replaceImage(image);
 
-        optimized = createViewPanel(imageSize);
+        optimized = createImagePanel(imageSize);
 
         setupScrollPanes(comparePanel);
 
@@ -97,14 +103,14 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private static JScrollPane createScrollPane(ImagePanel original, String borderTitle) {
-        var scrollPane = new JScrollPane(original);
+        JScrollPane scrollPane = new JScrollPane(original);
         HandToolSupport.addBehavior(scrollPane);
         scrollPane.setBorder(createTitledBorder(borderTitle));
 
         return scrollPane;
     }
 
-    private static ImagePanel createViewPanel(Dimension imageSize) {
+    private static ImagePanel createImagePanel(Dimension imageSize) {
         // no checkerboard, because here transparency is shown as black
         var viewPanel = new ImagePanel(false);
 
@@ -113,23 +119,28 @@ public class OptimizedJpegSavePanel extends JPanel {
         return viewPanel;
     }
 
-    private JPanel createControlsPanel() {
+    private JPanel createSettingsPanel() {
         JPanel p = new JPanel(new FlowLayout(LEFT));
 
+        // progressive encoding
         p.add(new JLabel("Progressive:"));
         progressiveCB = new JCheckBox("", false);
         progressiveCB.addActionListener(e -> updatePreviewAsync());
         p.add(progressiveCB);
 
+        // quality slider
         qualityParam = new RangeParam("  JPEG Quality", 1, 60, 100);
         qualityParam.setAdjustmentListener(this::updatePreviewAsync);
         p.add(new SliderSpinner(qualityParam, WEST, false));
 
+        // file size preview
         sizeLabel = new JLabel();
         p.add(sizeLabel);
 
+        // spacing
         p.add(Box.createRigidArea(new Dimension(40, 10)));
 
+        // progress indicator
         progressPanel = new ProgressPanel();
         p.add(progressPanel);
 
@@ -138,23 +149,21 @@ public class OptimizedJpegSavePanel extends JPanel {
 
     private void updatePreviewAsync() {
         CompletableFuture
-            .supplyAsync(() -> createPreview(getQuality(), isProgressive()), onPool)
-            .thenAcceptAsync(this::setPreview, onEDT)
+            .supplyAsync(() -> generatePreview(getQuality(), isProgressive()), onPool)
+            .thenAcceptAsync(this::updatePreview, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private ImageWithSize createPreview(float quality, boolean progressive) {
-        return JpegOutput.writeJPGtoPreviewImage(image,
+    private PreviewInfo generatePreview(float quality, boolean progressive) {
+        return writeJPGtoPreviewImage(sourceImage,
             JpegSettings.createJpegCustomizer(quality, progressive),
             new JProgressBarTracker(progressPanel));
     }
 
-    private void setPreview(ImageWithSize imageWithSize) {
-        BufferedImage newPreview = imageWithSize.image();
-        optimized.refreshImage(newPreview);
-
-        int numBytes = imageWithSize.size();
-        sizeLabel.setText("  Size: " + MemoryInfo.bytesToString(numBytes));
+    private void updatePreview(PreviewInfo previewInfo) {
+        optimized.refreshImage(previewInfo.image());
+        sizeLabel.setText("  Size: "
+            + MemoryInfo.bytesToString(previewInfo.sizeInBytes()));
     }
 
     private float getQuality() {
@@ -166,16 +175,53 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     public static void showInDialog(Composition comp, String title) {
-        BufferedImage image = comp.getCompositeImage();
+        var image = comp.getCompositeImage();
         var rgbImage = ImageUtils.convertToRGB(image, false);
-        var savePanel = new OptimizedJpegSavePanel(rgbImage);
+        var exportPanel = new OptimizedJpegExportPanel(rgbImage);
 
         new DialogBuilder()
-            .content(savePanel)
+            .content(exportPanel)
             .title(title)
             .okText(i18n("save"))
-            .okAction(() -> IO.saveJpegWithQuality(comp, savePanel.getQuality(), savePanel.isProgressive()))
+            .okAction(() -> IO.saveJpegWithQuality(comp,
+                exportPanel.getQuality(), exportPanel.isProgressive()))
             .show();
+    }
+
+    private static PreviewInfo writeJPGtoPreviewImage(BufferedImage image,
+                                                      Consumer<ImageWriteParam> customizer,
+                                                      ProgressTracker pt) {
+        var bos = new ByteArrayOutputStream(32768);
+        BufferedImage previewImage = null;
+        byte[] bytes = null;
+        try {
+            // Step 1: write JPEG with the given settings to memory.
+            // Approximately 70% of the total time is spent here.
+            ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
+            var pt1 = new SubtaskProgressTracker(0.7, pt);
+            TrackedIO.writeToIOS(image, ios, "jpg", pt1, customizer);
+
+            // Step 2: Read it back into the preview image.
+            // Approximately 30% of the total time is spent here.
+            bytes = bos.toByteArray();
+            var in = new ByteArrayInputStream(bytes);
+            var pt2 = new SubtaskProgressTracker(0.3, pt);
+            try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
+                previewImage = TrackedIO.readFromIIS(iis, pt2);
+            }
+
+            pt.finished();
+        } catch (IOException e) {
+            Messages.showException(e);
+        }
+
+        return new PreviewInfo(previewImage, bytes.length);
+    }
+
+    /**
+     * An image and its estimated (jpeg-compressed) disk size.
+     */
+    private record PreviewInfo(BufferedImage image, int sizeInBytes) {
     }
 }
 

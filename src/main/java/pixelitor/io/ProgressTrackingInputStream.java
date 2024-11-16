@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,56 +18,71 @@
 package pixelitor.io;
 
 import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
- * Tracks the progress of reading from an InputStream.
+ * An InputStream wrapper that monitors reading progress.
  * It is similar to {@link javax.swing.ProgressMonitorInputStream},
  * but works with {@link ProgressTracker} objects
  */
 public class ProgressTrackingInputStream extends FilterInputStream {
-    private final ProgressTracker pt;
+    private final ProgressTracker progressTracker;
+    private boolean closed = false;
 
-    /**
-     * The max value of the given {@link ProgressTracker}
-     * must be initialized to the file size
-     */
-    public ProgressTrackingInputStream(InputStream in, ProgressTracker pt) {
-        super(in);
-        this.pt = pt;
+    public ProgressTrackingInputStream(File file) throws FileNotFoundException {
+        super(new FileInputStream(file));
+
+        this.progressTracker = new StatusBarProgressTracker(
+            "Reading " + file.getName(), (int) file.length());
     }
 
     @Override
     public int read() throws IOException {
-        int readByte = in.read();
-        pt.unitDone();
-        return readByte;
+        int byteRead = in.read();
+        if (byteRead != -1) {
+            progressTracker.unitDone();
+        }
+        return byteRead;
     }
 
     @Override
     public int read(byte[] b) throws IOException {
-        int numBytes = in.read(b);
-        pt.unitsDone(numBytes);
-        return numBytes;
+        int bytesRead = in.read(b);
+        if (bytesRead > 0) {
+            progressTracker.unitsDone(bytesRead);
+        }
+        return bytesRead;
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int numBytes = in.read(b, off, len);
-        pt.unitsDone(numBytes);
-        return numBytes;
+        int bytesRead = in.read(b, off, len);
+        if (bytesRead > 0) {
+            progressTracker.unitsDone(bytesRead);
+        }
+        return bytesRead;
     }
 
     @Override
     public long skip(long n) throws IOException {
-        long numBytes = in.skip(n);
+        long bytesSkipped = in.skip(n);
+        if (bytesSkipped > 0) {
+            // by caring only about ints, we can handle files up to 2GBytes
+            progressTracker.unitsDone((int) Math.min(bytesSkipped, Integer.MAX_VALUE));
+        }
+        return bytesSkipped;
+    }
 
-        // by caring only about ints, we can handle files up to 2GBytes
-        pt.unitsDone((int) numBytes);
+    @Override
+    public void close() throws IOException {
+        if (closed) {
+            return;
+        }
+        closed = true;
 
-        return numBytes;
+        super.close();
+        progressTracker.finished();
     }
 }

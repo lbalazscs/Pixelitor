@@ -715,7 +715,7 @@ public class MainGuiTest {
     }
 
     private void testCheckForUpdate() {
-        runMenuCommand("Check for Update...");
+        runMenuCommand("Check for Updates...");
         try {
             app.findJOptionPane().buttonWithText("Close").click();
         } catch (ComponentLookupException e) {
@@ -1199,8 +1199,8 @@ public class MainGuiTest {
         var dialog = findDialogByTitle("Metadata for "
             + EDT.active(Composition::getName));
 
-        dialog.button("expandButton").click();
-        dialog.button("collapseButton").click();
+        dialog.button("expandAllButton").click();
+        dialog.button("collapseAllButton").click();
 
         dialog.button("ok").click();
         dialog.requireNotVisible();

@@ -924,7 +924,7 @@ public abstract class Layer implements Serializable, Debuggable {
         if (holder.canMergeDown(this)) {
             popup = new JPopupMenu();
             var mergeDownAction = new PAction(GUIText.MERGE_DOWN, () -> {
-                // check again to be sure that the layer bellow
+                // check again to be sure that the layer below
                 // this didn't change in the meantime
                 if (holder.canMergeDown(this)) {
                     holder.mergeDown(this);

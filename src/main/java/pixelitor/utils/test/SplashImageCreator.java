@@ -143,7 +143,7 @@ public class SplashImageCreator {
         FgBgColors.setFGColor(WHITE);
 
         Font font = createSplashFont(SPLASH_SMALL_FONT, 20);
-        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER, font, 50);
+        addTextLayer(comp, "version " + Pixelitor.VERSION, font, 50);
 
         font = createSplashFont(SPLASH_MAIN_FONT, MAIN_FONT_SIZE);
         addTextLayer(comp, "Pixelitor", font, -17);

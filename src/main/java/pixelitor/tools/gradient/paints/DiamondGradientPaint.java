@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,7 +97,7 @@ public record DiamondGradientPaint(Drag drag, Color startColor,
 
             this.cm = cm;
 
-            dragDist = drag.calcImDist();
+            dragDist = drag.calcImLength();
             double dragDistSqr = dragDist * dragDist;
             dragRelDX = (float) (drag.getDX() / dragDistSqr);
             dragRelDY = (float) (drag.getDY() / dragDistSqr);

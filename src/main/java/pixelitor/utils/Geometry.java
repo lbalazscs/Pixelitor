@@ -245,7 +245,7 @@ public class Geometry {
     /**
      * Returns the line orthogonal to the given line that passes through the point P
      */
-    public static Line2D orthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
+    public static Line2D createOrthogonalLine(Line2D line, Point2D.Double p) {
         return new Line2D.Double(p, projectPointToLine(line, p));
     }
 

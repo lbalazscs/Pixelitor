@@ -48,13 +48,8 @@ public class PXCFormat {
     }
 
     public static Composition read(File file) throws BadPxcFormatException {
-        long fileSize = file.length();
-        ProgressTracker pt = new StatusBarProgressTracker(
-            "Reading " + file.getName(), (int) fileSize);
         Composition comp = null;
-        try (InputStream is = new ProgressTrackingInputStream(
-            new FileInputStream(file), pt)) {
-
+        try (InputStream is = new ProgressTrackingInputStream(file)) {
             int firstByte = is.read();
             int secondByte = is.read();
             if (firstByte == 0xAB && secondByte == 0xC4) {
@@ -87,7 +82,6 @@ public class PXCFormat {
             try (GZIPInputStream gs = new GZIPInputStream(is)) {
                 try (ObjectInput ois = new ObjectInputStream(gs)) {
                     comp = (Composition) ois.readObject();
-                    pt.finished();
 
                     // file is transient in Composition because the pxc file can be renamed
                     comp.setFile(file);

@@ -69,18 +69,15 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     private final CornerHandle sw;
     private final RotationHandle rot;
 
+    // collections of handles for convenient iteration
     private DraggablePoint[] handles;
     private CornerHandle[] corners;
     private PositionHandle[] positions;
     private EdgeHandle[] edges;
 
-    private transient Transformable owner;
+    private transient Transformable target;
 
     private transient View view;
-
-    // Keep track of the rotated status because pixel
-    // snapping should not work after rotating.
-    private boolean rotated;
 
     // the starting positions of the box in component and image space,
     // corresponding to the initial size of the transformed object
@@ -88,6 +85,10 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
 
     // the current width/height of the rotated rectangle in image space
     private final DDimension rotatedImSize;
+
+    // Keep track of the rotated status because pixel
+    // snapping should not work after rotating.
+    private boolean rotated;
 
     private double angle = 0.0;
     private double sin = 0.0;
@@ -101,17 +102,17 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     // the box shape in component coordinates
     private GeneralPath coBoxShape;
 
-    private boolean wholeBoxDrag = false;
-    private double wholeBoxDragStartCoX;
-    private double wholeBoxDragStartCoY;
+    private transient boolean wholeBoxDrag = false;
+    private transient double wholeBoxDragStartCoX;
+    private transient double wholeBoxDragStartCoY;
 
     private transient Memento beforeMovement;
 
-    public TransformBox(Rectangle2D origRect, View view, Transformable owner) {
-        this(origRect, view, owner, false);
+    public TransformBox(Rectangle2D origRect, View view, Transformable target) {
+        this(origRect, view, target, false);
     }
 
-    public TransformBox(Rectangle2D origRect, View view, Transformable owner, boolean isCo) {
+    public TransformBox(Rectangle2D origRect, View view, Transformable target, boolean isCo) {
         // it must be transformed to positive rectangle before calling this
         assert !origRect.isEmpty();
 
@@ -122,7 +123,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         }
         rotatedImSize = new DDimension(origImRect);
         this.view = view;
-        this.owner = owner;
+        this.target = target;
 
         double westX = origImRect.getX();
         double eastX = westX + origImRect.getWidth();
@@ -213,9 +214,9 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         }
     }
 
-    public TransformBox copy(Transformable newOwner) {
+    public TransformBox copy(Transformable newTarget) {
         TransformBox box = new TransformBox(this);
-        box.setOwner(newOwner);
+        box.setTarget(newTarget);
         return box;
     }
 
@@ -223,27 +224,32 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
+        // initialize transient fields
+        wholeBoxDrag = false;
+        wholeBoxDragStartCoX = 0;
+        wholeBoxDragStartCoY = 0;
+
         // these transient fields will be set when they are first needed
-        owner = null;
+        target = null;
         view = null;
         beforeMovement = null;
     }
 
-    public void setOwner(Transformable owner) {
-        this.owner = owner;
+    public void setTarget(Transformable target) {
+        this.target = target;
     }
 
     /**
      * Initialize transient variables after deserialization.
      */
-    public void reInitialize(View view, Transformable owner) {
+    public void reInitialize(View view, Transformable target) {
         // A box needs reinitialization if the view is null after deserialization
         // or if it's the old view after the duplication of a composition.
         if (this.view == view) {
             return;
         }
         setView(view);
-        setOwner(owner);
+        setTarget(target);
     }
 
     public void setView(View view) {
@@ -338,7 +344,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     }
 
     public void applyTransform() {
-        owner.imTransform(calcImTransform());
+        target.imTransform(calcImTransform());
     }
 
     private void updateRotLocation() {
@@ -432,7 +438,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     public boolean processMouseDragged(PMouseEvent e) {
         if (activePoint != null) {
             activePoint.mouseDragged(e.getCoX(), e.getCoY());
-            owner.updateUI(view);
+            target.updateUI(view);
             return true;
         } else if (wholeBoxDrag) {
             dragBox(e.getCoX(), e.getCoY());
@@ -453,7 +459,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
                 // can happen if the handle has a constrained position
                 activePoint = null;
             }
-            owner.updateUI(view);
+            target.updateUI(view);
             updateDirections(); // necessary if dragged through the opposite corner
             addMovementToHistory(e.getComp(), "Change Transform Box");
             return true;
@@ -550,7 +556,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
 
         cornerHandlesMoved();
 
-        owner.updateUI(view);
+        target.updateUI(view);
     }
 
     public Point2D getCenter() {
@@ -614,7 +620,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     public void arrowKeyPressed(ArrowKey key, View view) {
         saveState();
 
-        moveWholeBox(key.getMoveX(), key.getMoveY());
+        moveWholeBox(key.getDeltaX(), key.getDeltaY());
 
         String editName = key.isShiftDown()
             ? "Shift-nudge Transform Box"
@@ -691,7 +697,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     public DebugNode createDebugNode(String key) {
         var node = new DebugNode(key, this);
 
-        node.addNullableDebuggable("owner", owner);
+        node.addNullableDebuggable("target", target);
 
         node.add(nw.createDebugNode());
         node.add(ne.createDebugNode());
@@ -743,7 +749,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         // just to be sure
         updateDirections();
 
-        owner.updateUI(view);
+        target.updateUI(view);
     }
 
     private void addMovementToHistory(Composition comp, String editName) {
@@ -770,7 +776,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     public TransformBoxChangedEdit createMovementEdit(Composition comp, String editName) {
         assert editName != null;
 
-        if (owner instanceof SubPath) {
+        if (target instanceof SubPath) {
             comp.pathChanged();
         }
 

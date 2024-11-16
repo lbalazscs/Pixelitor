@@ -202,9 +202,9 @@ public enum ShapeType {
 
             Rectangle2D r = drag.createPossiblyEmptyImRect();
 
-            double distance = drag.calcImDist();
+            double length = drag.calcImLength();
             var transform = AffineTransform.getTranslateInstance(r.getX(), r.getY());
-            transform.scale(distance, distance); // originally it had a length of 1.0
+            transform.scale(length, length); // originally it had a length of 1.0
 
             // rotate the arrow into the direction of the drag
             double angleInRadians = drag.getDrawAngle();

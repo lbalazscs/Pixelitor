@@ -33,13 +33,14 @@ import static javax.swing.SwingConstants.CENTER;
  * The "About" dialog of the app.
  */
 public class AboutDialog {
-    public static final String HOME_PAGE = "https://pixelitor.sourceforge.io";
+    public static final String WEBSITE_URL = "https://pixelitor.sourceforge.io";
+    private static final String APP_ICON_PATH = "/images/pixelitor_icon48.png";
 
     private AboutDialog() {
         // should not be instantiated
     }
 
-    public static void showDialog(String aboutText) {
+    public static void showDialog(String dialogTitle) {
         var tabbedPane = new JTabbedPane();
 
         tabbedPane.add("About", createAboutPanel());
@@ -47,7 +48,7 @@ public class AboutDialog {
         tabbedPane.add("System Info", new SystemInfoPanel());
 
         new DialogBuilder()
-            .title(aboutText)
+            .title(dialogTitle)
             .content(tabbedPane)
             .withScrollbars()
             .noCancelButton()
@@ -77,10 +78,10 @@ public class AboutDialog {
     private static JComponent createAboutPanel() {
         JComponent p = Box.createVerticalBox();
 
-        addLabel(p, AboutDialog.class.getResource("/images/pixelitor_icon48.png"));
+        addLabel(p, AboutDialog.class.getResource(APP_ICON_PATH));
 
         addLabel(p, "<html><b><font size=+1>Pixelitor</font></b></html>");
-        addLabel(p, "Version " + Pixelitor.VERSION_NUMBER);
+        addLabel(p, "Version " + Pixelitor.VERSION);
         p.add(Box.createRigidArea(new Dimension(10, 20)));
         addLabel(p, "<html><center> Copyright © 2009-2024 László Balázs-Csíki " +
             "<br>and Contributors<br><br>");
@@ -92,12 +93,8 @@ public class AboutDialog {
     }
 
     private static JButton createLinkButton(JComponent aboutPanel) {
-        String linkButtonText;
-        if (Themes.getCurrent().isDark()) {
-            linkButtonText = "<HTML><FONT color=\"#77ABD4\"><U>" + HOME_PAGE + "</U></FONT>";
-        } else {
-            linkButtonText = "<HTML><FONT color=\"#000099\"><U>" + HOME_PAGE + "</U></FONT>";
-        }
+        String fontColor = Themes.getCurrent().isDark() ? "#77ABD4" : "#000099";
+        String linkButtonText = "<html><font color=\"" + fontColor + "\"><u>" + WEBSITE_URL + "</u></font>";
         var linkButton = new JButton(linkButtonText);
 
         linkButton.setHorizontalAlignment(CENTER);
@@ -106,7 +103,7 @@ public class AboutDialog {
         linkButton.setOpaque(false);
         linkButton.setBackground(aboutPanel.getBackground());
         linkButton.setAlignmentX(CENTER_ALIGNMENT);
-        linkButton.addActionListener(new OpenInBrowserAction(null, HOME_PAGE));
+        linkButton.addActionListener(new OpenInBrowserAction(null, WEBSITE_URL));
 
         return linkButton;
     }

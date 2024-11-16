@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,18 +28,18 @@ import static javax.swing.BorderFactory.createCompoundBorder;
 import static javax.swing.BorderFactory.createLineBorder;
 
 /**
- * Represents the selection state of the layer and mask icons.
+ * The visual selection state of the layer and mask icons.
  */
 public enum SelectionState {
     /**
      * The layer is not the active layer.
      */
-    UNSELECTED {
+    INACTIVE {
         @Override
-        protected void show(JLabel layerLabel, JLabel maskLabel) {
-            layerLabel.setBorder(unselectedIconOnUnselectedLayerBorder);
-            if (maskLabel != null) {
-                maskLabel.setBorder(unselectedIconOnUnselectedLayerBorder);
+        protected void applyBorderStyles(JLabel layerIcon, JLabel maskIcon) {
+            layerIcon.setBorder(unselectedIconOnUnselectedLayerBorder);
+            if (maskIcon != null) {
+                maskIcon.setBorder(unselectedIconOnUnselectedLayerBorder);
             }
         }
     },
@@ -48,10 +48,10 @@ public enum SelectionState {
      */
     LAYER_SELECTED {
         @Override
-        protected void show(JLabel layerLabel, JLabel maskLabel) {
-            layerLabel.setBorder(selectedBorder);
-            if (maskLabel != null) {
-                maskLabel.setBorder(unselectedIconOnSelectedLayerBorder);
+        protected void applyBorderStyles(JLabel layerIcon, JLabel maskIcon) {
+            layerIcon.setBorder(selectedBorder);
+            if (maskIcon != null) {
+                maskIcon.setBorder(unselectedIconOnSelectedLayerBorder);
             }
         }
     },
@@ -60,27 +60,26 @@ public enum SelectionState {
      */
     MASK_SELECTED {
         @Override
-        protected void show(JLabel layerLabel, JLabel maskLabel) {
-            layerLabel.setBorder(unselectedIconOnSelectedLayerBorder);
-            if (maskLabel != null) {
-                maskLabel.setBorder(selectedBorder);
+        protected void applyBorderStyles(JLabel layerIcon, JLabel maskIcon) {
+            layerIcon.setBorder(unselectedIconOnSelectedLayerBorder);
+            if (maskIcon != null) {
+                maskIcon.setBorder(selectedBorder);
             }
         }
     };
 
-    private static final Border lightBorder;
+    // used only in other borders
+    private static final Border baseBorder;
 
     static {
         if (JVM.isMac) {
             // seems to be a Mac-specific problem: with LineBorder,
             // a one pixel wide line disappears
-            lightBorder = BorderFactory.createMatteBorder(1, 1, 1, 1, LayerGUI.UNSELECTED_COLOR);
+            baseBorder = BorderFactory.createMatteBorder(1, 1, 1, 1, LayerGUI.UNSELECTED_COLOR);
         } else {
-            lightBorder = createLineBorder(LayerGUI.UNSELECTED_COLOR, 1);
+            baseBorder = createLineBorder(LayerGUI.UNSELECTED_COLOR, 1);
         }
     }
-
-    // used only in other borders
 
     // indicates the selection of a layer or mask icon
     private static Border selectedBorder;
@@ -98,12 +97,12 @@ public enum SelectionState {
     public static void setupBorders(boolean dark) {
         if (dark) {
             Border transparentBorder = createLineBorder(Colors.TRANSPARENT_BLACK, 1);
-            selectedBorder = createCompoundBorder(lightBorder, transparentBorder);
+            selectedBorder = createCompoundBorder(baseBorder, transparentBorder);
             unselectedIconOnSelectedLayerBorder = null;
             unselectedIconOnUnselectedLayerBorder = null;
         } else {
             Border darkBorder = createLineBorder(LayerGUI.SELECTED_COLOR, 1);
-            selectedBorder = createCompoundBorder(lightBorder, darkBorder);
+            selectedBorder = createCompoundBorder(baseBorder, darkBorder);
             unselectedIconOnSelectedLayerBorder = null;
             unselectedIconOnUnselectedLayerBorder = null;
         }
@@ -113,5 +112,5 @@ public enum SelectionState {
      * Shows a selection state on a given layer and mask icon.
      * The mask argument can be null, if there is no mask.
      */
-    protected abstract void show(JLabel layerLabel, JLabel maskLabel);
+    protected abstract void applyBorderStyles(JLabel layerIcon, JLabel maskIcon);
 }

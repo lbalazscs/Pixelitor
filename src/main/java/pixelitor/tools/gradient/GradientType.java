@@ -47,7 +47,7 @@ public enum GradientType {
     }, RADIAL("Radial") {
         @Override
         public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
-            float radius = (float) drag.calcImDist();
+            float radius = (float) drag.calcImLength();
             Point2D center = drag.getStartPoint();
 
             return new RadialGradientPaint(center, radius, center, FRACTIONS,

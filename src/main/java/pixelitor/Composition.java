@@ -66,7 +66,7 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static pixelitor.io.FileUtils.removeExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
+import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
@@ -565,12 +565,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         addLayerNoUI(newLayer);
     }
 
-    public void addNewEmptyImageLayer(String name, boolean bellowActive) {
+    public void addNewEmptyImageLayer(String name, boolean belowActive) {
         var newLayer = ImageLayer.createEmpty(this, name);
         getHolderForNewLayers().adder()
             .withHistory("New Empty Layer")
-            .atPosition(bellowActive ? BELLOW_ACTIVE : ABOVE_ACTIVE)
-            .noUpdate()
+            .atPosition(belowActive ? BELOW_ACTIVE : ABOVE_ACTIVE)
+            .skipCompUpdate()
             .add(newLayer);
     }
 
@@ -585,7 +585,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         new LayerAdder(this)
             .withHistory("New Layer from Visible")
-            .noUpdate()
+            .skipCompUpdate()
             .atIndex(layerList.size())
             .add(newLayer);
     }
@@ -617,7 +617,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // add the flattened layer on top
         adder()
             .atIndex(numLayers)
-            .noUpdate()
+            .skipCompUpdate()
             .add(flattenedLayer);
 
         // remove all other layers

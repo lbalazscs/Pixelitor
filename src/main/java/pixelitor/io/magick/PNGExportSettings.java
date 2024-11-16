@@ -27,8 +27,8 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.util.List;
 
-class PNGExportSettingsPanel extends JPanel implements ExportSettings {
-    public static final ExportSettings INSTANCE = new PNGExportSettingsPanel();
+class PNGExportSettings extends JPanel implements ExportSettings {
+    public static final ExportSettings INSTANCE = new PNGExportSettings();
 
     enum Type {
         RGBA("RGBA (32 bit)"),
@@ -51,7 +51,7 @@ class PNGExportSettingsPanel extends JPanel implements ExportSettings {
     private final JCheckBox interlacedCB;
     private final RangeParam compression;
 
-    private PNGExportSettingsPanel() {
+    private PNGExportSettings() {
         super(new GridBagLayout());
         GridBagHelper gbh = new GridBagHelper(this);
 

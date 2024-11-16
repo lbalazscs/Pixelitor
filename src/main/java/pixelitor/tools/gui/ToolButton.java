@@ -30,25 +30,20 @@ import pixelitor.utils.debug.Debug;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.ItemEvent;
 import java.util.List;
 
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-
 /**
- * The button that activates a tool
+ * A button that activates a tool.
  */
 public class ToolButton extends JToggleButton {
-    public static final int TOOL_ICON_SIZE = 28;
+    public static final int ICON_SIZE = 28;
     private static Color darkThemeSelectedColor = Themes.DEFAULT_ACCENT_COLOR.asColor();
 
     private final Tool tool;
 
     private int numPresets;
-    private JPopupMenu popup;
+    private JPopupMenu presetsMenu;
 
     public ToolButton(Tool tool) {
         this.tool = tool;
@@ -59,11 +54,12 @@ public class ToolButton extends JToggleButton {
 
         putClientProperty("JComponent.sizeVariant", "mini");
 
-        setIcons(tool);
+        setupIcons(tool);
 
         setToolTipText("<html>" + tool.getName()
             + " (<b>" + tool.getActivationKey() + "</b>)");
 
+        // Adds a listener to activate the tool when the button is selected.
         // An item listener is better than an action listener because it
         // is also triggered by keyboard focus traversal selections.
         addItemListener(e -> {
@@ -73,95 +69,80 @@ public class ToolButton extends JToggleButton {
         });
 
         if (tool.canHaveUserPresets()) {
-            createPresetsPopup(tool);
+            initPresetsPopup(tool);
         }
-
-//        setPreferredSize(preferredSize);
     }
 
     @Override
     public void updateUI() {
         if (tool != null) { // changing the theme
-            setIcons(tool);
+            setupIcons(tool);
         }
         super.updateUI();
     }
 
-    private void setIcons(Tool tool) {
+    private void setupIcons(Tool tool) {
         VectorIcon toolIcon = tool.createIcon();
         setIcon(toolIcon);
 
-        if (Themes.getCurrent().isDark()) {
-            setSelectedIcon(toolIcon.copy(darkThemeSelectedColor));
-        } else {
-            // set it explicitly, so that it's updated
-            // when the theme changes from dark to light
-            setSelectedIcon(toolIcon);
-        }
+        VectorIcon selectedIcon = Themes.getCurrent().isDark()
+            ? toolIcon.copy(darkThemeSelectedColor)
+            : toolIcon;
+        setSelectedIcon(selectedIcon);
     }
 
-    private void createPresetsPopup(Tool tool) {
+    private void initPresetsPopup(Tool tool) {
         List<UserPreset> startupPresets = UserPreset.detectPresetNames(tool.getPresetDirName());
         numPresets = startupPresets.size();
 
-        popup = new JPopupMenu();
+        presetsMenu = new JPopupMenu();
 
         if (AppMode.isDevelopment()) {
-            popup.add(new PAction("Internal State...", () ->
+            presetsMenu.add(new PAction("Internal State...", () ->
                 Debug.showTree(tool, tool.getName())));
-            popup.addSeparator();
+            presetsMenu.addSeparator();
         }
 
-        popup.add(tool.createSavePresetAction(this,
-            this::addPreset, this::removePreset));
+        presetsMenu.add(tool.createSavePresetAction(this,
+            this::addPresetMenuItem, this::removePresetMenuItem));
+
         if (!startupPresets.isEmpty()) {
             if (GUIUtils.CAN_USE_FILE_MANAGER) {
-                popup.add(tool.createManagePresetsAction());
+                presetsMenu.add(tool.createManagePresetsAction());
             }
-            popup.addSeparator();
+            presetsMenu.addSeparator();
             for (UserPreset preset : startupPresets) {
-                popup.add(preset.createAction(tool));
+                presetsMenu.add(preset.createAction(tool));
             }
         }
 
-        setComponentPopupMenu(popup);
+        setComponentPopupMenu(presetsMenu);
     }
 
-    private void addPreset(UserPreset preset) {
+    private void addPresetMenuItem(UserPreset preset) {
         if (numPresets == 0) {
             if (GUIUtils.CAN_USE_FILE_MANAGER) {
-                popup.add(tool.createManagePresetsAction());
+                presetsMenu.add(tool.createManagePresetsAction());
             }
-            popup.addSeparator();
+            presetsMenu.addSeparator();
         }
-        popup.add(preset.createAction(tool));
+        presetsMenu.add(preset.createAction(tool));
         numPresets++;
     }
 
-    private void removePreset(UserPreset preset) {
-        Component[] menuComponents = popup.getComponents();
+    private void removePresetMenuItem(UserPreset preset) {
+        Component[] menuComponents = presetsMenu.getComponents();
         for (Component item : menuComponents) {
-            if (item instanceof JMenuItem menuItem) {
-                if (menuItem.getText().equals(preset.getName())) {
-                    popup.remove(menuItem);
-                    numPresets--;
-                    break;
-                }
+            if (item instanceof JMenuItem menuItem && menuItem.getText().equals(preset.getName())) {
+                presetsMenu.remove(menuItem);
+                numPresets--;
+                break;
             }
         }
     }
 
     public Tool getTool() {
         return tool;
-    }
-
-    @Override
-    public void paintComponent(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        if (tool == Tools.BRUSH) {
-            g2d.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-        }
-        super.paintComponent(g2d);
     }
 
     public static void setDarkThemeSelectedColor(Color darkThemeSelectedColor) {

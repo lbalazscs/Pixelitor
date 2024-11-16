@@ -217,7 +217,7 @@ public class MoveTool extends DragTool {
             return true;
         }
 
-        move(view.getComp(), currentMode, key.getMoveX(), key.getMoveY());
+        move(view.getComp(), currentMode, key.getDeltaX(), key.getDeltaY());
         return true;
     }
 
@@ -249,7 +249,7 @@ public class MoveTool extends DragTool {
         if (sel != null && transformBox == null) {
             Rectangle boxSize = view.imageToComponentSpace(sel.getShapeBounds2D());
             boxSize.grow(10, 10); // make sure the rectangular selections are visible
-            transformBox = new TransformBox(boxSize, view, new SelectionTransformable(sel), true);
+            transformBox = new TransformBox(boxSize, view, sel, true);
             sel.startMovement();
         }
     }

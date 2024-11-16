@@ -339,8 +339,8 @@ public class WorkflowTest {
         app.addShapesLayer(CAT, secondCatLoc);
 
         // ensure that the first layer is selected and the box is not shown
-        app.selectLayerBellow();
-        app.selectLayerBellow();
+        app.selectLayerBelow();
+        app.selectLayerBelow();
 
         // double the text
         app.clickLayerPopup("smart TEXT", "Edit Contents");
@@ -411,7 +411,7 @@ public class WorkflowTest {
         app.runMenuCommand("Edit Contents");
 
         // In the contents add a plasma image layer
-        // bellow the existing text layer.
+        // below the existing text layer.
         app.addEmptyImageLayer(false);
         app.runMenuCommand("Lower Layer");
         keyboard.undoRedo("Lower Layer");
@@ -439,7 +439,7 @@ public class WorkflowTest {
         app.runMenuCommand("Duplicate Layer");
 
         // add a smart filter to the original smart object and copy it
-        app.selectLayerBellow();
+        app.selectLayerBelow();
         runFilterWithDialog("Colorize");
         app.clickLayerPopup("Colorize", "Copy Colorize");
 
@@ -495,7 +495,7 @@ public class WorkflowTest {
         duplicateLayerThenUndo(SmartObject.class);
         cloneSmartObjectThenUndo();
 
-        // add a smart object bellow it
+        // add a smart object below it
         app.addColorFillLayer(Color.BLUE);
         convertLayerToSmartObject();
         app.runMenuCommand("Lower Layer");

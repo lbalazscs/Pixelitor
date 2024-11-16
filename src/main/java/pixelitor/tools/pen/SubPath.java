@@ -554,8 +554,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void deletePoint(AnchorPoint ap) {
-        // doesn't use List.remove, because it uses equals
-        // and not reference equality
+        // doesn't use List.remove, because we want to delete by ==, not equals
         int index = -1;
         for (int i = 0; i < anchorPoints.size(); i++) {
             if (anchorPoints.get(i) == ap) {

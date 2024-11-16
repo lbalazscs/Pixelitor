@@ -58,45 +58,45 @@ import static pixelitor.utils.Texts.i18n;
  * The main application window.
  */
 public class PixelitorWindow extends JFrame {
-    private static final String FIX_TITLE = calcFixTitle();
+    private static final String BASE_TITLE = calcBaseTitle();
 
-    private JPanel eastPanel;
+    private JPanel sidePanel; // layers and histograms
     private ToolsPanel toolsPanel;
+    private final WorkSpace workSpace;
 
     // normal bounds: the window bounds when it is not maximized
     private Rectangle lastNormalBounds; // the last one before maximization
     private Rectangle savedNormalBounds; // the saved one
 
-    private final WorkSpace workSpace;
-
     private PixelitorWindow() {
-        super(FIX_TITLE);
+        super(BASE_TITLE);
 
         workSpace = new WorkSpace();
 
         Dimension screenSize = Screens.getMaxWindowSize();
 
-        setupWindowEvents();
-
-        addMenus();
+        addMenuBar();
         addImageArea();
-        addLayersAndHistograms();
+        addSidePanel();
         addToolsPanel(screenSize);
         Tools.setDefaultTool();
         addStatusBar();
 
-        setupIcons();
+        initIcons();
 
         GlobalEvents.init();
 
-        AppPreferences.loadFramePosition(this, screenSize);
+        initWindow(screenSize);
+    }
 
+    private void initWindow(Dimension screenSize) {
+        AppPreferences.loadFramePosition(this, screenSize);
         if (JVM.isWindows) {
             // this is tricky code, and had problems on Linux
             setupRememberingLastBounds();
             setupFirstUnMaximization();
         }
-
+        configureWindowEvents();
         setVisible(true);
     }
 
@@ -104,13 +104,13 @@ public class PixelitorWindow extends JFrame {
         workSpace.restoreDefaults(this);
     }
 
-    private void setupWindowEvents() {
+    private void configureWindowEvents() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(
             new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent we) {
-                    Pixelitor.warnAndExit(PixelitorWindow.this);
+                    Pixelitor.exitApp(PixelitorWindow.this);
                 }
 
                 @Override
@@ -124,24 +124,25 @@ public class PixelitorWindow extends JFrame {
         );
     }
 
-    private void addMenus() {
+    private void addMenuBar() {
         setJMenuBar(new MenuBar(this));
 
         setupMacHandlers();
     }
 
     private void setupMacHandlers() {
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            if (desktop.isSupported(APP_ABOUT)) {
-                desktop.setAboutHandler(e -> AboutDialog.showDialog(i18n("about")));
-            }
-            if (desktop.isSupported(APP_PREFERENCES)) {
-                desktop.setPreferencesHandler(e -> PreferencesPanel.showInDialog());
-            }
-            if (desktop.isSupported(APP_QUIT_HANDLER)) {
-                desktop.setQuitHandler((e, r) -> Pixelitor.warnAndExit(this));
-            }
+        if (!Desktop.isDesktopSupported()) {
+            return;
+        }
+        Desktop desktop = Desktop.getDesktop();
+        if (desktop.isSupported(APP_ABOUT)) {
+            desktop.setAboutHandler(e -> AboutDialog.showDialog(i18n("about")));
+        }
+        if (desktop.isSupported(APP_PREFERENCES)) {
+            desktop.setPreferencesHandler(e -> PreferencesPanel.showInDialog());
+        }
+        if (desktop.isSupported(APP_QUIT_HANDLER)) {
+            desktop.setQuitHandler((e, r) -> Pixelitor.exitApp(this));
         }
     }
 
@@ -153,19 +154,19 @@ public class PixelitorWindow extends JFrame {
         remove(c);
     }
 
-    private void addLayersAndHistograms() {
-        eastPanel = new JPanel(new BorderLayout());
+    private void addSidePanel() {
+        sidePanel = new JPanel(new BorderLayout());
         HistogramsPanel histogramsPanel = HistogramsPanel.getInstance();
         Views.addActivationListener(histogramsPanel);
 
         if (workSpace.areHistogramsVisible()) {
-            eastPanel.add(histogramsPanel, NORTH);
+            sidePanel.add(histogramsPanel, NORTH);
         }
         if (workSpace.areLayersVisible()) {
-            eastPanel.add(LayersContainer.get(), CENTER);
+            sidePanel.add(LayersContainer.get(), CENTER);
         }
 
-        add(eastPanel, EAST);
+        add(sidePanel, EAST);
     }
 
     private void addToolsPanel(Dimension screenSize) {
@@ -183,7 +184,7 @@ public class PixelitorWindow extends JFrame {
         }
     }
 
-    private void setupIcons() {
+    private void initIcons() {
         var clazz = getClass();
         URL imgURL32 = clazz.getResource("/images/pixelitor_icon32.png");
         URL imgURL48 = clazz.getResource("/images/pixelitor_icon48.png");
@@ -197,15 +198,19 @@ public class PixelitorWindow extends JFrame {
             icons.add(img256);
             setIconImages(icons);
 
-            if (Taskbar.isTaskbarSupported()) {
-                Taskbar taskBar = Taskbar.getTaskbar();
-                if (taskBar.isSupported(ICON_IMAGE)) {
-                    taskBar.setIconImage(img256);
-                }
-            }
+            setTaskbarIcon(img256);
         } else {
             Dialogs.showErrorDialog(this, "Error",
                 "icon imgURL is null");
+        }
+    }
+
+    private static void setTaskbarIcon(Image img256) {
+        if (Taskbar.isTaskbarSupported()) {
+            Taskbar taskBar = Taskbar.getTaskbar();
+            if (taskBar.isSupported(ICON_IMAGE)) {
+                taskBar.setIconImage(img256);
+            }
         }
     }
 
@@ -217,7 +222,8 @@ public class PixelitorWindow extends JFrame {
     }
 
     /**
-     * See "Effective Java" 2nd edition, Item 71
+     * Singleton holder for the main window instance.
+     * Uses initialization-on-demand holder idiom for thread-safe lazy initialization.
      */
     private static class PixelitorWindowHolder {
         static final PixelitorWindow field = new PixelitorWindow();
@@ -239,29 +245,29 @@ public class PixelitorWindow extends JFrame {
         HistogramsPanel histogramsPanel = HistogramsPanel.getInstance();
         if (visible) {
             assert !HistogramsPanel.isShown();
-            eastPanel.add(histogramsPanel, NORTH);
+            sidePanel.add(histogramsPanel, NORTH);
             HistogramsPanel.updateFromActiveComp();
         } else {
-            assert histogramsPanel.getParent() == eastPanel;
-            eastPanel.remove(histogramsPanel);
+            assert histogramsPanel.getParent() == sidePanel;
+            sidePanel.remove(histogramsPanel);
         }
 
         if (revalidate) {
-            eastPanel.revalidate();
+            sidePanel.revalidate();
         }
     }
 
     public void setLayersVisible(boolean visible, boolean revalidate) {
         if (visible) {
             assert LayersContainer.parentIs(null);
-            eastPanel.add(LayersContainer.get(), CENTER);
+            sidePanel.add(LayersContainer.get(), CENTER);
         } else {
-            assert LayersContainer.parentIs(eastPanel);
-            eastPanel.remove(LayersContainer.get());
+            assert LayersContainer.parentIs(sidePanel);
+            sidePanel.remove(LayersContainer.get());
         }
 
         if (revalidate) {
-            eastPanel.revalidate();
+            sidePanel.revalidate();
         }
     }
 
@@ -288,12 +294,16 @@ public class PixelitorWindow extends JFrame {
         return toolsPanel.getParent() != null;
     }
 
-    private static String calcFixTitle() {
-        String fixTitle = "Pixelitor " + Pixelitor.VERSION_NUMBER;
+    /**
+     * Calculates the base title of the app, which is appended to
+     * composition names when files are open.
+     */
+    private static String calcBaseTitle() {
+        String baseTitle = "Pixelitor " + Pixelitor.VERSION;
         if (AppMode.isDevelopment()) {
-            fixTitle += " DEVELOPMENT " + System.getProperty("java.version");
+            baseTitle += " DEVELOPMENT " + System.getProperty("java.version");
         }
-        return fixTitle;
+        return baseTitle;
     }
 
     /**
@@ -302,9 +312,9 @@ public class PixelitorWindow extends JFrame {
     public void updateTitle(Composition comp) {
         String title;
         if (comp != null) {
-            title = comp.calcTitle() + " - " + FIX_TITLE;
+            title = comp.calcTitle() + " - " + BASE_TITLE;
         } else {
-            title = FIX_TITLE;
+            title = BASE_TITLE;
         }
         setTitle(title);
     }

@@ -316,7 +316,7 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public void arrowKeyPressed(ArrowKey key) {
-        translate(key.getMoveX(), key.getMoveY());
+        translate(key.getDeltaX(), key.getDeltaY());
     }
 
     public void setActive(boolean activate) {

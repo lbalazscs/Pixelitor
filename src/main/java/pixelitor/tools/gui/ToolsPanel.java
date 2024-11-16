@@ -30,8 +30,6 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
-import static pixelitor.tools.gui.ToolButton.TOOL_ICON_SIZE;
-
 /**
  * The panel with the tool buttons and the color selector
  */
@@ -73,22 +71,24 @@ public class ToolsPanel extends JPanel {
     }
 
     private static Dimension calcToolButtonSize(Dimension screen, PixelitorWindow pw) {
-        Dimension buttonSize;
-
         int effectiveScreenHeight = (int) (screen.height / pw.getHiDPIScaling().getScaleY());
+
+        int heightAdjustment;
         if (effectiveScreenHeight < 700) {
             // 720 is the lowest supported height.
             // The taskbar is already subtracted from the screen size.
-            buttonSize = new Dimension(TOOL_ICON_SIZE + 14, TOOL_ICON_SIZE + 8);
+            heightAdjustment = 8;
         } else if (effectiveScreenHeight < 770) {
             // Laptops with the height of 768 px are also common.
-            buttonSize = new Dimension(TOOL_ICON_SIZE + 14, TOOL_ICON_SIZE + 10);
+            heightAdjustment = 10;
         } else {
             // in the ideal case the button can be square
-            buttonSize = new Dimension(TOOL_ICON_SIZE + 14, TOOL_ICON_SIZE + 14);
+            heightAdjustment = 14;
         }
 
-        return buttonSize;
+        return new Dimension(
+            ToolButton.ICON_SIZE + 14,
+            ToolButton.ICON_SIZE + heightAdjustment);
     }
 
     private static void setupKeyboardShortcut(Tool tool) {

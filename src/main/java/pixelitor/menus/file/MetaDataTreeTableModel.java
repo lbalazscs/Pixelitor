@@ -23,10 +23,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
 /**
- * The model for the metadata tree-table
+ * A tree-table model for displaying hierarchical metadata information.
  */
 public class MetaDataTreeTableModel extends AbstractTreeTableModel {
     private static final String[] COLUMN_NAMES = {"Name", "Value"};
+    private static final int COLUMN_INDEX_NAME = 0;
+    private static final int COLUMN_INDEX_VALUE = 1;
 
     public MetaDataTreeTableModel(TreeNode root) {
         super(root);
@@ -35,21 +37,20 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
     @Override
     public Object getValueAt(Object node, int column) {
         DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
-        Object userObject = treeNode.getUserObject();
-        return switch (userObject) {
-            case String s -> switch (column) {
-                // a String means a "directory node" with no value
-                case 0 -> s;
-                case 1 -> null;
+        Object nodeData = treeNode.getUserObject();
+        return switch (nodeData) {
+            case String categoryName -> switch (column) {
+                case COLUMN_INDEX_NAME -> categoryName;
+                case COLUMN_INDEX_VALUE -> null; // category nodes don't have values
                 default -> throw new IllegalStateException("Unexpected column: " + column);
             };
-            case NameValue nameValue -> switch (column) {
+            case Property property -> switch (column) {
                 // a leaf node was found
-                case 0 -> nameValue.name();
-                case 1 -> nameValue.value();
+                case COLUMN_INDEX_NAME -> property.name();
+                case COLUMN_INDEX_VALUE -> property.value();
                 default -> throw new IllegalStateException("Unexpected column: " + column);
             };
-            default -> throw new IllegalStateException("Unexpected type: " + userObject.getClass().getName());
+            default -> throw new IllegalStateException("Unexpected type: " + nodeData.getClass().getName());
         };
     }
 
@@ -78,6 +79,9 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
         return COLUMN_NAMES[column];
     }
 
-    public record NameValue(String name, String value) {
+    /**
+     * A metadata property with a name and value.
+     */
+    public record Property(String name, String value) {
     }
 }

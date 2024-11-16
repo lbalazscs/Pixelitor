@@ -40,27 +40,27 @@ public class StatusBar extends JPanel {
     private static final StatusBar INSTANCE = new StatusBar();
 
     private final JLabel messageLabel;
-    private final JPanel progressPanel;
+    private final JPanel progressContainer;
 
-    private static int numProgressBars = 0;
+    private static int activeProgressBarCount = 0;
 
     private StatusBar() {
         super(new BorderLayout(0, 0));
 
-        progressPanel = new JPanel(new FlowLayout(LEFT, 5, 0));
+        progressContainer = new JPanel(new FlowLayout(LEFT, 5, 0));
         messageLabel = new JLabel(INITIAL_MESSAGE);
         // messageLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-        progressPanel.add(messageLabel);
+        progressContainer.add(messageLabel);
 
-        add(progressPanel, CENTER);
+        add(progressContainer, CENTER);
         add(ZoomControl.get(), EAST);
 
         setBorder(createEtchedBorder());
     }
 
-    public void setMessage(String msg) {
+    public void updateMessage(String msg) {
         assert msg != null;
-        if (numProgressBars > 0) {
+        if (activeProgressBarCount > 0) {
             // ignore any messages
         } else {
             messageLabel.setText(msg);
@@ -74,10 +74,11 @@ public class StatusBar extends JPanel {
         assert calledOnEDT() : threadInfo();
         assert msg != null;
 
+        // each progress handler will add its own label 
         messageLabel.setText("");
 
-        numProgressBars++;
-        return new StatusBarProgressHandler(progressPanel, msg, max);
+        activeProgressBarCount++;
+        return new StatusBarProgressHandler(progressContainer, msg, max);
     }
 
     public static StatusBar get() {
@@ -89,7 +90,9 @@ public class StatusBar extends JPanel {
     }
 
     /**
-     * Handles the display and updates of a progress bar within the status bar.
+     * A handler for managing a progress bar in the status bar.
+     * If multiple handlers are active at the same time,
+     * then each of them has its own progress bar.
      */
     static class StatusBarProgressHandler implements ProgressHandler {
         private final JLabel msgLabel;
@@ -134,8 +137,6 @@ public class StatusBar extends JPanel {
             assert calledOnEDT() : threadInfo();
 
             if (!determinate) {
-                // probably this is not necessary to stop
-                // the indeterminate animation, but can't be bad
                 progressBar.setValue(100);
                 progressBar.setIndeterminate(false);
             }
@@ -145,7 +146,7 @@ public class StatusBar extends JPanel {
 
             container.revalidate();
             container.repaint();
-            numProgressBars--;
+            activeProgressBarCount--;
         }
     }
 }

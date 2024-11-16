@@ -49,7 +49,7 @@ public interface LayerHolder extends Debuggable {
     boolean containsLayerOfType(Class<? extends Layer> type);
 
     default void addLayerNoUI(Layer newLayer) {
-        adder().noUI().add(newLayer);
+        adder().skipUIAdd().add(newLayer);
     }
 
     default void addWithHistory(Layer newLayer, String editName) {
@@ -233,8 +233,8 @@ public interface LayerHolder extends Debuggable {
     default boolean canMergeDown(Layer layer) {
         int index = indexOf(layer);
         if (index > 0 && layer.isVisible()) {
-            Layer bellow = getLayer(index - 1);
-            return bellow.getClass() == ImageLayer.class && bellow.isVisible();
+            Layer below = getLayer(index - 1);
+            return below.getClass() == ImageLayer.class && below.isVisible();
         }
         return false;
     }
@@ -242,27 +242,27 @@ public interface LayerHolder extends Debuggable {
     // this method assumes that canMergeDown() previously returned true
     default void mergeDown(Layer layer) {
         int layerIndex = indexOf(layer);
-        var bellowLayer = (ImageLayer) getLayer(layerIndex - 1);
+        var belowLayer = (ImageLayer) getLayer(layerIndex - 1);
 
-        var bellowImage = bellowLayer.getImage();
+        var belowImage = belowLayer.getImage();
         var maskViewModeBefore = getComp().getView().getMaskViewMode();
-        var imageBefore = ImageUtils.copyImage(bellowImage);
+        var imageBefore = ImageUtils.copyImage(belowImage);
 
         // apply the effect of the merged layer to the image of the image layer
-        Graphics2D g = bellowImage.createGraphics();
-        g.translate(-bellowLayer.getTx(), -bellowLayer.getTy());
-        BufferedImage result = layer.applyLayer(g, bellowImage, false);
+        Graphics2D g = belowImage.createGraphics();
+        g.translate(-belowLayer.getTx(), -belowLayer.getTy());
+        BufferedImage result = layer.applyLayer(g, belowImage, false);
         if (result != null) {  // this was an adjustment
-            bellowLayer.setImage(result);
+            belowLayer.setImage(result);
         }
         g.dispose();
 
-        bellowLayer.updateIconImage();
+        belowLayer.updateIconImage();
 
         deleteLayer(layer, false);
 
         History.add(new MergeDownEdit(this, layer,
-            bellowLayer, imageBefore, maskViewModeBefore, layerIndex));
+            belowLayer, imageBefore, maskViewModeBefore, layerIndex));
     }
 
     default boolean isHolderOfActiveLayer() {

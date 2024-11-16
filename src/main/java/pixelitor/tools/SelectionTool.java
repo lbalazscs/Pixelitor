@@ -323,7 +323,7 @@ public class SelectionTool extends DragTool {
             var comp = view.getComp();
             var selection = comp.getSelection();
             if (selection != null) {
-                selection.nudge(key.asTransform());
+                selection.nudge(key.toTransform());
                 return true;
             }
         }

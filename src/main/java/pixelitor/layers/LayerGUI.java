@@ -579,7 +579,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     @Override
     public void updateSelectionState() {
         if (!layer.isActive()) {
-            setSelectionState(SelectionState.UNSELECTED);
+            setSelectionState(SelectionState.INACTIVE);
         } else if (layer.isMaskEditing()) {
             setSelectionState(SelectionState.MASK_SELECTED);
         } else {
@@ -590,7 +590,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private void setSelectionState(SelectionState newSelectionState) {
         if (newSelectionState != selectionState) {
             selectionState = newSelectionState;
-            selectionState.show(layerIconLabel, maskIconLabel);
+            selectionState.applyBorderStyles(layerIconLabel, maskIconLabel);
         }
     }
 

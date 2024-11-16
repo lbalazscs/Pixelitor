@@ -30,7 +30,7 @@ public class AppNode extends DebugNode {
     public AppNode() {
         super("Pixelitor", PixelitorWindow.get());
 
-        addQuotedString("version", Pixelitor.VERSION_NUMBER);
+        addQuotedString("version", Pixelitor.VERSION);
         add(DebugNodes.createSystemNode());
         add(Tools.getActive().createDebugNode("active tool"));
         add(History.createDebugNode());

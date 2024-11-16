@@ -101,8 +101,8 @@ public class ImageMagick {
             return ExportSettings.DEFAULTS;
         }
         return switch (ext.toLowerCase(Locale.ROOT)) {
-            case "png" -> PNGExportSettingsPanel.INSTANCE;
-            case "webp" -> WebpExportSettingsPanel.INSTANCE;
+            case "png" -> PNGExportSettings.INSTANCE;
+            case "webp" -> WebPExportSettings.INSTANCE;
             default -> ExportSettings.DEFAULTS;
         };
     }

@@ -267,8 +267,8 @@ public class CropBox implements ToolWidget {
 
         Rectangle2D im = cropRect.getIm();
         im.setRect(
-            im.getX() + key.getMoveX() * moveScale,
-            im.getY() + key.getMoveY() * moveScale,
+            im.getX() + key.getDeltaX() * moveScale,
+            im.getY() + key.getDeltaY() * moveScale,
             im.getWidth(),
             im.getHeight()
         );

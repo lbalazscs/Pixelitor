@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,42 +33,45 @@ import java.awt.print.PrinterException;
 public class PrintPreviewPanel extends JPanel {
     private static final int SIZE = 500;
     private static final int MARGIN = 20;
-    private Rectangle2D paperRect;
+
     private final Dimension size = new Dimension(SIZE, SIZE);
-    private PageFormat pageFormat;
     private final Printable printable;
+
+    private Rectangle2D paperBounds;
+    private PageFormat pageFormat;
     private double scaling;
 
     public PrintPreviewPanel(PageFormat pageFormat, Printable printable) {
         this.pageFormat = pageFormat;
         this.printable = printable;
 
-        setPageFormat(pageFormat);
+        updatePageFormat(pageFormat);
     }
 
-    private void setPageFormat(PageFormat pageFormat) {
+    private void updatePageFormat(PageFormat pageFormat) {
         this.pageFormat = pageFormat;
 
         // the paper is within the margin, centered
         double aspectRatio = pageFormat.getWidth() / pageFormat.getHeight();
-        double maxRectSize = SIZE - 2 * MARGIN;
+        double maxContentSize = SIZE - 2 * MARGIN;
+        
         if (aspectRatio > 1) { // fit to the width
-            double rectWith = maxRectSize;
+            double rectWith = maxContentSize;
             double rectHeight = rectWith / aspectRatio;
-            paperRect = new Rectangle2D.Double(
+            paperBounds = new Rectangle2D.Double(
                 MARGIN, (SIZE - rectHeight) / 2, rectWith, rectHeight);
             scaling = rectWith / pageFormat.getWidth();
         } else { // fit to the height
-            double rectHeight = maxRectSize;
+            double rectHeight = maxContentSize;
             double rectWidth = rectHeight * aspectRatio;
-            paperRect = new Rectangle2D.Double(
+            paperBounds = new Rectangle2D.Double(
                 (SIZE - rectWidth) / 2, MARGIN, rectWidth, rectHeight);
             scaling = rectHeight / pageFormat.getHeight();
         }
     }
 
     public void updatePage(PageFormat pageFormat) {
-        setPageFormat(pageFormat);
+        updatePageFormat(pageFormat);
         repaint();
     }
 
@@ -78,19 +81,22 @@ public class PrintPreviewPanel extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
         AffineTransform origTransform = g2.getTransform();
-        g2.setColor(Color.WHITE);
-        g2.fill(paperRect);
 
-        // Simulate the actual printing Graphics.
-        // A difference is that this one doesn't implement PrinterGraphics.
-        g2.setClip(paperRect);
-        g2.translate(paperRect.getX(), paperRect.getY());
+        // draw paper background
+        g2.setColor(Color.WHITE);
+        g2.fill(paperBounds);
+
+        // set up transformation for content
+        g2.setClip(paperBounds);
+        g2.translate(paperBounds.getX(), paperBounds.getY());
         g2.scale(scaling, scaling);
+
         try {
             printable.print(g2, pageFormat, 0);
         } catch (PrinterException e) {
             Messages.showException(e);
         }
+
         g2.setTransform(origTransform);
     }
 

@@ -434,14 +434,14 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         // 2) Create a horizontal box for it.
         // 3) Rotate the box (an implicitly the shape) forwards.
 
-        double imDist = transformedDrag.calcImDist();
+        double dragLength = transformedDrag.calcImLength();
         double dragStartX = transformedDrag.getStartXFromCenter();
         double dragStartY = transformedDrag.getStartYFromCenter();
         Rectangle2D horBoxImBounds = new Rectangle2D.Double(
             dragStartX,
-            dragStartY - imDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
-            imDist,
-            imDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
+            dragStartY - dragLength * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
+            dragLength,
+            dragLength * Shapes.UNIT_ARROW_HEAD_WIDTH);
         assert !horBoxImBounds.isEmpty();
 
         double rotCenterImX = horBoxImBounds.getX();
@@ -457,11 +457,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         // Set the original drag to the diagonal of the back-rotated transform box,
         // so that after a shape-type change the new shape is created correctly
-        double halfImHeight = imDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0;
+        double halfImHeight = dragLength * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0;
         origDrag = new Drag(
             dragStartX,
             dragStartY - halfImHeight,
-            dragStartX + imDist,
+            dragStartX + dragLength,
             dragStartY + halfImHeight);
 
         TransformBox box = new TransformBox(horBoxImBounds, view, this);

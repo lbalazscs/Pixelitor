@@ -56,7 +56,7 @@ public enum Language {
     private static Language currentLang = ENGLISH;
     private static final Language[] languages = values();
 
-    public static boolean isCodeSupported(String code) {
+    public static boolean isSupported(String code) {
         for (Language lang : languages) {
             if (lang.getCode().equals(code)) {
                 return true;

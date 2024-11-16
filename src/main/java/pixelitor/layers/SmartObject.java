@@ -834,12 +834,12 @@ public class SmartObject extends CompositeLayer {
         SmartFilter filterA = filters.get(indexA);
         SmartFilter filterB = filters.get(indexB);
 
-        // handle the filter bellow them
-        SmartFilter bellow = null;
+        // handle the filter below them
+        SmartFilter below = null;
         if (indexA != 0) {
-            bellow = filters.get(indexA - 1);
-            assert bellow.getNext() == filterA;
-            bellow.setNext(filterB);
+            below = filters.get(indexA - 1);
+            assert below.getNext() == filterA;
+            below.setNext(filterB);
         }
 
         // handle the swap
@@ -869,7 +869,7 @@ public class SmartObject extends CompositeLayer {
         updateChildrenUI();
 
         // update the image
-        SmartFilter lowestChanged = bellow != null ? bellow : filterB;
+        SmartFilter lowestChanged = below != null ? below : filterB;
         lowestChanged.invalidateChain();
         invalidateImageCache();
         holder.update();

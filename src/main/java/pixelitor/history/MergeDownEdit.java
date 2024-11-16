@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,11 +36,11 @@ public class MergeDownEdit extends PixelitorEdit {
     private final DeleteLayerEdit deleteLayerEdit;
     private final MaskViewMode maskViewMode;
     private final Layer layer;
-    private final ImageLayer bellowLayer;
+    private final ImageLayer belowLayer;
 
     public MergeDownEdit(LayerHolder holder,
                          Layer layer,
-                         ImageLayer bellowLayer,
+                         ImageLayer belowLayer,
                          BufferedImage backupImage,
                          MaskViewMode maskViewMode,
                          int activeIndex) {
@@ -48,9 +48,9 @@ public class MergeDownEdit extends PixelitorEdit {
 
         this.layer = layer;
         this.maskViewMode = maskViewMode;
-        this.bellowLayer = bellowLayer;
+        this.belowLayer = belowLayer;
 
-        imageEdit = new ImageEdit("", comp, bellowLayer, backupImage, true);
+        imageEdit = new ImageEdit("", comp, belowLayer, backupImage, true);
         imageEdit.setEmbedded(true);
         deleteLayerEdit = new DeleteLayerEdit(holder, layer, activeIndex);
         deleteLayerEdit.setEmbedded(true);
@@ -63,7 +63,7 @@ public class MergeDownEdit extends PixelitorEdit {
         imageEdit.undo();
         deleteLayerEdit.undo();
 
-        bellowLayer.updateIconImage();
+        belowLayer.updateIconImage();
 
         // restore the original mask view mode of the merged layer
         if (layer.hasMask()) {
@@ -78,7 +78,7 @@ public class MergeDownEdit extends PixelitorEdit {
         imageEdit.redo();
         deleteLayerEdit.redo();
 
-        bellowLayer.updateIconImage();
+        belowLayer.updateIconImage();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class MergeDownEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode(key);
 
         node.add(layer.createDebugNode());
-        node.add(bellowLayer.createDebugNode());
+        node.add(belowLayer.createDebugNode());
         node.addAsString("mask view mode", maskViewMode);
         node.add(imageEdit.createDebugNode("image edit"));
         node.add(deleteLayerEdit.createDebugNode("delete layer edit"));

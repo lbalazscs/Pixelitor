@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,106 +19,35 @@ package pixelitor.tools.util;
 
 import java.awt.geom.AffineTransform;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_LEFT;
+import static java.awt.event.KeyEvent.VK_RIGHT;
+import static java.awt.event.KeyEvent.VK_UP;
 
 /**
  * Represents an arrow key (that can be used for nudging),
  * possibly with a shift modifier (indicating a faster nudge).
  */
 public enum ArrowKey {
-    UP(false, VK_UP) {
-        @Override
-        public int getMoveX() {
-            return 0;
-        }
-
-        @Override
-        public int getMoveY() {
-            return -1;
-        }
-    }, SHIFT_UP(true, VK_UP) {
-        @Override
-        public int getMoveX() {
-            return 0;
-        }
-
-        @Override
-        public int getMoveY() {
-            return -SHIFT_MULTIPLIER;
-        }
-    }, DOWN(false, VK_DOWN) {
-        @Override
-        public int getMoveX() {
-            return 0;
-        }
-
-        @Override
-        public int getMoveY() {
-            return 1;
-        }
-    }, SHIFT_DOWN(true, VK_DOWN) {
-        @Override
-        public int getMoveX() {
-            return 0;
-        }
-
-        @Override
-        public int getMoveY() {
-            return SHIFT_MULTIPLIER;
-        }
-    }, RIGHT(false, VK_RIGHT) {
-        @Override
-        public int getMoveX() {
-            return 1;
-        }
-
-        @Override
-        public int getMoveY() {
-            return 0;
-        }
-    }, SHIFT_RIGHT(true, VK_RIGHT) {
-        @Override
-        public int getMoveX() {
-            return SHIFT_MULTIPLIER;
-        }
-
-        @Override
-        public int getMoveY() {
-            return 0;
-        }
-    }, LEFT(false, VK_LEFT) {
-        @Override
-        public int getMoveX() {
-            return -1;
-        }
-
-        @Override
-        public int getMoveY() {
-            return 0;
-        }
-    }, SHIFT_LEFT(true, VK_LEFT) {
-        @Override
-        public int getMoveX() {
-            return -SHIFT_MULTIPLIER;
-        }
-
-        @Override
-        public int getMoveY() {
-            return 0;
-        }
-    };
-
-    /**
-     * When Shift is pressed, everything is nudged faster.
-     */
-    private static final int SHIFT_MULTIPLIER = 10;
+    UP(false, VK_UP, 0, -1),
+    SHIFT_UP(true, VK_UP, 0, -10),
+    DOWN(false, VK_DOWN, 0, 1),
+    SHIFT_DOWN(true, VK_DOWN, 0, 10),
+    RIGHT(false, VK_RIGHT, 1, 0),
+    SHIFT_RIGHT(true, VK_RIGHT, 10, 0),
+    LEFT(false, VK_LEFT, -1, 0),
+    SHIFT_LEFT(true, VK_LEFT, -10, 0);
 
     private final boolean shiftDown;
     private final int keyCode;
+    private final int deltaX;
+    private final int deltaY;
 
-    ArrowKey(boolean shiftDown, int keyCode) {
+    ArrowKey(boolean shiftDown, int keyCode, int deltaX, int deltaY) {
         this.shiftDown = shiftDown;
         this.keyCode = keyCode;
+        this.deltaX = deltaX;
+        this.deltaY = deltaY;
     }
 
     public static ArrowKey up(boolean shift) {
@@ -138,14 +67,24 @@ public enum ArrowKey {
     }
 
     /**
-     * Returns the amount of nudging in the x direction
+     * Returns the movement amount along the X-axis.
      */
-    public abstract int getMoveX();
+    public int getDeltaX() {
+        return deltaX;
+    }
 
-    public abstract int getMoveY();
+    /**
+     * Returns the movement amount along the Y-axis.
+     */
+    public int getDeltaY() {
+        return deltaY;
+    }
 
-    public AffineTransform asTransform() {
-        return AffineTransform.getTranslateInstance(getMoveX(), getMoveY());
+    /**
+     * Creates an AffineTransform representing this arrow key's movement.
+     */
+    public AffineTransform toTransform() {
+        return AffineTransform.getTranslateInstance(getDeltaX(), getDeltaY());
     }
 
     public boolean isShiftDown() {

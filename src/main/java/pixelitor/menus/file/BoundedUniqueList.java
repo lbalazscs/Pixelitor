@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.menus.file;
 
 import java.util.ArrayList;
 import java.util.Iterator;

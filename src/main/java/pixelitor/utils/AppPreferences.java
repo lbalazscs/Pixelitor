@@ -34,6 +34,7 @@ import pixelitor.io.Dirs;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileFormat;
 import pixelitor.layers.LayerGUILayout;
+import pixelitor.menus.file.BoundedUniqueList;
 import pixelitor.menus.file.RecentFile;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.tools.BrushTool;

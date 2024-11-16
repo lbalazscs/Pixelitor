@@ -28,12 +28,12 @@ import java.awt.geom.AffineTransform;
  */
 public interface Transformable extends Debuggable {
     /**
-     * Apply the given transform in image space.
+     * Applies the given transform in image space.
      */
     void imTransform(AffineTransform transform);
 
     /**
-     * Update the UI. A simple repaint isn't enough for the
+     * Updates the UI. A simple repaint isn't enough for the
      * shapes tool, because the image has to be recalculated.
      */
     void updateUI(View view);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,10 @@ import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
 import static pixelitor.utils.Geometry.GOLDEN_RATIO;
-import static pixelitor.utils.Geometry.orthogonalLineThroughPoint;
+import static pixelitor.utils.Geometry.createOrthogonalLine;
 
 /**
- * Crop composition guide
+ * Compositional guides for cropping.
  */
 public class CompositionGuide {
     private Graphics2D g2;
@@ -39,71 +39,47 @@ public class CompositionGuide {
     private int orientation = 0;
     private final GuidesRenderer renderer;
     private static final int NUM_SPIRAL_SEGMENTS = 11;
+    private static final int GRID_CELL_SIZE = 50;
 
     public CompositionGuide(GuidesRenderer renderer) {
         this.renderer = renderer;
     }
 
-    public CompositionGuideType getType() {
-        return type;
-    }
-
-    public void setType(CompositionGuideType type) {
-        this.type = type;
-    }
-
-    public int getOrientation() {
-        return orientation;
-    }
-
-    public void setOrientation(int orientation) {
-        this.orientation = orientation % 4;
-    }
-
-    public void setNextOrientation() {
-        setOrientation(orientation + 1);
-    }
-
     public void draw(Rectangle2D rect, Graphics2D g2) {
         this.g2 = g2;
         switch (type) {
-            case NONE:
-                break;
-            case RULE_OF_THIRDS:
-                drawRuleOfThirds(rect);
-                break;
-            case GOLDEN_SECTIONS:
-                drawGoldenSections(rect);
-                break;
-            case GOLDEN_SPIRAL:
-                drawGoldenSpiral(rect);
-                break;
-            case DIAGONALS:
-                drawDiagonals(rect);
-                break;
-            case TRIANGLES:
-                drawTriangles(rect);
-                break;
-            case GRID:
-                drawGrid(rect);
-                break;
+            case NONE -> {
+            }
+            case RULE_OF_THIRDS -> drawRuleOfThirds(rect);
+            case GOLDEN_SECTIONS -> drawGoldenSections(rect);
+            case GOLDEN_SPIRAL -> drawGoldenSpiral(rect);
+            case DIAGONALS -> drawDiagonals(rect);
+            case TRIANGLES -> drawTriangles(rect);
+            case GRID -> drawGrid(rect);
         }
     }
 
-    private void drawShapes(Shape[] shapes) {
+    /**
+     * Renders the given shapes using the guides renderer.
+     */
+    private void renderShapes(Shape[] shapes) {
         renderer.draw(g2, Arrays.asList(shapes));
     }
 
-    private void drawSections(Rectangle2D rect, double phi) {
-        double sectionWidth = rect.getWidth() / phi;
-        double sectionHeight = rect.getHeight() / phi;
+    /**
+     * Draws equally spaced vertical and horizontal lines dividing
+     * the rectangle according to the specified ratio.
+     */
+    private void drawDivisionLines(Rectangle2D rect, double divisionRatio) {
+        double sectionWidth = rect.getWidth() / divisionRatio;
+        double sectionHeight = rect.getHeight() / divisionRatio;
+        Line2D[] lines = new Line2D.Double[4];
 
         // vertical lines
         double x1 = rect.getX() + sectionWidth;
         double x2 = rect.getX() + rect.getWidth() - sectionWidth;
         double y1 = rect.getY();
         double y2 = rect.getY() + rect.getHeight();
-        Line2D[] lines = new Line2D.Double[4];
         lines[0] = new Line2D.Double(x1, y1, x1, y2);
         lines[1] = new Line2D.Double(x2, y1, x2, y2);
 
@@ -115,106 +91,111 @@ public class CompositionGuide {
         lines[2] = new Line2D.Double(x1, y1, x2, y1);
         lines[3] = new Line2D.Double(x1, y2, x2, y2);
 
-        drawShapes(lines);
+        renderShapes(lines);
     }
 
     private void drawRuleOfThirds(Rectangle2D rect) {
-        drawSections(rect, 3);
+        drawDivisionLines(rect, 3);
     }
 
     private void drawGoldenSections(Rectangle2D rect) {
-        drawSections(rect, GOLDEN_RATIO);
+        drawDivisionLines(rect, GOLDEN_RATIO);
     }
 
     private void drawDiagonals(Rectangle2D rect) {
-        double x1, x2, y1, y2;
-        Line2D[] lines = new Line2D.Double[4];
+        Line2D[] lines = (rect.getWidth() >= rect.getHeight())
+            ? createLandscapeDiagonals(rect)
+            : createPortraitDiagonals(rect);
 
-        if (rect.getWidth() >= rect.getHeight()) {
-            y1 = rect.getY();
-            y2 = rect.getY() + rect.getHeight();
+        renderShapes(lines);
+    }
 
-            // from left
-            x1 = rect.getX();
-            x2 = rect.getX() + rect.getHeight();
-            lines[0] = new Line2D.Double(x1, y1, x2, y2);
-            lines[1] = new Line2D.Double(x1, y2, x2, y1);
+    private static Line2D[] createLandscapeDiagonals(Rectangle2D rect) {
+        double x = rect.getX();
+        double y = rect.getY();
+        double width = rect.getWidth();
+        double height = rect.getHeight();
 
-            // from right
-            x1 = rect.getX() + rect.getWidth();
-            x2 = rect.getX() + rect.getWidth() - rect.getHeight();
-            lines[2] = new Line2D.Double(x1, y1, x2, y2);
-            lines[3] = new Line2D.Double(x1, y2, x2, y1);
-        } else {
-            x1 = rect.getX();
-            x2 = rect.getX() + rect.getWidth();
+        return new Line2D.Double[]{
+            // left-side diagonals
+            new Line2D.Double(x, y, x + height, y + height),
+            new Line2D.Double(x, y + height, x + height, y),
 
-            // from top
-            y1 = rect.getY();
-            y2 = rect.getY() + rect.getWidth();
-            lines[0] = new Line2D.Double(x1, y1, x2, y2);
-            lines[1] = new Line2D.Double(x1, y2, x2, y1);
+            // right-side diagonals
+            new Line2D.Double(x + width, y, x + width - height, y + height),
+            new Line2D.Double(x + width, y + height, x + width - height, y)
+        };
+    }
 
-            // from bottom
-            y1 = rect.getY() + rect.getHeight();
-            y2 = rect.getY() + rect.getHeight() - rect.getWidth();
-            lines[2] = new Line2D.Double(x1, y1, x2, y2);
-            lines[3] = new Line2D.Double(x1, y2, x2, y1);
-        }
+    private static Line2D[] createPortraitDiagonals(Rectangle2D rect) {
+        double x = rect.getX();
+        double y = rect.getY();
+        double width = rect.getWidth();
+        double height = rect.getHeight();
 
-        drawShapes(lines);
+        return new Line2D.Double[]{
+            // top diagonals
+            new Line2D.Double(x, y, x + width, y + width),
+            new Line2D.Double(x, y + width, x + width, y),
+
+            // bottom diagonals
+            new Line2D.Double(x, y + height, x + width, y + height - width),
+            new Line2D.Double(x, y + height - width, x + width, y + height)
+        };
     }
 
     private void drawGrid(Rectangle2D rect) {
-        int gridSize = 50;
-        int gridCountH = 1 + 2 * (int) (rect.getHeight() / 2 / gridSize);
-        int gridCountV = 1 + 2 * (int) (rect.getWidth() / 2 / gridSize);
-        double gridOffsetH = (rect.getHeight() - (gridCountH + 1) * gridSize) / 2;
-        double gridOffsetV = (rect.getWidth() - (gridCountV + 1) * gridSize) / 2;
-        Line2D[] lines = new Line2D.Double[gridCountH + gridCountV];
+        int horLineCount = 1 + 2 * (int) (rect.getHeight() / 2 / GRID_CELL_SIZE);
+        int verLineCount = 1 + 2 * (int) (rect.getWidth() / 2 / GRID_CELL_SIZE);
+
+        // calculate offsets to center the grid
+        double horOffset = (rect.getHeight() - (horLineCount + 1) * GRID_CELL_SIZE) / 2;
+        double verOffset = (rect.getWidth() - (verLineCount + 1) * GRID_CELL_SIZE) / 2;
+
+        Line2D[] lines = new Line2D.Double[horLineCount + verLineCount];
 
         // horizontal lines
         double startX = rect.getX();
         double endX = rect.getX() + rect.getWidth();
-        for (int i = 0; i < gridCountH; i++) {
-            double y = rect.getY() + (i + 1) * gridSize + gridOffsetH;
+        for (int i = 0; i < horLineCount; i++) {
+            double y = rect.getY() + (i + 1) * GRID_CELL_SIZE + horOffset;
             lines[i] = new Line2D.Double(startX, y, endX, y);
         }
 
         // vertical lines
         double startY = rect.getY();
         double endY = rect.getY() + rect.getHeight();
-        for (int i = 0; i < gridCountV; i++) {
-            double x = rect.getX() + (i + 1) * gridSize + gridOffsetV;
-            lines[gridCountH + i] = new Line2D.Double(x, startY, x, endY);
+        for (int i = 0; i < verLineCount; i++) {
+            double x = rect.getX() + (i + 1) * GRID_CELL_SIZE + verOffset;
+            lines[horLineCount + i] = new Line2D.Double(x, startY, x, endY);
         }
 
-        drawShapes(lines);
+        renderShapes(lines);
     }
 
     private void drawTriangles(Rectangle2D rect) {
-        double x1, x2, y1, y2;
+        double startX, endX, startY, endY;
 
         if (orientation % 2 == 0) {
             // diagonal line from top left to bottom right
-            x1 = rect.getX();
-            y1 = rect.getY();
-            x2 = rect.getX() + rect.getWidth();
-            y2 = rect.getY() + rect.getHeight();
+            startX = rect.getX();
+            startY = rect.getY();
+            endX = rect.getX() + rect.getWidth();
+            endY = rect.getY() + rect.getHeight();
         } else {
             // diagonal line form bottom left to top right
-            x1 = rect.getX();
-            y1 = rect.getY() + rect.getHeight();
-            x2 = rect.getX() + rect.getWidth();
-            y2 = rect.getY();
+            startX = rect.getX();
+            startY = rect.getY() + rect.getHeight();
+            endX = rect.getX() + rect.getWidth();
+            endY = rect.getY();
         }
 
         Line2D[] lines = new Line2D.Double[3];
-        lines[0] = new Line2D.Double(x1, y1, x2, y2);
-        lines[1] = orthogonalLineThroughPoint(lines[0], new Point2D.Double(x1, y2));
-        lines[2] = orthogonalLineThroughPoint(lines[0], new Point2D.Double(x2, y1));
+        lines[0] = new Line2D.Double(startX, startY, endX, endY);
+        lines[1] = createOrthogonalLine(lines[0], new Point2D.Double(startX, endY));
+        lines[2] = createOrthogonalLine(lines[0], new Point2D.Double(endX, startY));
 
-        drawShapes(lines);
+        renderShapes(lines);
     }
 
     private void drawGoldenSpiral(Rectangle2D rect) {
@@ -229,7 +210,7 @@ public class CompositionGuide {
             case 3 -> createSpiral3(rect, arcs, arcWidth, arcHeight);
         }
 
-        drawShapes(arcs);
+        renderShapes(arcs);
     }
 
     private static void createSpiral0(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
@@ -300,14 +281,36 @@ public class CompositionGuide {
         }
     }
 
-    private static Arc2D createArc(Point2D center, double arcWidth, double arcHeight, double angle, int extent) {
+    private static Arc2D createArc(Point2D center,
+                                   double width, double height,
+                                   double angle, int extent) {
         return new Arc2D.Double(
-            center.getX() - arcWidth,
-            center.getY() - arcHeight,
-            arcWidth * 2,
-            arcHeight * 2,
+            center.getX() - width,
+            center.getY() - height,
+            width * 2,
+            height * 2,
             angle,
             extent,
             Arc2D.OPEN);
+    }
+
+    public CompositionGuideType getType() {
+        return type;
+    }
+
+    public void setType(CompositionGuideType type) {
+        this.type = type;
+    }
+
+    public int getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(int orientation) {
+        this.orientation = orientation % 4;
+    }
+
+    public void setNextOrientation() {
+        setOrientation(orientation + 1);
     }
 }

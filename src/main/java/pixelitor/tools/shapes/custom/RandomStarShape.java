@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,10 +29,6 @@ import java.awt.geom.*;
  * A random star shape
  */
 public class RandomStarShape implements Shape {
-    // Warning: don't extend Polygon, because bizarre things (the process starts
-    // allocating all the memory, no matter what -Xmx says)
-    // can happen when the shape is used for selections - probably some JDK bug
-    // Things are OK with this delegate
     private GeneralPath path = null;
 
     private static final CachedFloatRandom random = new CachedFloatRandom();
@@ -59,7 +55,6 @@ public class RandomStarShape implements Shape {
 
         unitAngle = (2 * Math.PI) / numPoints;
 
-        // a random value between 0 and unitAngle
         initialAngle = 2 * random.nextFloat() * unitAngle;
     }
 

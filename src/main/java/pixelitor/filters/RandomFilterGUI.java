@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ public class RandomFilterGUI extends FilterGUI {
     private final JButton forwardButton;
 
     protected RandomFilterGUI(Filterable layer) {
-        super(null, layer); // the actual filter will be determined bellow
+        super(null, layer); // the actual filter will be determined below
         this.layer = layer;
         filterSource = new RandomFilterSource();
 

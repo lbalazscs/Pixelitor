@@ -30,8 +30,8 @@ import java.util.Locale;
 
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition;
 
-class WebpExportSettingsPanel extends JPanel implements ExportSettings {
-    public static final ExportSettings INSTANCE = new WebpExportSettingsPanel();
+class WebPExportSettings extends JPanel implements ExportSettings {
+    public static final ExportSettings INSTANCE = new WebPExportSettings();
 
     private static final int HINT_DEFAULT = 0;
     private static final int HINT_PHOTO = 1;
@@ -49,7 +49,7 @@ class WebpExportSettingsPanel extends JPanel implements ExportSettings {
         new IntChoiceParam.Item("Graph", HINT_GRAPH)
     });
 
-    private WebpExportSettingsPanel() {
+    private WebPExportSettings() {
         super(new GridBagLayout());
 
         GridBagHelper gbh = new GridBagHelper(this);

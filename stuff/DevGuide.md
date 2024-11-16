@@ -46,7 +46,9 @@ classDiagram
 
 ```PackedColorModel``` has a subclass specialized for RGB, called [```DirectColorModel```](https://docs.oracle.com/en/java/javase/21/docs/api/java.desktop/java/awt/image/DirectColorModel.html).
 
-[```ComponentColorModel```](https://docs.oracle.com/en/java/javase/21/docs/api/java.desktop/java/awt/image/ComponentColorModel.html) means that the colors are not indexed, but also not packed, there is a 1:1 correspondence between the color components and array elements. This works with ```ComponentSampleModel``` (see bellow).
+[```ComponentColorModel```](https://docs.oracle.com/en/java/javase/21/docs/api/java.desktop/java/awt/image/ComponentColorModel.html)
+means that the colors are not indexed, but also not packed, there is a 1:1 correspondence between the color components
+and array elements. This works with ```ComponentSampleModel``` (see below).
 
 ## Color Spaces
             

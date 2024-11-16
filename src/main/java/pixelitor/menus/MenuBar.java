@@ -58,7 +58,8 @@ import pixelitor.history.RedoAction;
 import pixelitor.history.UndoAction;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.IO;
-import pixelitor.io.OptimizedJpegSavePanel;
+import pixelitor.io.LayerAnimation;
+import pixelitor.io.OptimizedJpegExportPanel;
 import pixelitor.io.magick.ExportSettings;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.*;
@@ -66,7 +67,10 @@ import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.FadeAction;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
-import pixelitor.menus.file.*;
+import pixelitor.menus.file.MetaDataPanel;
+import pixelitor.menus.file.PrintAction;
+import pixelitor.menus.file.RecentFilesMenu;
+import pixelitor.menus.file.ScreenCaptureAction;
 import pixelitor.menus.help.AboutDialog;
 import pixelitor.menus.help.UpdatesCheck;
 import pixelitor.menus.view.ZoomMenu;
@@ -161,7 +165,7 @@ public class MenuBar extends JMenuBar {
         String exportOptimizedName = texts.getString("export_optimized_jpeg");
         fileMenu.add(new OpenViewEnabledAction(
             exportOptimizedName + "...",
-            comp -> OptimizedJpegSavePanel.showInDialog(comp, exportOptimizedName)));
+            comp -> OptimizedJpegExportPanel.showInDialog(comp, exportOptimizedName)));
 
         fileMenu.add(createImageMagickSubmenu());
 
@@ -169,7 +173,7 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.add(new OpenViewEnabledAction(
             texts.getString("export_layer_animation") + "...",
-            LayerAnimExport::start));
+            LayerAnimation::showExportDialog));
 
         fileMenu.add(new DrawableAction(texts.getString("export_tweening_animation")) {
             @Override
@@ -213,7 +217,7 @@ public class MenuBar extends JMenuBar {
         // exit
         String exitName = JVM.isMac ?
             texts.getString("exit_mac") : texts.getString("exit");
-        fileMenu.add(new PAction(exitName, () -> Pixelitor.warnAndExit(pw)));
+        fileMenu.add(new PAction(exitName, () -> Pixelitor.exitApp(pw)));
 
         return fileMenu;
     }
@@ -1490,7 +1494,7 @@ public class MenuBar extends JMenuBar {
         helpMenu.add(new PAction("Internal State...",
             Debug::showInternalState));
 
-        helpMenu.add(new PAction("Check for Update...",
+        helpMenu.add(new PAction("Check for Updates...",
             UpdatesCheck::checkForUpdates));
 
         String aboutText = texts.getString("about");

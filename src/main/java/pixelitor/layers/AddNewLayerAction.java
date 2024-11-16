@@ -39,7 +39,7 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
     private AddNewLayerAction() {
         super(i18n("new_layer"), Icons.loadThemed("add_layer.gif", ThemedImageIcon.GREEN));
         setToolTip("<html>Adds a new transparent image layer." +
-            "<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
+            "<br><b>Ctrl-click</b> to add the new layer below the active one.");
         setEnabled(false);
         Views.addActivationListener(this);
     }

@@ -25,6 +25,7 @@ import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.tools.move.MoveMode;
+import pixelitor.tools.transform.Transformable;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
@@ -43,7 +44,7 @@ import static java.awt.Color.WHITE;
 /**
  * Represents a selection area on an image with animated "marching ants" border.
  */
-public class Selection implements Debuggable {
+public class Selection implements Debuggable, Transformable {
     private static final double DASH_WIDTH = 1.0;
     private static final float DASH_LENGTH = 4.0f;
     private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
@@ -358,6 +359,16 @@ public class Selection implements Debuggable {
             origShape = null;
         }
         return edit;
+    }
+
+    @Override
+    public void imTransform(AffineTransform transform) {
+        transformWhileDragging(transform);
+    }
+
+    @Override
+    public void updateUI(View view) {
+        view.repaint();
     }
 
     @Override
