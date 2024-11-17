@@ -18,9 +18,11 @@
 package pixelitor.io;
 
 import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilterInputStream;
+import java.io.IOException;
 
 /**
  * A wrapper for an InputStream that tracks the progress of reading.
@@ -31,11 +33,10 @@ public class ProgressTrackingInputStream extends FilterInputStream {
     private final ProgressTracker progressTracker;
     private boolean closed = false;
 
-    public ProgressTrackingInputStream(File file) throws FileNotFoundException {
-        super(new FileInputStream(file));
+    public ProgressTrackingInputStream(FileInputStream inputStream, ProgressTracker tracker) throws FileNotFoundException {
+        super(inputStream);
 
-        this.progressTracker = new StatusBarProgressTracker(
-            "Reading " + file.getName(), (int) file.length());
+        this.progressTracker = tracker;
     }
 
     @Override

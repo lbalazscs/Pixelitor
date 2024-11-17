@@ -28,7 +28,6 @@ import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.utils.ImageUtils.getPixelArray;
@@ -37,7 +36,10 @@ import static pixelitor.utils.ImageUtils.getPixelArray;
  * PXC file format support.
  */
 public class PXCFormat {
-    private static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
+    private static final int CURRENT_PXC_VERSION_NUMBER = 0x04;
+
+    // the first version supporting a thumbnail
+    private static final int THUMBNAIL_FORMAT_VERSION = 0x04;
 
     // tracks the writing of the whole file
     private static ProgressTracker mainPT;
@@ -48,8 +50,14 @@ public class PXCFormat {
     }
 
     public static Composition read(File file) throws BadPxcFormatException {
+        ProgressTracker tracker = new StatusBarProgressTracker(
+            "Reading " + file.getName(), (int) file.length());
+        return read(file, tracker);
+    }
+
+    public static Composition read(File file, ProgressTracker tracker) throws BadPxcFormatException {
         Composition comp = null;
-        try (InputStream is = new ProgressTrackingInputStream(file)) {
+        try (InputStream is = new ProgressTrackingInputStream(new FileInputStream(file), tracker)) {
             int firstByte = is.read();
             int secondByte = is.read();
             if (firstByte == 0xAB && secondByte == 0xC4) {
@@ -79,16 +87,29 @@ public class PXCFormat {
                     + " has unknown version byte " + versionByte);
             }
 
-            try (GZIPInputStream gs = new GZIPInputStream(is)) {
-                try (ObjectInput ois = new ObjectInputStream(gs)) {
+            // Skip thumbnail data
+            if (versionByte >= THUMBNAIL_FORMAT_VERSION) {
+                // Read thumbnail length (4 bytes)
+                int thumbnailLength = readInt(is);
+                // Skip the thumbnail data
+                is.skip(thumbnailLength);
+            }
+
+            if (versionByte == 3) { // gzipped stream in old pxc files
+                try (GZIPInputStream gs = new GZIPInputStream(is)) {
+                    try (ObjectInput ois = new ObjectInputStream(gs)) {
+                        comp = (Composition) ois.readObject();
+                    }
+                }
+            } else {
+                try (ObjectInput ois = new ObjectInputStream(is)) {
                     comp = (Composition) ois.readObject();
-
-                    // file is transient in Composition because the pxc file can be renamed
-                    comp.setFile(file);
-
-                    EventQueue.invokeLater(comp::checkFontsAreInstalled);
                 }
             }
+            // file is transient in Composition because the pxc file can be renamed
+            comp.setFile(file);
+
+            EventQueue.invokeLater(comp::checkFontsAreInstalled);
         } catch (IOException | ClassNotFoundException e) {
             Messages.showException(e);
         }
@@ -106,13 +127,29 @@ public class PXCFormat {
             workRatioForOneImage = -1;
         }
         try (FileOutputStream fos = new FileOutputStream(file)) {
+            // write header bytes and version
             fos.write(new byte[]{(byte) 0xAB, (byte) 0xC4, CURRENT_PXC_VERSION_NUMBER});
 
-            try (GZIPOutputStream gz = new GZIPOutputStream(fos)) {
-                try (ObjectOutput oos = new ObjectOutputStream(gz)) {
-                    oos.writeObject(comp);
-                    oos.flush();
-                }
+            // write thumbnail
+            BufferedImage thumbnail = OpenRaster.createORAThumbnail(comp.getCompositeImage());
+            // create an extra stream so that we know the length of the thumbnail data
+            ByteArrayOutputStream thumbnailBytes = new ByteArrayOutputStream();
+            ImageIO.write(thumbnail, "PNG", thumbnailBytes);
+            byte[] thumbnailData = thumbnailBytes.toByteArray();
+            writeInt(fos, thumbnailData.length); // write thumbnail length
+            fos.write(thumbnailData); // write thumbnail data
+
+//            try (GZIPOutputStream gz = new GZIPOutputStream(fos)) {
+//                try (ObjectOutput oos = new ObjectOutputStream(gz)) {
+//                    oos.writeObject(comp);
+//                    oos.flush();
+//                }
+//            }
+
+            // since pxc version 4, the stream isn't gzipped
+            try (ObjectOutput oos = new ObjectOutputStream(fos)) {
+                oos.writeObject(comp);
+                oos.flush();
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -121,12 +158,44 @@ public class PXCFormat {
         mainPT = null;
     }
 
+    /**
+     * Reads only the thumbnail from a PXC file.
+     */
+    public static BufferedImage readThumbnail(File file) throws BadPxcFormatException {
+        try (InputStream is = new FileInputStream(file)) {
+            int firstByte = is.read();
+            int secondByte = is.read();
+            if (firstByte != 0xAB || secondByte != 0xC4) {
+                throw new BadPxcFormatException(file.getName() + " is not in the pxc format.");
+            }
+
+            int versionByte = is.read();
+            if (versionByte != THUMBNAIL_FORMAT_VERSION) {
+                return null; // old version, no thumbnail
+            }
+
+            int thumbnailLength = readInt(is);
+            byte[] thumbnailData = new byte[thumbnailLength];
+            is.read(thumbnailData);
+
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(thumbnailData)) {
+                return ImageIO.read(bais);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public static void serializeImage(ObjectOutputStream out,
                                       BufferedImage img) throws IOException {
         assert img != null;
-        int imgType = img.getType();
         int imgWidth = img.getWidth();
         int imgHeight = img.getHeight();
+
+        // in PXC version 3, only grayscale images were written
+        // as PNG, and for simplicity, we still write this field
+//        int imgType = img.getType();
+        int imgType = TYPE_BYTE_GRAY;
 
         out.writeInt(imgWidth);
         out.writeInt(imgHeight);
@@ -135,8 +204,10 @@ public class PXCFormat {
         ProgressTracker pt = getImageTracker();
 
         if (imgType == TYPE_BYTE_GRAY) {
-            ImageIO.write(img, "PNG", out);
+            TrackedIO.writeToStream(img, out, "PNG", pt);
+//            ImageIO.write(img, "PNG", out);
         } else {
+            // this legacy branch is never executed anymore
             int[] pixels = getPixelArray(img);
             int length = pixels.length;
             int progress = 0;
@@ -162,6 +233,7 @@ public class PXCFormat {
         if (type == TYPE_BYTE_GRAY) {
             return ImageIO.read(in);
         } else {
+            // this branch is executed only for legacy (version 3) pxc files
             BufferedImage img = new BufferedImage(width, height, type);
             int[] pixels = getPixelArray(img);
 
@@ -180,5 +252,19 @@ public class PXCFormat {
         } else {
             return new SubtaskProgressTracker(workRatioForOneImage, mainPT);
         }
+    }
+
+    // Reads 4 bytes as an int
+    private static int readInt(InputStream is) throws IOException {
+        return is.read() << 24 | (is.read() & 0xFF) << 16 |
+            (is.read() & 0xFF) << 8 | (is.read() & 0xFF);
+    }
+
+    // Writes an int as 4 bytes
+    private static void writeInt(OutputStream os, int value) throws IOException {
+        os.write((value >>> 24) & 0xFF);
+        os.write((value >>> 16) & 0xFF);
+        os.write((value >>> 8) & 0xFF);
+        os.write(value & 0xFF);
     }
 }

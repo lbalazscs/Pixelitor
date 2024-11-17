@@ -17,8 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.io.FileUtils;
-import pixelitor.io.TrackedIO;
+import pixelitor.io.*;
 import pixelitor.utils.JProgressBarTracker;
 import pixelitor.utils.ProgressPanel;
 import pixelitor.utils.ProgressTracker;
@@ -27,9 +26,11 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -80,28 +81,57 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             }
         }
 
+        ThumbInfo readResult = readThumb(file);
+        if (readResult.isSuccess()) {
+            // don't cache failures - perhaps the user
+            // is retrying after fixing the problem
+            thumbsCache.put(filePath, new SoftReference<>(readResult));
+        }
+        return readResult;
+    }
+
+    private ThumbInfo readThumb(File file) {
         if (!Files.isReadable(file.toPath())) {
             return ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
         }
 
-        // Currently, no thumb extraction is attempted for ora and pxc files.
-        if (FileUtils.hasMultiLayerExtension(file)) {
-            ThumbInfo fakeThumbInfo = ThumbInfo.failure(ThumbInfo.NO_PREVIEW);
-            thumbsCache.put(filePath, new SoftReference<>(fakeThumbInfo));
-            return fakeThumbInfo;
+        String extension = FileUtils.getExtension(file.getName());
+
+        if ("pxc".equalsIgnoreCase(extension)) {
+            try {
+                BufferedImage thumbnail = PXCFormat.readThumbnail(file);
+                if (thumbnail == null) {
+                    // old pxc file, without thumbnail
+                    return ThumbInfo.failure(ThumbInfo.NO_PREVIEW);
+                }
+                return ThumbInfo.success(thumbnail);
+            } catch (BadPxcFormatException e) {
+                // not in pxc format
+                return ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
+            }
+        }
+
+        if ("ora".equalsIgnoreCase(extension)) {
+            try {
+                BufferedImage thumbnail = OpenRaster.readThumbnail(file);
+                if (thumbnail == null) {
+                    // old ora file, without thumbnail
+                    return ThumbInfo.failure(ThumbInfo.NO_PREVIEW);
+                }
+                return ThumbInfo.success(thumbnail);
+            } catch (IOException e) {
+                // not zip format
+                return ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
+            }
         }
 
         int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
         int availableHeight = getHeight();
         try {
             ProgressTracker pt = new JProgressBarTracker(progressPanel);
-            ThumbInfo newThumbInfo = TrackedIO.readThumbnail(file, availableWidth, availableHeight, pt);
-            thumbsCache.put(filePath, new SoftReference<>(newThumbInfo));
-            return newThumbInfo;
+            return TrackedIO.readThumbnail(file, availableWidth, availableHeight, pt);
         } catch (Exception ex) {
-            ThumbInfo fakeThumbInfo = ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
-            thumbsCache.put(filePath, new SoftReference<>(fakeThumbInfo));
-            return fakeThumbInfo;
+            return ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
         }
     }
 

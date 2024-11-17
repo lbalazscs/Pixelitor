@@ -29,6 +29,7 @@ import pixelitor.compactions.Outsets;
 import pixelitor.layers.*;
 import pixelitor.utils.*;
 
+import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.Dimension;
@@ -339,7 +340,7 @@ public class OpenRaster {
         return builder.parse(inputSource);
     }
 
-    private static BufferedImage createORAThumbnail(BufferedImage src) {
+    public static BufferedImage createORAThumbnail(BufferedImage src) {
         // Create a thumbnail according to the OpenRaster spec:
         // "It must be a non-interlaced PNG with 8 bits per channel
         // of at most 256x256 pixels. It should be as big as possible
@@ -347,5 +348,21 @@ public class OpenRaster {
         Dimension thumbSize = ImageUtils.calcThumbDimensions(
             src.getWidth(), src.getHeight(), THUMBNAIL_MAX_DIMENSION, false);
         return ImageUtils.resize(src, thumbSize.width, thumbSize.height);
+    }
+
+    /**
+     * Reads only the thumbnail from an OpenRaster file.
+     */
+    public static BufferedImage readThumbnail(File file) throws IOException {
+        try (ZipFile zipFile = new ZipFile(file)) {
+            ZipEntry thumbnailEntry = zipFile.getEntry(THUMBNAIL_PATH);
+            if (thumbnailEntry == null) {
+                return null; // thumbnail not found
+            }
+
+            try (InputStream inputStream = zipFile.getInputStream(thumbnailEntry)) {
+                return ImageIO.read(inputStream);
+            }
+        }
     }
 }

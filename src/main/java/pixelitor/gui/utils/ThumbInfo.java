@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,6 +56,11 @@ public class ThumbInfo {
         return new ThumbInfo(thumb, origWidth, origHeight, null);
     }
 
+    // success, but no original size info
+    public static ThumbInfo success(BufferedImage thumb) {
+        return new ThumbInfo(thumb, -1, -1, null);
+    }
+
     public static ThumbInfo failure(int origWidth, int origHeight, String errMsg) {
         return new ThumbInfo(null, origWidth, origHeight, errMsg);
     }
@@ -102,5 +107,9 @@ public class ThumbInfo {
 
         g.setColor(WHITE);
         g.drawString(msg, drawX - 1, drawY - 1);
+    }
+
+    public boolean isSuccess() {
+        return errMsg != null;
     }
 }
