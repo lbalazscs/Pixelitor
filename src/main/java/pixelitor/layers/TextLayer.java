@@ -27,9 +27,9 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TransformedTextPainter;
-import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TextAlignment;
 import pixelitor.history.*;
 import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tools;
@@ -305,8 +305,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void enlargeCanvas(Outsets out) {
-        BoxAlignment alignment = settings.getAlignment();
-        if (alignment == BoxAlignment.PATH) {
+        TextAlignment alignment = settings.getAlignment();
+        if (alignment == TextAlignment.PATH) {
             return;
         }
 
@@ -431,15 +431,15 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             holder.invalidateImageCache();
 
             if (deleted) {
-                settings.setAlignment(BoxAlignment.CENTER_CENTER);
-                painter.setAlignment(BoxAlignment.CENTER_CENTER);
+                settings.setAlignment(TextAlignment.CENTER_CENTER);
+                painter.setAlignment(TextAlignment.CENTER_CENTER);
             }
         }
     }
 
     public void usePathEditing() {
-        settings.setAlignment(BoxAlignment.PATH);
-        painter.setAlignment(BoxAlignment.PATH);
+        settings.setAlignment(TextAlignment.PATH);
+        painter.setAlignment(TextAlignment.PATH);
 
         painter.pathChanged();
         holder.invalidateImageCache();

@@ -23,7 +23,7 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.gui.utils.BoxAlignment;
+import pixelitor.gui.utils.TextAlignment;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
@@ -250,9 +250,9 @@ public class TextSettings implements Serializable, Debuggable {
             horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
             verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
         } else {
-            BoxAlignment alignment = BoxAlignment.values()[alignIndex];
-            if (alignment == BoxAlignment.PATH && !Views.getActiveComp().hasActivePath()) {
-                alignment = BoxAlignment.CENTER_CENTER;
+            TextAlignment alignment = TextAlignment.values()[alignIndex];
+            if (alignment == TextAlignment.PATH && !Views.getActiveComp().hasActivePath()) {
+                alignment = TextAlignment.CENTER_CENTER;
             }
             horizontalAlignment = alignment.getHorizontal();
             verticalAlignment = alignment.getVertical();
@@ -312,11 +312,11 @@ public class TextSettings implements Serializable, Debuggable {
         this.font = font;
     }
 
-    public BoxAlignment getAlignment() {
-        return BoxAlignment.of(horizontalAlignment, verticalAlignment);
+    public TextAlignment getAlignment() {
+        return TextAlignment.from(horizontalAlignment, verticalAlignment);
     }
 
-    public void setAlignment(BoxAlignment newAlignment) {
+    public void setAlignment(TextAlignment newAlignment) {
         this.horizontalAlignment = newAlignment.getHorizontal();
         this.verticalAlignment = newAlignment.getVertical();
     }

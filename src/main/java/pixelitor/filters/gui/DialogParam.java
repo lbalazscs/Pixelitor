@@ -53,7 +53,7 @@ public class DialogParam extends AbstractFilterParam {
 
     private void configureDialog(DialogBuilder builder) {
         builder
-            .content(GUIUtils.arrangeVertically(List.of(children)))
+            .content(GUIUtils.createVerticalPanel(List.of(children)))
             .title(getName())
             .withScrollbars()
             .okText(GUIText.CLOSE_DIALOG)

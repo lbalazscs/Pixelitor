@@ -39,8 +39,8 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING
  * build the user interface of a {@link ParametrizedFilter}
  */
 public class ParamSet implements Debuggable {
-    private final List<FilterParam> paramList = new ArrayList<>();
-    private final List<FilterButtonModel> actionList = new ArrayList<>(3);
+    private final List<FilterParam> params = new ArrayList<>();
+    private final List<FilterButtonModel> actions = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
     private Runnable afterResetAction;
     private Preset[] builtinPresets;
@@ -57,47 +57,47 @@ public class ParamSet implements Debuggable {
     public ParamSet() {
     }
 
-    public void addParam(FilterParam param) {
-        paramList.add(param);
+    public void addParam(FilterParam newParam) {
+        params.add(newParam);
     }
 
-    public void addParams(FilterParam[] params) {
-        Collections.addAll(paramList, params);
+    public void addParams(FilterParam[] newParams) {
+        Collections.addAll(params, newParams);
     }
 
-    public void addParams(List<FilterParam> params) {
-        paramList.addAll(params);
+    public void addParams(List<FilterParam> newParams) {
+        params.addAll(newParams);
     }
 
     /**
      * Adds the given parameters before the existing ones
      */
-    public void addParamsToFront(FilterParam[] params) {
-        paramList.addAll(0, Arrays.asList(params));
+    public void addParamsToFront(FilterParam[] newParams) {
+        params.addAll(0, Arrays.asList(newParams));
     }
 
-    public void insertParam(FilterParam param, int index) {
-        paramList.add(index, param);
+    public void insertParam(FilterParam newParam, int index) {
+        params.add(index, newParam);
     }
 
-    public void insertAction(FilterButtonModel action, int index) {
-        actionList.add(index, action);
+    public void insertAction(FilterButtonModel newAction, int index) {
+        actions.add(index, newAction);
     }
 
-    public ParamSet withActions(FilterButtonModel... actions) {
-        actionList.addAll(List.of(actions));
+    public ParamSet withActions(FilterButtonModel... newActions) {
+        actions.addAll(List.of(newActions));
         return this;
     }
 
-    public ParamSet withActionsAtFront(FilterButtonModel... actions) {
-        for (FilterButtonModel action : actions) {
-            actionList.addFirst(action);
+    public ParamSet withActionsAtFront(FilterButtonModel... newActions) {
+        for (FilterButtonModel action : newActions) {
+            actions.addFirst(action);
         }
         return this;
     }
 
-    public ParamSet withAction(FilterButtonModel action) {
-        actionList.add(action);
+    public ParamSet withAction(FilterButtonModel newAction) {
+        actions.add(newAction);
         return this;
     }
 
@@ -113,7 +113,7 @@ public class ParamSet implements Debuggable {
             Icons.getRandomizeIcon(),
             "Randomize the settings for this filter.",
             "randomize");
-        actionList.add(randomizeAction);
+        actions.add(randomizeAction);
     }
 
     private void addResetAllAction() {
@@ -122,7 +122,7 @@ public class ParamSet implements Debuggable {
             Icons.getResetIcon(),
             Resettable.RESET_ALL_TOOLTIP,
             "resetAll");
-        actionList.add(resetAllAction);
+        actions.add(resetAllAction);
     }
 
     /**
@@ -136,7 +136,7 @@ public class ParamSet implements Debuggable {
      * Resets all params without triggering the filter
      */
     public void reset() {
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             param.reset(false);
         }
         if (afterResetAction != null) {
@@ -147,13 +147,14 @@ public class ParamSet implements Debuggable {
     public void randomize() {
         long before = Filter.executionCount;
 
-        paramList.forEach(FilterParam::randomize);
+        params.forEach(FilterParam::randomize);
 
-        // the filter is not supposed to be triggered
+        // check that the filter wasn't triggered
         long after = Filter.executionCount;
         assert before == after : "before = " + before + ", after = " + after;
     }
 
+    // programmatically triggers filter execution
     public void runFilter() {
         if (adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
@@ -163,16 +164,16 @@ public class ParamSet implements Debuggable {
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         adjustmentListener = listener;
 
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             param.setAdjustmentListener(listener);
         }
-        for (FilterButtonModel action : actionList) {
+        for (FilterButtonModel action : actions) {
             action.setAdjustmentListener(listener);
         }
     }
 
     public void adaptToContext(Filterable layer, boolean changeValue) {
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             param.adaptToContext(layer, changeValue);
         }
     }
@@ -182,7 +183,7 @@ public class ParamSet implements Debuggable {
      * one contained filter parameter can be
      */
     public boolean isAnimatable() {
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             if (param.isAnimatable()) {
                 return true;
             }
@@ -191,16 +192,16 @@ public class ParamSet implements Debuggable {
     }
 
     public void setFinalAnimationMode(boolean b) {
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             param.setEnabled(!b, ANIMATION_ENDING_STATE);
         }
-        for (FilterButtonModel action : actionList) {
+        for (FilterButtonModel action : actions) {
             action.setEnabled(!b, ANIMATION_ENDING_STATE);
         }
     }
 
     public boolean hasGradient() {
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             if (param instanceof GradientParam) {
                 return true;
             }
@@ -209,11 +210,11 @@ public class ParamSet implements Debuggable {
     }
 
     public List<FilterButtonModel> getActions() {
-        return actionList;
+        return actions;
     }
 
     public List<FilterParam> getParams() {
-        return paramList;
+        return params;
     }
 
     public FilterState copyState(boolean animOnly) {
@@ -224,7 +225,7 @@ public class ParamSet implements Debuggable {
      * Sets the state without triggering the filter.
      */
     public void setState(FilterState newState, boolean forAnimation) {
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             if (forAnimation && !param.isAnimatable()) {
                 continue;
             }
@@ -248,7 +249,7 @@ public class ParamSet implements Debuggable {
     public void loadUserPreset(UserPreset preset) {
         long executionsBefore = Filter.executionCount;
 
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             param.loadStateFrom(preset);
         }
         if (savesSeed) {
@@ -270,7 +271,7 @@ public class ParamSet implements Debuggable {
         Locale locale = Locale.getDefault(FORMAT);
         try {
             Locale.setDefault(FORMAT, Locale.US);
-            for (FilterParam param : paramList) {
+            for (FilterParam param : params) {
                 param.saveStateTo(preset);
             }
             if (savesSeed) {
@@ -283,7 +284,7 @@ public class ParamSet implements Debuggable {
 
     public void set(String paramName, String value) {
         FilterParam modified = null;
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             if (param.getName().equals(paramName)) {
                 modified = param;
             }
@@ -453,24 +454,24 @@ public class ParamSet implements Debuggable {
             return false;
         }
         ParamSet that = (ParamSet) o;
-        return Objects.equals(paramList, that.paramList);
+        return Objects.equals(params, that.params);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(paramList);
+        return Objects.hash(params);
     }
 
     @Override
     public String toString() {
-        return "ParamSet {" + paramList + "}";
+        return "ParamSet {" + params + "}";
     }
 
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
 
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             node.add(param.createDebugNode(param.getName()));
         }
 

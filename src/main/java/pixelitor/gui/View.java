@@ -137,14 +137,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         // prevent starting a new reload on the EDT while an asynchronous
         // reload is already scheduled or running on the IO thread
-        if (IOTasks.isProcessing(path)) {
+        if (IOTasks.isPathProcessing(path)) {
             return CompletableFuture.completedFuture(null);
         }
-        IOTasks.markReadProcessing(path);
+        IOTasks.markPathForReading(path);
 
         return IO.loadCompAsync(file)
             .thenApplyAsync(this::replaceJustReloadedComp, onEDT)
-            .whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
+            .whenComplete((v, e) -> IOTasks.markReadingComplete(path))
             .whenComplete((v, e) -> IO.handleReadingErrors(e));
     }
 

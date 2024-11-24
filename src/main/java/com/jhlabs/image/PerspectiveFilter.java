@@ -203,7 +203,7 @@ public class PerspectiveFilter extends TransformFilter {
         return super.filter(src, dst);
     }
 
-    @Override
+    // unused method
     protected void transformSpace(Rectangle rect) {
         if (scaled) {
             rect.x = (int) Math.min(Math.min(x0, x1), Math.min(x2, x3));

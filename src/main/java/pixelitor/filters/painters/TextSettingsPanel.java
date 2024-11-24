@@ -69,14 +69,14 @@ public class TextSettingsPanel extends FilterGUI
     private JCheckBox italicCB;
     private ColorParam color;
     private EffectsPanel effectsPanel;
-    private JComboBox<BoxAlignment> alignmentCB;
+    private JComboBox<TextAlignment> alignmentCB;
     private JCheckBox watermarkCB;
 
     private JDialog advancedSettingsDialog;
     private AdvancedTextSettingsPanel advancedSettingsPanel;
 
     private boolean suppressGuiUpdates = false;
-    private BoxAlignment lastAlignment;
+    private TextAlignment lastAlignment;
 
     /**
      * Used for the text filter on images
@@ -142,15 +142,15 @@ public class TextSettingsPanel extends FilterGUI
         rotationParam.setAdjustmentListener(this);
         gbh.addControl(rotationParam.createGUI());
 
-        alignmentCB = new JComboBox<>(BoxAlignment.values());
+        alignmentCB = new JComboBox<>(TextAlignment.values());
         alignmentCB.setName("alignmentCB");
-        BoxAlignment alignment = settings.getAlignment();
+        TextAlignment alignment = settings.getAlignment();
         lastAlignment = alignment;
         alignmentCB.setSelectedItem(alignment);
 
         alignmentCB.addActionListener(e -> {
-            BoxAlignment selectedAlignment = getSelectedAlignment();
-            if (selectedAlignment == BoxAlignment.PATH && !comp.hasActivePath()) {
+            TextAlignment selectedAlignment = getSelectedAlignment();
+            if (selectedAlignment == TextAlignment.PATH && !comp.hasActivePath()) {
                 String msg = "<html>There's no path in <b>\"" + comp.getName() + "\"</b>.<br>You can have text along a path after creating a path with the Pen Tool.";
                 Messages.showError("No Path", msg, this);
                 alignmentCB.setSelectedItem(lastAlignment);
@@ -352,7 +352,7 @@ public class TextSettingsPanel extends FilterGUI
             effects = effectsPanel.getEffects();
         }
 
-        BoxAlignment alignment = getSelectedAlignment();
+        TextAlignment alignment = getSelectedAlignment();
 
         return new TextSettings(
             textArea.getText(),
@@ -368,8 +368,8 @@ public class TextSettingsPanel extends FilterGUI
             getShearX(), getShearY(), this);
     }
 
-    private BoxAlignment getSelectedAlignment() {
-        return (BoxAlignment) alignmentCB.getSelectedItem();
+    private TextAlignment getSelectedAlignment() {
+        return (TextAlignment) alignmentCB.getSelectedItem();
     }
 
     private void updateApp(TextSettings settings) {

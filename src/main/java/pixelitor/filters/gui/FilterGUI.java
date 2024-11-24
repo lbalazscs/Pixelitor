@@ -40,7 +40,7 @@ public abstract class FilterGUI extends JPanel {
 
     public void startPreview(boolean firstPreview) {
         Component busyCursorTarget = firstPreview
-            ? GUIUtils.getTopContainer(this)
+            ? GUIUtils.getTopmostContainer(this)
             : this;
         layer.startPreview(filter, firstPreview, busyCursorTarget);
     }

@@ -63,13 +63,13 @@ public abstract class Wizard {
 
         dialog = new OKCancelDialog(activePage.createPanel(this, dr), dialogParent, title, "Next") {
             @Override
-            protected void cancelAction() {
+            protected void dialogCanceled() {
                 activePage.onWizardCanceled(dr);
-                super.cancelAction();
+                super.dialogCanceled();
             }
 
             @Override
-            protected void okAction() {
+            protected void dialogAccepted() {
                 handleNextButtonPress(dialog);
             }
         };
@@ -101,7 +101,7 @@ public abstract class Wizard {
 
     private void transitionToNextPage(OKCancelDialog dialog, WizardPage nextPage) {
         JComponent panel = nextPage.createPanel(this, dr);
-        dialog.changeForm(panel);
+        dialog.updateContent(panel);
         dialog.setHeaderMessage(nextPage.getHelpText(this));
         activePage = nextPage;
 

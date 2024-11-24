@@ -204,7 +204,7 @@ public class AppRunner {
         int remainingSeconds = secondsToWait;
         do {
             System.out.print(remainingSeconds + "...");
-            GUIUtils.showTaskbarProgress((int) (100 * (secondsToWait - remainingSeconds) / (double) secondsToWait));
+            GUIUtils.updateTaskbarProgress((int) (100 * (secondsToWait - remainingSeconds) / (double) secondsToWait));
             Utils.sleep(1, SECONDS);
         } while (--remainingSeconds > 0);
     }
@@ -358,7 +358,10 @@ public class AppRunner {
         openDialog.selectFile(file);
         openDialog.approve();
 
-        // wait a bit to make sure that the async open completed
+        // make sure that the opening task is started
+        Utils.sleep(200, TimeUnit.MILLISECONDS);
+
+        // wait until the async open completes
         IOTasks.waitForIdle();
         mouse.updateCanvasBounds();
 
@@ -385,11 +388,11 @@ public class AppRunner {
 
         // even if the dialog is not visible, the
         // async saving of the last file might be still running
-        boolean stillWriting = EDT.call(IOTasks::isBusyWriting);
+        boolean stillWriting = EDT.call(IOTasks::hasActiveWrites);
         while (stillWriting) {
             System.out.println("waiting 1s for the IO thread...");
             Utils.sleep(1, SECONDS);
-            stillWriting = EDT.call(IOTasks::isBusyWriting);
+            stillWriting = EDT.call(IOTasks::hasActiveWrites);
         }
     }
 

@@ -59,7 +59,7 @@ import static pixelitor.utils.Keys.ESC;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
- * Static GUI-related utility methods
+ * Static GUI-related utility methods.
  */
 public final class GUIUtils {
     private GUIUtils() {
@@ -68,15 +68,15 @@ public final class GUIUtils {
     public static final boolean CAN_USE_FILE_MANAGER = Desktop.isDesktopSupported()
         && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
 
-    private static final int BUSY_CURSOR_DELAY_MILLIS = 300;
-    private static Component lastParent;
+    private static final int BUSY_CURSOR_DELAY_MS = 300;
+    private static Component lastBusyCursorParent;
 
-    private static final Map<String, Point> lastDialogLocationsByTitle = new HashMap<>();
+    private static final Map<String, Point> dialogLocationsByTitle = new HashMap<>();
 
     /**
-     * @return true if any app window has focus
+     * Checks if any application window currently has focus.
      */
-    public static boolean appHasFocus() {
+    public static boolean isAppFocused() {
         Window[] windows = Window.getWindows();
         for (Window window : windows) {
             if (window.isActive()) {
@@ -87,13 +87,13 @@ public final class GUIUtils {
     }
 
     public static void showCopyTextToClipboardDialog(JComponent content,
-                                                     Supplier<String> text,
+                                                     Supplier<String> textSupplier,
                                                      String title) {
         new DialogBuilder()
             .okText("Copy as Text to the Clipboard")
             .cancelText(CLOSE_DIALOG)
             .validator(d -> {
-                Utils.copyStringToClipboard(text.get());
+                Utils.copyStringToClipboard(textSupplier.get()); // OK action
                 return false; // prevents the dialog from closing
             })
             .title(title)
@@ -101,74 +101,74 @@ public final class GUIUtils {
             .show();
     }
 
-    public static JPanel arrangeVertically(ParamSet paramSet) {
+    public static JPanel createVerticalPanel(ParamSet paramSet) {
         JPanel p = new JPanel(new GridBagLayout());
         new GridBagHelper(p).arrangeVertically(paramSet.getParams());
         return p;
     }
 
-    public static JPanel arrangeVertically(Iterable<? extends FilterSetting> settings) {
+    public static JPanel createVerticalPanel(Iterable<? extends FilterSetting> settings) {
         JPanel p = new JPanel();
         arrangeVertically(p, settings);
         return p;
     }
 
-    public static void arrangeVertically(JPanel p, Iterable<? extends FilterSetting> settings) {
-        p.setLayout(new GridBagLayout());
-        new GridBagHelper(p).arrangeVertically(settings);
+    public static void arrangeVertically(JPanel panel,
+                                         Iterable<? extends FilterSetting> settings) {
+        panel.setLayout(new GridBagLayout());
+        new GridBagHelper(panel).arrangeVertically(settings);
     }
 
-    public static Container getTopContainer(Container c) {
-        Container parent = c.getParent();
+    public static Container getTopmostContainer(Container component) {
+        Container parent = component.getParent();
         while (parent != null) {
             if (parent instanceof Dialog) {
                 // don't jump from dialogs to their parents
                 return parent;
             }
-            c = parent;
-            parent = c.getParent();
+            component = parent;
+            parent = component.getParent();
         }
-        return c;
+        return component;
     }
 
     public static JDialog getDialogAncestor(Component c) {
         return (JDialog) SwingUtilities.getWindowAncestor(c);
     }
 
-    public static void showDialog(JDialog d, JComponent parent) {
-        Point loc = lastDialogLocationsByTitle.get(d.getTitle());
-        if (loc != null) {
-            d.setLocation(loc);
+    public static void showDialog(JDialog dialog, JComponent parent) {
+        Point lastLocation = dialogLocationsByTitle.get(dialog.getTitle());
+        if (lastLocation != null) {
+            dialog.setLocation(lastLocation);
         } else {
-            d.setLocationRelativeTo(parent);
+            dialog.setLocationRelativeTo(parent);
         }
-        d.setVisible(true);
+        dialog.setVisible(true);
     }
 
     public static void showDialog(JDialog d) {
         showDialog(d, SCREEN_CENTER);
     }
 
-    public static void showDialog(JDialog d, Screens.Align align) {
-        Point loc = lastDialogLocationsByTitle.get(d.getTitle());
-        if (loc != null) {
-            d.setLocation(loc);
-            Screens.position(d, null, loc);
+    public static void showDialog(JDialog dialog, Screens.Align align) {
+        Point lastLocation = dialogLocationsByTitle.get(dialog.getTitle());
+        if (lastLocation != null) {
+            Screens.positionWindow(dialog, null, lastLocation);
         } else {
-            Screens.position(d, align, null);
+            Screens.positionWindow(dialog, align, null);
         }
 
-        d.setVisible(true);
+        dialog.setVisible(true);
     }
 
-    public static void closeDialog(JDialog d, boolean dispose) {
-        if (d != null && d.isVisible()) {
-            lastDialogLocationsByTitle.put(d.getTitle(), d.getLocationOnScreen());
-            d.setVisible(false);
+    public static void closeDialog(JDialog dialog, boolean dispose) {
+        if (dialog != null && dialog.isVisible()) {
+            dialogLocationsByTitle.put(dialog.getTitle(), dialog.getLocationOnScreen());
+            dialog.setVisible(false);
             // dispose should not be called if the dialog will be re-shown
             // because then AssertJ-Swing doesn't find it even if it's there
             if (dispose) {
-                d.dispose();
+                dialog.dispose();
             }
         }
     }
@@ -258,20 +258,20 @@ public final class GUIUtils {
             }
         };
 
-        int delay = BUSY_CURSOR_DELAY_MILLIS;
-        if (parent != lastParent) {
+        int delay = BUSY_CURSOR_DELAY_MS;
+        if (parent != lastBusyCursorParent) {
             // wait longer when a dialog is shown for the first time
             delay *= 2;
         }
-        lastParent = parent;
+        lastBusyCursorParent = parent;
 
         try {
-            // if after BUSY_CURSOR_DELAY the original task is still running,
-            // set the cursor to the delay cursor
+            // if after BUSY_CURSOR_DELAY_MS the original task is
+            // still running, set the cursor to the delay cursor
             timer.schedule(startBusyCursorTask, delay);
             task.run(); // on the current thread!
         } finally {
-            // when the original task has stopped running, the cursor is reset
+            // reset the cursor when the original task has stopped running
             timer.cancel();
             parent.setCursor(DEFAULT);
         }
@@ -286,21 +286,20 @@ public final class GUIUtils {
     }
 
     /**
-     * Adds a button-like behavior to the given component by
-     * attaching a mouse listener to it that will trigger
-     * the given Runnable when the left mouse button is released.
+     * Adds button-like behavior to a component by running
+     * an action when the left mouse button is released.
      */
-    public static void addClickAction(JComponent c, Runnable action) {
-        c.addMouseListener(new MouseAdapter() {
+    public static void addClickAction(JComponent component, Runnable action) {
+        component.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                // on Linux/Mac the popup trigger check isn't enough
+                // on Linux/Mac the popup trigger check alone isn't enough
                 // probably because the popups are started by mousePressed
-                boolean showDialog = c.isEnabled()
+                boolean shouldTriggerAction = component.isEnabled()
                     && !e.isPopupTrigger()
                     && SwingUtilities.isLeftMouseButton(e);
 
-                if (showDialog) {
+                if (shouldTriggerAction) {
                     action.run();
                 }
             }
@@ -336,8 +335,7 @@ public final class GUIUtils {
                     desktop.browseFileDirectory(file);
                 } else if (desktop.isSupported(Desktop.Action.OPEN)) {
                     // just open the parent directory
-                    File dir = file.getParentFile();
-                    desktop.open(dir);
+                    desktop.open(file.getParentFile());
                 }
                 // else give up
             }
@@ -350,7 +348,7 @@ public final class GUIUtils {
             if (comp.isDirty()) {
                 String msg = "<html>The file <i>" + file.getName() +
                     "</i> contains unsaved changes.<br>" +
-                    "Only the saved changes can be printed.<br>" +
+                    "Only saved changes can be printed.<br>" +
                     "Do you want to save your changes now?";
 
                 String[] options = {"Save and Print", GUIText.CANCEL};
@@ -370,7 +368,7 @@ public final class GUIUtils {
         });
     }
 
-    public static void showTaskbarProgress(int progressPercent) {
+    public static void updateTaskbarProgress(int progressPercent) {
         if (Taskbar.isTaskbarSupported()) {
             Taskbar taskbar = Taskbar.getTaskbar();
             if (taskbar.isSupported(PROGRESS_VALUE_WINDOW)) {

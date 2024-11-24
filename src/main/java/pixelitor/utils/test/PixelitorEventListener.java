@@ -33,7 +33,7 @@ public class PixelitorEventListener implements ActiveHolderListener,
     ActiveMaskListener, ViewActivationListener {
 
     public PixelitorEventListener() {
-        if (AppMode.isFinal()) {
+        if (!AppMode.isDevelopment()) {
             // should be used only for debugging
             throw new IllegalStateException();
         }

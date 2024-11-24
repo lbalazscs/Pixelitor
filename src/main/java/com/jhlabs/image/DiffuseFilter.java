@@ -28,7 +28,7 @@ public class DiffuseFilter extends TransformFilter {
 
     public DiffuseFilter(String filterName) {
         super(filterName);
-        setEdgeAction(REPEAT_EDGE_PIXELS);
+        setEdgeAction(REPEAT_EDGE);
     }
 
     /**

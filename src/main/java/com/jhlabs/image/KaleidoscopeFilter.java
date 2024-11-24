@@ -42,7 +42,7 @@ public class KaleidoscopeFilter extends TransformFilter {
      */
     public KaleidoscopeFilter(String filterName) {
         super(filterName);
-        setEdgeAction(REPEAT_EDGE_PIXELS);
+        setEdgeAction(REPEAT_EDGE);
     }
 
     /**

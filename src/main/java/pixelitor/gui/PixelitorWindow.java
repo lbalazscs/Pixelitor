@@ -90,7 +90,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     private void initWindow(Dimension screenSize) {
-        AppPreferences.loadFramePosition(this, screenSize);
+        AppPreferences.loadFramePreferences(this, screenSize);
         if (JVM.isWindows) {
             // this is tricky code, and had problems on Linux
             setupRememberingLastBounds();

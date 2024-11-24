@@ -24,10 +24,10 @@ public enum AppMode {
     /**
      * The mode used by end-users.
      */
-    FINAL_GUI() {
+    STANDARD_GUI() {
     },
     /**
-     * In this mode there are additional menus and runtime checks.
+     * In this mode there are additional development menus and runtime checks.
      */
     DEVELOPMENT_GUI() {
     },
@@ -37,7 +37,7 @@ public enum AppMode {
     UNIT_TESTS() {
     };
 
-    public static AppMode CURRENT = FINAL_GUI;
+    public static AppMode CURRENT = STANDARD_GUI;
 
     /**
      * Returns true if the app was started in development mode.
@@ -45,10 +45,6 @@ public enum AppMode {
      */
     public static boolean isDevelopment() {
         return CURRENT == DEVELOPMENT_GUI;
-    }
-
-    public static boolean isFinal() {
-        return !isDevelopment();
     }
 
     public static boolean isUnitTesting() {

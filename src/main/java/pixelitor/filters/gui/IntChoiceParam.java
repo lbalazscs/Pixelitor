@@ -120,7 +120,7 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
     }
 
     public static final Item EDGE_REPEAT_PIXELS = new Item(
-        "Repeat Edge Pixels", TransformFilter.REPEAT_EDGE_PIXELS);
+        "Repeat Edge Pixels", TransformFilter.REPEAT_EDGE);
     public static final Item EDGE_REFLECT = new Item(
         "Reflect Image", TransformFilter.REFLECT);
 

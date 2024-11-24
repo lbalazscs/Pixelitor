@@ -29,25 +29,28 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * A {@link LayerUI} support class for validating JTextFields.
- * Paints a red X on the textfield if the content is not valid.
+ * A {@link LayerUI} for validating {@link JTextField}s.
+ * Paints a red "X" on the text field if its content fails validation.
  */
 public class TFValidationLayerUI extends LayerUI<JTextField> {
-    private final Predicate<JTextField> checker;
+    private static final int ICON_SIZE = 8;
+    private static final int PADDING = 10;
 
-    private TFValidationLayerUI(Predicate<JTextField> checker) {
-        this.checker = checker;
+    private final Predicate<JTextField> validator;
+
+    private TFValidationLayerUI(Predicate<JTextField> validator) {
+        this.validator = validator;
     }
 
     // used when only the red warning icon is needed,
     // depending on the result of the given predicate
-    public static JLayer<JTextField> createCheckedTF(JTextField textField, Predicate<JTextField> checker) {
-        return new JLayer<>(textField, new TFValidationLayerUI(checker));
+    public static JLayer<JTextField> wrapWithSimpleValidation(JTextField textField, Predicate<JTextField> validator) {
+        return new JLayer<>(textField, new TFValidationLayerUI(validator));
     }
 
     // used when in addition to the red warning icon,
     // a specific error message is also needed
-    public static JLayer<JTextField> createValidatedTF(JTextField textField, TextFieldValidator validator) {
+    public static JLayer<JTextField> wrapWithValidation(JTextField textField, TextFieldValidator validator) {
         return new JLayer<>(textField, new TFValidationLayerUI(tf -> validator.check(tf).isValid()));
     }
 
@@ -59,25 +62,21 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
         JLayer<JTextField> jLayer = (JLayer<JTextField>) c;
 
         JTextField textField = jLayer.getView();
-        boolean isOK = checker.test(textField);
-        if (!isOK) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
-            // Paint the red X.
-            int w = c.getWidth();
-            int h = c.getHeight();
-            int s = 8;
-            int pad = 10;
-            int x = w - pad - s;
-            int y = (h - s) / 2;
-            g2.setPaint(RED);
-            g2.fillRect(x, y, s + 1, s + 1);
-            g2.setPaint(WHITE);
-            g2.drawLine(x, y, x + s, y + s);
-            g2.drawLine(x, y + s, x + s, y);
-
-            g2.dispose();
+        if (validator.test(textField)) {
+            return; // skip painting if validation passes
         }
+
+        // paint an "X" icon on the component
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        int x = c.getWidth() - PADDING - ICON_SIZE;
+        int y = (c.getHeight() - ICON_SIZE) / 2;
+        g2.setPaint(RED);
+        g2.fillRect(x, y, ICON_SIZE + 1, ICON_SIZE + 1);
+        g2.setPaint(WHITE);
+        g2.drawLine(x, y, x + ICON_SIZE, y + ICON_SIZE);
+        g2.drawLine(x, y + ICON_SIZE, x + ICON_SIZE, y);
+
+        g2.dispose();
     }
 }

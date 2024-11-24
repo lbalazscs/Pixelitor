@@ -482,7 +482,7 @@ public class TestHelper {
         if (Texts.getResources() == null) {
             Texts.init(); // needed for the views initialization
         }
-        Views.reinitialize();
+        Views.clear();
 
         if (AppMode.isUnitTesting()) {
             // unit testing mode is already set

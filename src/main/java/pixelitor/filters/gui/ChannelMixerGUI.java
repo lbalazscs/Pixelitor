@@ -45,7 +45,7 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
                             boolean addShowOriginal,
                             Action[] presets) {
         JPanel upperPanel = new JPanel(new BorderLayout());
-        JPanel leftPanel = GUIUtils.arrangeVertically(paramSet);
+        JPanel leftPanel = GUIUtils.createVerticalPanel(paramSet);
         JPanel rightPanel = createPresetsPanel(presets);
 
         // This is a right place to do this, because when this code is

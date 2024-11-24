@@ -23,6 +23,7 @@ import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A thread pool for parallel execution on multiple CPU cores
@@ -31,30 +32,38 @@ public class ThreadPool {
     private static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
 
     private static final ExecutorService pool =
-        Executors.newFixedThreadPool(NUM_CORES);
+        Executors.newFixedThreadPool(NUM_CORES, new ThreadFactory() {
+            private final AtomicInteger threadCount = new AtomicInteger(1);
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r, "ImageProcessor-" + threadCount.getAndIncrement());
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
 
     private ThreadPool() {
+        throw new AssertionError("utility class");
     }
 
     /**
-     * Submits a task that doesn't return anything
+     * Submits a task that doesn't return anything.
      */
     public static Future<?> submit(Runnable task) {
         return pool.submit(task);
     }
 
     /**
-     * Submits a task that returns something, such as
-     * the calculated pixels in a line
+     * Submits a task that returns a value, such as
+     * the calculated pixels in a line.
      */
     public static <T> Future<T> submit2(Callable<T> task) {
         return pool.submit(task);
     }
 
     /**
-     * Blocks the current thread until all the given futures finish
-     * their tasks. During this time, it updates the progress using
-     * the given {@link ProgressTracker}.
+     * Waits for all futures to complete while tracking progress.
      */
     public static void waitFor(Iterable<Future<?>> futures, ProgressTracker pt) {
         assert pt != null;
@@ -71,7 +80,7 @@ public class ThreadPool {
         }
     }
 
-    // same as the above, but with an array argument
+    // same as the method above, but with an array argument
     public static void waitFor(Future<?>[] futures, ProgressTracker pt) {
         assert pt != null;
 
@@ -86,19 +95,19 @@ public class ThreadPool {
     }
 
     /**
-     * Similar to waitFor, but works with futures
-     * that return an int array representing a line, and
-     * updates the given destination image with the new pixels.
+     * Similar to waitFor, but also updates given the destination image.
+     * Each future represents a processed line of pixels in the image.
      */
-    public static void waitFor2(Future<int[]>[] futures, BufferedImage dst, int width, ProgressTracker pt) {
+    public static void waitFor2(Future<int[]>[] lineFutures,
+                                BufferedImage dst,
+                                int lineWidth,
+                                ProgressTracker pt) {
         assert pt != null;
 
         try {
-            for (int i = 0; i < futures.length; i++) {
-                var lineFuture = futures[i];
-                int[] linePixels = lineFuture.get();
-                AbstractBufferedImageOp.setRGB(dst, 0, i, width, 1, linePixels);
-
+            for (int y = 0; y < lineFutures.length; y++) {
+                int[] linePixels = lineFutures[y].get();
+                AbstractBufferedImageOp.setRGB(dst, 0, y, lineWidth, 1, linePixels);
                 pt.unitDone();
             }
         } catch (InterruptedException | ExecutionException e) {

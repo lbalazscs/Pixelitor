@@ -32,7 +32,7 @@ public interface TextFieldValidator {
     static ValidationResult hasPositiveDouble(JTextField textField, String label) {
         String text = textField.getText().trim();
         if (text.isEmpty()) {
-            return ValidationResult.invalid("<b>" + label + "</b> can't be empty.");
+            return ValidationResult.invalidEmpty(label);
         }
         double value;
         try {
@@ -43,24 +43,24 @@ public interface TextFieldValidator {
         if (value > 0) {
             return ValidationResult.valid();
         } else if (value == 0) {
-            return ValidationResult.invalid("<b>" + label + "</b> can't be zero.");
+            return ValidationResult.invalidZero(label);
         } else {
-            return ValidationResult.invalid("<b>" + label + "</b> must be positive.");
+            return ValidationResult.invalidNegative(label);
         }
     }
 
     static ValidationResult hasPositiveInt(JTextField textField, String label, boolean allowZero) {
         String text = textField.getText().trim();
         if (text.isEmpty()) {
-            return ValidationResult.invalid("<b>" + label + "</b> can't be empty.");
+            return ValidationResult.invalidEmpty(label);
         }
         try {
             int value = Integer.parseInt(text);
             if (value == 0 && !allowZero) {
-                return ValidationResult.invalid("<b>" + label + "</b> can't be 0.");
+                return ValidationResult.invalidZero(label);
             }
             if (value < 0) {
-                return ValidationResult.invalid("<b>" + label + "</b> must be positive.");
+                return ValidationResult.invalidNegative(label);
             }
         } catch (NumberFormatException ex) {
             return ValidationResult.invalid("<b>" + label + "</b> must be an integer.");
@@ -71,6 +71,6 @@ public interface TextFieldValidator {
     static JLayer<JTextField> createPositiveIntLayer(String label,
                                                      JTextField tf,
                                                      boolean allowZero) {
-        return TFValidationLayerUI.createValidatedTF(tf, textField1 -> hasPositiveInt(textField1, label, allowZero));
+        return TFValidationLayerUI.wrapWithValidation(tf, textField1 -> hasPositiveInt(textField1, label, allowZero));
     }
 }

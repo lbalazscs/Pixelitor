@@ -32,7 +32,7 @@ public class MarbleFilter extends TransformFilter {
 
     public MarbleFilter(String filterName) {
         super(filterName);
-        setEdgeAction(REPEAT_EDGE_PIXELS);
+        setEdgeAction(REPEAT_EDGE);
     }
 
     /**

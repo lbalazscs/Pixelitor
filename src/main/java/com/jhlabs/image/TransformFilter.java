@@ -19,239 +19,97 @@ package com.jhlabs.image;
 import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
- * An abstract superclass for filters which distort images in some way. The subclass only needs to override
- * two methods to provide the mapping between source and destination pixels.
+ * An abstract superclass for filters that transform images through
+ * pixel coordinate mapping.
+ * Subclasses need to implement the transformInverse method to define
+ * the mapping between source and destination pixel coordinates.
  */
 public abstract class TransformFilter extends AbstractBufferedImageOp {
     // image dimensions
     protected int srcWidth;
     protected int srcHeight;
 
-    /**
-     * Treat pixels off the edge as zero.
-     */
-    public static final int TRANSPARENT = 0;
+    // strategies for pixels that map outside the source image bounds
+    public static final int TRANSPARENT = 0; // treat out-of-bounds pixels as transparent
+    public static final int REPEAT_EDGE = 1; // use the nearest edge pixel
+    public static final int WRAP_AROUND = 2; // wrap around to the opposite edge
+    public static final int REFLECT = 4; // mirror the image at edges
+    protected int edgeAction = REPEAT_EDGE;
 
-    /**
-     * Clamp pixels to the image edges.
-     */
-    public static final int REPEAT_EDGE_PIXELS = 1;
-
-    /**
-     * Wrap pixels off the edge onto the opposite edge.
-     */
-    public static final int WRAP_AROUND = 2;
-
-    /**
-     * Clamp pixels RGB to the image edges, but zero the alpha. This prevents gray borders on your image.
-     */
-    public static final int RGB_CLAMP = 3;
-
-    public static final int REFLECT = 4;
-
-
-    /**
-     * Use nearest-neighbour interpolation.
-     */
+    // Interpolation methods for sampling between pixel centers
     public static final int NEAREST_NEIGHBOUR = 0;
-    public static final int NEAREST_NEIGHBOUR_OLD = 2;
-
-    /**
-     * Use bilinear interpolation.
-     */
     public static final int BILINEAR = 1;
-    public static final int BILINEAR_OLD = 3;
-
-    /**
-     * The action to take for pixels off the image edge.
-     */
-    protected int edgeAction = RGB_CLAMP;
-
-    /**
-     * The type of interpolation to use.
-     */
     protected int interpolation = BILINEAR;
 
-    /**
-     * The output image rectangle.
-     */
-//    protected Rectangle transformedSpace;
-
-    /**
-     * The input image rectangle.
-     */
-//    protected Rectangle originalSpace;
     protected TransformFilter(String filterName) {
         super(filterName);
     }
 
     /**
-     * Set the action to perform for pixels off the edge of the image.
+     * Sets the strategy for handling pixels that map outside the source image bounds.
      *
-     * @param edgeAction one of TRANSPARENT, REPEAT_EDGE_PIXELS or WRAP_AROUND
-     * @see #getEdgeAction
+     * @param edgeAction one of TRANSPARENT, REPEAT_EDGE, REFLECT or WRAP_AROUND
      */
     public void setEdgeAction(int edgeAction) {
         this.edgeAction = edgeAction;
     }
 
-    /**
-     * Get the action to perform for pixels off the edge of the image.
-     *
-     * @return one of TRANSPARENT, REPEAT_EDGE_PIXELS or WRAP_AROUND
-     * @see #setEdgeAction
-     */
     public int getEdgeAction() {
         return edgeAction;
     }
 
     /**
-     * Set the type of interpolation to perform.
+     * Sets the interpolation method used when sampling between pixel centers.
      *
      * @param interpolation one of NEAREST_NEIGHBOUR or BILINEAR
-     * @see #getInterpolation
      */
     public void setInterpolation(int interpolation) {
         this.interpolation = interpolation;
     }
 
-    /**
-     * Get the type of interpolation to perform.
-     *
-     * @return one of NEAREST_NEIGHBOUR or BILINEAR
-     * @see #setInterpolation
-     */
     public int getInterpolation() {
         return interpolation;
     }
 
     /**
-     * Inverse transform a point. This method needs to be overriden by all subclasses.
+     * Maps a destination pixel coordinate back to its source location.
      *
-     * @param x   the X position of the pixel in the output image
-     * @param y   the Y position of the pixel in the output image
-     * @param out the position of the pixel in the input image
+     * @param x   The X coordinate in the destination image
+     * @param y   The Y coordinate in the destination image
+     * @param out Output array to store the mapped source coordinates (x, y)
      */
     protected abstract void transformInverse(int x, int y, float[] out);
-
-    /**
-     * Forward transform a rectangle. Used to determine the size of the output image.
-     *
-     * @param rect the rectangle to transform
-     */
-    protected void transformSpace(Rectangle rect) {
-    }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         srcWidth = src.getWidth();
         srcHeight = src.getHeight();
-//		int type = src.getType();
-//		WritableRaster srcRaster = src.getRaster();
-
-// lbalazscs: commented out space transformation because it is not used anyway
-// (in the Filters used by pixelitor)
-//        originalSpace = new Rectangle(0, 0, width, height);
-//        transformedSpace = new Rectangle(0, 0, width, height);
-//        transformSpace(transformedSpace);
 
         if (dst == null) {
             ColorModel dstCM = src.getColorModel();
-//            dst = new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(transformedSpace.width, transformedSpace.height), dstCM.isAlphaPremultiplied(), null);
             dst = new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(0, 0), dstCM
                     .isAlphaPremultiplied(), null);
         }
-//		WritableRaster dstRaster = dst.getRaster();
 
         int[] inPixels = getRGB(src, 0, 0, srcWidth, srcHeight, null);
 
         return switch (interpolation) {
             case BILINEAR -> filterPixelsBilinear(dst, srcWidth, srcHeight, inPixels);
             case NEAREST_NEIGHBOUR -> filterPixelsNN(dst, srcWidth, srcHeight, inPixels);
-            case BILINEAR_OLD -> filterPixelsBilinearOLD(dst, srcWidth, srcHeight, inPixels);
-            case NEAREST_NEIGHBOUR_OLD -> filterPixelsNNOLD(dst, srcWidth, srcHeight, inPixels);
             default -> throw new IllegalStateException("should not get here");
         };
-
     }
 
-    private BufferedImage filterPixelsBilinearOLD(BufferedImage dst, int width, int height, int[] inPixels) {
-        int srcWidth = width;
-        int srcHeight = height;
-        int srcWidth1 = width - 1;
-        int srcHeight1 = height - 1;
-        int outWidth = width;
-        int outHeight = height;
-//        int outX, outY;
-//		int index = 0;
-        int[] outPixels = new int[outWidth];
-
-        float[] out = new float[2];
-
-        for (int y = 0; y < outHeight; y++) {
-            for (int x = 0; x < outWidth; x++) {
-                transformInverse(x, y, out);
-                int srcX = (int) FastMath.floor(out[0]);
-                int srcY = (int) FastMath.floor(out[1]);
-                float xWeight = out[0] - srcX;
-                float yWeight = out[1] - srcY;
-                int nw, ne, sw, se;
-
-                if ((srcX >= 0) && (srcX < srcWidth1) && (srcY >= 0) && (srcY < srcHeight1)) {
-                    // Easy case, all corners are in the image
-                    int i = (srcWidth * srcY) + srcX;
-                    nw = inPixels[i];
-                    ne = inPixels[i + 1];
-                    sw = inPixels[i + srcWidth];
-                    se = inPixels[i + srcWidth + 1];
-                } else {
-                    // Some of the corners are off the image
-                    nw = getPixelBL(inPixels, srcX, srcY, srcWidth, srcHeight);
-                    ne = getPixelBL(inPixels, srcX + 1, srcY, srcWidth, srcHeight);
-                    sw = getPixelBL(inPixels, srcX, srcY + 1, srcWidth, srcHeight);
-                    se = getPixelBL(inPixels, srcX + 1, srcY + 1, srcWidth, srcHeight);
-                }
-                outPixels[x] = ImageMath.bilinearInterpolate(xWeight, yWeight, nw, ne, sw, se);
-            }
-            setRGB(dst, 0, y, width, 1, outPixels);
-        }
-        return dst;
-    }
-
-    protected BufferedImage filterPixelsNNOLD(BufferedImage dst, int width, int height, int[] inPixels) {
-        int srcWidth = width;
-        int srcHeight = height;
-        int outWidth = width;
-        int outHeight = height;
-
-        int[] outPixels = new int[outWidth];
-
-//		int[] rgb = new int[4];
-        float[] out = new float[2];
-
-        for (int y = 0; y < outHeight; y++) {
-            for (int x = 0; x < outWidth; x++) {
-                transformInverse(x, y, out);
-                int srcX = (int) out[0];
-                int srcY = (int) out[1];
-                // int casting rounds towards zero, so we check out[0] < 0, not srcX < 0
-                outPixels[x] = getPixelNN(inPixels, srcWidth, srcHeight, srcX, srcY, out);
-            }
-            setRGB(dst, 0, y, width, 1, outPixels);
-        }
-        return dst;
-    }
-
-    protected BufferedImage filterPixelsNN(BufferedImage dst, int width, int height, int[] inPixels) {
-        int srcWidth = width;
-        int srcHeight = height;
+    /**
+     * Applies the transform using nearest-neighbor interpolation.
+     */
+    private BufferedImage filterPixelsNN(BufferedImage dst, int width, int height, int[] inPixels) {
         int outWidth = width;
         int outHeight = height;
 
@@ -260,189 +118,166 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         @SuppressWarnings("unchecked")
         Future<int[]>[] resultLines = new Future[outHeight];
 
+        // process each output line in parallel
         for (int y = 0; y < outHeight; y++) {
             float[] out = new float[2];
             int finalY = y;
-            Callable<int[]> calculateLineTask = () -> {
-                int srcX, srcY;
-                int[] outPixels = new int[outWidth];
+
+            Callable<int[]> calcLineTask = () -> {
+                int[] outLine = new int[outWidth];
 
                 for (int x = 0; x < outWidth; x++) {
                     transformInverse(x, finalY, out);
-                    srcX = (int) out[0];
-                    srcY = (int) out[1];
+                    int srcX = (int) out[0];
+                    int srcY = (int) out[1];
                     // int casting rounds towards zero, so we check out[0] < 0, not srcX < 0
-                    outPixels[x] = getPixelNN(inPixels, srcWidth, srcHeight, srcX, srcY, out);
+                    outLine[x] = sampleNN(inPixels, srcX, srcY, srcWidth, srcHeight, out);
                 }
 
-                return outPixels;
-
+                return outLine;
             };
-            resultLines[finalY] = ThreadPool.submit2(calculateLineTask);
+
+            resultLines[finalY] = ThreadPool.submit2(calcLineTask);
         }
+
         ThreadPool.waitFor2(resultLines, dst, width, pt);
         finishProgressTracker();
 
         return dst;
     }
 
+    /**
+     * Applies the transform using bilinear interpolation.
+     */
     private BufferedImage filterPixelsBilinear(BufferedImage dst, int width, int height, int[] inPixels) {
-        int srcWidth = width;
-        int srcHeight = height;
-        int srcWidth1 = width - 1;
-        int srcHeight1 = height - 1;
+        int maxSrcX = width - 1;
+        int maxSrcY = height - 1;
         int outWidth = width;
         int outHeight = height;
-//        int outX, outY;
-//		int index = 0;
 
         pt = createProgressTracker(outHeight);
-
         @SuppressWarnings("unchecked")
         Future<int[]>[] resultLines = new Future[outHeight];
 
+        // process each output line in parallel
         for (int y = 0; y < outHeight; y++) {
             float[] out = new float[2];
             int finalY = y;
-            Callable<int[]> calculateLineTask = () -> {
-                int[] outPixels = new int[outWidth];
+
+            Callable<int[]> calcLineTask = () -> {
+                int[] outLine = new int[outWidth];
                 for (int x = 0; x < outWidth; x++) {
                     transformInverse(x, finalY, out);
+
                     int srcX = (int) FastMath.floor(out[0]);
                     int srcY = (int) FastMath.floor(out[1]);
                     float xWeight = out[0] - srcX;
                     float yWeight = out[1] - srcY;
                     int nw, ne, sw, se;
 
-                    if ((srcX >= 0) && (srcX < srcWidth1) && (srcY >= 0) && (srcY < srcHeight1)) {
-                        // Easy case, all corners are in the image
+                    if ((srcX >= 0) && (srcX < maxSrcX) && (srcY >= 0) && (srcY < maxSrcY)) {
+                        // fast path when all pixels are within bounds
                         int i = (srcWidth * srcY) + srcX;
                         nw = inPixels[i];
                         ne = inPixels[i + 1];
                         sw = inPixels[i + srcWidth];
                         se = inPixels[i + srcWidth + 1];
                     } else {
-                        // Some of the corners are off the image
-                        nw = getPixelBL(inPixels, srcX, srcY, srcWidth, srcHeight);
-                        ne = getPixelBL(inPixels, srcX + 1, srcY, srcWidth, srcHeight);
-                        sw = getPixelBL(inPixels, srcX, srcY + 1, srcWidth, srcHeight);
-                        se = getPixelBL(inPixels, srcX + 1, srcY + 1, srcWidth, srcHeight);
+                        // some of the corners are off the image
+                        nw = sampleBL(inPixels, srcX, srcY, srcWidth, srcHeight);
+                        ne = sampleBL(inPixels, srcX + 1, srcY, srcWidth, srcHeight);
+                        sw = sampleBL(inPixels, srcX, srcY + 1, srcWidth, srcHeight);
+                        se = sampleBL(inPixels, srcX + 1, srcY + 1, srcWidth, srcHeight);
                     }
-                    outPixels[x] = ImageMath.bilinearInterpolate(xWeight, yWeight, nw, ne, sw, se);
+                    outLine[x] = ImageMath.bilinearInterpolate(xWeight, yWeight, nw, ne, sw, se);
                 }
-                return outPixels;
+                return outLine;
             };
 
-            resultLines[finalY] = ThreadPool.submit2(calculateLineTask);
+            resultLines[finalY] = ThreadPool.submit2(calcLineTask);
         }
+
         ThreadPool.waitFor2(resultLines, dst, width, pt);
         finishProgressTracker();
 
         return dst;
     }
 
-    private int getPixelBL(int[] pixels, int x, int y, int width, int height) {
-        if ((x < 0) || (x >= width)) {  // x out of range
-            if ((y < 0) || (y >= height)) { // y also out of range {
-                switch (edgeAction) {
-                    case TRANSPARENT:
-                    default:
-                        return 0;
-                    case WRAP_AROUND:
-                        return pixels[(ImageMath.mod(y, height) * width) + ImageMath.mod(x, width)];
-                    case REPEAT_EDGE_PIXELS:
-                        return pixels[(ImageMath.clamp(y, 0, height - 1) * width) + ImageMath.clamp(x, 0, width - 1)];
-                    case REFLECT:
-                        int reflectedX = ImageMath.reflectTriangle(x, width);
-                        int reflectedY = ImageMath.reflectTriangle(y, height);
-                        return pixels[(reflectedY * width) + reflectedX];
-                }
-            } else { // x out of range, but y is OK
-                switch (edgeAction) {
-                    case TRANSPARENT:
-                    default:
-                        return 0;
-                    case WRAP_AROUND:
-                        return pixels[(y * width) + ImageMath.mod(x, width)];
-                    case REPEAT_EDGE_PIXELS:
-                        return pixels[(y * width) + ImageMath.clamp(x, 0, width - 1)];
-                    case REFLECT:
-                        int reflectedX = ImageMath.reflectTriangle(x, width);
-                        return pixels[(y * width) + reflectedX];
-                }
+    /**
+     * Samples a pixel for bilinear interpolation.
+     */
+    private int sampleBL(int[] pixels, int x, int y, int width, int height) {
+        if ((x < 0) || (x >= width)) {
+            if ((y < 0) || (y >= height)) {
+                return sampleCorner(pixels, x, y, width, height);
+            } else {
+                return sampleVerEdge(pixels, x, y, width);
             }
-        } else { // x in range
-            if ((y < 0) || (y >= height)) { // ... but y is out
-                switch (edgeAction) {
-                    case TRANSPARENT:
-                    default:
-                        return 0;
-                    case WRAP_AROUND:
-                        return pixels[(ImageMath.mod(y, height) * width) + x];
-                    case REPEAT_EDGE_PIXELS:
-                        return pixels[(ImageMath.clamp(y, 0, height - 1) * width) + x];
-                    case REFLECT:
-                        int reflectedY = ImageMath.reflectTriangle(y, height);
-                        return pixels[(reflectedY * width) + x];
-                }
-            } else { // both x and y are OK
+        } else {
+            if ((y < 0) || (y >= height)) {
+                return sampleHorEdge(pixels, x, y, width, height);
+            } else {
                 return pixels[((y * width) + x)];
             }
         }
     }
 
-    private int getPixelNN(int[] inPixels, int srcWidth, int srcHeight, int srcX, int srcY, float[] out) {
-        if ((out[0] < 0) || (srcX >= srcWidth)) { // x out of range
-            if ((out[1] < 0) || (srcY >= srcHeight)) {  // y also out of range
-                switch (edgeAction) {
-                    case TRANSPARENT:
-                    default:
-                        return 0;
-                    case WRAP_AROUND:
-                        return inPixels[(ImageMath.mod(srcY, srcHeight) * srcWidth) + ImageMath.mod(srcX, srcWidth)];
-                    case REPEAT_EDGE_PIXELS:
-                        return inPixels[(ImageMath.clamp(srcY, 0, srcHeight - 1) * srcWidth) + ImageMath
-                                .clamp(srcX, 0, srcWidth - 1)];
-                    case REFLECT:
-                        int reflectedX = ImageMath.reflectTriangle(srcX, srcWidth);
-                        int reflectedY = ImageMath.reflectTriangle(srcY, srcHeight);
-                        return inPixels[(reflectedY * srcWidth) + reflectedX];
-                }
-            } else { // x out of range, but y is OK
-                switch (edgeAction) {
-                    case TRANSPARENT:
-                    default:
-                        return 0;
-                    case WRAP_AROUND:
-                        return inPixels[(srcY * srcWidth) + ImageMath.mod(srcX, srcWidth)];
-                    case REPEAT_EDGE_PIXELS:
-                        return inPixels[(srcY * srcWidth) + ImageMath.clamp(srcX, 0, srcWidth - 1)];
-                    case REFLECT:
-                        int reflectedX = ImageMath.reflectTriangle(srcX, srcWidth);
-                        return inPixels[(srcY * srcWidth) + reflectedX];
-                }
-
+    /**
+     * Samples a pixel for nearest-neighbor interpolation.
+     */
+    private int sampleNN(int[] inPixels, int x, int y, int width, int height, float[] out) {
+        if ((out[0] < 0) || (x >= width)) {
+            if ((out[1] < 0) || (y >= height)) {
+                return sampleCorner(inPixels, x, y, width, height);
+            } else {
+                return sampleVerEdge(inPixels, x, y, width);
             }
-        } else {  // x in range
-            if ((out[1] < 0) || (srcY >= srcHeight)) { // ... but y isn't
-                switch (edgeAction) {
-                    case TRANSPARENT:
-                    default:
-                        return 0;
-                    case WRAP_AROUND:
-                        return inPixels[(ImageMath.mod(srcY, srcHeight) * srcWidth) + srcX];
-                    case REPEAT_EDGE_PIXELS:
-                        return inPixels[(ImageMath.clamp(srcY, 0, srcHeight - 1) * srcWidth) + srcX];
-                    case REFLECT:
-//                        int wrappedY = ImageMath.mod(srcY, srcHeight);
-//                        int reflectedY = srcHeight - wrappedY - 1;
-                        int reflectedY = ImageMath.reflectTriangle(srcY, srcHeight);
-                        return inPixels[(reflectedY * srcWidth) + srcX];
-                }
-            } else { // both x and y are OK
-                int i = (srcWidth * srcY) + srcX;
-                return inPixels[i];
+        } else {
+            if ((out[1] < 0) || (y >= height)) {
+                return sampleHorEdge(inPixels, x, y, width, height);
+            } else {
+                return inPixels[(width * y) + x];
             }
         }
+    }
+
+    private int sampleCorner(int[] pixels, int x, int y, int width, int height) {
+        return switch (edgeAction) {
+            case TRANSPARENT -> 0;
+            case WRAP_AROUND -> pixels[(ImageMath.mod(y, height) * width) + ImageMath.mod(x, width)];
+            case REPEAT_EDGE -> pixels[(ImageMath.clamp(y, 0, height - 1) * width) + ImageMath.clamp(x, 0, width - 1)];
+            case REFLECT -> {
+                int reflectedX = ImageMath.reflectTriangle(x, width);
+                int reflectedY = ImageMath.reflectTriangle(y, height);
+                yield pixels[(reflectedY * width) + reflectedX];
+            }
+            default -> 0;
+        };
+    }
+
+    private int sampleVerEdge(int[] pixels, int x, int y, int width) {
+        return switch (edgeAction) {
+            case TRANSPARENT -> 0;
+            case WRAP_AROUND -> pixels[(y * width) + ImageMath.mod(x, width)];
+            case REPEAT_EDGE -> pixels[(y * width) + ImageMath.clamp(x, 0, width - 1)];
+            case REFLECT -> {
+                int reflectedX = ImageMath.reflectTriangle(x, width);
+                yield pixels[(y * width) + reflectedX];
+            }
+            default -> 0;
+        };
+    }
+
+    private int sampleHorEdge(int[] pixels, int x, int y, int width, int height) {
+        return switch (edgeAction) {
+            case TRANSPARENT -> 0;
+            case WRAP_AROUND -> pixels[(ImageMath.mod(y, height) * width) + x];
+            case REPEAT_EDGE -> pixels[(ImageMath.clamp(y, 0, height - 1) * width) + x];
+            case REFLECT -> {
+                int reflectedY = ImageMath.reflectTriangle(y, height);
+                yield pixels[(reflectedY * width) + x];
+            }
+            default -> 0;
+        };
     }
 }

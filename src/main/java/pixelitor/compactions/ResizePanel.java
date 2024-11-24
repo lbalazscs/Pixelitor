@@ -40,7 +40,7 @@ import java.text.ParseException;
 
 import static java.awt.FlowLayout.LEFT;
 import static java.lang.Integer.parseInt;
-import static pixelitor.gui.utils.TFValidationLayerUI.createValidatedTF;
+import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
 
 /**
  * The GUI for the resize settings.
@@ -89,7 +89,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         widthTF.addKeyListener(this);
         updateWidthText(ResizeUnit.PIXELS);
         var unitChooser1 = new JComboBox<>(unitSelectorModel);
-        var widthLayer = createValidatedTF(widthTF, widthdValidator);
+        var widthLayer = wrapWithValidation(widthTF, widthdValidator);
         gbh.addLabelAndTwoControls("Width:", widthLayer, unitChooser1);
 
         heightTF = new JTextField(INPUT_FIELD_COLUMNS);
@@ -97,7 +97,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         updateHeightText(ResizeUnit.PIXELS);
         heightTF.addKeyListener(this);
         var unitChooser2 = new JComboBox<>(unitSelectorModel);
-        var heightLayer = createValidatedTF(heightTF, heightValidator);
+        var heightLayer = wrapWithValidation(heightTF, heightValidator);
         gbh.addLabelAndTwoControls("Height:", heightLayer, unitChooser2);
 
         unitChooser1.addItemListener(this);

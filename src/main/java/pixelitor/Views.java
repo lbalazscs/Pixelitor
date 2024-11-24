@@ -416,7 +416,7 @@ public class Views {
         addNew(comp);
 
         File file = comp.getFile();
-        RecentFilesMenu.INSTANCE.addFile(file);
+        RecentFilesMenu.INSTANCE.addRecentFile(file);
         Messages.showFileOpenedMessage(comp);
 
         // TODO this is a workaround hack because adj layer filters running
@@ -601,7 +601,7 @@ public class Views {
 
     // called from test initialization to ensure that views
     // from previous test runs don't interfere with the current test
-    public static void reinitialize() {
+    public static void clear() {
         views.clear();
     }
 }

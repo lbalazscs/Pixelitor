@@ -49,7 +49,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
         // It can be a window, but if progressPanel is not
         // added yet to a window, the broadest available
         // GUI area will do.
-        topContainer = GUIUtils.getTopContainer(progressPanel);
+        topContainer = GUIUtils.getTopmostContainer(progressPanel);
     }
 
     @Override

@@ -1657,10 +1657,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // save is already scheduled or running on the IO thread.
         File savedFile = saveSettings.file();
         String path = savedFile.getAbsolutePath();
-        if (IOTasks.isProcessing(path)) {
+        if (IOTasks.isPathProcessing(path)) {
             return CompletableFuture.completedFuture(null);
         }
-        IOTasks.markWriteProcessing(path);
+        IOTasks.markPathForWriting(path);
 
         // Set to not dirty already at the beginning of the saving process,
         // so that subsequent closing doesn't trigger another, parallel save.
@@ -1676,7 +1676,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                 } else {
                     afterSuccessfulSaveActions(savedFile, addToRecentMenus);
                 }
-                IOTasks.writingFinishedFor(path);
+                IOTasks.markWritingComplete(path);
                 return null;
             }, onEDT);
     }
@@ -1686,7 +1686,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         setFile(file);
         if (addToRecentMenus) {
-            RecentFilesMenu.INSTANCE.addFile(file);
+            RecentFilesMenu.INSTANCE.addRecentFile(file);
         }
         ImagePreviewPanel.removeThumbFromCache(file);
         Messages.showFileSavedMessage(file);

@@ -20,7 +20,7 @@ package pixelitor.gui;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.view.*;
 
-import static pixelitor.utils.AppPreferences.mainNode;
+import static pixelitor.utils.AppPreferences.mainPrefs;
 
 /**
  * Manages the visibility of various UI panels.
@@ -53,10 +53,10 @@ public class WorkSpace {
 
     public WorkSpace() {
         // load visibility preferences
-        histogramsVisible = mainNode.getBoolean(KEY_HISTOGRAMS_SHOWN, DEFAULT_HISTOGRAMS_VISIBLE);
-        toolsVisible = mainNode.getBoolean(KEY_TOOLS_SHOWN, DEFAULT_TOOLS_VISIBLE);
-        layersVisible = mainNode.getBoolean(KEY_LAYERS_SHOWN, DEFAULT_LAYERS_VISIBLE);
-        statusBarVisible = mainNode.getBoolean(KEY_STATUS_BAR_SHOWN, DEFAULT_STATUS_BAR_VISIBLE);
+        histogramsVisible = mainPrefs.getBoolean(KEY_HISTOGRAMS_SHOWN, DEFAULT_HISTOGRAMS_VISIBLE);
+        toolsVisible = mainPrefs.getBoolean(KEY_TOOLS_SHOWN, DEFAULT_TOOLS_VISIBLE);
+        layersVisible = mainPrefs.getBoolean(KEY_LAYERS_SHOWN, DEFAULT_LAYERS_VISIBLE);
+        statusBarVisible = mainPrefs.getBoolean(KEY_STATUS_BAR_SHOWN, DEFAULT_STATUS_BAR_VISIBLE);
 
         // initialize toogle actions
         histogramsAction = new ShowHideHistogramsAction(this);
@@ -120,10 +120,10 @@ public class WorkSpace {
     }
 
     public void savePreferences() {
-        mainNode.putBoolean(KEY_HISTOGRAMS_SHOWN, histogramsVisible);
-        mainNode.putBoolean(KEY_LAYERS_SHOWN, layersVisible);
-        mainNode.putBoolean(KEY_TOOLS_SHOWN, toolsVisible);
-        mainNode.putBoolean(KEY_STATUS_BAR_SHOWN, statusBarVisible);
+        mainPrefs.putBoolean(KEY_HISTOGRAMS_SHOWN, histogramsVisible);
+        mainPrefs.putBoolean(KEY_LAYERS_SHOWN, layersVisible);
+        mainPrefs.putBoolean(KEY_TOOLS_SHOWN, toolsVisible);
+        mainPrefs.putBoolean(KEY_STATUS_BAR_SHOWN, statusBarVisible);
     }
 
     public void setLayersVisible(boolean v, boolean revalidate) {

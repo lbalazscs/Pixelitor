@@ -21,9 +21,9 @@ import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignm
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 
 /**
- * Combines the horizontal and vertical alignments as a single list of values.
+ * A two-dimensional text alignment combining horizontal and vertical positioning.
  */
-public enum BoxAlignment {
+public enum TextAlignment {
     CENTER_CENTER("Center", HorizontalAlignment.CENTER, VerticalAlignment.CENTER),
     TOP_CENTER("Top", HorizontalAlignment.CENTER, VerticalAlignment.TOP),
     CENTER_LEFT("Left", HorizontalAlignment.LEFT, VerticalAlignment.CENTER),
@@ -33,13 +33,15 @@ public enum BoxAlignment {
     TOP_RIGHT("Top Right", HorizontalAlignment.RIGHT, VerticalAlignment.TOP),
     BOTTOM_LEFT("Bottom Left", HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM),
     BOTTOM_RIGHT("Bottom Right", HorizontalAlignment.RIGHT, VerticalAlignment.BOTTOM),
-    PATH("Path", null, null);
+
+    // special case: text aligned along a path
+    PATH("Text Along Path", null, null);
 
     private final String displayName;
     private final HorizontalAlignment horizontalAlignment;
     private final VerticalAlignment verticalAlignment;
 
-    BoxAlignment(String displayName, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+    TextAlignment(String displayName, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
         this.displayName = displayName;
         this.horizontalAlignment = horizontalAlignment;
         this.verticalAlignment = verticalAlignment;
@@ -58,7 +60,12 @@ public enum BoxAlignment {
         return displayName;
     }
 
-    public static BoxAlignment of(HorizontalAlignment horizontal, VerticalAlignment vertical) {
+    /**
+     * Returns the corresponding {@link TextAlignment} based
+     * on the given horizontal and vertical alignments.
+     */
+    public static TextAlignment from(HorizontalAlignment horizontal,
+                                     VerticalAlignment vertical) {
         if (horizontal == null || vertical == null) {
             return PATH;
         }

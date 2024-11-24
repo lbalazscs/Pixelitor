@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,82 +23,100 @@ import pixelitor.gui.View;
 
 import java.awt.*;
 
-import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
-import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
-
 public class Screens {
-    private static final GraphicsEnvironment LOCAL_GRAPHICS = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    private static final GraphicsDevice[] SCREEN_DEVICES = LOCAL_GRAPHICS.getScreenDevices();
-    private static final boolean MULTI_MONITORS = SCREEN_DEVICES.length > 1;
+    private static final GraphicsEnvironment GRAPHICS_ENV = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    private static final GraphicsDevice[] SCREEN_DEVICES = GRAPHICS_ENV.getScreenDevices();
+    private static final boolean IS_MULTI_MONITOR = SCREEN_DEVICES.length > 1;
 
-    public enum Align {SCREEN_CENTER, FRAME_RIGHT}
+    /**
+     * Alignment strategies for positioning windows.
+     */
+    public enum Align {
+        SCREEN_CENTER, // position the window at the center of the current screen
+        FRAME_RIGHT // align the window to the right side of the main app frame
+    }
 
     private Screens() {
+        // prevent instantiation
     }
 
     /**
-     * Positions the given window on the screen where Pixelitor is running.
+     * Positions a window on the screen based on the specified alignment or custom location.
      */
-    public static void position(Window window, Align align, Point loc) {
-        PixelitorWindow pw = PixelitorWindow.get();
-        Rectangle screenBounds;
-        if (MULTI_MONITORS) {
-            screenBounds = pw.getGraphicsConfiguration().getBounds();
-        } else {
-            // takes the taskbar into account
-            screenBounds = LOCAL_GRAPHICS.getMaximumWindowBounds();
-        }
+    public static void positionWindow(Window window, Align align, Point loc) {
+        // exactly one must be non-null
+        assert (align == null) != (loc == null);
+
+        Rectangle screenBounds = IS_MULTI_MONITOR
+            ? PixelitorWindow.get().getGraphicsConfiguration().getBounds()
+            : GRAPHICS_ENV.getMaximumWindowBounds(); // takes the taskbar into account
+
         Rectangle windowBounds = window.getBounds();
 
-        if (windowBounds.height > screenBounds.height) {
-            windowBounds.height = screenBounds.height;
-        }
-
-        if (windowBounds.width > screenBounds.width) {
-            windowBounds.width = screenBounds.width;
-        }
-
-        // if it was bigger than the screen, restrict it to screen size
+        // adjust window size if larger than the screen
+        windowBounds.height = Math.min(windowBounds.height, screenBounds.height);
+        windowBounds.width = Math.min(windowBounds.width, screenBounds.width);
         window.setSize(windowBounds.width, windowBounds.height);
 
+        // use predefined location if provided
         if (loc != null) {
-            // the presence of a non-null loc argument indicates
-            // that the location of the window was already set
+            window.setLocation(loc);
             return;
         }
-        // position it
-        if (align == SCREEN_CENTER) {
-            int locX = screenBounds.x + (screenBounds.width - windowBounds.width) / 2;
-            int locY = screenBounds.y + (screenBounds.height - windowBounds.height) / 2;
-            window.setLocation(locX, locY);
-        } else if (align == FRAME_RIGHT) {
-            Point pwLoc = pw.getLocationOnScreen();
-            int locX = pwLoc.x + pw.getWidth() - windowBounds.width;
-            int locY;
-            if (windowBounds.height < pw.getHeight()) {
-                // if it is less tall than the main window, then position relative to it
-                locY = pwLoc.y + (pw.getHeight() - windowBounds.height) / 2;
-            } else {
-                // else position it relative to the screen
-                locY = screenBounds.y + (screenBounds.height - windowBounds.height) / 2;
-            }
 
-            // if there is place between the canvas and the window,
-            // then place the window at half distance
-            View view = Views.getActive();
-            if (view != null && view.isShowing()) {
-                Rectangle canvasBounds = view.getVisibleCanvasBoundsOnScreen();
-                int canvasMaxX = canvasBounds.x + canvasBounds.width;
-                if (canvasMaxX < locX) {
-                    int dist = locX - canvasMaxX;
-                    locX -= dist / 2;
-                }
-            }
-
-            window.setLocation(locX, locY);
-        } else {
-            throw new IllegalStateException();
+        // calculate window position based on alignment
+        switch (align) {
+            case SCREEN_CENTER -> centerWindowOnScreen(window, screenBounds);
+            case FRAME_RIGHT -> alignWindowToFrameRight(window, screenBounds);
+            default -> throw new IllegalStateException();
         }
+    }
+
+    /**
+     * Centers the window on the screen.
+     */
+    private static void centerWindowOnScreen(Window window, Rectangle screenBounds) {
+        Dimension windowSize = window.getSize();
+        int locX = screenBounds.x + (screenBounds.width - windowSize.width) / 2;
+        int locY = screenBounds.y + (screenBounds.height - windowSize.height) / 2;
+        window.setLocation(locX, locY);
+    }
+
+    /**
+     * Aligns the window to the right side of the main application frame.
+     */
+    private static void alignWindowToFrameRight(Window window,
+                                                Rectangle screenBounds) {
+        PixelitorWindow mainWindow = PixelitorWindow.get();
+        Point pwLoc = mainWindow.getLocationOnScreen();
+        Dimension windowSize = window.getSize();
+
+        // the horizontal position is aligned to the main window's right edge
+        int locX = pwLoc.x + mainWindow.getWidth() - windowSize.width;
+
+        // calculates vertical alignment for the window
+        // based on its size and the main frame's height
+        int locY;
+        if (windowSize.height < mainWindow.getHeight()) {
+            // align relative to the main window
+            locY = pwLoc.y + (mainWindow.getHeight() - windowSize.height) / 2;
+        } else {
+            // center on screen
+            locY = screenBounds.y + (screenBounds.height - windowSize.height) / 2;
+        }
+
+        // if there is a horizontal gap between the canvas and
+        // the window, then put the window at half distance
+        View view = Views.getActive();
+        if (view != null && view.isShowing()) {
+            Rectangle canvasBounds = view.getVisibleCanvasBoundsOnScreen();
+            int canvasRightEdge = canvasBounds.x + canvasBounds.width;
+            if (canvasRightEdge < locX) {
+                locX -= (locX - canvasRightEdge) / 2;
+            }
+        }
+
+        window.setLocation(locX, locY);
     }
 
     public static Dimension getMaxWindowSize() {
@@ -109,15 +127,15 @@ public class Screens {
             // a "Window must not be zero" if there are 3 monitors
             // on Linux with some newer Java versions, see
             // https://github.com/lbalazscs/Pixelitor/issues/15
-            bounds = LOCAL_GRAPHICS.getMaximumWindowBounds();
+            bounds = GRAPHICS_ENV.getMaximumWindowBounds();
         } catch (Exception e) {
-            return Toolkit.getDefaultToolkit().getScreenSize();
+            return Toolkit.getDefaultToolkit().getScreenSize(); // fallback
         }
 
         return new Dimension(bounds.width, bounds.height);
     }
 
-    public static boolean hasMultipleMonitors() {
-        return MULTI_MONITORS;
+    public static boolean isMultiMonitorSetup() {
+        return IS_MULTI_MONITOR;
     }
 }

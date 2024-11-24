@@ -41,7 +41,7 @@ public class SphereFilter extends TransformFilter {
     public SphereFilter(String filterName) {
         super(filterName);
 
-        setEdgeAction(REPEAT_EDGE_PIXELS);
+        setEdgeAction(REPEAT_EDGE);
         setRadius(100.0f);
     }
 

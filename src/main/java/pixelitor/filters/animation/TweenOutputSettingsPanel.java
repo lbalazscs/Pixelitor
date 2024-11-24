@@ -35,7 +35,7 @@ import static java.lang.String.format;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
-import static pixelitor.gui.utils.TFValidationLayerUI.createValidatedTF;
+import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
 import static pixelitor.utils.Utils.parseLocalizedDouble;
 
 /**
@@ -89,7 +89,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
 
     private void addAnimationLengthSelectors(GridBagHelper gbh) {
         gbh.addLabelAndControlNoStretch("Number of Seconds:",
-            createValidatedTF(numSecondsTF, numSecondsValidator));
+            wrapWithValidation(numSecondsTF, numSecondsValidator));
 
         KeyListener keyListener = new KeyAdapter() {
             @Override
@@ -100,7 +100,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
         numSecondsTF.addKeyListener(keyListener);
 
         gbh.addLabelAndControlNoStretch("Frames per Second:",
-            createValidatedTF(fpsTF, fpsValidator));
+            wrapWithValidation(fpsTF, fpsValidator));
         fpsTF.addKeyListener(keyListener);
 
         updateCalculations();
@@ -126,7 +126,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(createTitledBorder("Output File/Folder"));
         fileNameTF = browseFilesSupport.getPathTextField();
-        filePanel.add(createValidatedTF(fileNameTF, fileNameValidator));
+        filePanel.add(wrapWithValidation(fileNameTF, fileNameValidator));
         filePanel.add(browseFilesSupport.getBrowseButton());
         gbh.addFullRow(filePanel);
     }

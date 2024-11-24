@@ -285,7 +285,7 @@ public class Dialogs {
     }
 
     private static void showMoreDevelopmentInfo(Throwable e) {
-        if (AppMode.isFinal()) {
+        if (!AppMode.isDevelopment()) {
             return;
         }
 

@@ -47,30 +47,32 @@ import static java.awt.event.KeyEvent.VK_DOWN;
 import static java.awt.event.KeyEvent.VK_UP;
 import static org.jdesktop.swingx.prompt.PromptSupport.FocusBehavior.SHOW_PROMPT;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
-import static pixelitor.gui.utils.TFValidationLayerUI.createCheckedTF;
+import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithSimpleValidation;
 
 public class FilterSearchPanel extends JPanel {
-    private static final int GAP = 4;
+    private static final int PADDING = 4;
 
     private JTextField searchTF;
-    private JXList filtersList;
+    private JXList filterList;
     private HighlightListCellRenderer highlighter;
     private boolean dialogCanceled;
 
     public FilterSearchPanel(FilterAction[] filters) {
-        super(new BorderLayout(GAP, GAP));
+        super(new BorderLayout(PADDING, PADDING));
 
-        createSearchTextField();
-        createFiltersList(filters);
+        initSearchField();
+        initFiltersList(filters);
 
-        add(createCheckedTF(searchTF, tf -> numMatchingFilters() > 0), BorderLayout.NORTH);
-        add(new JScrollPane(filtersList), BorderLayout.CENTER);
-        setBorder(BorderFactory.createEmptyBorder(GAP, GAP, GAP, GAP));
+        add(wrapWithSimpleValidation(searchTF, tf -> getMatchingFilterCount() > 0), BorderLayout.NORTH);
+        add(new JScrollPane(filterList), BorderLayout.CENTER);
+        setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
     }
 
-    private void createSearchTextField() {
+    private void initSearchField() {
         searchTF = new JXTextField("Search");
         searchTF.setName("searchTF");
+
+        // add placeholder behavior and left-aligned search icon
         PromptSupport.setFocusBehavior(SHOW_PROMPT, searchTF);
         JLabel searchBuddy = new JLabel(new SearchIcon());
         searchBuddy.setForeground(Color.GRAY);
@@ -78,10 +80,11 @@ public class FilterSearchPanel extends JPanel {
 
         searchTF.requestFocusInWindow();
 
+        // handle key events for navigation and search term updates
         searchTF.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                forwardUpDownToFilterList(e);
+                navigateFilterList(e);
             }
         });
         searchTF.getDocument().addDocumentListener(new DocumentListener() {
@@ -102,125 +105,127 @@ public class FilterSearchPanel extends JPanel {
         });
     }
 
-    private void forwardUpDownToFilterList(KeyEvent e) {
+    private void navigateFilterList(KeyEvent e) {
         int keyCode = e.getKeyCode();
         if (keyCode == VK_DOWN || keyCode == VK_UP) {
-            int numFilters = numMatchingFilters();
+            int numFilters = getMatchingFilterCount();
             if (numFilters > 0) {
-                if (filtersList.isSelectionEmpty()) {
+                if (filterList.isSelectionEmpty()) {
                     if (keyCode == VK_DOWN) {
                         selectFilter(0);
                     } else if (keyCode == VK_UP) {
                         selectFilter(numFilters - 1);
                     }
                 } else {
-                    forwardEvent(filtersList, e);
+                    forwardEventTo(filterList, e);
                 }
-                filtersList.requestFocusInWindow();
+                filterList.requestFocusInWindow();
             }
         }
     }
 
-    private void createFiltersList(FilterAction[] filters) {
-        filtersList = new JXList(filters);
-        filtersList.setAutoCreateRowSorter(true);
-        filtersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    private void initFiltersList(FilterAction[] filters) {
+        filterList = new JXList(filters);
+        filterList.setAutoCreateRowSorter(true);
+        filterList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         highlighter = new HighlightListCellRenderer("");
-        filtersList.setCellRenderer(highlighter);
+        filterList.setCellRenderer(highlighter);
 
-        filtersList.addKeyListener(new KeyAdapter() {
+        filterList.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == VK_UP) {
-                    if (firstFilterIsSelected()) {
+                    if (isFirstFilterSelected()) {
                         searchTF.requestFocusInWindow();
                     }
                 } else if (e.getKeyCode() == VK_DOWN) {
-                    if (lastFilterIsSelected()) {
+                    if (isLastFilterSelected()) {
                         searchTF.requestFocusInWindow();
                     }
                 } else if (e.getKeyCode() == VK_BACK_SPACE) {
-                    forwardEvent(searchTF, e);
+                    forwardEventTo(searchTF, e);
                 }
             }
 
             @Override
             public void keyTyped(KeyEvent e) {
-                char keyChar = e.getKeyChar();
-                //noinspection CharacterComparison
-                if (keyChar >= 'A' && keyChar <= 'z') {
-                    forwardEvent(searchTF, e);
+                if (Character.isLetter(e.getKeyChar())) {
+                    forwardEventTo(searchTF, e);
                 }
             }
         });
     }
 
-    private static void forwardEvent(JComponent target, KeyEvent e) {
+    private static void forwardEventTo(JComponent target, KeyEvent e) {
         e.setSource(target);
         target.dispatchEvent(e);
         target.requestFocusInWindow();
     }
 
-    private int numMatchingFilters() {
-        return filtersList.getElementCount();
+    private int getMatchingFilterCount() {
+        return filterList.getElementCount();
     }
 
     private void selectFilter(int index) {
-        filtersList.getSelectionModel().setSelectionInterval(index, index);
+        filterList.getSelectionModel().setSelectionInterval(index, index);
     }
 
-    private boolean firstFilterIsSelected() {
-        return filtersList.getSelectionModel().isSelectedIndex(0);
+    private boolean isFirstFilterSelected() {
+        return filterList.getSelectionModel().isSelectedIndex(0);
     }
 
-    private boolean lastFilterIsSelected() {
-        return filtersList.getSelectionModel().isSelectedIndex(numMatchingFilters() - 1);
+    private boolean isLastFilterSelected() {
+        return filterList.getSelectionModel().isSelectedIndex(getMatchingFilterCount() - 1);
     }
 
     private void searchTermChanged() {
-        String filterText = searchTF.getText().trim().toLowerCase(Locale.getDefault());
+        String searchTextLC = searchTF.getText().trim().toLowerCase(Locale.getDefault());
 
-        filtersList.setRowFilter(new RowFilter<ListModel<FilterAction>, Integer>() {
+        // dynamically filter the list based on the search text
+        filterList.setRowFilter(new RowFilter<ListModel<FilterAction>, Integer>() {
             @Override
             public boolean include(Entry<? extends ListModel<FilterAction>, ? extends Integer> entry) {
-                String filterName = entry.getStringValue(0).toLowerCase(Locale.getDefault());
-                return filterText.isEmpty() || filterName.contains(filterText);
+                String filterNameLC = entry.getStringValue(0).toLowerCase(Locale.getDefault());
+                // include filters that match the search text
+                // or show all filters if the search text is empty
+                return searchTextLC.isEmpty() || filterNameLC.contains(searchTextLC);
             }
         });
 
-        if (numMatchingFilters() > 0 && filtersList.isSelectionEmpty()) {
+        // if there are matching filters and none are selected,
+        // select the first matching filter by default
+        if (getMatchingFilterCount() > 0 && filterList.isSelectionEmpty()) {
             selectFilter(0);
         }
-        highlighter.setFilterText(filterText);
-        filtersList.ensureIndexIsVisible(filtersList.getSelectedIndex());
-    }
 
-    public void setDialogCanceled(boolean dialogCanceled) {
-        this.dialogCanceled = dialogCanceled;
+        highlighter.updateSearchText(searchTextLC);
+
+        // ensure the currently selected filter (if any) is visible in the list
+        filterList.ensureIndexIsVisible(filterList.getSelectedIndex());
     }
 
     public FilterAction getSelectedFilter() {
         if (dialogCanceled) {
             return null;
         }
-        FilterAction selected = (FilterAction) filtersList.getSelectedValue();
+        FilterAction selected = (FilterAction) filterList.getSelectedValue();
         if (selected != null) {
             return selected;
         }
-        if (numMatchingFilters() == 1) {
+        if (getMatchingFilterCount() == 1) {
             // nothing is selected, but there is only one remaining filter
-            return (FilterAction) filtersList.getElementAt(0);
+            return (FilterAction) filterList.getElementAt(0);
         }
         return null;
     }
 
     public boolean hasSelection() {
-        return !filtersList.isSelectionEmpty();
+        return !filterList.isSelectionEmpty();
     }
 
     public void addSelectionListener(ListSelectionListener listener) {
-        filtersList.getSelectionModel().addListSelectionListener(listener);
+        filterList.getSelectionModel().addListSelectionListener(listener);
     }
 
     public static FilterAction showInDialog(String title) {
@@ -228,7 +233,7 @@ public class FilterSearchPanel extends JPanel {
         DialogBuilder builder = new DialogBuilder()
             .content(panel)
             .title(title)
-            .cancelAction(() -> panel.setDialogCanceled(true));
+            .cancelAction(() -> panel.dialogCanceled = true);
 
         JDialog dialog = builder.build();
 
@@ -237,7 +242,7 @@ public class FilterSearchPanel extends JPanel {
         panel.addSelectionListener(e ->
             builder.getOkButton().setEnabled(panel.hasSelection()));
 
-        panel.filtersList.addMouseListener(new MouseAdapter() {
+        panel.filterList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
@@ -274,8 +279,7 @@ public class FilterSearchPanel extends JPanel {
             g.fill(shape);
             g.draw(shape);
 
-            Ellipse2D circle = new Ellipse2D.Double(1.0, 1.0, 8.5, 8.5);
-            g.draw(circle);
+            g.draw(new Ellipse2D.Double(1.0, 1.0, 8.5, 8.5));
         }
     }
 }

@@ -125,7 +125,7 @@ public class RandomGUITest {
     }
 
     public void start() {
-        if (AppMode.isFinal()) {
+        if (!AppMode.isDevelopment()) {
             Messages.showError("Error", "Build is FINAL");
             return;
         }
@@ -222,10 +222,10 @@ public class RandomGUITest {
         for (int roundNr = 0; roundNr < max; roundNr++) {
             printProgressPercentage(numTests, onePercent, roundNr);
 
-            if (!GUIUtils.appHasFocus()) {
+            if (!GUIUtils.isAppFocused()) {
                 tryRegainingWindowFocus(3);
 
-                if (!GUIUtils.appHasFocus()) {
+                if (!GUIUtils.isAppFocused()) {
                     System.out.println("\nRandomGUITest app focus lost.");
                     finishRunning();
                     break;
@@ -282,7 +282,7 @@ public class RandomGUITest {
             pw.repaint();
         });
 
-        if (!GUIUtils.appHasFocus()) {
+        if (!GUIUtils.isAppFocused()) {
             Utils.sleep(1, TimeUnit.SECONDS);
             //noinspection TailRecursion
             tryRegainingWindowFocus(attempts - 1);

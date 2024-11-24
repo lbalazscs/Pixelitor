@@ -59,6 +59,18 @@ public class ValidationResult {
         return new ValidationResult(false, errorMsg);
     }
 
+    static ValidationResult invalidZero(String name) {
+        return invalid("<b>" + name + "</b> can't be zero.");
+    }
+
+    static ValidationResult invalidNegative(String name) {
+        return invalid("<b>" + name + "</b> must be positive.");
+    }
+
+    static ValidationResult invalidEmpty(String name) {
+        return invalid("<b>" + name + "</b> can't be empty.");
+    }
+
     public boolean isValid() {
         return isValid;
     }

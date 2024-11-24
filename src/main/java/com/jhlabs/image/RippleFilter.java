@@ -20,8 +20,6 @@ import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pixelitor.filters.impl.RotatedEffectFilter;
 
-import java.awt.Rectangle;
-
 /**
  * A filter which distorts an image by rippling it in the X or Y directions.
  * The amplitude and wavelength of rippling can be specified as well as whether
@@ -145,16 +143,6 @@ public class RippleFilter extends RotatedEffectFilter {
      */
     public int getWaveType() {
         return waveType;
-    }
-
-    @Override
-    protected void transformSpace(Rectangle r) {
-//		if (edgeAction == TRANSPARENT) {
-//			r.x -= (int)xAmplitude;
-//			r.width += (int)(2*xAmplitude);
-//			r.y -= (int)yAmplitude;
-//			r.height += (int)(2*yAmplitude);
-//		}
     }
 
     @Override

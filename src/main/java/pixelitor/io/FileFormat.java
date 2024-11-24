@@ -34,7 +34,7 @@ import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
 
 /**
- * The input and output file formats
+ * The supported input and output file formats.
  */
 public enum FileFormat {
     BMP(false, ImageUtils::convertToRGB, FileChoosers.bmpFilter) {
@@ -100,13 +100,12 @@ public enum FileFormat {
     }
 
     public Runnable createSaveTask(Composition comp, SaveSettings settings) {
-        assert !multiLayered; // overwritten for multi-layered formats
-
+        assert !multiLayered; // overridden for multi-layered formats
         return () -> saveSingleLayered(comp, settings);
     }
 
     public Composition readSync(File file) {
-        // overwritten for multi-layered formats
+        assert !multiLayered; // overridden for multi-layered formats
         return readSingleLayeredSync(file);
     }
 
@@ -116,7 +115,7 @@ public enum FileFormat {
     }
 
     public CompletableFuture<Composition> readAsync(File file) {
-        // overwritten for multi-layered formats
+        assert !multiLayered; // overridden for multi-layered formats
         return readSingleLayeredAsync(file);
     }
 
@@ -146,14 +145,12 @@ public enum FileFormat {
     }
 
     public static Optional<FileFormat> fromFile(File file) {
-        String fileName = file.getName();
-        String extension = FileUtils.findExtension(fileName).orElse("");
+        String extension = FileUtils.findExtension(file.getName()).orElse("");
         return fromExtension(extension);
     }
 
     public static Optional<FileFormat> fromExtension(String extension) {
-        String extLC = extension.toLowerCase(Locale.ROOT);
-        return switch (extLC) {
+        return switch (extension.toLowerCase(Locale.ROOT)) {
             case "bmp" -> Optional.of(BMP);
             case "gif" -> Optional.of(GIF);
             case "jpg", "jpeg" -> Optional.of(JPG);
@@ -168,13 +165,13 @@ public enum FileFormat {
         };
     }
 
-    private static volatile FileFormat lastOutput = AppPreferences.loadLastSaveFormat();
+    private static volatile FileFormat lastOutputFormat = AppPreferences.loadLastSaveFormat();
 
     public static FileFormat getLastSaved() {
-        return lastOutput;
+        return lastOutputFormat;
     }
 
     public static void setLastSaved(FileFormat format) {
-        lastOutput = format;
+        lastOutputFormat = format;
     }
 }

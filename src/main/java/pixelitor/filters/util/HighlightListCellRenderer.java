@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,40 +24,44 @@ import java.awt.Component;
 import java.util.Locale;
 
 public class HighlightListCellRenderer extends DefaultListRenderer {
-    private String filterText;
+    private String searchText;
 
-    public HighlightListCellRenderer(String filterText) {
-        this.filterText = filterText;
-    }
-
-    private static String highlight(String text, String filter) {
-        int index = text.toLowerCase(Locale.getDefault()).indexOf(filter);
-        if (index == -1) {
-            return text;
-        }
-
-        int filterLength = filter.length();
-        return "<html>"
-            + text.substring(0, index)
-            + "<b><span style='background:#8A3958;'>"
-            + text.substring(index, index + filterLength)
-            + "</span></b>"
-            + text.substring(index + filterLength);
+    public HighlightListCellRenderer(String searchText) {
+        this.searchText = searchText;
     }
 
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        JLabel c = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-        if (isSelected && !filterText.isEmpty()) {
-            String fullText = value.toString();
-            c.setText(highlight(fullText, filterText));
+        // highlights the search matches in the selected filter
+        if (isSelected && !searchText.isEmpty()) {
+            String origText = value.toString();
+            label.setText(highlightText(origText, searchText));
         }
 
-        return c;
+        return label;
     }
 
-    public void setFilterText(String filterText) {
-        this.filterText = filterText;
+    /**
+     * Returns an HTML-formatted text with highlighted matches.
+     */
+    private static String highlightText(String text, String searchTextLC) {
+        int index = text.toLowerCase(Locale.getDefault()).indexOf(searchTextLC);
+        if (index == -1) {
+            return text;
+        }
+
+        int searchTextLength = searchTextLC.length();
+        return "<html>"
+            + text.substring(0, index)
+            + "<b><span style='background:#8A3958;'>"
+            + text.substring(index, index + searchTextLength)
+            + "</span></b>"
+            + text.substring(index + searchTextLength);
+    }
+
+    public void updateSearchText(String searchText) {
+        this.searchText = searchText;
     }
 }

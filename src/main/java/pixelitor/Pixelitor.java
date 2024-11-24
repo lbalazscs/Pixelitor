@@ -233,13 +233,13 @@ public class Pixelitor {
     }
 
     private static boolean hasOngoingWrite(PixelitorWindow mainWindow) {
-        var writePaths = IOTasks.getCurrentWritePaths();
+        var writePaths = IOTasks.getActiveWritePaths();
         if (writePaths.isEmpty()) {
             return false;
         }
 
         boolean waitRequested = showOngoingWriteWarning(writePaths);
-        if (waitRequested && IOTasks.isBusyWriting()) {
+        if (waitRequested && IOTasks.hasActiveWrites()) {
             scheduleExitRetry(mainWindow);
             return true;
         }
@@ -308,7 +308,7 @@ public class Pixelitor {
      * Executes development mode actions after application startup.
      */
     private static void doPostStartupActions() {
-        if (AppMode.isFinal()) {
+        if (!AppMode.isDevelopment()) {
             return;
         }
 

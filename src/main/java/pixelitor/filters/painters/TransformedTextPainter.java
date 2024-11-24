@@ -26,7 +26,7 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.compactions.Flip;
-import pixelitor.gui.utils.BoxAlignment;
+import pixelitor.gui.utils.TextAlignment;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Shapes;
@@ -686,7 +686,7 @@ public class TransformedTextPainter implements Debuggable {
         return new Area(strikethroughShape);
     }
 
-    public void setAlignment(BoxAlignment newAlignment) {
+    public void setAlignment(TextAlignment newAlignment) {
         setAlignment(newAlignment.getHorizontal(), newAlignment.getVertical());
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,9 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
@@ -36,67 +38,80 @@ import static pixelitor.utils.Threads.threadInfo;
 /**
  * A dialog with OK and Cancel buttons at the bottom.
  *
- * Usually a better alternative for creating dialogs is {@link DialogBuilder}.
+ * For creating dialogs, consider using {@link DialogBuilder} for more flexibility.
  */
 public abstract class OKCancelDialog extends JDialog {
-    private JComponent formPanel;
-    private JLabel msgLabel;
+    private JComponent content;
+    private JLabel headerMsgLabel;
     private JScrollPane scrollPane;
     private final JButton okButton;
 
-    protected OKCancelDialog(JComponent form, Frame owner,
-                             String title, String okText) {
+    protected OKCancelDialog(JComponent content, Frame owner,
+                             String title, String okButtonText) {
         super(owner, title, true);
         assert calledOnEDT() : threadInfo();
 
-        formPanel = form;
+        this.content = content;
 
         setLayout(new BorderLayout());
-        addForm(form);
+        addContent(content);
 
-        JPanel southPanel = new JPanel();
-        okButton = new JButton(okText);
+        JPanel footerPanel = new JPanel();
+        okButton = new JButton(okButtonText);
         JButton cancelButton = new JButton(GUIText.CANCEL);
-        cancelButton.setName("cancel");
 
         GlobalEvents.dialogOpened(getTitle());
 
-        GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
-        add(southPanel, SOUTH);
-        setupOKButton();
-        setupCancelButton(cancelButton);
+        GUIUtils.addOKCancelButtons(footerPanel, okButton, cancelButton);
+        add(footerPanel, SOUTH);
+        initOKButton();
+        initCancelButton(cancelButton);
 
         pack();
-        Screens.position(this, SCREEN_CENTER, null);
+        Screens.positionWindow(this, SCREEN_CENTER, null);
     }
 
-    private void setupOKButton() {
+    private void initOKButton() {
         okButton.setName("ok");
         getRootPane().setDefaultButton(okButton);
         okButton.addActionListener(e -> {
             try {
-                okAction();
+                dialogAccepted();
             } catch (Exception ex) {
                 Messages.showException(ex);
             }
         });
     }
 
-    private void setupCancelButton(JButton cancelButton) {
+    private void initCancelButton(JButton cancelButton) {
+        cancelButton.setName("cancel");
         cancelButton.addActionListener(e -> {
             try {
-                cancelAction();
+                dialogCanceled();
             } catch (Exception ex) {
                 Messages.showException(ex);
             }
         });
 
-        GUIUtils.setupCloseAction(this, this::cancelAction);
-        GUIUtils.setupEscAction(this, this::cancelAction);
+        GUIUtils.setupCloseAction(this, this::dialogCanceled);
+        GUIUtils.setupEscAction(this, this::dialogCanceled);
     }
 
     public void setOKButtonText(String text) {
         okButton.setText(text);
+    }
+
+    /**
+     * Action to perform when the OK button is clicked.
+     */
+    protected abstract void dialogAccepted();
+
+    /**
+     * Action to perform when the Cancel button is clicked.
+     * The default implementation closes the dialog.
+     */
+    protected void dialogCanceled() {
+        close();
     }
 
     public void close() {
@@ -105,39 +120,29 @@ public abstract class OKCancelDialog extends JDialog {
         dispose();
     }
 
-    protected abstract void okAction();
-
-    /**
-     * The default implementation only calls close()
-     * If overridden, call close() manually
-     */
-    protected void cancelAction() {
-        close();
-    }
-
     public void setHeaderMessage(String msg) {
-        if (msgLabel != null) { // there was a message before
-            remove(msgLabel);
+        if (headerMsgLabel != null) { // there was a message before
+            remove(headerMsgLabel);
         }
-        msgLabel = new JLabel(msg);
-        msgLabel.setBorder(createEmptyBorder(0, 5, 0, 5));
-        add(msgLabel, NORTH);
+        headerMsgLabel = new JLabel(msg);
+        headerMsgLabel.setBorder(createEmptyBorder(0, 5, 0, 5));
+        add(headerMsgLabel, NORTH);
         revalidate();
     }
 
-    public void changeForm(JComponent form) {
+    public void updateContent(JComponent content) {
         if (scrollPane != null) {
             remove(scrollPane);
         } else {
-            remove(formPanel);
+            remove(this.content);
         }
-        formPanel = form;
-        addForm(formPanel);
+        this.content = content;
+        addContent(this.content);
         revalidate();
     }
 
-    private void addForm(JComponent form) {
-        scrollPane = new JScrollPane(form,
+    private void addContent(JComponent content) {
+        scrollPane = new JScrollPane(content,
             VERTICAL_SCROLLBAR_AS_NEEDED,
             HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, CENTER);

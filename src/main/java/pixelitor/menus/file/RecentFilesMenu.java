@@ -35,53 +35,56 @@ public final class RecentFilesMenu extends JMenu {
 
     private final JMenuItem clearMenuItem;
 
-    private final BoundedUniqueList<RecentFile> recentFiles;
+    private final BoundedUniqueList<RecentFileEntry> recentFileEntries;
 
     private RecentFilesMenu() {
         super(i18n("recent_files"));
 
+        // the menu item for clearing the recent files history
         clearMenuItem = new JMenuItem(i18n("clear_recent"));
         clearMenuItem.addActionListener(e -> clear());
-        recentFiles = AppPreferences.loadRecentFiles();
-        rebuildGUI();
+
+        recentFileEntries = AppPreferences.loadRecentFiles();
+        updateMenuItems();
     }
 
+    /**
+     * Clears the recent files history and updates the menu.
+     */
     private void clear() {
         try {
             AppPreferences.removeRecentFiles();
-            recentFiles.clear();
-            rebuildGUI();
+            recentFileEntries.clear();
+            updateMenuItems();
         } catch (Exception ex) {
             Messages.showException(ex);
         }
     }
 
-    public void addFile(File f) {
+    public void addRecentFile(File f) {
         if (f.exists()) {
-            recentFiles.addToFront(new RecentFile(f));
-            rebuildGUI();
+            recentFileEntries.addToFront(new RecentFileEntry(f));
+            updateMenuItems();
         }
     }
 
-    private void removeAllMenuItems() {
-        removeAll();
+    public BoundedUniqueList<RecentFileEntry> getRecentFileEntries() {
+        return recentFileEntries;
     }
 
-    public BoundedUniqueList<RecentFile> getRecentFiles() {
-        return recentFiles;
-    }
+    /**
+     * Rebuilds the menu items to reflect the current state of the list.
+     */
+    private void updateMenuItems() {
+        removeAll(); // removes existing menu items
 
-    private void rebuildGUI() {
-        removeAllMenuItems();
-
-        for (int i = 0; i < recentFiles.size(); i++) {
-            RecentFile recentFile = recentFiles.get(i);
-            recentFile.setListPosition(i + 1);
-            RecentFilesMenuItem item = new RecentFilesMenuItem(recentFile);
-            add(item);
+        for (int i = 0; i < recentFileEntries.size(); i++) {
+            RecentFileEntry fileEntry = recentFileEntries.get(i);
+            fileEntry.setMenuPosition(i + 1);
+            add(new RecentFilesMenuItem(fileEntry));
         }
 
-        if (!recentFiles.isEmpty()) {
+        if (!recentFileEntries.isEmpty()) {
             addSeparator();
         }
 

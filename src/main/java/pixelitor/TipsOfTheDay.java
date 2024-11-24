@@ -35,7 +35,7 @@ import java.util.prefs.Preferences;
  * Shows the entries listed in tips.properties as tips of the day
  */
 public class TipsOfTheDay {
-    private static final Preferences tipPrefs = AppPreferences.getMainNode();
+    private static final Preferences tipPrefs = AppPreferences.getMainPrefs();
 
     private static int nextTip = -1;
 
