@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.colors.Colors;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -43,20 +44,30 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
                               String secondName, Color secondColor,
                               TransparencyPolicy transparencyPolicy,
                               boolean linkable, boolean linked) {
+        this(name,
+            new String[]{firstName, secondName},
+            new Color[]{firstColor, secondColor},
+            transparencyPolicy, linkable, linked);
+    }
+
+    public GroupedColorsParam(String name,
+                              String[] names, Color[] colors,
+                              TransparencyPolicy transparencyPolicy,
+                              boolean linkable, boolean linked) {
         super(name, RandomizePolicy.ALLOW_RANDOMIZE);
 
-        this.names = new String[]{firstName, secondName};
+        this.names = names;
         this.transparencyPolicy = transparencyPolicy;
 
-        colors = new Color[]{firstColor, secondColor};
-        defaultColors = new Color[]{firstColor, secondColor};
+        this.colors = colors;
+        this.defaultColors = colors.clone();
 
         this.linkedModel = linkable ? new JToggleButton.ToggleButtonModel() : null;
         this.linkedByDefault = linked;
         setLinked(linked);
 
         // if linked, then the default colors must be the same
-        assert !linked || firstColor.equals(secondColor);
+        assert !linked || Utils.allElementsEqual(defaultColors);
     }
 
     @Override

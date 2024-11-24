@@ -371,5 +371,18 @@ public final class Utils {
         }
         return input;
     }
+
+    public static <T> boolean allElementsEqual(T[] array) {
+        if (array == null || array.length == 0) {
+            return false;
+        }
+        T first = array[0];
+        for (int i = 1; i < array.length; i++) {
+            if (!array[i].equals(first)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 

@@ -604,6 +604,12 @@ public class Shapes {
         return new Ellipse2D.Double(cx - radius, cy - radius, diameter, diameter);
     }
 
+    public static void fillCircle(double cx, double cy, double radius, Color color, Graphics2D g) {
+        Shape circle = createCircle(cx, cy, radius);
+        g.setColor(color);
+        g.fill(circle);
+    }
+
     /**
      * Creates a Bezier path approximating a circle with the given number of control points.
      * Useful if the circle will be distorted in a nonlinear way.
@@ -2027,6 +2033,44 @@ public class Shapes {
             }
         } else {
             path.lineTo(to.getX(), to.getY());
+        }
+    }
+
+    /**
+     * Draws a curved line from the current point to the end point
+     * using a quadratic Bézier curve. The control point is calculated
+     * to be perpendicular to the midpoint of the line segment.
+     */
+    public static void curvedLine(Path2D path, double curvature,
+                                  double startX, double startY,
+                                  double endX, double endY) {
+        if (curvature == 0) {
+            path.lineTo(endX, endY);
+        } else {
+            // the midpoint of the line segment
+            double midX = (startX + endX) / 2;
+            double midY = (startY + endY) / 2;
+
+            // the vector from start to end
+            double dx = endX - startX;
+            double dy = endY - startY;
+
+            // the perpendicular vector: (dx, dy) => (-dy, dx)
+            double perpX = -dy;
+            double perpY = dx;
+
+            // normalize the perpendicular vector
+            double length = Math.sqrt(perpX * perpX + perpY * perpY);
+            perpX /= length;
+            perpY /= length;
+
+            // the distance of the control point is proportional
+            // to the curvature and line length
+            double distance = curvature * length / 2;
+            double controlX = midX + perpX * distance;
+            double controlY = midY + perpY * distance;
+
+            path.quadTo(controlX, controlY, endX, endY);
         }
     }
 
