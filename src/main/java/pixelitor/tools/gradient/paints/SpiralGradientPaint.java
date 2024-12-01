@@ -98,7 +98,7 @@ public record SpiralGradientPaint(boolean clockwise, Drag drag,
             endBlue = endColor.getBlue();
 
             this.cm = cm;
-            drawAngle = drag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
+            drawAngle = drag.calcDrawAngle() + Math.PI;  // between 0 and 2*PI
 
             dragDistance = drag.calcImLength();
         }
@@ -186,7 +186,7 @@ public record SpiralGradientPaint(boolean clockwise, Drag drag,
         }
 
         public double interpolate(double x, double y) {
-            double renderAngle = drag.getAngleFromStartTo(x, y) + Math.PI;
+            double renderAngle = drag.calcAngleFromStartTo(x, y) + Math.PI;
             double relativeAngle;
             if (clockwise) {
                 relativeAngle = renderAngle - drawAngle;
@@ -198,7 +198,7 @@ public record SpiralGradientPaint(boolean clockwise, Drag drag,
             }
             relativeAngle /= 2.0 * Math.PI;
 
-            double renderDist = drag.getStartDistanceFrom(x, y);
+            double renderDist = drag.calcStartDistanceFrom(x, y);
 
             double relativeDist = renderDist / dragDistance;
 

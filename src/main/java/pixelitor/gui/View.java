@@ -23,7 +23,7 @@ import pixelitor.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
@@ -142,10 +142,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
         IOTasks.markPathForReading(path);
 
-        return IO.loadCompAsync(file)
+        return FileIO.loadCompAsync(file)
             .thenApplyAsync(this::replaceJustReloadedComp, onEDT)
-            .whenComplete((v, e) -> IOTasks.markReadingComplete(path))
-            .whenComplete((v, e) -> IO.handleReadingErrors(e));
+            .whenComplete((composition, exception) -> {
+                IOTasks.markReadingComplete(path);
+                FileIO.handleFileReadErrors(exception);
+            });
     }
 
     private void setComp(Composition comp) {
@@ -245,7 +247,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        MouseZoomMethod.CURRENT.installOnView(this);
+        MouseZoomMethod.ACTIVE.installOnView(this);
     }
 
     public boolean isActive() {
@@ -598,7 +600,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         zoomScale = newZoom.getViewScale();
         canvas.recalcCoSize(this, true);
 
-        if (ImageArea.isCurrentMode(ImageArea.Mode.FRAMES)) {
+        if (ImageArea.isActiveMode(ImageArea.Mode.FRAMES)) {
             updateTitle();
         } else {
             revalidate(); // ensure scrollbars update in tabbed UI
@@ -851,11 +853,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         try {
             // otherwise loading multi-layer files makes the comp dirty
-            layerGUI.setUserInteraction(false);
+            layerGUI.setReactToItemEvents(false);
             layersPanel.addLayerGUI(layerGUI, newLayerIndex);
             layerGUI.updateSelectionState();
         } finally {
-            layerGUI.setUserInteraction(true);
+            layerGUI.setReactToItemEvents(true);
         }
 
         if (isActive() && comp.isHolderOfActiveLayer()) {

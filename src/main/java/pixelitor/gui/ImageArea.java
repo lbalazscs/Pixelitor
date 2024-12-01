@@ -105,7 +105,7 @@ public class ImageArea {
         return mode;
     }
 
-    public static boolean isCurrentMode(Mode m) {
+    public static boolean isActiveMode(Mode m) {
         return getMode() == m;
     }
 
@@ -183,13 +183,13 @@ public class ImageArea {
 
     public static void pixelGridEnabled() {
         // the global pixel grid switch was turned on
-        if (isCurrentMode(FRAMES)) {
+        if (isActiveMode(FRAMES)) {
             if (Views.isAnyPixelGridAllowed()) {
                 Views.repaintAll();
             } else {
                 showNoPixelGridMessage();
             }
-        } else { // Tabs: check only the current view
+        } else { // Tabs: check only the active view
             View view = Views.getActive();
             if (view != null) {
                 if (view.allowPixelGrid()) {

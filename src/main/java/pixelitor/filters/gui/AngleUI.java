@@ -47,7 +47,7 @@ public class AngleUI extends AbstractAngleUI {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        boolean darkTheme = Themes.getCurrent().isDark();
+        boolean darkTheme = Themes.getActive().isDark();
 
         // Draw the outer circle
         setupOuterColor(g2, darkTheme);

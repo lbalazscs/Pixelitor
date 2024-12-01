@@ -141,14 +141,14 @@ public class DropListener extends DropTargetAdapter {
                 + "<br>Do you want to open all image files inside it?", file.getName());
 
             if (Dialogs.showYesNoQuestionDialog(target, "Dropped Folder", question)) {
-                IO.openAllSupportedImagesInDir(file);
+                FileIO.openAllSupportedImagesInDir(file);
             }
         } else if (file.isFile()) {
             if (!Files.isReadable(file.toPath())) {
                 Dialogs.showFileNotReadableError(target, file);
                 return;
             }
-            IO.openFileAsync(file, true);
+            FileIO.openFileAsync(file, true);
         }
     }
 
@@ -159,14 +159,14 @@ public class DropListener extends DropTargetAdapter {
                 file.getName(), comp.getName());
 
             if (Dialogs.showYesNoQuestionDialog(target, "Dropped Folder", question)) {
-                IO.addAllImagesInDirAsLayers(file, comp);
+                FileIO.addAllImagesInDirAsLayers(file, comp);
             }
         } else if (file.isFile()) {
             if (!Files.isReadable(file.toPath())) {
                 Dialogs.showFileNotReadableError(target, file);
                 return;
             }
-            IO.addNewImageLayerAsync(file, comp);
+            FileIO.addNewImageLayerAsync(file, comp);
         }
     }
 }

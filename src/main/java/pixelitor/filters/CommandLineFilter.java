@@ -20,7 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.CommandLineGUI;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.TextParam;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
@@ -62,7 +62,7 @@ public class CommandLineFilter extends ParametrizedFilter {
         }
 
         List<String> commands = parseCommands(textParam.getValue());
-        return IO.commandLineFilter(src, commands);
+        return FileIO.applyCommandLineFilter(src, commands);
     }
 
     private static List<String> parseCommands(String input) {

@@ -139,10 +139,10 @@ public class JHPixelate extends ParametrizedFilter {
         Colors.fillWith(WHITE, g, width, height);
 
         if (type == TYPE_SQUARE) {
-            ImageUtils.drawGrid(GRAY, g, width, height,
-                gapWidth, cellSize, gapWidth, cellSize, false);
+            ImageUtils.renderGrid(g, GRAY, width, height,
+                gapWidth, cellSize, gapWidth, cellSize);
         } else if (type == TYPE_BRICK) {
-            ImageUtils.drawBrickGrid(GRAY, g, cellSize, width, height);
+            ImageUtils.renderBrickGrid(g, GRAY, cellSize, width, height);
         }
 
         g.dispose();

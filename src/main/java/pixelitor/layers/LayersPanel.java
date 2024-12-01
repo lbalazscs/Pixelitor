@@ -50,9 +50,9 @@ public class LayersPanel extends JLayeredPane {
         add(gui, JLayeredPane.DEFAULT_LAYER);
 
         // the new layer always becomes the selected layer
-        gui.setUserInteraction(false); // this selection should not go into history
+        gui.setReactToItemEvents(false); // this selection should not go into history
         gui.setSelected(true);
-        gui.setUserInteraction(true);
+        gui.setReactToItemEvents(true);
 
         revalidate();
         repaint();

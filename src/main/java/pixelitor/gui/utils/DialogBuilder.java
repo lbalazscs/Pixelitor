@@ -268,7 +268,7 @@ public class DialogBuilder {
         addContent(dialog);
         addButtons(dialog);
 
-        Runnable cancelTask = () -> dialogCancelled(dialog);
+        Runnable cancelTask = () -> dialogCanceled(dialog);
         GUIUtils.setupCloseAction(dialog, cancelTask);
         GUIUtils.setupEscAction(dialog, cancelTask);
 
@@ -339,7 +339,7 @@ public class DialogBuilder {
             cancelButton = new JButton(cancelText);
             cancelButton.setName("cancel");
 
-            cancelButton.addActionListener(e -> dialogCancelled(d));
+            cancelButton.addActionListener(e -> dialogCanceled(d));
         }
 
         JPanel southPanel = null;
@@ -370,8 +370,8 @@ public class DialogBuilder {
         canceled = false;
     }
 
-    // a dialog without a Cancel button can still be cancelled with Esc/X
-    private void dialogCancelled(JDialog d) {
+    // a dialog without a Cancel button can still be canceled with Esc/X
+    private void dialogCanceled(JDialog d) {
         if (validateOnCancel && isDialogInvalid(d)) {
             // keep the dialog open
             return;

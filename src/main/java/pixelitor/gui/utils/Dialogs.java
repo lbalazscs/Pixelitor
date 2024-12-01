@@ -234,8 +234,7 @@ public class Dialogs {
     }
 
     public static void showExceptionDialog(Throwable e) {
-        Thread currentThread = Thread.currentThread();
-        showExceptionDialog(e, currentThread);
+        showExceptionDialog(e, Thread.currentThread());
     }
 
     public static void showExceptionDialog(Throwable e, Thread srcThread) {

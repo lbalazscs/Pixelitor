@@ -26,40 +26,40 @@ import java.awt.Shape;
 import java.awt.geom.*;
 
 /**
- * A random star shape
+ * A randomly generated star shape.
  */
 public class RandomStarShape implements Shape {
-    private GeneralPath path = null;
-
     private static final CachedFloatRandom random = new CachedFloatRandom();
 
-    private static int numPoints;
-    private static int numRadii;
+    private static int numPoints; // number of points in the star (must be even)
+    private static int numRadiusVariants;
     private static double[] radiusRatios;
 
-    private static double unitAngle;
-    private static double initialAngle;
+    private static double angleIncrement;
+    private static double initialRotation;
 
     static {
-        randomize();
+        randomizeStarParameters();
     }
 
-    public static void randomize() {
+    private GeneralPath path = null;
+
+    public static void randomizeStarParameters() {
         numPoints = 2 * (4 + Rnd.nextInt(6));
-        numRadii = 2;
-        radiusRatios = new double[numRadii];
-        radiusRatios[0] = 1.0;
-        for (int i = 1; i < numRadii; i++) {
+        numRadiusVariants = 2;
+        radiusRatios = new double[numRadiusVariants];
+        radiusRatios[0] = 1.0; // first radius is always full scale
+        for (int i = 1; i < numRadiusVariants; i++) {
+            // random scale between 0.1 and 0.5
             radiusRatios[i] = 0.1 + random.nextFloat() / 2.5;
         }
 
-        unitAngle = (2 * Math.PI) / numPoints;
-
-        initialAngle = 2 * random.nextFloat() * unitAngle;
+        angleIncrement = (2 * Math.PI) / numPoints;
+        initialRotation = 2 * random.nextFloat() * angleIncrement;
     }
 
     public RandomStarShape(double x, double y, double width, double height) {
-        double[] radii = new double[numRadii];
+        double[] radii = new double[numRadiusVariants];
         double maxRadius = 1 + width / 2;
 
         radii[0] = maxRadius;
@@ -70,22 +70,26 @@ public class RandomStarShape implements Shape {
 
         double centerX = x + width / 2.0;
         double centerY = y + height / 2.0;
+
         for (int i = 0; i < numPoints; i++) {
-            double angle = initialAngle + i * unitAngle;
+            double angle = initialRotation + i * angleIncrement;
             int radiusIndex = i % radii.length;
             double radius = radii[radiusIndex];
-            double circleX = FastMath.cos(angle) * radius;
-            double circleY = FastMath.sin(angle) * radius;
-            double relX = centerX + circleX;
-            double relY = centerY + heightToWidthRatio * circleY;
+
+            double offsetX = radius * FastMath.cos(angle);
+            double offsetY = radius * FastMath.sin(angle);
+
+            double pointX = centerX + offsetX;
+            double pointY = centerY + heightToWidthRatio * offsetY;
 
             if (path == null) {
                 path = new GeneralPath();
-                path.moveTo(relX, relY);
+                path.moveTo(pointX, pointY);
             } else {
-                path.lineTo(relX, relY);
+                path.lineTo(pointX, pointY);
             }
         }
+
         path.closePath();
     }
 

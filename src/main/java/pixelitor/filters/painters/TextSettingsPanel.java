@@ -268,7 +268,7 @@ public class TextSettingsPanel extends FilterGUI
 
     private Font getSelectedFont() {
         String fontFamily = (String) fontFamilyCB.getSelectedItem();
-        int size = fontSizeSlider.getCurrentValue();
+        int size = fontSizeSlider.getValue();
         boolean bold = boldCB.isSelected();
         boolean italic = italicCB.isSelected();
         fontInfo.updateBasic(fontFamily, size, bold, italic);

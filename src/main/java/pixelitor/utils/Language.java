@@ -53,7 +53,7 @@ public enum Language {
 
     // from here static members and methods
 
-    private static Language currentLang = ENGLISH;
+    private static Language activeLang = ENGLISH;
     private static final Language[] languages = values();
 
     public static boolean isSupported(String code) {
@@ -73,16 +73,16 @@ public enum Language {
             .findFirst()
             .orElse(ENGLISH);
 
-        setCurrent(loadedLang);
+        setActive(loadedLang);
     }
 
-    public static Language getCurrent() {
-        return currentLang;
+    public static Language getActive() {
+        return activeLang;
     }
 
-    public static void setCurrent(Language lang) {
-        currentLang = lang;
-        Locale newLocale = Locale.forLanguageTag(currentLang.getCode());
+    public static void setActive(Language lang) {
+        activeLang = lang;
+        Locale newLocale = Locale.forLanguageTag(activeLang.getCode());
         Locale.setDefault(newLocale);
         Texts.init();
     }

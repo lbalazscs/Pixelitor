@@ -25,7 +25,7 @@ import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.io.IOTasks;
 import pixelitor.tools.util.DragDisplay;
 import pixelitor.utils.AppPreferences;
@@ -83,7 +83,7 @@ public class Pixelitor {
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
             Utils.ensureAssertionsEnabled();
-            AppMode.CURRENT = AppMode.DEVELOPMENT_GUI;
+            AppMode.ACTIVE = AppMode.DEVELOPMENT_GUI;
         }
     }
 
@@ -212,7 +212,7 @@ public class Pixelitor {
         for (String fileName : args) {
             File file = new File(fileName);
             if (file.exists()) {
-                fileOpeningTasks.add(IO.openFileAsync(file, false));
+                fileOpeningTasks.add(FileIO.openFileAsync(file, false));
             } else {
                 Messages.showError("File Not Found",
                     format("<html>Unable to locate file: <b>%s</b>", file.getAbsolutePath()));

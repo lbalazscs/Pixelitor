@@ -55,19 +55,19 @@ public enum Symmetry {
         @Override
         public void startAt(SymmetryBrush brush, PPoint p) {
             brush.startAt(0, p);
-            brush.startAt(1, p.mirrorVertically(compWidth));
+            brush.startAt(1, p.mirrorVertically(canvasWidth));
         }
 
         @Override
         public void continueTo(SymmetryBrush brush, PPoint p) {
             brush.continueTo(0, p);
-            brush.continueTo(1, p.mirrorVertically(compWidth));
+            brush.continueTo(1, p.mirrorVertically(canvasWidth));
         }
 
         @Override
         public void lineConnectTo(SymmetryBrush brush, PPoint p) {
             brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, p.mirrorVertically(compWidth));
+            brush.lineConnectTo(1, p.mirrorVertically(canvasWidth));
         }
 
         @Override
@@ -79,25 +79,25 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushNo) {
             assert brushNo == 1 : "brushNo = " + brushNo;
-            return p.mirrorVertically(compWidth);
+            return p.mirrorVertically(canvasWidth);
         }
     }, HORIZONTAL_MIRROR("Horizontal", 2) {
         @Override
         public void startAt(SymmetryBrush brush, PPoint p) {
             brush.startAt(0, p);
-            brush.startAt(1, p.mirrorHorizontally(compHeight));
+            brush.startAt(1, p.mirrorHorizontally(canvasHeight));
         }
 
         @Override
         public void continueTo(SymmetryBrush brush, PPoint p) {
             brush.continueTo(0, p);
-            brush.continueTo(1, p.mirrorHorizontally(compHeight));
+            brush.continueTo(1, p.mirrorHorizontally(canvasHeight));
         }
 
         @Override
         public void lineConnectTo(SymmetryBrush brush, PPoint p) {
             brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, p.mirrorHorizontally(compHeight));
+            brush.lineConnectTo(1, p.mirrorHorizontally(canvasHeight));
         }
 
         @Override
@@ -109,31 +109,31 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushNo) {
             assert brushNo == 1 : "brushNo = " + brushNo;
-            return p.mirrorHorizontally(compHeight);
+            return p.mirrorHorizontally(canvasHeight);
         }
     }, TWO_MIRRORS("Two Mirrors", 4) {
         @Override
         public void startAt(SymmetryBrush brush, PPoint p) {
             brush.startAt(0, p);
-            brush.startAt(1, p.mirrorVertically(compWidth));
-            brush.startAt(2, p.mirrorHorizontally(compHeight));
-            brush.startAt(3, p.mirrorBoth(compWidth, compHeight));
+            brush.startAt(1, p.mirrorVertically(canvasWidth));
+            brush.startAt(2, p.mirrorHorizontally(canvasHeight));
+            brush.startAt(3, p.mirrorBoth(canvasWidth, canvasHeight));
         }
 
         @Override
         public void continueTo(SymmetryBrush brush, PPoint p) {
             brush.continueTo(0, p);
-            brush.continueTo(1, p.mirrorVertically(compWidth));
-            brush.continueTo(2, p.mirrorHorizontally(compHeight));
-            brush.continueTo(3, p.mirrorBoth(compWidth, compHeight));
+            brush.continueTo(1, p.mirrorVertically(canvasWidth));
+            brush.continueTo(2, p.mirrorHorizontally(canvasHeight));
+            brush.continueTo(3, p.mirrorBoth(canvasWidth, canvasHeight));
         }
 
         @Override
         public void lineConnectTo(SymmetryBrush brush, PPoint p) {
             brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, p.mirrorVertically(compWidth));
-            brush.lineConnectTo(2, p.mirrorHorizontally(compHeight));
-            brush.lineConnectTo(3, p.mirrorBoth(compWidth, compHeight));
+            brush.lineConnectTo(1, p.mirrorVertically(canvasWidth));
+            brush.lineConnectTo(2, p.mirrorHorizontally(canvasHeight));
+            brush.lineConnectTo(3, p.mirrorBoth(canvasWidth, canvasHeight));
         }
 
         @Override
@@ -147,9 +147,9 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushNo) {
             return switch (brushNo) {
-                case 1 -> p.mirrorVertically(compWidth);
-                case 2 -> p.mirrorHorizontally(compHeight);
-                case 3 -> p.mirrorBoth(compWidth, compHeight);
+                case 1 -> p.mirrorVertically(canvasWidth);
+                case 2 -> p.mirrorHorizontally(canvasHeight);
+                case 3 -> p.mirrorBoth(canvasWidth, canvasHeight);
                 default -> throw new IllegalArgumentException("brushNo = " + brushNo);
             };
         }
@@ -157,19 +157,19 @@ public enum Symmetry {
         @Override
         public void startAt(SymmetryBrush brush, PPoint p) {
             brush.startAt(0, p);
-            brush.startAt(1, p.mirrorBoth(compWidth, compHeight));
+            brush.startAt(1, p.mirrorBoth(canvasWidth, canvasHeight));
         }
 
         @Override
         public void continueTo(SymmetryBrush brush, PPoint p) {
             brush.continueTo(0, p);
-            brush.continueTo(1, p.mirrorBoth(compWidth, compHeight));
+            brush.continueTo(1, p.mirrorBoth(canvasWidth, canvasHeight));
         }
 
         @Override
         public void lineConnectTo(SymmetryBrush brush, PPoint p) {
             brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, p.mirrorBoth(compWidth, compHeight));
+            brush.lineConnectTo(1, p.mirrorBoth(canvasWidth, canvasHeight));
         }
 
         @Override
@@ -181,7 +181,7 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushNo) {
             assert brushNo == 1 : "brushNo = " + brushNo;
-            return p.mirrorBoth(compWidth, compHeight);
+            return p.mirrorBoth(canvasWidth, canvasHeight);
         }
     }, CENTRAL_3("Central 3", 3) {
         private static final double cos120 = -0.5;
@@ -196,8 +196,8 @@ public enum Symmetry {
             double x = p.getImX();
             double y = p.getImY();
             // coordinates relative to the center
-            double relX = x - compCenterX;
-            double relY = compCenterY - y; // calculate in upwards looking coords
+            double relX = x - canvasCenterX;
+            double relY = canvasCenterY - y; // calculate in upwards looking coords
 
             View view = p.getView();
 
@@ -214,8 +214,8 @@ public enum Symmetry {
             double rotY = relX * sin120 + relY * cos120;
 
             // translate back to the original coordinate system
-            double finalX = compCenterX + rotX;
-            double finalY = compCenterY - rotY;
+            double finalX = canvasCenterX + rotX;
+            double finalY = canvasCenterY - rotY;
             return PPoint.fromIm(finalX, finalY, view);
         }
 
@@ -225,8 +225,8 @@ public enum Symmetry {
             double rotY = relX * sin240 + relY * cos240;
 
             // translate back to the original coordinate system
-            double finalX = compCenterX + rotX;
-            double finalY = compCenterY - rotY;
+            double finalX = canvasCenterX + rotX;
+            double finalY = canvasCenterY - rotY;
             return PPoint.fromIm(finalX, finalY, view);
         }
 
@@ -237,8 +237,8 @@ public enum Symmetry {
             double x = p.getImX();
             double y = p.getImY();
             // coordinates relative to the center
-            double relX = x - compCenterX;
-            double relY = compCenterY - y; // calculate in upwards looking coords
+            double relX = x - canvasCenterX;
+            double relY = canvasCenterY - y; // calculate in upwards looking coords
 
             View view = p.getView();
 
@@ -256,8 +256,8 @@ public enum Symmetry {
             double x = p.getImX();
             double y = p.getImY();
             // coordinates relative to the center
-            double relX = x - compCenterX;
-            double relY = compCenterY - y; // calculate in upwards looking coords
+            double relX = x - canvasCenterX;
+            double relY = canvasCenterY - y; // calculate in upwards looking coords
 
             View view = p.getView();
 
@@ -273,8 +273,8 @@ public enum Symmetry {
             double x = p.getImX();
             double y = p.getImY();
             // coordinates relative to the center
-            double relX = x - compCenterX;
-            double relY = compCenterY - y; // calculate in upwards looking coords
+            double relX = x - canvasCenterX;
+            double relY = canvasCenterY - y; // calculate in upwards looking coords
 
             View view = p.getView();
             if (brushNo == 1) {
@@ -294,17 +294,16 @@ public enum Symmetry {
         }
     };
 
-    // properties of the active composition in image space
-    private static int compWidth;
-    private static int compHeight;
-    private static double compCenterX;
-    private static double compCenterY;
+    private static int canvasWidth;
+    private static int canvasHeight;
+    private static double canvasCenterX;
+    private static double canvasCenterY;
 
     public static void activeCanvasSizeChanged(Canvas canvas) {
-        compWidth = canvas.getWidth();
-        compHeight = canvas.getHeight();
-        compCenterX = compWidth / 2.0;
-        compCenterY = compHeight / 2.0;
+        canvasWidth = canvas.getWidth();
+        canvasHeight = canvas.getHeight();
+        canvasCenterX = canvasWidth / 2.0;
+        canvasCenterY = canvasHeight / 2.0;
     }
 
     private final String displayName;

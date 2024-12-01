@@ -99,7 +99,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initFGButton() {
-        if (Themes.getCurrent().isNimbus()) {
+        if (Themes.getActive().isNimbus()) {
             fgButton = new JButton();
         } else {
             fgButton = new JButton(fgColorIcon);
@@ -112,7 +112,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initBGButton() {
-        if (Themes.getCurrent().isNimbus()) {
+        if (Themes.getActive().isNimbus()) {
             bgButton = new JButton();
         } else {
             bgButton = new JButton(bgColorIcon);

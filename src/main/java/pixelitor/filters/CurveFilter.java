@@ -25,7 +25,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.painters.AreaEffects;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Shapes.NonlinTransform;
@@ -317,7 +317,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
     }
 
     private void exportSVG() {
-        IO.saveSVG(exportedShape, strokeParam, getName() + ".svg");
+        FileIO.saveSVG(exportedShape, strokeParam, getName() + ".svg");
     }
 
     /**

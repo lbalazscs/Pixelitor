@@ -59,6 +59,7 @@ import static pixelitor.layers.ImageLayer.State.PREVIEW;
 import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.createThumbnail;
+import static pixelitor.utils.ImageUtils.replaceSelectedRegion;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
@@ -378,7 +379,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     private void setPreviewWithSelection(BufferedImage newPreview) {
-        previewImage = replaceSelectedRegion(previewImage, newPreview, false);
+        previewImage = replaceSelectedRegion(previewImage, newPreview, false, this);
 
         setState(PREVIEW);
         imageRefChanged();
@@ -386,78 +387,25 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     private void setImageWithSelection(BufferedImage newImage, boolean isUndoRedo) {
-        image = replaceSelectedRegion(image, newImage, isUndoRedo);
+        image = replaceSelectedRegion(image, newImage, isUndoRedo, this);
         imageRefChanged();
 
         comp.invalidateImageCache();
-    }
-
-    /**
-     * If there is no selection, returns the newImg
-     * If there is a selection, copies newImg into src
-     * according to the selection, and returns src
-     */
-    private BufferedImage replaceSelectedRegion(BufferedImage src,
-                                                BufferedImage newImg,
-                                                boolean isUndoRedo) {
-        assert src != null;
-        assert newImg != null;
-        assert Assertions.rasterStartsAtZero(newImg);
-
-        var selection = comp.getSelection();
-        if (selection == null) {
-            return newImg;
-        } else if (isUndoRedo) {
-            // when undoing something and there is a selection, the whole
-            // new image should be copied onto the old one, and the exact
-            // selection shape should not be considered because of AA effects
-            Graphics2D g = src.createGraphics();
-            Rectangle selBounds = selection.getShapeBounds();
-            g.drawImage(newImg, selBounds.x - getTx(), selBounds.y - getTy(), null);
-            g.dispose();
-            return src;
-        } else if (selection.isRectangular()) {
-            // rectangular selection, simple selection shape clipping
-            // is enough, because there are no aliasing problems
-            Graphics2D g = src.createGraphics();
-            g.translate(-getTx(), -getTy());
-
-            // transparency comes from the new image
-            g.setComposite(AlphaComposite.Src);
-            Shape shape = selection.getShape();
-            g.setClip(shape);
-            Rectangle bounds = selection.getShapeBounds();
-            g.drawImage(newImg, bounds.x, bounds.y, null);
-            g.dispose();
-            return src;
-        } else {
-            Rectangle bounds = selection.getShapeBounds();
-            BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
-            Graphics2D g2 = ImageUtils.setupForSoftSelection(tmpImg, selection.getShape(), bounds.x, bounds.y);
-
-            g2.drawImage(newImg, 0, 0, null);
-            g2.dispose();
-
-            Graphics2D srcG = src.createGraphics();
-            srcG.drawImage(tmpImg, bounds.x - getTx(), bounds.y - getTy(), null);
-            srcG.dispose();
-
-            return src;
-        }
     }
 
     @Override
     public void setImage(BufferedImage newImage) {
-        BufferedImage oldRef = image;
+        BufferedImage prevRef = image;
         image = requireNonNull(newImage);
+
         imageRefChanged();
 
-        assert Assertions.rasterStartsAtZero(newImage);
+        assert Assertions.rasterStartsAtOrigin(newImage);
 
         comp.invalidateImageCache();
 
-        if (oldRef != null && oldRef != image) {
-            oldRef.flush();
+        if (prevRef != null && prevRef != image) {
+            prevRef.flush();
         }
     }
 
@@ -465,10 +413,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Replaces the image with history and icon update
      */
     public void replaceImage(BufferedImage newImage, String editName) {
-        BufferedImage oldImage = image;
+        BufferedImage prevImage = image;
         setImage(newImage);
 
-        History.add(new ImageEdit(editName, comp, this, oldImage, true));
+        History.add(new ImageEdit(editName, comp, this, prevImage, true));
         holder.update();
         updateIconImage();
     }
@@ -932,15 +880,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy) {
+    ContentLayerMoveEdit createMovementEdit(int prevTx, int prevTy) {
         ContentLayerMoveEdit edit;
         boolean needsEnlarging = imageDoesNotCoverCanvas();
         if (needsEnlarging) {
             BufferedImage backupImage = getImage();
             enlargeImage(comp.getCanvasBounds());
-            edit = new ContentLayerMoveEdit(this, backupImage, oldTx, oldTy);
+            edit = new ContentLayerMoveEdit(this, backupImage, prevTx, prevTy);
         } else {
-            edit = new ContentLayerMoveEdit(this, null, oldTx, oldTy);
+            edit = new ContentLayerMoveEdit(this, null, prevTx, prevTy);
         }
 
         return edit;

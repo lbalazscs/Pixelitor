@@ -509,11 +509,11 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void moveWhileDragging(double relImX, double relImY) {
-        super.moveWhileDragging(relImX, relImY);
+    public void moveWhileDragging(double imDx, double imDy) {
+        super.moveWhileDragging(imDx, imDy);
 
         for (Layer layer : layers) {
-            layer.moveWhileDragging(relImX, relImY);
+            layer.moveWhileDragging(imDx, imDy);
         }
 
         invalidateImageCache();
@@ -542,7 +542,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    PixelitorEdit createMovementEdit(int oldTx, int oldTy) {
+    PixelitorEdit createMovementEdit(int prevTx, int prevTy) {
         return null; // the group has no content of its own
     }
 

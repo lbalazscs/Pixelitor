@@ -22,7 +22,7 @@ import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.history.History;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
@@ -218,7 +218,7 @@ public class Views {
     }
 
     public static void repaintVisible() {
-        if (ImageArea.isCurrentMode(FRAMES)) {
+        if (ImageArea.isActiveMode(FRAMES)) {
             repaintAll();
         } else {
             activeView.repaint();
@@ -302,7 +302,7 @@ public class Views {
 
                 switch (answer) {
                     case YES_OPTION:  // "Save"
-                        boolean fileSaved = IO.save(comp, false);
+                        boolean fileSaved = FileIO.save(comp, false);
                         if (fileSaved) {
                             view.close();
                         }
@@ -549,15 +549,17 @@ public class Views {
     }
 
     /**
-     * Return true if the opening of the file should proceed
+     * Checks if a file is already open and prompts the user for confirmation to proceed.
      */
     public static boolean warnIfAlreadyOpen(File file) {
-        View view = viewOfFile(file);
+        View view = findViewByFile(file);
         if (view == null) {
-            return true;
+            return true; // the file is not open; proceed with opening
         }
+
         activate(view);
-        String title = "File already opened";
+
+        String title = "File Already Open";
         String msg = "<html>The file <b>" + file.getAbsolutePath()
             + "</b> is already opened.";
         String[] options = {"Open Again", GUIText.CANCEL};
@@ -566,10 +568,10 @@ public class Views {
         return again;
     }
 
-    private static View viewOfFile(File newFile) {
+    private static View findViewByFile(File targetFile) {
         for (View view : views) {
             File file = view.getComp().getFile();
-            if (file != null && file.getPath().equals(newFile.getPath())) {
+            if (file != null && file.getPath().equals(targetFile.getPath())) {
                 return view;
             }
         }

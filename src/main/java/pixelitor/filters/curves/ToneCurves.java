@@ -120,7 +120,7 @@ public class ToneCurves {
      * Draws the tone curve grid, scales, and curves for all channels.
      */
     public void draw(Graphics2D g) {
-        boolean darkTheme = Themes.getCurrent().isDark();
+        boolean darkTheme = Themes.getActive().isDark();
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 

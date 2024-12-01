@@ -44,7 +44,7 @@ public class ElevationAngleUI extends AbstractAngleUI {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        boolean darkTheme = Themes.getCurrent().isDark();
+        boolean darkTheme = Themes.getActive().isDark();
 
         // draw lines representing 0 degrees (horizon) and 90 degrees (zenith)
         setupOuterColor(g2, darkTheme);

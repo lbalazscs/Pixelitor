@@ -58,7 +58,7 @@ public class ColorFillLayer extends Layer {
         Tools.forceFinish();
         ColorFillLayer layer = new ColorFillLayer(comp, createName(), null);
         var activeLayerBefore = comp.getActiveLayer();
-        var oldViewMode = comp.getView().getMaskViewMode();
+        var prevViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
         holder.add(layer);
@@ -70,9 +70,9 @@ public class ColorFillLayer extends Layer {
             defaultColor, true, c -> layer.changeColor(c, false))) {
             // dialog accepted, now it is safe to add it to the history
             History.add(new NewLayerEdit(title,
-                layer, activeLayerBefore, oldViewMode));
+                layer, activeLayerBefore, prevViewMode));
         } else {
-            // dialog cancelled
+            // dialog canceled
             holder.deleteLayer(layer, false);
         }
     }
@@ -84,23 +84,23 @@ public class ColorFillLayer extends Layer {
     @Override
     public boolean edit() {
         String title = "Edit Color Fill Layer";
-        Color oldColor = color;
+        Color prevColor = color;
         if (Colors.selectColorWithDialog(PixelitorWindow.get(), title,
             color, true, c -> changeColor(c, false))) {
             // adds an edit to the history only after the dialog is accepted
-            History.add(new ColorFillLayerChangeEdit(this, oldColor, color));
+            History.add(new ColorFillLayerChangeEdit(this, prevColor, color));
             return true;
         }
         return false;
     }
 
     public void changeColor(Color color, boolean addHistory) {
-        Color oldColor = this.color;
+        Color prevColor = this.color;
         this.color = color;
         holder.update();
         updateIconImage();
         if (addHistory) {
-            History.add(new ColorFillLayerChangeEdit(this, oldColor, color));
+            History.add(new ColorFillLayerChangeEdit(this, prevColor, color));
         }
     }
 

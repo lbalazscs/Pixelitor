@@ -64,7 +64,7 @@ public class TmpLayer {
                 selStartX = bounds.x;
                 selStartY = bounds.y;
                 image = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
-                g = ImageUtils.setupForSoftSelection(image, selShape, selStartX, selStartY);
+                g = ImageUtils.createSoftSelectionMask(image, selShape, selStartX, selStartY);
                 smallImage = true;
             }
         } else {
@@ -107,7 +107,7 @@ public class TmpLayer {
         image = null;
     }
 
-    public Drag translateDrag(Drag drag) {
+    public Drag translate(Drag drag) {
         if (smallImage) {
             // the drag was relative to the canvas, but if small images are used,
             // then it must be translated to be relative to the selection

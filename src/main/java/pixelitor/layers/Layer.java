@@ -370,9 +370,11 @@ public abstract class Layer implements Serializable, Debuggable {
 
     /**
      * Returns the holder for new layers.
-     * Must be called on the currently active layer.
      */
     public LayerHolder getHolderForNewLayers() {
+        // must be called on the currently active layer
+        assert isActive();
+
         return holder;
     }
 
@@ -565,9 +567,9 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void deleteMask(boolean addToHistory) {
-        LayerMask oldMask = mask;
+        LayerMask prevMask = mask;
         View view = comp.getView();
-        MaskViewMode oldMode = view.getMaskViewMode();
+        MaskViewMode prevMode = view.getMaskViewMode();
         mask = null;
 
         ui.removeMaskIcon();
@@ -578,7 +580,7 @@ public abstract class Layer implements Serializable, Debuggable {
         setMaskEditing(false);
 
         if (addToHistory) {
-            History.add(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
+            History.add(new DeleteLayerMaskEdit(comp, this, prevMask, prevMode));
         }
 
         // DeleteLayerMaskEdit assumes that it's created with
@@ -823,10 +825,10 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
-    public void moveWhileDragging(double x, double y) {
+    public void moveWhileDragging(double imDx, double imDy) {
         Layer linked = getLinked();
         if (linked != null) {
-            linked.moveWhileDragging(x, y);
+            linked.moveWhileDragging(imDx, imDy);
         }
     }
 

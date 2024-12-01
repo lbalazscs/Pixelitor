@@ -73,15 +73,15 @@ public enum GradientColorType {
 
     protected abstract Color getSecondColor();
 
-    public Color getStartColor(boolean revert) {
-        if (revert) {
+    public Color getStartColor(boolean reverse) {
+        if (reverse) {
             return getSecondColor();
         }
         return getFirstColor();
     }
 
-    public Color getEndColor(boolean revert) {
-        if (revert) {
+    public Color getEndColor(boolean reverse) {
+        if (reverse) {
             return getFirstColor();
         }
         return getSecondColor();

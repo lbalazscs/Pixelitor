@@ -99,7 +99,7 @@ public class PreferencesPanel extends JTabbedPane {
 
     private void addLanguageChooser(GridBagHelper gbh) {
         var languages = new EnumComboBoxModel<>(Language.class);
-        languages.setSelectedItem(Language.getCurrent());
+        languages.setSelectedItem(Language.getActive());
 
         @SuppressWarnings("unchecked")
         JComboBox<Language> langChooser = new JComboBox<>(languages);
@@ -108,8 +108,8 @@ public class PreferencesPanel extends JTabbedPane {
         gbh.addLabelAndControlNoStretch("Language: ", langChooser);
         langChooser.addActionListener(e -> {
             Language language = languages.getSelectedItem();
-            if (language != Language.getCurrent()) {
-                Language.setCurrent(language);
+            if (language != Language.getActive()) {
+                Language.setActive(language);
                 EventQueue.invokeLater(() -> Dialogs.showInfoDialog(this,
                     "Needs Restart",
                     "Changing the display language will take effect after restarting Pixelitor."));
@@ -119,8 +119,8 @@ public class PreferencesPanel extends JTabbedPane {
 
     private void addThemeChooser(GridBagHelper gbh) {
         EnumComboBoxModel<Theme> themes = new EnumComboBoxModel<>(Theme.class);
-        Theme currentTheme = Themes.getCurrent();
-        themes.setSelectedItem(currentTheme);
+        Theme activeTheme = Themes.getActive();
+        themes.setSelectedItem(activeTheme);
 
         @SuppressWarnings("unchecked")
         JComboBox<Theme> themeChooser = new JComboBox<>(themes);
@@ -137,7 +137,7 @@ public class PreferencesPanel extends JTabbedPane {
             accentColorLabel.setEnabled(enable);
             accentColorChooser.setEnabled(enable);
         };
-        accentColorEnabler.accept(currentTheme.isFlat());
+        accentColorEnabler.accept(activeTheme.isFlat());
 
         gbh.addTwoControlsNoStretch(accentColorLabel, accentColorChooser);
 */
@@ -187,7 +187,7 @@ public class PreferencesPanel extends JTabbedPane {
 
         UIManager.put("defaultFont", new FontUIResource(newFont));
 
-        if (Themes.getCurrent().isNimbus()) {
+        if (Themes.getActive().isNimbus()) {
             try {
                 NimbusLookAndFeel laf = new NimbusLookAndFeel();
                 UIManager.setLookAndFeel(laf);
@@ -241,12 +241,12 @@ public class PreferencesPanel extends JTabbedPane {
         var gbh = new GridBagHelper(contents);
 
         zoomMethodCB = new JComboBox<>(MouseZoomMethod.values());
-        zoomMethodCB.setSelectedItem(MouseZoomMethod.CURRENT);
+        zoomMethodCB.setSelectedItem(MouseZoomMethod.ACTIVE);
         zoomMethodCB.setName("zoomMethod");
         gbh.addLabelAndControlNoStretch("Zoom with:", zoomMethodCB);
 
         panMethodCB = new JComboBox<>(PanMethod.values());
-        panMethodCB.setSelectedItem(PanMethod.CURRENT);
+        panMethodCB.setSelectedItem(PanMethod.ACTIVE);
         panMethodCB.setName("panMethod");
         gbh.addLabelAndControlNoStretch("Pan with:", panMethodCB);
 

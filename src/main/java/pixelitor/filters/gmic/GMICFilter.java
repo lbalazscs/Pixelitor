@@ -19,7 +19,7 @@ package pixelitor.filters.gmic;
 
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -51,7 +51,7 @@ public abstract class GMICFilter extends ParametrizedFilter {
         command.add("-output");
         command.add("-.png");
 
-        return IO.commandLineFilter(src, command);
+        return FileIO.applyCommandLineFilter(src, command);
     }
 
     public abstract List<String> getArgs();

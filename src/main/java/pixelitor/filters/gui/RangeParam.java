@@ -395,9 +395,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         // make sure that the tic/label for max value is painted, see issue #91
         maxValue += (4 - (maxValue - minValue) % 4);
 
-        changeDefaultValue((int) (defaultToMaxRatio * maxValue));
+        setDefaultValue((int) (defaultToMaxRatio * maxValue));
         if (changeValue) {
-            // resets the current value to the new default
             value = defaultValue;
         }
     }
@@ -408,7 +407,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return this;
     }
 
-    public void changeDefaultValue(double newDefault) {
+    public void setDefaultValue(double newDefault) {
         defaultValue = Math.clamp(newDefault, minValue, maxValue);
     }
 

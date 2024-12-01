@@ -26,7 +26,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Dimension2D;
 import java.io.Serial;
 
-import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXEL;
+import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXELS;
 
 /**
  * The common functionality of corner and edge handles in a {@link TransformBox}.
@@ -88,11 +88,11 @@ public abstract class PositionHandle extends DraggablePoint {
 
         if (isActive()) {
             Dimension2D size = box.getRotatedImSize();
-            DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXEL);
+            DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXELS);
 
             drawDragDisplays(dd, size);
 
-            dd.finish();
+            dd.cleanup();
         }
     }
 

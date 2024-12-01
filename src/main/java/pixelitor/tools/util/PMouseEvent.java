@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,9 @@ public class PMouseEvent extends PPoint {
         super(e.getX(), e.getY(), view);
 
         if (View.isPixelSnapping()) {
-            updateSnappedCoValues();
+            // the image-space coordinates are assumed to be already snapped,
+            // and we just want to draw the helper widgets correctly
+            updateCoFromIm();
         }
 
         assert e.getSource() == view;

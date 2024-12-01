@@ -60,7 +60,7 @@ public enum MouseZoomMethod {
         }
     };
 
-    public static MouseZoomMethod CURRENT = WHEEL;
+    public static MouseZoomMethod ACTIVE = WHEEL;
 
     private final String displayName;
     private final String saveCode;
@@ -108,17 +108,17 @@ public enum MouseZoomMethod {
 
         for (MouseZoomMethod method : values()) {
             if (method.saveCode().equals(loadedCode)) {
-                CURRENT = method;
+                ACTIVE = method;
                 break;
             }
         }
     }
 
     public static void changeTo(MouseZoomMethod newMethod) {
-        if (newMethod == CURRENT) {
+        if (newMethod == ACTIVE) {
             return;
         }
-        CURRENT = newMethod;
+        ACTIVE = newMethod;
         Views.forEachView(newMethod::installOnView);
         Navigator.setMouseZoomMethod(newMethod);
     }

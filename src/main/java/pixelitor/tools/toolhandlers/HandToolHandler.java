@@ -45,7 +45,7 @@ public class HandToolHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        if (PanMethod.CURRENT.shouldStartPan(e)) {
+        if (PanMethod.ACTIVE.shouldStartPan(e)) {
             panning = true; // necessary in unit tests
 
             Tools.HAND.mousePressed(e);

@@ -22,7 +22,6 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Pixelitor;
 import pixelitor.Views;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Screens;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
@@ -52,6 +51,7 @@ import static java.awt.Desktop.Action.APP_ABOUT;
 import static java.awt.Desktop.Action.APP_PREFERENCES;
 import static java.awt.Desktop.Action.APP_QUIT_HANDLER;
 import static java.awt.Taskbar.Feature.ICON_IMAGE;
+import static pixelitor.utils.ImageUtils.findImageURL;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -185,31 +185,25 @@ public class PixelitorWindow extends JFrame {
     }
 
     private void initIcons() {
-        var clazz = getClass();
-        URL imgURL32 = clazz.getResource("/images/pixelitor_icon32.png");
-        URL imgURL48 = clazz.getResource("/images/pixelitor_icon48.png");
-        URL imgURL256 = clazz.getResource("/images/pixelitor_icon256.png");
+        URL imgURL32 = findImageURL("pixelitor_icon32.png");
+        URL imgURL48 = findImageURL("pixelitor_icon48.png");
+        URL imgURL256 = findImageURL("pixelitor_icon256.png");
 
-        if (imgURL32 != null && imgURL48 != null && imgURL256 != null) {
-            List<Image> icons = new ArrayList<>(2);
-            icons.add(new ImageIcon(imgURL32).getImage());
-            icons.add(new ImageIcon(imgURL48).getImage());
-            Image img256 = new ImageIcon(imgURL256).getImage();
-            icons.add(img256);
-            setIconImages(icons);
+        List<Image> icons = new ArrayList<>(2);
+        icons.add(new ImageIcon(imgURL32).getImage());
+        icons.add(new ImageIcon(imgURL48).getImage());
+        Image img256 = new ImageIcon(imgURL256).getImage();
+        icons.add(img256);
+        setIconImages(icons);
 
-            setTaskbarIcon(img256);
-        } else {
-            Dialogs.showErrorDialog(this, "Error",
-                "icon imgURL is null");
-        }
+        setTaskbarIcon(img256);
     }
 
-    private static void setTaskbarIcon(Image img256) {
+    private static void setTaskbarIcon(Image image) {
         if (Taskbar.isTaskbarSupported()) {
             Taskbar taskBar = Taskbar.getTaskbar();
             if (taskBar.isSupported(ICON_IMAGE)) {
-                taskBar.setIconImage(img256);
+                taskBar.setIconImage(image);
             }
         }
     }

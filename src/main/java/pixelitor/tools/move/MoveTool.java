@@ -47,7 +47,7 @@ import java.util.ResourceBundle;
  */
 public class MoveTool extends DragTool {
     private final JComboBox<MoveMode> modeSelector = new JComboBox<>(MoveMode.values());
-    private MoveMode currentMode = (MoveMode) modeSelector.getSelectedItem();
+    private MoveMode activeMode = (MoveMode) modeSelector.getSelectedItem();
 
     private final JCheckBox autoSelectCheckBox = new JCheckBox();
     private final JCheckBox freeTransformCheckBox = new JCheckBox();
@@ -56,9 +56,9 @@ public class MoveTool extends DragTool {
 
     public MoveTool() {
         super("Move", 'V',
-            "<b>drag</b> to move the active layer, " +
-                "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
-                "<b>Shift-drag</b> to constrain the movement.",
+            "<b>drag</b> to move the active layer. " +
+                "<b>Alt-drag</b> or <b>right-mouse-drag</b> to duplicate and move the active layer. " +
+                "<b>Shift-drag</b> to constrain movement.",
             Cursors.DEFAULT, true);
     }
 
@@ -66,7 +66,8 @@ public class MoveTool extends DragTool {
     public void initSettingsPanel(ResourceBundle resources) {
         String moveText = resources.getString("mt_move");
         settingsPanel.addComboBox(moveText, modeSelector, "modeSelector");
-        modeSelector.addActionListener(e -> currentMode = (MoveMode) modeSelector.getSelectedItem());
+        modeSelector.addActionListener(e ->
+            activeMode = (MoveMode) modeSelector.getSelectedItem());
 
         settingsPanel.addSeparator();
         settingsPanel.addWithLabel("Auto Select Layer:",
@@ -84,15 +85,15 @@ public class MoveTool extends DragTool {
     public void mouseMoved(MouseEvent e, View view) {
         super.mouseMoved(e, view);
 
-        if (currentMode.movesLayer()) {
-            setMoveCursor(view, e);
+        if (activeMode.movesLayer()) {
+            updateMoveCursor(view, e);
         }
         if (transformBox != null) {
             transformBox.mouseMoved(e);
         }
     }
 
-    private void setMoveCursor(View view, MouseEvent e) {
+    private void updateMoveCursor(View view, MouseEvent e) {
         if (isAutoSelecting()) {
             Point2D p = view.componentToImageSpace(e.getPoint());
             Layer movedLayer = view.getComp().findLayerAtPoint(p);
@@ -106,15 +107,15 @@ public class MoveTool extends DragTool {
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        if (currentMode.movesLayer() && isAutoSelecting()) {
-            Point2D p = e.asImPoint2D();
-            Layer movedLayer = e.getComp().findLayerAtPoint(p);
+        if (activeMode.movesLayer() && isAutoSelecting()) {
+            Point2D cursorPos = e.toImPoint2D();
+            Layer targetLayer = e.getComp().findLayerAtPoint(cursorPos);
 
-            if (movedLayer == null) {
+            if (targetLayer == null) {
                 drag.cancel();
                 return;
             }
-            e.getComp().setActiveLayer(movedLayer);
+            e.getComp().setActiveLayer(targetLayer);
         }
 
         if (transformBox != null) {
@@ -123,7 +124,7 @@ public class MoveTool extends DragTool {
             }
         } else {
             e.getComp().startMovement(
-                currentMode, e.isAltDown() || e.isRight());
+                activeMode, e.isAltDown() || e.isRight());
         }
     }
 
@@ -134,11 +135,34 @@ public class MoveTool extends DragTool {
                 return;
             }
         } else {
-            double relX = drag.getDX();
-            double relY = drag.getDY();
-
-            e.getComp().moveActiveContent(currentMode, relX, relY);
+            e.getComp().moveActiveContent(activeMode, drag.getDX(), drag.getDY());
         }
+    }
+
+    @Override
+    public void dragFinished(PMouseEvent e) {
+        if (transformBox != null) {
+            if (transformBox.processMouseReleased(e)) {
+                Selection selection = e.getComp().getSelection();
+                if (selection != null) {
+                    selection.endMovement(true);
+                }
+            }
+            return;
+        }
+
+        if (!freeTransformCheckBox.isSelected()) {
+            e.getComp().endMovement(activeMode);
+        }
+    }
+
+    /**
+     * Programmatically moves the active layer and/or the selection.
+     */
+    public static void move(Composition comp, MoveMode mode, int imDx, int imDy) {
+        comp.startMovement(mode, false);
+        comp.moveActiveContent(mode, imDx, imDy);
+        comp.endMovement(mode);
     }
 
     @Override
@@ -156,30 +180,13 @@ public class MoveTool extends DragTool {
             return;
         }
 
-        comp.drawMovementContours(g2, currentMode);
+        comp.drawMovementContours(g2, activeMode);
         DragDisplayType.REL_MOUSE_POS.draw(g2, drag);
     }
 
     @Override
     protected DragDisplayType getDragDisplayType() {
         return DragDisplayType.REL_MOUSE_POS;
-    }
-
-    @Override
-    public void dragFinished(PMouseEvent e) {
-        if (transformBox != null) {
-            if (transformBox.processMouseReleased(e)) {
-                Selection selection = e.getComp().getSelection();
-                if (selection != null) {
-                    selection.endMovement(true);
-                }
-            }
-            return;
-        }
-
-        if (!freeTransformCheckBox.isSelected()) {
-            e.getComp().endMovement(currentMode);
-        }
     }
 
     @Override
@@ -196,15 +203,6 @@ public class MoveTool extends DragTool {
         }
     }
 
-    /**
-     * Moves the active layer programmatically.
-     */
-    public static void move(Composition comp, MoveMode mode, int relX, int relY) {
-        comp.startMovement(mode, false);
-        comp.moveActiveContent(mode, relX, relY);
-        comp.endMovement(mode);
-    }
-
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         View view = Views.getActive();
@@ -217,7 +215,7 @@ public class MoveTool extends DragTool {
             return true;
         }
 
-        move(view.getComp(), currentMode, key.getDeltaX(), key.getDeltaY());
+        move(view.getComp(), activeMode, key.getDeltaX(), key.getDeltaY());
         return true;
     }
 
@@ -247,6 +245,7 @@ public class MoveTool extends DragTool {
         View view = Views.getActive();
         Selection sel = view.getComp().getSelection();
         if (sel != null && transformBox == null) {
+            // create a transform box around the selection
             Rectangle boxSize = view.imageToComponentSpace(sel.getShapeBounds2D());
             boxSize.grow(10, 10); // make sure the rectangular selections are visible
             transformBox = new TransformBox(boxSize, view, sel, true);

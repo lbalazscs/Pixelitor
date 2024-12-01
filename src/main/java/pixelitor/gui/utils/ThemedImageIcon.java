@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,10 +27,11 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
+/**
+ * An ImageIcon with theme-based image rendering.
+ */
 public class ThemedImageIcon extends ImageIcon {
-    private BufferedImage imageForLightTheme;
-
-    public static final int WHITE = 0x00BEBEBE;
+    // color constants for dark theme pixel replacement
     public static final int GREEN = 0x00428F4C;
     public static final int RED = 0x00CC555D;
     public static final int BLUE = 0x004488AD;
@@ -39,75 +40,69 @@ public class ThemedImageIcon extends ImageIcon {
     // if the dark-themed image has to be generated,
     // based on the alpha of the original, this
     // is the color of the new pixels, without the alpha
-    private int newPixelColor;
+    private int darkThemePixelColor;
 
-    private BufferedImage imageForDarkTheme;
+    private BufferedImage lightThemeImage;
+    private BufferedImage darkThemeImage;
 
-    public ThemedImageIcon(String iconFileName, int newPixelColor) {
-        imageForLightTheme = ImageUtils.loadJarImageFromImagesFolder(iconFileName);
-        this.newPixelColor = newPixelColor;
+    public ThemedImageIcon(String iconFileName, int darkThemePixelColor) {
+        lightThemeImage = ImageUtils.loadJarImageFromImagesFolder(iconFileName);
+        this.darkThemePixelColor = darkThemePixelColor;
     }
 
     public ThemedImageIcon(String ltIconFileName, String dtIconFileName) {
-        imageForLightTheme = ImageUtils.loadJarImageFromImagesFolder(ltIconFileName);
-        imageForDarkTheme = ImageUtils.loadJarImageFromImagesFolder(dtIconFileName);
-        assert imageForLightTheme.getWidth() == imageForDarkTheme.getWidth();
-        assert imageForLightTheme.getHeight() == imageForDarkTheme.getHeight();
+        lightThemeImage = ImageUtils.loadJarImageFromImagesFolder(ltIconFileName);
+        darkThemeImage = ImageUtils.loadJarImageFromImagesFolder(dtIconFileName);
+
+        assert lightThemeImage.getWidth() == darkThemeImage.getWidth();
+        assert lightThemeImage.getHeight() == darkThemeImage.getHeight();
     }
 
     @Override
     public synchronized void paintIcon(Component c, Graphics g, int x, int y) {
-        if (Themes.getCurrent().isDark()) {
-            if (imageForDarkTheme == null) {
-                createDarkThemedImage();
-            }
-            g.drawImage(imageForDarkTheme, x, y, null);
-        } else {
-            g.drawImage(imageForLightTheme, x, y, null);
-        }
+        g.drawImage(getImage(), x, y, null);
     }
 
     /**
-     * Automatically creates a dark themed icon based on the light
-     * themed icon by setting all pixel values to a light color.
+     * Generates a dark theme image by replacing pixel colors while preserving alpha.
      */
-    private void createDarkThemedImage() {
-        imageForDarkTheme = new BufferedImage(
-            imageForLightTheme.getWidth(), imageForLightTheme.getHeight(), TYPE_INT_ARGB);
-        if (!ImageUtils.hasPackedIntArray(imageForLightTheme)) {
-            imageForLightTheme = ImageUtils.convertToARGB(imageForLightTheme, true);
+    private void generateDarkThemedImage() {
+        darkThemeImage = new BufferedImage(
+            lightThemeImage.getWidth(), lightThemeImage.getHeight(), TYPE_INT_ARGB);
+        if (!ImageUtils.hasPackedIntArray(lightThemeImage)) {
+            lightThemeImage = ImageUtils.convertToARGB(lightThemeImage, true);
         }
 
-        int[] srcData = ImageUtils.getPixelArray(imageForLightTheme);
-        int[] dstData = ImageUtils.getPixelArray(imageForDarkTheme);
-        for (int i = 0; i < srcData.length; i++) {
-            int pixel = srcData[i];
-            int a = pixel & 0xFF000000;
-            dstData[i] = a | newPixelColor;
+        int[] lightThemePixels = ImageUtils.getPixelArray(lightThemeImage);
+        int[] darkThemePixels = ImageUtils.getPixelArray(darkThemeImage);
+        for (int i = 0; i < lightThemePixels.length; i++) {
+            int pixel = lightThemePixels[i];
+            int alpha = pixel & 0xFF000000;
+            darkThemePixels[i] = alpha | darkThemePixelColor;
         }
     }
 
     @Override
     public int getIconWidth() {
-        return imageForLightTheme.getWidth();
+        return lightThemeImage.getWidth();
     }
 
     @Override
     public int getIconHeight() {
-        return imageForLightTheme.getHeight();
+        return lightThemeImage.getHeight();
     }
 
     // this class extends ImageIcon and overrides this method so that
     // the look and feel automatically generates the disabled icons
     @Override
     public Image getImage() {
-        if (Themes.getCurrent().isDark()) {
-            if (imageForDarkTheme == null) {
-                createDarkThemedImage();
+        if (Themes.getActive().isDark()) {
+            if (darkThemeImage == null) {
+                generateDarkThemedImage();
             }
-            return imageForDarkTheme;
+            return darkThemeImage;
         } else {
-            return imageForLightTheme;
+            return lightThemeImage;
         }
     }
 }

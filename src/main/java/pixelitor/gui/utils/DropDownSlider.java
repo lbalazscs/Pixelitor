@@ -115,7 +115,7 @@ public class DropDownSlider extends JComboBox<String> {
         JTextField tf = getEditorComponent();
         int stringWidth = tf.getFontMetrics(tf.getFont()).stringWidth("100");
         preferredSize = super.getPreferredSize();
-        if (Themes.getCurrent().isFlat()) {
+        if (Themes.getActive().isFlat()) {
             preferredSize.width = 20 + (int) (stringWidth * 2.6);
         } else {
             preferredSize.width = stringWidth + 40;

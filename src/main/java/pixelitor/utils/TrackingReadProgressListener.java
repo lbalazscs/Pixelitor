@@ -21,12 +21,11 @@ import javax.imageio.ImageReader;
 import javax.imageio.event.IIOReadProgressListener;
 
 /**
- * Tracks the reading of a large file
- * with the help of a {@link ProgressTracker}
+ * Tracks the reading of a file with the help of a {@link ProgressTracker}.
  */
 public class TrackingReadProgressListener implements IIOReadProgressListener {
     private final ProgressTracker tracker;
-    private int workDone = 0;
+    private int trackedPercentage = 0;
 
     public TrackingReadProgressListener(ProgressTracker tracker) {
         this.tracker = tracker;
@@ -48,10 +47,10 @@ public class TrackingReadProgressListener implements IIOReadProgressListener {
 
     @Override
     public void imageProgress(ImageReader source, float percentageDone) {
-        int progress = (int) percentageDone;
-        if (progress > workDone) {
-            tracker.unitsDone(progress - workDone);
-            workDone = progress;
+        int currentPercentage = Math.round(percentageDone);
+        if (currentPercentage > trackedPercentage) {
+            tracker.unitsDone(currentPercentage - trackedPercentage);
+            trackedPercentage = currentPercentage;
         }
     }
 

@@ -93,7 +93,7 @@ public class AboutDialog {
     }
 
     private static JButton createLinkButton(JComponent aboutPanel) {
-        String fontColor = Themes.getCurrent().isDark() ? "#77ABD4" : "#000099";
+        String fontColor = Themes.getActive().isDark() ? "#77ABD4" : "#000099";
         String linkButtonText = "<html><font color=\"" + fontColor + "\"><u>" + WEBSITE_URL + "</u></font>";
         var linkButton = new JButton(linkButtonText);
 

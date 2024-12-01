@@ -136,7 +136,7 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
             .thenAcceptAsync(printingCompleted -> {
                 progressHandler.stopProgress();
                 if (!printingCompleted) {
-                    Messages.showStatusMessage("Printing was cancelled.");
+                    Messages.showStatusMessage("Printing was canceled.");
                 }
             }, onEDT);
     }
@@ -177,7 +177,7 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
             job.setPageable(book);
             job.print();
         } catch (PrinterAbortException e) {
-            // user cancelled printing at the OS level
+            // user canceled printing at the OS level
             return false;
         } catch (PrinterException e) {
             Messages.showException(e);

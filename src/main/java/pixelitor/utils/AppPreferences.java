@@ -512,7 +512,7 @@ public final class AppPreferences {
     }
 
     private static void saveTheme() {
-        mainPrefs.put(THEME_KEY, Themes.getCurrent().getSaveCode());
+        mainPrefs.put(THEME_KEY, Themes.getActive().getSaveCode());
     }
 
     public static int loadUIFontSize() {
@@ -544,7 +544,7 @@ public final class AppPreferences {
     }
 
     private static void saveLanguage() {
-        mainPrefs.put(LANG_KEY, Language.getCurrent().getCode());
+        mainPrefs.put(LANG_KEY, Language.getActive().getCode());
     }
 
     public static String loadMouseZoom() {
@@ -552,7 +552,7 @@ public final class AppPreferences {
     }
 
     private static void saveMouseZoom() {
-        mainPrefs.put(MOUSE_ZOOM_KEY, MouseZoomMethod.CURRENT.saveCode());
+        mainPrefs.put(MOUSE_ZOOM_KEY, MouseZoomMethod.ACTIVE.saveCode());
     }
 
     public static String loadPan() {
@@ -560,7 +560,7 @@ public final class AppPreferences {
     }
 
     private static void savePan() {
-        mainPrefs.put(PAN_KEY, PanMethod.CURRENT.saveCode());
+        mainPrefs.put(PAN_KEY, PanMethod.ACTIVE.saveCode());
     }
 
     private static void loadPaths() {

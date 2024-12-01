@@ -171,7 +171,7 @@ public enum ShapeType {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             if (drag != lastDrag) {
-                RandomStarShape.randomize();
+                RandomStarShape.randomizeStarParameters();
             } else {
                 // do not generate a completely new shape, only scale it
             }
@@ -183,7 +183,7 @@ public enum ShapeType {
 
         @Override
         public Shape createShape(double x, double y, double width, double height) {
-            RandomStarShape.randomize();
+            RandomStarShape.randomizeStarParameters();
             return new RandomStarShape(x, y, width, height);
         }
 
@@ -207,7 +207,7 @@ public enum ShapeType {
             transform.scale(length, length); // originally it had a length of 1.0
 
             // rotate the arrow into the direction of the drag
-            double angleInRadians = drag.getDrawAngle();
+            double angleInRadians = drag.calcDrawAngle();
             double angle = Geometry.atan2ToIntuitive(angleInRadians);
             angle += Math.PI / 2;
             transform.rotate(angle);

@@ -29,12 +29,12 @@ public interface AnimationWriter {
     void addFrame(BufferedImage image) throws IOException;
 
     /**
-     * Called if the animation rendering was cancelled
+     * Called if the animation rendering was canceled.
      */
     void cancel();
 
     /**
-     * Called after adding all the frames (if it was not cancelled)
+     * Called after adding all the frames (if it was not canceled).
      */
     void finish();
 }

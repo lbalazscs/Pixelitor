@@ -71,7 +71,7 @@ public class HistogramPainter extends JComponent {
 
         // draw background
         if (isLuminance) {
-            if (!Themes.getCurrent().isDark()) {
+            if (!Themes.getActive().isDark()) {
                 g.setColor(GRAY);
                 g.fillRect(offsetX, offsetY, PREFERRED_WIDTH, PREFERRED_HEIGHT);
             }

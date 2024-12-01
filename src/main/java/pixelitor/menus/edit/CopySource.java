@@ -34,7 +34,7 @@ import java.awt.image.BufferedImage;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Represents the source of the image to be copied to the clipboard.
+ * Defines different sources for images that can be copied to the clipboard.
  */
 public enum CopySource {
     LAYER_OR_MASK {
@@ -48,12 +48,12 @@ public enum CopySource {
             // TODO Text layers are rasterized, but they should probably be copied
             //   in other formats as well (as a string or a serialized object).
             //   An internal clipboard could be implemented to handle such cases.
-            BufferedImage canvasSizedImage = src.asImage(true, false);
-            if (canvasSizedImage == null) {
+            BufferedImage layerImage = src.asImage(true, false);
+            if (layerImage == null) {
                 return Result.error("this layer can't be copied");
             }
 
-            return createImageWithSelectedPixels(canvasSizedImage, comp);
+            return extractSelectedRegion(layerImage, comp);
         }
 
         @Override
@@ -63,7 +63,7 @@ public enum CopySource {
     }, COMPOSITE {
         @Override
         Result<BufferedImage, String> getImage(Composition comp) {
-            return createImageWithSelectedPixels(comp.getCompositeImage(), comp);
+            return extractSelectedRegion(comp.getCompositeImage(), comp);
         }
 
         @Override
@@ -72,10 +72,13 @@ public enum CopySource {
         }
     };
 
-    private static Result<BufferedImage, String> createImageWithSelectedPixels(
-        BufferedImage canvasSizedImage, Composition comp) {
+    /**
+     * Returns the selected portion of the image or the entire image if no selection exists.
+     */
+    private static Result<BufferedImage, String> extractSelectedRegion(BufferedImage sourceImage,
+                                                                       Composition comp) {
         if (!comp.hasSelection()) {
-            return Result.success(canvasSizedImage);
+            return Result.success(sourceImage);
         }
 
         Selection selection = comp.getSelection();
@@ -84,7 +87,7 @@ public enum CopySource {
             // for rectangular selections a simple crop is needed
             Rectangle2D selRect = (Rectangle2D) selectionShape;
             Rectangle selBounds = Shapes.roundCropRect(selRect);
-            return cropToSelectionBounds(canvasSizedImage, comp.getCanvas(), selBounds);
+            return cropToSelectionBounds(sourceImage, comp.getCanvas(), selBounds);
         }
 
         // in the case of a non-rectangular selection,
@@ -93,10 +96,10 @@ public enum CopySource {
 
         BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(
             selBounds.width, selBounds.height);
-        Graphics2D g2 = ImageUtils.setupForSoftSelection(
+        Graphics2D g2 = ImageUtils.createSoftSelectionMask(
             tmpImg, selection.getShape(), selBounds.x, selBounds.y);
 
-        g2.drawImage(canvasSizedImage, -selBounds.x, -selBounds.y, null);
+        g2.drawImage(sourceImage, -selBounds.x, -selBounds.y, null);
         g2.dispose();
         return Result.success(tmpImg);
     }

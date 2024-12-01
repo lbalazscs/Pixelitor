@@ -123,7 +123,7 @@ public class StrokeSettingsPanel extends JPanel {
 
             @Override
             protected void paintComponent(Graphics g) {
-                boolean darkTheme = Themes.getCurrent().isDark();
+                boolean darkTheme = Themes.getActive().isDark();
 
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

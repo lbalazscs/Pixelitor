@@ -79,7 +79,7 @@ public enum TweenWizardPage implements WizardPage {
     }, STARTING_FILTER_STATE {
         @Override
         public String getHelpText(Wizard wizard) {
-            String color = Themes.getCurrent().isDark() ? "#76ABFF" : "blue";
+            String color = Themes.getActive().isDark() ? "#76ABFF" : "blue";
             return "<html><b><font color=" + color + " size=+1>Initial</font></b> settings for the <i>"
                 + getFilter(wizard).getName() + "</i> filter.";
         }
@@ -109,7 +109,7 @@ public enum TweenWizardPage implements WizardPage {
     }, ENDING_FILTER_STATE {
         @Override
         public String getHelpText(Wizard wizard) {
-            String color = Themes.getCurrent().isDark() ? "#5DCF6E" : "blue";
+            String color = Themes.getActive().isDark() ? "#5DCF6E" : "blue";
             String text = "<html><b><font color=" + color + " size=+1>Final</font></b> settings for the <i>"
                 + getFilter(wizard).getName() + "</i> filter.";
             boolean hasGradient = getFilter(wizard).getParamSet().hasGradient();

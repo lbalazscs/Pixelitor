@@ -123,7 +123,7 @@ public class GradientFillLayer extends ContentLayer {
             thumbCheckerBoardPainter.paint(g2, null, thumbDim.width, thumbDim.height);
         }
         if (gradient != null) {
-            gradient.paintIconThumbnail(g2, comp.getCanvas(), thumbDim);
+            gradient.paintThumbnail(g2, comp.getCanvas(), thumbDim);
         }
 
         g2.dispose();
@@ -180,7 +180,7 @@ public class GradientFillLayer extends ContentLayer {
         // the gradient can be null if this is called while undoing the first gradient
         assert gradient != null || !addHistory;
 
-        Gradient oldGradient = this.gradient;
+        Gradient prevGradient = this.gradient;
 
         this.gradient = gradient;
         cachedImage = null;
@@ -188,7 +188,7 @@ public class GradientFillLayer extends ContentLayer {
         updateIconImage();
 
         if (addHistory) {
-            History.add(new GradientFillLayerChangeEdit(this, oldGradient, gradient));
+            History.add(new GradientFillLayerChangeEdit(this, prevGradient, gradient));
         } else { // called from the undo/redo
             if (Tools.GRADIENT.isActive()) {
                 // the handles have to be updated by the tool
@@ -220,10 +220,10 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public void moveWhileDragging(double relImX, double relImY) {
-        super.moveWhileDragging(relImX, relImY);
+    public void moveWhileDragging(double imDx, double imDy) {
+        super.moveWhileDragging(imDx, imDy);
         if (gradient != null) {
-            gradient.moveWhileDragging(relImX, relImY);
+            gradient.moveWhileDragging(imDx, imDy);
         }
     }
 
@@ -238,7 +238,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    PixelitorEdit createMovementEdit(int oldTx, int oldTy) {
+    PixelitorEdit createMovementEdit(int prevTx, int prevTy) {
         return new GradientFillLayerChangeEdit(this, backupGradient, gradient);
     }
 

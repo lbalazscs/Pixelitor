@@ -22,7 +22,7 @@ import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Shapes;
@@ -244,7 +244,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         }
         content.append("</svg>");
 
-        IO.saveSVG(content.toString(), "concentric.svg");
+        FileIO.saveSVG(content.toString(), "concentric.svg");
     }
 
     private static double calcMaxDistance(double cx, double cy, double width, double height) {

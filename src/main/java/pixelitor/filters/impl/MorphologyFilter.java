@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,12 +28,12 @@ import java.awt.Rectangle;
 public class MorphologyFilter extends WholeImageFilter {
     private int iterations = 1;
 
-    public static final int OP_ERODE = 1;
-    public static final int OP_DILATE = 2;
+    public static final int OP_ERODE = 1;  // reduces bright areas
+    public static final int OP_DILATE = 2; // expands bright areas
     private int op;
 
-    public static final int KERNEL_DIAMOND = 3;
-    public static final int KERNEL_SQUARE = 4;
+    public static final int KERNEL_DIAMOND = 3; // includes cross-shaped neighboring pixels
+    public static final int KERNEL_SQUARE = 4; // includes all 8 surrounding pixels
     private int kernel;
 
     public MorphologyFilter(String filterName) {
@@ -59,13 +59,16 @@ public class MorphologyFilter extends WholeImageFilter {
         short[] inR = new short[numPixels];
         short[] inG = new short[numPixels];
         short[] inB = new short[numPixels];
+        int[] outPixels = new int[width * height];
 
         pt = createProgressTracker(iterations);
-        int[] outPixels = new int[width * height];
         for (int it = 0; it < iterations; it++) {
             if (it > 0) {
+                // use output pixels from previous iteration as input for this iteration
                 System.arraycopy(outPixels, 0, inPixels, 0, numPixels);
             }
+
+            // extract the color channels
             for (int i = 0; i < numPixels; i++) {
                 int rgb = inPixels[i];
                 inA[i] = (short) ((rgb >> 24) & 0xFF);
@@ -74,26 +77,30 @@ public class MorphologyFilter extends WholeImageFilter {
                 inB[i] = (short) (rgb & 0xFF);
             }
 
-            int index = 0;
+            int index = 0; // the index of the processed pixel
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
+                    // the final alpha, red, green, blue values
                     short a = 0xFF;
                     short r = 0xFF;
                     short g = 0xFF;
                     short b = 0xFF;
 
                     if (op == OP_DILATE) {
+                        // initialize them with 0
                         r = 0;
                         g = 0;
                         b = 0;
                     }
 
+                    // examine neighboring pixels
                     for (int dy = -1; dy <= 1; dy++) {
-                        int iy = y + dy;
-                        if (0 <= iy && iy < height) {
-                            int xOffset = iy * width;
+                        int ny = y + dy;
+                        if (0 <= ny && ny < height) {
+                            int xOffset = ny * width;
                             for (int dx = -1; dx <= 1; dx++) {
                                 if (kernel == KERNEL_DIAMOND) {
+                                    // ignore the corner neighbours
                                     if (dx == dy && dx != 0) {
                                         continue;
                                     }
@@ -102,20 +109,20 @@ public class MorphologyFilter extends WholeImageFilter {
                                     }
                                 }
 
-                                int ix = x + dx;
-                                if (0 <= ix && ix < width) {
-                                    int comparedIndex = xOffset + ix;
+                                int nx = x + dx;
+                                if (0 <= nx && nx < width) {
+                                    int neighborIndex = xOffset + nx;
 
                                     if (op == OP_ERODE) {
-                                        a = min(a, inA[comparedIndex]);
-                                        r = min(r, inR[comparedIndex]);
-                                        g = min(g, inG[comparedIndex]);
-                                        b = min(b, inB[comparedIndex]);
+                                        a = min(a, inA[neighborIndex]);
+                                        r = min(r, inR[neighborIndex]);
+                                        g = min(g, inG[neighborIndex]);
+                                        b = min(b, inB[neighborIndex]);
                                     } else {
-                                        a = max(a, inA[comparedIndex]);
-                                        r = max(r, inR[comparedIndex]);
-                                        g = max(g, inG[comparedIndex]);
-                                        b = max(b, inB[comparedIndex]);
+                                        a = max(a, inA[neighborIndex]);
+                                        r = max(r, inR[neighborIndex]);
+                                        g = max(g, inG[neighborIndex]);
+                                        b = max(b, inB[neighborIndex]);
                                     }
                                 }
                             }

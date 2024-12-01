@@ -67,7 +67,7 @@ public enum DrawDestination {
         public void prepareBrushStroke(Drawable dr) {
             BufferedImage image = dr.getImage();
 
-            assert Assertions.rasterStartsAtZero(image);
+            assert Assertions.rasterStartsAtOrigin(image);
 
             backupImg = ImageUtils.copyImage(image);
         }

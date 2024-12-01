@@ -24,17 +24,16 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import static java.lang.String.format;
 
 /**
- * The "Pixelitor Point" represents an immutable point on an image both in
- * component (mouse) coordinates and image coordinates.
+ * The "Pixelitor Point" represents an immutable point on an image,
+ * both in component (mouse) coordinates and image coordinates.
  * <p>
- * Component coordinates are relative to the {@link View},
+ * Component coordinates are relative to the {@link View}, whereas
  * image coordinates are relative to the {@link Canvas} (not necessarily
  * to the BufferedImage, as the image can be bigger than the canvas) and
  * take the position of the {@link Canvas} within the
@@ -51,20 +50,27 @@ public class PPoint implements Debuggable {
     protected double imX;
     protected double imY;
 
-    // coordinates in component (MouseEvent) space
+    // coordinates in component (mouse event) space
     protected double coX;
     protected double coY;
 
-    // the original component-space coordinates (before snapping)
+    // original component space coordinates before any snapping
     private double origCoX;
     private double origCoY;
 
+    /**
+     * Constructs a PPoint without initializing coordinates.
+     * Used by subclasses that define their own initialization logic.
+     */
     protected PPoint(View view) {
         // the view can be null for example if a composition
         // with shape layers but without a view is duplicated
         this.view = view;
     }
 
+    /**
+     * Constructs a fully initialized PPoint with specified coordinates.
+     */
     public PPoint(double coX, double coY, double imX, double imY, View view) {
         this.coX = coX;
         this.coY = coY;
@@ -75,6 +81,10 @@ public class PPoint implements Debuggable {
         this.view = view;
     }
 
+    /**
+     * Constructs a PPoint from component-space coordinates, calculating
+     * the corresponding image-space coordinates.
+     */
     public PPoint(double coX, double coY, View view) {
         this(coX, coY,
             view.componentXToImageSpace(coX),
@@ -82,89 +92,46 @@ public class PPoint implements Debuggable {
             view);
     }
 
+    /**
+     * Creates a PPoint using image-space coordinates, calculating
+     * the corresponding component-space coordinates.
+     */
     public static PPoint fromIm(double imX, double imY, View view) {
         double coX = view.imageXToComponentSpace(imX);
         double coY = view.imageYToComponentSpace(imY);
         return new PPoint(coX, coY, imX, imY, view);
     }
 
-    public void updateSnappedCoValues() {
-        // the image-space coordinates are assumed to be already snapped,
-        // and we just want to draw the helper widgets correctly
-        coX = view.imageXToComponentSpace(imX);
-        coY = view.imageYToComponentSpace(imY);
+    public static PPoint lazyFromIm(double imX, double imY, View view) {
+        return new LazyIm(view, imX, imY);
+    }
+
+    public static PPoint halfPointBetween(DraggablePoint p1, DraggablePoint p2) {
+        double x = (p1.getImX() + p2.getImX()) / 2.0;
+        double y = (p1.getImY() + p2.getImY()) / 2.0;
+        View p1view = p1.getView();
+        if (p1view != null) {
+            return fromIm(x, y, p1view);
+        } else {
+            return lazyFromIm(x, y, p1view);
+        }
+    }
+
+    public PPoint mirrorVertically(int canvasWidth) {
+        return fromIm(canvasWidth - getImX(), getImY(), view);
+    }
+
+    public PPoint mirrorHorizontally(int canvasHeight) {
+        return fromIm(getImX(), canvasHeight - getImY(), view);
+    }
+
+    public PPoint mirrorBoth(int canvasWidth, int canvasHeight) {
+        return fromIm(canvasWidth - getImX(), canvasHeight - getImY(), view);
     }
 
     /**
-     * Returns the x coordinate in component space
+     * Draws a line from this point to another point in image space.
      */
-    public double getCoX() {
-        return coX;
-    }
-
-    /**
-     * Returns the y coordinate in component space
-     */
-    public double getCoY() {
-        return coY;
-    }
-
-    public double getOrigCoX() {
-        return origCoX;
-    }
-
-    public double getOrigCoY() {
-        return origCoY;
-    }
-
-    /**
-     * Returns the x coordinate in image space
-     */
-    public double getImX() {
-        return imX;
-    }
-
-    /**
-     * Returns the y coordinate in image space
-     */
-    public double getImY() {
-        return imY;
-    }
-
-    /**
-     * Returns the image space coordinates as a Point2D
-     */
-    public Point2D asImPoint2D() {
-        return new Point2D.Double(getImX(), getImY());
-    }
-
-    public Point asImPoint() {
-        return new Point((int) getImX(), (int) getImY());
-    }
-
-    /**
-     * Returns the component space coordinates as a Point2D
-     */
-    public Point2D asCoPoint2D() {
-        return new Point2D.Double(getCoX(), getCoY());
-    }
-
-    public View getView() {
-        return view;
-    }
-
-    public PPoint mirrorVertically(int compWidth) {
-        return fromIm(compWidth - getImX(), getImY(), view);
-    }
-
-    public PPoint mirrorHorizontally(int compHeight) {
-        return fromIm(getImX(), compHeight - getImY(), view);
-    }
-
-    public PPoint mirrorBoth(int compWidth, int compHeight) {
-        return fromIm(compWidth - getImX(), compHeight - getImY(), view);
-    }
-
     public void drawLineTo(PPoint end, Graphics2D g) {
         g.draw(new Line2D.Double(
             getImX(), getImY(), end.getImX(), end.getImY()));
@@ -202,23 +169,63 @@ public class PPoint implements Debuggable {
         return Math.sqrt(coDistSq(other));
     }
 
-    public static PPoint from(double coX, double coY, double imX, double imY, View view) {
-        return new PPoint(coX, coY, imX, imY, view);
+    public void updateCoFromIm() {
+        coX = view.imageXToComponentSpace(imX);
+        coY = view.imageYToComponentSpace(imY);
     }
 
-    public static PPoint lazyFromIm(double imX, double imY, View view) {
-        return new LazyIm(view, imX, imY);
+    /**
+     * Returns the x coordinate in component space.
+     */
+    public double getCoX() {
+        return coX;
     }
 
-    public static PPoint halfPointBetween(DraggablePoint p1, DraggablePoint p2) {
-        double x = (p1.getImX() + p2.getImX()) / 2.0;
-        double y = (p1.getImY() + p2.getImY()) / 2.0;
-        View p1view = p1.getView();
-        if (p1view != null) {
-            return fromIm(x, y, p1view);
-        } else {
-            return lazyFromIm(x, y, p1view);
-        }
+    /**
+     * Returns the y coordinate in component space.
+     */
+    public double getCoY() {
+        return coY;
+    }
+
+    public double getOrigCoX() {
+        return origCoX;
+    }
+
+    public double getOrigCoY() {
+        return origCoY;
+    }
+
+    /**
+     * Returns the x coordinate in image space.
+     */
+    public double getImX() {
+        return imX;
+    }
+
+    /**
+     * Returns the y coordinate in image space.
+     */
+    public double getImY() {
+        return imY;
+    }
+
+    /**
+     * Converts image-space coordinates to a Point2D.
+     */
+    public Point2D toImPoint2D() {
+        return new Point2D.Double(getImX(), getImY());
+    }
+
+    /**
+     * Converts component-space coordinates to a Point2D.
+     */
+    public Point2D toCoPoint2D() {
+        return new Point2D.Double(getCoX(), getCoY());
+    }
+
+    public View getView() {
+        return view;
     }
 
     public Composition getComp() {
@@ -239,7 +246,8 @@ public class PPoint implements Debuggable {
     }
 
     /**
-     * A {@link PPoint} lazily initialized with image-space coordinates
+     * A {@link PPoint} subclass that initializes component-space
+     * coordinates lazily when they are first accessed.
      */
     private static class LazyIm extends PPoint {
         private boolean xConverted = false;

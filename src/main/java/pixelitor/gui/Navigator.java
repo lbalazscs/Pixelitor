@@ -156,7 +156,7 @@ public class Navigator extends JComponent
     }
 
     private void addZoomingSupport() {
-        MouseZoomMethod.CURRENT.installOnOther(this, view);
+        MouseZoomMethod.ACTIVE.installOnOther(this, view);
         ZoomMenu.setupZoomKeys(this);
     }
 

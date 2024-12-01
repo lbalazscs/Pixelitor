@@ -95,7 +95,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         int availableHeight = getHeight();
         try {
             ProgressTracker pt = new JProgressBarTracker(progressPanel);
-            ThumbInfo newThumbInfo = TrackedIO.readSubsampledThumb(file, availableWidth, availableHeight, pt);
+            ThumbInfo newThumbInfo = TrackedIO.readThumbnail(file, availableWidth, availableHeight, pt);
             thumbsCache.put(filePath, new SoftReference<>(newThumbInfo));
             return newThumbInfo;
         } catch (Exception ex) {

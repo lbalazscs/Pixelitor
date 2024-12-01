@@ -28,14 +28,22 @@ public class Assertions {
     }
 
     public static boolean callingClassIs(String name) {
+        StackTraceElement[] stackTrace = new Exception().getStackTrace();
         // checks the caller of the caller
-        String callingClassName = new Exception().getStackTrace()[2].getClassName();
-        return callingClassName.contains(name);
+        String callerClassName = stackTrace.length > 2
+            ? stackTrace[2].getClassName()
+            : "";
+
+        if (!callerClassName.contains(name)) {
+            throw new IllegalCallerException("Unexpected caller: " + callerClassName);
+        }
+
+        return true;
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean rasterStartsAtZero(BufferedImage newImage) {
-        var raster = newImage.getRaster();
+    public static boolean rasterStartsAtOrigin(BufferedImage image) {
+        var raster = image.getRaster();
         if (raster.getMinX() != 0 || raster.getMinY() != 0) {
             throw new IllegalStateException("Raster " + raster +
                 " has minX or minY not equal to zero: "

@@ -36,7 +36,7 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
     void randomize();
 
     /**
-     * Can be used to adapt the offered ranges/choices to the current
+     * Can be used to adapt the offered ranges/choices to the active
      * layer, composition or the list of open compositions.
      */
     default void adaptToContext(Filterable layer, boolean changeValue) {

@@ -79,7 +79,7 @@ class CloseTabButton extends JButton {
         if (getModel().isRollover()) {
             g2.setColor(Color.RED); // highlighted color on hover
         } else {
-            g2.setColor(Themes.getCurrent().isDark()
+            g2.setColor(Themes.getActive().isDark()
                 ? Themes.LIGHT_ICON_COLOR
                 : Color.BLACK);
         }

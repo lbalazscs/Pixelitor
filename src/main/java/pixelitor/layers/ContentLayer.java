@@ -107,16 +107,16 @@ public abstract class ContentLayer extends Layer {
     }
 
     @Override
-    public void moveWhileDragging(double relImX, double relImY) {
-        tmpTx = (int) relImX;
-        tmpTy = (int) relImY;
-        super.moveWhileDragging(relImX, relImY);
+    public void moveWhileDragging(double imDx, double imDy) {
+        tmpTx = (int) imDx;
+        tmpTy = (int) imDy;
+        super.moveWhileDragging(imDx, imDy);
     }
 
     @Override
     public PixelitorEdit endMovement() {
-        int oldTx = translationX;
-        int oldTy = translationY;
+        int prevTx = translationX;
+        int prevTy = translationY;
 
         // while dragging only the temporary values were updated,
         // and now they can be committed to the final value
@@ -129,12 +129,12 @@ public abstract class ContentLayer extends Layer {
         PixelitorEdit linkedEdit = createLinkedMovementEdit();
 
         // can be null for empty shape layers
-        PixelitorEdit ownEdit = createMovementEdit(oldTx, oldTy);
+        PixelitorEdit ownEdit = createMovementEdit(prevTx, prevTy);
 
         return MultiEdit.combine(ownEdit, linkedEdit, ContentLayerMoveEdit.NAME);
     }
 
-    abstract PixelitorEdit createMovementEdit(int oldTx, int oldTy);
+    abstract PixelitorEdit createMovementEdit(int prevTx, int prevTy);
 
     /**
      * Programmatically sets the translation.

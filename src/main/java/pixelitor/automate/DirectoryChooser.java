@@ -102,7 +102,7 @@ public class DirectoryChooser extends ValidatedPanel {
 
     /**
      * Lets the user select the output directory property of the application.
-     * Returns true if a selection was made, false if the operation was cancelled.
+     * Returns true if a selection was made, false if the operation was canceled.
      */
     public static boolean selectOutputDir(FileFormat defaultFormat) {
         var chooserPanel = new DirectoryChooser("Output Folder:",

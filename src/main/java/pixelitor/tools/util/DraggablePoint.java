@@ -227,7 +227,7 @@ public class DraggablePoint extends Point2D.Double {
 
     public final void coTransformOnlyThis(AffineTransform at, PPoint refPoint) {
         Point2D transformed = new Point2D.Double();
-        Point2D orig = refPoint.asCoPoint2D();
+        Point2D orig = refPoint.toCoPoint2D();
         at.transform(orig, transformed);
         setLocationOnlyForThis(transformed);
     }

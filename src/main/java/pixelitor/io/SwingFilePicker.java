@@ -116,7 +116,7 @@ public class SwingFilePicker implements FilePicker {
             Dirs.setLastSave(selectedFile.getParentFile());
             return selectedFile;
         } else if (userChoice == JFileChooser.CANCEL_OPTION) {
-            // cancelled
+            // canceled
             return null;
         } else if (userChoice == JFileChooser.ERROR_OPTION) {
             // error or dismissed

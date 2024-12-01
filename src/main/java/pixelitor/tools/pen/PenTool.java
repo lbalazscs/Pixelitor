@@ -28,7 +28,7 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.ConvertPathToSelectionEdit;
@@ -515,7 +515,7 @@ public class PenTool extends Tool {
     }
 
     private static void exportSVG() {
-        IO.saveSVG(path.toImageSpaceShape(), null, "path.svg");
+        FileIO.saveSVG(path.toImageSpaceShape(), null, "path.svg");
     }
 
     @Override

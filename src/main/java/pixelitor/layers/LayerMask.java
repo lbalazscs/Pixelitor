@@ -116,13 +116,13 @@ public class LayerMask extends ImageLayer {
     }
 
     public void paintAsRubylith(Graphics2D g) {
-        Composite oldComposite = g.getComposite();
+        Composite origComposite = g.getComposite();
         WritableRaster raster = getVisibleImage().getRaster();
         var rubylithImage = new BufferedImage(RUBYLITH_COLOR_MODEL,
             raster, false, null);
         g.setComposite(RUBYLITH_COMPOSITE);
         g.drawImage(rubylithImage, 0, 0, null);
-        g.setComposite(oldComposite);
+        g.setComposite(origComposite);
     }
 
     @Override

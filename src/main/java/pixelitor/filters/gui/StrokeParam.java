@@ -240,7 +240,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public FilterParam withStrokeWidth(int newWidth) {
-        strokeWidthParam.changeDefaultValue(newWidth);
+        strokeWidthParam.setDefaultValue(newWidth);
         return this;
     }
 

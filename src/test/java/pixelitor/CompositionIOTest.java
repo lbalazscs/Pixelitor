@@ -18,7 +18,7 @@
 package pixelitor;
 
 import org.junit.jupiter.api.*;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.io.OpenRaster;
 import pixelitor.io.PXCFormat;
 import pixelitor.layers.*;
@@ -177,7 +177,7 @@ class CompositionIOTest {
         String fileName = "pxc_all_features.pxc";
         File inputFile = getTestResourceFile(fileName);
 
-        var loadFuture = IO.loadCompAsync(inputFile);
+        var loadFuture = FileIO.loadCompAsync(inputFile);
         var comp = loadFuture.join();
         assertThat(comp)
             .numLayersIs(6)
@@ -218,7 +218,7 @@ class CompositionIOTest {
 
     private static void checkSingleLayerImageRead(String fileName) {
         File inputFile = getTestResourceFile(fileName);
-        var loadFuture = IO.loadCompAsync(inputFile);
+        var loadFuture = FileIO.loadCompAsync(inputFile);
 
         var comp = loadFuture.join();
         assertThat(comp)
@@ -230,7 +230,7 @@ class CompositionIOTest {
     }
 
     private static Composition checkMultiLayerRead(File f, Consumer<Layer> secondLayerValidator) {
-        var loadFuture = IO.loadCompAsync(f);
+        var loadFuture = FileIO.loadCompAsync(f);
 
         var comp = loadFuture.join();
         assertThat(comp)

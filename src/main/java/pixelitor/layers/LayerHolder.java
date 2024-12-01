@@ -103,10 +103,10 @@ public interface LayerHolder extends Debuggable {
         assert targetIndex >= 0;
 
         if (editName != null) {
-            int oldIndex = indexOf(layer);
-            assert oldIndex >= 0;
+            int prevIndex = indexOf(layer);
+            assert prevIndex >= 0;
 
-            History.add(new ChangeHolderEdit(editName, layer, this, oldIndex, targetHolder, targetIndex));
+            History.add(new ChangeHolderEdit(editName, layer, this, prevIndex, targetHolder, targetIndex));
         }
 
         deleteLayer(layer, false);
@@ -118,17 +118,17 @@ public interface LayerHolder extends Debuggable {
     default void moveActiveLayerToTop() {
         assert isHolderOfActiveLayer();
 
-        int oldIndex = indexOf(getComp().getActiveLayer());
+        int prevIndex = indexOf(getComp().getActiveLayer());
         int newIndex = getNumLayers() - 1;
-        changeLayerOrder(oldIndex, newIndex,
+        changeLayerOrder(prevIndex, newIndex,
             true, LayerMoveAction.LAYER_TO_TOP);
     }
 
     default void moveActiveLayerToBottom() {
         assert isHolderOfActiveLayer();
 
-        int oldIndex = indexOf(getComp().getActiveLayer());
-        changeLayerOrder(oldIndex, 0,
+        int prevIndex = indexOf(getComp().getActiveLayer());
+        changeLayerOrder(prevIndex, 0,
             true, LayerMoveAction.LAYER_TO_BOTTOM);
     }
 
@@ -193,9 +193,9 @@ public interface LayerHolder extends Debuggable {
         Layer activeLayer = comp.getActiveLayer();
         Layer newTarget;
 
-        int oldIndex = indexOf(activeLayer);
+        int prevIndex = indexOf(activeLayer);
 
-        int newIndex = oldIndex + 1;
+        int newIndex = prevIndex + 1;
         if (newIndex >= getNumLayers()) {
             if (activeLayer.isTopLevel()) {
                 return;

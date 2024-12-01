@@ -112,8 +112,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         Tools.forceFinish();
 
         var textLayer = new TextLayer(comp, "", settings);
-        var activeLayerBefore = comp.getActiveLayer();
-        var oldViewMode = comp.getView().getMaskViewMode();
+        var prevActiveLayer = comp.getActiveLayer();
+        var prevViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
         holder.add(textLayer);
@@ -126,23 +126,23 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .withScrollbars()
             .align(FRAME_RIGHT)
             .okAction(() ->
-                textLayer.finalizeCreation(activeLayerBefore, oldViewMode))
+                textLayer.finalizeCreation(prevActiveLayer, prevViewMode))
             .cancelAction(() -> holder.deleteLayer(textLayer, false))
             .show();
         return textLayer;
     }
 
-    public void finalizeCreation(Layer activeLayerBefore, MaskViewMode oldViewMode) {
+    public void finalizeCreation(Layer prevActiveLayer, MaskViewMode prevViewMode) {
         updateLayerName();
 
         // now it is safe to add it to the history
         History.add(new NewLayerEdit("Add Text Layer",
-            this, activeLayerBefore, oldViewMode));
+            this, prevActiveLayer, prevViewMode));
     }
 
     @Override
     public boolean edit() {
-        TextSettings oldSettings = getSettings();
+        TextSettings prevSettings = getSettings();
         var settingsPanel = new TextSettingsPanel(this);
 
         return new DialogBuilder()
@@ -151,14 +151,16 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .content(settingsPanel)
             .withScrollbars()
             .align(FRAME_RIGHT)
-            .okAction(() -> commitSettings(oldSettings))
-            .cancelAction(() -> resetOldSettings(oldSettings))
+            .okAction(() -> commitSettings(prevSettings))
+            .cancelAction(() -> resetPrevSettings(prevSettings))
             .show()
             .wasAccepted();
     }
 
-    public void commitSettings(TextSettings oldSettings) {
-        if (oldSettings == settings) {
+    // the layer name is updated and a history edit is added
+    // only after the user accepts the dialog
+    public void commitSettings(TextSettings prevSettings) {
+        if (settings == prevSettings) {
             // The settings object is replaced every time
             // the user changes something in the dialog.
             // If it is still the same, in means that
@@ -167,12 +169,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         }
 
         updateLayerName();
-        var edit = new TextLayerChangeEdit(comp, this, oldSettings);
-        History.add(edit);
+        History.add(new TextLayerChangeEdit(comp, this, prevSettings));
     }
 
-    private void resetOldSettings(TextSettings oldSettings) {
-        applySettings(oldSettings);
+    private void resetPrevSettings(TextSettings prevSettings) {
+        applySettings(prevSettings);
         holder.update();
     }
 
@@ -249,14 +250,14 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void moveWhileDragging(double relImX, double relImY) {
-        super.moveWhileDragging(relImX, relImY);
+    public void moveWhileDragging(double imDx, double imDy) {
+        super.moveWhileDragging(imDx, imDy);
         painter.setTranslation(getTx(), getTy());
     }
 
     @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy) {
-        return new ContentLayerMoveEdit(this, null, oldTx, oldTy);
+    ContentLayerMoveEdit createMovementEdit(int prevTx, int prevTy) {
+        return new ContentLayerMoveEdit(this, null, prevTx, prevTy);
     }
 
     @Override

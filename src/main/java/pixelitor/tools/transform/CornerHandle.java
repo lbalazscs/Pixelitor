@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -157,7 +157,7 @@ public class CornerHandle extends PositionHandle {
 
     public void drawWidthDisplay(DragDisplay dd, Dimension2D imSize) {
         Direction horEdgeDirection = getHorEdgeDirection();
-        String widthString = DragDisplay.getWidthDisplayString(imSize.getWidth());
+        String widthString = DragDisplay.formatWidthString(imSize.getWidth());
         Point2D horHalf = getHorHalfPoint();
         float horX = (float) (horHalf.getX() + horEdgeDirection.dx);
         float horY = (float) (horHalf.getY() + horEdgeDirection.dy);
@@ -166,7 +166,7 @@ public class CornerHandle extends PositionHandle {
 
     public void drawHeightDisplay(DragDisplay dd, Dimension2D imSize) {
         Direction verEdgeDirection = getVerEdgeDirection();
-        String heightString = DragDisplay.getHeightDisplayString(imSize.getHeight());
+        String heightString = DragDisplay.formatHeightString(imSize.getHeight());
         Point2D verHalf = getVerHalfPoint();
         float verX = (float) (verHalf.getX() + verEdgeDirection.dx);
         float verY = (float) (verHalf.getY() + verEdgeDirection.dy);

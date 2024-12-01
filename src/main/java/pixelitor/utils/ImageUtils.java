@@ -30,10 +30,12 @@ import pixelitor.Canvas;
 import pixelitor.colors.Colors;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.debug.Debug;
+import pixelitor.utils.test.Assertions;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -66,7 +68,6 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
 import static pixelitor.Views.thumbSize;
-import static pixelitor.colors.Colors.toPackedARGB;
 import static pixelitor.utils.Threads.onPool;
 
 /**
@@ -395,13 +396,16 @@ public class ImageUtils {
         return new BufferedImage(cm, raster, false, null);
     }
 
-    public static URL imagePathToURL(String fileName) {
+    /**
+     * Converts an image filename to a resource URL within the images directory.
+     */
+    public static URL findImageURL(String fileName) {
         assert fileName != null;
 
-        String iconPath = "/images/" + fileName;
-        URL imgURL = ImageUtils.class.getResource(iconPath);
+        String path = "/images/" + fileName;
+        URL imgURL = ImageUtils.class.getResource(path);
         if (imgURL == null) {
-            Messages.showError("Error", iconPath + " not found");
+            Messages.showError("Error", path + " not found");
         }
 
         return imgURL;
@@ -410,7 +414,7 @@ public class ImageUtils {
     public static BufferedImage loadJarImageFromImagesFolder(String fileName) {
         assert fileName != null;
 
-        URL imgURL = imagePathToURL(fileName);
+        URL imgURL = findImageURL(fileName);
         BufferedImage image = null;
         try {
             image = ImageIO.read(imgURL);
@@ -874,80 +878,68 @@ public class ImageUtils {
         return image;
     }
 
-    public static void drawGrid(Color color, Graphics2D g,
-                                int maxX, int maxY,
-                                int hWidth, int hSpacing,
-                                int vWidth, int vSpacing,
-                                boolean emptyIntersections) {
-        if (hWidth < 0) {
-            throw new IllegalArgumentException("hWidth = " + hWidth);
+    public static void renderGrid(Graphics2D g, Color color,
+                                  int maxX, int maxY,
+                                  int horLineThickness, int horSpacing,
+                                  int verLineThickness, int verSpacing) {
+        if (horLineThickness < 0) {
+            throw new IllegalArgumentException("horLineThickness = " + horLineThickness);
         }
-        if (vWidth < 0) {
-            throw new IllegalArgumentException("vWidth = " + vWidth);
+        if (verLineThickness < 0) {
+            throw new IllegalArgumentException("verLineThickness = " + verLineThickness);
         }
-        if (hSpacing <= 0) {
-            throw new IllegalArgumentException("hSpacing = " + hSpacing);
+        if (horSpacing <= 0) {
+            throw new IllegalArgumentException("horSpacing = " + horSpacing);
         }
-        if (vSpacing <= 0) {
-            throw new IllegalArgumentException("vSpacing = " + vSpacing);
+        if (verSpacing <= 0) {
+            throw new IllegalArgumentException("verSpacing = " + verSpacing);
         }
 
         g.setColor(color);
 
-        Composite savedComposite = g.getComposite();
-        if (emptyIntersections) {
-            g.setComposite(AlphaComposite.Xor);
-        }
-
-        int halfHWidth = hWidth / 2;
-        int halfVWidth = vWidth / 2;
-
         // horizontal lines
-        if (hWidth > 0) {
-            for (int y = 0; y < maxY; y += vSpacing) {
-                int startY = y - halfVWidth;
+        if (horLineThickness > 0) {
+            int halfLineThickness = verLineThickness / 2;
+            for (int y = 0; y < maxY; y += verSpacing) {
+                int startY = y - halfLineThickness;
                 //noinspection SuspiciousNameCombination
-                g.fillRect(0, startY, maxX, vWidth);
+                g.fillRect(0, startY, maxX, verLineThickness);
             }
         }
 
         // vertical lines
-        if (vWidth > 0) {
-            for (int x = 0; x < maxX; x += hSpacing) {
-                g.fillRect(x - halfHWidth, 0, hWidth, maxY);
+        if (verLineThickness > 0) {
+            int halfLineThickness = horLineThickness / 2;
+            for (int x = 0; x < maxX; x += horSpacing) {
+                g.fillRect(x - halfLineThickness, 0, horLineThickness, maxY);
             }
-        }
-
-        if (emptyIntersections) {
-            g.setComposite(savedComposite);
         }
     }
 
-    public static void drawBrickGrid(Color color, Graphics2D g, int size,
-                                     int maxX, int maxY) {
-        if (size < 1) {
-            throw new IllegalArgumentException("size = " + size);
+    public static void renderBrickGrid(Graphics2D g, Color color,
+                                       int brickHeight,
+                                       int maxX, int maxY) {
+        if (brickHeight < 1) {
+            throw new IllegalArgumentException("brickHeight = " + brickHeight);
         }
 
         g.setColor(color);
 
-        int doubleSize = size * 2;
-        int y = size;
-        int verticalCount = 0;
-        while (y < maxY) {
+        int brickWidth = brickHeight * 2;
+        int currentY = brickHeight;
+        int rowCount = 0;
+
+        while (currentY < maxY) {
             // vertical lines
-            int hShift = 0;
-            if ((verticalCount % 2) == 1) {
-                hShift = size;
-            }
-            for (int x = hShift; x < maxX; x += doubleSize) {
-                g.drawLine(x, y, x, y - size);
+            int horOffset = ((rowCount % 2) == 1) ? brickHeight : 0;
+            for (int x = horOffset; x < maxX; x += brickWidth) {
+                g.drawLine(x, currentY, x, currentY - brickHeight);
             }
 
             // horizontal lines
-            g.drawLine(0, y, maxX, y);
-            y += size;
-            verticalCount++;
+            g.drawLine(0, currentY, maxX, currentY);
+            currentY += brickHeight;
+            rowCount++;
         }
     }
 
@@ -962,12 +954,12 @@ public class ImageUtils {
                                         BufferedImage bumpImage,
                                         float azimuth, float bumpHeight,
                                         String filterName, boolean tile) {
-        var embossFilter = new EmbossFilter(filterName);
-        embossFilter.setAzimuth(azimuth);
-        embossFilter.setElevation((float) (Math.PI / 6.0));
-        embossFilter.setBumpHeight(bumpHeight);
+        var emboss = new EmbossFilter(filterName);
+        emboss.setAzimuth(azimuth);
+        emboss.setElevation((float) (Math.PI / 6.0));
+        emboss.setBumpHeight(bumpHeight);
 
-        BufferedImage bumpMap = embossFilter.filter(bumpImage, null);
+        BufferedImage bumpMap = emboss.filter(bumpImage, null);
 
         BufferedImage dest = copyImage(src);
 
@@ -1041,16 +1033,6 @@ public class ImageUtils {
         return copyTo(TYPE_BYTE_GRAY, src);
     }
 
-    public static BufferedImage create1x1Image(Color c) {
-        return create1x1Image(c.getAlpha(), c.getRed(), c.getGreen(), c.getBlue());
-    }
-
-    public static BufferedImage create1x1Image(int a, int r, int g, int b) {
-        BufferedImage img = createSysCompatibleImage(1, 1);
-        img.setRGB(0, 0, toPackedARGB(a, r, g, b));
-        return img;
-    }
-
     public static BufferedImage getSelectionSizedPartFrom(BufferedImage src,
                                                           Selection selection,
                                                           int tx, int ty) {
@@ -1076,35 +1058,92 @@ public class ImageUtils {
     }
 
     /**
-     * Sets up the given image to be temporary image needed for soft
-     * (anti-aliased) selection clipping, following ideas from
+     * Replaces the selected region of the source image with a new image.
+     * Returns the modified image with the selected region replaced.
+     */
+    public static BufferedImage replaceSelectedRegion(BufferedImage src,
+                                                      BufferedImage replacement,
+                                                      boolean isUndoRedo,
+                                                      ImageLayer layer) {
+        assert src != null;
+        assert replacement != null;
+        assert Assertions.rasterStartsAtOrigin(replacement);
+
+        Selection selection = layer.getComp().getSelection();
+        if (selection == null) {
+            return replacement;
+        }
+
+        int tx = layer.getTx();
+        int ty = layer.getTy();
+        Rectangle selBounds = selection.getShapeBounds();
+
+        if (isUndoRedo) {
+            // ignore the precise selection shape to avoid AA complications
+            Graphics2D g = src.createGraphics();
+            g.drawImage(replacement, selBounds.x - tx, selBounds.y - ty, null);
+            g.dispose();
+            return src;
+        } else if (selection.isRectangular()) {
+            // rectangular selection, simple selection shape clipping
+            // is enough, because there are no aliasing problems
+            Graphics2D g = src.createGraphics();
+
+            // it's important to translate the whole graphics, and not
+            // just the draw start, because the clip must also be translated
+            g.translate(-tx, -ty);
+
+            // transparency comes from the new image
+            g.setComposite(AlphaComposite.Src);
+            Shape shape = selection.getShape();
+            g.setClip(shape);
+            g.drawImage(replacement, selBounds.x, selBounds.y, null);
+            g.dispose();
+            return src;
+        } else {  // non-rectangular selection: do soft clipping
+            BufferedImage tmpImg = createSysCompatibleImage(selBounds.width, selBounds.height);
+            Graphics2D tmpG = createSoftSelectionMask(tmpImg, selection.getShape(), selBounds.x, selBounds.y);
+
+            tmpG.drawImage(replacement, 0, 0, null);
+            tmpG.dispose();
+
+            Graphics2D srcG = src.createGraphics();
+            srcG.drawImage(tmpImg, selBounds.x - tx, selBounds.y - ty, null);
+            srcG.dispose();
+
+            return src;
+        }
+    }
+
+    /**
+     * Prepares a temporary Graphics2D for soft (anti-aliased) selection
+     * clipping. It follows ideas from
      * http://web.archive.org/web/20120603053853/http://weblogs.java.net/blog/campbell/archive/2006/07/java_2d_tricker.html
      */
-    public static Graphics2D setupForSoftSelection(Image image, Shape selShape,
-                                                   int selStartX, int selStartY) {
-        Graphics2D tmpG = (Graphics2D) image.getGraphics();
+    public static Graphics2D createSoftSelectionMask(Image image, Shape selShape,
+                                                     int selStartX, int selStartY) {
+        Graphics2D maskG = (Graphics2D) image.getGraphics();
 
-        // fill with transparent pixels
-        tmpG.setComposite(AlphaComposite.Clear);
-        tmpG.fillRect(0, 0, image.getWidth(null), image.getHeight(null));
+        // fill the entire image with transparent pixels
+        maskG.setComposite(AlphaComposite.Clear);
+        maskG.fillRect(0, 0, image.getWidth(null), image.getHeight(null));
 
         // fill the transparent image with anti-aliased
-        // selection-shaped white
-        tmpG.setComposite(AlphaComposite.Src);
-        tmpG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        tmpG.setColor(WHITE);
-        tmpG.translate(-selStartX, -selStartY); // because the selection shape is relative to the canvas
-        tmpG.fill(selShape);
+        // selection-shaped white mask
+        maskG.setComposite(AlphaComposite.Src);
+        maskG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        maskG.setColor(WHITE);
+        maskG.translate(-selStartX, -selStartY); // because the selection shape is relative to the canvas
+        maskG.fill(selShape);
 
-        // further drawing operations should not
-        // change the transparency of the image.
+        // Prepare the Graphics2D for subsequent rendering.
         // It is important to use SrcIn, and not SrcAtop like in the
         // blog mentioned above, because the new content might also
         // contain transparent pixels, and we don't want to lose that information.
-        tmpG.setComposite(AlphaComposite.SrcIn);
-        tmpG.translate(selStartX, selStartY);
+        maskG.setComposite(AlphaComposite.SrcIn);
+        maskG.translate(selStartX, selStartY); // undo the previous translation
 
-        return tmpG;
+        return maskG;
     }
 
     public static BufferedImage copyToBufferedImage(Image src) {

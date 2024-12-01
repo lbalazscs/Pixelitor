@@ -34,7 +34,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -191,7 +194,8 @@ public class OpenRaster {
                 String name = entry.getName();
 
                 if (name.equalsIgnoreCase(STACK_XML_PATH)) {
-                    stackXML = readInputStreamAsString(zipFile.getInputStream(entry));
+                    InputStream is = zipFile.getInputStream(entry);
+                    stackXML = new String(is.readAllBytes(), UTF_8);
                 } else if (name.equalsIgnoreCase(MERGED_IMAGE_PATH)) {
                     // no need to read it
                 } else if (name.equalsIgnoreCase(THUMBNAIL_PATH)) {
@@ -333,13 +337,6 @@ public class OpenRaster {
         var builder = factory.newDocumentBuilder();
         var inputSource = new InputSource(new StringReader(xml));
         return builder.parse(inputSource);
-    }
-
-    private static String readInputStreamAsString(InputStream is) {
-        // \A ensures that the entire input stream treated as a single token
-        try (Scanner s = new Scanner(is, UTF_8).useDelimiter("\\A")) {
-            return s.hasNext() ? s.next() : "";
-        }
     }
 
     private static BufferedImage createORAThumbnail(BufferedImage src) {

@@ -115,7 +115,7 @@ public class BatchProcessor {
     private void processIndividualFile(File file) {
         assert calledOutsideEDT() : "on EDT";
 
-        IO.openFileAsync(file, false)
+        FileIO.openFileAsync(file, false)
             .thenComposeAsync(action::process, onEDT)
             .thenComposeAsync(this::saveAndClose, onEDT)
             .exceptionally(Messages::showExceptionOnEDT)
@@ -192,7 +192,7 @@ public class BatchProcessor {
         String selectedValue = (String) optionPane.getValue();
 
         String answer;
-        if (selectedValue == null) { // cancelled
+        if (selectedValue == null) { // canceled
             answer = OVERWRITE_CANCEL;
         } else {
             answer = selectedValue;

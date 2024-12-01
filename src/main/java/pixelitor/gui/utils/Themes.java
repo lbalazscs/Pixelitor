@@ -39,15 +39,15 @@ public class Themes {
     public static final Theme DEFAULT = Theme.NIMBUS;
 
     // this theme will be used for the unit tests, otherwise it's overwritten at startup
-    private static Theme currentTheme = DEFAULT;
+    private static Theme activeTheme = DEFAULT;
 
     public static final AccentColor DEFAULT_ACCENT_COLOR = AccentColor.BLUE;
-    private static AccentColor currentAccentColor = DEFAULT_ACCENT_COLOR;
+    private static AccentColor activeAccentColor = DEFAULT_ACCENT_COLOR;
 
     public static void install(Theme theme, boolean updateGUI, boolean force) {
-        if (theme != currentTheme || force) {
+        if (theme != activeTheme || force) {
             setLookAndFeel(theme);
-            currentTheme = theme;
+            activeTheme = theme;
             if (updateGUI) {
                 LayerGUILayout.themeChanged(theme);
                 SelectionState.setupBorders(theme.isDark());
@@ -58,16 +58,16 @@ public class Themes {
     }
 
     public static void changeAccentColor(AccentColor newColor) {
-        if (!currentTheme.isFlat()) {
-            throw new IllegalStateException("Current theme is " + currentTheme.getLAFClassName());
+        if (!activeTheme.isFlat()) {
+            throw new IllegalStateException("Active theme is " + activeTheme.getLAFClassName());
         }
-        if (newColor == currentAccentColor) {
+        if (newColor == activeAccentColor) {
             return;
         }
-        currentAccentColor = newColor;
+        activeAccentColor = newColor;
         useAccentColor(newColor.asColor());
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", newColor.asHexCode()));
-        install(currentTheme, true, true);
+        install(activeTheme, true, true);
     }
 
     public static void useAccentColor(Color color) {
@@ -92,11 +92,11 @@ public class Themes {
         }
     }
 
-    public static Theme getCurrent() {
-        return currentTheme;
+    public static Theme getActive() {
+        return activeTheme;
     }
 
-    public static AccentColor getCurrentAccentColor() {
-        return currentAccentColor;
+    public static AccentColor getActiveAccentColor() {
+        return activeAccentColor;
     }
 }

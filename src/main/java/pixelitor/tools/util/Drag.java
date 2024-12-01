@@ -23,6 +23,8 @@ import pixelitor.tools.DragTool;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -38,13 +40,12 @@ import java.io.Serial;
 import java.io.Serializable;
 
 import static java.lang.String.format;
-import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
 
 /**
  * Represents a mouse drag performed by the user while using
  * a {@link DragTool}. Only the start and end points are relevant.
  */
-public class Drag implements Serializable {
+public class Drag implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -184,12 +185,12 @@ public class Drag implements Serializable {
 
     public PPoint getStart(View view) {
         assert hasCoCoords;
-        return PPoint.from(coStartX, coStartY, imStartX, imStartY, view);
+        return new PPoint(coStartX, coStartY, imStartX, imStartY, view);
     }
 
     public PPoint getEnd(View view) {
         assert hasCoCoords;
-        return PPoint.from(coEndX, coEndY, imEndX, imEndY, view);
+        return new PPoint(coEndX, coEndY, imEndX, imEndY, view);
     }
 
     // returns the start x coordinate in component space
@@ -305,16 +306,6 @@ public class Drag implements Serializable {
 
     public boolean isImClick() {
         return imStartX == imEndX && imStartY == imEndY;
-    }
-
-    public boolean hasZeroWidth() {
-        assert hasCoCoords;
-        return coStartX == coEndX;
-    }
-
-    public boolean hasZeroHeight() {
-        assert hasCoCoords;
-        return coStartY == coEndY;
     }
 
     public boolean hasZeroImWidth() {
@@ -570,7 +561,7 @@ public class Drag implements Serializable {
         return Math.abs(x - imStartX) + Math.abs(y - imStartY);
     }
 
-    public double getStartDistanceFrom(double x, double y) {
+    public double calcStartDistanceFrom(double x, double y) {
         double dx = imStartX - x;
         double dy = imStartY - y;
         return Math.sqrt(dx * dx + dy * dy);
@@ -589,76 +580,86 @@ public class Drag implements Serializable {
         return Math.atan2(coStartY - coEndY, coStartX - coEndX);
     }
 
-    public double getDrawAngle() {
+    public double calcDrawAngle() {
         return Math.atan2(imEndX - imStartX, imEndY - imStartY); //  between -PI and PI
     }
 
-    public double getAngleFromStartTo(double x, double y) {
+    public double calcAngleFromStartTo(double x, double y) {
         return Math.atan2(x - imStartX, y - imStartY);
     }
 
     public void displayWidthHeight(Graphics2D g) {
         assert hasCoCoords;
+
         double imWidth = imEndX - imStartX;
         double imHeight = imEndY - imStartY;
-        String widthInfo = DragDisplay.getWidthDisplayString(imWidth);
-        String heightInfo = DragDisplay.getHeightDisplayString(imHeight);
+        DragDisplay dd = new DragDisplay(g, DragDisplay.BG_WIDTH_PIXELS);
 
-        int displayBgWidth = DragDisplay.BG_WIDTH_PIXEL;
-        DragDisplay dd = new DragDisplay(g, displayBgWidth);
-
-        // draw the width display
-        float widthY;
-        if (imHeight >= 0) {
-            // display the width info below the mouse
-            widthY = (float) (coEndY + MOUSE_DISPLAY_DISTANCE + DragDisplay.ONE_LINER_BG_HEIGHT);
-        } else {
-            // display the width info above the mouse
-            widthY = (float) (coEndY - MOUSE_DISPLAY_DISTANCE);
-        }
-        float widthX = (float) (coStartX + (coEndX - coStartX) / 2.0f - displayBgWidth / 2.0f);
-        dd.drawOneLine(widthInfo, widthX, widthY);
-
-        // draw the height display
-        float heightX;
-        if (imWidth >= 0) {
-            // display the height info on the right side of the mouse
-            heightX = (float) (coEndX + MOUSE_DISPLAY_DISTANCE);
-        } else {
-            // display the height info on the left side of the mouse
-            heightX = (float) (coEndX - displayBgWidth - MOUSE_DISPLAY_DISTANCE);
-        }
-        float heightY = (float) (coStartY + (coEndY - coStartY) / 2.0f + DragDisplay.ONE_LINER_BG_HEIGHT / 2.0f);
-        dd.drawOneLine(heightInfo, heightX, heightY);
+        displayWidth(dd, imWidth, imHeight);
+        displayHeight(dd, imWidth, imHeight);
 
         if (startAdjusted) {
-            String xInfo = "x = " + (int) imStartX + " px";
-            String yInfo = "y = " + (int) imStartY + " px";
-            float startInfoX;
-            // can be smaller because of the rounded rectangle
-            // and because it is at a distance in both dimensions
-            int mouseDist = MOUSE_DISPLAY_DISTANCE / 2;
-            if (imWidth >= 0) {
-                // display the start info to the left of the start
-                startInfoX = (float) (coStartX - displayBgWidth - mouseDist);
-            } else {
-                // display the start info to the right of the start
-                startInfoX = (float) (coStartX + mouseDist);
-            }
-
-            float startInfoY;
-            if (imHeight >= 0) {
-                // display the start info above the start
-                startInfoY = (float) (coStartY - mouseDist);
-            } else {
-                // display the start info below the start
-                startInfoY = (float) (coStartY + mouseDist + DragDisplay.TWO_LINER_BG_HEIGHT);
-            }
-
-            dd.drawTwoLines(xInfo, yInfo, startInfoX, startInfoY);
+            displayStartInfo(dd, imWidth, imHeight);
         }
 
-        dd.finish();
+        dd.cleanup();
+    }
+
+    // draw the width display
+    private void displayWidth(DragDisplay dd, double imWidth, double imHeight) {
+        float y;
+        if (imHeight >= 0) {
+            // display the width info below the mouse
+            y = (float) (coEndY + DragDisplay.OFFSET_FROM_MOUSE + DragDisplay.SINGLE_LINE_HEIGHT);
+        } else {
+            // display the width info above the mouse
+            y = (float) (coEndY - DragDisplay.OFFSET_FROM_MOUSE);
+        }
+        float x = (float) (coStartX + (coEndX - coStartX) / 2.0f - DragDisplay.BG_WIDTH_PIXELS / 2.0f);
+        String widthInfo = DragDisplay.formatWidthString(imWidth);
+        dd.drawOneLine(widthInfo, x, y);
+    }
+
+    // draw the height display
+    private void displayHeight(DragDisplay dd, double imWidth, double imHeight) {
+        float x;
+        if (imWidth >= 0) {
+            // display the height info on the right side of the mouse
+            x = (float) (coEndX + DragDisplay.OFFSET_FROM_MOUSE);
+        } else {
+            // display the height info on the left side of the mouse
+            x = (float) (coEndX - DragDisplay.BG_WIDTH_PIXELS - DragDisplay.OFFSET_FROM_MOUSE);
+        }
+        float y = (float) (coStartY + (coEndY - coStartY) / 2.0f + DragDisplay.SINGLE_LINE_HEIGHT / 2.0f);
+        String heightInfo = DragDisplay.formatHeightString(imHeight);
+        dd.drawOneLine(heightInfo, x, y);
+    }
+
+    private void displayStartInfo(DragDisplay dd, double imWidth, double imHeight) {
+        // can be smaller because of the rounded rectangle
+        // and because it is at a distance in both dimensions
+        int mouseDist = DragDisplay.OFFSET_FROM_MOUSE / 2;
+        float startInfoX;
+        if (imWidth >= 0) {
+            // display the start info to the left of the start
+            startInfoX = (float) (coStartX - DragDisplay.BG_WIDTH_PIXELS - mouseDist);
+        } else {
+            // display the start info to the right of the start
+            startInfoX = (float) (coStartX + mouseDist);
+        }
+
+        float startInfoY;
+        if (imHeight >= 0) {
+            // display the start info above the start
+            startInfoY = (float) (coStartY - mouseDist);
+        } else {
+            // display the start info below the start
+            startInfoY = (float) (coStartY + mouseDist + DragDisplay.DOUBLE_LINE_HEIGHT);
+        }
+
+        String xInfo = "x = " + (int) imStartX + " px";
+        String yInfo = "y = " + (int) imStartY + " px";
+        dd.drawTwoLines(xInfo, yInfo, startInfoX, startInfoY);
     }
 
     public void displayRelativeMovement(Graphics2D g) {
@@ -673,27 +674,26 @@ public class Drag implements Serializable {
 
     public void displayAngleAndDist(Graphics2D g) {
         assert hasCoCoords;
-        int displayBgWidth = DragDisplay.BG_WIDTH_PIXEL;
 
         double coDx = coEndX - coStartX;
         double coDy = coEndY - coStartY;
 
         double x;
         boolean xDistIsSmall = false;
-        if (coDx >= displayBgWidth) {
+        if (coDx >= DragDisplay.BG_WIDTH_PIXELS) {
             // display it on the right side of the mouse
-            x = coEndX + MOUSE_DISPLAY_DISTANCE;
-        } else if (coDx <= -displayBgWidth) {
+            x = coEndX + DragDisplay.OFFSET_FROM_MOUSE;
+        } else if (coDx <= -DragDisplay.BG_WIDTH_PIXELS) {
             // display it on the left side of the mouse
-            x = coEndX - MOUSE_DISPLAY_DISTANCE - displayBgWidth;
+            x = coEndX - DragDisplay.OFFSET_FROM_MOUSE - DragDisplay.BG_WIDTH_PIXELS;
         } else {
             xDistIsSmall = true;
             // display it so that it has no sudden jumps
-            x = coEndX - displayBgWidth / 2.0
-                + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                * coDx / displayBgWidth);
+            x = coEndX - DragDisplay.BG_WIDTH_PIXELS / 2.0
+                + ((DragDisplay.BG_WIDTH_PIXELS / 2.0 + DragDisplay.OFFSET_FROM_MOUSE)
+                * coDx / DragDisplay.BG_WIDTH_PIXELS);
         }
-        int yInterpolationLimit = DragDisplay.TWO_LINER_BG_HEIGHT;
+        int yInterpolationLimit = DragDisplay.DOUBLE_LINE_HEIGHT;
         if (xDistIsSmall) {
             // if the x distance is small, don't try to smoothly interpolate
             // the y position, because the drag display might cover the shape
@@ -703,25 +703,26 @@ public class Drag implements Serializable {
         double y;
         if (coDy <= -yInterpolationLimit) {
             // display it above the mouse
-            y = coEndY - MOUSE_DISPLAY_DISTANCE;
+            y = coEndY - DragDisplay.OFFSET_FROM_MOUSE;
         } else if (coDy >= yInterpolationLimit) {
             // display it below the mouse
-            y = coEndY + MOUSE_DISPLAY_DISTANCE + DragDisplay.TWO_LINER_BG_HEIGHT;
+            y = coEndY + DragDisplay.OFFSET_FROM_MOUSE + DragDisplay.DOUBLE_LINE_HEIGHT;
         } else {
             // display it so that it has no sudden jumps
-            y = coEndY + DragDisplay.TWO_LINER_BG_HEIGHT / 2.0
-                + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
+            y = coEndY + DragDisplay.DOUBLE_LINE_HEIGHT / 2.0
+                + ((DragDisplay.DOUBLE_LINE_HEIGHT / 2.0 + DragDisplay.OFFSET_FROM_MOUSE)
+                * coDy / DragDisplay.DOUBLE_LINE_HEIGHT);
         }
 
         int dragAngle = (int) Math.toDegrees(calcIntuitiveAngle());
-        int dragLength = (int) calcImLength();
+        String angleInfo = "∡ = " + dragAngle + " °";
 
-        String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
+        int dragLength = (int) calcImLength();
         String distInfo = "d = " + dragLength + " px";
-        DragDisplay dd = new DragDisplay(g, displayBgWidth);
+
+        DragDisplay dd = new DragDisplay(g, DragDisplay.BG_WIDTH_PIXELS);
         dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
-        dd.finish();
+        dd.cleanup();
     }
 
     public void ensureCoCoords() {
@@ -744,6 +745,18 @@ public class Drag implements Serializable {
         Shape circle = Shapes.createCircle(imStartX, imStartY, 10);
         Shapes.debug(g, c, line);
         Shapes.debug(g, c, circle);
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.addDouble("im start x", imStartX);
+        node.addDouble("im start y", imStartY);
+        node.addDouble("im end x", imEndX);
+        node.addDouble("im end y", imEndY);
+
+        return node;
     }
 
     @Override

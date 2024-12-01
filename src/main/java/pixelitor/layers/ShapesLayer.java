@@ -241,10 +241,10 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public void moveWhileDragging(double relImX, double relImY) {
-        super.moveWhileDragging(relImX, relImY);
+    public void moveWhileDragging(double imDx, double imDy) {
+        super.moveWhileDragging(imDx, imDy);
         if (hasShape() && transformBox != null) {
-            transformBox.moveWhileDragging(relImX, relImY);
+            transformBox.moveWhileDragging(imDx, imDy);
         }
     }
 
@@ -258,7 +258,7 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    PixelitorEdit createMovementEdit(int oldTx, int oldTy) {
+    PixelitorEdit createMovementEdit(int prevTx, int prevTy) {
         if (hasShape() && transformBox != null) {
             return transformBox.createMovementEdit(comp, "Move Layer");
         }

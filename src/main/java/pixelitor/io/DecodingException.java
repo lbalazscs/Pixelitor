@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,32 +23,44 @@ public class DecodingException extends RuntimeException {
     private final File file;
     private final boolean magick;
 
+    // Private constructor to enforce factory method usage
     private DecodingException(File file, boolean magick, Exception cause) {
-        super(createUserMsg(file, magick, cause), cause);
+        super(generateErrorMessage(file, magick, cause), cause);
         this.file = file;
         this.magick = magick;
     }
 
-    public static DecodingException normal(File file, Exception cause) {
+    /**
+     * Create a DecodingException for ImageIO read errors.
+     */
+    public static DecodingException forImageIORead(File file, Exception cause) {
         return new DecodingException(file, false, cause);
     }
 
-    public static DecodingException magick(File file, Exception cause) {
+    /**
+     * Create a DecodingException for ImageMagick import errors.
+     */
+    public static DecodingException forMagickImport(File file, Exception cause) {
         return new DecodingException(file, true, cause);
     }
 
     // create the message shown to the user
-    private static String createUserMsg(File file, boolean magick, Exception cause) {
-        return String.format("<html>Could not %s <b>%s</b> as an image file.%s",
-            magick ? "import" : "read",
-            file.getName(),
-            cause == null ? "" : "<br> (" + cause.getMessage() + ")");
+    private static String generateErrorMessage(File file, boolean magick, Exception cause) {
+        String operation = magick ? "import" : "read";
+        String origMessage = (cause == null)
+            ? ""
+            : "<br>Error details: " + cause.getMessage();
+        return String.format("<html>Failed to %s <b>%s</b> as an image file.%s",
+            operation, file.getName(), origMessage);
     }
 
     public File getFile() {
         return file;
     }
 
+    /**
+     * Whether this error occured during an ImageMagick import.
+     */
     public boolean wasMagick() {
         return magick;
     }

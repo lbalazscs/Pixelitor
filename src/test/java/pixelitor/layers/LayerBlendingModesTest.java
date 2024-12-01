@@ -29,9 +29,9 @@ import java.awt.Color;
 import java.awt.Font;
 
 import static pixelitor.Composition.fromImage;
+import static pixelitor.TestHelper.create1x1Image;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.BlendingMode.*;
-import static pixelitor.utils.ImageUtils.create1x1Image;
 
 @DisplayName("Layer blending mode tests")
 @TestMethodOrder(MethodOrderer.Random.class)

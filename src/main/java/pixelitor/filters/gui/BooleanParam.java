@@ -37,7 +37,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  */
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
-    private boolean currentValue;
+    private boolean value;
     private final boolean addResetButton;
     private List<ItemListener> pendingItemListeners;
 
@@ -53,7 +53,7 @@ public class BooleanParam extends AbstractFilterParam {
         super(name, randomizePolicy);
 
         this.defaultValue = defaultValue;
-        this.currentValue = defaultValue;
+        this.value = defaultValue;
         this.addResetButton = addResetButton;
     }
 
@@ -113,7 +113,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public boolean hasDefault() {
-        return defaultValue == currentValue;
+        return defaultValue == value;
     }
 
     @Override
@@ -127,19 +127,19 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     public boolean isChecked() {
-        return currentValue;
+        return value;
     }
 
     public String isCheckedStr() {
-        return currentValue ? "1" : "0";
+        return value ? "1" : "0";
     }
 
     public void setValue(boolean newValue, boolean updateGUI, boolean trigger) {
-        if (currentValue == newValue) {
+        if (value == newValue) {
             return;
         }
 
-        currentValue = newValue;
+        value = newValue;
         if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
@@ -155,7 +155,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public ParamState<?> copyState() {
-        return currentValue ? BooleanParamState.YES : BooleanParamState.NO;
+        return value ? BooleanParamState.YES : BooleanParamState.NO;
     }
 
     @Override
@@ -199,8 +199,8 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return format("%s[name = '%s', currentValue = %s]",
-            getClass().getSimpleName(), getName(), currentValue);
+        return format("%s[name = '%s', value = %s]",
+            getClass().getSimpleName(), getName(), value);
     }
 
     /**

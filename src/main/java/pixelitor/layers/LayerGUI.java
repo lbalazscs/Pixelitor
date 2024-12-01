@@ -50,6 +50,8 @@ import static pixelitor.utils.Threads.threadInfo;
  * a layer in the "Layers" part of the GUI.
  */
 public class LayerGUI extends JToggleButton implements LayerUI {
+    public static final int BORDER_WIDTH = 2;
+
     private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png", "eye_open_dark.png");
     private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png", "eye_closed_dark.png");
 
@@ -59,35 +61,34 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private static final Color SEMI_SELECTED_COLOR = new Color(131, 146, 167);
     private static final Color SEMI_SELECTED_DARK_COLOR = new Color(38, 39, 40);
 
-    public static final int BORDER_WIDTH = 2;
-    private DragReorderHandler dragReorderHandler;
+    private SelectionState selectionState;
 
     // this field can't be called parent, because the setters/getters
     // would conflict with the methods in java.awt.Component
     private LayerGUI parentUI;
 
     private final List<LayerGUI> children = new ArrayList<>();
-
-    // Most often false, but when opening serialized pxc files,
-    // the mask/smart filter label might be added before the drag handler,
-    // and in unit tests the drag handler isn't added at all.
-    private boolean hasLateDragHandler;
+    private JPanel childrenPanel;
 
     // for debugging only: each layer GUI has a different id
     private static int idCounter = 0;
     private final int uniqueId;
-    private JPanel childrenPanel;
-
-    private SelectionState selectionState;
 
     private Layer layer;
     private final LayerGUILayout layout;
-    private boolean userInteraction = true;
+    private boolean reactToItemEvents = true;
 
     private JCheckBox visibilityCB;
     private LayerNameEditor nameEditor;
     private JLabel layerIconLabel;
     private JLabel maskIconLabel;
+
+    private DragReorderHandler dragReorderHandler;
+
+    // Most often false, but when opening serialized pxc files,
+    // the mask/smart filter label might be added before the drag handler,
+    // and in unit tests the drag handler isn't added at all.
+    private boolean delayedDragHandler;
 
     /**
      * The Y coordinate in the parent when it is not dragged.
@@ -113,28 +114,34 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             addMaskIcon();
         }
 
-        wireSelectionWithLayerActivation();
+        bindSelectionToLayerActivation();
         uniqueId = idCounter++;
     }
 
     @Override
     public void updateChildrenPanel() {
         if (!(layer instanceof LayerHolder holder)) {
-            if (childrenPanel != null) { // can happen after holder rasterization.
+            if (childrenPanel != null) {
+                // Only layer holders should have a children panel.
+                // However, after holder rasterization we could
+                // have one for other layers, so remove it.
                 remove(childrenPanel);
                 childrenPanel = null;
+                children.clear();
             }
             return;
         }
         int numChildLayers = holder.getNumLayers();
         if (numChildLayers > 0) {
+            // Ensure that we have an empty children panel.
+            // The child GUIs will be added later.
             if (childrenPanel == null) {
                 VerticalLayout innerLayout = new VerticalLayout();
                 childrenPanel = new JPanel(innerLayout);
             } else {
                 childrenPanel.removeAll();
             }
-        } else {
+        } else { // a holder with zero children
             if (childrenPanel != null) {
                 // all children have been removed
                 remove(childrenPanel);
@@ -142,7 +149,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             }
         }
 
-        // TODO it's not elegant to detach all layer GUIs and
+        // TODO it's not elegant to detach all child GUIs and
         //   then reattach those that weren't changed.
         for (LayerGUI child : children) {
             child.detach();
@@ -154,7 +161,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             Layer child = holder.getLayer(i);
             LayerGUI childUI = (LayerGUI) child.createUI();
             childUI.setParentUI(this);
-            assert !children.contains(childUI);
             children.add(childUI);
 
             // when duplicating a smart object with filters
@@ -162,7 +168,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             if (dragReorderHandler != null) {
                 childUI.setDragReorderHandler(dragReorderHandler);
             }
-            assert childUI != null;
             childrenPanel.add(childUI);
         }
         if (numChildLayers > 0) {
@@ -311,9 +316,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         addPropertyChangeListener("name", evt -> updateName());
     }
 
-    private void wireSelectionWithLayerActivation() {
+    private void bindSelectionToLayerActivation() {
         addItemListener(e -> {
-            if (userInteraction) {
+            if (reactToItemEvents) {
                 // invoke later, when isSelected() returns the correct value
                 EventQueue.invokeLater(this::buttonActivationChanged);
             }
@@ -345,8 +350,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         return visibilityCB.isSelected();
     }
 
-    public void setUserInteraction(boolean userInteraction) {
-        this.userInteraction = userInteraction;
+    public void setReactToItemEvents(boolean reactToItemEvents) {
+        this.reactToItemEvents = reactToItemEvents;
     }
 
     private void setDragReorderHandler(DragReorderHandler handler) {
@@ -365,7 +370,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         handler.attachTo(nameEditor);
         handler.attachTo(layerIconLabel);
 
-        if (hasLateDragHandler) {
+        if (delayedDragHandler) {
             if (maskIconLabel != null) {
                 handler.attachTo(maskIconLabel);
             }
@@ -377,7 +382,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
     }
 
-    public void removeDragReorderHandler() {
+    private void removeDragReorderHandler() {
         if (dragReorderHandler == null) {
             return;
         }
@@ -504,9 +509,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         if (dragReorderHandler != null) {
             dragReorderHandler.attachTo(maskIconLabel);
-            hasLateDragHandler = false;
+            delayedDragHandler = false;
         } else {
-            hasLateDragHandler = true;
+            delayedDragHandler = true;
         }
 
         // don't call layer.getMask().updateIconImage(); because
@@ -573,7 +578,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         repaint();
         maskIconLabel = null;
 
-        hasLateDragHandler = false;
+        delayedDragHandler = false;
     }
 
     @Override
@@ -627,36 +632,33 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             return;
         }
 
-        Color selectedColor;
-        if (layer.isActive()) {
-            if (Themes.getCurrent().isDark()) {
-                selectedColor = SELECTED_DARK_COLOR;
-            } else {
-                selectedColor = SELECTED_COLOR;
-            }
-        } else {
-            if (Themes.getCurrent().isDark()) {
-                selectedColor = SEMI_SELECTED_DARK_COLOR;
-            } else {
-                selectedColor = SEMI_SELECTED_COLOR;
-            }
-        }
-
         Graphics2D g2 = (Graphics2D) g;
 
         // save Graphics settings
-        Color oldColor = g.getColor();
-        Object oldAA = g2.getRenderingHint(KEY_ANTIALIASING);
+        Color origColor = g.getColor();
+        Object origAA = g2.getRenderingHint(KEY_ANTIALIASING);
 
         // paint a rounded rectangle with the
         // selection color on the selected layer GUI
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g.setColor(selectedColor);
+        g.setColor(determineSelectedColor());
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
 
         // restore Graphics settings
-        g.setColor(oldColor);
-        g2.setRenderingHint(KEY_ANTIALIASING, oldAA);
+        g.setColor(origColor);
+        g2.setRenderingHint(KEY_ANTIALIASING, origAA);
+    }
+
+    private Color determineSelectedColor() {
+        if (layer.isActive()) {
+            return Themes.getActive().isDark()
+                ? SELECTED_DARK_COLOR
+                : SELECTED_COLOR;
+        } else {
+            return Themes.getActive().isDark()
+                ? SEMI_SELECTED_DARK_COLOR
+                : SEMI_SELECTED_COLOR;
+        }
     }
 
     @Override
@@ -736,7 +738,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             node.add(child.createDebugNode("child " + child.getLayer().getName()));
         }
 
-        node.addBoolean("lateDragHandler", hasLateDragHandler);
+        node.addBoolean("lateDragHandler", delayedDragHandler);
         node.addAsString("selectionState", selectionState);
         node.addString("layer name", layer.getName());
 

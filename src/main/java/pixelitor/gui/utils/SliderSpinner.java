@@ -301,7 +301,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         slider.setPaintLabels(true);
     }
 
-    public int getCurrentValue() {
+    public int getValue() {
         return model.getValue();
     }
 

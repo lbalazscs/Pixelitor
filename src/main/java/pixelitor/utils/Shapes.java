@@ -439,6 +439,17 @@ public class Shapes {
         pathBuilder.append("\n");
     }
 
+    public static String determineSvgFillRule(Shape shape) {
+        if (shape instanceof Path2D path) {
+            return switch (path.getWindingRule()) {
+                case Path2D.WIND_EVEN_ODD -> "evenodd";
+                case Path2D.WIND_NON_ZERO -> "nonzero";
+                default -> throw new IllegalStateException("Error: " + path.getWindingRule());
+            };
+        }
+        return "nonzero";
+    }
+
     public static void debugPathIterator(Shape shape) {
         PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];

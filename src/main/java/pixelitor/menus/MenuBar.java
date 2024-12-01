@@ -57,7 +57,7 @@ import pixelitor.history.History;
 import pixelitor.history.RedoAction;
 import pixelitor.history.UndoAction;
 import pixelitor.io.FileChoosers;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.io.LayerAnimation;
 import pixelitor.io.OptimizedJpegExportPanel;
 import pixelitor.io.magick.ExportSettings;
@@ -157,10 +157,10 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         fileMenu.add(new OpenViewEnabledAction(texts.getString("save"),
-            comp -> IO.save(comp, false)), CTRL_S);
+            comp -> FileIO.save(comp, false)), CTRL_S);
 
         fileMenu.add(new OpenViewEnabledAction(texts.getString("save_as") + "...",
-            comp -> IO.save(comp, true)), CTRL_SHIFT_S);
+            comp -> FileIO.save(comp, true)), CTRL_SHIFT_S);
 
         String exportOptimizedName = texts.getString("export_optimized_jpeg");
         fileMenu.add(new OpenViewEnabledAction(
@@ -256,7 +256,7 @@ public class MenuBar extends JMenuBar {
 
         automateMenu.add(new OpenViewEnabledAction(
             texts.getString("export_layers_to_png") + "...",
-            IO::exportLayersToPNGAsync));
+            FileIO::exportLayersToPNGAsync));
 
         return automateMenu;
     }
@@ -564,10 +564,10 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenViewEnabledAction("Add Linked...", comp -> {
             File file = FileChoosers.getSupportedOpenFile();
             if (file == null) {
-                return; // the user cancelled the dialog
+                return; // the user canceled the dialog
             }
 
-            IO.loadCompAsync(file)
+            FileIO.loadCompAsync(file)
                 .thenAcceptAsync(content ->
                     comp.add(new SmartObject(file, comp, content)), Threads.onEDT)
                 .exceptionally(Messages::showExceptionOnEDT);
@@ -839,7 +839,7 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createDistortSubmenu(texts));
         filterMenu.add(createFindEdgesSubmenu(texts));
 
-        File gmicExe = Utils.checkExecutable(AppPreferences.gmicDirName, "gmic");
+        File gmicExe = Utils.findExecutable(AppPreferences.gmicDirName, "gmic");
         if (gmicExe != null) {
             GMICFilter.GMIC_PATH = gmicExe;
             filterMenu.add(createGMICSubmenu());
@@ -1232,11 +1232,11 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Arrange Windows");
 
         var cascadeAction = new PAction("Cascade", ImageArea::cascadeWindows);
-        cascadeAction.setEnabled(ImageArea.isCurrentMode(FRAMES));
+        cascadeAction.setEnabled(ImageArea.isActiveMode(FRAMES));
         sub.add(cascadeAction);
 
         var tileAction = new PAction("Tile", ImageArea::tileWindows);
-        tileAction.setEnabled(ImageArea.isCurrentMode(FRAMES));
+        tileAction.setEnabled(ImageArea.isActiveMode(FRAMES));
         sub.add(tileAction);
 
         // make sure that "Cascade" and "Tile" are grayed out in TABS mode
@@ -1409,7 +1409,7 @@ public class MenuBar extends JMenuBar {
             }), CTRL_ALT_E);
 
         sub.add(new OpenViewEnabledAction(
-            "Reset the translation of current layer",
+            "Reset Active Layer Translation",
             comp -> {
                 Layer layer = comp.getActiveLayer();
                 if (layer instanceof ContentLayer contentLayer) {
@@ -1459,7 +1459,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction(
             "Save in All Formats...",
-            IO::saveInAllFormats));
+            FileIO::saveInAllFormats));
 
         sub.addSeparator();
 

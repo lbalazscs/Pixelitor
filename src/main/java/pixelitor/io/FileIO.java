@@ -34,7 +34,6 @@ import javax.imageio.ImageWriteParam;
 import javax.swing.*;
 import java.awt.EventQueue;
 import java.awt.Shape;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.List;
@@ -57,21 +56,27 @@ import static pixelitor.utils.Threads.threadInfo;
 /**
  * Utility class with static methods related to opening and saving files.
  */
-public class IO {
-    private IO() {
+public class FileIO {
+    private FileIO() {
         // Prevent instantiation
     }
 
+    /**
+     * Opens a file asynchronously, optionally checking if it's already open.
+     */
     public static CompletableFuture<Composition> openFileAsync(File file,
-                                                               boolean checkAlreadyOpen) {
-        if (checkAlreadyOpen && !Views.warnIfAlreadyOpen(file)) {
+                                                               boolean preventDuplicateOpen) {
+        if (preventDuplicateOpen && !Views.warnIfAlreadyOpen(file)) {
             return CompletableFuture.completedFuture(null);
         }
         return loadCompAsync(file)
             .thenApplyAsync(Views::addJustLoadedComp, onEDT)
-            .whenComplete((comp, e) -> handleReadingErrors(e));
+            .whenComplete((comp, exception) -> handleFileReadErrors(exception));
     }
 
+    /**
+     * Asynchronously loads a {@link Composition} from a file.
+     */
     public static CompletableFuture<Composition> loadCompAsync(File file) {
         // If the file format isn't recognized, this will still try to
         // read it in a single-layered format, which doesn't have to be JPG.
@@ -79,33 +84,38 @@ public class IO {
         return format.readAsync(file);
     }
 
+    /**
+     * Synchronously loads a Composition from a file.
+     */
     public static Composition loadCompSync(File file) {
         FileFormat format = FileFormat.fromFile(file).orElse(FileFormat.JPG);
         return format.readSync(file);
     }
 
+    /**
+     * Asynchronously adds a new image layer to an existing composition.
+     */
     public static void addNewImageLayerAsync(File file, Composition comp) {
         CompletableFuture
             .supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
             .thenAcceptAsync(img -> comp.addExternalImageAsNewLayer(
                     img, file.getName(), "Dropped Layer"),
                 onEDT)
-            .whenComplete((v, e) -> handleReadingErrors(e));
+            .whenComplete((result, exception) -> handleFileReadErrors(exception));
     }
 
     /**
-     * Utility method designed to be used with CompletableFuture.
-     * Can be called on any thread.
+     * Handles errors that occur during file reading.
+     * Can be called from any thread.
      */
-    public static void handleReadingErrors(Throwable error) {
+    public static void handleFileReadErrors(Throwable error) {
         if (error == null) {
-            // do nothing if the stage didn't complete exceptionally
             return;
         }
         if (error instanceof CompletionException) {
             // if the exception was thrown in a previous
             // stage, handle it the same way
-            handleReadingErrors(error.getCause());
+            handleFileReadErrors(error.getCause());
             return;
         }
         if (error instanceof DecodingException de) {
@@ -124,12 +134,16 @@ public class IO {
         if (de.wasMagick()) {
             Messages.showError("Error", msg);
         } else {
-            String[] options = {"Try with ImageMagick Import", GUIText.CANCEL};
-            boolean retryWithMagick = Dialogs.showOKCancelDialog(msg, "Error",
-                options, 0, JOptionPane.ERROR_MESSAGE);
-            if (retryWithMagick) {
-                ImageMagick.importComposition(de.getFile(), false);
-            }
+            promptImageMagickRetry(de, msg);
+        }
+    }
+
+    private static void promptImageMagickRetry(DecodingException de, String msg) {
+        String[] options = {"Try with ImageMagick Import", GUIText.CANCEL};
+        boolean retryWithMagick = Dialogs.showOKCancelDialog(msg, "Error",
+            options, 0, JOptionPane.ERROR_MESSAGE);
+        if (retryWithMagick) {
+            ImageMagick.importComposition(de.getFile(), false);
         }
     }
 
@@ -138,38 +152,41 @@ public class IO {
      * for the file location. Returns true if the file was saved,
      * false if the user cancels the saving or if it could not be saved.
      */
-    public static boolean save(Composition comp, boolean saveAs) {
-        boolean needsFileChooser = saveAs || comp.getFile() == null;
-        if (needsFileChooser) {
+    public static boolean save(Composition comp, boolean forceChooser) {
+        boolean useFileChooser = forceChooser || comp.getFile() == null;
+        if (useFileChooser) {
             return FileChoosers.saveWithChooser(comp);
+        }
+
+        File targetFile = comp.getFile();
+        if (targetFile.exists()) { // if it was not deleted in the meantime...
+            if (!isWritable(targetFile.toPath())) {
+                Dialogs.showFileNotWritableDialog(targetFile);
+                return false;
+            }
+        }
+        Optional<FileFormat> fileFormat = FileFormat.fromFile(targetFile);
+        if (fileFormat.isPresent()) {
+            var saveSettings = new SaveSettings.Simple(fileFormat.get(), targetFile);
+            comp.saveAsync(saveSettings, true);
+            return true;
         } else {
-            File file = comp.getFile();
-            if (file.exists()) { // if it was not deleted in the meantime...
-                if (!isWritable(file.toPath())) {
-                    Dialogs.showFileNotWritableDialog(file);
-                    return false;
-                }
-            }
-            Optional<FileFormat> fileFormat = FileFormat.fromFile(file);
-            if (fileFormat.isPresent()) {
-                var saveSettings = new SaveSettings.Simple(fileFormat.get(), file);
-                comp.saveAsync(saveSettings, true);
-                return true;
-            } else {
-                // the file was read from a file with an unsupported
-                // extension, save it with a file chooser
-                return FileChoosers.saveWithChooser(comp);
-            }
+            // the file was read from a file with an unsupported
+            // extension, save it with a file chooser
+            return FileChoosers.saveWithChooser(comp);
         }
     }
 
+    /**
+     * Saves an image to a file using the given settings.
+     */
     public static void saveImageToFile(BufferedImage image,
                                        SaveSettings saveSettings) {
         FileFormat format = saveSettings.format();
-        File selectedFile = saveSettings.file();
+        File targetFile = saveSettings.file();
 
         Objects.requireNonNull(format);
-        Objects.requireNonNull(selectedFile);
+        Objects.requireNonNull(targetFile);
         Objects.requireNonNull(image);
         assert calledOutsideEDT() : "on EDT";
 
@@ -177,21 +194,21 @@ public class IO {
             if (format == FileFormat.JPG) {
                 JpegSettings settings = JpegSettings.from(saveSettings);
                 Consumer<ImageWriteParam> customizer = settings.toCustomizer();
-                TrackedIO.write(image, "jpg", selectedFile, customizer);
+                TrackedIO.write(image, "jpg", targetFile, customizer);
             } else {
-                TrackedIO.write(image, format.toString(), selectedFile, null);
+                TrackedIO.write(image, format.toString(), targetFile, null);
             }
         } catch (IOException e) {
             if (e.getMessage().contains("another process")) {
                 // handle here, because we have the file information
-                showAnotherProcessErrorMsg(selectedFile);
+                showFileInUseError(targetFile);
             } else {
                 throw new UncheckedIOException(e);
             }
         }
     }
 
-    private static void showAnotherProcessErrorMsg(File file) {
+    private static void showFileInUseError(File file) {
         String msg = format(
             "Can't save to%n%s%nbecause this file is being used by another program.",
             file.getAbsolutePath());
@@ -201,17 +218,19 @@ public class IO {
 
     public static void openAllSupportedImagesInDir(File dir) {
         List<File> files = FileUtils.listSupportedInputFiles(dir);
-        boolean found = false;
-        for (File file : files) {
-            found = true;
-            openFileAsync(file, false);
-        }
-        if (!found) {
+        if (files.isEmpty()) {
             Messages.showInfo("No Images Found",
                 format("<html>No supported image files found in <b>%s</b>.", dir.getName()));
+            return;
+        }
+        for (File file : files) {
+            openFileAsync(file, false);
         }
     }
 
+    /**
+     * Adds all supported images from a directory as new layers to an existing composition.
+     */
     public static void addAllImagesInDirAsLayers(File dir, Composition comp) {
         List<File> files = FileUtils.listSupportedInputFiles(dir);
         for (File file : files) {
@@ -219,6 +238,9 @@ public class IO {
         }
     }
 
+    /**
+     * Exports all layers of a composition as separate PNG files asynchronously.
+     */
     public static void exportLayersToPNGAsync(Composition comp) {
         assert calledOnEDT() : threadInfo();
 
@@ -234,24 +256,24 @@ public class IO {
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private static String getSavedImagesMessage(int numImg, File directory) {
-        String what = numImg == 1 ? "image" : "images";
-        return "Saved %d %s to <b>%s</b>".formatted(numImg, what, directory);
+    private static String getSavedImagesMessage(int imageCount, File directory) {
+        String what = imageCount == 1 ? "image" : "images";
+        return "Saved %d %s to <b>%s</b>".formatted(imageCount, what, directory);
     }
 
     private static int exportLayersToPNG(Composition comp) {
         assert calledOutsideEDT() : "on EDT";
 
-        int numSavedImages = 0;
+        int exportedCount = 0;
         for (int layerIndex = 0; layerIndex < comp.getNumLayers(); layerIndex++) {
             Layer layer = comp.getLayer(layerIndex);
             BufferedImage image = layer.asImage(true, false);
             if (image != null) {
                 saveLayerImage(image, layer.getName(), layerIndex);
-                numSavedImages++;
+                exportedCount++;
             }
         }
-        return numSavedImages;
+        return exportedCount;
     }
 
     private static void saveLayerImage(BufferedImage image,
@@ -266,19 +288,25 @@ public class IO {
         saveImageToFile(image, new SaveSettings.Simple(FileFormat.PNG, file));
     }
 
+    /**
+     * Saves a composition in all supported file formats.
+     * Prompts user for output directory selection.
+     */
     public static void saveInAllFormats(Composition comp) {
         boolean canceled = !DirectoryChooser.selectOutputDir();
         if (canceled) {
             return;
         }
-        File saveDir = Dirs.getLastSave();
+        File outputDir = Dirs.getLastSave();
         for (FileFormat format : FileFormat.values()) {
-            File outFile = new File(saveDir, "all_formats." + format);
+            File outFile = new File(outputDir, "all_formats." + format);
             comp.saveAsync(new SaveSettings.Simple(format, outFile), false);
         }
     }
 
-    public static void saveJpegWithQuality(Composition comp, float quality, boolean progressive) {
+    public static void saveJpegWithCustomSettings(Composition comp,
+                                                  float quality,
+                                                  boolean progressive) {
         File selectedFile = FileChoosers.selectSaveFileForFormat(
             comp.suggestFileName("jpg"), FileChoosers.jpegFilter);
         comp.saveAsync(new JpegSettings(quality, progressive, selectedFile), true);
@@ -290,7 +318,7 @@ public class IO {
 
     public static void saveSVG(String content, String suggestedFileName) {
         File file = FileChoosers.selectSaveFileForFormat(suggestedFileName, svgFilter);
-        if (file == null) { // save file dialog cancelled
+        if (file == null) { // save file dialog canceled
             return;
         }
 
@@ -303,26 +331,12 @@ public class IO {
     }
 
     private static String createSVGContent(Shape shape, StrokeParam strokeParam) {
-        boolean exportFilled = false;
-        if (strokeParam != null) {
-            exportFilled = switch (strokeParam.getStrokeType()) {
-                case ZIGZAG, CALLIGRAPHY, SHAPE, TAPERING, TAPERING_REV, RAILWAY -> true;
-                case BASIC, WOBBLE, CHARCOAL, BRISTLE, OUTLINE -> false;
-            };
-        }
+        boolean exportFilled = isSvgExportFilled(strokeParam);
         if (exportFilled) {
             shape = strokeParam.createStroke().createStrokedShape(shape);
         }
         String svgPath = Shapes.toSVGPath(shape);
-
-        String svgFillRule = "nonzero";
-        if (shape instanceof Path2D path) {
-            svgFillRule = switch (path.getWindingRule()) {
-                case Path2D.WIND_EVEN_ODD -> "evenodd";
-                case Path2D.WIND_NON_ZERO -> "nonzero";
-                default -> throw new IllegalStateException("Error: " + path.getWindingRule());
-            };
-        }
+        String svgFillRule = Shapes.determineSvgFillRule(shape);
 
         String svgFillAttr = exportFilled ? "black" : "none";
         String svgStrokeAttr = exportFilled ? "none" : "black";
@@ -340,34 +354,21 @@ public class IO {
             svgFillAttr, svgStrokeAttr, svgFillRule, svgStrokeStyle);
     }
 
-    public static void writeToOutStream(BufferedImage img, OutputStream magickInput) throws IOException {
-        // Write as png to ImageMagick and let it do
-        // the conversion to the final format.
-        // Explicitly setting a low compression level doesn't seem
-        // to make it faster (why?), so use the simple approach.
-        ImageIO.write(img, "png", magickInput);
-
-//        try (ImageOutputStream ios = ImageIO.createImageOutputStream(magickInput)) {
-//            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
-//            ImageWriter writer = writers.next();
-//            ImageWriteParam writeParam = writer.getDefaultWriteParam();
-//            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-//            writeParam.setCompressionQuality(1.0f); // 1 is no compression
-//            try {
-//                writer.setOutput(ios);
-//                writer.write(img);
-//            } finally {
-//                writer.dispose();
-//                ios.flush();
-//            }
-//        }
+    private static boolean isSvgExportFilled(StrokeParam strokeParam) {
+        if (strokeParam == null) {
+            return false;
+        }
+        return switch (strokeParam.getStrokeType()) {
+            case ZIGZAG, CALLIGRAPHY, SHAPE, TAPERING, TAPERING_REV, RAILWAY -> true;
+            case BASIC, WOBBLE, CHARCOAL, BRISTLE, OUTLINE -> false;
+        };
     }
 
-    public static BufferedImage commandLineFilter(BufferedImage src, List<String> command) {
+    public static BufferedImage applyCommandLineFilter(BufferedImage src, List<String> command) {
         return switch (runCommandLineFilter(src, command)) {
             case Success<BufferedImage, ?>(var img) -> ImageUtils.toSysCompatibleImage(img);
             case Error<?, String>(String errorMsg) -> {
-                Messages.showError("Command Line Error", errorMsg);
+                Messages.showError("Command Line Filter Error", errorMsg);
                 yield src;
             }
         };
@@ -381,32 +382,19 @@ public class IO {
         BufferedImage out;
 
         try {
-            Process p = pb.start();
+            Process process = pb.start();
 
-            // Write the source image to the standard input
-            // of the external process
-            try (OutputStream processInput = p.getOutputStream()) {
-                assert processInput instanceof BufferedOutputStream;
+            writeToCommandLineProcess(src, process);
+            out = readFromCommandLineProcess(process);
 
-                writeToOutStream(src, processInput);
-                processInput.flush();
-            }
-
-            // Read the filtered image the from the standard output
-            // of the external process
-            try (InputStream processOutput = p.getInputStream()) {
-                assert processOutput instanceof BufferedInputStream;
-
-                out = ImageIO.read(processOutput);
-            }
             String errorMsg = null;
             if (out == null) {
                 // There was an error. Try to get the error message.
-                try (InputStream processError = p.getErrorStream()) {
+                try (InputStream processError = process.getErrorStream()) {
                     errorMsg = new String(processError.readAllBytes(), UTF_8);
                 }
             }
-            p.waitFor();
+            process.waitFor();
             if (errorMsg != null) {
                 return Result.error(errorMsg);
             }
@@ -416,5 +404,53 @@ public class IO {
             throw new RuntimeException(e);
         }
         return Result.success(out);
+    }
+
+    // Read an image the from the standard output of an external process
+    public static BufferedImage readFromCommandLineProcess(Process process) throws IOException {
+        BufferedImage image;
+        try (InputStream processOutput = process.getInputStream()) {
+            assert processOutput instanceof BufferedInputStream;
+
+            image = ImageIO.read(processOutput);
+        }
+        return image;
+    }
+
+    // Write the source image to the standard input of the external process
+    public static void writeToCommandLineProcess(BufferedImage src, Process process) throws IOException {
+        try (OutputStream processInput = process.getOutputStream()) {
+            assert processInput instanceof BufferedOutputStream;
+
+            writeToCommandLineInputStream(src, processInput);
+            processInput.flush();
+        }
+    }
+
+    /**
+     * Writes an image to the standard input of an external
+     * command-line program in PNG format.
+     */
+    private static void writeToCommandLineInputStream(BufferedImage img, OutputStream commandLineInput) throws IOException {
+        // Write as png to ImageMagick and let it do
+        // the conversion to the final format.
+        // Explicitly setting a low compression level doesn't seem
+        // to make it faster (why?), so use the simple approach.
+        ImageIO.write(img, "png", commandLineInput);
+
+//        try (ImageOutputStream ios = ImageIO.createImageOutputStream(commandLineInput)) {
+//            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
+//            ImageWriter writer = writers.next();
+//            ImageWriteParam writeParam = writer.getDefaultWriteParam();
+//            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+//            writeParam.setCompressionQuality(1.0f); // 1 is no compression
+//            try {
+//                writer.setOutput(ios);
+//                writer.write(img);
+//            } finally {
+//                writer.dispose();
+//                ios.flush();
+//            }
+//        }
     }
 }

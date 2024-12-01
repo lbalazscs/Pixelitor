@@ -91,7 +91,7 @@ public enum SelectionState {
     private static Border unselectedIconOnUnselectedLayerBorder;
 
     static {
-        setupBorders(Themes.getCurrent().isDark());
+        setupBorders(Themes.getActive().isDark());
     }
 
     public static void setupBorders(boolean dark) {

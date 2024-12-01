@@ -373,13 +373,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (action == null) {
             return; // dialog canceled
         }
-        Filter oldFilter = filter;
-        String oldName = getName();
+        Filter origFilter = filter;
+        String origName = getName();
 
         filter = action.createNewFilterInstance();
         setName(filter.getName(), false);
 
-        History.add(new FilterChangedEdit(this, oldFilter, oldName));
+        History.add(new FilterChangedEdit(this, origFilter, origName));
 
         invalidateAll();
         holder.update();
@@ -388,6 +388,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     public BufferedImage getCachedImage() {
         return cachedImage;
+    }
+
+    @Override
+    public boolean isConvertibleToSmartObject() {
+        return false;
     }
 
     @Override

@@ -30,7 +30,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.io.FileChoosers;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.utils.Messages;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Threads;
@@ -216,7 +216,7 @@ public class SmartObject extends CompositeLayer {
                 updateLinkedContentTime();
                 // also read the content
                 assert content == null;
-                setContent(IO.loadCompSync(linkedContentFile));
+                setContent(FileIO.loadCompSync(linkedContentFile));
             } else { // linked file not found
                 // Set a transparent image as content to avoid all sorts of errors.
                 // It will be replaced if the content is found later.
@@ -291,7 +291,7 @@ public class SmartObject extends CompositeLayer {
             linkedContentFile = newFile;
             updateLinkedContentTime();
 
-            IO.loadCompAsync(linkedContentFile)
+            FileIO.loadCompAsync(linkedContentFile)
                 .thenAcceptAsync(loadedComp -> {
                     setContent(loadedComp);
                     iconImageNeedsRefresh = true;
@@ -630,7 +630,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     private CompletableFuture<Composition> reloadContent(File file) {
-        return IO.loadCompAsync(file)
+        return FileIO.loadCompAsync(file)
             .thenApplyAsync(loaded -> {
                 setContent(loaded);
 
@@ -800,9 +800,9 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy) {
+    ContentLayerMoveEdit createMovementEdit(int prevTx, int prevTy) {
         // a smart object never enlarges the image
-        return new ContentLayerMoveEdit(this, null, oldTx, oldTy);
+        return new ContentLayerMoveEdit(this, null, prevTx, prevTy);
     }
 
     public SmartObject shallowDuplicate() {

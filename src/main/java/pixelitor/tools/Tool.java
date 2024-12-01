@@ -370,7 +370,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
 
     protected abstract static class ToolIcon extends VectorIcon {
         protected ToolIcon() {
-            super(Themes.getCurrent().isDark() ? Themes.LIGHT_ICON_COLOR : BLACK,
+            super(Themes.getActive().isDark() ? Themes.LIGHT_ICON_COLOR : BLACK,
                 ToolButton.ICON_SIZE, ToolButton.ICON_SIZE);
         }
     }

@@ -75,16 +75,16 @@ public final class Icons {
 
     public static Icon load(String iconFileName) {
         assert iconFileName != null;
-        URL imgURL = ImageUtils.imagePathToURL(iconFileName);
+        URL imgURL = ImageUtils.findImageURL(iconFileName);
         return new ImageIcon(imgURL);
     }
 
     public static Icon loadMultiRes(String baseIconFileName, String bigIconFileName) {
         try {
-            URL imgURL1 = ImageUtils.imagePathToURL(baseIconFileName);
+            URL imgURL1 = ImageUtils.findImageURL(baseIconFileName);
             BufferedImage img1 = ImageIO.read(imgURL1);
 
-            URL imgURL2 = ImageUtils.imagePathToURL(bigIconFileName);
+            URL imgURL2 = ImageUtils.findImageURL(bigIconFileName);
             BufferedImage img2 = ImageIO.read(imgURL2);
 
             return new ImageIcon(new BaseMultiResolutionImage(img1, img2));

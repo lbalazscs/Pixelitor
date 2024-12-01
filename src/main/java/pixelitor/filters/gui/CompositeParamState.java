@@ -46,10 +46,6 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
             .collect(toList());
     }
 
-    /**
-     * Calculate an interpolated state,
-     * where the current object is the starting state
-     */
     @Override
     public CompositeParamState interpolate(CompositeParamState endState, double progress) {
         int numChildren = children.size();

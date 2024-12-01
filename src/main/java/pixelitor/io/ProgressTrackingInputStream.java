@@ -23,9 +23,9 @@ import pixelitor.utils.StatusBarProgressTracker;
 import java.io.*;
 
 /**
- * An InputStream wrapper that monitors reading progress.
- * It is similar to {@link javax.swing.ProgressMonitorInputStream},
- * but works with {@link ProgressTracker} objects
+ * A wrapper for an InputStream that tracks the progress of reading.
+ * It's similar to {@link javax.swing.ProgressMonitorInputStream},
+ * but it uses a {@link ProgressTracker}.
  */
 public class ProgressTrackingInputStream extends FilterInputStream {
     private final ProgressTracker progressTracker;

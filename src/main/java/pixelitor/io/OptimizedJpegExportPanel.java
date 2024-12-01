@@ -183,7 +183,7 @@ public class OptimizedJpegExportPanel extends JPanel {
             .content(exportPanel)
             .title(title)
             .okText(i18n("save"))
-            .okAction(() -> IO.saveJpegWithQuality(comp,
+            .okAction(() -> FileIO.saveJpegWithCustomSettings(comp,
                 exportPanel.getQuality(), exportPanel.isProgressive()))
             .show();
     }

@@ -90,7 +90,7 @@ public interface Filterable {
     /**
      * This method is used when the filter is started from the menu.
      *
-     * @return true if the filter was not cancelled
+     * @return true if the filter was not canceled
      */
     default boolean startFilter(Filter filter, boolean reset) {
         assert Threads.calledOnEDT();
@@ -110,7 +110,7 @@ public interface Filterable {
 
             FilterGUI gui = fwg.createGUI(this, reset);
 
-            MouseZoomMethod.CURRENT.installOnOther(gui, getComp().getView());
+            MouseZoomMethod.ACTIVE.installOnOther(gui, getComp().getView());
             ZoomMenu.setupZoomKeys(gui);
 
             DialogBuilder dialogBuilder = new DialogBuilder()

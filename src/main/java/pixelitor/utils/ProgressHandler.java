@@ -31,7 +31,7 @@ public interface ProgressHandler {
 
     /**
      * Terminates the progress bar.
-     * Should be called when the operation is complete or cancelled.
+     * Should be called when the operation is complete or canceled.
      */
     void stopProgress();
 
@@ -39,7 +39,7 @@ public interface ProgressHandler {
      * Safely stops the progress bar on the EDT.
      */
     default void stopProgressOnEDT() {
-        if (Threads.calledOnEDT()) {
+        if (EventQueue.isDispatchThread()) {
             stopProgress();
         } else {
             EventQueue.invokeLater(this::stopProgress);

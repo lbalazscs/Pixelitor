@@ -134,7 +134,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
      */
     public GroupedRangeParam autoNormalized() {
         assert !linkedByDefault;
-        assert calcCurrentSumOfValues() == 100;
+        assert calcSumOfValues() == 100;
 
         linkedModel = null;
         for (RangeParam param : children) {
@@ -155,7 +155,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         }
         autoNormalizing = true;
 
-        int sumOfAllValues = calcCurrentSumOfValues();
+        int sumOfAllValues = calcSumOfValues();
         int diff = sumOfAllValues - 100;
         if (diff == 0) {
             autoNormalizing = false;
@@ -200,7 +200,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         autoNormalizing = false;
     }
 
-    private int calcCurrentSumOfValues() {
+    private int calcSumOfValues() {
         int sumOfAllValues = 0;
         for (RangeParam param : children) {
             sumOfAllValues += param.getValue();
@@ -209,12 +209,12 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     private void normalizeNow() {
-        int diff = calcCurrentSumOfValues() - 100;
+        int diff = calcSumOfValues() - 100;
         if (diff != 0) {
             double correction = diff / (double) children.length;
-            for (RangeParam param : children) {
-                double currentValue = param.getValueAsDouble();
-                param.setValueNoTrigger(currentValue - correction);
+            for (RangeParam child : children) {
+                double currentValue = child.getValueAsDouble();
+                child.setValueNoTrigger(currentValue - correction);
             }
         }
     }

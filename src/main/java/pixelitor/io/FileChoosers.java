@@ -89,7 +89,7 @@ public class FileChoosers {
         if (selectedFile != null) {
             String fileName = selectedFile.getName();
             if (FileUtils.hasSupportedInputExt(fileName)) {
-                IO.openFileAsync(selectedFile, true);
+                FileIO.openFileAsync(selectedFile, true);
             } else {
                 showUnsupportedExtensionError(fileName);
             }

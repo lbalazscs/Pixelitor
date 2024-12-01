@@ -60,7 +60,6 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static java.awt.event.KeyEvent.*;
-import static java.lang.String.format;
 import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.colors.FgBgColors.randomizeColors;
@@ -329,7 +328,7 @@ public class RandomGUITest {
 
     private static void resetGUI() {
         PixelitorWindow.get().resetDefaultWorkspace();
-        if (ImageArea.isCurrentMode(FRAMES)) {
+        if (ImageArea.isActiveMode(FRAMES)) {
             ImageArea.toggleUI();
         }
         PixelitorWindow.get().setAlwaysOnTop(false);
@@ -446,6 +445,67 @@ public class RandomGUITest {
             return;
         }
 
+        Filter filter = chooseRandomFilter();
+
+        log("filter: " + filter.getName());
+
+        long executionsBefore = Filter.executionCount;
+
+        if (filter instanceof FilterWithGUI guiFilter) {
+            runGUIFilter(guiFilter, dr);
+        } else {
+            runNonGUIFilter(filter, dr);
+        }
+
+        if (Filter.executionCount != executionsBefore + 1) {
+            throw new IllegalStateException("%s: before = %d, after = %d"
+                .formatted(filter.getName(), executionsBefore, Filter.executionCount));
+        }
+    }
+
+    private static void runGUIFilter(FilterWithGUI filter, Drawable dr) {
+        filter.randomize();
+        dr.startPreviewing();
+
+        try {
+            dr.startFilter(filter, PREVIEWING);
+        } catch (Throwable e) {
+            BufferedImage src = dr.getFilterSourceImage();
+            if (filter instanceof ParametrizedFilter pf) {
+                ParamSet paramSet = pf.getParamSet();
+                System.out.printf(
+                    "RandomGUITest::runGUIFilter: filterName = %s, " +
+                        "src.width = %d, src.height = %d, params = %s%n",
+                    filter.getName(), src.getWidth(), src.getHeight(), paramSet);
+            } else {
+                System.out.printf(
+                    "RandomGUITest::runGUIFilter: filterName = %s, " +
+                        "src.width = %d, src.height = %d%n",
+                    filter.getName(), src.getWidth(), src.getHeight());
+            }
+            throw e;
+        }
+
+        if (Math.random() > 0.3) {
+            dr.onFilterDialogAccepted(filter.getName());
+        } else {
+            dr.onFilterDialogCanceled();
+        }
+    }
+
+    private static void runNonGUIFilter(Filter filter, Drawable dr) {
+        BufferedImage src = dr.getFilterSourceImage();
+        try {
+            dr.startFilter(filter, FILTER_WITHOUT_DIALOG);
+        } catch (Throwable e) {
+            System.out.printf(
+                "RandomGUITest::runNonGUIFilter: name = %s, width = %d, height = %d%n",
+                filter.getName(), src.getWidth(), src.getHeight());
+            throw e;
+        }
+    }
+
+    private Filter chooseRandomFilter() {
         Filter filter;
         if (preferredFilter == null) {
             filter = Filters.getRandomFilter(f ->
@@ -455,56 +515,7 @@ public class RandomGUITest {
         } else {
             filter = preferredFilter;
         }
-
-        String filterName = filter.getName();
-        log("filter: " + filterName);
-
-        long executionsBefore = Filter.executionCount;
-
-        if (filter instanceof FilterWithGUI guiFilter) {
-            guiFilter.randomize();
-            dr.startPreviewing();
-
-            try {
-                dr.startFilter(filter, PREVIEWING);
-            } catch (Throwable e) {
-                BufferedImage src = dr.getFilterSourceImage();
-                if (guiFilter instanceof ParametrizedFilter pf) {
-                    ParamSet paramSet = pf.getParamSet();
-                    System.out.printf(
-                        "RandomGUITest::randomFilter: filterName = %s, " +
-                            "src.width = %d, src.height = %d, params = %s%n",
-                        filterName, src.getWidth(), src.getHeight(), paramSet);
-                } else {
-                    System.out.printf(
-                        "RandomGUITest::randomFilter: filterName = %s, " +
-                            "src.width = %d, src.height = %d%n",
-                        filterName, src.getWidth(), src.getHeight());
-                }
-                throw e;
-            }
-
-            if (Math.random() > 0.3) {
-                dr.onFilterDialogAccepted(filterName);
-            } else {
-                dr.onFilterDialogCanceled();
-            }
-        } else {
-            BufferedImage src = dr.getFilterSourceImage();
-            try {
-                dr.startFilter(filter, FILTER_WITHOUT_DIALOG);
-            } catch (Throwable e) {
-                System.out.printf(
-                    "RandomGUITest::randomFilter: name = %s, width = %d, height = %d%n",
-                    filterName, src.getWidth(), src.getHeight());
-                throw e;
-            }
-        }
-        if (Filter.executionCount != executionsBefore + 1) {
-            throw new IllegalStateException(
-                "before = " + executionsBefore
-                    + ", after = " + Filter.executionCount);
-        }
+        return filter;
     }
 
     private void randomTween() {
@@ -542,7 +553,7 @@ public class RandomGUITest {
             dr.startFilter(filter, PREVIEWING);
         } catch (Throwable e) {
             BufferedImage src = dr.getFilterSourceImage();
-            String msg = format(
+            String msg = String.format(
                 "Exception in random tween: filter name = %s, " +
                     "srcWidth = %d, srcHeight = %d, " +
                     "isMaskEditing = %b, params = %s",
@@ -732,7 +743,7 @@ public class RandomGUITest {
     }
 
     private void arrangeWindows() {
-        if (ImageArea.isCurrentMode(TABS)) {
+        if (ImageArea.isActiveMode(TABS)) {
             return;
         }
         double r = Math.random();
@@ -919,7 +930,7 @@ public class RandomGUITest {
     }
 
     private void runAction(Action action) {
-        String msg = format("action \"%s\" (class: \"%s\")",
+        String msg = String.format("action \"%s\" (class: \"%s\")",
             action.getValue(Action.NAME),
             action.getClass().getSimpleName());
         log(msg);
@@ -1048,10 +1059,8 @@ public class RandomGUITest {
 
     private void convertToSmartObject() {
         Layer layer = Views.getActiveLayer();
-        if (!(layer instanceof SmartObject)) {
-            log("Convert Layer to Smart Object");
-            layer.replaceWithSmartObject();
-        }
+        log(String.format("Convert %s to Smart Object", layer.getTypeString()));
+        layer.replaceWithSmartObject();
     }
 
     private void randomRasterizeLayer() {
@@ -1142,7 +1151,7 @@ public class RandomGUITest {
         int east = rand.nextInt(3);
         int south = rand.nextInt(3);
         int west = rand.nextInt(3);
-        log(format("enlarge canvas north = %d, east = %d, south = %d, west = %d",
+        log(String.format("enlarge canvas north = %d, east = %d, south = %d, west = %d",
             north, east, south, west));
         var comp = Views.getActiveComp();
         new EnlargeCanvas(north, east, south, west).process(comp);

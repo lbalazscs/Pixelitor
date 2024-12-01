@@ -42,71 +42,72 @@ import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
- * This class describes a gradient with all the information
- * necessary to recreate it.
- * Note that no pixel values are stored here, this is
- * all vector graphics.
+ * A vector graphics gradient with all necessary information for rendering.
  */
 public class Gradient implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = -6574312118763734469L;
 
+    // the drag representing the start and end points
     private Drag drag;
+
     private final GradientType type;
     private final CycleMethod cycleMethod;
     private final GradientColorType colorType;
-    private final boolean reverted;
+    private final boolean reversed;
     private final BlendingMode blendingMode;
     private final float opacity;
 
     // the actual painting colors
     private final Color[] colors;
 
-    // saved so that they can be restored
+    // stored here so that they can be restored
     private final Color fgColor;
     private final Color bgColor;
 
-    private transient Drag moveStartDrag;
+    // helper variable, used when a gradient
+    // fill layer is moved using the move tool
+    private transient Drag origDrag;
 
     public Gradient(Drag drag, GradientType type,
                     CycleMethod cycleMethod, GradientColorType colorType,
-                    boolean reverted, BlendingMode blendingMode, float opacity) {
+                    boolean reversed, BlendingMode blendingMode, float opacity) {
         assert !drag.isImClick();
+
         this.drag = drag;
         this.type = type;
         this.cycleMethod = cycleMethod;
         this.colorType = colorType;
-        this.reverted = reverted;
+        this.reversed = reversed;
         this.blendingMode = blendingMode;
         this.opacity = opacity;
 
         fgColor = getFGColor();
         bgColor = getBGColor();
-        colors = initColors(colorType, reverted);
+        colors = initColors(colorType, reversed);
     }
 
-    private Gradient(Gradient other) {
-        this.drag = other.drag;
-        this.type = other.type;
-        this.cycleMethod = other.cycleMethod;
-        this.colorType = other.colorType;
-        this.reverted = other.reverted;
-        this.blendingMode = other.blendingMode;
-        this.opacity = other.opacity;
-        this.fgColor = other.fgColor;
-        this.bgColor = other.bgColor;
-        this.colors = other.colors;
+    private Gradient(Gradient source) {
+        this.drag = source.drag;
+        this.type = source.type;
+        this.cycleMethod = source.cycleMethod;
+        this.colorType = source.colorType;
+        this.reversed = source.reversed;
+        this.blendingMode = source.blendingMode;
+        this.opacity = source.opacity;
+        this.fgColor = source.fgColor;
+        this.bgColor = source.bgColor;
+        this.colors = source.colors;
     }
 
     public Gradient copy() {
         return new Gradient(this);
     }
 
-    private static Color[] initColors(GradientColorType colorType, boolean reverted) {
-        Color startColor = colorType.getStartColor(reverted);
-        Color endColor = colorType.getEndColor(reverted);
-        assert startColor != null;
-        assert endColor != null;
+    private static Color[] initColors(GradientColorType colorType, boolean reversed) {
+        Color startColor = colorType.getStartColor(reversed);
+        Color endColor = colorType.getEndColor(reversed);
+
         return new Color[]{startColor, endColor};
     }
 
@@ -137,7 +138,7 @@ public class Gradient implements Serializable, Debuggable {
                 height = canvas.getHeight();
             }
 
-            drag = tmpDrawingLayer.translateDrag(drag);
+            drag = tmpDrawingLayer.translate(drag);
         }
 
         paintOnGraphics(g, width, height);
@@ -156,7 +157,10 @@ public class Gradient implements Serializable, Debuggable {
         g.fillRect(0, 0, width, height);
     }
 
-    public void paintIconThumbnail(Graphics2D g2, Canvas canvas, Dimension thumbSize) {
+    /**
+     * Paints a thumbnail preview of the gradient.
+     */
+    public void paintThumbnail(Graphics2D g2, Canvas canvas, Dimension thumbSize) {
         double scaling;
         if (thumbSize.width > thumbSize.height) {
             scaling = thumbSize.width / (double) canvas.getWidth();
@@ -174,7 +178,7 @@ public class Gradient implements Serializable, Debuggable {
      * Returns whether the gradient pixels fully cover the originals.
      * If true, then it should not be necessary to save the images for undo.
      */
-    public boolean fullyCovers() {
+    public boolean isFullyCovering() {
         return colorType != GradientColorType.FG_TO_TRANSPARENT
             && blendingMode == BlendingMode.NORMAL
             && opacity == 1.0f;
@@ -192,8 +196,8 @@ public class Gradient implements Serializable, Debuggable {
         return colorType;
     }
 
-    public boolean isReverted() {
-        return reverted;
+    public boolean isReversed() {
+        return reversed;
     }
 
     public BlendingMode getBlendingMode() {
@@ -230,11 +234,11 @@ public class Gradient implements Serializable, Debuggable {
     }
 
     public void startMovement() {
-        moveStartDrag = drag.copy();
+        origDrag = drag.copy();
     }
 
     public void moveWhileDragging(double x, double y) {
-        drag = moveStartDrag.imTranslatedCopy(x, y);
+        drag = origDrag.imTranslatedCopy(x, y);
     }
 
     public void endMovement() {
@@ -260,7 +264,13 @@ public class Gradient implements Serializable, Debuggable {
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
 
+        node.add(drag.createDebugNode("drag"));
         node.addAsString("type", type);
+        node.addAsString("cycle method", cycleMethod);
+        node.addAsString("color type", colorType);
+        node.addBoolean("reversed", reversed);
+        node.addAsString("blending mode", blendingMode);
+        node.addFloat("opacity", opacity);
 
         return node;
     }

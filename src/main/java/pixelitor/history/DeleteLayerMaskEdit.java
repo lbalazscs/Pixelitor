@@ -31,17 +31,17 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the deletion of a layer mask
  */
 public class DeleteLayerMaskEdit extends PixelitorEdit {
-    private final LayerMask oldMask;
+    private final LayerMask prevMask;
     private final Layer layer;
-    private final MaskViewMode oldMode;
+    private final MaskViewMode prevMode;
 
-    public DeleteLayerMaskEdit(Composition comp, Layer layer, LayerMask oldMask, MaskViewMode oldMode) {
+    public DeleteLayerMaskEdit(Composition comp, Layer layer, LayerMask prevMask, MaskViewMode prevMode) {
         super("Delete Layer Mask", comp);
-        this.oldMode = oldMode;
+        this.prevMode = prevMode;
 
         assert layer.isActive() || AppMode.isUnitTesting();
         this.layer = layer;
-        this.oldMask = oldMask;
+        this.prevMask = prevMask;
     }
 
     @Override
@@ -52,8 +52,8 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
 
         super.undo();
 
-        layer.addConfiguredMask(oldMask);
-        oldMode.activate(comp, layer);
+        layer.addConfiguredMask(prevMask);
+        prevMode.activate(comp, layer);
     }
 
     @Override
@@ -68,8 +68,8 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode(key);
 
         node.add(layer.createDebugNode());
-        node.add(oldMask.createDebugNode("old mask"));
-        node.addAsString("old mode", oldMode);
+        node.add(prevMask.createDebugNode("previous mask"));
+        node.addAsString("previous mode", prevMode);
 
         return node;
     }

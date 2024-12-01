@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,28 +21,26 @@ import javax.imageio.ImageWriter;
 import javax.imageio.event.IIOWriteProgressListener;
 
 /**
- * Tracks the writing of a large file
- * with the help of a {@link ProgressTracker}
+ * Tracks the writing of a file with the help of a {@link ProgressTracker}.
  */
-public class TrackerWriteProgressListener implements IIOWriteProgressListener {
+public class TrackingWriteProgressListener implements IIOWriteProgressListener {
     private final ProgressTracker tracker;
-    private int workDone = 0;
+    private int trackedPercentage = 0;
 
-    public TrackerWriteProgressListener(ProgressTracker tracker) {
+    public TrackingWriteProgressListener(ProgressTracker tracker) {
         this.tracker = tracker;
     }
 
     @Override
     public void imageStarted(ImageWriter source, int imageIndex) {
-
     }
 
     @Override
     public void imageProgress(ImageWriter source, float percentageDone) {
-        int progress = (int) percentageDone;
-        if (progress > workDone) {
-            tracker.unitsDone(progress - workDone);
-            workDone = progress;
+        int currentPercentage = Math.round(percentageDone);
+        if (currentPercentage > trackedPercentage) {
+            tracker.unitsDone(currentPercentage - trackedPercentage);
+            trackedPercentage = currentPercentage;
         }
     }
 

@@ -263,7 +263,7 @@ public class FilterSearchPanel extends JPanel {
 
     private static class SearchIcon extends VectorIcon {
         public SearchIcon() {
-            super(Themes.getCurrent().isDark() ? Themes.LIGHT_ICON_COLOR : LayerGUI.SELECTED_COLOR, 20, 14);
+            super(Themes.getActive().isDark() ? Themes.LIGHT_ICON_COLOR : LayerGUI.SELECTED_COLOR, 20, 14);
         }
 
         @Override

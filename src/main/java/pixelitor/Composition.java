@@ -632,12 +632,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void addLayersToUI() {
         assert checkInvariants();
 
-        Layer activeRootBefore = activeRoot;
+        Layer origActiveRoot = activeRoot;
 
         // this shouldn't change the active layer here,
         // but sets the last button to selected
         forEachTopLevelLayer(this::addLayerToGUI);
-        assert activeRoot == activeRootBefore;
+        assert activeRoot == origActiveRoot;
 
         // correct the selection
         LayerGUI ui = (LayerGUI) activeRoot.getUI();
@@ -898,7 +898,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void isolate(Layer layer, boolean addHistory) {
-        if (addHistory) { // currently not undoing an "isolate"
+        if (addHistory) { // not undoing an "isolate"
             // check if we should undo the last isolate
             if (History.getEditToBeUndone() instanceof IsolateEdit isolateEdit) {
                 if (isolateEdit.getLayer() == layer) {
@@ -1091,14 +1091,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
-    public void moveActiveContent(MoveMode mode, double relImX, double relImY) {
+    public void moveActiveContent(MoveMode mode, double imDx, double imDy) {
         if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
-            layer.moveWhileDragging(relImX, relImY);
+            layer.moveWhileDragging(imDx, imDy);
             layer.getHolder().invalidateImageCache();
         }
         if (mode.movesSelection() && selection != null) {
-            selection.moveWhileDragging(relImX, relImY);
+            selection.moveWhileDragging(imDx, imDy);
         }
         update();
     }
@@ -1405,8 +1405,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public void intersectSelection(Rectangle2D cropRect) {
         if (selection != null) {
-            Shape currentShape = selection.getShape();
-            Shape intersection = ShapeCombinator.INTERSECT.combine(currentShape, cropRect);
+            Shape intersection = ShapeCombinator.INTERSECT.combine(
+                selection.getShape(), cropRect);
+
             if (intersection.getBounds().isEmpty()) {
                 selection.dispose();
                 setSelectionRef(null);

@@ -32,8 +32,8 @@ import java.util.concurrent.CompletableFuture;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
- * Copies the image given by the {@link CopySource}
- * to the system clipboard
+ * The action of copying an image from a specified {@link CopySource}
+ * to the system clipboard.
  */
 public class CopyAction extends OpenViewEnabledAction {
     public static final CopyAction COPY_LAYER = new CopyAction(CopySource.LAYER_OR_MASK);
@@ -45,25 +45,25 @@ public class CopyAction extends OpenViewEnabledAction {
 
     private static void copy(Composition comp, CopySource source) {
         switch (source.getImage(comp)) {
-            case Success<BufferedImage, ?>(var img) -> startImageCopy(img);
+            case Success<BufferedImage, ?>(var img) -> startAsyncCopy(img);
             case Error<?, String>(var errorMsg) -> Dialogs.showErrorDialog(
-                "Error", "Could not copy because " + errorMsg);
+                "Copy Failed", "Could not copy because " + errorMsg);
         }
     }
 
-    private static void startImageCopy(BufferedImage img) {
+    private static void startAsyncCopy(BufferedImage img) {
         // make a copy, because otherwise changing the image
         // will also change the clipboard contents
-        BufferedImage copy = ImageUtils.copySubImage(img);
+        BufferedImage imageCopy = ImageUtils.copySubImage(img);
 
         ProgressHandler progressHandler = Messages.startProgress("Copying to clipboard", -1);
-        CompletableFuture.runAsync(() -> copyImage(copy))
-            .thenRunAsync(() -> afterCopyActions(progressHandler), onEDT)
+        CompletableFuture.runAsync(() -> transferToClipboard(imageCopy))
+            .thenRunAsync(() -> postCopyEDTActions(progressHandler), onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private static void copyImage(BufferedImage copy) {
-        Transferable imageTransferable = new ImageTransferable(copy);
+    private static void transferToClipboard(BufferedImage image) {
+        Transferable imageTransferable = new ImageTransferable(image);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
         try {
@@ -73,7 +73,7 @@ public class CopyAction extends OpenViewEnabledAction {
         }
     }
 
-    private static void afterCopyActions(ProgressHandler handler) {
+    private static void postCopyEDTActions(ProgressHandler handler) {
         handler.stopProgress();
         Messages.showStatusMessage("Image copied to the clipboard.");
     }

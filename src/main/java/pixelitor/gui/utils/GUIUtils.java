@@ -27,7 +27,7 @@ import pixelitor.filters.gui.Resettable;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
@@ -269,7 +269,7 @@ public final class GUIUtils {
             // if after BUSY_CURSOR_DELAY_MS the original task is
             // still running, set the cursor to the delay cursor
             timer.schedule(startBusyCursorTask, delay);
-            task.run(); // on the current thread!
+            task.run(); // on this thread!
         } finally {
             // reset the cursor when the original task has stopped running
             timer.cancel();
@@ -358,7 +358,7 @@ public final class GUIUtils {
                     return;
                 }
 
-                IO.save(comp, false);
+                FileIO.save(comp, false);
             }
             try {
                 Desktop.getDesktop().print(file);

@@ -343,16 +343,20 @@ public final class Utils {
         return (int) (float01 * 100);
     }
 
-    public static File checkExecutable(String dirName, String exeName) {
-        if (dirName.isEmpty()) {
+    /**
+     * Checks if an executable file with the given name exists and
+     * can be executed in the given directory.
+     */
+    public static File findExecutable(String dirPath, String executableName) {
+        if (dirPath.isEmpty()) {
             return null;
         }
         if (JVM.isWindows) {
-            exeName += ".exe";
+            executableName += ".exe";
         }
-        File exeFile = new File(dirName, exeName);
-        if (exeFile.exists() && exeFile.canExecute()) {
-            return exeFile;
+        File executableFile = new File(dirPath, executableName);
+        if (executableFile.exists() && executableFile.canExecute()) {
+            return executableFile;
         }
         return null;
     }

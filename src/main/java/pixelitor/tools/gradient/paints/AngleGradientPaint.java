@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,7 +92,7 @@ public record AngleGradientPaint(Drag drag, Color startColor, Color endColor,
             endBlue = endColor.getBlue();
 
             this.cm = cm;
-            drawAngle = drag.getDrawAngle();
+            drawAngle = drag.calcDrawAngle();
         }
 
         @Override
@@ -172,7 +172,7 @@ public record AngleGradientPaint(Drag drag, Color startColor, Color endColor,
         }
 
         public double interpolate(double x, double y) {
-            double relativeAngle = drag.getAngleFromStartTo(x, y) - drawAngle;
+            double relativeAngle = drag.calcAngleFromStartTo(x, y) - drawAngle;
 
             // relativeAngle is now between -2*PI and 2*PI, and the -2*PI..0 range is the same as 0..2*PI
 

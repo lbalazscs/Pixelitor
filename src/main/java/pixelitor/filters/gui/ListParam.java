@@ -80,8 +80,8 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
         setSelectedValue(choice, false);
     }
 
-    private void setSelectedValue(E currentChoice, boolean trigger) {
-        setSelectedItem(currentChoice, trigger);
+    private void setSelectedValue(E newChoice, boolean trigger) {
+        setSelectedItem(newChoice, trigger);
     }
 
     @Override

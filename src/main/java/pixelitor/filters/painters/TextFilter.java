@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * A filter that adds a text to the current image layer.
+ * A filter that adds a text to the active image layer.
  * It has the same GUI as a {@link TextLayer}.
  */
 public class TextFilter extends FilterWithGUI {

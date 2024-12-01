@@ -826,7 +826,7 @@ public class MainGuiTest {
 
     private static void testPreferencesUIChooser(DialogFixture dialog) {
         var uiChooser = dialog.comboBox("uiChooser");
-        if (EDT.call(() -> ImageArea.isCurrentMode(FRAMES))) {
+        if (EDT.call(() -> ImageArea.isActiveMode(FRAMES))) {
             uiChooser.requireSelection("Internal Windows");
             uiChooser.selectItem("Tabs");
             uiChooser.selectItem("Internal Windows");
@@ -1444,7 +1444,7 @@ public class MainGuiTest {
 
         testGuides();
 
-        if (ImageArea.isCurrentMode(FRAMES)) {
+        if (ImageArea.isActiveMode(FRAMES)) {
             runMenuCommand("Cascade");
             runMenuCommand("Tile");
         }
@@ -2245,7 +2245,7 @@ public class MainGuiTest {
                     }
                     pw.comboBox("colorTypeCB").selectItem(colorType.toString());
 
-                    GUITestUtils.checkRandomly(pw.checkBox("revertCB"));
+                    GUITestUtils.checkRandomly(pw.checkBox("reverseCB"));
 
                     // drag the gradient
                     Point start = mouse.moveRandomlyWithinCanvas();

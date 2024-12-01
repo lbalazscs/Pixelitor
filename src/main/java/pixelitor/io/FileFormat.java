@@ -132,7 +132,7 @@ public enum FileFormat {
             img = converter.apply(img);
         }
 
-        IO.saveImageToFile(img, settings);
+        FileIO.saveImageToFile(img, settings);
     }
 
     public FileFilter getFileFilter() {

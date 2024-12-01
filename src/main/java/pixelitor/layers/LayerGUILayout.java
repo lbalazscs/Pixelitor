@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,10 @@ import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.LayoutManager;
 
 /**
  * The layout manager for a {@link LayerGUI}
@@ -50,7 +53,7 @@ public class LayerGUILayout implements LayoutManager {
     public static final int SMALL_THUMB_SIZE = 24;
     private static final int GAP = 7;
 
-    private static boolean isNimbus = Themes.getCurrent().isNimbus();
+    private static boolean isNimbus = Themes.getActive().isNimbus();
 
     // The labels will appear to have thumbSize, but in reality
     // they must be larger in order to leave space to the borders

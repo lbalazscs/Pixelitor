@@ -23,7 +23,6 @@ import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.*;
-import pixelitor.io.IO;
 import pixelitor.io.FileChooserConfig.SelectableFormats;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -43,18 +42,21 @@ import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
 
 /**
- * If ImageMagick is installed and can be found in the PATH, then this
- * class provides static utility methods that use it.
+ * Utility class for working with ImageMagick if installed and accessible
+ * in the PATH (or if the ImageMagick path is configured in the settings).
  */
 public class ImageMagick {
     private ImageMagick() {
-        // only static utility methods
+        // utility class
     }
 
     // check only once, when this class is first used
-    private static final boolean installed = checkInstalled();
-    private static File magickCommand;
+    private static final boolean installed = checkImageMagickInstalled();
+    private static File magickExecutable;
 
+    /**
+     * Exports the given composition using ImageMagick.
+     */
     public static void export(Composition comp) {
         if (!installed) {
             showNotInstalledDialog();
@@ -63,39 +65,40 @@ public class ImageMagick {
 
         BufferedImage image = comp.getCompositeImage();
         String suggestedFileName = FileUtils.removeExtension(comp.getName());
-        File file = FileChoosers.showSaveDialog(new FileChooserConfig(
+
+        File targetFile = FileChoosers.showSaveDialog(new FileChooserConfig(
             suggestedFileName, null, SelectableFormats.ANY));
-        if (file == null) { // canceled
+        if (targetFile == null) { // canceled
             return;
         }
 
-        ExportSettings settings = settingsFromExtension(file);
-        boolean accepted = true;
-        if (settings instanceof JPanel) { // has GUI
-            accepted = Dialogs.showOKCancelDialog(settings,
-                settings.getFormatName() + " Export Options for " + file.getName(),
+        ExportSettings settings = determineExportSettings(targetFile);
+        if (settings instanceof JPanel) { // has a configuration GUI
+            boolean dialogAccepted = Dialogs.showOKCancelDialog(settings,
+                settings.getFormatName() + " Export Options for " + targetFile.getName(),
                 new String[]{"Export", GUIText.CANCEL}, 0,
                 JOptionPane.PLAIN_MESSAGE);
-        }
-        if (!accepted) {
-            return;
+            if (!dialogAccepted) {
+                return;
+            }
         }
 
-        var progressHandler = Messages.startProgress("ImageMagick Export", -1);
-        CompletableFuture.runAsync(() -> exportImage(image, file, settings), onIOThread)
+        // executes the export asynchronously
+        var progressHandler = Messages.startProgress("Exporting with ImageMagick", -1);
+        CompletableFuture.runAsync(() -> exportImage(image, targetFile, settings), onIOThread)
             .thenRunAsync(() -> {
                 progressHandler.stopProgress();
-                comp.afterSuccessfulSaveActions(file, true);
+                comp.afterSuccessfulSaveActions(targetFile, true);
                 comp.setDirty(false);
             }, onEDT)
-            .whenComplete((v, e) -> {
-                if (e != null) {
-                    Messages.showExceptionOnEDT(e);
+            .whenComplete((result, exception) -> {
+                if (exception != null) {
+                    Messages.showExceptionOnEDT(exception);
                 }
             });
     }
 
-    private static ExportSettings settingsFromExtension(File file) {
+    private static ExportSettings determineExportSettings(File file) {
         String ext = FileUtils.getExtension(file.getName());
         if (ext == null) {
             return ExportSettings.DEFAULTS;
@@ -107,6 +110,9 @@ public class ImageMagick {
         };
     }
 
+    /**
+     * Imports a composition from a file using ImageMagick.
+     */
     public static void importComposition() {
         if (!installed) {
             showNotInstalledDialog();
@@ -128,7 +134,7 @@ public class ImageMagick {
             return;
         }
 
-        var progressHandler = Messages.startProgress("ImageMagick Import", -1);
+        var progressHandler = Messages.startProgress("Importing with ImageMagick", -1);
         CompletableFuture.supplyAsync(() -> importImage(file), onIOThread)
             .thenAcceptAsync(img -> {
                 // called if there were no exceptions while importing
@@ -136,19 +142,38 @@ public class ImageMagick {
                 progressHandler.stopProgress();
                 Views.addJustLoadedComp(comp);
             }, onEDT)
-            .whenComplete((v, e) -> {
+            .whenComplete((result, exception) -> {
                 // always called
-                if (e != null) {
+                if (exception != null) {
                     progressHandler.stopProgressOnEDT();
+                    FileIO.handleFileReadErrors(exception);
                 }
-                IO.handleReadingErrors(e);
             });
     }
 
     public static void exportImage(BufferedImage img, File outFile,
                                    ExportSettings settings) {
+        List<String> command = createExportCommand(outFile, settings);
+
+        // a process that reads a png file from the standard input,
+        // and converts it to the given file
+        ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
+        pb.redirectInput(ProcessBuilder.Redirect.PIPE);
+
+        try {
+            Process process = pb.start();
+            FileIO.writeToCommandLineProcess(img, process);
+            process.waitFor();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static List<String> createExportCommand(File outFile, ExportSettings settings) {
         List<String> command = new ArrayList<>();
-        command.add(magickCommand.getAbsolutePath());
+        command.add(magickExecutable.getAbsolutePath());
         command.add("convert");
 
 // this setting doesn't seem to have an effect on the speed
@@ -160,47 +185,28 @@ public class ImageMagick {
         settings.addMagickOptions(command);
         command.add(settings.getFormatSpecifier() + outFile.getAbsolutePath());
 
-        System.out.println("ImageMagick::exportImage: command = " + command);
-
-        // a process that reads a png file from the standard input,
-        // and converts it to the given file
-        ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
-        pb.redirectInput(ProcessBuilder.Redirect.PIPE);
-        try {
-            Process p = pb.start();
-            try (OutputStream magickInput = p.getOutputStream()) {
-                IO.writeToOutStream(img, magickInput);
-                magickInput.flush();
-            }
-            p.waitFor();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return command;
     }
 
     private static BufferedImage importImage(File file) {
         // a process that reads the given file,
         // and writes it as png (depth=8 bit) to the standard output
         ProcessBuilder pb = new ProcessBuilder(
-            magickCommand.getAbsolutePath(), "convert", file.getAbsolutePath(),
+            magickExecutable.getAbsolutePath(), "convert", file.getAbsolutePath(),
             "-depth", "8", // don't send 16-bit data
             "-quality", "1", // importing is faster with minimal compression
             "png:-");
         BufferedImage img;
         try {
-            Process p = pb.start();
+            Process process = pb.start();
 
             // read the image as png after ImageMagick did the conversion
-            try (InputStream magickOutput = p.getInputStream()) {
-                img = ImageIO.read(magickOutput);
-            }
+            img = FileIO.readFromCommandLineProcess(process);
         } catch (IOException e) {
-            throw DecodingException.magick(file, e);
+            throw DecodingException.forMagickImport(file, e);
         }
         if (img == null) {
-            throw DecodingException.magick(file, null);
+            throw DecodingException.forMagickImport(file, null);
         }
 
         return img;
@@ -212,7 +218,7 @@ public class ImageMagick {
             System.exit(1);
         }
 
-        File inputFile = new File("C:\\Users\\Laci\\Desktop\\new_bosch.jpg");
+        File inputFile = new File(System.getProperty("user.home"), "test_input.jpg");
         System.out.println("ImageMagick::main: inputFile = " + inputFile.getAbsolutePath() + (inputFile.exists() ? " - exists" : " - does not exist!"));
         BufferedImage img = ImageIO.read(inputFile);
 
@@ -220,9 +226,9 @@ public class ImageMagick {
         ImageIO.write(img, "PNG", origFile);
         System.out.println("ImageMagick::main: origFile = " + origFile.getAbsolutePath() + (origFile.exists() ? " - exists" : " - does not exist!"));
 
-        BufferedImage out = IO.runCommandLineFilter(img,
+        BufferedImage out = FileIO.runCommandLineFilter(img,
             List.of(
-                magickCommand.getAbsolutePath(),
+                magickExecutable.getAbsolutePath(),
                 "convert",
                 "png:-",
                 "-bilateral-blur",
@@ -234,13 +240,13 @@ public class ImageMagick {
         System.out.println("ImageMagick::main: outFile = " + outFile.getAbsolutePath() + (outFile.exists() ? " - exists" : " - does not exist!"));
     }
 
-    private static boolean checkInstalled() {
-        magickCommand = Utils.checkExecutable(magickDirName, "magick");
-        if (magickCommand != null) {
-            return true;
+    private static boolean checkImageMagickInstalled() {
+        magickExecutable = Utils.findExecutable(magickDirName, "magick");
+        if (magickExecutable != null) {
+            return true; // executable found
         }
 
-        // try to find it
+        // try to find it in the PATH
         String searchCommand = JVM.isWindows ? "where" : "which";
 
         ProcessBuilder pb = new ProcessBuilder(searchCommand, "magick");
@@ -254,8 +260,8 @@ public class ImageMagick {
             }
             int exitValue = process.waitFor();
             if (exitValue == 0 && magickFullPath != null) {
-                magickCommand = new File(magickFullPath);
-                magickDirName = magickCommand.getParent();
+                magickExecutable = new File(magickFullPath);
+                magickDirName = magickExecutable.getParent();
             }
             return exitValue == 0;
         } catch (InterruptedException | IOException e) {
@@ -264,7 +270,7 @@ public class ImageMagick {
     }
 
     private static void showNotInstalledDialog() {
-        Dialogs.showInfoDialog("ImageMagick 7 not found",
+        Dialogs.showInfoDialog("ImageMagick 7 Not Found",
             "<html>ImageMagick 7 was not found in the PATH" +
                 "<br>or in the folder configured in the Preferences." +
                 "<br><br>It can be downloaded from https://imagemagick.org");

@@ -16,7 +16,7 @@
  */
 package pixelitor.menus.file;
 
-import pixelitor.io.IO;
+import pixelitor.io.FileIO;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -40,7 +40,7 @@ public class RecentFilesMenuItem extends JMenuItem {
     private void openRecentFileAsync() {
         File file = fileEntry.getFile();
         if (file.exists()) {
-            IO.openFileAsync(file, true);
+            FileIO.openFileAsync(file, true);
         } else {
             // the file was deleted since Pixelitor started
             String errorMessage = format("The file %s doesn't exist.", file);

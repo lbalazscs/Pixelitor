@@ -37,21 +37,21 @@ public enum AppMode {
     UNIT_TESTS() {
     };
 
-    public static AppMode CURRENT = STANDARD_GUI;
+    public static AppMode ACTIVE = STANDARD_GUI;
 
     /**
      * Returns true if the app was started in development mode.
      * In this mode, additional menus and correctness checks are enabled.
      */
     public static boolean isDevelopment() {
-        return CURRENT == DEVELOPMENT_GUI;
+        return ACTIVE == DEVELOPMENT_GUI;
     }
 
     public static boolean isUnitTesting() {
-        return CURRENT == UNIT_TESTS;
+        return ACTIVE == UNIT_TESTS;
     }
 
     public static void setUnitTestingMode() {
-        CURRENT = UNIT_TESTS;
+        ACTIVE = UNIT_TESTS;
     }
 }

@@ -24,21 +24,23 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
- * Support for drawing drag information (pixels, angles) in the tools.
- * All coordinates are in component space, unless they have the im prefix in their name.
+ * The rendering of drag-related information (distances, angles)
+ * in tools. All coordinates are in component space unless
+ * they have the 'im' prefix (image space) in their name.
  */
 public class DragDisplay {
     private static final AlphaComposite BG_COMPOSITE = AlphaComposite.SrcOver.derive(0.65f);
-    private static final BasicStroke BG_STROKE = new BasicStroke(1.0f);
-    private static final int BG_RECT_RADIUS = 20;
-    private static final int BG_TEXT_HOR_DIST = 8;
-    private static final int BG_TEXT_VER_DIST = 7;
+    private static final BasicStroke BG_BORDER_STROKE = new BasicStroke(1.0f);
+    private static final int BG_CORNER_RADIUS = 20;
+    private static final int TEXT_HOR_PADDING = 8;
+    private static final int TEXT_VER_PADDING = 7;
 
-    public static final int BG_WIDTH_PIXEL = 84;
-    public static final int BG_WIDTH_ANGLE = 70; // enough for an angle
-    public static final int ONE_LINER_BG_HEIGHT = 22;
-    public static final int TWO_LINER_BG_HEIGHT = 47;
-    public static final int MOUSE_DISPLAY_DISTANCE = 10;
+    public static final int BG_WIDTH_PIXELS = 84;
+    public static final int BG_WIDTH_ANGLES = 70; // enough for an angle
+    public static final int SINGLE_LINE_HEIGHT = 22;
+    public static final int DOUBLE_LINE_HEIGHT = 47;
+    public static final int OFFSET_FROM_MOUSE = 10;
+    
     private final Graphics2D g;
     private final Composite origComposite;
     private final Stroke origStroke;
@@ -52,45 +54,55 @@ public class DragDisplay {
         origClip = g.getClip();
         this.bgWidth = bgWidth;
 
-        g.setStroke(BG_STROKE);
+        g.setStroke(BG_BORDER_STROKE);
         g.setClip(null);
     }
 
-    public static String getHeightDisplayString(double imHeight) {
+    /**
+     * Generates a display string for vertical height.
+     */
+    public static String formatHeightString(double imHeight) {
         return "↕ = " + Math.abs((int) imHeight) + " px";
     }
 
-    public static String getWidthDisplayString(double imWidth) {
+    /**
+     * Generates a display string for horizontal width.
+     */
+    public static String formatWidthString(double imWidth) {
         return "↔ = " + Math.abs((int) imWidth) + " px";
     }
 
-    public static void displayRelativeMovement(Graphics2D g, int imDx, int imDy,
+    /**
+     * Displays the relative movement information with directional arrows.
+     */
+    public static void displayRelativeMovement(Graphics2D g,
+                                               int imDx, int imDy,
                                                float x, float y) {
-        String dxString;
-        if (imDx >= 0) {
-            dxString = "→ = " + imDx + " px";
-        } else {
-            dxString = "← = " + (-imDx) + " px";
-        }
-        String dyString;
-        if (imDy >= 0) {
-            dyString = "↓ = " + imDy + " px";
-        } else {
-            dyString = "↑ = " + (-imDy) + " px";
-        }
+        String horMovement = (imDx >= 0)
+            ? "→ = " + imDx + " px"
+            : "← = " + (-imDx) + " px";
 
-        DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXEL);
+        String verMovement = (imDy >= 0)
+            ? "↓ = " + imDy + " px"
+            : "↑ = " + (-imDy) + " px";
 
-        dd.drawTwoLines(dxString, dyString, x, y);
-
-        dd.finish();
+        DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXELS);
+        dd.drawTwoLines(horMovement, verMovement, x, y);
+        dd.cleanup();
     }
 
-    private void drawBg(float x, float y, int height) {
+    /**
+     * Draws the semi-transparent background rectangle with border.
+     *
+     * @param x      Left coordinate of the background
+     * @param y      Bottom coordinate of the background
+     * @param height Height of the background rectangle
+     */
+    private void drawBackground(float x, float y, int height) {
         g.setComposite(BG_COMPOSITE);
         g.setColor(Color.BLACK);
         RoundRectangle2D rect = new RoundRectangle2D.Float(
-            x, y - height, bgWidth, height, BG_RECT_RADIUS, BG_RECT_RADIUS);
+            x, y - height, bgWidth, height, BG_CORNER_RADIUS, BG_CORNER_RADIUS);
         g.fill(rect);
         g.setColor(Color.WHITE);
         g.draw(rect);
@@ -98,34 +110,46 @@ public class DragDisplay {
     }
 
     /**
-     * x and y are the bottom left coordinates of the background rectangle.
+     * Draws a single-line message at the given position.
+     *
+     * @param text Text to display
+     * @param x Left coordinate of the background
+     * @param y Bottom coordinate of the background
      */
-    public void drawOneLine(String s, float x, float y) {
-        drawBg(x, y, ONE_LINER_BG_HEIGHT);
-        g.drawString(s, x + BG_TEXT_HOR_DIST, y - BG_TEXT_VER_DIST);
+    public void drawOneLine(String text, float x, float y) {
+        drawBackground(x, y, SINGLE_LINE_HEIGHT);
+        g.drawString(text, x + TEXT_HOR_PADDING, y - TEXT_VER_PADDING);
     }
 
-    public void drawTwoLines(String s1, String s2, float x, float y) {
-        drawBg(x, y, TWO_LINER_BG_HEIGHT);
-        g.drawString(s1, x + BG_TEXT_HOR_DIST, y - 23 - BG_TEXT_VER_DIST);
-        g.drawString(s2, x + BG_TEXT_HOR_DIST, y - BG_TEXT_VER_DIST);
+    /**
+     * Draws a two-line message at the given position.
+     *
+     * @param line1 First line of text
+     * @param line2 Second line of text
+     * @param x     Left coordinate of the background
+     * @param y     Bottom coordinate of the background
+     */
+    public void drawTwoLines(String line1, String line2, float x, float y) {
+        drawBackground(x, y, DOUBLE_LINE_HEIGHT);
+        g.drawString(line1, x + TEXT_HOR_PADDING, y - 23 - TEXT_VER_PADDING);
+        g.drawString(line2, x + TEXT_HOR_PADDING, y - TEXT_VER_PADDING);
     }
 
-    public void finish() {
+    public void cleanup() {
         g.setStroke(origStroke);
         g.setClip(origClip);
     }
 
     /**
-     * The first time {@link DragDisplay} is used, it initializes
-     * some fonts (sun.font.CompositeFont.doDeferredInitialisation),
-     * and it is better to do this before the GUI starts,
-     * otherwise it would block the EDT
+     * The first time {@link DragDisplay} is used, it triggers font
+     * initialization (sun.font.CompositeFont.doDeferredInitialisation).
+     * This method should be called before the GUI starts
+     * to prevent blocking the EDT.
      */
     public static void initializeFont() {
         BufferedImage tmp = ImageUtils.createSysCompatibleImage(10, 10);
         Graphics2D g2 = tmp.createGraphics();
-        DragDisplay dd = new DragDisplay(g2, BG_WIDTH_PIXEL);
+        DragDisplay dd = new DragDisplay(g2, BG_WIDTH_PIXELS);
 
         dd.drawOneLine("x", 0, 10);
 

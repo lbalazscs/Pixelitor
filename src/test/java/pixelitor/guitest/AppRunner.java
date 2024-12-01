@@ -130,10 +130,10 @@ public class AppRunner {
         keyboard = new Keyboard(pw, robot, this);
         layersContainer = new LayersContainerFixture(robot);
 
-        if (Language.getCurrent() != Language.ENGLISH) {
-            throw new IllegalStateException("language is " + Language.getCurrent());
+        if (Language.getActive() != Language.ENGLISH) {
+            throw new IllegalStateException("language is " + Language.getActive());
         }
-        if (EDT.call(() -> ImageArea.isCurrentMode(ImageArea.Mode.FRAMES))) {
+        if (EDT.call(() -> ImageArea.isActiveMode(ImageArea.Mode.FRAMES))) {
             EDT.run(ImageArea::toggleUI);
         }
 
@@ -881,7 +881,7 @@ public class AppRunner {
 
         pw.comboBox("typeCB").selectItem(gradientType.toString());
         pw.comboBox("colorTypeCB").selectItem(colorType.toString());
-        pw.checkBox("revertCB").uncheck();
+        pw.checkBox("reverseCB").uncheck();
 
         EDT.setFgBgColors(fgColor, bgColor);
         mouse.drag(dragLocation);
@@ -894,7 +894,7 @@ public class AppRunner {
 
         // draw a radial gradient
         pw.comboBox("typeCB").selectItem(gradientType.toString());
-        pw.checkBox("revertCB").check();
+        pw.checkBox("reverseCB").check();
 
         if (EDT.getZoomLevelOfActive() != ZoomLevel.ACTUAL_SIZE) {
             // otherwise location on screen can lead to crazy results

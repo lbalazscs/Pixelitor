@@ -213,7 +213,7 @@ public class ZoomLevel {
         double availableHeight = availableArea.getHeight();
 
         // Adjust for frame decoration height if in frames mode
-        if (ImageArea.isCurrentMode(ImageArea.Mode.FRAMES)) {
+        if (ImageArea.isActiveMode(ImageArea.Mode.FRAMES)) {
             int frameDecorationHeight = 35; // Nimbus
             availableHeight -= frameDecorationHeight;
         }

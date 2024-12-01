@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -87,7 +87,7 @@ public abstract class VectorIcon implements Icon, Cloneable {
         return new VectorIcon(Color.WHITE, 24, 24) {
             @Override
             protected void paintIcon(Graphics2D g) {
-                boolean darkTheme = Themes.getCurrent().isDark();
+                boolean darkTheme = Themes.getActive().isDark();
                 g.setColor(darkTheme ? DARK_BG : LIGHT_BG);
                 g.fillRect(0, 0, 24, 24);
 

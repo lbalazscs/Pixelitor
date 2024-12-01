@@ -61,6 +61,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.colors.Colors.toPackedARGB;
 import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
@@ -493,7 +494,7 @@ public class TestHelper {
         Utils.ensureAssertionsEnabled();
         Utils.preloadUnitTestFontNames();
 
-        Language.setCurrent(Language.ENGLISH);
+        Language.setActive(Language.ENGLISH);
         Messages.setHandler(new TestMessageHandler());
 
         // make sure that the active tool is not null
@@ -511,5 +512,15 @@ public class TestHelper {
         when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
         when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
         FgBgColors.setUI(fgBgColorSelector);
+    }
+
+    public static BufferedImage create1x1Image(Color c) {
+        return create1x1Image(c.getAlpha(), c.getRed(), c.getGreen(), c.getBlue());
+    }
+
+    public static BufferedImage create1x1Image(int a, int r, int g, int b) {
+        BufferedImage img = ImageUtils.createSysCompatibleImage(1, 1);
+        img.setRGB(0, 0, toPackedARGB(a, r, g, b));
+        return img;
     }
 }

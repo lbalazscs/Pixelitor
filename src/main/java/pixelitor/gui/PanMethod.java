@@ -56,7 +56,7 @@ public enum PanMethod {
      * Whether space key events should be ignored for panning.
      */
     public static boolean shouldIgnoreSpace() {
-        return CURRENT != SPACE_DRAG;
+        return ACTIVE != SPACE_DRAG;
     }
 
     /**
@@ -64,21 +64,21 @@ public enum PanMethod {
      */
     public abstract boolean shouldStartPan(PMouseEvent e);
 
-    public static PanMethod CURRENT = SPACE_DRAG;
+    public static PanMethod ACTIVE = SPACE_DRAG;
 
     public static void loadFromPreferences() {
         String loadedCode = AppPreferences.loadPan();
 
         for (PanMethod method : values()) {
             if (method.saveCode().equals(loadedCode)) {
-                CURRENT = method;
+                ACTIVE = method;
                 break;
             }
         }
     }
 
     public static void changeTo(PanMethod newMethod) {
-        CURRENT = newMethod;
+        ACTIVE = newMethod;
     }
 
     public String saveCode() {
