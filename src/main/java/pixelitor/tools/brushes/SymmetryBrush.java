@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,7 +72,7 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public void rememberPrevious(PPoint previous) {
+    public void setPrevious(PPoint previous) {
         throw new IllegalStateException("should not be called");
     }
 
@@ -151,7 +151,7 @@ public class SymmetryBrush implements Brush {
                 // the previous coordinates to the newly created brushes
                 if (previous0 != null) {
                     PPoint generatedPrevious = symmetry.transform(previous0, i);
-                    brushes[i].rememberPrevious(generatedPrevious);
+                    brushes[i].setPrevious(generatedPrevious);
                 }
             }
         } else if (newNumBrushes < numBrushes) {

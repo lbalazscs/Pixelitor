@@ -30,7 +30,7 @@ public class OnePixelBrush extends AbstractBrush {
     private final OnePixelBrushSettings settings;
 
     public OnePixelBrush(OnePixelBrushSettings settings) {
-        super(1); // this radius value is not used by this brush
+        super(1); // the radius value is not used by this brush
         this.settings = settings;
     }
 
@@ -38,9 +38,9 @@ public class OnePixelBrush extends AbstractBrush {
     public void startAt(PPoint p) {
         super.startAt(p);
         repaintComp(p);
-        rememberPrevious(p);
+        setPrevious(p);
 
-        // make sure a pixel is changed without dragging
+        // ensure that a click has an effect
         continueTo(p);
     }
 
@@ -52,7 +52,12 @@ public class OnePixelBrush extends AbstractBrush {
 
         previous.drawLineTo(p, targetG);
         repaintComp(p);
-        rememberPrevious(p);
+        setPrevious(p);
+    }
+
+    @Override
+    public double getPreferredSpacing() {
+        return 0;
     }
 
     @Override
@@ -60,10 +65,5 @@ public class OnePixelBrush extends AbstractBrush {
         DebugNode node = super.createDebugNode(key);
         node.addBoolean("anti-aliasing", settings.hasAA());
         return node;
-    }
-
-    @Override
-    public double getPreferredSpacing() {
-        return 0;
     }
 }

@@ -16,7 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 
@@ -25,16 +24,6 @@ import java.awt.image.ColorModel;
  * to do their stuff.
  */
 public abstract class WholeImageFilter extends AbstractBufferedImageOp {
-    /**
-     * The output image bounds.
-     */
-    protected Rectangle transformedSpace;
-
-    /**
-     * The input image bounds.
-     */
-    protected Rectangle originalSpace;
-
     /**
      * Construct a WholeImageFilter.
      */
@@ -49,42 +38,29 @@ public abstract class WholeImageFilter extends AbstractBufferedImageOp {
 //		int type = src.getType();
 //		WritableRaster srcRaster = src.getRaster();
 
-        originalSpace = new Rectangle(0, 0, width, height);
-        transformedSpace = new Rectangle(0, 0, width, height);
-        transformSpace(transformedSpace);
-
         if (dst == null) {
             ColorModel dstCM = src.getColorModel();
             dst = new BufferedImage(dstCM, dstCM
-                    .createCompatibleWritableRaster(transformedSpace.width, transformedSpace.height), dstCM
+                    .createCompatibleWritableRaster(width, height), dstCM
                     .isAlphaPremultiplied(), null);
         }
 //		WritableRaster dstRaster = dst.getRaster();
 
         int[] inPixels = getRGB(src, 0, 0, width, height, null);
-        inPixels = filterPixels(width, height, inPixels, transformedSpace);
-        setRGB(dst, 0, 0, transformedSpace.width, transformedSpace.height, inPixels);
+        inPixels = filterPixels(width, height, inPixels);
+        setRGB(dst, 0, 0, width, height, inPixels);
 
         return dst;
     }
 
     /**
-     * Calculate output bounds for given input bounds.
-     *
-     * @param rect input and output rectangle
-     */
-    protected void transformSpace(Rectangle rect) {
-    }
-
-    /**
      * Actually filter the pixels.
      *
-     * @param width            the image width
-     * @param height           the image height
-     * @param inPixels         the image pixels
-     * @param transformedSpace the output bounds
+     * @param width    the image width
+     * @param height   the image height
+     * @param inPixels the image pixels
      * @return the output pixels
      */
-    protected abstract int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace);
+    protected abstract int[] filterPixels(int width, int height, int[] inPixels);
 }
 

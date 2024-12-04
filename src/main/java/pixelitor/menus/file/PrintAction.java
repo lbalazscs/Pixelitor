@@ -18,8 +18,8 @@
 package pixelitor.menus.file;
 
 import pixelitor.Composition;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.utils.Messages;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
 
-public class PrintAction extends OpenViewEnabledAction.Checked implements Printable {
+public class PrintAction extends AbstractViewEnabledAction implements Printable {
     private static final float DPI = 72.0f;
     private static final float PAGE_MARGIN_INCHES = 0.25f;
     private final ResourceBundle resourceBundle;

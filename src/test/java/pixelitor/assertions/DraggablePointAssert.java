@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,7 +63,7 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
     }
 
     // can be called only on an AnchorPoint
-    public DraggablePointAssert anchorPointTypeIs(AnchorPointType expected) {
+    public DraggablePointAssert typeIs(AnchorPointType expected) {
         isNotNull();
 
         if (!(actual instanceof AnchorPoint)) {

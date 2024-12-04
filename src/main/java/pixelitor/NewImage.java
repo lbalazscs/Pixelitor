@@ -22,7 +22,7 @@ import pixelitor.filters.Fill;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.NewImagePanel;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 
@@ -72,7 +72,7 @@ public final class NewImage {
     }
 
     public static Action getAction() {
-        return new PAction(NEW_IMAGE_STRING + "...", NewImage::showInDialog);
+        return new TaskAction(NEW_IMAGE_STRING + "...", NewImage::showInDialog);
     }
 
     public static String generateTitle() {

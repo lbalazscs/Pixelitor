@@ -23,8 +23,8 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.SimpleForwardingFilter;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.history.History;
 import pixelitor.layers.*;
 import pixelitor.utils.Messages;
@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 /**
  * An action for running a lazily initialized filter.
  */
-public class FilterAction extends OpenViewEnabledAction.Checked {
+public class FilterAction extends AbstractViewEnabledAction {
     @Serial
     private static final long serialVersionUID = 1L;
 

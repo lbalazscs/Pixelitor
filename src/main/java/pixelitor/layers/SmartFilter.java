@@ -24,7 +24,7 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.FilterChangedEdit;
 import pixelitor.history.History;
 import pixelitor.utils.Icons;
@@ -107,17 +107,17 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             return prevImage;
         }
 
-        return adjustImageWithMaskAndBlending(prevImage, false);
+        return adjustImage(prevImage, false);
     }
 
     // Smart filters don't use the normal layer painting mechanism,
     // therefore overriding this method isn't really necessary.
     @Override
-    protected BufferedImage adjustImageWithMaskAndBlending(BufferedImage imgSoFar,
-                                                           boolean firstVisibleLayer) {
+    protected BufferedImage adjustImage(BufferedImage currentComposite,
+                                        boolean firstVisibleLayer) {
         assert !firstVisibleLayer; // never true for smart filters
 
-        BufferedImage transformed = transformImage(imgSoFar);
+        BufferedImage transformed = transformImage(currentComposite);
 
         if (usesMask()) {
             // copy, because otherwise different masks
@@ -131,7 +131,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         } else {
             // Unlike an adjustment layer, this makes sure that imgSoFar
             // (which could be cached in the image source) isn't modified.
-            BufferedImage copy = ImageUtils.copyImage(imgSoFar);
+            BufferedImage copy = ImageUtils.copyImage(currentComposite);
 
             Graphics2D g = copy.createGraphics();
             setupComposite(g, firstVisibleLayer);
@@ -227,7 +227,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
-    public void maskingChanged() {
+    protected void maskChanged() {
         layerLevelSettingsChanged(false);
     }
 
@@ -340,24 +340,24 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         JPopupMenu popup = new JPopupMenu();
 
         if (filter instanceof FilterWithGUI) {
-            popup.add(new PAction("Edit " + getName() + "...", this::edit));
+            popup.add(new TaskAction("Edit " + getName() + "...", this::edit));
         }
-        popup.add(new PAction("Delete " + getName(), () ->
+        popup.add(new TaskAction("Delete " + getName(), () ->
             smartObject.deleteSmartFilter(this, true, true)));
-        popup.add(new PAction("Copy " + getName(), () ->
+        popup.add(new TaskAction("Copy " + getName(), () ->
             copiedSmartFilter = (SmartFilter) copy(CopyType.UNDO, true, comp)));
 
         if (!hasMask()) {
-            popup.add(new PAction("Add Layer Mask", () -> addMask(false)));
+            popup.add(new TaskAction("Add Layer Mask", () -> addMask(false)));
         }
 
-        popup.add(new PAction("Change Filter...", this::replaceFilter));
+        popup.add(new TaskAction("Replace Filter...", this::replaceFilter));
 
         if (smartObject.getNumSmartFilters() > 1) {
             popup.addSeparator();
-            popup.add(new PAction("Move Up", Icons.getUpArrowIcon(), () ->
+            popup.add(new TaskAction("Move Up", Icons.getUpArrowIcon(), () ->
                 smartObject.moveUp(this)));
-            popup.add(new PAction("Move Down", Icons.getDownArrowIcon(), () ->
+            popup.add(new TaskAction("Move Down", Icons.getDownArrowIcon(), () ->
                 smartObject.moveDown(this)));
         }
 

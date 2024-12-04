@@ -20,7 +20,7 @@ package pixelitor.gui;
 import pixelitor.AppMode;
 import pixelitor.Views;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
@@ -108,16 +108,16 @@ public class TabViewContainer extends JComponent implements ViewContainer {
     private void showPopup(MouseEvent e) {
         JPopupMenu popup = new JPopupMenu();
 
-        popup.add(new PAction("Rename...", () ->
+        popup.add(new TaskAction("Rename...", () ->
             view.getComp().rename(this)));
 
         popup.addSeparator();
 
         // close the clicked one, even if it isn't the active!
-        popup.add(new PAction(i18n("close"), () ->
+        popup.add(new TaskAction(i18n("close"), () ->
             Views.warnAndClose(view)));
 
-        popup.add(new PAction("Close Others", () ->
+        popup.add(new TaskAction("Close Others", () ->
             Views.warnAndCloseAllBut(view)));
         popup.add(Views.CLOSE_UNMODIFIED_ACTION);
         popup.add(Views.CLOSE_ALL_ACTION);
@@ -140,7 +140,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         popup.add(tabsUI.getTabPlacementMenu());
 
         if (AppMode.isDevelopment()) {
-            popup.add(new PAction("Debug View...", () ->
+            popup.add(new TaskAction("Debug View...", () ->
                 Debug.showTree(view, "View " + view.getName())));
         }
 

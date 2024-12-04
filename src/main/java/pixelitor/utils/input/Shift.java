@@ -15,18 +15,23 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools;
+package pixelitor.utils.input;
 
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.util.Random;
+
+import static java.awt.event.KeyEvent.VK_SHIFT;
 
 /**
- * Represents the state of the Ctrl key during a {@link KeyEvent}.
+ * Represents the state of the Shift key during a {@link KeyEvent}.
  */
-public enum Ctrl implements EventMaskModifier {
+public enum Shift implements EventMaskModifier {
     PRESSED {
         @Override
         public int modify(int currentMask) {
-            return currentMask | KeyEvent.CTRL_DOWN_MASK;
+            return currentMask | KeyEvent.SHIFT_DOWN_MASK;
         }
     }, RELEASED {
         @Override
@@ -35,7 +40,30 @@ public enum Ctrl implements EventMaskModifier {
         }
     };
 
-    public boolean isPressed() {
+    public boolean isDown() {
         return this == PRESSED;
+    }
+
+    public static Shift from(MouseEvent e) {
+        return e.isShiftDown() ? PRESSED : RELEASED;
+    }
+
+    public static Shift randomly(Random rand) {
+        return rand.nextBoolean() ? PRESSED : RELEASED;
+    }
+
+    public Shift press(Robot robot) {
+        if (this == PRESSED) {
+            robot.keyPress(VK_SHIFT);
+            robot.delay(50);
+        }
+        return this;
+    }
+
+    public void release(Robot robot) {
+        if (this == PRESSED) {
+            robot.keyRelease(VK_SHIFT);
+            robot.delay(50);
+        }
     }
 }

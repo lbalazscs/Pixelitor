@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.brushes;
 import pixelitor.filters.gui.UserPreset;
 
 /**
- * Angle-related settings for the brushes
+ * Angle-related settings for the brushes.
  */
 public final class AngleSettings {
     // global shared immutable instances for the most common cases
@@ -38,17 +38,13 @@ public final class AngleSettings {
         this.maxAngleJitter = maxAngleJitter;
     }
 
-    public boolean shouldJitterAngle() {
+    public boolean isJitterEnabled() {
         return maxAngleJitter > 0;
     }
 
-    public double calcJitteredAngle(double theta) {
-        double retVal = theta;
-
-        retVal -= maxAngleJitter;
-        retVal += 2 * maxAngleJitter * Math.random();
-
-        return retVal;
+    public double calcJitteredAngle(double baseAngle) {
+        double jitter = (2 * Math.random() - 1) * maxAngleJitter;
+        return baseAngle + jitter;
     }
 
     public boolean isAngled() {

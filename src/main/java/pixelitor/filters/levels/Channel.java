@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import static java.awt.Color.WHITE;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Determines which channels are currently edited.
+ * Represents the currently edited color channels.
  */
 public enum Channel {
     RGB("RGB", "rgb", BLACK) {
@@ -42,18 +42,14 @@ public enum Channel {
         }
 
         @Override
-        public double getValue(int r, int g, int b) {
+        public double getIntensity(int r, int g, int b) {
             return LuminanceLookup.from(r, g, b);
         }
 
         @Override
         public Color getDrawColor(boolean active, boolean darkTheme) {
             if (darkTheme) {
-                if (active) {
-                    return WHITE;
-                } else {
-                    return FADED_WHITE;
-                }
+                return active ? WHITE : FADED_WHITE;
             } else {
                 return super.getDrawColor(active, darkTheme);
             }
@@ -70,7 +66,7 @@ public enum Channel {
         }
 
         @Override
-        public double getValue(int r, int g, int b) {
+        public double getIntensity(int r, int g, int b) {
             return r;
         }
     }, GREEN(i18n("green"), "green", Color.GREEN) {
@@ -85,7 +81,7 @@ public enum Channel {
         }
 
         @Override
-        public double getValue(int r, int g, int b) {
+        public double getIntensity(int r, int g, int b) {
             return g;
         }
     }, BLUE(i18n("blue"), "blue", Color.BLUE) {
@@ -100,7 +96,7 @@ public enum Channel {
         }
 
         @Override
-        public double getValue(int r, int g, int b) {
+        public double getIntensity(int r, int g, int b) {
             return b;
         }
     };
@@ -134,7 +130,10 @@ public enum Channel {
         return active ? color : inactiveColor;
     }
 
-    public abstract double getValue(int r, int g, int b);
+    /**
+     * Calculates the intensity of this channel based on the given RGB values.
+     */
+    public abstract double getIntensity(int r, int g, int b);
 
     public String getName() {
         return name;

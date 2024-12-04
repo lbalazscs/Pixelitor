@@ -52,12 +52,12 @@ class PathTest {
 
         var shape = new Rectangle(10, 10, 100, 100);
         Path path = Shapes.shapeToPath(shape, view);
-        SubPath sp = path.getActiveSubpath();
-        assertThat(sp).numAnchorsIs(4);
-        sp.getAnchor(3).delete(); // delete last
-        sp.getAnchor(2).delete(); // delete last
-        sp.getAnchor(0).delete(); // delete first
-        sp.getAnchor(0).delete(); // delete first (and last)
+        SubPath subpath = path.getActiveSubpath();
+        assertThat(subpath).numAnchorsIs(4);
+        subpath.getAnchor(3).delete(); // delete last
+        subpath.getAnchor(2).delete(); // delete last
+        subpath.getAnchor(0).delete(); // delete first
+        subpath.getAnchor(0).delete(); // delete first (and last)
         assertThat(path.getActiveSubpath()).numAnchorsIs(0);
 
         History.assertNumEditsIs(4);
@@ -88,18 +88,18 @@ class PathTest {
     void transform() {
         Rectangle shape = new Rectangle(10, 10, 100, 100);
         Path path = Shapes.shapeToPath(shape, view);
-        SubPath sp = path.getActiveSubpath();
-        assertThat(sp).firstAnchorIsAt(10, 10);
+        SubPath subpath = path.getActiveSubpath();
+        assertThat(subpath).firstAnchorIsAt(10, 10);
 
-        sp.saveImTransformRefPoints(); // the ref point for the first anchor is 10, 10
+        subpath.saveImTransformRefPoints(); // the ref point for the first anchor is 10, 10
 
         var at = AffineTransform.getTranslateInstance(20, 10);
-        sp.imTransform(at);
-        assertThat(sp).firstAnchorIsAt(30, 20);
+        subpath.imTransform(at);
+        assertThat(subpath).firstAnchorIsAt(30, 20);
 
         at = AffineTransform.getTranslateInstance(10, 20);
-        sp.imTransform(at);
-        assertThat(sp).firstAnchorIsAt(20, 30);
+        subpath.imTransform(at);
+        assertThat(subpath).firstAnchorIsAt(20, 30);
     }
 
     private void testConversionsFor(Shape shape) {

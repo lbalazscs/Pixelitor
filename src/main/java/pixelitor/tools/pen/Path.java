@@ -95,12 +95,12 @@ public class Path implements Serializable, Debuggable {
 
     public Path deepCopy(Composition newComp) {
         Path copy = new Path(newComp, false);
-        for (SubPath sp : subPaths) {
-            SubPath spCopy = sp.deepCopy(copy, newComp);
-            copy.subPaths.add(spCopy);
+        for (SubPath subPath : subPaths) {
+            SubPath subPathCopy = subPath.deepCopy(copy, newComp);
+            copy.subPaths.add(subPathCopy);
 
-            if (sp == activeSubPath) {
-                copy.activeSubPath = spCopy;
+            if (subPath == activeSubPath) {
+                copy.activeSubPath = subPathCopy;
             }
         }
         return copy;
@@ -112,8 +112,8 @@ public class Path implements Serializable, Debuggable {
     public void paintForBuilding(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
 
-        for (SubPath sp : subPaths) {
-            sp.paintHandlesForBuilding(g, buildState);
+        for (SubPath subPath : subPaths) {
+            subPath.paintHandlesForBuilding(g, buildState);
         }
     }
 
@@ -123,8 +123,8 @@ public class Path implements Serializable, Debuggable {
     public void paintForEditing(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
 
-        for (SubPath sp : subPaths) {
-            sp.paintHandlesForEditing(g);
+        for (SubPath subPath : subPaths) {
+            subPath.paintHandlesForEditing(g);
         }
     }
 
@@ -136,8 +136,8 @@ public class Path implements Serializable, Debuggable {
     }
 
     public DraggablePoint findHandleAt(double x, double y, boolean altDown) {
-        for (SubPath sp : subPaths) {
-            DraggablePoint handle = sp.findHandleAt(x, y, altDown);
+        for (SubPath subPath : subPaths) {
+            DraggablePoint handle = subPath.findHandleAt(x, y, altDown);
             if (handle != null) {
                 return handle;
             }
@@ -147,16 +147,16 @@ public class Path implements Serializable, Debuggable {
 
     public Path2D toImageSpaceShape() {
         GeneralPath path = new GeneralPath();
-        for (SubPath sp : subPaths) {
-            sp.addToImageSpaceShape(path);
+        for (SubPath subPath : subPaths) {
+            subPath.addToImageSpaceShape(path);
         }
         return path;
     }
 
     public Shape toComponentSpaceShape() {
         GeneralPath path = new GeneralPath();
-        for (SubPath sp : subPaths) {
-            sp.addToComponentSpaceShape(path);
+        for (SubPath subPath : subPaths) {
+            subPath.addToComponentSpaceShape(path);
         }
         return path;
     }
@@ -185,20 +185,20 @@ public class Path implements Serializable, Debuggable {
     }
 
     public void mergeOverlappingAnchors() {
-        for (SubPath sp : subPaths) {
-            sp.mergeOverlappingAnchors();
+        for (SubPath subPath : subPaths) {
+            subPath.mergeOverlappingAnchors();
         }
     }
 
     public void setHeuristicTypes() {
-        for (SubPath sp : subPaths) {
-            sp.setHeuristicTypes();
+        for (SubPath subPath : subPaths) {
+            subPath.setHeuristicTypes();
         }
     }
 
     public void coCoordsChanged(View view) {
-        for (SubPath sp : subPaths) {
-            sp.coCoordsChanged(view);
+        for (SubPath subPath : subPaths) {
+            subPath.coCoordsChanged(view);
         }
     }
 
@@ -209,11 +209,11 @@ public class Path implements Serializable, Debuggable {
     }
 
     public SubPath startNewSubpath(double x, double y, View view) {
-        SubPath sp = startNewSubpath();
-        AnchorPoint first = new AnchorPoint(PPoint.lazyFromIm(x, y, view), sp);
+        SubPath subPath = startNewSubpath();
+        AnchorPoint first = new AnchorPoint(PPoint.lazyFromIm(x, y, view), subPath);
         first.setType(SMOOTH);
-        sp.addFirstPoint(first, false);
-        return sp;
+        subPath.addFirstPoint(first, false);
+        return subPath;
     }
 
     public SubPath startNewSubpath() {
@@ -416,14 +416,14 @@ public class Path implements Serializable, Debuggable {
     public void printDebugInfo() {
         checkConsistency();
         System.out.println("Path " + this);
-        for (SubPath sp : subPaths) {
-            if (sp.isClosed()) {
-                System.out.println("New closed subpath " + sp.getId());
+        for (SubPath subPath : subPaths) {
+            if (subPath.isClosed()) {
+                System.out.println("New closed subpath " + subPath.getId());
             } else {
-                System.out.println("New unclosed subpath" + sp.getId());
+                System.out.println("New unclosed subpath" + subPath.getId());
             }
 
-            sp.printDebugInfo();
+            subPath.printDebugInfo();
         }
     }
 

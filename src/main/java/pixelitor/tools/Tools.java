@@ -170,7 +170,7 @@ public class Tools {
         activeTool.compReplaced(newComp, reloaded);
     }
 
-    public static void activeLayerChanged(Layer layer) {
+    public static void editingTargetChanged(Layer activeLayer) {
         if (AppMode.isUnitTesting()) {
             return;
         }
@@ -179,14 +179,14 @@ public class Tools {
         // don't switch from the Move Tool, because it's confusing and
         // bug-prone if the tool is changed during an auto-select
         if (activeTool != MOVE) {
-            Tool preferredTool = layer.getPreferredTool();
+            Tool preferredTool = activeLayer.getPreferredTool();
             if (preferredTool != null && preferredTool != activeTool) {
                 preferredTool.activate();
             }
         }
 
         if (activeTool != null) {
-            activeTool.activeLayerChanged(layer);
+            activeTool.editingTargetChanged(activeLayer);
         }
     }
 

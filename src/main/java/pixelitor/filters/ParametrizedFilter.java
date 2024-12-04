@@ -117,7 +117,9 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     @Override
     public boolean canHaveUserPresets() {
-        return paramSet.canHaveUserPresets();
+        // trivial filters don't have a "Save Preset" menu
+        // option, but they still might be smart filters
+        return paramSet.isNonTrivial();
     }
 
     @Override

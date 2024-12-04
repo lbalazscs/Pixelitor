@@ -273,7 +273,7 @@ public class StrokeParam extends AbstractFilterParam {
         return strokeCapParam;
     }
 
-    public int getCapValue() {
+    public int getCap() {
         return strokeCapParam.getSelected().getValue();
     }
 
@@ -281,7 +281,7 @@ public class StrokeParam extends AbstractFilterParam {
         return strokeJoinParam;
     }
 
-    public int getJoinValue() {
+    public int getJoin() {
         return strokeJoinParam.getSelected().getValue();
     }
 

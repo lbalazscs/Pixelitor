@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,8 @@ public class DeselectEdit extends PixelitorEdit {
 
     public DeselectEdit(Composition comp, Shape backupShape) {
         super("Deselect", comp);
+
+        assert !comp.hasSelection();
 
         this.backupShape = Objects.requireNonNull(backupShape);
     }

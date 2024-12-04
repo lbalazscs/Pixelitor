@@ -60,17 +60,17 @@ public class TransformedRectangle implements Debuggable {
     private Rectangle cachedBox;
 
     public TransformedRectangle(Rectangle r,
-                                double theta,
-                                double sx, double sy,
-                                double shx, double shy) {
-        this(r.getX(), r.getY(), r.getWidth(), r.getHeight(), theta, sx, sy, shx, shy);
+                                double angle,
+                                double scaleX, double scaleY,
+                                double shearX, double shearY) {
+        this(r.getX(), r.getY(), r.getWidth(), r.getHeight(), angle, scaleX, scaleY, shearX, shearY);
     }
 
     public TransformedRectangle(double x, double y,
                                 double width, double height,
-                                double theta,
-                                double sx, double sy,
-                                double shx, double shy) {
+                                double angle,
+                                double scaleX, double scaleY,
+                                double shearX, double shearY) {
         origTopLeftX = x;
         origTopLeftY = y;
 
@@ -87,15 +87,15 @@ public class TransformedRectangle implements Debuggable {
         double cy = y + height / 2.0;
 
         AffineTransform transform = AffineTransform.getTranslateInstance(cx, cy);
-        if (theta != 0) {
-            transform.rotate(theta);
+        if (angle != 0) {
+            transform.rotate(angle);
         }
-        if (sx != 1.0 || sy != 1.0) {
-            transform.scale(sx, sy);
+        if (scaleX != 1.0 || scaleY != 1.0) {
+            transform.scale(scaleX, scaleY);
         }
-        if (shx != 0 || shy != 0) {
+        if (shearX != 0 || shearY != 0) {
             // the opposite direction seems to be more intuitive
-            transform.shear(-shx, -shy); 
+            transform.shear(-shearX, -shearY);
         }
         transform.translate(-cx, -cy);
 

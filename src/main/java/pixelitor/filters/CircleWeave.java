@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -123,12 +123,12 @@ public class CircleWeave extends CurveFilter {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
-        double angle = 2 * Math.PI / numPoints;
+        double angleIncrement = 2 * Math.PI / numPoints;
         for (int i = 0; i < points.length; i++) {
-            double theta = i * angle - Math.PI / 2.0;
+            double angle = i * angleIncrement - Math.PI / 2.0;
             points[i] = new Point2D.Double(
-                cx + r * Math.cos(theta),
-                cy + r * Math.sin(theta));
+                cx + r * Math.cos(angle),
+                cy + r * Math.sin(angle));
         }
         return points;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import javax.swing.*;
 import java.util.function.Consumer;
 
 /**
- * Abstract superclass for settings that can be configured using a cached JPanel
+ * Abstract base class for configurable settings, providing a cached configuration panel.
  */
 public abstract class Configurable {
     private final Lazy<JPanel> configPanel = Lazy.of(this::createConfigPanel);

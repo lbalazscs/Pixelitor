@@ -1207,13 +1207,13 @@ public class ImageUtils {
     }
 
     /**
-     * Calculates the composite image of the given layers.
+     * Calculates the composite image from the given layers.
      */
     public static BufferedImage calcComposite(List<Layer> layers, Canvas canvas) {
-        if (layers.size() == 1) { // shortcut
+        if (layers.size() == 1) { // optimization for single-layer compositions
             Layer layer = layers.getFirst();
             if (Tools.activeTool.isDirectDrawing() && layer.isVisible()) {
-                BufferedImage layerImg = layer.asImage(true, true);
+                BufferedImage layerImg = layer.toImage(true, true);
 
                 // it can be null if there's a single adjustment layer
                 if (layerImg != null) {
@@ -1230,12 +1230,10 @@ public class ImageUtils {
         boolean firstVisibleLayer = true;
         for (Layer layer : layers) {
             if (layer.isVisible()) {
-                BufferedImage result = layer.applyLayer(g, compositeImg, firstVisibleLayer);
+                BufferedImage result = layer.render(g, compositeImg, firstVisibleLayer);
                 if (result != null) { // adjustment layer or watermarking text layer
                     compositeImg = result;
-                    if (g != null) {
-                        g.dispose();
-                    }
+                    g.dispose();
                     g = compositeImg.createGraphics();
                 }
                 firstVisibleLayer = false;
@@ -1243,7 +1241,6 @@ public class ImageUtils {
         }
 
         g.dispose();
-
         return compositeImg;
     }
 

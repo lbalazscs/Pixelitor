@@ -31,13 +31,13 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
- * A {@link DabsBrush} where the dabs are images
+ * A {@link DabsBrush} that uses images as dabs.
  */
 public class ImageDabsBrush extends DabsBrush {
     private static final Map<ImageBrushType, BufferedImage> templateImages
         = new EnumMap<>(ImageBrushType.class);
 
-    private final BufferedImage templateImg;
+    private final BufferedImage templateImg; // not colorized, unchanging
     private BufferedImage coloredBrushImg;
     private BufferedImage finalScaledImg;
     private Color lastColor;
@@ -47,8 +47,7 @@ public class ImageDabsBrush extends DabsBrush {
         super(radius, new RadiusRatioSpacing(spacingRatio),
             angleSettings, false);
 
-        // for each brush type multiple brush instances are created because
-        // of the symmetry, but the template image can be shared between them
+        // share template images between instances of the same brush type
         templateImg = templateImages.computeIfAbsent(imageBrushType,
             ImageBrushType::createBWBrushImage);
     }
@@ -58,97 +57,99 @@ public class ImageDabsBrush extends DabsBrush {
         super.setRadius(radius);
 
         // if the radius changes during the brush stroke
-        // via hotkeys, the brush image has to be recreated
+        // via hotkeys, recreate the brush image
         if (targetG != null) {
             // the point argument isn't used by this class
-            setupBrushStamp(null);
+            initBrushStamp(null);
         }
     }
 
     @Override
-    void setupBrushStamp(PPoint p) {
+    void initBrushStamp(PPoint p) {
         assert diameter > 0 : "zero diameter in " + getClass().getName();
-        Color currColor = targetG.getColor();
+        Color currentColor = targetG.getColor();
 
-        if (!currColor.equals(lastColor)) {
-            createColoredBrushImage(currColor);
-            lastColor = currColor;
+        if (!currentColor.equals(lastColor)) {
+            recreateColoredBrushImage(currentColor);
+            lastColor = currentColor;
             recreateBrushImage(diameter, true);
         } else {
+            // color unchanged, but size may have changed
             recreateBrushImage(diameter, false);
         }
     }
 
+    /**
+     * Recreates the final scaled image from the colorized image.
+     */
     private void recreateBrushImage(double diameter, boolean colorChanged) {
         int newSize = (int) diameter;
         assert newSize > 0 : "newSize = " + newSize;
-
-        if (!colorChanged && brushImageSizeIs(newSize)) {
-            return;
+        if (!colorChanged && isBrushImageSize(newSize)) {
+            return; // nothing changed
         }
 
-        // if the color changed, then recreate it no matter what the size is
         if (finalScaledImg != null) {
             finalScaledImg.flush();
         }
-
         finalScaledImg = new BufferedImage(newSize, newSize, TYPE_INT_ARGB);
         Graphics2D g = finalScaledImg.createGraphics();
         g.drawImage(coloredBrushImg, 0, 0, newSize, newSize, null);
         g.dispose();
     }
 
-    private boolean brushImageSizeIs(double size) {
+    private boolean isBrushImageSize(double size) {
         return finalScaledImg != null && finalScaledImg.getWidth() == size;
     }
 
     /**
-     * Creates a colorized brush image from the template image
-     * according to the given color.
+     * Recreates a colorized brush image from the template image
+     * using the given color.
      */
-    private void createColoredBrushImage(Color color) {
+    private void recreateColoredBrushImage(Color color) {
         coloredBrushImg = new BufferedImage(
             templateImg.getWidth(), templateImg.getHeight(), TYPE_INT_ARGB);
         int[] srcPixels = ImageUtils.getPixelArray(templateImg);
         int[] destPixels = ImageUtils.getPixelArray(coloredBrushImg);
 
-        int destR = color.getRed();
-        int destG = color.getGreen();
-        int destB = color.getBlue();
+        int colorNoAlpha = color.getRGB() & 0x00_FF_FF_FF;
+
         for (int i = 0; i < destPixels.length; i++) {
             int srcRGB = srcPixels[i];
 
             int srcR = (srcRGB >>> 16) & 0xFF;
             int srcG = (srcRGB >>> 8) & 0xFF;
             int srcB = srcRGB & 0xFF;
+            // averaging is not actually necessary since all channels
+            // should be the same in the grayscale image, but doesn't hurt
             int srcAverage = (srcR + srcG + srcB) / 3;
 
             // the color comes from the given color,
-            // the alpha depends on the source
-            destPixels[i] = (0xFF - srcAverage) << 24 | destR << 16 | destG << 8 | destB;
+            // the alpha depends on the template image
+            destPixels[i] = (0xFF - srcAverage) << 24 | colorNoAlpha;
         }
     }
 
     @Override
-    public void putDab(PPoint p, double theta) {
+    public void putDab(PPoint currentPoint, double angle) {
         assert finalScaledImg != null;
 
-        double x = p.getImX();
-        double y = p.getImY();
+        double x = currentPoint.getImX();
+        double y = currentPoint.getImY();
         int drawStartX = (int) (x - radius);
         int drawStartY = (int) (y - radius);
 
-        if (!settings.isAngled() || theta == 0) {
+        if (!settings.isAngled() || angle == 0) {
             targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
         } else {
             // draw rotated image
-            var oldTransform = targetG.getTransform();
-            targetG.rotate(theta, x, y);
+            var origTransform = targetG.getTransform();
+            targetG.rotate(angle, x, y);
             targetG.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
             targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
-            targetG.setTransform(oldTransform);
+            targetG.setTransform(origTransform);
         }
 
-        repaintComp(p);
+        repaintComp(currentPoint);
     }
 }

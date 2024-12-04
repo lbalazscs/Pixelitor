@@ -48,7 +48,7 @@ public enum CopySource {
             // TODO Text layers are rasterized, but they should probably be copied
             //   in other formats as well (as a string or a serialized object).
             //   An internal clipboard could be implemented to handle such cases.
-            BufferedImage layerImage = src.asImage(true, false);
+            BufferedImage layerImage = src.toImage(true, false);
             if (layerImage == null) {
                 return Result.error("this layer can't be copied");
             }

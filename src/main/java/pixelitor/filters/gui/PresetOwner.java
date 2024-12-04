@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
 
@@ -80,8 +80,8 @@ public interface PresetOwner {
      * Creates an action that opens the {@link UserPreset} directory
      * in the system's file manager.
      */
-    default PAction createManagePresetsAction() {
-        return new PAction("Manage Presets...", () -> {
+    default TaskAction createManagePresetsAction() {
+        return new TaskAction("Manage Presets...", () -> {
             try {
                 String dirPath = PRESETS_DIR + File.separator + getPresetDirName();
                 Desktop.getDesktop().open(new File(dirPath));
@@ -98,7 +98,7 @@ public interface PresetOwner {
     default Action createSavePresetAction(Component parent,
                                           Consumer<UserPreset> menuAdder,
                                           Consumer<UserPreset> menuRemover) {
-        return new PAction("Save Preset...", () ->
+        return new TaskAction("Save Preset...", () ->
             savePreset(parent, menuRemover, menuAdder));
     }
 

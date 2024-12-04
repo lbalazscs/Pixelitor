@@ -15,29 +15,39 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.layers;
+package pixelitor.gui.utils;
 
-import pixelitor.Composition;
-import pixelitor.gui.utils.AbstractViewEnabledAction;
-import pixelitor.gui.utils.ThemedImageIcon;
-import pixelitor.utils.Icons;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
 
 /**
- * An {@link Action} that adds a new text layer to the active composition.
+ * An action that executes a given Runnable.
  */
-public class AddTextLayerAction extends AbstractViewEnabledAction {
-    public static final AddTextLayerAction INSTANCE = new AddTextLayerAction();
+public class TaskAction extends NamedAction {
+    private final Runnable task;
 
-    private AddTextLayerAction() {
-        super("Add Text Layer",
-            Icons.loadThemed("add_text_layer.png", ThemedImageIcon.GREEN));
-        setToolTip("Adds a new text layer.");
+    public TaskAction(Runnable task) {
+        this.task = task;
+    }
+
+    public TaskAction(String name, Runnable task) {
+        super(name);
+        this.task = task;
+    }
+
+    public TaskAction(String name, Icon icon, Runnable task) {
+        super(name, icon);
+        this.task = task;
     }
 
     @Override
-    protected void onClick(Composition comp) {
-        TextLayer.createNew(comp);
+    public void actionPerformed(ActionEvent e) {
+        try {
+            task.run();
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
     }
 }

@@ -21,7 +21,7 @@ import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -92,7 +92,7 @@ public class ToolsPanel extends JPanel {
     }
 
     private static void setupKeyboardShortcut(Tool tool) {
-        Action activateAction = new PAction(() -> {
+        Action activateAction = new TaskAction(() -> {
             if (Tools.activeTool != tool) {
                 tool.activate();
             }

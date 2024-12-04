@@ -18,7 +18,6 @@ package com.jhlabs.image;
 
 import pixelitor.utils.ProgressTracker;
 
-import java.awt.Rectangle;
 import java.util.SplittableRandom;
 
 public class PlasmaFilter extends WholeImageFilter {
@@ -242,7 +241,7 @@ public class PlasmaFilter extends WholeImageFilter {
     }
 
     @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
 
         if (width == 1 && height == 1) {

@@ -15,9 +15,14 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools;
+package pixelitor.utils.input;
 
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.util.Random;
+
+import static java.awt.event.KeyEvent.VK_ALT;
 
 /**
  * Represents the state of the Alt key during a {@link KeyEvent}.
@@ -35,7 +40,30 @@ public enum Alt implements EventMaskModifier {
         }
     };
 
-    public boolean isPressed() {
+    public boolean isDown() {
         return this == PRESSED;
+    }
+
+    public static Alt from(MouseEvent e) {
+        return e.isAltDown() ? PRESSED : RELEASED;
+    }
+
+    public static Alt randomly(Random rand) {
+        return rand.nextBoolean() ? PRESSED : RELEASED;
+    }
+
+    public Alt press(Robot robot) {
+        if (this == PRESSED) {
+            robot.keyPress(VK_ALT);
+            robot.delay(50);
+        }
+        return this;
+    }
+
+    public void release(Robot robot) {
+        if (this == PRESSED) {
+            robot.keyRelease(VK_ALT);
+            robot.delay(50);
+        }
     }
 }

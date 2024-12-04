@@ -39,12 +39,8 @@ public enum ShapeType {
             var rs = (RectangleSettings) settings;
             double radius = rs == null ? 0 : rs.getRadius();
             Rectangle2D r = drag.createPositiveImRect();
-            if (radius == 0) {
-                return r;
-            } else {
-                return new RoundRectangle2D.Double(r.getX(), r.getY(),
-                    r.getWidth(), r.getHeight(), radius, radius);
-            }
+            return (radius == 0) ? r : new RoundRectangle2D.Double(
+                r.getX(), r.getY(), r.getWidth(), r.getHeight(), radius, radius);
         }
 
         @Override
@@ -97,12 +93,9 @@ public enum ShapeType {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             var lineSettings = (LineSettings) settings;
-            Stroke stroke;
-            if (lineSettings != null) {
-                stroke = lineSettings.getStroke();
-            } else {
-                stroke = new BasicStroke(5);
-            }
+            Stroke stroke = (lineSettings != null)
+                ? lineSettings.getStroke()
+                : new BasicStroke(5);
             return stroke.createStrokedShape(drag.asLine());
         }
 
@@ -207,8 +200,7 @@ public enum ShapeType {
             transform.scale(length, length); // originally it had a length of 1.0
 
             // rotate the arrow into the direction of the drag
-            double angleInRadians = drag.calcDrawAngle();
-            double angle = Geometry.atan2ToIntuitive(angleInRadians);
+            double angle = Geometry.atan2ToIntuitive(drag.calcDrawAngle());
             angle += Math.PI / 2;
             transform.rotate(angle);
 
@@ -284,17 +276,17 @@ public enum ShapeType {
     private final String displayName;
 
     private final boolean hasSettings;
-    private final boolean areaProblem;
+    private final boolean hasAreaBug;
 
-    // directional shapes are the arrow and line, where the
-    // transform box is initialized at the angle of the shape
+    // for the directional shapes the transform box
+    // is initialized at the angle of the shape
     private final boolean directional;
 
-    ShapeType(String displayName, boolean directional, boolean hasSettings, boolean areaProblem) {
+    ShapeType(String displayName, boolean directional, boolean hasSettings, boolean hasAreaBug) {
         this.displayName = displayName;
         this.directional = directional;
         this.hasSettings = hasSettings;
-        this.areaProblem = areaProblem;
+        this.hasAreaBug = hasAreaBug;
     }
 
     /**
@@ -325,11 +317,10 @@ public enum ShapeType {
      * Return true if the shape could trigger https://bugs.openjdk.java.net/browse/JDK-6357341
      */
     public boolean hasAreaProblem() {
-        return areaProblem;
+        return hasAreaBug;
     }
 
     public ShapeTypeSettings createSettings() {
-        assert hasSettings() : "no settings for " + this;
         // should be overridden, if it has settings
         throw new UnsupportedOperationException("no settings for " + this);
     }

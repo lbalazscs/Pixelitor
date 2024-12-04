@@ -21,6 +21,7 @@ import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.input.Modifiers;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -74,11 +75,7 @@ class TransformBoxTest {
         CornerHandle ne = box.getNE();
         CornerHandle se = box.getSE();
 
-        // check the handles original state
-        assertThat(nw).isAt(200, 100);
-        assertThat(sw).isAt(200, 200);
-        assertThat(ne).isAt(400, 100);
-        assertThat(se).isAt(400, 200);
+        checkOriginalHandleState(nw, sw, ne, se);
 
         nw.mousePressed(202, 100);
         nw.mouseDragged(222, 100); // dragged 20 pixels horizontally to the right
@@ -117,11 +114,7 @@ class TransformBoxTest {
         CornerHandle ne = box.getNE();
         CornerHandle se = box.getSE();
 
-        // check the handles original state
-        assertThat(nw).isAt(200, 100);
-        assertThat(sw).isAt(200, 200);
-        assertThat(ne).isAt(400, 100);
-        assertThat(se).isAt(400, 200);
+        checkOriginalHandleState(nw, sw, ne, se);
 
         se.mousePressed(402, 202);
         se.mouseDragged(382, 202); // dragged 20 pixels horizontally to the left
@@ -160,11 +153,7 @@ class TransformBoxTest {
         CornerHandle ne = box.getNE();
         CornerHandle se = box.getSE();
 
-        // check the handles original state
-        assertThat(nw).isAt(200, 100);
-        assertThat(sw).isAt(200, 200);
-        assertThat(ne).isAt(400, 100);
-        assertThat(se).isAt(400, 200);
+        checkOriginalHandleState(nw, sw, ne, se);
 
         // translate NW by 30, 20
         nw.mousePressed(200, 100);
@@ -192,11 +181,7 @@ class TransformBoxTest {
         CornerHandle ne = box.getNE();
         CornerHandle se = box.getSE();
 
-        // check the handles original state
-        assertThat(nw).isAt(200, 100).isAtIm(200, 100);
-        assertThat(sw).isAt(200, 200).isAtIm(200, 200);
-        assertThat(ne).isAt(400, 100).isAtIm(400, 100);
-        assertThat(se).isAt(400, 200).isAtIm(400, 200);
+        checkOriginalHandleState(nw, sw, ne, se);
 
         // translate SE from 400, 200 to 600, 400
         // so that the width becomes 200->400, (xScale = 2)
@@ -225,11 +210,8 @@ class TransformBoxTest {
         CornerHandle se = box.getSE();
         RotationHandle rot = box.getRot();
 
-        // check the handles original state
-        assertThat(nw).isAt(200, 100).isAtIm(200, 100);
-        assertThat(sw).isAt(200, 200).isAtIm(200, 200);
-        assertThat(ne).isAt(400, 100).isAtIm(400, 100);
-        assertThat(se).isAt(400, 200).isAtIm(400, 200);
+        checkOriginalHandleState(nw, sw, ne, se);
+
         int rotOrigY = 100 - TransformBox.ROT_HANDLE_DISTANCE;
         assertThat(rot).isAt(300, rotOrigY).isAtIm(300, rotOrigY);
         assertThat(box).angleDegreesIs(0);
@@ -349,11 +331,8 @@ class TransformBoxTest {
         CornerHandle se = box.getSE();
         RotationHandle rot = box.getRot();
 
-        // check the handles original state
-        assertThat(nw).isAt(200, 100).isAtIm(200, 100);
-        assertThat(sw).isAt(200, 200).isAtIm(200, 200);
-        assertThat(ne).isAt(400, 100).isAtIm(400, 100);
-        assertThat(se).isAt(400, 200).isAtIm(400, 200);
+        checkOriginalHandleState(nw, sw, ne, se);
+        
         int rotOrigY = 100 - TransformBox.ROT_HANDLE_DISTANCE;
         assertThat(rot)
             .isAt(300, rotOrigY)
@@ -445,15 +424,23 @@ class TransformBoxTest {
         checkTransform(at, bottomRightStart, bottomRightExpected);
     }
 
+    // check the original state of the handles
+    private static void checkOriginalHandleState(CornerHandle nw, CornerHandle sw, CornerHandle ne, CornerHandle se) {
+        assertThat(nw).isAt(200, 100).isAtIm(200, 100);
+        assertThat(sw).isAt(200, 200).isAtIm(200, 200);
+        assertThat(ne).isAt(400, 100).isAtIm(400, 100);
+        assertThat(se).isAt(400, 200).isAtIm(400, 200);
+    }
+
     private void press(TransformBox box, int x, int y) {
-        box.processMousePressed(TestHelper.createPEvent(x, y, MOUSE_PRESSED, view));
+        box.processMousePressed(Modifiers.NONE.createPEvent(x, y, MOUSE_PRESSED, view));
     }
 
     private void drag(TransformBox box, int x, int y) {
-        box.processMouseDragged(TestHelper.createPEvent(x, y, MOUSE_DRAGGED, view));
+        box.processMouseDragged(Modifiers.NONE.createPEvent(x, y, MOUSE_DRAGGED, view));
     }
 
     private void release(TransformBox box, int x, int y) {
-        box.processMouseReleased(TestHelper.createPEvent(x, y, MOUSE_RELEASED, view));
+        box.processMouseReleased(Modifiers.NONE.createPEvent(x, y, MOUSE_RELEASED, view));
     }
 }

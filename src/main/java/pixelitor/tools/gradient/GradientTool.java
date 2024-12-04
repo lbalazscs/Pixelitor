@@ -341,8 +341,8 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void activeLayerChanged(Layer layer) {
-        layerActivated(layer);
+    public void editingTargetChanged(Layer activeLayer) {
+        layerActivated(activeLayer);
     }
 
     @Override

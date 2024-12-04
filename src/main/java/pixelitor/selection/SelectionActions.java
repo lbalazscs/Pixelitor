@@ -26,7 +26,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.utils.ViewActivationListener;
 
@@ -40,33 +40,45 @@ import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Static methods for managing the actions that should be enabled
+ * Static methods related to actions that should be enabled
  * only when there is a selection on the active composition.
  */
 public final class SelectionActions {
     private static Shape copiedSelShape = null;
 
-    private static final Action crop = new PAction(i18n("crop_selection"),
+    private static final Action crop = new TaskAction(i18n("crop_selection"),
         Crop::selectionCropActiveComp);
 
-    private static final Action deselect = new PAction(i18n("deselect"), () ->
+    private static final Action deselect = new TaskAction(i18n("deselect"), () ->
         getActiveComp().deselect(true));
 
-    private static final Action invert = new PAction(i18n("invert_sel"), () ->
+    private static final Action invert = new TaskAction(i18n("invert_sel"), () ->
         getActiveComp().invertSelection());
 
     private static final ShowHideSelectionAction showHide = new ShowHideSelectionAction();
 
-    private static final Action convertToPath = new PAction("Convert to Path", () ->
+    private static final Action convertToPath = new TaskAction("Convert to Path", () ->
         selectionToPath(getActiveComp(), true));
 
-    private static final Action copySel = new PAction(i18n("copy_sel"),
+    private static final Action copySel = new TaskAction(i18n("copy_sel"),
         SelectionActions::copySelection);
 
-    private static final Action pasteSel = new PAction(i18n("paste_sel"), () ->
+    private static final Action pasteSel = new TaskAction(i18n("paste_sel"), () ->
         getActiveComp().changeSelection(copiedSelShape));
 
+    private static final Action modify = new TaskAction(i18n("modify_sel") + "...",
+        SelectionActions::showModifySelectionDialog);
+
     static {
+        initPasteSelAction();
+        update(null);
+    }
+
+    private SelectionActions() {
+        // prevent instantiation
+    }
+
+    private static void initPasteSelAction() {
         pasteSel.setEnabled(false);
         Views.addActivationListener(new ViewActivationListener() {
             @Override
@@ -92,7 +104,7 @@ public final class SelectionActions {
         comp.createPathFromShape(shape, addToHistory, true);
     }
 
-    private static final Action modify = new PAction(i18n("modify_sel") + "...", () -> {
+    private static void showModifySelectionDialog() {
         JPanel panel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(panel);
         RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
@@ -109,12 +121,11 @@ public final class SelectionActions {
             .validator(d -> {
                 modifySelection(type, amount);
 
-                // Always return false so that
-                // the Change button doesn't close it.
+                // return false so that clicking on Change doesn't close it
                 return false;
             })
             .show();
-    });
+    }
 
     private static void modifySelection(EnumParam<SelectionModifyType> type,
                                         RangeParam amount) {
@@ -128,36 +139,25 @@ public final class SelectionActions {
         }
     }
 
-    static {
-        update(null);
-    }
-
-    private SelectionActions() {
-    }
-
     /**
      * Selection actions must be enabled only if
      * the active composition has a selection
      */
     public static void update(Composition comp) {
-        boolean enabled;
-        if (comp == null) {
-            enabled = false;
-        } else {
-            assert comp.isActive();
-            enabled = comp.hasSelection();
-        }
+        assert comp == null || comp.isActive();
 
-        crop.setEnabled(enabled);
-        deselect.setEnabled(enabled);
-        invert.setEnabled(enabled);
-        showHide.setEnabled(enabled);
-        modify.setEnabled(enabled);
-        convertToPath.setEnabled(enabled);
-        copySel.setEnabled(enabled);
+        boolean hasSelection = comp != null && comp.hasSelection();
+        crop.setEnabled(hasSelection);
+        deselect.setEnabled(hasSelection);
+        invert.setEnabled(hasSelection);
+        showHide.setEnabled(hasSelection);
+        modify.setEnabled(hasSelection);
+        convertToPath.setEnabled(hasSelection);
+        copySel.setEnabled(hasSelection);
     }
 
     public static boolean areEnabled() {
+        // or any other action, as they are updated together
         return crop.isEnabled();
     }
 

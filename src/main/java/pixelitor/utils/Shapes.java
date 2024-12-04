@@ -2020,8 +2020,8 @@ public class Shapes {
         Geometry.add(Q, B, Q);
     }
 
-    public static Shape rotate(Shape shape, double theta, double anchorX, double anchorY) {
-        return AffineTransform.getRotateInstance(theta, anchorX, anchorY)
+    public static Shape rotate(Shape shape, double angle, double anchorX, double anchorY) {
+        return AffineTransform.getRotateInstance(angle, anchorX, anchorY)
             .createTransformedShape(shape);
     }
 
@@ -2146,7 +2146,7 @@ public class Shapes {
      * Transforms the given {@link Shape} into another
      * {@link Shape} using the given {@link PointMapper}.
      */
-    public static Shape transformShape(Shape shape, PointMapper mapper) {
+    public static Path2D transformShape(Shape shape, PointMapper mapper) {
         Path2D transformedShape = new Path2D.Double();
         double[] coords = new double[6];
         Point2D target;
@@ -2188,12 +2188,15 @@ public class Shapes {
     }
 
     /**
-     * Maps the given point into another point.
+     * Maps a coordinate to another coordinate.
      */
     public interface PointMapper {
         Point2D map(double x, double y);
     }
 
+    /**
+     * Nonlinear transformations that can be applied to points.
+     */
     public enum NonlinTransform {
         NONE("None", false) {
             @Override
@@ -2204,13 +2207,13 @@ public class Shapes {
             @Override
             public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
                 double circleRadius2 = (width * width + height * height) / 20.0;
-                double tuningEffect = tuning * width / 500.0;
+                double tuningOffset = tuning * width / 500.0;
                 return (x, y) -> {
-                    x -= tuningEffect;
+                    x -= tuningOffset;
                     double r = center.distance(x, y);
                     double cx = center.getX();
                     double cy = center.getY();
-                    double theta = atan2(y - cy, x - cx);
+                    double angle = atan2(y - cy, x - cx);
                     double invertedR;
                     if (r > 1) { // the normal case
                         invertedR = circleRadius2 / r;
@@ -2220,9 +2223,9 @@ public class Shapes {
                         invertedR = circleRadius2;
                     }
 
-                    // inverted point: same angle, but r => circleRadius2/r distance
-                    double newX = cx + invertedR * cos(theta);
-                    double newY = cy + invertedR * sin(theta);
+                    // inverted point: same angle, but inverted distance
+                    double newX = cx + invertedR * cos(angle);
+                    double newY = cy + invertedR * sin(angle);
                     return new Point2D.Double(newX, newY);
                 };
             }
@@ -2234,7 +2237,6 @@ public class Shapes {
                     double cx = center.getX();
                     double cy = center.getY();
                     double angle = atan2(y - cy, x - cx);
-
                     double newAngle = angle + tuning * r / 20_000;
 
                     double newX = cx + r * cos(newAngle);
@@ -2250,12 +2252,11 @@ public class Shapes {
                     double r = center.distance(x, y) / maxR;
                     double cx = center.getX();
                     double cy = center.getY();
-                    double theta = atan2(y - cy, x - cx);
-
+                    double angle = atan2(y - cy, x - cx);
                     double newRadius = maxR * Math.pow(r, -tuning / 100 + 1);
 
-                    double newX = cx + newRadius * cos(theta);
-                    double newY = cy + newRadius * sin(theta);
+                    double newX = cx + newRadius * cos(angle);
+                    double newY = cy + newRadius * sin(angle);
                     return new Point2D.Double(newX, newY);
                 };
             }
@@ -2265,10 +2266,10 @@ public class Shapes {
                 double maxR = Math.min(width, height) / 2.0;
                 return (x, y) -> {
                     double r = x * maxR / width;
-                    double theta = y * 2 * PI / height;
+                    double angle = y * 2 * PI / height;
 
-                    double newX = center.getX() + r * cos(theta);
-                    double newY = center.getY() + r * sin(theta);
+                    double newX = center.getX() + r * cos(angle);
+                    double newY = center.getY() + r * sin(angle);
                     return new Point2D.Double(newX, newY);
                 };
             }
@@ -2281,19 +2282,19 @@ public class Shapes {
                     double cx = center.getX();
                     double cy = center.getY();
 
-                    // atan2 is in the range -pi..pi, theta will be 0..2*pi
-                    double theta = atan2(y - cy, x - cx) + PI;
+                    // atan2 is in the range -pi..pi, angle will be 0..2*pi
+                    double angle = atan2(y - cy, x - cx) + PI;
 
                     // in the range 0..1
-                    double normalizedTheta = theta / (2 * PI);
-                    normalizedTheta += tuning / 100.0;
-                    if (normalizedTheta > 1) {
-                        normalizedTheta -= 1;
-                    } else if (normalizedTheta < 0) {
-                        normalizedTheta += 1;
+                    double normalizedAngle = angle / (2 * PI);
+                    normalizedAngle += tuning / 100.0;
+                    if (normalizedAngle > 1) {
+                        normalizedAngle -= 1;
+                    } else if (normalizedAngle < 0) {
+                        normalizedAngle += 1;
                     }
 
-                    double newX = normalizedTheta * width;
+                    double newX = normalizedAngle * width;
                     double newY = r * height;
 
                     return new Point2D.Double(newX, newY);
@@ -2309,6 +2310,9 @@ public class Shapes {
             this.hasTuning = hasTuning;
         }
 
+        /**
+         * Creates a point mapper for this transformation.
+         */
         public abstract PointMapper createMapper(Point2D center, double tuning, int width, int height);
 
         public static EnumParam<NonlinTransform> asParam() {

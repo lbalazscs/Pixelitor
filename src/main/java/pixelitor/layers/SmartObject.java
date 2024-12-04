@@ -27,7 +27,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileIO;
@@ -389,15 +389,15 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     protected void addSmartObjectMenus(JPopupMenu popup) {
-        popup.add(new PAction("Edit Contents", this::edit));
-        popup.add(new PAction("Clone", () ->
+        popup.add(new TaskAction("Edit Contents", this::edit));
+        popup.add(new TaskAction("Clone", () ->
             comp.shallowDuplicate(this)));
         if (isContentLinked()) {
-            popup.add(new PAction("Embed Contents", this::embedLinkedContent));
-            popup.add(new PAction("Reload Contents", this::reloadLinkedContent));
+            popup.add(new TaskAction("Embed Contents", this::embedLinkedContent));
+            popup.add(new TaskAction("Reload Contents", this::reloadLinkedContent));
         }
         if (SmartFilter.copiedSmartFilter != null) {
-            popup.add(new PAction("Paste " + SmartFilter.copiedSmartFilter.getName(), () -> {
+            popup.add(new TaskAction("Paste " + SmartFilter.copiedSmartFilter.getName(), () -> {
                 // copy again, because it could be pasted multiple times
                 SmartFilter newSF = (SmartFilter) SmartFilter.copiedSmartFilter.copy(CopyType.DUPLICATE_LAYER, true, comp);
                 newSF.setSmartObject(this);
@@ -405,7 +405,7 @@ public class SmartObject extends CompositeLayer {
             }));
         }
         if (AppMode.isDevelopment()) {
-            popup.add(new PAction("Debug Images", this::debugImages));
+            popup.add(new TaskAction("Debug Images", this::debugImages));
         }
     }
 
@@ -1107,7 +1107,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paint(Graphics2D g, boolean firstVisibleLayer) {
         g.drawImage(getVisibleImage(), getTx(), getTy(), null);
     }
 

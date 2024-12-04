@@ -18,8 +18,10 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.colors.Colors;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
@@ -33,16 +35,23 @@ import java.awt.geom.Rectangle2D;
 
 import static pixelitor.utils.Rnd.nextGaussian;
 
+/**
+ * A brush that simulates a spray paint effect.
+ */
 public class SprayBrush extends AbstractBrush {
-    private static final int DELAY_MILLIS = 50;
+    private static final int SPRAY_INTERVAL_MILLIS = 50;
 
     private final SprayBrushSettings settings;
     private double minShapeRadius;
     private double maxShapeRadius;
     private double mouseX;
     private double mouseY;
-    private double maxRadiusSoFar;
-    private boolean isEraser;
+
+    // the maximum observed distance between the mouse position
+    // and any shape center, over the lifetime of a brush stroke
+    private double maxObservedDist;
+
+    private boolean isErasing;
     private Color baseColor;
     private Timer timer;
     private final CachedFloatRandom rnd = new CachedFloatRandom();
@@ -55,16 +64,16 @@ public class SprayBrush extends AbstractBrush {
     @Override
     public void setTarget(Drawable dr, Graphics2D g) {
         super.setTarget(dr, g);
-        AlphaComposite ac = (AlphaComposite) g.getComposite();
-        isEraser = ac.getRule() == AlphaComposite.DST_OUT;
-        baseColor = g.getColor();
-    }
 
-    @Override
-    public double getMaxEffectiveRadius() {
-        // The points have a Gaussian distribution, the actual radius
-        // is theoretically infinite, so return the maximum observed value
-        return maxShapeRadius + maxRadiusSoFar;
+        // detect tool settings
+//        AlphaComposite currentComposite = (AlphaComposite) g.getComposite();
+//        isErasing = currentComposite.getRule() == AlphaComposite.DST_OUT;
+//        baseColor = g.getColor();
+
+        // the Graphics is not completely configured yet,
+        // so the above code doesn't work
+        isErasing = Tools.activeIs(Tools.ERASER);
+        baseColor = FgBgColors.getFGColor();
     }
 
     @Override
@@ -76,22 +85,28 @@ public class SprayBrush extends AbstractBrush {
         minShapeRadius = shapeRadius - radiusVariability * shapeRadius;
         maxShapeRadius = shapeRadius + radiusVariability * shapeRadius;
 
-        maxRadiusSoFar = Double.MIN_VALUE;
+        maxObservedDist = 0;
 
-        timer = new Timer(DELAY_MILLIS, e -> sprayOnce());
+        timer = new Timer(SPRAY_INTERVAL_MILLIS, e -> spray());
         timer.start();
 
         mouseX = previous.getImX();
         mouseY = previous.getImY();
 
-        sprayOnce();
+        spray(); // initial spray
     }
 
-    private double nextShapeRadius() {
+    /**
+     * Generates a random shape radius within the allowed range.
+     */
+    private double genShapeRadius() {
         return minShapeRadius + rnd.nextFloat() * (maxShapeRadius - minShapeRadius);
     }
 
-    private void sprayOnce() {
+    /**
+     * Sprays a burst of shapes.
+     */
+    private void spray() {
         View view = dr.getComp().getView();
         if (view == null) {
             // can happen if the composition was reloaded while spraying
@@ -103,26 +118,29 @@ public class SprayBrush extends AbstractBrush {
         ShapeType shapeType = settings.getShapeType();
         boolean useRandomOpacity = settings.randomOpacity();
         float colorRandomness = (float) settings.getColorRandomness();
-        int numSimultaneousShapes = settings.getFlow();
+        int shapesPerSpray = settings.getFlow();
 
-        for (int i = 0; i < numSimultaneousShapes; i++) {
-            double dx = nextGaussian() * radius;
-            double x = mouseX + dx;
-            double dy = nextGaussian() * radius;
-            double y = mouseY + dy;
-            updateTheMaxRadius(dx, dy);
+        for (int i = 0; i < shapesPerSpray; i++) {
+            double offsetX = nextGaussian() * radius;
+            double offsetY = nextGaussian() * radius;
+
+            maxObservedDist = Math.max(
+                maxObservedDist,
+                Math.max(Math.abs(offsetX), Math.abs(offsetY)));
 
             if (useRandomOpacity) {
-                setOpacityRandomly();
+                setRandomOpacity();
             }
 
-            if (!isEraser && colorRandomness > 0.0f) {
+            if (!isErasing && colorRandomness > 0.0f) {
                 Color randomColor = Rnd.createRandomColor();
                 Color color = Colors.interpolateRGB(baseColor, randomColor, colorRandomness);
                 targetG.setColor(color);
             }
 
-            double shapeRadius = nextShapeRadius();
+            double x = mouseX + offsetX;
+            double y = mouseY + offsetY;
+            double shapeRadius = genShapeRadius();
             Shape shape = shapeType.createShape(
                 x - shapeRadius, y - shapeRadius, 2 * shapeRadius);
             targetG.fill(shape);
@@ -134,36 +152,12 @@ public class SprayBrush extends AbstractBrush {
         dr.repaintRegion(PRectangle.fromIm(imArea, view));
     }
 
-    private void setOpacityRandomly() {
-        Composite composite;
-        float strength = rnd.nextFloat();
-        if (isEraser) {
-            composite = AlphaComposite.DstOut.derive(strength);
-        } else {
-            composite = AlphaComposite.SrcOver.derive(strength);
-        }
+    private void setRandomOpacity() {
+        float opacity = rnd.nextFloat();
+        Composite composite = isErasing
+            ? AlphaComposite.DstOut.derive(opacity)
+            : AlphaComposite.SrcOver.derive(opacity);
         targetG.setComposite(composite);
-    }
-
-    private void updateTheMaxRadius(double dx, double dy) {
-        if (dx > 0) {
-            if (dx > maxRadiusSoFar) {
-                maxRadiusSoFar = dx;
-            }
-        } else {
-            if (-dx > maxRadiusSoFar) {
-                maxRadiusSoFar = -dx;
-            }
-        }
-        if (dy > 0) {
-            if (dy > maxRadiusSoFar) {
-                maxRadiusSoFar = dy;
-            }
-        } else {
-            if (-dy > maxRadiusSoFar) {
-                maxRadiusSoFar = -dy;
-            }
-        }
     }
 
     @Override
@@ -172,7 +166,7 @@ public class SprayBrush extends AbstractBrush {
         // brush outline still has to be repainted
         repaintComp(p);
 
-        rememberPrevious(p);
+        setPrevious(p);
 
         mouseX = previous.getImX();
         mouseY = previous.getImY();
@@ -201,6 +195,13 @@ public class SprayBrush extends AbstractBrush {
             timer.stop();
             timer = null;
         }
+    }
+
+    @Override
+    public double getMaxEffectiveRadius() {
+        // the points have a Gaussian distribution, making the actual radius
+        // theoretically infinite, so return the maximum observed value
+        return maxObservedDist + maxShapeRadius;
     }
 
     @Override

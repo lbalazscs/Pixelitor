@@ -102,15 +102,15 @@ public final class GUIUtils {
     }
 
     public static JPanel createVerticalPanel(ParamSet paramSet) {
-        JPanel p = new JPanel(new GridBagLayout());
-        new GridBagHelper(p).arrangeVertically(paramSet.getParams());
-        return p;
+        JPanel panel = new JPanel(new GridBagLayout());
+        new GridBagHelper(panel).arrangeVertically(paramSet.getParams());
+        return panel;
     }
 
     public static JPanel createVerticalPanel(Iterable<? extends FilterSetting> settings) {
-        JPanel p = new JPanel();
-        arrangeVertically(p, settings);
-        return p;
+        JPanel panel = new JPanel();
+        arrangeVertically(panel, settings);
+        return panel;
     }
 
     public static void arrangeVertically(JPanel panel,
@@ -342,9 +342,9 @@ public final class GUIUtils {
         }
     }
 
-    public static AbstractAction createPrintFileAction(Composition comp,
-                                                       File file, Component parent) {
-        return new PAction("Print...", () -> {
+    public static Action createPrintFileAction(Composition comp,
+                                               File file, Component parent) {
+        return new TaskAction("Print...", () -> {
             if (comp.isDirty()) {
                 String msg = "<html>The file <i>" + file.getName() +
                     "</i> contains unsaved changes.<br>" +

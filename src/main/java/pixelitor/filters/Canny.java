@@ -123,7 +123,7 @@ public class Canny extends ParametrizedFilter {
             "Available memory is " + availableMemoryMB +
             " megabytes, memory needed for this image is " + estimatedMemoryMB
             + " megabytes.";
-        Messages.showInfo("Not enough memory", msg);
+        Messages.showInfo("Not Enough Memory", msg);
     }
 
     private static long estimateNeededMemoryMB(BufferedImage src) {

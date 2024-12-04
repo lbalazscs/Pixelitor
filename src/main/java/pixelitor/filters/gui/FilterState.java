@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 
 import javax.swing.*;
 import java.util.HashMap;
@@ -128,7 +128,7 @@ public class FilterState implements Preset {
 
     @Override
     public Action createAction(PresetOwner owner) {
-        return new PAction(name, () -> owner.loadFilterState(this, shouldResetBeforeApplying));
+        return new TaskAction(name, () -> owner.loadFilterState(this, shouldResetBeforeApplying));
     }
 
     public String toDebugString() {

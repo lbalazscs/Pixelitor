@@ -157,19 +157,19 @@ public class ContentLayerTest {
     }
 
     @Test
-    public void applyLayer() {
+    public void render() {
         var g2 = TestHelper.createGraphics();
         var image = TestHelper.createImage();
 
-        layer.applyLayer(g2, image, true);
-        layer.applyLayer(g2, image, false);
+        layer.render(g2, image, true);
+        layer.render(g2, image, false);
         iconUpdates.check(0, 0);
     }
 
     @Test
     public void paintLayerOnGraphics() {
         Graphics2D g2 = TestHelper.createGraphics();
-        layer.paintLayerOnGraphics(g2, false);
+        layer.paint(g2, false);
         iconUpdates.check(0, 0);
     }
 

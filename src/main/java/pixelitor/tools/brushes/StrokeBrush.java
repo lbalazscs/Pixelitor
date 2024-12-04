@@ -61,7 +61,7 @@ public abstract class StrokeBrush extends AbstractBrush {
 
         drawLine(previous, p);
         repaintComp(p);
-        rememberPrevious(p);
+        setPrevious(p);
     }
 
     /**

@@ -97,7 +97,7 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paint(Graphics2D g, boolean firstVisibleLayer) {
         if (styledShape != null) {
             // the custom blending modes don't work with gradients
             boolean useCachedImage = g.getComposite().getClass() != AlphaComposite.class

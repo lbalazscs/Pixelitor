@@ -68,7 +68,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         zoomPercentageLabel.setPreferredSize(preferredSize);
 
         zoomSlider.addChangeListener(e ->
-            Views.onActiveView(this::updateZoomBasedOnSlider));
+            Views.onActive(this::updateZoomBasedOnSlider));
 
         zoomTextLabel = new JLabel("  " + ZOOM + ": ");
 

@@ -71,10 +71,9 @@ public abstract class AbstractBrush implements Brush {
         dr.repaintRegion(previous, p, diameter);
     }
 
-    // A simple setter, but with a more expressive name.
-    // Always call it after repaintComp!
+    // Always call this after repaintComp!
     @Override
-    public void rememberPrevious(PPoint p) {
+    public void setPrevious(PPoint p) {
         previous = p;
     }
 
@@ -88,7 +87,7 @@ public abstract class AbstractBrush implements Brush {
         // when starting a new stroke, the previous
         // variables should not be set to 0, 0
         // because it causes unnecessary repainting
-        rememberPrevious(p);
+        setPrevious(p);
 
         initDrawing(p);
 

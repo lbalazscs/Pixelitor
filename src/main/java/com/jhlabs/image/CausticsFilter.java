@@ -19,7 +19,6 @@ package com.jhlabs.image;
 import com.jhlabs.math.Noise;
 import pixelitor.ThreadPool;
 
-import java.awt.*;
 import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
@@ -215,17 +214,15 @@ public class CausticsFilter extends WholeImageFilter {
     }
 
     @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels) {
 //        sin = (float) Math.sin(0.1);
 //        cos = (float) Math.cos(0.1);
 
-        int outWidth = transformedSpace.width;
-        int outHeight = transformedSpace.height;
         int index = 0;
-        int[] pixels = new int[outWidth * outHeight];
+        int[] pixels = new int[width * height];
 
-        for (int y = 0; y < outHeight; y++) {
-            for (int x = 0; x < outWidth; x++) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 pixels[index++] = bgColor;
             }
         }
@@ -238,13 +235,13 @@ public class CausticsFilter extends WholeImageFilter {
         float rs = 1.0f / scale;
         float d = 0.95f;
 
-        pt = createProgressTracker(outHeight);
+        pt = createProgressTracker(height);
 
-        Future<?>[] futures = new Future[outHeight];
-        for (int y = 0; y < outHeight; y++) {
+        Future<?>[] futures = new Future[height];
+        for (int y = 0; y < height; y++) {
             int finalY = y;
             int finalV = v;
-            Runnable lineTask = () -> calculateLine(outWidth, outHeight, pixels, finalV, rs, d, finalY);
+            Runnable lineTask = () -> calculateLine(width, height, pixels, finalV, rs, d, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitFor(futures, pt);
@@ -254,10 +251,10 @@ public class CausticsFilter extends WholeImageFilter {
         return pixels;
     }
 
-    private void calculateLine(int outWidth, int outHeight, int[] pixels, int v, float rs, float d, int y) {
-        for (int x = 0; x < outWidth; x++) {
+    private void calculateLine(int width, int height, int[] pixels, int v, float rs, float d, int y) {
+        Random random = ThreadLocalRandom.current();
+        for (int x = 0; x < width; x++) {
             for (int s = 0; s < samples; s++) {
-                Random random = ThreadLocalRandom.current();
                 float sx = x + random.nextFloat();
                 float sy = y + random.nextFloat();
                 float nx = sx * rs;
@@ -273,9 +270,9 @@ public class CausticsFilter extends WholeImageFilter {
                         float srcX = sx + scaleXFocusXca * xDisplacement;
                         float srcY = sy + scaleXFocusXca * yDisplacement;
 
-                        if (srcX < 0 || srcX >= outWidth - 1 || srcY < 0 || srcY >= outHeight - 1) {
+                        if (srcX < 0 || srcX >= width - 1 || srcY < 0 || srcY >= height - 1) {
                         } else {
-                            int i = ((int) srcY) * outWidth + (int) srcX;
+                            int i = ((int) srcY) * width + (int) srcX;
                             int rgb = pixels[i];
                             int r = (rgb >> 16) & 0xff;
                             int g = (rgb >> 8) & 0xff;
@@ -303,9 +300,9 @@ public class CausticsFilter extends WholeImageFilter {
                     float srcX = sx + scale * focus * xDisplacement;
                     float srcY = sy + scale * focus * yDisplacement;
 
-                    if (srcX < 0 || srcX >= outWidth - 1 || srcY < 0 || srcY >= outHeight - 1) {
+                    if (srcX < 0 || srcX >= width - 1 || srcY < 0 || srcY >= height - 1) {
                     } else {
-                        int i = ((int) srcY) * outWidth + (int) srcX;
+                        int i = ((int) srcY) * width + (int) srcX;
                         int rgb = pixels[i];
                         int r = (rgb >> 16) & 0xff;
                         int g = (rgb >> 8) & 0xff;

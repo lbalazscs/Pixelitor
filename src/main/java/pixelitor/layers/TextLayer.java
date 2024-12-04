@@ -28,7 +28,7 @@ import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TransformedTextPainter;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.TextAlignment;
 import pixelitor.history.*;
 import pixelitor.io.TranslatedImage;
@@ -197,7 +197,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             return painter.getBoundingBox();
         } else {
             // make an image-based calculation for an exact "content crop"
-            BufferedImage image = asImage(false, false);
+            BufferedImage image = toImage(false, false);
             Rectangle bounds = ImageUtils.getNonTransparentBounds(image);
             image.flush();
             return bounds;
@@ -227,20 +227,20 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paint(Graphics2D g, boolean firstVisibleLayer) {
         painter.setColor(settings.getColor());
         painter.paint(g, comp.getCanvasWidth(), comp.getCanvasHeight(), comp);
     }
 
     @Override
-    public BufferedImage applyLayer(Graphics2D g, BufferedImage imageSoFar, boolean firstVisibleLayer) {
+    public BufferedImage render(Graphics2D g, BufferedImage currentComposite, boolean firstVisibleLayer) {
         if (settings == null) {
             // the layer was just created, nothing to paint yet
             return null;
         }
 
         // the text will be painted normally
-        return super.applyLayer(g, imageSoFar, firstVisibleLayer);
+        return super.render(g, currentComposite, firstVisibleLayer);
     }
 
     @Override
@@ -379,7 +379,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         editMenuItem.setAccelerator(CTRL_T);
         popup.add(editMenuItem);
 
-        popup.add(new PAction("Selection from Text", this::createSelectionFromText));
+        popup.add(new TaskAction("Selection from Text", this::createSelectionFromText));
 
         return popup;
     }

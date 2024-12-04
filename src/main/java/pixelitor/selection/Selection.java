@@ -27,6 +27,7 @@ import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.transform.Transformable;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.Threads;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -124,6 +125,7 @@ public class Selection implements Debuggable, Transformable {
     }
 
     public void paintMarchingAnts(Graphics2D g2) {
+        assert Threads.calledOnEDT() : Threads.threadInfo();
         assert !disposed : "dead selection";
 
         if (shape == null || hidden) {
@@ -165,6 +167,7 @@ public class Selection implements Debuggable, Transformable {
     }
 
     public void dispose() {
+        assert AppMode.isUnitTesting() || Threads.calledOnEDT() : Threads.threadInfo();
         if (disposed) {
             return;
         }
@@ -234,11 +237,11 @@ public class Selection implements Debuggable, Transformable {
         Shape prevShape = shape;
 
         // Create the modified shape
-        Stroke outlineStroke = new BasicStroke(amount);
-        Shape outlineShape = outlineStroke.createStrokedShape(shape);
+        Stroke borderStroke = new BasicStroke(amount);
+        Shape borderShape = borderStroke.createStrokedShape(shape);
         Area currentArea = new Area(shape);
-        Area outlineArea = new Area(outlineShape);
-        shape = type.modify(currentArea, outlineArea);
+        Area borderArea = new Area(borderShape);
+        shape = type.modify(currentArea, borderArea);
 
         // Handle the modification result
         var comp = view.getComp();
@@ -348,9 +351,8 @@ public class Selection implements Debuggable, Transformable {
 
         shape = comp.clipToCanvasBounds(shape);
         if (shape.getBounds().isEmpty()) { // moved outside the canvas
-            var deselectEdit = new DeselectEdit(comp, origShape);
             comp.deselect(false);
-            return deselectEdit;
+            return new DeselectEdit(comp, origShape);
         }
 
         var edit = new SelectionShapeChangeEdit(
@@ -376,7 +378,7 @@ public class Selection implements Debuggable, Transformable {
         var node = new DebugNode(name, this);
 
         node.addBoolean("hidden", hidden);
-        node.addBoolean("dead", disposed);
+        node.addBoolean("disposed", disposed);
         node.addBoolean("frozen", frozen);
         node.addBoolean("marching", isMarching());
         node.addBoolean("rectangular", isRectangular());

@@ -308,12 +308,13 @@ public class Drag implements Serializable, Debuggable {
         return imStartX == imEndX && imStartY == imEndY;
     }
 
-    public boolean hasZeroImWidth() {
-        return imStartX == imEndX;
+    public boolean isEmptyRect() {
+        assert hasCoCoords;
+        return coStartX == coEndX || coStartY == coEndY;
     }
 
-    public boolean hasZeroImHeight() {
-        return imStartY == imEndY;
+    public boolean isEmptyImRect() {
+        return imStartX == imEndX || imStartY == imEndY;
     }
 
     public void setAngleConstrained(boolean angleConstrained) {

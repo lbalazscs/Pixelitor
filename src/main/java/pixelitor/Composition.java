@@ -124,6 +124,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private transient boolean dirty = false;
 
+    // cached composite image
     private transient BufferedImage compositeImage;
 
     private transient View view;
@@ -317,7 +318,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         if (selection != null) {
             if (view == null) {
-                selection.dispose();
+                disposeSelection();
             } else {
                 selection.setView(view);
             }
@@ -447,7 +448,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void dispose() {
         if (selection != null) {
             // stop the timer thread
-            selection.dispose();
+            disposeSelection();
         }
         removeAllLayersFromUI();
         setView(null);
@@ -814,7 +815,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         if (isOpen() && isActive()) {  // shouldn't run while loading the composition
-            Tools.activeLayerChanged(layer);
+            Tools.editingTargetChanged(layer);
             Layers.layerActivated(layer, true);
 
             if (oldActive != null) {
@@ -1145,7 +1146,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * The GUI doesn't have to be updated because this method is
      * called when the layer order is changed by drag-reordering in the GUI.
      */
-    public void reorderLayer(Layer layer, int newIndex) {
+    public void changeStackIndex(Layer layer, int newIndex) {
         int oldIndex = layerList.indexOf(layer);
         assert oldIndex != -1;
         assert newIndex < layerList.size() : "oldIndex = " + oldIndex + ", newIndex = " + newIndex;
@@ -1243,7 +1244,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         DeselectEdit edit = null;
+
         Shape shape = selection.getShape();
+        boolean wasHidden = selection.isHidden();
+
+        disposeSelection();
+
         if (shape != null) { // null for a simple click without a previous selection
             edit = new DeselectEdit(this, shape);
         }
@@ -1251,16 +1257,17 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             History.add(edit);
         }
 
-        boolean wasHidden = selection.isHidden();
-        selection.dispose();
-        setSelectionRef(null);
-
         if (wasHidden && isActive()) {
             // the "hide selection" menu will be disabled, but it's better
             // than the "show selection" when there is no selection
             SelectionActions.getShowHide().setHideText();
         }
         return edit;
+    }
+
+    private void disposeSelection() {
+        selection.dispose();
+        setSelectionRef(null);
     }
 
     public Selection getSelection() {
@@ -1359,6 +1366,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void promoteSelection() {
         assert selection == null || !selection.isUsable() : "selection = " + selection;
         assert draftSelection != null;
+        assert draftSelection.isUsable();
+        
         setSelectionRef(draftSelection);
         setDraftSelection(null);
     }
@@ -1409,8 +1418,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                 selection.getShape(), cropRect);
 
             if (intersection.getBounds().isEmpty()) {
-                selection.dispose();
-                setSelectionRef(null);
+                disposeSelection();
             } else {
                 selection.setShape(intersection);
             }
@@ -1449,7 +1457,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Returns the (canvas-sized) composite image.
+     * Returns the (canvas-sized) composite image, recalculating it if necessary.
      */
     public BufferedImage getCompositeImage() {
         if (compositeImage == null) {
@@ -1470,8 +1478,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Forces the recalculation of the composite image
-     * the next time when getCompositeImage() is called.
+     * Invalidates the cached composite image, forcing a
+     * recalculation on the next call to {@link #getCompositeImage()}.
      */
     @Override
     public void invalidateImageCache() {

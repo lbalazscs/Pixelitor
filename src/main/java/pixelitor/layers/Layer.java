@@ -25,8 +25,8 @@ import pixelitor.Features;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
 import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tool;
@@ -63,7 +63,7 @@ import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
- * The base class of all layer classes.
+ * The base class for all layer classes.
  */
 public abstract class Layer implements Serializable, Debuggable {
     @Serial
@@ -82,8 +82,7 @@ public abstract class Layer implements Serializable, Debuggable {
     private boolean maskEnabled = true;
 
     /**
-     * Whether the edited image is the layer image or
-     * the layer mask image.
+     * Whether the mask is currently being edited.
      * Related to {@link MaskViewMode}.
      */
     private transient boolean maskEditing = false;
@@ -173,6 +172,7 @@ public abstract class Layer implements Serializable, Debuggable {
         ui.setSelected(true);
     }
 
+    // redraws the UI to reflect changes in layer activation
     public void updateUI() {
         if (ui != null) {
             ui.updateSelectionState();
@@ -372,8 +372,10 @@ public abstract class Layer implements Serializable, Debuggable {
      * Returns the holder for new layers.
      */
     public LayerHolder getHolderForNewLayers() {
-        // must be called on the currently active layer
-        assert isActive();
+        // usually called on the currently active layer,
+        // but if a new layer is added while a smart filter
+        // is active, then it's called on the smart object
+        assert isActive() || this instanceof SmartObject;
 
         return holder;
     }
@@ -504,7 +506,7 @@ public abstract class Layer implements Serializable, Debuggable {
             return null;
         }
 
-        maskingChanged();
+        maskChanged();
         holder.update();
 
         Layers.maskAdded(this);
@@ -556,7 +558,7 @@ public abstract class Layer implements Serializable, Debuggable {
             ui.addMaskIcon();
         }
         if (comp.isActive()) {
-            maskingChanged();
+            maskChanged();
             holder.update();
             if (isActive()) {
                 Layers.maskAdded(this);
@@ -592,11 +594,11 @@ public abstract class Layer implements Serializable, Debuggable {
         if (isActive()) {
             MaskViewMode.NORMAL.activate(view, this);
         }
-        maskingChanged();
+        maskChanged();
         holder.update();
     }
 
-    public void maskingChanged() {
+    protected void maskChanged() {
         // empty by default
     }
 
@@ -614,7 +616,7 @@ public abstract class Layer implements Serializable, Debuggable {
         if (maskEditing != newValue) {
             maskEditing = newValue;
             ui.updateSelectionState();
-            Tools.activeLayerChanged(this);
+            Tools.editingTargetChanged(this);
         }
     }
 
@@ -666,7 +668,7 @@ public abstract class Layer implements Serializable, Debuggable {
         assert hasMask();
         this.maskEnabled = maskEnabled;
 
-        maskingChanged();
+        maskChanged();
         holder.update();
         mask.updateIconImage();
         notifyListeners();
@@ -703,41 +705,43 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Paints the content of this layer on the given Graphics2D,
-     * or it transforms the given BufferedImage.
+     * Renders this layer onto the given Graphics2D
+     * or transforms the given image.
      * Adjustment layers and watermarked text layers change the
      * BufferedImage, while other layers just paint on the Graphics2D.
-     * If the BufferedImage is changed, this method returns
-     * the new image, otherwise it returns null.
+     * Returns the new image if transformation occurs, otherwise null.
      */
-    public BufferedImage applyLayer(Graphics2D g,
-                                    BufferedImage imageSoFar,
-                                    boolean firstVisibleLayer) {
+    public BufferedImage render(Graphics2D g,
+                                BufferedImage currentComposite,
+                                boolean firstVisibleLayer) {
         if (isAdjustment) { // adjustment layer or watermarked text layer
-            return adjustImageWithMaskAndBlending(imageSoFar, firstVisibleLayer);
+            return adjustImage(currentComposite, firstVisibleLayer);
         } else {
             setupComposite(g, firstVisibleLayer);
             if (usesMask()) {
-                paintLayerOnGraphicsWithMask(g, firstVisibleLayer);
+                paintWithMask(g, firstVisibleLayer);
             } else {
-                paintLayerOnGraphics(g, firstVisibleLayer);
+                paint(g, firstVisibleLayer);
             }
         }
         return null;
     }
 
-    // used by the non-adjustment stuff
-    // This method assumes that the composite of the graphics is already
-    // set up according to the transparency and blending mode
-    public abstract void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer);
+    /**
+     * Paints the layer content on the given Graphics2D.
+     * Called by non-adjustment layers.
+     * The Graphics2D is assumed to be already configured
+     * with the correct blending mode and opacity.
+     */
+    public abstract void paint(Graphics2D g, boolean firstVisibleLayer);
 
-    private void paintLayerOnGraphicsWithMask(Graphics2D g, boolean firstVisibleLayer) {
+    private void paintWithMask(Graphics2D g, boolean firstVisibleLayer) {
         // 1. create the masked image
         // TODO the masked image should be cached
         var maskedImage = new BufferedImage(
             comp.getCanvasWidth(), comp.getCanvasHeight(), TYPE_INT_ARGB);
         Graphics2D mig = maskedImage.createGraphics();
-        paintLayerOnGraphics(mig, firstVisibleLayer);
+        paint(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
         mig.drawImage(mask.getTransparencyImage(),
             mask.getTx(), mask.getTy(), null);
@@ -748,30 +752,32 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Used by adjustment layers and watermarked text layers
+     * Applies the layer's effect to the given image.
+     * Used by adjustment and watermarking text layers.
      */
-    protected BufferedImage adjustImageWithMaskAndBlending(BufferedImage imgSoFar,
-                                                           boolean firstVisibleLayer) {
+    protected BufferedImage adjustImage(BufferedImage currentComposite,
+                                        boolean firstVisibleLayer) {
         if (firstVisibleLayer) {
-            return imgSoFar; // there's nothing we can do
+            return currentComposite; // there's nothing to transform
         }
-        BufferedImage transformed = transformImage(imgSoFar);
-        if (usesMask()) {
+        BufferedImage transformed = transformImage(currentComposite);
+        boolean useMask = usesMask();
+        if (useMask) {
             mask.applyTo(transformed);
         }
-        if (!usesMask() && isNormalAndOpaque()) {
+        if (!useMask && isNormalAndOpaque()) {
             return transformed;
         } else {
-            Graphics2D g = imgSoFar.createGraphics();
+            Graphics2D g = currentComposite.createGraphics();
             setupComposite(g, firstVisibleLayer);
             g.drawImage(transformed, 0, 0, null);
             g.dispose();
-            return imgSoFar;
+            return currentComposite;
         }
     }
 
     /**
-     * Used by adjustment layers and watermarked text layers
+     * Used by adjustment layers and watermarking text layers
      * to apply this layer's effect on the given image.
      */
     protected abstract BufferedImage transformImage(BufferedImage src);
@@ -787,11 +793,11 @@ public abstract class Layer implements Serializable, Debuggable {
                               boolean allowGrowing);
 
     public void changeStackIndex(int newIndex) {
-        comp.reorderLayer(this, newIndex);
+        comp.changeStackIndex(this, newIndex);
     }
 
     /**
-     * Returns true if the layer is in normal mode and the opacity is 100%
+     * Checks if the layer has normal blending mode and 100% opacity.
      */
     protected boolean isNormalAndOpaque() {
         return blendingMode == BlendingMode.NORMAL
@@ -807,8 +813,7 @@ public abstract class Layer implements Serializable, Debuggable {
             // the first visible layer is always painted with normal mode
             g.setComposite(AlphaComposite.getInstance(SRC_OVER, opacity));
         } else {
-            Composite composite = blendingMode.getComposite(opacity);
-            g.setComposite(composite);
+            g.setComposite(blendingMode.getComposite(opacity));
         }
     }
 
@@ -878,7 +883,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
     public TranslatedImage getTranslatedImage() {
         // the default implementation is good for color and gradient fill layers
-        return new TranslatedImage(asImage(true, false), 0, 0);
+        return new TranslatedImage(toImage(true, false), 0, 0);
     }
 
     /**
@@ -889,7 +894,7 @@ public abstract class Layer implements Serializable, Debuggable {
      * @param applyMask    if false, then the mask is ignored
      * @param applyOpacity if false, then the layer's opacity is ignored.
      */
-    public BufferedImage asImage(boolean applyMask, boolean applyOpacity) {
+    public BufferedImage toImage(boolean applyMask, boolean applyOpacity) {
         BufferedImage img = comp.getCanvas().createTmpImage();
         Graphics2D g = img.createGraphics();
         if (applyOpacity) {
@@ -899,9 +904,9 @@ public abstract class Layer implements Serializable, Debuggable {
         }
 
         if (applyMask && usesMask()) {
-            paintLayerOnGraphicsWithMask(g, true);
+            paintWithMask(g, true);
         } else {
-            paintLayerOnGraphics(g, true);
+            paint(g, true);
         }
         g.dispose();
         return img;
@@ -925,7 +930,7 @@ public abstract class Layer implements Serializable, Debuggable {
         JPopupMenu popup = null;
         if (holder.canMergeDown(this)) {
             popup = new JPopupMenu();
-            var mergeDownAction = new PAction(GUIText.MERGE_DOWN, () -> {
+            var mergeDownAction = new TaskAction(GUIText.MERGE_DOWN, () -> {
                 // check again to be sure that the layer below
                 // this didn't change in the meantime
                 if (holder.canMergeDown(this)) {
@@ -940,7 +945,7 @@ public abstract class Layer implements Serializable, Debuggable {
             if (popup == null) {
                 popup = new JPopupMenu();
             }
-            popup.add(new PAction("Rasterize", this::replaceWithRasterized));
+            popup.add(new TaskAction("Rasterize", this::replaceWithRasterized));
         }
 
         if (Features.enableExperimental) {
@@ -956,7 +961,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
     protected void addSmartObjectMenus(JPopupMenu popup) {
         if (isConvertibleToSmartObject()) {
-            popup.add(new PAction("Convert to Smart Object", this::replaceWithSmartObject));
+            popup.add(new TaskAction("Convert to Smart Object", this::replaceWithSmartObject));
         }
     }
 
@@ -1019,7 +1024,7 @@ public abstract class Layer implements Serializable, Debuggable {
     public ImageLayer replaceWithRasterized() {
         assert isRasterizable();
 
-        var rasterizedImage = asImage(false, false);
+        var rasterizedImage = toImage(false, false);
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
         newImageLayer.setHolder(holder);
         copyCommonPropertiesTo(newImageLayer);

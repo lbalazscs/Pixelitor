@@ -21,7 +21,7 @@ import com.bric.util.JVM;
 import pixelitor.AppMode;
 import pixelitor.colors.Colors;
 import pixelitor.filters.Truchet;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
 
@@ -294,7 +294,7 @@ public class UserPreset implements Preset {
 
     @Override
     public Action createAction(PresetOwner owner) {
-        return new PAction(name, () -> {
+        return new TaskAction(name, () -> {
             if (!loaded) {
                 try {
                     loadFromFile();

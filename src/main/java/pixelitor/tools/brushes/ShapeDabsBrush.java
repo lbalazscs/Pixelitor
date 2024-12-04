@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * A {@link DabsBrush} where the dabs are filled shapes
+ * A {@link DabsBrush} that draws filled shapes as dabs.
  */
 public class ShapeDabsBrush extends DabsBrush {
     public ShapeDabsBrush(double radius, ShapeDabsBrushSettings settings) {
@@ -43,23 +43,25 @@ public class ShapeDabsBrush extends DabsBrush {
     }
 
     @Override
-    public void putDab(PPoint p, double theta) {
-        double x = p.getImX();
-        double y = p.getImY();
+    public void putDab(PPoint currentPoint, double angle) {
+        double x = currentPoint.getImX();
+        double y = currentPoint.getImY();
         ShapeType shapeType = ((ShapeDabsBrushSettings) settings).getShapeType();
-        if (theta != 0) {
-            Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
-            Shape rotatedShape = Shapes.rotate(shape, theta, x, y);
-            targetG.fill(rotatedShape);
-        } else {
-            Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
-            targetG.fill(shape);
-        }
-        repaintComp(p);
+
+        // create the base shape at the given position
+        Shape baseShape = shapeType.createShape(x - radius, y - radius, diameter);
+
+        // rotate around the center if necessary
+        Shape finalShape = (angle == 0)
+            ? baseShape
+            : Shapes.rotate(baseShape, angle, x, y);
+
+        targetG.fill(finalShape);
+        repaintComp(currentPoint);
     }
 
     @Override
-    void setupBrushStamp(PPoint p) {
+    void initBrushStamp(PPoint p) {
         // no setup is necessary for shape brushes
     }
 }

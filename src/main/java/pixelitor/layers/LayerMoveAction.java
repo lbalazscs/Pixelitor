@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.utils.Icons;
 
 import javax.swing.*;
@@ -29,7 +29,7 @@ import static pixelitor.utils.Texts.i18n;
  * An {@link Action} that moves the active layer of the active composition
  * up or down in the layer stack
  */
-public class LayerMoveAction extends OpenViewEnabledAction.Checked {
+public class LayerMoveAction extends AbstractViewEnabledAction {
     // menu and history names (also for selection movements)
     public static final String RAISE_LAYER = i18n("raise_layer");
     public static final String LOWER_LAYER = i18n("lower_layer");

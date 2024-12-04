@@ -22,7 +22,7 @@ import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Outsets;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
@@ -128,20 +128,20 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public BufferedImage applyLayer(Graphics2D g, BufferedImage imageSoFar, boolean firstVisibleLayer) {
+    public BufferedImage render(Graphics2D g, BufferedImage currentComposite, boolean firstVisibleLayer) {
         if (isPassThrough()) {
             // Apply the layers as if they were directly in the parent holder.
             // The algorithm is similar to ImageUtils.calcComposite(),
             // but here we have to consider the existing state of the composition.
             for (Layer layer : layers) {
                 if (layer.isVisible()) {
-                    BufferedImage result = layer.applyLayer(g, imageSoFar, firstVisibleLayer);
+                    BufferedImage result = layer.render(g, currentComposite, firstVisibleLayer);
                     if (result != null) { // adjustment layer or watermarking text layer
-                        imageSoFar = result;
+                        currentComposite = result;
                         if (g != null) {
                             g.dispose();
                         }
-                        g = imageSoFar.createGraphics();
+                        g = currentComposite.createGraphics();
                     }
                     firstVisibleLayer = false;
                 }
@@ -152,7 +152,7 @@ public class LayerGroup extends CompositeLayer {
             g.setComposite(blendingMode.getComposite(getOpacity()));
             g.drawImage(getCachedImage(), 0, 0, null);
         }
-        return imageSoFar;
+        return currentComposite;
     }
 
     @Override
@@ -183,7 +183,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public BufferedImage asImage(boolean applyMask, boolean applyOpacity) {
+    public BufferedImage toImage(boolean applyMask, boolean applyOpacity) {
         // TODO This method currently ignores its arguments.
         //   (It was only implemented to support the
         //   shortcut in Composition.getCompositeImage.)
@@ -202,7 +202,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paint(Graphics2D g, boolean firstVisibleLayer) {
         throw new UnsupportedOperationException();
     }
 
@@ -567,7 +567,7 @@ public class LayerGroup extends CompositeLayer {
             popup = new JPopupMenu();
         }
 
-        popup.add(new PAction("Ungroup", () ->
+        popup.add(new TaskAction("Ungroup", () ->
             replaceWithUnGrouped(null, true)));
 
         return popup;

@@ -18,7 +18,6 @@ package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -98,7 +97,7 @@ public class SmearFilter extends WholeImageFilter {
     }
 
     @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
 
         int i = 0;

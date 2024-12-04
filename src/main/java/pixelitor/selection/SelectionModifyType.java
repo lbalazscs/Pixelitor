@@ -24,37 +24,37 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 
 /**
- * The "Type" in the "Modify Selection" dialog
+ * The modification type for a selection, used in the "Modify Selection" dialog.
  */
 public enum SelectionModifyType {
     EXPAND("Expand") {
         @Override
-        public Shape modify(Area previous, Area outlineShape) {
-            previous.add(outlineShape);
-            return previous;
+        public Shape modify(Area previousSelection, Area borderArea) {
+            previousSelection.add(borderArea);
+            return previousSelection;
         }
     }, CONTRACT("Contract") {
         @Override
-        public Shape modify(Area previous, Area outlineShape) {
-            previous.subtract(outlineShape);
-            return previous;
+        public Shape modify(Area previousSelection, Area borderArea) {
+            previousSelection.subtract(borderArea);
+            return previousSelection;
         }
     }, BORDER("Border") {
         @Override
-        public Shape modify(Area previous, Area outlineShape) {
-            return outlineShape;
+        public Shape modify(Area previousSelection, Area borderArea) {
+            return borderArea;
         }
-    }, BORDER_OUT("Border Outwards Only") {
+    }, OUTWARD_BORDER("Border Outwards Only") {
         @Override
-        public Shape modify(Area previous, Area outlineShape) {
-            outlineShape.subtract(previous);
-            return outlineShape;
+        public Shape modify(Area previousSelection, Area borderArea) {
+            borderArea.subtract(previousSelection);
+            return borderArea;
         }
-    }, BORDER_IN("Border Inwards Only") {
+    }, INWARD_BORDER("Border Inwards Only") {
         @Override
-        public Shape modify(Area previous, Area outlineShape) {
-            previous.intersect(outlineShape);
-            return previous;
+        public Shape modify(Area previousSelection, Area borderArea) {
+            previousSelection.intersect(borderArea);
+            return previousSelection;
         }
     };
 
@@ -65,10 +65,9 @@ public enum SelectionModifyType {
     }
 
     /**
-     * Calculates a new shape from the existing one
-     * and its stroked outline shape.
+     * Modifies a selection shape based on this modification type.
      */
-    public abstract Shape modify(Area previous, Area outlineShape);
+    public abstract Shape modify(Area previousSelection, Area borderArea);
 
     public static EnumParam<SelectionModifyType> asParam() {
         return new EnumParam<>(GUIText.TYPE, SelectionModifyType.class);

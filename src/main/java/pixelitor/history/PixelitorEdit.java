@@ -33,7 +33,11 @@ import javax.swing.undo.CannotUndoException;
 public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debuggable {
     protected Composition comp;
     private final String name;
+
+    // heavy edits consume more memory, and therefore their
+    // number is limited by the "minimum undo levels" settings
     private final boolean isHeavy;
+
     private final boolean wasDirty;
     private boolean cleanedByUndo = false;
 
@@ -72,12 +76,12 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debu
         // any action triggered from this method
         // must not add something to the history
         try {
-            History.setForbidEdits(true);
+            History.setRejectEdits(true);
 
             afterActions();
             cleanIfThisEditMadeItDirty();
         } finally {
-            History.setForbidEdits(false);
+            History.setRejectEdits(false);
         }
     }
 
@@ -94,12 +98,12 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debu
         }
 
         try {
-            History.setForbidEdits(true);
+            History.setRejectEdits(true);
 
             afterActions();
             makeDirtyAgain();
         } finally {
-            History.setForbidEdits(false);
+            History.setRejectEdits(false);
         }
     }
 

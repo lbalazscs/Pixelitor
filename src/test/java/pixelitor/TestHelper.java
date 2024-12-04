@@ -29,18 +29,14 @@ import pixelitor.history.History;
 import pixelitor.layers.*;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithTranslation;
-import pixelitor.tools.KeyModifiers;
-import pixelitor.tools.MouseButton;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
-import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -48,10 +44,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
-import static java.awt.event.MouseEvent.MOUSE_MOVED;
-import static java.awt.event.MouseEvent.MOUSE_PRESSED;
-import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
@@ -397,74 +389,6 @@ public class TestHelper {
         return new Resize(targetWidth, targetHeight)
             .process(comp)
             .join();
-    }
-
-    public static PMouseEvent createPEvent(int x, int y, int id,
-                                           View view) {
-        return createPEvent(x, y, id, KeyModifiers.NONE, MouseButton.LEFT, view);
-    }
-
-    public static PMouseEvent createPEvent(int x, int y, int id,
-                                           KeyModifiers keys,
-                                           MouseButton mouseButton, View view) {
-        MouseEvent e = createEvent(x, y, id, keys, mouseButton, view);
-        return new PMouseEvent(e, view);
-    }
-
-    public static MouseEvent createEvent(int x, int y, int id,
-                                         KeyModifiers keys,
-                                         MouseButton mouseButton,
-                                         View view) {
-        int modifiers = 0;
-        modifiers = keys.modify(modifiers);
-        modifiers = mouseButton.modify(modifiers);
-        //noinspection MagicConstant
-        return new MouseEvent(view, id, System.currentTimeMillis(),
-            modifiers, x, y, 1, mouseButton == MouseButton.RIGHT);
-    }
-
-    public static void press(int x, int y, View view) {
-        press(x, y, KeyModifiers.NONE, view);
-    }
-
-    public static void press(int x, int y,
-                             KeyModifiers keys, View view) {
-        MouseEvent e = createEvent(x, y, MOUSE_PRESSED,
-            keys, MouseButton.LEFT, view);
-        Tools.EventDispatcher.mousePressed(e, view);
-    }
-
-    public static void drag(int x, int y, View view) {
-        drag(x, y, KeyModifiers.NONE, view);
-    }
-
-    public static void drag(int x, int y,
-                            KeyModifiers keys, View view) {
-        MouseEvent e = createEvent(x, y, MOUSE_DRAGGED,
-            keys, MouseButton.LEFT, view);
-        Tools.EventDispatcher.mouseDragged(e, view);
-    }
-
-    public static void release(int x, int y, View view) {
-        release(x, y, KeyModifiers.NONE, view);
-    }
-
-    public static void release(int x, int y,
-                               KeyModifiers keys, View view) {
-        MouseEvent e = createEvent(x, y, MOUSE_RELEASED,
-            keys, MouseButton.LEFT, view);
-        Tools.EventDispatcher.mouseReleased(e, view);
-    }
-
-    public static void move(int x, int y, View view) {
-        move(x, y, KeyModifiers.NONE, view);
-    }
-
-    public static void move(int x, int y,
-                            KeyModifiers keys, View view) {
-        MouseEvent e = createEvent(x, y, MOUSE_MOVED,
-            keys, MouseButton.LEFT, view);
-        Tools.EventDispatcher.mouseMoved(e, view);
     }
 
     public static void assertHistoryEditsAre(String... values) {

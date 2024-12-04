@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.ViewEnabledAction;
 import pixelitor.menus.view.ZoomMenu;
 
 import javax.swing.*;
@@ -68,7 +68,7 @@ public enum AutoZoom {
     public abstract double calcRatio(double horRatio, double verRatio);
 
     private Action toAction() {
-        var action = new OpenViewEnabledAction(displayName,
+        var action = new ViewEnabledAction(displayName,
             comp -> comp.getView().setZoom(this));
         action.setToolTip(toolTip);
         return action;

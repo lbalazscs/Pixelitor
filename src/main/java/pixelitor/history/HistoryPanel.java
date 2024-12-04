@@ -36,22 +36,24 @@ public class HistoryPanel extends JPanel {
     private final JButton redoButton;
     private final PixelitorUndoManager pum;
 
-    public HistoryPanel(PixelitorUndoManager pum, JList<PixelitorEdit> historyList) {
+    public HistoryPanel(PixelitorUndoManager pum) {
         super(new BorderLayout());
         this.pum = pum;
-        add(new JScrollPane(historyList), CENTER);
-        JPanel buttonsPanel = new JPanel(new FlowLayout());
 
+        JList<PixelitorEdit> historyList = new JList<>(pum);
+        historyList.setSelectionModel(pum.getSelectionModel());
+        add(new JScrollPane(historyList), CENTER);
+
+        JPanel buttonsPanel = new JPanel(new FlowLayout());
         undoButton = createButton(Icons.getUndoIcon(), "undo",
             "AbstractUndoableEdit.undoText", UndoAction.INSTANCE);
         redoButton = createButton(Icons.getRedoIcon(), "redo",
             "AbstractUndoableEdit.redoText", RedoAction.INSTANCE);
+        buttonsPanel.add(undoButton);
+        buttonsPanel.add(redoButton);
 
         History.addUndoableEditListener(e -> updateHistoryButtons());
         updateHistoryButtons();
-
-        buttonsPanel.add(undoButton);
-        buttonsPanel.add(redoButton);
 
         if (AppMode.isDevelopment()) {
             JButton debugButton = new JButton("Debug...");

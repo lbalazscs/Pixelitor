@@ -26,6 +26,7 @@ import javax.swing.undo.CannotUndoException;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -36,73 +37,77 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class ConnectBrushHistory {
     // a brush stroke is a list of points, and the history is a list of strokes
-    private static final List<List<HistoryPoint>> history = new ArrayList<>();
-    private static List<HistoryPoint> lastStroke;
+    private static final List<List<Point2D>> history = new ArrayList<>();
+    private static List<Point2D> currentStroke;
     private static int numPoints;
-    private static int indexOfNextAdd = 0;
+
+    // index for the next stroke to be added (for undo/redo)
+    private static int nextAddIndex = 0;
 
     private ConnectBrushHistory() {
     }
 
     public static void startNewBrushStroke(PPoint p) {
-        lastStroke = new ArrayList<>();
+        currentStroke = new ArrayList<>();
 
-        // the entries after indexOfNextAdd will never be
-        // redone, they can be discarded
-        if (history.size() > indexOfNextAdd) {
-            history.subList(indexOfNextAdd, history.size()).clear();
+        // remove redoable strokes if any exist beyond the current index
+        if (history.size() > nextAddIndex) {
+            history.subList(nextAddIndex, history.size()).clear();
         }
+        assert history.size() == nextAddIndex;
 
-        assert history.size() == indexOfNextAdd;
-        history.add(lastStroke);
-        indexOfNextAdd++;
+        history.add(currentStroke);
+        nextAddIndex++;
 
-        lastStroke.add(new HistoryPoint(p.getImX(), p.getImY()));
+        currentStroke.add(p.toImPoint2D());
         numPoints++;
     }
 
     public static void drawConnectingLines(Graphics2D targetG,
                                            ConnectBrushSettings settings,
-                                           PPoint p, double diamSq) {
+                                           PPoint currentPoint, double diamSq) {
         if (history.isEmpty()) {
-            indexOfNextAdd = 0;
+            nextAddIndex = 0;
             return;
         }
 
-        HistoryPoint last = new HistoryPoint(p.getImX(), p.getImY());
-        lastStroke.add(last);
+        Point2D last = currentPoint.toImPoint2D();
+        currentStroke.add(last);
         numPoints++;
 
-        if (numPoints > 2) {
-            int currentColor = targetG.getColor().getRGB();
-            int currentColorZeroAlpha = currentColor & 0x00_FF_FF_FF;
+        if (numPoints <= 2) {
+            return; // not enough points to connect
+        }
+        int baseColor = targetG.getColor().getRGB();
+        int baseColorNoAlpha = baseColor & 0x00_FF_FF_FF;
 
-            double offSet = settings.getStyle().getOffset();
-            double density = settings.getDensity();
+        double offset = settings.getStyle().getOffset();
+        double density = settings.getDensity();
 
-            Line2D line = new Line2D.Double();
+        Line2D line = new Line2D.Double();
 
-            // randomly connect with nearby old points
-            ThreadLocalRandom rnd = ThreadLocalRandom.current();
-            for (int i = 0; i < indexOfNextAdd; i++) {
-                List<HistoryPoint> stroke = history.get(i);
-                for (HistoryPoint old : stroke) {
-                    double dx = old.x - last.x;
-                    double dy = old.y - last.y;
-                    double distSq = dx * dx + dy * dy;
-                    if (distSq < diamSq && distSq > 0 && density > rnd.nextFloat()) {
-                        int alpha = (int) Math.min(255.0, 10000 / distSq);
+        // randomly connect with nearby old points
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+        for (int i = 0; i < nextAddIndex; i++) {
+            List<Point2D> stroke = history.get(i);
+            for (Point2D old : stroke) {
+                double dx = old.getX() - last.getX();
+                double dy = old.getY() - last.getY();
+                double distSq = dx * dx + dy * dy;
+                if (distSq < diamSq && distSq > 0 && density > rnd.nextFloat()) {
+                    // calculate the line opacity based on distance
+                    int alpha = (int) Math.min(255.0, 10000 / distSq);
 
-                        int lineColor = alpha << 24 | currentColorZeroAlpha;
+                    // combine the opacity with the base color
+                    int lineColor = alpha << 24 | baseColorNoAlpha;
 
-                        targetG.setColor(new Color(lineColor, true));
-                        double xOffset = dx * offSet;
-                        double yOffset = dy * offSet;
-                        line.setLine(last.x - xOffset, last.y - yOffset,
-                            old.x + xOffset, old.y + yOffset);
+                    targetG.setColor(new Color(lineColor, true));
+                    double xOffset = dx * offset;
+                    double yOffset = dy * offset;
+                    line.setLine(last.getX() - xOffset, last.getY() - yOffset,
+                        old.getX() + xOffset, old.getY() + yOffset);
 
-                        targetG.draw(line);
-                    }
+                    targetG.draw(line);
                 }
             }
         }
@@ -110,21 +115,18 @@ public class ConnectBrushHistory {
 
     public static void clear() {
         history.clear();
-        indexOfNextAdd = 0;
+        nextAddIndex = 0;
         numPoints = 0;
     }
 
     private static void undo() {
-        if (indexOfNextAdd > 0) {
-            indexOfNextAdd--;
+        if (nextAddIndex > 0) {
+            nextAddIndex--; // move back one step in the history
         }
     }
 
     private static void redo() {
-        indexOfNextAdd++;
-    }
-
-    private record HistoryPoint(double x, double y) {
+        nextAddIndex++; // move forward one step in the history
     }
 
     public static class Edit extends PixelitorEdit {

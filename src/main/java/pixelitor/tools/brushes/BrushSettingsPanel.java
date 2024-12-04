@@ -49,7 +49,8 @@ public class BrushSettingsPanel extends JPanel {
         gbh.addLabelAndControlNoStretch(param.getName() + ":", param.createGUI(name));
     }
 
-    public void addOnlyButton(String text, ActionListener action, String name) {
+    // adds a button in a new row so that it occupies the full row
+    public void addFullWidthButton(String text, ActionListener action, String name) {
         JButton button = new JButton(text);
         button.setName(name);
         gbh.addFullRow(button);

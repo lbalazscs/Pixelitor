@@ -158,7 +158,6 @@ public enum SelectionType {
 
             while (!pixelsToProcess.isEmpty()) {
                 Point currentPixel = pixelsToProcess.pop();
-                System.out.println("working");
 
                 int startX = currentPixel.x;
                 int startY = currentPixel.y;

@@ -121,7 +121,7 @@ public class AppRunner {
             .start();
 
         new PixelitorEventListener().register();
-        rememberNormalSettings();
+        rememberInitialSettings();
 
         pw = WindowFinder.findFrame(PixelitorWindow.class)
             .withTimeout(APP_START_TIMEOUT, SECONDS)
@@ -209,23 +209,28 @@ public class AppRunner {
         } while (--remainingSeconds > 0);
     }
 
-    public void testBrushSettings(BrushType brushType, Tool tool) {
-        var dialog = findDialogByTitleStartingWith("Settings for the");
-
-        if (brushType == BrushType.CALLIGRAPHY) {
-            slideRandomly(dialog.slider("angle"));
-        } else if (brushType == BrushType.SHAPE) {
-            testShapeBrushSettings(dialog);
-        } else if (brushType == BrushType.SPRAY) {
-            testSprayBrushSettings(dialog, tool == ERASER);
-        } else if (brushType == BrushType.CONNECT) {
-            testConnectBrushSettings(dialog);
-        } else if (brushType == BrushType.OUTLINE_CIRCLE || brushType == BrushType.OUTLINE_SQUARE) {
-            checkRandomly(dialog.checkBox("dependsOnSpeed"));
-        } else if (brushType == BrushType.ONE_PIXEL) {
-            checkRandomly(dialog.checkBox("aa"));
+    public void testBrushSettings(Tool tool, BrushType brushType) {
+        var settingsButton = findButtonByText("Settings...");
+        if (brushType.hasSettings()) {
+            settingsButton.requireEnabled().click();
+            var dialog = findDialogByTitleStartingWith("Settings for the");
+            testBrushSettingsDialog(dialog, tool, brushType);
         } else {
-            throw new IllegalStateException("brushType is " + brushType);
+            settingsButton.requireDisabled();
+        }
+    }
+
+    private static void testBrushSettingsDialog(DialogFixture dialog, Tool tool, BrushType brushType) {
+        switch (brushType) {
+            case HARD, SOFT, WOBBLE, REALISTIC, HAIR -> {
+                assert !brushType.hasSettings();
+            }
+            case CALLIGRAPHY -> slideRandomly(dialog.slider("angle"));
+            case SHAPE -> testShapeBrushSettings(dialog);
+            case SPRAY -> testSprayBrushSettings(dialog, tool == ERASER);
+            case CONNECT -> testConnectBrushSettings(dialog);
+            case OUTLINE_CIRCLE, OUTLINE_SQUARE -> checkRandomly(dialog.checkBox("dependsOnSpeed"));
+            case ONE_PIXEL -> checkRandomly(dialog.checkBox("aa"));
         }
 
         dialog.button("ok").click();
@@ -746,7 +751,7 @@ public class AppRunner {
         layersContainer.requireLayerNames(expectedNames);
     }
 
-    private static void rememberNormalSettings() {
+    private static void rememberInitialSettings() {
         initialOpenDir = Dirs.getLastOpen();
         initialSaveDir = Dirs.getLastSave();
     }
@@ -876,7 +881,10 @@ public class AppRunner {
         keyboard.undoRedo("Gradient Fill Layer Change");
     }
 
-    public void drawGradient(GradientType gradientType, GradientColorType colorType, CanvasDrag dragLocation, Color fgColor, Color bgColor) {
+    public void drawGradient(GradientType gradientType,
+                             GradientColorType colorType,
+                             CanvasDrag dragLocation,
+                             Color fgColor, Color bgColor) {
         clickTool(Tools.GRADIENT);
 
         pw.comboBox("typeCB").selectItem(gradientType.toString());

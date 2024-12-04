@@ -21,9 +21,9 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.History;
 import pixelitor.menus.PMenu;
 import pixelitor.menus.edit.FadeAction;
@@ -86,7 +86,7 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the given layer and its image
      */
     public void addToPopupMenu(JMenu menu, Layer layer) {
-        var menuItem = new JMenuItem(new PAction(displayName, () ->
+        var menuItem = new JMenuItem(new TaskAction(displayName, () ->
             activate(layer)));
         menuItem.setAccelerator(keyStroke);
         menu.add(menuItem);

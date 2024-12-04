@@ -19,7 +19,7 @@ package pixelitor.menus.edit;
 
 import pixelitor.Composition;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.ViewEnabledAction;
 import pixelitor.utils.Error;
 import pixelitor.utils.*;
 
@@ -35,7 +35,7 @@ import static pixelitor.utils.Threads.onEDT;
  * The action of copying an image from a specified {@link CopySource}
  * to the system clipboard.
  */
-public class CopyAction extends OpenViewEnabledAction {
+public class CopyAction extends ViewEnabledAction {
     public static final CopyAction COPY_LAYER = new CopyAction(CopySource.LAYER_OR_MASK);
     public static final CopyAction COPY_COMPOSITE = new CopyAction(CopySource.COMPOSITE);
 

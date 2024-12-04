@@ -22,7 +22,6 @@ import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 import pixelitor.utils.CachedFloatRandom;
 
-import java.awt.Rectangle;
 import java.util.concurrent.Future;
 
 /**
@@ -591,7 +590,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
     }
 
     @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels) {
 //		float[] minmax = Noise.findRange(this, null);
 //		min = minmax[0];
 //		max = minmax[1];

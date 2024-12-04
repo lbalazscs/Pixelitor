@@ -41,7 +41,7 @@ public class AppNode extends DebugNode {
     private void addViewNodes() {
         addInt("# open images", Views.getNumViews());
 
-        Views.forEachView(view -> {
+        Views.forEach(view -> {
             String prefix = view.isActive() ? "active view - " : "view - ";
             add(view.createDebugNode(prefix + view.getName()));
         });

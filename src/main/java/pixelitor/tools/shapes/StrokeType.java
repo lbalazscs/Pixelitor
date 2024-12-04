@@ -35,29 +35,19 @@ import java.awt.Shape;
 import java.awt.Stroke;
 
 /**
- * The line type that can be selected in the
- * Stroke Settings dialog of the Shapes Tool.
- * Some members are also used in some brushes.
+ * Different stroke types available for drawing shapes.
  */
 public enum StrokeType {
     BASIC("Basic", false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
-            return new BasicStroke(width, cap, join, 1.5f,
-                dashPattern, 0.0f);
+            return new BasicStroke(width, cap, join, 1.5f, dashPattern, 0.0f);
         }
     }, ZIGZAG("Zigzag", false) {
-        private Stroke tmp;
-
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
-            tmp = BASIC.createStroke(width, cap, join, dashPattern);
+            Stroke tmp = BASIC.createStroke(width, cap, join, dashPattern);
             return new ZigzagStroke(tmp, width, width);
-        }
-
-        @Override
-        public Stroke getInnerStroke() {
-            return tmp;
         }
 
         @Override
@@ -71,24 +61,14 @@ public enum StrokeType {
 
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
-            if (wobbleStroke == null) {
-                createStroke(width);
-                lastWidth = width;
-                return wobbleStroke;
-            }
-
-            if (width != lastWidth) {
-                // Create new stroke objects only when necessary; the main benefit
-                // is that the seed isn't changed when the mouse is released.
-                createStroke(width);
+            // Create a stroke object only when necessary; the main benefit
+            // is that the seed doesn't change when the mouse is released.
+            if (wobbleStroke == null || width != lastWidth) {
+                wobbleStroke = new WobbleStroke(0.5f,
+                    width / SIZE_DIVIDING_FACTOR, 10);
                 lastWidth = width;
             }
             return wobbleStroke;
-        }
-
-        private void createStroke(float width) {
-            wobbleStroke = new WobbleStroke(0.5f,
-                width / SIZE_DIVIDING_FACTOR, 10);
         }
 
         @Override
@@ -169,21 +149,15 @@ public enum StrokeType {
         this.slow = slow;
     }
 
-    /**
-     * Composite strokes have an inner stroke.
-     * They can return here a non-null value
-     */
     public Stroke getInnerStroke() {
-        return null;
+        // overridden for OUTLINE
+        throw new UnsupportedOperationException();
     }
 
     public abstract Stroke createStroke(float width, int cap, int join, float[] dashPattern);
 
     public Stroke createStroke(StrokeParam param, float width) {
-        int cap = param.getCapValue();
-        int join = param.getJoinValue();
-        float[] dashPattern = param.getDashPattern(width);
-        return createStroke(width, cap, join, dashPattern);
+        return createStroke(width, param.getCap(), param.getJoin(), param.getDashPattern(width));
     }
 
     public boolean isSlow() {
@@ -191,8 +165,8 @@ public enum StrokeType {
     }
 
     /**
-     * Return the real thickness (for the undo), which can be bigger
-     * than the specified width.
+     * Returns the additional thickness added to the specified
+     * width to determine the actual stroke thickness.
      */
     public double getExtraThickness(double specifiedWidth) {
         return 0; // return 0 by default, can be overridden

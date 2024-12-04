@@ -16,8 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.Rectangle;
-
 /**
  * An edge-detection filter.
  */
@@ -89,7 +87,7 @@ public class EdgeFilter extends WholeImageFilter {
     }
 
     @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels) {
         pt = createProgressTracker(height);
 
         int index = 0;

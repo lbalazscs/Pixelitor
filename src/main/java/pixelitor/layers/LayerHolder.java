@@ -251,7 +251,7 @@ public interface LayerHolder extends Debuggable {
         // apply the effect of the merged layer to the image of the image layer
         Graphics2D g = belowImage.createGraphics();
         g.translate(-belowLayer.getTx(), -belowLayer.getTy());
-        BufferedImage result = layer.applyLayer(g, belowImage, false);
+        BufferedImage result = layer.render(g, belowImage, false);
         if (result != null) {  // this was an adjustment
             belowLayer.setImage(result);
         }

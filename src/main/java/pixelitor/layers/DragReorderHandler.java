@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,13 +25,20 @@ import java.awt.Component;
 import java.awt.event.MouseEvent;
 
 /**
- * The MouseListener and MouseMotionListener for the layer GUIs for the drag-reordering
+ * Handles mouse events for drag-reordering layers in the {@link LayersPanel}.
+ * Used booth as MouseListener and as MouseMotionListener.
  */
 public class DragReorderHandler extends MouseInputAdapter {
-    private static final int DRAG_X_INDENT = 10;
+    // horizontal offset while dragging
+    private static final int DRAG_X_OFFSET = 10;
+
     private final LayersPanel layersPanel;
-    private int dragStartYInLayerGUI;
     private boolean dragging = false;
+
+    // the y coordinate within a LayerGUI where the drag started
+    private int dragStartY;
+
+    // timestamp of the last press on a LayerNameEditor
     private long lastNameEditorPressTime;
 
     public DragReorderHandler(LayersPanel layersPanel) {
@@ -43,22 +50,22 @@ public class DragReorderHandler extends MouseInputAdapter {
         // a manual double-click watch - necessary on Mac?
         Component c = e.getComponent();
         if (c instanceof LayerNameEditor editor) {
-            long when = e.getWhen();
-            long diffMillis = when - lastNameEditorPressTime;
+            long eventTime = e.getWhen();
+            long diffMillis = eventTime - lastNameEditorPressTime;
             if (diffMillis < 250) {
                 editor.enableEditing();
             }
-            lastNameEditorPressTime = when;
+            lastNameEditorPressTime = eventTime;
         }
 
-        layerGUIForEvent(e); // the call is necessary for translating the mouse event
-        dragStartYInLayerGUI = e.getY();
+        translateMouseEvent(e);
+        dragStartY = e.getY();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        LayerGUI layerGUI = layerGUIForEvent(e);
-        if (!dragging && Math.abs(dragStartYInLayerGUI - e.getY()) < 5) {
+        LayerGUI layerGUI = translateMouseEvent(e);
+        if (!dragging && Math.abs(dragStartY - e.getY()) < 5) {
             // it seems that on Mac we get mouseDragged events even when the mouse isn't moved
             return;
         }
@@ -66,10 +73,11 @@ public class DragReorderHandler extends MouseInputAdapter {
             return;
         }
 
-        // since the LayerGUI is continuously relocated, e.getY()
+        // Calculate the new LayerGUI y position.
+        // Since the LayerGUI is continuously relocated, e.getY()
         // returns the mouse relative to the last LayerGUI position
-        int newY = layerGUI.getY() + e.getY() - dragStartYInLayerGUI;
-        layerGUI.setLocation(DRAG_X_INDENT, newY);
+        int newY = layerGUI.getY() + e.getY() - dragStartY;
+        layerGUI.setLocation(DRAG_X_OFFSET, newY);
 
         layersPanel.updateDrag(layerGUI, newY, !dragging);
         dragging = true;
@@ -80,26 +88,26 @@ public class DragReorderHandler extends MouseInputAdapter {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        LayerGUI layerGUI = layerGUIForEvent(e);
+        LayerGUI layerGUI = translateMouseEvent(e);
         if (dragging) {
             layerGUI.setCursor(Cursors.DEFAULT);
             layersPanel.dragFinished();
         } else {
-            // select the layer if the user clicks on the name field
-            realLayerGUIForEvent(e).getLayer().activate();
+            // activate the layer if the user clicks on the name field
+            getRealLayerGUI(e).getLayer().activate();
         }
         dragging = false;
     }
 
     /**
-     * Returns the layer GUI for the mouse event and also translate
-     * the coordinates of the argument into the layer GUI's space
+     * Translates the mouse event coordinates into the LayerGUI's
+     * coordinate system, and returns the corresponding LayerGUI.
      */
-    private static LayerGUI layerGUIForEvent(MouseEvent e) {
+    private static LayerGUI translateMouseEvent(MouseEvent e) {
         LayerGUI layerGUI;
         Component c = e.getComponent();
-        // the source of the event must be either the
-        // layer GUI or the textfield inside it
+
+        // determine the source of the event and translate coordinates accordingly
         if (c instanceof LayerNameEditor nameEditor) {
             layerGUI = nameEditor.getLayerGUI();
             // translate into the LayerGUI coordinate system
@@ -111,8 +119,8 @@ public class DragReorderHandler extends MouseInputAdapter {
             layerGUI = (LayerGUI) c;
         }
 
-        // ensure that mouse drags on smart filter
-        // guis move the whole smart object
+        // ensure that mouse drags on embedded LayerGUIs
+        // move the entire top parent
         while (layerGUI.isEmbedded()) {
             e.translatePoint(layerGUI.getX(), layerGUI.getY());
             layerGUI = layerGUI.getParentUI();
@@ -122,9 +130,9 @@ public class DragReorderHandler extends MouseInputAdapter {
     }
 
     /**
-     * Returns the real LayerGUI, without going up in the hierarchy
+     * Returns the real LayerGUI, without going up in the hierarchy.
      */
-    private static LayerGUI realLayerGUIForEvent(MouseEvent e) {
+    private static LayerGUI getRealLayerGUI(MouseEvent e) {
         Component c = e.getComponent();
         if (c instanceof LayerNameEditor nameEditor) {
             return nameEditor.getLayerGUI();

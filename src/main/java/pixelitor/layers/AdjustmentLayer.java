@@ -92,12 +92,12 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paint(Graphics2D g, boolean firstVisibleLayer) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public BufferedImage asImage(boolean applyMask, boolean applyOpacity) {
+    public BufferedImage toImage(boolean applyMask, boolean applyOpacity) {
         return null;
     }
 

@@ -37,6 +37,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
+import pixelitor.utils.input.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -175,10 +176,20 @@ public class Debug {
             SwingUtilities.isRightMouseButton(e), e.isPopupTrigger());
     }
 
-    public static String modifiersToString(boolean control, boolean alt, boolean shift,
+    public static String modifiersToString(Modifiers modifiers, boolean popup) {
+        return modifiersToString(modifiers.ctrl(), modifiers.alt(), modifiers.shift(), modifiers.button(), popup);
+    }
+
+    public static String modifiersToString(Ctrl control, Alt alt, Shift shift,
+                                           MouseButton button, boolean popup) {
+        return modifiersToString(control.isDown(), alt.isDown(), shift.isDown(),
+            button.isRight(), popup);
+    }
+
+    public static String modifiersToString(boolean ctrl, boolean alt, boolean shift,
                                            boolean right, boolean popup) {
         StringBuilder msg = new StringBuilder(25);
-        if (control) {
+        if (ctrl) {
             msg.append(Ansi.red("ctrl-"));
         }
         if (alt) {

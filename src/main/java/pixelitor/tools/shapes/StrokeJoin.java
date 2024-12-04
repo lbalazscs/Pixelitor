@@ -21,29 +21,40 @@ import pixelitor.filters.gui.EnumParam;
 import java.awt.BasicStroke;
 import java.util.Locale;
 
-import static java.awt.BasicStroke.JOIN_BEVEL;
-import static java.awt.BasicStroke.JOIN_MITER;
-import static java.awt.BasicStroke.JOIN_ROUND;
-
 /**
- * An enum wrapper around the join argument of a {@link BasicStroke} constructor
+ * The join style for a stroke, corresponding to the 'join'
+ * argument of the {@link BasicStroke} constructor.
  */
 public enum StrokeJoin {
-    ROUND("Round", JOIN_ROUND),
-    BEVEL("Bevel", JOIN_BEVEL),
-    MITER("Miter", JOIN_MITER);
+    /**
+     * Joins path segments by rounding off the corner with a circular arc.
+     */
+    ROUND("Round", BasicStroke.JOIN_ROUND),
+
+    /**
+     * Joins path segments by connecting the outer corners of their strokes with a straight line segment.
+     */
+    BEVEL("Bevel", BasicStroke.JOIN_BEVEL),
+
+    /**
+     * Joins path segments by extending their outside edges until they meet.
+     */
+    MITER("Miter", BasicStroke.JOIN_MITER);
 
     public static final String NAME = "Corner Join";
-    private final int value;
+
+    // the corresponding constant defined in BasicStroke
+    private final int awtConstant;
+
     private final String displayName;
 
-    StrokeJoin(String displayName, int value) {
+    StrokeJoin(String displayName, int awtConstant) {
         this.displayName = displayName;
-        this.value = value;
+        this.awtConstant = awtConstant;
     }
 
     public int getValue() {
-        return value;
+        return awtConstant;
     }
 
     public static EnumParam<StrokeJoin> asParam() {
@@ -52,12 +63,12 @@ public enum StrokeJoin {
         return param;
     }
 
+    public String toSVGAttribute() {
+        return "stroke-linejoin=\"" + displayName.toLowerCase(Locale.ENGLISH) + "\"";
+    }
+
     @Override
     public String toString() {
         return displayName;
-    }
-
-    public String toSVG() {
-        return "stroke-linejoin=\"" + displayName.toLowerCase(Locale.ENGLISH) + "\"";
     }
 }

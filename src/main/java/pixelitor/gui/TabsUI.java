@@ -18,7 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Views;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.Lazy;
 
 import javax.swing.*;
@@ -127,7 +127,7 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     private JRadioButtonMenuItem createTabPlacementMenuItem(String name, int pos) {
-        return new JRadioButtonMenuItem(new PAction(name, () -> {
+        return new JRadioButtonMenuItem(new TaskAction(name, () -> {
             setTabPlacement(pos); // update the GUI
             ImageArea.setTabPlacement(pos); // store it for the saved preferences
         }));

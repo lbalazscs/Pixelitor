@@ -49,16 +49,16 @@ public class Keyboard {
 
     private final FrameFixture pw;
     private final Robot robot;
-    private final AppRunner runner;
+    private final AppRunner app;
 
     private boolean ctrlDown = false;
     private boolean altDown = false;
     private boolean shiftDown = false;
 
-    public Keyboard(FrameFixture pw, Robot robot, AppRunner runner) {
+    public Keyboard(FrameFixture pw, Robot robot, AppRunner app) {
         this.pw = pw;
         this.robot = robot;
-        this.runner = runner;
+        this.app = app;
     }
 
     void undo(String editName) {
@@ -124,7 +124,7 @@ public class Keyboard {
             // press Ctrl-I
             pressKeys(VK_CONTROL, VK_I);
         } else {
-            runner.runMenuCommand("Invert");
+            app.runMenuCommand("Invert");
         }
     }
 
@@ -161,7 +161,7 @@ public class Keyboard {
             // press Ctrl-0
             pw.pressKey(VK_CONTROL).pressKey(VK_0).releaseKey(VK_0).releaseKey(VK_CONTROL);
         } else {
-            runner.runMenuCommand("Actual Pixels");
+            app.runMenuCommand("Actual Pixels");
         }
     }
 
@@ -231,7 +231,8 @@ public class Keyboard {
 
     void press(int keyCode) {
         if (USE_OS_LEVEL_EVENTS) {
-            pw.pressKey(keyCode).releaseKey(keyCode);
+            pw.pressKey(keyCode);
+            pw.releaseKey(keyCode);
         } else {
             postKeyToEventQueue(0, keyCode);
         }

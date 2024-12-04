@@ -72,7 +72,7 @@ public class LayerAnimation {
 
     private void addFrameFromLayer(Composition comp, int layerIndex) {
         Layer layer = comp.getLayer(layerIndex);
-        BufferedImage layerImage = layer.asImage(true, true);
+        BufferedImage layerImage = layer.toImage(true, true);
         if (layerImage != null) {
             frames.add(layerImage);
         }

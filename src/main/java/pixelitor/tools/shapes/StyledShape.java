@@ -409,7 +409,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             // for directional shapes, zero-width or zero-height drags are allowed
             box = createRotatedBox(view, origDrag.calcAngle());
         } else {
-            if (origDrag.hasZeroImWidth() || origDrag.hasZeroImHeight()) {
+            if (origDrag.isEmptyImRect()) {
                 return null;
             }
             Rectangle2D origImRect = origDrag.toPosImRect();

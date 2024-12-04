@@ -19,7 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.AppMode;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.History;
 import pixelitor.tools.pen.history.AnchorPointChangeEdit;
 import pixelitor.tools.pen.history.SubPathEdit;
@@ -257,26 +257,26 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.addSeparator();
 
-        popup.add(new PAction("Retract Handles", this::retractHandles));
+        popup.add(new TaskAction("Retract Handles", this::retractHandles));
 
         popup.addSeparator();
 
         if (AppMode.isDevelopment()) {
-            popup.add(new PAction("Dump", this::dump));
+            popup.add(new TaskAction("Dump", this::dump));
         }
 
         boolean singleSubPath = subPath.isSingle();
         boolean isLastPoint = singleSubPath && subPath.getNumAnchors() == 1;
 
         if (!isLastPoint) {
-            popup.add(new PAction("Delete Point", this::delete));
+            popup.add(new TaskAction("Delete Point", this::delete));
         }
 
         if (!singleSubPath) {
-            popup.add(new PAction("Delete Subpath", subPath::delete));
+            popup.add(new TaskAction("Delete Subpath", subPath::delete));
         }
 
-        popup.add(new PAction("Delete Path", subPath::deletePath));
+        popup.add(new TaskAction("Delete Path", subPath::deletePath));
 
         try {
             popup.show(view, x, y);

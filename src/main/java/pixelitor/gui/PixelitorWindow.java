@@ -117,7 +117,7 @@ public class PixelitorWindow extends JFrame {
                 public void windowActivated(WindowEvent e) {
                     // ignore activation events from closed dialogs
                     if (e.getOppositeWindow() == null) {
-                        Views.appActivated();
+                        Views.appWindowActivated();
                     }
                 }
             }

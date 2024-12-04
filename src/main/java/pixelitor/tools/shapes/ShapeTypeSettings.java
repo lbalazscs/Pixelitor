@@ -23,9 +23,10 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.utils.Configurable;
 
 import javax.swing.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * The settings of a configurable {@link ShapeType}.
@@ -39,16 +40,16 @@ public abstract class ShapeTypeSettings extends Configurable {
     }
 
     public List<ParamState<?>> copyState() {
-        List<FilterParam> params = getParams();
-        List<ParamState<?>> state = new ArrayList<>(params.size());
-        for (FilterParam param : params) {
-            state.add(param.copyState());
-        }
-        return state;
+        return getParams().stream()
+            .map(FilterParam::copyState)
+            .collect(toList());
     }
 
     public void loadStateFrom(List<ParamState<?>> state) {
         List<FilterParam> params = getParams();
+        if (params.size() != state.size()) {
+            throw new IllegalArgumentException("Expected " + params.size() + ", got " + state.size());
+        }
         for (int i = 0; i < params.size(); i++) {
             params.get(i).loadStateFrom(state.get(i), true);
         }

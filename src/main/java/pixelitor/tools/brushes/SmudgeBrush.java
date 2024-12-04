@@ -28,25 +28,25 @@ import java.awt.image.BufferedImage;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
- * The brush used by the Smudge Tool
+ * The brush used by the Smudge Tool.
  */
 public class SmudgeBrush extends CopyBrush {
     /**
-     * The smudge brush samples the source image at
-     * the last mouse coordinates and puts the pixels to
-     * the current coordinates.
+     * The last point where the brush was used.
+     * Used for sampling the source image.
      */
-    private PPoint last;
+    private PPoint lastPoint;
 
     /**
      * The opacity of the brush (strength in the GUI).
      */
-    private float strength;
+    private float opacity;
 
-    private boolean firstUsageInStroke = true;
+    private boolean firstDabInStroke = true;
 
     /**
-     * If true, we start with the foreground color
+     * If true, the brush starts with the foreground color
+     * instead of sampling the source image.
      */
     private boolean fingerPainting = false;
 
@@ -54,57 +54,57 @@ public class SmudgeBrush extends CopyBrush {
         super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
-    public void setupFirstPoint(BufferedImage sourceImage, PPoint src, float strength) {
+    public void initFirstPoint(BufferedImage sourceImage, PPoint startPoint, float opacity) {
         this.sourceImage = sourceImage;
-        last = src;
-        this.strength = strength;
-        firstUsageInStroke = true;
+        lastPoint = startPoint;
+        this.opacity = opacity;
+        firstDabInStroke = true;
     }
 
-    public boolean firstPointWasInitialized() {
-        return last != null;
+    public boolean isFirstPointInitialized() {
+        return lastPoint != null;
     }
 
     @Override
-    void setupBrushStamp(PPoint p) {
+    void initBrushStamp(PPoint p) {
         Graphics2D g = brushImage.createGraphics();
         type.beforeDrawImage(g);
 
-        if (firstUsageInStroke && fingerPainting) {
-            // finger painting starts with the foreground color
+        if (firstDabInStroke && fingerPainting) {
+            // finger painting: fill the brush with the foreground color
             g.setColor(getFGColor());
             int size = (int) diameter;
             g.fillRect(0, 0, size, size);
         } else {
-            // samples the source image at the last point into the brush image
+            // normal smudging: sample the source image at the last point
             g.drawImage(sourceImage,
                 AffineTransform.getTranslateInstance(
-                    -last.getImX() + radius,
-                    -last.getImY() + radius), null);
+                    -lastPoint.getImX() + radius,
+                    -lastPoint.getImY() + radius), null);
         }
 
         type.afterDrawImage(g);
         g.dispose();
 
-        firstUsageInStroke = false;
+        firstDabInStroke = false;
         debugImage();
     }
 
     @Override
-    public void putDab(PPoint p, double theta) {
+    public void putDab(PPoint currentPoint, double angle) {
         var transform = AffineTransform.getTranslateInstance(
-            p.getImX() - radius,
-            p.getImY() - radius
+            currentPoint.getImX() - radius,
+            currentPoint.getImY() - radius
         );
 
         // SrcOver allows to smudge into transparent areas, but transparency
         // can't be smudged into non-transparent areas.
         // DstOver allows only smudging into transparent.
-        targetG.setComposite(AlphaComposite.SrcOver.derive(strength));
+        targetG.setComposite(AlphaComposite.SrcOver.derive(opacity));
 
         targetG.drawImage(brushImage, transform, null);
-        last = p;
-        repaintComp(p);
+        lastPoint = currentPoint;
+        repaintComp(currentPoint);
     }
 
     public void setFingerPainting(boolean fingerPainting) {
@@ -115,9 +115,9 @@ public class SmudgeBrush extends CopyBrush {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addNullableDebuggable("last", last);
-        node.addFloat("strength", strength);
-        node.addBoolean("first usage in stroke", firstUsageInStroke);
+        node.addNullableDebuggable("last", lastPoint);
+        node.addFloat("opacity", opacity);
+        node.addBoolean("first usage in stroke", firstDabInStroke);
 
         return node;
     }

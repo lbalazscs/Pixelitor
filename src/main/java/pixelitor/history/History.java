@@ -40,11 +40,15 @@ import static java.lang.String.format;
  * Static methods for managing the editing history and undo/redo
  */
 public class History {
-    private static final UndoableEditSupport undoableEditSupport = new UndoableEditSupport();
+    private static final UndoableEditSupport editSupport = new UndoableEditSupport();
     private static final PixelitorUndoManager undoManager = new PixelitorUndoManager();
     private static int numUndoneEdits = 0;
+
+    // quietly ignores new edits if true
     private static boolean ignoreEdits = false;
-    private static boolean forbidEdits = false;
+
+    // it's a program error to add edits if true
+    private static boolean rejectEdits = false;
 
     static {
         setUndoLevels(AppPreferences.loadUndoLevels());
@@ -53,13 +57,12 @@ public class History {
     private History() {
     }
 
-    public static void notifyMenus(PixelitorEdit edit) {
-        undoableEditSupport.postEdit(edit);
-    }
-
+    /**
+     * Adds a new edit to the history.
+     */
     public static void add(PixelitorEdit edit) {
         assert edit != null;
-        if (forbidEdits) {
+        if (rejectEdits) {
             // TODO we can get here if undoing something activates a view, and this in turn
             //   creates another edit, such as an auto-rasterization in the shapes tool
             if (AppMode.isDevelopment()) {
@@ -72,10 +75,8 @@ public class History {
             return;
         }
 
-        var comp = edit.getComp();
-
         if (edit.makesDirty()) {
-            comp.setDirty(true);
+            edit.getComp().setDirty(true);
         }
 
         if (edit.canUndo()) {
@@ -86,27 +87,18 @@ public class History {
 
         // reset BEFORE posting, so that the fade menu item can become enabled
         numUndoneEdits = 0;
-        undoableEditSupport.postEdit(edit);
+        editSupport.postEdit(edit);
 
         if (AppMode.isDevelopment()) {
             Events.postAddToHistoryEvent(edit);
 
-            ConsistencyChecks.checkAll(comp);
+            ConsistencyChecks.checkAll(edit.getComp());
         }
-    }
-
-    public static String getUndoPresentationName() {
-        return undoManager.getUndoPresentationName();
-    }
-
-    public static String getRedoPresentationName() {
-        return undoManager.getRedoPresentationName();
     }
 
     public static void undo() {
         if (AppMode.isDevelopment()) {
-            PixelitorEdit edit = undoManager.getEditToBeUndone();
-            Events.postUndoEvent(edit);
+            Events.postUndoEvent(undoManager.getEditToBeUndone());
         }
 
         try {
@@ -115,34 +107,32 @@ public class History {
             numUndoneEdits++;
             undoManager.undo();
         } catch (CannotUndoException e) {
-            handleCannotException(e, "undo");
+            handleUndoRedoException(e, "undo");
         }
     }
 
     public static void redo() {
         if (AppMode.isDevelopment()) {
-            PixelitorEdit edit = undoManager.getEditToBeRedone();
-            Events.postRedoEvent(edit);
+            Events.postRedoEvent(undoManager.getEditToBeRedone());
         }
 
         try {
             numUndoneEdits--; // after redo we should be fadeable again
             undoManager.redo();
         } catch (CannotRedoException e) {
-            handleCannotException(e, "redo");
+            handleUndoRedoException(e, "redo");
         }
     }
 
-    private static void handleCannotException(RuntimeException e, String type) {
+    private static void handleUndoRedoException(RuntimeException e, String action) {
         if (RandomGUITest.isRunning()) {
-            throw new RuntimeException("No " + type + " available", e);
-        } else {
-            Messages.showWarning("No " + type + " available",
-                "<html>No " + type + " is available, possible reasons are:<ul>" +
-                    "<li>The edited image was closed" +
-                    "<li>The " + type + " image was discarded by Pixelitor in order to save memory");
-            clear();
+            throw new RuntimeException("No " + action + " available", e);
         }
+        Messages.showWarning("Can't " + action,
+            "<html>No " + action + " is available. Possible reasons:<ul>" +
+                "<li>The edited image was closed" +
+                "<li>The " + action + " image was discarded by Pixelitor in order to save memory");
+        clear();
     }
 
     public static void compClosed(Composition closedComp) {
@@ -160,6 +150,18 @@ public class History {
         }
     }
 
+    public static void notifyMenus(PixelitorEdit edit) {
+        editSupport.postEdit(edit);
+    }
+
+    public static String getUndoPresentationName() {
+        return undoManager.getUndoPresentationName();
+    }
+
+    public static String getRedoPresentationName() {
+        return undoManager.getRedoPresentationName();
+    }
+
     public static boolean canUndo() {
         return undoManager.canUndo();
     }
@@ -169,7 +171,7 @@ public class History {
     }
 
     public static void addUndoableEditListener(UndoableEditListener listener) {
-        undoableEditSupport.addUndoableEditListener(listener);
+        editSupport.addUndoableEditListener(listener);
     }
 
     public static void setUndoLevels(int undoLevels) {
@@ -245,11 +247,11 @@ public class History {
         numUndoneEdits = 0;
 
         undoManager.discardAllEdits();
-        undoableEditSupport.postEdit(null);
+        editSupport.postEdit(null);
     }
 
-    public static void showHistory() {
-        undoManager.showHistory();
+    public static void showHistoryDialog() {
+        undoManager.showHistoryDialog();
     }
 
     public static void clear() {
@@ -313,8 +315,8 @@ public class History {
         History.ignoreEdits = ignoreEdits;
     }
 
-    public static void setForbidEdits(boolean forbidEdits) {
-        History.forbidEdits = forbidEdits;
+    public static void setRejectEdits(boolean rejectEdits) {
+        History.rejectEdits = rejectEdits;
     }
 
     public static DebugNode createDebugNode() {

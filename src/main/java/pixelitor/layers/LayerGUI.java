@@ -21,7 +21,7 @@ import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.AppMode;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
@@ -219,6 +219,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         } else if (layer.getClass() == SmartFilter.class) {
             return Icons.getSmartFilterIcon();
         } else {
+            // for other layer types, the icon depends on the contents
             return null;
         }
     }
@@ -245,7 +246,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         JPopupMenu popup = layer.createLayerIconPopupMenu();
         if (popup != null) {
             if (AppMode.isDevelopment()) {
-                popup.add(new PAction("Internal State...", () ->
+                popup.add(new TaskAction("Internal State...", () ->
                     Debug.showTree(layer, layer.getTypeString())));
             }
 
@@ -266,7 +267,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private void initLayerVisibilityCB() {
         visibilityCB = createVisibilityCheckBox(false);
 
-        // when loading pxc files, the layer might not be visible
         visibilityCB.setSelected(layer.isVisible());
         visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.<br><b>Alt-click</b> to isolate this layer.");
         add(visibilityCB, LayerGUILayout.CHECKBOX);
@@ -327,9 +327,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     private void buttonActivationChanged() {
         if (isSelected()) {
-            // during comp actions, the active layer might already be inside the active layer
-            boolean setActiveLayer = !layer.contains(layer.getComp().getActiveLayer());
-            if (setActiveLayer) {
+            // during comp actions, the active layer might already be inside the layer
+            if (!layer.contains(layer.getComp().getActiveLayer())) {
                 layer.activate();
             }
         } else {
@@ -358,10 +357,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         if (dragReorderHandler != null) {
             return; // don't attach twice
         }
-        addDragReorderHandler(handler);
+        attachDragHandler(handler);
     }
 
-    public void addDragReorderHandler(DragReorderHandler handler) {
+    public void attachDragHandler(DragReorderHandler handler) {
         assert dragReorderHandler == null;
         assert handler != null;
 
@@ -382,7 +381,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
     }
 
-    private void removeDragReorderHandler() {
+    private void detachDragHandler() {
         if (dragReorderHandler == null) {
             return;
         }
@@ -396,7 +395,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
 
         for (LayerGUI child : children) {
-            child.removeDragReorderHandler();
+            child.detachDragHandler();
         }
 
         dragReorderHandler = null;
@@ -525,11 +524,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         boolean altClick = e.isAltDown();
         boolean shiftClick = e.isShiftDown();
+        View view = layer.getComp().getView();
 
         if (altClick && shiftClick) {
             // shift-alt-click switches to RUBYLITH
             // except when it already is in RUBYLITH
-            View view = layer.getComp().getView();
             if (view.getMaskViewMode() == MaskViewMode.RUBYLITH) {
                 MaskViewMode.EDIT_MASK.activate(view, layer);
             } else {
@@ -538,7 +537,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         } else if (altClick) {
             // alt-click switches to SHOW_MASK
             // except when it already is in SHOW_MASK
-            View view = layer.getComp().getView();
             if (view.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
                 MaskViewMode.EDIT_MASK.activate(view, layer);
             } else {
@@ -548,8 +546,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             // shift-click toggles the enabled-disabled state
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
         } else { // plain click, without key modifiers
-            View view = layer.getComp().getView();
-
             // don't change SHOW_MASK or RUBYLITH into EDIT_MASK
             if (!view.getMaskViewMode().editMask()) {
                 MaskViewMode.EDIT_MASK.activate(layer);
@@ -650,14 +646,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     private Color determineSelectedColor() {
+        boolean darkTheme = Themes.getActive().isDark();
         if (layer.isActive()) {
-            return Themes.getActive().isDark()
-                ? SELECTED_DARK_COLOR
-                : SELECTED_COLOR;
+            return darkTheme ? SELECTED_DARK_COLOR : SELECTED_COLOR;
         } else {
-            return Themes.getActive().isDark()
-                ? SEMI_SELECTED_DARK_COLOR
-                : SEMI_SELECTED_COLOR;
+            return darkTheme ? SEMI_SELECTED_DARK_COLOR : SEMI_SELECTED_COLOR;
         }
     }
 
@@ -689,7 +682,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     @Override
     public void detach() {
         setParentUI(null);
-        removeDragReorderHandler();
+        detachDragHandler();
     }
 
     public List<LayerGUI> getChildren() {

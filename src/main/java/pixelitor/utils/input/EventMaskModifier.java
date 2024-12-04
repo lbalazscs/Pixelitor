@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools;
+package pixelitor.utils.input;
 
 import java.awt.event.InputEvent;
 

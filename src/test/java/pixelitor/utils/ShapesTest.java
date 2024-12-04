@@ -87,24 +87,24 @@ class ShapesTest {
         checker.assertNumClosesIs(1);
     }
 
-    private static void checkRectanglePath(SubPath sp) {
-        assertThat(sp)
+    private static void checkRectanglePath(SubPath subPath) {
+        assertThat(subPath)
             .numAnchorsIs(4)
             .isClosed();
 
-        assertThat(sp.getAnchor(0))
+        assertThat(subPath.getAnchor(0))
             .isAt(2, 2)
             .bothControlsAreRetracted();
 
-        assertThat(sp.getAnchor(1))
+        assertThat(subPath.getAnchor(1))
             .isAt(12, 2)
             .bothControlsAreRetracted();
 
-        assertThat(sp.getAnchor(2))
+        assertThat(subPath.getAnchor(2))
             .isAt(12, 12)
             .bothControlsAreRetracted();
 
-        assertThat(sp.getAnchor(3))
+        assertThat(subPath.getAnchor(3))
             .isAt(2, 12)
             .bothControlsAreRetracted();
     }
@@ -118,29 +118,29 @@ class ShapesTest {
         checker.assertNumClosesIs(1);
     }
 
-    private static void checkEllipsePath(SubPath sp) {
-        assertThat(sp)
+    private static void checkEllipsePath(SubPath subPath) {
+        assertThat(subPath)
             .numAnchorsIs(4)
             .isClosed();
 
-        var p1 = sp.getAnchor(0);
+        var p1 = subPath.getAnchor(0);
         assertThat(p1)
             .isAt(12, 7)
-            .anchorPointTypeIs(SYMMETRIC);
+            .typeIs(SYMMETRIC);
         assertThat(p1.ctrlOut).isAt(12, 9.76);
         assertThat(p1.ctrlIn).isAt(12, 4.24);
 
-        var p2 = sp.getAnchor(1);
+        var p2 = subPath.getAnchor(1);
         assertThat(p2).isAt(7, 12);
         assertThat(p2.ctrlOut).isAt(4.24, 12.00);
         assertThat(p2.ctrlIn).isAt(9.76, 12);
 
-        var p3 = sp.getAnchor(2);
+        var p3 = subPath.getAnchor(2);
         assertThat(p3).isAt(2, 7);
         assertThat(p3.ctrlOut).isAt(2, 4.24);
         assertThat(p3.ctrlIn).isAt(2, 9.76);
 
-        var p4 = sp.getAnchor(3);
+        var p4 = subPath.getAnchor(3);
         assertThat(p4).isAt(7, 2);
         assertThat(p4.ctrlOut).isAt(9.76, 2);
         assertThat(p4.ctrlIn).isAt(4.24, 2);

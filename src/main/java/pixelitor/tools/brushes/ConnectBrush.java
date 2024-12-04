@@ -22,20 +22,17 @@ import pixelitor.tools.util.PPoint;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.awt.geom.Line2D;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * "History Connect" brushes based on ideas from "project harmony", see
- * https://github.com/mrdoob/harmony.
- * Also see issue #11
+ * "History Connect" brush implementation inspired by "Project Harmony".
+ * See https://github.com/mrdoob/harmony and issue #11.
  */
 public class ConnectBrush extends AbstractBrush {
     private final ConnectBrushSettings settings;
-    private double diamSq;
+    private double diameterSquared;
 
     public ConnectBrush(ConnectBrushSettings settings, double radius) {
         super(radius);
@@ -45,13 +42,13 @@ public class ConnectBrush extends AbstractBrush {
     @Override
     public void setRadius(double radius) {
         super.setRadius(radius);
-        diamSq = 4 * radius * radius;
+        diameterSquared = 4 * radius * radius;
     }
 
     @Override
     public void setTarget(Drawable dr, Graphics2D g) {
         if (dr != this.dr) {
-            deleteHistory();
+            clearHistory();
         }
         super.setTarget(dr, g);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -61,31 +58,27 @@ public class ConnectBrush extends AbstractBrush {
     public void startAt(PPoint p) {
         super.startAt(p);
 
-        if (settings.deleteHistoryForEachStroke()) {
-            deleteHistory();
+        if (settings.shouldClearHistoryPerStroke()) {
+            clearHistory();
         }
         ConnectBrushHistory.startNewBrushStroke(p);
     }
 
     @Override
     public void continueTo(PPoint p) {
-        float lineWidth = settings.getLineWidth();
-        Line2D line = new Line2D.Double();
-        Stroke stroke = new BasicStroke(lineWidth);
-        targetG.setStroke(stroke);
+        targetG.setStroke(new BasicStroke(settings.getLineWidth()));
 
-        line.setLine(p.getImX(), p.getImY(), previous.getImX(), previous.getImY());
-        targetG.draw(line);
+        p.drawLineTo(previous, targetG);
 
-        ConnectBrushHistory.drawConnectingLines(targetG, settings, p, diamSq);
+        ConnectBrushHistory.drawConnectingLines(targetG, settings, p, diameterSquared);
 
         repaintComp(p);
-        rememberPrevious(p);
+        setPrevious(p);
     }
 
     @Override
     public void dispose() {
-        deleteHistory();
+        clearHistory();
     }
 
     @Override
@@ -93,7 +86,7 @@ public class ConnectBrush extends AbstractBrush {
         return 0;
     }
 
-    public static void deleteHistory() {
+    public static void clearHistory() {
         ConnectBrushHistory.clear();
     }
 }

@@ -191,7 +191,10 @@ public class EDT {
     }
 
     public static void assertNumLayersIs(int expected) {
-        run(() -> Views.assertNumLayersIs(expected));
+        Integer found = call(Views::getNumLayersInActiveHolder);
+        if (found != expected) {
+            throw new AssertionError("expected " + expected + ", found = " + found);
+        }
     }
 
     public static void assertShapesToolStateIs(DragToolState expected) {

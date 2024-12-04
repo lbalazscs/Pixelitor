@@ -404,7 +404,7 @@ public final class AppPreferences {
         PixelitorWindow.get().getWorkSpace().savePreferences();
         saveUndoLevels();
         saveThumbSize();
-        TipsOfTheDay.saveNextTipNr();
+        TipsOfTheDay.saveNextTipIndex();
         saveNewImageSize();
         saveLastToolName();
         saveGuideStyles();

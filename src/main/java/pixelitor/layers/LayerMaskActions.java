@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.gui.utils.NamedAction;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -84,13 +84,13 @@ public class LayerMaskActions {
         }
     }
 
-    private static class DeleteMaskAction extends PAction {
+    private static class DeleteMaskAction extends TaskAction {
         protected DeleteMaskAction(Layer layer) {
             super("Delete", () -> layer.deleteMask(true));
         }
     }
 
-    private static class ApplyMaskAction extends PAction {
+    private static class ApplyMaskAction extends TaskAction {
         protected ApplyMaskAction(Layer layer) {
             super("Apply", () -> {
                 if (!(layer instanceof ImageLayer)) {

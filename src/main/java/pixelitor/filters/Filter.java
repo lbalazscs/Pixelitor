@@ -115,6 +115,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     /**
      * Whether this filter can be used as a smart filter.
      * One condition is that the filter must have a no-arg constructor.
+     * Another condition is that is must support user presets.
      */
     public boolean canBeSmart() {
         return true;
@@ -163,6 +164,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
         // Stateless filters can be shared.
         // TODO a few filters do have settings, but no preset support.
+        //   Currently not a problem because they can't be smart filters.
         return this;
     }
 

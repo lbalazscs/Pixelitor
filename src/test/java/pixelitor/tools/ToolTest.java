@@ -33,17 +33,13 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.utils.Texts;
+import pixelitor.utils.input.*;
 
-import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
-
-import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
-import static java.awt.event.MouseEvent.MOUSE_PRESSED;
-import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 
 /**
  * Behavior that is common to all tools
@@ -137,39 +133,36 @@ public class ToolTest {
     }
 
     private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {
-        KeyModifiers keys = new KeyModifiers(ctrl, alt, shift);
+        Modifiers modifiers = new Modifiers(ctrl, alt, shift, mouseButton);
         // stroke with all the modifiers
-        press(keys, mouseButton, 2, 2);
-        drag(keys, mouseButton, 3, 3);
-        release(keys, mouseButton, 4, 4);
+        press(modifiers, 2, 2);
+        drag(modifiers, 3, 3);
+        release(modifiers, 4, 4);
 
         // press the modifiers, but release them before finishing
-        press(keys, mouseButton, 2, 2);
-        drag(keys, mouseButton, 3, 3);
-        release(KeyModifiers.NONE, mouseButton, 4, 4);
+        press(modifiers, 2, 2);
+        drag(modifiers, 3, 3);
+        release(Modifiers.NONE, 4, 4);
 
         // start without the modifiers, but finish with them
-        press(KeyModifiers.NONE, mouseButton, 2, 2);
-        drag(keys, mouseButton, 3, 3);
-        release(keys, mouseButton, 4, 4);
+        press(Modifiers.NONE, 2, 2);
+        drag(modifiers, 3, 3);
+        release(modifiers, 4, 4);
 
         // do a simple click
-        press(keys, mouseButton, 1, 1);
-        release(keys, mouseButton, 1, 1);
+        press(modifiers, 1, 1);
+        release(modifiers, 1, 1);
     }
 
-    private void press(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
-        MouseEvent e = TestHelper.createEvent(x, y, MOUSE_PRESSED, keys, mouseButton, view);
-        Tools.EventDispatcher.mousePressed(e, view);
+    private void press(Modifiers modifiers, int x, int y) {
+        modifiers.dispatchPressedEvent(x, y, view);
     }
 
-    private void drag(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
-        MouseEvent e = TestHelper.createEvent(x, y, MOUSE_DRAGGED, keys, mouseButton, view);
-        Tools.EventDispatcher.mouseDragged(e, view);
+    private void drag(Modifiers modifiers, int x, int y) {
+        modifiers.dispatchDraggedEvent(x, y, view);
     }
 
-    private void release(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
-        MouseEvent e = TestHelper.createEvent(x, y, MOUSE_RELEASED, keys, mouseButton, view);
-        Tools.EventDispatcher.mouseReleased(e, view);
+    private void release(Modifiers modifiers, int x, int y) {
+        modifiers.dispatchReleasedEvent(x, y, view);
     }
 }

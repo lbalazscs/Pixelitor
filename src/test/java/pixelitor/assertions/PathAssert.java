@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,13 +41,13 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
         return this;
     }
 
-    public PathAssert activeSubPathIs(SubPath sp) {
+    public PathAssert activeSubPathIs(SubPath subPath) {
         isNotNull();
 
         SubPath activeSubpath = actual.getActiveSubpath();
-        if (activeSubpath != sp) {
+        if (activeSubpath != subPath) {
             throw new AssertionError(String.format(
-                "Expected %s, found %s", sp, activeSubpath));
+                "Expected %s, found %s", subPath, activeSubpath));
         }
 
         return this;

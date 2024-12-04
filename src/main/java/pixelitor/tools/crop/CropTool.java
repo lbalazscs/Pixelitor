@@ -263,6 +263,13 @@ public class CropTool extends DragTool {
 
     @Override
     protected void dragFinished(PMouseEvent e) {
+        if (state == INITIAL_DRAG && drag.isEmptyRect()) {
+            // roll back
+            setState(IDLE);
+            setCropEnabled(false);
+            return;
+        }
+
         e.getComp().update(); // TODO is an update needed?
 
         switch (state) {
@@ -440,7 +447,7 @@ public class CropTool extends DragTool {
 
         Rectangle2D cropRect = getCropRect(Views.getActive()).getIm();
         if (cropRect.isEmpty()) {
-            Messages.showInfo("Empty crop rectangle",
+            Messages.showInfo("Empty Crop Rectangle",
                 "Can't crop to %dx%d image.".formatted(
                     (int) cropRect.getWidth(),
                     (int) cropRect.getHeight()));

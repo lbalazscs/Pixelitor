@@ -131,7 +131,7 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     private void createLayerBasedSourceImage() {
-        srcImage = layer.asImage(false, false);
+        srcImage = layer.toImage(false, false);
         if (isSubImage(srcImage)) { // can happen for big image layers
             srcImage = copySubImage(srcImage);
         }

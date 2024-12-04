@@ -92,7 +92,7 @@ public class ShapesTool extends DragTool {
         = new EnumComboBoxModel<>(TwoPointPaintType.class);
 
     private JButton showShapeSettingsButton;
-    private final Action shapeSettingsAction = new PAction(
+    private final Action shapeSettingsAction = new TaskAction(
         "Settings...", this::showShapeSettingsDialog);
 
     private final JComboBox<TwoPointPaintType> fillPaintCombo
@@ -122,7 +122,7 @@ public class ShapesTool extends DragTool {
 
     private ShapesLayer shapesLayer;
 
-    private final Action convertToSelectionAction = new PAction(
+    private final Action convertToSelectionAction = new TaskAction(
         "Convert to Selection", this::convertToSelection);
 
     public ShapesTool() {
@@ -151,7 +151,7 @@ public class ShapesTool extends DragTool {
         settingsPanel.addComboBox("Fill:", fillPaintCombo, "fillPaintCB");
         settingsPanel.addComboBox("Stroke:", strokePaintCombo, "strokePaintCB");
 
-        strokeSettingsAction = new PAction("Stroke Settings...",
+        strokeSettingsAction = new TaskAction("Stroke Settings...",
             this::initAndShowStrokeSettingsDialog);
         showStrokeDialogButton = settingsPanel.addButton(strokeSettingsAction,
             "strokeSettingsButton",
@@ -365,14 +365,14 @@ public class ShapesTool extends DragTool {
 
         if (drag.isClick()) {
             // cancel the shape started in dragStarted
-            setNoInteractionState();
+            setIdleState();
             return;
         }
 
         if (styledShape == null) {
             // this can happen when getting a fake mouse released event
             // because the user started another tool via keyboard
-            setNoInteractionState();
+            setIdleState();
             return;
         }
 
@@ -382,7 +382,7 @@ public class ShapesTool extends DragTool {
         if (transformBox == null) {
             // The box could not be created.
             // Cancel just as for empty clicks.
-            setNoInteractionState();
+            setIdleState();
             e.getView().repaint();
             return;
         }
@@ -458,7 +458,7 @@ public class ShapesTool extends DragTool {
         return false;
     }
 
-    private void setNoInteractionState() {
+    private void setIdleState() {
         transformBox = null;
         styledShape = null;
 
@@ -486,7 +486,7 @@ public class ShapesTool extends DragTool {
 
         styledShape.rasterize(comp, transformBox, this);
 
-        setNoInteractionState();
+        setIdleState();
     }
 
     private void regenerateShape(String editName) {
@@ -606,7 +606,7 @@ public class ShapesTool extends DragTool {
         // true, for example, when the initial box creation is undone
         boolean hadShape = styledShape != null;
 
-        setNoInteractionState();
+        setIdleState();
 
         Composition comp = Views.getActiveComp();
         if (comp != null) {
@@ -628,8 +628,8 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void activeLayerChanged(Layer layer) {
-        layerActivated(layer);
+    public void editingTargetChanged(Layer activeLayer) {
+        layerActivated(activeLayer);
     }
 
     /**
@@ -846,7 +846,7 @@ public class ShapesTool extends DragTool {
     private void startEditingShapesLayer() {
         styledShape = shapesLayer.getStyledShape();
         if (styledShape == null || !styledShape.hasShape()) {
-            setNoInteractionState();
+            setIdleState();
             return;
         }
 
@@ -872,7 +872,7 @@ public class ShapesTool extends DragTool {
         shapesLayer = null;
         if (wasShapesLayer) {
             // hide the shape and box
-            setNoInteractionState();
+            setIdleState();
             layer.getComp().repaint();
         }
     }

@@ -24,6 +24,7 @@ import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JPopupMenuFixture;
 import pixelitor.Views;
 import pixelitor.utils.Utils;
+import pixelitor.utils.input.Modifiers;
 
 import javax.swing.*;
 import java.awt.MouseInfo;
@@ -217,37 +218,41 @@ public class Mouse {
         click();
     }
 
-    void randomClick(boolean ctrl, boolean alt, boolean shift) {
-        moveRandomlyWithinCanvas();
-        click(ctrl, alt, shift);
-    }
-
     void randomDoubleClick() {
         moveRandomlyWithinCanvas();
         doubleClick();
     }
 
-    void click(boolean ctrl, boolean alt, boolean shift) {
-        if (ctrl) {
+    void randomClick(Modifiers modifiers) {
+        moveRandomlyWithinCanvas();
+        click(modifiers);
+    }
+
+    void click(Modifiers modifiers) {
+        if (modifiers.ctrl().isDown()) {
             robot.pressKey(VK_CONTROL);
         }
-        if (alt) {
+        if (modifiers.alt().isDown()) {
             robot.pressKey(VK_ALT);
         }
-        if (shift) {
+        if (modifiers.shift().isDown()) {
             robot.pressKey(VK_SHIFT);
         }
 
-        click();
-
-        if (ctrl) {
-            robot.releaseKey(VK_CONTROL);
+        if (modifiers.button().isRight()) {
+            rightClick();
+        } else {
+            click();
         }
-        if (alt) {
+
+        if (modifiers.shift().isDown()) {
+            robot.releaseKey(VK_SHIFT);
+        }
+        if (modifiers.alt().isDown()) {
             robot.releaseKey(VK_ALT);
         }
-        if (shift) {
-            robot.releaseKey(VK_SHIFT);
+        if (modifiers.ctrl().isDown()) {
+            robot.releaseKey(VK_CONTROL);
         }
     }
 

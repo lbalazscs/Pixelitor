@@ -172,7 +172,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addBrushSettingsButton() {
-        brushSettingsAction = new PAction("Settings...",
+        brushSettingsAction = new TaskAction("Settings...",
             this::brushSettingsButtonPressed);
         brushSettingsDialogButton = settingsPanel.addButton(brushSettingsAction,
             "brushSettingsDialogButton", "Configure the selected brush");
@@ -717,9 +717,6 @@ public abstract class AbstractBrushTool extends Tool {
                 .append(" d=")
                 .append(lazyMouseDist.getValue())
                 .append(")");
-        } else {
-            sb.append(", eager ");
-            sb.append(UNICODE_MOUSE_SYMBOL);
         }
 
         return sb.toString();

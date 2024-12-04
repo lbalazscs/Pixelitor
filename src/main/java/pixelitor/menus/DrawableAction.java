@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.menus;
 
 import pixelitor.Composition;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.layers.*;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  * An {@link Action} that can be done with {@link Drawable}
  * objects (image layers or masks)
  */
-public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
+public abstract class DrawableAction extends AbstractViewEnabledAction {
     protected final String name;
     private final boolean allowSmartObjects;
 
@@ -45,6 +45,7 @@ public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
     }
 
     protected DrawableAction(String name, boolean hasDialog, boolean allowSmartObjects) {
+        super(name);
         this.allowSmartObjects = allowSmartObjects;
         assert name != null;
 

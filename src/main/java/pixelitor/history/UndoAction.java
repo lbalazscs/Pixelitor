@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,14 +17,14 @@
 
 package pixelitor.history;
 
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 
-public class UndoAction extends PAction implements UndoableEditListener {
+public class UndoAction extends TaskAction implements UndoableEditListener {
     private static final String UNDO_TEXT = UIManager.getString(
         "AbstractUndoableEdit.undoText");
 

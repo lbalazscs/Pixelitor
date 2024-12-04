@@ -196,7 +196,7 @@ public class CloneTool extends BlendingModeBrushTool {
         cloneBrush.setScale(
             mirror.getScaleX(scaleAbs),
             mirror.getScaleY(scaleAbs));
-        cloneBrush.setRotate(rotationParam.getValueInRadians());
+        cloneBrush.setRotationAngle(rotationParam.getValueInRadians());
 
         // when drawing with line, a mouse press should not change the destination
         if (!lineConnect) {

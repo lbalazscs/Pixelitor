@@ -17,13 +17,12 @@
 
 package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
-import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 
@@ -32,25 +31,22 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * An {@link Action} that deletes the active layer from the active composition.
  */
-public class DeleteActiveLayerAction extends PAction
-    implements ViewActivationListener, ActiveHolderListener {
+public class DeleteActiveLayerAction extends AbstractViewEnabledAction
+    implements ActiveHolderListener {
 
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
     private DeleteActiveLayerAction() {
         super(i18n("delete_layer"),
-            Icons.loadThemed("delete_layer.gif", ThemedImageIcon.RED),
-            () -> Views.getActiveComp().deleteActiveLayer(true));
+            Icons.loadThemed("delete_layer.gif", ThemedImageIcon.RED));
 
         setToolTip("Deletes the active layer.");
-        setEnabled(false);
-        Views.addActivationListener(this);
         Layers.addHolderListener(this);
     }
 
     @Override
-    public void allViewsClosed() {
-        setEnabled(false);
+    protected void onClick(Composition comp) {
+        comp.deleteActiveLayer(true);
     }
 
     @Override

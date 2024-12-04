@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 
 import javax.swing.*;
 
@@ -104,7 +104,7 @@ public enum AnchorPointType {
      */
     static class AnchorPointTypeMenuItem extends JRadioButtonMenuItem {
         public AnchorPointTypeMenuItem(AnchorPoint ap, AnchorPointType type) {
-            super(new PAction(type.toString(), () -> ap.setType(type)));
+            super(new TaskAction(type.toString(), () -> ap.setType(type)));
             if (ap.getType() == type) {
                 setSelected(true);
             }

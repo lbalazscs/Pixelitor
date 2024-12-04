@@ -35,7 +35,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
- * Rose curve filter
+ * The Render/Geometry/Rose filter, generating a polar rose curve.
  */
 public class Rose extends ParametrizedFilter {
     public static final String NAME = "Rose";
@@ -80,7 +80,6 @@ public class Rose extends ParametrizedFilter {
         g.setColor(fgColor.getColor());
 
         Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-        boolean firstPoint = true;
         double radius = Math.min(width, height) / 2.0;
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
@@ -90,6 +89,7 @@ public class Rose extends ParametrizedFilter {
         double k = n / (double) d;
 
         double maxAngle = calcMaxAngle(n, d);
+        boolean firstPoint = true;
         for (double a = 0; a < maxAngle; a += 0.01) {
             double cosKA = Math.cos(k * a);
             double x = cx + radius * cosKA * Math.cos(a);
@@ -116,9 +116,9 @@ public class Rose extends ParametrizedFilter {
             shape = path;
         }
 
-        double theta = rotate.getValueInRadians();
-        if (theta != 0) {
-            shape = AffineTransform.getRotateInstance(theta, cx, cy).createTransformedShape(shape);
+        double angle = rotate.getValueInRadians();
+        if (angle != 0) {
+            shape = AffineTransform.getRotateInstance(angle, cx, cy).createTransformedShape(shape);
         }
 
         g.fill(shape);
@@ -127,22 +127,20 @@ public class Rose extends ParametrizedFilter {
         return dest;
     }
 
+    /**
+     * Calculates the angle at which the curve begins to repeat.
+     */
     private static double calcMaxAngle(int n, int d) {
         boolean nIsEven = n % 2 == 0;
         boolean dIsEven = d % 2 == 0;
-        if (nIsEven) {
-            if (dIsEven) {
-                //noinspection TailRecursion
-                return calcMaxAngle(n / 2, d / 2);
-            } else {
-                return 2 * d * Math.PI;
-            }
+
+        if (nIsEven && dIsEven) {
+            //noinspection TailRecursion
+            return calcMaxAngle(n / 2, d / 2);
+        } else if (nIsEven || dIsEven) {
+            return 2 * d * Math.PI;
         } else {
-            if (dIsEven) {
-                return 2 * d * Math.PI;
-            } else {
-                return d * Math.PI;
-            }
+            return d * Math.PI;
         }
     }
 

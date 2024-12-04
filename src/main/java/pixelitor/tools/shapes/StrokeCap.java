@@ -21,29 +21,40 @@ import pixelitor.filters.gui.EnumParam;
 import java.awt.BasicStroke;
 import java.util.Locale;
 
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.CAP_ROUND;
-import static java.awt.BasicStroke.CAP_SQUARE;
-
 /**
- * An enum wrapper around the cap argument of a {@link BasicStroke} constructor
+ * The line cap style for a stroke, corresponding to the 'cap'
+ * argument of the {@link BasicStroke} constructor.
  */
 public enum StrokeCap {
-    ROUND("Round", CAP_ROUND),
-    BUTT("Butt", CAP_BUTT),
-    SQUARE("Square", CAP_SQUARE);
+    /**
+     * A rounded end cap.
+     */
+    ROUND("Round", BasicStroke.CAP_ROUND),
+
+    /**
+     * A butt (square, no extension) end cap.
+     */
+    BUTT("Butt", BasicStroke.CAP_BUTT),
+
+    /**
+     * A square end cap (extends the line).
+     */
+    SQUARE("Square", BasicStroke.CAP_SQUARE);
 
     public static final String NAME = "Endpoint Cap";
-    private final int value;
+
+    // the corresponding constant defined in BasicStroke
+    private final int awtConstant;
+
     private final String displayName;
 
-    StrokeCap(String displayName, int value) {
+    StrokeCap(String displayName, int awtConstant) {
         this.displayName = displayName;
-        this.value = value;
+        this.awtConstant = awtConstant;
     }
 
     public int getValue() {
-        return value;
+        return awtConstant;
     }
 
     public static EnumParam<StrokeCap> asParam() {
@@ -56,12 +67,12 @@ public enum StrokeCap {
         return asParam().withDefault(defaultCap);
     }
 
+    public String toSVGAttribute() {
+        return "stroke-linecap=\"" + displayName.toLowerCase(Locale.ENGLISH) + "\"";
+    }
+
     @Override
     public String toString() {
         return displayName;
-    }
-
-    public String toSVG() {
-        return "stroke-linecap=\"" + displayName.toLowerCase(Locale.ENGLISH) + "\"";
     }
 }

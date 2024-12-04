@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.Colorize;
 import pixelitor.filters.Filter;
@@ -26,13 +27,11 @@ import pixelitor.filters.curves.ToneCurvesFilter;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
-import pixelitor.gui.View;
-import pixelitor.gui.utils.NamedAction;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
-import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -45,7 +44,7 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
 /**
  * An Action that adds a new adjustment layer to the active composition.
  */
-public class AddAdjLayerAction extends NamedAction implements ViewActivationListener {
+public class AddAdjLayerAction extends AbstractViewEnabledAction {
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
     public static final List<Action> actions = List.of(
@@ -61,8 +60,6 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
         super("Add Adjustment Layer",
             Icons.loadThemed("add_adj_layer.png", ThemedImageIcon.GREEN));
         setToolTip("Adds a new adjustment layer.");
-        setEnabled(false);
-        Views.addActivationListener(this);
     }
 
     @Override
@@ -86,6 +83,12 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
         }
     }
 
+    @Override
+    protected void onClick(Composition comp) {
+        // never called, because this class overrides actionPerformed
+        throw new UnsupportedOperationException();
+    }
+
     private static JPopupMenu createActionsPopup() {
         JPopupMenu popup = new JPopupMenu();
         for (Action action : actions) {
@@ -96,7 +99,7 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
     }
 
     private static Action createAction(Supplier<Filter> factory, String name) {
-        return new PAction("New " + name, () ->
+        return new TaskAction("New " + name, () ->
             addAdjustmentLayer(factory, name));
     }
 
@@ -114,15 +117,5 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
             .addWithHistory(adjustmentLayer, "New Adjustment Layer");
 
         adjustmentLayer.edit();
-    }
-
-    @Override
-    public void allViewsClosed() {
-        setEnabled(false);
-    }
-
-    @Override
-    public void viewActivated(View oldView, View newView) {
-        setEnabled(true);
     }
 }

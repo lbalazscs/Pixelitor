@@ -84,7 +84,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paint(Graphics2D g, boolean firstVisibleLayer) {
         if (gradient != null) {
             int width = comp.getCanvasWidth();
             int height = comp.getCanvasHeight();

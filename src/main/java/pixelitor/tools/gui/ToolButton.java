@@ -20,7 +20,7 @@ package pixelitor.tools.gui;
 import pixelitor.AppMode;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.Tool;
@@ -98,7 +98,7 @@ public class ToolButton extends JToggleButton {
         presetsMenu = new JPopupMenu();
 
         if (AppMode.isDevelopment()) {
-            presetsMenu.add(new PAction("Internal State...", () ->
+            presetsMenu.add(new TaskAction("Internal State...", () ->
                 Debug.showTree(tool, tool.getName())));
             presetsMenu.addSeparator();
         }

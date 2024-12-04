@@ -119,7 +119,7 @@ public enum MouseZoomMethod {
             return;
         }
         ACTIVE = newMethod;
-        Views.forEachView(newMethod::installOnView);
+        Views.forEach(newMethod::installOnView);
         Navigator.setMouseZoomMethod(newMethod);
     }
 

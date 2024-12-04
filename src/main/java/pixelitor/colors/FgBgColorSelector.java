@@ -23,7 +23,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ColorIcon;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
@@ -130,7 +130,7 @@ public class FgBgColorSelector extends JLayeredPane {
         String selectorName = fg ? "Foreground" : "Background";
         String otherName = fg ? "Background" : "Foreground";
 
-        popup.add(new PAction(selectorName + " Color Variations...", () -> {
+        popup.add(new TaskAction(selectorName + " Color Variations...", () -> {
             if (fg) {
                 PalettePanel.showFGVariationsDialog(pw);
             } else {
@@ -138,13 +138,13 @@ public class FgBgColorSelector extends JLayeredPane {
             }
         }));
 
-        popup.add(new PAction("HSB Mix with " + otherName + "...", () ->
+        popup.add(new TaskAction("HSB Mix with " + otherName + "...", () ->
             PalettePanel.showHSBMixDialog(pw, fg)));
 
-        popup.add(new PAction("RGB Mix with " + otherName + "...", () ->
+        popup.add(new TaskAction("RGB Mix with " + otherName + "...", () ->
             PalettePanel.showRGBMixDialog(pw, fg)));
 
-        popup.add(new PAction("Color History...", () ->
+        popup.add(new TaskAction("Color History...", () ->
             ColorHistory.INSTANCE.showDialog(pw, ColorSwatchClickHandler.STANDARD, false)));
 
         popup.addSeparator();
@@ -163,7 +163,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initResetDefaultsButton() {
-        resetToDefaultAction = new PAction(this::setDefaultColors);
+        resetToDefaultAction = new TaskAction(this::setDefaultColors);
 
         JButton defaultsButton = new JButton();
         initButton(defaultsButton, "Reset Default Colors (D)",
@@ -178,7 +178,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initSwapColorsButton() {
-        swapColorsAction = new PAction(this::swapColors);
+        swapColorsAction = new TaskAction(this::swapColors);
 
         JButton swapButton = new JButton();
         initButton(swapButton, "Swap Colors (X)",
@@ -199,7 +199,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initRandomizeButton() {
-        randomizeColorsAction = new PAction(this::randomizeColors);
+        randomizeColorsAction = new TaskAction(this::randomizeColors);
 
         JButton randomizeButton = new JButton();
         initButton(randomizeButton, "Randomize Colors (R)",

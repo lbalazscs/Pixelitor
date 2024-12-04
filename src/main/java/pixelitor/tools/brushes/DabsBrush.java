@@ -21,7 +21,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 /**
- * An abstract superclass for brushes that work by putting down dabs
+ * Abstract base class for brushes that apply dabs (small marks).
  */
 public abstract class DabsBrush extends AbstractBrush {
     private final Spacing spacing;
@@ -29,7 +29,8 @@ public abstract class DabsBrush extends AbstractBrush {
     private final DabsStrategy dabsStrategy;
 
     protected DabsBrush(double radius, Spacing spacing,
-                        AngleSettings angleSettings, boolean refreshBrushForEachDab) {
+                        AngleSettings angleSettings,
+                        boolean refreshBrushForEachDab) {
         super(radius);
         this.spacing = spacing;
         settings = new DabsBrushSettings(angleSettings, spacing);
@@ -52,12 +53,15 @@ public abstract class DabsBrush extends AbstractBrush {
     }
 
     /**
-     * Sets up the brush stamp. Depending on the type of brush, it can be
-     * called at the beginning of a stroke or before each dab.
+     * Prepares the brush stamp. This method may be called at the start
+     * of a stroke or before each dab, depending on the brush type.
      */
-    abstract void setupBrushStamp(PPoint p);
+    abstract void initBrushStamp(PPoint p);
 
-    public abstract void putDab(PPoint p, double theta);
+    /**
+     * Applies a single dab at the given location and angle.
+     */
+    public abstract void putDab(PPoint currentPoint, double angle);
 
     @Override
     public void startAt(PPoint p) {
@@ -69,24 +73,20 @@ public abstract class DabsBrush extends AbstractBrush {
     @Override
     public void initDrawing(PPoint p) {
         super.initDrawing(p);
-        setupBrushStamp(p);
+        initBrushStamp(p);
     }
 
     @Override
     public void continueTo(PPoint p) {
         dabsStrategy.onNewStrokePoint(p);
         repaintComp(p);
-        rememberPrevious(p);
-    }
-
-    public DabsBrushSettings getSettings() {
-        return settings;
+        this.setPrevious(p);
     }
 
     @Override
-    public void rememberPrevious(PPoint previous) {
-        super.rememberPrevious(previous);
-        dabsStrategy.rememberPrevious(previous);
+    public void setPrevious(PPoint previous) {
+        super.setPrevious(previous);
+        dabsStrategy.setPrevious(previous);
     }
 
     @Override
@@ -99,20 +99,24 @@ public abstract class DabsBrush extends AbstractBrush {
         settings.unregisterBrush(this);
     }
 
+    public DabsBrushSettings getSettings() {
+        return settings;
+    }
+
+    @Override
+    public double getPreferredSpacing() {
+        return spacing.getSpacing(radius);
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
         node.addBoolean("angled", settings.isAngled());
         node.addBoolean("jittered",
-            settings.getAngleSettings().shouldJitterAngle());
+            settings.getAngleSettings().isJitterEnabled());
         node.addDouble("spacing", spacing.getSpacing(radius));
 
         return node;
-    }
-
-    @Override
-    public double getPreferredSpacing() {
-        return spacing.getSpacing(radius);
     }
 }

@@ -134,7 +134,7 @@ public class ImageArea {
             // in the top-left corner when they are re-added
             FramesUI.resetCascadeCount();
         }
-        Views.forEachView(ImageArea::addView);
+        Views.forEach(ImageArea::addView);
 
         modeChangeListeners.forEach(listener -> listener.accept(mode));
     }
@@ -184,7 +184,7 @@ public class ImageArea {
     public static void pixelGridEnabled() {
         // the global pixel grid switch was turned on
         if (isActiveMode(FRAMES)) {
-            if (Views.isAnyPixelGridAllowed()) {
+            if (Views.doesAnyViewAllowPixelGrid()) {
                 Views.repaintAll();
             } else {
                 showNoPixelGridMessage();

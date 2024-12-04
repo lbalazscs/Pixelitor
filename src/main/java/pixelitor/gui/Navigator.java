@@ -23,7 +23,7 @@ import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.tools.util.PRectangle;
@@ -106,11 +106,11 @@ public class Navigator extends JComponent
         contextMenu = new JPopupMenu();
         ZoomLevel[] levels = {ACTUAL_SIZE, HALF_SIZE, QUARTER_SIZE, EIGHTH_SIZE};
         for (ZoomLevel level : levels) {
-            contextMenu.add(new PAction("Navigator Zoom: " + level, () ->
+            contextMenu.add(new TaskAction("Navigator Zoom: " + level, () ->
                 setNavigatorSizeFromZoom(level)));
         }
         contextMenu.addSeparator();
-        contextMenu.add(new PAction("View Box Color...", () ->
+        contextMenu.add(new TaskAction("View Box Color...", () ->
             Colors.selectColorWithDialog(this,
                 "View Box Color", viewBoxColor, true,
                 this::setNewViewBoxColor)));

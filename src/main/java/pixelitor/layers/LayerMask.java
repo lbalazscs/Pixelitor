@@ -49,35 +49,43 @@ public class LayerMask extends ImageLayer {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private transient BufferedImage transparencyImage;
+    // a color model that interprets the grayscale pixel data as transparency
     public static final ColorModel TRANSPARENCY_COLOR_MODEL;
-    public static final ColorModel RUBYLITH_COLOR_MODEL;
-    private boolean linked = true; // whether it moves together with its parent layer
 
-    // the real layer for this mask
+    // a color model that interprets the grayscale pixel data as a rubylith overlay
+    public static final ColorModel RUBYLITH_COLOR_MODEL;
+
+    private transient BufferedImage transparencyImage;
+
+    // the owner (parent) layer of this mask
     private Layer owner;
 
+    // whether the mask is linked to its owner layer (moves together).
+    private boolean linked = true;
+
     static {
-        byte[] lookup = new byte[256];
+        // initialize the transparency color model
+        byte[] identityLookup = new byte[256];
         for (int i = 0; i < 256; i++) {
-            lookup[i] = (byte) i;
+            identityLookup[i] = (byte) i;
         }
         TRANSPARENCY_COLOR_MODEL = new IndexColorModel(8, 256,
-            lookup,  // red
-            lookup,  // green
-            lookup,  // blue
-            lookup); // alpha
+            identityLookup,  // red
+            identityLookup,  // green
+            identityLookup,  // blue
+            identityLookup); // alpha
 
+        // initialize the rubylith color model
         byte[] invertedLookup = new byte[256];
         for (int i = 0; i < 256; i++) {
             invertedLookup[i] = (byte) (255 - i);
         }
-        byte[] allZeroLookup = new byte[256];
+        byte[] zeroLookup = new byte[256]; // all zeros for green and blue
 
         RUBYLITH_COLOR_MODEL = new IndexColorModel(8, 256,
             invertedLookup,  // red
-            allZeroLookup,   // green
-            allZeroLookup,   // blue
+            zeroLookup,   // green
+            zeroLookup,   // blue
             invertedLookup); // alpha
     }
 
@@ -91,10 +99,13 @@ public class LayerMask extends ImageLayer {
 
         this.owner = owner;
 
-        // layer masks use the button of their owner
+        // layer masks use the UI of their owner
         ui = owner.getUI();
     }
 
+    /**
+     * Applies this mask to the given image, modifying its alpha channel.
+     */
     public void applyTo(BufferedImage in) {
         Graphics2D g = in.createGraphics();
         g.setComposite(DstIn);
@@ -102,6 +113,9 @@ public class LayerMask extends ImageLayer {
         g.dispose();
     }
 
+    /**
+     * Updates the cached transparency image to reflect changes in the mask.
+     */
     public void updateTransparencyImage() {
         assert image.getType() == TYPE_BYTE_GRAY;
         assert image.getColorModel() != TRANSPARENCY_COLOR_MODEL;
@@ -115,6 +129,9 @@ public class LayerMask extends ImageLayer {
             raster, false, null);
     }
 
+    /**
+     * Paints the mask as a rubylith overlay.
+     */
     public void paintAsRubylith(Graphics2D g) {
         Composite origComposite = g.getComposite();
         WritableRaster raster = getVisibleImage().getRaster();
@@ -168,24 +185,25 @@ public class LayerMask extends ImageLayer {
 
     @Override
     public TmpLayer createTmpLayer(Composite c, boolean softSelection) {
+        // masks don't use temporary drawing layers
         throw new IllegalStateException("tmp layer with masks");
     }
 
     @Override
-    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g,
-                                                  BufferedImage visibleImage,
-                                                  boolean firstVisibleLayer) {
+    protected void paintWithoutTmpLayer(Graphics2D g,
+                                        BufferedImage visibleImage,
+                                        boolean firstVisibleLayer) {
         if (Tools.isShapesDrawing()) {
-            paintDraggedShapesOverActiveLayer(g, visibleImage, firstVisibleLayer);
+            paintLayerWithShapes(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
             g.drawImage(visibleImage, getTx(), getTy(), null);
         }
     }
 
     @Override
-    protected void paintDraggedShapesOverActiveLayer(Graphics2D g,
-                                                     BufferedImage visibleImage,
-                                                     boolean firstVisibleLayer) {
+    protected void paintLayerWithShapes(Graphics2D g,
+                                        BufferedImage visibleImage,
+                                        boolean firstVisibleLayer) {
         g.drawImage(visibleImage, getTx(), getTy(), null);
         Tools.SHAPES.paintOverActiveLayer(g);
     }
@@ -194,7 +212,7 @@ public class LayerMask extends ImageLayer {
         if (!owner.isMaskEditing() || !Tools.isShapesDrawing()) {
             // simple case
             return transparencyImage;
-        } else { // drawing with the shapes tool while in Ctrl-3 mode
+        } else { // drawing with the shapes tool while editing the mask
 
             // Create a temporary image that shows how the image would look like
             // if the shapes tool would draw directly into the mask image

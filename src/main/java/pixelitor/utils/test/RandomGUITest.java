@@ -33,13 +33,13 @@ import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.Filters;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.layers.*;
 import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.PasteAction;
-import pixelitor.menus.edit.PasteDestination;
+import pixelitor.menus.edit.PasteTarget;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tool;
@@ -48,6 +48,10 @@ import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
+import pixelitor.utils.input.Alt;
+import pixelitor.utils.input.Ctrl;
+import pixelitor.utils.input.MouseButton;
+import pixelitor.utils.input.Shift;
 
 import javax.swing.*;
 import java.awt.*;
@@ -143,7 +147,7 @@ public class RandomGUITest {
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing a key
-        GlobalEvents.registerHotKey(PAUSE_KEY_CHAR, new PAction(() -> {
+        GlobalEvents.registerHotKey(PAUSE_KEY_CHAR, new TaskAction(() -> {
                 System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
                 stopRunning = true;
             })
@@ -151,7 +155,7 @@ public class RandomGUITest {
         stopRunning = false;
 
         // This key not only stops the testing, but also exits the app
-        GlobalEvents.registerHotKey(EXIT_KEY_CHAR, new PAction(() -> {
+        GlobalEvents.registerHotKey(EXIT_KEY_CHAR, new TaskAction(() -> {
             System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
                 EXIT_KEY_CHAR);
             // no need to reset the GUI here, because preferences won't be saved
@@ -382,56 +386,25 @@ public class RandomGUITest {
     }
 
     private String runWithModifiers(Robot robot, Runnable task) {
-        boolean shiftDown = rand.nextBoolean();
-        if (shiftDown) {
-            robot.keyPress(VK_SHIFT);
-            robot.delay(50);
-        }
+        Shift shift = Shift.randomly(rand).press(robot);
         // don't generate Alt-movements on Linux, because it can drag the window
-        boolean altDown = JVM.isLinux ? false : rand.nextBoolean();
-        if (altDown) {
-            robot.keyPress(VK_ALT);
-            robot.delay(50);
-        }
-        boolean ctrlDown = rand.nextBoolean();
-        if (ctrlDown) {
-            robot.keyPress(VK_CONTROL);
-            robot.delay(50);
-        }
+        Alt alt = JVM.isLinux ? Alt.RELEASED : Alt.randomly(rand);
+        alt.press(robot);
 
-        boolean rightMouse = rand.nextFloat() < 0.2;
-        if (rightMouse) {
-            robot.mousePress(BUTTON3_DOWN_MASK);
-        } else {
-            robot.mousePress(BUTTON1_DOWN_MASK);
-        }
-        robot.delay(50);
+        Ctrl ctrl = Ctrl.randomly(rand).press(robot);
+        MouseButton button = MouseButton.randomly(rand).press(robot);
 
         if (task != null) {
             task.run();
             robot.delay(50);
         }
 
-        if (rightMouse) {
-            robot.mouseRelease(BUTTON3_DOWN_MASK);
-        } else {
-            robot.mouseRelease(BUTTON1_DOWN_MASK);
-        }
-        robot.delay(50);
-        if (ctrlDown) {
-            robot.keyRelease(VK_CONTROL);
-            robot.delay(50);
-        }
-        if (altDown) {
-            robot.keyRelease(VK_ALT);
-            robot.delay(50);
-        }
-        if (shiftDown) {
-            robot.keyRelease(VK_SHIFT);
-            robot.delay(50);
-        }
+        button.release(robot);
+        ctrl.release(robot);
+        alt.release(robot);
+        shift.release(robot);
 
-        return Debug.modifiersToString(ctrlDown, altDown, shiftDown, rightMouse, false);
+        return Debug.modifiersToString(ctrl, alt, shift, button, false);
     }
 
     private void randomColors() {
@@ -636,7 +609,7 @@ public class RandomGUITest {
     }
 
     private void randomZoom() {
-        Views.onActiveView(this::setRandomZoom);
+        Views.onActive(this::setRandomZoom);
     }
 
     private void setRandomZoom(View view) {
@@ -944,10 +917,10 @@ public class RandomGUITest {
         }
         int r = rand.nextInt(10);
         if (r == 0) {
-            runAction(new PasteAction(PasteDestination.NEW_IMAGE));
+            runAction(new PasteAction(PasteTarget.NEW_IMAGE));
             numPastedImages++;
         } else if (r == 1) {
-            runAction(new PasteAction(PasteDestination.NEW_LAYER));
+            runAction(new PasteAction(PasteTarget.NEW_LAYER));
             numPastedImages++;
         }
         // paste as mask?
@@ -1192,7 +1165,7 @@ public class RandomGUITest {
     // prevents paths from growing too large
     private void setPathsToNull() {
         log("set paths to null");
-        Views.forEachView(view -> {
+        Views.forEach(view -> {
             // don't touch the active, as its path might be edited just now
             if (!view.isActive()) {
                 view.getComp().setActivePath(null);

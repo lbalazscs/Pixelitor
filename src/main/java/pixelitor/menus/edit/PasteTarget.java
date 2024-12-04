@@ -30,42 +30,43 @@ import java.awt.image.BufferedImage;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
- * Represents the destination of a pasted image
+ * Represents the destination of a pasted image.
  */
-public enum PasteDestination {
-    NEW_LAYER(true) {
-        @Override
-        public String getResourceKey() {
-            return "paste_as_new_layer";
-        }
-
+public enum PasteTarget {
+    /**
+     * Paste the image as a new layer in the active composition.
+     */
+    NEW_LAYER(true, "paste_as_new_layer") {
         @Override
         void paste(BufferedImage pastedImage) {
             var comp = Views.getActiveComp();
             comp.addExternalImageAsNewLayer(pastedImage,
                 "Pasted Layer", "New Pasted Layer");
         }
-    }, NEW_IMAGE(false) {
-        @Override
-        public String getResourceKey() {
-            return "paste_as_new_img";
-        }
-
+    },
+    /**
+     * Paste the image as a completely new image.
+     */
+    NEW_IMAGE(false, "paste_as_new_img") {
         @Override
         void paste(BufferedImage pastedImage) {
             Views.addNewPasted(pastedImage);
         }
-
-    }, MASK(true) {
-        @Override
-        public String getResourceKey() {
-            return "paste_as_layer_mask";
-        }
-
+    },
+    /**
+     * Paste the image as a layer mask, centering and/or cropping to match the canvas.
+     */
+    MASK(true, "paste_as_layer_mask") {
         @Override
         void paste(BufferedImage pastedImage) {
             var comp = Views.getActiveComp();
-            Canvas canvas = comp.getCanvas();
+
+            updateLayerMask(
+                comp.getActiveLayer(),
+                createCanvasSizedMaskImage(pastedImage, comp.getCanvas()));
+        }
+
+        private static BufferedImage createCanvasSizedMaskImage(BufferedImage pastedImage, Canvas canvas) {
             int canvasWidth = canvas.getWidth();
             int canvasHeight = canvas.getHeight();
 
@@ -89,8 +90,10 @@ public enum PasteDestination {
             g.drawImage(pastedImage, x, y, null);
 
             g.dispose();
+            return bwImage;
+        }
 
-            Layer layer = comp.getActiveLayer();
+        private static void updateLayerMask(Layer layer, BufferedImage bwImage) {
             if (layer.hasMask()) {
                 LayerMask mask = layer.getMask();
                 mask.replaceImage(bwImage, "Replace Mask");
@@ -103,8 +106,12 @@ public enum PasteDestination {
 
     private final boolean requiresOpenView;
 
-    PasteDestination(boolean requiresOpenView) {
+    // the resource key for the localized action name
+    private final String resourceKey;
+
+    PasteTarget(boolean requiresOpenView, String resourceKey) {
         this.requiresOpenView = requiresOpenView;
+        this.resourceKey = resourceKey;
     }
 
     abstract void paste(BufferedImage pastedImage);
@@ -113,5 +120,7 @@ public enum PasteDestination {
         return requiresOpenView;
     }
 
-    abstract String getResourceKey();
+    public String getResourceKey() {
+        return resourceKey;
+    }
 }

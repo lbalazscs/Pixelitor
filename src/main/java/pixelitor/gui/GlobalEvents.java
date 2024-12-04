@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
@@ -66,9 +66,9 @@ public class GlobalEvents {
     private static Tool activeTool;
 
     private static final Action INCREASE_BRUSH_SIZE_ACTION =
-        new PAction(Tools::increaseBrushSize);
+        new TaskAction(Tools::increaseBrushSize);
     private static final Action DECREASE_BRUSH_SIZE_ACTION =
-        new PAction(Tools::decreaseBrushSize);
+        new TaskAction(Tools::decreaseBrushSize);
 
     private static final Map<KeyStroke, Action> hotKeyMap = new HashMap<>();
 

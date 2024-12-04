@@ -21,7 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
@@ -38,10 +38,11 @@ import java.util.concurrent.CompletableFuture;
  * A {@link CompAction} where the processing can be simplified
  * by using the template method pattern.
  */
-public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked implements CompAction {
+public abstract class SimpleCompAction extends AbstractViewEnabledAction implements CompAction {
     private final boolean affectsCanvasSize;
 
     SimpleCompAction(String name, boolean affectsCanvasSize) {
+        super(name);
         this.affectsCanvasSize = affectsCanvasSize;
         assert name != null;
         setText(name);

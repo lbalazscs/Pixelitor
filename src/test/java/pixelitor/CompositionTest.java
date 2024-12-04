@@ -598,13 +598,13 @@ class CompositionTest {
         History.assertNumEditsIs(0); // nothing happened
 
         // set a selection
-        Rectangle2D originalSelectionRect = new Rectangle2D.Double(3, 3, 4, 4);
-        comp.createSelectionFrom(originalSelectionRect);
+        Rectangle2D origSelRect = new Rectangle2D.Double(3, 3, 4, 4);
+        comp.createSelectionFrom(origSelRect);
 
         assertThat(comp).hasSelection();
         assertThat(comp.getSelection())
             .isNotNull()
-            .hasShapeBounds(originalSelectionRect);
+            .hasShapeBounds(origSelRect);
 
         comp.invertSelection();
 
@@ -616,7 +616,7 @@ class CompositionTest {
         History.undo("Invert Selection");
         assertThat(comp.getSelection())
             .isNotNull()
-            .hasShapeBounds(originalSelectionRect);
+            .hasShapeBounds(origSelRect);
 
         History.redo("Invert Selection");
         assertThat(comp.getSelection())
@@ -638,11 +638,11 @@ class CompositionTest {
     }
 
     @Test
-    void reorderLayer() {
+    void changeStackIndex() {
         assertThat(comp).layerNamesAre("layer 1", "layer 2");
 
         Layer layer = comp.getLayer(0);
-        comp.reorderLayer(layer, 1);
+        comp.changeStackIndex(layer, 1);
 
         assertThat(comp)
             .layerNamesAre("layer 2", "layer 1")

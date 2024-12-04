@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.gui.*;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.ImageUtils;
 
@@ -66,37 +66,37 @@ public class ChannelMixer extends ParametrizedFilter {
     private final BooleanParam autoBWParam = new BooleanParam(
         "Allow only Black and White", false, IGNORE_RANDOMIZE);
 
-    private final Action swapRedGreen = new PAction("Swap Red-Green", () -> withoutNormalization(() -> {
+    private final Action swapRedGreen = new TaskAction("Swap Red-Green", () -> withoutNormalization(() -> {
         setRedSource(0, 100, 0);
         setGreenSource(100, 0, 0);
         setBlueSource(0, 0, 100);
     }));
 
-    private final Action swapRedBlue = new PAction("Swap Red-Blue", () -> withoutNormalization(() -> {
+    private final Action swapRedBlue = new TaskAction("Swap Red-Blue", () -> withoutNormalization(() -> {
         setRedSource(0, 0, 100);
         setGreenSource(0, 100, 0);
         setBlueSource(100, 0, 0);
     }));
 
-    private final Action swapGreenBlue = new PAction("Swap Green-Blue", () -> withoutNormalization(() -> {
+    private final Action swapGreenBlue = new TaskAction("Swap Green-Blue", () -> withoutNormalization(() -> {
         setRedSource(100, 0, 0);
         setGreenSource(0, 0, 100);
         setBlueSource(0, 100, 0);
     }));
 
-    private final Action shiftRGBR = new PAction("R -> G -> B -> R", () -> withoutNormalization(() -> {
+    private final Action shiftRGBR = new TaskAction("R -> G -> B -> R", () -> withoutNormalization(() -> {
         setRedSource(0, 0, 100);
         setGreenSource(100, 0, 0);
         setBlueSource(0, 100, 0);
     }));
 
-    private final Action shiftRBGR = new PAction("R -> B -> G -> R", () -> withoutNormalization(() -> {
+    private final Action shiftRBGR = new TaskAction("R -> B -> G -> R", () -> withoutNormalization(() -> {
         setRedSource(0, 100, 0);
         setGreenSource(0, 0, 100);
         setBlueSource(100, 0, 0);
     }));
 
-    private final Action removeRed = new PAction("Remove Red", () -> {
+    private final Action removeRed = new TaskAction("Remove Red", () -> {
         assert !preserveBrightnessParam.isChecked();
 
         setRedSource(0, 0, 0);
@@ -106,7 +106,7 @@ public class ChannelMixer extends ParametrizedFilter {
         getParamSet().runFilter();
     });
 
-    private final Action removeGreen = new PAction("Remove Green", () -> {
+    private final Action removeGreen = new TaskAction("Remove Green", () -> {
         assert !preserveBrightnessParam.isChecked();
 
         setRedSource(100, 0, 0);
@@ -116,7 +116,7 @@ public class ChannelMixer extends ParametrizedFilter {
         getParamSet().runFilter();
     });
 
-    private final Action removeBlue = new PAction("Remove Blue", () -> {
+    private final Action removeBlue = new TaskAction("Remove Blue", () -> {
         assert !preserveBrightnessParam.isChecked();
 
         setRedSource(100, 0, 0);
@@ -126,19 +126,19 @@ public class ChannelMixer extends ParametrizedFilter {
         getParamSet().runFilter();
     });
 
-    private final Action averageBW = new PAction("Average BW", () -> withoutNormalization(() -> {
+    private final Action averageBW = new TaskAction("Average BW", () -> withoutNormalization(() -> {
         setRedSource(33, 33, 33);
         setGreenSource(33, 33, 33);
         setBlueSource(33, 33, 33);
     }));
 
-    private final Action luminosityBW = new PAction("Luminosity BW", () -> withoutNormalization(() -> {
+    private final Action luminosityBW = new TaskAction("Luminosity BW", () -> withoutNormalization(() -> {
         setRedSource(22, 71, 7);
         setGreenSource(22, 71, 7);
         setBlueSource(22, 71, 7);
     }));
 
-    private final Action sepia = new PAction("Sepia", () -> {
+    private final Action sepia = new TaskAction("Sepia", () -> {
         assert !preserveBrightnessParam.isChecked();
 
         setRedSource(39, 77, 19);

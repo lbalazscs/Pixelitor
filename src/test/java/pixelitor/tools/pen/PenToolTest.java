@@ -25,6 +25,7 @@ import pixelitor.history.History;
 import pixelitor.layers.ColorFillLayer;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
+import pixelitor.utils.input.Modifiers;
 
 import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
@@ -162,9 +163,9 @@ class PenToolTest {
         click(200, 100);
 
         Path path = PenTool.path;
-        SubPath sp = path.getActiveSubpath();
-        assertThat(sp).numAnchorsIs(2).isNotClosed();
-        AnchorPoint firstAnchor = sp.getAnchor(0);
+        SubPath subpath = path.getActiveSubpath();
+        assertThat(subpath).numAnchorsIs(2).isNotClosed();
+        AnchorPoint firstAnchor = subpath.getAnchor(0);
         assertThat(firstAnchor).isAt(100, 100);
 
         // switch to edit mode
@@ -199,7 +200,7 @@ class PenToolTest {
     @Test
     @DisplayName("undo a build-mode change in edit-mode")
     void undoBuildModeChangeInEditMode() {
-        SubPath sp = createSimpleClosedPathInBuildMode();
+        SubPath subPath = createSimpleClosedPathInBuildMode();
 
         // switch to edit mode
         Tools.PEN.activateMode(EDIT, false);
@@ -209,7 +210,7 @@ class PenToolTest {
             .modeIs(EDIT);
 
         // move the first point upwards
-        AnchorPoint ap1 = sp.getAnchor(0);
+        AnchorPoint ap1 = subPath.getAnchor(0);
         assertThat(ap1).isAt(100, 100);
         press(100, 100);
         release(100, 50);
@@ -243,9 +244,9 @@ class PenToolTest {
         redo("Add Anchor Point");
         redo("Add Anchor Point");
 
-        assertThat(sp).isNotClosed();
+        assertThat(subPath).isNotClosed();
         redo("Close Subpath");
-        assertThat(sp).isClosed();
+        assertThat(subPath).isClosed();
 
         assertThat(ap1).isAt(100, 100);
         redo("Move Anchor Point");
@@ -257,14 +258,16 @@ class PenToolTest {
     void deleteSubPathAndPathInEditMode() {
         // create a path with two subpaths
         Path path = new Path(comp, true);
+
         path.startNewSubpath(10, 20, view);
-        SubPath sp1 = path.getActiveSubpath();
-        sp1.addPoint(20, 10);
-        sp1.finish(comp, false);
+        SubPath subpath = path.getActiveSubpath();
+        subpath.addPoint(20, 10);
+        subpath.finish(comp, false);
+
         path.startNewSubpath(100, 20, view);
-        SubPath sp2 = path.getActiveSubpath();
-        sp2.addPoint(100, 120);
-        sp2.finish(comp, false);
+        SubPath newSubpath = path.getActiveSubpath();
+        newSubpath.addPoint(100, 120);
+        newSubpath.finish(comp, false);
 
         // there are no edits yet, because this was not created with the build API
         History.assertNumEditsIs(0);
@@ -278,13 +281,13 @@ class PenToolTest {
             .isConsistent();
         assertThat(PenTool.path)
             .numSubPathsIs(2)
-            .activeSubPathIs(sp2);
+            .activeSubPathIs(newSubpath);
 
-        sp2.delete();
+        newSubpath.delete();
         History.assertNumEditsIs(1);
         assertThat(PenTool.path)
             .numSubPathsIs(1)
-            .activeSubPathIs(sp1);
+            .activeSubPathIs(subpath);
         assertThat(Tools.PEN)
             .modeIs(EDIT)
             .isConsistent();
@@ -299,7 +302,7 @@ class PenToolTest {
         redo("Delete Subpath");
         assertThat(PenTool.path)
             .numSubPathsIs(1)
-            .activeSubPathIs(sp1);
+            .activeSubPathIs(subpath);
         assertThat(Tools.PEN)
             .modeIs(EDIT)
             .isConsistent();
@@ -351,8 +354,8 @@ class PenToolTest {
             .pathActionAreEnabled();
         assertThat(PenTool.path).numSubPathsIs(1);
 
-        SubPath sp = PenTool.path.getSubPath(0);
-        assertThat(sp)
+        SubPath subPath = PenTool.path.getSubPath(0);
+        assertThat(subPath)
             .isClosed()
             .isFinished()
             .numAnchorsIs(3);
@@ -380,13 +383,13 @@ class PenToolTest {
             .pathActionAreEnabled();
         assertThat(PenTool.path).numSubPathsIs(1);
 
-        Assertions.assertSame(sp, PenTool.path.getSubPath(0));
-        assertThat(sp)
+        Assertions.assertSame(subPath, PenTool.path.getSubPath(0));
+        assertThat(subPath)
             .isClosed()
             .isFinished()
             .numAnchorsIs(3);
 
-        return sp;
+        return subPath;
     }
 
     private void click(int x, int y) {
@@ -395,14 +398,14 @@ class PenToolTest {
     }
 
     private void press(int x, int y) {
-        TestHelper.press(x, y, view);
+        Modifiers.NONE.dispatchPressedEvent(x, y, view);
     }
 
     private void drag(int x, int y) {
-        TestHelper.drag(x, y, view);
+        Modifiers.NONE.dispatchDraggedEvent(x, y, view);
     }
 
     private void release(int x, int y) {
-        TestHelper.release(x, y, view);
+        Modifiers.NONE.dispatchReleasedEvent(x, y, view);
     }
 }

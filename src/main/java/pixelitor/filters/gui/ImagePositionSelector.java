@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.AppMode;
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
@@ -51,14 +50,12 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
                                  int thumbnailSize) {
         this.parentGUI = parentGUI;
         this.model = model;
+
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        if (AppMode.isUnitTesting()) {
-            return; // TODO should not be needed or it could use a blank image
-        }
-
         createThumbnail(thumbnailSize);
+
         setPreferredSize(new Dimension(
             thumb.getWidth(),
             thumb.getHeight()));

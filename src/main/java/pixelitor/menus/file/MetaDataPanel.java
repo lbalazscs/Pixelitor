@@ -24,7 +24,7 @@ import org.w3c.dom.NodeList;
 import pixelitor.Composition;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.menus.file.MetaDataTreeTableModel.Property;
 import pixelitor.utils.Messages;
 
@@ -74,11 +74,11 @@ public class MetaDataPanel extends JPanel {
     private JPanel createControlPanel() {
         JPanel panel = new JPanel(new FlowLayout(LEFT));
 
-        JButton expandAllButton = new JButton(new PAction(
+        JButton expandAllButton = new JButton(new TaskAction(
             "Expand All", treeTable::expandAll));
         expandAllButton.setName("expandAllButton");
 
-        JButton collapseAllButton = new JButton(new PAction(
+        JButton collapseAllButton = new JButton(new TaskAction(
             "Collapse All", treeTable::collapseAll));
         collapseAllButton.setName("collapseAllButton");
 

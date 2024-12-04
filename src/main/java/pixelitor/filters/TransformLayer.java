@@ -41,7 +41,7 @@ import static pixelitor.colors.Colors.TRANSPARENT_BLACK;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
- * A filter for arbitrary affine transforms.
+ * A filter for applying arbitrary affine transformations to an image.
  */
 public class TransformLayer extends ParametrizedFilter {
     @Serial
@@ -59,6 +59,7 @@ public class TransformLayer extends ParametrizedFilter {
         super(true);
 
         bgColorParam.setPresetKey("Background Color");
+        shearParam.setLinked(false);
 
         setParams(
             center,
@@ -67,13 +68,12 @@ public class TransformLayer extends ParametrizedFilter {
             shearParam,
             bgColorParam
         );
-        shearParam.setLinked(false);
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Graphics2D g = createDestGraphics(dest);
-        fillWithBgColor(dest, g);
+        Colors.fillWith(bgColorParam.getColor(), g, dest.getWidth(), dest.getHeight());
 
         AffineTransform transform = calcTransform(src);
         g.drawImage(src, transform, null);
@@ -89,56 +89,52 @@ public class TransformLayer extends ParametrizedFilter {
         return g;
     }
 
-    private void fillWithBgColor(BufferedImage dest, Graphics2D g) {
-        Colors.fillWith(bgColorParam.getColor(), g, dest.getWidth(), dest.getHeight());
-    }
-
     private AffineTransform calcTransform(BufferedImage src) {
-        Point2D centerShift = calcCenterShift(src);
-        var transform = calcRotateTransform(centerShift);
-        applyScale(transform, centerShift);
-        applyShear(transform, centerShift);
+        Point2D pivotPoint = calcPivotPoint(src);
+        var transform = calcRotateTransform(pivotPoint);
+        applyScaling(transform, pivotPoint);
+        applyShearing(transform, pivotPoint);
         return transform;
     }
 
-    private Point2D calcCenterShift(BufferedImage src) {
+    private Point2D calcPivotPoint(BufferedImage src) {
         int tx = 0;
         int ty = 0;
-        // if this can run as a smart filter, then it shouldn't assume
-        // that the active layer is the owner of the image
+        // TODO if this can run as a smart filter, then it shouldn't
+        //   assume that the active layer is the owner of the image
         if (!Features.enableExperimental) {
             Drawable dr = Views.getActiveDrawable();
             tx = -dr.getTx();
             ty = -dr.getTy();
         }
-        double centerShiftX = (tx + src.getWidth()) * center.getRelativeX();
-        double centerShiftY = (ty + src.getHeight()) * center.getRelativeY();
-        return new Point2D.Double(centerShiftX, centerShiftY);
+        double pivotX = (tx + src.getWidth()) * center.getRelativeX();
+        double pivotY = (ty + src.getHeight()) * center.getRelativeY();
+        return new Point2D.Double(pivotX, pivotY);
     }
 
-    private AffineTransform calcRotateTransform(Point2D centerShift) {
-        double theta = angleParam.getValueInRadians();
+    private AffineTransform calcRotateTransform(Point2D pivotPoint) {
+        double angle = angleParam.getValueInRadians();
         return AffineTransform.getRotateInstance(
-            theta, centerShift.getX(), centerShift.getY());
+            angle, pivotPoint.getX(), pivotPoint.getY());
     }
 
-    private void applyScale(AffineTransform transform, Point2D centerShift) {
+    private void applyScaling(AffineTransform transform, Point2D pivotPoint) {
         int scaleX = scaleParam.getValue(0);
         int scaleY = scaleParam.getValue(1);
         if (scaleX != 100 || scaleY != 100) {
-            transform.translate(centerShift.getX(), centerShift.getY());
+            transform.translate(pivotPoint.getX(), pivotPoint.getY());
             transform.scale(scaleX / 100.0, scaleY / 100.0);
-            transform.translate(-centerShift.getX(), -centerShift.getY());
+            transform.translate(-pivotPoint.getX(), -pivotPoint.getY());
         }
     }
 
-    private void applyShear(AffineTransform transform, Point2D centerShift) {
+    private void applyShearing(AffineTransform transform, Point2D pivotPoint) {
         int shearX = shearParam.getValue(0);
         int shearY = shearParam.getValue(1);
         if (shearX != 0 || shearY != 0) {
-            transform.translate(centerShift.getX(), centerShift.getY());
+            transform.translate(pivotPoint.getX(), pivotPoint.getY());
             transform.shear(shearX / 100.0, shearY / 100.0);
-            transform.translate(-centerShift.getX(), -centerShift.getY());
+            transform.translate(-pivotPoint.getX(), -pivotPoint.getY());
         }
     }
 }

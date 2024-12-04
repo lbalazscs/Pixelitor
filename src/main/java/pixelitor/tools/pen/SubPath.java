@@ -572,8 +572,8 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void setView(View view) {
-        for (AnchorPoint ap : anchorPoints) {
-            ap.setView(view);
+        for (AnchorPoint anchor : anchorPoints) {
+            anchor.setView(view);
         }
         if (moving != null) {
             moving.setView(view);
@@ -649,8 +649,8 @@ public class SubPath implements Serializable, Transformable {
 
     public void addLine(double newX, double newY, View view) {
         PPoint point = PPoint.lazyFromIm(newX, newY, view);
-        AnchorPoint ap = new AnchorPoint(point, view, this);
-        addPoint(ap);
+        AnchorPoint anchor = new AnchorPoint(point, view, this);
+        addPoint(anchor);
     }
 
     public void addCubicCurve(double c1x, double c1y,

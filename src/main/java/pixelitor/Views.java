@@ -20,7 +20,7 @@ package pixelitor;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.ViewEnabledAction;
 import pixelitor.history.History;
 import pixelitor.io.FileIO;
 import pixelitor.layers.*;
@@ -71,13 +71,13 @@ public class Views {
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
 
-    public static final Action CLOSE_ALL_ACTION = new OpenViewEnabledAction(
+    public static final Action CLOSE_ALL_ACTION = new ViewEnabledAction(
         i18n("close_all"), comp -> warnAndCloseAll());
 
-    public static final Action CLOSE_ACTIVE_ACTION = new OpenViewEnabledAction(
+    public static final Action CLOSE_ACTIVE_ACTION = new ViewEnabledAction(
         i18n("close"), comp -> warnAndClose(comp.getView()));
 
-    public static final Action CLOSE_UNMODIFIED_ACTION = new OpenViewEnabledAction(
+    public static final Action CLOSE_UNMODIFIED_ACTION = new ViewEnabledAction(
         "Close Unmodified", comp -> warnAndCloseUnmodified());
 
     static {
@@ -110,7 +110,7 @@ public class Views {
         if (views.isEmpty()) {
             onAllViewsClosed();
         }
-        makeSureAViewIsActive();
+        ensureActiveViewExists();
     }
 
     private static void onAllViewsClosed() {
@@ -122,14 +122,10 @@ public class Views {
         FramesUI.resetCascadeCount();
     }
 
-    private static void makeSureAViewIsActive() {
-        if (!views.isEmpty()) {
-            boolean activeFound = views.stream()
-                .anyMatch(view -> view == activeView);
-
-            if (!activeFound) {
-                activate(views.getFirst());
-            }
+    // ensures that one of the open views is active
+    private static void ensureActiveViewExists() {
+        if (!views.isEmpty() && !views.contains(activeView)) {
+            activate(views.getFirst());
         }
     }
 
@@ -202,7 +198,7 @@ public class Views {
         Canvas.activeCanvasSizeChanged(comp.getCanvas());
         PixelitorWindow.get().updateTitle(comp);
 
-        Tools.activeLayerChanged(comp.getActiveLayer());
+        Tools.editingTargetChanged(comp.getActiveLayer());
     }
 
     public static void repaintActive() {
@@ -231,13 +227,13 @@ public class Views {
         }
     }
 
-    public static void onActiveView(Consumer<View> action) {
+    public static void onActive(Consumer<View> action) {
         if (activeView != null) {
             action.accept(activeView);
         }
     }
 
-    public static void forEachView(Consumer<View> action) {
+    public static void forEach(Consumer<View> action) {
         for (View view : views) {
             action.accept(view);
         }
@@ -347,7 +343,7 @@ public class Views {
         }
     }
 
-    public static boolean isAnyPixelGridAllowed() {
+    public static boolean doesAnyViewAllowPixelGrid() {
         for (View view : views) {
             if (view.allowPixelGrid()) {
                 return true;
@@ -450,20 +446,17 @@ public class Views {
         }
     }
 
-    public static void assertNumLayersIs(int expected) {
-        int found = getNumLayersInActiveHolder();
-        if (found != expected) {
-            throw new AssertionError("expected " + expected + ", found = " + found);
-        }
-    }
-
     public static int getNumLayersInActiveHolder() {
         var comp = getActiveComp();
         if (comp == null) {
             throw new AssertionError("no open images");
         }
 
-        return comp.getActiveHolder().getNumLayers();
+//        return comp.getActiveHolder().getNumLayers();
+
+        // in the case of smart filters, this one checks
+        // the holder of the smart object
+        return getActiveLayer().getHolderForNewLayers().getNumLayers();
     }
 
     public static Layer getActiveRoot() {
@@ -578,7 +571,7 @@ public class Views {
         return null;
     }
 
-    public static void appActivated() {
+    public static void appWindowActivated() {
         // Check if any views need to be automatically reloaded
         CompletableFuture<Composition> cf = CompletableFuture.completedFuture(null);
         for (View view : views) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor;
 import com.twelvemonkeys.image.ImageUtil;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.IndexedModePanel;
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.ViewEnabledAction;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 
@@ -73,7 +73,7 @@ public enum ImageMode {
     private final Lazy<JMenuItem> menuItem = Lazy.of(this::createMenuItem);
 
     private JMenuItem createMenuItem() {
-        Action action = new OpenViewEnabledAction(toString(),
+        Action action = new ViewEnabledAction(toString(),
             comp -> comp.changeMode(this));
 
         return new JRadioButtonMenuItem(action);

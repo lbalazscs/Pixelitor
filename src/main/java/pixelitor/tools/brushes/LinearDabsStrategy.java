@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.test.RandomGUITest;
 
 /**
- * The simplest dabs strategy: it places the dabs along the lines
- * connecting the mouse events with a uniform spacing between them.
+ * A dabs strategy that places dabs along the lines connecting
+ * mouse events with uniform spacing between them.
  */
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
@@ -43,41 +43,39 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
+    public void onStrokeStart(PPoint startPoint) {
         distFromLastDab = 0; // moved from reset()
 
-        prev = p;
+        prev = startPoint;
         if (angleSettings.isAngled()) {
-            // No dab is drawn for the angled brushes in this method,
-            // because there is no angle information yet.
-            // However, the distance from the last dab is set
-            // artificially, so that a dab is drawn soon.
+            // Angled brushes don't draw a dab initially as there is no angle information yet.
+            // Distance is artificially set to ensure a dab is drawn soon.
             distFromLastDab = spacing.getSpacing(brush.getRadius()) * 0.8;
         } else {
-            brush.putDab(p, 0);
+            brush.putDab(startPoint, 0);
         }
     }
 
     @Override
-    public void onNewStrokePoint(PPoint end) {
-        double endX = end.getImX();
-        double endY = end.getImY();
+    public void onNewStrokePoint(PPoint newPoint) {
+        double newX = newPoint.getImX();
+        double newY = newPoint.getImY();
         double prevX = prev.getImX();
         double prevY = prev.getImY();
 
-        double lineDist = end.imDist(prev);
+        double lineDist = newPoint.imDist(prev);
         double spacingDist = spacing.getSpacing(brush.getRadius());
         double initialRelativeSpacingDist = (spacingDist - distFromLastDab) / lineDist;
 
-        double theta = 0;
-        double dx = endX - prevX;
-        double dy = endY - prevY;
+        double angle = 0;
+        double dx = newX - prevX;
+        double dy = newY - prevY;
         if (angleSettings.isAngled()) {
-            theta = Math.atan2(dy, dx);
+            angle = Math.atan2(dy, dx);
         }
 
         double x = prevX, y = prevY;
-        boolean drew = false;
+        boolean dabDrawn = false;
 
         int steps = 0;
 
@@ -90,33 +88,30 @@ public class LinearDabsStrategy implements DabsStrategy {
             }
             x = prevX + t * dx;
             y = prevY + t * dy;
-            PPoint p = PPoint.fromIm(x, y, end.getView());
+            PPoint dabPoint = PPoint.fromIm(x, y, newPoint.getView());
 
             if (refreshBrushForEachDab) {
-                brush.setupBrushStamp(p);
+                brush.initBrushStamp(dabPoint);
             }
 
-            if (angleSettings.shouldJitterAngle()) {
-                theta = angleSettings.calcJitteredAngle(theta);
+            if (angleSettings.isJitterEnabled()) {
+                angle = angleSettings.calcJitteredAngle(angle);
             }
 
-            // TODO perhaps this could be optimized if, instead of putDab,
-            // we called a special version that doesn't update the region
-            // and then we updated the region at the end.
-            brush.putDab(p, theta);
-            drew = true;
+            brush.putDab(dabPoint, angle);
+            dabDrawn = true;
         }
 
-        if (drew) {
-            double remainingDx = endX - x;
-            double remainingDy = endY - y;
+        if (dabDrawn) {
+            double remainingDx = newX - x;
+            double remainingDy = newY - y;
             distFromLastDab = Math.sqrt(remainingDx * remainingDx
                 + remainingDy * remainingDy);
         } else {
             distFromLastDab += lineDist;
         }
 
-        prev = end;
+        prev = newPoint;
     }
 
     @Override
@@ -127,7 +122,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void rememberPrevious(PPoint previous) {
+    public void setPrevious(PPoint previous) {
         prev = previous;
     }
 }

@@ -16,8 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.Rectangle;
-
 /**
  * A class to emboss an image.
  */
@@ -65,7 +63,7 @@ public class EmbossFilter extends WholeImageFilter {
     }
 
     @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels) {
         pt = createProgressTracker(height);
 
         int index = 0;

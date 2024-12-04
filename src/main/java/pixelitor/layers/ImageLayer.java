@@ -339,7 +339,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     /**
-     * Returns the image that should be shown by this layer
+     * Returns the image that should be shown by this layer,
      * without considering the canvas or the translation.
      */
     public BufferedImage getVisibleImage() {
@@ -361,11 +361,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage asImage(boolean applyMask, boolean applyOpacity) {
+    public BufferedImage toImage(boolean applyMask, boolean applyOpacity) {
         if (!usesMask() && getOpacity() == 1.0f) {
             return getCanvasSizedVisibleImage();
         }
-        return super.asImage(applyMask, applyOpacity);
+        return super.toImage(applyMask, applyOpacity);
     }
 
     @Override
@@ -958,48 +958,56 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paint(Graphics2D g, boolean firstVisibleLayer) {
         BufferedImage visibleImage = getVisibleImage();
 
         if (tmpLayer == null) {
-            paintLayerOnGraphicsWOTmpLayer(g, visibleImage, firstVisibleLayer);
+            paintWithoutTmpLayer(g, visibleImage, firstVisibleLayer);
         } else { // we are in the middle of a brush draw
-            if (isNormalAndOpaque()) {
-                g.drawImage(visibleImage, getTx(), getTy(), null);
-                tmpLayer.paintOn(g, 0, 0);
-            } else {
-                // the composite of the graphics is already set up, but
-                // the drawing layer still has to be considered
-
-                // first create a merged layer-brush image
-                BufferedImage mergedLayerBrushImg = copyImage(visibleImage);
-                // TODO a canvas-sized image would be enough?
-                Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
-
-                // draw the drawing layer on the layer
-                tmpLayer.paintOn(mergedLayerBrushG, -getTx(), -getTy());
-                mergedLayerBrushG.dispose();
-
-                // now draw the merged layer-brush on the target Graphics
-                // with the layer composite
-                g.drawImage(mergedLayerBrushImg, getTx(), getTy(), null);
-            }
+            paintWithTmpLayer(g, visibleImage);
         }
     }
 
-    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g,
-                                                  BufferedImage visibleImage,
-                                                  boolean firstVisibleLayer) {
+    protected void paintWithoutTmpLayer(Graphics2D g,
+                                        BufferedImage visibleImage,
+                                        boolean firstVisibleLayer) {
         if (Tools.isShapesDrawing() && isActive() && !isMaskEditing()) {
-            paintDraggedShapesOverActiveLayer(g, visibleImage, firstVisibleLayer);
+            paintLayerWithShapes(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
             g.drawImage(visibleImage, getTx(), getTy(), null);
         }
     }
 
-    protected void paintDraggedShapesOverActiveLayer(Graphics2D g,
-                                                     BufferedImage visibleImage,
-                                                     boolean firstVisibleLayer) {
+    private void paintWithTmpLayer(Graphics2D g, BufferedImage visibleImage) {
+        if (isNormalAndOpaque()) {
+            g.drawImage(visibleImage, getTx(), getTy(), null);
+            tmpLayer.paintOn(g, 0, 0);
+        } else {
+            // the composite of the graphics is already set up, but
+            // the drawing layer still has to be considered
+
+            // first create a merged layer-brush image
+            BufferedImage mergedLayerBrushImg = copyImage(visibleImage);
+            // TODO a canvas-sized image would be enough?
+            Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
+
+            // draw the drawing layer on the layer
+            tmpLayer.paintOn(mergedLayerBrushG, -getTx(), -getTy());
+            mergedLayerBrushG.dispose();
+
+            // now draw the merged layer-brush on the target Graphics
+            // with the layer composite
+            g.drawImage(mergedLayerBrushImg, getTx(), getTy(), null);
+        }
+    }
+
+    /**
+     * Paints the current layer and the unrasterized shapes from the
+     * shapes tool on top of it, onto the given Graphics context.
+     */
+    protected void paintLayerWithShapes(Graphics2D g,
+                                        BufferedImage visibleImage,
+                                        boolean firstVisibleLayer) {
         if (firstVisibleLayer) {
             // Create a copy of the graphics, because we don't want to
             // mess with the clipping of the original
@@ -1035,7 +1043,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (previewImage != null) {
             Debug.debugImage(previewImage, "previewImage");
         } else {
-            Messages.showInfo("null", "previewImage is null");
+            Messages.showInfo("No Preview", "previewImage is null");
         }
     }
 

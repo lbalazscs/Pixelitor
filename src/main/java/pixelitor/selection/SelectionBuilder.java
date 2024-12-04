@@ -86,7 +86,15 @@ public class SelectionBuilder {
         updateExistingDraftSelection(draftSelection, mouseInfo, comp, mouseEvent);
     }
 
-    private void createNewDraftSelection(Object mouseInfo, Composition comp, PMouseEvent pm) {
+    private void createNewDraftSelection(Object mouseInfo,
+                                         Composition comp,
+                                         PMouseEvent pm) {
+        if (pm == null) {
+            if (selectionType == SelectionType.SELECTION_MAGIC_WAND) {
+                return; // TODO happend in alt-release in random tool tests
+            }
+        }
+
         Shape newShape = (selectionType == SelectionType.SELECTION_MAGIC_WAND)
             ? selectionType.createShape(pm, null)
             : selectionType.createShape(mouseInfo, null);
@@ -134,7 +142,6 @@ public class SelectionBuilder {
      * any existing selection according to the combination mode.
      */
     public void combineShapes(Composition comp) {
-        Selection origSelection = comp.getSelection();
         Selection draftSelection = comp.getDraftSelection();
 
         Shape newShape = draftSelection.getShape();
@@ -143,8 +150,8 @@ public class SelectionBuilder {
             return;
         }
 
-        if (origSelection != null) {
-            combineWithExistingSelection(origSelection, draftSelection, newShape, comp);
+        if (comp.hasSelection()) {
+            combineWithExistingSelection(draftSelection, newShape, comp);
         } else {
             finalizeNewSelection(draftSelection, newShape, comp);
         }
@@ -152,10 +159,10 @@ public class SelectionBuilder {
         complete = true;
     }
 
-    private void combineWithExistingSelection(Selection origSelection,
-                                              Selection draftSelection,
+    private void combineWithExistingSelection(Selection draftSelection,
                                               Shape newShape,
                                               Composition comp) {
+        Selection origSelection = comp.getSelection();
         Shape origShape = origSelection.getShape();
         Shape combinedShape = combinator.combine(origShape, newShape);
 
@@ -175,7 +182,7 @@ public class SelectionBuilder {
         comp.promoteSelection();
         comp.deselect(true);
 
-        Messages.showInfo("Nothing selected",
+        Messages.showInfo("Nothing Selected",
             "As a result of the "
                 + combinator.toString().toLowerCase(Locale.ENGLISH)
                 + " operation, nothing is selected now.",
@@ -187,8 +194,8 @@ public class SelectionBuilder {
                                           Shape combinedShape,
                                           Shape origShape,
                                           Composition comp) {
-        origSelection.dispose();
         draftSelection.setShape(combinedShape);
+        origSelection.dispose();
         comp.promoteSelection();
 
         History.add(new SelectionShapeChangeEdit(

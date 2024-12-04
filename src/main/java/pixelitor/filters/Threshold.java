@@ -76,15 +76,15 @@ public class Threshold extends ParametrizedFilter {
             int b = rgb & 0xFF;
             int out;
 
-            double value = channel.getValue(r, g, b);
-            if (value > threshold) {
+            double intensity = channel.getIntensity(r, g, b);
+            if (intensity > threshold) {
                 out = 255;
             } else {
                 out = 0;
             }
 
             if (dither) {
-                double error = (value - out) * ditherStrength;
+                double error = (intensity - out) * ditherStrength;
                 // Floyd–Steinberg dithering
                 if (i + 1 < length) {
                     addError(inputData, i + 1, (int) (error * 7.0 / 16));

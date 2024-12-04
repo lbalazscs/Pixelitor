@@ -307,7 +307,7 @@ public class ParamSet implements Debuggable {
         return builtinPresets != null;
     }
 
-    public boolean canHaveUserPresets() {
+    public boolean isNonTrivial() {
         return nonTrivialFilter;
     }
 

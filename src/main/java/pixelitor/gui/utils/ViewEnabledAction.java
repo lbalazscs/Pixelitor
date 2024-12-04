@@ -15,29 +15,31 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools;
+package pixelitor.gui.utils;
 
-import java.awt.event.MouseEvent;
+import pixelitor.Composition;
+
+import javax.swing.*;
+import java.util.function.Consumer;
 
 /**
- * Represents which mouse button is being simulated in a {@link MouseEvent}.
+ * An {@link AbstractViewEnabledAction} implementation that delegates to a given task.
  */
-public enum MouseButton implements EventMaskModifier {
-    LEFT(MouseEvent.BUTTON1_DOWN_MASK),
-    RIGHT(MouseEvent.BUTTON3_DOWN_MASK);
+public class ViewEnabledAction extends AbstractViewEnabledAction {
+    private final Consumer<Composition> task;
 
-    private final int buttonMask;
+    public ViewEnabledAction(String name, Consumer<Composition> task) {
+        super(name);
+        this.task = task;
+    }
 
-    MouseButton(int buttonMask) {
-        this.buttonMask = buttonMask;
+    public ViewEnabledAction(String name, Icon icon, Consumer<Composition> task) {
+        super(name, icon);
+        this.task = task;
     }
 
     @Override
-    public int modify(int currentMask) {
-        return currentMask | buttonMask;
-    }
-
-    public boolean isRightButton() {
-        return this == RIGHT;
+    protected void onClick(Composition comp) {
+        task.accept(comp);
     }
 }

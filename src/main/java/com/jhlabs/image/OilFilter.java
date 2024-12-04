@@ -18,7 +18,6 @@ package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
 
-import java.awt.*;
 import java.util.concurrent.Future;
 
 /**
@@ -67,7 +66,7 @@ public class OilFilter extends WholeImageFilter {
     }
 
     @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
 
         pt = createProgressTracker(height);

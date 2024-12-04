@@ -43,8 +43,7 @@ public enum BlendingMode {
         public Composite getComposite(float opacity) {
             return new DarkenComposite(opacity);
         }
-    },
-    MULTIPLY("Multiply", "svg:multiply") {
+    }, MULTIPLY("Multiply", "svg:multiply") {
         @Override
         public Composite getComposite(float opacity) {
             return new MultiplyComposite(opacity);
@@ -147,15 +146,6 @@ public enum BlendingMode {
 
     public abstract Composite getComposite(float opacity);
 
-    public String toSVGName() {
-        return svgName;
-    }
-
-    @Override
-    public String toString() {
-        return displayName;
-    }
-
     public static BlendingMode fromSVGName(String svgName) {
         for (BlendingMode mode : LAYER_MODES) {
             String modeSVGName = mode.toSVGName();
@@ -164,5 +154,14 @@ public enum BlendingMode {
             }
         }
         return NORMAL;
+    }
+
+    public String toSVGName() {
+        return svgName;
+    }
+
+    @Override
+    public String toString() {
+        return displayName;
     }
 }

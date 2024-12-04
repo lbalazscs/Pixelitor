@@ -267,7 +267,7 @@ public class FileIO {
         int exportedCount = 0;
         for (int layerIndex = 0; layerIndex < comp.getNumLayers(); layerIndex++) {
             Layer layer = comp.getLayer(layerIndex);
-            BufferedImage image = layer.asImage(true, false);
+            BufferedImage image = layer.toImage(true, false);
             if (image != null) {
                 saveLayerImage(image, layer.getName(), layerIndex);
                 exportedCount++;
@@ -406,7 +406,9 @@ public class FileIO {
         return Result.success(out);
     }
 
-    // Read an image the from the standard output of an external process
+    /**
+     * Reads an image from the standard output of an external process.
+     */
     public static BufferedImage readFromCommandLineProcess(Process process) throws IOException {
         BufferedImage image;
         try (InputStream processOutput = process.getInputStream()) {
@@ -417,7 +419,9 @@ public class FileIO {
         return image;
     }
 
-    // Write the source image to the standard input of the external process
+    /**
+     * Writes an image to the standard input of an external process.
+     */
     public static void writeToCommandLineProcess(BufferedImage src, Process process) throws IOException {
         try (OutputStream processInput = process.getOutputStream()) {
             assert processInput instanceof BufferedOutputStream;
@@ -428,8 +432,8 @@ public class FileIO {
     }
 
     /**
-     * Writes an image to the standard input of an external
-     * command-line program in PNG format.
+     * Writes the given image to the standard input stream
+     * of an external command-line program in PNG format.
      */
     private static void writeToCommandLineInputStream(BufferedImage img, OutputStream commandLineInput) throws IOException {
         // Write as png to ImageMagick and let it do

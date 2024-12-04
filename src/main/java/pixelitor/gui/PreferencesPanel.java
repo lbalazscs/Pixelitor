@@ -55,7 +55,7 @@ import static pixelitor.utils.Texts.i18n;
 public class PreferencesPanel extends JTabbedPane {
     private static final Border PANEL_PADDING =
         BorderFactory.createEmptyBorder(5, 10, 5, 0);
-    private static final String UNDO_LEVELS_LABEL = "Minimum Undo/Redo Levels";
+    private static final String UNDO_LEVELS_LABEL = "Minimum Undo Levels";
     private static final String IMAGEMAGICK_FOLDER_LABEL = "ImageMagick 7 Folder";
     private static final String GMIC_FOLDER_LABEL = "G'MIC Folder";
 

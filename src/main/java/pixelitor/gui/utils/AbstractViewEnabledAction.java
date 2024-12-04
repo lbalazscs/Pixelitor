@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,37 +17,52 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.Composition;
+import pixelitor.Views;
+import pixelitor.gui.View;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * The "Pixelitor action" is the common superclass of most actions.
+ * An Action that is enabled only if at least one view is opened.
  */
-public class PAction extends NamedAction {
-    private final Runnable task;
-
-    public PAction(Runnable task) {
-        this.task = task;
-    }
-
-    public PAction(String name, Runnable task) {
+public abstract class AbstractViewEnabledAction extends NamedAction implements ViewActivationListener {
+    protected AbstractViewEnabledAction(String name) {
         super(name);
-        this.task = task;
+        init();
     }
 
-    public PAction(String name, Icon icon, Runnable task) {
+    protected AbstractViewEnabledAction(String name, Icon icon) {
         super(name, icon);
-        this.task = task;
+        init();
+    }
+
+    private void init() {
+        setEnabled(false);
+        Views.addActivationListener(this);
+    }
+
+    @Override
+    public void viewActivated(View oldView, View newView) {
+        setEnabled(true);
+    }
+
+    @Override
+    public void allViewsClosed() {
+        setEnabled(false);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            task.run();
+            onClick(Views.getActiveComp());
         } catch (Exception ex) {
             Messages.showException(ex);
         }
     }
+
+    protected abstract void onClick(Composition comp);
 }

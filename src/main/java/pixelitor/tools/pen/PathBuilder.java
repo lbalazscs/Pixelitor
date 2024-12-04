@@ -100,10 +100,10 @@ public final class PathBuilder implements PenToolMode {
             // in the IDLE state. Normally points
             // are added by finalizing (in mousePressed)
             // the moving point (created in mouseReleased)
-            SubPath sp = path.startNewSubpath();
-            AnchorPoint ap = new AnchorPoint(e, sp);
-            sp.addFirstPoint(ap, true);
-            ap.ctrlOut.mousePressed(x, y);
+            SubPath subPath = path.startNewSubpath();
+            AnchorPoint anchor = new AnchorPoint(e, subPath);
+            subPath.addFirstPoint(anchor, true);
+            anchor.ctrlOut.mousePressed(x, y);
         } else if (state.isMoving()) {
             if (state == MOVING_TO_NEXT_ANCHOR) {
                 assert path.hasMovingPoint();
@@ -144,11 +144,11 @@ public final class PathBuilder implements PenToolMode {
 
     private static void finalizeMovingPoint(double x, double y, boolean altDownHitNothing, boolean shiftDown) {
         path.getMovingPoint().mouseReleased(x, y, shiftDown);
-        AnchorPoint ap = path.addMovingPointAsAnchor();
+        AnchorPoint anchor = path.addMovingPointAsAnchor();
         if (altDownHitNothing) {
-            ap.setType(CUSP);
+            anchor.setType(CUSP);
         }
-        ap.ctrlOut.mousePressed(x, y);
+        anchor.ctrlOut.mousePressed(x, y);
     }
 
     private static boolean handleCtrlPressBeforeSubpath(boolean altDown,
@@ -303,10 +303,10 @@ public final class PathBuilder implements PenToolMode {
             }
 
             // initialize the moving point for the next state
-            SubPath sp = path.getActiveSubpath();
+            SubPath subpath = path.getActiveSubpath();
             MovingPoint moving = new MovingPoint(x, y, last, last.getView());
             moving.mousePressed(x, y);
-            sp.setMovingPoint(moving);
+            subpath.setMovingPoint(moving);
         }
 
         if (e.isControlDown() || e.isAltDown()) {

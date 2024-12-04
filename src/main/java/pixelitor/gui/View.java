@@ -389,7 +389,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         if (showMask) {
             LayerMask mask = comp.getActiveLayer().getMask();
             assert mask != null : "no mask in " + maskViewMode;
-            mask.paintLayerOnGraphics(g2, true);
+            mask.paint(g2, true);
         } else {
             g2.drawImage(comp.getCompositeImage(), 0, 0, null);
 

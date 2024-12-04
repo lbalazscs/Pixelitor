@@ -119,26 +119,23 @@ public class WorkflowTest {
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.selectActiveLayer("layer 1");
             }
-        }, DOUBLE_PP("PP") {
+        }, DOUBLE_PP("PP") { // two nested pass-through groups
             @Override
             public void configure(AppRunner app) {
-                // two nested pass-through groups
                 app.runMenuCommand("Convert Visible to Group");
                 app.runMenuCommand("Convert Visible to Group");
                 app.selectActiveLayer("layer 1");
             }
-        }, DOUBLE_II("II") {
+        }, DOUBLE_II("II") { // two nested isolated groups
             @Override
             public void configure(AppRunner app) {
-                // two nested isolated groups
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.selectActiveLayer("layer 1");
             }
-        }, DOUBLE_PI("PI") {
-            // inner pass-through, outer isolated
+        }, DOUBLE_PI("PI") { // inner pass-through, outer isolated
             @Override
             public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
@@ -146,8 +143,7 @@ public class WorkflowTest {
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.selectActiveLayer("layer 1");
             }
-        }, DOUBLE_IP("IP") {
-            // inner isolated, outer pass-through
+        }, DOUBLE_IP("IP") { // inner isolated, outer pass-through
             @Override
             public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
@@ -225,7 +221,7 @@ public class WorkflowTest {
     }
 
     private void wfTest1(GroupSetting groupSetting) {
-        String compName = createCompName(1, groupSetting);
+        String compName = genCompName(1, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -253,7 +249,7 @@ public class WorkflowTest {
         app.addEmptyImageLayer(true);
         renderCaustics();
         app.selectLayerAbove(); // select the wood layer
-        addHeartShapedHoleToTheWoodLayer();
+        addHeartShapedTransparency();
         runFilterWithDialog("Drop Shadow");
         app.mergeDown();
         createEllipseSelection();
@@ -276,7 +272,7 @@ public class WorkflowTest {
         loadReferenceImage("wf1.png");
     }
 
-    private static String createCompName(int testNr, GroupSetting groupSetting) {
+    private static String genCompName(int testNr, GroupSetting groupSetting) {
         return "wf " + testNr + groupSetting.getNameSuffix();
     }
 
@@ -285,7 +281,7 @@ public class WorkflowTest {
     }
 
     private void wfTest2(GroupSetting groupSetting) {
-        String compName = createCompName(2, groupSetting);
+        String compName = genCompName(2, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -397,7 +393,7 @@ public class WorkflowTest {
     }
 
     private void wfTest3(GroupSetting groupSetting) {
-        String compName = createCompName(3, groupSetting);
+        String compName = genCompName(3, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -461,7 +457,7 @@ public class WorkflowTest {
     }
 
     private void wfTest4(GroupSetting groupSetting) {
-        String compName = createCompName(4, groupSetting);
+        String compName = genCompName(4, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -535,16 +531,39 @@ public class WorkflowTest {
     }
 
     private void wfTest5(GroupSetting groupSetting) {
-        String compName = createCompName(5, groupSetting);
+        String compName = genCompName(5, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
 
         runFilterWithDialog("Marble");
         convertLayerToSmartObject();
+
+        // first smart filter
         runFilterWithDialog("Crystallize");
-        app.resize(600);
+        app.resize(50);
         keyboard.undoRedoUndo("Resize");
+
+        // second smart filter
+        runFilterWithDialog("Color Wheel", dialog -> {
+            dialog.slider("Brightness (%)").slideTo(100);
+            dialog.slider("Saturation (%)").slideTo(100);
+        });
+        // add a mask to the second smart filter and edit it
+        app.addLayerMask();
+        runFilterWithDialog("Concentric Shapes", dialog ->
+            dialog.slider("Distance").slideTo(75));
+
+        // switch back from the mask and add a third smart filter
+        keyboard.pressCtrlOne();
+        runFilterWithDialog("Radial Waves", dialog -> {
+            dialog.slider("Radial Amplitude (Amount)").slideTo(64);
+            dialog.comboBox("Edge Action").selectItem("Reflect Image");
+        });
+
+        app.addEmptyImageLayer(false);
+
+        loadReferenceImage("wf5.png");
     }
 
     private void addTextLayer(String text, String alignment) {
@@ -573,7 +592,10 @@ public class WorkflowTest {
 
         boolean activeIsSmart = EDT.activeLayer(layer ->
             (layer instanceof SmartObject) || (layer instanceof SmartFilter));
-        String expectedEditName = activeIsSmart ? "Add Smart " + filterName : filterName;
+        boolean maskEditing = EDT.activeLayerIsMaskEditing();
+        boolean smartFilter = activeIsSmart && !maskEditing;
+
+        String expectedEditName = smartFilter ? "Add Smart " + filterName : filterName;
         keyboard.undoRedo(expectedEditName);
     }
 
@@ -643,15 +665,13 @@ public class WorkflowTest {
 
     private void deleteActiveLayer(Class<? extends Layer> expectedLayerType) {
         String expectedEditName = "Delete " + EDT.active(comp -> comp.getActiveLayer().getName());
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
 
-        // save a reference, because after the deleting the last child, 
-        // it would stop being the active holder
+        // Save a reference, because after the deleting the
+        // last child, it would stop being the active holder.
         LayerHolder holder = EDT.active(Composition::getActiveHolder);
 
         int numLayers = EDT.call(holder::getNumLayers);
-
-        EDT.assertActiveLayerTypeIs(expectedLayerType);
-        app.checkNumLayersIs(numLayers);
 
         pw.button("deleteLayer").click();
         assert EDT.call(holder::getNumLayers) == numLayers - 1;
@@ -743,7 +763,7 @@ public class WorkflowTest {
         keyboard.undoRedo("Caustics");
     }
 
-    private void addHeartShapedHoleToTheWoodLayer() {
+    private void addHeartShapedTransparency() {
         app.setDefaultColors();
         app.addLayerMask();
         CanvasDrag heartLocation = new CanvasDrag(340, 100, 100);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.ViewEnabledAction;
 import pixelitor.menus.PMenu;
 import pixelitor.utils.Utils;
 
@@ -28,7 +28,15 @@ import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_HEIGHT_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_WIDTH_ACTION;
-import static pixelitor.utils.Keys.*;
+import static pixelitor.utils.Keys.ACTUAL_PIXELS_KEY;
+import static pixelitor.utils.Keys.CTRL_ALT_NUMPAD_0;
+import static pixelitor.utils.Keys.CTRL_MINUS;
+import static pixelitor.utils.Keys.CTRL_NUMPAD_0;
+import static pixelitor.utils.Keys.CTRL_NUMPAD_MINUS;
+import static pixelitor.utils.Keys.CTRL_NUMPAD_PLUS;
+import static pixelitor.utils.Keys.CTRL_PLUS;
+import static pixelitor.utils.Keys.CTRL_SHIFT_EQUALS;
+import static pixelitor.utils.Keys.FIT_SPACE_KEY;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -48,11 +56,11 @@ public class ZoomMenu extends PMenu {
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
     private static final String ACTION_MAP_KEY_FIT_SPACE = "fit space";
 
-    private static final Action ZOOM_IN_ACTION = new OpenViewEnabledAction(
+    private static final Action ZOOM_IN_ACTION = new ViewEnabledAction(
         i18n("zoom_in"),
         comp -> comp.getView().zoomIn());
 
-    private static final Action ZOOM_OUT_ACTION = new OpenViewEnabledAction(
+    private static final Action ZOOM_OUT_ACTION = new ViewEnabledAction(
         i18n("zoom_out"),
         comp -> comp.getView().zoomOut());
 

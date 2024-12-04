@@ -2334,13 +2334,8 @@ public class MainGuiTest {
         boolean tested = false;
         for (BrushType brushType : BrushType.values()) {
             pw.comboBox("typeCB").selectItem(brushType.toString());
-            var settingsButton = app.findButtonByText("Settings...");
-            if (brushType.hasSettings()) {
-                settingsButton.requireEnabled().click();
-                app.testBrushSettings(brushType, tool);
-            } else {
-                settingsButton.requireDisabled();
-            }
+            app.testBrushSettings(tool, brushType);
+
             for (Symmetry symmetry : Symmetry.values()) {
                 if (skipThis()) {
                     continue;

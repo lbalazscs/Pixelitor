@@ -24,7 +24,7 @@ import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
@@ -283,9 +283,9 @@ public class Colors {
         ColorSwatchClickHandler clickHandler = (newColor, e) -> colorSetter.accept(newColor);
         Window window = SwingUtilities.windowForComponent(parent);
 
-        popup.add(new PAction("Color Variations...", () ->
+        popup.add(new TaskAction("Color Variations...", () ->
             PalettePanel.showFilterVariationsDialog(window, colorSource.get(), clickHandler)));
-        popup.add(new PAction("Color History...", () ->
+        popup.add(new TaskAction("Color History...", () ->
             ColorHistory.INSTANCE.showDialog(window, clickHandler, true)));
 
         popup.addSeparator();
@@ -293,21 +293,21 @@ public class Colors {
         popup.add(createPasteColorAction(window, colorSetter));
 
         popup.addSeparator();
-        popup.add(new PAction("Set to Foreground Color", () ->
+        popup.add(new TaskAction("Set to Foreground Color", () ->
             colorSetter.accept(FgBgColors.getFGColor())));
-        popup.add(new PAction("Set to Background Color", () ->
+        popup.add(new TaskAction("Set to Background Color", () ->
             colorSetter.accept(FgBgColors.getBGColor())));
 
         return popup;
     }
 
-    public static PAction createCopyColorAction(Supplier<Color> colorSource) {
-        return new PAction("Copy Color", () ->
+    public static Action createCopyColorAction(Supplier<Color> colorSource) {
+        return new TaskAction("Copy Color", () ->
             copyColorToClipboard(colorSource.get()));
     }
 
-    public static PAction createPasteColorAction(Window window, Consumer<Color> colorSetter) {
-        return new PAction("Paste Color", () -> {
+    public static Action createPasteColorAction(Window window, Consumer<Color> colorSetter) {
+        return new TaskAction("Paste Color", () -> {
             Color color = getColorFromClipboard();
             if (color == null) {
                 Dialogs.showNotAColorOnClipboardDialog(window);

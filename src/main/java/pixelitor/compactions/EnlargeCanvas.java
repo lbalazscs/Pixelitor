@@ -22,7 +22,7 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.ViewEnabledAction;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
@@ -88,7 +88,7 @@ public class EnlargeCanvas extends SimpleCompAction {
      * Creates an action that shows the canvas enlargement dialog.
      */
     public static Action createDialogAction(String name) {
-        return new OpenViewEnabledAction(name + "...",
+        return new ViewEnabledAction(name + "...",
             EnlargeCanvas::showInDialog);
     }
 

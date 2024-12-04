@@ -16,8 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.Rectangle;
-
 /**
  * A filter which quantizes an image to a set number of colors - useful for producing
  * images which are to be encoded using an index color model. The filter can perform
@@ -194,7 +192,7 @@ public class QuantizeFilter extends WholeImageFilter {
     }
 
     @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
 
         quantize(inPixels, outPixels, width, height, numColors, dither, serpentine);

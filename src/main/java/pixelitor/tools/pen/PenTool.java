@@ -24,7 +24,7 @@ import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
@@ -87,7 +87,7 @@ public class PenTool extends Tool {
     private static final Action traceWithSmudgeAction = new TraceAction(
         "Stroke with Smudge", Tools.SMUDGE);
 
-    private static final Action deletePathAction = new PAction(
+    private static final Action deletePathAction = new TaskAction(
         "Delete Path", PenTool::deletePath);
 
     public PenTool() {
@@ -96,8 +96,8 @@ public class PenTool extends Tool {
             Cursors.DEFAULT);
 
         pixelSnapping = true;
-        toSelectionAction = new PAction("Convert to Selection", this::convertToSelection);
-        exportSVGAction = new PAction("Export SVG...", PenTool::exportSVG);
+        toSelectionAction = new TaskAction("Convert to Selection", this::convertToSelection);
+        exportSVGAction = new TaskAction("Export SVG...", PenTool::exportSVG);
 
         setActionsEnabled(false);
     }

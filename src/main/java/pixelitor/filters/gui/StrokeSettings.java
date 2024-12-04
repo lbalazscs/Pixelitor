@@ -58,7 +58,7 @@ public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
 
     public String toSVGStyle() {
         String svg = format("stroke-width=\"%.2f\" %s %s",
-            width, cap.toSVG(), join.toSVG());
+            width, cap.toSVGAttribute(), join.toSVGAttribute());
         if (dashed) {
             svg += format(" stroke-dasharray=\"%.2f %.2f\"", 2 * width, 2 * width);
         }

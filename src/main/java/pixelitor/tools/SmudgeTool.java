@@ -120,7 +120,7 @@ public class SmudgeTool extends AbstractBrushTool {
         if (e.isShiftDown()) {
             // if we *start* with a shift-click, then we must initialize,
             // but otherwise don't re-initialize for shift-clicks
-            if (!smudgeBrush.firstPointWasInitialized()) {
+            if (!smudgeBrush.isFirstPointInitialized()) {
                 initStroke(sourceImage, e);
             }
         } else {
@@ -130,8 +130,8 @@ public class SmudgeTool extends AbstractBrushTool {
         super.mousePressed(e);
     }
 
-    private void initStroke(BufferedImage sourceImage, PPoint p) {
-        smudgeBrush.setupFirstPoint(sourceImage, p, (float) strengthParam.getPercentage());
+    private void initStroke(BufferedImage sourceImage, PPoint startPoint) {
+        smudgeBrush.initFirstPoint(sourceImage, startPoint, (float) strengthParam.getPercentage());
     }
 
     @Override

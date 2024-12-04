@@ -40,7 +40,7 @@ public class ConnectBrushSettings extends BrushSettings {
         consumer.accept(resetForEachStroke);
     }
 
-    public boolean deleteHistoryForEachStroke() {
+    public boolean shouldClearHistoryPerStroke() {
         return resetForEachStroke.isChecked();
     }
 
@@ -57,8 +57,8 @@ public class ConnectBrushSettings extends BrushSettings {
         p.addSlider(widthModel, "width");
         p.addParam(resetForEachStroke, "resetForEach");
 
-        p.addOnlyButton("Reset History Now",
-            e -> ConnectBrush.deleteHistory(), "resetHistNow");
+        p.addFullWidthButton("Reset History",
+            e -> ConnectBrush.clearHistory(), "resetHistNow");
 
         return p;
     }

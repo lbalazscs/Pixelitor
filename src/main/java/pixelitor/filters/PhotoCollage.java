@@ -216,9 +216,9 @@ public class PhotoCollage extends ParametrizedFilter {
 
         // step 1: rotate
         // the rotation amount is a number between -PI and PI if maxRandomRot is 1.0
-        double theta = Math.PI * 2 * rand.nextFloat() - Math.PI;
-        theta *= randomRotation.getPercentage();
-        imageTransform.rotate(theta, photoWidth / 2.0, photoHeight / 2.0);
+        double angle = Math.PI * 2 * rand.nextFloat() - Math.PI;
+        angle *= randomRotation.getPercentage();
+        imageTransform.rotate(angle, photoWidth / 2.0, photoHeight / 2.0);
 
         return imageTransform;
     }

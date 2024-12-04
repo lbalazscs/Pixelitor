@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,63 +34,59 @@ import java.util.Optional;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Pastes an image from the system clipboard
+ * Action for pasting an image from the system clipboard to a given target.
  */
 public class PasteAction extends NamedAction.Checked implements ViewActivationListener {
-    private final PasteDestination destination;
+    private final PasteTarget pasteTarget;
 
-    public PasteAction(PasteDestination destination) {
-        super(i18n(destination.getResourceKey()));
+    public PasteAction(PasteTarget pasteTarget) {
+        super(i18n(pasteTarget.getResourceKey()));
 
-        this.destination = destination;
-        if (destination.requiresOpenView()) {
+        this.pasteTarget = pasteTarget;
+
+        if (pasteTarget.requiresOpenView()) {
             Views.addActivationListener(this);
-            setEnabled(false);
+            setEnabled(false); // disabled by default until a view is opened
         }
     }
 
     @Override
     protected void onClick() {
-        getImageFromClipboard().ifPresent(this::pasteImage);
+        retrieveClipboardImage().ifPresent(pasteTarget::paste);
     }
 
-    private void pasteImage(BufferedImage pastedImage) {
-        // the pasted image could have an unexpected type
-        // (such as RGB, without transparency ), but the
-        // code executing later is responsible for converting it.
-        destination.paste(pastedImage);
-    }
-
-    private static Optional<BufferedImage> getImageFromClipboard() {
+    private static Optional<BufferedImage> retrieveClipboardImage() {
         Transferable clipboardContents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+
         if (clipboardContents == null) {
-            Messages.showInfo("Paste", "There is nothing to paste.");
+            Messages.showInfo("Paste", "The clipboard is empty. Nothing to paste.");
             return Optional.empty();
         }
 
-        BufferedImage pastedImage = null;
-        if (clipboardContents.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-            try {
-                pastedImage = (BufferedImage) clipboardContents.getTransferData(DataFlavor.imageFlavor);
-            } catch (UnsupportedFlavorException | IOException ex) {
-                Messages.showException(ex);
-            }
-        } else {
+        if (!clipboardContents.isDataFlavorSupported(DataFlavor.imageFlavor)) {
             Messages.showInfo("Paste", "The clipboard content isn't an image.");
             return Optional.empty();
         }
-        return Optional.ofNullable(pastedImage);
+
+        try {
+            BufferedImage pastedImage = (BufferedImage)
+                clipboardContents.getTransferData(DataFlavor.imageFlavor);
+            return Optional.of(pastedImage);
+        } catch (UnsupportedFlavorException | IOException ex) {
+            Messages.showException(ex);
+            return Optional.empty();
+        }
     }
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        assert destination.requiresOpenView();
+        assert pasteTarget.requiresOpenView();
         setEnabled(true);
     }
 
     @Override
     public void allViewsClosed() {
-        assert destination.requiresOpenView();
+        assert pasteTarget.requiresOpenView();
         setEnabled(false);
     }
 }

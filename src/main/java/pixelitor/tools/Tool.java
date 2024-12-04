@@ -205,7 +205,11 @@ public abstract class Tool implements PresetOwner, Debuggable {
         // empty by default
     }
 
-    public void activeLayerChanged(Layer layer) {
+    /**
+     * Called when a new layer becomes active, and also when the mask editing state changes.
+     * The argument is always the active layer, not the mask.
+     */
+    public void editingTargetChanged(Layer activeLayer) {
         // empty by default
     }
 

@@ -24,6 +24,7 @@ import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Dimension;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -32,80 +33,88 @@ import java.util.Properties;
 import java.util.prefs.Preferences;
 
 /**
- * Shows the entries listed in tips.properties as tips of the day
+ * Loads the tips of the day from a properties file and shows them.
  */
 public class TipsOfTheDay {
     private static final Preferences tipPrefs = AppPreferences.getMainPrefs();
 
-    private static int nextTip = -1;
+    private static final String NEXT_TIP_INDEX_KEY = "next_tip_nr";
 
-    private static final String NEXT_TIP_NR_KEY = "next_tip_nr";
+    private static int nextTipIndex = tipPrefs.getInt(NEXT_TIP_INDEX_KEY, 0);
 
     private TipsOfTheDay() {
     }
 
     public static void showTips(JFrame parent, boolean force) {
         try {
-            if (nextTip == -1) {
-                nextTip = tipPrefs.getInt(NEXT_TIP_NR_KEY, 0);
-            }
+            TipOfTheDayModel model = loadTipsModel();
+            int tipCount = model.getTipCount();
 
-            var tipOfTheDayModel = loadModel();
-            int tipCount = tipOfTheDayModel.getTipCount();
-            if (nextTip < 0) {
-                nextTip = 0;
-            }
-            if (nextTip > tipCount - 1) {
-                nextTip = tipCount - 1;
-            }
+            // ensure that the tip index is within valid range
+            nextTipIndex = Math.min(Math.max(nextTipIndex, 0), tipCount - 1);
 
-            var size = new Dimension(480, 230);
-            var tipOfTheDay = new JXTipOfTheDay(tipOfTheDayModel) {
+            var dialogPreferredSize = new Dimension(480, 230);
+            var tipOfTheDay = new JXTipOfTheDay(model) {
                 @Override
                 public Dimension getPreferredSize() {
-                    return size;
+                    return dialogPreferredSize;
                 }
             };
-            tipOfTheDay.setCurrentTip(nextTip);
-            tipOfTheDay.showDialog(parent, tipPrefs, force);  // this stops until the user hits close
+            tipOfTheDay.setCurrentTip(nextTipIndex);
 
-            int lastTipIndex = tipOfTheDay.getCurrentTip();
-            if (lastTipIndex < tipCount - 1) {
-                nextTip = lastTipIndex + 1;
-            } else {
-                nextTip = 0;
-            }
+            // this blocks until the user closes the dialog
+            tipOfTheDay.showDialog(parent, tipPrefs, force);
+
+            // updates the next tip index based on the last shown tip
+            int lastTipSeen = tipOfTheDay.getCurrentTip();
+            nextTipIndex = lastTipSeen < tipCount - 1 ? lastTipSeen + 1 : 0;
         } catch (IOException ex) {
             Messages.showException(ex);
         }
     }
 
-    private static TipOfTheDayModel loadModel() throws IOException {
-        var properties = new Properties();
-        TipOfTheDayModel model;
+    /**
+     * Loads the tips model based on the current locale.
+     */
+    // TODO this method is called at startup, and then called again
+    //   whenever the dialog is shown
+    private static TipOfTheDayModel loadTipsModel() throws IOException {
+//        ResourceBundle bundle = ResourceBundle.getBundle("tips", Locale.getDefault());
+        // Here we can't use a ResourceBundle, because the TipLoader
+        // expects Properties, but we need the replicate the
+        // ResourceBundle's file resolution logic for consistency.
+        Locale locale = Locale.getDefault();
+        String langCode = locale.getLanguage();
+        String fileName = switch (langCode) {
+            case "en" -> "/tips.properties";
+            case "pt" -> "/tips_pt_BR.properties";
+            default -> "/tips_" + langCode + ".properties";
+        };
 
-//        ResourceBundle bundle = PropertyResourceBundle.getBundle("tips", Locale.getDefault());
-
-        String fileName = "/tips.properties";
-
-        // TODO do it in a generic way
-        String langCode = Locale.getDefault().getLanguage();
-        if ("pt".equals(langCode)) {
-            fileName = "/tips_pt_BR.properties";
-        } else if("fr".equals(langCode)) {
-            fileName = "/tips_fr.properties";
-        } else if("ru".equals(langCode)) {
-            fileName = "/tips_ru.properties";
+        try {
+            return loadTipsModelFromFile(fileName);
+        } catch (FileNotFoundException e) {
+            // fallback to English tips in the case of a
+            // supported language without a localized tips file
+            return loadTipsModelFromFile("/tips.properties");
         }
-
-        try (var propertiesInputStream = TipsOfTheDay.class.getResourceAsStream(fileName)) {
-            properties.load(new InputStreamReader(propertiesInputStream, StandardCharsets.UTF_8));
-            model = TipLoader.load(properties);
-        }
-        return model;
     }
 
-    public static void saveNextTipNr() {
-        tipPrefs.putInt(NEXT_TIP_NR_KEY, nextTip);
+    /**
+     * Loads the tips model from a specific properties file.
+     */
+    private static TipOfTheDayModel loadTipsModelFromFile(String fileName) throws IOException {
+        var properties = new Properties();
+        try (var inputStream = TipsOfTheDay.class.getResourceAsStream(fileName)) {
+            if (inputStream == null) {
+                throw new FileNotFoundException(fileName);
+            }
+            properties.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        }
+        return TipLoader.load(properties);
+    }
+
+    public static void saveNextTipIndex() {
+        tipPrefs.putInt(NEXT_TIP_INDEX_KEY, nextTipIndex);
     }
 }

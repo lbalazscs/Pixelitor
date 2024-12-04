@@ -137,7 +137,7 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paint(Graphics2D g, boolean firstVisibleLayer) {
         Canvas canvas = comp.getCanvas();
         Colors.fillWith(color, g, canvas.getWidth(), canvas.getHeight());
     }
