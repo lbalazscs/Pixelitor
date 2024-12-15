@@ -140,6 +140,39 @@ public enum NonlinTransform {
                 return new Point2D.Double(newX, newY);
             };
         }
+    }, WAVE("Wave", true) {
+        @Override
+        public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+            return (x, y) -> {
+                double cx = center.getX();
+                double cy = center.getY();
+                double dx = x - cx;
+                double dy = y - cy;
+
+                double newX = dx + tuning * sin(dy / 50.0);
+                double newY = dy + tuning * cos(dx / 50.0);
+
+                return new Point2D.Double(cx + newX, cy + newY);
+            };
+        }
+    }, VORTEX("Vortex", true) {
+        @Override
+        public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+            return (x, y) -> {
+                double dist = center.distance(x, y);
+                double cx = center.getX();
+                double cy = center.getY();
+                double angle = atan2(y - cy, x - cx);
+                int numBranches = 5;
+                double displacement = tuning * sin(numBranches * angle + dist / 20.0);
+                double newDist = dist + displacement;
+
+                double newX = cx + newDist * cos(angle);
+                double newY = cy + newDist * sin(angle);
+
+                return new Point2D.Double(newX, newY);
+            };
+        }
     };
 
     private final String displayName;

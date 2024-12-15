@@ -598,5 +598,6 @@ public class Views {
     // from previous test runs don't interfere with the current test
     public static void clear() {
         views.clear();
+        activeView = null;
     }
 }
