@@ -95,7 +95,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
     private final EnumParam<NonlinTransform> nonlinType = NonlinTransform.asParam();
-    private final RangeParam nonlinTuning = new RangeParam("Nonlinear Tuning", -100, 0, 100);
+    private final RangeParam nonlinTuning = new RangeParam("Distortion Tuning", -100, 0, 100);
 
     private transient Shape exportedShape;
 

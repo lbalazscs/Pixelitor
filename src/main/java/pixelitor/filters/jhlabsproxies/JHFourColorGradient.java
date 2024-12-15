@@ -19,17 +19,15 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.FourColorFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.FilterButtonModel;
-import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.GridAdjustmentPanel;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.layers.Filterable;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
  * Four Color Gradient filter based on the JHLabs FourColorFilter
@@ -41,13 +39,25 @@ public class JHFourColorGradient extends ParametrizedFilter {
     private static final long serialVersionUID = -3344171912935129684L;
 
     private final ColorParam northWestParam =
-        new ColorParam("Northwest", new Color(20, 128, 20), NO_TRANSPARENCY);
+        new ColorParam("Northwest", new Color(20, 128, 20), USER_ONLY_TRANSPARENCY);
     private final ColorParam northEastParam =
-        new ColorParam("Northeast", new Color(200, 200, 20), NO_TRANSPARENCY);
+        new ColorParam("Northeast", new Color(200, 200, 20), USER_ONLY_TRANSPARENCY);
     private final ColorParam southWestParam =
-        new ColorParam("Southwest", new Color(20, 20, 200), NO_TRANSPARENCY);
+        new ColorParam("Southwest", new Color(20, 20, 200), USER_ONLY_TRANSPARENCY);
     private final ColorParam southEastParam =
-        new ColorParam("Southeast", new Color(200, 20, 20), NO_TRANSPARENCY);
+        new ColorParam("Southeast", new Color(200, 20, 20), USER_ONLY_TRANSPARENCY);
+
+    private final IntChoiceParam interpolation = new IntChoiceParam("Interpolation", new Item[]{
+        new Item("Linear", FourColorFilter.INTERPOLATION_LINEAR),
+        new Item("Cubic", FourColorFilter.INTERPOLATION_CUBIC),
+        new Item("Quintic", FourColorFilter.INTERPOLATION_QUINTIC),
+        new Item("Septic", FourColorFilter.INTERPOLATION_SEPTIC),
+    });
+
+    private final IntChoiceParam space = new IntChoiceParam("Space", new Item[]{
+        new Item("sRGB", FourColorFilter.SPACE_SRGB),
+        new Item("Linear RGB", FourColorFilter.SPACE_LINEAR),
+    });
 
     private FourColorFilter filter;
 
@@ -63,7 +73,9 @@ public class JHFourColorGradient extends ParametrizedFilter {
             northWestParam,
             northEastParam,
             southWestParam,
-            southEastParam
+            southEastParam,
+            interpolation,
+            space
         ).withActionsAtFront(darkenAll, brightenAll);
     }
 
@@ -91,6 +103,8 @@ public class JHFourColorGradient extends ParametrizedFilter {
         filter.setColorNE(northEastParam.getColor().getRGB());
         filter.setColorSW(southWestParam.getColor().getRGB());
         filter.setColorSE(southEastParam.getColor().getRGB());
+        filter.setInterpolation(interpolation.getValue());
+        filter.setLinearSpace(space.getValue() == FourColorFilter.SPACE_LINEAR);
 
         return filter.filter(src, dest);
     }

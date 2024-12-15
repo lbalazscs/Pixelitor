@@ -116,11 +116,11 @@ public enum NonlinTransform {
     }, POLAR_TO_RECT("Polar to Rectangular", true) {
         @Override
         public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+            double cx = center.getX();
+            double cy = center.getY();
             double maxR = Math.sqrt(width * width + height * height) / 2.0;
             return (x, y) -> {
                 double r = center.distance(x, y) / maxR;
-                double cx = center.getX();
-                double cy = center.getY();
 
                 // atan2 is in the range -pi..pi, angle will be 0..2*pi
                 double angle = atan2(y - cy, x - cx) + PI;
@@ -143,28 +143,40 @@ public enum NonlinTransform {
     }, WAVE("Wave", true) {
         @Override
         public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+            double cx = center.getX();
+            double cy = center.getY();
+
+            // make the effect size-independent
+            double diagonal = Math.sqrt(width * width + height * height);
+            double waveConstant = diagonal / 10.0;
+            double adjustedTuning = tuning * diagonal / 800;
+
             return (x, y) -> {
-                double cx = center.getX();
-                double cy = center.getY();
                 double dx = x - cx;
                 double dy = y - cy;
 
-                double newX = dx + tuning * sin(dy / 50.0);
-                double newY = dy + tuning * cos(dx / 50.0);
+                double newX = x + adjustedTuning * sin(dy / waveConstant);
+                double newY = y + adjustedTuning * cos(dx / waveConstant);
 
-                return new Point2D.Double(cx + newX, cy + newY);
+                return new Point2D.Double(newX, newY);
             };
         }
     }, VORTEX("Vortex", true) {
         @Override
         public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+            double cx = center.getX();
+            double cy = center.getY();
+            int numBranches = 5;
+
+            // make the effect size-independent
+            double diagonal = Math.sqrt(width * width + height * height);
+            double div = diagonal / 30.0;
+            double adjustedTuning = tuning * diagonal / 2000;
+
             return (x, y) -> {
                 double dist = center.distance(x, y);
-                double cx = center.getX();
-                double cy = center.getY();
                 double angle = atan2(y - cy, x - cx);
-                int numBranches = 5;
-                double displacement = tuning * sin(numBranches * angle + dist / 20.0);
+                double displacement = adjustedTuning * sin(numBranches * angle + dist / div);
                 double newDist = dist + displacement;
 
                 double newX = cx + newDist * cos(angle);
@@ -242,7 +254,7 @@ public enum NonlinTransform {
     public abstract PointMapper createMapper(Point2D center, double tuning, int width, int height);
 
     public static EnumParam<NonlinTransform> asParam() {
-        return new EnumParam<>("Nonlinear Transform", NonlinTransform.class);
+        return new EnumParam<>("Distortion", NonlinTransform.class);
     }
 
     public boolean hasTuning() {
