@@ -20,11 +20,13 @@ package pixelitor.filters;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.NonlinTransform;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
@@ -33,6 +35,7 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.utils.NonlinTransform.NONE;
 
 /**
  * The Render/Geometry/Rose filter, generating a polar rose curve.
@@ -50,18 +53,21 @@ public class Rose extends ParametrizedFilter {
     private final ColorParam fgColor = new ColorParam("Foreground Color", WHITE, USER_ONLY_TRANSPARENCY);
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
+    private final EnumParam<NonlinTransform> nonlinType = NonlinTransform.asParam();
+    private final RangeParam nonlinTuning = new RangeParam("Nonlinear Tuning", -100, 0, 100);
 
     public Rose() {
         super(false);
+
+        nonlinType.setupEnableOtherIf(nonlinTuning, NonlinTransform::hasTuning);
 
         setParams(
             nParam,
             dParam,
             bgColor,
             fgColor,
-            center,
-            scale,
-            rotate
+            new DialogParam("Transform",
+                nonlinType, nonlinTuning, center, rotate, scale)
         );
 
         helpURL = "https://en.wikipedia.org/wiki/Rose_(mathematics)";
@@ -103,6 +109,13 @@ public class Rose extends ParametrizedFilter {
             }
         }
         path.closePath();
+
+        NonlinTransform nonlin = nonlinType.getSelected();
+        if (nonlin != NONE) {
+            double amount = nonlinTuning.getValueAsDouble();
+            Point2D pivotPoint = new Point2D.Double(cx, cy);
+            path = nonlin.transform(path, pivotPoint, amount, width, height);
+        }
 
         int scaleX = scale.getValue(0);
         int scaleY = scale.getValue(1);

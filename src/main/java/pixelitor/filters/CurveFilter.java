@@ -27,9 +27,8 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.io.FileIO;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.NonlinTransform;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.Shapes.NonlinTransform;
-import pixelitor.utils.Shapes.PointMapper;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -48,7 +47,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.utils.Shapes.NonlinTransform.NONE;
+import static pixelitor.utils.NonlinTransform.NONE;
 
 /**
  * Abstract superclass for the "Render/Curves" filters.
@@ -152,12 +151,11 @@ public abstract class CurveFilter extends ParametrizedFilter {
             return dest;
         }
 
-        NonlinTransform transform = nonlinType.getSelected();
-        if (transform != NONE) {
+        NonlinTransform nonlin = nonlinType.getSelected();
+        if (nonlin != NONE) {
             double amount = nonlinTuning.getValueAsDouble();
-            Point2D mapCenter = center.getAbsolutePoint(src);
-            PointMapper mapper = transform.createMapper(mapCenter, amount, srcWidth, srcHeight);
-            shape = Shapes.transformShape(shape, mapper);
+            Point2D pivotPoint = center.getAbsolutePoint(src);
+            shape = nonlin.transform(shape, pivotPoint, amount, srcWidth, srcHeight);
         }
 
         double scaleX = scale.getPercentage(0);
