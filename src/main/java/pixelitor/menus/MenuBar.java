@@ -796,10 +796,6 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHTriTone.NAME, JHTriTone::new);
         sub.addFilter(GradientMap.NAME, GradientMap::new);
 
-        sub.addSeparator();
-
-        sub.addFilter(JHDither.NAME, JHDither::new);
-
         return sub;
     }
 
@@ -880,6 +876,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHStripedHalftone.NAME, JHStripedHalftone::new);
         sub.addFilter(JHConcentricHalftone.NAME, JHConcentricHalftone::new);
         sub.addFilter(JHColorHalftone.NAME, JHColorHalftone::new);
+        sub.addFilter(JHDither.NAME, JHDither::new);
 
         return sub;
     }

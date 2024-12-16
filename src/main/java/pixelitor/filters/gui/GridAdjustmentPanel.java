@@ -19,12 +19,13 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.jhlabsproxies.JHFourColorGradient;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.awt.BorderLayout.CENTER;
@@ -49,7 +50,8 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     public JPanel createFilterParamsPanel(ParamSet paramSet) {
         // hack, otherwise the setting of the flag in the constructor is too late,
         // because this is called by the superclass constructor
-        if (filter instanceof JHFourColorGradient) {
+        boolean fourColorGradient = filter instanceof JHFourColorGradient;
+        if (fourColorGradient) {
             addGridLabels = true;
         }
 
@@ -60,31 +62,29 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
         List<FilterParam> paramList = paramSet.getParams();
         int numParams = paramList.size();
 
-        JPanel extraParamsPanel = null;
-        if (numParams > MAX_GRID_PARAMS) {
-            extraParamsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        }
 
+        List<FilterParam> extraParams = new ArrayList<>();
         for (int i = 0; i < numParams; i++) {
             FilterParam param = paramList.get(i);
-            JComponent control = param.createGUI();
-            String labelText = param.getName() + ':';
 
             // the first 4 are added into the 4 grid positions
             if (i < MAX_GRID_PARAMS) {
                 if (addGridLabels) {
-                    gridPanel.add(new JLabel(labelText));
+                    gridPanel.add(new JLabel(param.getName() + ':'));
                 }
-                gridPanel.add(control);
+                gridPanel.add(param.createGUI());
             } else {
-                extraParamsPanel.add(new JLabel(labelText));
-                extraParamsPanel.add(control);
+                extraParams.add(param);
             }
         }
 
         if (numParams <= MAX_GRID_PARAMS) {
             return gridPanel;
         }
+
+        JPanel extraParamsPanel = fourColorGradient
+            ? GUIUtils.createVerticalPanel(extraParams)
+            : GUIUtils.createHorizontalPanel(extraParams);
 
         JPanel combinedPanel = new JPanel(new BorderLayout());
         combinedPanel.add(gridPanel, CENTER);

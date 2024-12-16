@@ -18,14 +18,23 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.levels.Channel;
+import pixelitor.utils.Dithering;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static com.jhlabs.image.ImageMath.clamp;
+import static pixelitor.utils.Dithering.DITHER_BURKES;
+import static pixelitor.utils.Dithering.DITHER_FLOYD_STEINBERG;
+import static pixelitor.utils.Dithering.DITHER_SIERRA;
+import static pixelitor.utils.Dithering.DITHER_STUCKI;
+import static pixelitor.utils.Dithering.ditherBurkes;
+import static pixelitor.utils.Dithering.ditherFloydSteinberg;
+import static pixelitor.utils.Dithering.ditherSierra;
+import static pixelitor.utils.Dithering.ditherStucki;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -40,37 +49,45 @@ public class Threshold extends ParametrizedFilter {
 
     private final EnumParam<Channel> channelParam = Channel.asParam();
     private final RangeParam thresholdParam = new RangeParam(THRESHOLD, 0, 128, 255);
-    private final RangeParam dithering = new RangeParam("Dithering Amount (%)", 0, 0, 100);
+    private final RangeParam diffusionStrengthParam = new RangeParam("Dithering Amount (%)", 0, 0, 100);
+    private final IntChoiceParam ditheringMethodParam = Dithering.createDitheringChoices();
 
     public Threshold() {
         super(true);
 
         thresholdParam.setPresetKey("Threshold");
 
-        setParams(channelParam, thresholdParam, dithering);
+        diffusionStrengthParam.setupEnableOtherIfNotZero(ditheringMethodParam);
+
+        setParams(
+            thresholdParam,
+            channelParam,
+            diffusionStrengthParam,
+            ditheringMethodParam);
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        boolean dither = dithering.getValue() != 0;
-        double ditherStrength = dithering.getPercentage();
-        BufferedImage input;
-        if (dither) {
-            input = ImageUtils.copyImage(src);
-        } else {
-            input = src;
-        }
+        boolean dither = diffusionStrengthParam.getValue() != 0;
+        double diffusionStrength = diffusionStrengthParam.getPercentage();
+
+        // the input array is modified during the error diffusion
+        BufferedImage input = dither ? ImageUtils.copyImage(src) : src;
 
         double threshold = thresholdParam.getValueAsDouble();
+        int ditheringMethod = ditheringMethodParam.getValue();
+
         Channel channel = channelParam.getSelected();
         int[] inputData = ImageUtils.getPixelArray(input);
         int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcData = ImageUtils.getPixelArray(src);
 
         int width = src.getWidth();
         int length = inputData.length;
         for (int i = 0; i < length; i++) {
             int rgb = inputData[i];
 
+            int a = srcData[i] & 0xFF_00_00_00; // the original, and not shifted
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
@@ -78,37 +95,39 @@ public class Threshold extends ParametrizedFilter {
 
             double intensity = channel.getIntensity(r, g, b);
             if (intensity > threshold) {
-                out = 255;
+                out = 0xFF;
             } else {
                 out = 0;
             }
 
             if (dither) {
-                double error = (intensity - out) * ditherStrength;
-                // Floyd–Steinberg dithering
-                if (i + 1 < length) {
-                    addError(inputData, i + 1, (int) (error * 7.0 / 16));
-                }
-                int belowIndex = i + width;
-                if (belowIndex + 1 < length) {
-                    addError(inputData, belowIndex - 1, (int) (error * 3.0 / 16));
-                    addError(inputData, belowIndex, (int) (error * 5.0 / 16));
-                    addError(inputData, belowIndex + 1, (int) (error / 16));
+                // the diffusion strength controls how much of the
+                // quantization error is diffused to neighboring pixels
+                double error = (intensity - out) * diffusionStrength;
+
+                // Distribute the error to neighboring pixels.
+                // These methods only modify the inputData array.
+                // This will have an effect in the next iteration of the for loop.
+                switch (ditheringMethod) {
+                    case DITHER_FLOYD_STEINBERG:
+                        ditherFloydSteinberg(inputData, i, width, length, error);
+                        break;
+                    case DITHER_STUCKI:
+                        ditherStucki(inputData, i, width, length, error);
+                        break;
+                    case DITHER_BURKES:
+                        ditherBurkes(inputData, i, width, length, error);
+                        break;
+                    case DITHER_SIERRA:
+                        ditherSierra(inputData, i, width, length, error);
+                        break;
                 }
             }
 
-            destData[i] = 0xFF << 24 | out << 16 | out << 8 | out;
+            destData[i] = a | out << 16 | out << 8 | out;
         }
 
         return dest;
-    }
-
-    private static void addError(int[] pixels, int index, int value) {
-        int rgb = pixels[index];
-        int r = clamp(((rgb >>> 16) & 0xFF) + value, 0, 255);
-        int g = clamp(((rgb >>> 8) & 0xFF) + value, 0, 255);
-        int b = clamp((rgb & 0xFF) + value, 0, 255);
-        pixels[index] = r << 16 | g << 8 | b;
     }
 
     @Override

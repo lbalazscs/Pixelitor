@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -95,15 +95,21 @@ public class RGBLookup {
 
     public void initFromPosterize(int numRedLevels, int numGreenLevels, int numBlueLevels) {
         for (int i = 0; i < ARRAY_LENGTH; i++) {
-            int mapping = (ARRAY_LENGTH - 1) * (numRedLevels * i / ARRAY_LENGTH) / (numRedLevels - 1);
+            int mapping = numRedLevels == 1
+                ? ARRAY_LENGTH / 2
+                : (ARRAY_LENGTH - 1) * (numRedLevels * i / ARRAY_LENGTH) / (numRedLevels - 1);
             redLUT[i] = (short) mapping;
         }
         for (int i = 0; i < ARRAY_LENGTH; i++) {
-            int mapping = (ARRAY_LENGTH - 1) * (numGreenLevels * i / ARRAY_LENGTH) / (numGreenLevels - 1);
+            int mapping = numGreenLevels == 1
+                ? ARRAY_LENGTH / 2
+                : (ARRAY_LENGTH - 1) * (numGreenLevels * i / ARRAY_LENGTH) / (numGreenLevels - 1);
             greenLUT[i] = (short) mapping;
         }
         for (int i = 0; i < ARRAY_LENGTH; i++) {
-            int mapping = (ARRAY_LENGTH - 1) * (numBlueLevels * i / ARRAY_LENGTH) / (numBlueLevels - 1);
+            int mapping = numBlueLevels == 1
+                ? ARRAY_LENGTH / 2
+                : (ARRAY_LENGTH - 1) * (numBlueLevels * i / ARRAY_LENGTH) / (numBlueLevels - 1);
             blueLUT[i] = (short) mapping;
         }
     }
@@ -133,5 +139,17 @@ public class RGBLookup {
 
     int mapBlue(int input) {
         return blueLUT[input];
+    }
+
+    public short[] getRedLUT() {
+        return redLUT;
+    }
+
+    public short[] getGreenLUT() {
+        return greenLUT;
+    }
+
+    public short[] getBlueLUT() {
+        return blueLUT;
     }
 }

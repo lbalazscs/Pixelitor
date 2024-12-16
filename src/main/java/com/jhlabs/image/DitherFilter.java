@@ -188,92 +188,56 @@ public class DitherFilter extends PointFilter {
     private int[] div;
     private int[] map;
     private boolean colorDither;
-//	private boolean initialized = false;
 
     /**
      * Constuct a DitherFilter.
      */
     public DitherFilter(String filterName) {
         super(filterName);
-
-        rows = 2;
-        cols = 2;
-        matrix = ditherMagic4x4Matrix;
-        levels = 6;
-        colorDither = true;
     }
 
     /**
      * Set the dither matrix.
      *
      * @param matrix the dither matrix
-     * @see #getMatrix
      */
     public void setMatrix(int[] matrix) {
         this.matrix = matrix;
     }
 
     /**
-     * Get the dither matrix.
-     *
-     * @return the dither matrix
-     * @see #setMatrix
-     */
-    public int[] getMatrix() {
-        return matrix;
-    }
-
-    /**
      * Set the number of dither levels.
      *
      * @param levels the number of levels
-     * @see #getLevels
      */
     public void setLevels(int levels) {
         this.levels = levels;
     }
 
-    /**
-     * Get the number of dither levels.
-     *
-     * @return the number of levels
-     * @see #setLevels
-     */
-    public int getLevels() {
-        return levels;
-    }
 
     /**
      * Set whether to use a color dither.
      *
      * @param colorDither whether to use a color dither
-     * @see #getColorDither
      */
     public void setColorDither(boolean colorDither) {
         this.colorDither = colorDither;
     }
 
     /**
-     * Get whether to use a color dither.
-     *
-     * @return whether to use a color dither
-     * @see #getColorDither
-     */
-    public boolean getColorDither() {
-        return colorDither;
-    }
-
-    /**
-     * Initialize the filter.
+     * Must be called after all the properties have been set.
      */
     public void initialize() {
         rows = cols = (int) Math.sqrt(matrix.length);
+
+        // map maps the levels to actual 0..255 values
         map = new int[levels];
         for (int i = 0; i < levels; i++) {
             int v = 255 * i / (levels - 1);
             map[i] = v;
         }
-        div = new int[256];
+
+        div = new int[256]; // pre-calculates the level of a 0..255 value
         mod = new int[256];
         int rc = (rows * cols + 1);
         for (int i = 0; i < 256; i++) {
@@ -282,20 +246,23 @@ public class DitherFilter extends PointFilter {
         }
     }
 
+    // In orderd dithering each pixel is processed independently based
+    // on its position relative to the tiling of the threshold matrix.
     @Override
     public int filterRGB(int x, int y, int rgb) {
-//		if (!initialized) {
-//			initialized = true;
-//			initialize();
-//		}
         int a = rgb & 0xff000000;
         int r = (rgb >> 16) & 0xff;
         int g = (rgb >> 8) & 0xff;
         int b = rgb & 0xff;
+
         int col = x % cols;
         int row = y % rows;
+
+        // the threshold value in the matrix for the current x, y position
         int v = matrix[row * cols + col];
+
         if (colorDither) {
+            // adding 1 to a div[x] moves it the next higher color level
             r = map[mod[r] > v ? div[r] + 1 : div[r]];
             g = map[mod[g] > v ? div[g] + 1 : div[g]];
             b = map[mod[b] > v ? div[b] + 1 : div[b]];

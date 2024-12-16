@@ -54,7 +54,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
         new Item("Septic", FourColorFilter.INTERPOLATION_SEPTIC),
     });
 
-    private final IntChoiceParam space = new IntChoiceParam("Space", new Item[]{
+    private final IntChoiceParam space = new IntChoiceParam("Color Space", new Item[]{
         new Item("Linear RGB", FourColorFilter.SPACE_LINEAR),
         new Item("sRGB", FourColorFilter.SPACE_SRGB),
     });

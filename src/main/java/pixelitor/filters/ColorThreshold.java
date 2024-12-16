@@ -18,7 +18,9 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Dithering;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -39,6 +41,9 @@ public class ColorThreshold extends ParametrizedFilter {
     private final RangeParam greenThreshold = new RangeParam(i18n("green"), 0, 128, 256);
     private final RangeParam blueThreshold = new RangeParam(i18n("blue"), 0, 128, 256);
 
+    private final RangeParam diffusionStrengthParam = new RangeParam("Dithering Amount (%)", 0, 0, 100);
+    private final IntChoiceParam ditheringMethodParam = Dithering.createDitheringChoices();
+
     public ColorThreshold() {
         super(true);
 
@@ -50,31 +55,54 @@ public class ColorThreshold extends ParametrizedFilter {
             }, false);
 
         threshold.setPresetKey("Threshold");
-        setParams(threshold);
+        diffusionStrengthParam.setupEnableOtherIfNotZero(ditheringMethodParam);
+
+        setParams(
+            threshold,
+            diffusionStrengthParam,
+            ditheringMethodParam
+        );
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
-
         int redTh = redThreshold.getValue();
         int greenTh = greenThreshold.getValue();
         int blueTh = blueThreshold.getValue();
 
-        int length = srcData.length;
+        boolean dither = diffusionStrengthParam.getValue() != 0;
+        double diffusionStrength = diffusionStrengthParam.getPercentage();
+        int ditheringMethod = ditheringMethodParam.getValue();
+
+        BufferedImage input = dither ? ImageUtils.copyImage(src) : src;
+
+        int[] inputData = ImageUtils.getPixelArray(input);
+        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcData = ImageUtils.getPixelArray(src);
+
+        int width = src.getWidth();
+        int length = inputData.length;
+
         for (int i = 0; i < length; i++) {
-            int srcPixel = srcData[i];
-            int a = (srcPixel >>> 24) & 0xFF;
-            int r = (srcPixel >>> 16) & 0xFF;
-            int g = (srcPixel >>> 8) & 0xFF;
-            int b = srcPixel & 0xFF;
+            int inPixel = inputData[i];
+            int a = srcData[i] & 0xFF_00_00_00;
+            int r = (inPixel >>> 16) & 0xFF;
+            int g = (inPixel >>> 8) & 0xFF;
+            int b = inPixel & 0xFF;
 
-            r = r >= redTh ? 0xFF : 0;
-            g = g >= greenTh ? 0xFF : 0;
-            b = b >= blueTh ? 0xFF : 0;
+            int outR = r >= redTh ? 0xFF : 0;
+            int outG = g >= greenTh ? 0xFF : 0;
+            int outB = b >= blueTh ? 0xFF : 0;
 
-            destData[i] = a << 24 | r << 16 | g << 8 | b;
+            if (dither) {
+                double errorR = (r - outR) * diffusionStrength;
+                double errorG = (g - outG) * diffusionStrength;
+                double errorB = (b - outB) * diffusionStrength;
+
+                Dithering.ditherRGB(ditheringMethod, inputData, i, width, length, errorR, errorG, errorB);
+            }
+
+            destData[i] = a | outR << 16 | outG << 8 | outB;
         }
 
         return dest;

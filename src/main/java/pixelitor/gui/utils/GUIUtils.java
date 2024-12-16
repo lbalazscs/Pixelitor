@@ -113,6 +113,15 @@ public final class GUIUtils {
         return panel;
     }
 
+    public static JPanel createHorizontalPanel(Iterable<? extends FilterSetting> settings) {
+        JPanel panel = new JPanel(new FlowLayout(CENTER));
+        for (FilterSetting setting : settings) {
+            panel.add(new JLabel(setting.getName() + ":"));
+            panel.add(setting.createGUI());
+        }
+        return panel;
+    }
+
     public static void arrangeVertically(JPanel panel,
                                          Iterable<? extends FilterSetting> settings) {
         panel.setLayout(new GridBagLayout());
@@ -389,9 +398,9 @@ public final class GUIUtils {
     }
 
     public static JButton createResetChannelButton(ActionListener action) {
-        JButton resetChannel = new JButton("Reset Channel", Icons.getResetIcon());
-        resetChannel.addActionListener(action);
-        return resetChannel;
+        JButton button = new JButton("Reset Channel", Icons.getResetIcon());
+        button.addActionListener(action);
+        return button;
     }
 
     public static <E> JComboBox<E> createComboBox(ComboBoxModel<E> model,

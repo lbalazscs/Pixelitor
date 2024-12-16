@@ -27,18 +27,27 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static com.jhlabs.image.DitherFilter.*;
+import static com.jhlabs.image.DitherFilter.MATRIX_2x2;
+import static com.jhlabs.image.DitherFilter.MATRIX_4x4_LINES;
+import static com.jhlabs.image.DitherFilter.MATRIX_4x4_ORDERED;
+import static com.jhlabs.image.DitherFilter.MATRIX_4x4_SQUARE;
+import static com.jhlabs.image.DitherFilter.MATRIX_6x6_HALFTONE;
+import static com.jhlabs.image.DitherFilter.MATRIX_6x6_ORDERED;
+import static com.jhlabs.image.DitherFilter.MATRIX_8x8_ORDERED;
+import static com.jhlabs.image.DitherFilter.MATRIX_CLUSTER3;
+import static com.jhlabs.image.DitherFilter.MATRIX_CLUSTER4;
+import static com.jhlabs.image.DitherFilter.MATRIX_CLUSTER8;
 
 /**
- * Dither filter based on the JHLabs DitherFilter
+ * Ordered dithering filter based on the JHLabs DitherFilter.
  */
 public class JHDither extends ParametrizedFilter {
-    public static final String NAME = "Dither";
+    public static final String NAME = "Ordered Dithering";
 
     @Serial
     private static final long serialVersionUID = 2507052624030584415L;
 
-    private final RangeParam levels = new RangeParam("Levels", 2, 8, 100);
+    private final RangeParam levels = new RangeParam("Levels", 2, 2, 8);
     private final BooleanParam colorDither = new BooleanParam("Color Dither", true);
     private final IntChoiceParam matrixMethod = new IntChoiceParam("Matrix Type", new Item[]{
         new Item("2x2", MATRIX_2x2),

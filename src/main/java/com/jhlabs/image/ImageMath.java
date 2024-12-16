@@ -130,7 +130,9 @@ public class ImageMath {
     }
 
     /**
-     * A smoothed step function. A cubic function is used to smooth the step between two thresholds.
+     * A smoothed step function. A cubic function is used to smooth the
+     * step between two thresholds.
+     * It smoothly interpolates between 0 and 1 as x moves from a to b.
      *
      * @param a the lower threshold position
      * @param b the upper threshold position

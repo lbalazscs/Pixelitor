@@ -124,6 +124,8 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
         pt = createProgressTracker(height);
         for (int y = 0; y < height; y++) {
             getRGB(src, 0, y, width, 1, inPixels);
+
+            // the mask is tiled if it's smaller than the source image
             getRGB(mask, 0, y % maskHeight, maskWidth, 1, maskPixels);
 
             for (int x = 0; x < width; x++) {
@@ -135,6 +137,8 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
                 if (monochrome) {
                     int v = PixelUtils.brightness(maskRGB);
                     int iv = PixelUtils.brightness(inRGB);
+
+                    // the mask image is used as a threshold map
                     float f = 1 - ImageMath.smoothStep(iv - s, iv + s, v);
                     int a = (int) (255 * f);
                     inPixels[x] = (inRGB & 0xff000000) | (a << 16) | (a << 8) | a;
