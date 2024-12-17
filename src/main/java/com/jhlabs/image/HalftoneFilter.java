@@ -26,6 +26,7 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
     private boolean invert;
     private boolean monochrome;
     private BufferedImage mask;
+    private boolean triangleGrid = true;
 
     public HalftoneFilter(String name) {
         super(name);
@@ -101,6 +102,13 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
         return monochrome;
     }
 
+    /**
+     * Set whether to use a triangle grid for the halftoning.
+     */
+    public void setTriangleGrid(boolean triangleGrid) {
+        this.triangleGrid = triangleGrid;
+    }
+
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         int width = src.getWidth();
@@ -128,8 +136,14 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
             // the mask is tiled if it's smaller than the source image
             getRGB(mask, 0, y % maskHeight, maskWidth, 1, maskPixels);
 
+            boolean offset = triangleGrid && (y / maskHeight) % 2 != 0;
+
             for (int x = 0; x < width; x++) {
-                int maskRGB = maskPixels[x % maskWidth];
+                int maskX = x % maskWidth;
+                if (offset) {
+                    maskX = (maskX + maskWidth / 2) % maskWidth;
+                }
+                int maskRGB = maskPixels[maskX];
                 int inRGB = inPixels[x];
                 if (invert) {
                     maskRGB ^= 0xffffff;

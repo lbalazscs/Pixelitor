@@ -1607,7 +1607,6 @@ public class MainGuiTest {
         testFilterWithDialog("Color Threshold", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Tritone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Gradient Map", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Dither", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter(GUIText.FG_COLOR);
         testNoDialogFilter(GUIText.BG_COLOR);
         testNoDialogFilter("Transparent");
@@ -1667,6 +1666,7 @@ public class MainGuiTest {
     }
 
     private void testNoiseFilters() {
+        testFilterWithDialog("Kuwahara", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Reduce Single Pixel Noise");
         testNoDialogFilter("3x3 Median Filter");
         testFilterWithDialog("Add Noise", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1725,9 +1725,11 @@ public class MainGuiTest {
         testFilterWithDialog("Photo Collage", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Weave", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
+        testFilterWithDialog("Dots Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Striped Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Concentric Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Color Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Ordered Dithering", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testFindEdgesFilters() {

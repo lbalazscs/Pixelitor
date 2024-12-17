@@ -32,11 +32,11 @@ import java.io.Serial;
  * Abstract base class for filters that use {@link HalftoneFilter}
  */
 public abstract class JHMaskedHalftone extends ParametrizedFilter {
-    private static final int REPETITION_REFLECT = 1;
-    private static final int REPETITION_REPEAT = 2;
-
     @Serial
     private static final long serialVersionUID = -8785201913136925217L;
+
+    private static final int REPETITION_REFLECT = 1;
+    private static final int REPETITION_REPEAT = 2;
 
     protected final BooleanParam monochrome = new BooleanParam("Monochrome", true);
     protected final BooleanParam invert = new BooleanParam("Invert Pattern", false);
@@ -47,6 +47,7 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
     });
     protected final RangeParam shiftStripes = new RangeParam("Shift Stripes (%)", 0, 0, 100);
     protected final RangeParam softness = new RangeParam("Softness", 0, 10, 100);
+
     protected CycleMethod cycle;
     protected float distanceCorrection;
 
@@ -56,12 +57,12 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        setupHelperVariables();
+        calcHelperVariables();
 
-        BufferedImage stripes = createMaskImage(src);
+        BufferedImage thresholdMask = createMaskImage(src);
 
         var filter = new HalftoneFilter(getName());
-        filter.setMask(stripes);
+        filter.setMask(thresholdMask);
         filter.setMonochrome(monochrome.isChecked());
         filter.setSoftness((float) softness.getPercentage());
         filter.setInvert(invert.isChecked());
@@ -69,7 +70,7 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
         return filter.filter(src, dest);
     }
 
-    private void setupHelperVariables() {
+    private void calcHelperVariables() {
         int repetition = repetitionType.getValue();
         if (repetition == REPETITION_REFLECT) {
             cycle = CycleMethod.REFLECT;

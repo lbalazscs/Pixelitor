@@ -873,6 +873,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createHalftoneSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("halftone"));
 
+        sub.addFilter(JHDotsHalftone.NAME, JHDotsHalftone::new);
         sub.addFilter(JHStripedHalftone.NAME, JHStripedHalftone::new);
         sub.addFilter(JHConcentricHalftone.NAME, JHConcentricHalftone::new);
         sub.addFilter(JHColorHalftone.NAME, JHColorHalftone::new);
