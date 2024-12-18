@@ -1020,6 +1020,8 @@ public class MenuBar extends JMenuBar {
     private static JMenu createNoiseSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("noise"));
 
+        sub.addFilter(Kuwahara.NAME, Kuwahara::new);
+
         String reduceNoiseFilterName = "Reduce Single Pixel Noise";
         sub.addForwardingFilter(reduceNoiseFilterName,
             () -> new ReduceNoiseFilter(reduceNoiseFilterName));
