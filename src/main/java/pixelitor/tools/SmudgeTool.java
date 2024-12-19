@@ -53,7 +53,7 @@ public class SmudgeTool extends AbstractBrushTool {
                 "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
             Cursors.HAND, false);
 
-        drawDestination = DrawDestination.DIRECT;
+        drawTarget = DrawTarget.DIRECT;
     }
 
     private final RangeParam strengthParam = new RangeParam("Strength", 1, 60, 100);
@@ -68,7 +68,7 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void updateLazyBrushEnabledState() {
+    protected void updateLazyMouseEnabledState() {
         if (lazyMouseEnabled.isChecked()) {
             lazyMouseBrush = new LazyMouseBrush(smudgeBrush);
             brush = new AffectedAreaTracker(lazyMouseBrush, affectedArea);

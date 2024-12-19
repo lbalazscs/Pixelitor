@@ -32,7 +32,7 @@ public class EraserTool extends AbstractBrushTool {
         super("Eraser", 'E',
             "<b>click and drag</b> to erase pixels. <b>Shift-click</b> to erase lines.",
             Cursors.CROSSHAIR, true);
-        drawDestination = DrawDestination.DIRECT;
+        drawTarget = DrawTarget.DIRECT;
     }
 
     @Override

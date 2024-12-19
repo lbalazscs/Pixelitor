@@ -52,8 +52,7 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
         }
 
         try {
-            var comp = Views.getActiveComp();
-            comp.addNewEmptyImageLayer(comp.generateLayerName(), ctrlPressed);
+            Views.getActiveComp().addNewEmptyImageLayer(Views.getActiveComp().generateLayerName(), ctrlPressed);
         } catch (Exception ex) {
             Messages.showException(ex);
         }

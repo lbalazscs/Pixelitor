@@ -394,7 +394,7 @@ public class GradientTool extends DragTool {
         if (isEditingGradientLayer()) {
             gradientLayer.setGradient(createGradient(handleDrag), true);
         } else {
-            var comp = view.getComp();
+            Composition comp = view.getComp();
             Drawable dr = comp.getActiveDrawable();
             if (dr == null) {
                 // It shouldn't be possible to have handles without drawable,
@@ -519,7 +519,7 @@ public class GradientTool extends DragTool {
 
     private void layerActivated(Layer layer) {
         if (layer.isMaskEditing()) {
-            setupMaskEditing(true);
+            maskEditingChanged(true);
             gradientLayer = null;
         } else {
             if (layer instanceof GradientFillLayer gfl) {
@@ -540,13 +540,13 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void setupMaskEditing(boolean editMask) {
+    public void maskEditingChanged(boolean editMask) {
         blendingModePanel.setEnabled(!editMask);
     }
 
     // called only by history edits
     public void setGradient(Gradient gradient, boolean regenerate, Drawable dr) {
-        var comp = dr.getComp();
+        Composition comp = dr.getComp();
         if (gradient == null) {
             hideHandles(comp, false);
             return;

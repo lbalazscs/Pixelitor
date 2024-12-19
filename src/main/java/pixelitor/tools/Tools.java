@@ -202,8 +202,8 @@ public class Tools {
         activeTool.forceFinish();
     }
 
-    public static void setupMaskEditing(boolean maskEditing) {
-        activeTool.setupMaskEditing(maskEditing);
+    public static void maskEditingChanged(boolean maskEditing) {
+        activeTool.maskEditingChanged(maskEditing);
     }
 
     public static class EventDispatcher {

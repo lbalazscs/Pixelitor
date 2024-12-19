@@ -37,8 +37,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
-import static pixelitor.Views.thumbSize;
-
 /**
  * The canvas represents the size of a composition.
  * A layer can be larger than the canvas if it's partially hidden,
@@ -96,13 +94,13 @@ public class Canvas implements Serializable, Debuggable {
     public void recalcCoSize(View view, boolean updateView) {
         double viewScale = view.getZoomScale();
 
-        int oldCoWidth = coWidth;
-        int oldCoHeight = coHeight;
+        int prevCoWidth = coWidth;
+        int prevCoHeight = coHeight;
 
         coWidth = (int) (viewScale * width);
         coHeight = (int) (viewScale * height);
 
-        if (updateView && (coWidth != oldCoWidth || coHeight != oldCoHeight)) {
+        if (updateView && (coWidth != prevCoWidth || coHeight != prevCoHeight)) {
             view.canvasCoSizeChanged();
         }
     }
@@ -259,9 +257,13 @@ public class Canvas implements Serializable, Debuggable {
     public Dimension getThumbSize() {
         if (thumbDimension == null) {
             thumbDimension = ImageUtils.calcThumbDimensions(
-                width, height, thumbSize, true);
+                width, height, Views.thumbSize, true);
         }
         return thumbDimension;
+    }
+
+    public boolean isLandscape() {
+        return width > height;
     }
 
     public String createSVGElement() {

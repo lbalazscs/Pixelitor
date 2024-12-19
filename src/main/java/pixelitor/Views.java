@@ -178,7 +178,7 @@ public class Views {
             oldView.getComp().deactivated();
         }
 
-        var comp = view.getComp();
+        Composition comp = view.getComp();
         setActiveView(view, false);
         SelectionActions.update(comp);
         view.getViewContainer().select();
@@ -192,8 +192,8 @@ public class Views {
         Layers.activeCompChanged(comp, false);
 
         boolean maskEditing = view.getMaskViewMode().editMask();
-        Tools.setupMaskEditing(maskEditing);
-        FgBgColors.setLayerMaskEditing(maskEditing);
+        Tools.maskEditingChanged(maskEditing);
+        FgBgColors.maskEditingChanged(maskEditing);
 
         Canvas.activeCanvasSizeChanged(comp.getCanvas());
         PixelitorWindow.get().updateTitle(comp);
@@ -292,7 +292,7 @@ public class Views {
         }
 
         try {
-            var comp = view.getComp();
+            Composition comp = view.getComp();
             if (comp.isUnsaved()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
@@ -447,7 +447,7 @@ public class Views {
     }
 
     public static int getNumLayersInActiveHolder() {
-        var comp = getActiveComp();
+        Composition comp = getActiveComp();
         if (comp == null) {
             throw new AssertionError("no open images");
         }
@@ -484,8 +484,7 @@ public class Views {
 
     public static Drawable getActiveDrawable() {
         if (activeView != null) {
-            var comp = activeView.getComp();
-            return comp.getActiveDrawable();
+            return activeView.getComp().getActiveDrawable();
         }
 
         return null;

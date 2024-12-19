@@ -244,7 +244,7 @@ public class Selection implements Debuggable, Transformable {
         shape = type.modify(currentArea, borderArea);
 
         // Handle the modification result
-        var comp = view.getComp();
+        Composition comp = view.getComp();
         boolean valid = clipToCanvasBounds(comp);
         if (valid) {
             var edit = new SelectionShapeChangeEdit(
@@ -347,7 +347,7 @@ public class Selection implements Debuggable, Transformable {
     }
 
     public PixelitorEdit endMovement(boolean keepStartShape) {
-        var comp = view.getComp();
+        Composition comp = view.getComp();
 
         shape = comp.clipToCanvasBounds(shape);
         if (shape.getBounds().isEmpty()) { // moved outside the canvas

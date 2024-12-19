@@ -1207,7 +1207,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createColorVariationsSubmenu(PixelitorWindow pw) {
         PMenu variations = new PMenu("Color Variations");
         variations.add(new TaskAction("Foreground...", () ->
-            PalettePanel.showFGVariationsDialog(pw)));
+            PalettePanel.showVariationsDialog(pw, true)));
         variations.add(new TaskAction(
             "HSB Mix Foreground with Background...", () ->
             PalettePanel.showHSBMixDialog(pw, true)));
@@ -1218,7 +1218,7 @@ public class MenuBar extends JMenuBar {
         variations.addSeparator();
 
         variations.add(new TaskAction("Background...", () ->
-            PalettePanel.showBGVariationsDialog(pw)));
+            PalettePanel.showVariationsDialog(pw, false)));
         variations.add(new TaskAction(
             "HSB Mix Background with Foreground...", () ->
             PalettePanel.showHSBMixDialog(pw, false)));
@@ -1441,7 +1441,7 @@ public class MenuBar extends JMenuBar {
             SplashImageCreator::createSplashComp), CTRL_K);
 
         sub.add(new TaskAction("Save Many Splash Images...", () ->
-            SplashImageCreator.saveManySplashImages(64)));
+            SplashImageCreator.saveSplashImages(64)));
 
         return sub;
     }

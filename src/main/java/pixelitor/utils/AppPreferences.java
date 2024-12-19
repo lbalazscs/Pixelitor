@@ -431,12 +431,12 @@ public final class AppPreferences {
     }
 
     private static void saveFgBgColors() {
-        Color fgColor = FgBgColors.getRealFgColor();
+        Color fgColor = FgBgColors.getActualFgColor();
         if (fgColor != null) {
             mainPrefs.putInt(FG_COLOR_KEY, fgColor.getRGB());
         }
 
-        Color bgColor = FgBgColors.getRealBgColor();
+        Color bgColor = FgBgColors.getActualBgColor();
         if (bgColor != null) {
             mainPrefs.putInt(BG_COLOR_KEY, bgColor.getRGB());
         }

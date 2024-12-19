@@ -21,6 +21,7 @@ import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.utils.debug.DebugNode;
 
@@ -39,47 +40,53 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     protected BlendingModeBrushTool(String name, char activationKey, String toolMessage,
                                     Cursor cursor, boolean addSymmetry) {
         super(name, activationKey, toolMessage, cursor, addSymmetry);
-        drawDestination = DrawDestination.DIRECT;
+        drawTarget = DrawTarget.DIRECT;
         maskEditing = false;
     }
 
     @Override
-    public void setupMaskEditing(boolean isMask) {
-        maskEditing = isMask;
-        updateDrawDestination();
+    public void maskEditingChanged(boolean maskEditing) {
+        if (maskEditing == this.maskEditing) {
+            return;
+        }
+        this.maskEditing = maskEditing;
+        updateDrawTarget();
     }
 
-    private void updateDrawDestination() {
+    private void updateDrawTarget() {
         if (maskEditing) {
-            drawDestination = DrawDestination.DIRECT;
+            // in mask editing mode, always use direct drawing
+            // with disabled blending controls
+            drawTarget = DrawTarget.DIRECT;
             blendingModePanel.setEnabled(false);
         } else {
-            boolean noBlending = blendingModePanel.isNormalAndOpaque();
-            drawDestination = noBlending ?
-                DrawDestination.DIRECT :
-                DrawDestination.TMP_LAYER;
+            // in normal mode, use direct drawing only when
+            // the blending mode is normal and the opacity is 100%
+            drawTarget = blendingModePanel.isNormalAndOpaque()
+                ? DrawTarget.DIRECT
+                : DrawTarget.TMP_LAYER;
             blendingModePanel.setEnabled(true);
         }
     }
 
     @Override
     public boolean isDirectDrawing() {
-        return drawDestination == DrawDestination.DIRECT;
+        return drawTarget == DrawTarget.DIRECT;
     }
 
     @Override
     protected void toolActivated() {
         super.toolActivated();
 
-        var activeLayer = Views.getActiveLayer();
+        Layer activeLayer = Views.getActiveLayer();
         if (activeLayer != null) {
-            setupMaskEditing(activeLayer.isMaskEditing());
+            maskEditingChanged(activeLayer.isMaskEditing());
         }
     }
 
     @Override
     public void trace(Drawable dr, Shape shape) {
-        setupMaskEditing(dr instanceof LayerMask);
+        maskEditingChanged(dr instanceof LayerMask);
         super.trace(dr, shape);
     }
 
@@ -91,7 +98,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     protected void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
         settingsPanel.add(blendingModePanel);
-        blendingModePanel.addActionListener(e -> updateDrawDestination());
+        blendingModePanel.addActionListener(e -> updateDrawTarget());
     }
 
     @Override

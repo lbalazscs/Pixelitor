@@ -110,12 +110,12 @@ public class AddAdjLayerAction extends AbstractViewEnabledAction {
     }
 
     private static void addAdjustmentLayer(Filter filter, String name) {
-        var comp = Views.getActiveComp();
-        var adjustmentLayer = new AdjustmentLayer(comp, name, filter);
+        Composition comp = Views.getActiveComp();
+        AdjustmentLayer layer = new AdjustmentLayer(comp, name, filter);
 
         comp.getHolderForNewLayers()
-            .addWithHistory(adjustmentLayer, "New Adjustment Layer");
+            .addWithHistory(layer, "New Adjustment Layer");
 
-        adjustmentLayer.edit();
+        layer.edit();
     }
 }

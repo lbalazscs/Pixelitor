@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.AppMode;
+import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TaskAction;
@@ -123,7 +124,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         popup.add(Views.CLOSE_ALL_ACTION);
 
         if (Desktop.isDesktopSupported()) {
-            var comp = view.getComp();
+            Composition comp = view.getComp();
             File file = comp.getFile();
             if (file != null && file.exists()) {
                 popup.addSeparator();

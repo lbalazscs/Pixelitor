@@ -170,15 +170,11 @@ public class PalettePanel extends JPanel {
         return new Dimension(width, height);
     }
 
-    public static void showFGVariationsDialog(PixelitorWindow pw) {
-        var palette = new VariationsPalette(getFGColor(),
-            "Foreground Color Variations");
-        showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
-    }
-
-    public static void showBGVariationsDialog(PixelitorWindow pw) {
-        var palette = new VariationsPalette(getBGColor(),
-            "Background Color Variations");
+    public static void showVariationsDialog(PixelitorWindow pw, boolean fg) {
+        var palette = new VariationsPalette(
+            fg ? getFGColor() : getBGColor(),
+            fg ? "Foreground Color Variations" : "Background Color Variations"
+        );
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
@@ -205,16 +201,16 @@ public class PalettePanel extends JPanel {
 
         var palettePanel = new PalettePanel(palette, clickHandler);
 
-        JPanel form = new JPanel(new BorderLayout());
+        JPanel fullPanel = new JPanel(new BorderLayout());
 
-        form.add(palette.getConfig()
+        fullPanel.add(palette.getConfig()
             .createConfigPanel(palettePanel), NORTH);
-        form.add(palettePanel, CENTER);
+        fullPanel.add(palettePanel, CENTER);
 
         new DialogBuilder()
             .title(palette.getDialogTitle())
             .owner(window)
-            .content(form)
+            .content(fullPanel)
             .notModal()
             .noOKButton()
             .noCancelButton()

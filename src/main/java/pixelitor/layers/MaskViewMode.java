@@ -114,10 +114,10 @@ public enum MaskViewMode {
         boolean changed = view.setMaskViewMode(this);
         layer.setMaskEditing(editMask);
         if (changed) {
-            FgBgColors.setLayerMaskEditing(editMask);
+            FgBgColors.maskEditingChanged(editMask);
 
             if (!view.isMock()) {
-                Tools.setupMaskEditing(editMask);
+                Tools.maskEditingChanged(editMask);
             }
 
             boolean canFade;

@@ -18,6 +18,7 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.compactions.Outsets;
 import pixelitor.gui.View;
 import pixelitor.layers.BlendingMode;
@@ -113,7 +114,7 @@ public class Gradient implements Serializable, Debuggable {
 
     public void paintOn(Drawable dr) {
         Graphics2D g;
-        var comp = dr.getComp();
+        Composition comp = dr.getComp();
         Canvas canvas = comp.getCanvas();
         int width, height;
         if (dr instanceof LayerMask) {

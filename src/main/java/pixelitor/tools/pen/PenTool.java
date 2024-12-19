@@ -221,7 +221,7 @@ public class PenTool extends Tool {
         Path oldPath = path;
 
         Shape shape = path.toImageSpaceShape();
-        var comp = Views.getActiveComp();
+        Composition comp = Views.getActiveComp();
 
         PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
@@ -337,8 +337,7 @@ public class PenTool extends Tool {
 
     @Override
     public void resetInitialState() {
-        var comp = Views.getActiveComp();
-        setPathFromComp(comp);
+        setPathFromComp(Views.getActiveComp());
 
         assert checkPathConsistency();
     }

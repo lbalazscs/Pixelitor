@@ -51,10 +51,10 @@ public class BlendingModePanel extends JPanel {
 
     public BlendingModePanel(boolean detailedLabel) {
         super(new FlowLayout(LEFT));
+
         opacityLabel = new JLabel(OPACITY_LABEL_TEXT);
         add(opacityLabel);
         opacityDDSlider = new DropDownSlider(0, 100, 100);
-
         add(opacityDDSlider);
 
         if (detailedLabel) {
@@ -67,8 +67,7 @@ public class BlendingModePanel extends JPanel {
         layerModel = new DefaultComboBoxModel<>(BlendingMode.LAYER_MODES);
         bmCombo = new JComboBox<>(layerModel);
 
-        // Make sure all values are visible without a scrollbar.
-        // +1 because for layer groups PASS_THROUGH can also be selected.
+        // show all modes without scrolling (+1 for PASS_THROUGH in layer groups)
         bmCombo.setMaximumRowCount(layerModel.getSize() + 1);
 
         bmCombo.setFocusable(false);
@@ -100,12 +99,9 @@ public class BlendingModePanel extends JPanel {
         return getBlendingMode().getComposite(getOpacity());
     }
 
-    public void randomize() {
-        int randomIndex = Rnd.nextInt(bmCombo.getModel().getSize());
-        bmCombo.setSelectedIndex(randomIndex);
-
-        int newOpacity = Rnd.nextInt(100);
-        opacityDDSlider.setValue(newOpacity);
+    public boolean isNormalAndOpaque() {
+        return getBlendingMode() == BlendingMode.NORMAL
+            && getOpacity() > FULLY_OPAQUE_THRESHOLD;
     }
 
     @Override
@@ -122,9 +118,12 @@ public class BlendingModePanel extends JPanel {
         bmCombo.addActionListener(al);
     }
 
-    public boolean isNormalAndOpaque() {
-        return getBlendingMode() == BlendingMode.NORMAL
-            && getOpacity() > FULLY_OPAQUE_THRESHOLD;
+    public void randomize() {
+        int randomIndex = Rnd.nextInt(bmCombo.getModel().getSize());
+        bmCombo.setSelectedIndex(randomIndex);
+
+        int newOpacity = Rnd.nextInt(100);
+        opacityDDSlider.setValue(newOpacity);
     }
 
     public void saveStateTo(UserPreset preset) {

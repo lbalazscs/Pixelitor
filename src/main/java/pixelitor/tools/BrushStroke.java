@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.Composition;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.tools.brushes.Brush;
@@ -33,25 +34,25 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 public class BrushStroke {
     private final Graphics2D graphics;
     private final Drawable dr;
-    private final DrawDestination drawDestination;
+    private final DrawTarget drawTarget;
 
-    public BrushStroke(Drawable dr, DrawDestination drawDestination, Brush brush, Composite composite) {
+    public BrushStroke(Drawable dr, DrawTarget drawTarget, Brush brush, Composite composite) {
         this.dr = dr;
-        this.drawDestination = drawDestination;
+        this.drawTarget = drawTarget;
 
-        drawDestination.prepareBrushStroke(dr);
+        drawTarget.prepareForBrushStroke(dr);
 
-        var comp = dr.getComp();
+        Composition comp = dr.getComp();
 
         // when editing masks, no tmp drawing layer should be used
         assert !(dr instanceof LayerMask)
-            || drawDestination == DrawDestination.DIRECT :
+            || drawTarget == DrawTarget.DIRECT :
             "dr is " + dr.getClass().getSimpleName()
                 + ", comp = " + comp.getName()
                 + ", tool = " + getClass().getSimpleName()
-                + ", drawDestination = " + drawDestination;
+                + ", drawDestination = " + drawTarget;
 
-        graphics = drawDestination.createGraphics(dr, composite);
+        graphics = drawTarget.createGraphics(dr, composite);
         comp.applySelectionClipping(graphics);
 
         graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -73,7 +74,7 @@ public class BrushStroke {
 
         graphics.dispose();
 
-        drawDestination.finishBrushStroke(dr);
+        drawTarget.finalizeBrushStroke(dr);
         dr.update();
         dr.updateIconImage();
     }

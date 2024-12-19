@@ -18,6 +18,7 @@
 package pixelitor.guides;
 
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Outsets;
 import pixelitor.filters.gui.BooleanParam;
@@ -353,7 +354,7 @@ public class Guides implements Serializable, Debuggable {
             setup.accept(guides);
 
             guides.regenerateLines(view);
-            var comp = view.getComp();
+            Composition comp = view.getComp();
             comp.setGuides(guides);
             comp.repaint();
             if (!preview) {
@@ -362,7 +363,7 @@ public class Guides implements Serializable, Debuggable {
         }
 
         public void resetOrigGuides() {
-            var comp = view.getComp();
+            Composition comp = view.getComp();
             comp.setGuides(origGuides);
             view.repaint();
         }

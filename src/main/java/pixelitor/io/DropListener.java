@@ -64,7 +64,7 @@ public class DropListener extends DropTargetAdapter {
         ADD_AS_NEW_LAYERS {
             @Override
             protected void handleDrop(List<File> files, Component target) {
-                var comp = Views.getActiveComp();
+                Composition comp = Views.getActiveComp();
                 if (comp == null) {
                     // If there is no active composition,
                     // fall back to opening the files as new images

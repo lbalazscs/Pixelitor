@@ -128,8 +128,8 @@ public class ShapesTool extends DragTool {
     public ShapesTool() {
         super("Shapes", 'U',
             "<b>drag</b> to draw a shape. " +
-                "<b>Alt</b> starts from the center, <b>Shift</b> constrains. " +
-                "Hold <b>SPACE</b> down while drawing to move the shape. ",
+                "<b>Alt</b>-drag from the center, <b>Shift</b>-drag to constrain. " +
+                "<b>Space</b>-drag while drawing to move. ",
             Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
         convertToSelectionAction.setEnabled(false);
@@ -500,7 +500,7 @@ public class ShapesTool extends DragTool {
     }
 
     private void updateStrokeEnabledState() {
-        enableStrokeSettings(getSelectedStrokePaint() != NONE);
+        enableStrokeSettings(hasStroke());
     }
 
     /**
@@ -560,7 +560,7 @@ public class ShapesTool extends DragTool {
 
         Shape shape = styledShape.getShape();
 
-        var comp = Views.getActiveComp();
+        Composition comp = Views.getActiveComp();
 
         PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
@@ -651,6 +651,10 @@ public class ShapesTool extends DragTool {
 
     public boolean hasStyledShape() {
         return styledShape != null;
+    }
+
+    private boolean hasStroke() {
+        return getSelectedStrokePaint() != NONE;
     }
 
     public TransformBox getTransformBox() {
@@ -784,7 +788,7 @@ public class ShapesTool extends DragTool {
     public double calcThickness() {
         double thickness = 0;
         double extraStrokeThickness = 0;
-        if (getSelectedStrokePaint() != NONE) {
+        if (hasStroke()) {
             thickness = strokeParam.getStrokeWidth();
 
             StrokeType strokeType = strokeParam.getStrokeType();

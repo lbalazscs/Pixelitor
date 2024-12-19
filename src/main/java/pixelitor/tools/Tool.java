@@ -242,7 +242,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     /**
      * Called when a layer mask is activated or deactivated
      */
-    public void setupMaskEditing(boolean maskEditing) {
+    public void maskEditingChanged(boolean maskEditing) {
         // empty by default
     }
 

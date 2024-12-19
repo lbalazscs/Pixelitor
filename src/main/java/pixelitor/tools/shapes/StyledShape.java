@@ -515,8 +515,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         Graphics2D g2 = bi.createGraphics();
         g2.translate(tx, ty);
 
-        var comp = dr.getComp();
-        comp.applySelectionClipping(g2);
+        dr.getComp().applySelectionClipping(g2);
 
         paint(g2);
         g2.dispose();
@@ -569,7 +568,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             default -> throw new IllegalStateException("Unexpected edit: " + editName);
         }
 
-        var comp = Views.getActiveComp();
+        Composition comp = Views.getActiveComp();
         History.add(new StyledShapeEdit(editName, comp, backup));
         comp.getActiveLayer().update();
 

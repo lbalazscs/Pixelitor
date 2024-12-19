@@ -39,8 +39,7 @@ public enum PasteTarget {
     NEW_LAYER(true, "paste_as_new_layer") {
         @Override
         void paste(BufferedImage pastedImage) {
-            var comp = Views.getActiveComp();
-            comp.addExternalImageAsNewLayer(pastedImage,
+            Views.getActiveComp().addExternalImageAsNewLayer(pastedImage,
                 "Pasted Layer", "New Pasted Layer");
         }
     },

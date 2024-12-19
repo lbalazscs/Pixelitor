@@ -67,7 +67,7 @@ public class BrushTool extends BlendingModeBrushTool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        setupDrawingColor(e);
+        initDrawingColor(e);
         super.mousePressed(e);
     }
 
@@ -83,12 +83,8 @@ public class BrushTool extends BlendingModeBrushTool {
         brushStroke.setColor(getFGColor());
     }
 
-    private void setupDrawingColor(PMouseEvent e) {
-        if (e.isRight()) {
-            drawingColor = getBGColor();
-        } else {
-            drawingColor = getFGColor();
-        }
+    private void initDrawingColor(PMouseEvent e) {
+        drawingColor = e.isRight() ? getBGColor() : getFGColor();
     }
 
     @Override

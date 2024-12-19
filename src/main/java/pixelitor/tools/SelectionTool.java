@@ -179,7 +179,7 @@ public class SelectionTool extends DragTool {
             return;
         }
 
-        var comp = e.getComp();
+        Composition comp = e.getComp();
         Selection builtSelection = comp.getDraftSelection();
         if (builtSelection == null && !polygonal) {
             // can happen, if we called stopBuildingSelection()
@@ -200,7 +200,7 @@ public class SelectionTool extends DragTool {
     }
 
     private void polygonalDragFinished(PMouseEvent e) {
-        var comp = e.getComp();
+        Composition comp = e.getComp();
         if (selectionBuilder == null) {
             setupCombinatorWithKeyModifiers(e);
             selectionBuilder = new SelectionBuilder(
@@ -217,7 +217,7 @@ public class SelectionTool extends DragTool {
     }
 
     private void notPolygonalDragFinished(PMouseEvent e) {
-        var comp = e.getComp();
+        Composition comp = e.getComp();
         restoreCombinator();
 
         boolean startFromCenter = !altMeansSubtract && e.isAltDown();
@@ -236,7 +236,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     public void mouseClicked(PMouseEvent e) {
-        var comp = e.getComp();
+        Composition comp = e.getComp();
         if (polygonal) {
             if (selectionBuilder != null && e.getClickCount() > 1) {
                 // finish polygonal for double-click
@@ -320,8 +320,7 @@ public class SelectionTool extends DragTool {
     public boolean arrowKeyPressed(ArrowKey key) {
         View view = Views.getActive();
         if (view != null) {
-            var comp = view.getComp();
-            var selection = comp.getSelection();
+            Selection selection = view.getComp().getSelection();
             if (selection != null) {
                 selection.nudge(key.toTransform());
                 return true;

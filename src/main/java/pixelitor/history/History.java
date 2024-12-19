@@ -227,7 +227,7 @@ public class History {
     }
 
     public static boolean canFade() {
-        var comp = Views.getActiveComp();
+        Composition comp = Views.getActiveComp();
         if (comp == null) {
             return false;
         }

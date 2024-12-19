@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,12 +49,12 @@ public class FgBgColors {
         return selector.getBgColor();
     }
 
-    public static Color getRealFgColor() {
-        return selector.getRealFgColor();
+    public static Color getActualFgColor() {
+        return selector.getActualFgColor();
     }
 
-    public static Color getRealBgColor() {
-        return selector.getRealBgColor();
+    public static Color getActualBgColor() {
+        return selector.getActualBgColor();
     }
 
     public static void setFGColor(Color c) {
@@ -81,8 +81,8 @@ public class FgBgColors {
         selector.setDefaultColors();
     }
 
-    public static void setLayerMaskEditing(boolean b) {
-        selector.setLayerMaskEditing(b);
+    public static void maskEditingChanged(boolean b) {
+        selector.maskEditingChanged(b);
     }
 
     public static void saveStateTo(UserPreset preset) {

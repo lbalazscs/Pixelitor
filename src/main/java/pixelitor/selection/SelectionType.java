@@ -107,7 +107,7 @@ public enum SelectionType {
             int x = (int) pm.getImX();
             int y = (int) pm.getImY();
 
-            var comp = pm.getComp();
+            Composition comp = pm.getComp();
             Drawable dr = comp.getActiveDrawableOrThrow();
 
             int tx = dr.getTx();

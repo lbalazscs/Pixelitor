@@ -17,6 +17,7 @@
 
 package pixelitor.filters.animation;
 
+import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterState;
@@ -161,7 +162,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         assert Filter.executionCount == executionsBefore + 1;
 
-        var comp = drawable.getComp();
+        Composition comp = drawable.getComp();
         comp.repaint();
         return comp.getCompositeImage();
     }

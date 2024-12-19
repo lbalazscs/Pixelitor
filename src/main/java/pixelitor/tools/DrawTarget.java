@@ -26,11 +26,14 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
- * {@link AbstractBrushTool} subclasses either draw into
- * a temporary layer (so that the tool can have blending
- * mode and opacity) or directly into the layer image
+ * Defines how {@link AbstractBrushTool} subclasses draw: either to a
+ * temporary layer to support blending modes and opacity or directly
+ * to the layer's image.
  */
-public enum DrawDestination {
+public enum DrawTarget {
+    /**
+     * Renders brush strokes to a temporary layer that is later merged down.
+     */
     TMP_LAYER {
         @Override
         public Graphics2D createGraphics(Drawable dr, Composite composite) {
@@ -38,12 +41,12 @@ public enum DrawDestination {
         }
 
         @Override
-        public void prepareBrushStroke(Drawable dr) {
-            // nothing to be done
+        public void prepareForBrushStroke(Drawable dr) {
+            // no preparation needed
         }
 
         @Override
-        public void finishBrushStroke(Drawable dr) {
+        public void finalizeBrushStroke(Drawable dr) {
             dr.mergeTmpDrawingLayerDown();
         }
 
@@ -53,27 +56,33 @@ public enum DrawDestination {
             // the drawing was on the temporary layer
             return dr.getImage();
         }
-    }, DIRECT {
+    },
+    /**
+     * Renders brush strokes directly to the target layer. This is
+     * better for performance, but doesn't support blending modes or
+     * opacity for the brush strokes.
+     */
+    DIRECT {
         private BufferedImage backupImg;
 
         @Override
         public Graphics2D createGraphics(Drawable dr, Composite composite) {
             // ignores the composite!
-            BufferedImage drawImage = dr.getCanvasSizedSubImage();
-            return drawImage.createGraphics();
+            return dr.getCanvasSizedSubImage().createGraphics();
         }
 
         @Override
-        public void prepareBrushStroke(Drawable dr) {
+        public void prepareForBrushStroke(Drawable dr) {
             BufferedImage image = dr.getImage();
 
             assert Assertions.rasterStartsAtOrigin(image);
 
+            // store the original image for undo support
             backupImg = ImageUtils.copyImage(image);
         }
 
         @Override
-        public void finishBrushStroke(Drawable dr) {
+        public void finalizeBrushStroke(Drawable dr) {
             backupImg.flush();
             backupImg = null;
         }
@@ -81,7 +90,7 @@ public enum DrawDestination {
         @Override
         public BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool) {
             if (backupImg == null) {
-                throw new IllegalStateException("copyBeforeStart is null for " + tool.getName());
+                throw new IllegalStateException("no backup image in " + tool.getName());
             }
 
             return backupImg;
@@ -90,12 +99,12 @@ public enum DrawDestination {
 
     public abstract Graphics2D createGraphics(Drawable dr, Composite composite);
 
-    public abstract void prepareBrushStroke(Drawable dr);
+    public abstract void prepareForBrushStroke(Drawable dr);
 
-    public abstract void finishBrushStroke(Drawable dr);
+    public abstract void finalizeBrushStroke(Drawable dr);
 
     /**
-     * Returns the original (untouched) image for undo
+     * Returns the original (unchanged) image for undo support.
      */
     public abstract BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool);
 }
