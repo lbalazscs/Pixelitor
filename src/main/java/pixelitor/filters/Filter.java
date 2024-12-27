@@ -68,7 +68,9 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         BufferedImage dest = createDefaultDestImg() ?
             ImageUtils.createImageWithSameCM(src) : null;
 
+        assert src.getType() != BufferedImage.TYPE_CUSTOM;
         dest = transform(src, dest);
+        assert dest.getType() != BufferedImage.TYPE_CUSTOM : "filter = " + getName();
 
         if (grayConversion) { // convert the result back
             dest = ImageUtils.convertToGrayScaleImage(dest);

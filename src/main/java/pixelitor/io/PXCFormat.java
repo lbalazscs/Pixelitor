@@ -18,10 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.SubtaskProgressTracker;
+import pixelitor.utils.*;
 
 import javax.imageio.ImageIO;
 import java.awt.EventQueue;
@@ -231,7 +228,12 @@ public class PXCFormat {
         int type = in.readInt();
 
         if (type == TYPE_BYTE_GRAY) {
-            return ImageIO.read(in);
+            BufferedImage img = ImageIO.read(in);
+            int imgType = img.getType();
+            if (imgType != TYPE_BYTE_GRAY && imgType != BufferedImage.TYPE_INT_ARGB) {
+                img = ImageUtils.toSysCompatibleImage(img);
+            }
+            return img;
         } else {
             // this branch is executed only for legacy (version 3) pxc files
             BufferedImage img = new BufferedImage(width, height, type);
