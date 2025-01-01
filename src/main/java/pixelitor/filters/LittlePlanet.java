@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ public class LittlePlanet extends ParametrizedFilter {
 
         filter.setZoom(zoom.getPercentage());
         filter.setInnerZoom(innerZoom.getPercentage());
-        filter.setRotateResult(rotateResult.getValueInIntuitiveRadians());
+        filter.setRotationAngle(rotateResult.getValueInIntuitiveRadians());
         filter.setInverted(invert.isChecked());
 
         filter.setCenter(center.getAbsolutePoint(src));

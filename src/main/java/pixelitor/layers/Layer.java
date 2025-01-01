@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -267,7 +267,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void isolate() {
-        comp.isolate(this, true);
+        comp.isolateLayer(this, true);
     }
 
     public float getOpacity() {
@@ -436,19 +436,9 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void addMask(boolean ctrlPressed) {
-        if (comp.hasSelection()) {
-            if (ctrlPressed) {
-                addMask(HIDE_SELECTION);
-            } else {
-                addMask(REVEAL_SELECTION);
-            }
-        } else { // there is no selection
-            if (ctrlPressed) {
-                addMask(HIDE_ALL);
-            } else {
-                addMask(REVEAL_ALL);
-            }
-        }
+        addMask(comp.hasSelection()
+            ? (ctrlPressed ? HIDE_SELECTION : REVEAL_SELECTION)
+            : (ctrlPressed ? HIDE_ALL : REVEAL_ALL));
     }
 
     public void addMask(LayerMaskAddType addType) {
@@ -855,17 +845,15 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Returns the layer that should move together with the current one,
-     * (Assuming that we are in the edited layer)
-     * or null if this layer should move alone
+     * Returns the layer/mask that should move together with this
+     * one when this layer is being moved.
+     * Returns null if this layer should move independently.
      */
     protected Layer getLinked() {
-        if (hasMask()) {
-            if (!maskEditing) { // we are in the edited layer
-                if (mask.isLinked()) {
-                    return mask;
-                }
-            }
+        // Returns the mask if it is linked.
+        // Overridden for masks to return their owner layer.
+        if (hasMask() && !maskEditing && mask.isLinked()) {
+            return mask;
         }
         return null;
     }
@@ -873,7 +861,7 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Returns true if asImage() returns non-null.
      */
-    public boolean exportsORAImage() {
+    public boolean canExportORAImage() {
         return true;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static pixelitor.utils.ImageUtils.isGrayscale;
 
 /**
  * Base class for all filters and color adjustments in Pixelitor.
@@ -58,7 +58,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
      */
     public BufferedImage transformImage(BufferedImage src) {
         boolean grayConversion = false;
-        if (src.getType() == TYPE_BYTE_GRAY && !supportsGray()) {
+        if (isGrayscale(src) && !supportsGray()) {
             // converting the image to RGB, because the filter
             // doesn't support the grayscale image of a layer mask
             grayConversion = true;
@@ -73,7 +73,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         assert dest.getType() != BufferedImage.TYPE_CUSTOM : "filter = " + getName();
 
         if (grayConversion) { // convert the result back
-            dest = ImageUtils.convertToGrayScaleImage(dest);
+            dest = ImageUtils.convertToGrayscaleImage(dest);
         }
 
         executionCount++;

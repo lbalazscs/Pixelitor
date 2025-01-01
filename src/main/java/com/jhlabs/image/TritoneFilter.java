@@ -23,10 +23,12 @@ import java.awt.image.BufferedImage;
  * it converts the image to grayscale and then applies a color mapping based on the colors.
  */
 public class TritoneFilter extends PointFilter {
-
     private int shadowColor = 0xff000000;
     private int midColor = 0xff888888;
     private int highColor = 0xffffffff;
+
+    // lookup table for mapping grayscale values
+    // to the corresponding tritone colors
     private int[] lut;
 
     public TritoneFilter(String filterName) {
@@ -36,14 +38,19 @@ public class TritoneFilter extends PointFilter {
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         lut = new int[256];
+
+        // fill the LUT for shadow to midtone transition
         for (int i = 0; i < 128; i++) {
             float t = i / 127.0f;
             lut[i] = ImageMath.mixColors(t, shadowColor, midColor);
         }
+
+        // fill the LUT for midtone to highlight transition
         for (int i = 128; i < 256; i++) {
             float t = (i - 127) / 128.0f;
             lut[i] = ImageMath.mixColors(t, midColor, highColor);
         }
+
         dst = super.filter(src, dst);
         lut = null;
         return dst;
@@ -58,67 +65,32 @@ public class TritoneFilter extends PointFilter {
      * Set the shadow color.
      *
      * @param shadowColor the shadow color
-     * @see #getShadowColor
      */
     public void setShadowColor(int shadowColor) {
         this.shadowColor = shadowColor;
     }
 
     /**
-     * Get the shadow color.
-     *
-     * @return the shadow color
-     * @see #setShadowColor
-     */
-    public int getShadowColor() {
-        return shadowColor;
-    }
-
-    /**
      * Set the mid color.
      *
      * @param midColor the mid color
-     * @see #getmidColor
      */
     public void setMidColor(int midColor) {
         this.midColor = midColor;
     }
 
     /**
-     * Get the mid color.
-     *
-     * @return the mid color
-     * @see #setmidColor
-     */
-    public int getMidColor() {
-        return midColor;
-    }
-
-    /**
      * Set the high color.
      *
      * @param highColor the high color
-     * @see #gethighColor
      */
     public void setHighColor(int highColor) {
         this.highColor = highColor;
     }
 
-    /**
-     * Get the high color.
-     *
-     * @return the high color
-     * @see #sethighColor
-     */
-    public int getHighColor() {
-        return highColor;
-    }
-
-
     @Override
     public String toString() {
         return "Colors/Tritone...";
     }
-
 }
 

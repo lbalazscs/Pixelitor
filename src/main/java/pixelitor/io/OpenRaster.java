@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -137,7 +137,7 @@ public class OpenRaster {
             Layer layer = holder.getLayer(i);
             if (layer instanceof LayerGroup group) {
                 uniqueId = writeLayerHierarchy(group, mainTracker, zipStream, stackXML, progressPerImage, uniqueId);
-            } else if (layer.exportsORAImage()) {
+            } else if (layer.canExportORAImage()) {
                 var subTracker = new SubtaskProgressTracker(progressPerImage, mainTracker);
                 writeLayer(layer, uniqueId, zipStream, subTracker, stackXML);
                 uniqueId++;

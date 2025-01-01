@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,21 +79,21 @@ public class HueSat extends ParametrizedFilter {
 
         float satShift = (float) saturation.getPercentage();
         float briShift = (float) brightness.getPercentage();
-        float hueShift = hue.getValueAsFloat() / 360.0f;
+        float hueRot = hue.getValueAsFloat() / 360.0f;
 
-        dest = new Impl(hueShift, satShift, briShift).filter(src, dest);
+        dest = new Impl(hueRot, satShift, briShift).filter(src, dest);
 
         return dest;
     }
 
     private static class Impl extends PointFilter {
-        private final float hueShift;
+        private final float hueRot;
         private final float satShift;
         private final float briShift;
 
-        protected Impl(float hueShift, float satShift, float briShift) {
+        protected Impl(float hueRot, float satShift, float briShift) {
             super(NAME);
-            this.hueShift = hueShift;
+            this.hueRot = hueRot;
             this.satShift = satShift;
             this.briShift = briShift;
         }
@@ -111,7 +111,7 @@ public class HueSat extends ParametrizedFilter {
 
             tmpHSBArray = Color.RGBtoHSB(r, g, b, tmpHSBArray);
 
-            float shiftedHue = tmpHSBArray[0] + hueShift;
+            float shiftedHue = tmpHSBArray[0] + hueRot;
             float shiftedSat = tmpHSBArray[1] + satShift;
             float shiftedBri = tmpHSBArray[2] + briShift;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -121,23 +121,23 @@ public class ValueNoise extends ParametrizedFilter {
         var pt = new StatusBarProgressTracker(NAME, height);
         NoiseInterpolation interp = interpolation.getSelected();
 
-        Future<?>[] futures = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calculateLine(lookupTable, destData,
+            Runnable rowTask = () -> processRow(lookupTable, destData,
                 width, frequency, persistence, finalY, interp);
-            futures[y] = ThreadPool.submit(lineTask);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
-        ThreadPool.waitFor(futures, pt);
+        ThreadPool.waitFor(rowFutures, pt);
 
         pt.finished();
 
         return dest;
     }
 
-    private void calculateLine(int[] lookupTable, int[] destData,
-                               int width, float frequency, float persistence,
-                               int y, NoiseInterpolation interp) {
+    private void processRow(int[] lookupTable, int[] destData,
+                            int width, float frequency, float persistence,
+                            int y, NoiseInterpolation interp) {
         float outerY = y - cy;
         for (int x = 0; x < width; x++) {
             int octaves = details.getValue();

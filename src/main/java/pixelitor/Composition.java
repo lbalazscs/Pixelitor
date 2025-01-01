@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -109,10 +109,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     // transient variables from here
     //
 
-    // Not null if this is the content of a smart object.
-    // A single content can have multiple smart object owners within the
-    // same composition due to the "Clone" feature (shallow duplication).
-    // Transient because the parent compositions should not be written out.
+    // List of smart objects that use this composition as their content.
+    // Multiple smart objects can reference the same content due to shallow cloning.
+    // Marked transient to prevent serialization of parent compositions.
     private transient List<SmartObject> owners;
 
     // useful for distinguishing between versions with the same name
@@ -120,7 +119,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private transient File file;
     // the last modified time of the file in millis since the epoch
-    private transient long fileTime;
+    private transient long fileTimestamp;
 
     private transient boolean dirty = false;
 
@@ -198,7 +197,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // Initialize transient variables
         compositeImage = null; // will be set when needed
         file = null; // will be set later
-        fileTime = 0;
+        fileTimestamp = 0;
         debugName = null; // will be set later
         dirty = false;
         view = null; // will be set later
@@ -252,13 +251,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (copyType == CopyType.UNDO) {
             compCopy.dirty = dirty;
             compCopy.file = file;
-            compCopy.fileTime = fileTime;
+            compCopy.fileTimestamp = fileTimestamp;
             compCopy.name = name;
             // the new guides are set in the action that needed undo
         } else {
             compCopy.dirty = false;
             compCopy.file = null;
-            compCopy.fileTime = 0;
+            compCopy.fileTimestamp = 0;
             compCopy.name = createCopyName(removeExtension(name));
             if (guides != null) {
                 compCopy.guides = guides.copyIdentical(view);
@@ -338,8 +337,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return view.getDialogParent();
     }
 
+    // called when another view has been activated
     public void deactivated() {
         if (isSmartObjectContent()) {
+            // lazily update all containing smart objects
             for (SmartObject owner : owners) {
                 owner.propagateContentChanges(this, false);
             }
@@ -354,16 +355,17 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert newOwner != null;
         if (owners == null) {
             owners = new ArrayList<>(1);
-        } else {
-            if (owners.contains(newOwner)) {
-                return;
-            }
+        } else if (owners.contains(newOwner)) {
+            return; // avoid duplicate owners
         }
         owners.add(newOwner);
     }
 
+    /**
+     * Checks if this {@link Composition} is the content of any {@link SmartObject}.
+     */
     public boolean isSmartObjectContent() {
-        // If a content file is open independently of its parent,
+        // If a content file is opened independently of its parent,
         // then this will return false, even for PXC files!
         return owners != null;
     }
@@ -396,37 +398,33 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return dirty;
     }
 
-    public boolean isUnsaved() {
-        if (dirty) {
-            // If this is the contents of a smart object,
-            // then the dirty flag matters only if it's linked,
-            // otherwise, the parent composition saves it.
-            if (isSmartObjectContent()) {
-                boolean savedByParent = false;
-                for (SmartObject owner : owners) {
-                    if (!owner.isContentLinked()) {
-                        savedByParent = true;
-                        break;
-                    }
-                }
-                return !savedByParent;
-            } else {
-                return true;
-            }
-        } else {
+    public boolean hasUnsavedChanges() {
+        if (!dirty) {
             return false;
         }
+
+        // If this is the content of a smart object, the dirty flag
+        // is relevant only if the content is linked (not embedded).
+        // Otherwise, the parent composition should save it.
+        if (isSmartObjectContent()) {
+            for (SmartObject owner : owners) {
+                if (owner.isContentEmbedded()) {
+                    return false;
+                }
+            }
+        }
+        return true; // dirty and there's no embedding parent to save it
     }
 
     public void setDirty(boolean dirty) {
         this.dirty = dirty;
     }
 
-    private void clearAllDirtyFlagsAfterSave() {
+    private void clearDirtyFlagsRecursively() {
         setDirty(false);
 
         forAllNestedSmartObjects(so -> {
-            if (so.getSavingComp() == this) {
+            if (so.findSavingComp() == this) {
                 so.getContent().setDirty(false);
             }
         });
@@ -455,9 +453,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Returns the first open view in the hierarchy of parents
+     * Finds the first open view in the parent hierarchy.
      */
-    public View getParentView() {
+    public View findParentView() {
         if (isOpen()) {
             return view;
         }
@@ -465,7 +463,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // Recursively search in the hierarchy of parents.
             // It checks only the first owner, because it assumes
             // that all owners are in the same composition.
-            return owners.getFirst().getParentView();
+            return owners.getFirst().findParentView();
         }
 
         throw new IllegalStateException("no view for top-level comp " + getDebugName());
@@ -539,7 +537,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (file == null) {
             return;
         }
-        this.fileTime = file.lastModified();
+        this.fileTimestamp = file.lastModified();
         setName(file.getName());
     }
 
@@ -870,7 +868,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public void addLayerToList(int index, Layer newLayer) {
+    public void addLayerToList(Layer newLayer, int index) {
         layerList.add(index, newLayer);
     }
 
@@ -882,7 +880,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public int getNumORAExportableImages() {
         int[] count = {0};
         forEachNestedLayer(layer -> {
-            if (layer.exportsORAImage()) {
+            if (layer.canExportORAImage()) {
                 count[0]++;
             }
         }, false);
@@ -895,12 +893,15 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void isolateRoot() {
-        isolate(activeRoot, true);
+        isolateLayer(activeRoot, true);
     }
 
-    public void isolate(Layer layer, boolean addHistory) {
+    /**
+     * Shows only the given layer and hides all others.
+     */
+    public void isolateLayer(Layer layer, boolean addHistory) {
         if (addHistory) { // not undoing an "isolate"
-            // check if we should undo the last isolate
+            // check if we should undo the last isolation of the same layer
             if (History.getEditToBeUndone() instanceof IsolateEdit isolateEdit) {
                 if (isolateEdit.getLayer() == layer) {
                     History.undo();
@@ -924,12 +925,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         update();
     }
 
-    private List<Layer> getVisibleTopLevelLayers() {
-        return layerList.stream()
-            .filter(Layer::isVisible)
-            .toList();
-    }
-
     public void forEachTopLevelLayer(Consumer<Layer> action) {
         layerList.forEach(action);
     }
@@ -938,24 +933,30 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         forEachNestedLayer(action, true);
     }
 
+    /**
+     * Applies an action to all nested layers.
+     * Traverses both layer group hierarchy and smart object content hierarchy.
+     */
     public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
         for (Layer layer : layerList) {
             layer.forEachNestedLayer(action, includeMasks);
         }
     }
 
+    /**
+     * Applies an action to all nested layers of a specific type.
+     */
     @SuppressWarnings("unchecked")
-    public <T extends Layer> void forEachNestedLayer(Class<T> clazz, Consumer<T> action) {
+    public <T extends Layer> void forEachNestedLayer(Class<T> layerType, Consumer<T> action) {
         forEachNestedLayer(layer -> {
-            if (clazz.isAssignableFrom(layer.getClass())) {
+            if (layerType.isAssignableFrom(layer.getClass())) {
                 action.accept((T) layer);
             }
         }, false);
     }
 
     /**
-     * Recursively applies the given action to all nested smart objects.
-     * "Nested" here means both the layer group nesting and the smart object nesting.
+     * Applies the given action to all nested smart objects recursively.
      */
     public void forAllNestedSmartObjects(Consumer<SmartObject> action) {
         forEachNestedLayer(SmartObject.class, so -> so.forAllNestedSmartObjects(action));
@@ -1393,17 +1394,19 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void invertSelection() {
-        if (selection != null) {
-            Shape backupShape = selection.getShape();
-            Shape inverted = canvas.invertShape(backupShape);
-            if (inverted.getBounds2D().isEmpty()) {
-                // everything was selected, and now nothing is
-                deselect(true);
-            } else {
-                selection.setShape(inverted);
-                History.add(new SelectionShapeChangeEdit(
-                    "Invert Selection", this, backupShape));
-            }
+        if (selection == null) {
+            throw new IllegalStateException();
+        }
+
+        Shape origShape = selection.getShape();
+        Shape inverted = canvas.invertShape(origShape);
+        if (inverted.getBounds2D().isEmpty()) {
+            // everything was selected, and now nothing is
+            deselect(true);
+        } else {
+            selection.setShape(inverted);
+            History.add(new SelectionShapeChangeEdit(
+                "Invert Selection", this, origShape));
         }
     }
 
@@ -1412,10 +1415,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * The selection is not translated here into the coordinate
      * system of the new, cropped image.
      */
-    public void intersectSelection(Rectangle2D cropRect) {
+    public void intersectSelection(Rectangle2D rect) {
         if (selection != null) {
             Shape intersection = ShapeCombinator.INTERSECT.combine(
-                selection.getShape(), cropRect);
+                selection.getShape(), rect);
 
             if (intersection.getBounds().isEmpty()) {
                 disposeSelection();
@@ -1674,7 +1677,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // Set to not dirty already at the beginning of the saving process,
         // so that subsequent closing doesn't trigger another, parallel save.
         boolean wasDirty = isDirty();
-        clearAllDirtyFlagsAfterSave();
+        clearDirtyFlagsRecursively();
 
         return CompletableFuture
             .runAsync(saveTask, onIOThread)
@@ -1755,7 +1758,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void createPathFromShape(Shape shape, boolean addToHistory, boolean startEditing) {
-        Path oldActivePath = getActivePath();
+        Path origActivePath = getActivePath();
         Path newPath = Shapes.shapeToPath(shape, getView());
         setActivePath(newPath);
         Tools.PEN.setPath(newPath);
@@ -1765,7 +1768,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         Tools.PEN.activate();
 
         if (addToHistory) {
-            History.add(new ConvertSelectionToPathEdit(this, shape, oldActivePath));
+            History.add(new ConvertSelectionToPathEdit(this, shape, origActivePath));
         }
     }
 
@@ -1810,30 +1813,37 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return mode;
     }
 
+    /**
+     * Checks if this composition or any of its smart object contents
+     * need to be reloaded due to external file modifications.
+     */
     public CompletableFuture<Composition> checkForAutoReload() {
-        // check only the open compositions here
+        // check only the open compositions here - hidden
+        // smart object contents will be checked later
         if (file != null && isOpen()) {
-            long newFileTime = file.lastModified();
-            if (newFileTime > fileTime) { // a newer version is on the disk
-                fileTime = newFileTime;
+            long currentFileTimestamp = file.lastModified();
+            if (currentFileTimestamp > fileTimestamp) { // a newer version is on the disk
+                fileTimestamp = currentFileTimestamp;
                 Views.activate(view);
                 boolean reload = Messages.showReloadFileQuestion(file);
                 if (reload) {
-                    return view.reloadAsync();
+                    return view.reloadCompAsync();
                 }
             }
         }
-        // also check in the smart objects
-        CompletableFuture<Composition> cf = CompletableFuture.completedFuture(null);
+
+        // if the whole composition wasn't reloaded, check nested
+        // smart objects recursively, looking for linked contents
+        CompletableFuture<Composition> reloadFuture = CompletableFuture.completedFuture(null);
         for (Layer layer : layerList) {
             if (layer instanceof SmartObject so) {
                 // open contents are checked directly via the view
                 if (!so.isContentOpen()) {
-                    cf = cf.thenCompose(comp -> so.checkForAutoReload());
+                    reloadFuture = reloadFuture.thenCompose(comp -> so.checkForAutoReload());
                 }
             }
         }
-        return cf;
+        return reloadFuture;
     }
 
     public void closeAllNestedComps() {
@@ -1845,8 +1855,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return true;
     }
 
-    // replaces the entire composition with a smart object
-    // that has this composition as contents
+    // Replaces this composition in its view with a new composition
+    // containing a smart object that has this composition as its content.
     public void replaceWithSmartObject() {
         Composition newComp = new Composition(canvas.copy(), mode);
 
@@ -1866,8 +1876,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         setName("Contents of " + name);
     }
 
+    /**
+     * Converts the visible top-level layers into a new smart object.
+     */
     public void convertVisibleLayersToSmartObject() {
-        long visibleCount = layerList.stream().filter(Layer::isVisible).count();
+        long visibleCount = layerList.stream()
+            .filter(Layer::isVisible)
+            .count();
         if (visibleCount == 0) {
             Messages.showNoVisibleLayersError(this);
             return;
@@ -1881,7 +1896,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         content.setName("visible");
         Composition newMainComp = copy(CopyType.UNDO, true);
 
-        List<Layer> visibleLayers = newMainComp.getVisibleTopLevelLayers();
+        List<Layer> visibleLayers = newMainComp.layerList.stream()
+            .filter(Layer::isVisible)
+            .toList();
 
         for (Layer layer : visibleLayers) {
             newMainComp.deleteLayer(layer, false, false);

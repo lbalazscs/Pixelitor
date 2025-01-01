@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,6 +49,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
+import static pixelitor.utils.ImageUtils.isWithinBounds;
 import static pixelitor.utils.Keys.CTRL_T;
 
 /**
@@ -211,7 +212,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
                 BufferedImage maskImage = mask.getImage();
                 int ix = p.x - mask.getTx();
                 int iy = p.y - mask.getTy();
-                if (ix >= 0 && iy >= 0 && ix < maskImage.getWidth() && iy < maskImage.getHeight()) {
+                if (isWithinBounds(ix, iy, maskImage)) {
                     int maskPixel = maskImage.getRGB(ix, iy);
                     int maskAlpha = maskPixel & 0xFF;
                     return 0x00_FF_FF_FF | maskAlpha << 24;

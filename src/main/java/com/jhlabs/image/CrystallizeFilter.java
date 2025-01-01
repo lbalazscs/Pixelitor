@@ -36,28 +36,16 @@ public class CrystallizeFilter extends CellularFilter {
         this.edgeThickness = edgeThickness;
     }
 
-    public float getEdgeThickness() {
-        return edgeThickness;
-    }
-
     public void setFadeEdges(boolean fadeEdges) {
         this.fadeEdges = fadeEdges;
-    }
-
-    public boolean getFadeEdges() {
-        return fadeEdges;
     }
 
     public void setEdgeColor(int edgeColor) {
         this.edgeColor = edgeColor;
     }
 
-    public int getEdgeColor() {
-        return edgeColor;
-    }
-
     @Override
-    public int getPixel(int x, int y, int[] inPixels, int width, int height) {
+    public int genPixel(int x, int y, int[] inPixels, int width, int height) {
         float nx = m00 * x + m01 * y;
         float ny = m10 * x + m11 * y;
         nx /= scale;

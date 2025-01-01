@@ -19,7 +19,11 @@ package com.jhlabs.image;
 
 import java.util.Random;
 
-import static com.jhlabs.image.ImageMath.*;
+import static com.jhlabs.image.ImageMath.PI;
+import static com.jhlabs.image.ImageMath.TWO_PI;
+import static com.jhlabs.image.ImageMath.clamp01;
+import static com.jhlabs.image.ImageMath.lerp;
+import static com.jhlabs.image.ImageMath.mixColors;
 import static net.jafama.FastMath.atan2;
 import static net.jafama.FastMath.powQuick;
 
@@ -30,13 +34,13 @@ public class SparkleFilter extends PointFilter {
     private int color = 0xffffffff;
     private int randomness = 25;
     //    private int width, height;
-    private int centreX, centreY;
+    private int centerX, centerY;
     //    private long seed = 371;
     private float[] rayLengths;
     private Random random;
 
-    private float relativeCentreX = 0.5f;
-    private float relativeCentreY = 0.5f;
+    private float relativeCenterX = 0.5f;
+    private float relativeCenterY = 0.5f;
     private boolean lightOnly;
 
     private double power;
@@ -49,16 +53,8 @@ public class SparkleFilter extends PointFilter {
         this.color = color;
     }
 
-    public int getColor() {
-        return color;
-    }
-
     public void setRandomness(int randomness) {
         this.randomness = randomness;
-    }
-
-    public int getRandomness() {
-        return randomness;
     }
 
     /**
@@ -67,28 +63,13 @@ public class SparkleFilter extends PointFilter {
      * @param amount the amount
      * @min-value 0
      * @max-value 1
-     * @see #getAmount
      */
     public void setAmount(int amount) {
         this.amount = amount;
     }
 
-    /**
-     * Get the amount of sparkle.
-     *
-     * @return the amount
-     * @see #setAmount
-     */
-    public int getAmount() {
-        return amount;
-    }
-
     public void setNumRays(int numRays) {
         this.numRays = numRays;
-    }
-
-    public int getNumRays() {
-        return numRays;
     }
 
     /**
@@ -96,30 +77,16 @@ public class SparkleFilter extends PointFilter {
      *
      * @param radius the radius
      * @min-value 0
-     * @see #getRadius
      */
     public void setRadius(int radius) {
         this.radius = radius;
     }
 
-    /**
-     * Get the radius of the effect.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public int getRadius() {
-        return radius;
-    }
-
     @Override
     public void setDimensions(int width, int height) {
-//        this.width = width;
-//        this.height = height;
-        centreX = (int) (width * relativeCentreX);
-        centreY = (int) (height * relativeCentreY);
+        centerX = (int) (width * relativeCenterX);
+        centerY = (int) (height * relativeCenterY);
         super.setDimensions(width, height);
-//        random.setSeed(seed);
         rayLengths = new float[numRays];
         for (int i = 0; i < numRays; i++) {
             rayLengths[i] = radius + randomness / 100.0f * radius * (float) random.nextGaussian();
@@ -129,8 +96,8 @@ public class SparkleFilter extends PointFilter {
 
     @Override
     public int filterRGB(int x, int y, int rgb) {
-        float dx = x - centreX;
-        float dy = y - centreY;
+        float dx = x - centerX;
+        float dy = y - centerY;
         float distance = dx * dx + dy * dy;
         float angle = (float) atan2(dy, dx);
 
@@ -159,24 +126,12 @@ public class SparkleFilter extends PointFilter {
         }
     }
 
-    public void setRelativeCentreX(float relativeCentreX) {
-        this.relativeCentreX = relativeCentreX;
+    public void setRelativeCenterX(float relativeCenterX) {
+        this.relativeCenterX = relativeCenterX;
     }
 
-    public void setRelativeCentreY(float relativeCentreY) {
-        this.relativeCentreY = relativeCentreY;
-    }
-
-    public float getRelativeCentreX() {
-        return relativeCentreX;
-    }
-
-    public float getRelativeCentreY() {
-        return relativeCentreY;
-    }
-
-    public boolean isLightOnly() {
-        return lightOnly;
+    public void setRelativeCenterY(float relativeCenterY) {
+        this.relativeCenterY = relativeCenterY;
     }
 
     public void setLightOnly(boolean lightOnly) {
@@ -191,15 +146,4 @@ public class SparkleFilter extends PointFilter {
     public String toString() {
         return "Stylize/Sparkle...";
     }
-
-
-    // the radius does not define the affected area!!
-/*
-
-    public Shape[] getAffectedAreaShapes() {
-        return new Shape[]{
-                new Ellipse2D.Float(centreX - radius, centreY - radius, 2 * radius, 2 * radius)
-        };
-    }
-*/
 }

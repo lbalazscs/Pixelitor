@@ -30,7 +30,7 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
  * A filter which produces motion blur the faster, but lower-quality way.
  */
 public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur {
-    private float centreX = 0.5f, centreY = 0.5f;
+    private float centerX = 0.5f, centerY = 0.5f;
     private float distance;
     private float angle;
     private float rotation;
@@ -44,11 +44,10 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Specifies the angle of blur.
+     * Sets the angle of blur.
      *
      * @param angle the angle of blur.
      * @angle
-     * @see #getAngle
      */
     @Override
     public void setAngle(float angle) {
@@ -56,21 +55,9 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Returns the angle of blur.
-     *
-     * @return the angle of blur.
-     * @see #setAngle
-     */
-    @Override
-    public float getAngle() {
-        return angle;
-    }
-
-    /**
      * Set the distance of blur.
      *
      * @param distance the distance of blur.
-     * @see #getDistance
      */
     @Override
     public void setDistance(float distance) {
@@ -78,21 +65,9 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Get the distance of blur.
-     *
-     * @return the distance of blur.
-     * @see #setDistance
-     */
-    @Override
-    public float getDistance() {
-        return distance;
-    }
-
-    /**
      * Set the blur rotation.
      *
      * @param rotation the angle of rotation.
-     * @see #getRotation
      */
     @Override
     public void setRotation(float rotation) {
@@ -100,21 +75,9 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Get the blur rotation.
-     *
-     * @return the angle of rotation.
-     * @see #setRotation
-     */
-    @Override
-    public float getRotation() {
-        return rotation;
-    }
-
-    /**
      * Set the blur zoom.
      *
      * @param zoom the zoom factor.
-     * @see #getZoom
      */
     @Override
     public void setZoom(float zoom) {
@@ -122,81 +85,34 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Get the blur zoom.
+     * Set the center of the effect in the X direction as a proportion of the image size.
      *
-     * @return the zoom factor.
-     * @see #setZoom
+     * @param centerX the center
      */
     @Override
-    public float getZoom() {
-        return zoom;
+    public void setCenterX(float centerX) {
+        this.centerX = centerX;
     }
 
     /**
-     * Set the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect in the Y direction as a proportion of the image size.
      *
-     * @param centreX the center
-     * @see #getCentreX
+     * @param centerY the center
      */
     @Override
-    public void setCentreX(float centreX) {
-        this.centreX = centreX;
+    public void setCenterY(float centerY) {
+        this.centerY = centerY;
     }
 
     /**
-     * Get the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect as a proportion of the image size.
      *
-     * @return the center
-     * @see #setCentreX
+     * @param center the center
      */
     @Override
-    public float getCentreX() {
-        return centreX;
-    }
-
-    /**
-     * Set the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centreY the center
-     * @see #getCentreY
-     */
-    @Override
-    public void setCentreY(float centreY) {
-        this.centreY = centreY;
-    }
-
-    /**
-     * Get the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentreY
-     */
-    @Override
-    public float getCentreY() {
-        return centreY;
-    }
-
-    /**
-     * Set the centre of the effect as a proportion of the image size.
-     *
-     * @param centre the center
-     * @see #getCentre
-     */
-    @Override
-    public void setCentre(Point2D centre) {
-        centreX = (float) centre.getX();
-        centreY = (float) centre.getY();
-    }
-
-    /**
-     * Get the centre of the effect as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentre
-     */
-    @Override
-    public Point2D getCentre() {
-        return new Point2D.Float(centreX, centreY);
+    public void setCenter(Point2D center) {
+        centerX = (float) center.getX();
+        centerY = (float) center.getY();
     }
 
     private static int log2(int n) {
@@ -216,8 +132,8 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
             dst = createCompatibleDestImage(src, null);
         }
         BufferedImage tsrc = src;
-        float cx = src.getWidth() * centreX;
-        float cy = src.getHeight() * centreY;
+        float cx = src.getWidth() * centerX;
+        float cy = src.getHeight() * centerY;
         float imageRadius = (float) Math.sqrt(cx * cx + cy * cy);
         float translateX = (float) (distance * Math.cos(angle));
         float translateY = (float) (distance * -Math.sin(angle));

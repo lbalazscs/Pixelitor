@@ -39,50 +39,24 @@ public class MarbleFilter extends TransformFilter {
      * Set the X scale of the effect.
      *
      * @param scale the scale.
-     * @see #getScale
      */
     public void setScale(float scale) {
         this.scale = scale;
-    }
-
-    /**
-     * Get the X scale of the effect.
-     *
-     * @return the scale.
-     * @see #setScale
-     */
-    public float getScale() {
-        return scale;
     }
 
     public void setAmount(float amount) {
         this.amount = amount;
     }
 
-    public float getAmount() {
-        return amount;
-    }
-
     /**
-     * Specifies the turbulence of the effect.
+     * Sets the turbulence of the effect.
      *
      * @param turbulence the turbulence of the effect.
      * @min-value 0
      * @max-value 1
-     * @see #getTurbulence
      */
     public void setTurbulence(float turbulence) {
         this.turbulence = turbulence;
-    }
-
-    /**
-     * Returns the turbulence of the effect.
-     *
-     * @return the turbulence of the effect.
-     * @see #setTurbulence
-     */
-    public float getTurbulence() {
-        return turbulence;
     }
 
     private void initialize() {

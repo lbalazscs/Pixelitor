@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -135,7 +135,7 @@ public class Pixelitor {
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
         Theme theme = AppPreferences.loadTheme();
-        Themes.install(theme, false, true);
+        Themes.apply(theme, false, true);
         loadUIFonts(theme);
 
         PixelitorWindow mainWindow = PixelitorWindow.get();

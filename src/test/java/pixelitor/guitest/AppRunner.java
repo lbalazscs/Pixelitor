@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -196,7 +196,7 @@ public class AppRunner {
         
         String exitMenuName = JVM.isMac ? "Quit" : "Exit";
         runMenuCommand(exitMenuName);
-        findJOptionPane().yesButton().click();
+        findJOptionPane("Unsaved Changes").yesButton().click();
     }
 
     private static void countDownBeforeExit() {
@@ -349,7 +349,7 @@ public class AppRunner {
         var saveDialog = findSaveFileChooser();
         saveDialog.selectFile(new File(baseTestingDir, fileName));
         saveDialog.approve();
-        var optionPane = findJOptionPane(); // overwrite question
+        var optionPane = findJOptionPane("Confirmation"); // overwrite question
         optionPane.yesButton().click();
     }
 
@@ -402,7 +402,7 @@ public class AppRunner {
     }
 
     void closeCurrentView(ExpectConfirmation expectConfirmation) {
-        boolean unsaved = EDT.active(Composition::isUnsaved);
+        boolean unsaved = EDT.active(Composition::hasUnsavedChanges);
 
         if (unsaved && expectConfirmation == ExpectConfirmation.NO
             || !unsaved && expectConfirmation == ExpectConfirmation.YES) {
@@ -418,7 +418,8 @@ public class AppRunner {
         runMenuCommand("Close");
 
         if (expectDialog) {
-            findJOptionPane().buttonWithText("Don't Save").click();
+            findJOptionPane("Unsaved Changes")
+                .buttonWithText("Don't Save").click();
         }
     }
 
@@ -429,7 +430,8 @@ public class AppRunner {
         boolean warnings = true;
         while (warnings) {
             try {
-                findJOptionPane().buttonWithText("Don't Save").click();
+                findJOptionPane("Unsaved Changes")
+                    .buttonWithText("Don't Save").click();
             } catch (Exception e) { // no more JOptionPane found
                 warnings = false;
             }
@@ -571,10 +573,14 @@ public class AppRunner {
         }));
     }
 
-    JOptionPaneFixture findJOptionPane() {
-        return JOptionPaneFinder.findOptionPane()
+    JOptionPaneFixture findJOptionPane(String expectedTitle) {
+        JOptionPaneFixture pane = JOptionPaneFinder.findOptionPane()
             .withTimeout(10, SECONDS)
             .using(robot);
+        if (expectedTitle != null) {
+            pane.requireTitle(expectedTitle);
+        }
+        return pane;
     }
 
     JFileChooserFixture findOpenFileChooser() {
@@ -714,14 +720,13 @@ public class AppRunner {
         JMenu presetsMenu = getPresetsMenu(dialog);
         if (presetsMenu != null) {
             dialog.menuItem("savePreset").click();
-            // expect a "preset name" OK-Cancel input dialog
-            var pane = findJOptionPane();
+
+            var pane = findJOptionPane("Preset Name");
             pane.textBox().enterText(presetName);
             pane.okButton().click();
 
             if (alreadyExists) {
-                // expect a "preset already exists" Yes-No warning dialog
-                pane = findJOptionPane();
+                pane = findJOptionPane("Preset Exists");
                 pane.yesButton().click();
             }
         }

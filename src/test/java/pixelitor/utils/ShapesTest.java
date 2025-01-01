@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,11 +80,11 @@ class ShapesTest {
 
     private static void checkRectangleShape(Shape shape) {
         SegmentCounter checker = new SegmentCounter(shape);
-        checker.assertNumMoveTosIs(1);
-        checker.assertNumLineTosIs(4);
-        checker.assertNumQuadTosIs(0);
-        checker.assertNumCubicTosIs(0);
-        checker.assertNumClosesIs(1);
+        checker.assertMoveToCount(1);
+        checker.assertLineToCount(4);
+        checker.assertQuadToCount(0);
+        checker.assertCubicToCount(0);
+        checker.assertPathCloseCount(1);
     }
 
     private static void checkRectanglePath(SubPath subPath) {
@@ -111,11 +111,11 @@ class ShapesTest {
 
     private static void checkEllipseShape(Shape shape) {
         SegmentCounter checker = new SegmentCounter(shape);
-        checker.assertNumMoveTosIs(1);
-        checker.assertNumLineTosIs(0);
-        checker.assertNumQuadTosIs(0);
-        checker.assertNumCubicTosIs(4);
-        checker.assertNumClosesIs(1);
+        checker.assertMoveToCount(1);
+        checker.assertLineToCount(0);
+        checker.assertQuadToCount(0);
+        checker.assertCubicToCount(4);
+        checker.assertPathCloseCount(1);
     }
 
     private static void checkEllipsePath(SubPath subPath) {

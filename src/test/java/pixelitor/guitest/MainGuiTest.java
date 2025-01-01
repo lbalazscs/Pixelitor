@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -182,7 +182,7 @@ public class MainGuiTest {
         if (testOneMethodSlowly) {
             app.runSlowly();
 
-            testGMICFilters();
+            testMagick();
         } else {
             runMenuCommand("Set Default Workspace");
 
@@ -717,10 +717,12 @@ public class MainGuiTest {
     private void testCheckForUpdate() {
         runMenuCommand("Check for Updates...");
         try {
-            app.findJOptionPane().buttonWithText("Close").click();
+            // the title is either "Pixelitor Is Up to Date"
+            // or "New Version Available"
+            app.findJOptionPane(null).buttonWithText("Close").click();
         } catch (ComponentLookupException e) {
-            // can happen if the current version is the same as the latest
-            app.findJOptionPane().okButton().click();
+            // if a close button was not found, then it must be the up to date dialog
+            app.findJOptionPane("Pixelitor Is Up to Date").okButton().click();
         }
     }
 
@@ -1046,7 +1048,7 @@ public class MainGuiTest {
 
         if (fileExistsAlready) {
             // say OK to the overwrite question
-            app.findJOptionPane().yesButton().click();
+            app.findJOptionPane("Confirmation").yesButton().click();
         }
         Utils.sleep(500, MILLISECONDS);
         assertThat(file).exists().isFile();
@@ -1093,9 +1095,16 @@ public class MainGuiTest {
     private void testMagick() {
         log(1, "testing ImageMagick export-import");
 
+        // test importing
         app.openFileWithDialog("Import...", baseDir, "webp_image.webp");
 
-        // TODO test ImageMagick exporting as well
+        // test exporting
+        app.runMenuCommand("Export...");
+        String exportFileName = "saved_image.webp";
+        app.saveWithOverwrite(baseDir, exportFileName);
+        app.findJOptionPane("WebP Export Options for " + exportFileName)
+            .buttonWithText("Export").click();
+
         app.closeCurrentView(ExpectConfirmation.NO);
     }
 
@@ -1107,7 +1116,8 @@ public class MainGuiTest {
 
         runMenuCommand("Export Layer Animation...");
         // error dialog, because there is only one layer
-        app.findJOptionPane().okButton().click();
+        app.findJOptionPane("Not Enough Layers")
+            .okButton().click();
 
         addNewLayer();
         // this time it should work
@@ -1154,8 +1164,8 @@ public class MainGuiTest {
         dialog.button("ok").click(); // render button
         dialog.requireVisible(); // still visible because of the validation error
 
-        // say OK to the folder not empty question
-        app.findJOptionPane().yesButton().click();
+        app.findJOptionPane("Folder Not Empty")
+            .yesButton().click();
         dialog.requireNotVisible();
 
         app.waitForProgressMonitorEnd();
@@ -2524,7 +2534,8 @@ public class MainGuiTest {
         }
 
         // not rectangular: test choosing "Only Crop"
-        app.findJOptionPane().buttonWithText("Only Crop").click();
+        app.findJOptionPane("Selection Crop Type")
+            .buttonWithText("Only Crop").click();
         undoRedoUndoSimpleSelectionCrop(origCanvasWidth, origCanvasHeight, selWidth, selHeight);
 
         if (skipThis(0.5)) {
@@ -2533,7 +2544,8 @@ public class MainGuiTest {
 
         // not rectangular: test choosing "Only Hide"
         triggerTask.run();
-        app.findJOptionPane().buttonWithText("Only Hide").click();
+        app.findJOptionPane("Selection Crop Type")
+            .buttonWithText("Only Hide").click();
 
         EDT.assertThereIsNoSelection();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);
@@ -2547,7 +2559,8 @@ public class MainGuiTest {
 
         // not rectangular: test choosing "Crop and Hide"
         triggerTask.run();
-        app.findJOptionPane().buttonWithText("Crop and Hide").click();
+        app.findJOptionPane("Selection Crop Type")
+            .buttonWithText("Crop and Hide").click();
         checkAfterSelectionCrop(selWidth, selHeight);
         assert EDT.activeLayerHasMask();
 
@@ -2559,7 +2572,7 @@ public class MainGuiTest {
 
         // not rectangular: test choosing "Cancel"
         triggerTask.run();
-        app.findJOptionPane().buttonWithText("Cancel").click();
+        app.findJOptionPane("Selection Crop Type").buttonWithText("Cancel").click();
 
         EDT.assertThereIsSelection();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);

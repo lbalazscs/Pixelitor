@@ -23,7 +23,7 @@ import java.util.Random;
 /**
  * Perlin Noise functions
  */
-public class Noise implements Function1D, Function2D, Function3D {
+public class Noise {
     private static final Random randomGenerator = new Random();
 
     public static void reseed(long newSeed) {
@@ -42,21 +42,6 @@ public class Noise implements Function1D, Function2D, Function3D {
 
     static {
         init();
-    }
-
-    @Override
-    public float evaluate(float x) {
-        return noise1(x);
-    }
-
-    @Override
-    public float evaluate(float x, float y) {
-        return noise2(x, y);
-    }
-
-    @Override
-    public float evaluate(float x, float y, float z) {
-        return noise3(x, y, z);
     }
 
     /**
@@ -313,49 +298,5 @@ public class Noise implements Function1D, Function2D, Function3D {
                 g3[B + i][j] = g3[i][j];
             }
         }
-    }
-
-    /**
-     * Returns the minimum and maximum of a number of random values
-     * of the given function. This is useful for making some stab at
-     * normalising the function.
-     */
-    public static float[] findRange(Function1D f, float[] minmax) {
-        if (minmax == null) {
-            minmax = new float[2];
-        }
-        float min = 0, max = 0;
-        // Some random numbers here...
-        for (float x = -100; x < 100; x = (float) (x + 1.27139)) {
-            float n = f.evaluate(x);
-            min = Math.min(min, n);
-            max = Math.max(max, n);
-        }
-        minmax[0] = min;
-        minmax[1] = max;
-        return minmax;
-    }
-
-    /**
-     * Returns the minimum and maximum of a number of random values
-     * of the given function. This is useful for making some stab at
-     * normalising the function.
-     */
-    public static float[] findRange(Function2D f, float[] minmax) {
-        if (minmax == null) {
-            minmax = new float[2];
-        }
-        float min = 0, max = 0;
-        // Some random numbers here...
-        for (float y = -100; y < 100; y = (float) (y + 10.35173)) {
-            for (float x = -100; x < 100; x = (float) (x + 10.77139)) {
-                float n = f.evaluate(x, y);
-                min = Math.min(min, n);
-                max = Math.max(max, n);
-            }
-        }
-        minmax[0] = min;
-        minmax[1] = max;
-        return minmax;
     }
 }

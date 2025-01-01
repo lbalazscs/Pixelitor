@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,45 +20,47 @@ package pixelitor.layers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * A utility class that checks that the image layer icon images
- * and the mask icon images are updated the correct number of times.
+ * Utility class for verifying the number of updates to layer and mask icons.
  */
 public class IconUpdateChecker {
     private final TestLayerUI ui;
     private final LayerMask mask;
 
-    private final int layerIconUpdatesAtStart;
-    private final int maskIconUpdatesAtStart;
+    private final int initialLayerIconUpdates;
+    private final int initialMaskIconUpdates;
 
     public IconUpdateChecker(Layer layer, LayerMask mask) {
-        this.ui = (TestLayerUI) layer.getUI();
+        if (!(layer.getUI() instanceof TestLayerUI layerUI)) {
+            throw new IllegalArgumentException();
+        }
+        this.ui = layerUI;
         this.mask = mask;
 
-        layerIconUpdatesAtStart = ui.getNumLayerIconUpdates();
-        if (mask != null) {
-            maskIconUpdatesAtStart = ui.getNumMaskIconUpdates();
-        } else {
-            maskIconUpdatesAtStart = 0;
-        }
+        initialLayerIconUpdates = ui.getLayerIconUpdateCount();
+        initialMaskIconUpdates = mask == null ? 0 : ui.getMaskIconUpdateCount();
 
-        // check the start update counts for safety
-        check(0, 0);
+        // sanity check
+        verifyUpdateCounts(0, 0);
     }
 
-    public void check(int numLayer, int numMask) {
-        checkLayer(numLayer);
-        checkMask(numMask);
+    public void verifyUpdateCounts(int expectedLayerUpdates, int expectedMaskUpdates) {
+        verifyLayerUpdates(expectedLayerUpdates);
+        verifyMaskUpdates(expectedMaskUpdates);
     }
 
-    private void checkLayer(int num) {
-        assertThat(ui.getNumLayerIconUpdates()).isEqualTo(layerIconUpdatesAtStart + num);
+    private void verifyLayerUpdates(int expectedUpdates) {
+        assertThat(ui.getLayerIconUpdateCount())
+            .as("layer icon updates")
+            .isEqualTo(initialLayerIconUpdates + expectedUpdates);
     }
 
-    private void checkMask(int num) {
+    private void verifyMaskUpdates(int expectedUpdates) {
         if (mask == null) {
             // this was a test without a mask
             return;
         }
-        assertThat(ui.getNumMaskIconUpdates()).isEqualTo(maskIconUpdatesAtStart + num);
+        assertThat(ui.getMaskIconUpdateCount())
+            .as("mask icon updates")
+            .isEqualTo(initialMaskIconUpdates + expectedUpdates);
     }
 }

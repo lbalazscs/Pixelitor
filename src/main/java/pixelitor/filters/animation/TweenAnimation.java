@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -146,7 +146,7 @@ public class TweenAnimation {
     }
 
     private boolean showFolderNotEmptyDialog(Component dialogParent) {
-        return Dialogs.showYesNoWarningDialog(dialogParent, "Folder not empty",
+        return Dialogs.showYesNoWarningDialog(dialogParent, "Folder Not Empty",
             String.format("<html>The folder <b>%s</b> is not empty. " +
                     "<br>Some files might be overwritten. Are sure you want to continue?",
                 outputLocation.getAbsolutePath()));

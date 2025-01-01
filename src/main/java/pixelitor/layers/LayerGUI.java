@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -246,6 +246,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         JPopupMenu popup = layer.createLayerIconPopupMenu();
         if (popup != null) {
             if (AppMode.isDevelopment()) {
+                popup.addSeparator();
                 popup.add(new TaskAction("Internal State...", () ->
                     Debug.showTree(layer, layer.getTypeString())));
             }

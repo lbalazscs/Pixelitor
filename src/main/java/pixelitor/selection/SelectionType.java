@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,8 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
+
+import static pixelitor.utils.ImageUtils.isGrayscale;
 
 /**
  * The type of a new selection created interactively by the user.
@@ -125,13 +127,13 @@ public enum SelectionType {
                 return null;
             }
 
-            boolean thereIsSelection = comp.hasSelection();
-            boolean grayScale = image.getType() == BufferedImage.TYPE_BYTE_GRAY;
+            boolean hasSelection = comp.hasSelection();
+            boolean grayScale = isGrayscale(image);
 
             BufferedImage workingImage;
             if (grayScale) {
                 workingImage = ImageUtils.toSysCompatibleImage(image);
-            } else if (thereIsSelection) {
+            } else if (hasSelection) {
                 workingImage = ImageUtils.copyImage(image);
             } else {
                 workingImage = image;

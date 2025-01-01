@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,20 +25,20 @@ import pixelitor.tools.shapes.StarSettings;
 import java.awt.geom.Point2D;
 
 /**
- * A shape that is blurred in the sense that a floating-point value
- * rather than a boolean describes whether a point is inside or outside it.
+ * A shape with a blurred boundary that uses floating-point
+ * values to define its edges.
  */
 public interface BlurredShape {
-    static BlurredShape createEmptyShape() {
-        return (x, y) -> 1.0; // everything is outside
-    }
-
     /**
      * Returns 1.0 if the given coordinate is completely outside
-     * the shape, 0.0 if it's completely inside, and
-     * a number between 0.0 and 1.0 if it's in the blurred area.
+     * the shape, 0.0 if it's completely inside, and a number between
+     * 0.0 and 1.0 if it's in the blurred boundary region.
      */
     double isOutside(int x, int y);
+
+    static BlurredShape createEmptyShape() {
+        return (x, y) -> 1.0; // all points are outside
+    }
 
     int TYPE_ELLIPSE = 0;
     int TYPE_RECTANGLE = 1;

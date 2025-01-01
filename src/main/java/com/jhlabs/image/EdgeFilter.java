@@ -22,6 +22,8 @@ package com.jhlabs.image;
 public class EdgeFilter extends WholeImageFilter {
     public static final float R2 = (float) Math.sqrt(2);
 
+    // Roberts cross vertical and horizontal edge detection matrices
+    // https://en.wikipedia.org/wiki/Roberts_cross
     public static final float[] ROBERTS_V = {
             0, 0, -1,
             0, 1, 0,
@@ -32,6 +34,9 @@ public class EdgeFilter extends WholeImageFilter {
             0, 1, 0,
             0, 0, 0,
     };
+
+    // Prewitt vertical and horizontal edge detection matrices
+    // https://en.wikipedia.org/wiki/Prewitt_operator
     public static final float[] PREWITT_V = {
             -1, 0, 1,
             -1, 0, 1,
@@ -42,6 +47,9 @@ public class EdgeFilter extends WholeImageFilter {
             0, 0, 0,
             1, 1, 1,
     };
+
+    // Sobel vertical and horizontal edge detection matrices
+    // https://en.wikipedia.org/wiki/Sobel_operator
     public static final float[] SOBEL_V = {
             -1, 0, 1,
             -2, 0, 2,
@@ -52,6 +60,8 @@ public class EdgeFilter extends WholeImageFilter {
             0, 0, 0,
             1, 2, 1,
     };
+
+    // Frei-Chen vertical and horizontal edge detection matrices
     public static final float[] FREI_CHEN_V = {
             -1, 0, 1,
             -R2, 0, R2,
@@ -63,8 +73,8 @@ public class EdgeFilter extends WholeImageFilter {
             1, R2, 1,
     };
 
-    protected float[] vEdgeMatrix = SOBEL_V;
-    protected float[] hEdgeMatrix = SOBEL_H;
+    private float[] vEdgeMatrix = SOBEL_V;
+    private float[] hEdgeMatrix = SOBEL_H;
 
     public EdgeFilter(String filterName) {
         super(filterName);
@@ -74,16 +84,8 @@ public class EdgeFilter extends WholeImageFilter {
         this.vEdgeMatrix = vEdgeMatrix;
     }
 
-    public float[] getVEdgeMatrix() {
-        return vEdgeMatrix;
-    }
-
     public void setHEdgeMatrix(float[] hEdgeMatrix) {
         this.hEdgeMatrix = hEdgeMatrix;
-    }
-
-    public float[] getHEdgeMatrix() {
-        return hEdgeMatrix;
     }
 
     @Override
@@ -100,6 +102,7 @@ public class EdgeFilter extends WholeImageFilter {
                 int rv = 0, gv = 0, bv = 0;
                 int a = inPixels[y * width + x] & 0xff000000;
 
+                // convolve the 3x3 neighborhood around the current pixel
                 for (int row = -1; row <= 1; row++) {
                     int iy = y + row;
                     int ioffset;

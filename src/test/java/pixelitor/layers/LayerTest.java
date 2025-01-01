@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,7 +59,7 @@ public class LayerTest {
     @Parameter(value = 1)
     public WithMask withMask;
 
-    private IconUpdateChecker iconUpdates;
+    private IconUpdateChecker iconChecker;
     private ImageLayer layer2;
 
     @Parameters(name = "{index}: {0}, mask = {1}")
@@ -104,13 +104,13 @@ public class LayerTest {
         layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
         comp.addLayerNoUI(layer2);
 
-        withMask.setupForLayer(layer);
+        withMask.configure(layer);
         LayerMask mask = null;
         if (withMask.isTrue()) {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask);
+        iconChecker = new IconUpdateChecker(layer, mask);
 
         comp.setActiveLayer(layer, true, null);
 
@@ -146,7 +146,7 @@ public class LayerTest {
         checkShown(layer);
 
         History.assertNumEditsIs(2);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -192,7 +192,7 @@ public class LayerTest {
         Layer exactCopy = layer.copy(CopyType.UNDO, true, comp);
         checkCopy(exactCopy, "layer 1");
 
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     private void checkCopy(Layer copy, String expectedName) {
@@ -224,7 +224,7 @@ public class LayerTest {
         assertThat(layer).opacityIs(newValue);
 
         History.assertNumEditsIs(1);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -241,7 +241,7 @@ public class LayerTest {
         assertThat(layer).blendingModeIs(DIFFERENCE);
 
         History.assertNumEditsIs(1);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -258,7 +258,7 @@ public class LayerTest {
         assertThat(layer).nameIs("newName").uiNameIs("newName");
 
         History.assertNumEditsIs(1);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -282,7 +282,7 @@ public class LayerTest {
         assertThat(layer2).isActive();
 
         History.assertNumEditsIs(1);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -298,7 +298,7 @@ public class LayerTest {
         layer.resize(new Dimension(1, 10)).join();
         layer.resize(origSize).join();
 
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -307,7 +307,7 @@ public class LayerTest {
         assertThat(comp.indexOf(topLevelLayer)).isEqualTo(0);
         topLevelLayer.changeStackIndex(1);
         assertThat(comp.indexOf(topLevelLayer)).isEqualTo(1);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -334,7 +334,7 @@ public class LayerTest {
                 History.undo(expectedEditName);
                 assertThat(layer).hasNoMask();
 
-                iconUpdates.check(0, 0);
+                iconChecker.verifyUpdateCounts(0, 0);
             }
         }
     }
@@ -347,15 +347,15 @@ public class LayerTest {
             layer.deleteMask(true);
             assertThat(layer).hasNoMask();
             History.assertNumEditsIs(1);
-            iconUpdates.check(0, 0);
+            iconChecker.verifyUpdateCounts(0, 0);
 
             History.undo("Delete Layer Mask");
             assertThat(layer).hasMask();
-            iconUpdates.check(0, 0);
+            iconChecker.verifyUpdateCounts(0, 0);
 
             History.redo("Delete Layer Mask");
             assertThat(layer).hasNoMask();
-            iconUpdates.check(0, 0);
+            iconChecker.verifyUpdateCounts(0, 0);
         }
     }
 
@@ -369,28 +369,28 @@ public class LayerTest {
             layer.setMaskEnabled(false, true);
             checkMaskIsDisabled(action);
             History.assertNumEditsIs(1);
-            iconUpdates.check(0, 1);
+            iconChecker.verifyUpdateCounts(0, 1);
 
             History.undo("Disable Layer Mask");
             checkMaskIsEnabled(action);
-            iconUpdates.check(0, 2);
+            iconChecker.verifyUpdateCounts(0, 2);
 
             History.redo("Disable Layer Mask");
             checkMaskIsDisabled(action);
-            iconUpdates.check(0, 3);
+            iconChecker.verifyUpdateCounts(0, 3);
 
             // now test enabling the layer mask
             layer.setMaskEnabled(true, true);
             checkMaskIsEnabled(action);
-            iconUpdates.check(0, 4);
+            iconChecker.verifyUpdateCounts(0, 4);
 
             History.undo("Enable Layer Mask");
             checkMaskIsDisabled(action);
-            iconUpdates.check(0, 5);
+            iconChecker.verifyUpdateCounts(0, 5);
 
             History.redo("Enable Layer Mask");
             checkMaskIsEnabled(action);
-            iconUpdates.check(0, 6);
+            iconChecker.verifyUpdateCounts(0, 6);
         }
     }
 
@@ -431,7 +431,7 @@ public class LayerTest {
             checkMaskIsLinked(linkAction);
 
             History.assertNumEditsIs(2);
-            iconUpdates.check(0, 0);
+            iconChecker.verifyUpdateCounts(0, 0);
         }
     }
 

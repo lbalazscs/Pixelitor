@@ -48,144 +48,67 @@ public class ShadowFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Specifies the angle of the shadow.
+     * Sets the angle of the shadow.
      *
      * @param angle the angle of the shadow.
      * @angle
-     * @see #getAngle
      */
     public void setAngle(float angle) {
         this.angle = angle;
     }
 
     /**
-     * Returns the angle of the shadow.
-     *
-     * @return the angle of the shadow.
-     * @see #setAngle
-     */
-    public float getAngle() {
-        return angle;
-    }
-
-    /**
      * Set the distance of the shadow.
      *
      * @param distance the distance.
-     * @see #getDistance
      */
     public void setDistance(float distance) {
         this.distance = distance;
     }
 
     /**
-     * Get the distance of the shadow.
-     *
-     * @return the distance.
-     * @see #setDistance
-     */
-    public float getDistance() {
-        return distance;
-    }
-
-    /**
      * Set the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
      * @param radius the radius of the blur in pixels.
-     * @see #getRadius
      */
     public void setRadius(float radius) {
         this.radius = radius;
     }
 
     /**
-     * Get the radius of the kernel.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public float getRadius() {
-        return radius;
-    }
-
-    /**
      * Set the opacity of the shadow.
      *
      * @param opacity the opacity.
-     * @see #getOpacity
      */
     public void setOpacity(float opacity) {
         this.opacity = opacity;
     }
 
     /**
-     * Get the opacity of the shadow.
-     *
-     * @return the opacity.
-     * @see #setOpacity
-     */
-    public float getOpacity() {
-        return opacity;
-    }
-
-    /**
      * Set the color of the shadow.
      *
      * @param shadowColor the color.
-     * @see #getShadowColor
      */
     public void setShadowColor(int shadowColor) {
         this.shadowColor = shadowColor;
     }
 
     /**
-     * Get the color of the shadow.
-     *
-     * @return the color.
-     * @see #setShadowColor
-     */
-    public int getShadowColor() {
-        return shadowColor;
-    }
-
-    /**
      * Set whether to increase the size of the output image to accomodate the shadow.
      *
      * @param addMargins true to add margins.
-     * @see #getAddMargins
      */
     public void setAddMargins(boolean addMargins) {
         this.addMargins = addMargins;
     }
 
     /**
-     * Get whether to increase the size of the output image to accomodate the shadow.
-     *
-     * @return true to add margins.
-     * @see #setAddMargins
-     */
-    public boolean getAddMargins() {
-        return addMargins;
-    }
-
-    /**
      * Set whether to only draw the shadow without the original image.
      *
      * @param shadowOnly true to only draw the shadow.
-     * @see #getShadowOnly
      */
     public void setShadowOnly(boolean shadowOnly) {
         this.shadowOnly = shadowOnly;
-    }
-
-    /**
-     * Get whether to only draw the shadow without the original image.
-     *
-     * @return true to only draw the shadow.
-     * @see #setShadowOnly
-     */
-    public boolean getShadowOnly() {
-        return shadowOnly;
     }
 
     @Override

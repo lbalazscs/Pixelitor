@@ -56,20 +56,9 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      * Set whether to premultiply the alpha channel.
      *
      * @param premultiplyAlpha true to premultiply the alpha
-     * @see #getPremultiplyAlpha
      */
     public void setPremultiplyAlpha(boolean premultiplyAlpha) {
         this.premultiplyAlpha = premultiplyAlpha;
-    }
-
-    /**
-     * Get whether to premultiply the alpha channel.
-     *
-     * @return true to premultiply the alpha
-     * @see #setPremultiplyAlpha
-     */
-    public boolean getPremultiplyAlpha() {
-        return premultiplyAlpha;
     }
 
     @Override
@@ -225,9 +214,9 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
                 outIndex += height;
             }
 
-            // Laszlo: we get an array index out of bounds exception here
-            // if either the width or the height of the image is 1 pixel.
-            // In Pixelitor these cases are already filtered before we get here
+            // If either the width or the height of the image is one pixel,
+            // an array index out-of-bounds exception occurs here.
+            // In Pixelitor these cases are handled before we get here.
             out[outIndex] = in[width - 1];
             inIndex += width;
         }
@@ -238,20 +227,9 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      *
      * @param hRadius the radius of the blur in the horizontal direction
      * @min-value 0
-     * @see #getHRadius
      */
     public void setHRadius(float hRadius) {
         this.hRadius = hRadius;
-    }
-
-    /**
-     * Get the horizontal size of the blur.
-     *
-     * @return the radius of the blur in the horizontal direction
-     * @see #setHRadius
-     */
-    public float getHRadius() {
-        return hRadius;
     }
 
     /**
@@ -259,20 +237,9 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      *
      * @param vRadius the radius of the blur in the vertical direction
      * @min-value 0
-     * @see #getVRadius
      */
     public void setVRadius(float vRadius) {
         this.vRadius = vRadius;
-    }
-
-    /**
-     * Get the vertical size of the blur.
-     *
-     * @return the radius of the blur in the vertical direction
-     * @see #setVRadius
-     */
-    public float getVRadius() {
-        return vRadius;
     }
 
     /**
@@ -280,20 +247,9 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      *
      * @param radius the radius of the blur in both directions
      * @min-value 0
-     * @see #getRadius
      */
     public void setRadius(float radius) {
         hRadius = vRadius = radius;
-    }
-
-    /**
-     * Get the size of the blur.
-     *
-     * @return the radius of the blur in the horizontal direction
-     * @see #setRadius
-     */
-    public float getRadius() {
-        return hRadius;
     }
 
     /**
@@ -301,20 +257,9 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      *
      * @param iterations the number of iterations
      * @min-value 0
-     * @see #getIterations
      */
     public void setIterations(int iterations) {
         this.iterations = iterations;
-    }
-
-    /**
-     * Get the number of iterations the blur is performed.
-     *
-     * @return the number of iterations
-     * @see #setIterations
-     */
-    public int getIterations() {
-        return iterations;
     }
 
     @Override

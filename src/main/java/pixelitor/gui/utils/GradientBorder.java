@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,16 +18,11 @@
 package pixelitor.gui.utils;
 
 import javax.swing.border.AbstractBorder;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Paint;
+import javax.swing.border.Border;
+import java.awt.*;
 
 /**
- * A {@link javax.swing.border.Border} that has a gradient fill.
+ * A {@link Border} implementation that draws a gradient-filled border.
  */
 public class GradientBorder extends AbstractBorder {
     private static final int WIDTH = 4;
@@ -55,7 +50,7 @@ public class GradientBorder extends AbstractBorder {
         i.top = WIDTH;
         i.bottom = WIDTH;
 
-        return i; // reuse the same object for efficiency
+        return i;
     }
 
     @Override
@@ -76,8 +71,7 @@ public class GradientBorder extends AbstractBorder {
 
         g2d.setPaint(paint);
 
-        // Draw rectangles around the component, but do not draw
-        // in the component area itself.
+        // draw rectangles to create the border, leaving the component's area untouched
         g2d.fillRect(x, y, width, insets.top);
         g2d.fillRect(x, y, insets.left, height);
         g2d.fillRect(x + width - insets.right, y, insets.right, height);

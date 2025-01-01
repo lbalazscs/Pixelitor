@@ -73,24 +73,12 @@ public class OffsetFilter extends TransformFilter {
         this.xOffset = xOffset;
     }
 
-    public int getXOffset() {
-        return xOffset;
-    }
-
     public void setYOffset(int yOffset) {
         this.yOffset = yOffset;
     }
 
-    public int getYOffset() {
-        return yOffset;
-    }
-
     public void setWrap(boolean wrap) {
         this.wrap = wrap;
-    }
-
-    public boolean getWrap() {
-        return wrap;
     }
 
     @Override

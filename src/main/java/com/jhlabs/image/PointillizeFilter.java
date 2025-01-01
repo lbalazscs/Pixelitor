@@ -34,43 +34,27 @@ public class PointillizeFilter extends CellularFilter {
         this.edgeThickness = edgeThickness;
     }
 
-    public float getEdgeThickness() {
-        return edgeThickness;
-    }
-
     public void setFadeEdges(boolean fadeEdges) {
         this.fadeEdges = fadeEdges;
-    }
-
-    public boolean getFadeEdges() {
-        return fadeEdges;
     }
 
     public void setEdgeColor(int edgeColor) {
         this.edgeColor = edgeColor;
     }
 
-    public int getEdgeColor() {
-        return edgeColor;
-    }
-
     public void setFuzziness(float fuzziness) {
         this.fuzziness = fuzziness;
     }
 
-    public float getFuzziness() {
-        return fuzziness;
-    }
-
     @Override
-    public int getPixel(int x, int y, int[] inPixels, int width, int height) {
+    public int genPixel(int x, int y, int[] inPixels, int width, int height) {
         float nx = m00 * x + m01 * y;
         float ny = m10 * x + m11 * y;
         nx /= scale;
         ny /= scale * stretch;
         nx += 1000;
         ny += 1000;    // Reduce artifacts around 0,0
-        float f = evaluate(nx, ny);
+        evaluate(nx, ny);
 
         Point[] results = resultsTL.get();
 
@@ -86,7 +70,7 @@ public class PointillizeFilter extends CellularFilter {
             int v2 = inPixels[srcy * width + srcx];
             v = ImageMath.mixColors(0.5f * f1 / f2, v, v2);
         } else {
-            f = 1 - ImageMath.smoothStep(edgeThickness, edgeThickness + fuzziness, f1);
+            float f = 1 - ImageMath.smoothStep(edgeThickness, edgeThickness + fuzziness, f1);
             v = ImageMath.mixColors(f, edgeColor, v);
         }
         return v;

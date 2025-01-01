@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ import static pixelitor.layers.LayerMask.RUBYLITH_COLOR_MODEL;
 import static pixelitor.layers.LayerMask.RUBYLITH_COMPOSITE;
 import static pixelitor.layers.LayerMask.TRANSPARENCY_COLOR_MODEL;
 import static pixelitor.utils.ImageUtils.calcThumbDimensions;
-import static pixelitor.utils.ImageUtils.convertToGrayScaleImage;
+import static pixelitor.utils.ImageUtils.convertToGrayscaleImage;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.copySubImage;
 import static pixelitor.utils.ImageUtils.createSysCompatibleImage;
@@ -298,7 +298,7 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     private void updateRubyPreview(BufferedImage rgbMask) {
-        BufferedImage grayMask = convertToGrayScaleImage(rgbMask);
+        BufferedImage grayMask = convertToGrayscaleImage(rgbMask);
         BufferedImage ruby = new BufferedImage(RUBYLITH_COLOR_MODEL,
             grayMask.getRaster(), false, null);
         BufferedImage rubyPreview = copyImage(colorPickerImg);
@@ -310,7 +310,7 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     private void updateMattePreview(BufferedImage rgbMask, Color matteColor) {
-        BufferedImage grayMask = convertToGrayScaleImage(rgbMask);
+        BufferedImage grayMask = convertToGrayscaleImage(rgbMask);
         BufferedImage transparencyImage = new BufferedImage(
             TRANSPARENCY_COLOR_MODEL, grayMask.getRaster(),
             false, null);
@@ -336,7 +336,7 @@ public class MaskFromColorRangePanel extends JPanel {
 
         BufferedImage rgbMask = filter.filter(srcImage, null);
 
-        return convertToGrayScaleImage(rgbMask);
+        return convertToGrayscaleImage(rgbMask);
     }
 
     private Color getReferenceColor() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,6 +55,9 @@ public enum Theme {
         this.flat = flat;
     }
 
+    /**
+     * Returns the fully qualified class name of the Look and Feel implementation.
+     */
     abstract String getLAFClassName();
 
     public boolean isDark() {
@@ -69,7 +72,7 @@ public enum Theme {
         return flat;
     }
 
-    public String getSaveCode() {
+    public String getPrefsCode() {
         return displayName;
     }
 

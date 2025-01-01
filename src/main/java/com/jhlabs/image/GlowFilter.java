@@ -48,20 +48,9 @@ public class GlowFilter extends AbstractBufferedImageOp {
      * @param amount the amount
      * @min-value 0
      * @max-value 1
-     * @see #getAmount
      */
     public void setAmount(float amount) {
         this.amount = amount;
-    }
-
-    /**
-     * Get the amount of glow.
-     *
-     * @return the amount
-     * @see #setAmount
-     */
-    public float getAmount() {
-        return amount;
     }
 
     @Override
@@ -69,14 +58,9 @@ public class GlowFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
-//        if (dst == null) {
-//            dst = createCompatibleDestImage(src, null);
-//        }
-
         BufferedImage srcCopy = ImageUtils.copyImage(src);
 
         int[] inPixels = ImageUtils.getPixelArray(src);
-
 
         if (radius > 0) {
             BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3, filterName);

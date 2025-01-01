@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,8 +72,8 @@ public class JHSparkle extends ParametrizedFilter {
         }
 
         filter.setLightOnly(lightOnly.isChecked());
-        filter.setRelativeCentreX((float) center.getRelativeX());
-        filter.setRelativeCentreY((float) center.getRelativeY());
+        filter.setRelativeCenterX((float) center.getRelativeX());
+        filter.setRelativeCenterY((float) center.getRelativeY());
         filter.setRadius(radius.getValue());
         filter.setNumRays(numRays.getValue());
         filter.setAmount(shine.getValue());

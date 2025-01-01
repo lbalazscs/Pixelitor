@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static pixelitor.Views.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
@@ -72,10 +71,12 @@ public class SmartObject extends CompositeLayer {
     @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
     private boolean newVersion = true;
 
-    // Null if the content is not linked.
+    // The file containing the linked content, if this smart object's content is linked.
     // This is the same object as the content's file field, but it's not transient.
     private File linkedContentFile;
-    private transient long linkedContentFileTime;
+
+    // Timestamp of the last known modification to the linked content file.
+    private transient long linkedContentTimestamp;
 
     // "Legacy" fields from Pixelitor 4.3.0, they are only
     // used for automatic migration of old pxc files
@@ -95,10 +96,10 @@ public class SmartObject extends CompositeLayer {
     // transformer in new pxc files
     private ImageTransformer imageTransformer;
 
-    private transient boolean imageNeedsRefresh = false;
-
     // the cached image of this smart object
     private transient BufferedImage image = null;
+
+    private transient boolean imageNeedsRefresh = false;
 
     // It's important to call updateIconImage() only when we are
     // sure that the smart object's image is up-to-date, because otherwise
@@ -109,24 +110,7 @@ public class SmartObject extends CompositeLayer {
     public SmartObject(Layer layer) {
         super(layer.getComp(), NAME_PREFIX + layer.getName());
 
-        Composition newContent = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
-        // the mask stays outside the content, and will become the mask of the smart object
-        if (layer instanceof LayerGroup group) {
-            // flatten the contents of the group
-            int numLayers = group.getNumLayers();
-            for (int i = 0; i < numLayers; i++) {
-                Layer layerCopy = group.getLayer(i).copy(CopyType.UNDO, true, newContent);
-                newContent.addLayerNoUI(layerCopy);
-            }
-        } else {
-            Layer contentLayer = layer.copy(CopyType.UNDO, false, newContent);
-            contentLayer.setName("original content", false);
-            contentLayer.setHolder(newContent);
-            newContent.addLayerNoUI(contentLayer);
-        }
-        newContent.setName(getName());
-        newContent.createDebugName();
-        setContent(newContent);
+        createContentFromLayer(layer);
 
         layer.copyCommonPropertiesTo(this);
 
@@ -145,7 +129,7 @@ public class SmartObject extends CompositeLayer {
     public SmartObject(File file, Composition parent, Composition content) {
         super(parent, file.getName());
         linkedContentFile = file;
-        updateLinkedContentTime();
+        updateLinkedContentTimestamp();
         setContent(content);
 
         assert checkInvariants();
@@ -172,7 +156,7 @@ public class SmartObject extends CompositeLayer {
         }
 
         linkedContentFile = orig.linkedContentFile;
-        linkedContentFileTime = orig.linkedContentFileTime;
+        linkedContentTimestamp = orig.linkedContentTimestamp;
         if (orig.imageTransformer != null) {
             imageTransformer = orig.imageTransformer.copy(content);
             setBaseSource(imageTransformer);
@@ -213,7 +197,7 @@ public class SmartObject extends CompositeLayer {
     public void afterDeserialization() {
         if (isContentLinked()) {
             if (linkedContentFile.exists()) {
-                updateLinkedContentTime();
+                updateLinkedContentTimestamp();
                 // also read the content
                 assert content == null;
                 setContent(FileIO.loadCompSync(linkedContentFile));
@@ -289,7 +273,7 @@ public class SmartObject extends CompositeLayer {
         }
         if (newFile != null) { // file found
             linkedContentFile = newFile;
-            updateLinkedContentTime();
+            updateLinkedContentTimestamp();
 
             FileIO.loadCompAsync(linkedContentFile)
                 .thenAcceptAsync(loadedComp -> {
@@ -301,6 +285,27 @@ public class SmartObject extends CompositeLayer {
             // give up and use the previously created transparent image
             linkedContentFile = null;
         }
+    }
+
+    private void createContentFromLayer(Layer layer) {
+        Composition newContent = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
+        // the mask stays outside the content, and will become the mask of the smart object
+        if (layer instanceof LayerGroup group) {
+            // flatten the contents of the group
+            int numLayers = group.getNumLayers();
+            for (int i = 0; i < numLayers; i++) {
+                Layer layerCopy = group.getLayer(i).copy(CopyType.UNDO, true, newContent);
+                newContent.addLayerNoUI(layerCopy);
+            }
+        } else {
+            Layer contentLayer = layer.copy(CopyType.UNDO, false, newContent);
+            contentLayer.setName("original content", false);
+            contentLayer.setHolder(newContent);
+            newContent.addLayerNoUI(contentLayer);
+        }
+        newContent.setName(getName());
+        newContent.createDebugName();
+        setContent(newContent);
     }
 
     private void recalculateImage() {
@@ -337,14 +342,19 @@ public class SmartObject extends CompositeLayer {
 
         // invalidate everything because if the content reference
         // didn't change, then setContent didn't do it
+        invalidateAllCaches(true);
+
+        holder.smartObjectChanged(isContentLinked());
+    }
+
+    private void invalidateAllCaches(boolean invalidateTransformer) {
         iconImageNeedsRefresh = true;
         invalidateImageCache();
         invalidateAllFilterCaches();
-        if (imageTransformer != null) {
+
+        if (invalidateTransformer && imageTransformer != null) {
             imageTransformer.invalidateCache();
         }
-
-        holder.smartObjectChanged(isContentLinked());
     }
 
     private void invalidateAllFilterCaches() {
@@ -377,9 +387,7 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void replaceWithSmartObject() {
-        String msg = format("<html>The layer <b>%s</b> is already a smart object.",
-            getName());
-        Messages.showInfo("Already a Smart Object", msg);
+        throw new IllegalStateException(); // it's already smart
     }
 
     @Override
@@ -415,7 +423,7 @@ public class SmartObject extends CompositeLayer {
         if (contentView == null) {
             Views.addNew(content);
             content.setDirty(false);
-        } else {
+        } else { // the view is already opened
             Views.activate(contentView);
         }
         return true;
@@ -428,10 +436,6 @@ public class SmartObject extends CompositeLayer {
         content.forAllNestedSmartObjects(action);
     }
 
-    public boolean hasSmartFilters() {
-        return !filters.isEmpty();
-    }
-
     public int getNumSmartFilters() {
         return filters.size();
     }
@@ -440,37 +444,26 @@ public class SmartObject extends CompositeLayer {
         return filters.get(index);
     }
 
+    // adds a smart filter, and shows its configuration dialog,
+    // but if the user cancels the dialog, the filter is removed
     public void tryAddingSmartFilter(Filter filter) {
-        // adds a smart filter, and triggers an edit,
-        // but if the user cancels the first edit,
-        // then the filter is removed.
         SmartFilter smartFilter = new SmartFilter(filter, baseSource, this);
+        boolean hasDialog = filter instanceof FilterWithGUI;
+        addSmartFilter(smartFilter, !hasDialog, true);
 
-        if (filter instanceof FilterWithGUI) {
+        if (hasDialog) {
             smartFilter.setTentative(true);
-            addSmartFilter(smartFilter, false, true);
             if (smartFilter.edit()) { // dialog accepted
                 smartFilter.setTentative(false);
                 History.add(new NewSmartFilterEdit(this, smartFilter));
             } else {
                 deleteSmartFilter(smartFilter, false, true);
             }
-        } else {
-            addSmartFilter(smartFilter, true, true);
         }
     }
 
     public void addSmartFilter(SmartFilter newFilter, boolean addToHistory, boolean update) {
-        int numFilters = filters.size();
-        if (numFilters == 0) {
-            // When duplicating a smart object, baseSource isn't
-            // known yet. The first filter will be updated later.
-            if (baseSource != null) {
-                newFilter.setImageSource(baseSource);
-            }
-        }
-
-        insertSmartFilter(newFilter, numFilters, update, update);
+        insertSmartFilter(newFilter, filters.size(), update, update);
 
         if (addToHistory) {
             History.add(new NewSmartFilterEdit(this, newFilter));
@@ -485,16 +478,8 @@ public class SmartObject extends CompositeLayer {
     private void insertSmartFilter(SmartFilter newFilter, int index, boolean update, boolean activate) {
         assert newFilter.getHolder() == this;
 
-        SmartFilter previous = null;
-        if (index > 0) {
-            previous = filters.get(index - 1);
-        }
-
-        int numFilters = filters.size();
-        SmartFilter next = null;
-        if (index < numFilters) {
-            next = filters.get(index);
-        }
+        SmartFilter previous = (index == 0) ? null : filters.get(index - 1);
+        SmartFilter next = (index == filters.size()) ? null : filters.get(index);
 
         filters.add(index, newFilter);
 
@@ -529,43 +514,11 @@ public class SmartObject extends CompositeLayer {
     }
 
     public void deleteSmartFilter(SmartFilter filter, boolean addToHistory, boolean update) {
-        int numFilters = filters.size();
-        int index = -1;
-        for (int i = 0; i < numFilters; i++) {
-            if (filters.get(i) == filter) {
-                index = i;
-                SmartFilter previous = null;
-                SmartFilter next = null;
-                if (i > 0) {
-                    previous = filters.get(i - 1);
-                }
-                if (i < numFilters - 1) {
-                    next = filters.get(i + 1);
-                }
-                if (previous != null) {
-                    previous.setNext(next);
-                }
-                if (next != null) {
-                    next.invalidateChain();
-                    if (previous != null) {
-                        next.setImageSource(previous);
-                    } else {
-                        next.setImageSource(baseSource);
-                    }
-                    comp.setActiveLayer(next);
-                } else if (previous != null) {
-                    comp.setActiveLayer(previous);
-                } else {
-                    comp.setActiveLayer(this);
-                }
-                filters.remove(i);
-                break;
-            }
-        }
-
+        int index = filters.indexOf(filter);
         if (index == -1) {
             throw new IllegalStateException(filter.getName() + " not found in " + getName());
         }
+        deleteSmartFilterAtIndex(index);
 
         filter.setNext(null);
 
@@ -583,6 +536,25 @@ public class SmartObject extends CompositeLayer {
         assert checkInvariants();
     }
 
+    private void deleteSmartFilterAtIndex(int i) {
+        SmartFilter previous = (i > 0) ? filters.get(i - 1) : null;
+        SmartFilter next = (i < filters.size() - 1) ? filters.get(i + 1) : null;
+
+        if (previous != null) {
+            previous.setNext(next);
+        }
+        if (next != null) {
+            next.invalidateChain();
+            next.setImageSource(previous != null ? previous : baseSource);
+            comp.setActiveLayer(next);
+        } else if (previous != null) {
+            comp.setActiveLayer(previous);
+        } else {
+            comp.setActiveLayer(this);
+        }
+        filters.remove(i);
+    }
+
     @Override
     public void deleteTemporarily(Layer layer) {
         deleteSmartFilter((SmartFilter) layer, false, false);
@@ -596,11 +568,11 @@ public class SmartObject extends CompositeLayer {
         }
     }
 
-    public View getParentView() {
+    public View findParentView() {
         if (isContentOpen()) {
             return content.getView();
         }
-        return comp.getParentView();
+        return comp.findParentView();
     }
 
     public CompletableFuture<Composition> checkForAutoReload() {
@@ -608,20 +580,21 @@ public class SmartObject extends CompositeLayer {
         assert checkInvariants();
 
         if (isContentLinked()) {
-            long newLinkedContentFileTime = linkedContentFile.lastModified();
-            if (newLinkedContentFileTime > linkedContentFileTime) {
-                linkedContentFileTime = newLinkedContentFileTime;
+            long currentTimestamp = linkedContentFile.lastModified();
+            if (currentTimestamp > linkedContentTimestamp) {
+                linkedContentTimestamp = currentTimestamp;
 
-                Views.activate(getParentView());
-                boolean reload = Messages.showReloadFileQuestion(linkedContentFile);
-                if (reload) {
+                Views.activate(findParentView());
+                boolean shouldReload = Messages.showReloadFileQuestion(linkedContentFile);
+                if (shouldReload) {
                     // if this content is reloaded, then return because
                     // the nested smart objects don't have to be checked
                     return reloadLinkedContent();
                 }
             }
         }
-        // also check recursively deeper
+
+        // recursively check nested smart objects within the content
         return content.checkForAutoReload();
     }
 
@@ -631,13 +604,11 @@ public class SmartObject extends CompositeLayer {
 
     private CompletableFuture<Composition> reloadContent(File file) {
         return FileIO.loadCompAsync(file)
-            .thenApplyAsync(loaded -> {
-                setContent(loaded);
-
-                // only a grandparent composition might be opened
-                propagateContentChanges(loaded, true);
-                getParentView().repaint();
-                return loaded;
+            .thenApplyAsync(loadedContent -> {
+                setContent(loadedContent);
+                propagateContentChanges(loadedContent, true);
+                findParentView().repaint();
+                return loadedContent;
             }, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
@@ -681,13 +652,17 @@ public class SmartObject extends CompositeLayer {
         return linkedContentFile != null;
     }
 
-    public void setLinkedContentFile(File file) {
-        this.linkedContentFile = file;
-        updateLinkedContentTime();
+    public boolean isContentEmbedded() {
+        return !isContentLinked();
     }
 
-    private void updateLinkedContentTime() {
-        linkedContentFileTime = linkedContentFile.lastModified();
+    public void setLinkedContentFile(File file) {
+        this.linkedContentFile = file;
+        updateLinkedContentTimestamp();
+    }
+
+    private void updateLinkedContentTimestamp() {
+        linkedContentTimestamp = linkedContentFile.lastModified();
     }
 
     private void embedLinkedContent() {
@@ -707,19 +682,29 @@ public class SmartObject extends CompositeLayer {
     }
 
     /**
-     * Returns the composition that saves the contents of this smart object to its file
+     * Returns the composition responsible for saving the contents of this smart object to its file.
      */
-    public Composition getSavingComp() {
-        SmartObject so = this;
+    public Composition findSavingComp() {
+        SmartObject currentSO = this;
+
+        // traverses up through potentially multiple levels of nesting
+        // until it finds either a linked content or a top-level composition
         while (true) {
-            if (so.isContentLinked()) {
-                return so.getContent();
+            // if the content is linked (saved as separate file),
+            // then the content is responsible for saving itself
+            if (currentSO.isContentLinked()) {
+                return currentSO.getContent();
             }
-            Composition parent = so.getComp();
+
+            Composition parent = currentSO.getComp();
             if (parent.isSmartObjectContent()) {
-                // assumes that all owners are in the same comp
-                so = parent.getOwners().getFirst();
+                // we assume all smart objects having this content are
+                // in the same composition, so we can take any one of
+                // them to continue traversing up the hierarchy
+                currentSO = parent.getOwners().getFirst();
             } else {
+                // we've reached a top-level composition (not smart
+                // object content), which saves all its embedded content
                 return parent;
             }
         }
@@ -740,8 +725,7 @@ public class SmartObject extends CompositeLayer {
             imageTransformer.concatenate(newScaling, newSize.width, newSize.height);
             assert baseSource == imageTransformer;
         }
-        invalidateAllFilterCaches();
-        invalidateImageCache();
+        invalidateAllCaches(false);
 
         if (filters.isEmpty()) {
             return CompletableFuture.completedFuture(null);
@@ -770,8 +754,7 @@ public class SmartObject extends CompositeLayer {
         } else {
             imageTransformer.concatenate(flipTransform, targetWidth, targetHeight);
         }
-        invalidateAllFilterCaches();
-        invalidateImageCache();
+        invalidateAllCaches(false);
 
         for (SmartFilter filter : filters) {
             if (filter.hasMask()) {
@@ -788,8 +771,7 @@ public class SmartObject extends CompositeLayer {
         } else {
             contentTransform.concatenate(rotation);
         }
-        invalidateAllFilterCaches();
-        invalidateImageCache();
+        invalidateAllCaches(false);
     }
 
     private void setBaseSource(ImageSource baseSource) {
@@ -814,7 +796,8 @@ public class SmartObject extends CompositeLayer {
     public void moveUp(SmartFilter smartFilter) {
         int index = filters.indexOf(smartFilter);
         if (index == filters.size() - 1) {
-            return; // already the last filter
+            // already the last filter
+            throw new IllegalStateException();
         }
         swapSmartFilters(index, index + 1, "Move " + smartFilter.getName() + " Up");
         comp.setActiveLayer(smartFilter);
@@ -823,7 +806,8 @@ public class SmartObject extends CompositeLayer {
     public void moveDown(SmartFilter smartFilter) {
         int index = filters.indexOf(smartFilter);
         if (index == 0) {
-            return; // already the first filter
+            // already the first filter
+            throw new IllegalStateException();
         }
         swapSmartFilters(index - 1, index, "Move " + smartFilter.getName() + " Down");
         comp.setActiveLayer(smartFilter);
@@ -831,34 +815,34 @@ public class SmartObject extends CompositeLayer {
 
     public void swapSmartFilters(int indexA, int indexB, String editName) {
         assert indexB == indexA + 1;
+
         SmartFilter filterA = filters.get(indexA);
         SmartFilter filterB = filters.get(indexB);
+        assert filterA.getNext() == filterB;
+        assert filterB.getImageSource() == filterA;
 
-        // handle the filter below them
-        SmartFilter below = null;
-        if (indexA != 0) {
-            below = filters.get(indexA - 1);
+        SmartFilter below = (indexA == 0) ? null : filters.get(indexA - 1);
+        SmartFilter above = filterB.getNext();
+        ImageSource origSource = filterA.getImageSource();
+
+        Collections.swap(filters, indexA, indexB);
+
+        if (below != null) {
             assert below.getNext() == filterA;
             below.setNext(filterB);
         }
 
-        // handle the swap
-        assert filterA.getNext() == filterB;
-        assert filterB.getImageSource() == filterA;
-        ImageSource origSource = filterA.getImageSource();
-        SmartFilter above = filterB.getNext(); // keep the reference
-        filterB.setNext(filterA);
-        filterA.setImageSource(filterB);
-        filterB.setImageSource(origSource);
-        Collections.swap(filters, indexA, indexB);
-
-        // handle the filter above them
         if (above != null) {
             filterA.setNext(above);
             above.setImageSource(filterA);
         } else {
             filterA.setNext(null);
         }
+
+        filterB.setNext(filterA);
+        filterA.setImageSource(filterB);
+        filterB.setImageSource(origSource);
+
         assert checkInvariants();
 
         if (editName != null) {
@@ -1007,7 +991,7 @@ public class SmartObject extends CompositeLayer {
             }
         }
         for (SmartFilter filter : filters) {
-            BufferedImage filterCache = filter.getCachedImage();
+            BufferedImage filterCache = filter.getOutputCache();
             if (filterCache != null) {
                 Debug.debugImage(filterCache, "filterCache for " + filter.getName());
             }
@@ -1053,7 +1037,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void addLayerToList(int index, Layer newLayer) {
+    public void addLayerToList(Layer newLayer, int index) {
         SmartFilter newSmartFilter = (SmartFilter) newLayer;
 
         // This code is called when duplicating a smart filter.

@@ -30,13 +30,13 @@ public class WaterFilter extends TransformFilter {
     private float wavelength = 16;
     private float amplitude = 10;
     private float phase = 0;
-    private float centreX = 0.5f;
-    private float centreY = 0.5f;
+    private float centerX = 0.5f;
+    private float centerY = 0.5f;
     private float radius = 50;
 
     private float radius2 = 0;
-    private float icentreX;
-    private float icentreY;
+    private float icenterX;
+    private float icenterY;
 
     public WaterFilter(String filterName) {
         super(filterName);
@@ -46,121 +46,55 @@ public class WaterFilter extends TransformFilter {
      * Set the wavelength of the ripples.
      *
      * @param wavelength the wavelength
-     * @see #getWavelength
      */
     public void setWavelength(float wavelength) {
         this.wavelength = wavelength;
     }
 
     /**
-     * Get the wavelength of the ripples.
-     *
-     * @return the wavelength
-     * @see #setWavelength
-     */
-    public float getWavelength() {
-        return wavelength;
-    }
-
-    /**
      * Set the amplitude of the ripples.
      *
      * @param amplitude the amplitude
-     * @see #getAmplitude
      */
     public void setAmplitude(float amplitude) {
         this.amplitude = amplitude;
     }
 
     /**
-     * Get the amplitude of the ripples.
-     *
-     * @return the amplitude
-     * @see #setAmplitude
-     */
-    public float getAmplitude() {
-        return amplitude;
-    }
-
-    /**
      * Set the phase of the ripples.
      *
      * @param phase the phase
-     * @see #getPhase
      */
     public void setPhase(float phase) {
         this.phase = phase;
     }
 
     /**
-     * Get the phase of the ripples.
+     * Set the center of the effect in the X direction as a proportion of the image size.
      *
-     * @return the phase
-     * @see #setPhase
+     * @param centerX the center
      */
-    public float getPhase() {
-        return phase;
+    public void setCenterX(float centerX) {
+        this.centerX = centerX;
     }
 
     /**
-     * Set the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect in the Y direction as a proportion of the image size.
      *
-     * @param centreX the center
-     * @see #getCentreX
+     * @param centerY the center
      */
-    public void setCentreX(float centreX) {
-        this.centreX = centreX;
+    public void setCenterY(float centerY) {
+        this.centerY = centerY;
     }
 
     /**
-     * Get the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect as a proportion of the image size.
      *
-     * @return the center
-     * @see #setCentreX
+     * @param center the center
      */
-    public float getCentreX() {
-        return centreX;
-    }
-
-    /**
-     * Set the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centreY the center
-     * @see #getCentreY
-     */
-    public void setCentreY(float centreY) {
-        this.centreY = centreY;
-    }
-
-    /**
-     * Get the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentreY
-     */
-    public float getCentreY() {
-        return centreY;
-    }
-
-    /**
-     * Set the centre of the effect as a proportion of the image size.
-     *
-     * @param centre the center
-     * @see #getCentre
-     */
-    public void setCentre(Point2D centre) {
-        centreX = (float) centre.getX();
-        centreY = (float) centre.getY();
-    }
-
-    /**
-     * Get the centre of the effect as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentre
-     */
-    public Point2D getCentre() {
-        return new Point2D.Float(centreX, centreY);
+    public void setCenter(Point2D center) {
+        centerX = (float) center.getX();
+        centerY = (float) center.getY();
     }
 
     /**
@@ -168,28 +102,17 @@ public class WaterFilter extends TransformFilter {
      *
      * @param radius the radius
      * @min-value 0
-     * @see #getRadius
      */
     public void setRadius(float radius) {
         this.radius = radius;
     }
 
-    /**
-     * Get the radius of the effect.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public float getRadius() {
-        return radius;
-    }
-
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        icentreX = src.getWidth() * centreX;
-        icentreY = src.getHeight() * centreY;
+        icenterX = src.getWidth() * centerX;
+        icenterY = src.getHeight() * centerY;
         if (radius == 0) {
-            radius = Math.min(icentreX, icentreY);
+            radius = Math.min(icenterX, icenterY);
         }
         radius2 = radius * radius;
         return super.filter(src, dst);
@@ -197,8 +120,8 @@ public class WaterFilter extends TransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - icentreX;
-        float dy = y - icentreY;
+        float dx = x - icenterX;
+        float dy = y - icenterY;
         float distance2 = dx * dx + dy * dy;
         if (distance2 > radius2) {
             out[0] = x;
@@ -222,7 +145,7 @@ public class WaterFilter extends TransformFilter {
 
     public Shape[] getAffectedAreaShapes() {
         return new Shape[]{
-                new Ellipse2D.Float(icentreX - radius, icentreY - radius, 2 * radius, 2 * radius)
+            new Ellipse2D.Float(icenterX - radius, icenterY - radius, 2 * radius, 2 * radius)
         };
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -181,7 +181,7 @@ public class FgBgColorSelector extends JLayeredPane {
         Color newFgColor = layerMaskEditing ? maskBgColor : bgColor;
         Color newBgColor = layerMaskEditing ? maskFgColor : fgColor;
 
-        // notify the listenersw only once
+        // notify the listeners only once
         setFgColor(newFgColor, false);
         setBgColor(newBgColor, true);
     }

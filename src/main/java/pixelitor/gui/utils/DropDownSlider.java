@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import static java.awt.FlowLayout.CENTER;
 import static javax.swing.SwingConstants.HORIZONTAL;
 
 /**
- * A special combo box that shows a slider in the popup window.
+ * A specialized combo box that has a slider in its popup window.
  */
 public class DropDownSlider extends JComboBox<String> {
     private final JPopupMenu popupMenu;
@@ -37,7 +37,7 @@ public class DropDownSlider extends JComboBox<String> {
 
     public DropDownSlider(int minValue, int value, int maxValue) {
         super(new String[]{String.valueOf(value)});
-        recalcPreferredSize();
+
         setEditable(true);
 
         new IntDocumentFilter(minValue, maxValue).applyOn(getEditorComponent());
@@ -49,8 +49,17 @@ public class DropDownSlider extends JComboBox<String> {
 
         slider.addChangeListener(e ->
             setSelectedItem(String.valueOf(slider.getValue())));
+    }
 
+    // called when initializating and when the look and feel changes
+    @Override
+    public void updateUI() {
+        super.updateUI();
         replaceMouseListeners();
+        if (popupMenu != null) {
+            SwingUtilities.updateComponentTreeUI(popupMenu);
+        }
+        updatePreferredSize();
     }
 
     @Override
@@ -65,7 +74,7 @@ public class DropDownSlider extends JComboBox<String> {
     }
 
     private void replaceMouseListeners() {
-        MouseAdapter newMouseListener = new MouseAdapter() {
+        MouseAdapter popupMouseListener = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 setPopupVisible(true);
@@ -73,11 +82,11 @@ public class DropDownSlider extends JComboBox<String> {
         };
 
         // it this necessary?
-        GUIUtils.replaceMouseListeners(this, newMouseListener);
+        GUIUtils.replaceMouseListeners(this, popupMouseListener);
 
         for (Component c : getComponents()) {
             if (c instanceof JButton b) {
-                GUIUtils.replaceMouseListeners(b, newMouseListener);
+                GUIUtils.replaceMouseListeners(b, popupMouseListener);
                 break;
             }
         }
@@ -95,23 +104,13 @@ public class DropDownSlider extends JComboBox<String> {
     }
 
     @Override
-    public void updateUI() {
-        super.updateUI();
-        replaceMouseListeners();
-        if (popupMenu != null) {
-            SwingUtilities.updateComponentTreeUI(popupMenu);
-        }
-        recalcPreferredSize();
-    }
-
-    @Override
     public Dimension getPreferredSize() {
         return preferredSize;
     }
 
     // The default preferred size is larger than required,
     // and it would increase the width of the whole layer panel.
-    private void recalcPreferredSize() {
+    private void updatePreferredSize() {
         JTextField tf = getEditorComponent();
         int stringWidth = tf.getFontMetrics(tf.getFont()).stringWidth("100");
         preferredSize = super.getPreferredSize();

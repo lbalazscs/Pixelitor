@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,7 +88,7 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public void afterDeserialization() {
-        recalculateCachedImage();
+        recalcCachedImage();
     }
 
     @Override
@@ -118,7 +118,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public boolean exportsORAImage() {
+    public boolean canExportORAImage() {
         return false;
     }
 
@@ -130,38 +130,43 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public BufferedImage render(Graphics2D g, BufferedImage currentComposite, boolean firstVisibleLayer) {
         if (isPassThrough()) {
-            // Apply the layers as if they were directly in the parent holder.
-            // The algorithm is similar to ImageUtils.calcComposite(),
-            // but here we have to consider the existing state of the composition.
-            for (Layer layer : layers) {
-                if (layer.isVisible()) {
-                    BufferedImage result = layer.render(g, currentComposite, firstVisibleLayer);
-                    if (result != null) { // adjustment layer or watermarking text layer
-                        currentComposite = result;
-                        if (g != null) {
-                            g.dispose();
-                        }
-                        g = currentComposite.createGraphics();
-                    }
-                    firstVisibleLayer = false;
-                }
+            return renderPassThrough(g, currentComposite, firstVisibleLayer);
+        }
+
+        // TODO Currently the layer mask of isolated
+        //   (non-passthrough) groups is ignored.
+        g.setComposite(blendingMode.getComposite(getOpacity()));
+        g.drawImage(getCachedImage(), 0, 0, null);
+
+        return currentComposite;
+    }
+
+    private BufferedImage renderPassThrough(Graphics2D g, BufferedImage currentComposite, boolean firstVisibleLayer) {
+        // Apply the layers as if they were directly in the parent holder.
+        // The algorithm is similar to ImageUtils.calcComposite(),
+        // but here we have to consider the existing state of the composition.
+        for (Layer layer : layers) {
+            if (!layer.isVisible()) {
+                continue;
             }
-        } else {
-            // TODO Currently the layer mask of isolated
-            //   (non-passthrough) groups is ignored.
-            g.setComposite(blendingMode.getComposite(getOpacity()));
-            g.drawImage(getCachedImage(), 0, 0, null);
+            BufferedImage result = layer.render(g, currentComposite, firstVisibleLayer);
+            if (result != null) { // adjustment layer or watermarking text layer
+                currentComposite = result;
+                g.dispose();
+                g = currentComposite.createGraphics();
+            }
+            firstVisibleLayer = false;
         }
         return currentComposite;
     }
 
     @Override
     public void update(boolean updateHistogram) {
-        recalculateCachedImage();
+        recalcCachedImage();
         holder.update(updateHistogram);
     }
 
-    private void recalculateCachedImage() {
+    private void recalcCachedImage() {
         if (isPassThrough()) {
             cachedImage = null;
         } else {
@@ -196,7 +201,7 @@ public class LayerGroup extends CompositeLayer {
 
     private BufferedImage getCachedImage() {
         if (cachedImage == null) {
-            recalculateCachedImage();
+            recalcCachedImage();
         }
         return cachedImage;
     }
@@ -221,7 +226,7 @@ public class LayerGroup extends CompositeLayer {
 
         if (update) {
             if (wasPassThrough != isPassThrough()) {
-                recalculateCachedImage();
+                recalcCachedImage();
                 thumb = null;
                 updateIconImage();
             }
@@ -332,7 +337,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void addLayerToList(int index, Layer newLayer) {
+    public void addLayerToList(Layer newLayer, int index) {
         layers.add(index, newLayer);
     }
 
@@ -429,17 +434,18 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public BufferedImage createIconThumbnail() {
+        if (thumb != null) {
+            return thumb;
+        }
+
         if (isPassThrough()) {
-            if (thumb == null) {
-                thumb = ImageUtils.createCircleThumb(new Color(0, 138, 0));
-            }
+            thumb = ImageUtils.createCircleThumb(new Color(0, 138, 0));
+        } else if (cachedImage != null) {
+            thumb = createThumbnail(cachedImage, thumbSize, thumbCheckerBoardPainter);
         } else {
-            if (cachedImage != null) {
-                thumb = createThumbnail(cachedImage, thumbSize, thumbCheckerBoardPainter);
-            } else {
-                // should not happen
-                thumb = ImageUtils.createCircleThumb(new Color(0, 0, 203));
-            }
+            // isolated groups should always have a cached image
+            throw new IllegalStateException();
+//            thumb = ImageUtils.createCircleThumb(new Color(0, 0, 203));
         }
 
         return thumb;
@@ -448,7 +454,8 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public void unGroup() {
         if (layers.isEmpty() && isTopLevel() && comp.getNumLayers() == 1) {
-            String msg = "<html>The empty layer group <b>" + name + "</b> can't be ungrouped<br>because a composition must always have at least one layer.";
+            String msg = "<html>The empty layer group <b>" + name + "</b> can't be ungrouped"
+                + "<br>because a composition must always have at least one layer.";
             Messages.showInfo("Can't Ungroup", msg);
             return;
         }

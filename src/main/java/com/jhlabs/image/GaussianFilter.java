@@ -58,21 +58,10 @@ public class GaussianFilter extends ConvolveFilter {
      * @param radius the radius of the blur in pixels.
      * @min-value 0
      * @max-value 100+
-     * @see #getRadius
      */
     public void setRadius(float radius) {
         this.radius = radius;
         kernel = makeKernel(radius);
-    }
-
-    /**
-     * Get the radius of the kernel.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public float getRadius() {
-        return radius;
     }
 
     @Override
@@ -88,8 +77,6 @@ public class GaussianFilter extends ConvolveFilter {
 
         int[] inPixels = new int[width * height];
 
-//        src.getRGB(0, 0, width, height, inPixels, 0, width);
-//        int[] inPixels = ImageUtils.getPixelsAsArray( src);
         getRGB(src, 0, 0, width, height, inPixels);
 
         if (radius > 0) {
@@ -98,7 +85,6 @@ public class GaussianFilter extends ConvolveFilter {
             convolveAndTranspose(kernel, outPixels, inPixels, height, width, false, premultiplyAlpha, CLAMP_EDGES, pt);
         }
 
-//        dst.setRGB(0, 0, width, height, inPixels, 0, width);
         setRGB(dst, 0, 0, width, height, inPixels);
 
         finishProgressTracker();
@@ -124,17 +110,17 @@ public class GaussianFilter extends ConvolveFilter {
         int cols = kernel.getWidth();
         int cols2 = cols / 2;
 
-        Future<?>[] resultLines = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> convolveAndTransposeLine(inPixels, outPixels, width, height, premultiply, unpremultiply, edgeAction, matrix, cols2, finalY);
-            resultLines[y] = ThreadPool.submit(lineTask);
+            Runnable rowTask = () -> convolveAndTransposeRow(inPixels, outPixels, width, height, premultiply, unpremultiply, edgeAction, matrix, cols2, finalY);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
 
-        ThreadPool.waitFor(resultLines, pt);
+        ThreadPool.waitFor(rowFutures, pt);
     }
 
-    private static void convolveAndTransposeLine(int[] inPixels, int[] outPixels, int width, int height, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {
+    private static void convolveAndTransposeRow(int[] inPixels, int[] outPixels, int width, int height, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {
         int index = y;
         int ioffset = y * width;
         for (int x = 0; x < width; x++) {

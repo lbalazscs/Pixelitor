@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -146,7 +146,7 @@ public class PreferencesPanel extends JTabbedPane {
             setCursor(Cursors.BUSY);
 
             EventQueue.invokeLater(() -> {
-                Themes.install(theme, true, false);
+                Themes.apply(theme, true, false);
 //                accentColorEnabler.accept(theme.isFlat());
                 SwingUtilities.getWindowAncestor(this).pack();
                 setCursor(Cursors.DEFAULT);
@@ -198,7 +198,7 @@ public class PreferencesPanel extends JTabbedPane {
         }
 
         EventQueue.invokeLater(() -> {
-            Themes.updateAllUI();
+            Themes.updateAllComponents();
             SwingUtilities.getWindowAncestor(this).pack();
             setCursor(Cursors.DEFAULT);
         });

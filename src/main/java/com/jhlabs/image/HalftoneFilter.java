@@ -38,68 +38,31 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
      * @param softness the softness
      * @min-value 0
      * @max-value 1
-     * @see #getSoftness
      */
     public void setSoftness(float softness) {
         this.softness = softness;
     }
 
     /**
-     * Get the softness of the effect.
-     *
-     * @return the softness
-     * @see #setSoftness
-     */
-    public float getSoftness() {
-        return softness;
-    }
-
-    /**
      * Set the halftone mask.
      *
      * @param mask the mask
-     * @see #getMask
      */
     public void setMask(BufferedImage mask) {
         this.mask = mask;
-    }
-
-    /**
-     * Get the halftone mask.
-     *
-     * @return the mask
-     * @see #setMask
-     */
-    public BufferedImage getMask() {
-        return mask;
     }
 
     public void setInvert(boolean invert) {
         this.invert = invert;
     }
 
-    public boolean getInvert() {
-        return invert;
-    }
-
     /**
      * Set whether to do monochrome halftoning.
      *
      * @param monochrome true for monochrome halftoning
-     * @see #getMonochrome
      */
     public void setMonochrome(boolean monochrome) {
         this.monochrome = monochrome;
-    }
-
-    /**
-     * Get whether to do monochrome halftoning.
-     *
-     * @return true for monochrome halftoning
-     * @see #setMonochrome
-     */
-    public boolean getMonochrome() {
-        return monochrome;
     }
 
     /**

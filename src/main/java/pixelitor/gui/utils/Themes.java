@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,15 +44,16 @@ public class Themes {
     public static final AccentColor DEFAULT_ACCENT_COLOR = AccentColor.BLUE;
     private static AccentColor activeAccentColor = DEFAULT_ACCENT_COLOR;
 
-    public static void install(Theme theme, boolean updateGUI, boolean force) {
+    public static void apply(Theme theme, boolean updateGUI, boolean force) {
         if (theme != activeTheme || force) {
-            setLookAndFeel(theme);
+            applyLookAndFeel(theme);
             activeTheme = theme;
+
             if (updateGUI) {
                 LayerGUILayout.themeChanged(theme);
                 SelectionState.setupBorders(theme.isDark());
                 FgBgColors.getGUI().themeChanged();
-                updateAllUI();
+                updateAllComponents();
             }
         }
     }
@@ -67,21 +68,23 @@ public class Themes {
         activeAccentColor = newColor;
         useAccentColor(newColor.asColor());
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", newColor.asHexCode()));
-        install(activeTheme, true, true);
+        apply(activeTheme, true, true);
     }
 
     public static void useAccentColor(Color color) {
         ToolButton.setDarkThemeSelectedColor(color);
     }
 
-    public static void updateAllUI() {
-        Window[] windows = Window.getWindows();
-        for (Window window : windows) {
+    /**
+     * Updates all UI components to reflect theme changes.
+     */
+    public static void updateAllComponents() {
+        for (Window window : Window.getWindows()) {
             SwingUtilities.updateComponentTreeUI(window);
         }
     }
 
-    private static void setLookAndFeel(Theme theme) {
+    private static void applyLookAndFeel(Theme theme) {
         try {
             // has an effect only for the flat lafs
             UIManager.put("Component.focusWidth", 1);

@@ -43,72 +43,38 @@ public class SwimFilter extends TransformFilter {
      * @param amount the amount of swim
      * @min-value 0
      * @max-value 100+
-     * @see #getAmount
      */
     public void setAmount(float amount) {
         this.amount = amount;
     }
 
     /**
-     * Get the amount of swim.
-     *
-     * @return the amount swim
-     * @see #setAmount
-     */
-    public float getAmount() {
-        return amount;
-    }
-
-    /**
-     * Specifies the scale of the distortion.
+     * Sets the scale of the distortion.
      *
      * @param scale the scale of the distortion.
      * @min-value 1
      * @max-value 300+
-     * @see #getScale
      */
     public void setScale(float scale) {
         this.scale = scale;
     }
 
     /**
-     * Returns the scale of the distortion.
-     *
-     * @return the scale of the distortion.
-     * @see #setScale
-     */
-    public float getScale() {
-        return scale;
-    }
-
-    /**
-     * Specifies the stretch factor of the distortion.
+     * Sets the stretch factor of the distortion.
      *
      * @param stretch the stretch factor of the distortion.
      * @min-value 1
      * @max-value 50+
-     * @see #getStretch
      */
     public void setStretch(float stretch) {
         this.stretch = stretch;
     }
 
     /**
-     * Returns the stretch factor of the distortion.
-     *
-     * @return the stretch factor of the distortion.
-     * @see #setStretch
-     */
-    public float getStretch() {
-        return stretch;
-    }
-
-    /**
-     * Specifies the angle of the effect.
+     * Sets the angle of the effect.
      *
      * @param angle the angle of the effect.
      * @angle
-     * @see #getAngle
      */
     public void setAngle(float angle) {
         this.angle = angle;
@@ -121,34 +87,13 @@ public class SwimFilter extends TransformFilter {
     }
 
     /**
-     * Returns the angle of the effect.
-     *
-     * @return the angle of the effect.
-     * @see #setAngle
-     */
-    public float getAngle() {
-        return angle;
-    }
-
-    /**
-     * Specifies the time. Use this to animate the effect.
+     * Sets the time. Use this to animate the effect.
      *
      * @param time the time.
      * @angle
-     * @see #getTime
      */
     public void setTime(float time) {
         this.time = time;
-    }
-
-    /**
-     * Returns the time.
-     *
-     * @return the time.
-     * @see #setTime
-     */
-    public float getTime() {
-        return time;
     }
 
     @Override

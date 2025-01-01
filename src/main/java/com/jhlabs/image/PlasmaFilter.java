@@ -20,9 +20,13 @@ import pixelitor.utils.ProgressTracker;
 
 import java.util.SplittableRandom;
 
+/**
+ * Generates plasma-like textures using a recursive diamond-square algorithm.
+ * See https://en.wikipedia.org/wiki/Diamond-square_algorithm
+ */
 public class PlasmaFilter extends WholeImageFilter {
-    private static final int DO_PLASMA_CALL_PER_UNIT = 200_000;
-    private int doPlasmaCalls = 0;
+    private static final int ITERATIONS_PER_UNIT = 200_000;
+    private int iterationCount = 0;
 
     public float turbulence = 1.0f;
     private float scaling = 0.0f;
@@ -45,61 +49,31 @@ public class PlasmaFilter extends WholeImageFilter {
     }
 
     /**
-     * Specifies the turbulence of the texture.
+     * Sets the turbulence of the texture.
      *
      * @param turbulence the turbulence of the texture.
      * @min-value 0
      * @max-value 10
-     * @see #getTurbulence
      */
     public void setTurbulence(float turbulence) {
         this.turbulence = turbulence;
-    }
-
-    /**
-     * Returns the turbulence of the effect.
-     *
-     * @return the turbulence of the effect.
-     * @see #setTurbulence
-     */
-    public float getTurbulence() {
-        return turbulence;
     }
 
     public void setScaling(float scaling) {
         this.scaling = scaling;
     }
 
-    public float getScaling() {
-        return scaling;
-    }
-
     /**
      * Set the colormap to be used for the filter.
      *
      * @param colormap the colormap
-     * @see #getColormap
      */
     public void setColormap(Colormap colormap) {
         this.colormap = colormap;
     }
 
-    /**
-     * Get the colormap to be used for the filter.
-     *
-     * @return the colormap
-     * @see #setColormap
-     */
-    public Colormap getColormap() {
-        return colormap;
-    }
-
     public void setUseColormap(boolean useColormap) {
         this.useColormap = useColormap;
-    }
-
-    public boolean getUseColormap() {
-        return useColormap;
     }
 
     private int randomRGB() {
@@ -119,23 +93,19 @@ public class PlasmaFilter extends WholeImageFilter {
         int b = rgb & 0xff;
 
         if (lessColors) {
+            // apply the same variation to all channels
             int d = (int) (amount * (random.nextDouble() - 0.5));
-
-            int r1 = r + d;
-            int g1 = g + d;
-            int b1 = b + d;
-
-            r = PixelUtils.clamp(r1);
-            g = PixelUtils.clamp(g1);
-            b = PixelUtils.clamp(b1);
+            r = PixelUtils.clamp(r + d);
+            g = PixelUtils.clamp(g + d);
+            b = PixelUtils.clamp(b + d);
         } else {
-            int r1 = r + (int) (amount * (random.nextDouble() - 0.5));
-            int g1 = g + (int) (amount * (random.nextDouble() - 0.5));
-            int b1 = b + (int) (amount * (random.nextDouble() - 0.5));
-
-            r = PixelUtils.clamp(r1);
-            g = PixelUtils.clamp(g1);
-            b = PixelUtils.clamp(b1);
+            // apply independent variations to each channel
+            int d1 = (int) (amount * (random.nextDouble() - 0.5));
+            int d2 = (int) (amount * (random.nextDouble() - 0.5));
+            int d3 = (int) (amount * (random.nextDouble() - 0.5));
+            r = PixelUtils.clamp(r + d1);
+            g = PixelUtils.clamp(g + d2);
+            b = PixelUtils.clamp(b + d3);
         }
 
         return 0xff000000 | (r << 16) | (g << 8) | b;
@@ -159,14 +129,15 @@ public class PlasmaFilter extends WholeImageFilter {
         return (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
     }
 
-    private boolean doPlasma(int x1, int y1, int x2, int y2, int[] pixels, int stride, int depth, int scale) {
-        doPlasmaCalls++;
-        if (doPlasmaCalls == DO_PLASMA_CALL_PER_UNIT) {
-            doPlasmaCalls = 0;
+    private boolean plasmaStep(int x1, int y1, int x2, int y2, int[] pixels, int stride, int depth, int scale) {
+        iterationCount++;
+        if (iterationCount == ITERATIONS_PER_UNIT) {
+            iterationCount = 0;
             pt.unitDone();
         }
 
-        int mx, my;
+        int midX = (x1 + x2) / 2;
+        int midY = (y1 + y2) / 2;
 
         if (depth == 0) {
             int ml, mr, mt, mb, mm, t;
@@ -178,40 +149,37 @@ public class PlasmaFilter extends WholeImageFilter {
 
             float amount = ((256.0f / (2.0f * scale)) * turbulence);
 
-            mx = (x1 + x2) / 2;
-            my = (y1 + y2) / 2;
-
-            if (mx == x1 && mx == x2 && my == y1 && my == y2) {
+            if (midX == x1 && midX == x2 && midY == y1 && midY == y2) {
                 return true;
             }
 
-            if (mx != x1 || mx != x2) {
+            if (midX != x1 || midX != x2) {
                 // left
                 ml = average(tl, bl);
                 ml = changeColor(ml, amount);
-                pixels[my * stride + x1] = ml;
+                pixels[midY * stride + x1] = ml;
 
                 if (x1 != x2) {
                     // right
                     mr = average(tr, br);
                     mr = changeColor(mr, amount);
-                    pixels[my * stride + x2] = mr;
+                    pixels[midY * stride + x2] = mr;
                 }
             }
 
-            if (my != y1 || my != y2) {
-                if (x1 != mx || my != y2) {
+            if (midY != y1 || midY != y2) {
+                if (x1 != midX || midY != y2) {
                     // bottom
                     mb = average(bl, br);
                     mb = changeColor(mb, amount);
-                    pixels[y2 * stride + mx] = mb;
+                    pixels[y2 * stride + midX] = mb;
                 }
 
                 if (y1 != y2) {
                     // top
                     mt = average(tl, tr);
                     mt = changeColor(mt, amount);
-                    pixels[y1 * stride + mx] = mt;
+                    pixels[y1 * stride + midX] = mt;
                 }
             }
 
@@ -221,23 +189,21 @@ public class PlasmaFilter extends WholeImageFilter {
                 t = average(bl, tr);
                 mm = average(mm, t);
                 mm = changeColor(mm, amount);
-                pixels[my * stride + mx] = mm;
+                pixels[midY * stride + midX] = mm;
             }
 
             return x2 - x1 >= 3 || y2 - y1 >= 3;
         }
 
-        mx = (x1 + x2) / 2;
-        my = (y1 + y2) / 2;
-
+        // recursively process quadrants
         // top left
-        doPlasma(x1, y1, mx, my, pixels, stride, depth - 1, scale + 1);
+        plasmaStep(x1, y1, midX, midY, pixels, stride, depth - 1, scale + 1);
         // bottom left
-        doPlasma(x1, my, mx, y2, pixels, stride, depth - 1, scale + 1);
+        plasmaStep(x1, midY, midX, y2, pixels, stride, depth - 1, scale + 1);
         // top right
-        doPlasma(mx, y1, x2, my, pixels, stride, depth - 1, scale + 1);
+        plasmaStep(midX, y1, x2, midY, pixels, stride, depth - 1, scale + 1);
         // bottom right
-        return doPlasma(mx, my, x2, y2, pixels, stride, depth - 1, scale + 1);
+        return plasmaStep(midX, midY, x2, y2, pixels, stride, depth - 1, scale + 1);
     }
 
     @Override
@@ -270,8 +236,8 @@ public class PlasmaFilter extends WholeImageFilter {
         outPixels[0 * width + w1 / 2] = randomRGB();
         outPixels[h1 * width + w1 / 2] = randomRGB();
 
-        int estimatedDoPlasmaCalls = estimateDoPlasmaCalls(width, height);
-        int workUnits = estimatedDoPlasmaCalls / DO_PLASMA_CALL_PER_UNIT;
+        int estimatedIterations = calcEstimatedIterations(width, height);
+        int workUnits = estimatedIterations / ITERATIONS_PER_UNIT;
 
         if (workUnits > 0) {
             pt = createProgressTracker(workUnits);
@@ -279,13 +245,13 @@ public class PlasmaFilter extends WholeImageFilter {
             pt = ProgressTracker.NULL_TRACKER;
         }
 
-        doPlasmaCalls = 0;
+        iterationCount = 0;
 
         /*
          * Now we recurse through the image, going further each time.
          */
         int depth = 1;
-        while (doPlasma(0, 0, width - 1, height - 1, outPixels, width, depth, 0)) {
+        while (plasmaStep(0, 0, width - 1, height - 1, outPixels, width, depth, 0)) {
             depth++;
         }
 
@@ -302,33 +268,30 @@ public class PlasmaFilter extends WholeImageFilter {
         return outPixels;
     }
 
-    private static int estimateDoPlasmaCalls(int width, int height) {
-        // some logarithmic formula could be found
-        // instead of these empirical values
+    private static int calcEstimatedIterations(int width, int height) {
         int maxSize = Math.max(width, height);
-        int estimatedDoPlasmaCalls = 7278;
+
+        // empirically determined values
         if (maxSize <= 129) {
-            // doesn't care about smaller thresholds, they
-            // don't have a progress bar anyway
-            estimatedDoPlasmaCalls = 7278;
+            // ignores smaller thresholds, they won't have a progress bar
+            return 7_278;
         } else if (maxSize <= 257) {
-            estimatedDoPlasmaCalls = 29123;
+            return 29_123;
         } else if (maxSize <= 513) {
-            estimatedDoPlasmaCalls = 116504;
+            return 116_504;
         } else if (maxSize <= 1025) {
-            estimatedDoPlasmaCalls = 466029;
+            return 466_029;
         } else if (maxSize <= 2049) {
-            estimatedDoPlasmaCalls = 1864130;
+            return 1_864_130;
         } else if (maxSize <= 4097) {
-            estimatedDoPlasmaCalls = 7456535;
+            return 7_456_535;
         } else if (maxSize <= 8193) {
-            estimatedDoPlasmaCalls = 29826156;
+            return 29_826_156;
         } else {
             // we don't expect images with a
             // max size of more than 16 000 pixels
-            estimatedDoPlasmaCalls = 119304641;
+            return 119_304_641;
         }
-        return estimatedDoPlasmaCalls;
     }
 
     @Override

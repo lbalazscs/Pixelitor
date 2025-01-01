@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -551,8 +551,7 @@ public class WorkflowTest {
         });
         // add a mask to the second smart filter and edit it
         app.addLayerMask();
-        runFilterWithDialog("Concentric Shapes", dialog ->
-            dialog.slider("Distance").slideTo(75));
+        runFilterWithDialog("Rose");
 
         // switch back from the mask and add a third smart filter
         keyboard.pressCtrlOne();

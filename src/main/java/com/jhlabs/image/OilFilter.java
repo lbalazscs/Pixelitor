@@ -49,20 +49,9 @@ public class OilFilter extends WholeImageFilter {
      * Set the number of levels for the effect.
      *
      * @param levels the number of levels
-     * @see #getLevels
      */
     public void setLevels(int levels) {
         this.levels = levels;
-    }
-
-    /**
-     * Get the number of levels for the effect.
-     *
-     * @return the number of levels
-     * @see #setLevels
-     */
-    public int getLevels() {
-        return levels;
     }
 
     @Override
@@ -70,20 +59,20 @@ public class OilFilter extends WholeImageFilter {
         int[] outPixels = new int[width * height];
 
         pt = createProgressTracker(height);
-        Future<?>[] futures = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calculateLine(width, height, inPixels, outPixels, finalY);
-            futures[y] = ThreadPool.submit(lineTask);
+            Runnable rowTask = () -> processRow(width, height, inPixels, outPixels, finalY);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
 
-        ThreadPool.waitFor(futures, pt);
+        ThreadPool.waitFor(rowFutures, pt);
         finishProgressTracker();
 
         return outPixels;
     }
 
-    private void calculateLine(int width, int height, int[] inPixels, int[] outPixels, int y) {
+    private void processRow(int width, int height, int[] inPixels, int[] outPixels, int y) {
         int index = y * width;
         int[] rTotal = new int[levels];
         int[] gTotal = new int[levels];

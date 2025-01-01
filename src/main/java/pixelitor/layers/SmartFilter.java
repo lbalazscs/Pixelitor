@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,26 +43,29 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A specialized layer inside a smart object that contains a
- * filter that can edit its smart object in a non-destructive way.
- * Unlike regular adjustment layers, they don't have to apply their filter
- * whenever an unrelated layer is changed, because their output is cached
- * inside the smart object. Additionally, smart filters also
- * cache their own output, so that if the filter settings are changed,
- * only the filters downstream from that filter will be rerun.
+ * A specialized layer within a smart object that applies a filter
+ * non-destructively. Unlike regular adjustment layers, they don't
+ * have to execute their filter whenever an unrelated layer is changed,
+ * because their output is cached inside the smart object.
+ * Additionally, smart filters also cache their own output,
+ * so that if the filter settings are changed, only the filters
+ * downstream from that filter will be rerun.
  */
 public class SmartFilter extends AdjustmentLayer implements ImageSource {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // the source of the input image, for example the previous
+    // smart filter in the chain or the composition if this is the first
     private ImageSource imageSource;
-    private transient BufferedImage cachedImage;
-    private SmartObject smartObject;
 
-    // the smart filter that is applied after this one.
+    private transient BufferedImage outputCache;
+    private SmartObject smartObject; // the parent
+
+    // the next smart filter in the chain (null if this is the last filter)
     private SmartFilter next;
 
-    // static field for the copy-paste of smart filters
+    // static field used for the copy-paste of smart filters
     public static SmartFilter copiedSmartFilter;
 
     public SmartFilter(Filter filter, ImageSource imageSource, SmartObject smartObject) {
@@ -79,13 +82,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         this.smartObject = orig.smartObject;
 
         holder = smartObject;
-        cachedImage = orig.cachedImage; // safe to share
+        outputCache = orig.outputCache; // safe to share
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // defaults for transient fields
-        cachedImage = null;
+        outputCache = null;
 
         in.defaultReadObject();
 
@@ -99,25 +102,21 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
+    protected BufferedImage adjustImage(BufferedImage currentComposite,
+                                        boolean firstVisibleLayer) {
+        // Smart filters don't use the normal layer painting
+        // mechanism, therefore this methid is never called.
+        throw new IllegalStateException();
+    }
+
+    @Override
     public BufferedImage getImage() {
-        // If not visible, then ignore the cached image.
-        // The previous image must be cached anyway.
         BufferedImage prevImage = imageSource.getImage();
         if (!isVisible()) {
             return prevImage;
         }
 
-        return adjustImage(prevImage, false);
-    }
-
-    // Smart filters don't use the normal layer painting mechanism,
-    // therefore overriding this method isn't really necessary.
-    @Override
-    protected BufferedImage adjustImage(BufferedImage currentComposite,
-                                        boolean firstVisibleLayer) {
-        assert !firstVisibleLayer; // never true for smart filters
-
-        BufferedImage transformed = transformImage(currentComposite);
+        BufferedImage transformed = transformImage(prevImage);
 
         if (usesMask()) {
             // copy, because otherwise different masks
@@ -129,12 +128,12 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (!usesMask() && isNormalAndOpaque()) {
             return transformed;
         } else {
-            // Unlike an adjustment layer, this makes sure that imgSoFar
+            // Unlike an adjustment layer, this makes sure that prevImage
             // (which could be cached in the image source) isn't modified.
-            BufferedImage copy = ImageUtils.copyImage(currentComposite);
+            BufferedImage copy = ImageUtils.copyImage(prevImage);
 
             Graphics2D g = copy.createGraphics();
-            setupComposite(g, firstVisibleLayer);
+            setupComposite(g, false);
             g.drawImage(transformed, 0, 0, null);
             g.dispose();
             return copy;
@@ -143,26 +142,217 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     @Override
     public BufferedImage transformImage(BufferedImage src) {
-        if (cachedImage != null) {
-            return cachedImage;
+        if (outputCache != null) {
+            return outputCache;
         }
         assert src != null;
-        createCachedImage(src);
+        createOutputCache(src);
 
-        return cachedImage;
+        return outputCache;
     }
 
     public void evaluateNow() {
-        if (cachedImage == null) {
-            createCachedImage(imageSource.getImage());
+        if (outputCache == null) {
+            createOutputCache(imageSource.getImage());
         }
     }
 
-    private void createCachedImage(BufferedImage src) {
-        cachedImage = filter.transformImage(src);
-        if (cachedImage == src) {
-            cachedImage = ImageUtils.copyImage(cachedImage);
+    private void createOutputCache(BufferedImage src) {
+        outputCache = filter.transformImage(src);
+        if (outputCache == src) {
+            outputCache = ImageUtils.copyImage(outputCache);
         }
+    }
+
+    @Override
+    public void setVisible(boolean newVisibility, boolean addToHistory, boolean update) {
+        super.setVisible(newVisibility, addToHistory, false);
+        if (update) {
+            layerLevelSettingsChanged(true);
+        }
+    }
+
+    @Override
+    protected void maskChanged() {
+        layerLevelSettingsChanged(false);
+    }
+
+    @Override
+    public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
+        if (opacity == newOpacity) {
+            return;
+        }
+        super.setOpacity(newOpacity, addToHistory, false);
+        if (update) {
+            layerLevelSettingsChanged(true);
+        }
+    }
+
+    @Override
+    public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
+        if (blendingMode == newMode) {
+            return;
+        }
+        super.setBlendingMode(newMode, addToHistory, false);
+        if (update) {
+            layerLevelSettingsChanged(true);
+        }
+    }
+
+    /**
+     * Invalidates the cache for this filter and all subsequent filters in the chain.
+     */
+    public void invalidateChain() {
+        invalidateCache();
+        if (next != null) {
+            //noinspection TailRecursion
+            next.invalidateChain();
+        }
+    }
+
+    /**
+     * Clears the cached filtered image, forcing recomputation on next access.
+     */
+    public void invalidateCache() {
+        if (outputCache != null) {
+            outputCache.flush();
+            outputCache = null;
+        }
+    }
+
+    @Override
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+
+        invalidateAll();
+        holder.update();
+    }
+
+    /**
+     * Invalidates both the filter chain and the parent smart object's cache.
+     */
+    public void invalidateAll() {
+        invalidateChain();
+        smartObject.invalidateImageCache();
+    }
+
+    /**
+     * Only invalidates downstream filters and the smart object cache.
+     */
+    private void invalidateAllButTheCache() {
+        // invalidate only starting from the next one
+        if (next != null) {
+            next.invalidateChain();
+        }
+        smartObject.invalidateImageCache();
+    }
+
+    /**
+     * Called when "layer level" settings have changed (such
+     * as the blending mode, opacity, visibility, layer mask),
+     * but not the filter settings.
+     */
+    public void layerLevelSettingsChanged(boolean update) {
+        invalidateAllButTheCache();
+        if (update) {
+            holder.update();
+            smartObject.updateIconImage();
+        }
+    }
+
+    @Override
+    public void onFilterDialogAccepted(String filterName) {
+        super.onFilterDialogAccepted(filterName);
+        smartObject.updateIconImage();
+    }
+
+    @Override
+    public void onFilterDialogCanceled() {
+        boolean changed = filterSettingsChanged();
+        super.onFilterDialogCanceled();
+        if (changed) {
+            // Force recalculating the image if this dialog session
+            // changed the filter (and therefore the image).
+            invalidateAll();
+        }
+    }
+
+    @Override
+    public void startPreview(Filter filter, boolean firstPreview, Component busyCursorTarget) {
+        if (!firstPreview) {
+            invalidateAll();
+        }
+        if (outputCache != null) {
+            // the painting thread already calculated it
+            return;
+        }
+        GUIUtils.runWithBusyCursor(() ->
+                createOutputCache(imageSource.getImage()),
+            busyCursorTarget);
+        holder.update();
+    }
+
+    @Override
+    public JPopupMenu createLayerIconPopupMenu() {
+        // just create the popup menu from scratch, since the
+        // superclasses don't add anything to it
+        JPopupMenu popup = new JPopupMenu();
+
+        if (filter instanceof FilterWithGUI) {
+            popup.add(new TaskAction("Edit " + getName() + "...", this::edit));
+        }
+        popup.add(new TaskAction("Delete " + getName(), () ->
+            smartObject.deleteSmartFilter(this, true, true)));
+        popup.add(new TaskAction("Copy " + getName(), () ->
+            copiedSmartFilter = (SmartFilter) copy(CopyType.UNDO, true, comp)));
+
+        if (!hasMask()) {
+            popup.add(new TaskAction("Add Layer Mask", () -> addMask(false)));
+        }
+
+        popup.add(new TaskAction("Replace Filter...", this::replaceFilter));
+
+        int numSmartFilters = smartObject.getNumSmartFilters();
+        if (numSmartFilters > 1) {
+            int index = smartObject.indexOf(this);
+            boolean canMoveUp = index < numSmartFilters - 1;
+            boolean canMoveDown = index > 0;
+            if (canMoveUp && canMoveDown) {
+                popup.addSeparator();
+            }
+            if (canMoveUp) {
+                popup.add(new TaskAction("Move Up", Icons.getUpArrowIcon(), () ->
+                    smartObject.moveUp(this)));
+            }
+            if (canMoveDown) {
+                popup.add(new TaskAction("Move Down", Icons.getDownArrowIcon(), () ->
+                    smartObject.moveDown(this)));
+            }
+        }
+
+        return popup;
+    }
+
+    public void shapeDraggedOnMask() {
+        smartObject.invalidateImageCache();
+    }
+
+    private void replaceFilter() {
+        FilterAction action = FilterSearchPanel.showInDialog("Replace " + filter.getName());
+        if (action == null) {
+            return; // dialog canceled
+        }
+        Filter origFilter = filter;
+        String origName = getName();
+
+        filter = action.createNewFilterInstance();
+        setName(filter.getName(), false);
+
+        History.add(new FilterChangedEdit(this, origFilter, origName));
+
+        invalidateAll();
+        holder.update();
+        edit();
     }
 
     public ImageSource getImageSource() {
@@ -215,179 +405,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     public boolean hasCachedImage() {
-        return cachedImage != null;
+        return outputCache != null;
     }
 
-    @Override
-    public void setVisible(boolean newVisibility, boolean addToHistory, boolean update) {
-        super.setVisible(newVisibility, addToHistory, false);
-        if (update) {
-            layerLevelSettingsChanged(true);
-        }
-    }
-
-    @Override
-    protected void maskChanged() {
-        layerLevelSettingsChanged(false);
-    }
-
-    @Override
-    public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
-        if (opacity == newOpacity) {
-            return;
-        }
-        super.setOpacity(newOpacity, addToHistory, false);
-        if (update) {
-            layerLevelSettingsChanged(true);
-        }
-    }
-
-    @Override
-    public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
-        if (blendingMode == newMode) {
-            return;
-        }
-        super.setBlendingMode(newMode, addToHistory, false);
-        if (update) {
-            layerLevelSettingsChanged(true);
-        }
-    }
-
-    /**
-     * Recursively invalidates all smart filters after the edited one.
-     */
-    public void invalidateChain() {
-        invalidateCache();
-        if (next != null) {
-            //noinspection TailRecursion
-            next.invalidateChain();
-        }
-    }
-
-    public void invalidateCache() {
-        if (cachedImage != null) {
-            cachedImage.flush();
-            cachedImage = null;
-        }
-    }
-
-    public void invalidateAll() {
-        invalidateChain();
-        smartObject.invalidateImageCache();
-    }
-
-    private void invalidateAllButTheCache() {
-        // invalidate only starting from the next one
-        if (next != null) {
-            next.invalidateChain();
-        }
-        smartObject.invalidateImageCache();
-    }
-
-    // "layer level" = not related to the filter settings
-    public void layerLevelSettingsChanged(boolean update) {
-        invalidateAllButTheCache();
-        if (update) {
-            holder.update();
-            smartObject.updateIconImage();
-        }
-    }
-
-    @Override
-    public void onFilterDialogAccepted(String filterName) {
-        super.onFilterDialogAccepted(filterName);
-        smartObject.updateIconImage();
-    }
-
-    @Override
-    public void onFilterDialogCanceled() {
-        boolean changed = filterSettingsChanged();
-        super.onFilterDialogCanceled();
-        if (changed) {
-            // Force recalculating the image if this dialog session
-            // changed the filter (and therefore the image).
-            invalidateAll();
-        }
-    }
-
-    @Override
-    public void setFilter(Filter filter) {
-        this.filter = filter;
-
-        invalidateAll();
-        holder.update();
-    }
-
-    @Override
-    public void startPreview(Filter filter, boolean firstPreview, Component busyCursorTarget) {
-        if (!firstPreview) {
-            invalidateAll();
-        }
-        if (cachedImage != null) {
-            // the painting thread already calculated it
-            return;
-        }
-        GUIUtils.runWithBusyCursor(() ->
-                createCachedImage(imageSource.getImage()),
-            busyCursorTarget);
-        holder.update();
-    }
-
-    @Override
-    public JPopupMenu createLayerIconPopupMenu() {
-        // just create the popup menu from scratch, since the
-        // superclasses don't add anything to it
-        JPopupMenu popup = new JPopupMenu();
-
-        if (filter instanceof FilterWithGUI) {
-            popup.add(new TaskAction("Edit " + getName() + "...", this::edit));
-        }
-        popup.add(new TaskAction("Delete " + getName(), () ->
-            smartObject.deleteSmartFilter(this, true, true)));
-        popup.add(new TaskAction("Copy " + getName(), () ->
-            copiedSmartFilter = (SmartFilter) copy(CopyType.UNDO, true, comp)));
-
-        if (!hasMask()) {
-            popup.add(new TaskAction("Add Layer Mask", () -> addMask(false)));
-        }
-
-        popup.add(new TaskAction("Replace Filter...", this::replaceFilter));
-
-        if (smartObject.getNumSmartFilters() > 1) {
-            popup.addSeparator();
-            popup.add(new TaskAction("Move Up", Icons.getUpArrowIcon(), () ->
-                smartObject.moveUp(this)));
-            popup.add(new TaskAction("Move Down", Icons.getDownArrowIcon(), () ->
-                smartObject.moveDown(this)));
-        }
-
-        return popup;
-    }
-
-    public void shapeDraggedOnMask() {
-        smartObject.invalidateImageCache();
-    }
-
-    private void replaceFilter() {
-        FilterAction action = FilterSearchPanel.showInDialog("Replace " + filter.getName());
-        if (action == null) {
-            return; // dialog canceled
-        }
-        Filter origFilter = filter;
-        String origName = getName();
-
-        filter = action.createNewFilterInstance();
-        setName(filter.getName(), false);
-
-        History.add(new FilterChangedEdit(this, origFilter, origName));
-
-        invalidateAll();
-        holder.update();
-        edit();
-    }
-
-    public BufferedImage getCachedImage() {
-        return cachedImage;
+    public BufferedImage getOutputCache() {
+        return outputCache;
     }
 
     @Override
@@ -427,7 +449,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         node.addString("imageSource class", imageSource.getClass().getSimpleName());
         node.add(imageSource.createDebugNode("imageSource"));
         node.addString("next", String.valueOf(next));
-        node.addBoolean("cached", (cachedImage != null));
+        node.addBoolean("cached", (outputCache != null));
 
         return node;
     }

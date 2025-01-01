@@ -194,20 +194,9 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
      * @param radius the radius of the blur in the horizontal direction
      * @min-value 0
      * @max-value 100+
-     * @see #getRadius
      */
     public void setRadius(int radius) {
         this.radius = radius;
-    }
-
-    /**
-     * Get the horizontal size of the blur.
-     *
-     * @return the radius of the blur in the horizontal direction
-     * @see #setRadius
-     */
-    public int getRadius() {
-        return radius;
     }
 
     /**
@@ -216,20 +205,9 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
      * @param amount the amount of noise
      * @min-value 0
      * @max-value 1
-     * @see #getAmount
      */
     public void setAmount(float amount) {
         this.amount = amount;
-    }
-
-    /**
-     * Get the amount of noise to add.
-     *
-     * @return the amount of noise
-     * @see #setAmount
-     */
-    public float getAmount() {
-        return amount;
     }
 
     /**
@@ -238,68 +216,35 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
      * @param shine the amount of shine
      * @min-value 0
      * @max-value 1
-     * @see #getShine
      */
     public void setShine(float shine) {
         this.shine = shine;
     }
 
     /**
-     * Get the amount of shine to add in the range 0..1.
-     *
-     * @return the amount of shine
-     * @see #setShine
-     */
-    public float getShine() {
-        return shine;
-    }
-
-    /**
      * Set the color of the metal.
      *
      * @param color the color in ARGB form
-     * @see #getColor
      */
     public void setColor(int color) {
         this.color = color;
     }
 
     /**
-     * Get the color of the metal.
-     *
-     * @return the color in ARGB form
-     * @see #setColor
-     */
-    public int getColor() {
-        return color;
-    }
-
-    /**
      * Set the type of noise to add.
      *
      * @param monochrome true for monochrome noise
-     * @see #getMonochrome
      */
     public void setMonochrome(boolean monochrome) {
         this.monochrome = monochrome;
     }
 
-    /**
-     * Get the type of noise to add.
-     *
-     * @return true for monochrome noise
-     * @see #setMonochrome
-     */
-    public boolean getMonochrome() {
-        return monochrome;
+    public void setRandom(SplittableRandom random) {
+        this.random = random;
     }
 
     @Override
     public String toString() {
         return "Texture/Brushed Metal...";
-    }
-
-    public void setRandom(SplittableRandom random) {
-        this.random = random;
     }
 }

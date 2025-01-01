@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import pixelitor.utils.Geometry;
  * This is actually a rectangular -> polar filter with some extra features.
  */
 public class LittlePlanetFilter extends CenteredTransformFilter {
-    private double rotateResult;
+    private double rotationAngle;
     private double zoom;
     private float innerZoom;
     private boolean inverted = false;
@@ -41,26 +41,26 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         double dy = cy - y;
         double r = Math.sqrt(dx * dx + dy * dy);
 
-        double radius = srcHeight * zoom / 2;
-        double angle = Geometry.atan2ToIntuitive(FastMath.atan2(dy, dx)) + rotateResult;
+        double maxRadius = srcHeight * zoom / 2;
+        double angle = Geometry.atan2ToIntuitive(FastMath.atan2(dy, dx)) + rotationAngle;
 
         if (angle > 2 * Math.PI) {
             angle -= 2 * Math.PI;
         }
-        float nx = (float) (angle * srcWidth / (2 * Math.PI));
-        float ratio = (float) (r / radius);
-        float correctedRatio = ImageMath.bias(ratio, innerZoom);
-        float ny = correctedRatio * srcHeight;
+        float srcX = (float) (angle * srcWidth / (2 * Math.PI));
+        float radiusRatio = (float) (r / maxRadius);
+        float biasedRadiusRatio = ImageMath.bias(radiusRatio, innerZoom);
+        float srcY = biasedRadiusRatio * srcHeight;
         if (!inverted) {
-            ny = srcHeight - ny;
+            srcY = srcHeight - srcY;
         }
 
-        out[0] = nx;
-        out[1] = ny;
+        out[0] = srcX;
+        out[1] = srcY;
     }
 
-    public void setRotateResult(double turn) {
-        rotateResult = turn;
+    public void setRotationAngle(double turn) {
+        rotationAngle = turn;
     }
 
     public void setZoom(double zoom) {

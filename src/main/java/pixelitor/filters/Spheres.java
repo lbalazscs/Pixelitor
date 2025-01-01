@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -110,6 +110,9 @@ public class Spheres extends ParametrizedFilter {
         double maxR = maxRadius.getValueAsDouble();
         double averageR = (minR + maxR) / 2.0;
         int numCircles = (int) (width * height * density.getPercentage() / (averageR * averageR));
+        if (numCircles == 0) {
+            return dest;
+        }
 
         LayoutType type = this.layout.getSelected();
 

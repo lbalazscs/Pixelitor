@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,25 +25,25 @@ import java.awt.Rectangle;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
- * Whether there is a selection present when a test runs
+ * Whether there is a selection present during tests.
  */
 public enum WithSelection {
     YES {
         @Override
-        public void setupFor(Composition comp) {
+        public void configure(Composition comp) {
             TestHelper.setSelection(comp, SELECTION_SHAPE);
             assertThat(comp).selectionBoundsIs(SELECTION_SHAPE);
         }
     }, NO {
         @Override
-        public void setupFor(Composition comp) {
+        public void configure(Composition comp) {
             // do nothing
         }
     };
 
     public static final Rectangle SELECTION_SHAPE = new Rectangle(4, 4, 8, 4);
 
-    public abstract void setupFor(Composition comp);
+    public abstract void configure(Composition comp);
 
     public boolean isTrue() {
         return this == YES;

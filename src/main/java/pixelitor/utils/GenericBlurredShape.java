@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,67 +32,61 @@ import java.util.function.Function;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
- * A {@link BlurredShape} which can take any shape
+ * A generic {@link BlurredShape} with a customizable boundary.
  */
 public class GenericBlurredShape implements BlurredShape {
+    // the position of the image within the shape
     private double imgTx;
     private double imgTy;
+
     private final int imgWidth, imgHeight;
 
-    private final Function<Drag, Shape> shapeCreator;
+    private final Function<Drag, Shape> shapeFactory;
     private final double innerRadiusX;
     private final double innerRadiusY;
     private final double outerRadiusX;
     private final double outerRadiusY;
     private final byte[] pixels;
 
-    private static WeakReference<GenericBlurredShape> lastRef;
+    // cache the most recent instance since the image pixels don't
+    // need recalculation when only the shape center changes
+    private static WeakReference<GenericBlurredShape> instanceCache;
 
-    public static GenericBlurredShape of(Function<Drag, Shape> shapeCreator,
+    public static GenericBlurredShape of(Function<Drag, Shape> shapeFactory,
                                          Point2D center,
                                          double innerRadiusX, double innerRadiusY,
                                          double outerRadiusX, double outerRadiusY) {
-        if (lastRef == null) {
-            GenericBlurredShape last = new GenericBlurredShape(shapeCreator,
-                center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-            lastRef = new WeakReference<>(last);
-            return last;
+        GenericBlurredShape cachedShape = instanceCache != null ? instanceCache.get() : null;
+
+        if (cachedShape != null
+            && shapeFactory == cachedShape.shapeFactory
+            && innerRadiusX == cachedShape.innerRadiusX
+            && innerRadiusY == cachedShape.innerRadiusY
+            && outerRadiusX == cachedShape.outerRadiusX
+            && outerRadiusY == cachedShape.outerRadiusY) {
+
+            // reuse the image of the last blurred shape
+            cachedShape.updateCenter(center);
+            return cachedShape;
         }
 
-        GenericBlurredShape last = lastRef.get();
-        if (last != null
-            && shapeCreator == last.shapeCreator
-            && innerRadiusX == last.innerRadiusX
-            && innerRadiusY == last.innerRadiusY
-            && outerRadiusX == last.outerRadiusX
-            && outerRadiusY == last.outerRadiusY) {
-            // if only the center changed,
-            // there is no need to recreate the image
-            last.recenter(center);
-            return last;
-        }
-
-        // there was a radius or softness change
-        last = new GenericBlurredShape(shapeCreator, center,
-            innerRadiusX, innerRadiusY,
-            outerRadiusX, outerRadiusY);
-        lastRef = new WeakReference<>(last);
-        return last;
+        GenericBlurredShape newShape = new GenericBlurredShape(shapeFactory, center,
+            innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+        instanceCache = new WeakReference<>(newShape);
+        return newShape;
     }
 
-    private GenericBlurredShape(Function<Drag, Shape> shapeCreator,
+    private GenericBlurredShape(Function<Drag, Shape> shapeFactory,
                                 Point2D center,
                                 double innerRadiusX, double innerRadiusY,
                                 double outerRadiusX, double outerRadiusY) {
-        this.shapeCreator = shapeCreator;
+        this.shapeFactory = shapeFactory;
         this.innerRadiusX = innerRadiusX;
         this.innerRadiusY = innerRadiusY;
         this.outerRadiusX = outerRadiusX;
         this.outerRadiusY = outerRadiusY;
 
-        recenter(center);
+        updateCenter(center);
 
         imgWidth = (int) (2 * outerRadiusX);
         imgHeight = (int) (2 * outerRadiusY);
@@ -100,13 +94,13 @@ public class GenericBlurredShape implements BlurredShape {
         Graphics2D g2 = img.createGraphics();
         Colors.fillWith(Color.WHITE, g2, imgWidth, imgHeight);
 
-        // the shape coordinates within the blurred image
+        // the shape bounds within the mask image
         double shapeStartX = (outerRadiusX - innerRadiusX) / 2.0;
         double shapeStartY = (outerRadiusY - innerRadiusY) / 2.0;
         double shapeEndX = 2 * outerRadiusX - shapeStartX;
         double shapeEndY = 2 * outerRadiusY - shapeStartY;
 
-        Shape shape = shapeCreator.apply(
+        Shape shape = shapeFactory.apply(
             new Drag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
         g2.setClip(shape);
         Colors.fillWith(Color.BLACK, g2, imgWidth, imgHeight);
@@ -119,50 +113,44 @@ public class GenericBlurredShape implements BlurredShape {
     }
 
     private static BoxBlurFilter createBlurFilter(double shapeStartX, double shapeStartY) {
-        int numIterations = 3;
+        int iterations = 3;
         // cast first to int in order to avoid fractional blurring
-        float hRadius = (int) (shapeStartX / numIterations);
-        float vRadius = (int) (shapeStartY / numIterations);
+        float hRadius = (int) (shapeStartX / iterations);
+        float vRadius = (int) (shapeStartY / iterations);
         var blurFilter = new BoxBlurFilter(
-            hRadius, vRadius, numIterations, "");
+            hRadius, vRadius, iterations, "");
         blurFilter.setPremultiplyAlpha(false);
 
-        // it would be complicated to set up a better progress tracking
+        // it would be complicated to set up better progress tracking
         // because we would have to know in advance whether we can cache
         blurFilter.setProgressTracker(ProgressTracker.NULL_TRACKER);
         return blurFilter;
     }
 
-    private void recenter(Point2D center) {
-        // the blurred image translation relative to the source
-        imgTx = center.getX() - outerRadiusX;
-        imgTy = center.getY() - outerRadiusY;
+    private void updateCenter(Point2D newCenter) {
+        imgTx = newCenter.getX() - outerRadiusX;
+        imgTy = newCenter.getY() - outerRadiusY;
     }
 
     @Override
     public double isOutside(int x, int y) {
-        if (x < imgTx) {
-            return 1;
-        }
-        if (y < imgTy) {
-            return 1;
-        }
-        if (x > imgTx + imgWidth) {
-            return 1;
-        }
-        if (y > imgTy + imgHeight) {
+        // the coordinates relative to the image
+        int imgX = (int) (x - imgTx);
+        int imgY = (int) (y - imgTy);
+
+        // outside the image bounds we are definitely outside the shape
+        if (imgX < 0 || imgX > imgWidth || imgY < 0 || imgY > imgHeight) {
             return 1;
         }
 
-        int xx = (int) (x - imgTx);
-        int yy = (int) (y - imgTy);
-        int pixel;
+        // inside the image bounds return the normalized pixel intensity
         try {
-            pixel = pixels[xx + imgWidth * yy];
+            int pixel = pixels[imgX + imgWidth * imgY];
+            // transform from unsigned byte to int
+            return (pixel & 0xff) / 255.0;
         } catch (ArrayIndexOutOfBoundsException e) {
+            // TODO this shouldn't happen as the outside case was already handled
             return 1;
         }
-        // transform from unsigned byte to int
-        return (pixel & 0xff) / 255.0;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -94,10 +94,13 @@ public abstract class AbstractBrushTool extends Tool {
     private JDialog lazyMouseDialog;
     private JButton showLazyMouseDialogButton;
 
+    // Current brush outline coordinates in component space.
+    // If lazy mouse is enabled, then they are lagging behind the mouse.
     private int outlineCoX;
     private int outlineCoY;
+
     private final BrushOutlinePainter brushPainter = new BrushOutlinePainter(DEFAULT_BRUSH_RADIUS);
-    private boolean paintBrushOutline = false;
+    private boolean brushPainted = false;
 
     AbstractBrushTool(String name, char activationKey, String toolMessage,
                       Cursor cursor, boolean supportsSymmetry) {
@@ -195,8 +198,8 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addLazyMouseDialogButton() {
-        showLazyMouseDialogButton = settingsPanel.addButton("Lazy Mouse...",
-            e -> showLazyMouseDialog(),
+        showLazyMouseDialogButton = settingsPanel.addButton(
+            "Lazy Mouse...", e -> showLazyMouseDialog(),
             "lazyMouseDialogButton", "Configure brush smoothing");
     }
 
@@ -238,8 +241,7 @@ public abstract class AbstractBrushTool extends Tool {
     public void mousePressed(PMouseEvent e) {
         boolean lineConnect = e.isShiftDown() && brush.hasPrevious();
 
-        Drawable dr = e.getComp().getActiveDrawableOrThrow();
-        newMousePoint(dr, e, lineConnect);
+        newMousePoint(e, lineConnect);
 
         // if it can have symmetry, then the symmetry brush does
         // the tracking of the affected area
@@ -255,7 +257,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
+        newMousePoint(e, false);
 
         if (lazyMouse) {
             PPoint drawLoc = lazyMouseBrush.getDrawLoc();
@@ -292,28 +294,30 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mouseEntered(MouseEvent e, View view) {
-        startOutlinePaintingAt(e.getX(), e.getY(), view);
+        showOutlineAt(e.getX(), e.getY(), view);
     }
 
     @Override
     public void mouseExited(MouseEvent e, View view) {
-        stopOutlinePaintingAt(e.getX(), e.getY(), view);
+        hideOutlineAt(e.getX(), e.getY(), view);
     }
 
     @Override
     public void mouseMoved(MouseEvent e, View view) {
-        repaintOutlineSinceLast(e.getX(), e.getY(), view);
+        updateOutlinePosition(e.getX(), e.getY(), view);
     }
 
-    private void repaintOutlineSinceLast(int x, int y, View view) {
+    private void updateOutlinePosition(int x, int y, View view) {
         int prevX = outlineCoX;
         int prevY = outlineCoY;
 
         outlineCoX = x;
         outlineCoY = y;
 
+        // calculates the rectangle that encompasses both the old and new positions
         var repaintRect = Shapes.toPositiveRect(prevX, outlineCoX, prevY, outlineCoY);
 
+        // add padding to account for brush radius and repaint delay
         int growth = brushPainter.getCoRadius() + REPAINT_EXTRA_SPACE;
         repaintRect.grow(growth, growth);
         view.repaint(repaintRect);
@@ -325,33 +329,33 @@ public abstract class AbstractBrushTool extends Tool {
         view.repaint(outlineCoX - growth, outlineCoY - growth, 2 * growth, 2 * growth);
     }
 
-    private void startOutlinePainting(View view) {
+    private void showOutline(View view) {
         Point mousePos = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mousePos, view);
         Rectangle visibleRegion = view.getVisibleRegion();
         if (visibleRegion != null) {
             if (visibleRegion.contains(mousePos)) {
-                startOutlinePaintingAt(mousePos.x, mousePos.y, view);
+                showOutlineAt(mousePos.x, mousePos.y, view);
             }
         } else if (!AppMode.isUnitTesting()) {
             throw new IllegalStateException();
         }
     }
 
-    private void startOutlinePaintingAt(int x, int y, View view) {
-        paintBrushOutline = typeCB == null || getBrushType() != BrushType.ONE_PIXEL;
+    private void showOutlineAt(int x, int y, View view) {
+        brushPainted = typeCB == null || getBrushType() != BrushType.ONE_PIXEL;
         outlineCoX = x;
         outlineCoY = y;
         repaintOutline(view);
     }
 
-    private void stopOutlinePainting(View view) {
-        stopOutlinePaintingAt(outlineCoX, outlineCoY, view);
+    private void hideOutline(View view) {
+        hideOutlineAt(outlineCoX, outlineCoY, view);
     }
 
-    private void stopOutlinePaintingAt(int x, int y, View view) {
-        paintBrushOutline = false;
-        repaintOutlineSinceLast(x, y, view);
+    private void hideOutlineAt(int x, int y, View view) {
+        brushPainted = false;
+        updateOutlinePosition(x, y, view);
     }
 
     private void finishBrushStroke(Drawable dr) {
@@ -410,7 +414,8 @@ public abstract class AbstractBrushTool extends Tool {
     /**
      * Called from mousePressed, mouseDragged
      */
-    private void newMousePoint(Drawable dr, PPoint p, boolean lineConnect) {
+    private void newMousePoint(PMouseEvent p, boolean lineConnect) {
+        Drawable dr = p.getComp().getActiveDrawableOrThrow();
         if (brushStroke == null) { // a new brush stroke has to be initialized
             createBrushStroke(dr);
 
@@ -433,7 +438,7 @@ public abstract class AbstractBrushTool extends Tool {
         brush.setRadius(newRadius);
 
         brushPainter.setRadius(newRadius);
-        if (paintBrushOutline) {
+        if (brushPainted) {
             // changing the brush via keyboard shortcut
             repaintOutline(Views.getActive());
         }
@@ -450,7 +455,7 @@ public abstract class AbstractBrushTool extends Tool {
 
             // If the tool is started with the hotkey, then there is
             // no mouseEntered event to start the outline painting
-            startOutlinePainting(view);
+            showOutline(view);
         }
     }
 
@@ -460,7 +465,7 @@ public abstract class AbstractBrushTool extends Tool {
 
         View view = Views.getActive();
         if (view != null) {
-            stopOutlinePainting(view);
+            hideOutline(view);
         }
     }
 
@@ -493,7 +498,7 @@ public abstract class AbstractBrushTool extends Tool {
         Point mousePos = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mousePos, view);
         brushPainter.setView(view);
-        repaintOutlineSinceLast(mousePos.x, mousePos.y, view);
+        updateOutlinePosition(mousePos.x, mousePos.y, view);
     }
 
     @Override
@@ -501,7 +506,7 @@ public abstract class AbstractBrushTool extends Tool {
         // the outline has to be hidden, because there is no mouseExited event
         View view = Views.getActive();
         if (view != null) {
-            stopOutlinePainting(view);
+            hideOutline(view);
         }
     }
 
@@ -510,7 +515,7 @@ public abstract class AbstractBrushTool extends Tool {
         // the outline has to be shown again, because there is no mouseEntered event
         View view = Views.getActive();
         if (view != null) {
-            startOutlinePainting(view);
+            showOutline(view);
         }
     }
 
@@ -621,7 +626,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
-        if (paintBrushOutline) {
+        if (brushPainted) {
             brushPainter.paint(g2, outlineCoX, outlineCoY);
         }
     }
@@ -742,8 +747,8 @@ public abstract class AbstractBrushTool extends Tool {
      * made via custom brush images. See java.awt.Toolkit.getBestCursorSize.
      */
     static class BrushOutlinePainter extends SimpleCachedPainter {
-        private static final Stroke stroke3 = new BasicStroke(3);
-        private static final Stroke stroke1 = new BasicStroke(1);
+        private static final Stroke OUTER_STROKE = new BasicStroke(3);
+        private static final Stroke INNER_STROKE = new BasicStroke(1);
 
         private int imRadius;
         private double coRadius;
@@ -784,11 +789,11 @@ public abstract class AbstractBrushTool extends Tool {
             // start at 1, 1 so that the full stroke width fits in the image
             Shape shape = new Ellipse2D.Double(1, 1, coDiameter, coDiameter);
 
-            g.setStroke(stroke3);
+            g.setStroke(OUTER_STROKE);
             g.setColor(Color.BLACK);
             g.draw(shape);
 
-            g.setStroke(stroke1);
+            g.setStroke(INNER_STROKE);
             g.setColor(Color.WHITE);
             g.draw(shape);
         }

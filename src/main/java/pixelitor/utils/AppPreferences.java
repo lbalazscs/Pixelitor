@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -502,9 +502,9 @@ public final class AppPreferences {
     }
 
     public static Theme loadTheme() {
-        String code = mainPrefs.get(THEME_KEY, Themes.DEFAULT.getSaveCode());
+        String code = mainPrefs.get(THEME_KEY, Themes.DEFAULT.getPrefsCode());
         for (Theme theme : Theme.values()) {
-            if (code.equals(theme.getSaveCode())) {
+            if (code.equals(theme.getPrefsCode())) {
                 return theme;
             }
         }
@@ -512,7 +512,7 @@ public final class AppPreferences {
     }
 
     private static void saveTheme() {
-        mainPrefs.put(THEME_KEY, Themes.getActive().getSaveCode());
+        mainPrefs.put(THEME_KEY, Themes.getActive().getPrefsCode());
     }
 
     public static int loadUIFontSize() {

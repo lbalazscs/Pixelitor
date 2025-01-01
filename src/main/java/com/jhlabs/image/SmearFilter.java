@@ -47,53 +47,26 @@ public class SmearFilter extends WholeImageFilter {
         this.shape = shape;
     }
 
-    public int getShape() {
-        return shape;
-    }
-
     public void setDistance(int distance) {
         this.distance = distance;
-    }
-
-    public int getDistance() {
-        return distance;
     }
 
     public void setDensity(float density) {
         this.density = density;
     }
 
-    public float getDensity() {
-        return density;
-    }
-
     /**
-     * Specifies the angle of the texture.
+     * Sets the angle of the texture.
      *
      * @param angle the angle of the texture.
      * @angle
-     * @see #getAngle
      */
     public void setAngle(float angle) {
         this.angle = angle;
     }
 
-    /**
-     * Returns the angle of the texture.
-     *
-     * @return the angle of the texture.
-     * @see #setAngle
-     */
-    public float getAngle() {
-        return angle;
-    }
-
     public void setMix(float mix) {
         this.mix = mix;
-    }
-
-    public float getMix() {
-        return mix;
     }
 
     @Override

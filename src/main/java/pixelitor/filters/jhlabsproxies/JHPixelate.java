@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -127,17 +127,10 @@ public class JHPixelate extends ParametrizedFilter {
     private static BufferedImage createBumpSource(int type, int cellSize, int width, int height, BufferedImage src) {
         BufferedImage bumpSource = ImageUtils.createImageWithSameCM(src);
 
-        int gapWidth;
-        if (cellSize < 15) {
-            gapWidth = 1;
-        } else {
-            gapWidth = 2;
-        }
-
         Graphics2D g = bumpSource.createGraphics();
-
         Colors.fillWith(WHITE, g, width, height);
 
+        int gapWidth = (cellSize < 15) ? 1 : 2;
         if (type == TYPE_SQUARE) {
             ImageUtils.renderGrid(g, GRAY, width, height,
                 gapWidth, cellSize, gapWidth, cellSize);

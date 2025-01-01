@@ -77,28 +77,12 @@ public class WeaveFilter extends PointFilter {
         this.xWidth = xWidth;
     }
 
-    public float getXWidth() {
-        return xWidth;
-    }
-
     public void setYWidth(float yWidth) {
         this.yWidth = yWidth;
     }
 
-    public float getYWidth() {
-        return yWidth;
-    }
-
-    public float getXGap() {
-        return xGap;
-    }
-
     public void setYGap(float yGap) {
         this.yGap = yGap;
-    }
-
-    public float getYGap() {
-        return yGap;
     }
 
     public void setPattern(int pattern) {
@@ -111,32 +95,16 @@ public class WeaveFilter extends PointFilter {
         rows = matrix.length;
     }
 
-    public int[][] getCrossings() {
-        return matrix;
-    }
-
     public void setUseImageColors(boolean useImageColors) {
         this.useImageColors = useImageColors;
-    }
-
-    public boolean getUseImageColors() {
-        return useImageColors;
     }
 
     public void setRoundThreads(boolean roundThreads) {
         this.roundThreads = roundThreads;
     }
 
-    public boolean getRoundThreads() {
-        return roundThreads;
-    }
-
     public void setShadeCrossings(boolean shadeCrossings) {
         this.shadeCrossings = shadeCrossings;
-    }
-
-    public boolean getShadeCrossings() {
-        return shadeCrossings;
     }
 
     @Override

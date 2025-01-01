@@ -43,40 +43,18 @@ public class StampFilter extends PointFilter {
      *
      * @param radius the radius
      * @min-value 0
-     * @see #getRadius
      */
     public void setRadius(float radius) {
         this.radius = radius;
     }
 
     /**
-     * Get the radius of the effect.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public float getRadius() {
-        return radius;
-    }
-
-    /**
      * Set the threshold value.
      *
      * @param threshold the threshold value
-     * @see #getThreshold
      */
     public void setThreshold(float threshold) {
         this.threshold = threshold;
-    }
-
-    /**
-     * Get the threshold value.
-     *
-     * @return the threshold value
-     * @see #setThreshold
-     */
-    public float getThreshold() {
-        return threshold;
     }
 
     /**
@@ -85,67 +63,34 @@ public class StampFilter extends PointFilter {
      * @param softness the softness
      * @min-value 0
      * @max-value 1
-     * @see #getSoftness
      */
     public void setSoftness(float softness) {
         this.softness = softness;
     }
 
     /**
-     * Get the softness of the effect.
-     *
-     * @return the softness
-     * @see #setSoftness
-     */
-    public float getSoftness() {
-        return softness;
-    }
-
-    /**
      * Set the color to be used for pixels above the upper threshold.
      *
      * @param white the color
-     * @see #getWhite
      */
     public void setWhite(int white) {
         this.white = white;
     }
 
     /**
-     * Get the color to be used for pixels above the upper threshold.
-     *
-     * @return the color
-     * @see #setWhite
-     */
-    public int getWhite() {
-        return white;
-    }
-
-    /**
      * Set the color to be used for pixels below the lower threshold.
      *
      * @param black the color
-     * @see #getBlack
      */
     public void setBlack(int black) {
         this.black = black;
-    }
-
-    /**
-     * Set the color to be used for pixels below the lower threshold.
-     *
-     * @return the color
-     * @see #setBlack
-     */
-    public int getBlack() {
-        return black;
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         if (blurMethod == BOX3_BLUR) {
             if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
-                // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
+                // avoid ArrayIndexOutOfBoundsException in BoxBlurFilter
                 return src;
             }
             dst = new BoxBlurFilter(radius, radius, 3, filterName).filter(src, null);
@@ -171,12 +116,12 @@ public class StampFilter extends PointFilter {
         return ImageMath.mixColors(f, black, white);
     }
 
+    public void setBlurMethod(int blurMethod) {
+        this.blurMethod = blurMethod;
+    }
+
     @Override
     public String toString() {
         return "Stylize/Stamp...";
-    }
-
-    public void setBlurMethod(int blurMethod) {
-        this.blurMethod = blurMethod;
     }
 }

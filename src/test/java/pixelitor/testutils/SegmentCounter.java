@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,11 +29,11 @@ import static java.awt.geom.PathIterator.SEG_QUADTO;
  * Analyzes shapes by counting different types of path segments.
  */
 public class SegmentCounter {
-    private int numMoveTos = 0;
-    private int numLineTos = 0;
-    private int numQuadTos = 0;
-    private int numCubicTos = 0;
-    private int numCloses = 0;
+    private int moveToCount = 0;
+    private int lineToCount = 0;
+    private int quadToCount = 0;
+    private int cubicToCount = 0;
+    private int pathCloseCount = 0;
 
     public SegmentCounter(Shape shape) {
         var pathIterator = shape.getPathIterator(null);
@@ -41,11 +41,11 @@ public class SegmentCounter {
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
             switch (type) {
-                case SEG_MOVETO -> numMoveTos++;
-                case SEG_LINETO -> numLineTos++;
-                case SEG_QUADTO -> numQuadTos++;
-                case SEG_CUBICTO -> numCubicTos++;
-                case SEG_CLOSE -> numCloses++;
+                case SEG_MOVETO -> moveToCount++;
+                case SEG_LINETO -> lineToCount++;
+                case SEG_QUADTO -> quadToCount++;
+                case SEG_CUBICTO -> cubicToCount++;
+                case SEG_CLOSE -> pathCloseCount++;
                 default -> throw new IllegalArgumentException("type = " + type);
             }
 
@@ -53,38 +53,31 @@ public class SegmentCounter {
         }
     }
 
-    public void assertNumMoveTosIs(int expected) {
-        if (numMoveTos != expected) {
-            throw new AssertionError("numMoveTos = " + numMoveTos
-                + ", expected = " + expected);
+    private static void verifySegmentCount(int actual, int expected, String segmentType) {
+        if (actual != expected) {
+            throw new AssertionError(String.format(
+                "Expected %d %s segments but found %d",
+                expected, segmentType, actual));
         }
     }
 
-    public void assertNumLineTosIs(int expected) {
-        if (numLineTos != expected) {
-            throw new AssertionError("numLineTos = " + numLineTos
-                + ", expected = " + expected);
-        }
+    public void assertMoveToCount(int expected) {
+        verifySegmentCount(moveToCount, expected, "moveTo");
     }
 
-    public void assertNumQuadTosIs(int expected) {
-        if (numQuadTos != expected) {
-            throw new AssertionError("numQuadTos = " + numQuadTos
-                + ", expected = " + expected);
-        }
+    public void assertLineToCount(int expected) {
+        verifySegmentCount(lineToCount, expected, "lineTo");
     }
 
-    public void assertNumCubicTosIs(int expected) {
-        if (numCubicTos != expected) {
-            throw new AssertionError("numCubicTos = " + numCubicTos
-                + ", expected = " + expected);
-        }
+    public void assertQuadToCount(int expected) {
+        verifySegmentCount(quadToCount, expected, "quadTo");
     }
 
-    public void assertNumClosesIs(int expected) {
-        if (numCloses != expected) {
-            throw new AssertionError("numCloses = " + numCloses
-                + ", expected = " + expected);
-        }
+    public void assertCubicToCount(int expected) {
+        verifySegmentCount(cubicToCount, expected, "cubicTo");
+    }
+
+    public void assertPathCloseCount(int expected) {
+        verifySegmentCount(pathCloseCount, expected, "close");
     }
 }

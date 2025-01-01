@@ -50,19 +50,19 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
         int[] outPixels = ImageUtils.getPixelArray(dst);
 
         pt = createProgressTracker(height);
-        Future<?>[] futures = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable calculateLineTask = () -> {
+            Runnable rowTask = () -> {
                 for (int x = 0; x < width; x++) {
                     int index = finalY * width + x;
                     outPixels[index] = filterRGB(x, finalY, inPixels[index]);
                 }
             };
-            futures[y] = ThreadPool.submit(calculateLineTask);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
 
-        ThreadPool.waitFor(futures, pt);
+        ThreadPool.waitFor(rowFutures, pt);
         finishProgressTracker();
 
         return dst;
@@ -73,10 +73,10 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
         int height = src.getHeight();
 
         pt = createProgressTracker(height);
-        Future<?>[] futures = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable calculateLineTask = () -> {
+            Runnable rowTask = () -> {
                 int[] inPixels = new int[width];
                 src.getRGB(0, finalY, width, 1, inPixels, 0, width);
                 for (int x = 0; x < width; x++) {
@@ -84,9 +84,9 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
                 }
                 dst.setRGB(0, finalY, width, 1, inPixels, 0, width);
             };
-            futures[y] = ThreadPool.submit(calculateLineTask);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
-        ThreadPool.waitFor(futures, pt);
+        ThreadPool.waitFor(rowFutures, pt);
         finishProgressTracker();
 
         return dst;

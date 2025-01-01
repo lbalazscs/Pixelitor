@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public class ContentLayerTest {
     private ContentLayer layer;
     private Composition comp;
 
-    private IconUpdateChecker iconUpdates;
+    private IconUpdateChecker iconChecker;
 
     @Parameters(name = "{index}: layer = {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
@@ -77,13 +77,13 @@ public class ContentLayerTest {
 
         comp.addLayerNoUI(layer);
 
-        withMask.setupForLayer(layer);
+        withMask.configure(layer);
         LayerMask mask = null;
         if (withMask.isTrue()) {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask);
+        iconChecker = new IconUpdateChecker(layer, mask);
 
         assert comp.getNumLayers() == 1 : "found " + comp.getNumLayers() + " layers";
         History.clear();
@@ -108,7 +108,7 @@ public class ContentLayerTest {
 
         checkTranslationAfterPositiveDrag();
         int expectedLayerIconUpdates = layerClass == ImageLayer.class ? 1 : 0;
-        iconUpdates.check(expectedLayerIconUpdates, 1);
+        iconChecker.verifyUpdateCounts(expectedLayerIconUpdates, 1);
 
         // start another drag to the negative direction
         layer.startMovement();
@@ -123,7 +123,7 @@ public class ContentLayerTest {
         // TextLayer: endMovement does not change the tmpTranslation + translation sum
         checkTranslationAfterNegativeDrag();
         expectedLayerIconUpdates = layerClass == ImageLayer.class ? 2 : 0;
-        iconUpdates.check(expectedLayerIconUpdates, 2);
+        iconChecker.verifyUpdateCounts(expectedLayerIconUpdates, 2);
         History.assertNumEditsIs(2);
 
         History.undo("Move Layer");
@@ -163,14 +163,14 @@ public class ContentLayerTest {
 
         layer.render(g2, image, true);
         layer.render(g2, image, false);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
     public void paintLayerOnGraphics() {
         Graphics2D g2 = TestHelper.createGraphics();
         layer.paint(g2, false);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -178,6 +178,6 @@ public class ContentLayerTest {
         Graphics2D g = TestHelper.createGraphics();
         layer.setupComposite(g, true);
         layer.setupComposite(g, false);
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 }

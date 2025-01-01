@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -332,7 +332,7 @@ public class RandomToolTest {
 
         JOptionPaneFixture optionPane;
         try {
-            optionPane = app.findJOptionPane();
+            optionPane = app.findJOptionPane(null);
         } catch (WaitTimedOutError e) {
             throw new IllegalStateException("No option pane");
         }
@@ -366,7 +366,7 @@ public class RandomToolTest {
         if (tool == PEN && !PenTool.hasPath()) {
             // error dialog when switching to Edit or Transform mode
             if (EDT.getModalDialogCount() > 0) {
-                app.findJOptionPane().okButton().click();
+                app.findJOptionPane(null).okButton().click();
             }
         }
     }

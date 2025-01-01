@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,10 +38,11 @@ import java.util.ResourceBundle;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
+import static pixelitor.utils.ImageUtils.isGrayscale;
+import static pixelitor.utils.ImageUtils.isWithinBounds;
 
 /**
  * The color picker tool
@@ -52,7 +53,7 @@ public class ColorPickerTool extends Tool {
         "<b>click</b> to pick the foreground color, " +
             "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.";
 
-    private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
+    private final JCheckBox layerOnlySamplingCB = new JCheckBox(SAMPLE_LABEL_TEXT);
 
     public ColorPickerTool() {
         super("Color Picker", 'I', HELP_TEXT, Cursors.CROSSHAIR);
@@ -60,7 +61,7 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public void initSettingsPanel(ResourceBundle resources) {
-        settingsPanel.add(sampleLayerOnly);
+        settingsPanel.add(layerOnlySamplingCB);
     }
 
     @Override
@@ -79,41 +80,47 @@ public class ColorPickerTool extends Tool {
 
     public void sampleColor(PMouseEvent e, boolean selectBackground) {
         View view = e.getView();
+
+        // image-space coordinates relative to the canvas
         int x = (int) e.getImX();
         int y = (int) e.getImY();
 
-        BufferedImage img;
+        BufferedImage srcImg;
         boolean isGray = false;
         Composition comp = view.getComp();
-        if (sampleLayerOnly.isSelected()) {
+        if (layerOnlySamplingCB.isSelected()) {
             Drawable dr = comp.getActiveDrawable();
             if (dr == null) {
                 return;
             }
-            img = dr.getImage();
-            isGray = img.getType() == TYPE_BYTE_GRAY;
+            srcImg = dr.getImage();
+            isGray = isGrayscale(srcImg);
 
+            // make them relative to the drawable's image
             x -= dr.getTx();
             y -= dr.getTy();
         } else {
-            img = comp.getCompositeImage();
+            srcImg = comp.getCompositeImage();
         }
 
-        if (x < img.getWidth() && y < img.getHeight() && x >= 0 && y >= 0) {
-            int rgb = img.getRGB(x, y);
+        if (!isWithinBounds(x, y, srcImg)) {
+            return;
+        } else {
+            int sampledRGB = srcImg.getRGB(x, y);
 
-            showColorInStatusBar(x, y, rgb, isGray);
+            showColorInfo(x, y, sampledRGB, isGray);
 
-            Color sampledColor = new Color(rgb);
+            Color pickedColor = new Color(sampledRGB);
             if (selectBackground) {
-                setBGColor(sampledColor);
+                setBGColor(pickedColor);
             } else {
-                setFGColor(sampledColor);
+                setFGColor(pickedColor);
             }
         }
+
     }
 
-    private static void showColorInStatusBar(int x, int y, int rgb, boolean isGray) {
+    private static void showColorInfo(int x, int y, int rgb, boolean isGray) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
@@ -134,7 +141,7 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public void editingTargetChanged(Layer activeLayer) {
-        if (sampleLayerOnly.isSelected()) {
+        if (layerOnlySamplingCB.isSelected()) {
             // don't show the values for the old layer
             Messages.clearStatusBar();
         }
@@ -158,7 +165,7 @@ public class ColorPickerTool extends Tool {
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
-        node.addBoolean(SAMPLE_LABEL_TEXT, sampleLayerOnly.isSelected());
+        node.addBoolean(SAMPLE_LABEL_TEXT, layerOnlySamplingCB.isSelected());
         return node;
     }
 

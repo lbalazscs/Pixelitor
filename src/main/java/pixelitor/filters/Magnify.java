@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class Magnify extends ParametrizedFilter {
 
     private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 501);
     private final GroupedRangeParam outerRadius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 999);
-    private final RangeParam outerInnerRadiusRatio = new RangeParam("Softness", 0, 100, 1000);
+    private final RangeParam softness = new RangeParam("Softness", 0, 100, 1000);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam shape = BlurredShape.getChoices();
     private final BooleanParam invert = new BooleanParam("Invert", false);
@@ -50,7 +50,7 @@ public class Magnify extends ParametrizedFilter {
         setParams(
             magnification,
             outerRadius.withAdjustedRange(1.0),
-            outerInnerRadiusRatio,
+            softness,
             center,
             shape,
             invert,
@@ -70,21 +70,19 @@ public class Magnify extends ParametrizedFilter {
         filter.setOuterRadiusX(outerRadiusX);
         filter.setOuterRadiusY(outerRadiusY);
 
-        double ratio = outerInnerRadiusRatio.getPercentage() + 1.0;
-        int innerRadiusX = (int) (outerRadiusX / ratio);
-        int innerRadiusY = (int) (outerRadiusY / ratio);
+        double radiusRatio = softness.getPercentage() + 1.0;
+        float innerRadiusX = (float) (outerRadiusX / radiusRatio);
+        float innerRadiusY = (float) (outerRadiusY / radiusRatio);
         filter.setInnerRadiusX(innerRadiusX);
         filter.setInnerRadiusY(innerRadiusY);
 
         filter.setMagnification(magnification.getPercentage());
+        filter.setCenter(center.getAbsolutePoint(src));
+        filter.setInvert(invert.isChecked());
+        filter.setShape(shape.getValue());
 
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setInvert(invert.isChecked());
-
-        filter.setShape(shape.getValue());
 
         dest = filter.filter(src, dest);
 //        setAffectedAreaShapes(filter.getAffectedAreaShapes());

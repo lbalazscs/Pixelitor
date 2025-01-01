@@ -60,10 +60,6 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         this.edgeAction = edgeAction;
     }
 
-    public int getEdgeAction() {
-        return edgeAction;
-    }
-
     /**
      * Sets the interpolation method used when sampling between pixel centers.
      *
@@ -71,10 +67,6 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
      */
     public void setInterpolation(int interpolation) {
         this.interpolation = interpolation;
-    }
-
-    public int getInterpolation() {
-        return interpolation;
     }
 
     /**
@@ -110,23 +102,20 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
      * Applies the transform using nearest-neighbor interpolation.
      */
     private BufferedImage filterPixelsNN(BufferedImage dst, int width, int height, int[] inPixels) {
-        int outWidth = width;
-        int outHeight = height;
-
-        pt = createProgressTracker(outHeight);
+        pt = createProgressTracker(height);
 
         @SuppressWarnings("unchecked")
-        Future<int[]>[] resultLines = new Future[outHeight];
+        Future<int[]>[] rowFutures = new Future[height];
 
         // process each output line in parallel
-        for (int y = 0; y < outHeight; y++) {
+        for (int y = 0; y < height; y++) {
             float[] out = new float[2];
             int finalY = y;
 
-            Callable<int[]> calcLineTask = () -> {
-                int[] outLine = new int[outWidth];
+            Callable<int[]> rowTask = () -> {
+                int[] outLine = new int[width];
 
-                for (int x = 0; x < outWidth; x++) {
+                for (int x = 0; x < width; x++) {
                     transformInverse(x, finalY, out);
                     int srcX = (int) out[0];
                     int srcY = (int) out[1];
@@ -137,10 +126,10 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                 return outLine;
             };
 
-            resultLines[finalY] = ThreadPool.submit2(calcLineTask);
+            rowFutures[finalY] = ThreadPool.submit2(rowTask);
         }
 
-        ThreadPool.waitFor2(resultLines, dst, width, pt);
+        ThreadPool.waitFor2(rowFutures, dst, width, pt);
         finishProgressTracker();
 
         return dst;
@@ -152,21 +141,19 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     private BufferedImage filterPixelsBilinear(BufferedImage dst, int width, int height, int[] inPixels) {
         int maxSrcX = width - 1;
         int maxSrcY = height - 1;
-        int outWidth = width;
-        int outHeight = height;
 
-        pt = createProgressTracker(outHeight);
+        pt = createProgressTracker(height);
         @SuppressWarnings("unchecked")
-        Future<int[]>[] resultLines = new Future[outHeight];
+        Future<int[]>[] rowFutures = new Future[height];
 
         // process each output line in parallel
-        for (int y = 0; y < outHeight; y++) {
+        for (int y = 0; y < height; y++) {
             float[] out = new float[2];
             int finalY = y;
 
-            Callable<int[]> calcLineTask = () -> {
-                int[] outLine = new int[outWidth];
-                for (int x = 0; x < outWidth; x++) {
+            Callable<int[]> rowTask = () -> {
+                int[] outLine = new int[width];
+                for (int x = 0; x < width; x++) {
                     transformInverse(x, finalY, out);
 
                     int srcX = (int) FastMath.floor(out[0]);
@@ -194,10 +181,10 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                 return outLine;
             };
 
-            resultLines[finalY] = ThreadPool.submit2(calcLineTask);
+            rowFutures[finalY] = ThreadPool.submit2(rowTask);
         }
 
-        ThreadPool.waitFor2(resultLines, dst, width, pt);
+        ThreadPool.waitFor2(rowFutures, dst, width, pt);
         finishProgressTracker();
 
         return dst;

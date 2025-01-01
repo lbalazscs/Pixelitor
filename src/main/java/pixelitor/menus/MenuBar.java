@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -187,7 +187,7 @@ public class MenuBar extends JMenuBar {
         // reload
         fileMenu.add(new ViewEnabledAction(
             texts.getString("reload"),
-            comp -> comp.getView().reloadAsync()), F12);
+            comp -> comp.getView().reloadCompAsync()), F12);
 
         String showMetaDataName = texts.getString("show_metadata");
         fileMenu.add(new ViewEnabledAction(
@@ -1386,7 +1386,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new TaskAction("revalidate() the main window", () ->
             pw.getContentPane().revalidate()));
 
-        sub.add(new TaskAction("Themes.updateAllUI()", Themes::updateAllUI));
+        sub.add(new TaskAction("Themes.updateAllComponents()", Themes::updateAllComponents));
 
         sub.add(new ViewEnabledAction("update() on the active image",
             Composition::update));

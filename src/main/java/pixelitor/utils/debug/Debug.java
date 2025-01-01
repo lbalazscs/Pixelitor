@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,6 @@ import pixelitor.utils.input.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.color.ColorSpace;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
@@ -317,11 +316,9 @@ public class Debug {
     }
 
     public static void sendKeyPress(PixelitorWindow pw, boolean ctrl, int keyCode, char keyChar) {
-        int modifiers;
+        int modifiers = 0;
         if (ctrl) {
-            modifiers = InputEvent.CTRL_DOWN_MASK;
-        } else {
-            modifiers = 0;
+            modifiers = Ctrl.PRESSED.modify(modifiers);
         }
         pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED,
             System.currentTimeMillis(), modifiers, keyCode, keyChar));

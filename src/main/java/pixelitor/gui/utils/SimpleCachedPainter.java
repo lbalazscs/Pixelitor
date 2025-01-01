@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,12 @@ import java.lang.ref.SoftReference;
  * More sophisticated cached painters are in the sun.* packages.
  */
 public abstract class SimpleCachedPainter implements Painter<Object> {
+    // maximum number of attempts to restore lost volatile image content
+    private static final int MAX_RESTORE_ATTEMPTS = 3;
+
+    // the transparency setting for the cached image
     private final int transparency;
+
     private SoftReference<VolatileImage> cache;
 
     /**
@@ -85,7 +90,7 @@ public abstract class SimpleCachedPainter implements Painter<Object> {
                 vi.flush();
                 vi = createAndUseCachedImage(g, gc, width, height);
             }
-        } while (vi.contentsLost() && safetyCounter++ < 3); // check after rendering
+        } while (vi.contentsLost() && safetyCounter++ < MAX_RESTORE_ATTEMPTS); // check after rendering
     }
 
     protected VolatileImage createAndUseCachedImage(Graphics2D g,

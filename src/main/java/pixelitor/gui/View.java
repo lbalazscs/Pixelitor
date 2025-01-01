@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -112,7 +112,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     /**
      * Attempts to reload the composition from its source file.
      */
-    public CompletableFuture<Composition> reloadAsync() {
+    public CompletableFuture<Composition> reloadCompAsync() {
         assert isActive();
 
         File file = comp.getFile();

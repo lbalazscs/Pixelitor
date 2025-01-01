@@ -36,15 +36,9 @@ public class GlintFilter extends AbstractBufferedImageOp {
     private Colormap colormap = new LinearColormap(0xffffffff, 0xff000000);
 
     private float coverage = 1.0f; // probability in percentage
-//    private Random random;
 
     public GlintFilter(String filterName) {
         super(filterName);
-
-    }
-
-    public float getCoverage() {
-        return coverage;
     }
 
     public void setCoverage(float coverage) {
@@ -55,20 +49,9 @@ public class GlintFilter extends AbstractBufferedImageOp {
      * Set the threshold value.
      *
      * @param threshold the threshold value
-     * @see #getThreshold
      */
     public void setThreshold(float threshold) {
         this.threshold = threshold;
-    }
-
-    /**
-     * Get the threshold value.
-     *
-     * @return the threshold value
-     * @see #setThreshold
-     */
-    public float getThreshold() {
-        return threshold;
     }
 
     /**
@@ -77,100 +60,45 @@ public class GlintFilter extends AbstractBufferedImageOp {
      * @param amount the amount
      * @min-value 0
      * @max-value 1
-     * @see #getAmount
      */
     public void setAmount(float amount) {
         this.amount = amount;
     }
 
     /**
-     * Get the amount of glint.
-     *
-     * @return the amount
-     * @see #setAmount
-     */
-    public float getAmount() {
-        return amount;
-    }
-
-    /**
      * Set the length of the stars.
      *
      * @param length the length
-     * @see #getLength
      */
     public void setLength(int length) {
         this.length = length;
     }
 
     /**
-     * Get the length of the stars.
-     *
-     * @return the length
-     * @see #setLength
-     */
-    public int getLength() {
-        return length;
-    }
-
-    /**
      * Set the blur that is applied before thresholding.
      *
      * @param blur the blur radius
-     * @see #getBlur
      */
     public void setBlur(float blur) {
         this.blur = blur;
     }
 
     /**
-     * Set the blur that is applied before thresholding.
-     *
-     * @return the blur radius
-     * @see #setBlur
-     */
-    public float getBlur() {
-        return blur;
-    }
-
-    /**
      * Set whether to render the stars and the image or only the stars.
      *
      * @param glintOnly true to render only stars
-     * @see #getGlintOnly
      */
     public void setGlintOnly(boolean glintOnly) {
         this.glintOnly = glintOnly;
     }
 
     /**
-     * Get whether to render the stars and the image or only the stars.
-     *
-     * @return true to render only stars
-     * @see #setGlintOnly
-     */
-    public boolean getGlintOnly() {
-        return glintOnly;
-    }
-
-    /**
      * Set the colormap to be used for the filter.
      *
      * @param colormap the colormap
-     * @see #getColormap
      */
     public void setColormap(Colormap colormap) {
         this.colormap = colormap;
-    }
-
-    /**
-     * Get the colormap to be used for the filter.
-     *
-     * @return the colormap
-     * @see #setColormap
-     */
-    public Colormap getColormap() {
-        return colormap;
     }
 
     @Override
@@ -185,7 +113,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
             pt = createProgressTracker(height);
         }
 
-        // Laszlo: added this in order to prevent division by 0
+        // in order to prevent division by 0
         int calculatedLength2 = (int) (length / 1.414f);
         int length2 = calculatedLength2 > 0 ? calculatedLength2 : 1;
 
@@ -250,14 +178,14 @@ public class GlintFilter extends AbstractBufferedImageOp {
             dstPixels = getRGB(src, 0, 0, width, height, null);//FIXME - only need 2*length
         }
 
-        Future<?>[] futures = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
             BufferedImage finalMask = mask;
-            Runnable lineTask = () -> calculateLine(width, height, pixels, length2, colors, colors2, finalMask, dstPixels, finalY);
-            futures[y] = ThreadPool.submit(lineTask);
+            Runnable rowTask = () -> processRow(width, height, pixels, length2, colors, colors2, finalMask, dstPixels, finalY);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
-        ThreadPool.waitFor(futures, pt);
+        ThreadPool.waitFor(rowFutures, pt);
 
         setRGB(dst, 0, 0, width, height, dstPixels);
 
@@ -266,7 +194,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    private void calculateLine(int width, int height, int[] pixels, int length2, int[] colors, int[] colors2, BufferedImage mask, int[] dstPixels, int y) {
+    private void processRow(int width, int height, int[] pixels, int length2, int[] colors, int[] colors2, BufferedImage mask, int[] dstPixels, int y) {
         int index = y * width;
         getRGB(mask, 0, y, width, 1, pixels);
         int ymin = Math.max(y - length, 0) - y;
@@ -298,8 +226,6 @@ public class GlintFilter extends AbstractBufferedImageOp {
                 }
 
                 // Diagonals
-//					int xymin = Math.max( xmin2, ymin2 );
-//					int xymax = Math.min( xmax2, ymax2 );
                 // SE
                 int count = Math.min(xmax2, ymax2);
                 for (int i = 1, j = index + width + 1, k = 0; i <= count; i++, j += width + 1, k++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -373,12 +373,16 @@ public class ImageUtils {
     }
 
     public static byte[] getGrayPixelByteArray(BufferedImage img) {
-        assert img.getType() == TYPE_BYTE_GRAY;
+        assert isGrayscale(img);
 
         WritableRaster raster = img.getRaster();
         DataBufferByte db = (DataBufferByte) raster.getDataBuffer();
 
         return db.getData();
+    }
+
+    public static boolean isGrayscale(BufferedImage img) {
+        return img.getType() == TYPE_BYTE_GRAY;
     }
 
     public static BufferedImage createGrayImageFromByteArray(byte[] pixels, int width, int height) {
@@ -1029,7 +1033,7 @@ public class ImageUtils {
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
-    public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
+    public static BufferedImage convertToGrayscaleImage(BufferedImage src) {
         return copyTo(TYPE_BYTE_GRAY, src);
     }
 
@@ -1229,15 +1233,16 @@ public class ImageUtils {
         // the first visible layer is always applied with normal blending mode
         boolean firstVisibleLayer = true;
         for (Layer layer : layers) {
-            if (layer.isVisible()) {
-                BufferedImage result = layer.render(g, compositeImg, firstVisibleLayer);
-                if (result != null) { // adjustment layer or watermarking text layer
-                    compositeImg = result;
-                    g.dispose();
-                    g = compositeImg.createGraphics();
-                }
-                firstVisibleLayer = false;
+            if (!layer.isVisible()) {
+                continue;
             }
+            BufferedImage result = layer.render(g, compositeImg, firstVisibleLayer);
+            if (result != null) { // adjustment layer or watermarking text layer
+                compositeImg = result;
+                g.dispose();
+                g = compositeImg.createGraphics();
+            }
+            firstVisibleLayer = false;
         }
 
         g.dispose();
@@ -1334,5 +1339,12 @@ public class ImageUtils {
         }
 
         return dest;
+    }
+
+    /**
+     * Returns true if the coordinates (x, y) are within the image.
+     */
+    public static boolean isWithinBounds(int x, int y, BufferedImage img) {
+        return x >= 0 && y >= 0 && x < img.getWidth() && y < img.getHeight();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
@@ -52,7 +53,9 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
         }
 
         try {
-            Views.getActiveComp().addNewEmptyImageLayer(Views.getActiveComp().generateLayerName(), ctrlPressed);
+            Composition comp = Views.getActiveComp();
+            String layerName = comp.generateLayerName();
+            comp.addNewEmptyImageLayer(layerName, ctrlPressed);
         } catch (Exception ex) {
             Messages.showException(ex);
         }

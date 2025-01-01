@@ -62,47 +62,24 @@ public class CheckFilter extends PointFilter {
      * Set the foreground color.
      *
      * @param foreground the color.
-     * @see #getForeground
      */
     public void setForeground(int foreground) {
         this.foreground = foreground;
     }
 
     /**
-     * Get the foreground color.
-     *
-     * @return the color.
-     * @see #setForeground
-     */
-    public int getForeground() {
-        return foreground;
-    }
-
-    /**
      * Set the background color.
      *
      * @param background the color.
-     * @see #getBackground
      */
     public void setBackground(int background) {
         this.background = background;
     }
 
     /**
-     * Get the background color.
-     *
-     * @return the color.
-     * @see #setBackground
-     */
-    public int getBackground() {
-        return background;
-    }
-
-    /**
      * Set the X scale of the texture.
      *
      * @param xScale the scale.
-     * @see #getXScale
      */
     public void setXScale(int xScale) {
         this.xScale = xScale;
@@ -111,20 +88,9 @@ public class CheckFilter extends PointFilter {
     }
 
     /**
-     * Get the X scale of the texture.
-     *
-     * @return the scale.
-     * @see #setXScale
-     */
-    public int getXScale() {
-        return xScale;
-    }
-
-    /**
      * Set the Y scale of the texture.
      *
      * @param yScale the scale.
-     * @see #getYScale
      */
     public void setYScale(int yScale) {
         this.yScale = yScale;
@@ -133,33 +99,12 @@ public class CheckFilter extends PointFilter {
     }
 
     /**
-     * Get the Y scale of the texture.
-     *
-     * @return the scale.
-     * @see #setYScale
-     */
-    public int getYScale() {
-        return yScale;
-    }
-
-    /**
      * Set the fuzziness of the texture.
      *
      * @param fuzziness the fuzziness.
-     * @see #getFuzziness
      */
     public void setFuzziness(int fuzziness) {
         this.fuzziness = fuzziness;
-    }
-
-    /**
-     * Get the fuzziness of the texture.
-     *
-     * @return the fuzziness.
-     * @see #setFuzziness
-     */
-    public int getFuzziness() {
-        return fuzziness;
     }
 
     /**
@@ -167,7 +112,6 @@ public class CheckFilter extends PointFilter {
      *
      * @param angle the angle of the texture.
      * @angle
-     * @see #getAngle
      */
     public void setAngle(float angle) {
         this.angle = angle;
@@ -199,16 +143,6 @@ public class CheckFilter extends PointFilter {
                 setAaRes(8);
             }
         }
-    }
-
-    /**
-     * Get the angle of the texture.
-     *
-     * @return the angle of the texture.
-     * @see #setAngle
-     */
-    public float getAngle() {
-        return angle;
     }
 
     public void setDistortion(double distortion) {

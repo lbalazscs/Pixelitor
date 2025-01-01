@@ -30,7 +30,7 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
  * A filter which priduces a video feedback effect by repeated transformations.
  */
 public class FeedbackFilter extends AbstractBufferedImageOp {
-    private float centreX = 0.5f, centreY = 0.5f;
+    private float centerX = 0.5f, centerY = 0.5f;
     private float distance;
     private float angle;
     private float rotation;
@@ -64,212 +64,101 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Specifies the angle of each iteration.
+     * Sets the angle of each iteration.
      *
      * @param angle the angle of each iteration.
      * @angle
-     * @see #getAngle
      */
     public void setAngle(float angle) {
         this.angle = angle;
     }
 
     /**
-     * Returns the angle of each iteration.
-     *
-     * @return the angle of each iteration.
-     * @see #setAngle
-     */
-    public float getAngle() {
-        return angle;
-    }
-
-    /**
-     * Specifies the distance to move on each iteration.
+     * Sets the distance to move on each iteration.
      *
      * @param distance the distance
-     * @see #getDistance
      */
     public void setDistance(float distance) {
         this.distance = distance;
     }
 
     /**
-     * Get the distance to move on each iteration.
-     *
-     * @return the distance
-     * @see #setDistance
-     */
-    public float getDistance() {
-        return distance;
-    }
-
-    /**
-     * Specifies the amount of rotation on each iteration.
+     * Sets the amount of rotation on each iteration.
      *
      * @param rotation the angle of rotation
      * @angle
-     * @see #getRotation
      */
     public void setRotation(float rotation) {
         this.rotation = rotation;
     }
 
     /**
-     * Returns the amount of rotation on each iteration.
-     *
-     * @return the angle of rotation
-     * @angle
-     * @see #setRotation
-     */
-    public float getRotation() {
-        return rotation;
-    }
-
-    /**
-     * Specifies the amount to scale on each iteration.
+     * Sets the amount to scale on each iteration.
      *
      * @param zoom the zoom factor
-     * @see #getZoom
      */
     public void setZoom(float zoom) {
         this.zoom = zoom;
     }
 
     /**
-     * Returns the amount to scale on each iteration.
-     *
-     * @return the zoom factor
-     * @see #setZoom
-     */
-    public float getZoom() {
-        return zoom;
-    }
-
-    /**
-     * Set the alpha value at the first iteration.
+     * Sets the alpha value at the first iteration.
      *
      * @param startAlpha the alpha value
      * @min-value 0
      * @max-value 1
-     * @see #getStartAlpha
      */
     public void setStartAlpha(float startAlpha) {
         this.startAlpha = startAlpha;
     }
 
     /**
-     * Get the alpha value at the first iteration.
-     *
-     * @return the alpha value
-     * @see #setStartAlpha
-     */
-    public float getStartAlpha() {
-        return startAlpha;
-    }
-
-    /**
-     * Set the alpha value at the last iteration.
+     * Sets the alpha value at the last iteration.
      *
      * @param endAlpha the alpha value
      * @min-value 0
      * @max-value 1
-     * @see #getEndAlpha
      */
     public void setEndAlpha(float endAlpha) {
         this.endAlpha = endAlpha;
     }
 
     /**
-     * Get the alpha value at the last iteration.
+     * Sets the center of the effect in the X direction as a proportion of the image size.
      *
-     * @return the alpha value
-     * @see #setEndAlpha
+     * @param centerX the center
      */
-    public float getEndAlpha() {
-        return endAlpha;
+    public void setCenterX(float centerX) {
+        this.centerX = centerX;
     }
 
     /**
-     * Set the centre of the effect in the X direction as a proportion of the image size.
+     * Sets the center of the effect in the Y direction as a proportion of the image size.
      *
-     * @param centreX the center
-     * @see #getCentreX
+     * @param centerY the center
      */
-    public void setCentreX(float centreX) {
-        this.centreX = centreX;
+    public void setCenterY(float centerY) {
+        this.centerY = centerY;
     }
 
     /**
-     * Get the centre of the effect in the X direction as a proportion of the image size.
+     * Sets the center of the effect as a proportion of the image size.
      *
-     * @return the center
-     * @see #setCentreX
+     * @param center the center
      */
-    public float getCentreX() {
-        return centreX;
+    public void setCenter(Point2D center) {
+        centerX = (float) center.getX();
+        centerY = (float) center.getY();
     }
 
     /**
-     * Set the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centreY the center
-     * @see #getCentreY
-     */
-    public void setCentreY(float centreY) {
-        this.centreY = centreY;
-    }
-
-    /**
-     * Get the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentreY
-     */
-    public float getCentreY() {
-        return centreY;
-    }
-
-    /**
-     * Set the centre of the effect as a proportion of the image size.
-     *
-     * @param centre the center
-     * @see #getCentre
-     */
-    public void setCentre(Point2D centre) {
-        centreX = (float) centre.getX();
-        centreY = (float) centre.getY();
-    }
-
-    /**
-     * Get the centre of the effect as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentre
-     */
-    public Point2D getCentre() {
-        return new Point2D.Float(centreX, centreY);
-    }
-
-    /**
-     * Set the number of iterations.
+     * Sets the number of iterations.
      *
      * @param iterations the number of iterations
      * @min-value 0
-     * @see #getIterations
      */
     public void setIterations(int iterations) {
         this.iterations = iterations;
-    }
-
-    /**
-     * Get the number of iterations.
-     *
-     * @return the number of iterations
-     * @see #setIterations
-     */
-    public int getIterations() {
-        return iterations;
     }
 
     @Override
@@ -277,8 +166,8 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
-        float cx = src.getWidth() * centreX;
-        float cy = src.getHeight() * centreY;
+        float cx = src.getWidth() * centerX;
+        float cy = src.getHeight() * centerY;
 //        float imageRadius = (float)Math.sqrt( cx*cx + cy*cy );
         float translateX = (float) (distance * Math.cos(angle));
         float translateY = (float) (distance * -Math.sin(angle));

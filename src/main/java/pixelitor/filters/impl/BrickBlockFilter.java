@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,14 +57,17 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
         for (int y = 0; y < imgHeight; y += verBlockSize) {
             verticalBlockNo++;
 
-            int hShift = 0;
+            int hOffset = 0;  // horizontal offset for alternate rows
             if (verticalBlockNo % 2 == 0) {
-                hShift = horBlockSize / 2;
+                hOffset = horBlockSize / 2;
+
+                // process the left half-block at the start of the row
                 replaceWithAverage(src, dst, imgWidth, imgHeight,
                     halfPixels, 0, y, horBlockSize / 2, verBlockSize);
             }
 
-            for (int x = hShift; x < imgWidth; x += horBlockSize) {
+            // process the horizontal blocks in the row
+            for (int x = hOffset; x < imgWidth; x += horBlockSize) {
                 replaceWithAverage(src, dst, imgWidth, imgHeight,
                     pixels, x, y, horBlockSize, verBlockSize);
             }
@@ -73,6 +76,7 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
+    // replaces a block with its average color
     private static void replaceWithAverage(BufferedImage src, BufferedImage dst,
                                            int width, int height,
                                            int[] pixels, int x, int y,
@@ -84,6 +88,8 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
         int r = 0, g = 0, b = 0;
         int rgb;
         int i = 0;
+
+        // accumulate individual channel values
         for (int by = 0; by < h; by++) {
             for (int bx = 0; bx < w; bx++) {
                 rgb = pixels[i];
@@ -93,9 +99,14 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
                 i++;
             }
         }
+
+        // calculate the average color of the block
         int t = w * h;
         rgb = ((r / t) << 16) | ((g / t) << 8) | (b / t);
         i = 0;
+
+        // set all pixels in the block to the average color,
+        // preserving the alpha channel
         for (int by = 0; by < h; by++) {
             for (int bx = 0; bx < w; bx++) {
                 pixels[i] = (pixels[i] & 0xFF_00_00_00) | rgb;

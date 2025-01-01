@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,12 @@ import pixelitor.TestHelper;
 import pixelitor.layers.ContentLayer;
 
 /**
- * Whether there is a translation present when a test runs
+ * Whether and how translatios should be applied to content layers during tests.
  */
 public enum WithTranslation {
     NO(0, 0) {
         @Override
-        public void setupFor(Composition comp) {
+        public void configure(Composition comp) {
             // do nothing
         }
 
@@ -37,12 +37,12 @@ public enum WithTranslation {
         }
 
         @Override
-        public void setupFor(ContentLayer layer) {
+        public void configure(ContentLayer layer) {
             // do nothing
         }
     }, YES(-4, -4) {
         @Override
-        public void setupFor(Composition comp) {
+        public void configure(Composition comp) {
             comp.forEachNestedLayer(ContentLayer.class, contentLayer ->
                 TestHelper.setTranslation(comp, contentLayer, this));
         }
@@ -54,7 +54,7 @@ public enum WithTranslation {
         }
 
         @Override
-        public void setupFor(ContentLayer layer) {
+        public void configure(ContentLayer layer) {
             layer.startMovement();
             layer.moveWhileDragging(-2, -2);
             layer.endMovement();
@@ -69,9 +69,9 @@ public enum WithTranslation {
         this.expectedTY = expectedTY;
     }
 
-    public abstract void setupFor(Composition comp);
+    public abstract void configure(Composition comp);
 
-    public abstract void setupFor(ContentLayer layer);
+    public abstract void configure(ContentLayer layer);
 
     public abstract void move(Composition comp);
 

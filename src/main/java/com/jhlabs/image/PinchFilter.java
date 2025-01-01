@@ -29,14 +29,14 @@ import java.awt.image.BufferedImage;
  */
 public class PinchFilter extends TransformFilter implements SwirlMethod {
     private float angle = 0;
-    private float centreX = 0.5f;
-    private float centreY = 0.5f;
+    private float centerX = 0.5f;
+    private float centerY = 0.5f;
     private float radius = 100;
     private float pinchBulgeAmount = 0.5f;
 
     private float radius2 = 0;
-    private float icentreX;
-    private float icentreY;
+    private float icenterX;
+    private float icenterY;
 
     private float zoom;
     private float rotateResultAngle;
@@ -49,7 +49,6 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      * Set the angle of twirl in radians. 0 means no distortion.
      *
      * @param angle the angle of twirl. This is the angle by which pixels at the nearest edge of the image will move.
-     * @see #getAngle
      */
     @Override
     public void setSwirlAmount(float angle) {
@@ -57,76 +56,33 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     }
 
     /**
-     * Get the angle of twist.
-     *
-     * @return the angle in radians.
-     * @see #setAngle
-     */
-    public float getAngle() {
-        return angle;
-    }
-
-    /**
-     * Set the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect in the X direction as a proportion of the image size.
      *
      * @param centerX the center
-     * @see #getCentreX
      */
     @Override
     public void setCenterX(float centerX) {
-        centreX = centerX;
+        this.centerX = centerX;
     }
 
     /**
-     * Get the centre of the effect in the X direction as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCenterX
-     */
-    public float getCentreX() {
-        return centreX;
-    }
-
-    /**
-     * Set the centre of the effect in the Y direction as a proportion of the image size.
+     * Set the center of the effect in the Y direction as a proportion of the image size.
      *
      * @param centerY the center
-     * @see #getCentreY
      */
     @Override
     public void setCenterY(float centerY) {
-        centreY = centerY;
+        this.centerY = centerY;
     }
 
     /**
-     * Get the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCenterY
-     */
-    public float getCentreY() {
-        return centreY;
-    }
-
-    /**
-     * Set the centre of the effect as a proportion of the image size.
+     * Set the center of the effect as a proportion of the image size.
      *
      * @param center the center
-     * @see #getCentre
      */
     public void setCenter(Point2D center) {
-        centreX = (float) center.getX();
-        centreY = (float) center.getY();
-    }
-
-    /**
-     * Get the centre of the effect as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCenter
-     */
-    public Point2D getCentre() {
-        return new Point2D.Float(centreX, centreY);
+        centerX = (float) center.getX();
+        centerY = (float) center.getY();
     }
 
     /**
@@ -134,21 +90,10 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      *
      * @param radius the radius
      * @min-value 0
-     * @see #getRadius
      */
     @Override
     public void setRadius(float radius) {
         this.radius = radius;
-    }
-
-    /**
-     * Get the radius of the effect.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public float getRadius() {
-        return radius;
     }
 
     /**
@@ -157,31 +102,20 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      * @param amount the amount
      * @min-value -1
      * @max-value 1
-     * @see #getPinchBulgeAmount
      */
     @Override
     public void setPinchBulgeAmount(float amount) {
         pinchBulgeAmount = -amount;
     }
 
-    /**
-     * Get the amount of pinch.
-     *
-     * @return the amount
-     * @see #setSwirlAmount
-     */
-    public float getPinchBulgeAmount() {
-        return pinchBulgeAmount;
-    }
-
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         float width = src.getWidth();
         float height = src.getHeight();
-        icentreX = width * centreX;
-        icentreY = height * centreY;
+        icenterX = width * centerX;
+        icenterY = height * centerY;
         if (radius == 0) {
-            radius = Math.min(icentreX, icentreY);
+            radius = Math.min(icenterX, icenterY);
         }
         radius2 = radius * radius;
         return super.filter(src, dst);
@@ -189,8 +123,8 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - icentreX;
-        float dy = y - icentreY;
+        float dx = x - icenterX;
+        float dy = y - icenterY;
         float distance = dx * dx + dy * dy;
 
         if (distance > radius2 || distance == 0) {
@@ -204,8 +138,8 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
             float u = (float) (zoomedR * FastMath.cos(angle));
             float v = (float) (zoomedR * FastMath.sin(angle));
 
-            out[0] = (u + icentreX);
-            out[1] = (v + icentreY);
+            out[0] = (u + icenterX);
+            out[1] = (v + icenterY);
         } else {
             float scaledDist = (float) Math.sqrt(distance / radius2);
             float pinchBulgeFactor = (float) FastMath.pow(FastMath.sin(Math.PI * 0.5 * scaledDist), -pinchBulgeAmount);
@@ -226,8 +160,8 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
             float u = (cos * dx - sin * dy) / zoom;
             float v = (sin * dx + cos * dy) / zoom;
 
-            out[0] = icentreX + u;
-            out[1] = icentreY + v;
+            out[0] = icenterX + u;
+            out[1] = icenterY + v;
         }
     }
 
@@ -249,7 +183,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     @Override
     public Shape[] getAffectedAreaShapes() {
         return new Shape[]{
-                new Ellipse2D.Float(icentreX - radius, icentreY - radius, 2 * radius, 2 * radius)
+            new Ellipse2D.Float(icenterX - radius, icenterY - radius, 2 * radius, 2 * radius)
         };
     }
 }

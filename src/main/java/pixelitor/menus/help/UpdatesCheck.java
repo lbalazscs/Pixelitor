@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,7 +73,7 @@ public class UpdatesCheck {
         String msg = format(
             "You already have the latest version (%s) of Pixelitor installed",
             latestVersion);
-        Messages.showInfo("Pixelitor is up to date", msg);
+        Messages.showInfo("Pixelitor Is Up to Date", msg);
     }
 
     private static void showNewVersionAlert(String lastVersion, String requiredJavaVersion) {

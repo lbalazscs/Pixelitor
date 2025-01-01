@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 public class TextLayerTest {
     private TextLayer layer;
     private Composition comp;
-    private IconUpdateChecker iconUpdates;
+    private IconUpdateChecker iconChecker;
 
     @Parameter
     public WithMask withMask;
@@ -67,13 +67,13 @@ public class TextLayerTest {
         layer.updateLayerName();
         comp.add(layer);
 
-        withMask.setupForLayer(layer);
+        withMask.configure(layer);
         LayerMask mask = null;
         if (withMask.isTrue()) {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask);
+        iconChecker = new IconUpdateChecker(layer, mask);
 
         assert layer.getComp().checkInvariants();
         History.clear();
@@ -95,7 +95,7 @@ public class TextLayerTest {
 
         // the layer icon is updated when rasterizing, but not
         // through an external updateLayerIconImageAsync call
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     private void checkBeforeRasterizationState() {
@@ -139,7 +139,7 @@ public class TextLayerTest {
     public void enlargeCanvas() {
         layer.enlargeCanvas(new Outsets(5, 5, 5, 10));
 
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -147,7 +147,7 @@ public class TextLayerTest {
         ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
 
         assertThat(edit).isNotNull();
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
@@ -180,6 +180,6 @@ public class TextLayerTest {
             .textIs(newText)
             .nameIs(expectedNewName);
 
-        iconUpdates.check(0, 0);
+        iconChecker.verifyUpdateCounts(0, 0);
     }
 }

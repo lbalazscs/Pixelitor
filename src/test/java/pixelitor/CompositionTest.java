@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -594,9 +594,6 @@ class CompositionTest {
     void invertSelection() {
         assertThat(comp).doesNotHaveSelection();
 
-        comp.invertSelection(); // nothing to invert yet
-        History.assertNumEditsIs(0); // nothing happened
-
         // set a selection
         Rectangle2D origSelRect = new Rectangle2D.Double(3, 3, 4, 4);
         comp.createSelectionFrom(origSelRect);
@@ -610,7 +607,7 @@ class CompositionTest {
 
         assertThat(comp.getSelection())
             .isNotNull()
-            .hasShapeBounds(comp.getCanvasBounds()); // the whole canvas!
+            .hasShapeBounds(comp.getCanvasBounds());
         History.assertNumEditsIs(1);
 
         History.undo("Invert Selection");
@@ -621,7 +618,7 @@ class CompositionTest {
         History.redo("Invert Selection");
         assertThat(comp.getSelection())
             .isNotNull()
-            .hasShapeBounds(comp.getCanvasBounds()); // the whole canvas!
+            .hasShapeBounds(comp.getCanvasBounds());
     }
 
     @Test

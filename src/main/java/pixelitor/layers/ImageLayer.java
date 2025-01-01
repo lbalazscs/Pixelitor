@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,6 +59,7 @@ import static pixelitor.layers.ImageLayer.State.PREVIEW;
 import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.createThumbnail;
+import static pixelitor.utils.ImageUtils.isWithinBounds;
 import static pixelitor.utils.ImageUtils.replaceSelectedRegion;
 import static pixelitor.utils.Threads.onEDT;
 
@@ -608,7 +609,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public int getPixelAtPoint(Point p) {
         int x = p.x - getTx();
         int y = p.y - getTy();
-        if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
+        if (isWithinBounds(x, y, image)) {
             if (hasMask() && isMaskEnabled()) {
                 int maskPixel = getMask().getPixelAtPoint(p);
                 if (maskPixel != 0) {

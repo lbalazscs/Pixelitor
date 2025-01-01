@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ public class TestLayerUI implements LayerUI {
     private boolean showVisibility = true;
     private boolean hasMaskIconLabel = false;
 
-    private int numLayerIconUpdates;
-    private int numMaskIconUpdates;
+    private int layerIconUpdates;
+    private int maskIconUpdates;
 
     public TestLayerUI(Layer layer) {
         this.layer = layer;
@@ -85,18 +85,18 @@ public class TestLayerUI implements LayerUI {
     @Override
     public void updateLayerIconImageAsync(Layer layer) {
         if (layer instanceof LayerMask) {
-            numMaskIconUpdates++;
+            maskIconUpdates++;
         } else {
-            numLayerIconUpdates++;
+            layerIconUpdates++;
         }
     }
 
-    public int getNumLayerIconUpdates() {
-        return numLayerIconUpdates;
+    public int getLayerIconUpdateCount() {
+        return layerIconUpdates;
     }
 
-    public int getNumMaskIconUpdates() {
-        return numMaskIconUpdates;
+    public int getMaskIconUpdateCount() {
+        return maskIconUpdates;
     }
 
     @Override

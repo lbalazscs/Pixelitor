@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.utils.MockFilter;
 
 import java.awt.Dimension;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("Smart filter tests")
@@ -37,7 +38,7 @@ class SmartFilterTest {
     private SmartFilter middle;
     private SmartFilter last;
 
-    private IconUpdateChecker soIconUpdates;
+    private IconUpdateChecker soIconChecker;
 
     @BeforeAll
     static void beforeAllTests() {
@@ -80,7 +81,7 @@ class SmartFilterTest {
             .invariantsAreOK();
 
         smartObject.createUI();
-        soIconUpdates = new IconUpdateChecker(smartObject, null);
+        soIconChecker = new IconUpdateChecker(smartObject, null);
 
         firstFilter.resetNumTransformCalls();
         middleFilter.resetNumTransformCalls();
@@ -114,7 +115,7 @@ class SmartFilterTest {
 
         History.assertNumEditsIs(1);
         smartObject.getVisibleImage();
-        soIconUpdates.check(1, 0);
+        soIconChecker.verifyUpdateCounts(1, 0);
 
         undo("Add Smart Filter 4");
         assertThat(smartObject)
@@ -125,7 +126,7 @@ class SmartFilterTest {
         assertThat(smartObject.getComp())
             .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
-        soIconUpdates.check(2, 0);
+        soIconChecker.verifyUpdateCounts(2, 0);
 
         redo("Add Smart Filter 4");
         assertThat(smartObject)
@@ -136,7 +137,7 @@ class SmartFilterTest {
         assertThat(smartObject.getComp())
             .activeLayerNameIs("Filter 4")
             .invariantsAreOK();
-        soIconUpdates.check(3, 0);
+        soIconChecker.verifyUpdateCounts(3, 0);
     }
 
     @Test
@@ -169,7 +170,7 @@ class SmartFilterTest {
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 1, 1);
-        soIconUpdates.check(1, 0);
+        soIconChecker.verifyUpdateCounts(1, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(false, true, true)
             .invariantsAreOK();
@@ -178,7 +179,7 @@ class SmartFilterTest {
 
         undo("Hide Smart Filter");
         checkNumFilterRuns(0, 2, 2);
-        soIconUpdates.check(2, 0);
+        soIconChecker.verifyUpdateCounts(2, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, true, true)
             .invariantsAreOK();
@@ -186,7 +187,7 @@ class SmartFilterTest {
 
         redo("Hide Smart Filter");
         checkNumFilterRuns(0, 3, 3);
-        soIconUpdates.check(3, 0);
+        soIconChecker.verifyUpdateCounts(3, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(false, true, true)
             .invariantsAreOK();
@@ -199,7 +200,7 @@ class SmartFilterTest {
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 0, 1);
-        soIconUpdates.check(1, 0);
+        soIconChecker.verifyUpdateCounts(1, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, false, true)
             .invariantsAreOK();
@@ -208,7 +209,7 @@ class SmartFilterTest {
 
         undo("Hide Smart Filter");
         checkNumFilterRuns(0, 0, 2);
-        soIconUpdates.check(2, 0);
+        soIconChecker.verifyUpdateCounts(2, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, true, true)
             .invariantsAreOK();
@@ -216,7 +217,7 @@ class SmartFilterTest {
 
         redo("Hide Smart Filter");
         checkNumFilterRuns(0, 0, 3);
-        soIconUpdates.check(3, 0);
+        soIconChecker.verifyUpdateCounts(3, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, false, true)
             .invariantsAreOK();
@@ -229,7 +230,7 @@ class SmartFilterTest {
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 0, 0);
-        soIconUpdates.check(1, 0);
+        soIconChecker.verifyUpdateCounts(1, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, true, false)
             .invariantsAreOK();
@@ -238,7 +239,7 @@ class SmartFilterTest {
 
         undo("Hide Smart Filter");
         checkNumFilterRuns(0, 0, 0);
-        soIconUpdates.check(2, 0);
+        soIconChecker.verifyUpdateCounts(2, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, true, true)
             .invariantsAreOK();
@@ -246,7 +247,7 @@ class SmartFilterTest {
 
         redo("Hide Smart Filter");
         checkNumFilterRuns(0, 0, 0);
-        soIconUpdates.check(3, 0);
+        soIconChecker.verifyUpdateCounts(3, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, true, false)
             .invariantsAreOK();
@@ -291,7 +292,7 @@ class SmartFilterTest {
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 1, 1);
-        soIconUpdates.check(1, 0);
+        soIconChecker.verifyUpdateCounts(1, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 2", "Filter 3")
             .smartFilterVisibilitiesAre(true, true)
@@ -303,7 +304,7 @@ class SmartFilterTest {
 
         undo("Delete Filter 1");
         checkNumFilterRuns(0, 2, 2);
-        soIconUpdates.check(2, 0);
+        soIconChecker.verifyUpdateCounts(2, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
             .smartFilterVisibilitiesAre(true, true, true)
@@ -314,7 +315,7 @@ class SmartFilterTest {
 
         redo("Delete Filter 1");
         checkNumFilterRuns(0, 3, 3);
-        soIconUpdates.check(3, 0);
+        soIconChecker.verifyUpdateCounts(3, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 2", "Filter 3")
             .smartFilterVisibilitiesAre(true, true)
@@ -330,7 +331,7 @@ class SmartFilterTest {
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 0, 1);
-        soIconUpdates.check(1, 0);
+        soIconChecker.verifyUpdateCounts(1, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 3")
             .invariantsAreOK();
@@ -341,7 +342,7 @@ class SmartFilterTest {
 
         undo("Delete Filter 2");
         checkNumFilterRuns(0, 0, 2);
-        soIconUpdates.check(2, 0);
+        soIconChecker.verifyUpdateCounts(2, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
             .smartFilterVisibilitiesAre(true, true, true)
@@ -352,7 +353,7 @@ class SmartFilterTest {
 
         redo("Delete Filter 2");
         checkNumFilterRuns(0, 0, 3);
-        soIconUpdates.check(3, 0);
+        soIconChecker.verifyUpdateCounts(3, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 3")
             .smartFilterVisibilitiesAre(true, true)
@@ -368,7 +369,7 @@ class SmartFilterTest {
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 0, 0);
-        soIconUpdates.check(1, 0);
+        soIconChecker.verifyUpdateCounts(1, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 2")
             .invariantsAreOK();
@@ -379,7 +380,7 @@ class SmartFilterTest {
 
         undo("Delete Filter 3");
         checkNumFilterRuns(0, 0, 0);
-        soIconUpdates.check(2, 0);
+        soIconChecker.verifyUpdateCounts(2, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
             .smartFilterVisibilitiesAre(true, true, true)
@@ -390,7 +391,7 @@ class SmartFilterTest {
 
         redo("Delete Filter 3");
         checkNumFilterRuns(0, 0, 0);
-        soIconUpdates.check(3, 0);
+        soIconChecker.verifyUpdateCounts(3, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 2")
             .smartFilterVisibilitiesAre(true, true)
@@ -424,7 +425,10 @@ class SmartFilterTest {
             .invariantsAreOK();
         History.assertNumEditsIs(2);
 
-        smartObject.moveUp(filter1); // nothing should happen
+        // can't be moved further
+        assertThatThrownBy(() -> smartObject.moveUp(filter1))
+            .isInstanceOf(IllegalStateException.class);
+
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 2", "Filter 3", "Filter 1")
             .invariantsAreOK();
@@ -490,7 +494,10 @@ class SmartFilterTest {
             .invariantsAreOK();
         History.assertNumEditsIs(2);
 
-        smartObject.moveDown(filter3); // nothing should happen
+        // can't be moved further
+        assertThatThrownBy(() -> smartObject.moveDown(filter3))
+            .isInstanceOf(IllegalStateException.class);
+
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 3", "Filter 1", "Filter 2")
             .invariantsAreOK();

@@ -37,43 +37,33 @@ public class BlockFilter extends AbstractBufferedImageOp {
      * @param blockSize the number of pixels along each block edge
      * @min-value 1
      * @max-value 100+
-     * @see #getBlockSize
      */
     public void setBlockSize(int blockSize) {
         this.blockSize = blockSize;
-    }
-
-    /**
-     * Get the pixel block size.
-     *
-     * @return the number of pixels along each block edge
-     * @see #setBlockSize
-     */
-    public int getBlockSize() {
-        return blockSize;
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         int width = src.getWidth();
         int height = src.getHeight();
-//		int type = src.getType();
-//		WritableRaster srcRaster = src.getRaster();
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
 
+        // pixel data for a single block
         int[] pixels = new int[blockSize * blockSize];
+
         for (int y = 0; y < height; y += blockSize) {
             for (int x = 0; x < width; x += blockSize) {
                 int w = Math.min(blockSize, width - x);
                 int h = Math.min(blockSize, height - y);
-                int t = w * h;
                 getRGB(src, x, y, w, h, pixels);
                 int r = 0, g = 0, b = 0;
                 int argb;
                 int i = 0;
+
+                // accumulate individual channel values
                 for (int by = 0; by < h; by++) {
                     for (int bx = 0; bx < w; bx++) {
                         argb = pixels[i];
@@ -83,7 +73,13 @@ public class BlockFilter extends AbstractBufferedImageOp {
                         i++;
                     }
                 }
+
+                // calculate the average color of the block
+                int t = w * h;
                 argb = ((r / t) << 16) | ((g / t) << 8) | (b / t);
+
+                // set all pixels in the block to the average color,
+                // preserving the alpha channel
                 i = 0;
                 for (int by = 0; by < h; by++) {
                     for (int bx = 0; bx < w; bx++) {

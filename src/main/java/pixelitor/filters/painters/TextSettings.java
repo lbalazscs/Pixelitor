@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -283,10 +283,10 @@ public class TextSettings implements Serializable, Debuggable {
         int index = Arrays.binarySearch(Utils.getAvailableFontNames(), fontName);
         if (index < 0) {
             if (fontName.equals("Default")) {
-                // TODO for some reason the "all smart filters" test file has this
+                // for some reason the "all smart filters" test file has this
                 return;
             }
-            Messages.showError("Error loading " + textLayer.getComp().getName(),
+            Messages.showError("Missing Font In " + textLayer.getComp().getName(),
                 "<html>The font <b>" + fontName + "</b> was not found on this computer." +
                     "<br>It's used in the text layer <b>" + textLayer.getName() + "</b>.");
         }

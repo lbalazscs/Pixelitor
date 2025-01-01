@@ -29,15 +29,14 @@ import java.util.concurrent.Future;
  */
 public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionBlur {
     private float angle = 0.0f;
-//    private final float falloff = 1.0f;
     private float distance = 1.0f;
     private float zoom = 0.0f;
     private float rotation = 0.0f;
     private boolean wrapEdges = false;
     private boolean premultiplyAlpha = true;
 
-    private float centreY = 0.5f;
-    private float centreX = 0.5f;
+    private float centerX = 0.5f;
+    private float centerY = 0.5f;
 
     /**
      * Construct a MotionBlurFilter.
@@ -47,78 +46,41 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Set the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect in the X direction as a proportion of the image size.
      *
-     * @param centreX the center
-     * @see #getCentreX
+     * @param centerX the center
      */
     @Override
-    public void setCentreX(float centreX) {
-        this.centreX = centreX;
+    public void setCenterX(float centerX) {
+        this.centerX = centerX;
     }
 
     /**
-     * Get the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect in the Y direction as a proportion of the image size.
      *
-     * @return the center
-     * @see #setCentreX
+     * @param centerY the center
      */
     @Override
-    public float getCentreX() {
-        return centreX;
+    public void setCenterY(float centerY) {
+        this.centerY = centerY;
     }
 
     /**
-     * Set the centre of the effect in the Y direction as a proportion of the image size.
+     * Set the center of the effect as a proportion of the image size.
      *
-     * @param centreY the center
-     * @see #getCentreY
+     * @param center the center
      */
     @Override
-    public void setCentreY(float centreY) {
-        this.centreY = centreY;
+    public void setCenter(Point2D center) {
+        centerX = (float) center.getX();
+        centerY = (float) center.getY();
     }
 
     /**
-     * Get the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentreY
-     */
-    @Override
-    public float getCentreY() {
-        return centreY;
-    }
-
-    /**
-     * Set the centre of the effect as a proportion of the image size.
-     *
-     * @param centre the center
-     * @see #getCentre
-     */
-    @Override
-    public void setCentre(Point2D centre) {
-        centreX = (float) centre.getX();
-        centreY = (float) centre.getY();
-    }
-
-    /**
-     * Get the centre of the effect as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentre
-     */
-    @Override
-    public Point2D getCentre() {
-        return new Point2D.Float(centreX, centreY);
-    }
-
-    /**
-     * Specifies the angle of blur.
+     * Sets the angle of blur.
      *
      * @param angle the angle of blur.
      * @angle
-     * @see #getAngle
      */
     @Override
     public void setAngle(float angle) {
@@ -129,21 +91,9 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Returns the angle of blur.
-     *
-     * @return the angle of blur.
-     * @see #setAngle
-     */
-    @Override
-    public float getAngle() {
-        return angle;
-    }
-
-    /**
      * Set the distance of blur.
      *
      * @param distance the distance of blur.
-     * @see #getDistance
      */
     @Override
     public void setDistance(float distance) {
@@ -151,21 +101,9 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Get the distance of blur.
-     *
-     * @return the distance of blur.
-     * @see #setDistance
-     */
-    @Override
-    public float getDistance() {
-        return distance;
-    }
-
-    /**
      * Set the blur rotation.
      *
      * @param rotation the angle of rotation.
-     * @see #getRotation
      */
     @Override
     public void setRotation(float rotation) {
@@ -173,21 +111,9 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Get the blur rotation.
-     *
-     * @return the angle of rotation.
-     * @see #setRotation
-     */
-    @Override
-    public float getRotation() {
-        return rotation;
-    }
-
-    /**
      * Set the blur zoom.
      *
      * @param zoom the zoom factor.
-     * @see #getZoom
      */
     @Override
     public void setZoom(float zoom) {
@@ -195,54 +121,21 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Get the blur zoom.
-     *
-     * @return the zoom factor.
-     * @see #setZoom
-     */
-    @Override
-    public float getZoom() {
-        return zoom;
-    }
-
-    /**
      * Set whether to wrap at the image edges.
      *
      * @param wrapEdges true if it should wrap.
-     * @see #getWrapEdges
      */
     public void setWrapEdges(boolean wrapEdges) {
         this.wrapEdges = wrapEdges;
     }
 
     /**
-     * Get whether to wrap at the image edges.
-     *
-     * @return true if it should wrap.
-     * @see #setWrapEdges
-     */
-    public boolean getWrapEdges() {
-        return wrapEdges;
-    }
-
-    /**
      * Set whether to premultiply the alpha channel.
      *
      * @param premultiplyAlpha true to premultiply the alpha
-     * @see #getPremultiplyAlpha
      */
     public void setPremultiplyAlpha(boolean premultiplyAlpha) {
         this.premultiplyAlpha = premultiplyAlpha;
-    }
-
-    /**
-     * Get whether to premultiply the alpha channel.
-     *
-     * @return true to premultiply the alpha
-     * @see #setPremultiplyAlpha
-     */
-    public boolean getPremultiplyAlpha() {
-        return premultiplyAlpha;
     }
 
     @Override
@@ -267,8 +160,8 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
 
 //		int cx = width/2;
 //		int cy = height/2;
-        int cx = (int) (width * centreX);
-        int cy = (int) (height * centreY);
+        int cx = (int) (width * centerX);
+        int cy = (int) (height * centerY);
 
 //        int index = 0;
 
@@ -282,13 +175,13 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
             ImageMath.premultiply(inPixels, 0, inPixels.length);
         }
 
-        Future<?>[] futures = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calcLine(width, height, inPixels, outPixels, cx, cy, translateX, translateY, repetitions, finalY);
-            futures[y] = ThreadPool.submit(lineTask);
+            Runnable rowTask = () -> processRow(width, height, inPixels, outPixels, cx, cy, translateX, translateY, repetitions, finalY);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
-        ThreadPool.waitFor(futures, pt);
+        ThreadPool.waitFor(rowFutures, pt);
         if (premultiplyAlpha) {
             ImageMath.unpremultiply(outPixels, 0, inPixels.length);
         }
@@ -300,7 +193,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
         return dst;
     }
 
-    private void calcLine(int width, int height, int[] inPixels, int[] outPixels, int cx, int cy, float translateX, float translateY, int repetitions, int y) {
+    private void processRow(int width, int height, int[] inPixels, int[] outPixels, int cx, int cy, float translateX, float translateY, int repetitions, int y) {
         int index = y * width;
         FastTransform t = new FastTransform();
         Point2D.Float p = new Point2D.Float();

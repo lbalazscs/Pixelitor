@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
-import pixelitor.testutils.NumLayers;
+import pixelitor.testutils.LayerCount;
 import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithSelection;
 import pixelitor.testutils.WithTranslation;
@@ -64,16 +64,16 @@ public class CompActionTest {
     private final WithTranslation withTranslation;
     private final WithSelection withSelection;
     private final WithMask withMask;
-    private final NumLayers numLayers;
+    private final LayerCount layerCount;
 
     public CompActionTest(WithTranslation withTranslation,
                           WithSelection withSelection,
                           WithMask withMask,
-                          NumLayers numLayers) {
+                          LayerCount layerCount) {
         this.withSelection = withSelection;
         this.withTranslation = withTranslation;
         this.withMask = withMask;
-        this.numLayers = numLayers;
+        this.layerCount = layerCount;
 
         origTX = withTranslation.getExpectedTX();
         origTY = withTranslation.getExpectedTY();
@@ -85,11 +85,11 @@ public class CompActionTest {
     @Parameters(name = "{index}: translation = {0}, selection = {1}, mask = {2}, layers = {3}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
-            {WithTranslation.NO, WithSelection.NO, WithMask.NO, NumLayers.ONE},
-            {WithTranslation.YES, WithSelection.NO, WithMask.NO, NumLayers.ONE},
-            {WithTranslation.YES, WithSelection.YES, WithMask.NO, NumLayers.ONE},
-            {WithTranslation.YES, WithSelection.YES, WithMask.YES, NumLayers.ONE},
-            {WithTranslation.YES, WithSelection.YES, WithMask.YES, NumLayers.TWO},
+            {WithTranslation.NO, WithSelection.NO, WithMask.NO, LayerCount.ONE},
+            {WithTranslation.YES, WithSelection.NO, WithMask.NO, LayerCount.ONE},
+            {WithTranslation.YES, WithSelection.YES, WithMask.NO, LayerCount.ONE},
+            {WithTranslation.YES, WithSelection.YES, WithMask.YES, LayerCount.ONE},
+            {WithTranslation.YES, WithSelection.YES, WithMask.YES, LayerCount.TWO},
         });
     }
 
@@ -113,10 +113,10 @@ public class CompActionTest {
             .firstLayerHasMask()
             .secondLayerHasMask();
 
-        withTranslation.setupFor(origComp);
-        withSelection.setupFor(origComp);
-        withMask.setupFor(origComp);
-        numLayers.setupFor(origComp);
+        withTranslation.configure(origComp);
+        withSelection.configure(origComp);
+        withMask.configure(origComp);
+        layerCount.configure(origComp);
 
         if (withSelection.isTrue()) {
             origSelection = WithSelection.SELECTION_SHAPE;
@@ -490,7 +490,7 @@ public class CompActionTest {
     }
 
     private void checkTranslationOfNonActiveLayer() {
-        if (numLayers == NumLayers.TWO) {
+        if (layerCount == LayerCount.TWO) {
             var activeComp = view.getComp();
 
             var layer2 = (ImageLayer) activeComp.getLayer(1);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,21 +20,24 @@ package pixelitor.testutils;
 import pixelitor.Composition;
 
 /**
- * The number of layers which is present when a test runs
+ * The number of layers required for different test scenarios in a composition.
  */
-public enum NumLayers {
+public enum LayerCount {
     ONE() {
         @Override
-        public void setupFor(Composition comp) {
-            // delete one layer so that we have one left
+        public void configure(Composition comp) {
+            // delete a layer to ensure only one layer remains
             comp.deleteLayer(comp.getActiveLayer(), true);
         }
     }, TWO() {
         @Override
-        public void setupFor(Composition comp) {
-
+        public void configure(Composition comp) {
+            // default composition starts with two layers, so no action needed
         }
     };
 
-    public abstract void setupFor(Composition comp);
+    /**
+     * Configures the composition to have the required number of layers.
+     */
+    public abstract void configure(Composition comp);
 }

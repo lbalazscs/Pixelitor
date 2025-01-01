@@ -31,12 +31,12 @@ public class SphereFilter extends TransformFilter {
     private float b = 0;
     private float a2 = 0;
     private float b2 = 0;
-    private float centreX = 0.5f;
-    private float centreY = 0.5f;
+    private float centerX = 0.5f;
+    private float centerY = 0.5f;
     private float refractionIndex = 1.5f;
 
-    private float icentreX;
-    private float icentreY;
+    private float icenterX;
+    private float icenterY;
 
     public SphereFilter(String filterName) {
         super(filterName);
@@ -49,20 +49,9 @@ public class SphereFilter extends TransformFilter {
      * Set the index of refraction.
      *
      * @param refractionIndex the index of refraction
-     * @see #getRefractionIndex
      */
     public void setRefractionIndex(float refractionIndex) {
         this.refractionIndex = refractionIndex;
-    }
-
-    /**
-     * Get the index of refaction.
-     *
-     * @return the index of refaction
-     * @see #setRefractionIndex
-     */
-    public float getRefractionIndex() {
-        return refractionIndex;
     }
 
     /**
@@ -70,7 +59,6 @@ public class SphereFilter extends TransformFilter {
      *
      * @param r the radius
      * @min-value 0
-     * @see #getRadius
      */
     public void setRadius(float r) {
         a = r;
@@ -78,74 +66,31 @@ public class SphereFilter extends TransformFilter {
     }
 
     /**
-     * Get the radius of the effect.
+     * Set the center of the effect in the X direction as a proportion of the image size.
      *
-     * @return the radius
-     * @see #setRadius
+     * @param centerX the center
      */
-    public float getRadius() {
-        return a;
+    public void setCenterX(float centerX) {
+        this.centerX = centerX;
     }
 
     /**
-     * Set the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect in the Y direction as a proportion of the image size.
      *
-     * @param centreX the center
-     * @see #getCentreX
+     * @param centerY the center
      */
-    public void setCentreX(float centreX) {
-        this.centreX = centreX;
+    public void setCenterY(float centerY) {
+        this.centerY = centerY;
     }
 
     /**
-     * Get the centre of the effect in the X direction as a proportion of the image size.
+     * Set the center of the effect as a proportion of the image size.
      *
-     * @return the center
-     * @see #setCentreX
+     * @param center the center
      */
-    public float getCentreX() {
-        return centreX;
-    }
-
-    /**
-     * Set the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centreY the center
-     * @see #getCentreY
-     */
-    public void setCentreY(float centreY) {
-        this.centreY = centreY;
-    }
-
-    /**
-     * Get the centre of the effect in the Y direction as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentreY
-     */
-    public float getCentreY() {
-        return centreY;
-    }
-
-    /**
-     * Set the centre of the effect as a proportion of the image size.
-     *
-     * @param centre the center
-     * @see #getCentre
-     */
-    public void setCentre(Point2D centre) {
-        centreX = (float) centre.getX();
-        centreY = (float) centre.getY();
-    }
-
-    /**
-     * Get the centre of the effect as a proportion of the image size.
-     *
-     * @return the center
-     * @see #setCentre
-     */
-    public Point2D getCentre() {
-        return new Point2D.Float(centreX, centreY);
+    public void setCenter(Point2D center) {
+        centerX = (float) center.getX();
+        centerY = (float) center.getY();
     }
 
     public void setA(float a) {
@@ -160,8 +105,8 @@ public class SphereFilter extends TransformFilter {
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         float width = src.getWidth();
         float height = src.getHeight();
-        icentreX = width * centreX;
-        icentreY = height * centreY;
+        icenterX = width * centerX;
+        icenterY = height * centerY;
         if (a == 0) {
             a = width / 2;
         }
@@ -175,8 +120,8 @@ public class SphereFilter extends TransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - icentreX;
-        float dy = y - icentreY;
+        float dx = x - icenterX;
+        float dy = y - icenterY;
         float x2 = dx * dx;
         float y2 = dy * dy;
         if (y2 >= (b2 - (b2 * x2) / a2)) {
@@ -209,7 +154,7 @@ public class SphereFilter extends TransformFilter {
 
     public Shape[] getAffectedAreaShapes() {
         return new Shape[]{
-                new Ellipse2D.Float(icentreX - a, icentreY - b, 2 * a, 2 * b)
+            new Ellipse2D.Float(icenterX - a, icenterY - b, 2 * a, 2 * b)
         };
     }
 }

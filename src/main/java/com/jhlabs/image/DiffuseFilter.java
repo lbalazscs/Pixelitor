@@ -32,25 +32,14 @@ public class DiffuseFilter extends TransformFilter {
     }
 
     /**
-     * Specifies the scale of the texture.
+     * Sets the scale of the texture.
      *
      * @param scale the scale of the texture.
      * @min-value 1
      * @max-value 100+
-     * @see #getScale
      */
     public void setScale(float scale) {
         this.scale = scale;
-    }
-
-    /**
-     * Returns the scale of the texture.
-     *
-     * @return the scale of the texture.
-     * @see #setScale
-     */
-    public float getScale() {
-        return scale;
     }
 
     @Override

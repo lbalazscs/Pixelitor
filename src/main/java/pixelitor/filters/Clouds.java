@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -94,18 +94,18 @@ public class Clouds extends ParametrizedFilter {
         int[] c1Arr = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
         int[] c2Arr = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 
-        Future<?>[] futures = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calculateLine(scale, roughness, width, finalY, destData, c1Arr, c2Arr);
-            futures[y] = ThreadPool.submit(lineTask);
+            Runnable rowTask = () -> processRow(scale, roughness, width, finalY, destData, c1Arr, c2Arr);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
-        ThreadPool.waitFor(futures, pt);
+        ThreadPool.waitFor(rowFutures, pt);
     }
 
-    private void calculateLine(float startingScale, float roughness,
-                               int width, int y, int[] destData,
-                               int[] color1, int[] color2) {
+    private void processRow(float startingScale, float roughness,
+                            int width, int y, int[] destData,
+                            int[] color1, int[] color2) {
         for (int x = 0; x < width; x++) {
             float scale = startingScale;
             float noiseValue = 0.0f;

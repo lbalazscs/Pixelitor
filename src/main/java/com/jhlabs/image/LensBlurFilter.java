@@ -41,82 +41,37 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
      * Set the radius of the kernel, and hence the amount of blur.
      *
      * @param radius the radius of the blur in pixels.
-     * @see #getRadius
      */
     public void setRadius(float radius) {
         this.radius = radius;
     }
 
     /**
-     * Get the radius of the kernel.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public float getRadius() {
-        return radius;
-    }
-
-    /**
      * Set the number of sides of the aperture.
      *
      * @param sides the number of sides
-     * @see #getSides
      */
     public void setSides(int sides) {
         this.sides = sides;
     }
 
     /**
-     * Get the number of sides of the aperture.
-     *
-     * @return the number of sides
-     * @see #setSides
-     */
-    public int getSides() {
-        return sides;
-    }
-
-    /**
      * Set the bloom factor.
      *
      * @param bloom the bloom factor
-     * @see #getBloom
      */
     public void setBloom(float bloom) {
         this.bloom = bloom;
     }
 
     /**
-     * Get the bloom factor.
-     *
-     * @return the bloom factor
-     * @see #setBloom
-     */
-    public float getBloom() {
-        return bloom;
-    }
-
-    /**
      * Set the bloom threshold.
      *
      * @param bloomThreshold the bloom threshold
-     * @see #getBloomThreshold
      */
     public void setBloomThreshold(float bloomThreshold) {
         this.bloomThreshold = bloomThreshold;
     }
-
-    /**
-     * Get the bloom threshold.
-     *
-     * @return the bloom threshold
-     * @see #setBloomThreshold
-     */
-    public float getBloomThreshold() {
-        return bloomThreshold;
-    }
-
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
@@ -125,11 +80,6 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         int rows = 1, cols = 1;
         int log2rows = 0, log2cols = 0;
         int iradius = (int) Math.ceil(radius);
-//        int tileWidth = 128;
-//        int tileHeight = tileWidth;
-
-//        int adjustedWidth = (int)(width + iradius*2);
-//        int adjustedHeight = (int)(height + iradius*2);
 
         int tileWidth = iradius < 32 ? Math.min(128, width + 2 * iradius) : Math.min(256, width + 2 * iradius);
         int tileHeight = iradius < 32 ? Math.min(128, height + 2 * iradius) : Math.min(256, height + 2 * iradius);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,26 +43,49 @@ import static java.awt.BasicStroke.JOIN_MITER;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
+import static pixelitor.utils.ImageUtils.isGrayscale;
 
 /**
  * The paint bucket tool.
  */
 public class PaintBucketTool extends Tool {
-    private static final String ACTION_LOCAL = "Local";
-    private static final String ACTION_GLOBAL = "Global";
+    private enum Action {
+        LOCAL("Local"),   // flood fill around clicked pixel
+        GLOBAL("Global"); // replace throughout image
 
-    private static final String FILL_FOREGROUND = GUIText.FG_COLOR;
-    private static final String FILL_BACKGROUND = GUIText.BG_COLOR;
-    private static final String FILL_TRANSPARENT = "Transparent";
-    private static final String FILL_CLICKED = "Clicked Pixel Color";
+        private final String displayName;
 
-    private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
-    private final JComboBox<String> fillCB = new JComboBox<>(
-        new String[]{FILL_FOREGROUND, FILL_BACKGROUND,
-            FILL_TRANSPARENT, FILL_CLICKED}
-    );
-    private final JComboBox<String> actionCB = new JComboBox<>(
-        new String[]{ACTION_LOCAL, ACTION_GLOBAL});
+        Action(String displayName) {
+            this.displayName = displayName;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    private enum Fill {
+        FOREGROUND(GUIText.FG_COLOR),
+        BACKGROUND(GUIText.BG_COLOR),
+        TRANSPARENT("Transparent"),
+        CLICKED("Clicked Pixel Color");
+
+        private final String displayName;
+
+        Fill(String displayName) {
+            this.displayName = displayName;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    private final RangeParam colorTolerance = new RangeParam("Tolerance", 0, 20, 255);
+    private final JComboBox<Fill> fillCB = new JComboBox<>(Fill.values());
+    private final JComboBox<Action> actionCB = new JComboBox<>(Action.values());
 
     public PaintBucketTool() {
         super("Paint Bucket", 'N',
@@ -72,7 +95,7 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void initSettingsPanel(ResourceBundle resources) {
-        settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
+        settingsPanel.add(new SliderSpinner(colorTolerance, WEST, false));
 
         settingsPanel.addComboBox(GUIText.FILL_WITH + ":", fillCB, "fillCB");
         settingsPanel.addComboBox("Action:", actionCB, "actionCB");
@@ -96,64 +119,62 @@ public class PaintBucketTool extends Tool {
         int tx = dr.getTx();
         int ty = dr.getTy();
 
+        // the click position relative to image coordinates
         int x = (int) e.getImX() - tx;
         int y = (int) e.getImY() - ty;
 
-        BufferedImage image = dr.getImage();
-        int imgHeight = image.getHeight();
-        int imgWidth = image.getWidth();
+        BufferedImage targetImage = dr.getImage();
+        int imgHeight = targetImage.getHeight();
+        int imgWidth = targetImage.getWidth();
         if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight) {
             return;
         }
 
-        BufferedImage backupForUndo = ImageUtils.copyImage(image);
-        boolean thereIsSelection = comp.hasSelection();
+        BufferedImage backupForUndo = ImageUtils.copyImage(targetImage);
+        boolean hasSelection = comp.hasSelection();
 
-        boolean grayScale = image.getType() == BufferedImage.TYPE_BYTE_GRAY;
+        boolean targetIsGrayscale = isGrayscale(targetImage);
 
         BufferedImage workingImage;
-        if (grayScale) {
-            workingImage = ImageUtils.toSysCompatibleImage(image);
-        } else if (thereIsSelection) {
-            workingImage = ImageUtils.copyImage(image);
+        if (targetIsGrayscale) {
+            // the algorithms are implemented only for RGBA images
+            workingImage = ImageUtils.toSysCompatibleImage(targetImage);
+        } else if (hasSelection) {
+            // copy to be able to apply only the selected modifications
+            workingImage = ImageUtils.copyImage(targetImage);
         } else {
-            workingImage = image;
+            // we can modify the original image directly
+            workingImage = targetImage;
         }
 
-        String fill = getSelectedFill();
         int rgbAtMouse = workingImage.getRGB(x, y);
 
-        int fillRGB;
-        if (fill.equals(FILL_FOREGROUND)) {
-            fillRGB = getFGColor().getRGB();
-        } else if (fill.equals(FILL_BACKGROUND)) {
-            fillRGB = getBGColor().getRGB();
-        } else if (fill.equals(FILL_TRANSPARENT)) {
-            fillRGB = 0x00_00_00_00;
-        } else if (fill.equals(FILL_CLICKED)) {
-            fillRGB = rgbAtMouse;
-        } else {
-            throw new IllegalStateException("fill = " + fill);
-        }
-
-        int tolerance = toleranceParam.getValue();
-        Rectangle replacedArea = switch (getSelectedAction()) {
-            case ACTION_LOCAL -> scanlineFloodFill(workingImage,
-                x, y, tolerance, rgbAtMouse, fillRGB);
-            case ACTION_GLOBAL -> globalReplaceColor(workingImage,
-                tolerance, rgbAtMouse, fillRGB);
-            default -> throw new IllegalStateException("action = " + getSelectedAction());
+        int fillRGB = switch (getSelectedFill()) {
+            case Fill.FOREGROUND -> getFGColor().getRGB();
+            case Fill.BACKGROUND -> getBGColor().getRGB();
+            case Fill.TRANSPARENT -> 0x00_00_00_00;
+            case Fill.CLICKED -> rgbAtMouse;
         };
 
-        if (replacedArea != null) { // something was replaced
-            PartialImageEdit edit = PartialImageEdit.create(replacedArea, backupForUndo, dr,
+        int tolerance = colorTolerance.getValue();
+        Rectangle modifiedArea = switch (getSelectedAction()) {
+            case LOCAL -> scanlineFloodFill(workingImage,
+                x, y, tolerance, rgbAtMouse, fillRGB);
+            case GLOBAL -> globalReplaceColor(workingImage,
+                tolerance, rgbAtMouse, fillRGB);
+        };
+
+        if (modifiedArea != null) { // something was modified
+            PartialImageEdit edit = PartialImageEdit.create(modifiedArea, backupForUndo, dr,
                 true, getName());
             if (edit != null) {
                 History.add(edit);
             }
 
-            if (thereIsSelection) {
-                Graphics2D g = image.createGraphics();
+            if (hasSelection) {
+                // apply the changes through the selection clip
+
+                Graphics2D g = targetImage.createGraphics();
 
                 // the selection is relative to the canvas,
                 // so go to the canvas start
@@ -167,8 +188,8 @@ public class PaintBucketTool extends Tool {
                 g.drawImage(workingImage, 0, 0, null);
                 g.dispose();
                 workingImage.flush();
-            } else if (grayScale) {
-                dr.setImage(ImageUtils.convertToGrayScaleImage(workingImage));
+            } else if (targetIsGrayscale) {
+                dr.setImage(ImageUtils.convertToGrayscaleImage(workingImage));
             }
             dr.update();
             dr.updateIconImage();
@@ -221,7 +242,7 @@ public class PaintBucketTool extends Tool {
             scanlineMaxX--;
 
             // set the minX, maxX, minY, maxY variables
-            // that will be used to calculate the affected area
+            // that will be used to calculate the modified area
             if (scanlineMinX < minX) {
                 minX = scanlineMinX;
             }
@@ -286,7 +307,7 @@ public class PaintBucketTool extends Tool {
             }
         }
 
-        // return the affected area
+        // return the modified area
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
@@ -304,6 +325,9 @@ public class PaintBucketTool extends Tool {
         return new Rectangle(0, 0, img.getWidth(), img.getHeight());
     }
 
+    /**
+     * Whether two colors are similar within the given tolerance.
+     */
     private static boolean isSimilar(int color1, int color2, int tolerance) {
         if (color1 == color2) {
             return true;
@@ -330,35 +354,35 @@ public class PaintBucketTool extends Tool {
         return true;
     }
 
-    private String getSelectedFill() {
-        return (String) fillCB.getSelectedItem();
+    private Fill getSelectedFill() {
+        return (Fill) fillCB.getSelectedItem();
     }
 
-    private String getSelectedAction() {
-        return (String) actionCB.getSelectedItem();
+    private Action getSelectedAction() {
+        return (Action) actionCB.getSelectedItem();
     }
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        toleranceParam.saveStateTo(preset);
-        preset.put("Fill", getSelectedFill());
-        preset.put("Action", getSelectedAction());
+        colorTolerance.saveStateTo(preset);
+        preset.put("Fill", getSelectedFill().toString());
+        preset.put("Action", getSelectedAction().toString());
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        toleranceParam.loadStateFrom(preset);
-        fillCB.setSelectedItem(preset.get("Fill"));
-        actionCB.setSelectedItem(preset.get("Action"));
+        colorTolerance.loadStateFrom(preset);
+        fillCB.setSelectedItem(preset.getEnum("Fill", Fill.class));
+        actionCB.setSelectedItem(preset.getEnum("Action", Action.class));
     }
 
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addInt("tolerance", toleranceParam.getValue());
-        node.addQuotedString("fill with", getSelectedFill());
-        node.addQuotedString("action", getSelectedAction());
+        node.addInt("tolerance", colorTolerance.getValue());
+        node.addQuotedString("fill", getSelectedFill().toString());
+        node.addQuotedString("action", getSelectedAction().toString());
 
         return node;
     }

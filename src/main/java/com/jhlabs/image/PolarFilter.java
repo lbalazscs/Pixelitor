@@ -74,20 +74,9 @@ public class PolarFilter extends TransformFilter {
      * Set the distortion type.
      *
      * @param type the distortion type
-     * @see #getType
      */
     public void setType(int type) {
         this.type = type;
-    }
-
-    /**
-     * Get the distortion type.
-     *
-     * @return the distortion type
-     * @see #setType
-     */
-    public int getType() {
-        return type;
     }
 
     private static float sqr(float x) {
@@ -202,20 +191,12 @@ public class PolarFilter extends TransformFilter {
         this.relativeCenterY = relativeCenterY;
     }
 
-    public float getRelativeCenterX() {
-        return relativeCenterX;
-    }
-
-    public float getRelativeCenterY() {
-        return relativeCenterY;
+    public void setAngle(double angle) {
+        this.angle = (float) angle;
     }
 
     @Override
     public String toString() {
         return "Distort/Polar Coordinates...";
-    }
-
-    public void setAngle(double angle) {
-        this.angle = (float) angle;
     }
 }

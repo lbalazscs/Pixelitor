@@ -138,20 +138,9 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
      *
      * @param hRadius the radius of the blur in the horizontal direction
      * @min-value 0
-     * @see #getHRadius
      */
     public void setHRadius(int hRadius) {
         this.hRadius = hRadius;
-    }
-
-    /**
-     * Get the horizontal size of the blur.
-     *
-     * @return the radius of the blur in the horizontal direction
-     * @see #setHRadius
-     */
-    public int getHRadius() {
-        return hRadius;
     }
 
     /**
@@ -159,20 +148,9 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
      *
      * @param vRadius the radius of the blur in the vertical direction
      * @min-value 0
-     * @see #getVRadius
      */
     public void setVRadius(int vRadius) {
         this.vRadius = vRadius;
-    }
-
-    /**
-     * Get the vertical size of the blur.
-     *
-     * @return the radius of the blur in the vertical direction
-     * @see #setVRadius
-     */
-    public int getVRadius() {
-        return vRadius;
     }
 
     /**
@@ -180,40 +158,18 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
      *
      * @param radius the radius
      * @min-value 0
-     * @see #getRadius
      */
     public void setRadius(int radius) {
         hRadius = vRadius = radius;
     }
 
     /**
-     * Get the radius of the effect.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public int getRadius() {
-        return hRadius;
-    }
-
-    /**
      * Set the threshold value.
      *
      * @param threshold the threshold value
-     * @see #getThreshold
      */
     public void setThreshold(int threshold) {
         this.threshold = threshold;
-    }
-
-    /**
-     * Get the threshold value.
-     *
-     * @return the threshold value
-     * @see #setThreshold
-     */
-    public int getThreshold() {
-        return threshold;
     }
 
     @Override

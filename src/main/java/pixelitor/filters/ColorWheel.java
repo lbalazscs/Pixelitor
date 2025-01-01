@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,32 +44,32 @@ public class ColorWheel extends ParametrizedFilter {
     public enum ColorSpaceType {
         HSB {
             @Override
-            int toRGB(float a, float b, float c) {
-                return Color.HSBtoRGB(a, b, c);
+            int toRGB(float hue, float sat, float bri) {
+                return Color.HSBtoRGB(hue, sat, bri);
             }
         },
         HSL {
             @Override
-            int toRGB(float a, float b, float c) {
+            int toRGB(float hue, float sat, float bri) {
                 int[] buffer = new int[3];
-                ColorUtilities.HSLtoRGB((a - (float) Math.floor(a)), b, c, buffer);
+                ColorUtilities.HSLtoRGB((hue - (float) Math.floor(hue)), sat, bri, buffer);
                 return 0xFF_00_00_00 | (buffer[0] << 16) | (buffer[1] << 8) | buffer[2];
             }
         };
 
-        abstract int toRGB(float a, float b, float c);
+        abstract int toRGB(float hue, float sat, float bri);
     }
 
     private final EnumParam<ColorSpaceType> type = new EnumParam<>("Color Space", ColorSpaceType.class);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final AngleParam hueShiftParam = new AngleParam("Rotate", 0);
+    private final AngleParam hueRotParam = new AngleParam("Rotate", 0);
     private final RangeParam brgLumParam = new RangeParam("Brightness (%)", 0, 75, 100);
     private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 90, 100);
 
     public ColorWheel() {
         super(false);
 
-        setParams(type, center, hueShiftParam, brgLumParam, satParam);
+        setParams(type, center, hueRotParam, brgLumParam, satParam);
     }
 
     @Override
@@ -84,32 +84,32 @@ public class ColorWheel extends ParametrizedFilter {
         int cx = (int) (width * center.getRelativeX());
         int cy = (int) (height * center.getRelativeY());
 
-        double hueShift = hueShiftParam.getValueInRadians();
+        double hueRot = hueRotParam.getValueInRadians();
         double sat = satParam.getPercentage();
         double brgLum = brgLumParam.getPercentage();
 
         var pt = new StatusBarProgressTracker(NAME, height);
 
-        Future<?>[] futures = new Future[height];
+        Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calculateLine(
-                destData, width, finalY, cx, cy, hueShift, sat, brgLum, space);
-            futures[y] = ThreadPool.submit(lineTask);
+            Runnable rowTask = () -> processRow(
+                destData, width, finalY, cx, cy, hueRot, sat, brgLum, space);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
-        ThreadPool.waitFor(futures, pt);
+        ThreadPool.waitFor(rowFutures, pt);
         pt.finished();
 
         return dest;
     }
 
-    private static void calculateLine(int[] destData, int width, int y,
-                                      int cx, int cy, double hueShift,
-                                      double saturation, double brightness, ColorSpaceType model) {
+    private static void processRow(int[] destData, int width, int y,
+                                   int cx, int cy, double hueRot,
+                                   double saturation, double brightness, ColorSpaceType model) {
         for (int x = 0; x < width; x++) {
             int yDiff = cy - y;
             int xDiff = x - cx;
-            double angle = FastMath.atan2(yDiff, xDiff) + hueShift;
+            double angle = FastMath.atan2(yDiff, xDiff) + hueRot;
             double hue = angle / (2 * Math.PI);
 
             destData[x + y * width] = model.toRGB((float) hue, (float) saturation, (float) brightness);

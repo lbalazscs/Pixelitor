@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.SplittableRandom;
 
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.gui.GUIText.OPACITY;
+import static pixelitor.utils.ImageUtils.isGrayscale;
 
 /**
  * Add Noise filter
@@ -71,7 +71,7 @@ public class AddNoise extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         SplittableRandom rand = paramSet.getLastSeedSRandom();
 
-        if (src.getType() == TYPE_BYTE_GRAY) {
+        if (isGrayscale(src)) {
             return addNoiseToGray(src, dest, rand);
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,6 @@
 
 package pixelitor.utils;
 
-import net.jafama.FastMath;
-
 import java.awt.geom.Point2D;
 
 /**
@@ -27,19 +25,22 @@ import java.awt.geom.Point2D;
 public class BlurredEllipse implements BlurredShape {
     private final Point2D center;
 
-    private final boolean linkedRadius;
     private final double innerRadiusY;
-    private double innerRadius2;
-    private double innerRadiusX2;
-    private double innerRadiusY2;
-
     private final double outerRadiusX;
     private final double outerRadiusY;
+
+    // cached squared values for circular shape
+    private double innerRadius2;
     private double outerRadius2;
+
+    // cached squared values for elliptical shape
+    private double innerRadiusX2;
+    private double innerRadiusY2;
     private double outerRadiusX2;
     private double outerRadiusY2;
 
-    private final double yRadiusDifference;
+    private final boolean isCircular;
+    private final double radiusDifferenceY;
 
     public BlurredEllipse(Point2D center,
                           double innerRadiusX, double innerRadiusY,
@@ -51,9 +52,9 @@ public class BlurredEllipse implements BlurredShape {
 
         // This class assumes that the outer/inner radius ratios are the same
         // for the x and y radii => no need to compare the outer radii
-        linkedRadius = innerRadiusX == innerRadiusY;
+        isCircular = innerRadiusX == innerRadiusY;
 
-        if (linkedRadius) {
+        if (isCircular) {
             innerRadius2 = innerRadiusX * innerRadiusX;
             outerRadius2 = outerRadiusX * outerRadiusX;
         } else {
@@ -64,7 +65,7 @@ public class BlurredEllipse implements BlurredShape {
             outerRadiusY2 = outerRadiusY * outerRadiusY;
         }
 
-        yRadiusDifference = outerRadiusY - innerRadiusY;
+        radiusDifferenceY = outerRadiusY - innerRadiusY;
     }
 
     @Override
@@ -72,33 +73,26 @@ public class BlurredEllipse implements BlurredShape {
         double dx = x - center.getX();
         double dy = y - center.getY();
 
-        if (linkedRadius) {
-            double dist2 = dx * dx + dy * dy;
-            return isOutsideCircle(dist2);
-        } else {
-            return isOutsideEllipsis(dx, dy);
-        }
+        return isCircular
+            ? isOutsideCircle(dx, dy)
+            : isOutsideEllipse(dx, dy);
     }
 
-    private double isOutsideCircle(double dist2) {
+    private double isOutsideCircle(double dx, double dy) {
+        double dist2 = dx * dx + dy * dy;
         if (dist2 > outerRadius2) { // outside
             return 1.0;
         } else if (dist2 < innerRadius2) { // innermost region
             return 0.0;
         } else { // between the inner and outer radius
             double distance = Math.sqrt(dist2);
-            double ratio = (distance - innerRadiusY) / yRadiusDifference; // a value between 0 and 1
-
-//                double trigRatio = (FastMath.cos(ratio * Math.PI) + 1.0) / 2.0;
-            // 1- smooth step is faster than cosine interpolation
-            // http://en.wikipedia.org/wiki/Smoothstep
-            // http://www.wolframalpha.com/input/?i=Plot[{%281+%2B+Cos[a+*+Pi]%29%2F2%2C+1+-+3+*+a+*+a+%2B+2+*+a+*+a+*a}%2C+{a%2C+0%2C+1}]
-            double trigRatio = 1 + ratio * ratio * (2 * ratio - 3);
-            return 1.0 - trigRatio;
+            double ratio = (distance - innerRadiusY) / radiusDifferenceY; // a value between 0 and 1
+            double smoothStep = 1 + ratio * ratio * (2 * ratio - 3);
+            return 1.0 - smoothStep;
         }
     }
 
-    private double isOutsideEllipsis(double dx, double dy) {
+    private double isOutsideEllipse(double dx, double dy) {
         double dx2 = dx * dx;
         double dy2 = dy * dy;
 
@@ -118,9 +112,8 @@ public class BlurredEllipse implements BlurredShape {
         double ellipseDistortion = outerRadiusX / outerRadiusY;
         double b = Math.sqrt(ellipseDistortion * ellipseDistortion * dy2 + dx2) / ellipseDistortion;
         // calculate how far away we are between the two ellipses
-        double ratio = (b - innerRadiusY) / yRadiusDifference; // a value between 0 and 1
-        double trigRatio = (FastMath.cos(ratio * Math.PI) + 1.0) / 2.0;
-
-        return 1.0 - trigRatio;
+        double ratio = (b - innerRadiusY) / radiusDifferenceY; // a value between 0 and 1
+        double smoothStep = 1 + ratio * ratio * (2 * ratio - 3);
+        return 1.0 - smoothStep;
     }
 }

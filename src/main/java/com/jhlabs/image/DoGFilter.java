@@ -31,70 +31,35 @@ public class DoGFilter extends AbstractBufferedImageOp {
     private float radius1 = 1;
     private float radius2 = 2;
     private boolean normalize = true;
-    private boolean invert;
 
     public DoGFilter(String filterName) {
         super(filterName);
     }
 
     /**
-     * Set the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
+     * Set the radius of the first kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
      * @param radius1 the radius of the blur in pixels.
      * @min-value 0
      * @max-value 100+
-     * @see #getRadius
      */
     public void setRadius1(float radius1) {
         this.radius1 = radius1;
     }
 
     /**
-     * Get the radius of the kernel.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public float getRadius1() {
-        return radius1;
-    }
-
-    /**
-     * Set the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
+     * Set the radius of the second kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
      * @param radius2 the radius of the blur in pixels.
      * @min-value 0
      * @max-value 100+
-     * @see #getRadius
      */
     public void setRadius2(float radius2) {
         this.radius2 = radius2;
     }
 
-    /**
-     * Get the radius of the kernel.
-     *
-     * @return the radius
-     * @see #setRadius
-     */
-    public float getRadius2() {
-        return radius2;
-    }
-
     public void setNormalize(boolean normalize) {
         this.normalize = normalize;
-    }
-
-    public boolean getNormalize() {
-        return normalize;
-    }
-
-    public void setInvert(boolean invert) {
-        this.invert = invert;
-    }
-
-    public boolean getInvert() {
-        return invert;
     }
 
     @Override
@@ -124,7 +89,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
         } else {
             image1 = src;
         }
-//        BufferedImage image2;
+
         if (radius2 > 0.0f) {
             BoxBlurFilter blur = new BoxBlurFilter(radius2, radius2, 3, filterName);
             blur.setProgressTracker(pt);
@@ -178,15 +143,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
                     setRGB(dst, 0, y, width, 1, pixels);
                 }
             }
-
         }
-
-//        if ( invert )
-//            image2 = new InvertFilter().filter( image2, image2 );
-
-        // the progress of invert is not tracked,
-        // because it is in the calling filter
-        // but it is a fast operation anyway
 
         finishProgressTracker();
 

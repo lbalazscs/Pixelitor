@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,6 +41,7 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.Views.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
+import static pixelitor.utils.ImageUtils.isGrayscale;
 
 /**
  * A layer mask that applies a transparency mask to an associated layer, controlling its visibility.
@@ -95,7 +96,7 @@ public class LayerMask extends ImageLayer {
                      Layer owner, int tx, int ty) {
         super(comp, bwImage, owner.getName() + " MASK", tx, ty);
 
-        assert bwImage.getType() == TYPE_BYTE_GRAY;
+        assert isGrayscale(bwImage);
 
         this.owner = owner;
 
@@ -117,7 +118,7 @@ public class LayerMask extends ImageLayer {
      * Updates the cached transparency image to reflect changes in the mask.
      */
     public void updateTransparencyImage() {
-        assert image.getType() == TYPE_BYTE_GRAY;
+        assert isGrayscale(image);
         assert image.getColorModel() != TRANSPARENCY_COLOR_MODEL;
 
         // The transparency image shares the raster data with the BW image,
@@ -231,10 +232,9 @@ public class LayerMask extends ImageLayer {
 
     @Override
     protected Layer getLinked() {
-        if (owner.isMaskEditing()) {
-            if (isLinked()) {
-                return owner;
-            }
+        // returns the parent layer if this mask is linked
+        if (owner.isMaskEditing() && isLinked()) {
+            return owner;
         }
         return null;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
+
+import static pixelitor.utils.ImageUtils.isWithinBounds;
 
 /**
  * A specialized {@link ImagePanel} that allows users to pick colors
@@ -51,15 +53,12 @@ public class ColorPickerPanel extends ImagePanel {
             }
 
             private void sampleColorAt(int x, int y) {
-                if (isWithinImageBounds(x, y)) {
+                if (isWithinBounds(x, y, image)) {
                     int rgb = image.getRGB(x, y);
                     colorSelectionHandler.accept(new Color(rgb));
                 }
             }
 
-            private boolean isWithinImageBounds(int x, int y) {
-                return x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight();
-            }
         };
         addMouseListener(ma);
         addMouseMotionListener(ma);
