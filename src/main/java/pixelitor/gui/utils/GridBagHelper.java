@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,6 @@ import static java.awt.GridBagConstraints.HORIZONTAL;
 import static java.awt.GridBagConstraints.NONE;
 import static java.awt.GridBagConstraints.REMAINDER;
 import static java.awt.GridBagConstraints.WEST;
-import static javax.swing.SwingConstants.RIGHT;
 
 /**
  * Helper object for GridBagLayout
@@ -80,7 +79,7 @@ public class GridBagHelper {
     }
 
     public void addLabel(String labelText, int column, int row) {
-        JLabel label = new JLabel(labelText, RIGHT);
+        JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
         addLabel(label, column, row);
     }
 
@@ -129,7 +128,7 @@ public class GridBagHelper {
     }
 
     public void addVerticallyStretchable(String labelText, Component c, double verticalWeight) {
-        JLabel label = new JLabel(labelText, RIGHT);
+        JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
         LABEL_CONSTRAINTS.gridx = 0;
         LABEL_CONSTRAINTS.gridy = currentRow;
         container.add(label, LABEL_CONSTRAINTS);
@@ -153,7 +152,7 @@ public class GridBagHelper {
     }
 
     public void addLabelAndControl(String labelText, Component c, int row) {
-        JLabel label = new JLabel(labelText, RIGHT);
+        JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
         addTwoControls(label, c, row);
     }
 

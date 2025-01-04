@@ -23,7 +23,8 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.gui.utils.TextAlignment;
+import pixelitor.gui.utils.AlignmentSelector;
+import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
@@ -59,6 +60,7 @@ public class TextSettings implements Serializable, Debuggable {
     private static final String PRESET_KEY_COLOR = "color";
     private static final String PRESET_KEY_ROTATION = "rotation";
     private static final String PRESET_KEY_ALIGN = "align";
+    private static final String PRESET_KEY_MLP_ALIGN = "mlp_align";
     private static final String PRESET_KEY_WATERMARK = "watermark";
     private static final String PRESET_KEY_REL_LINE_HEIGHT = "rel_line_height";
     private static final String PRESET_KEY_SX = "sx";
@@ -77,6 +79,7 @@ public class TextSettings implements Serializable, Debuggable {
     private VerticalAlignment verticalAlignment;
     private HorizontalAlignment horizontalAlignment;
     private boolean watermark;
+    private int mlpAlignment;
 
     private double rotation;
     private double sx;
@@ -95,6 +98,7 @@ public class TextSettings implements Serializable, Debuggable {
                         AreaEffects effects,
                         HorizontalAlignment horizontalAlignment,
                         VerticalAlignment verticalAlignment,
+                        int mlpAlignment,
                         boolean watermark, double rotation,
                         double relLineHeight,
                         double sx, double sy,
@@ -102,12 +106,13 @@ public class TextSettings implements Serializable, Debuggable {
                         Consumer<TextSettings> guiUpdateCallback) {
         assert effects != null;
 
+        this.text = text;
         this.areaEffects = effects;
         this.color = color;
         this.font = font;
         this.horizontalAlignment = horizontalAlignment;
-        this.text = text;
         this.verticalAlignment = verticalAlignment;
+        this.mlpAlignment = mlpAlignment;
         this.watermark = watermark;
         this.rotation = rotation;
         this.relLineHeight = relLineHeight;
@@ -129,6 +134,8 @@ public class TextSettings implements Serializable, Debuggable {
         text = DEFAULT_TEXT;
         verticalAlignment = VerticalAlignment.CENTER;
         watermark = false;
+        mlpAlignment = AlignmentSelector.LEFT;
+
         rotation = 0;
         relLineHeight = 1.0;
         sx = 1.0;
@@ -149,6 +156,7 @@ public class TextSettings implements Serializable, Debuggable {
         color = other.color;
         verticalAlignment = other.verticalAlignment;
         horizontalAlignment = other.horizontalAlignment;
+        mlpAlignment = other.mlpAlignment;
         watermark = other.watermark;
         rotation = other.rotation;
         relLineHeight = other.relLineHeight;
@@ -170,6 +178,10 @@ public class TextSettings implements Serializable, Debuggable {
             shx = 0.0;
             shy = 0.0;
         }
+        if (mlpAlignment == 0) {
+            // field not found in old pxc files
+            mlpAlignment = AlignmentSelector.LEFT;
+        }
     }
 
     public TextSettings copy() {
@@ -181,6 +193,7 @@ public class TextSettings implements Serializable, Debuggable {
         painter.setFont(font);
         painter.setEffects(areaEffects);
         painter.setAlignment(horizontalAlignment, verticalAlignment);
+        painter.setMLPAlignment(mlpAlignment);
         painter.setRotation(rotation);
         painter.setAdvancedSettings(relLineHeight, sx, sy, shx, shy);
     }
@@ -212,6 +225,12 @@ public class TextSettings implements Serializable, Debuggable {
         color = Rnd.createRandomColor();
         horizontalAlignment = Rnd.chooseFrom(HorizontalAlignment.values());
         verticalAlignment = Rnd.chooseFrom(VerticalAlignment.values());
+        mlpAlignment = Rnd.chooseFrom(new int[]{
+            AlignmentSelector.LEFT,
+            AlignmentSelector.CENTER,
+            AlignmentSelector.RIGHT
+        });
+
         watermark = Rnd.nextBoolean();
         rotation = Rnd.nextDouble() * Math.PI * 2;
         relLineHeight = 0.5 + Rnd.nextDouble();
@@ -226,6 +245,7 @@ public class TextSettings implements Serializable, Debuggable {
         preset.putColor(PRESET_KEY_COLOR, color);
         preset.putFloat(PRESET_KEY_ROTATION, (float) rotation);
         preset.putInt(PRESET_KEY_ALIGN, getAlignment().ordinal());
+        preset.putInt(PRESET_KEY_MLP_ALIGN, mlpAlignment);
 
         new FontInfo(font).saveStateTo(preset);
 
@@ -250,13 +270,14 @@ public class TextSettings implements Serializable, Debuggable {
             horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
             verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
         } else {
-            TextAlignment alignment = TextAlignment.values()[alignIndex];
-            if (alignment == TextAlignment.PATH && !Views.getActiveComp().hasActivePath()) {
-                alignment = TextAlignment.CENTER_CENTER;
+            BoxAlignment alignment = BoxAlignment.values()[alignIndex];
+            if (alignment == BoxAlignment.PATH && !Views.getActiveComp().hasActivePath()) {
+                alignment = BoxAlignment.CENTER_CENTER;
             }
             horizontalAlignment = alignment.getHorizontal();
             verticalAlignment = alignment.getVertical();
         }
+        mlpAlignment = preset.getInt(PRESET_KEY_MLP_ALIGN);
 
         font = new FontInfo(preset).createFont();
 
@@ -312,13 +333,21 @@ public class TextSettings implements Serializable, Debuggable {
         this.font = font;
     }
 
-    public TextAlignment getAlignment() {
-        return TextAlignment.from(horizontalAlignment, verticalAlignment);
+    public BoxAlignment getAlignment() {
+        return BoxAlignment.from(horizontalAlignment, verticalAlignment);
     }
 
-    public void setAlignment(TextAlignment newAlignment) {
+    public void setAlignment(BoxAlignment newAlignment) {
         this.horizontalAlignment = newAlignment.getHorizontal();
         this.verticalAlignment = newAlignment.getVertical();
+    }
+
+    public int getMLPAlignment() {
+        return mlpAlignment;
+    }
+
+    public void setMLPAlignment(int mlpAlignment) {
+        this.mlpAlignment = mlpAlignment;
     }
 
     public String getText() {
@@ -379,6 +408,7 @@ public class TextSettings implements Serializable, Debuggable {
         node.add(areaEffects.createDebugNode("effects"));
         node.addDouble("rotation", rotation);
         node.addBoolean("watermark", watermark);
+        node.addInt("multiline/path alignment", mlpAlignment);
 
         return node;
     }

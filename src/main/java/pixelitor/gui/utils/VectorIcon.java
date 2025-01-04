@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public abstract class VectorIcon implements Icon, Cloneable {
 
     private static final Color LIGHT_BG = new Color(214, 217, 223);
     private static final Color DARK_BG = new Color(42, 42, 42);
-    private static final Color LIGHT_FG = new Color(19, 30, 43);
+    public static final Color LIGHT_FG = new Color(19, 30, 43);
 
     protected VectorIcon(Color color, int width, int height) {
         this.color = color;
@@ -68,7 +68,7 @@ public abstract class VectorIcon implements Icon, Cloneable {
         return height;
     }
 
-    public VectorIcon copy(Color color) {
+    public VectorIcon copyWithColor(Color color) {
         VectorIcon copy = clone();
         copy.color = color;
         return copy;
@@ -93,6 +93,16 @@ public abstract class VectorIcon implements Icon, Cloneable {
 
                 g.setColor(darkTheme ? Themes.LIGHT_ICON_COLOR : LIGHT_FG);
 
+                g.fill(shape);
+            }
+        };
+    }
+
+    public static VectorIcon createFilled(Shape shape, Color color, int width, int height) {
+        return new VectorIcon(color, width, height) {
+            @Override
+            protected void paintIcon(Graphics2D g) {
+                g.setColor(color);
                 g.fill(shape);
             }
         };

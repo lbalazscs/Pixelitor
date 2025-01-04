@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class ToolButton extends JToggleButton {
     public static final int ICON_SIZE = 28;
-    private static Color darkThemeSelectedColor = Themes.DEFAULT_ACCENT_COLOR.asColor();
+    public static Color darkThemeSelectedColor = Themes.DEFAULT_ACCENT_COLOR.asColor();
 
     private final Tool tool;
 
@@ -86,7 +86,7 @@ public class ToolButton extends JToggleButton {
         setIcon(toolIcon);
 
         VectorIcon selectedIcon = Themes.getActive().isDark()
-            ? toolIcon.copy(darkThemeSelectedColor)
+            ? toolIcon.copyWithColor(darkThemeSelectedColor)
             : toolIcon;
         setSelectedIcon(selectedIcon);
     }

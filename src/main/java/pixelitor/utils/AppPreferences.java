@@ -51,10 +51,6 @@ import java.io.File;
 import java.util.Locale;
 import java.util.prefs.Preferences;
 
-import static javax.swing.SwingConstants.BOTTOM;
-import static javax.swing.SwingConstants.LEFT;
-import static javax.swing.SwingConstants.RIGHT;
-import static javax.swing.SwingConstants.TOP;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.menus.file.RecentFilesMenu.MAX_RECENT_FILES;
@@ -461,16 +457,16 @@ public final class AppPreferences {
         } else {
             // return TOP tab placement so that if the user
             // changes the UI via preferences, this will be set
-            return new ImageAreaConfig(FRAMES, TOP);
+            return new ImageAreaConfig(FRAMES, SwingConstants.TOP);
         }
     }
 
     private static ImageAreaConfig loadSavedTabsInfo(String value) {
         int tabPlacement = switch (value) {
-            case "TabsL" -> LEFT;
-            case "TabsR" -> RIGHT;
-            case "TabsB" -> BOTTOM;
-            default -> TOP;
+            case "TabsL" -> SwingConstants.LEFT;
+            case "TabsR" -> SwingConstants.RIGHT;
+            case "TabsB" -> SwingConstants.BOTTOM;
+            default -> SwingConstants.TOP;
         };
         return new ImageAreaConfig(TABS, tabPlacement);
     }
@@ -483,10 +479,10 @@ public final class AppPreferences {
         } else {
             int tabPlacement = ImageArea.getTabPlacement();
             savedString = switch (tabPlacement) {
-                case TOP -> "TabsT";
-                case LEFT -> "TabsL";
-                case RIGHT -> "TabsR";
-                case BOTTOM -> "TabsB";
+                case SwingConstants.TOP -> "TabsT";
+                case SwingConstants.LEFT -> "TabsL";
+                case SwingConstants.RIGHT -> "TabsR";
+                case SwingConstants.BOTTOM -> "TabsB";
                 default -> throw new IllegalStateException("tabPlacement = " + tabPlacement);
             };
         }

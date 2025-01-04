@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,9 +21,9 @@ import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignm
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 
 /**
- * A two-dimensional text alignment combining horizontal and vertical positioning.
+ * A two-dimensional text box alignment combining horizontal and vertical positioning.
  */
-public enum TextAlignment {
+public enum BoxAlignment {
     CENTER_CENTER("Center", HorizontalAlignment.CENTER, VerticalAlignment.CENTER),
     TOP_CENTER("Top", HorizontalAlignment.CENTER, VerticalAlignment.TOP),
     CENTER_LEFT("Left", HorizontalAlignment.LEFT, VerticalAlignment.CENTER),
@@ -41,7 +41,7 @@ public enum TextAlignment {
     private final HorizontalAlignment horizontalAlignment;
     private final VerticalAlignment verticalAlignment;
 
-    TextAlignment(String displayName, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+    BoxAlignment(String displayName, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
         this.displayName = displayName;
         this.horizontalAlignment = horizontalAlignment;
         this.verticalAlignment = verticalAlignment;
@@ -61,11 +61,11 @@ public enum TextAlignment {
     }
 
     /**
-     * Returns the corresponding {@link TextAlignment} based
+     * Returns the corresponding {@link BoxAlignment} based
      * on the given horizontal and vertical alignments.
      */
-    public static TextAlignment from(HorizontalAlignment horizontal,
-                                     VerticalAlignment vertical) {
+    public static BoxAlignment from(HorizontalAlignment horizontal,
+                                    VerticalAlignment vertical) {
         if (horizontal == null || vertical == null) {
             return PATH;
         }

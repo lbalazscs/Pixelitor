@@ -26,6 +26,7 @@ import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.util.Filters;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.AlignmentSelector;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.FileUtils;
@@ -551,5 +552,14 @@ public class Debug {
         }
 
         return descr;
+    }
+
+    public static String mlpAlignmentToString(int alignment) {
+        return switch (alignment) {
+            case AlignmentSelector.LEFT -> "left";
+            case AlignmentSelector.CENTER -> "center";
+            case AlignmentSelector.RIGHT -> "right";
+            default -> throw new IllegalStateException("Unexpected value: " + alignment);
+        };
     }
 }

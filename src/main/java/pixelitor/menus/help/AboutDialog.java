@@ -23,11 +23,9 @@ import pixelitor.gui.utils.Themes;
 import pixelitor.utils.OpenInBrowserAction;
 
 import javax.swing.*;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.net.URL;
-
-import static java.awt.Component.CENTER_ALIGNMENT;
-import static javax.swing.SwingConstants.CENTER;
 
 /**
  * The "About" dialog of the app.
@@ -97,12 +95,12 @@ public class AboutDialog {
         String linkButtonText = "<html><font color=\"" + fontColor + "\"><u>" + WEBSITE_URL + "</u></font>";
         var linkButton = new JButton(linkButtonText);
 
-        linkButton.setHorizontalAlignment(CENTER);
+        linkButton.setHorizontalAlignment(SwingConstants.CENTER);
         linkButton.setBorderPainted(false);
         linkButton.setFocusPainted(false);
         linkButton.setOpaque(false);
         linkButton.setBackground(aboutPanel.getBackground());
-        linkButton.setAlignmentX(CENTER_ALIGNMENT);
+        linkButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         linkButton.addActionListener(new OpenInBrowserAction(null, WEBSITE_URL));
 
         return linkButton;
@@ -110,14 +108,14 @@ public class AboutDialog {
 
     private static void addLabel(JComponent p, URL imageURL) {
         var imageIcon = new ImageIcon(imageURL);
-        var label = new JLabel(imageIcon, CENTER);
-        label.setAlignmentX(CENTER_ALIGNMENT);
+        var label = new JLabel(imageIcon, SwingConstants.CENTER);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
         p.add(label);
     }
 
     private static void addLabel(JComponent p, String text) {
-        var label = new JLabel(text, CENTER);
-        label.setAlignmentX(CENTER_ALIGNMENT);
+        var label = new JLabel(text, SwingConstants.CENTER);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
         p.add(label);
     }
 }

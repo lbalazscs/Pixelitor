@@ -27,9 +27,9 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TransformedTextPainter;
+import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.TaskAction;
-import pixelitor.gui.utils.TextAlignment;
 import pixelitor.history.*;
 import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tools;
@@ -229,7 +229,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void paint(Graphics2D g, boolean firstVisibleLayer) {
-        painter.setColor(settings.getColor());
+        painter.setColor(settings.getColor()); // TODO is this already set?
         painter.paint(g, comp.getCanvasWidth(), comp.getCanvasHeight(), comp);
     }
 
@@ -307,8 +307,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void enlargeCanvas(Outsets out) {
-        TextAlignment alignment = settings.getAlignment();
-        if (alignment == TextAlignment.PATH) {
+        BoxAlignment alignment = settings.getAlignment();
+        if (alignment == BoxAlignment.PATH) {
             return;
         }
 
@@ -433,15 +433,15 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             holder.invalidateImageCache();
 
             if (deleted) {
-                settings.setAlignment(TextAlignment.CENTER_CENTER);
-                painter.setAlignment(TextAlignment.CENTER_CENTER);
+                settings.setAlignment(BoxAlignment.CENTER_CENTER);
+                painter.setAlignment(BoxAlignment.CENTER_CENTER);
             }
         }
     }
 
     public void usePathEditing() {
-        settings.setAlignment(TextAlignment.PATH);
-        painter.setAlignment(TextAlignment.PATH);
+        settings.setAlignment(BoxAlignment.PATH);
+        painter.setAlignment(BoxAlignment.PATH);
 
         painter.pathChanged();
         holder.invalidateImageCache();

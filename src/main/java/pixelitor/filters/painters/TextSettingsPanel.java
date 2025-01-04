@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,14 +69,19 @@ public class TextSettingsPanel extends FilterGUI
     private JCheckBox italicCB;
     private ColorParam color;
     private EffectsPanel effectsPanel;
-    private JComboBox<TextAlignment> alignmentCB;
+    private JComboBox<BoxAlignment> boxAlignmentCB;
     private JCheckBox watermarkCB;
 
     private JDialog advancedSettingsDialog;
     private AdvancedTextSettingsPanel advancedSettingsPanel;
 
     private boolean suppressGuiUpdates = false;
-    private TextAlignment lastAlignment;
+    private BoxAlignment lastBoxAlignment;
+
+    // multiline/path alignment settings
+    private boolean hasMLPAlign = true;
+    private AlignmentSelector mlpAlignmentSelector;
+    private JLabel mlpLabel;
 
     /**
      * Used for the text filter on images
@@ -134,34 +139,46 @@ public class TextSettingsPanel extends FilterGUI
 
         gbh.addLabel("Color:", 0, 1);
         color = new ColorParam("Color", settings.getColor(), USER_ONLY_TRANSPARENCY);
-        gbh.addControl(color.createGUI());
         color.setAdjustmentListener(this);
 
-        gbh.addLabel("Rotation:", 2, 1);
+        JPanel colorRotPanel = new JPanel(new FlowLayout(LEFT));
+        colorRotPanel.add(color.createGUI());
+        colorRotPanel.add(new JLabel("     Rotation:"));
         rotationParam = new AngleParam("", settings.getRotation());
         rotationParam.setAdjustmentListener(this);
-        gbh.addControl(rotationParam.createGUI());
+        colorRotPanel.add(rotationParam.createGUI());
+        gbh.addControl(colorRotPanel);
 
-        alignmentCB = new JComboBox<>(TextAlignment.values());
-        alignmentCB.setName("alignmentCB");
-        TextAlignment alignment = settings.getAlignment();
-        lastAlignment = alignment;
-        alignmentCB.setSelectedItem(alignment);
+        boxAlignmentCB = new JComboBox<>(BoxAlignment.values());
+        boxAlignmentCB.setName("alignmentCB");
+        BoxAlignment alignment = settings.getAlignment();
+        lastBoxAlignment = alignment;
+        boxAlignmentCB.setSelectedItem(alignment);
 
-        alignmentCB.addActionListener(e -> {
-            TextAlignment selectedAlignment = getSelectedAlignment();
-            if (selectedAlignment == TextAlignment.PATH && !comp.hasActivePath()) {
+        boxAlignmentCB.addActionListener(e -> {
+            BoxAlignment selectedAlignment = getSelectedBoxAlignment();
+            if (selectedAlignment == BoxAlignment.PATH && !comp.hasActivePath()) {
                 String msg = "<html>There's no path in <b>\"" + comp.getName() + "\"</b>.<br>You can have text along a path after creating a path with the Pen Tool.";
                 Messages.showError("No Path", msg, this);
-                alignmentCB.setSelectedItem(lastAlignment);
+                boxAlignmentCB.setSelectedItem(lastBoxAlignment);
                 return;
             }
 
-            lastAlignment = selectedAlignment;
+            lastBoxAlignment = selectedAlignment;
+            updateMLPAlignEnabled();
             actionPerformed(e);
         });
-        gbh.addLabel("Alignment:", 0, 2);
-        gbh.addControl(alignmentCB);
+        gbh.addLabel("Box Alignment:", 0, 2);
+
+        JPanel alignPanel = new JPanel(new FlowLayout(LEFT));
+        alignPanel.add(boxAlignmentCB);
+        mlpLabel = new JLabel("     Multiline/Path Alignment:");
+        alignPanel.add(mlpLabel);
+        mlpAlignmentSelector = new AlignmentSelector(settings.getMLPAlignment(), this);
+        alignPanel.add(mlpAlignmentSelector);
+        updateMLPAlignEnabled();
+
+        gbh.addControl(alignPanel);
 
         return textPanel;
     }
@@ -173,19 +190,33 @@ public class TextSettingsPanel extends FilterGUI
         textArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                paramAdjusted();
+                textChanged();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                paramAdjusted();
+                textChanged();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                paramAdjusted();
+                textChanged();
             }
         });
+    }
+
+    private void textChanged() {
+        updateMLPAlignEnabled();
+        paramAdjusted();
+    }
+
+    private void updateMLPAlignEnabled() {
+        boolean hasMLPAlignNow = getSelectedBoxAlignment() == BoxAlignment.PATH || textArea.getText().contains("\n");
+        if (hasMLPAlignNow != hasMLPAlign) {
+            hasMLPAlign = hasMLPAlignNow;
+            mlpLabel.setEnabled(hasMLPAlign);
+            mlpAlignmentSelector.setEnabled(hasMLPAlign);
+        }
     }
 
     private JPanel createFontPanel(TextSettings settings) {
@@ -323,12 +354,12 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private JPanel createBottomPanel(TextSettings settings) {
-        watermarkCB = new JCheckBox("Watermarking", settings.hasWatermark());
-
-        watermarkCB.addActionListener(this);
-
         JPanel p = new JPanel(new FlowLayout(LEFT, 5, 5));
+
+        watermarkCB = new JCheckBox("Watermarking", settings.hasWatermark());
+        watermarkCB.addActionListener(this);
         p.add(watermarkCB);
+
         return p;
     }
 
@@ -352,7 +383,7 @@ public class TextSettingsPanel extends FilterGUI
             effects = effectsPanel.getEffects();
         }
 
-        TextAlignment alignment = getSelectedAlignment();
+        BoxAlignment alignment = getSelectedBoxAlignment();
 
         return new TextSettings(
             textArea.getText(),
@@ -361,6 +392,7 @@ public class TextSettingsPanel extends FilterGUI
             effects,
             alignment.getHorizontal(),
             alignment.getVertical(),
+            mlpAlignmentSelector.getSelectedAlignment(),
             watermarkCB.isSelected(),
             rotationParam.getValueInRadians(),
             getRelLineHeight(),
@@ -368,8 +400,8 @@ public class TextSettingsPanel extends FilterGUI
             getShearX(), getShearY(), this);
     }
 
-    private TextAlignment getSelectedAlignment() {
-        return (TextAlignment) alignmentCB.getSelectedItem();
+    private BoxAlignment getSelectedBoxAlignment() {
+        return (BoxAlignment) boxAlignmentCB.getSelectedItem();
     }
 
     private void updateApp(TextSettings settings) {
@@ -403,7 +435,9 @@ public class TextSettingsPanel extends FilterGUI
         textArea.setText(settings.getText());
         color.setColor(settings.getColor(), false);
         rotationParam.setValue(settings.getRotation(), false);
-        alignmentCB.setSelectedItem(settings.getAlignment());
+        boxAlignmentCB.setSelectedItem(settings.getAlignment());
+        mlpAlignmentSelector.setSelected(settings.getMLPAlignment());
+        updateMLPAlignEnabled();
 
         Font font = settings.getFont();
         fontSizeSlider.setValue(font.getSize());

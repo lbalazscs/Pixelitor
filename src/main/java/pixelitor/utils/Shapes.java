@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -2139,5 +2139,36 @@ public class Shapes {
             pathIterator.next();
         }
         return points;
+    }
+
+    public static double calcPathLength(Path2D path) {
+        double pathLength = 0;
+        double[] points = new double[6];
+        PathIterator pathIt = new FlatteningPathIterator(path.getPathIterator(null), 1);
+        double moveX = 0, moveY = 0;
+        double lastX = 0, lastY = 0;
+
+        while (!pathIt.isDone()) {
+            int type = pathIt.currentSegment(points);
+            switch (type) {
+                case SEG_MOVETO:
+                    moveX = lastX = points[0];
+                    moveY = lastY = points[1];
+                    break;
+                case SEG_CLOSE:
+                    points[0] = moveX;
+                    points[1] = moveY;
+                    // fall through
+                case SEG_LINETO:
+                    double dx = points[0] - lastX;
+                    double dy = points[1] - lastY;
+                    pathLength += Math.sqrt(dx * dx + dy * dy);
+                    lastX = points[0];
+                    lastY = points[1];
+                    break;
+            }
+            pathIt.next();
+        }
+        return pathLength;
     }
 }
