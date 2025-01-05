@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -243,6 +243,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         maxValue = newMaximum;
     }
 
+    public boolean isMaximum() {
+        return getValue() == maxValue;
+    }
+
+    public boolean isZero() {
+        return getValue() == 0;
+    }
+
     @Override
     public int getValue() {
         return (int) value;
@@ -250,14 +258,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     public String getValueStr() {
         return getValue() + "";
-    }
-
-    public boolean isZero() {
-        return getValue() == 0;
-    }
-
-    public boolean isMaximum() {
-        return getValue() == maxValue;
     }
 
     public float getValueAsFloat() {

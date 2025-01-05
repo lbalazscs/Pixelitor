@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import net.jafama.FastMath;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
@@ -31,15 +32,18 @@ public class Lissajous extends CurveFilter {
     private static final long serialVersionUID = 3307105281671382731L;
 
     public static final String NAME = "Lissajous Curve";
+    private static final int NUM_STEPS = 5000;
 
     private final RangeParam a = new RangeParam("a", 1, 4, 41);
     private final RangeParam b = new RangeParam("b", 1, 5, 41);
+    private final AngleParam delta = new AngleParam("delta", 0);
     private final RangeParam time = new RangeParam("Time", 0, 100, 100);
 
     public Lissajous() {
         addParamsToFront(
             a,
             b,
+            delta,
             time
         );
 
@@ -50,25 +54,23 @@ public class Lissajous extends CurveFilter {
     protected Path2D createCurve(int width, int height) {
         double aVal = a.getValueAsDouble();
         double bVal = b.getValueAsDouble();
-
-        int numSteps = 5000;
+        double deltaVal = delta.getValueInRadians();
 
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
         double w = width / 2.0;
         double h = height / 2.0;
-        double dt = 2 * Math.PI / numSteps;
+        double dt = 2 * Math.PI / NUM_STEPS;
 
         double distThreshold = Math.sqrt(width * width + height * height) / 50;
         double angleThreshold = calcAngleThreshold(aVal, bVal);
 
-        PathConnector connector = new PathConnector(numSteps + 1, distThreshold, angleThreshold);
-        connector.add(cx, cy);
+        PathConnector connector = new PathConnector(NUM_STEPS + 1, distThreshold, angleThreshold);
 
         double maxT = Math.PI * time.getValueAsDouble() / 50.0;
-        for (double t = dt; t < maxT; t += dt) {
-            double x = w * FastMath.sin(aVal * t) + cx;
+        for (double t = 0; t < maxT; t += dt) {
+            double x = w * FastMath.sin(aVal * t + deltaVal) + cx;
             double y = h * FastMath.sin(bVal * t) + cy;
             connector.add(x, y);
         }
