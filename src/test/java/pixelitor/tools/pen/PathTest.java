@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -106,6 +106,6 @@ class PathTest {
         Path path = Shapes.shapeToPath(shape, view);
         Path copy = path.deepCopy(view.getComp());
         Shape convertedShape = copy.toImageSpaceShape();
-        assertThat(Shapes.pathIteratorIsEqual(shape, convertedShape, 0.01)).isTrue();
+        assertThat(Shapes.pathsAreEqual(shape, convertedShape, 0.01)).isTrue();
     }
 }

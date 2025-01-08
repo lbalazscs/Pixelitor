@@ -104,7 +104,6 @@ public class CompActionTest {
     public void beforeEachTest() {
         origComp = TestHelper.createComp("CompActionTest", 2, true);
         assertThat(origComp)
-            .isNotEmpty()
             .hasName("CompActionTest")
             .numLayersIs(2)
             .layerNamesAre("layer 1", "layer 2")

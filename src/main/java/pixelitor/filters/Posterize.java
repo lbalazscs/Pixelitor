@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,23 +85,23 @@ public class Posterize extends ParametrizedFilter {
 
 
         BufferedImage input = ImageUtils.copyImage(src);
-        int[] inputData = ImageUtils.getPixelArray(input);
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] inputPixels = ImageUtils.getPixels(input);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
         int width = src.getWidth();
-        int length = inputData.length;
+        int length = inputPixels.length;
 
         short[] redLUT = rgbLookup.getRedLUT();
         short[] greenLUT = rgbLookup.getGreenLUT();
         short[] blueLUT = rgbLookup.getBlueLUT();
 
         for (int i = 0; i < length; i++) {
-            int inPixel = inputData[i];
-            int a = srcData[i] & 0xFF_00_00_00;
-            int r = (inPixel >>> 16) & 0xFF;
-            int g = (inPixel >>> 8) & 0xFF;
-            int b = inPixel & 0xFF;
+            int inRGB = inputPixels[i];
+            int a = srcPixels[i] & 0xFF_00_00_00;
+            int r = (inRGB >>> 16) & 0xFF;
+            int g = (inRGB >>> 8) & 0xFF;
+            int b = inRGB & 0xFF;
 
             int outR = redLUT[r];
             int outG = greenLUT[g];
@@ -110,9 +110,9 @@ public class Posterize extends ParametrizedFilter {
             double errorR = (r - outR) * diffusionStrength;
             double errorG = (g - outG) * diffusionStrength;
             double errorB = (b - outB) * diffusionStrength;
-            Dithering.ditherRGB(ditheringMethod, inputData, i, width, length, errorR, errorG, errorB);
+            Dithering.ditherRGB(ditheringMethod, inputPixels, i, width, length, errorR, errorG, errorB);
 
-            destData[i] = a | outR << 16 | outG << 8 | outB;
+            destPixels[i] = a | outR << 16 | outG << 8 | outB;
         }
 
         return dest;

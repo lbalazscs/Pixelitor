@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -114,6 +114,7 @@ public class RotationHandle extends DraggablePoint {
     public void paintHandle(Graphics2D g) {
         super.paintHandle(g);
         if (isActive()) {
+            // show the current angle in a drag display
             int displayBgWidth = DragDisplay.BG_WIDTH_ANGLES;
             DragDisplay dd = new DragDisplay(g, displayBgWidth);
             int dragAngle = box.getAngleDegrees();

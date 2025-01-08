@@ -447,7 +447,7 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     protected void toolActivated() {
         super.toolActivated();
-        resetInitialState();
+        reset();
 
         View view = Views.getActive();
         if (view != null) {
@@ -476,7 +476,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void viewActivated(View oldCV, View newCV) {
-        resetInitialState();
+        reset();
         brushPainter.setView(newCV);
 
         // get rid of the outline on the old view
@@ -625,14 +625,14 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp) {
+    public void paintOverView(Graphics2D g2, Composition comp) {
         if (brushPainted) {
             brushPainter.paint(g2, outlineCoX, outlineCoY);
         }
     }
 
     @Override
-    protected void closeToolDialogs() {
+    protected void closeAllDialogs() {
         closeBrushSettingsDialog();
         GUIUtils.closeDialog(lazyMouseDialog, false);
     }

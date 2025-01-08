@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -86,7 +86,7 @@ public enum CopySource {
         if (selection.isRectangular()) {
             // for rectangular selections a simple crop is needed
             Rectangle2D selRect = (Rectangle2D) selectionShape;
-            Rectangle selBounds = Shapes.roundCropRect(selRect);
+            Rectangle selBounds = Shapes.roundRect(selRect);
             return cropToSelectionBounds(sourceImage, comp.getCanvas(), selBounds);
         }
 

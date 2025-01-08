@@ -901,7 +901,7 @@ public class MainGuiTest {
         EDT.assertNumOpenImagesIs(2);
         EDT.assertNumLayersIs(numLayers);
 
-        closeOneOfTwo();
+        closeOneOfTwoViews();
         EDT.assertNumOpenImagesIs(1);
     }
 
@@ -975,9 +975,9 @@ public class MainGuiTest {
         testNewImage();
         testSave("png");
         testSave("pxc");
-        closeOneOfTwo();
+        closeOneOfTwoViews();
         testFileOpen();
-        closeOneOfTwo();
+        closeOneOfTwoViews();
         testExportOptimizedJPEG();
         testMagick();
         testExportLayerAnimation();
@@ -1173,8 +1173,8 @@ public class MainGuiTest {
         checkConsistency();
     }
 
-    private void closeOneOfTwo() {
-        log(1, "testing close one of two");
+    private void closeOneOfTwoViews() {
+        log(1, "testing close one of two views");
 
         int numOpenImages = EDT.call(Views::getNumViews);
         if (numOpenImages == 1) {

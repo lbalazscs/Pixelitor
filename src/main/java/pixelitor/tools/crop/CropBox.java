@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -117,7 +117,7 @@ public class CropBox implements ToolWidget {
      *
      * @return true if the cursor was set, false otherwise
      */
-    private boolean setCursorForPoint(double x, double y, View view) {
+    private boolean setHandleCursor(double x, double y, View view) {
         CropHandle handle = findHandleAt(x, y);
         if (handle != null) {
             view.setCursor(handle.getCursor());
@@ -204,19 +204,17 @@ public class CropBox implements ToolWidget {
         cropRect.ensureCoPositive();
 
         updateHandlePositions();
-        setCursorForPoint(e.getCoX(), e.getCoY(), e.getView());
+        setHandleCursor(e.getCoX(), e.getCoY(), e.getView());
 
         transformMode = MODE_NONE;
     }
 
     public void mouseMoved(MouseEvent e, View view) {
-        boolean cursorSet = setCursorForPoint(e.getX(), e.getY(), view);
-        if (!cursorSet) {
-            if (cropRect.containsCo(e.getX(), e.getY())) {
-                view.setCursor(Cursors.MOVE);
-            } else {
-                view.setCursor(Cursors.DEFAULT);
-            }
+        boolean handleCursorSet = setHandleCursor(e.getX(), e.getY(), view);
+        if (!handleCursorSet) {
+            view.setCursor(cropRect.containsCo(e.getX(), e.getY())
+                ? Cursors.MOVE
+                : Cursors.DEFAULT);
         }
     }
 
@@ -377,17 +375,6 @@ public class CropBox implements ToolWidget {
             Rectangle co = view.imageToComponentSpace(im);
             rect.setRect(co);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "CropBox{ topLeft=" + topLeft +
-            ", bottomRight=" + bottomRight +
-            ", cropRect=" + cropRect +
-            ", adjusting=" + isAdjusting() +
-            ", transformMode=" + transformMode +
-            ", aspectRatio=" + aspectRatio +
-            '}';
     }
 }
 

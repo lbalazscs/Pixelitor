@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -297,7 +297,7 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp) {
+    public void paintOverView(Graphics2D g2, Composition comp) {
         if (state == IDLE) {
             return;
         }
@@ -380,11 +380,11 @@ public class CropTool extends DragTool {
     @Override
     protected void toolDeactivated() {
         super.toolDeactivated();
-        resetInitialState();
+        reset();
     }
 
     @Override
-    public void resetInitialState() {
+    public void reset() {
         cropBox = null;
         setState(IDLE);
 
@@ -404,7 +404,7 @@ public class CropTool extends DragTool {
     @Override
     public void compReplaced(Composition newComp, boolean reloaded) {
         if (reloaded) {
-            resetInitialState();
+            reset();
         }
     }
 
@@ -456,7 +456,7 @@ public class CropTool extends DragTool {
 
         Crop.toolCropActiveImage(cropRect,
             allowGrowingCB.isSelected(), deleteCroppedCB.isSelected());
-        resetInitialState();
+        reset();
         return true;
     }
 
@@ -465,7 +465,7 @@ public class CropTool extends DragTool {
             return;
         }
 
-        resetInitialState();
+        reset();
         Messages.showPlainStatusMessage("Crop canceled.");
     }
 

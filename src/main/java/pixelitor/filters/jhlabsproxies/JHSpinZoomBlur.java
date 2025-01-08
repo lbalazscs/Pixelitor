@@ -72,7 +72,7 @@ public class JHSpinZoomBlur extends ParametrizedFilter {
         dest = filter.filter(src, dest);
 
         if (hpSharpening.isChecked()) {
-            dest = ImageUtils.getHighPassSharpenedImage(src, dest);
+            dest = ImageUtils.toHighPassSharpenedImage(src, dest);
         }
 
         return dest;

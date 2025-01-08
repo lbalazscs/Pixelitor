@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,23 +71,23 @@ public class Invert extends Filter {
         // normal case
         dest = ImageUtils.createImageWithSameCM(src);
 
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
         boolean simple = !src.isAlphaPremultiplied();
 
-        for (int i = 0; i < destData.length; i++) {
-            int srcPixel = srcData[i];
-            int a = (srcPixel >>> 24) & 0xFF;
+        for (int i = 0; i < destPixels.length; i++) {
+            int rgb = srcPixels[i];
+            int a = (rgb >>> 24) & 0xFF;
 
             if (a == 255 || simple) {
-                destData[i] = srcPixel ^ 0x00_FF_FF_FF;  // invert the r, g, b values
+                destPixels[i] = rgb ^ 0x00_FF_FF_FF;  // invert the r, g, b values
             } else if (a == 0) {
-                destData[i] = 0;
+                destPixels[i] = 0;
             } else {
-                int r = (srcPixel >>> 16) & 0xFF;
-                int g = (srcPixel >>> 8) & 0xFF;
-                int b = srcPixel & 0xFF;
+                int r = (rgb >>> 16) & 0xFF;
+                int g = (rgb >>> 8) & 0xFF;
+                int b = rgb & 0xFF;
 
                 // unpremultiply
                 float f = 255.0f / a;
@@ -120,14 +120,14 @@ public class Invert extends Filter {
                 g = PixelUtils.clamp(g);
                 b = PixelUtils.clamp(b);
 
-                destData[i] = a << 24 | r << 16 | g << 8 | b;
+                destPixels[i] = a << 24 | r << 16 | g << 8 | b;
             }
         }
         return dest;
     }
 
     public static void quickInvert(BufferedImage dest) {
-        int[] pixels = ImageUtils.getPixelArray(dest);
+        int[] pixels = ImageUtils.getPixels(dest);
         for (int i = 0, pixelsLength = pixels.length; i < pixelsLength; i++) {
             pixels[i] ^= 0x00_FF_FF_FF;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,250 +34,250 @@ public class Dithering {
     private Dithering() {
     }
 
-    public static void ditherFloydSteinberg(int[] inputData, int i, int width, int length, double error) {
+    public static void ditherFloydSteinberg(int[] inputPixels, int i, int width, int length, double error) {
         // 7 to the right
         if (i + 1 < length) {
-            addError(inputData, i + 1, error * 7.0 / 16);
+            addError(inputPixels, i + 1, error * 7.0 / 16);
         }
 
         int belowIndex = i + width;
         if (belowIndex < length) {
             if (belowIndex - 1 >= 0) {
-                addError(inputData, belowIndex - 1, error * 3.0 / 16);
+                addError(inputPixels, belowIndex - 1, error * 3.0 / 16);
             }
-            addError(inputData, belowIndex, error * 5.0 / 16);
+            addError(inputPixels, belowIndex, error * 5.0 / 16);
             if (belowIndex + 1 < length) {
-                addError(inputData, belowIndex + 1, error / 16);
+                addError(inputPixels, belowIndex + 1, error / 16);
             }
         }
     }
 
-    public static void ditherFloydSteinbergRGB(int[] inputData, int i, int width, int length, double errorR, double errorG, double errorB) {
+    public static void ditherFloydSteinbergRGB(int[] inputPixels, int i, int width, int length, double errorR, double errorG, double errorB) {
         // 7 to the right
         if (i + 1 < length) {
-            addErrorRGB(inputData, i + 1, errorR * 7.0 / 16, errorG * 7.0 / 16, errorB * 7.0 / 16);
+            addErrorRGB(inputPixels, i + 1, errorR * 7.0 / 16, errorG * 7.0 / 16, errorB * 7.0 / 16);
         }
 
         int belowIndex = i + width;
         if (belowIndex < length) {
             if (belowIndex - 1 >= 0) {
-                addErrorRGB(inputData, belowIndex - 1, errorR * 3.0 / 16, errorG * 3.0 / 16, errorB * 3.0 / 16);
+                addErrorRGB(inputPixels, belowIndex - 1, errorR * 3.0 / 16, errorG * 3.0 / 16, errorB * 3.0 / 16);
             }
-            addErrorRGB(inputData, belowIndex, errorR * 5.0 / 16, errorG * 5.0 / 16, errorB * 5.0 / 16);
+            addErrorRGB(inputPixels, belowIndex, errorR * 5.0 / 16, errorG * 5.0 / 16, errorB * 5.0 / 16);
             if (belowIndex + 1 < length) {
-                addErrorRGB(inputData, belowIndex + 1, errorR / 16, errorG / 16, errorB / 16);
+                addErrorRGB(inputPixels, belowIndex + 1, errorR / 16, errorG / 16, errorB / 16);
             }
         }
     }
 
-    public static void ditherStucki(int[] inputData, int i, int width, int length, double error) {
+    public static void ditherStucki(int[] inputPixels, int i, int width, int length, double error) {
         if (i + 1 < length) {
-            addError(inputData, i + 1, error * 8.0 / 42);
+            addError(inputPixels, i + 1, error * 8.0 / 42);
         }
         if (i + 2 < length) {
-            addError(inputData, i + 2, error * 4.0 / 42);
+            addError(inputPixels, i + 2, error * 4.0 / 42);
         }
 
         int belowIndex = i + width;
         if (belowIndex < length) {
             if (belowIndex - 2 >= 0) {
-                addError(inputData, belowIndex - 2, error * 2.0 / 42);
+                addError(inputPixels, belowIndex - 2, error * 2.0 / 42);
             }
             if (belowIndex - 1 >= 0) {
-                addError(inputData, belowIndex - 1, error * 4.0 / 42);
+                addError(inputPixels, belowIndex - 1, error * 4.0 / 42);
             }
-            addError(inputData, belowIndex, error * 8.0 / 42);
+            addError(inputPixels, belowIndex, error * 8.0 / 42);
             if (belowIndex + 1 < length) {
-                addError(inputData, belowIndex + 1, error * 4.0 / 42);
+                addError(inputPixels, belowIndex + 1, error * 4.0 / 42);
             }
             if (belowIndex + 2 < length) {
-                addError(inputData, belowIndex + 2, error * 2.0 / 42);
+                addError(inputPixels, belowIndex + 2, error * 2.0 / 42);
             }
         }
 
         int below2Index = i + 2 * width;
         if (below2Index < length) {
             if (below2Index - 2 >= 0) {
-                addError(inputData, below2Index - 2, error / 42);
+                addError(inputPixels, below2Index - 2, error / 42);
             }
             if (below2Index - 1 >= 0) {
-                addError(inputData, below2Index - 1, error * 2.0 / 42);
+                addError(inputPixels, below2Index - 1, error * 2.0 / 42);
             }
-            addError(inputData, below2Index, error * 4.0 / 42);
+            addError(inputPixels, below2Index, error * 4.0 / 42);
             if (below2Index + 1 < length) {
-                addError(inputData, below2Index + 1, error * 2.0 / 42);
+                addError(inputPixels, below2Index + 1, error * 2.0 / 42);
             }
             if (below2Index + 2 < length) {
-                addError(inputData, below2Index + 2, error / 42);
+                addError(inputPixels, below2Index + 2, error / 42);
             }
         }
     }
 
-    public static void ditherStuckiRGB(int[] inputData, int i, int width, int length, double errorR, double errorG, double errorB) {
+    public static void ditherStuckiRGB(int[] inputPixels, int i, int width, int length, double errorR, double errorG, double errorB) {
         if (i + 1 < length) {
-            addErrorRGB(inputData, i + 1, errorR * 8.0 / 42, errorG * 8.0 / 42, errorB * 8.0 / 42);
+            addErrorRGB(inputPixels, i + 1, errorR * 8.0 / 42, errorG * 8.0 / 42, errorB * 8.0 / 42);
         }
         if (i + 2 < length) {
-            addErrorRGB(inputData, i + 2, errorR * 4.0 / 42, errorG * 4.0 / 42, errorB * 4.0 / 42);
+            addErrorRGB(inputPixels, i + 2, errorR * 4.0 / 42, errorG * 4.0 / 42, errorB * 4.0 / 42);
         }
 
         int belowIndex = i + width;
         if (belowIndex < length) {
             if (belowIndex - 2 >= 0) {
-                addErrorRGB(inputData, belowIndex - 2, errorR * 2.0 / 42, errorG * 2.0 / 42, errorB * 2.0 / 42);
+                addErrorRGB(inputPixels, belowIndex - 2, errorR * 2.0 / 42, errorG * 2.0 / 42, errorB * 2.0 / 42);
             }
             if (belowIndex - 1 >= 0) {
-                addErrorRGB(inputData, belowIndex - 1, errorR * 4.0 / 42, errorG * 4.0 / 42, errorB * 4.0 / 42);
+                addErrorRGB(inputPixels, belowIndex - 1, errorR * 4.0 / 42, errorG * 4.0 / 42, errorB * 4.0 / 42);
             }
-            addErrorRGB(inputData, belowIndex, errorR * 8.0 / 42, errorG * 8.0 / 42, errorB * 8.0 / 42);
+            addErrorRGB(inputPixels, belowIndex, errorR * 8.0 / 42, errorG * 8.0 / 42, errorB * 8.0 / 42);
             if (belowIndex + 1 < length) {
-                addErrorRGB(inputData, belowIndex + 1, errorR * 4.0 / 42, errorG * 4.0 / 42, errorB * 4.0 / 42);
+                addErrorRGB(inputPixels, belowIndex + 1, errorR * 4.0 / 42, errorG * 4.0 / 42, errorB * 4.0 / 42);
             }
             if (belowIndex + 2 < length) {
-                addErrorRGB(inputData, belowIndex + 2, errorR * 2.0 / 42, errorG * 2.0 / 42, errorB * 2.0 / 42);
+                addErrorRGB(inputPixels, belowIndex + 2, errorR * 2.0 / 42, errorG * 2.0 / 42, errorB * 2.0 / 42);
             }
         }
 
         int below2Index = i + 2 * width;
         if (below2Index < length) {
             if (below2Index - 2 >= 0) {
-                addErrorRGB(inputData, below2Index - 2, errorR / 42, errorG / 42, errorB / 42);
+                addErrorRGB(inputPixels, below2Index - 2, errorR / 42, errorG / 42, errorB / 42);
             }
             if (below2Index - 1 >= 0) {
-                addErrorRGB(inputData, below2Index - 1, errorR * 2.0 / 42, errorG * 2.0 / 42, errorB * 2.0 / 42);
+                addErrorRGB(inputPixels, below2Index - 1, errorR * 2.0 / 42, errorG * 2.0 / 42, errorB * 2.0 / 42);
             }
-            addErrorRGB(inputData, below2Index, errorR * 4.0 / 42, errorG * 4.0 / 42, errorB * 4.0 / 42);
+            addErrorRGB(inputPixels, below2Index, errorR * 4.0 / 42, errorG * 4.0 / 42, errorB * 4.0 / 42);
             if (below2Index + 1 < length) {
-                addErrorRGB(inputData, below2Index + 1, errorR * 2.0 / 42, errorG * 2.0 / 42, errorB * 2.0 / 42);
+                addErrorRGB(inputPixels, below2Index + 1, errorR * 2.0 / 42, errorG * 2.0 / 42, errorB * 2.0 / 42);
             }
             if (below2Index + 2 < length) {
-                addErrorRGB(inputData, below2Index + 2, errorR / 42, errorG / 42, errorB / 42);
+                addErrorRGB(inputPixels, below2Index + 2, errorR / 42, errorG / 42, errorB / 42);
             }
         }
     }
 
-    public static void ditherBurkes(int[] inputData, int i, int width, int length, double error) {
+    public static void ditherBurkes(int[] inputPixels, int i, int width, int length, double error) {
         if (i + 1 < length) {
-            addError(inputData, i + 1, error * 8.0 / 32);
+            addError(inputPixels, i + 1, error * 8.0 / 32);
         }
         if (i + 2 < length) {
-            addError(inputData, i + 2, error * 4.0 / 32);
+            addError(inputPixels, i + 2, error * 4.0 / 32);
         }
 
         int belowIndex = i + width;
         if (belowIndex < length) {
             if (belowIndex - 2 >= 0) {
-                addError(inputData, belowIndex - 2, error * 2.0 / 32);
+                addError(inputPixels, belowIndex - 2, error * 2.0 / 32);
             }
             if (belowIndex - 1 >= 0) {
-                addError(inputData, belowIndex - 1, error * 4.0 / 32);
+                addError(inputPixels, belowIndex - 1, error * 4.0 / 32);
             }
-            addError(inputData, belowIndex, error * 8.0 / 32);
+            addError(inputPixels, belowIndex, error * 8.0 / 32);
             if (belowIndex + 1 < length) {
-                addError(inputData, belowIndex + 1, error * 4.0 / 32);
+                addError(inputPixels, belowIndex + 1, error * 4.0 / 32);
             }
             if (belowIndex + 2 < length) {
-                addError(inputData, belowIndex + 2, error * 2.0 / 32);
+                addError(inputPixels, belowIndex + 2, error * 2.0 / 32);
             }
         }
     }
 
-    public static void ditherBurkesRGB(int[] inputData, int i, int width, int length, double errorR, double errorG, double errorB) {
+    public static void ditherBurkesRGB(int[] inputPixels, int i, int width, int length, double errorR, double errorG, double errorB) {
         if (i + 1 < length) {
-            addErrorRGB(inputData, i + 1, errorR * 8.0 / 32, errorG * 8.0 / 32, errorB * 8.0 / 32);
+            addErrorRGB(inputPixels, i + 1, errorR * 8.0 / 32, errorG * 8.0 / 32, errorB * 8.0 / 32);
         }
         if (i + 2 < length) {
-            addErrorRGB(inputData, i + 2, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
+            addErrorRGB(inputPixels, i + 2, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
         }
 
         int belowIndex = i + width;
         if (belowIndex < length) {
             if (belowIndex - 2 >= 0) {
-                addErrorRGB(inputData, belowIndex - 2, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
+                addErrorRGB(inputPixels, belowIndex - 2, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
             }
             if (belowIndex - 1 >= 0) {
-                addErrorRGB(inputData, belowIndex - 1, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
+                addErrorRGB(inputPixels, belowIndex - 1, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
             }
-            addErrorRGB(inputData, belowIndex, errorR * 8.0 / 32, errorG * 8.0 / 32, errorB * 8.0 / 32);
+            addErrorRGB(inputPixels, belowIndex, errorR * 8.0 / 32, errorG * 8.0 / 32, errorB * 8.0 / 32);
             if (belowIndex + 1 < length) {
-                addErrorRGB(inputData, belowIndex + 1, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
+                addErrorRGB(inputPixels, belowIndex + 1, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
             }
             if (belowIndex + 2 < length) {
-                addErrorRGB(inputData, belowIndex + 2, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
+                addErrorRGB(inputPixels, belowIndex + 2, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
             }
         }
     }
 
-    public static void ditherSierra(int[] inputData, int i, int width, int length, double error) {
+    public static void ditherSierra(int[] inputPixels, int i, int width, int length, double error) {
         if (i + 1 < length) {
-            addError(inputData, i + 1, error * 5.0 / 32);
+            addError(inputPixels, i + 1, error * 5.0 / 32);
         }
         if (i + 2 < length) {
-            addError(inputData, i + 2, error * 3.0 / 32);
+            addError(inputPixels, i + 2, error * 3.0 / 32);
         }
 
         int belowIndex = i + width;
         if (belowIndex < length) {
             if (belowIndex - 2 >= 0) {
-                addError(inputData, belowIndex - 2, error * 2.0 / 32);
+                addError(inputPixels, belowIndex - 2, error * 2.0 / 32);
             }
             if (belowIndex - 1 >= 0) {
-                addError(inputData, belowIndex - 1, error * 4.0 / 32);
+                addError(inputPixels, belowIndex - 1, error * 4.0 / 32);
             }
-            addError(inputData, belowIndex, error * 5.0 / 32);
+            addError(inputPixels, belowIndex, error * 5.0 / 32);
             if (belowIndex + 1 < length) {
-                addError(inputData, belowIndex + 1, error * 4.0 / 32);
+                addError(inputPixels, belowIndex + 1, error * 4.0 / 32);
             }
             if (belowIndex + 2 < length) {
-                addError(inputData, belowIndex + 2, error * 2.0 / 32);
+                addError(inputPixels, belowIndex + 2, error * 2.0 / 32);
             }
         }
 
         int below2Index = i + 2 * width;
         if (below2Index < length) {
             if (below2Index - 1 >= 0) {
-                addError(inputData, below2Index - 1, error * 2.0 / 32);
+                addError(inputPixels, below2Index - 1, error * 2.0 / 32);
             }
-            addError(inputData, below2Index, error * 3.0 / 32);
+            addError(inputPixels, below2Index, error * 3.0 / 32);
             if (below2Index + 1 < length) {
-                addError(inputData, below2Index + 1, error * 2.0 / 32);
+                addError(inputPixels, below2Index + 1, error * 2.0 / 32);
             }
         }
     }
 
-    public static void ditherSierraRGB(int[] inputData, int i, int width, int length, double errorR, double errorG, double errorB) {
+    public static void ditherSierraRGB(int[] inputPixels, int i, int width, int length, double errorR, double errorG, double errorB) {
         if (i + 1 < length) {
-            addErrorRGB(inputData, i + 1, errorR * 5.0 / 32, errorG * 5.0 / 32, errorB * 5.0 / 32);
+            addErrorRGB(inputPixels, i + 1, errorR * 5.0 / 32, errorG * 5.0 / 32, errorB * 5.0 / 32);
         }
         if (i + 2 < length) {
-            addErrorRGB(inputData, i + 2, errorR * 3.0 / 32, errorG * 3.0 / 32, errorB * 3.0 / 32);
+            addErrorRGB(inputPixels, i + 2, errorR * 3.0 / 32, errorG * 3.0 / 32, errorB * 3.0 / 32);
         }
 
         int belowIndex = i + width;
         if (belowIndex < length) {
             if (belowIndex - 2 >= 0) {
-                addErrorRGB(inputData, belowIndex - 2, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
+                addErrorRGB(inputPixels, belowIndex - 2, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
             }
             if (belowIndex - 1 >= 0) {
-                addErrorRGB(inputData, belowIndex - 1, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
+                addErrorRGB(inputPixels, belowIndex - 1, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
             }
-            addErrorRGB(inputData, belowIndex, errorR * 5.0 / 32, errorG * 5.0 / 32, errorB * 5.0 / 32);
+            addErrorRGB(inputPixels, belowIndex, errorR * 5.0 / 32, errorG * 5.0 / 32, errorB * 5.0 / 32);
             if (belowIndex + 1 < length) {
-                addErrorRGB(inputData, belowIndex + 1, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
+                addErrorRGB(inputPixels, belowIndex + 1, errorR * 4.0 / 32, errorG * 4.0 / 32, errorB * 4.0 / 32);
             }
             if (belowIndex + 2 < length) {
-                addErrorRGB(inputData, belowIndex + 2, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
+                addErrorRGB(inputPixels, belowIndex + 2, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
             }
         }
 
         int below2Index = i + 2 * width;
         if (below2Index < length) {
             if (below2Index - 1 >= 0) {
-                addErrorRGB(inputData, below2Index - 1, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
+                addErrorRGB(inputPixels, below2Index - 1, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
             }
-            addErrorRGB(inputData, below2Index, errorR * 3.0 / 32, errorG * 3.0 / 32, errorB * 3.0 / 32);
+            addErrorRGB(inputPixels, below2Index, errorR * 3.0 / 32, errorG * 3.0 / 32, errorB * 3.0 / 32);
             if (below2Index + 1 < length) {
-                addErrorRGB(inputData, below2Index + 1, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
+                addErrorRGB(inputPixels, below2Index + 1, errorR * 2.0 / 32, errorG * 2.0 / 32, errorB * 2.0 / 32);
             }
         }
     }
@@ -315,20 +315,20 @@ public class Dithering {
         });
     }
 
-    public static void ditherRGB(int ditheringMethod, int[] inputData, int i, int width, int length, double errorR, double errorG, double errorB) {
+    public static void ditherRGB(int ditheringMethod, int[] inputPixels, int i, int width, int length, double errorR, double errorG, double errorB) {
         // distribute the error to neighboring pixels
         switch (ditheringMethod) {
             case DITHER_FLOYD_STEINBERG:
-                ditherFloydSteinbergRGB(inputData, i, width, length, errorR, errorG, errorB);
+                ditherFloydSteinbergRGB(inputPixels, i, width, length, errorR, errorG, errorB);
                 break;
             case DITHER_STUCKI:
-                ditherStuckiRGB(inputData, i, width, length, errorR, errorG, errorB);
+                ditherStuckiRGB(inputPixels, i, width, length, errorR, errorG, errorB);
                 break;
             case DITHER_BURKES:
-                ditherBurkesRGB(inputData, i, width, length, errorR, errorG, errorB);
+                ditherBurkesRGB(inputPixels, i, width, length, errorR, errorG, errorB);
                 break;
             case DITHER_SIERRA:
-                ditherSierraRGB(inputData, i, width, length, errorR, errorG, errorB);
+                ditherSierraRGB(inputPixels, i, width, length, errorR, errorG, errorB);
                 break;
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,13 +55,13 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     public static void createNew(Composition comp) {
-        var layer = new GradientFillLayer(comp, createName());
+        var layer = new GradientFillLayer(comp, generateName());
         comp.getHolderForNewLayers()
             .addWithHistory(layer, "Add Gradient Fill Layer");
         Tools.GRADIENT.activate();
     }
 
-    private static String createName() {
+    private static String generateName() {
         return "gradient fill " + (++count);
     }
 
@@ -91,7 +91,7 @@ public class GradientFillLayer extends ContentLayer {
             // the custom blending modes don't work with gradients
             boolean useCachedImage = g.getComposite().getClass() != AlphaComposite.class
                 // and custom gradients using transparency also have a problem
-                || gradient.isCustomTransparency();
+                || gradient.hasCustomTransparency();
             if (useCachedImage) {
                 if (cachedImage == null) {
                     cachedImage = ImageUtils.createSysCompatibleImage(width, height);

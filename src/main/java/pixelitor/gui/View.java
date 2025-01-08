@@ -55,7 +55,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.lang.String.format;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.threadInfo;
@@ -66,28 +65,30 @@ import static pixelitor.utils.Threads.threadInfo;
 public class View extends JComponent implements MouseListener, MouseMotionListener, Debuggable {
     private Composition comp;
     private Canvas canvas;
+
     private ZoomLevel zoomLevel = ZoomLevel.ACTUAL_SIZE;
     private double zoomScale = 1.0f;
 
     private ViewContainer viewContainer = null;
     private final LayersPanel layersPanel;
-    private MaskViewMode maskViewMode;
     private Navigator navigator;
+
+    private MaskViewMode maskViewMode;
 
     private static final CheckerboardPainter checkerBoardPainter
         = ImageUtils.createCheckerboardPainter();
 
-    // The start coordinates of the canvas in component space (greater than zero
-    // if the canvas has to be centralized because it's smaller than the view).
+    // Coordinates of the canvas origin within the component (for centering).
     // They can't have floating-point precision, otherwise the checkerboard
     // and the image might be painted on slightly different coordinates.
     private int canvasStartX;
     private int canvasStartY;
 
+    // cached coordinate transformation matrices
     private final Lazy<AffineTransform> imToCo = Lazy.of(this::createImToCoTransform);
     private final Lazy<AffineTransform> coToIm = Lazy.of(this::createCoToImTransform);
 
-    private static boolean showPixelGrid = false;
+    private static boolean pixelGridVisible = false;
 
     // true if the snapping preference is set and the tool also approves
     private static boolean pixelSnapping = false;
@@ -97,57 +98,17 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         assert comp != null;
 
         setComp(comp);
-
         setZoom(ZoomLevel.calcBestZoom(canvas, null, false));
 
         layersPanel = new LayersPanel();
-
-        addListeners();
+        addMouseListeners();
     }
 
-    public CompletableFuture<Composition> checkForAutoReload() {
-        return comp.checkForAutoReload();
-    }
+    private void addMouseListeners() {
+        addMouseListener(this);
+        addMouseMotionListener(this);
 
-    /**
-     * Attempts to reload the composition from its source file.
-     */
-    public CompletableFuture<Composition> reloadCompAsync() {
-        assert isActive();
-
-        File file = comp.getFile();
-        if (file == null) {
-            String msg = format(
-                "<html>The image <b>%s</b> can't be reloaded because it wasn't yet saved.",
-                comp.getName());
-            Messages.showError("No file", msg);
-            return CompletableFuture.completedFuture(null);
-        }
-
-        String path = file.getAbsolutePath();
-        if (!file.exists()) {
-            String msg = format(
-                "<html>The image <b>%s</b> can't be reloaded because the file" +
-                    "<br><b>%s</b>" +
-                    "<br>doesn't exist anymore.",
-                comp.getName(), path);
-            Messages.showError("File not found", msg, getDialogParent());
-            return CompletableFuture.completedFuture(null);
-        }
-
-        // prevent starting a new reload on the EDT while an asynchronous
-        // reload is already scheduled or running on the IO thread
-        if (IOTasks.isPathProcessing(path)) {
-            return CompletableFuture.completedFuture(null);
-        }
-        IOTasks.markPathForReading(path);
-
-        return FileIO.loadCompAsync(file)
-            .thenApplyAsync(this::replaceJustReloadedComp, onEDT)
-            .whenComplete((composition, exception) -> {
-                IOTasks.markReadingComplete(path);
-                FileIO.handleFileReadErrors(exception);
-            });
+        MouseZoomMethod.ACTIVE.installOnView(this);
     }
 
     private void setComp(Composition comp) {
@@ -160,7 +121,56 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         comp.setView(this);
     }
 
-    private Composition replaceJustReloadedComp(Composition newComp) {
+    public boolean isActive() {
+        return Views.getActive() == this;
+    }
+
+    public CompletableFuture<Composition> checkForAutoReload() {
+        return comp.checkForAutoReload();
+    }
+
+    /**
+     * Reloads the composition from its source file asynchronously.
+     */
+    public CompletableFuture<Composition> reloadCompAsync() {
+        assert isActive();
+
+        File file = comp.getFile();
+        if (file == null) {
+            Messages.showError("No File", String.format(
+                "<html>The image <b>%s</b> can't be reloaded because it wasn't yet saved.",
+                comp.getName()));
+            return CompletableFuture.completedFuture(null);
+        }
+
+        String filePath = file.getAbsolutePath();
+        if (!file.exists()) {
+            Messages.showError("File Not Found", String.format(
+                "<html>The image <b>%s</b> can't be reloaded because the file" +
+                    "<br><b>%s</b>" +
+                    "<br>doesn't exist anymore.",
+                comp.getName(), filePath), getDialogParent());
+            return CompletableFuture.completedFuture(null);
+        }
+
+        // prevent concurrent reloads of the same file
+        if (IOTasks.isPathProcessing(filePath)) {
+            return CompletableFuture.completedFuture(null);
+        }
+        IOTasks.markPathForReading(filePath);
+
+        return FileIO.loadCompAsync(file)
+            .thenApplyAsync(this::handleReloadedComp, onEDT)
+            .whenComplete((composition, exception) -> {
+                IOTasks.markReadingComplete(filePath);
+                FileIO.handleFileReadErrors(exception);
+            });
+    }
+
+    /**
+     * Handles a successfully reloaded composition by replacing the current one.
+     */
+    private Composition handleReloadedComp(Composition newComp) {
         assert calledOnEDT() : threadInfo();
         assert newComp != comp;
         assert !newComp.hasSelection();
@@ -187,9 +197,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             SelectionActions.update(newComp);
         }
 
-        String msg = format("The image <b>%s</b> was reloaded from the file <b>%s</b>.",
-            newComp.getName(), newComp.getFile().getAbsolutePath());
-        Messages.showStatusMessage(msg);
+        Messages.showStatusMessage(String.format(
+            "The image <b>%s</b> was reloaded from the file <b>%s</b>.",
+            newComp.getName(), newComp.getFile().getAbsolutePath()));
 
         return newComp;
     }
@@ -219,19 +229,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         newComp.addLayersToUI();
 
         if (isActive()) {
-            LayersContainer.showLayersOf(this);
-
-            Layers.activeCompChanged(newComp, reloaded);
-
-            // is this needed?
-            newMaskViewMode.activate(this, newComp.getActiveLayer());
-
-            repaintNavigator(true);
-            HistogramsPanel.updateFrom(newComp);
-            PixelitorWindow.get().updateTitle(newComp);
+            updateUIForNewComp(newComp, newMaskViewMode, reloaded);
         }
 
-        Tools.compReplaced(newComp, reloaded);
         if (newComp.isSmartObjectContent()) {
             for (SmartObject owner : newComp.getOwners()) {
                 owner.propagateContentChanges(newComp, true);
@@ -243,20 +243,26 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         repaint();
     }
 
-    private void addListeners() {
-        addMouseListener(this);
-        addMouseMotionListener(this);
+    /**
+     * Updates all UI elements when a new composition becomes active.
+     */
+    private void updateUIForNewComp(Composition newComp, MaskViewMode newMaskViewMode, boolean reloaded) {
+        LayersContainer.showLayersOf(this);
 
-        MouseZoomMethod.ACTIVE.installOnView(this);
-    }
+        Layers.activeCompChanged(newComp, reloaded);
 
-    public boolean isActive() {
-        return Views.getActive() == this;
+        // is this needed?
+        newMaskViewMode.activate(this, newComp.getActiveLayer());
+
+        repaintNavigator(true);
+        HistogramsPanel.updateFrom(newComp);
+        PixelitorWindow.get().updateTitle(newComp);
+        Tools.compReplaced(newComp, reloaded);
     }
 
     @Override
     public Dimension getPreferredSize() {
-        if (comp.isEmpty()) {
+        if (comp.hasNoLayers()) {
             return super.getPreferredSize();
         } else {
             return canvas.getCoSize();
@@ -353,8 +359,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return comp.getName();
     }
 
-    public void changeLayerGUIOrder(int oldIndex, int newIndex) {
-        layersPanel.changeLayerGUIOrder(oldIndex, newIndex);
+    public void reorderLayerInUI(int oldIndex, int newIndex) {
+        layersPanel.reorderLayer(oldIndex, newIndex);
     }
 
     @Override
@@ -405,14 +411,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         g2.setTransform(componentTransform);
         // now we are back in "component space"
 
-        if (showPixelGrid && allowPixelGrid()) {
+        if (pixelGridVisible && allowPixelGrid()) {
             drawPixelGrid(g2);
         }
 
         comp.drawGuides(g2);
 
         if (isActive()) {
-            Tools.getActive().paintOverImage(g2, comp);
+            Tools.getActive().paintOverView(g2, comp);
         }
     }
 
@@ -458,11 +464,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         g2.setPaintMode();
     }
 
-    public static void setShowPixelGrid(boolean newValue) {
-        if (showPixelGrid == newValue) {
+    public static void setPixelGridVisible(boolean newValue) {
+        if (pixelGridVisible == newValue) {
             return;
         }
-        showPixelGrid = newValue;
+        pixelGridVisible = newValue;
         if (newValue) {
             ImageArea.pixelGridEnabled();
         } else {
@@ -907,15 +913,16 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * in screen coordinates
      */
     public Rectangle getVisibleCanvasBoundsOnScreen() {
-        Rectangle canvasRelativeToView = canvas.getCoBounds(this);
+        // the canvas bounds relative to this view
+        Rectangle canvasBounds = canvas.getCoBounds(this);
 
         // take scrollbars into account
-        Rectangle visibleCanvas = canvasRelativeToView.intersection(getVisibleRegion());
+        Rectangle visibleCanvas = canvasBounds.intersection(getVisibleRegion());
         if (visibleCanvas.isEmpty()) {
             throw new IllegalStateException("canvas not visible");
         }
 
-        // transform into screen coordinates
+        // convert to screen coordinates
         Point offset = getLocationOnScreen();
         visibleCanvas.translate(offset.x, offset.y);
         return visibleCanvas;

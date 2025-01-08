@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import static pixelitor.tools.util.DraggablePoint.HANDLE_RADIUS;
 
 /**
  * The direction of a corner or an edge in a {@link TransformBox}.
+ * It determines the (rotation-dependent) cursors and drag display positions.
  */
 public enum Direction {
     NORTH(Cursors.N,

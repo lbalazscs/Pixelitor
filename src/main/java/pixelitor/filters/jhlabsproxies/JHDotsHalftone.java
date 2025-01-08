@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -115,7 +115,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
             matrixSize, 0.5, shapeParam.getValue());
         BufferedImage maskImage = ImageUtils.createImageWithSameCM(src, matrixSize, matrixSize);
 
-        int[] maskPixels = ImageUtils.getPixelArray(maskImage);
+        int[] maskPixels = ImageUtils.getPixels(maskImage);
         for (int y = 0; y < matrixSize; y++) {
             for (int x = 0; x < matrixSize; x++) {
                 int threshold = matrix[x][y];

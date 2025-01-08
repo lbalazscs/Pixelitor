@@ -102,7 +102,7 @@ public class ValueNoise extends ParametrizedFilter {
                 i / 255.0f, colorArray1, colorArray2);
         }
 
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] destPixels = ImageUtils.getPixels(dest);
         int width = dest.getWidth();
         int height = dest.getHeight();
         cx = width / 2.0f;
@@ -124,7 +124,7 @@ public class ValueNoise extends ParametrizedFilter {
         Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable rowTask = () -> processRow(lookupTable, destData,
+            Runnable rowTask = () -> processRow(lookupTable, destPixels,
                 width, frequency, persistence, finalY, interp);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
@@ -135,7 +135,7 @@ public class ValueNoise extends ParametrizedFilter {
         return dest;
     }
 
-    private void processRow(int[] lookupTable, int[] destData,
+    private void processRow(int[] lookupTable, int[] destPixels,
                             int width, float frequency, float persistence,
                             int y, NoiseInterpolation interp) {
         float outerY = y - cy;
@@ -155,7 +155,7 @@ public class ValueNoise extends ParametrizedFilter {
                 octaves, frequency, persistence, interp));
 
             int value = lookupTable[noise];
-            destData[x + y * width] = value;
+            destPixels[x + y * width] = value;
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,7 +79,7 @@ public class TestHelper {
     public static Composition createRealComp(String name, Class<? extends Layer> layerClass, int width, int height) {
         Composition comp = createEmptyComp(name, width, height, true);
         Layer layer = createLayer(layerClass, comp);
-        comp.addLayerNoUI(layer);
+        comp.addLayerWithoutUI(layer);
         return comp;
     }
 
@@ -125,7 +125,7 @@ public class TestHelper {
         doAnswer(invocation -> {
             currentSel = (Selection) invocation.getArguments()[0];
             return null;
-        }).when(comp).setSelectionRef(any(Selection.class));
+        }).when(comp).setSelection(any(Selection.class));
 
         // when getSelection() is called on the mock, then return the currentSel field
         when(comp.getSelection()).thenAnswer((Answer<Selection>) invocation -> currentSel);
@@ -145,7 +145,7 @@ public class TestHelper {
 
         for (int i = 0; i < numLayers; i++) {
             var layer = createEmptyImageLayer(comp, "layer " + (i + 1));
-            comp.addLayerNoUI(layer);
+            comp.addLayerWithoutUI(layer);
             if (addMasks) {
                 layer.addMask(REVEAL_ALL);
             }

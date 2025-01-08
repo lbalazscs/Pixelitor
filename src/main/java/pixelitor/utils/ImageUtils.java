@@ -165,7 +165,7 @@ public class ImageUtils {
     public static BufferedImage resize(BufferedImage img, int targetWidth, int targetHeight) {
         boolean progressiveBilinear = targetWidth < img.getWidth() / 2
             || targetHeight < img.getHeight() / 2;
-        return getFasterScaledInstance(img, targetWidth, targetHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
+        return scaleImage(img, targetWidth, targetHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
     }
 
     // From the Filthy Rich Clients book
@@ -191,10 +191,10 @@ public class ImageUtils {
      *                            smaller than the original dimensions)
      * @return a scaled version of the original BufferedImage
      */
-    public static BufferedImage getFasterScaledInstance(BufferedImage img,
-                                                        int targetWidth, int targetHeight,
-                                                        Object hint,
-                                                        boolean progressiveBilinear) {
+    private static BufferedImage scaleImage(BufferedImage img,
+                                            int targetWidth, int targetHeight,
+                                            Object hint,
+                                            boolean progressiveBilinear) {
         assert img != null;
 
         int prevW = img.getWidth();
@@ -275,9 +275,9 @@ public class ImageUtils {
     /**
      * Also an iterative approach, but using even smaller steps
      */
-    public static BufferedImage enlargeSmooth(BufferedImage src,
-                                              int targetWidth, int targetHeight,
-                                              Object hint, double step, ProgressTracker pt) {
+    public static BufferedImage enlargeSmoothly(BufferedImage src,
+                                                int targetWidth, int targetHeight,
+                                                Object hint, double step, ProgressTracker pt) {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
         double factorX = targetWidth / (double) srcWidth;
@@ -329,7 +329,7 @@ public class ImageUtils {
      * Returns the number of steps (progress tracking work units)
      * required for smooth enlargement.
      */
-    public static int calcNumStepsForEnlargeSmooth(double resizeFactor, double step) {
+    public static int calcEnlargeSmoothlySteps(double resizeFactor, double step) {
         double progress = 1.0;
         double lastStep = resizeFactor / step;
         int retVal = 1; // for the final step
@@ -351,7 +351,7 @@ public class ImageUtils {
      * Returns the pixel array behind the given BufferedImage.
      * If the array data is modified, the image itself is modified.
      */
-    public static int[] getPixelArray(BufferedImage src) {
+    public static int[] getPixels(BufferedImage src) {
         assert src != null;
 
         int[] pixels;
@@ -372,7 +372,7 @@ public class ImageUtils {
         return pixels;
     }
 
-    public static byte[] getGrayPixelByteArray(BufferedImage img) {
+    public static byte[] getGrayPixels(BufferedImage img) {
         assert isGrayscale(img);
 
         WritableRaster raster = img.getRaster();
@@ -385,7 +385,7 @@ public class ImageUtils {
         return img.getType() == TYPE_BYTE_GRAY;
     }
 
-    public static BufferedImage createGrayImageFromByteArray(byte[] pixels, int width, int height) {
+    public static BufferedImage createGrayscaleImage(byte[] pixels, int width, int height) {
         assert pixels.length == width * height;
 
         DataBuffer data = new DataBufferByte(pixels, 1);
@@ -415,7 +415,7 @@ public class ImageUtils {
         return imgURL;
     }
 
-    public static BufferedImage loadJarImageFromImagesFolder(String fileName) {
+    public static BufferedImage loadResourceImage(String fileName) {
         assert fileName != null;
 
         URL imgURL = findImageURL(fileName);
@@ -791,7 +791,7 @@ public class ImageUtils {
     }
 
     // See https://graphicdesign.stackexchange.com/questions/89969/what-does-photoshops-high-pass-filter-actually-do-under-the-hood
-    public static BufferedImage getHighPassFilteredImage(BufferedImage original, BufferedImage blurred) {
+    public static BufferedImage toHighPassFilteredImage(BufferedImage original, BufferedImage blurred) {
         assert original != null;
         assert blurred != null;
 
@@ -807,8 +807,8 @@ public class ImageUtils {
         return blurred;
     }
 
-    public static BufferedImage getHighPassSharpenedImage(BufferedImage original, BufferedImage blurred) {
-        BufferedImage highPass = getHighPassFilteredImage(original, blurred);
+    public static BufferedImage toHighPassSharpenedImage(BufferedImage original, BufferedImage blurred) {
+        BufferedImage highPass = toHighPassFilteredImage(original, blurred);
 
         // blend it with overlay to get a sharpening effect
         Graphics2D g2 = highPass.createGraphics();
@@ -830,7 +830,7 @@ public class ImageUtils {
         int radius2 = radius * radius;
         Random random = new Random();
 
-        int[] pixels = getPixelArray(brushImage);
+        int[] pixels = getPixels(brushImage);
         for (int x = 0; x < diameter; x++) {
             for (int y = 0; y < diameter; y++) {
                 int dx = x - radius;
@@ -873,7 +873,7 @@ public class ImageUtils {
 
     public static BufferedImage createSoftTransparencyImage(int size) {
         BufferedImage image = createSoftBWBrush(size);
-        int[] pixels = getPixelArray(image);
+        int[] pixels = getPixels(image);
         for (int i = 0, pixelsLength = pixels.length; i < pixelsLength; i++) {
             int pixelValue = pixels[i] & 0xFF; // take the blue channel: they are all the same
             int alpha = 255 - pixelValue;
@@ -1037,9 +1037,9 @@ public class ImageUtils {
         return copyTo(TYPE_BYTE_GRAY, src);
     }
 
-    public static BufferedImage getSelectionSizedPartFrom(BufferedImage src,
-                                                          Selection selection,
-                                                          int tx, int ty) {
+    public static BufferedImage extractSelectedRegion(BufferedImage src,
+                                                      Selection selection,
+                                                      int tx, int ty) {
         assert selection != null;
 
         Rectangle bounds = selection.getShapeBounds(); // relative to the canvas
@@ -1167,12 +1167,12 @@ public class ImageUtils {
     }
 
     public static void unpremultiply(BufferedImage dest) {
-        int[] pixels = getPixelArray(dest);
+        int[] pixels = getPixels(dest);
         ImageMath.unpremultiply(pixels);
     }
 
     public static void premultiply(BufferedImage src) {
-        int[] pixels = getPixelArray(src);
+        int[] pixels = getPixels(src);
         ImageMath.premultiply(pixels);
     }
 
@@ -1262,7 +1262,7 @@ public class ImageUtils {
     /**
      * Returns the minimum enclosing rectangle around the non-transparent region in the given image.
      */
-    public static Rectangle getNonTransparentBounds(BufferedImage image) {
+    public static Rectangle calcOpaqueBounds(BufferedImage image) {
         WritableRaster alphaRaster = image.getAlphaRaster();
         int width = alphaRaster.getWidth();
         int height = alphaRaster.getHeight();
@@ -1327,10 +1327,10 @@ public class ImageUtils {
 
     public static BufferedImage mask(BufferedImage srcA, BufferedImage srcB, BufferedImage mask) {
         BufferedImage dest = createImageWithSameCM(srcA);
-        int[] srcAPixels = getPixelArray(srcA);
-        int[] srcBPixels = getPixelArray(srcB);
-        int[] maskPixels = getPixelArray(mask);
-        int[] destPixels = getPixelArray(dest);
+        int[] srcAPixels = getPixels(srcA);
+        int[] srcBPixels = getPixels(srcB);
+        int[] maskPixels = getPixels(mask);
+        int[] destPixels = getPixels(dest);
 
         for (int i = 0, numPixels = destPixels.length; i < numPixels; i++) {
             // take the blue channel, assuming that all channels are the same

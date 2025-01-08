@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -648,7 +648,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     /**
      * Calculates the angle-dependent part of the cursor offset,
      * by dividing the 0-360 range of angles into eight equal parts,
-     * corresponding to the eight cursors
+     * corresponding to the eight cursors.
      */
     static int calcCursorOffset(int angleDeg) {
         if (angleDeg > 338) { // 360 - (45/2) = 338
@@ -691,6 +691,10 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
 
     public RotationHandle getRot() {
         return rot;
+    }
+
+    public Transformable getTarget() {
+        return target;
     }
 
     @Override

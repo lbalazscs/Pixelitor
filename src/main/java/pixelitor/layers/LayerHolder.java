@@ -34,32 +34,68 @@ import java.util.stream.Stream;
  * child layers, such as compositions, layer groups, or smart objects.
  */
 public interface LayerHolder extends Debuggable {
+    /**
+     * Returns the index of the currently active layer within this holder.
+     */
     int getActiveLayerIndex();
 
+    /**
+     * Returns the index of the given layer within this holder.
+     */
     int indexOf(Layer layer);
 
+    /**
+     * Returns the number of layers directly contained within this holder.
+     */
     int getNumLayers();
 
+    /**
+     * Returns the layer at the given index within this holder.
+     */
     Layer getLayer(int index);
 
+    /**
+     * Adds a layer (only) to the list of layers maintained by this holder, at a specific index.
+     */
     void addLayerToList(Layer newLayer, int index);
 
+    /**
+     * Recursively checks if this layer holder contains
+     * the given layer at any nesting level.
+     */
     boolean containsLayer(Layer layer);
 
+    /**
+     * Recursively checks if this layer holder contains
+     * a layer of the given type at any nesting level.
+     */
     boolean containsLayerOfType(Class<? extends Layer> type);
 
-    default void addLayerNoUI(Layer newLayer) {
+    /**
+     * Adds a layer to this holder without adding it to the UI.
+     */
+    default void addLayerWithoutUI(Layer newLayer) {
         adder().skipUIAdd().add(newLayer);
     }
 
+    /**
+     * Adds a layer to this holder and also adds an undoable edit
+     * to the history, using the given edit name.
+     */
     default void addWithHistory(Layer newLayer, String editName) {
         adder().withHistory(editName).add(newLayer);
     }
 
+    /**
+     * Adds a layer to this holder.
+     */
     default void add(Layer newLayer) {
         adder().add(newLayer);
     }
 
+    /**
+     * Moves the currently active layer up or down in the layer stack.
+     */
     default void moveActiveLayer(boolean up) {
         assert isHolderOfActiveLayer();
         Layer activeLayer = getComp().getActiveLayer();
@@ -88,7 +124,7 @@ public interface LayerHolder extends Debuggable {
             int groupIndex = up ? 0 : group.getNumLayers();
             moveLayerInto(activeLayer, group, groupIndex, editName);
         } else {
-            changeLayerOrder(index, newIndex, true, editName);
+            reorderLayer(index, newIndex, true, editName);
         }
     }
 
@@ -100,7 +136,7 @@ public interface LayerHolder extends Debuggable {
         assert targetHolder != this;
         assert containsLayer(layer);
         assert !targetHolder.containsLayer(layer);
-        assert targetIndex >= 0;
+        assert targetIndex >= 0 && targetIndex <= targetHolder.getNumLayers();
 
         if (editName != null) {
             int prevIndex = indexOf(layer);
@@ -115,31 +151,43 @@ public interface LayerHolder extends Debuggable {
             .add(layer);
     }
 
+    /**
+     * Moves the currently active layer to the top of the layer stack within this holder.
+     */
     default void moveActiveLayerToTop() {
         assert isHolderOfActiveLayer();
 
         int prevIndex = indexOf(getComp().getActiveLayer());
         int newIndex = getNumLayers() - 1;
-        changeLayerOrder(prevIndex, newIndex,
+        reorderLayer(prevIndex, newIndex,
             true, LayerMoveAction.LAYER_TO_TOP);
     }
 
+    /**
+     * Moves the currently active layer to the bottom of the layer stack within this holder.
+     */
     default void moveActiveLayerToBottom() {
         assert isHolderOfActiveLayer();
 
         int prevIndex = indexOf(getComp().getActiveLayer());
-        changeLayerOrder(prevIndex, 0,
+        reorderLayer(prevIndex, 0,
             true, LayerMoveAction.LAYER_TO_BOTTOM);
     }
 
-    default void changeLayerOrder(int oldIndex, int newIndex) {
-        changeLayerOrder(oldIndex, newIndex, false, null);
+    /**
+     * Changes the position of a layer within this holder, without adding the change to history.
+     */
+    default void reorderLayer(int oldIndex, int newIndex) {
+        reorderLayer(oldIndex, newIndex, false, null);
     }
 
-    // Called when the layer order is changed by an action.
-    // The GUI has to be updated.
-    default void changeLayerOrder(int oldIndex, int newIndex,
-                                  boolean addToHistory, String editName) {
+    /**
+     * Changes the position of a layer within this holder.
+     */
+    default void reorderLayer(int oldIndex, int newIndex,
+                              boolean addToHistory, String editName) {
+        // Called when the layer order is changed by an action.
+        // The GUI has to be updated.
         if (newIndex < 0) {
             return;
         }
@@ -154,7 +202,7 @@ public interface LayerHolder extends Debuggable {
         removeLayerFromList(layer);
         insertLayer(layer, newIndex, false);
 
-        changeLayerGUIOrder(oldIndex, newIndex);
+        reorderLayerUI(oldIndex, newIndex);
         update();
         Layers.layersReordered(this);
 
@@ -163,12 +211,25 @@ public interface LayerHolder extends Debuggable {
         }
     }
 
-    void changeLayerGUIOrder(int oldIndex, int newIndex);
+    /**
+     * Updates the UI to reflect the layer order change.
+     */
+    void reorderLayerUI(int oldIndex, int newIndex);
 
+    /**
+     * Inserts a layer at the specified index.
+     */
     void insertLayer(Layer layer, int index, boolean update);
 
+
+    /**
+     * Removes a layer (only) from the layer list.
+     */
     void removeLayerFromList(Layer layer);
 
+    /**
+     * Deletes a layer from this holder.
+     */
     void deleteLayer(Layer layer, boolean addToHistory);
 
     /**
@@ -178,8 +239,8 @@ public interface LayerHolder extends Debuggable {
     void deleteTemporarily(Layer layer);
 
     /**
-     * Returns whether this holder can be empty
-     * (is it allowed to contain no layers).
+     * Returns whether this holder can be empty,
+     * i.e. whether it can contain zero layers.
      */
     boolean canBeEmpty();
 
@@ -188,6 +249,9 @@ public interface LayerHolder extends Debuggable {
      */
     void replaceLayer(Layer before, Layer after);
 
+    /**
+     * Selects the layer above the current one.
+     */
     default void raiseLayerSelection() {
         Composition comp = getComp();
         Layer activeLayer = comp.getActiveLayer();
@@ -216,6 +280,9 @@ public interface LayerHolder extends Debuggable {
         assert ConsistencyChecks.fadeWouldWorkOn(comp);
     }
 
+    /**
+     * Selects the layer below the current one.
+     */
     default void lowerLayerSelection() {
         Composition comp = getComp();
         int oldIndex = indexOf(comp.getActiveLayer());
@@ -230,6 +297,9 @@ public interface LayerHolder extends Debuggable {
         assert ConsistencyChecks.fadeWouldWorkOn(comp);
     }
 
+    /**
+     * Checks if the given layer can be merged down with the layer beneath it.
+     */
     default boolean canMergeDown(Layer layer) {
         int index = indexOf(layer);
         if (index > 0 && layer.isVisible()) {
@@ -239,7 +309,10 @@ public interface LayerHolder extends Debuggable {
         return false;
     }
 
-    // this method assumes that canMergeDown() previously returned true
+    /**
+     * Merges the specified layer down into the layer below it.
+     * This method assumes that canMergeDown()  has previously returned true.
+     */
     default void mergeDown(Layer layer) {
         int layerIndex = indexOf(layer);
         var belowLayer = (ImageLayer) getLayer(layerIndex - 1);
@@ -265,6 +338,9 @@ public interface LayerHolder extends Debuggable {
             belowLayer, imageBefore, maskViewModeBefore, layerIndex));
     }
 
+    /**
+     * Checks if the current active layer belongs to this holder.
+     */
     default boolean isHolderOfActiveLayer() {
         return getComp().getActiveHolder() == this;
     }
@@ -273,6 +349,9 @@ public interface LayerHolder extends Debuggable {
 
     void update();
 
+    /**
+     * Callback invoked when a smart object belonging to this holder has been changed.
+     */
     void smartObjectChanged(boolean linked);
 
     String getORAStackXML();
@@ -293,6 +372,9 @@ public interface LayerHolder extends Debuggable {
      */
     Stream<? extends Layer> levelStream();
 
+    /**
+     * Converts the visible layers in this holder to a new layer group.
+     */
     default void convertVisibleLayersToGroup() {
         int[] indices = levelStream()
             .filter(Layer::isVisible)
@@ -305,6 +387,10 @@ public interface LayerHolder extends Debuggable {
         convertToGroup(indices, null, true);
     }
 
+    /**
+     * Converts the layers at the given indices to a group,
+     * optionally using an existing group as the target.
+     */
     default void convertToGroup(int[] indices, LayerGroup target, boolean addHistory) {
         List<Layer> movedLayers = new ArrayList<>(indices.length);
         for (int index : indices) {
@@ -324,7 +410,7 @@ public interface LayerHolder extends Debuggable {
             newGroup.updateChildrenUI();
         } else {
             assert addHistory;
-            newGroup = new LayerGroup(getComp(), LayerGroup.createName(), movedLayers);
+            newGroup = new LayerGroup(getComp(), LayerGroup.generateName(), movedLayers);
         }
 
         int lastMovedIndex = indices[indices.length - 1];
@@ -336,8 +422,11 @@ public interface LayerHolder extends Debuggable {
         }
     }
 
+    /**
+     * Adds a new empty group to this holder.
+     */
     default void addEmptyGroup() {
-        LayerGroup group = new LayerGroup(getComp(), LayerGroup.createName());
+        LayerGroup group = new LayerGroup(getComp(), LayerGroup.generateName());
         addWithHistory(group, "New Layer Group");
     }
 

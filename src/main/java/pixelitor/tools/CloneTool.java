@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -261,15 +261,15 @@ public class CloneTool extends BlendingModeBrushTool {
     protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint strokeStart) {
         super.prepareProgrammaticBrushStroke(dr, strokeStart);
 
-        PPoint randomPoint = dr.getComp().getRandomPointInCanvas();
+        PPoint randomPoint = dr.getComp().genRandomPointInCanvas();
         setCloningSource(randomPoint);
 
         startNewCloningStroke(strokeStart, false);
     }
 
     @Override
-    protected void closeToolDialogs() {
-        super.closeToolDialogs();
+    protected void closeAllDialogs() {
+        super.closeAllDialogs();
         GUIUtils.closeDialog(transformDialog, true);
     }
 

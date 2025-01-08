@@ -117,15 +117,18 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     // useful for distinguishing between versions with the same name
     private transient String debugName;
 
+    // the file associated with the composition, if any
     private transient File file;
     // the last modified time of the file in millis since the epoch
     private transient long fileTimestamp;
 
+    // whether the composition has been modified since the last save
     private transient boolean dirty = false;
 
     // cached composite image
     private transient BufferedImage compositeImage;
 
+    // the View that shows this composition, if any
     private transient View view;
 
     private transient Selection selection;
@@ -238,7 +241,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         compCopy.mode = mode;
 
         if (copySelection && selection != null) {
-            compCopy.setSelectionRef(new Selection(selection, copyType == CopyType.UNDO));
+            compCopy.setSelection(new Selection(selection, copyType == CopyType.UNDO));
         }
         if (paths != null) {
             compCopy.paths = paths.deepCopy(compCopy);
@@ -281,7 +284,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Returns the holder of the active layer
+     * Returns the holder of the active layer.
      */
     public LayerHolder getActiveHolder() {
         return activeLayer.getHolder();
@@ -390,8 +393,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return canvas.clip(shape);
     }
 
-    public PPoint getRandomPointInCanvas() {
-        return canvas.getRandomPoint(view);
+    public PPoint genRandomPointInCanvas() {
+        return canvas.genRandomPoint(view);
     }
 
     public boolean isDirty() {
@@ -423,13 +426,16 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     private void clearDirtyFlagsRecursively() {
         setDirty(false);
 
-        forAllNestedSmartObjects(so -> {
+        forEachNestedSmartObject(so -> {
             if (so.findSavingComp() == this) {
                 so.getContent().setDirty(false);
             }
         });
     }
 
+    /**
+     * Checks if this composition is currently open in a view.
+     */
     public boolean isOpen() {
         return view != null;
     }
@@ -445,7 +451,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public void dispose() {
         if (selection != null) {
-            // stop the timer thread
             disposeSelection();
         }
         removeAllLayersFromUI();
@@ -498,6 +503,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return name + " (" + canvas.getSizeString() + ")";
     }
 
+    /**
+     * Opens a dialog to rename this composition.
+     */
     public void rename(TabViewContainer owner) {
         String origName = getName();
         String chosenName = JOptionPane.showInputDialog(owner,
@@ -505,6 +513,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         rename(origName, chosenName);
     }
 
+    /**
+     * Renames the composition and adds a history entry.
+     */
     public void rename(String oldName, String newName) {
         if (newName.equals(oldName)) {
             return;
@@ -524,6 +535,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         this.debugName = name + " " + debugCounter++;
     }
 
+    /**
+     * Generates a unique name for a new layer.
+     */
     public String generateLayerName() {
         return "layer " + newLayerCount++;
     }
@@ -553,17 +567,20 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
-    public boolean isEmpty() {
+    public boolean hasNoLayers() {
         return layerList.isEmpty();
     }
 
     private void addBaseLayer(BufferedImage baseLayerImage) {
-        var newLayer = new ImageLayer(this,
-            baseLayerImage, generateLayerName());
+        assert hasNoLayers();
 
-        addLayerNoUI(newLayer);
+        addLayerWithoutUI(new ImageLayer(this,
+            baseLayerImage, generateLayerName()));
     }
 
+    /**
+     * Creates a new empty image layer and adds it to the composition.
+     */
     public void addNewEmptyImageLayer(String name, boolean belowActive) {
         var newLayer = ImageLayer.createEmpty(this, name);
         getHolderForNewLayers().adder()
@@ -628,6 +645,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         History.add(new NotUndoableEdit("Flatten Image", this));
     }
 
+    /**
+     * Adds all layers in this composition to the UI.
+     */
     public void addLayersToUI() {
         assert checkInvariants();
 
@@ -659,6 +679,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
+    /**
+     * Merges the active layer with the layer below it.
+     */
     public void mergeActiveLayerDown() {
         assert checkInvariants();
 
@@ -734,8 +757,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public void changeLayerGUIOrder(int oldIndex, int newIndex) {
-        view.changeLayerGUIOrder(oldIndex, newIndex);
+    public void reorderLayerUI(int oldIndex, int newIndex) {
+        view.reorderLayerInUI(oldIndex, newIndex);
     }
 
     @Override
@@ -745,6 +768,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     @Override
     public boolean canBeEmpty() {
+        // unlike other layer holders, a composition can't be empty
         return false;
     }
 
@@ -877,6 +901,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return layerList.size();
     }
 
+    /**
+     * Returns the number of images that can be exported
+     * from this composition in OpenRaster files.
+     */
     public int getNumORAExportableImages() {
         int[] count = {0};
         forEachNestedLayer(layer -> {
@@ -885,6 +913,22 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             }
         }, false);
         return count[0];
+    }
+
+    /**
+     * Calculates the total number of images in this composition including any mask images.
+     */
+    public int calcNumImages() {
+        int count = 0;
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                count++;
+            }
+            if (layer.hasMask()) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Override
@@ -958,10 +1002,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Applies the given action to all nested smart objects recursively.
      */
-    public void forAllNestedSmartObjects(Consumer<SmartObject> action) {
-        forEachNestedLayer(SmartObject.class, so -> so.forAllNestedSmartObjects(action));
+    public void forEachNestedSmartObject(Consumer<SmartObject> action) {
+        forEachNestedLayer(SmartObject.class, so -> so.forEachNestedSmartObject(action));
     }
 
+    /**
+     * Finds the first layer that is opaque at a given point on the canvas.
+     */
     public Layer findLayerAtPoint(Point2D p) {
         // In mask editing mode never auto-select another layer
         if (getView().getMaskViewMode().showMask()) {
@@ -1078,6 +1125,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
+    /**
+     * Starts a movement operation for a layer and/or the selection.
+     */
     public void startMovement(MoveMode mode, boolean duplicateLayer) {
         if (mode.movesLayer()) {
             if (duplicateLayer) {
@@ -1093,6 +1143,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
+    /**
+     * Moves the active layer and/or selection during a drag operation.
+     */
     public void moveActiveContent(MoveMode mode, double imDx, double imDy) {
         if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
@@ -1105,6 +1158,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         update();
     }
 
+    /**
+     * Ends a move operation, creating a history edit if a change has been made.
+     */
     public void endMovement(MoveMode mode) {
         PixelitorEdit layerEdit = null;
         if (mode.movesLayer()) {
@@ -1129,6 +1185,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
+    /**
+     * Draws the contours of the currently moved content.
+     */
     public void drawMovementContours(Graphics2D g, MoveMode mode) {
         if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
@@ -1191,47 +1250,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void paintSelection(Graphics2D g) {
-        boolean ruby = false; // feature to be added one day
-        if (ruby) {
-            paintSelectionAsRubyOverlay(g);
-        } else {
-            paintSelectionAsMarchingAnts(g);
-        }
-    }
-
-    private void paintSelectionAsMarchingAnts(Graphics2D g) {
         if (draftSelection != null) {
             draftSelection.paintMarchingAnts(g);
         }
         if (selection != null) {
             selection.paintMarchingAnts(g);
         }
-    }
-
-    private void paintSelectionAsRubyOverlay(Graphics2D g) {
-        Shape totalShape = calcTotalSelectionShape();
-        if (totalShape != null) {
-            Shape inverted = canvas.invertShape(totalShape);
-            g.setComposite(AlphaComposite.SrcOver.derive(0.5f));
-            g.setColor(Color.RED);
-            g.fill(inverted);
-        }
-    }
-
-    private Shape calcTotalSelectionShape() {
-        Shape totalShape = null;
-        if (draftSelection != null) {
-            totalShape = draftSelection.getShape();
-        }
-        if (selection != null) {
-            if (totalShape == null) {
-                totalShape = selection.getShape();
-            } else {
-                totalShape = ShapeCombinator.ADD.combine(
-                    totalShape, selection.getShape());
-            }
-        }
-        return totalShape;
     }
 
     public DeselectEdit deselect(boolean addToHistory) {
@@ -1268,11 +1292,15 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private void disposeSelection() {
         selection.dispose();
-        setSelectionRef(null);
+        setSelection(null);
     }
 
     public Selection getSelection() {
         return selection;
+    }
+
+    public boolean hasSelection() {
+        return selection != null;
     }
 
     public Shape getSelectionShape() {
@@ -1284,6 +1312,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public Selection getDraftSelection() {
         return draftSelection;
+    }
+
+    public boolean hasDraftSelection() {
+        return draftSelection != null;
     }
 
     public void setDraftSelection(Selection selection) {
@@ -1303,7 +1335,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         if (selection == null) { // no existing selection
             // create a new selection
-            setSelectionRef(new Selection(newShape, view));
+            setSelection(new Selection(newShape, view));
             return new NewSelectionEdit(this, selection.getShape());
         }
 
@@ -1346,14 +1378,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (selection != null) {
             throw new IllegalStateException("There is already a selection: " + selection);
         }
-        setSelectionRef(new Selection(shape, view));
+        setSelection(new Selection(shape, view));
     }
 
     /**
      * Changing the selection reference should be done only by using
      * this method (in order to make debugging easier).
      */
-    public void setSelectionRef(Selection selection) {
+    public void setSelection(Selection selection) {
         this.selection = selection;
         if (isActive()) {
             SelectionActions.update(this);
@@ -1368,17 +1400,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert selection == null || !selection.isUsable() : "selection = " + selection;
         assert draftSelection != null;
         assert draftSelection.isUsable();
-        
-        setSelectionRef(draftSelection);
+
+        setSelection(draftSelection);
         setDraftSelection(null);
-    }
-
-    public boolean hasSelection() {
-        return selection != null;
-    }
-
-    public boolean hasDraftSelection() {
-        return draftSelection != null;
     }
 
     /**
@@ -1431,7 +1455,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Called when the image-space coordinates have been changed by the
      * given transform (resize, crop, etc.).
-     * The View argument is used because at this point it might not have a view.
+     * The View argument is used because at this point the composition
+     * might not be open in a view.
      */
     public void imCoordsChanged(AffineTransform at, boolean isUndoRedo, View view) {
         // The selection is explicitly reset to a backup shape
@@ -1543,24 +1568,33 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         ((ImageLayer) activeRoot).toCanvasSizeWithHistory();
     }
 
+    /**
+     * Fits the canvas to the combined bounds of all content layers.
+     * If any content layer is larger than the current canvas, the
+     * canvas will be enlarged to fully contain all content layers.
+     */
     public void fitCanvasToLayers() {
-        Outsets outsets = Outsets.createZero();
+        Outsets enlargement = Outsets.createZero();
 
         for (Layer layer : layerList) {
             if (layer instanceof ContentLayer contentLayer) {
-                outsets.ensureFitsContentOf(contentLayer);
+                enlargement.ensureFitsContentOf(contentLayer);
             }
         }
 
-        if (outsets.isZero()) {
-            Dialogs.showInfoDialog(getDialogParent(), "Nothing to be done",
+        if (enlargement.isZero()) {
+            Dialogs.showInfoDialog(getDialogParent(), "Nothing To Be Done",
                 "The canvas is already large enough to show all layer content.");
             return;
         }
 
-        new EnlargeCanvas(outsets).process(this);
+        new EnlargeCanvas(enlargement).process(this);
     }
 
+    /**
+     * Recursively checks if this composition contains
+     * the given layer at any nesting level.
+     */
     public boolean contains(Layer searched) {
         for (Layer layer : layerList) {
             if (layer.contains(searched)) {
@@ -1644,19 +1678,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return true;
     }
 
-    public int calcNumImages() {
-        int count = 0;
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                count++;
-            }
-            if (layer.hasMask()) {
-                count++;
-            }
-        }
-        return count;
-    }
-
+    /**
+     * Saves the current composition asynchronously.
+     */
     public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
                                              boolean addToRecentMenus) {
         assert calledOnEDT() : threadInfo();
@@ -1693,6 +1717,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             }, onEDT);
     }
 
+    /**
+     * Performs post-save operations on the EDT.
+     */
     public void afterSuccessfulSaveActions(File file, boolean addToRecentMenus) {
         assert calledOnEDT() : threadInfo();
 
@@ -1757,6 +1784,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         forEachNestedLayer(TextLayer.class, textLayer -> textLayer.pathChanged(deleted));
     }
 
+    /**
+     * Creates a path from the given shape, sets it to active and starts editing it with the Pen Tool.
+     */
     public void createPathFromShape(Shape shape, boolean addToHistory, boolean startEditing) {
         Path origActivePath = getActivePath();
         Path newPath = Shapes.shapeToPath(shape, getView());
@@ -1847,16 +1877,18 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void closeAllNestedComps() {
-        forAllNestedSmartObjects(so -> so.getContent().close());
+        forEachNestedSmartObject(so -> so.getContent().close());
     }
 
     private boolean checkAllSOInvariants() {
-        forAllNestedSmartObjects(SmartObject::checkInvariants);
+        forEachNestedSmartObject(SmartObject::checkInvariants);
         return true;
     }
 
-    // Replaces this composition in its view with a new composition
-    // containing a smart object that has this composition as its content.
+    /**
+     * Replaces this composition in its view with a new composition
+     * containing a smart object that has this composition as its content.
+     */
     public void replaceWithSmartObject() {
         Composition newComp = new Composition(canvas.copy(), mode);
 
@@ -1869,7 +1901,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         newComp.createDebugName();
 
         SmartObject so = new SmartObject(newComp, this);
-        newComp.addLayerNoUI(so);
+        newComp.addLayerWithoutUI(so);
         History.add(new CompositionReplacedEdit("Convert All to Smart Object",
             view, this, newComp, null, false));
         view.replaceComp(newComp);
@@ -1903,11 +1935,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         for (Layer layer : visibleLayers) {
             newMainComp.deleteLayer(layer, false, false);
             layer.setComp(content);
-            content.addLayerNoUI(layer);
+            content.addLayerWithoutUI(layer);
         }
 
         SmartObject so = new SmartObject(newMainComp, content);
-        newMainComp.addLayerNoUI(so);
+        newMainComp.addLayerWithoutUI(so);
         History.add(new CompositionReplacedEdit("Convert Visible to Smart Object",
             view, this, newMainComp, null, false));
         view.replaceComp(newMainComp);
@@ -1921,6 +1953,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         addWithHistory(so.shallowDuplicate(), "Clone");
     }
 
+    /**
+     * Checks if all fonts of all text layers can be found on the current machine.
+     */
     public void checkFontsAreInstalled() {
         assert calledOnEDT();
         forEachNestedLayer(TextLayer.class, TextLayer::checkFontIsInstalled);

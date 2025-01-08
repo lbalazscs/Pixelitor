@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -238,7 +238,7 @@ public class ConcentricShapes extends ParametrizedFilter {
 
         List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight(), paramSet.getLastSeedRandom(), rotate.getValueInRadians(), tuning.getPercentage());
         for (ColoredShape coloredShape : coloredShapes) {
-            String svgPath = Shapes.toSVGPath(coloredShape.shape());
+            String svgPath = Shapes.toSvgPath(coloredShape.shape());
             String svgColor = Colors.toHTMLHex(coloredShape.color(), false);
             content.append("<path d=\"%s\" fill=\"#%s\"/>\n".formatted(svgPath, svgColor));
         }

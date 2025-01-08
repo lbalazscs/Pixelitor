@@ -122,7 +122,7 @@ public class TransformedTextPainter implements Debuggable {
         }
 
         // must be called before updateLayout, even if we paint on the cached image
-        setOptimalRenderingHints(g);
+        setHighQualityRendering(g);
 
         if (invalidLayout) {
             updateLayout(width, height, g, comp);
@@ -135,8 +135,8 @@ public class TransformedTextPainter implements Debuggable {
         }
 
         if (DISABLE_CACHE) {
-            doPaint(g, g.getTransform());
-            restoreDefaultRenderingHints(g);
+            paintText(g, g.getTransform());
+            restoreDefaultRendering(g);
             return;
         }
 
@@ -153,26 +153,26 @@ public class TransformedTextPainter implements Debuggable {
             cachedImg = GraphicsUtilities.createCompatibleTranslucentImage(bounds.width, bounds.height);
             Graphics2D cacheG = cachedImg.createGraphics();
 
-            setOptimalRenderingHints(cacheG);
+            setHighQualityRendering(cacheG);
             AffineTransform origTransform = cacheG.getTransform();
             cacheG.translate(-bounds.x, -bounds.y);
-            doPaint(cacheG, origTransform);
+            paintText(cacheG, origTransform);
             cacheG.dispose();
 
             renderCache = new SoftReference<>(cachedImg);
         }
 
-        restoreDefaultRenderingHints(g);
+        restoreDefaultRendering(g);
         g.drawImage(cachedImg, bounds.x, bounds.y, null);
     }
 
-    private static void setOptimalRenderingHints(Graphics2D g) {
+    private static void setHighQualityRendering(Graphics2D g) {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
     }
 
-    private static void restoreDefaultRenderingHints(Graphics2D g) {
+    private static void restoreDefaultRendering(Graphics2D g) {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_DEFAULT);
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_DEFAULT);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_DEFAULT);
@@ -276,7 +276,7 @@ public class TransformedTextPainter implements Debuggable {
         return rotation == 0 && scaleX == 1.0 && scaleY == 1.0 && shearX == 0 && shearY == 0;
     }
 
-    private void doPaint(Graphics2D g, AffineTransform origTransform) {
+    private void paintText(Graphics2D g, AffineTransform origTransform) {
         g.setColor(color);
 
         if (isOnPath()) {
@@ -342,7 +342,7 @@ public class TransformedTextPainter implements Debuggable {
         BufferedImage img = new BufferedImage(area.width, area.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
         g2.translate(-area.x, -area.y);
-        doPaint(g2, g2.getTransform());
+        paintText(g2, g2.getTransform());
         g2.dispose();
         return img;
     }
@@ -436,14 +436,17 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     private Path2D distributeGlyphsAlongPath(GlyphVector glyphVector, Path2D path) {
-        double pathLength = Shapes.calcPathLength(path);
         double tracking = calcTracking();
-        double textLength = calcTextLength(glyphVector, tracking);
+
+        double pathLength = 0;
+        double textLength = 0;
+        if (mlpAlignment != AlignmentSelector.LEFT) {
+            // they need to be calculated
+            pathLength = Shapes.calcPathLength(path);
+            textLength = calcTextLength(glyphVector, tracking);
+        }
 
         // calculate the initial offset based on alignment
-        int startGlyphIndex = 0;
-        int numGlyphs = glyphVector.getNumGlyphs();
-
         double initialOffset = switch (mlpAlignment) {
             case AlignmentSelector.LEFT -> 0;
             case AlignmentSelector.CENTER -> (pathLength - textLength) / 2;
@@ -452,7 +455,9 @@ public class TransformedTextPainter implements Debuggable {
         };
 
         // handle text overflow for right or center alignment
-        if (initialOffset < 0 && (mlpAlignment == AlignmentSelector.RIGHT || mlpAlignment == AlignmentSelector.CENTER)) {
+        int startGlyphIndex = 0;
+        int numGlyphs = glyphVector.getNumGlyphs();
+        if (initialOffset < 0 && mlpAlignment != AlignmentSelector.LEFT) {
             // calculate how many glyphs we need to skip
             double accumulatedWidth = 0;
             double overflow = -initialOffset;
@@ -727,7 +732,7 @@ public class TransformedTextPainter implements Debuggable {
 
         if (hasStrikeThrough) {
             combinedOutline.add(
-                createStrikeThroughShape(lineMetrics, ascent, stringWidth));
+                createStrikethroughShape(lineMetrics, ascent, stringWidth));
         }
 
         return combinedOutline;
@@ -744,7 +749,7 @@ public class TransformedTextPainter implements Debuggable {
         return new Area(underLineShape);
     }
 
-    private static Area createStrikeThroughShape(LineMetrics lineMetrics, float ascent, int stringWidth) {
+    private static Area createStrikethroughShape(LineMetrics lineMetrics, float ascent, int stringWidth) {
         float strikethroughOffset = lineMetrics.getStrikethroughOffset();
         float strikethroughThickness = lineMetrics.getStrikethroughThickness();
         Shape strikethroughShape = new Rectangle2D.Float(
@@ -755,11 +760,11 @@ public class TransformedTextPainter implements Debuggable {
         return new Area(strikethroughShape);
     }
 
-    public void setAlignment(BoxAlignment newAlignment) {
-        setAlignment(newAlignment.getHorizontal(), newAlignment.getVertical());
+    public void setBoxAlignment(BoxAlignment newAlignment) {
+        setBoxAlignment(newAlignment.getHorizontal(), newAlignment.getVertical());
     }
 
-    public void setAlignment(HorizontalAlignment newHorAlignment, VerticalAlignment newVerAlignment) {
+    public void setBoxAlignment(HorizontalAlignment newHorAlignment, VerticalAlignment newVerAlignment) {
         boolean change = this.horizontalAlignment != newHorAlignment
             || this.verticalAlignment != newVerAlignment;
         if (change) {
@@ -839,14 +844,14 @@ public class TransformedTextPainter implements Debuggable {
         clearCache();
     }
 
-    public BufferedImage watermarkImage(BufferedImage src, Composition comp) {
-        BufferedImage bumpImage = createBumpMapImage(
+    public BufferedImage createWatermark(BufferedImage src, Composition comp) {
+        BufferedImage bumpImage = createBumpMap(
             src.getWidth(), src.getHeight(), comp);
         return ImageUtils.bumpMap(src, bumpImage, "Watermarking");
     }
 
     // the bump map image has white text on a black background
-    private BufferedImage createBumpMapImage(int width, int height, Composition comp) {
+    private BufferedImage createBumpMap(int width, int height, Composition comp) {
         BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
         Graphics2D g = bumpImage.createGraphics();
         Colors.fillWith(BLACK, g, width, height);

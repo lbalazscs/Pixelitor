@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,14 +85,14 @@ public class BrightnessContrast extends ParametrizedFilter {
         }
 
         // transform the image
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
-        for (int i = 0; i < destData.length; i++) {
-            int rgb = srcData[i];
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
+        for (int i = 0; i < destPixels.length; i++) {
+            int rgb = srcPixels[i];
 
             int a = rgb & 0xFF_00_00_00; // not in the range 0..255!
             if (a == 0) {
-                destData[i] = 0; // for premultiplied images
+                destPixels[i] = 0; // for premultiplied images
             } else {
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
@@ -102,7 +102,7 @@ public class BrightnessContrast extends ParametrizedFilter {
                 g = lookup[g];
                 b = lookup[b];
 
-                destData[i] = a | r << 16 | g << 8 | b;
+                destPixels[i] = a | r << 16 | g << 8 | b;
             }
         }
 

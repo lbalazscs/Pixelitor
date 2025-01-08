@@ -51,7 +51,7 @@ class SmartFilterTest {
         Composition content = TestHelper.createComp("SmartFilterTest content", 1, false);
 
         smartObject = new SmartObject(parent, content);
-        parent.addLayerNoUI(smartObject);
+        parent.addLayerWithoutUI(smartObject);
 
         MockFilter firstFilter = TestHelper.createMockFilter("Filter 1");
         MockFilter middleFilter = TestHelper.createMockFilter("Filter 2");

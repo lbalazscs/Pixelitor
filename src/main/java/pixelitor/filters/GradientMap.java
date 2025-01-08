@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,11 +51,11 @@ public class GradientMap extends ParametrizedFilter {
             gradientLookup[i] = colormap.getColor(i / 255.0f);
         }
 
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
-        for (int i = 0; i < destData.length; i++) {
-            int rgb = srcData[i];
+        for (int i = 0; i < destPixels.length; i++) {
+            int rgb = srcPixels[i];
 
             int a = (rgb >>> 24) & 0xFF;
             int r = (rgb >>> 16) & 0xFF;
@@ -66,10 +66,10 @@ public class GradientMap extends ParametrizedFilter {
 
             int gr = gradientLookup[lum];
             if (a == 0xFF) {
-                destData[i] = gr;
+                destPixels[i] = gr;
             } else {
                 int mask = a << 24 | 0xFF_FF_FF;
-                destData[i] = mask & gr;
+                destPixels[i] = mask & gr;
             }
         }
 

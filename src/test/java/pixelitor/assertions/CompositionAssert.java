@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,26 +38,6 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert(Composition actual) {
         super(actual, CompositionAssert.class);
         assert actual.checkInvariants();
-    }
-
-    public CompositionAssert isEmpty() {
-        isNotNull();
-
-        if (!actual.isEmpty()) {
-            failWithMessage("\nExpecting that actual Composition is empty but is not.");
-        }
-
-        return this;
-    }
-
-    public CompositionAssert isNotEmpty() {
-        isNotNull();
-
-        if (actual.isEmpty()) {
-            failWithMessage("\nExpecting that actual Composition is not empty but is.");
-        }
-
-        return this;
     }
 
     public CompositionAssert isDirty() {

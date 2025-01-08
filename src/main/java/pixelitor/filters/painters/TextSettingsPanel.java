@@ -265,7 +265,7 @@ public class TextSettingsPanel extends FilterGUI
         italicCB = createCheckBox("italicCB", gbh, defaultItalic);
 
         JButton showAdvancedSettingsButton = new JButton("Advanced...");
-        showAdvancedSettingsButton.addActionListener(e -> onAdvancedSettingsClick());
+        showAdvancedSettingsButton.addActionListener(e -> showAdvancedSettingsDialog());
 
         gbh.addLabel("      ", 4, 2);
         gbh.addControl(showAdvancedSettingsButton);
@@ -273,7 +273,7 @@ public class TextSettingsPanel extends FilterGUI
         return fontPanel;
     }
 
-    private void onAdvancedSettingsClick() {
+    private void showAdvancedSettingsDialog() {
         if (advancedSettingsDialog == null) {
             advancedSettingsPanel = new AdvancedTextSettingsPanel(
                 this, fontInfo, relLineHeight, scaleX, scaleY, shearX, shearY);
@@ -305,7 +305,7 @@ public class TextSettingsPanel extends FilterGUI
         fontInfo.updateBasic(fontFamily, size, bold, italic);
 
         if (advancedSettingsDialog != null) {
-            advancedSettingsPanel.configure(fontInfo);
+            advancedSettingsPanel.updateFontInfo(fontInfo);
         }
 
         return fontInfo.createFont();
@@ -374,10 +374,10 @@ public class TextSettingsPanel extends FilterGUI
             return;
         }
 
-        updateApp(createSettingsFromGui());
+        applySettingsToTarget(createSettingsFromUI());
     }
 
-    private TextSettings createSettingsFromGui() {
+    private TextSettings createSettingsFromUI() {
         AreaEffects effects = null;
         if (effectsPanel != null) {
             effects = effectsPanel.getEffects();
@@ -404,8 +404,8 @@ public class TextSettingsPanel extends FilterGUI
         return (BoxAlignment) boxAlignmentCB.getSelectedItem();
     }
 
-    private void updateApp(TextSettings settings) {
-        if (isFilter()) {
+    private void applySettingsToTarget(TextSettings settings) {
+        if (isUsingFilter()) {
             ((TextFilter) filter).setSettings(settings);
             startPreview(false); // TODO currently always false
         } else {
@@ -423,20 +423,20 @@ public class TextSettingsPanel extends FilterGUI
     public void accept(TextSettings settings) {
         try {
             suppressGuiUpdates = true;
-            setUIValues(settings);
+            setUIFromSettings(settings);
         } finally {
             suppressGuiUpdates = false;
         }
 
-        updateApp(settings);
+        applySettingsToTarget(settings);
     }
 
-    private void setUIValues(TextSettings settings) {
+    private void setUIFromSettings(TextSettings settings) {
         textArea.setText(settings.getText());
         color.setColor(settings.getColor(), false);
         rotationParam.setValue(settings.getRotation(), false);
         boxAlignmentCB.setSelectedItem(settings.getAlignment());
-        mlpAlignmentSelector.setSelected(settings.getMLPAlignment());
+        mlpAlignmentSelector.setAlignment(settings.getMLPAlignment());
         updateMLPAlignEnabled();
 
         Font font = settings.getFont();
@@ -458,7 +458,7 @@ public class TextSettingsPanel extends FilterGUI
         watermarkCB.setSelected(settings.hasWatermark());
     }
 
-    private boolean isFilter() {
+    private boolean isUsingFilter() {
         return filter != null;
     }
 }

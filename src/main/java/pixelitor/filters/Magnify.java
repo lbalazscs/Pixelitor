@@ -71,10 +71,8 @@ public class Magnify extends ParametrizedFilter {
         filter.setOuterRadiusY(outerRadiusY);
 
         double radiusRatio = softness.getPercentage() + 1.0;
-        float innerRadiusX = (float) (outerRadiusX / radiusRatio);
-        float innerRadiusY = (float) (outerRadiusY / radiusRatio);
-        filter.setInnerRadiusX(innerRadiusX);
-        filter.setInnerRadiusY(innerRadiusY);
+        filter.setInnerRadiusX((float) (outerRadiusX / radiusRatio));
+        filter.setInnerRadiusY((float) (outerRadiusY / radiusRatio));
 
         filter.setMagnification(magnification.getPercentage());
         filter.setCenter(center.getAbsolutePoint(src));
@@ -84,9 +82,7 @@ public class Magnify extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        dest = filter.filter(src, dest);
-//        setAffectedAreaShapes(filter.getAffectedAreaShapes());
-        return dest;
+        return filter.filter(src, dest);
     }
 }
 

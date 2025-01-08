@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,19 +46,19 @@ public class FastLookupOp implements BufferedImageOp {
             }
             boolean notPremultiplied = !src.isAlphaPremultiplied();
 
-            int[] srcData = ((DataBufferInt) src.getRaster()
+            int[] srcPixels = ((DataBufferInt) src.getRaster()
                 .getDataBuffer()).getData();
 
-            int[] destData = ((DataBufferInt) dst.getRaster()
+            int[] destPixels = ((DataBufferInt) dst.getRaster()
                 .getDataBuffer()).getData();
 
-            int numPixels = srcData.length;
-            assert numPixels == destData.length;
+            int numPixels = srcPixels.length;
+            assert numPixels == destPixels.length;
 
             short[][] table = lut.getTable();
 
             for (int i = 0; i < numPixels; i++) {
-                int rgb = srcData[i];
+                int rgb = srcPixels[i];
                 int a = (rgb >>> 24) & 0xFF;
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
@@ -104,7 +104,7 @@ public class FastLookupOp implements BufferedImageOp {
                     g = PixelUtils.clamp(g);
                     b = PixelUtils.clamp(b);
                 }
-                destData[i] = a << 24 | r << 16 | g << 8 | b;
+                destPixels[i] = a << 24 | r << 16 | g << 8 | b;
             }
         } else if (src.getColorModel() instanceof IndexColorModel) {
             short[][] table = lut.getTable();

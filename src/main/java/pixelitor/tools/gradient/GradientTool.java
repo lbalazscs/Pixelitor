@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -324,7 +324,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void resetInitialState() {
+    public void reset() {
         handles = null;
         activePoint = null;
         lastGradient = null;
@@ -452,13 +452,13 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp) {
+    public void paintOverView(Graphics2D g2, Composition comp) {
         if (!comp.getActiveLayer().isVisible()) {
             return;
         }
 
         // the superclass draws the drag display
-        super.paintOverImage(g2, comp);
+        super.paintOverView(g2, comp);
 
         if (handles != null) {
             handles.paint(g2);
@@ -514,7 +514,7 @@ public class GradientTool extends DragTool {
     protected void toolDeactivated() {
         super.toolDeactivated();
 
-        resetInitialState();
+        reset();
     }
 
     private void layerActivated(Layer layer) {

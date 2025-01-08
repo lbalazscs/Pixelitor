@@ -75,7 +75,7 @@ public class ContentLayerTest {
         comp = TestHelper.createEmptyComp("ContentLayerTest");
         layer = (ContentLayer) TestHelper.createLayer(layerClass, comp);
 
-        comp.addLayerNoUI(layer);
+        comp.addLayerWithoutUI(layer);
 
         withMask.configure(layer);
         LayerMask mask = null;

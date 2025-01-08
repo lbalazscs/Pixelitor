@@ -82,7 +82,7 @@ public class LayerGroup extends CompositeLayer {
         needsIconUpdate = false;
     }
 
-    public static String createName() {
+    public static String generateName() {
         return "layer group " + (++groupCounter);
     }
 
@@ -342,7 +342,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void changeLayerGUIOrder(int oldIndex, int newIndex) {
+    public void reorderLayerUI(int oldIndex, int newIndex) {
         updateChildrenUI();
     }
 

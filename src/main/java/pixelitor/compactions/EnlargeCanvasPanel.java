@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -419,7 +419,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
                 float startY = origTop;
                 // End at enlarged canvas top edge
                 float endY = enlargedTop;
-                g.fill(Shapes.createFixWidthArrow(
+                g.fill(Shapes.createFixedWidthArrow(
                     startX, startY, startX, endY));
             }
 
@@ -429,7 +429,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
                 float startY = origBottom;
                 // End at enlarged canvas bottom edge
                 float endY = enlargedBottom;
-                g.fill(Shapes.createFixWidthArrow(
+                g.fill(Shapes.createFixedWidthArrow(
                     startX, startY, startX, endY));
             }
 
@@ -439,7 +439,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
                 float startY = origTop + dims.originalHeight / 2;
                 // End at enlarged canvas right edge
                 float endX = enlargedRight;
-                g.fill(Shapes.createFixWidthArrow(
+                g.fill(Shapes.createFixedWidthArrow(
                     startX, startY, endX, startY));
             }
 
@@ -449,7 +449,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
                 float startY = origTop + dims.originalHeight / 2;
                 // End at enlarged canvas left edge
                 float endX = enlargedLeft;
-                g.fill(Shapes.createFixWidthArrow(
+                g.fill(Shapes.createFixedWidthArrow(
                     startX, startY, endX, startY));
             }
         }

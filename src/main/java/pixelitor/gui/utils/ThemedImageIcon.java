@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,13 +46,13 @@ public class ThemedImageIcon extends ImageIcon {
     private BufferedImage darkThemeImage;
 
     public ThemedImageIcon(String iconFileName, int darkThemePixelColor) {
-        lightThemeImage = ImageUtils.loadJarImageFromImagesFolder(iconFileName);
+        lightThemeImage = ImageUtils.loadResourceImage(iconFileName);
         this.darkThemePixelColor = darkThemePixelColor;
     }
 
     public ThemedImageIcon(String ltIconFileName, String dtIconFileName) {
-        lightThemeImage = ImageUtils.loadJarImageFromImagesFolder(ltIconFileName);
-        darkThemeImage = ImageUtils.loadJarImageFromImagesFolder(dtIconFileName);
+        lightThemeImage = ImageUtils.loadResourceImage(ltIconFileName);
+        darkThemeImage = ImageUtils.loadResourceImage(dtIconFileName);
 
         assert lightThemeImage.getWidth() == darkThemeImage.getWidth();
         assert lightThemeImage.getHeight() == darkThemeImage.getHeight();
@@ -73,8 +73,8 @@ public class ThemedImageIcon extends ImageIcon {
             lightThemeImage = ImageUtils.convertToARGB(lightThemeImage, true);
         }
 
-        int[] lightThemePixels = ImageUtils.getPixelArray(lightThemeImage);
-        int[] darkThemePixels = ImageUtils.getPixelArray(darkThemeImage);
+        int[] lightThemePixels = ImageUtils.getPixels(lightThemeImage);
+        int[] darkThemePixels = ImageUtils.getPixels(darkThemeImage);
         for (int i = 0; i < lightThemePixels.length; i++) {
             int pixel = lightThemePixels[i];
             int alpha = pixel & 0xFF000000;

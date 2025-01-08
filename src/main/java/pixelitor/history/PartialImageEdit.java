@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -186,7 +186,7 @@ public class PartialImageEdit extends FadeableEdit {
         var selection = dr.getComp().getSelection();
         if (selection != null) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
-            previousImage = ImageUtils.getSelectionSizedPartFrom(
+            previousImage = ImageUtils.extractSelectedRegion(
                 previousImage, selection, dr.getTx(), dr.getTy());
         }
 

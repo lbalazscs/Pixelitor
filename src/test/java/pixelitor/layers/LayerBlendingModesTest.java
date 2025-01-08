@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ class LayerBlendingModesTest {
 
         upperLayer = TestHelper.createImageLayer(
             comp, create1x1Image(upperColor), "Layer 2");
-        comp.addLayerNoUI(upperLayer);
+        comp.addLayerWithoutUI(upperLayer);
 
         lowerLayer = (ImageLayer) comp.getLayer(0);
         lowerLayer.createUI();
@@ -205,7 +205,7 @@ class LayerBlendingModesTest {
 
         // adding an invert adjustment should deliver the inverted color
         Color inverted = invert(expectedColor);
-        comp.addLayerNoUI(invertAdjustment);
+        comp.addLayerWithoutUI(invertAdjustment);
         assertThat(comp).numLayersIs(3);
         assertThat(getResultingColor()).isEqualTo(inverted);
 
@@ -224,7 +224,7 @@ class LayerBlendingModesTest {
 
         // adding a no-op adjustment layer should change nothing
         var noOpAdjustment = new AdjustmentLayer(comp, "No-op", new NoOpFilter());
-        comp.addLayerNoUI(noOpAdjustment);
+        comp.addLayerWithoutUI(noOpAdjustment);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the no-op adjustment with black mask should have no effect
@@ -236,7 +236,7 @@ class LayerBlendingModesTest {
         assertThat(comp).numLayersIs(1);
 
         // test the blending mode with an OneColorFilter that outputs the upper color
-        comp.addLayerNoUI(alwaysUpperColorAdjustment);
+        comp.addLayerWithoutUI(alwaysUpperColorAdjustment);
         alwaysUpperColorAdjustment.setBlendingMode(blendingMode, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
@@ -255,7 +255,7 @@ class LayerBlendingModesTest {
         assertThat(comp).numLayersIs(1);
 
         // test with text layer
-        comp.addLayerNoUI(upperColorTextLayer);
+        comp.addLayerWithoutUI(upperColorTextLayer);
         upperColorTextLayer.setBlendingMode(blendingMode, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
@@ -274,7 +274,7 @@ class LayerBlendingModesTest {
         assertThat(comp).numLayersIs(1);
 
         // merging down the upper layer should result in the expected color
-        comp.addLayerNoUI(upperLayer);
+        comp.addLayerWithoutUI(upperLayer);
         assertThat(comp).numLayersIs(2);
         upperLayer.setBlendingMode(blendingMode, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);

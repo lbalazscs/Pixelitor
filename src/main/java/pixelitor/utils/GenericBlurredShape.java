@@ -109,7 +109,7 @@ public class GenericBlurredShape implements BlurredShape {
         var blurFilter = createBlurFilter(shapeStartX, shapeStartY);
         img = blurFilter.filter(img, null);
 
-        pixels = ImageUtils.getGrayPixelByteArray(img);
+        pixels = ImageUtils.getGrayPixels(img);
     }
 
     private static BoxBlurFilter createBlurFilter(double shapeStartX, double shapeStartY) {

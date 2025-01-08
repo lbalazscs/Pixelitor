@@ -552,7 +552,7 @@ public class MenuBar extends JMenuBar {
         });
 
         sub.add(new ViewEnabledAction("Edit All Nested Contents",
-            comp -> comp.forAllNestedSmartObjects(SmartObject::edit)), CTRL_ALT_O);
+            comp -> comp.forEachNestedSmartObject(SmartObject::edit)), CTRL_ALT_O);
 
         sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject) {
             @Override
@@ -1179,7 +1179,7 @@ public class MenuBar extends JMenuBar {
 //        if (!JVM.isLinux) { // see https://github.com/lbalazscs/Pixelitor/issues/140
         var showPixelGridMI = new OpenViewEnabledCheckBoxMenuItem("Show Pixel Grid");
         showPixelGridMI.addActionListener(e ->
-            View.setShowPixelGrid(showPixelGridMI.getState()));
+            View.setPixelGridVisible(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);
 //        }
 
@@ -1287,13 +1287,6 @@ public class MenuBar extends JMenuBar {
             @Override
             protected void onActiveSO(SmartObject so) {
                 so.getSmartFilter(2).edit();
-            }
-        });
-
-        developMenu.add(new ActiveSmartObjectAction("Print Smart Filters") {
-            @Override
-            protected void onActiveSO(SmartObject so) {
-                System.out.printf("%s%n", so.debugSmartFilters());
             }
         });
 

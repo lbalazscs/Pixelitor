@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -101,14 +101,14 @@ public class ZoomTool extends DragTool {
             setState(TRANSFORM);
 
             view.zoomToRegion(getZoomRect(view));
-            resetInitialState();
+            reset();
 
             e.consume();
         }
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp) {
+    public void paintOverView(Graphics2D g2, Composition comp) {
         if (state == IDLE) {
             return;
         }
@@ -133,11 +133,11 @@ public class ZoomTool extends DragTool {
     @Override
     protected void toolDeactivated() {
         super.toolDeactivated();
-        resetInitialState();
+        reset();
     }
 
     @Override
-    public void resetInitialState() {
+    public void reset() {
         box = null;
         setState(IDLE);
 
@@ -152,7 +152,7 @@ public class ZoomTool extends DragTool {
     @Override
     public void compReplaced(Composition newComp, boolean reloaded) {
         if (reloaded) {
-            resetInitialState();
+            reset();
         }
     }
 

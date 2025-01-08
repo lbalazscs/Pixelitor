@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,16 +78,16 @@ public class Threshold extends ParametrizedFilter {
         int ditheringMethod = ditheringMethodParam.getValue();
 
         Channel channel = channelParam.getSelected();
-        int[] inputData = ImageUtils.getPixelArray(input);
-        int[] destData = ImageUtils.getPixelArray(dest);
-        int[] srcData = ImageUtils.getPixelArray(src);
+        int[] inputPixels = ImageUtils.getPixels(input);
+        int[] destPixels = ImageUtils.getPixels(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
 
         int width = src.getWidth();
-        int length = inputData.length;
+        int length = inputPixels.length;
         for (int i = 0; i < length; i++) {
-            int rgb = inputData[i];
+            int rgb = inputPixels[i];
 
-            int a = srcData[i] & 0xFF_00_00_00; // the original, and not shifted
+            int a = srcPixels[i] & 0xFF_00_00_00; // the original, and not shifted
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
@@ -106,25 +106,25 @@ public class Threshold extends ParametrizedFilter {
                 double error = (intensity - out) * diffusionStrength;
 
                 // Distribute the error to neighboring pixels.
-                // These methods only modify the inputData array.
+                // These methods only modify the inputPixels array.
                 // This will have an effect in the next iteration of the for loop.
                 switch (ditheringMethod) {
                     case DITHER_FLOYD_STEINBERG:
-                        ditherFloydSteinberg(inputData, i, width, length, error);
+                        ditherFloydSteinberg(inputPixels, i, width, length, error);
                         break;
                     case DITHER_STUCKI:
-                        ditherStucki(inputData, i, width, length, error);
+                        ditherStucki(inputPixels, i, width, length, error);
                         break;
                     case DITHER_BURKES:
-                        ditherBurkes(inputData, i, width, length, error);
+                        ditherBurkes(inputPixels, i, width, length, error);
                         break;
                     case DITHER_SIERRA:
-                        ditherSierra(inputData, i, width, length, error);
+                        ditherSierra(inputPixels, i, width, length, error);
                         break;
                 }
             }
 
-            destData[i] = a | out << 16 | out << 8 | out;
+            destPixels[i] = a | out << 16 | out << 8 | out;
         }
 
         return dest;

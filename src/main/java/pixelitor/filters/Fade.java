@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,19 +83,19 @@ public class Fade extends ParametrizedFilter {
 
         double fadeFactor = opacity.getPercentage();
         // A simple AlphaComposite would not handle semitransparent pixels correctly
-        int[] srcData = ImageUtils.getPixelArray(after);
-        int[] destData = ImageUtils.getPixelArray(dest);
-        int[] prevData = ImageUtils.getPixelArray(before);
+        int[] srcPixels = ImageUtils.getPixels(after);
+        int[] destPixels = ImageUtils.getPixels(dest);
+        int[] prevPixels = ImageUtils.getPixels(before);
 
-        int length = srcData.length;
+        int length = srcPixels.length;
         for (int i = 0; i < length; i++) {
-            int rgb = srcData[i];
+            int rgb = srcPixels[i];
             int a = (rgb >>> 24) & 0xFF;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            int prevRGB = prevData[i];
+            int prevRGB = prevPixels[i];
             int prevA = (prevRGB >>> 24) & 0xFF;
             int prevR = (prevRGB >>> 16) & 0xFF;
             int prevG = (prevRGB >>> 8) & 0xFF;
@@ -106,7 +106,7 @@ public class Fade extends ParametrizedFilter {
             g = (int) (prevG + fadeFactor * (g - prevG));
             b = (int) (prevB + fadeFactor * (b - prevB));
 
-            destData[i] = a << 24 | r << 16 | g << 8 | b;
+            destPixels[i] = a << 24 | r << 16 | g << 8 | b;
         }
         return dest;
     }
@@ -120,18 +120,18 @@ public class Fade extends ParametrizedFilter {
         double fadeFactor = opacity.getPercentage();
         // A simple AlphaComposite would not handle semitransparent pixels correctly
 
-        byte[] srcData = ImageUtils.getGrayPixelByteArray(after);
-        byte[] destData = ImageUtils.getGrayPixelByteArray(dest);
-        byte[] prevData = ImageUtils.getGrayPixelByteArray(before);
+        byte[] srcPixels = ImageUtils.getGrayPixels(after);
+        byte[] destPixels = ImageUtils.getGrayPixels(dest);
+        byte[] prevPixels = ImageUtils.getGrayPixels(before);
 
-        int length = srcData.length;
+        int length = srcPixels.length;
         for (int i = 0; i < length; i++) {
-            int srcVal = Byte.toUnsignedInt(srcData[i]);
-            int prevVal = Byte.toUnsignedInt(prevData[i]);
+            int srcVal = Byte.toUnsignedInt(srcPixels[i]);
+            int prevVal = Byte.toUnsignedInt(prevPixels[i]);
 
             int val = ImageMath.lerp(fadeFactor, prevVal, srcVal);
 
-            destData[i] = (byte) val;
+            destPixels[i] = (byte) val;
         }
         return dest;
     }

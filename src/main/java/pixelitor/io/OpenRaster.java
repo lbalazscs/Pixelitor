@@ -256,7 +256,7 @@ public class OpenRaster {
                 String groupName = childElem.getAttribute("name");
                 LayerGroup group = new LayerGroup(parent.getComp(), groupName);
                 group.setHolder(parent);
-                parent.addLayerNoUI(group);
+                parent.addLayerWithoutUI(group);
                 readBasicAttributes(childElem, group);
 
                 String isolation = childElem.getAttribute("isolation");
@@ -291,7 +291,7 @@ public class OpenRaster {
 
         readBasicAttributes(element, layer);
 
-        holder.addLayerNoUI(layer);
+        holder.addLayerWithoutUI(layer);
     }
 
     private static void readBasicAttributes(Element element, Layer layer) {

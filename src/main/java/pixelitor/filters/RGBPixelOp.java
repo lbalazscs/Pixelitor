@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,18 +39,18 @@ public interface RGBPixelOp {
 
     default BufferedImage filter(BufferedImage src,
                                  BufferedImage dest) {
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
-        for (int i = 0; i < srcData.length; i++) {
-            int rgb = srcData[i];
+        for (int i = 0; i < srcPixels.length; i++) {
+            int rgb = srcPixels[i];
 
             int a = (rgb >>> 24) & 0xFF;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            destData[i] = changeRGB(a, r, g, b);
+            destPixels[i] = changeRGB(a, r, g, b);
         }
 
         return dest;

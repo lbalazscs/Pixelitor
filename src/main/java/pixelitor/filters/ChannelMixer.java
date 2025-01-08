@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -217,14 +217,14 @@ public class ChannelMixer extends ParametrizedFilter {
 
         boolean packedInt = ImageUtils.hasPackedIntArray(src);
         if (packedInt) {
-            int[] srcData = ImageUtils.getPixelArray(src);
-            int[] destData = ImageUtils.getPixelArray(dest);
+            int[] srcPixels = ImageUtils.getPixels(src);
+            int[] destPixels = ImageUtils.getPixels(dest);
 
-            int length = srcData.length;
-            assert length == destData.length;
+            int length = srcPixels.length;
+            assert length == destPixels.length;
 
             for (int i = 0; i < length; i++) {
-                int rgb = srcData[i];
+                int rgb = srcPixels[i];
                 int a = rgb & 0xFF_00_00_00;
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
@@ -238,7 +238,7 @@ public class ChannelMixer extends ParametrizedFilter {
                 newGreen = PixelUtils.clamp(newGreen);
                 newBlue = PixelUtils.clamp(newBlue);
 
-                destData[i] = a | newRed << 16 | newGreen << 8 | newBlue;
+                destPixels[i] = a | newRed << 16 | newGreen << 8 | newBlue;
             }
         } else { // not packed int
             var bandCombineOp = new BandCombineOp(new float[][]{

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -123,7 +123,7 @@ public class AutoPaint {
         assert calledOnEDT() : threadInfo();
 
         setColors(settings, rand);
-        PPoint start = comp.getRandomPointInCanvas();
+        PPoint start = comp.genRandomPointInCanvas();
         PPoint end = settings.genRandomEndPoint(start, comp, rand);
 
         Tool tool = settings.getTool();

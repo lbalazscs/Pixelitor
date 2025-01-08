@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.Themes;
 import pixelitor.gui.utils.VectorIcon;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.gui.ToolSettingsPanel;
@@ -70,7 +71,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     protected boolean altDown = false;
 
     // Whether pixel snapping should be turned on as far as the tool is concerned.
-    // The actual snapping also depends on the setting in the Preferences.
+    // The actual snapping also depends on the Preferences setting.
     protected boolean pixelSnapping = false;
 
     protected Tool(String name, char activationKey, String toolMessage, Cursor cursor) {
@@ -85,34 +86,67 @@ public abstract class Tool implements PresetOwner, Debuggable {
         eventHandlerChain = new ToolHandlerChain(this, cursor);
     }
 
+    /**
+     * Initializes the tool's settings panel.
+     */
     public abstract void initSettingsPanel(ResourceBundle resources);
 
+    /**
+     * A hook for actions to be performed when the tool is activated.
+     */
     protected void toolActivated() {
         GlobalEvents.setActiveTool(this);
         Views.setCursorForAll(cursor);
         View.toolSnappingChanged(pixelSnapping, this == Tools.CROP);
     }
 
+    /**
+     * A hook for actions to be performed when the tool is deactivated.
+     */
     protected void toolDeactivated() {
         DraggablePoint.activePoint = null;
-        closeToolDialogs();
+        closeAllDialogs();
     }
 
-    protected void closeToolDialogs() {
+    /**
+     * Programmatically activates the tool.
+     */
+    public void activate() {
+        if (toolButton != null) {
+            // this will also call Tools.start() indirectly via the event handlers.
+            toolButton.setSelected(true);
+            toolButton.requestFocus();
+        } else {
+            assert AppMode.isUnitTesting();
+            Tools.start(this);
+        }
+    }
+
+    public boolean isActive() {
+        return Tools.activeIs(this);
+    }
+
+    /**
+     * Closes all tool dialogs.
+     */
+    protected void closeAllDialogs() {
         // empty by default
     }
 
     /**
-     * Creates the tool's icon. Tools create their icon using
-     * vector graphics so that is looks good on HiDPI screens.
+     * Creates the tool's icon. Tools create their icons using
+     * vector graphics so they look good on HiDPI screens.
      */
     public abstract VectorIcon createIcon();
 
     /**
-     * Paint over the given {@link Composition} after all the layers have been painted.
+     * Allows tools to paint additional content over the view, after
+     * all layers have been painted. Useful for visual feedback that
+     * is not directly part of the edited image.
+     * This method can paint outside of the canvas bounds.
      * The transform of the given Graphics2D is in component space.
      */
-    public void paintOverImage(Graphics2D g2, Composition comp) {
+    public void paintOverView(Graphics2D g2, Composition comp) {
         // empty by default
     }
 
@@ -159,7 +193,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Returns true if the key event was used for something
+     * Returns true if the key event was used
      * and it should not be further processed.
      */
     public boolean arrowKeyPressed(ArrowKey key) {
@@ -190,14 +224,14 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     public void allViewsClosed() {
-        resetInitialState();
+        reset();
     }
 
     public void viewActivated(View oldCV, View newCV) {
         assert Tools.activeTool == this;
         if (oldCV != null) {
             oldCV.repaint();
-            resetInitialState();
+            reset();
         }
     }
 
@@ -206,7 +240,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Called when a new layer becomes active, and also when the mask editing state changes.
+     * Called when a new layer becomes active, or when the mask editing state changes.
      * The argument is always the active layer, not the mask.
      */
     public void editingTargetChanged(Layer activeLayer) {
@@ -214,7 +248,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * A modal dialog, such as a filter or the color selector, was shown.
+     * Called before a modal dialog, such as a filter or the color selector, is shown.
      */
     public void firstModalDialogShown() {
         // empty by default
@@ -231,7 +265,10 @@ public abstract class Tool implements PresetOwner, Debuggable {
         // empty by default
     }
 
-    public void resetInitialState() {
+    /**
+     * Resets the tool to its initial/default state.
+     */
+    public void reset() {
         // empty by default
     }
 
@@ -247,55 +284,47 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Called when the component space coordinates of the pixels changed,
-     * but the image coordinates are still the same (zooming, view resizing).
+     * Called when the component space coordinates of the pixels change,
+     * but the image coordinates remain the same (zooming, view resizing).
      *
      * The component coordinates of the widgets must be restored
-     * from their image coordinates
+     * from their image coordinates.
      */
     public void coCoordsChanged(View view) {
         // empty by default
     }
 
     /**
-     * Called when the image space coordinates of the pixels changed
+     * Called when the image space coordinates of the pixels change
      * (image resizing, cropping, canvas enlargement, flipping, etc.),
      * and this change is described by the given {@link AffineTransform}
      *
-     * The change in image coords implies a change in component coords,
+     * The change in image coordinates implies a change in component coordinates,
      * therefore the component space coordinates also have to be recalculated.
      */
     public void imCoordsChanged(AffineTransform at, View view) {
         // empty by default
     }
 
-    public void activate() {
-        if (toolButton != null) {
-            // this will also call Tools.start() indirectly via the event handlers.
-            toolButton.setSelected(true);
-            toolButton.requestFocus();
-        } else {
-            assert AppMode.isUnitTesting();
-            Tools.start(this);
-        }
-    }
-
-    public boolean isActive() {
-        return Tools.activeIs(this);
-    }
-
+    /**
+     * Whether this tool behaves like the hand tool when the space key is pressed.
+     */
     public boolean hasHandToolForwarding() {
         // all tools behave like the hand tool if space is pressed,
         // but the hand tool itself doesn't need the forwarding
         return true;
     }
 
-    // whether this tool can only be used with layers implementing Drawable
+    /**
+     * Whether this tool can only be used with layers that implement {@link Drawable}.
+     */
     public boolean allowOnlyDrawables() {
         return false;
     }
 
-    // whether this tool works like a color picker when Alt is pressed
+    /**
+     * Whether this tool behaves like the color picker tool when Alt is pressed.
+     */
     public boolean hasColorPickerForwarding() {
         return false;
     }
@@ -337,7 +366,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Returns true if this tool is currently not affecting the
+     * Returns true if this tool is not currently affecting the
      * composite image in ways other than directly drawing
      * into the pixels of the actual image layer.
      */
@@ -372,6 +401,9 @@ public abstract class Tool implements PresetOwner, Debuggable {
         return shortName; // so that they can be selected from a JComboBox
     }
 
+    /**
+     * Abstract base class for tool icons.
+     */
     protected abstract static class ToolIcon extends VectorIcon {
         protected ToolIcon() {
             super(Themes.getActive().isDark() ? Themes.LIGHT_ICON_COLOR : BLACK,

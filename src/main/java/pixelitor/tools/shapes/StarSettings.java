@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,9 @@ import java.util.List;
  */
 public class StarSettings extends ShapeTypeSettings {
     public static final int DEFAULT_NUM_BRANCHES = 5;
-    public static final double DEFAULT_RADIUS_RATIO = 0.38;
+
+    // the ratio for a standard 5-pointed star is 1 / (golden ratio squared)
+    public static final double DEFAULT_RADIUS_RATIO = 0.381966;
 
     private final RangeParam numBranches = new RangeParam("Number of Branches",
         3, DEFAULT_NUM_BRANCHES, 12);

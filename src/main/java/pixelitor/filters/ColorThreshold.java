@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,19 +76,19 @@ public class ColorThreshold extends ParametrizedFilter {
 
         BufferedImage input = dither ? ImageUtils.copyImage(src) : src;
 
-        int[] inputData = ImageUtils.getPixelArray(input);
-        int[] destData = ImageUtils.getPixelArray(dest);
-        int[] srcData = ImageUtils.getPixelArray(src);
+        int[] inputPixels = ImageUtils.getPixels(input);
+        int[] destPixels = ImageUtils.getPixels(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
 
         int width = src.getWidth();
-        int length = inputData.length;
+        int length = inputPixels.length;
 
         for (int i = 0; i < length; i++) {
-            int inPixel = inputData[i];
-            int a = srcData[i] & 0xFF_00_00_00;
-            int r = (inPixel >>> 16) & 0xFF;
-            int g = (inPixel >>> 8) & 0xFF;
-            int b = inPixel & 0xFF;
+            int inRGB = inputPixels[i];
+            int a = srcPixels[i] & 0xFF_00_00_00;
+            int r = (inRGB >>> 16) & 0xFF;
+            int g = (inRGB >>> 8) & 0xFF;
+            int b = inRGB & 0xFF;
 
             int outR = r >= redTh ? 0xFF : 0;
             int outG = g >= greenTh ? 0xFF : 0;
@@ -99,10 +99,10 @@ public class ColorThreshold extends ParametrizedFilter {
                 double errorG = (g - outG) * diffusionStrength;
                 double errorB = (b - outB) * diffusionStrength;
 
-                Dithering.ditherRGB(ditheringMethod, inputData, i, width, length, errorR, errorG, errorB);
+                Dithering.ditherRGB(ditheringMethod, inputPixels, i, width, length, errorR, errorG, errorB);
             }
 
-            destData[i] = a | outR << 16 | outG << 8 | outB;
+            destPixels[i] = a | outR << 16 | outG << 8 | outB;
         }
 
         return dest;

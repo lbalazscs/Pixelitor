@@ -46,8 +46,8 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
             return grayFilter(src, dst);
         }
 
-        int[] inPixels = ImageUtils.getPixelArray(src);
-        int[] outPixels = ImageUtils.getPixelArray(dst);
+        int[] inPixels = ImageUtils.getPixels(src);
+        int[] outPixels = ImageUtils.getPixels(dst);
 
         pt = createProgressTracker(height);
         Future<?>[] rowFutures = new Future[height];

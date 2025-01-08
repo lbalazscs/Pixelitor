@@ -74,7 +74,7 @@ public class ColorWheel extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
         int width = dest.getWidth();
         int height = dest.getHeight();
@@ -94,7 +94,7 @@ public class ColorWheel extends ParametrizedFilter {
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable rowTask = () -> processRow(
-                destData, width, finalY, cx, cy, hueRot, sat, brgLum, space);
+                destPixels, width, finalY, cx, cy, hueRot, sat, brgLum, space);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
         ThreadPool.waitFor(rowFutures, pt);
@@ -103,7 +103,7 @@ public class ColorWheel extends ParametrizedFilter {
         return dest;
     }
 
-    private static void processRow(int[] destData, int width, int y,
+    private static void processRow(int[] destPixels, int width, int y,
                                    int cx, int cy, double hueRot,
                                    double saturation, double brightness, ColorSpaceType model) {
         for (int x = 0; x < width; x++) {
@@ -112,7 +112,7 @@ public class ColorWheel extends ParametrizedFilter {
             double angle = FastMath.atan2(yDiff, xDiff) + hueRot;
             double hue = angle / (2 * Math.PI);
 
-            destData[x + y * width] = model.toRGB((float) hue, (float) saturation, (float) brightness);
+            destPixels[x + y * width] = model.toRGB((float) hue, (float) saturation, (float) brightness);
         }
     }
 

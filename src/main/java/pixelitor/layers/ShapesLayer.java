@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -180,7 +180,7 @@ public class ShapesLayer extends ContentLayer {
                 // This case should never happen, because an
                 // initialized shape should always have a box.
                 // Implemented here, but not for the Move Tool support.
-                styledShape.resetTransform();
+                styledShape.captureOrigState();
                 styledShape.imTransform(at);
                 System.out.println("ShapesLayer::transform: transforming only the shape");
             }
@@ -222,10 +222,8 @@ public class ShapesLayer extends ContentLayer {
 
     @Override
     public int getPixelAtPoint(Point p) {
-        if (hasShape()) {
-            if (styledShape.containsPoint(p)) {
-                return 0xFF_FF_FF_FF;
-            }
+        if (hasShape() && styledShape.containsPoint(p)) {
+            return 0xFF_FF_FF_FF;
         }
         return 0;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,12 +69,23 @@ public class SelectionTool extends DragTool {
         "<b>Alt</b> removes from it, <b>Shift-Alt</b> intersects.";
     private static final String NEW_SELECTION_TEXT = "New Selection";
 
+    // whether the Alt key is pressed and used for subtraction mode
     private boolean altMeansSubtract = false;
-    private ShapeCombinator originalShapeCombinator;
 
+    // the shape combinator that was selected in the UI
+    // before being overridden by pressing the SHIFT or ALT key
+    private ShapeCombinator previousShapeCombinator;
+
+    // manages the building of the current selection
     private SelectionBuilder selectionBuilder;
+
+    // whether the selection type is polygonal
     private boolean polygonal = false;
+
+    // whether the selection type is magic wand
     private boolean magicWand = false;
+
+    // whether the width/height should be displayed
     private boolean displayWidthHeight = true;
 
     private final EnumComboBoxModel<SelectionType> typeModel
@@ -82,8 +93,8 @@ public class SelectionTool extends DragTool {
     private final EnumComboBoxModel<ShapeCombinator> combinatorModel
         = new EnumComboBoxModel<>(ShapeCombinator.class);
 
-    private static final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
-    private static final SliderSpinner sliderSpinner = new SliderSpinner(toleranceParam, WEST, false);
+    private static final RangeParam magicWandToleranceParam = new RangeParam("Tolerance", 0, 20, 255);
+    private static final SliderSpinner magicWandToleranceSlider = new SliderSpinner(magicWandToleranceParam, WEST, false);
 
     SelectionTool() {
         super("Selection", 'M', HELP_TEXT, Cursors.DEFAULT, false);
@@ -114,8 +125,8 @@ public class SelectionTool extends DragTool {
 
         settingsPanel.addSeparator();
 
-        sliderSpinner.setEnabled(false);
-        settingsPanel.add(sliderSpinner);
+        magicWandToleranceSlider.setEnabled(false);
+        settingsPanel.add(magicWandToleranceSlider);
     }
 
     private void selectionTypeChanged() {
@@ -126,7 +137,7 @@ public class SelectionTool extends DragTool {
         magicWand = type == SelectionType.SELECTION_MAGIC_WAND;
         displayWidthHeight = type.displayWidthHeight();
 
-        if (!magicWand) { sliderSpinner.setEnabled(false); }
+        magicWandToleranceSlider.setEnabled(magicWand);
 
         if (polygonal) {
             Messages.showStatusMessage(POLY_HELP_TEXT);
@@ -134,7 +145,6 @@ public class SelectionTool extends DragTool {
             Messages.showStatusMessage(FREEHAND_HELP_TEXT);
         } else if (magicWand) {
             Messages.showStatusMessage(MAGIC_WAND_HELP_TEXT);
-            sliderSpinner.setEnabled(true);
         } else {
             Messages.showStatusMessage("Selection Tool: " + HELP_TEXT);
         }
@@ -175,13 +185,13 @@ public class SelectionTool extends DragTool {
     @Override
     protected void dragFinished(PMouseEvent e) {
         if (drag.isClick() && !polygonal && !magicWand) { // will be handled by mouseClicked
-            restoreCombinator();
+            resetCombinator();
             return;
         }
 
         Composition comp = e.getComp();
-        Selection builtSelection = comp.getDraftSelection();
-        if (builtSelection == null && !polygonal) {
+        Selection draftSelection = comp.getDraftSelection();
+        if (draftSelection == null && !polygonal) {
             // can happen, if we called stopBuildingSelection()
             // for some exceptional reason
             return;
@@ -206,7 +216,7 @@ public class SelectionTool extends DragTool {
             selectionBuilder = new SelectionBuilder(
                 getSelectionType(), getCombinator(), comp);
             selectionBuilder.updateDraftSelection(e, comp);
-            restoreCombinator();
+            resetCombinator();
         } else {
             selectionBuilder.updateDraftSelection(e, comp);
             if (e.isRight()) {
@@ -218,7 +228,7 @@ public class SelectionTool extends DragTool {
 
     private void notPolygonalDragFinished(PMouseEvent e) {
         Composition comp = e.getComp();
-        restoreCombinator();
+        resetCombinator();
 
         boolean startFromCenter = !altMeansSubtract && e.isAltDown();
         drag.setExpandFromCenter(startFromCenter);
@@ -231,7 +241,7 @@ public class SelectionTool extends DragTool {
     }
 
     public static int getTolerance() {
-        return toleranceParam.getValue();
+        return magicWandToleranceParam.getValue();
     }
 
     @Override
@@ -282,7 +292,7 @@ public class SelectionTool extends DragTool {
         if (comp.hasSelection() || comp.hasDraftSelection()) {
             comp.deselect(true);
         }
-        assert !comp.hasDraftSelection() : "built selection is = " + comp.getDraftSelection();
+        assert !comp.hasDraftSelection() : "draft selection is = " + comp.getDraftSelection();
         assert !comp.hasSelection() : "selection is = " + comp.getSelection();
 
         altMeansSubtract = false;
@@ -344,7 +354,7 @@ public class SelectionTool extends DragTool {
         altMeansSubtract = altDown;
 
         if (shiftDown || altDown) {
-            originalShapeCombinator = getCombinator();
+            previousShapeCombinator = getCombinator();
             if (shiftDown) {
                 if (altDown) {
                     setCombinator(INTERSECT);
@@ -357,10 +367,10 @@ public class SelectionTool extends DragTool {
         }
     }
 
-    private void restoreCombinator() {
-        if (originalShapeCombinator != null) {
-            setCombinator(originalShapeCombinator);
-            originalShapeCombinator = null;
+    private void resetCombinator() {
+        if (previousShapeCombinator != null) {
+            setCombinator(previousShapeCombinator);
+            previousShapeCombinator = null;
         }
     }
 
@@ -385,7 +395,7 @@ public class SelectionTool extends DragTool {
     protected void toolDeactivated() {
         super.toolDeactivated();
 
-        // otherwise in polygonal mode half-built selections
+        // otherwise in polygonal mode unfinished selections
         // remain visible after switching to another tool
         stopBuildingSelection();
     }

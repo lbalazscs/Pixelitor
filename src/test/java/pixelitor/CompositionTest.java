@@ -46,7 +46,6 @@ class CompositionTest {
         comp = TestHelper.createComp("CompositionTest", 2, true);
         assertThat(comp)
             .isNotDirty()
-            .isNotEmpty()
             .hasName("CompositionTest")
             .numLayersIs(2)
             .layerNamesAre("layer 1", "layer 2")
@@ -144,7 +143,7 @@ class CompositionTest {
             .isNotDirty()
             .numLayersIs(2);
 
-        comp.addLayerNoUI(createEmptyImageLayer(comp, "layer 3"));
+        comp.addLayerWithoutUI(createEmptyImageLayer(comp, "layer 3"));
 
         assertThat(comp)
             .isNotDirty()  // still not dirty!
@@ -410,7 +409,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.changeLayerOrder(0, 1, true, null);
+        comp.reorderLayer(0, 1, true, null);
         assertThat(comp)
             .layerNamesAre("layer 2", "layer 1")
             .firstLayerIsActive();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -100,23 +100,23 @@ public class ChannelInvert extends ParametrizedFilter {
             return invertHSB(invertType, src, dest);
         }
 
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
-        for (int i = 0; i < destData.length; i++) {
-            int srcPixel = srcData[i];
-            int alpha = srcPixel & 0xFF_00_00_00;
+        for (int i = 0; i < destPixels.length; i++) {
+            int srcRGB = srcPixels[i];
+            int alpha = srcRGB & 0xFF_00_00_00;
             if (alpha == 0) {
-                destData[i] = srcPixel;
+                destPixels[i] = srcRGB;
             } else {
-                destData[i] = switch (invertType) {
-                    case RED_ONLY -> srcPixel ^ 0x00_FF_00_00;
-                    case GREEN_ONLY -> srcPixel ^ 0x00_00_FF_00;
-                    case BLUE_ONLY -> srcPixel ^ 0x00_00_00_FF;
-                    case RED_GREEN -> srcPixel ^ 0x00_FF_FF_00;
-                    case RED_BLUE -> srcPixel ^ 0x00_FF_00_FF;
-                    case GREEN_BLUE -> srcPixel ^ 0x00_00_FF_FF;
-                    case RED_GREEN_BLUE -> srcPixel ^ 0x00_FF_FF_FF;
+                destPixels[i] = switch (invertType) {
+                    case RED_ONLY -> srcRGB ^ 0x00_FF_00_00;
+                    case GREEN_ONLY -> srcRGB ^ 0x00_00_FF_00;
+                    case BLUE_ONLY -> srcRGB ^ 0x00_00_00_FF;
+                    case RED_GREEN -> srcRGB ^ 0x00_FF_FF_00;
+                    case RED_BLUE -> srcRGB ^ 0x00_FF_00_FF;
+                    case GREEN_BLUE -> srcRGB ^ 0x00_00_FF_FF;
+                    case RED_GREEN_BLUE -> srcRGB ^ 0x00_FF_FF_FF;
                     default -> throw new IllegalStateException("Unexpected type: " + invertType);
                 };
             }
@@ -126,21 +126,21 @@ public class ChannelInvert extends ParametrizedFilter {
     }
 
     private static BufferedImage invertHSB(int invertType, BufferedImage src, BufferedImage dest) {
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
         float[] hsb = {0.0f, 0.0f, 0.0f};
 
-        for (int i = 0; i < destData.length; i++) {
-            int srcPixel = srcData[i];
-            int origAlphaShifted = srcPixel & 0xFF_00_00_00;
+        for (int i = 0; i < destPixels.length; i++) {
+            int rgb = srcPixels[i];
+            int origAlphaShifted = rgb & 0xFF_00_00_00;
             if (origAlphaShifted == 0) {
-                destData[i] = srcPixel;
+                destPixels[i] = rgb;
                 continue;
             }
-            int r = (srcPixel >>> 16) & 0xFF;
-            int g = (srcPixel >>> 8) & 0xFF;
-            int b = srcPixel & 0xFF;
+            int r = (rgb >>> 16) & 0xFF;
+            int g = (rgb >>> 8) & 0xFF;
+            int b = rgb & 0xFF;
             hsb = Color.RGBtoHSB(r, g, b, hsb);
             int newRGB = switch (invertType) {
                 case HUE_ONLY -> Color.HSBtoRGB(0.5f + hsb[0], hsb[1], hsb[2]);
@@ -154,7 +154,7 @@ public class ChannelInvert extends ParametrizedFilter {
             };
 
             // Color.HSBtoRGB always creates an alpha of 255, so now restore the original value
-            destData[i] = origAlphaShifted | (newRGB & 0x00_FF_FF_FF);
+            destPixels[i] = origAlphaShifted | (newRGB & 0x00_FF_FF_FF);
         }
 
         return dest;

@@ -199,7 +199,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         } else {
             // make an image-based calculation for an exact "content crop"
             BufferedImage image = toImage(false, false);
-            Rectangle bounds = ImageUtils.getNonTransparentBounds(image);
+            Rectangle bounds = ImageUtils.calcOpaqueBounds(image);
             image.flush();
             return bounds;
         }
@@ -247,7 +247,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public BufferedImage transformImage(BufferedImage src) {
         assert settings.hasWatermark(); // should be called only in this case
-        return painter.watermarkImage(src, comp);
+        return painter.createWatermark(src, comp);
     }
 
     @Override
@@ -434,14 +434,14 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
             if (deleted) {
                 settings.setAlignment(BoxAlignment.CENTER_CENTER);
-                painter.setAlignment(BoxAlignment.CENTER_CENTER);
+                painter.setBoxAlignment(BoxAlignment.CENTER_CENTER);
             }
         }
     }
 
     public void usePathEditing() {
         settings.setAlignment(BoxAlignment.PATH);
-        painter.setAlignment(BoxAlignment.PATH);
+        painter.setBoxAlignment(BoxAlignment.PATH);
 
         painter.pathChanged();
         holder.invalidateImageCache();

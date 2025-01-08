@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,7 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.Magnify;
 import pixelitor.utils.BlurredShape;
-import pixelitor.utils.Shapes;
 
-import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -65,6 +63,16 @@ public class MagnifyFilter extends CenteredTransformFilter {
         this.magnification = magnification;
     }
 
+    // must be called after the radius arguments!
+    public void setShape(int type) {
+        shape = BlurredShape.create(type, new Point2D.Double(cx, cy),
+            innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+    }
+
+    public void setInvert(boolean invert) {
+        this.invert = invert;
+    }
+
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         radiusRatio = 1 / magnification;
@@ -85,28 +93,12 @@ public class MagnifyFilter extends CenteredTransformFilter {
         } else if (outside == 0.0) { // 100% inside
             out[0] = (float) (radiusRatio * x + (1 - radiusRatio) * cx);
             out[1] = (float) (radiusRatio * y + (1 - radiusRatio) * cy);
-        } else { // the blurred region between the inner and outer radius
+        } else { // transition between the inner and outer radius
             double movedX = radiusRatio * x + (1 - radiusRatio) * cx;
             double movedY = radiusRatio * y + (1 - radiusRatio) * cy;
 
             out[0] = (float) ImageMath.lerp(outside, movedX, x);
             out[1] = (float) ImageMath.lerp(outside, movedY, y);
         }
-    }
-
-    public Shape[] getAffectedAreaShapes() {
-        Shape inner = Shapes.createEllipse(cx, cy, innerRadiusX, innerRadiusY);
-        Shape outer = Shapes.createEllipse(cx, cy, outerRadiusX, outerRadiusY);
-        return new Shape[]{inner, outer};
-    }
-
-    // must be called after the shape arguments!
-    public void setShape(int type) {
-        shape = BlurredShape.create(type, new Point2D.Double(cx, cy),
-            innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
-    }
-
-    public void setInvert(boolean invert) {
-        this.invert = invert;
     }
 }

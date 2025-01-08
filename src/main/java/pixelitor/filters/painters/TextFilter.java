@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public class TextFilter extends FilterWithGUI {
         settings.configurePainter(textPainter);
 
         if (settings.hasWatermark()) {
-            dest = textPainter.watermarkImage(src, null);
+            dest = textPainter.createWatermark(src, null);
         } else {
             int width = dest.getWidth();
             int height = dest.getHeight();

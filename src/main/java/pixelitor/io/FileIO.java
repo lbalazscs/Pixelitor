@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -335,8 +335,8 @@ public class FileIO {
         if (exportFilled) {
             shape = strokeParam.createStroke().createStrokedShape(shape);
         }
-        String svgPath = Shapes.toSVGPath(shape);
-        String svgFillRule = Shapes.determineSvgFillRule(shape);
+        String svgPath = Shapes.toSvgPath(shape);
+        String svgFillRule = Shapes.getSvgFillRule(shape);
 
         String svgFillAttr = exportFilled ? "black" : "none";
         String svgStrokeAttr = exportFilled ? "none" : "black";

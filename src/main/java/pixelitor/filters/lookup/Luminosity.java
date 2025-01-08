@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,17 +30,17 @@ public class Luminosity extends Filter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
-        for (int i = 0; i < destData.length; i++) {
-            int rgb = srcData[i];
+        for (int i = 0; i < destPixels.length; i++) {
+            int rgb = srcPixels[i];
             int alpha = rgb & 0xFF_00_00_00;
             if (alpha == 0) {
-                destData[i] = 0;
+                destPixels[i] = 0;
             } else {
                 int lum = (int) LuminanceLookup.from(rgb);
-                destData[i] = alpha | lum << 16 | lum << 8 | lum;
+                destPixels[i] = alpha | lum << 16 | lum << 8 | lum;
             }
         }
 

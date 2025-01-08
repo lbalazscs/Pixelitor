@@ -298,7 +298,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         // there is selection
-        return ImageUtils.getSelectionSizedPartFrom(image,
+        return ImageUtils.extractSelectedRegion(image,
             selection, getTx(), getTy());
     }
 
@@ -599,7 +599,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (includeTransparent) {
             return new Rectangle(getTx(), getTy(), image.getWidth(), image.getHeight());
         } else {
-            Rectangle rect = ImageUtils.getNonTransparentBounds(image);
+            Rectangle rect = ImageUtils.calcOpaqueBounds(image);
             rect.translate(getTx(), getTy());
             return rect;
         }

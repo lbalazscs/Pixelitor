@@ -192,7 +192,7 @@ public class TextSettings implements Serializable, Debuggable {
         painter.setText(text);
         painter.setFont(font);
         painter.setEffects(areaEffects);
-        painter.setAlignment(horizontalAlignment, verticalAlignment);
+        painter.setBoxAlignment(horizontalAlignment, verticalAlignment);
         painter.setMLPAlignment(mlpAlignment);
         painter.setRotation(rotation);
         painter.setAdvancedSettings(relLineHeight, sx, sy, shx, shy);

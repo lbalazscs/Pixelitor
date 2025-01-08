@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -265,7 +265,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp) {
+    public void paintOverView(Graphics2D g2, Composition comp) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         mode.paint(g2);
     }
@@ -336,7 +336,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void resetInitialState() {
+    public void reset() {
         setPathFromComp(Views.getActiveComp());
 
         assert checkPathConsistency();

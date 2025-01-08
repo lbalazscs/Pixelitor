@@ -154,7 +154,7 @@ public class Shapes {
      * The width of the shaft and the size of the arrowhead don't depend
      * on the arrow's length.
      */
-    public static Shape createFixWidthArrow(double startX, double startY, double endX, double endY) {
+    public static Shape createFixedWidthArrow(double startX, double startY, double endX, double endY) {
         // Configurable properties
         double arrowWidth = 10.0;  // Width of the arrow shaft
         double arrowheadSize = 20.0;  // Size of the arrowhead
@@ -383,20 +383,20 @@ public class Shapes {
         return rect;
     }
 
-    public static String toSVGPath(Shape shape) {
+    public static String toSvgPath(Shape shape) {
         StringBuilder sb = new StringBuilder();
         PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];
 
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
-            addSVGPathSegment(type, coords, sb);
+            appendSvgPathSegment(sb, type, coords);
             pathIterator.next();
         }
         return sb.toString();
     }
 
-    private static void addSVGPathSegment(int type, double[] coords, StringBuilder pathBuilder) {
+    private static void appendSvgPathSegment(StringBuilder pathBuilder, int type, double[] coords) {
         int numCoords;
         String command;
 
@@ -438,7 +438,7 @@ public class Shapes {
         pathBuilder.append("\n");
     }
 
-    public static String determineSvgFillRule(Shape shape) {
+    public static String getSvgFillRule(Shape shape) {
         if (shape instanceof Path2D path) {
             return switch (path.getWindingRule()) {
                 case Path2D.WIND_EVEN_ODD -> "evenodd";
@@ -479,7 +479,7 @@ public class Shapes {
     /**
      * Returns true if the two given shapes have identical path iterators within the given tolerance.
      */
-    public static boolean pathIteratorIsEqual(Shape shape1, Shape shape2, double tolerance) {
+    public static boolean pathsAreEqual(Shape shape1, Shape shape2, double tolerance) {
         PathIterator pathIterator1 = shape1.getPathIterator(null);
         PathIterator pathIterator2 = shape2.getPathIterator(null);
 
@@ -1779,7 +1779,7 @@ public class Shapes {
      * Transform fractional crop dimensions (in zoomed-in images)
      * into the actual pixel boundaries
      */
-    public static Rectangle roundCropRect(Rectangle2D rect) {
+    public static Rectangle roundRect(Rectangle2D rect) {
         int x = (int) Math.round(rect.getX());
         int y = (int) Math.round(rect.getY());
         int width = (int) Math.round(rect.getWidth());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public class Fill extends Filter {
      * Fills the BufferedImage with the specified color
      */
     public static void fillImage(BufferedImage img, Color c) {
-        int[] pixels = ImageUtils.getPixelArray(img);
+        int[] pixels = ImageUtils.getPixels(img);
 
         int fillColor = c.getRGB();
 

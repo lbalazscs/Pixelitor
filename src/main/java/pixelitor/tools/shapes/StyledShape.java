@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,7 +57,7 @@ import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.TRANSPARENT;
 
 /**
- * A shape with associated stroke, fill and effects
+ * A shape with associated stroke, fill, and effects
  * that can render itself on a given {@link Graphics2D},
  * and can be transformed by a {@link TransformBox}.
  */
@@ -67,6 +67,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     private static final boolean DEBUG_PAINTING = false;
 
+    /**
+     * The state of a {@link StyledShape}.
+     */
     enum State {
         CREATED, // after the constructor - no actual shape yet
         DESERIALIZED, // after being deserialized
@@ -249,6 +252,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         effects.apply(g, shape); // simplest case
     }
 
+    /**
+     * Paints a thumbnail icon of the shape.
+     */
     public void paintIconThumbnail(Graphics2D g2, int thumbSize) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         Drag drag;
@@ -268,7 +274,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         g2.fill(shapeType.createShape(drag, null));
     }
 
-    // called during the initial drag, when there is no transform box yet
+    /**
+     * Updates the shape based on the current initial drag.
+     */
     public void updateFromDrag(Drag drag, boolean altDown, boolean shiftDown) {
         assert !Tools.SHAPES.hasBox();
 
@@ -386,7 +394,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         }
     }
 
-    public void resetTransform() {
+    /**
+     * Captures the current state as the original state.
+     * Subsequent transformations will be relative to this captured state.
+     */
+    public void captureOrigState() {
         assert transformedDrag != null : "state = " + state;
         origDrag = transformedDrag;
         origShape = shape;
@@ -401,7 +413,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         assert hasShape();
         if (origDrag != transformedDrag) {
             // we aren't at the end of the first user drag
-            resetTransform();
+            captureOrigState();
         }
 
         TransformBox box;
@@ -476,6 +488,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return box;
     }
 
+    /**
+     * Rasterizes the shape, making it part of the drawable's pixels.
+     */
     public void rasterize(Composition comp, TransformBox transformBox, ShapesTool tool) {
         assert checkInvariants();
 
@@ -483,7 +498,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         Drawable dr = comp.getActiveDrawable();
         if (dr != null) { // a text layer could be active
             Rectangle shapeBounds = shape.getBounds();
-            int thickness = 1 + (int) tool.calcThickness();
+            int thickness = 1 + (int) tool.calcExtraThickness();
             shapeBounds.grow(thickness, thickness);
 
             if (!shapeBounds.isEmpty()) {
@@ -508,16 +523,13 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private void paintOnDrawable(Drawable dr) {
-        int tx = -dr.getTx();
-        int ty = -dr.getTy();
-
-        BufferedImage bi = dr.getImage();
-        Graphics2D g2 = bi.createGraphics();
-        g2.translate(tx, ty);
-
+        BufferedImage image = dr.getImage();
+        Graphics2D g2 = image.createGraphics();
+        g2.translate(-dr.getTx(), -dr.getTy());
         dr.getComp().applySelectionClipping(g2);
 
         paint(g2);
+
         g2.dispose();
     }
 
@@ -535,36 +547,41 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         }
     }
 
-    // TODO a hack method
+    /**
+     * Regenerates all aspects of the shape.
+     */
     public void regenerateAll(TransformBox box, ShapesTool tool) {
-        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_TYPE);
-        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_TYPE_SETTINGS);
-        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_FILL);
-        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_STROKE);
-        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS);
-        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_EFFECTS);
-        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_COLORS);
-        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS);
+        regenerate(box, tool, ShapesTool.EDIT_TYPE);
+        regenerate(box, tool, ShapesTool.EDIT_TYPE_SETTINGS);
+        regenerate(box, tool, ShapesTool.EDIT_FILL);
+        regenerate(box, tool, ShapesTool.EDIT_STROKE);
+        regenerate(box, tool, ShapesTool.EDIT_STROKE_SETTINGS);
+        regenerate(box, tool, ShapesTool.EDIT_EFFECTS);
+        regenerate(box, tool, ShapesTool.EDIT_COLORS);
+        regenerate(box, tool, ShapesTool.EDIT_STROKE_SETTINGS);
     }
 
+    /**
+     * Regenerates a specific aspect of the shape.
+     */
     public void regenerate(TransformBox box, ShapesTool tool, String editName) {
         StyledShape backup = clone();
 
         // calculate the new transformed shape
         switch (editName) {
-            case ShapesTool.CHANGE_SHAPE_TYPE -> {
+            case ShapesTool.EDIT_TYPE -> {
                 updateShapeType(tool);
                 recreateShape(tool, box, editName);
             }
-            case ShapesTool.CHANGE_SHAPE_TYPE_SETTINGS -> {
+            case ShapesTool.EDIT_TYPE_SETTINGS -> {
                 reloadTypeSettings(tool);
                 recreateShape(tool, box, editName);
             }
-            case ShapesTool.CHANGE_SHAPE_FILL -> updateFillPaint(tool);
-            case ShapesTool.CHANGE_SHAPE_STROKE -> updateStrokePaint(tool);
-            case ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS -> updateStroke(tool);
-            case ShapesTool.CHANGE_SHAPE_EFFECTS -> updateEffects(tool);
-            case ShapesTool.CHANGE_SHAPE_COLORS -> updateColors();
+            case ShapesTool.EDIT_FILL -> updateFillPaint(tool);
+            case ShapesTool.EDIT_STROKE -> updateStrokePaint(tool);
+            case ShapesTool.EDIT_STROKE_SETTINGS -> updateStroke(tool);
+            case ShapesTool.EDIT_EFFECTS -> updateEffects(tool);
+            case ShapesTool.EDIT_COLORS -> updateColors();
             default -> throw new IllegalStateException("Unexpected edit: " + editName);
         }
 
@@ -579,7 +596,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return shapeType;
     }
 
-    public List<ParamState<?>> getShapeTypeSettings() {
+    public List<ParamState<?>> getTypeSettings() {
         return typeSettings;
     }
 

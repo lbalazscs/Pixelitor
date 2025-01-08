@@ -60,14 +60,14 @@ public class GlowFilter extends AbstractBufferedImageOp {
 
         BufferedImage srcCopy = ImageUtils.copyImage(src);
 
-        int[] inPixels = ImageUtils.getPixelArray(src);
+        int[] inPixels = ImageUtils.getPixels(src);
 
         if (radius > 0) {
             BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3, filterName);
             srcCopy = boxBlur.filter(srcCopy, srcCopy);
         }
 
-        int[] outPixels = ImageUtils.getPixelArray(srcCopy);
+        int[] outPixels = ImageUtils.getPixels(srcCopy);
 
         float a = 4 * amount;
 

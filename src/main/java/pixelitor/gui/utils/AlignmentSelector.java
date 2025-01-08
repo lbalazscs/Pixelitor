@@ -44,18 +44,18 @@ public class AlignmentSelector extends JPanel {
     public AlignmentSelector(int defaultAlignment, ParamAdjustmentListener adjustmentListener) {
         setLayout(new GridLayout(1, 3, 0, 0));
 
-        boolean darkTheme = Themes.getActive().isDark();
-        ButtonGroup group = new ButtonGroup();
-
         if (iconShapes == null) {
             createIconShapes();
         }
+
+        boolean darkTheme = Themes.getActive().isDark();
+        ButtonGroup group = new ButtonGroup();
 
         leftAlign = addButton(0, group, darkTheme);
         centerAlign = addButton(1, group, darkTheme);
         rightAlign = addButton(2, group, darkTheme);
 
-        setSelected(defaultAlignment);
+        setAlignment(defaultAlignment);
 
         // bind to the listener only after setting the default selection
         leftAlign.addActionListener(e -> adjustmentListener.paramAdjusted());
@@ -101,20 +101,18 @@ public class AlignmentSelector extends JPanel {
     private static Path2D createIconShape(int alignment) {
         int lineHeight = 2;
         int lineGap = 2;
-
         // 5 lines, and 4 gaps between them
         assert (5 * lineHeight) + (4 * lineGap) == ICON_SIZE;
 
-        // TODO the 3 shapes could be cached
         Path2D shape = new Path2D.Double();
         for (int i = 0; i < 5; i++) {
             int y = i * (lineHeight + lineGap);
             int lineWidth = (i % 2 == 0) ? ICON_SIZE : (int) (ICON_SIZE * 0.6);
 
             double x = switch (alignment) {
-                case CENTER -> (ICON_SIZE - lineWidth) / 2.0;  // center all lines
-                case RIGHT -> ICON_SIZE - lineWidth;         // align to right
-                case LEFT -> 0;                               // align to left
+                case CENTER -> (ICON_SIZE - lineWidth) / 2.0;
+                case RIGHT -> ICON_SIZE - lineWidth;
+                case LEFT -> 0;
                 default -> throw new IllegalStateException("Unexpected value: " + alignment);
             };
 
@@ -138,7 +136,7 @@ public class AlignmentSelector extends JPanel {
         return LEFT;
     }
 
-    public void setSelected(int alignment) {
+    public void setAlignment(int alignment) {
         JToggleButton selectedButton = switch (alignment) {
             case LEFT -> leftAlign;
             case CENTER -> centerAlign;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,8 +72,8 @@ public class Colorize extends ParametrizedFilter {
 
     private static BufferedImage colorize(BufferedImage src, BufferedImage dest,
                                           Color color, float briShift, float opacity) {
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
         int red = color.getRed();
         int green = color.getGreen();
@@ -90,11 +90,11 @@ public class Colorize extends ParametrizedFilter {
             blueLookup[i] = (i * blue) / 255;
         }
 
-        int length = srcData.length;
+        int length = srcPixels.length;
 
         float translucence = 1 - opacity;
         for (int i = 0; i < length; i++) {
-            int srcRGB = srcData[i];
+            int srcRGB = srcPixels[i];
             float lum = LuminanceLookup.from(srcRGB);
             if (briShift > 0) {
                 lum = lum * (1.0f - briShift);
@@ -120,7 +120,7 @@ public class Colorize extends ParametrizedFilter {
             }
 
             int a = srcRGB & 0xFF_00_00_00;
-            destData[i] = a | destRed << 16 | destGreen << 8 | destBlue;
+            destPixels[i] = a | destRed << 16 | destGreen << 8 | destBlue;
         }
 
         return dest;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class XYZTest extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         dest = ImageUtils.copyImage(src);
-        int[] pixels = ImageUtils.getPixelArray(dest);
+        int[] pixels = ImageUtils.getPixels(dest);
 
         double[] rgb = {0.0, 0.0, 0.0};
         double[] xyz = {0.0, 0.0, 0.0};

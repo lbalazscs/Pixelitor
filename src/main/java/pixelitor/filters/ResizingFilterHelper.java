@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,13 +60,13 @@ public class ResizingFilterHelper {
             @Override
             public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
                                          double resizeFactor, ProgressTracker pt) {
-                return ImageUtils.enlargeSmooth(smallDest, src.getWidth(), src.getHeight(),
+                return ImageUtils.enlargeSmoothly(smallDest, src.getWidth(), src.getHeight(),
                     VALUE_INTERPOLATION_BILINEAR, 1.1, pt);
             }
 
             @Override
             public int getWorkUnits(double resizeFactor) {
-                return ImageUtils.calcNumStepsForEnlargeSmooth(resizeFactor, 1.1);
+                return ImageUtils.calcEnlargeSmoothlySteps(resizeFactor, 1.1);
             }
         };
 

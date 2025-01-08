@@ -90,21 +90,21 @@ public class Clouds extends ParametrizedFilter {
                               Color c1, Color c2, ProgressTracker pt) {
         int width = dest.getWidth();
         int height = dest.getHeight();
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] destPixels = ImageUtils.getPixels(dest);
         int[] c1Arr = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
         int[] c2Arr = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 
         Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable rowTask = () -> processRow(scale, roughness, width, finalY, destData, c1Arr, c2Arr);
+            Runnable rowTask = () -> processRow(scale, roughness, width, finalY, destPixels, c1Arr, c2Arr);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
         ThreadPool.waitFor(rowFutures, pt);
     }
 
     private void processRow(float startingScale, float roughness,
-                            int width, int y, int[] destData,
+                            int width, int y, int[] destPixels,
                             int[] color1, int[] color2) {
         for (int x = 0; x < width; x++) {
             float scale = startingScale;
@@ -127,7 +127,7 @@ public class Clouds extends ParametrizedFilter {
                 noiseValue = 1.0f;
             }
 
-            destData[x + y * width] = ImageUtils.lerpAndPremultiply(
+            destPixels[x + y * width] = ImageUtils.lerpAndPremultiply(
                 noiseValue, color1, color2);
         }
     }

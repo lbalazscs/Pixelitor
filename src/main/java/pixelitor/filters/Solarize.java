@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,8 +62,8 @@ public class Solarize extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
         float redThr = redThreshold.getValueAsFloat();
         float greenThr = greenThreshold.getValueAsFloat();
@@ -125,12 +125,12 @@ public class Solarize extends ParametrizedFilter {
             }
         }
 
-        for (int i = 0, destDataLength = destData.length; i < destDataLength; i++) {
-            int rgb = srcData[i];
+        for (int i = 0, destPixelsLength = destPixels.length; i < destPixelsLength; i++) {
+            int rgb = srcPixels[i];
 
             int a = (rgb >>> 24) & 0xFF;
             if (a == 0) {
-                destData[i] = 0;
+                destPixels[i] = 0;
             } else {
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
@@ -140,7 +140,7 @@ public class Solarize extends ParametrizedFilter {
                 int newG = greenLookup[g];
                 int newB = blueLookup[b];
 
-                destData[i] = a << 24 | newR << 16 | newG << 8 | newB;
+                destPixels[i] = a << 24 | newR << 16 | newG << 8 | newB;
             }
         }
 

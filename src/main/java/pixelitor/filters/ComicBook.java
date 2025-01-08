@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,23 +82,23 @@ public class ComicBook extends ParametrizedFilter {
 
     public static BufferedImage edges(BufferedImage src, float radius) {
         BufferedImage blurredI = blur(src, radius);
-        return ImageUtils.getHighPassFilteredImage(src, blurredI);
+        return ImageUtils.toHighPassFilteredImage(src, blurredI);
     }
 
     public static BufferedImage gray(BufferedImage src) {
         BufferedImage out = ImageUtils.createImageWithSameCM(src);
 
-        int[] src_pixels = ImageUtils.getPixelArray(src);
-        int[] out_pixels = ImageUtils.getPixelArray(out);
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] outPixels = ImageUtils.getPixels(out);
 
-        for (int i = 0; i < src_pixels.length; i++) {
-            int rgb = src_pixels[i];
+        for (int i = 0; i < srcPixels.length; i++) {
+            int rgb = srcPixels[i];
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
             r = (r + g + b) / 3;
             rgb = packSingleValue(r);
-            out_pixels[i] = rgb;
+            outPixels[i] = rgb;
         }
 
         return out;
@@ -107,7 +107,7 @@ public class ComicBook extends ParametrizedFilter {
     public static BufferedImage stairs(BufferedImage src, int stair_steps) {
         Stairs stairs = new Stairs(stair_steps);
         BufferedImage out = ImageUtils.copyImage(src);
-        int[] pixels = ImageUtils.getPixelArray(out);
+        int[] pixels = ImageUtils.getPixels(out);
         for (int i = 0; i < pixels.length; i++) {
             int rgb = pixels[i];
             int r = (rgb >>> 16) & 0xFF;
@@ -130,14 +130,14 @@ public class ComicBook extends ParametrizedFilter {
 
     public static BufferedImage threshold(BufferedImage bias_src, BufferedImage src, int threshold) {
         BufferedImage out = ImageUtils.copyImage(src);
-        int[] bias_pix = ImageUtils.getPixelArray(bias_src);
-        int[] out_pix = ImageUtils.getPixelArray(out);
+        int[] biasPixels = ImageUtils.getPixels(bias_src);
+        int[] outPixels = ImageUtils.getPixels(out);
 
         int blackRGB = Color.BLACK.getRGB();
-        for (int i = 0; i < bias_pix.length; i++) {
-            int bias = bias_pix[i] & 0xFF; // Just the b is enough because here we know that the image is gray scaled.
+        for (int i = 0; i < biasPixels.length; i++) {
+            int bias = biasPixels[i] & 0xFF; // Just the b is enough because here we know that the image is gray scaled.
             if (bias < threshold) {
-                out_pix[i] = blackRGB;
+                outPixels[i] = blackRGB;
             }
         }
 

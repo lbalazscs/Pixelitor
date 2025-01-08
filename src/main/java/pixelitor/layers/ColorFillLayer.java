@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public class ColorFillLayer extends Layer {
 
     public static void createNew(Composition comp) {
         Tools.forceFinish();
-        ColorFillLayer layer = new ColorFillLayer(comp, createName(), null);
+        ColorFillLayer layer = new ColorFillLayer(comp, generateName(), null);
         var activeLayerBefore = comp.getActiveLayer();
         var prevViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
@@ -77,7 +77,7 @@ public class ColorFillLayer extends Layer {
         }
     }
 
-    private static String createName() {
+    private static String generateName() {
         return "color fill " + (++count);
     }
 

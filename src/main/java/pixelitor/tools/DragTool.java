@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,23 +28,26 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 
 /**
- * An abstract superclass for tools that only care about the mouse drag
+ * An abstract base class for tools that only care about the mouse drag
  * start and end positions, and not about the intermediate mouse positions.
- * The start and end points of the drag gesture are continuously
- * updated in the {@link Drag} object.
+ * The start and end points of the drag gesture are
+ * continuously updated in the {@link Drag} object.
  */
 public abstract class DragTool extends Tool {
+    // encapsulates the start and end points of the drag
     protected Drag drag;
 
-    // Declared here, but the state transitions are
-    // managed by the concrete tool subclasses.
+    // the current state of the drag tool (managed by concrete subclasses)
     protected DragToolState state = DragToolState.IDLE;
 
+    // whether the end point inside the Drag object is initialized
     private boolean endPointInitialized = false;
+
+    // whether the starting point is adjusted when space is pressed during drag
     protected boolean spaceDragStartPoint = false;
 
-    // subclasses will automatically support constrained
-    // movement when Shift is pressed if this is set to true
+    // whether movement is constrained to multiples
+    // of 45 degree angles when Shift is pressed
     private final boolean shiftConstrains;
 
     protected DragTool(String name, char activationKey, String toolMessage,
@@ -69,7 +72,7 @@ public abstract class DragTool extends Tool {
     public void mouseDragged(PMouseEvent e) {
         // the drag could be null if this tool was activated while dragging
         if (drag == null) {
-            mousePressed(e);
+            mousePressed(e); // start drag as if mouse was just pressed
         }
 
         if (drag.isCanceled()) {
@@ -110,14 +113,23 @@ public abstract class DragTool extends Tool {
         endPointInitialized = false;
     }
 
+    /**
+     * Called when a drag is started.
+     */
     protected abstract void dragStarted(PMouseEvent e);
 
+    /**
+     * Called continuously while a drag is in progress.
+     */
     protected abstract void ongoingDrag(PMouseEvent e);
 
+    /**
+     * Called when a drag is finished
+     */
     protected abstract void dragFinished(PMouseEvent e);
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp) {
+    public void paintOverView(Graphics2D g2, Composition comp) {
         if (drag == null || !drag.isDragging()) {
             return;
         }
@@ -126,7 +138,7 @@ public abstract class DragTool extends Tool {
     }
 
     protected DragDisplayType getDragDisplayType() {
-        return DragDisplayType.WIDTH_HEIGHT;
+        return DragDisplayType.WIDTH_HEIGHT; // default to width/height display
     }
 
     public DragToolState getState() {

@@ -46,6 +46,7 @@ public interface BlurredShape {
     int TYPE_DIAMOND = 3;
     int TYPE_HEXAGON = 4;
     int TYPE_OCTAGON = 5;
+    int TYPE_STAR = 6;
 
     static IntChoiceParam getChoices() {
         return new IntChoiceParam("Shape", new Item[]{
@@ -55,6 +56,7 @@ public interface BlurredShape {
             new Item("Diamond", TYPE_DIAMOND),
             new Item("Hexagon", TYPE_HEXAGON),
             new Item("Octagon", TYPE_OCTAGON),
+            new Item("Star", TYPE_STAR),
         });
     }
 
@@ -87,6 +89,10 @@ public interface BlurredShape {
                 outerRadiusX, outerRadiusY);
             case TYPE_OCTAGON -> GenericBlurredShape.of(
                 drag -> ShapeType.STAR.createShape(drag, new StarSettings(4, 100)), center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+            case TYPE_STAR -> GenericBlurredShape.of(
+                drag -> ShapeType.STAR.createShape(drag, new StarSettings()), center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
             default -> throw new IllegalStateException();

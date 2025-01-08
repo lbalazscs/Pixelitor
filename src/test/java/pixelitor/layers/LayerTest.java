@@ -99,10 +99,10 @@ public class LayerTest {
         layer = TestHelper.createLayer(layerClass, comp);
 
         // for smart filters add their smart object
-        comp.addLayerNoUI(layer.getTopLevelLayer());
+        comp.addLayerWithoutUI(layer.getTopLevelLayer());
 
         layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
-        comp.addLayerNoUI(layer2);
+        comp.addLayerWithoutUI(layer2);
 
         withMask.configure(layer);
         LayerMask mask = null;
