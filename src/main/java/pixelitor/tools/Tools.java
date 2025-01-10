@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,16 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
+import pixelitor.selection.SelectionType;
 import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.move.MoveTool;
 import pixelitor.tools.pen.PenTool;
+import pixelitor.tools.selection.LassoSelectionTool;
+import pixelitor.tools.selection.MagicWandSelectionTool;
+import pixelitor.tools.selection.MarqueeSelectionTool;
+import pixelitor.tools.selection.PolygonalSelectionTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.AppPreferences;
@@ -46,7 +51,12 @@ public class Tools {
 
     public static final MoveTool MOVE = new MoveTool();
     public static final CropTool CROP = new CropTool();
-    public static final SelectionTool SELECTION = new SelectionTool();
+    //    public static final SelectionTool SELECTION = new SelectionTool();
+    public static final MarqueeSelectionTool RECTANGLE_SELECTION = new MarqueeSelectionTool(SelectionType.RECTANGLE);
+    public static final MarqueeSelectionTool ELLIPSE_SELECTION = new MarqueeSelectionTool(SelectionType.ELLIPSE);
+    public static final LassoSelectionTool LASSO_SELECTION = new LassoSelectionTool();
+    public static final PolygonalSelectionTool POLY_SELECTION = new PolygonalSelectionTool();
+    public static final MagicWandSelectionTool MAGIC_SELECTION = new MagicWandSelectionTool();
     public static final BrushTool BRUSH = new BrushTool();
     public static final CloneTool CLONE = new CloneTool();
     public static final EraserTool ERASER = new EraserTool();
@@ -60,7 +70,10 @@ public class Tools {
     public static final ZoomTool ZOOM = new ZoomTool();
 
     private static final Tool[] allTools = {
-        MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
+        MOVE, CROP,
+        RECTANGLE_SELECTION, ELLIPSE_SELECTION, LASSO_SELECTION,
+        POLY_SELECTION, MAGIC_SELECTION,
+        BRUSH, CLONE, ERASER,
         SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
         PEN, SHAPES, HAND, ZOOM};
 

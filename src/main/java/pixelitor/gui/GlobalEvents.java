@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -103,11 +103,11 @@ public class GlobalEvents {
         // Private constructor to prevent instantiation of utility class
     }
 
-    public static void registerHotKey(char key, Action action) {
-        registerHotKey(key, action, false);
+    public static void registerHotkey(char key, Action action) {
+        registerHotkey(key, action, false);
     }
 
-    private static void registerHotKey(char key, Action action, boolean caseSensitive) {
+    private static void registerHotkey(char key, Action action, boolean caseSensitive) {
         if (!caseSensitive) {
             assert Character.isUpperCase(key) : "Non-case-sensitive keys must be uppercase";
 
@@ -157,8 +157,8 @@ public class GlobalEvents {
     }
 
     private static void registerBrushSizeShortcuts() {
-        registerHotKey(']', INCREASE_BRUSH_SIZE_ACTION, true);
-        registerHotKey('[', DECREASE_BRUSH_SIZE_ACTION, true);
+        registerHotkey(']', INCREASE_BRUSH_SIZE_ACTION, true);
+        registerHotkey('[', DECREASE_BRUSH_SIZE_ACTION, true);
     }
 
     private static void keyPressed(KeyEvent e) {

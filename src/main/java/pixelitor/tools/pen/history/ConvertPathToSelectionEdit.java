@@ -61,6 +61,6 @@ public class ConvertPathToSelectionEdit extends PixelitorEdit {
 
         comp.setActivePath(null);
         Tools.PEN.reset();
-        Tools.SELECTION.activate();
+        Tools.LASSO_SELECTION.activate();
     }
 }

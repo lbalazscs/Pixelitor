@@ -56,7 +56,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     private final String name;
     private final String shortName;
     private final String toolMessage;
-    private final char activationKey;
+    private final char hotKey;
     private final Cursor cursor;
 
     // a chain of handlers that can intercept
@@ -74,9 +74,9 @@ public abstract class Tool implements PresetOwner, Debuggable {
     // The actual snapping also depends on the Preferences setting.
     protected boolean pixelSnapping = false;
 
-    protected Tool(String name, char activationKey, String toolMessage, Cursor cursor) {
-        this.activationKey = activationKey;
-        assert Character.isUpperCase(activationKey);
+    protected Tool(String name, char hotKey, String toolMessage, Cursor cursor) {
+        this.hotKey = hotKey;
+        assert Character.isUpperCase(hotKey);
 
         this.shortName = name;
         this.name = name + " Tool";
@@ -345,8 +345,17 @@ public abstract class Tool implements PresetOwner, Debuggable {
         return shortName;
     }
 
-    public char getActivationKey() {
-        return activationKey;
+    public char getHotkey() {
+        return hotKey;
+    }
+
+    /**
+     * Returns whether this tool shares its hotkey with other tools.
+     * A tool shares its key when it's part of a tool group where
+     * multiple tools can be activated by the same keyboard shortcut.
+     */
+    public boolean hasSharedHotkey() {
+        return false;
     }
 
     public boolean hasPixelSnapping() {

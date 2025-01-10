@@ -102,9 +102,9 @@ public abstract class AbstractBrushTool extends Tool {
     private final BrushOutlinePainter brushPainter = new BrushOutlinePainter(DEFAULT_BRUSH_RADIUS);
     private boolean brushPainted = false;
 
-    AbstractBrushTool(String name, char activationKey, String toolMessage,
+    AbstractBrushTool(String name, char hotKey, String toolMessage,
                       Cursor cursor, boolean supportsSymmetry) {
-        super(name, activationKey, toolMessage, cursor);
+        super(name, hotKey, toolMessage, cursor);
         this.supportsSymmetry = supportsSymmetry;
         if (supportsSymmetry) {
             symmetryModel = new EnumComboBoxModel<>(Symmetry.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,6 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.history.History.redo;
 import static pixelitor.history.History.undo;
-import static pixelitor.selection.SelectionType.RECTANGLE;
 import static pixelitor.selection.ShapeCombinator.REPLACE;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
@@ -74,7 +73,7 @@ class PenToolTest {
         createSimpleClosedPathInBuildMode();
 
         Tools.PEN.convertToSelection();
-        assertThat(Tools.SELECTION).isActive();
+        assertThat(Tools.LASSO_SELECTION).isActive();
         assertThat(comp).hasSelection();
 
         undo("Convert Path to Selection");
@@ -86,7 +85,7 @@ class PenToolTest {
         assertThat(comp).doesNotHaveSelection();
 
         redo("Convert Path to Selection");
-        assertThat(Tools.SELECTION).isActive();
+        assertThat(Tools.LASSO_SELECTION).isActive();
         assertThat(comp).hasSelection();
     }
 
@@ -101,7 +100,7 @@ class PenToolTest {
             .modeIs(EDIT);
 
         Tools.PEN.convertToSelection();
-        assertThat(Tools.SELECTION).isActive();
+        assertThat(Tools.LASSO_SELECTION).isActive();
         assertThat(comp).hasSelection();
 
         undo("Convert Path to Selection");
@@ -113,17 +112,16 @@ class PenToolTest {
         assertThat(comp).doesNotHaveSelection();
 
         redo("Convert Path to Selection");
-        assertThat(Tools.SELECTION).isActive();
+        assertThat(Tools.LASSO_SELECTION).isActive();
         assertThat(comp).hasSelection();
     }
 
     @Test
     @DisplayName("convert selection to path")
     void convertSelectionToPath() {
-        Tools.setActiveTool(Tools.SELECTION);
-        assertThat(Tools.SELECTION)
+        Tools.setActiveTool(Tools.RECTANGLE_SELECTION);
+        assertThat(Tools.RECTANGLE_SELECTION)
             .isActive()
-            .selectionTypeIs(RECTANGLE)
             .combinatorIs(REPLACE);
 
         // build a quick rectangular selection by dragging
@@ -142,7 +140,7 @@ class PenToolTest {
         assertThat(comp).doesNotHaveSelection();
 
         undo("Convert Selection to Path");
-        assertThat(Tools.SELECTION).isActive();
+        assertThat(Tools.LASSO_SELECTION).isActive();
         assertThat(comp).hasSelection();
 
         redo("Convert Selection to Path");

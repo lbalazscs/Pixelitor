@@ -237,7 +237,7 @@ public class PenTool extends Tool {
             comp, oldPath, selectionEdit, oldMode));
         assert checkPathConsistency();
 
-        Tools.SELECTION.activate();
+        Tools.LASSO_SELECTION.activate();
     }
 
     @Override

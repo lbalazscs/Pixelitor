@@ -50,10 +50,10 @@ public abstract class DragTool extends Tool {
     // of 45 degree angles when Shift is pressed
     private final boolean shiftConstrains;
 
-    protected DragTool(String name, char activationKey, String toolMessage,
+    protected DragTool(String name, char hotKey, String toolMessage,
                        Cursor cursor, boolean shiftConstrains) {
 
-        super(name, activationKey, toolMessage, cursor);
+        super(name, hotKey, toolMessage, cursor);
 
         this.shiftConstrains = shiftConstrains;
     }

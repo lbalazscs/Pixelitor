@@ -254,7 +254,7 @@ public class WorkflowTest {
         app.mergeDown();
         createEllipseSelection();
         expandSelection();
-        selectionToPath();
+        eclipseSelectionToPath();
         flipHorizontal();
         tracePath(BrushType.WOBBLE);
         pathToSelection();
@@ -262,7 +262,7 @@ public class WorkflowTest {
         move(MOVE_SELECTION_ONLY, 0, -100);
         pasteSelection();
         move(MOVE_SELECTION_ONLY, 0, 50);
-        selectionToPath();
+        eclipseSelectionToPath();
         app.swapColors();
         tracePath(BrushType.SHAPE);
         flipHorizontal();
@@ -776,8 +776,7 @@ public class WorkflowTest {
     }
 
     private void createEllipseSelection() {
-        app.clickTool(Tools.SELECTION);
-        pw.comboBox("typeCB").selectItem("Ellipse");
+        app.clickTool(Tools.ELLIPSE_SELECTION);
         pw.button("toPathButton").requireDisabled();
 
         int canvasWidth = INITIAL_WIDTH + 2 * EXTRA_WIDTH;
@@ -796,8 +795,8 @@ public class WorkflowTest {
         keyboard.undoRedo("Modify Selection");
     }
 
-    private void selectionToPath() {
-        app.clickTool(Tools.SELECTION);
+    private void eclipseSelectionToPath() {
+        app.clickTool(Tools.ELLIPSE_SELECTION);
         pw.button("toPathButton")
             .requireEnabled()
             .click();

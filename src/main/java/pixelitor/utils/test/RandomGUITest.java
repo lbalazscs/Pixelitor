@@ -177,7 +177,7 @@ public class RandomGUITest {
 
     private void registerHotKeys() {
         // make sure it can be stopped by pressing a key
-        GlobalEvents.registerHotKey(PAUSE_KEY_CHAR, new TaskAction(() -> {
+        GlobalEvents.registerHotkey(PAUSE_KEY_CHAR, new TaskAction(() -> {
                 System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
                 stopRunning = true;
             })
@@ -185,7 +185,7 @@ public class RandomGUITest {
         stopRunning = false;
 
         // This key not only stops the testing, but also exits the app
-        GlobalEvents.registerHotKey(EXIT_KEY_CHAR, new TaskAction(() -> {
+        GlobalEvents.registerHotkey(EXIT_KEY_CHAR, new TaskAction(() -> {
             System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
                 EXIT_KEY_CHAR);
             // no need to reset the GUI here, because preferences won't be saved

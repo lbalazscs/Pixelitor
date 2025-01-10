@@ -302,9 +302,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void setupKeyboardShortcuts() {
-        GlobalEvents.registerHotKey('D', resetToDefaultAction);
-        GlobalEvents.registerHotKey('X', swapColorsAction);
-        GlobalEvents.registerHotKey('R', randomizeColorsAction);
+        GlobalEvents.registerHotkey('D', resetToDefaultAction);
+        GlobalEvents.registerHotkey('X', swapColorsAction);
+        GlobalEvents.registerHotkey('R', randomizeColorsAction);
     }
 
     public void maskEditingChanged(boolean maskEditing) {

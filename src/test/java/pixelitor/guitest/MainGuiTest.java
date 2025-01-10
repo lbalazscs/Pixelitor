@@ -99,7 +99,6 @@ import static pixelitor.guitest.GUITestUtils.findButtonByText;
 import static pixelitor.guitest.MaskMode.NO_MASK;
 import static pixelitor.menus.view.ZoomLevel.zoomLevels;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
-import static pixelitor.selection.SelectionType.RECTANGLE;
 import static pixelitor.selection.ShapeCombinator.ADD;
 import static pixelitor.selection.ShapeCombinator.REPLACE;
 import static pixelitor.tools.DragToolState.IDLE;
@@ -225,8 +224,7 @@ public class MainGuiTest {
     }
 
     private void clickAndResetSelectTool() {
-        pw.toggleButton("Selection Tool Button").click();
-        pw.comboBox("typeCB").selectItem("Rectangle");
+        pw.toggleButton("Rectangle Selection Tool Button").click();
         pw.comboBox("combinatorCB").selectItem("Replace");
     }
 
@@ -751,8 +749,6 @@ public class MainGuiTest {
 
         // select for crop
         clickAndResetSelectTool();
-        assert EDT.call(() ->
-            Tools.SELECTION.getSelectionType() == RECTANGLE);
 
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(400, 400);
@@ -2177,7 +2173,7 @@ public class MainGuiTest {
         pw.button("toSelectionButton")
             .requireEnabled()
             .click();
-        EDT.assertActiveToolIs(Tools.SELECTION);
+        EDT.assertActiveToolIs(Tools.LASSO_SELECTION);
 
         keyboard.invert();
 
@@ -2421,13 +2417,13 @@ public class MainGuiTest {
         // make sure we are at 100%
         keyboard.actualPixels();
 
-        app.clickTool(Tools.SELECTION);
-        EDT.assertSelectionCombinatorIs(REPLACE);
+        app.clickTool(Tools.RECTANGLE_SELECTION);
+        EDT.assertSelectionCombinatorIs(Tools.RECTANGLE_SELECTION, REPLACE);
 
         mouse.randomAltClick();
         // the Alt should change the interaction only temporarily,
         // while the mouse is down
-        EDT.assertSelectionCombinatorIs(REPLACE);
+        EDT.assertSelectionCombinatorIs(Tools.RECTANGLE_SELECTION, REPLACE);
 
         // TODO test poly selection
         testWithSimpleSelection();
@@ -2461,8 +2457,8 @@ public class MainGuiTest {
     }
 
     private void testWithTwoEclipseSelections() {
-        pw.comboBox("typeCB").selectItem("Ellipse");
-        EDT.assertActiveToolIs(Tools.SELECTION);
+        app.clickTool(Tools.ELLIPSE_SELECTION);
+        EDT.assertActiveToolIs(Tools.ELLIPSE_SELECTION);
 
         // replace current selection with the first ellipse
         int e1X = 200;
@@ -2475,7 +2471,7 @@ public class MainGuiTest {
 
         // add second ellipse
         pw.comboBox("combinatorCB").selectItem("Add");
-        EDT.assertSelectionCombinatorIs(ADD);
+        EDT.assertSelectionCombinatorIs(Tools.ELLIPSE_SELECTION, ADD);
 
         int e2X = 400;
         int e2Y = 100;
@@ -2940,7 +2936,7 @@ public class MainGuiTest {
     }
 
     private void addSelection() {
-        pw.toggleButton("Selection Tool Button").click();
+        pw.toggleButton("Rectangle Selection Tool Button").click();
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(600, 500);
     }

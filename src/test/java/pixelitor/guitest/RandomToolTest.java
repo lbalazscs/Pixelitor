@@ -41,6 +41,7 @@ import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.PenToolMode;
+import pixelitor.tools.selection.AbstractSelectionTool;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.StrokeCap;
 import pixelitor.tools.util.ArrowKey;
@@ -79,7 +80,6 @@ import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.Tools.HAND;
 import static pixelitor.tools.Tools.MOVE;
 import static pixelitor.tools.Tools.PEN;
-import static pixelitor.tools.Tools.SELECTION;
 import static pixelitor.tools.Tools.SHAPES;
 import static pixelitor.tools.Tools.ZOOM;
 import static pixelitor.tools.Tools.getRandomTool;
@@ -355,7 +355,7 @@ public class RandomToolTest {
             app.clickTool(tool);
         } else {
             log("activating " + tool.getName() + " with keyboard");
-            keyboard.pressChar(tool.getActivationKey());
+            keyboard.pressChar(tool.getHotkey());
         }
     }
 
@@ -716,7 +716,7 @@ public class RandomToolTest {
             Rnd.runWithProbability(this::clickPenToolButton, 0.4);
         } else if (tool == ZOOM || tool == HAND) {
             Rnd.runWithProbability(this::clickZoomOrHandToolButton, 0.2);
-        } else if (tool == SELECTION) {
+        } else if (tool instanceof AbstractSelectionTool) {
             Rnd.runWithProbability(this::clickSelectionToolButton, 0.5);
         } else if (tool == SHAPES) {
             Rnd.runWithProbability(this::randomizeShapeTypeSettings, 0.2);
@@ -975,7 +975,7 @@ public class RandomToolTest {
     }
 
     private void setupPauseKey() {
-        GlobalEvents.registerHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
+        GlobalEvents.registerHotkey(PAUSE_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 pauseKeyPressed();
@@ -1000,7 +1000,7 @@ public class RandomToolTest {
 
     private void setupExitKey() {
         // This key not only pauses the testing, but also exits the app
-        GlobalEvents.registerHotKey(EXIT_KEY_CHAR, new AbstractAction() {
+        GlobalEvents.registerHotkey(EXIT_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 exitKeyPressed();

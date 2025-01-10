@@ -57,7 +57,7 @@ public class ToolButton extends JToggleButton {
         setupIcons(tool);
 
         setToolTipText("<html>" + tool.getName()
-            + " (<b>" + tool.getActivationKey() + "</b>)");
+            + " (<b>" + tool.getHotkey() + "</b>)");
 
         // Adds a listener to activate the tool when the button is selected.
         // An item listener is better than an action listener because it

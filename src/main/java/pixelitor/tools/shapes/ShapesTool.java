@@ -580,7 +580,7 @@ public class ShapesTool extends DragTool {
             comp, transformBox, styledShape, selectionEdit));
 
         reset();
-        Tools.SELECTION.activate();
+        Tools.LASSO_SELECTION.activate();
     }
 
     @Override

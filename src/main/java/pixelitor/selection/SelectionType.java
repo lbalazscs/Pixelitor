@@ -20,7 +20,7 @@ package pixelitor.selection;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.SelectionTool;
+import pixelitor.tools.selection.MagicWandSelectionTool;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.ImageUtils;
@@ -118,7 +118,7 @@ public enum SelectionType {
             x -= tx;
             y -= ty;
 
-            int colorTolerance = SelectionTool.getTolerance();
+            int colorTolerance = MagicWandSelectionTool.getTolerance();
 
             BufferedImage image = dr.getImage();
             int imgHeight = image.getHeight();

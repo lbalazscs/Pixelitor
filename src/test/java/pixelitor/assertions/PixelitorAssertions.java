@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,10 +26,10 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.layers.*;
 import pixelitor.selection.Selection;
-import pixelitor.tools.SelectionTool;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.SubPath;
+import pixelitor.tools.selection.AbstractSelectionTool;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 
@@ -69,7 +69,7 @@ public class PixelitorAssertions extends Assertions {
         return new PenToolAssert(actual);
     }
 
-    public static SelectionToolAssert assertThat(SelectionTool actual) {
+    public static SelectionToolAssert assertThat(AbstractSelectionTool actual) {
         return new SelectionToolAssert(actual);
     }
 

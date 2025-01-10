@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import pixelitor.tools.Tools;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 
 /**
  * The panel with the tool buttons and the color selector
@@ -54,8 +55,13 @@ public class ToolsPanel extends JPanel {
             ToolButton toolButton = new ToolButton(tool);
             toolsPanel.add(toolButton);
             group.add(toolButton);
-            setupKeyboardShortcut(tool);
+            if (!tool.hasSharedHotkey()) {
+                setupHotkey(tool);
+            }
         }
+        // manually register the hotkeys of the sharing tools
+        setupSharedHotkey(Tools.RECTANGLE_SELECTION, Tools.ELLIPSE_SELECTION);
+        setupSharedHotkey(Tools.LASSO_SELECTION, Tools.POLY_SELECTION);
     }
 
     private void addColorSelector(PixelitorWindow pw) {
@@ -67,7 +73,7 @@ public class ToolsPanel extends JPanel {
     private static void setupTShortCut() {
         // There is no text tool, but pressing T should add a text layer.
         // In the menu it was added using T, not t.
-        GlobalEvents.registerHotKey('T', AddTextLayerAction.INSTANCE);
+        GlobalEvents.registerHotkey('T', AddTextLayerAction.INSTANCE);
     }
 
     private static Dimension calcToolButtonSize(Dimension screen, PixelitorWindow pw) {
@@ -91,13 +97,35 @@ public class ToolsPanel extends JPanel {
             ToolButton.ICON_SIZE + heightAdjustment);
     }
 
-    private static void setupKeyboardShortcut(Tool tool) {
+    private static void setupHotkey(Tool tool) {
         Action activateAction = new TaskAction(() -> {
             if (Tools.activeTool != tool) {
                 tool.activate();
             }
         });
 
-        GlobalEvents.registerHotKey(tool.getActivationKey(), activateAction);
+        GlobalEvents.registerHotkey(tool.getHotkey(), activateAction);
+    }
+
+    private static void setupSharedHotkey(Tool... sharingTools) {
+        Action multiToolAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int activeIndex = -1;
+                for (int i = 0; i < sharingTools.length; i++) {
+                    if (sharingTools[i].isActive()) {
+                        activeIndex = i;
+                        break;
+                    }
+                }
+
+                // activate the next tool, or the first tool if
+                // none of the sharing tools were active
+                int nextIndex = (activeIndex + 1) % sharingTools.length;
+                sharingTools[nextIndex].activate();
+            }
+        };
+        char key = sharingTools[0].getHotkey();
+        GlobalEvents.registerHotkey(key, multiToolAction);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PathTransformer;
 import pixelitor.tools.pen.PenTool;
+import pixelitor.tools.selection.AbstractSelectionTool;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.test.Events;
@@ -107,8 +108,8 @@ public class EDT {
         }
     }
 
-    public static void assertSelectionCombinatorIs(ShapeCombinator expected) {
-        ShapeCombinator actual = call(Tools.SELECTION::getCombinator);
+    public static void assertSelectionCombinatorIs(AbstractSelectionTool tool, ShapeCombinator expected) {
+        ShapeCombinator actual = call(tool::getCombinator);
         if (expected != actual) {
             throw new AssertionError("expected " + expected + ", found " + actual);
         }

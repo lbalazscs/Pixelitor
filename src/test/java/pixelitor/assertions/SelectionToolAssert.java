@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,27 +17,15 @@
 
 package pixelitor.assertions;
 
-import pixelitor.selection.SelectionType;
 import pixelitor.selection.ShapeCombinator;
-import pixelitor.tools.SelectionTool;
+import pixelitor.tools.selection.AbstractSelectionTool;
 
 /**
- * Custom AssertJ assertions for {@link SelectionTool} objects.
+ * Custom AssertJ assertions for {@link AbstractSelectionTool} objects.
  */
-public class SelectionToolAssert extends ToolAssert<SelectionToolAssert, SelectionTool> {
-    public SelectionToolAssert(SelectionTool actual) {
+public class SelectionToolAssert extends ToolAssert<SelectionToolAssert, AbstractSelectionTool> {
+    public SelectionToolAssert(AbstractSelectionTool actual) {
         super(actual, SelectionToolAssert.class);
-    }
-
-    public SelectionToolAssert selectionTypeIs(SelectionType expected) {
-        isNotNull();
-
-        var selectionType = actual.getSelectionType();
-        if (selectionType != expected) {
-            throw new AssertionError("Expected " + expected + ", found " + selectionType);
-        }
-
-        return this;
     }
 
     public SelectionToolAssert combinatorIs(ShapeCombinator expected) {

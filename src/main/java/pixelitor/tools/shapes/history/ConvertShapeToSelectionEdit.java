@@ -57,6 +57,6 @@ public class ConvertShapeToSelectionEdit extends PixelitorEdit {
 
         selectionEdit.redo();
         Tools.SHAPES.reset();
-        Tools.SELECTION.activate();
+        Tools.LASSO_SELECTION.activate();
     }
 }

@@ -178,4 +178,9 @@ public class Kuwahara extends ParametrizedFilter {
     private static int hsvToRgb(float[] hsv) {
         return Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

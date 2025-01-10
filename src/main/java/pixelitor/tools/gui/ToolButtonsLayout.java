@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,10 +24,9 @@ import java.awt.LayoutManager;
 
 /**
  * A layout manager designed specifically for tool buttons.
- * It arranges equal-sized components in a vertical column, but
- * automatically creates additional columns when vertical space
- * is constrained. It attempts to keep the number of components
- * balanced across columns. All components will have the same size,
+ * It arranges equal-sized components in a vertical column,
+ * but automatically creates additional columns when vertical space is
+ * constrained. All components will have the same size,
  * which is specified when creating the layout manager.
  */
 public class ToolButtonsLayout implements LayoutManager {
@@ -56,7 +55,7 @@ public class ToolButtonsLayout implements LayoutManager {
             return new Dimension(0, 0);
         }
 
-        // Calculate optimal number of columns based on available height
+        // calculate optimal number of columns based on available height
         int maxRowsInSingleColumn = Math.max(1, (availableHeight + gap) / (buttonHeight + gap));
         int columns = Math.min(componentCount, (int) Math.ceil((double) componentCount / maxRowsInSingleColumn));
         int rows = (int) Math.ceil((double) componentCount / columns);
@@ -84,20 +83,21 @@ public class ToolButtonsLayout implements LayoutManager {
             return;
         }
 
-        // Calculate optimal number of columns based on available height
+        // calculate optimal number of columns based on available height
         int availableHeight = parent.getHeight();
         int maxRowsInSingleColumn = Math.max(1, (availableHeight + gap) / (buttonHeight + gap));
         int columns = Math.min(componentCount, (int) Math.ceil((double) componentCount / maxRowsInSingleColumn));
-        int rows = (int) Math.ceil((double) componentCount / columns);
+//        int rows = (int) Math.ceil((double) componentCount / columns);
 
-        // Calculate starting x position to center the columns
+        // calculate starting x position to center the columns
         int totalWidth = columns * buttonWidth + (columns - 1) * gap;
         int startX = (parent.getWidth() - totalWidth) / 2;
 
-        // Layout components
         for (int i = 0; i < componentCount; i++) {
-            int column = i / rows;
-            int row = i % rows;
+            // fills columns horizontally first (left-to-right)
+            // before moving to the next row
+            int row = i / columns;
+            int column = i % columns;
 
             int x = startX + column * (buttonWidth + gap);
             int y = row * (buttonHeight + gap);
