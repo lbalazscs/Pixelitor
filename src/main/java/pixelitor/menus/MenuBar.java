@@ -904,6 +904,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(DisplacementMap.NAME, DisplacementMap::new);
         sub.addFilter(DrunkVision.NAME, DrunkVision::new);
+        sub.addFilter(GridKaleidoscope.NAME, GridKaleidoscope::new);
         sub.addFilter(JHKaleidoscope.NAME, JHKaleidoscope::new);
         sub.addFilter(Mirror.NAME, Mirror::new);
         sub.addFilter(JHOffset.NAME, JHOffset::new);
