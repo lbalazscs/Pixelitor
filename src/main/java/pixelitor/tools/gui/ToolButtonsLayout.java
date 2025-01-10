@@ -32,12 +32,16 @@ import java.awt.LayoutManager;
 public class ToolButtonsLayout implements LayoutManager {
     private final int buttonWidth;
     private final int buttonHeight;
-    private final int gap; // gap between components
+    private final int gap;
+    private final int defaultHeight;
 
-    public ToolButtonsLayout(int buttonWidth, int buttonHeight, int gap) {
+    public ToolButtonsLayout(int buttonWidth, int buttonHeight, int gap, int defaultHeight) {
         this.buttonWidth = buttonWidth;
         this.buttonHeight = buttonHeight;
         this.gap = gap;
+        this.defaultHeight = defaultHeight;
+
+        assert defaultHeight > 0 : "defaultHeight = " + defaultHeight;
     }
 
     @Override
@@ -48,11 +52,10 @@ public class ToolButtonsLayout implements LayoutManager {
     public void removeLayoutComponent(Component comp) {
     }
 
-    private Dimension calculateSize(Container parent) {
+    private Dimension calculateSize(Container parent, int availableHeight) {
         int componentCount = parent.getComponentCount();
-        int availableHeight = parent.getHeight();
         if (componentCount == 0 || availableHeight == 0) {
-            return new Dimension(0, 0);
+            return new Dimension(0, 0); // shouldn't happen
         }
 
         // calculate optimal number of columns based on available height
@@ -68,42 +71,50 @@ public class ToolButtonsLayout implements LayoutManager {
 
     @Override
     public Dimension preferredLayoutSize(Container parent) {
-        return calculateSize(parent);
+        synchronized (parent.getTreeLock()) {
+            int height = parent.getHeight();
+            return calculateSize(parent, height <= 0 ? defaultHeight : height);
+        }
     }
 
     @Override
     public Dimension minimumLayoutSize(Container parent) {
-        return calculateSize(parent);
+        synchronized (parent.getTreeLock()) {
+            int height = parent.getHeight();
+            return calculateSize(parent, height <= 0 ? defaultHeight : height);
+        }
     }
 
     @Override
     public void layoutContainer(Container parent) {
-        int componentCount = parent.getComponentCount();
-        if (componentCount == 0) {
-            return;
-        }
+        synchronized (parent.getTreeLock()) {
+            int componentCount = parent.getComponentCount();
+            if (componentCount == 0) {
+                return;
+            }
 
-        // calculate optimal number of columns based on available height
-        int availableHeight = parent.getHeight();
-        int maxRowsInSingleColumn = Math.max(1, (availableHeight + gap) / (buttonHeight + gap));
-        int columns = Math.min(componentCount, (int) Math.ceil((double) componentCount / maxRowsInSingleColumn));
+            // calculate optimal number of columns based on available height
+            int availableHeight = parent.getHeight();
+            int maxRowsInSingleColumn = Math.max(1, (availableHeight + gap) / (buttonHeight + gap));
+            int columns = Math.min(componentCount, (int) Math.ceil((double) componentCount / maxRowsInSingleColumn));
 //        int rows = (int) Math.ceil((double) componentCount / columns);
 
-        // calculate starting x position to center the columns
-        int totalWidth = columns * buttonWidth + (columns - 1) * gap;
-        int startX = (parent.getWidth() - totalWidth) / 2;
+            // calculate starting x position to center the columns
+            int totalWidth = columns * buttonWidth + (columns - 1) * gap;
+            int startX = (parent.getWidth() - totalWidth) / 2;
 
-        for (int i = 0; i < componentCount; i++) {
-            // fills columns horizontally first (left-to-right)
-            // before moving to the next row
-            int row = i / columns;
-            int column = i % columns;
+            for (int i = 0; i < componentCount; i++) {
+                // fills columns horizontally first (left-to-right)
+                // before moving to the next row
+                int row = i / columns;
+                int column = i % columns;
 
-            int x = startX + column * (buttonWidth + gap);
-            int y = row * (buttonHeight + gap);
+                int x = startX + column * (buttonWidth + gap);
+                int y = row * (buttonHeight + gap);
 
-            Component comp = parent.getComponent(i);
-            comp.setBounds(x, y, buttonWidth, buttonHeight);
+                Component comp = parent.getComponent(i);
+                comp.setBounds(x, y, buttonWidth, buttonHeight);
+            }
         }
     }
 }

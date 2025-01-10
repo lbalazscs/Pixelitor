@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Only represents the deletion of a path or a subpath.
+ * Only represents the deletion of a path or a subpath, or a path flipping.
  * Similarly, {@link SubPathEdit} is only used to represent
  * the deletion of an anchor point.
  * Other types of path editing are tracked either by
@@ -42,7 +42,7 @@ public class PathEdit extends PixelitorEdit {
     private final Path before;
     private final Path after;
     private final PenToolMode modeBefore;
-    private List<TextLayer> formerUsers;
+    private final List<TextLayer> formerUsers;
 
     public PathEdit(String name, Composition comp, Path before, Path after) {
         super(name, comp);
@@ -50,14 +50,12 @@ public class PathEdit extends PixelitorEdit {
         this.after = after;
         modeBefore = Tools.PEN.getMode();
 
-        if (isPathDeletion()) {
-            formerUsers = new ArrayList<>();
-            comp.forEachNestedLayer(TextLayer.class, textLayer -> {
-                if (textLayer.isOnPath()) {
-                    formerUsers.add(textLayer);
-                }
-            });
-        }
+        formerUsers = new ArrayList<>();
+        comp.forEachNestedLayer(TextLayer.class, textLayer -> {
+            if (textLayer.isOnPath()) {
+                formerUsers.add(textLayer);
+            }
+        });
     }
 
     @Override
@@ -65,11 +63,14 @@ public class PathEdit extends PixelitorEdit {
         super.undo();
 
         setPath(before);
-        if (isPathDeletion()) {
-            for (TextLayer textLayer : formerUsers) {
+        for (TextLayer textLayer : formerUsers) {
+            if (isPathDeletion()) {
                 textLayer.usePathEditing();
+            } else {
+                textLayer.pathChanged(false);
             }
         }
+        comp.repaint();
     }
 
     @Override
@@ -77,11 +78,10 @@ public class PathEdit extends PixelitorEdit {
         super.redo();
 
         setPath(after);
-        if (isPathDeletion()) {
-            for (TextLayer textLayer : formerUsers) {
-                textLayer.pathChanged(true);
-            }
+        for (TextLayer textLayer : formerUsers) {
+            textLayer.pathChanged(isPathDeletion());
         }
+        comp.repaint();
     }
 
     private void setPath(Path newPath) {
@@ -98,7 +98,6 @@ public class PathEdit extends PixelitorEdit {
                     Tools.PEN.activateMode(modeBefore, false);
                 }
             }
-            comp.repaint();
         }
     }
 
@@ -107,3 +106,4 @@ public class PathEdit extends PixelitorEdit {
         return after == null;
     }
 }
+

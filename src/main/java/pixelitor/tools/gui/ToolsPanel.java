@@ -38,11 +38,15 @@ public class ToolsPanel extends JPanel {
     public ToolsPanel(PixelitorWindow pw, Dimension screenSize) {
         Dimension buttonSize = calcToolButtonSize(screenSize, pw);
 
-        JPanel toolsPanel = new JPanel(new ToolButtonsLayout(buttonSize.width, buttonSize.height, 0));
-        addToolButtons(toolsPanel);
+        // we need to give a hint to the layout manager, but at
+        // this point neither the panel nor the window size is known
+        int heightHint = screenSize.height - 168;
+
+        JPanel buttonsPanel = new JPanel(new ToolButtonsLayout(buttonSize.width, buttonSize.height, 0, heightHint));
+        addToolButtons(buttonsPanel);
 
         setLayout(new BorderLayout());
-        add(toolsPanel, BorderLayout.CENTER);
+        add(buttonsPanel, BorderLayout.CENTER);
         addColorSelector(pw);
 
         setupTShortCut();

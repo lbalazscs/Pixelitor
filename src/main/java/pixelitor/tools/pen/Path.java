@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -241,8 +241,7 @@ public class Path implements Serializable, Debuggable {
         activeSubPath = subPaths.getLast();
         comp.repaint();
 
-        PathEdit edit = new PathEdit("Delete Subpath", comp, backup, this);
-        History.add(edit);
+        History.add(new PathEdit("Delete Subpath", comp, backup, this));
 
         assert comp.getActivePath() == this;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.io.Serial;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
@@ -259,6 +260,11 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.add(new TaskAction("Retract Handles", this::retractHandles));
 
+        String flipName = subPath.getPath().getNumSubpaths() == 1
+            ? "Flip Path Direction"
+            : "Flip Subpath Direction";
+        popup.add(new TaskAction(flipName, () -> subPath.flipDirection(flipName)));
+
         popup.addSeparator();
 
         if (AppMode.isDevelopment()) {
@@ -297,6 +303,14 @@ public class AnchorPoint extends DraggablePoint {
 
         History.add(new AnchorPointChangeEdit("Retract Handles",
             subPath.getComp(), backup, this));
+    }
+
+    public void swapControlPositions() {
+        Point2D prevInPos = ctrlIn.getImLocationCopy();
+        Point2D prevOutPos = ctrlOut.getImLocationCopy();
+
+        ctrlIn.setImLocationOnlyForThis(prevOutPos);
+        ctrlOut.setImLocationOnlyForThis(prevInPos);
     }
 
     @Override

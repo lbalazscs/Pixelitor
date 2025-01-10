@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,10 +23,7 @@ import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
-import pixelitor.tools.pen.history.AddAnchorPointEdit;
-import pixelitor.tools.pen.history.CloseSubPathEdit;
-import pixelitor.tools.pen.history.FinishSubPathEdit;
-import pixelitor.tools.pen.history.SubPathStartEdit;
+import pixelitor.tools.pen.history.*;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.DraggablePoint;
@@ -42,10 +39,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
@@ -597,6 +591,22 @@ public class SubPath implements Serializable, Transformable {
 
     public void deletePath() {
         path.delete();
+    }
+
+    public void flipDirection(String editName) {
+        // TODO: for closed paths the first point should stay first?
+        Path backup = path.deepCopy(comp);
+
+        anchorPoints = new ArrayList<>(anchorPoints);
+        Collections.reverse(anchorPoints);
+        for (AnchorPoint anchor : anchorPoints) {
+            anchor.swapControlPositions();
+        }
+
+        comp.pathChanged();
+        comp.repaint();
+
+        History.add(new PathEdit(editName, comp, backup, path));
     }
 
     public Composition getComp() {
