@@ -39,6 +39,12 @@ public class ImageMath {
      * The value of two pi as a float.
      */
     public static final float TWO_PI = (float) Math.PI * 2.0f;
+    public static final double SQRT_3 = 1.7320508075688772;
+    public static final double HALF_SQRT_3 = SQRT_3 / 2.0;
+    public static final double SQRT_2 = 1.4142135623730951;
+
+    private ImageMath() {
+    }
 
     /**
      * Apply a bias to a number in the unit interval, moving numbers towards 0 or 1

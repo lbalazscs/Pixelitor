@@ -24,10 +24,12 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.BrickBlockFilter;
+import pixelitor.filters.impl.HexagonBlockFilter;
 import pixelitor.filters.impl.TriangleBlockFilter;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -37,7 +39,8 @@ import static java.awt.Color.WHITE;
 
 /**
  * Pixelate filter based on the JHLabs {@link BlockFilter}
- * (or alternatively on {@link BrickBlockFilter})
+ * (or alternatively on {@link BrickBlockFilter},
+ * {@link TriangleBlockFilter}, or {@link HexagonBlockFilter}).
  */
 public class JHPixelate extends ParametrizedFilter {
     public static final String NAME = "Pixelate";
@@ -52,11 +55,13 @@ public class JHPixelate extends ParametrizedFilter {
     private static final int TYPE_SQUARE = 0;
     private static final int TYPE_BRICK = 1;
     private static final int TYPE_TRIANGLE = 2;
+    private static final int TYPE_HEXAGON = 3;
 
     private final IntChoiceParam typeParam = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Squares", TYPE_SQUARE),
         new Item("Brick Wall", TYPE_BRICK),
         new Item("Triangles", TYPE_TRIANGLE),
+        new Item("Hexagons", TYPE_HEXAGON),
     });
 
     private final IntChoiceParam styleParam = new IntChoiceParam("Style", new Item[]{
@@ -70,6 +75,7 @@ public class JHPixelate extends ParametrizedFilter {
     private BlockFilter blockFilter;
     private BrickBlockFilter brickBlockFilter;
     private TriangleBlockFilter triangleBlockFilter;
+    private HexagonBlockFilter hexagonBlockFilter;
 
     public JHPixelate() {
         super(true);
@@ -78,8 +84,8 @@ public class JHPixelate extends ParametrizedFilter {
 
         setParams(
             cellSizeParam.withAdjustedRange(0.2),
-            styleParam,
-            typeParam
+            typeParam,
+            styleParam
         );
     }
 
@@ -114,6 +120,13 @@ public class JHPixelate extends ParametrizedFilter {
                     triangleBlockFilter.setSize(cellSize);
                     dest = triangleBlockFilter.filter(src, dest);
                 }
+                case TYPE_HEXAGON -> {
+                    if (hexagonBlockFilter == null) {
+                        hexagonBlockFilter = new HexagonBlockFilter(NAME);
+                    }
+                    hexagonBlockFilter.setSize(cellSize);
+                    dest = hexagonBlockFilter.filter(src, dest);
+                }
             }
         }
 
@@ -136,11 +149,18 @@ public class JHPixelate extends ParametrizedFilter {
         Graphics2D g = bumpSource.createGraphics();
         Colors.fillWith(WHITE, g, width, height);
 
-        int gapWidth = (cellSize < 15) ? 1 : 2;
+//        int gapWidth = (cellSize < 15) ? 1 : 2;
+        int gapWidth = 1;
+        if (gapWidth != 1) {
+            g.setStroke(new BasicStroke(gapWidth));
+        }
+        g.setColor(GRAY);
+
         switch (type) {
-            case TYPE_SQUARE -> ImageUtils.renderGrid(g, GRAY, gapWidth, cellSize, width, height);
-            case TYPE_BRICK -> ImageUtils.renderBrickGrid(g, GRAY, cellSize, width, height);
-            case TYPE_TRIANGLE -> ImageUtils.renderTriangleGrid(g, GRAY, gapWidth, cellSize, width, height);
+            case TYPE_SQUARE -> ImageUtils.renderGrid(g, gapWidth, cellSize, width, height);
+            case TYPE_BRICK -> ImageUtils.renderBrickGrid(g, cellSize, width, height);
+            case TYPE_TRIANGLE -> ImageUtils.renderTriangleGrid(g, cellSize, width, height);
+            case TYPE_HEXAGON -> ImageUtils.renderHexagonGrid(g, cellSize, width, height);
             default -> throw new IllegalStateException("Unexpected value: " + type);
         }
 

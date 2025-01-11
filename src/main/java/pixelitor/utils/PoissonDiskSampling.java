@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 
+import static com.jhlabs.image.ImageMath.SQRT_2;
+
 /**
  * Poisson disk sampling generates a set of randomly distributed points with
  * the constraint that no two points are closer than a specified minimum distance.
@@ -51,8 +53,6 @@ public class PoissonDiskSampling {
     private final int numVerCells;
     private final double cellWidth;
     private final double cellHeight;
-
-    private static final double SQRT_2 = 1.414213562373095;
 
     public PoissonDiskSampling(int width, int height, double minDist, int k,
                                boolean improved, SplittableRandom rnd) {

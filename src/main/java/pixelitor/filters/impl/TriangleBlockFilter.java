@@ -23,13 +23,15 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
+import static com.jhlabs.image.ImageMath.HALF_SQRT_3;
+import static com.jhlabs.image.ImageMath.SQRT_3;
+
 /**
  * Pixelates an image using a grid of equilateral triangles,
  * filling each triangle with its average color.
  */
 public class TriangleBlockFilter extends AbstractBufferedImageOp {
     private int size = 20;
-    private static final double SQRT3 = Math.sqrt(3);
     private int[][] triangleIndices; // cache for pixel-to-triangle mapping
     private Rectangle[] triangleBounds; // cache for triangle boundaries
     private int numTrianglesX;
@@ -48,23 +50,22 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
     }
 
     private void initializeCaches(int width, int height) {
-        double h = size * SQRT3 / 2;
+        double h = size * HALF_SQRT_3;
         numTrianglesY = (int) Math.ceil(height / h);
 
         // first pass to determine the range of column indices
-        int minCol = Integer.MAX_VALUE;
-        int maxCol = Integer.MIN_VALUE;
+        int minColIndex = Integer.MAX_VALUE;
+        int maxColIndex = Integer.MIN_VALUE;
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Point idx = getTriangleIndex(x, y, size);
-                minCol = Math.min(minCol, idx.x);
-                maxCol = Math.max(maxCol, idx.x);
+                minColIndex = Math.min(minColIndex, idx.x);
+                maxColIndex = Math.max(maxColIndex, idx.x);
             }
         }
 
-        int minColumnIndex = minCol;
-        numTrianglesX = maxCol - minCol + 1;
+        numTrianglesX = maxColIndex - minColIndex + 1;
         triangleIndices = new int[height][width];
         triangleBounds = new Rectangle[numTrianglesX * numTrianglesY];
 
@@ -73,7 +74,7 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
             for (int x = 0; x < width; x++) {
                 Point idx = getTriangleIndex(x, y, size);
                 // adjust the column index to be non-negative
-                int adjustedCol = idx.x - minColumnIndex;
+                int adjustedCol = idx.x - minColIndex;
                 int triangleId = adjustedCol + idx.y * numTrianglesX;
 
                 triangleIndices[y][x] = triangleId;
@@ -81,8 +82,7 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
                 if (triangleBounds[triangleId] == null) {
                     triangleBounds[triangleId] = new Rectangle(x, y, 1, 1);
                 } else {
-                    Rectangle bounds = triangleBounds[triangleId];
-                    bounds.add(x, y);
+                    triangleBounds[triangleId].add(x, y);
                 }
             }
         }
@@ -102,6 +102,8 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
         }
 
         int[] triangleAverages = new int[numTrianglesX * numTrianglesY];
+
+        // ensure that each triangle’s average color is calculated only once
         boolean[] processed = new boolean[numTrianglesX * numTrianglesY];
 
         for (int y = 0; y < height; y++) {
@@ -150,13 +152,13 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
     }
 
     private static Point getTriangleIndex(int x, int y, int size) {
-        double h = size * SQRT3 / 2;
+        double h = size * HALF_SQRT_3;
         int row = (int) Math.floor(y / h);
         double relativeY = y - row * h;
         int col;
 
         if (row % 2 == 0) {
-            if (relativeY < h - SQRT3 * Math.abs(x % size - size / 2.0)) {
+            if (relativeY < h - SQRT_3 * Math.abs(x % size - size / 2.0)) {
                 col = (int) Math.floor(x / (double) size);
                 return new Point(2 * col, row); // upward triangle
             } else {
@@ -164,7 +166,7 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
                 return new Point(2 * col + 1, row); // downward triangle
             }
         } else {
-            if (relativeY < h - SQRT3 * Math.abs((x + size / 2.0) % size - size / 2.0)) {
+            if (relativeY < h - SQRT_3 * Math.abs((x + size / 2.0) % size - size / 2.0)) {
                 col = (int) Math.floor((x - size / 2.0) / (double) size);
                 return new Point(2 * col + 1, row); // upward triangle
             } else {
