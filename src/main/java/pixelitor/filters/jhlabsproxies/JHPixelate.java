@@ -24,6 +24,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.BrickBlockFilter;
+import pixelitor.filters.impl.TriangleBlockFilter;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
@@ -50,10 +51,12 @@ public class JHPixelate extends ParametrizedFilter {
 
     private static final int TYPE_SQUARE = 0;
     private static final int TYPE_BRICK = 1;
+    private static final int TYPE_TRIANGLE = 2;
 
     private final IntChoiceParam typeParam = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Squares", TYPE_SQUARE),
         new Item("Brick Wall", TYPE_BRICK),
+        new Item("Triangles", TYPE_TRIANGLE),
     });
 
     private final IntChoiceParam styleParam = new IntChoiceParam("Style", new Item[]{
@@ -66,6 +69,7 @@ public class JHPixelate extends ParametrizedFilter {
 
     private BlockFilter blockFilter;
     private BrickBlockFilter brickBlockFilter;
+    private TriangleBlockFilter triangleBlockFilter;
 
     public JHPixelate() {
         super(true);
@@ -87,19 +91,29 @@ public class JHPixelate extends ParametrizedFilter {
         int cellSize = cellSizeParam.getValue();
 
         if (style == STYLE_FLAT || style == STYLE_3D || style == STYLE_EMBEDDED) {
-            if (type == TYPE_SQUARE) {
-                if (blockFilter == null) {
-                    blockFilter = new BlockFilter(NAME);
+            switch (type) {
+                case TYPE_SQUARE -> {
+                    if (blockFilter == null) {
+                        blockFilter = new BlockFilter(NAME);
+                    }
+                    blockFilter.setBlockSize(cellSize);
+                    dest = blockFilter.filter(src, dest);
                 }
-                blockFilter.setBlockSize(cellSize);
-                dest = blockFilter.filter(src, dest);
-            } else if (type == TYPE_BRICK) {
-                if (brickBlockFilter == null) {
-                    brickBlockFilter = new BrickBlockFilter(NAME);
+                case TYPE_BRICK -> {
+                    if (brickBlockFilter == null) {
+                        brickBlockFilter = new BrickBlockFilter(NAME);
+                    }
+                    brickBlockFilter.setHorBlockSize(cellSize * 2);
+                    brickBlockFilter.setVerBlockSize(cellSize);
+                    dest = brickBlockFilter.filter(src, dest);
                 }
-                brickBlockFilter.setHorBlockSize(cellSize * 2);
-                brickBlockFilter.setVerBlockSize(cellSize);
-                dest = brickBlockFilter.filter(src, dest);
+                case TYPE_TRIANGLE -> {
+                    if (triangleBlockFilter == null) {
+                        triangleBlockFilter = new TriangleBlockFilter(NAME);
+                    }
+                    triangleBlockFilter.setSize(cellSize);
+                    dest = triangleBlockFilter.filter(src, dest);
+                }
             }
         }
 
@@ -107,18 +121,10 @@ public class JHPixelate extends ParametrizedFilter {
             int width = dest.getWidth();
             int height = dest.getHeight();
 
-            BufferedImage bumpSource;
-            if (style == STYLE_EMBEDDED) {
-                bumpSource = dest;
-            } else {
-                bumpSource = createBumpSource(type, cellSize, width, height, src);
-            }
-
-            if (style == STYLE_3D || style == STYLE_EMBEDDED) {
-                dest = ImageUtils.bumpMap(dest, bumpSource, NAME);
-            } else {
-                throw new IllegalStateException("style = " + style);
-            }
+            BufferedImage bumpSource = (style == STYLE_EMBEDDED)
+                ? dest
+                : createBumpSource(type, cellSize, width, height, src);
+            dest = ImageUtils.bumpMap(dest, bumpSource, NAME);
         }
 
         return dest;
@@ -131,11 +137,11 @@ public class JHPixelate extends ParametrizedFilter {
         Colors.fillWith(WHITE, g, width, height);
 
         int gapWidth = (cellSize < 15) ? 1 : 2;
-        if (type == TYPE_SQUARE) {
-            ImageUtils.renderGrid(g, GRAY, width, height,
-                gapWidth, cellSize, gapWidth, cellSize);
-        } else if (type == TYPE_BRICK) {
-            ImageUtils.renderBrickGrid(g, GRAY, cellSize, width, height);
+        switch (type) {
+            case TYPE_SQUARE -> ImageUtils.renderGrid(g, GRAY, gapWidth, cellSize, width, height);
+            case TYPE_BRICK -> ImageUtils.renderBrickGrid(g, GRAY, cellSize, width, height);
+            case TYPE_TRIANGLE -> ImageUtils.renderTriangleGrid(g, GRAY, gapWidth, cellSize, width, height);
+            default -> throw new IllegalStateException("Unexpected value: " + type);
         }
 
         g.dispose();

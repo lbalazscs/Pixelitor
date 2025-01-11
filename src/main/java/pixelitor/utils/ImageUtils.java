@@ -44,6 +44,7 @@ import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.image.*;
 import java.io.IOException;
 import java.net.URL;
@@ -883,46 +884,30 @@ public class ImageUtils {
     }
 
     public static void renderGrid(Graphics2D g, Color color,
-                                  int maxX, int maxY,
-                                  int horLineThickness, int horSpacing,
-                                  int verLineThickness, int verSpacing) {
-        if (horLineThickness < 0) {
-            throw new IllegalArgumentException("horLineThickness = " + horLineThickness);
-        }
-        if (verLineThickness < 0) {
-            throw new IllegalArgumentException("verLineThickness = " + verLineThickness);
-        }
-        if (horSpacing <= 0) {
-            throw new IllegalArgumentException("horSpacing = " + horSpacing);
-        }
-        if (verSpacing <= 0) {
-            throw new IllegalArgumentException("verSpacing = " + verSpacing);
-        }
+                                  int lineWidth, int spacing,
+                                  int width, int height) {
+        assert lineWidth > 0;
+        assert spacing > 0;
 
         g.setColor(color);
 
         // horizontal lines
-        if (horLineThickness > 0) {
-            int halfLineThickness = verLineThickness / 2;
-            for (int y = 0; y < maxY; y += verSpacing) {
-                int startY = y - halfLineThickness;
-                //noinspection SuspiciousNameCombination
-                g.fillRect(0, startY, maxX, verLineThickness);
-            }
+        int halfLineThickness = lineWidth / 2;
+        for (int y = 0; y < height; y += spacing) {
+            int startY = y - halfLineThickness;
+            //noinspection SuspiciousNameCombination
+            g.fillRect(0, startY, width, lineWidth);
         }
 
         // vertical lines
-        if (verLineThickness > 0) {
-            int halfLineThickness = horLineThickness / 2;
-            for (int x = 0; x < maxX; x += horSpacing) {
-                g.fillRect(x - halfLineThickness, 0, horLineThickness, maxY);
-            }
+        for (int x = 0; x < width; x += spacing) {
+            g.fillRect(x - halfLineThickness, 0, lineWidth, height);
         }
     }
 
     public static void renderBrickGrid(Graphics2D g, Color color,
                                        int brickHeight,
-                                       int maxX, int maxY) {
+                                       int width, int height) {
         if (brickHeight < 1) {
             throw new IllegalArgumentException("brickHeight = " + brickHeight);
         }
@@ -930,20 +915,121 @@ public class ImageUtils {
         g.setColor(color);
 
         int brickWidth = brickHeight * 2;
-        int currentY = brickHeight;
+        int currentY = 0;
         int rowCount = 0;
 
-        while (currentY < maxY) {
-            // vertical lines
-            int horOffset = ((rowCount % 2) == 1) ? brickHeight : 0;
-            for (int x = horOffset; x < maxX; x += brickWidth) {
-                g.drawLine(x, currentY, x, currentY - brickHeight);
+        while (currentY <= height) {
+            // horizontal lines
+            g.drawLine(0, currentY, width, currentY);
+
+            // only draw vertical lines if we're not at the last line
+            if (currentY < height) {
+                // vertical lines
+                int horOffset = ((rowCount % 2) == 1) ? brickHeight : 0;
+                for (int x = horOffset; x < width; x += brickWidth) {
+                    g.drawLine(x, currentY, x, Math.min(currentY + brickHeight, height));
+                }
             }
 
-            // horizontal lines
-            g.drawLine(0, currentY, maxX, currentY);
             currentY += brickHeight;
             rowCount++;
+        }
+    }
+
+    public static void renderTriangleGrid(Graphics2D g, Color color,
+                                          int lineWidth, int size,
+                                          int width, int height) {
+        g.setColor(color);
+//        g.setStroke(new BasicStroke(lineWidth));
+
+        double halfSize = size / 2.0;
+        double triangleHeight = size * Math.sqrt(3) / 2;
+        double tan30 = halfSize / triangleHeight;
+        double cotan30 = triangleHeight / halfSize;
+
+        // horizontal lines
+        double currentY = triangleHeight;
+        while (currentY < height) {
+            Line2D line = new Line2D.Double(0, currentY, width, currentY);
+            g.draw(line);
+            currentY += triangleHeight;
+        }
+
+        // slanted lines downwards to the right
+        // starting from the top edge (startX = 0)
+        for (double startY = 0; startY <= height; startY += 2 * triangleHeight) {
+            double startX = 0;
+
+            double endX = width;
+            double endY = startY + width * cotan30;
+
+            // ensure the end point stays within bounds
+            if (endY > height) {
+                endX = (height - startY) * tan30;
+                endY = height;
+            }
+
+            Line2D line = new Line2D.Double(startX, startY, endX, endY);
+            g.draw(line);
+        }
+
+        // slanted lines downwards to the right
+        // starting from the left edge (startY = 0)
+        for (double x = 0; x <= width; x += size) {
+            double startX = x;
+            double startY = 0;
+
+            double endX = x + height * tan30;
+            double endY = height;
+
+            // ensure the end point stays within bounds
+            if (endX > width) {
+                endY = height - (endX - width) * cotan30;
+                endX = width;
+            }
+
+            Line2D line = new Line2D.Double(startX, startY, endX, endY);
+            g.draw(line);
+        }
+
+        // slanted lines upwards to the right
+        // starting from the top edge (startY = 0)
+        for (double x = size; x <= width; x += size) {
+            double startX = x;
+            double startY = 0;
+
+            double endX = x - height * tan30;
+            double endY = height;
+
+            // ensure the end point stays within bounds
+            if (endX < 0) {
+                endY = height + endX * cotan30;
+                endX = 0;
+            }
+
+            Line2D line = new Line2D.Double(startX, startY, endX, endY);
+            g.draw(line);
+        }
+
+        // slanted lines upwards to the right
+        // starting from the right edge (startX = width)
+        int numHorTriangles = width / size;
+        int xOffset = (numHorTriangles + 1) * size - width;
+        double yOffset = xOffset * cotan30;
+        for (double startY = yOffset; startY <= height; startY += 2 * triangleHeight) {
+            double startX = width;
+
+            double endX = width - (height - startY) * tan30;
+            double endY = height;
+
+            // ensure the end point stays within bounds
+            if (endX < 0) {
+                endY = startY + width * cotan30;
+                endX = 0;
+            }
+
+            Line2D line = new Line2D.Double(startX, startY, endX, endY);
+            g.draw(line);
         }
     }
 
