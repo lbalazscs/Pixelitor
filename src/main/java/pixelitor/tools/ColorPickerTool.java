@@ -18,14 +18,18 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -33,6 +37,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
 
@@ -41,6 +46,7 @@ import static java.awt.BasicStroke.JOIN_MITER;
 import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 import static pixelitor.utils.ImageUtils.isGrayscale;
 import static pixelitor.utils.ImageUtils.isWithinBounds;
 
@@ -53,7 +59,16 @@ public class ColorPickerTool extends Tool {
         "<b>click</b> to pick the foreground color, " +
             "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.";
 
-    private final JCheckBox layerOnlySamplingCB = new JCheckBox(SAMPLE_LABEL_TEXT);
+    private final JCheckBox layerOnlySamplingCB = new JCheckBox();
+    private final RangeParam samplingRadius = new RangeParam(GUIText.RADIUS,
+        0, 0, 10, false, WEST);
+
+    // the sampling bounds if the sampling radius > 0
+    private int startX;
+    private int endX;
+    private int startY;
+    private int endY;
+    private boolean paintSamplingBounds = false;
 
     public ColorPickerTool() {
         super("Color Picker", 'I', HELP_TEXT, Cursors.CROSSHAIR);
@@ -61,7 +76,12 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public void initSettingsPanel(ResourceBundle resources) {
+        settingsPanel.add(new JLabel(SAMPLE_LABEL_TEXT + ":"));
         settingsPanel.add(layerOnlySamplingCB);
+
+        settingsPanel.addSeparator();
+
+        settingsPanel.addParam(samplingRadius);
     }
 
     @Override
@@ -76,6 +96,11 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
+        if (paintSamplingBounds) {
+            // stop painting
+            paintSamplingBounds = false;
+            e.getView().repaint();
+        }
     }
 
     public void sampleColor(PMouseEvent e, boolean selectBackground) {
@@ -106,8 +131,11 @@ public class ColorPickerTool extends Tool {
         if (!isWithinBounds(x, y, srcImg)) {
             return;
         } else {
-            int sampledRGB = srcImg.getRGB(x, y);
+            int sampledRGB = sampleImage(srcImg, x, y, samplingRadius.getValue());
 
+            if (paintSamplingBounds) {
+                view.repaint();
+            }
             showColorInfo(x, y, sampledRGB, isGray);
 
             Color pickedColor = new Color(sampledRGB);
@@ -117,7 +145,47 @@ public class ColorPickerTool extends Tool {
                 setFGColor(pickedColor);
             }
         }
+    }
 
+    private int sampleImage(BufferedImage srcImg, int x, int y, int radius) {
+        int width = srcImg.getWidth();
+        int height = srcImg.getHeight();
+        int[] pixels = ImageUtils.getPixels(srcImg);
+
+        // if radius is 0, sample only the pixel under the mouse
+        if (radius == 0) {
+            paintSamplingBounds = false;
+            return pixels[x + y * width];
+        }
+        paintSamplingBounds = true;
+
+        // calculate the sampling bounds
+        startX = Math.max(0, x - radius);
+        endX = Math.min(width - 1, x + radius);
+        startY = Math.max(0, y - radius);
+        endY = Math.min(height - 1, y + radius);
+
+        // accumulate values for each channel
+        int a = 0, r = 0, g = 0, b = 0;
+        int sampledPixels = 0;
+        for (int sy = startY; sy <= endY; sy++) {
+            for (int sx = startX; sx <= endX; sx++) {
+                int rgb = pixels[sx + sy * width];
+                a += (rgb >> 24) & 0xff;
+                r += (rgb >> 16) & 0xff;
+                g += (rgb >> 8) & 0xff;
+                b += rgb & 0xff;
+                sampledPixels++;
+            }
+        }
+
+        // return the average color
+        a /= sampledPixels;
+        r /= sampledPixels;
+        g /= sampledPixels;
+        b /= sampledPixels;
+        int avg = (a << 24) | (r << 16) | (g << 8) | b;
+        return avg;
     }
 
     private static void showColorInfo(int x, int y, int rgb, boolean isGray) {
@@ -148,6 +216,30 @@ public class ColorPickerTool extends Tool {
     }
 
     @Override
+    public void paintOverView(Graphics2D g2, Composition comp) {
+        if (!paintSamplingBounds) {
+            return;
+        }
+        Rectangle2D imSamplingRect;
+        if (layerOnlySamplingCB.isSelected()) {
+            // tranlate the sampling bounds to be relative to the canvas
+            Drawable dr = comp.getActiveDrawable();
+            if (dr == null) {
+                return;
+            }
+            imSamplingRect = new Rectangle2D.Double(
+                startX + dr.getTx(), startY + dr.getTx(),
+                endX - startX + 1, endY - startY + 1);
+        } else {
+            imSamplingRect = new Rectangle2D.Double(
+                startX, startY,
+                endX - startX + 1, endY - startY + 1);
+        }
+        Rectangle2D coSamplingRect = comp.getView().imageToComponentSpace2(imSamplingRect);
+        Shapes.drawVisibly(g2, coSamplingRect);
+    }
+
+    @Override
     public boolean canHaveUserPresets() {
         return false;
     }
@@ -175,10 +267,10 @@ public class ColorPickerTool extends Tool {
     }
 
     private static class ColorPickerToolIcon extends Tool.ToolIcon {
+        private static final Color GLASS_COLOR = new Color(0x68_00_00_00, true);
+
         @Override
         public void paintIcon(Graphics2D g) {
-//            boolean dark = Themes.getCurrent().isDark();
-
             // based on color_picker_tool.svg
             Path2D glassPath = new Path2D.Float();
 
@@ -189,7 +281,7 @@ public class ColorPickerTool extends Tool {
             glassPath.lineTo(17.305561, 12.512863);
             glassPath.closePath();
 
-            g.setColor(new Color(0x68_00_00_00, true));
+            g.setColor(GLASS_COLOR);
             g.fill(glassPath);
 
             g.setColor(color);

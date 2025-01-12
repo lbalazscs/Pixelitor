@@ -819,6 +819,15 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         );
     }
 
+    public Rectangle2D imageToComponentSpace2(Rectangle2D im) {
+        return new Rectangle2D.Double(
+            imageXToComponentSpace(im.getX()),
+            imageYToComponentSpace(im.getY()),
+            im.getWidth() * zoomScale,
+            im.getHeight() * zoomScale
+        );
+    }
+
     public AffineTransform getImageToComponentTransform() {
         return imToCo.get();
     }
