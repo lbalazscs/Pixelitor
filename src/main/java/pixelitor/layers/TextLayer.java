@@ -40,6 +40,7 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -251,9 +252,22 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
+    public void startMovement() {
+        super.startMovement();
+        if (painter.isOnPath()) {
+            comp.getActivePath().getSubPath(0).saveImTransformRefPoints();
+        }
+    }
+
+    @Override
     public void moveWhileDragging(double imDx, double imDy) {
         super.moveWhileDragging(imDx, imDy);
-        painter.setTranslation(getTx(), getTy());
+        if (painter.isOnPath()) {
+            AffineTransform at = AffineTransform.getTranslateInstance(imDx, imDy);
+            comp.getActivePath().getSubPath(0).imTransform(at);
+        } else {
+            painter.setTranslation(getTx(), getTy());
+        }
     }
 
     @Override
