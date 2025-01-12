@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 public abstract class AbstractTransition extends ParametrizedFilter {
     private final RangeParam progress = new RangeParam("Progress (%)", 0, 50, 100);
-    protected final BooleanParam invert = new BooleanParam("Invert Transparency", false);
+    protected final BooleanParam invert = new BooleanParam("Invert Transparency");
 
     protected AbstractTransition() {
         super(true);

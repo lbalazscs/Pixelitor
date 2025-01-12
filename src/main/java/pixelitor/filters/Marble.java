@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,7 +64,7 @@ public class Marble extends ParametrizedFilter {
     });
 
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
-    private final BooleanParam smoothDetails = new BooleanParam("Smoother Details", false);
+    private final BooleanParam smoothDetails = new BooleanParam("Smoother Details");
 
     private final GradientParam gradient = new GradientParam("Colors",
         new float[]{0.0f, 0.5f, 1.0f},

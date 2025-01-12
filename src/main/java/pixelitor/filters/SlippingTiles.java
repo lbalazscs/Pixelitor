@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -107,7 +107,7 @@ public class SlippingTiles extends ParametrizedFilter {
     }
 
     private final RangeParam centerTileSizeParam = new RangeParam("Center Tile Width", 1, 50, 99);
-    private final BooleanParam isCenterTileSizeAutomaticallyCalculatedParam = new BooleanParam("Auto-Adjust Width", false);
+    private final BooleanParam isCenterTileSizeAutomaticallyCalculatedParam = new BooleanParam("Auto-Adjust Width");
     private final RangeParam numberOfTilesParam = new RangeParam("Number of Tiles", 1, 4, 20);
     private final EnumParam<Distributor> distributionParam = new EnumParam<>("Distribution", Distributor.class);
     private final RangeParam slipDisplacementParam = new RangeParam("Slip Length", 1, 50, 99);

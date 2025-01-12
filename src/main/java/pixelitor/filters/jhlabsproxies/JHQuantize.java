@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,8 +35,8 @@ public class JHQuantize extends ParametrizedFilter {
     private static final long serialVersionUID = 8187472652067667061L;
 
     private final RangeParam numColors = new RangeParam("Number of Colors", 2, 2, 256);
-    private final BooleanParam dither = new BooleanParam("Dither", false);
-    private final BooleanParam serpentine = new BooleanParam("Dither with Serpentine", false);
+    private final BooleanParam dither = new BooleanParam("Dither");
+    private final BooleanParam serpentine = new BooleanParam("Dither with Serpentine");
 
     private QuantizeFilter filter;
 

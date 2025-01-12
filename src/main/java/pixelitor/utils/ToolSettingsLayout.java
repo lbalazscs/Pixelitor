@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,14 +25,14 @@ import java.awt.Dimension;
 import java.awt.LayoutManager;
 
 /**
- * The layout manager used in {@link ToolSettingsPanel}
+ * Custom layout manager for {@link ToolSettingsPanel}.
  *
  * It is similar to a left-aligned FlowLayout, but
- * the components are centered vertically
+ * the components are centered vertically.
  */
 public class ToolSettingsLayout implements LayoutManager {
     private static final int HEIGHT = 38;
-    private static final Dimension size = new Dimension(100, HEIGHT);
+    private static final Dimension PREFERRED_SIZE = new Dimension(100, HEIGHT);
     private static final int HORIZONTAL_GAP = 5;
 
     @Override
@@ -47,25 +47,25 @@ public class ToolSettingsLayout implements LayoutManager {
 
     @Override
     public Dimension preferredLayoutSize(Container parent) {
-        return size;
+        return PREFERRED_SIZE;
     }
 
     @Override
     public Dimension minimumLayoutSize(Container parent) {
-        return size;
+        return PREFERRED_SIZE;
     }
 
     @Override
     public void layoutContainer(Container parent) {
         synchronized (parent.getTreeLock()) {
             int numChildren = parent.getComponentCount();
-            int x = HORIZONTAL_GAP;
+            int currentX = HORIZONTAL_GAP;
             for (int i = 0; i < numChildren; i++) {
-                Component m = parent.getComponent(i);
-                Dimension childSize = m.getPreferredSize();
-                m.setSize(childSize);
-                m.setLocation(x, (HEIGHT - childSize.height) / 2);
-                x += (childSize.width + HORIZONTAL_GAP);
+                Component child = parent.getComponent(i);
+                Dimension childSize = child.getPreferredSize();
+                child.setSize(childSize);
+                child.setLocation(currentX, (HEIGHT - childSize.height) / 2);
+                currentX += (childSize.width + HORIZONTAL_GAP);
             }
         }
     }

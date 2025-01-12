@@ -72,7 +72,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
     });
 
     private final BooleanParam monochrome = new BooleanParam("Monochrome", true);
-    private final BooleanParam invert = new BooleanParam("Invert Pattern", false);
+    private final BooleanParam invert = new BooleanParam("Invert Pattern");
     private final RangeParam softness = new RangeParam("Softness", 0, 10, 100);
 
     public JHDotsHalftone() {

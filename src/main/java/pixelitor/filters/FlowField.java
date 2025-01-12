@@ -235,7 +235,7 @@ public class FlowField extends ParametrizedFilter {
 
     private final RangeParam numParticlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
-    private final BooleanParam antiAliasParam = new BooleanParam("Use Antialiasing", false);
+    private final BooleanParam antiAliasParam = new BooleanParam("Use Antialiasing");
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
     private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
     private final EnumParam<ColorSource> initialColorsParam = new EnumParam<>("Initialize Colors", ColorSource.class);

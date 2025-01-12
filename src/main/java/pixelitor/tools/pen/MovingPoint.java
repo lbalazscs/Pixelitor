@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,12 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
 /**
- * A point that is at the mouse cursor when the mouse
- * is moving (as opposed to dragging) as the path is built.
- * It has an inverse mouse cycle: it is dragged when the mouse is
- * actually up; its mousePressed is called when the mouse is released, etc.
- * If Shift is pressed, it is constrained relative to the previous
- * anchor point.
+ * A point that follows the mouse cursor when the mouse
+ * is moving (not dragging) as the path is being built.
+ * It has an inverse mouse cycle: it is dragged when the mouse is actually
+ * moved; its mousePressed is called when the mouse is released, etc.
+ * If the Shift key is pressed, the point is constrained
+ * relative to the previous anchor point.
  */
 public class MovingPoint extends DraggablePoint {
     private final AnchorPoint prevAnchor;
@@ -48,13 +48,14 @@ public class MovingPoint extends DraggablePoint {
 
     @Override
     public void setConstrainedLocation(double mouseX, double mouseY) {
-        // constrain it relative to the previous anchor
-        Point2D p = Utils.constrainToNearestAngle(prevAnchor.x, prevAnchor.y, mouseX, mouseY);
+        // constrain it relative to the previous anchor point
+        Point2D p = Utils.constrainToNearestAngle(
+            prevAnchor.x, prevAnchor.y, mouseX, mouseY);
         setLocation(p.getX(), p.getY());
     }
 
     /**
-     * Transform it into a regular anchor point when the mouse is pressed.
+     * Converts this moving point into a regular anchor point when the mouse is pressed.
      */
     public AnchorPoint toAnchor() {
         return new AnchorPoint(x, y, view, prevAnchor.getSubPath());

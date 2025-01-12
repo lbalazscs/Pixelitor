@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
         new Item("Green", GREEN),
         new Item("Blue", BLUE)
     });
-    private final BooleanParam invertParam = new BooleanParam("Invert", false);
+    private final BooleanParam invertParam = new BooleanParam("Invert");
     private final BooleanParam keepParam = new BooleanParam("Keep Existing Transparency", true);
 
     public ChannelToTransparency() {

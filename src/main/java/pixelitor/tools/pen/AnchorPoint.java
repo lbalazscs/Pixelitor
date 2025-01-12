@@ -44,7 +44,6 @@ import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
  * An anchor point on a {@link SubPath}.
  */
 public class AnchorPoint extends DraggablePoint {
-    // compatible with Pixelitor 4.2.3
     @Serial
     private static final long serialVersionUID = -7001569188242665053L;
 
@@ -169,29 +168,36 @@ public class AnchorPoint extends DraggablePoint {
      */
     public DraggablePoint findHandleAt(double x, double y,
                                        boolean altDown) {
-        if (altDown) {
-            // check the control handles first, so that
-            // retracted handles can be dragged out with Alt-drag
-            if (ctrlOut.handleContains(x, y)) {
-                return ctrlOut;
-            }
-            if (ctrlIn.handleContains(x, y)) {
-                return ctrlIn;
-            }
-            if (handleContains(x, y)) {
-                return this;
-            }
-        } else {
-            // check the anchor handle first
-            if (handleContains(x, y)) {
-                return this;
-            }
-            if (ctrlOut.handleContains(x, y)) {
-                return ctrlOut;
-            }
-            if (ctrlIn.handleContains(x, y)) {
-                return ctrlIn;
-            }
+        return altDown
+            ? findControlHandleFirst(x, y)
+            : findAnchorHandleFirst(x, y);
+    }
+
+    // checks the control handles first, so that
+    // retracted handles can be dragged out with Alt-drag
+    private DraggablePoint findControlHandleFirst(double x, double y) {
+        if (ctrlOut.handleContains(x, y)) {
+            return ctrlOut;
+        }
+        if (ctrlIn.handleContains(x, y)) {
+            return ctrlIn;
+        }
+        if (handleContains(x, y)) {
+            return this;
+        }
+        return null;
+    }
+
+    // checks the anchor handle first
+    private DraggablePoint findAnchorHandleFirst(double x, double y) {
+        if (handleContains(x, y)) {
+            return this;
+        }
+        if (ctrlOut.handleContains(x, y)) {
+            return ctrlOut;
+        }
+        if (ctrlIn.handleContains(x, y)) {
+            return ctrlIn;
         }
         return null;
     }

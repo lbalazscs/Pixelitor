@@ -88,8 +88,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     protected boolean lazyMouse;
     // the name of the param is used only as the preset key
-    protected final BooleanParam lazyMouseEnabled = new BooleanParam(
-        "Lazy.Enabled", false);
+    protected final BooleanParam lazyMouseEnabled = new BooleanParam("Lazy.Enabled");
     private final RangeParam lazyMouseDist = LazyMouseBrush.createDistParam();
     private JDialog lazyMouseDialog;
     private JButton showLazyMouseDialogButton;

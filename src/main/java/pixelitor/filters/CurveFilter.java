@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -90,25 +90,25 @@ public abstract class CurveFilter extends ParametrizedFilter {
         new Item("Transparent", FG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
 
-    private final BooleanParam waterMark = new BooleanParam("Watermarking", false);
+    private final BooleanParam waterMark = new BooleanParam("Watermarking");
     protected final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
-    private final EnumParam<NonlinTransform> nonlinType = NonlinTransform.asParam();
-    private final RangeParam nonlinTuning = new RangeParam("Distortion Tuning", -100, 0, 100);
+    private final EnumParam<NonlinTransform> distortType = NonlinTransform.asParam();
+    private final RangeParam distortAmount = NonlinTransform.createAmountParam();
 
     private transient Shape exportedShape;
 
     protected CurveFilter() {
         super(false);
 
-        nonlinType.setupEnableOtherIf(nonlinTuning, NonlinTransform::hasTuning);
+        distortType.setupEnableOtherIf(distortAmount, NonlinTransform::hasAmount);
 
         setParams(
             background,
             foreground,
             waterMark,
-            new DialogParam("Transform", nonlinType, nonlinTuning, center, rotate, scale),
+            new DialogParam("Transform", distortType, distortAmount, center, rotate, scale),
             strokeParam.withStrokeWidth(2),
             effectsParam
         ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
@@ -151,9 +151,9 @@ public abstract class CurveFilter extends ParametrizedFilter {
             return dest;
         }
 
-        NonlinTransform nonlin = nonlinType.getSelected();
+        NonlinTransform nonlin = distortType.getSelected();
         if (nonlin != NONE) {
-            double amount = nonlinTuning.getValueAsDouble();
+            double amount = distortAmount.getValueAsDouble();
             Point2D pivotPoint = center.getAbsolutePoint(src);
             shape = nonlin.transform(shape, pivotPoint, amount, srcWidth, srcHeight);
         }
@@ -357,6 +357,6 @@ public abstract class CurveFilter extends ParametrizedFilter {
     }
 
     protected boolean hasNonlinDistort() {
-        return nonlinType.getSelected() != NONE;
+        return distortType.getSelected() != NONE;
     }
 }

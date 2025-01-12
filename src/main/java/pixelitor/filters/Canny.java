@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,10 +48,8 @@ public class Canny extends ParametrizedFilter {
         "Gaussian Kernel Width", 2, 16, 50);
     private final RangeParam gaussianKernelRadius = new RangeParam(
         "Gaussian Kernel Radius", 0, 2, 10);
-    private final BooleanParam contrastNormalized = new BooleanParam(
-        "Contrast Normalized", false);
-    private final BooleanParam invert = new BooleanParam(
-        "Invert", false);
+    private final BooleanParam contrastNormalized = new BooleanParam("Contrast Normalized");
+    private final BooleanParam invert = new BooleanParam("Invert");
 
     public Canny() {
         super(true);

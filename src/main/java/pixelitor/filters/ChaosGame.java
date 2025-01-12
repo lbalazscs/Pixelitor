@@ -71,9 +71,9 @@ public class ChaosGame extends ParametrizedFilter {
         new Item("Last but One", COLORS_LAST_BUT_ONE),
         new Item("Last but Two", COLORS_LAST_BUT_TWO),
     }, IGNORE_RANDOMIZE);
-    private final BooleanParam centerJump = new BooleanParam("Jump to Center", false);
-    private final BooleanParam midpointJump = new BooleanParam("Jump to Midpoints", false);
-    private final BooleanParam restrict = new BooleanParam("No Vertex Repetition", false);
+    private final BooleanParam centerJump = new BooleanParam("Jump to Center");
+    private final BooleanParam midpointJump = new BooleanParam("Jump to Midpoints");
+    private final BooleanParam restrict = new BooleanParam("No Vertex Repetition");
     private final BooleanParam showPoly = new BooleanParam("Show Polygon", false, IGNORE_RANDOMIZE);
 
     public ChaosGame() {

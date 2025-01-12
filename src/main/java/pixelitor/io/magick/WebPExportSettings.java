@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ class WebPExportSettings extends JPanel implements ExportSettings {
 
     private final RangeParam quality = new RangeParam("Quality (Size)",
         1, 50, 100, false, LabelPosition.NONE);
-    private final BooleanParam lossless = new BooleanParam("Lossless", false);
+    private final BooleanParam lossless = new BooleanParam("Lossless");
     private final IntChoiceParam imageHint = new IntChoiceParam(
         "Image Hint", new IntChoiceParam.Item[]{
         new IntChoiceParam.Item("Default", HINT_DEFAULT),

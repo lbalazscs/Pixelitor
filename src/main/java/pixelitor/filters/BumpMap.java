@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ public class BumpMap extends ParametrizedFilter {
     public static final String NAME = "Bump Map";
 
     private final SelectImageParam imageParam = new SelectImageParam("Bump Map");
-    private final BooleanParam tileParam = new BooleanParam("Tile", false);
+    private final BooleanParam tileParam = new BooleanParam("Tile");
     private final AngleParam lightDirection = new AngleParam(
         "Light Direction", 0);
     private final RangeParam depth = new RangeParam(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class TraceAction extends NamedAction.Checked {
         Path path = comp.getActivePath();
         if (path == null) {
             String msg = "There is no path in the composition.";
-            Messages.showInfo("No path", msg, comp.getDialogParent());
+            Messages.showInfo("No Path", msg, comp.getDialogParent());
             return;
         }
 

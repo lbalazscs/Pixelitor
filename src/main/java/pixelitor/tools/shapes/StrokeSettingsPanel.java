@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,10 +38,10 @@ import static javax.swing.BorderFactory.createTitledBorder;
 public class StrokeSettingsPanel extends JPanel {
     private static final int PREVIEW_SIZE = 120;
 
-    public StrokeSettingsPanel(StrokeParam sp) {
+    public StrokeSettingsPanel(StrokeParam strokeParam) {
         super(new GridBagLayout());
 
-        RangeParam strokeWidthParam = sp.getStrokeWidthParam();
+        RangeParam strokeWidthParam = strokeParam.getStrokeWidthParam();
         JComponent strokeWidthGUI = strokeWidthParam.createGUI("width");
         GridBagConstraints gbc = new GridBagConstraints(
             0, 0, 1, 1,
@@ -52,24 +52,24 @@ public class StrokeSettingsPanel extends JPanel {
             3, 3);
         add(strokeWidthGUI, gbc);
 
-        JPanel capJoinPanel = createCapJoinPanel(sp);
+        JPanel capJoinPanel = createCapJoinPanel(strokeParam);
         gbc.gridy = 1;
         add(capJoinPanel, gbc);
 
-        JPanel strokeTypePanel = createStrokeTypePanel(sp);
+        JPanel strokeTypePanel = createStrokeTypePanel(strokeParam);
         gbc.gridy = 2;
         add(strokeTypePanel, gbc);
 
-        JPanel strokePreviewPanel = createStrokePreviewPanel(sp);
+        JPanel strokePreviewPanel = createStrokePreviewPanel(strokeParam);
         gbc.gridy = 3;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         add(strokePreviewPanel, gbc);
     }
 
-    private static JPanel createCapJoinPanel(StrokeParam sp) {
-        EnumParam<StrokeCap> capParam = sp.getStrokeCapParam();
-        EnumParam<StrokeJoin> joinParam = sp.getStrokeJoinParam();
+    private static JPanel createCapJoinPanel(StrokeParam strokeParam) {
+        EnumParam<StrokeCap> capParam = strokeParam.getStrokeCapParam();
+        EnumParam<StrokeJoin> joinParam = strokeParam.getStrokeJoinParam();
 
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(createTitledBorder("Line Endpoints"));
@@ -78,9 +78,8 @@ public class StrokeSettingsPanel extends JPanel {
 
         JComponent capSelector = capParam.createGUI("cap");
 
-        // Dirty trick: manually set the preferred width so that
-        // the layout aligns with the layout in the other panel.
-        // Doubling the width is about OK.
+        // Manually set the preferred width so that the layout aligns with
+        // the layout in the other panel. Doubling the width is about OK.
         Dimension dim = capSelector.getPreferredSize();
         dim.setSize(dim.getWidth() * 2, dim.getHeight());
         capSelector.setPreferredSize(dim);
@@ -93,21 +92,21 @@ public class StrokeSettingsPanel extends JPanel {
         return panel;
     }
 
-    private static JPanel createStrokeTypePanel(StrokeParam sp) {
+    private static JPanel createStrokeTypePanel(StrokeParam strokeParam) {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(createTitledBorder("Stroke Type"));
         var gbh = new GridBagHelper(panel);
 
-        gbh.addLabelAndControl(sp.getStrokeTypeParam(), "strokeType");
-        gbh.addLabelAndControl(sp.getShapeTypeParam(), "shapeType");
-        gbh.addLabelAndControl(sp.getDashedParam(), "dashed");
+        gbh.addLabelAndControl(strokeParam.getStrokeTypeParam(), "strokeType");
+        gbh.addLabelAndControl(strokeParam.getShapeTypeParam(), "shapeType");
+        gbh.addLabelAndControl(strokeParam.getDashedParam(), "dashed");
 
         return panel;
     }
 
-    private static JPanel createStrokePreviewPanel(StrokeParam sp) {
-        JComponent preview = createPreviewComponent(sp);
-        sp.setPreviewer(preview);
+    private static JPanel createStrokePreviewPanel(StrokeParam strokeParam) {
+        JComponent preview = createPreviewComponent(strokeParam);
+        strokeParam.setPreviewer(preview);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(preview, CENTER);
@@ -116,7 +115,7 @@ public class StrokeSettingsPanel extends JPanel {
         return panel;
     }
 
-    private static JComponent createPreviewComponent(StrokeParam sp) {
+    private static JComponent createPreviewComponent(StrokeParam strokeParam) {
         JComponent preview = new JComponent() {
             // only the height matters, because the width will be stretched
             final Dimension size = new Dimension(PREVIEW_SIZE, PREVIEW_SIZE);
@@ -141,7 +140,7 @@ public class StrokeSettingsPanel extends JPanel {
                     width * 0.9, height * 0.4
                 );
                 g2.setColor(darkTheme ? Color.WHITE : Color.BLACK);
-                g2.setStroke(sp.createStroke());
+                g2.setStroke(strokeParam.createStroke());
                 g2.draw(shape);
             }
 

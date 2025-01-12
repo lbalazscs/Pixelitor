@@ -26,7 +26,6 @@ import pixelitor.utils.MockFilter;
 
 import java.awt.Dimension;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("Smart filter tests")
@@ -425,10 +424,8 @@ class SmartFilterTest {
             .invariantsAreOK();
         History.assertNumEditsIs(2);
 
-        // can't be moved further
-        assertThatThrownBy(() -> smartObject.moveUp(filter1))
-            .isInstanceOf(IllegalStateException.class);
-
+        smartObject.moveUp(filter1);
+        // can't be moved further, nothing happens
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 2", "Filter 3", "Filter 1")
             .invariantsAreOK();
@@ -494,10 +491,8 @@ class SmartFilterTest {
             .invariantsAreOK();
         History.assertNumEditsIs(2);
 
-        // can't be moved further
-        assertThatThrownBy(() -> smartObject.moveDown(filter3))
-            .isInstanceOf(IllegalStateException.class);
-
+        smartObject.moveDown(filter3);
+        // can't be moved further, nothing happens
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 3", "Filter 1", "Filter 2")
             .invariantsAreOK();

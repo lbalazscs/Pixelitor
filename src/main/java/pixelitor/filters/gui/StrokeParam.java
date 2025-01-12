@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ public class StrokeParam extends AbstractFilterParam {
     private final EnumParam<StrokeJoin> strokeJoinParam = StrokeJoin.asParam();
     private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam();
     private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam();
-    private final BooleanParam dashedParam = new BooleanParam("Dashed", false);
+    private final BooleanParam dashedParam = new BooleanParam("Dashed");
 
     private ResetButton resetButton;
     private JComponent previewer;

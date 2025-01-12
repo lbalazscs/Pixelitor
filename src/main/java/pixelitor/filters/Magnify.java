@@ -38,7 +38,7 @@ public class Magnify extends ParametrizedFilter {
     private final RangeParam softness = new RangeParam("Softness", 0, 100, 1000);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam shape = BlurredShape.getChoices();
-    private final BooleanParam invert = new BooleanParam("Invert", false);
+    private final BooleanParam invert = new BooleanParam("Invert");
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 

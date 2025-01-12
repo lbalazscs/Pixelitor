@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Shape;
 import java.awt.geom.Path2D;
@@ -113,33 +114,33 @@ public enum NonlinTransform {
                 return new Point2D.Double(newX, newY);
             };
         }
-    }, POLAR_TO_RECT("Polar to Rectangular", true) {
-        @Override
-        public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
-            double cx = center.getX();
-            double cy = center.getY();
-            double maxR = Math.sqrt(width * width + height * height) / 2.0;
-            return (x, y) -> {
-                double r = center.distance(x, y) / maxR;
-
-                // atan2 is in the range -pi..pi, angle will be 0..2*pi
-                double angle = atan2(y - cy, x - cx) + PI;
-
-                // in the range 0..1
-                double normalizedAngle = angle / (2 * PI);
-                normalizedAngle += tuning / 100.0;
-                if (normalizedAngle > 1) {
-                    normalizedAngle -= 1;
-                } else if (normalizedAngle < 0) {
-                    normalizedAngle += 1;
-                }
-
-                double newX = normalizedAngle * width;
-                double newY = r * height;
-
-                return new Point2D.Double(newX, newY);
-            };
-        }
+//    }, POLAR_TO_RECT("Polar to Rectangular", true) {
+//        @Override
+//        public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+//            double cx = center.getX();
+//            double cy = center.getY();
+//            double maxR = Math.sqrt(width * width + height * height) / 2.0;
+//            return (x, y) -> {
+//                double r = center.distance(x, y) / maxR;
+//
+//                // atan2 is in the range -pi..pi, angle will be 0..2*pi
+//                double angle = atan2(y - cy, x - cx) + PI;
+//
+//                // in the range 0..1
+//                double normalizedAngle = angle / (2 * PI);
+//                normalizedAngle += tuning / 100.0;
+//                if (normalizedAngle > 1) {
+//                    normalizedAngle -= 1;
+//                } else if (normalizedAngle < 0) {
+//                    normalizedAngle += 1;
+//                }
+//
+//                double newX = normalizedAngle * width;
+//                double newY = r * height;
+//
+//                return new Point2D.Double(newX, newY);
+//            };
+//        }
     }, WAVE("Wave", true) {
         @Override
         public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
@@ -257,7 +258,11 @@ public enum NonlinTransform {
         return new EnumParam<>("Distortion", NonlinTransform.class);
     }
 
-    public boolean hasTuning() {
+    public static RangeParam createAmountParam() {
+        return new RangeParam("Distortion Amount", -100, 0, 100);
+    }
+
+    public boolean hasAmount() {
         return hasTuning;
     }
 

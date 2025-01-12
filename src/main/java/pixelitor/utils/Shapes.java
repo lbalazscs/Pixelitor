@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -42,7 +43,6 @@ import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
 import static java.awt.geom.PathIterator.SEG_QUADTO;
 import static java.lang.Math.PI;
-import static java.lang.String.format;
 import static net.jafama.FastMath.atan2;
 import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.sin;
@@ -433,7 +433,7 @@ public class Shapes {
 
         pathBuilder.append(command);
         for (int i = 0; i < numCoords; i++) {
-            pathBuilder.append(format("%.3f ", coords[i]));
+            pathBuilder.append(String.format("%.3f ", coords[i]));
         }
         pathBuilder.append("\n");
     }
@@ -450,7 +450,10 @@ public class Shapes {
     }
 
     public static void debugPathIterator(Shape shape) {
-        PathIterator pathIterator = shape.getPathIterator(null);
+        debugPathIterator(shape.getPathIterator(null));
+    }
+
+    public static void debugPathIterator(PathIterator pathIterator) {
         double[] coords = new double[6];
 
         while (!pathIterator.isDone()) {
@@ -470,10 +473,13 @@ public class Shapes {
     }
 
     /**
-     * Converts the first n elements of the given array to a String representation.
+     * Converts the first n elements of the given array to a string
+     * representation, with numbers rounded to 2 decimal places.
      */
     private static String arrayToString(double[] array, int n) {
-        return Arrays.toString(Arrays.copyOf(array, n));
+        return Arrays.stream(Arrays.copyOf(array, n))
+            .mapToObj(d -> String.format("%.2f", d))
+            .collect(Collectors.joining(", ", "(", ")"));
     }
 
     /**

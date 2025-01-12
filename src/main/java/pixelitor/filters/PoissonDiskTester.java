@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class PoissonDiskTester extends ParametrizedFilter {
 
     private final RangeParam distance = new RangeParam("Distance", 10, 20, 300);
     private final RangeParam k = new RangeParam("k", 1, 30, 100);
-    private final BooleanParam improved = new BooleanParam("Improved", false);
+    private final BooleanParam improved = new BooleanParam("Improved");
     private final BooleanParam debugGrid = new BooleanParam("Debug Grid", false, IGNORE_RANDOMIZE);
 
     private final ColorListParam colors = new ColorListParam("Colors",

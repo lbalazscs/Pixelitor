@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class ExtractChannel extends ParametrizedFilter {
         new Item("Blue", BLUE_CHANNEL),
         new Item("Remove Blue", REMOVE_BLUE_CHANNEL),
     });
-    private final BooleanParam bwParam = new BooleanParam("Black and White", false);
+    private final BooleanParam bwParam = new BooleanParam("Black and White");
 
     public ExtractChannel() {
         super(true);

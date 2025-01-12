@@ -448,7 +448,7 @@ public abstract class Layer implements Serializable, Debuggable {
         }
         if (addType.needsSelection() && !comp.hasSelection()) {
             String msg = format("The composition \"%s\" has no selection.", comp.getName());
-            Messages.showInfo("No selection", msg, comp.getDialogParent());
+            Messages.showInfo("No Selection", msg, comp.getDialogParent());
             return;
         }
 
@@ -1036,7 +1036,7 @@ public abstract class Layer implements Serializable, Debuggable {
         if (holder instanceof LayerGroup group) {
             group.replaceWithUnGrouped(null, true);
         } else {
-            Messages.showError("Can't ungroup",
+            Messages.showError("Can't Ungroup",
                 "<html>The layer \"<b>%s</b>\" isn't inside a layer group.".formatted(getName()));
         }
     }

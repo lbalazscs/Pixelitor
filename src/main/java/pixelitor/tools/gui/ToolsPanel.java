@@ -38,9 +38,9 @@ public class ToolsPanel extends JPanel {
     public ToolsPanel(PixelitorWindow pw, Dimension screenSize) {
         Dimension buttonSize = calcToolButtonSize(screenSize, pw);
 
-        // we need to give a hint to the layout manager, but at
-        // this point neither the panel nor the window size is known
-        int heightHint = screenSize.height - 168;
+        // We need to give a hint to the layout manager, but at
+        // this point neither the panel nor the window size is known.
+        int heightHint = Math.max(screenSize.height - 168, 0);
 
         JPanel buttonsPanel = new JPanel(new ToolButtonsLayout(buttonSize.width, buttonSize.height, 0, heightHint));
         addToolButtons(buttonsPanel);

@@ -792,23 +792,31 @@ public class SmartObject extends CompositeLayer {
         return d;
     }
 
-    public void moveUp(SmartFilter smartFilter) {
-        int index = filters.indexOf(smartFilter);
-        if (index == filters.size() - 1) {
-            // already the last filter
-            throw new IllegalStateException();
+    @Override
+    public void moveActiveLayer(boolean up) {
+        SmartFilter smartFilter = getSelectedSmartFilter();
+        if (smartFilter != null) {
+            move(smartFilter, up);
         }
-        swapSmartFilters(index, index + 1, "Move " + smartFilter.getName() + " Up");
-        comp.setActiveLayer(smartFilter);
+    }
+
+    public void moveUp(SmartFilter smartFilter) {
+        move(smartFilter, true);
     }
 
     public void moveDown(SmartFilter smartFilter) {
+        move(smartFilter, false);
+    }
+
+    public void move(SmartFilter smartFilter, boolean up) {
         int index = filters.indexOf(smartFilter);
-        if (index == 0) {
-            // already the first filter
-            throw new IllegalStateException();
+        if ((up && index == filters.size() - 1) || (!up && index == 0)) {
+            return; // already at the boundary
         }
-        swapSmartFilters(index - 1, index, "Move " + smartFilter.getName() + " Down");
+        String editName = "Move " + smartFilter.getName() + (up ? " Up" : " Down");
+        int indexA = up ? index : index - 1;
+        int indexB = indexA + 1;
+        swapSmartFilters(indexA, indexB, editName);
         comp.setActiveLayer(smartFilter);
     }
 
@@ -874,7 +882,7 @@ public class SmartObject extends CompositeLayer {
         SmartFilter selected = getSelectedSmartFilter();
         if (selected != null) {
             selected.edit();
-        } else { // the smart object as a whole is selected
+        } else {
             // edit the last smart filter
             filters.getLast().edit();
         }
@@ -886,7 +894,7 @@ public class SmartObject extends CompositeLayer {
                 return filter;
             }
         }
-        return null;
+        return null; // the smart object as a whole is selected
     }
 
     @Override
@@ -1000,7 +1008,7 @@ public class SmartObject extends CompositeLayer {
         if (sf != null) {
             return filters.indexOf(sf);
         }
-        return -1; // TODO
+        return -1;
     }
 
     @Override
@@ -1040,18 +1048,6 @@ public class SmartObject extends CompositeLayer {
         // Update and setActiveLayer will be called later, but this is necessary.
         invalidateImageCache();
         iconImageNeedsRefresh = true;
-    }
-
-    @Override
-    public void moveActiveLayer(boolean up) {
-        SmartFilter sf = getSelectedSmartFilter();
-        if (sf != null) {
-            if (up) {
-                moveUp(sf);
-            } else {
-                moveDown(sf);
-            }
-        }
     }
 
     @Override
@@ -1124,8 +1120,8 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public BufferedImage createIconThumbnail() {
-//        BufferedImage bigImg = getCanvasSizedSubImage();
-        // TODO is the image always canvas-sized?
+        // TODO the thumbnail currently isn't created from the
+        //   canvas-visible region of the image
         return createThumbnail(getVisibleImage(), thumbSize, thumbCheckerBoardPainter);
     }
 

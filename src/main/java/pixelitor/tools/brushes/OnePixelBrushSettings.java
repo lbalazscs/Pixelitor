@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,7 @@ import java.util.function.Consumer;
  */
 public class OnePixelBrushSettings extends BrushSettings {
     private static final String AA_TEXT = "Anti-aliasing";
-    private final BooleanParam aaParam =
-        new BooleanParam(AA_TEXT, false);
+    private final BooleanParam aaParam = new BooleanParam(AA_TEXT);
     private JComponent aaGUI;
 
     @Override

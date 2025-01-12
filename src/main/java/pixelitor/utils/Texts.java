@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,8 +25,6 @@ import java.util.ResourceBundle;
  * The internationalized texts of the UI
  */
 public class Texts {
-    // this locale is used in the tests, the GUI replaces it
-//    private static ResourceBundle resources = ResourceBundle.getBundle("texts", Locale.US);
     private static ResourceBundle resources;
 
     private Texts() {

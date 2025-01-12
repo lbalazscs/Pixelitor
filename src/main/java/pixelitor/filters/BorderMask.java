@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,8 +51,8 @@ public class BorderMask extends ParametrizedFilter {
         new String[]{"North", "East", "South", "West"}, 0, 10, 500, true);
     private final RangeParam roundnessParam = new RangeParam("Roundness", 0, 20, 500);
     private final AngleParam angleParam = new AngleParam("Rotate", 0);
-    private final BooleanParam invertParam = new BooleanParam("Invert", false);
-    private final BooleanParam transparencyParam = new BooleanParam("Render Transparency", false);
+    private final BooleanParam invertParam = new BooleanParam("Invert");
+    private final BooleanParam transparencyParam = new BooleanParam("Render Transparency");
 
     public BorderMask() {
         super(false);

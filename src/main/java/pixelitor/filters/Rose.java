@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,13 +53,13 @@ public class Rose extends ParametrizedFilter {
     private final ColorParam fgColor = new ColorParam("Foreground Color", WHITE, USER_ONLY_TRANSPARENCY);
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
-    private final EnumParam<NonlinTransform> nonlinType = NonlinTransform.asParam();
-    private final RangeParam nonlinTuning = new RangeParam("Distortion Tuning", -100, 0, 100);
+    private final EnumParam<NonlinTransform> distortType = NonlinTransform.asParam();
+    private final RangeParam distortAmount = NonlinTransform.createAmountParam();
 
     public Rose() {
         super(false);
 
-        nonlinType.setupEnableOtherIf(nonlinTuning, NonlinTransform::hasTuning);
+        distortType.setupEnableOtherIf(distortAmount, NonlinTransform::hasAmount);
 
         setParams(
             nParam,
@@ -67,7 +67,7 @@ public class Rose extends ParametrizedFilter {
             bgColor,
             fgColor,
             new DialogParam("Transform",
-                nonlinType, nonlinTuning, center, rotate, scale)
+                distortType, distortAmount, center, rotate, scale)
         );
 
         helpURL = "https://en.wikipedia.org/wiki/Rose_(mathematics)";
@@ -110,9 +110,9 @@ public class Rose extends ParametrizedFilter {
         }
         path.closePath();
 
-        NonlinTransform nonlin = nonlinType.getSelected();
+        NonlinTransform nonlin = distortType.getSelected();
         if (nonlin != NONE) {
-            double amount = nonlinTuning.getValueAsDouble();
+            double amount = distortAmount.getValueAsDouble();
             Point2D pivotPoint = new Point2D.Double(cx, cy);
             path = nonlin.transform(path, pivotPoint, amount, width, height);
         }

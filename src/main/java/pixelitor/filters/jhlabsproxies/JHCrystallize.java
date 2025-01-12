@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class JHCrystallize extends ParametrizedFilter {
     private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);
     private final RangeParam size = new RangeParam("Size", 1, 20, 200);
     private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, FREE_TRANSPARENCY);
-    private final BooleanParam fadeEdges = new BooleanParam("Fade Edges", false);
+    private final BooleanParam fadeEdges = new BooleanParam("Fade Edges");
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 0, 100);
     private final IntChoiceParam gridType = IntChoiceParam.forGridType("Shape", randomness);
 

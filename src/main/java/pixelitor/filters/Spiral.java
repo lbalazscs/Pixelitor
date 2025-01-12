@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,8 +51,8 @@ public class Spiral extends CurveFilter {
         new Item("Polygon", TYPE_POLYGON)
     });
     private final RangeParam sidesParam = new RangeParam("Polygon Sides", 3, 4, 10);
-    private final BooleanParam symmetry = new BooleanParam("Symmetric", false);
-    private final BooleanParam log = new BooleanParam("Logarithmic", false);
+    private final BooleanParam symmetry = new BooleanParam("Symmetric");
+    private final BooleanParam log = new BooleanParam("Logarithmic");
     private final BooleanParam scale = new BooleanParam("Scale", true);
 
     public Spiral() {

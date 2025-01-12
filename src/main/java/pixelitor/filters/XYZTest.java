@@ -40,7 +40,7 @@ public class XYZTest extends ParametrizedFilter {
     private final RangeParam x = new RangeParam("X", -20, 0, 20);
     private final RangeParam y = new RangeParam("Y", -20, 0, 20);
     private final RangeParam z = new RangeParam("Z", -20, 0, 20);
-    private final BooleanParam linRGB = new BooleanParam("Linearize", false);
+    private final BooleanParam linRGB = new BooleanParam("Linearize");
 
 //    private static final ColorSpace XYZ_CS = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
 

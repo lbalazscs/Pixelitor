@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class Flashlight extends ParametrizedFilter {
         new Item("Background Color", Impl.BG_TOOL_BG),
         new Item("Transparent", Impl.BG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
-    private final BooleanParam invert = new BooleanParam("Invert", false);
+    private final BooleanParam invert = new BooleanParam("Invert");
 
     private Impl filter;
 

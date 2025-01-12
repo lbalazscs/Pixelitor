@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ public class ConnectBrushSettings extends BrushSettings {
     private final RangeParam densityModel = new RangeParam("Line Density (%)", 1, 50, 100);
     private final RangeParam widthModel = new RangeParam("Line Width (px)", 1, 1, 10);
     private final BooleanParam resetForEachStroke = new BooleanParam(
-        "Reset History for Each Stroke", false);
+        "Reset History for Each Stroke");
 
     @Override
     protected void forEachParam(Consumer<FilterParam> consumer) {

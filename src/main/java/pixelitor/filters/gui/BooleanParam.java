@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,10 @@ public class BooleanParam extends AbstractFilterParam {
     private boolean value;
     private final boolean addResetButton;
     private List<ItemListener> pendingItemListeners;
+
+    public BooleanParam(String name) {
+        this(name, false, ALLOW_RANDOMIZE);
+    }
 
     public BooleanParam(String name, boolean defaultValue) {
         this(name, defaultValue, ALLOW_RANDOMIZE);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
     private final RangeParam radius1 = new RangeParam(GUIText.RADIUS + " 1", 0, 0, 10);
     private final RangeParam radius2 = new RangeParam(GUIText.RADIUS + " 2", 0, 4, 10);
     private final BooleanParam normalize = new BooleanParam("Maximize Contrast", true);
-    private final BooleanParam invert = new BooleanParam("Invert", false);
+    private final BooleanParam invert = new BooleanParam("Invert");
 
     private DoGFilter filter;
 

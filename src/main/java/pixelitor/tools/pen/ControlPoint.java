@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,6 @@ import java.io.Serial;
  * A control point of an {@link AnchorPoint}.
  */
 public class ControlPoint extends DraggablePoint {
-    // compatible with Pixelitor 4.2.3
     @Serial
     private static final long serialVersionUID = 8776344572399099909L;
 
@@ -142,17 +141,15 @@ public class ControlPoint extends DraggablePoint {
 
     @Override
     public String toColoredString() {
-        if (isRetracted()) {
-            return super.toColoredString() + Ansi.red(" retracted!");
-        }
-        return super.toColoredString();
+        return isRetracted()
+            ? super.toColoredString() + Ansi.red(" retracted!")
+            : super.toColoredString();
     }
 
     @Override
     public String toString() {
-        if (isRetracted()) {
-            return super.toString() + " retracted!";
-        }
-        return super.toString();
+        return isRetracted()
+            ? super.toString() + " retracted!"
+            : super.toString();
     }
 }

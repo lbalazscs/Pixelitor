@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class JHWeave extends ParametrizedFilter {
     });
     private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 0, 16, 100, true);
     private final GroupedRangeParam gap = new GroupedRangeParam("Gap", 0, 6, 100);
-    private final BooleanParam roundThreads = new BooleanParam("Round Threads", false);
+    private final BooleanParam roundThreads = new BooleanParam("Round Threads");
     private final BooleanParam shadeCrossings = new BooleanParam("Shade Crossings", true);
     private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", true, IGNORE_RANDOMIZE);
 

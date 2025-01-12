@@ -42,7 +42,7 @@ public class JHFocus extends ParametrizedFilter {
     private final RangeParam softness = new RangeParam("Transition Softness", 0, 20, 100);
     private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 48);
     private final RangeParam numIterations = new RangeParam("Blur Iterations (Quality)", 1, 3, 10);
-    private final BooleanParam invert = new BooleanParam("Invert", false);
+    private final BooleanParam invert = new BooleanParam("Invert");
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
     private final IntChoiceParam shape = BlurredShape.getChoices();
 

@@ -40,7 +40,7 @@ public class JHSparkle extends ParametrizedFilter {
     private static final long serialVersionUID = -2547285385455761188L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final BooleanParam lightOnly = new BooleanParam("Light Only", false);
+    private final BooleanParam lightOnly = new BooleanParam("Light Only");
     private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_TRANSPARENCY);
     private final RangeParam numRays = new RangeParam("Number of Rays", 1, 200, 501);
     private final RangeParam radius = new RangeParam("High Intensity Radius", 1, 50, 500);

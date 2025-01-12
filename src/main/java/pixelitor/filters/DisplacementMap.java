@@ -27,7 +27,7 @@ public class DisplacementMap extends ParametrizedFilter {
     public static final String NAME = "Displacement Map";
 
     private final SelectImageParam imageParam = new SelectImageParam("Displacement Map");
-    private final BooleanParam tileParam = new BooleanParam("Tile", false);
+    private final BooleanParam tileParam = new BooleanParam("Tile");
     private final RangeParam amount = new RangeParam(
         "Amount", 0, 10, 100);
     private final AngleParam angle = new AngleParam("Angle", 0);
