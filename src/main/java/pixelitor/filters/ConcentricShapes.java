@@ -51,6 +51,21 @@ public class ConcentricShapes extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    private enum Arrangement {
+        NESTED("Nested"), RINGED("Ringed");
+
+        private final String displayName;
+
+        Arrangement(String displayName) {
+            this.displayName = displayName;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
     private enum ConcentricShapeType {
         CIRCLES("Circles", false, false, 1.0, 1.0) {
             @Override
@@ -124,7 +139,8 @@ public class ConcentricShapes extends ParametrizedFilter {
         }
     }
 
-    private final EnumParam<ConcentricShapeType> type = new EnumParam<>("Type", ConcentricShapeType.class);
+    private final EnumParam<ConcentricShapeType> shapeTypeParam = new EnumParam<>("Type", ConcentricShapeType.class);
+    private final EnumParam<Arrangement> arrangementParam = new EnumParam<>("Arrangement", Arrangement.class);
     private final RangeParam sides = new RangeParam("Sides", 3, 7, 25);
     private final RangeParam tuning = new RangeParam("Tuning", -100, 0, 100);
     private final RangeParam distanceParam = new RangeParam("Distance", 1, 20, 100);
@@ -144,11 +160,12 @@ public class ConcentricShapes extends ParametrizedFilter {
         super(false);
 
         FilterButtonModel reseedAction = paramSet.createReseedAction("", "Reseed Randomness");
-        type.setupEnableOtherIf(sides, ConcentricShapeType::hasSides);
-        type.setupEnableOtherIf(tuning, ConcentricShapeType::hasTuning);
+        shapeTypeParam.setupEnableOtherIf(sides, ConcentricShapeType::hasSides);
+        shapeTypeParam.setupEnableOtherIf(tuning, ConcentricShapeType::hasTuning);
 
         setParams(
-            type,
+            arrangementParam,
+            shapeTypeParam,
             sides,
             tuning,
             distanceParam,
@@ -166,11 +183,18 @@ public class ConcentricShapes extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         dest = ImageUtils.copyImage(src);
         Graphics2D g = dest.createGraphics();
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Random random = paramSet.getLastSeedRandom();
-        List<ColoredShape> shapes = createShapes(dest.getWidth(), dest.getHeight(),
-            random, rotate.getValueInRadians(), tuning.getPercentage());
+
+        int width = dest.getWidth();
+        int height = dest.getHeight();
+        g.setColor(colorsParam.getColor(0));
+        g.fillRect(0, 0, width, height);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+
+        List<ColoredShape> shapes = createShapes(width, height, random,
+            tuning.getPercentage(), arrangementParam.getSelected());
+
         for (ColoredShape shape : shapes) {
             g.setColor(shape.color());
             g.fill(shape.shape());
@@ -180,11 +204,17 @@ public class ConcentricShapes extends ParametrizedFilter {
         return dest;
     }
 
-    private List<ColoredShape> createShapes(int width, int height, Random rng, double angle, double tuning) {
+    private List<ColoredShape> createShapes(int width, int height, Random rng, double tuning, Arrangement arrangement) {
+        return arrangement == Arrangement.NESTED
+            ? createNestedShapes(width, height, rng, tuning)
+            : createRingedShapes(width, height, rng, tuning);
+    }
+
+    private List<ColoredShape> createNestedShapes(int width, int height, Random rng, double tuning) {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
-        ConcentricShapeType shapeType = type.getSelected();
+        ConcentricShapeType shapeType = shapeTypeParam.getSelected();
         double maxDist = calcMaxDistance(cx, cy, width, height);
 
         int randomness = randomnessParam.getValue();
@@ -197,37 +227,99 @@ public class ConcentricShapes extends ParametrizedFilter {
         distance *= shapeType.getDistMultiplier();
 
         Color[] colors = colorsParam.getColors();
-        int numColors = colors.length;
         List<ColoredShape> retVal = new ArrayList<>(numRings);
 
         int numSides = sides.getValue();
 
+        AffineTransform at = createTransform(cx, cy);
+
+        for (int ring = numRings; ring > 0; ring--) {
+            double r = ring * distance;
+            Color color = colorsParam.getColor((ring - 1) % colors.length);
+            Shape shape = createShape(shapeType, cx, cy, rng, tuning, r, numSides, randomness, rndMultiplier, at);
+            retVal.add(new ColoredShape(color, shape));
+        }
+        return retVal;
+    }
+
+    private List<ColoredShape> createRingedShapes(int width, int height, Random rng, double tuning) {
+        double cx = width * center.getRelativeX();
+        double cy = height * center.getRelativeY();
+
+        ConcentricShapeType shapeType = shapeTypeParam.getSelected();
+        double r = distanceParam.getValue();
+        int numSides = sides.getValue();
+        Color[] colors = colorsParam.getColors();
+
+        double maxDist = Math.sqrt(width * width + height + height) / 2.0;
+        int numRings = (int) (maxDist / (2 * r));
+        List<ColoredShape> retVal = new ArrayList<>(numRings);
+
+        int randomness = randomnessParam.getValue();
+
+
+        AffineTransform at = createTransform(cx, cy);
+
+        // add a shape at the center
+        Shape shape = createShape(shapeType, cx, cy, rng, tuning, r, numSides, randomness, randomness / 400.0, at);
+        Color color = selectColor(colors, 0);
+        retVal.add(new ColoredShape(color, shape));
+
+        // add concentric rings of shapes
+        int shapeCount = 1;
+        for (int ring = 1; ring <= numRings; ring++) {
+            int numShapes = ring * 6;
+            double ringRadius = ring * 2 * r;
+
+            double startAngle = 3 * Math.PI / 2;
+            for (int i = 0; i < numShapes; i++) {
+                double angle = startAngle + 2 * Math.PI * i / numShapes;
+                double x = cx + ringRadius * Math.cos(angle);
+                double y = cy + ringRadius * Math.sin(angle);
+                shape = createShape(shapeType, x, y, rng, tuning, r, numSides, randomness, randomness / 400.0, at);
+                shapeCount++;
+                color = selectColor(colors, shapeCount);
+                retVal.add(new ColoredShape(color, shape));
+            }
+        }
+
+        return retVal;
+    }
+
+    // the shapes are transformed using this transform, instead of transforming
+    // the Graphics, so that they are also tranformed in the SVG export
+    private AffineTransform createTransform(double cx, double cy) {
         double scaleX = scale.getPercentage(0);
         double scaleY = scale.getPercentage(1);
+        double rotation = rotate.getValueInRadians();
 
         AffineTransform at = null;
-        if (angle != 0 || scaleX != 1.0 || scaleY != 1.0) {
+        if (rotation != 0 || scaleX != 1.0 || scaleY != 1.0) {
             at = new AffineTransform();
             // this will first scale, and then rotate!
-            at.rotate(angle, cx, cy);
+            at.rotate(rotation, cx, cy);
             at.translate(cx, cy);
             at.scale(scaleX, scaleY);
             at.translate(-cx, -cy);
         }
+        return at;
+    }
 
-        for (int ring = numRings; ring > 0; ring--) {
-            double r = ring * distance;
-            Color color = colorsParam.getColor((ring - 1) % numColors);
-            Shape shape = shapeType.createShape(cx, cy, r, numSides, tuning);
-            if (randomness > 0) {
-                shape = Shapes.randomize(shape, rng, rndMultiplier * r);
-            }
-            if (at != null) {
-                shape = at.createTransformedShape(shape);
-            }
-            retVal.add(new ColoredShape(color, shape));
+    private static Shape createShape(ConcentricShapeType shapeType, double x, double y, Random rng, double tuning, double r, int numSides, int randomness, double rndMultiplier, AffineTransform at) {
+        Shape shape = shapeType.createShape(x, y, r, numSides, tuning);
+        if (randomness > 0) {
+            shape = Shapes.randomize(shape, rng, rndMultiplier * r);
         }
-        return retVal;
+        if (at != null) {
+            shape = at.createTransformedShape(shape);
+        }
+        return shape;
+    }
+
+    private Color selectColor(Color[] colors, int shapeCount) {
+        // the index for circular iteration, skipping the first color
+        int colorIndex = (shapeCount % (colors.length - 1)) + 1;
+        return colorsParam.getColor(colorIndex);
     }
 
     private void exportSVG() {
@@ -236,7 +328,8 @@ public class ConcentricShapes extends ParametrizedFilter {
         content.append(canvas.createSVGElement());
         content.append("\n");
 
-        List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight(), paramSet.getLastSeedRandom(), rotate.getValueInRadians(), tuning.getPercentage());
+        List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight(),
+            paramSet.getLastSeedRandom(), tuning.getPercentage(), arrangementParam.getSelected());
         for (ColoredShape coloredShape : coloredShapes) {
             String svgPath = Shapes.toSvgPath(coloredShape.shape());
             String svgColor = Colors.toHTMLHex(coloredShape.color(), false);
