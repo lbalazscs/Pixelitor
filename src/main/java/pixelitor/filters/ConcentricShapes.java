@@ -22,6 +22,7 @@ import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
+import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
@@ -77,7 +78,6 @@ public class ConcentricShapes extends ParametrizedFilter {
             Shape createShape(double cx, double cy, double r, int n, double tuning) {
                 return Shapes.createCircumscribedPolygon(n, cx, cy, r, tuning);
             }
-            // the number of rings multiplier corresponds to the max/min radius ratio
         }, STARS("Stars", true, true, 2.0, 2.0) {
             @Override
             Shape createShape(double cx, double cy, double r, int n, double tuning) {
@@ -153,15 +153,14 @@ public class ConcentricShapes extends ParametrizedFilter {
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
-    private record ColoredShape(Color color, Shape shape) {
-    }
-
     public ConcentricShapes() {
         super(false);
 
         FilterButtonModel reseedAction = paramSet.createReseedAction("", "Reseed Randomness");
+
         shapeTypeParam.setupEnableOtherIf(sides, ConcentricShapeType::hasSides);
         shapeTypeParam.setupEnableOtherIf(tuning, ConcentricShapeType::hasTuning);
+        randomnessParam.setupEnableOtherIfNotZero(reseedAction);
 
         setParams(
             arrangementParam,
@@ -172,11 +171,7 @@ public class ConcentricShapes extends ParametrizedFilter {
             colorsParam,
             new DialogParam("Transform", center, scale, rotate),
             randomnessParam.withAction(reseedAction)
-        ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
-            null, "Export the current image to an SVG file",
-            null, false));
-
-        randomnessParam.setupEnableOtherIfNotZero(reseedAction);
+        ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
     }
 
     @Override
@@ -192,10 +187,10 @@ public class ConcentricShapes extends ParametrizedFilter {
         g.fillRect(0, 0, width, height);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        List<ColoredShape> shapes = createShapes(width, height, random,
+        List<ShapeWithColor> shapes = createShapes(width, height, random,
             tuning.getPercentage(), arrangementParam.getSelected());
 
-        for (ColoredShape shape : shapes) {
+        for (ShapeWithColor shape : shapes) {
             g.setColor(shape.color());
             g.fill(shape.shape());
         }
@@ -204,13 +199,13 @@ public class ConcentricShapes extends ParametrizedFilter {
         return dest;
     }
 
-    private List<ColoredShape> createShapes(int width, int height, Random rng, double tuning, Arrangement arrangement) {
+    private List<ShapeWithColor> createShapes(int width, int height, Random rng, double tuning, Arrangement arrangement) {
         return arrangement == Arrangement.NESTED
             ? createNestedShapes(width, height, rng, tuning)
             : createRingedShapes(width, height, rng, tuning);
     }
 
-    private List<ColoredShape> createNestedShapes(int width, int height, Random rng, double tuning) {
+    private List<ShapeWithColor> createNestedShapes(int width, int height, Random rng, double tuning) {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
@@ -223,26 +218,23 @@ public class ConcentricShapes extends ParametrizedFilter {
 
         double distance = distanceParam.getValueAsDouble();
         int numRings = (int) (shapeType.getRingsMultiplier() * (1 + (maxDist / distance)));
-
         distance *= shapeType.getDistMultiplier();
 
         Color[] colors = colorsParam.getColors();
-        List<ColoredShape> retVal = new ArrayList<>(numRings);
-
         int numSides = sides.getValue();
-
         AffineTransform at = createTransform(cx, cy);
 
+        List<ShapeWithColor> shapes = new ArrayList<>(numRings);
         for (int ring = numRings; ring > 0; ring--) {
             double r = ring * distance;
             Color color = colorsParam.getColor((ring - 1) % colors.length);
             Shape shape = createShape(shapeType, cx, cy, rng, tuning, r, numSides, randomness, rndMultiplier, at);
-            retVal.add(new ColoredShape(color, shape));
+            shapes.add(new ShapeWithColor(shape, color));
         }
-        return retVal;
+        return shapes;
     }
 
-    private List<ColoredShape> createRingedShapes(int width, int height, Random rng, double tuning) {
+    private List<ShapeWithColor> createRingedShapes(int width, int height, Random rng, double tuning) {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
@@ -252,18 +244,15 @@ public class ConcentricShapes extends ParametrizedFilter {
         Color[] colors = colorsParam.getColors();
 
         double maxDist = Math.sqrt(width * width + height + height) / 2.0;
-        int numRings = (int) (maxDist / (2 * r));
-        List<ColoredShape> retVal = new ArrayList<>(numRings);
-
         int randomness = randomnessParam.getValue();
-
-
         AffineTransform at = createTransform(cx, cy);
+        int numRings = (int) (maxDist / (2 * r));
+        List<ShapeWithColor> shapes = new ArrayList<>(numRings);
 
         // add a shape at the center
         Shape shape = createShape(shapeType, cx, cy, rng, tuning, r, numSides, randomness, randomness / 400.0, at);
         Color color = selectColor(colors, 0);
-        retVal.add(new ColoredShape(color, shape));
+        shapes.add(new ShapeWithColor(shape, color));
 
         // add concentric rings of shapes
         int shapeCount = 1;
@@ -279,11 +268,11 @@ public class ConcentricShapes extends ParametrizedFilter {
                 shape = createShape(shapeType, x, y, rng, tuning, r, numSides, randomness, randomness / 400.0, at);
                 shapeCount++;
                 color = selectColor(colors, shapeCount);
-                retVal.add(new ColoredShape(color, shape));
+                shapes.add(new ShapeWithColor(shape, color));
             }
         }
 
-        return retVal;
+        return shapes;
     }
 
     // the shapes are transformed using this transform, instead of transforming
@@ -305,7 +294,9 @@ public class ConcentricShapes extends ParametrizedFilter {
         return at;
     }
 
-    private static Shape createShape(ConcentricShapeType shapeType, double x, double y, Random rng, double tuning, double r, int numSides, int randomness, double rndMultiplier, AffineTransform at) {
+    private static Shape createShape(ConcentricShapeType shapeType, double x, double y,
+                                     Random rng, double tuning, double r, int numSides,
+                                     int randomness, double rndMultiplier, AffineTransform at) {
         Shape shape = shapeType.createShape(x, y, r, numSides, tuning);
         if (randomness > 0) {
             shape = Shapes.randomize(shape, rng, rndMultiplier * r);
@@ -324,17 +315,14 @@ public class ConcentricShapes extends ParametrizedFilter {
 
     private void exportSVG() {
         Canvas canvas = Views.getActiveComp().getCanvas();
-        StringBuilder content = new StringBuilder();
-        content.append(canvas.createSVGElement());
-        content.append("\n");
+        StringBuilder content = new StringBuilder()
+            .append(canvas.createSVGElement())
+            .append("\n");
 
-        List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight(),
+        List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight(),
             paramSet.getLastSeedRandom(), tuning.getPercentage(), arrangementParam.getSelected());
-        for (ColoredShape coloredShape : coloredShapes) {
-            String svgPath = Shapes.toSvgPath(coloredShape.shape());
-            String svgColor = Colors.toHTMLHex(coloredShape.color(), false);
-            content.append("<path d=\"%s\" fill=\"#%s\"/>\n".formatted(svgPath, svgColor));
-        }
+
+        ShapeWithColor.appendSvgPaths(shapes, content);
         content.append("</svg>");
 
         FileIO.saveSVG(content.toString(), "concentric.svg");

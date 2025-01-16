@@ -111,9 +111,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
             new DialogParam("Transform", distortType, distortAmount, center, rotate, scale),
             strokeParam.withStrokeWidth(2),
             effectsParam
-        ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
-            null, "Export the current shape to an SVG file",
-            null, false));
+        ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
 
         // disable foreground and background if watermarking is selected
         waterMark.setupDisableOtherIfChecked(foreground);

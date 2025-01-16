@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,6 +89,12 @@ public class FilterButtonModel implements FilterSetting {
      */
     public static FilterButtonModel createNoOpReseed() {
         return createReseed(() -> {});
+    }
+
+    public static FilterButtonModel createExportSvg(Runnable exportAction) {
+        return new FilterButtonModel("Export SVG...", exportAction,
+            null, "Export the current image to an SVG file",
+            null, false);
     }
 
     @Override

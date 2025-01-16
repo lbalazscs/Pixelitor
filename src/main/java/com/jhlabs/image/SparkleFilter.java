@@ -95,7 +95,7 @@ public class SparkleFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         float dx = x - centerX;
         float dy = y - centerY;
         float distance = dx * dx + dy * dy;

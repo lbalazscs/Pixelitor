@@ -117,7 +117,7 @@ public class Flashlight extends ParametrizedFilter {
         }
 
         @Override
-        public int filterRGB(int x, int y, int rgb) {
+        public int processPixel(int x, int y, int rgb) {
             double outside = shape.isOutside(x, y);
             if (invert) {
                 outside = 1.0 - outside;

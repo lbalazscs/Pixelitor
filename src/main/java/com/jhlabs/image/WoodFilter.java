@@ -134,7 +134,7 @@ public class WoodFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         float nx = m00 * x + m01 * y;
         float ny = m10 * x + m11 * y;
         nx /= scale;

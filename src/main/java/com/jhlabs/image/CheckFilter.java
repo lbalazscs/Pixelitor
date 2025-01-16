@@ -154,7 +154,7 @@ public class CheckFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         float nx = (m00 * x + m01 * y) / xScale;
         float ny = (m10 * x + m11 * y) / yScale;
         if (distortion > 0) {

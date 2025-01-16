@@ -1411,7 +1411,11 @@ public class ImageUtils {
         return new Rectangle(left, top, right - left + 1, bottom - top + 1);
     }
 
-    public static BufferedImage mask(BufferedImage srcA, BufferedImage srcB, BufferedImage mask) {
+    /**
+     * Blends two source images based on a mask image. The blend ratio for
+     * each pixel is determined by the corresponding pixel in the mask image.
+     */
+    public static BufferedImage blendWithMask(BufferedImage srcA, BufferedImage srcB, BufferedImage mask) {
         BufferedImage dest = createImageWithSameCM(srcA);
         int[] srcAPixels = getPixels(srcA);
         int[] srcBPixels = getPixels(srcB);

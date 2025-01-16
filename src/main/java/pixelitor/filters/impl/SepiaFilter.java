@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class SepiaFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
@@ -56,15 +56,10 @@ public class SepiaFilter extends PointFilter {
             g = 255;
         }
 
-        // Darken blue color to increase sepia effect
         b -= intensity;
 
-        // normalize if out of bounds
         if (b < 0) {
             b = 0;
-        }
-        if (b > 255) {
-            b = 255;
         }
 
         return a << 24 | r << 16 | g << 8 | b;

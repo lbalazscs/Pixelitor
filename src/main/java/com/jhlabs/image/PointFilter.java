@@ -56,7 +56,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
             Runnable rowTask = () -> {
                 for (int x = 0; x < width; x++) {
                     int index = finalY * width + x;
-                    outPixels[index] = filterRGB(x, finalY, inPixels[index]);
+                    outPixels[index] = processPixel(x, finalY, inPixels[index]);
                 }
             };
             rowFutures[y] = ThreadPool.submit(rowTask);
@@ -80,7 +80,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
                 int[] inPixels = new int[width];
                 src.getRGB(0, finalY, width, 1, inPixels, 0, width);
                 for (int x = 0; x < width; x++) {
-                    inPixels[x] = filterRGB(x, finalY, inPixels[x]);
+                    inPixels[x] = processPixel(x, finalY, inPixels[x]);
                 }
                 dst.setRGB(0, finalY, width, 1, inPixels, 0, width);
             };
@@ -95,5 +95,5 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
     public void setDimensions(int width, int height) {
     }
 
-    public abstract int filterRGB(int x, int y, int rgb);
+    public abstract int processPixel(int x, int y, int rgb);
 }

@@ -108,7 +108,7 @@ public class WeaveFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         x = (int) (x + (xWidth + xGap / 2));
         y = (int) (y + (yWidth + yGap / 2));
         float nx = ImageMath.mod(x, xWidth + xGap);

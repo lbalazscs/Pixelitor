@@ -25,7 +25,7 @@ public class InvertAlphaFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         return rgb ^ 0xff000000;
     }
 

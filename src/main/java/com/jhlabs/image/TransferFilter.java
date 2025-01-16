@@ -27,7 +27,7 @@ public abstract class TransferFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         int a = rgb & 0xff000000;
         int r = (rgb >> 16) & 0xff;
         int g = (rgb >> 8) & 0xff;
@@ -69,7 +69,7 @@ public abstract class TransferFilter extends PointFilter {
         }
         int[] lut = new int[256];
         for (int i = 0; i < 256; i++) {
-            lut[i] = filterRGB(0, 0, (i << 24) | (i << 16) | (i << 8) | i);
+            lut[i] = processPixel(0, 0, (i << 24) | (i << 16) | (i << 8) | i);
         }
         return lut;
     }

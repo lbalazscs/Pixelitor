@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,8 +32,18 @@ import java.awt.image.BufferedImage;
 public class TileSeamless extends ParametrizedFilter {
     public static final String NAME = "Tile Seamless";
 
+//    private static final int SHOW_FINAL = 0;
+//    private static final int SHOW_MASK = 1;
+//    private static final int SHOW_OFFSET = 2;
+
     private final ImagePositionParam center =
         new ImagePositionParam("Center");
+
+//    private final IntChoiceParam showParam = new IntChoiceParam("Show", new IntChoiceParam.Item[]{
+//        new IntChoiceParam.Item("Final", SHOW_FINAL),
+//        new IntChoiceParam.Item("Mask", SHOW_MASK),
+//        new IntChoiceParam.Item("Final", SHOW_OFFSET),
+//    });
 
     private MaskMaker maskMaker = null;
     private OffsetFilter offsetFilter = null;
@@ -41,7 +51,12 @@ public class TileSeamless extends ParametrizedFilter {
     public TileSeamless() {
         super(true);
 
-        setParams(center);
+        helpText = "Modifies an image to make it \"seamless,\" meaning it can be tiled (repeated) without visible edges or discontinuities.";
+
+        setParams(
+//            showParam,
+            center
+        );
     }
 
     @Override
@@ -63,14 +78,18 @@ public class TileSeamless extends ParametrizedFilter {
         maskMaker.setSize(src);
         BufferedImage maskImage = maskMaker.filter(src, ImageUtils.createImageWithSameCM(src));
 
-        return ImageUtils.mask(src, offsetImage, maskImage);
-//        return switch (showParam.getSelected()) {
-//            case Final -> ImageUtils.mask(src, offsetImage, maskImage);
-//            case Offset -> offsetImage;
-//            case Mask -> maskImage;
+        return ImageUtils.blendWithMask(src, offsetImage, maskImage);
+//        return switch (showParam.getSelected().getValue()) {
+//            case SHOW_FINAL -> ImageUtils.blendWithMask(src, offsetImage, maskImage);
+//            case SHOW_OFFSET -> offsetImage;
+//            case SHOW_MASK -> maskImage;
+//            default -> throw new IllegalStateException("Unexpected value: " + showParam.getSelected().getValue());
 //        };
     }
 
+    /**
+     * Generates a mask image based on the distance of each pixel from the center.
+     */
     private static class MaskMaker extends PointFilter {
         double cx;
         double cy;
@@ -92,7 +111,7 @@ public class TileSeamless extends ParametrizedFilter {
         }
 
         @Override
-        public int filterRGB(int x, int y, int rgb) {
+        public int processPixel(int x, int y, int rgb) {
             double distX;
             double distY;
 

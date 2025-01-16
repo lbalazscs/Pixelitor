@@ -81,8 +81,8 @@ public class ColorWheel extends ParametrizedFilter {
 
         ColorSpaceType space = type.getSelected();
 
-        int cx = (int) (width * center.getRelativeX());
-        int cy = (int) (height * center.getRelativeY());
+        double cx = width * center.getRelativeX();
+        double cy = height * center.getRelativeY();
 
         double hueRot = hueRotParam.getValueInRadians();
         double sat = satParam.getPercentage();
@@ -104,11 +104,11 @@ public class ColorWheel extends ParametrizedFilter {
     }
 
     private static void processRow(int[] destPixels, int width, int y,
-                                   int cx, int cy, double hueRot,
+                                   double cx, double cy, double hueRot,
                                    double saturation, double brightness, ColorSpaceType model) {
         for (int x = 0; x < width; x++) {
-            int yDiff = cy - y;
-            int xDiff = x - cx;
+            double yDiff = cy - y;
+            double xDiff = x - cx;
             double angle = FastMath.atan2(yDiff, xDiff) + hueRot;
             double hue = angle / (2 * Math.PI);
 

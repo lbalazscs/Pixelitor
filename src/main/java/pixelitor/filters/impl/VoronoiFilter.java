@@ -80,11 +80,13 @@ public class VoronoiFilter extends PointFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
+        // generate a set of points using Poisson disk sampling
         sampling = new PoissonDiskSampling(width, height, distanceBetweenPoints, 10, true, rand);
         List<Point2D> points = sampling.getSamples();
+
+        // assign colors to the points
         int numPoints = points.size();
         colors = new int[numPoints];
-
         for (int i = 0; i < numPoints; i++) {
             int color;
             if (useImageColors) {
@@ -96,7 +98,100 @@ public class VoronoiFilter extends PointFilter {
             colors[i] = color;
         }
 
+        // process each pixel
         return super.filter(src, dst);
+    }
+
+    @Override
+    public int processPixel(int x, int y, int rgb) {
+        // find the closest sampled point to the current pixel
+        int closestIndex = sampling.findClosestPointIndex(x, y,
+            metric.asIntPrecisionDistance());
+        if (closestIndex == -1) {
+            // there wasn't a point in the cell or in its neighbours
+            if (AppMode.isDevelopment()) {
+                throw new IllegalStateException(String.format(
+                    "x = %d, y = %d", x, y));
+            }
+            return 0xFF_FF_FF_FF;
+        }
+
+        return colors[closestIndex];
+    }
+
+    /**
+     * Checks whether the pixel is different from its neighbors.
+     */
+    private static boolean isEdge(int index, int[] allPixels, int width, int height) {
+        int row = index / width;
+        int col = index % width;
+        int color = allPixels[index];
+
+        if (col > 0 && allPixels[index - 1] != color) { // left
+            return true;
+        }
+        if (col < width - 1 && allPixels[index + 1] != color) { // right
+            return true;
+        }
+        if (row > 0 && allPixels[index - width] != color) { // up
+            return true;
+        }
+        if (row < height - 1 && allPixels[index + width] != color) { // down
+            return true;
+        }
+
+        return false; // no different neighbors found
+    }
+
+    /**
+     * Calculates the average color for a pixel using sub-pixel sampling.
+     */
+    private int calcSuperSampledColor(int pixelIndex, int width) {
+        int x = pixelIndex % width;
+        int y = pixelIndex / width;
+
+        int r = 0;
+        int g = 0;
+        int b = 0;
+
+        for (int i = 0; i < aaRes; i++) {
+            double sy = y + 1.0 / aaRes * i - 0.5;
+            for (int j = 0; j < aaRes; j++) {
+                double sx = x + 1.0 / aaRes * j - 0.5;
+                // sx and sy are the supersampling coordinates
+                int closestIndex = sampling.findClosestPointIndex(sx, sy, metric.asDoublePrecisionDistance());
+                int color = colors[closestIndex];
+                r += (color >>> 16) & 0xFF;
+                g += (color >>> 8) & 0xFF;
+                b += color & 0xFF;
+            }
+        }
+        r /= aaRes2;
+        g /= aaRes2;
+        b /= aaRes2;
+
+        return 0xFF_00_00_00 | r << 16 | g << 8 | b;
+    }
+
+    // called after the first pass
+    public void antiAlias(BufferedImage imgSoFar) {
+        assert aaRes != 0;
+        int width = imgSoFar.getWidth();
+        int height = imgSoFar.getHeight();
+        int[] pixels = ImageUtils.getPixels(imgSoFar);
+
+        // since this code runs outside the superclass-powered
+        // parallelization, use parallel streams
+        int[] aaPixels = IntStream.range(0, pixels.length).parallel()
+            .map(i -> {
+                // only pixels at the edges are supersampled
+                if (isEdge(i, pixels, width, height)) {
+                    return calcSuperSampledColor(i, width);
+                } else {
+                    return pixels[i];
+                }
+            }).toArray();
+        System.arraycopy(aaPixels, 0, pixels, 0, pixels.length);
     }
 
     public void showPoints(BufferedImage img) {
@@ -114,93 +209,6 @@ public class VoronoiFilter extends PointFilter {
         sampling.renderPoints(g, radius);
 
         g.dispose();
-    }
-
-    @Override
-    public int filterRGB(int x, int y, int rgb) {
-        int closestIndex = sampling.findClosestPointIndex(x, y,
-            metric.asIntPrecisionDistance());
-        if (closestIndex == -1) {
-            // there wasn't a point in the cell or in its neighbours
-            if (AppMode.isDevelopment()) {
-                throw new IllegalStateException(String.format(
-                    "x = %d, y = %d", x, y));
-            }
-            return 0xFF_FF_FF_FF;
-        }
-
-        return colors[closestIndex];
-    }
-
-    /**
-     * Check whether the pixel is different from its neighbours.
-     */
-    private static boolean isEdge(int[] allPixels, int pixelIndex, int width) {
-        int color = allPixels[pixelIndex];
-        int colorLeft = allPixels[pixelIndex - 1];
-        int colorRight = allPixels[pixelIndex + 1];
-        if (color != colorLeft || color != colorRight) {
-            return true;
-        }
-        int colorUp = allPixels[pixelIndex - width];
-        int colorDown = allPixels[pixelIndex + width];
-        return color != colorUp || color != colorDown;
-    }
-
-    private static boolean tryIsEdge(int width, int[] pixelsCopy, int i) {
-        boolean edge;
-        try {
-            edge = isEdge(pixelsCopy, i, width);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            edge = false;
-        }
-        return edge;
-    }
-
-    private int calcSuperSampledColor(int pixelIndex, int width) {
-        int x = pixelIndex % width;
-        int y = pixelIndex / width;
-
-        int r = 0;
-        int g = 0;
-        int b = 0;
-
-        for (int i = 0; i < aaRes; i++) {
-            double yy = y + 1.0 / aaRes * i - 0.5;
-            for (int j = 0; j < aaRes; j++) {
-                double xx = x + 1.0 / aaRes * j - 0.5;
-                // xx and yy are the supersampling coordinates
-                int closestIndex = sampling.findClosestPointIndex(xx, yy, metric.asDoublePrecisionDistance());
-                int color = colors[closestIndex];
-                r += (color >>> 16) & 0xFF;
-                g += (color >>> 8) & 0xFF;
-                b += color & 0xFF;
-            }
-        }
-        r /= aaRes2;
-        g /= aaRes2;
-        b /= aaRes2;
-
-        return 0xFF_00_00_00 | r << 16 | g << 8 | b;
-    }
-
-    public void antiAlias(BufferedImage imgSoFar) {
-        assert aaRes != 0;
-        int width = imgSoFar.getWidth();
-        int[] pixels = ImageUtils.getPixels(imgSoFar);
-
-        // since this code runs outside the superclass-powered
-        // parallelization, use parallel streams
-        int[] aaPixels = IntStream.range(0, pixels.length).parallel()
-            .map(i -> {
-                // only pixels at the edges are supersampled
-                if (tryIsEdge(width, pixels, i)) {
-                    return calcSuperSampledColor(i, width);
-                } else {
-                    return pixels[i];
-                }
-            }).toArray();
-        System.arraycopy(aaPixels, 0, pixels, 0, pixels.length);
     }
 
     public void debugGrid(BufferedImage dest) {

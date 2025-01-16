@@ -116,7 +116,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
         }
 
         @Override
-        public int filterRGB(int x, int y, int argb) {
+        public int processPixel(int x, int y, int argb) {
             int v = getChannelValue(argb);
             int alpha;
             if (invert) {

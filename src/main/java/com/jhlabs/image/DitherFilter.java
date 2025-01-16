@@ -249,7 +249,7 @@ public class DitherFilter extends PointFilter {
     // In orderd dithering each pixel is processed independently based
     // on its position relative to the tiling of the threshold matrix.
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         int a = rgb & 0xff000000;
         int r = (rgb >> 16) & 0xff;
         int g = (rgb >> 8) & 0xff;

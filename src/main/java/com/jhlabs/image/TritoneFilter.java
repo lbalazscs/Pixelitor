@@ -57,7 +57,7 @@ public class TritoneFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         return lut[PixelUtils.brightness(rgb)];
     }
 

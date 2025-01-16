@@ -194,7 +194,7 @@ public class Marble extends ParametrizedFilter {
         }
 
         @Override
-        public int filterRGB(int x, int y, int rgb) {
+        public int processPixel(int x, int y, int rgb) {
             double dy = y - cy;
             double dx = x - cx;
             double nx = m00 * dx + m01 * dy;

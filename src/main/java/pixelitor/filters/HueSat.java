@@ -99,7 +99,7 @@ public class HueSat extends ParametrizedFilter {
         }
 
         @Override
-        public int filterRGB(int x, int y, int rgb) {
+        public int processPixel(int x, int y, int rgb) {
             int a = rgb & 0xFF_00_00_00;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;

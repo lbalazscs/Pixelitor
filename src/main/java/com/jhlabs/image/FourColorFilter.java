@@ -142,7 +142,7 @@ public class FourColorFilter extends PointFilter {
     }
 
     @Override
-    public int filterRGB(int x, int y, int rgb) {
+    public int processPixel(int x, int y, int rgb) {
         // calculate normalized x and y coordinates (0.0 to 1.0)
         float fx = (float) x / width;
         float fy = (float) y / height;

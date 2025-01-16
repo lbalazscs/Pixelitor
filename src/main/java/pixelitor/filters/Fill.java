@@ -45,12 +45,9 @@ public class Fill extends Filter {
     /**
      * Fills the BufferedImage with the specified color
      */
-    public static void fillImage(BufferedImage img, Color c) {
+    public static void fillImage(BufferedImage img, Color color) {
         int[] pixels = ImageUtils.getPixels(img);
-
-        int fillColor = c.getRGB();
-
-        Arrays.fill(pixels, fillColor);
+        Arrays.fill(pixels, color.getRGB());
     }
 
     @Override
