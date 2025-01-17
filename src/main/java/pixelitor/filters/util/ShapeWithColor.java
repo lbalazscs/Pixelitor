@@ -29,14 +29,6 @@ import java.util.List;
  * Associates a {@link Shape} with a {@link Color}.
  */
 public record ShapeWithColor(Shape shape, Color color) {
-    public static void appendSvgPaths(List<ShapeWithColor> shapes, StringBuilder sb) {
-        for (ShapeWithColor shape : shapes) {
-            String pathData = Shapes.toSvgPath(shape.shape());
-            String colorHex = Colors.toHTMLHex(shape.color(), false);
-            sb.append("<path d=\"%s\" fill=\"#%s\"/>\n".formatted(pathData, colorHex));
-        }
-    }
-
     public static String createSvgContent(List<ShapeWithColor> shapes, Canvas canvas, Color bgColor) {
         StringBuilder content = new StringBuilder()
             .append(canvas.createSVGElement())
@@ -48,5 +40,15 @@ public record ShapeWithColor(Shape shape, Color color) {
         appendSvgPaths(shapes, content);
         content.append("</svg>");
         return content.toString();
+    }
+
+    private static void appendSvgPaths(List<ShapeWithColor> shapes, StringBuilder sb) {
+        for (ShapeWithColor shape : shapes) {
+            String pathData = Shapes.toSvgPath(shape.shape());
+            String svgFillRule = Shapes.getSvgFillRule(shape.shape());
+            String colorHex = Colors.toHTMLHex(shape.color(), false);
+            sb.append("<path d=\"%s\" fill=\"#%s\" fill-rule=\"%s\"/>\n".
+                formatted(pathData, colorHex, svgFillRule));
+        }
     }
 }

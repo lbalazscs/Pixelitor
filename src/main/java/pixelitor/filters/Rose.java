@@ -17,8 +17,12 @@
 
 package pixelitor.filters;
 
+import pixelitor.Canvas;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
+import pixelitor.filters.util.ShapeWithColor;
+import pixelitor.io.FileIO;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.NonlinTransform;
 
@@ -29,6 +33,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -68,7 +73,7 @@ public class Rose extends ParametrizedFilter {
             fgColor,
             new DialogParam("Transform",
                 distortType, distortAmount, center, rotate, scale)
-        );
+        ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
 
         helpURL = "https://en.wikipedia.org/wiki/Rose_(mathematics)";
     }
@@ -85,6 +90,15 @@ public class Rose extends ParametrizedFilter {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setColor(fgColor.getColor());
 
+        Shape shape = createShape(width, height);
+
+        g.fill(shape);
+
+        g.dispose();
+        return dest;
+    }
+
+    private Shape createShape(int width, int height) {
         Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         double radius = Math.min(width, height) / 2.0;
         double cx = width * center.getRelativeX();
@@ -133,11 +147,7 @@ public class Rose extends ParametrizedFilter {
         if (angle != 0) {
             shape = AffineTransform.getRotateInstance(angle, cx, cy).createTransformedShape(shape);
         }
-
-        g.fill(shape);
-
-        g.dispose();
-        return dest;
+        return shape;
     }
 
     /**
@@ -155,6 +165,16 @@ public class Rose extends ParametrizedFilter {
         } else {
             return d * Math.PI;
         }
+    }
+
+    private void exportSVG() {
+        Canvas canvas = Views.getActiveComp().getCanvas();
+        List<ShapeWithColor> shapes = List.of(new ShapeWithColor(
+            createShape(canvas.getWidth(), canvas.getHeight()),
+            fgColor.getColor()
+        ));
+        String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, bgColor.getColor());
+        FileIO.saveSVG(svgContent, "rose.svg");
     }
 
     @Override

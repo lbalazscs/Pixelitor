@@ -315,17 +315,10 @@ public class ConcentricShapes extends ParametrizedFilter {
 
     private void exportSVG() {
         Canvas canvas = Views.getActiveComp().getCanvas();
-        StringBuilder content = new StringBuilder()
-            .append(canvas.createSVGElement())
-            .append("\n");
-
         List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight(),
             paramSet.getLastSeedRandom(), tuning.getPercentage(), arrangementParam.getSelected());
-
-        ShapeWithColor.appendSvgPaths(shapes, content);
-        content.append("</svg>");
-
-        FileIO.saveSVG(content.toString(), "concentric.svg");
+        String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, null);
+        FileIO.saveSVG(svgContent, "concentric.svg");
     }
 
     private static double calcMaxDistance(double cx, double cy, double width, double height) {
