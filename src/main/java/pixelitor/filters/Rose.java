@@ -20,17 +20,19 @@ package pixelitor.filters;
 import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterButtonModel;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
+import pixelitor.utils.Distortion;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.NonlinTransform;
+import pixelitor.utils.Transform;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.List;
@@ -40,7 +42,6 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
-import static pixelitor.utils.NonlinTransform.NONE;
 
 /**
  * The Render/Geometry/Rose filter, generating a polar rose curve.
@@ -53,26 +54,20 @@ public class Rose extends ParametrizedFilter {
 
     private final RangeParam nParam = new RangeParam("n", 1, 4, 20);
     private final RangeParam dParam = new RangeParam("d", 1, 7, 20);
-    private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
     private final ColorParam fgColor = new ColorParam("Foreground Color", WHITE, USER_ONLY_TRANSPARENCY);
-    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
-    private final AngleParam rotate = new AngleParam("Rotate", 0);
-    private final EnumParam<NonlinTransform> distortType = NonlinTransform.asParam();
-    private final RangeParam distortAmount = NonlinTransform.createAmountParam();
+
+    private final Transform transform = new Transform();
 
     public Rose() {
         super(false);
-
-        distortType.setupEnableOtherIf(distortAmount, NonlinTransform::hasAmount);
 
         setParams(
             nParam,
             dParam,
             bgColor,
             fgColor,
-            new DialogParam("Transform",
-                distortType, distortAmount, center, rotate, scale)
+            transform.createDialogParam()
         ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
 
         helpURL = "https://en.wikipedia.org/wiki/Rose_(mathematics)";
@@ -101,8 +96,8 @@ public class Rose extends ParametrizedFilter {
     private Shape createShape(int width, int height) {
         Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         double radius = Math.min(width, height) / 2.0;
-        double cx = width * center.getRelativeX();
-        double cy = height * center.getRelativeY();
+        double cx = transform.getCx(width);
+        double cy = transform.getCy(height);
 
         int n = nParam.getValue();
         int d = dParam.getValue();
@@ -123,30 +118,17 @@ public class Rose extends ParametrizedFilter {
             }
         }
         path.closePath();
+        Shape shape = path;
 
-        NonlinTransform nonlin = distortType.getSelected();
-        if (nonlin != NONE) {
-            double amount = distortAmount.getValueAsDouble();
-            Point2D pivotPoint = new Point2D.Double(cx, cy);
-            path = nonlin.transform(path, pivotPoint, amount, width, height);
+        if (transform.hasNonlinDistort()) {
+            Distortion distortion = transform.createDistortion(width, height);
+            shape = distortion.distort(shape);
+        }
+        AffineTransform at = transform.calcAffineTransform(width, height);
+        if (at != null) {
+            shape = at.createTransformedShape(shape);
         }
 
-        int scaleX = scale.getValue(0);
-        int scaleY = scale.getValue(1);
-        Shape shape;
-        if (scaleX != 100 || scaleY != 100) {
-            AffineTransform at = AffineTransform.getTranslateInstance(cx, cy);
-            at.scale(scaleX / 100.0, scaleY / 100.0);
-            at.translate(-cx, -cy);
-            shape = at.createTransformedShape(path);
-        } else {
-            shape = path;
-        }
-
-        double angle = rotate.getValueInRadians();
-        if (angle != 0) {
-            shape = AffineTransform.getRotateInstance(angle, cx, cy).createTransformedShape(shape);
-        }
         return shape;
     }
 

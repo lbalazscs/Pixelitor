@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class CircleWeave extends CurveFilter {
 
         int m = mParam.getValue();
         int type = typeParam.getValue();
-        boolean nonlin = hasNonlinDistort();
+        boolean nonlin = transform.hasNonlinDistort();
 
         return switch (type) {
             case TYPE_MYSTIC_ROSE -> createMysticRose(points, nonlin);
@@ -88,8 +88,8 @@ public class CircleWeave extends CurveFilter {
 
     private Path2D createCircles(Point2D[] points, boolean nonlin, int width, int height) {
         double radius = getRadius(width, height) / 2.0;
-        double cx = width * center.getRelativeX();
-        double cy = height * center.getRelativeY();
+        double cx = transform.getCx(width);
+        double cy = transform.getCy(height);
         Point2D imageCenter = new Point2D.Double(cx, cy);
 
         Path2D path = new Path2D.Double();
@@ -120,8 +120,8 @@ public class CircleWeave extends CurveFilter {
     private Point2D[] calcPoints(int width, int height, int numPoints) {
         Point2D[] points = new Point2D[numPoints];
         double r = getRadius(width, height);
-        double cx = width * center.getRelativeX();
-        double cy = height * center.getRelativeY();
+        double cx = transform.getCx(width);
+        double cy = transform.getCy(height);
 
         double angleIncrement = 2 * Math.PI / numPoints;
         for (int i = 0; i < points.length; i++) {

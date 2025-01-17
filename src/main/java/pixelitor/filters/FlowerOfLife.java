@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,8 +65,8 @@ public class FlowerOfLife extends CurveFilter {
         Path2D shape = new Path2D.Double();
 
         double r = radius.getValueAsDouble();
-        double cx = width * center.getRelativeX();
-        double cy = height * center.getRelativeY();
+        double cx = transform.getCx(width);
+        double cy = transform.getCy(height);
 
         Circle firstCircle = new Circle(cx, cy, r);
         Set<Circle> circlesSet = new HashSet<>();
@@ -82,7 +82,7 @@ public class FlowerOfLife extends CurveFilter {
             }
         }
 
-        boolean manyPoints = hasNonlinDistort();
+        boolean manyPoints = transform.hasNonlinDistort();
         for (Circle circle : circlesSet) {
             shape.append(circle.toShape(manyPoints), false);
         }

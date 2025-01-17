@@ -73,8 +73,8 @@ public class Spiral extends CurveFilter {
 
     @Override
     protected Path2D createCurve(int width, int height) {
-        double cx = width * center.getRelativeX();
-        double cy = height * center.getRelativeY();
+        double cx = transform.getCx(width);
+        double cy = transform.getCy(height);
 
         int numSpins = numSpinsParam.getValue();
 

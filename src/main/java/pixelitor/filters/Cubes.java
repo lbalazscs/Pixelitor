@@ -17,10 +17,18 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.*;
+import pixelitor.Canvas;
+import pixelitor.Views;
+import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterButtonModel;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.util.ShapeWithColor;
+import pixelitor.io.FileIO;
+import pixelitor.utils.Distortion;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.NonlinTransform;
+import pixelitor.utils.Transform;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -28,9 +36,10 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.GRAY;
@@ -39,7 +48,6 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
-import static pixelitor.utils.NonlinTransform.NONE;
 
 /**
  * The Render/Geometry/Cubes Pattern filter.
@@ -63,7 +71,6 @@ public class Cubes extends ParametrizedFilter {
         new Item("Corner Cut 3", TYPE_CORNER_CUT3),
         new Item("Interlocking", TYPE_INTERLOCKING),
     });
-//    private final RangeParam hollowDepthParam = new RangeParam("Hollow Depth (%)", 1, 50, 99);
 
     private final RangeParam sizeParam = new RangeParam("Size", 5, 20, 200);
     private final ColorParam topColorParam = new ColorParam("Top Color", WHITE, USER_ONLY_TRANSPARENCY);
@@ -72,68 +79,74 @@ public class Cubes extends ParametrizedFilter {
     private final RangeParam edgeWidthParam = new RangeParam("Edge Width", 0, 0, 10);
     private final ColorParam edgeColorParam = new ColorParam("Edge Color", BLACK, USER_ONLY_TRANSPARENCY);
 
-    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
-    private final AngleParam rotate = new AngleParam("Rotate", 0);
-    private final EnumParam<NonlinTransform> distortType = NonlinTransform.asParam();
-    private final RangeParam distortAmount = NonlinTransform.createAmountParam();
+    private final Transform transform = new Transform();
 
     public Cubes() {
         super(false);
 
-        distortType.setupEnableOtherIf(distortAmount, NonlinTransform::hasAmount);
         edgeWidthParam.setupEnableOtherIfNotZero(edgeColorParam);
-//        typeParam.setupEnableOtherIf(hollowDepthParam, selectedType ->
-//            selectedType.valueIs(TYPE_HOLLOWED));
 
         setParams(
             typeParam,
             sizeParam,
-//            hollowDepthParam,
             topColorParam,
             leftColorParam,
             rightColorParam,
             edgeWidthParam,
             edgeColorParam,
-            new DialogParam("Transform",
-                distortType, distortAmount, rotate, scale)
-        );
+            transform.createDialogParam()
+        ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         dest = ImageUtils.createImageWithSameCM(src);
-
         int width = dest.getWidth();
         int height = dest.getHeight();
 
         Graphics2D g = dest.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        double sx = scale.getPercentage(0);
-        double sy = scale.getPercentage(0);
-        double angle = rotate.getValueInRadians();
-        double cx = width / 2.0;
-        double cy = height / 2.0;
-        if (sx != 1 || sy != 1) {
-            g.translate(cx, cy);
-            g.scale(sx, sy);
-            g.translate(-cx, -cy);
+        AffineTransform at = transform.calcAffineTransform(width, height);
+        if (at != null) {
+            g.transform(at);
         }
-        if (angle != 0) {
-            g.rotate(angle, cx, cy);
-        }
-
-        NonlinTransform distortion = distortType.getSelected();
-        double amount = distortAmount.getValueAsDouble();
-        Point2D pivotPoint = new Point2D.Double(cx, cy);
 
         float edgeWidth = edgeWidthParam.getValueAsFloat();
-        boolean renderEdges = edgeWidth > 0;
-        Color edgeColor = null;
-        if (renderEdges) {
+        if (edgeWidth > 0) {
             g.setStroke(new BasicStroke(edgeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-            edgeColor = edgeColorParam.getColor();
         }
+
+        List<ShapeWithColor> shapes = createDistortedShapes(width, height);
+
+        for (ShapeWithColor shapeWithColor : shapes) {
+            g.setColor(shapeWithColor.color());
+            g.fill(shapeWithColor.shape());
+
+            if (edgeWidth > 0) {
+                g.setColor(edgeColorParam.getColor());
+                g.draw(shapeWithColor.shape());
+            }
+        }
+
+        g.dispose();
+        return dest;
+    }
+
+    private List<ShapeWithColor> createDistortedShapes(int width, int height) {
+        List<ShapeWithColor> shapes = createShapes(width, height);
+
+        if (transform.hasNonlinDistort()) {
+            Distortion distortion = transform.createDistortion(width, height);
+            shapes = shapes.stream()
+                .map(sc -> sc.distort(distortion))
+                .toList();
+        }
+        return shapes;
+    }
+
+    private List<ShapeWithColor> createShapes(int width, int height) {
+        List<ShapeWithColor> shapes = new ArrayList<>();
 
         Color topColor = topColorParam.getColor();
         Color rightColor = rightColorParam.getColor();
@@ -141,22 +154,16 @@ public class Cubes extends ParametrizedFilter {
 
         int type = typeParam.getSelected().getValue();
         boolean interlocking = type == TYPE_INTERLOCKING;
-//        double hollowDepth = hollowDepthParam.getPercentage();
 
         double size = sizeParam.getValueAsDouble();
-
         double longer = size * Math.cos(Math.PI / 6);
         double shorter = size * Math.sin(Math.PI / 6);
 
         double horizontalSpacing = interlocking ? 3 * longer : 2 * longer;
-        double verticalSpacing = size + shorter;
-        if (interlocking) {
-            verticalSpacing = size * 0.75;
-        }
-        int numCubesX = (int) (width / horizontalSpacing) + 2;
+        double verticalSpacing = interlocking ? size * 0.75 : (size + shorter);
 
-        int numCubesY = (int) (height / verticalSpacing)
-            + (interlocking ? 3 : 2);
+        int numCubesX = (int) (width / horizontalSpacing) + 2;
+        int numCubesY = (int) (height / verticalSpacing) + (interlocking ? 3 : 2);
 
         int numCornerCuts = switch (type) {
             case TYPE_BASIC, TYPE_INTERLOCKING -> 0;
@@ -166,52 +173,62 @@ public class Cubes extends ParametrizedFilter {
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
 
-        double verOffset = interlocking ? -size / 2 : 0;
+        double moveHorOffset = transform.getHorOffset(width);
+        double moveVerOffset = transform.getVerOffset(height);
+
+        double verOffset = moveVerOffset + (interlocking ? -size / 2 : 0);
         for (int row = 0; row < numCubesY; row++) {
-            double horOffset = row % 2 == 0 ? 0 : longer;
+            double horOffset = moveHorOffset + (row % 2 == 0 ? 0 : longer);
             if (interlocking) {
                 horOffset *= 1.5;
             }
+
             for (int col = 0; col < numCubesX; col++) {
-                // base point (shared vertex)
                 double baseX = horOffset + col * horizontalSpacing;
                 double baseY = verOffset + row * verticalSpacing;
 
-                Path2D topFace = createTop(baseX, baseY, longer, shorter, interlocking, size);
-                renderShape(topFace, g, distortion, pivotPoint, amount, width, height, topColor, edgeColor);
-
-                Path2D rightFace = createRight(baseX, baseY, longer, shorter, interlocking, size);
-                renderShape(rightFace, g, distortion, pivotPoint, amount, width, height, rightColor, edgeColor);
-
-                Path2D leftFace = createLeft(baseX, baseY, longer, shorter, interlocking, size);
-                renderShape(leftFace, g, distortion, pivotPoint, amount, width, height, leftColor, edgeColor);
-
-                for (int cut = 0; cut < numCornerCuts; cut++) {
-                    double cutRatio = 1.0 - (double) (cut + 1) / (numCornerCuts + 1);
-
-                    AffineTransform carvedCube = new AffineTransform();
-                    carvedCube.translate(baseX, baseY);
-                    if (cut % 2 == 0) {
-                        carvedCube.rotate(Math.PI);
-                    }
-                    carvedCube.scale(cutRatio, cutRatio);
-                    carvedCube.translate(-baseX, -baseY);
-
-                    Shape miniTopFace = carvedCube.createTransformedShape(topFace);
-                    renderShape(miniTopFace, g, distortion, pivotPoint, amount, width, height, topColor, edgeColor);
-
-                    Shape miniLeftFace = carvedCube.createTransformedShape(leftFace);
-                    renderShape(miniLeftFace, g, distortion, pivotPoint, amount, width, height, leftColor, edgeColor);
-
-                    Shape miniRightFace = carvedCube.createTransformedShape(rightFace);
-                    renderShape(miniRightFace, g, distortion, pivotPoint, amount, width, height, rightColor, edgeColor);
-                }
-//                Shapes.fillCircle(baseX, baseY, 5, Color.RED, g);
+                addCubeShapes(shapes, baseX, baseY, longer, shorter, interlocking, size,
+                    topColor, rightColor, leftColor, numCornerCuts);
             }
         }
 
-        g.dispose();
-        return dest;
+        return shapes;
+    }
+
+    private void addCubeShapes(List<ShapeWithColor> shapes,
+                               double baseX, double baseY,
+                               double longer, double shorter,
+                               boolean interlocking, double size,
+                               Color topColor, Color rightColor, Color leftColor,
+                               int numCornerCuts) {
+
+        Path2D topFace = createTop(baseX, baseY, longer, shorter, interlocking, size);
+        Path2D rightFace = createRight(baseX, baseY, longer, shorter, interlocking, size);
+        Path2D leftFace = createLeft(baseX, baseY, longer, shorter, interlocking, size);
+
+        shapes.add(new ShapeWithColor(topFace, topColor));
+        shapes.add(new ShapeWithColor(rightFace, rightColor));
+        shapes.add(new ShapeWithColor(leftFace, leftColor));
+
+        for (int cut = 0; cut < numCornerCuts; cut++) {
+            double cutRatio = 1.0 - (double) (cut + 1) / (numCornerCuts + 1);
+
+            AffineTransform carvedCube = new AffineTransform();
+            carvedCube.translate(baseX, baseY);
+            if (cut % 2 == 0) {
+                carvedCube.rotate(Math.PI);
+            }
+            carvedCube.scale(cutRatio, cutRatio);
+            carvedCube.translate(-baseX, -baseY);
+
+            Shape miniTopFace = carvedCube.createTransformedShape(topFace);
+            Shape miniRightFace = carvedCube.createTransformedShape(rightFace);
+            Shape miniLeftFace = carvedCube.createTransformedShape(leftFace);
+
+            shapes.add(new ShapeWithColor(miniTopFace, topColor));
+            shapes.add(new ShapeWithColor(miniRightFace, rightColor));
+            shapes.add(new ShapeWithColor(miniLeftFace, leftColor));
+        }
     }
 
     private static Path2D createTop(double baseX, double baseY, double longer, double shorter, boolean interlocking, double size) {
@@ -262,17 +279,20 @@ public class Cubes extends ParametrizedFilter {
         return left;
     }
 
-    private static void renderShape(Shape shape, Graphics2D g, NonlinTransform distortion, Point2D pivotPoint, double amount, int width, int height, Color color, Color edgeColor) {
-        if (distortion != NONE) {
-            shape = distortion.transform(shape, pivotPoint, amount, width, height);
+    private void exportSVG() {
+        Canvas canvas = Views.getActiveComp().getCanvas();
+        int width = canvas.getWidth();
+        int height = canvas.getHeight();
+        List<ShapeWithColor> shapes = createDistortedShapes(width, height);
+        AffineTransform at = transform.calcAffineTransform(width, height);
+        if (at != null) {
+            shapes = shapes.stream()
+                .map(s -> s.transform(at))
+                .toList();
         }
-        g.setColor(color);
-        g.fill(shape);
-
-        if (edgeColor != null) {
-            g.setColor(edgeColor);
-            g.draw(shape);
-        }
+        String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, null,
+            edgeWidthParam.getValue(), edgeColorParam.getColor());
+        FileIO.saveSVG(svgContent, "cubes.svg");
     }
 
     @Override

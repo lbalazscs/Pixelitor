@@ -56,8 +56,8 @@ public class Lissajous extends CurveFilter {
         double bVal = b.getValueAsDouble();
         double deltaVal = delta.getValueInRadians();
 
-        double cx = width * center.getRelativeX();
-        double cy = height * center.getRelativeY();
+        double cx = transform.getCx(width);
+        double cy = transform.getCy(height);
 
         double w = width / 2.0;
         double h = height / 2.0;

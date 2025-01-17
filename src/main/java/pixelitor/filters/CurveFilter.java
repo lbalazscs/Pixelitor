@@ -26,9 +26,10 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.io.FileIO;
+import pixelitor.utils.Distortion;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.NonlinTransform;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.Transform;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -47,7 +48,6 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.utils.NonlinTransform.NONE;
 
 /**
  * Abstract superclass for the "Render/Curves" filters.
@@ -91,24 +91,18 @@ public abstract class CurveFilter extends ParametrizedFilter {
     }, IGNORE_RANDOMIZE);
 
     private final BooleanParam waterMark = new BooleanParam("Watermarking");
-    protected final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
-    private final AngleParam rotate = new AngleParam("Rotate", 0);
-    private final EnumParam<NonlinTransform> distortType = NonlinTransform.asParam();
-    private final RangeParam distortAmount = NonlinTransform.createAmountParam();
+    protected final Transform transform = new Transform();
 
     private transient Shape exportedShape;
 
     protected CurveFilter() {
         super(false);
 
-        distortType.setupEnableOtherIf(distortAmount, NonlinTransform::hasAmount);
-
         setParams(
             background,
             foreground,
             waterMark,
-            new DialogParam("Transform", distortType, distortAmount, center, rotate, scale),
+            transform.createDialogParam(),
             strokeParam.withStrokeWidth(2),
             effectsParam
         ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
@@ -149,43 +143,11 @@ public abstract class CurveFilter extends ParametrizedFilter {
             return dest;
         }
 
-        NonlinTransform nonlin = distortType.getSelected();
-        if (nonlin != NONE) {
-            double amount = distortAmount.getValueAsDouble();
-            Point2D pivotPoint = center.getAbsolutePoint(src);
-            shape = nonlin.transform(shape, pivotPoint, amount, srcWidth, srcHeight);
-        }
+        Distortion distortion = transform.createDistortion(srcWidth, srcHeight);
+        shape = distortion.distort(shape);
 
-        double scaleX = scale.getPercentage(0);
-        double scaleY = scale.getPercentage(1);
-        boolean hasScaling = scaleX != 1.0 || scaleY != 1.0;
-
-        double relX = center.getRelativeX();
-        double relY = center.getRelativeY();
-        boolean hasTranslation = relX != 0.5 || relY != 0.5;
-
-        boolean hasRotation = !rotate.hasDefault();
-
-        if (hasTranslation || hasRotation || hasScaling) {
-            double cx = srcWidth * relX;
-            double cy = srcHeight * relY;
-
-            AffineTransform at;
-            if (hasScaling) {
-                // scale around the center point
-                at = AffineTransform.getTranslateInstance
-                    (cx - scaleX * cx, cy - scaleY * cy);
-                at.scale(scaleX, scaleY);
-            } else {
-                at = new AffineTransform();
-            }
-            if (hasRotation) {
-                at.rotate(rotate.getValueInRadians(), cx, cy);
-            }
-            if (hasTranslation) {
-                at.translate(cx - srcWidth / 2.0, cy - srcHeight / 2.0);
-            }
-
+        AffineTransform at = transform.calcAffineTransform(srcWidth, srcHeight);
+        if (at != null) {
             shape = at.createTransformedShape(shape);
         }
 
@@ -352,9 +314,5 @@ public abstract class CurveFilter extends ParametrizedFilter {
             }
             return Shapes.smoothConnect(points);
         }
-    }
-
-    protected boolean hasNonlinDistort() {
-        return distortType.getSelected() != NONE;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,6 +74,9 @@ public class Grid extends CurveFilter {
         int horDiv = divisions.getValue(0);
         int verDiv = divisions.getValue(1);
 
+        double moveHorOffset = transform.getHorOffset(width);
+        double moveVerOffset = transform.getVerOffset(height);
+
         //                      /\
         // Width and height of /  \
         double cellW = width / (double) horDiv;
@@ -96,23 +99,26 @@ public class Grid extends CurveFilter {
 
         for (int i = -1; i < horDiv + 1; i++) {
             for (int j = 0; j < verDiv + 2; j += 2) {
-                baselessTriangle(shape, i * cellW, j * cellH, cellW, cellH);
-                baselessTriangle(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH);
+                double x = i * cellW + moveHorOffset;
+                double y = j * cellH + moveVerOffset;
+                baselessTriangle(shape, x, y, cellW, cellH);
+                baselessTriangle(shape, x + cellInterval, y + cellH, cellW, cellH);
             }
         }
 
         // horizontal lines
         if (!diamond) {
             for (int i = 0; i <= verDiv; i++) {
-                double x = 0;
+                double x = moveHorOffset;
                 if (i % 2 != 0) {
                     x -= cellInterval;
                 }
 
-                shape.moveTo(x, i * cellH);
+                double startY = i * cellH + moveVerOffset;
+                shape.moveTo(x, startY);
 
                 // draw the line as multiple segments
-                double lineY = i * cellH;
+                double lineY = startY;
                 for (int j = 0; j < horDiv + 1; j++) {
                     x += cellW;
                     shape.lineTo(x, lineY);
@@ -138,13 +144,16 @@ public class Grid extends CurveFilter {
         int horDiv = divisions.getValue(0);
         int verDiv = divisions.getValue(1);
 
+        double moveHorOffset = transform.getHorOffset(width);
+        double moveVerOffset = transform.getVerOffset(height);
+
         double cellW = width / (double) horDiv;
         double cellH = height / (double) verDiv;
 
         // horizontal lines
         for (int i = 0; i < verDiv + 1; i++) {
-            double lineY = i * cellH;
-            double x = 0;
+            double lineY = i * cellH + moveVerOffset;
+            double x = moveHorOffset;
             shape.moveTo(x, lineY);
             // draw the line as multiple segments
             for (int j = 0; j < horDiv; j++) {
@@ -155,8 +164,8 @@ public class Grid extends CurveFilter {
 
         // vertical lines
         for (int i = 0; i < horDiv + 1; i++) {
-            double lineX = i * cellW;
-            double y = 0;
+            double lineX = i * cellW + moveHorOffset;
+            double y = moveVerOffset;
             shape.moveTo(lineX, y);
 
             // draw the line as multiple segments
@@ -174,6 +183,9 @@ public class Grid extends CurveFilter {
 
         int horDiv = divisions.getValue(0);
         int verDiv = divisions.getValue(1);
+
+        double moveHorOffset = transform.getHorOffset(width);
+        double moveVerOffset = transform.getVerOffset(height);
 
         //                       ___
         // width and height of  /   \
@@ -193,8 +205,10 @@ public class Grid extends CurveFilter {
 
         for (int i = -1; i < horDiv; i++) {
             for (int j = 0; j < verDiv + 2; j += 2) {
-                hexagonTopHalf(shape, i * cellSpace, j * cellH, cellW, cellH);
-                hexagonTopHalf(shape, i * cellSpace + cellInterval, (j + 1) * cellH, cellW, cellH);
+                double startX = i * cellSpace + moveHorOffset;
+                double startY = j * cellH + moveVerOffset;
+                hexagonTopHalf(shape, startX, startY, cellW, cellH);
+                hexagonTopHalf(shape, startX + cellInterval, startY + cellH, cellW, cellH);
             }
         }
 
@@ -214,6 +228,9 @@ public class Grid extends CurveFilter {
         int horDiv = divisions.getValue(0);
         int verDiv = divisions.getValue(1);
 
+        double moveHorOffset = transform.getHorOffset(width);
+        double moveVerOffset = transform.getVerOffset(height);
+
         double cellW = width / (double) horDiv;
         double cellH = height / (double) verDiv;
 
@@ -221,9 +238,10 @@ public class Grid extends CurveFilter {
 
         for (int i = -1; i < horDiv; i++) {
             for (int j = 1; j < verDiv; j += 2) {
-                double x = i * cellW;
-                scale(shape, x, j * cellH, cellW, cellH, dragon);
-                scale(shape, x + cellInterval, (j + 1) * cellH, cellW, cellH, dragon);
+                double x = i * cellW + moveHorOffset;
+                double y = j * cellH + moveVerOffset;
+                scale(shape, x, y, cellW, cellH, dragon);
+                scale(shape, x + cellInterval, y + cellH, cellW, cellH, dragon);
             }
         }
 

@@ -2092,15 +2092,18 @@ public class Shapes {
 
     /**
      * Resizes the given shape to fit centrally within a target rectangle
-     * without distortion, considering the given width, height, and margin.
+     * without distortion, considering the given width, height, margin, and offset.
      *
-     * @param shape  The shape to be resized.
-     * @param width  The width of the target rectangle.
-     * @param height The height of the target rectangle.
-     * @param margin The margin around the shape inside the target rectangle.
+     * @param shape   The shape to be resized.
+     * @param width   The width of the target rectangle.
+     * @param height  The height of the target rectangle.
+     * @param margin  The margin around the shape inside the target rectangle.
+     * @param startX  The horizontal offset to apply after resizing.
+     * @param startY  The vertical offset to apply after resizing.
      * @return A new shape that fits within the target rectangle.
      */
-    public static Shape resizeToFit(Shape shape, double width, double height, double margin) {
+    public static Shape resizeToFit(Shape shape, double width, double height, double margin,
+                                    double startX, double startY) {
         Rectangle2D bounds = shape.getBounds2D();
         double shapeAspectRatio = bounds.getWidth() / bounds.getHeight();
         double areaWidth = width - 2 * margin;
@@ -2111,11 +2114,21 @@ public class Shapes {
         if (shapeAspectRatio >= areaAspectRatio) {
             double newAreaHeight = areaWidth / shapeAspectRatio;
             double newAreaY = margin + (areaHeight - newAreaHeight) / 2.0;
-            targetArea = new Rectangle2D.Double(margin, newAreaY, areaWidth, newAreaHeight);
+            targetArea = new Rectangle2D.Double(
+                margin + startX,
+                newAreaY + startY,
+                areaWidth,
+                newAreaHeight
+            );
         } else {
             double newAreaWidth = areaHeight * shapeAspectRatio;
             double newAreaX = margin + (areaWidth - newAreaWidth) / 2.0;
-            targetArea = new Rectangle2D.Double(newAreaX, margin, newAreaWidth, areaHeight);
+            targetArea = new Rectangle2D.Double(
+                newAreaX + startX,
+                margin + startY,
+                newAreaWidth,
+                areaHeight
+            );
         }
 
         AffineTransform at = RectangularTransform.create(bounds, targetArea);

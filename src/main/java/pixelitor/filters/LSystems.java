@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -313,7 +313,9 @@ public class LSystems extends CurveFilter {
         Turtle turtle = fractalType.createTurtle(n);
         Path2D path = turtle.interpret(commands);
 
-        return Shapes.resizeToFit(path, width, height, margin);
+        return Shapes.resizeToFit(path, width, height, margin,
+            transform.getHorOffset(width),
+            transform.getVerOffset(height));
     }
 
     private static String iterate(Type type, int order) {
@@ -350,6 +352,9 @@ public class LSystems extends CurveFilter {
         public Turtle(int startAngle, int turnAngle) {
             this.angle = startAngle;
             this.turnAngle = turnAngle;
+
+            // the turtle always starts at (0, 0), but the whole path
+            // will be rescaled after the Shapes.resizeToFit method
             this.x = 0;
             this.y = 0;
             this.moveDistance = 10;
