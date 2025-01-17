@@ -17,6 +17,7 @@
 
 package pixelitor.filters.util;
 
+import pixelitor.Canvas;
 import pixelitor.colors.Colors;
 import pixelitor.utils.Shapes;
 
@@ -34,5 +35,18 @@ public record ShapeWithColor(Shape shape, Color color) {
             String colorHex = Colors.toHTMLHex(shape.color(), false);
             sb.append("<path d=\"%s\" fill=\"#%s\"/>\n".formatted(pathData, colorHex));
         }
+    }
+
+    public static String createSvgContent(List<ShapeWithColor> shapes, Canvas canvas, Color bgColor) {
+        StringBuilder content = new StringBuilder()
+            .append(canvas.createSVGElement())
+            .append("\n");
+        if (bgColor != null) {
+            content.append(String.format("<rect width=\"100%%\" height=\"100%%\" fill=\"#%s\"/>\n",
+                Colors.toHTMLHex(bgColor, true)));
+        }
+        appendSvgPaths(shapes, content);
+        content.append("</svg>");
+        return content.toString();
     }
 }

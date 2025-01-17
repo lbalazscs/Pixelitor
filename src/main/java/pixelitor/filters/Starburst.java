@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,12 @@
 
 package pixelitor.filters;
 
+import pixelitor.Canvas;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
+import pixelitor.filters.util.ShapeWithColor;
+import pixelitor.io.FileIO;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Shapes;
 
@@ -67,7 +71,7 @@ public class Starburst extends ParametrizedFilter {
             center,
             rotate,
             spiralParam
-        );
+        ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
     }
 
     @Override
@@ -81,11 +85,27 @@ public class Starburst extends ParametrizedFilter {
         Colors.fillWith(bgColor.getColor(), g, width, height);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
+        List<ShapeWithColor> shapes = createShapes(width, height);
+        for (ShapeWithColor shapeWithColor : shapes) {
+            g.setColor(shapeWithColor.color());
+            g.fill(shapeWithColor.shape());
+        }
+
+        g.dispose();
+        return dest;
+    }
+
+    /**
+     * Creates a list of shapes with their associated colors.
+     * Used both for drawing and SVG export.
+     */
+    private List<ShapeWithColor> createShapes(int width, int height) {
+        List<ShapeWithColor> shapes = new ArrayList<>();
+
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
         int numRays = numRaysParam.getValue();
-
         double sliceWidthAngle = Math.PI / numRays;
         double sliceAngle = rotate.getValueInRadians();
 
@@ -94,6 +114,7 @@ public class Starburst extends ParametrizedFilter {
 
         Color[] rayColors = rayColorsParam.getColors();
         int numRayColors = rayColors.length;
+
         for (int i = 0; i < numRays; i++) {
             var slice = new Path2D.Double();
             slice.moveTo(cx, cy);
@@ -124,14 +145,11 @@ public class Starburst extends ParametrizedFilter {
             }
             slice.closePath();
 
-            g.setColor(rayColors[i % numRayColors]);
-            g.fill(slice);
-
+            shapes.add(new ShapeWithColor(slice, rayColors[i % numRayColors]));
             sliceAngle += sliceWidthAngle; // leave out a slice
         }
 
-        g.dispose();
-        return dest;
+        return shapes;
     }
 
     @Override
@@ -152,5 +170,12 @@ public class Starburst extends ParametrizedFilter {
             points.add(new Point2D.Double(x, y));
         }
         return points;
+    }
+
+    private void exportSVG() {
+        Canvas canvas = Views.getActiveComp().getCanvas();
+        List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight());
+        String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, bgColor.getColor());
+        FileIO.saveSVG(svgContent, "starburst.svg");
     }
 }
