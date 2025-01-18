@@ -90,7 +90,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
         new Item("Transparent", FG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
 
-    private final BooleanParam waterMark = new BooleanParam("Watermarking");
+    private final BooleanParam waterMark = new BooleanParam("Watermarking", false, IGNORE_RANDOMIZE);
     protected final Transform transform = new Transform();
 
     private transient Shape exportedShape;

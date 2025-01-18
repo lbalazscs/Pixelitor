@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import javax.swing.event.ListDataListener;
 import java.io.Serial;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 /**
  * Base class for filter params that have a JComboBox as their GUI.
@@ -219,8 +220,13 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
         });
     }
 
-    public void setupMaximizeOtherOnChange(RangeParam other, int maxValue) {
+    /**
+     * Sets up the automatic limiting of the given {@link RangeParam}
+     * to a maximum value that depends on the selected item in this {@link ListParam}.
+     */
+    public void setupLimitOtherToMax(RangeParam other, ToIntFunction<E> mapper) {
         addOnChangeTask(() -> {
+            int maxValue = mapper.applyAsInt(getSelected());
             if (other.getValue() > maxValue) {
                 other.setValueNoTrigger(maxValue);
             }

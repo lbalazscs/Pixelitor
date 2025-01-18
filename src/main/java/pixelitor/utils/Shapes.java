@@ -2035,17 +2035,22 @@ public class Shapes {
             .createTransformedShape(shape);
     }
 
-    public static void elasticLine(Path2D path, Point2D from, Point2D to, boolean nonlin) {
-        if (nonlin) {
-            // create a line that can be distorted
-            // by nonlinear distortions
-            int numExtraPoints = 25;
-            double dt = 1.0 / (numExtraPoints + 1);
-            for (int i = 0; i <= numExtraPoints; i++) {
+    /**
+     * Creates a line between two points that can optionally be made
+     * "elastic" by breaking it into small curved segments.
+     */
+    public static void elasticLine(Path2D path, Point2D from, Point2D to, boolean elastic) {
+        if (elastic) {
+            // create a line that can be distorted by nonlinear distortions
+            int numSegments = 26;
+            double dt = 1.0 / numSegments;
+            for (int i = 0; i <= numSegments; i++) {
                 double t = i * dt;
-                Point2D cp = Geometry.interpolate(from, to, t + dt * 0.5);
-                Point2D p = Geometry.interpolate(from, to, t + dt);
-                path.curveTo(cp.getX(), cp.getY(), cp.getX(), cp.getY(), p.getX(), p.getY());
+                Point2D controlPoint = Geometry.interpolate(from, to, t + dt * 0.5);
+                Point2D segmentEnd = Geometry.interpolate(from, to, t + dt);
+                path.curveTo(controlPoint.getX(), controlPoint.getY(),
+                    controlPoint.getX(), controlPoint.getY(),
+                    segmentEnd.getX(), segmentEnd.getY());
             }
         } else {
             path.lineTo(to.getX(), to.getY());
@@ -2058,11 +2063,16 @@ public class Shapes {
      * to be perpendicular to the midpoint of the line segment.
      */
     public static void curvedLine(Path2D path, double curvature,
-                                  double startX, double startY,
-                                  double endX, double endY) {
+                                  Point2D start, Point2D end) {
+        double endX = end.getX();
+        double endY = end.getY();
+
         if (curvature == 0) {
             path.lineTo(endX, endY);
         } else {
+            double startX = start.getX();
+            double startY = start.getY();
+
             // the midpoint of the line segment
             double midX = (startX + endX) / 2;
             double midY = (startY + endY) / 2;
