@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,7 +75,7 @@ public class JHUnderWater extends ParametrizedFilter {
 
         filter.setAmount(amount.getValueAsFloat());
         filter.setScale(scale.getValueAsFloat());
-        filter.setStretch((float) Math.pow(10.0, stretch.getValueAsDouble() / 100.0));
+        filter.setStretch((float) Math.pow(10.0, stretch.getPercentage()));
         filter.setTime((float) time.getPercentage());
         filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2.0));
         filter.setEdgeAction(edgeAction.getValue());

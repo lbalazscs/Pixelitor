@@ -550,7 +550,7 @@ public class CropTool extends DragTool {
         @Override
         public void paintIcon(Graphics2D g) {
             // the shape is based on crop_tool.svg
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
 
             // top-left little square
             shape.moveTo(5, 1);

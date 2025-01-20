@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -177,7 +177,7 @@ public class SmudgeTool extends AbstractBrushTool {
         public void paintIcon(Graphics2D g) {
             // based on smudge_tool.svg
 
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
             shape.moveTo(22.147558, 2.4032667);
             shape.curveTo(24.571192, 8.312117, 24.440912, 17.305197, 23.313412, 17.941687);
             shape.curveTo(21.999336, 18.683477, 19.62295, 19.883547, 18.796078, 20.238096);

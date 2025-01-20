@@ -366,12 +366,12 @@ public class LSystems extends CurveFilter {
         public Path2D interpret(String s) {
             for (int i = 0, n = s.length(); i < n; i++) {
                 switch (s.charAt(i)) {
-                    case 'F', 'G' -> moveForward();
+                    case 'F', 'G' -> moveForward(true);
                     case '+' -> turnLeft();
                     case '-' -> turnRight();
                     case '[' -> push();
                     case ']' -> pop();
-//                    case 'b' -> moveForwardPenUp();
+//                    case 'b' -> moveForward(false);
                 }
             }
             return path;
@@ -397,18 +397,15 @@ public class LSystems extends CurveFilter {
             path.moveTo(x, y);
         }
 
-        private void moveForward() {
+        private void moveForward(boolean penDown) {
             double angleRadians = Math.toRadians(angle);
             x += moveDistance * FastMath.cos(angleRadians);
             y += moveDistance * FastMath.sin(angleRadians);
-            path.lineTo(x, y);
-        }
-
-        private void moveForwardPenUp() {
-            double angleRadians = Math.toRadians(angle);
-            x += moveDistance * FastMath.cos(angleRadians);
-            y += moveDistance * FastMath.sin(angleRadians);
-            path.moveTo(x, y);
+            if (penDown) {
+                path.lineTo(x, y);
+            } else {
+                path.moveTo(x, y);
+            }
         }
     }
 

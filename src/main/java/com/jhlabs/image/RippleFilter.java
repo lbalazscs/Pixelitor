@@ -89,8 +89,16 @@ public class RippleFilter extends RotatedEffectFilter {
         this.waveType = waveType;
     }
 
+    public void setPhaseX(double phaseX) {
+        this.phaseX = phaseX * Math.PI * 2;
+    }
+
+    public void setPhaseY(double phaseY) {
+        this.phaseY = phaseY * Math.PI * 2;
+    }
+
     @Override
-    protected void transformInverseUnRotated(double x, double y, double[] out) {
+    protected void coreTransformInverse(double x, double y, double[] out) {
         double nx = y / xWavelength;
         double ny = x / yWavelength;
         double fx, fy;
@@ -120,13 +128,5 @@ public class RippleFilter extends RotatedEffectFilter {
     @Override
     public String toString() {
         return "Distort/Ripple...";
-    }
-
-    public void setPhaseX(double phaseX) {
-        this.phaseX = phaseX * Math.PI * 2;
-    }
-
-    public void setPhaseY(double phaseY) {
-        this.phaseY = phaseY * Math.PI * 2;
     }
 }

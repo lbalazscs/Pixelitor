@@ -70,7 +70,7 @@ public class BlurredShapeTester extends ParametrizedFilter {
 
         double radiusX = radius.getValueAsDouble(0);
         double radiusY = radius.getValueAsDouble(1);
-        double softnessFactor = softness.getValueAsDouble() / 100.0;
+        double softnessFactor = softness.getPercentage();
         filter.setRadius(radiusX, radiusY, softnessFactor);
 
         filter.setShape(shape.getValue());

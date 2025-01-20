@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,7 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -41,7 +42,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
- * Renders a fractal tree
+ * Renders a fractal tree.
  */
 public class FractalTree extends ParametrizedFilter {
     public static final String NAME = "Fractal Tree";
@@ -73,10 +74,11 @@ public class FractalTree extends ParametrizedFilter {
         new Item("Faster", QUALITY_FASTER)
     }, IGNORE_RANDOMIZE);
 
-    // precalculated objects for the various depths
+    // precalculated objects for different depths of the tree
     private Stroke[] strokeLookup;
     private Color[] colorLookup;
     private Physics[] physicsLookup;
+
     private boolean doPhysics;
     private boolean leftFirst;
     private boolean hasRandomness;
@@ -147,6 +149,7 @@ public class FractalTree extends ParametrizedFilter {
             float strokeWidth = (float) (w1 * w2);
             float zoomedStrokeWidth = (strokeWidth * zoom.getValue()) / (float) zoom.getDefaultValue();
             strokeLookup[depth] = new BasicStroke(zoomedStrokeWidth, CAP_ROUND, JOIN_ROUND);
+
             // colors
             float where = ((float) depth) / iterations.getValue();
             int rgb = colors.getColorMap().getColor(1.0f - where);
@@ -178,21 +181,23 @@ public class FractalTree extends ParametrizedFilter {
         return dest;
     }
 
-    private void drawTree(Graphics2D g, double x1, double y1,
-                          double angle, int depth, SplittableRandom rand, double c) {
+    private void drawTree(Graphics2D g, double startX, double startY,
+                          double angle, int depth,
+                          RandomGenerator rand, double curvature) {
         if (depth == 0) {
             return;
         }
 
-        c = -c; // change the direction of the curvature in each iteration
+        // alternate the direction of curvature in each iteration
+        curvature = -curvature;
 
         if (doPhysics) {
             angle = adjustPhysics(angle, depth);
         }
 
         double angleRad = Math.toRadians(angle);
-        double x2 = x1 + FastMath.cos(angleRad) * depth * genRandomLength(rand);
-        double y2 = y1 + FastMath.sin(angleRad) * depth * genRandomLength(rand);
+        double endX = startX + FastMath.cos(angleRad) * depth * genRandomLength(rand);
+        double endY = startY + FastMath.sin(angleRad) * depth * genRandomLength(rand);
 
         g.setStroke(strokeLookup[depth]);
         int nextDepth = depth - 1;
@@ -201,14 +206,14 @@ public class FractalTree extends ParametrizedFilter {
                 g.setColor(colorLookup[depth]);
             } else {
                 g.setPaint(new GradientPaint(
-                    (float) x1, (float) y1, colorLookup[depth],
-                    (float) x2, (float) y2, colorLookup[nextDepth]));
+                    (float) startX, (float) startY, colorLookup[depth],
+                    (float) endX, (float) endY, colorLookup[nextDepth]));
             }
         } else {
             g.setColor(colorLookup[depth]);
         }
 
-        connectPoints(g, x1, y1, x2, y2, c);
+        connectPoints(g, curvature, startX, startY, endX, endY);
 
         int split = this.angle.getValue();
 
@@ -219,18 +224,18 @@ public class FractalTree extends ParametrizedFilter {
 
         leftFirst = !leftFirst;
         if (leftFirst) {
-            drawTree(g, x2, y2, leftBranchAngle, nextDepth, rand, c);
-            drawTree(g, x2, y2, rightBranchAngle, nextDepth, rand, c);
+            drawTree(g, endX, endY, leftBranchAngle, nextDepth, rand, curvature);
+            drawTree(g, endX, endY, rightBranchAngle, nextDepth, rand, curvature);
         } else {
-            drawTree(g, x2, y2, rightBranchAngle, nextDepth, rand, c);
-            drawTree(g, x2, y2, leftBranchAngle, nextDepth, rand, c);
+            drawTree(g, endX, endY, rightBranchAngle, nextDepth, rand, curvature);
+            drawTree(g, endX, endY, leftBranchAngle, nextDepth, rand, curvature);
         }
     }
 
     private double adjustPhysics(double angle, int depth) {
         assert doPhysics;
 
-        // make sure we have the angle in the range 0-360
+        // ensure the angle is within the range 0-360
         angle += 720;
         angle = angle % 360;
 
@@ -255,32 +260,31 @@ public class FractalTree extends ParametrizedFilter {
         return angle;
     }
 
-    private static void connectPoints(Graphics2D g,
-                                      double x1, double y1,
-                                      double x2, double y2, double c) {
-        if (c == 0) {
-            g.draw(new Line2D.Double(x1, y1, x2, y2));
+    private static void connectPoints(Graphics2D g, double curvature,
+                                      double startX, double startY,
+                                      double endX, double endY) {
+        if (curvature == 0) {
+            g.draw(new Line2D.Double(startX, startY, endX, endY));
         } else {
             Path2D path = new Path2D.Double();
-            path.moveTo(x1, y1);
+            path.moveTo(startX, startY);
 
-            double dx = x2 - x1;
-            double dy = y2 - y1;
+            double dx = endX - startX;
+            double dy = endY - startY;
 
-            // center point
-            double cx = x1 + dx / 2.0;
-            double cy = y1 + dy / 2.0;
+            double midX = startX + dx / 2.0;
+            double midY = startY + dy / 2.0;
 
             // The normal vector is (-dy, dx).
-            double ctrlX = cx - dy * c;
-            double ctrlY = cy + dx * c;
+            double ctrlX = midX - dy * curvature;
+            double ctrlY = midY + dx * curvature;
 
-            path.quadTo(ctrlX, ctrlY, x2, y2);
+            path.quadTo(ctrlX, ctrlY, endX, endY);
             g.draw(path);
         }
     }
 
-    private double genAngleRandomness(SplittableRandom rand) {
+    private double genAngleRandomness(RandomGenerator rand) {
         if (!hasRandomness) {
             return 0;
         }
@@ -288,7 +292,7 @@ public class FractalTree extends ParametrizedFilter {
         return -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
     }
 
-    private double genRandomLength(SplittableRandom rand) {
+    private double genRandomLength(RandomGenerator rand) {
         if (!hasRandomness) {
             return defaultLength;
         }

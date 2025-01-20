@@ -324,7 +324,7 @@ public class CloneTool extends BlendingModeBrushTool {
             // based on clone_tool.svg
 
             // body
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
             shape.moveTo(0.9556584, 15.885808);
             shape.lineTo(4.6826134, 26.81291);
             shape.lineTo(23.317389, 26.81291);
@@ -337,7 +337,7 @@ public class CloneTool extends BlendingModeBrushTool {
             g.draw(shape);
 
             // triangle
-            shape = new Path2D.Float();
+            shape = new Path2D.Double();
             shape.moveTo(10.273045, 19.449001);
             shape.lineTo(14.0, 25.150095);
             shape.lineTo(17.726954, 19.449001);
@@ -347,7 +347,7 @@ public class CloneTool extends BlendingModeBrushTool {
             g.draw(shape);
 
             // handle
-            shape = new Path2D.Float();
+            shape = new Path2D.Double();
             shape.moveTo(12.602392, 15.648266);
             shape.curveTo(12.602392, 15.648266, 8.388771, 10.379845, 8.438116, 6.145397);
             shape.curveTo(8.471819, 3.2532463, 10.364073, 1.4242454, 14.003829, 1.4242454);

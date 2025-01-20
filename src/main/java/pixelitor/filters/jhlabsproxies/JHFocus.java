@@ -94,7 +94,7 @@ public class JHFocus extends ParametrizedFilter {
 
         double radiusX = radius.getValueAsDouble(0);
         double radiusY = radius.getValueAsDouble(1);
-        double softnessFactor = softness.getValueAsDouble() / 100.0;
+        double softnessFactor = softness.getPercentage();
         filter.setRadius(radiusX, radiusY, softnessFactor);
 
         filter.setInverted(invert.isChecked());

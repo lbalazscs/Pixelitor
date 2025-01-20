@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -145,11 +145,11 @@ public class ToneCurves {
      * Draws the tone curve grid lines in alternating light and dark colors.
      */
     private void drawGrid(Graphics2D g) {
-        Path2D lightPath2D = new Path2D.Float();
-        Path2D darkPath2D = new Path2D.Float();
+        Path2D lightPath2D = new Path2D.Double();
+        Path2D darkPath2D = new Path2D.Double();
 
-        float gridWidth = (float) curveWidth / GRID_DENSITY;
-        float gridHeight = (float) curveHeight / GRID_DENSITY;
+        double gridWidth = curveWidth / (double) GRID_DENSITY;
+        double gridHeight = curveHeight / (double) GRID_DENSITY;
         for (int i = 0; i <= GRID_DENSITY; i++) {
             Path2D path2D = i % 2 == 0 ? darkPath2D : lightPath2D;
             // horizontal

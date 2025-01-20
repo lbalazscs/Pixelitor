@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -251,11 +251,11 @@ public class ToneCurve {
      */
     private void drawCurve(Graphics2D g, boolean darkTheme) {
         updateCurvePlotData();
-        Path2D path = new Path2D.Float();
+        Path2D path = new Path2D.Double();
         path.moveTo(0, ((float) curvePlotData[0] / 255) * height);
         for (int i = 0; i < curvePlotData.length; i++) {
-            float x = ((float) i / 255) * width;
-            float y = ((float) curvePlotData[i] / 255) * height;
+            double x = (i / 255.0) * width;
+            double y = (curvePlotData[i] / 255.0) * height;
             path.lineTo(x, y);
         }
 

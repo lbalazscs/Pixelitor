@@ -178,7 +178,7 @@ public class Flashlight extends ParametrizedFilter {
             };
         }
 
-        // must be called after the shape arguments!
+        // must be called after the radius/center settings
         public void setShape(int type) {
             shape = BlurredShape.create(type, center,
                 innerRadiusX, innerRadiusY,

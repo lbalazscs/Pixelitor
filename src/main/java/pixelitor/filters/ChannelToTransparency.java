@@ -118,21 +118,16 @@ public class ChannelToTransparency extends ParametrizedFilter {
         @Override
         public int processPixel(int x, int y, int argb) {
             int v = getChannelValue(argb);
-            int alpha;
-            if (invert) {
-                alpha = v;
-            } else {
-                alpha = 255 - v;
-            }
+            int newAlpha = invert ? v : 255 - v;
 
             if (keep) {
                 int origAlpha = (argb >>> 24) & 0xFF;
-                if (origAlpha < alpha) {
-                    alpha = origAlpha;
+                if (origAlpha < newAlpha) {
+                    newAlpha = origAlpha;
                 }
             }
 
-            return Colors.setAlpha(argb, alpha);
+            return Colors.setAlpha(argb, newAlpha);
         }
 
         abstract int getChannelValue(int rgb);

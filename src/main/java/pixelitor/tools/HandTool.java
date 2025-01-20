@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -90,7 +90,7 @@ public class HandTool extends Tool {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on hand_tool.svg
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
 
             shape.moveTo(12.343156, 28.583105);
             shape.curveTo(9.511524, 26.499704, 7.455484, 25.649765, 6.0110054, 24.676895);

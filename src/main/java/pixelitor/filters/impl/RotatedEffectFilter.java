@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,9 +22,14 @@ import net.jafama.FastMath;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * A {@link TransformFilter} that can rotate a distortion effect,
+ * in a way that leaves the undistorted pixels unaffected.
+ * Not to be confused with {@link CenteredTransformFilter}.
+ */
 public abstract class RotatedEffectFilter extends TransformFilter {
-    private float halfWidth;
-    private float halfHeight;
+    private double centerX;
+    private double centerY;
 
     private double angle;
     private double sin = 0;
@@ -36,50 +41,53 @@ public abstract class RotatedEffectFilter extends TransformFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        halfWidth = src.getWidth() / 2.0f;
-        halfHeight = src.getHeight() / 2.0f;
+        centerX = src.getWidth() / 2.0;
+        centerY = src.getHeight() / 2.0;
 
         return super.filter(src, dst);
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        double i = x - halfWidth;
-        double j = y - halfHeight;
+        double relX = x - centerX;
+        double relY = y - centerY;
 
-        double ii, jj;
+        double rotatedX, rotatedY;
         if (angle != 0) {
             // rotate the sampling coordinates around the center
-            ii = i * cos - j * sin;
-            jj = j * cos + i * sin;
+            rotatedX = relX * cos - relY * sin;
+            rotatedY = relY * cos + relX * sin;
         } else {
-            ii = i;
-            jj = j;
+            rotatedX = relX;
+            rotatedY = relY;
         }
 
         // not a field, because this is multithreaded
-        double[] twoDoubles = new double[2];
+        double[] distorted = new double[2];
 
-        transformInverseUnRotated(ii, jj, twoDoubles);
-        double sampleX = twoDoubles[0];
-        double sampleY = twoDoubles[1];
+        coreTransformInverse(rotatedX, rotatedY, distorted);
+        double distortedX = distorted[0];
+        double distortedY = distorted[1];
 
-        // So far we have rotated both the effect and the background.
-        // Now rotate the background back.
-        double sampleXX, sampleYY;
+        // rotate back to ensure that only the distortion effect is
+        // rotated while keeping the underlying image properly oriented
+        double unrotatedX, unrotatedY;
         if (angle != 0) {
-            sampleXX = sampleX * cos + sampleY * sin;
-            sampleYY = sampleY * cos - sampleX * sin;
+            unrotatedX = distortedX * cos + distortedY * sin;
+            unrotatedY = distortedY * cos - distortedX * sin;
         } else {
-            sampleXX = sampleX;
-            sampleYY = sampleY;
+            unrotatedX = distortedX;
+            unrotatedY = distortedY;
         }
 
-        out[0] = (float) (halfWidth + sampleXX);
-        out[1] = (float) (halfHeight + sampleYY);
+        out[0] = (float) (centerX + unrotatedX);
+        out[1] = (float) (centerY + unrotatedY);
     }
 
-    protected abstract void transformInverseUnRotated(double x, double y, double[] out);
+    /**
+     * Subclasses implement this to define the inverse transformation.
+     */
+    protected abstract void coreTransformInverse(double x, double y, double[] out);
 
     public void setAngle(double angle) {
         this.angle = angle;

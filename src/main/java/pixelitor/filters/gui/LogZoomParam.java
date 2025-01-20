@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public class LogZoomParam extends RangeParam {
     }
 
     public double getZoomValue() {
-        return Math.pow(10.0, getValueAsDouble() / 100.0);
+        return Math.pow(10.0, getPercentage());
     }
 
     public double getZoomRatio() {

@@ -41,12 +41,12 @@ public class Spheres extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = -2472078121608102477L;
 
-    enum LayoutType {
+    enum Layout {
         PATTERN("Pattern"), RANDOM("Random");
 
         private final String displayName;
 
-        LayoutType(String displayName) {
+        Layout(String displayName) {
             this.displayName = displayName;
         }
 
@@ -56,22 +56,23 @@ public class Spheres extends ParametrizedFilter {
         }
     }
 
+    // Constants for quasi-random sequence generation (R2 sequence),
     // see http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
     private static final double PHI_2 = 1.324717957244746;
     private static final double a1 = 1.0 / PHI_2;
     private static final double a2 = 1.0 / (PHI_2 * PHI_2);
 
-    private final EnumParam<LayoutType> layout = new EnumParam<>("Layout", LayoutType.class);
+    private final EnumParam<Layout> layout = new EnumParam<>("Layout", Layout.class);
     private final RangeParam minRadius = new RangeParam("Min Radius", 2, 10, 100);
     private final RangeParam maxRadius = new RangeParam("Max Radius", 2, 10, 100);
     private final RangeParam density = new RangeParam("Density (%)", 1, 50, 100);
 
     private final BooleanParam addHighLightsCB = new BooleanParam(
         "Add 3D Highlights", true);
-    private final AngleParam highlightAngleSelector = new AngleParam(
+    private final AngleParam lightAzimuth = new AngleParam(
         "Light Direction (Azimuth)", 0);
-    private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
-        "Highlight Elevation", 45, INTUITIVE_DEGREES);
+    private final ElevationAngleParam lightElevation = new ElevationAngleParam(
+        "Light Elevation", 45, INTUITIVE_DEGREES);
 
     private final RangeParam opacity = new RangeParam(GUIText.OPACITY, 0, 100, 100);
 
@@ -80,13 +81,13 @@ public class Spheres extends ParametrizedFilter {
 
         // enable "Light Direction" and "Highlight Elevation"
         // only if "Add Highlights" is checked
-        addHighLightsCB.setupEnableOtherIfChecked(highlightAngleSelector);
-        addHighLightsCB.setupEnableOtherIfChecked(highlightElevationSelector);
+        addHighLightsCB.setupEnableOtherIfChecked(lightAzimuth);
+        addHighLightsCB.setupEnableOtherIfChecked(lightElevation);
 
         opacity.setPresetKey("Opacity");
 
         FilterButtonModel reseedAction = paramSet.createReseedAction();
-        layout.setupEnableOtherIf(reseedAction, layoutType -> layoutType == LayoutType.RANDOM);
+        layout.setupEnableOtherIf(reseedAction, layoutType -> layoutType == Layout.RANDOM);
 
         setParams(
             layout.withAction(reseedAction),
@@ -95,8 +96,8 @@ public class Spheres extends ParametrizedFilter {
             density,
             opacity,
             addHighLightsCB,
-            highlightAngleSelector,
-            highlightElevationSelector
+            lightAzimuth,
+            lightElevation
         );
 
         maxRadius.ensureHigherValueThan(minRadius);
@@ -106,6 +107,7 @@ public class Spheres extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int width = dest.getWidth();
         int height = dest.getHeight();
+
         double minR = minRadius.getValueAsDouble();
         double maxR = maxRadius.getValueAsDouble();
         double averageR = (minR + maxR) / 2.0;
@@ -113,18 +115,16 @@ public class Spheres extends ParametrizedFilter {
         if (numCircles == 0) {
             return dest;
         }
-
-        LayoutType type = this.layout.getSelected();
-
         var pt = new StatusBarProgressTracker(NAME, numCircles);
+
+        Layout type = this.layout.getSelected();
 
         Graphics2D g = dest.createGraphics();
         g.setComposite(AlphaComposite.SrcOver.derive((float) opacity.getPercentage()));
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        double angle = highlightAngleSelector.getValueInRadians() + Math.PI;
-
-        double elevation = highlightElevationSelector.getValueInRadians();
+        double angle = lightAzimuth.getValueInRadians() + Math.PI;
+        double elevation = lightElevation.getValueInRadians();
         double cosAngle = Math.cos(angle);
         double sinAngle = Math.sin(angle);
         double cosElevation = Math.cos(elevation);
@@ -134,20 +134,15 @@ public class Spheres extends ParametrizedFilter {
         boolean addHighlights = addHighLightsCB.isChecked();
 
         Random rand = paramSet.getLastSeedRandom();
-        double deltaR = (maxR - minR) / numCircles;
+        double radiusStep = (maxR - minR) / numCircles;
         for (int i = 0; i < numCircles; i++) {
-            double r;
-            if (minR != maxR) {
-                r = maxR - i * deltaR;
-            } else {
-                r = minR;
-            }
+            double r = minR == maxR ? minR : maxR - i * radiusStep;
             int x, y;
-            if (type == LayoutType.PATTERN) {
+            if (type == Layout.PATTERN) {
                 // http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
                 x = (int) (width * ((0.5 + a1 * (i + 1)) % 1));
                 y = (int) (height * ((0.5 + a2 * (i + 1)) % 1));
-            } else if (type == LayoutType.RANDOM) {
+            } else if (type == Layout.RANDOM) {
                 x = rand.nextInt(width);
                 y = rand.nextInt(height);
             } else {

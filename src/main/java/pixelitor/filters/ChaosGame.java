@@ -89,6 +89,12 @@ public class ChaosGame extends ParametrizedFilter {
             restrict,
             showPoly).withAction(FilterButtonModel.createNoOpReseed());
 
+        setupBuiltinPresets();
+
+        helpURL = "https://en.wikipedia.org/wiki/Chaos_game";
+    }
+
+    private void setupBuiltinPresets() {
         FilterState triangle = new FilterState("Sierpinski Triangle (defaults)")
             .with(numVerticesParam, new RangeParamState(3))
             .with(fraction, new RangeParamState(50))
@@ -125,8 +131,6 @@ public class ChaosGame extends ParametrizedFilter {
             .with(restrict, NO);
 
         paramSet.setBuiltinPresets(triangle, carpet, vicsek, penta, hexa);
-
-        helpURL = "https://en.wikipedia.org/wiki/Chaos_game";
     }
 
     @Override
@@ -145,55 +149,52 @@ public class ChaosGame extends ParametrizedFilter {
         int[] destPixels = ImageUtils.getPixels(dest);
         Arrays.fill(destPixels, 0xFF_FF_FF_FF); // fill the image with white
 
-        Random r = ThreadLocalRandom.current();
+        Random random = ThreadLocalRandom.current();
 
         double factor = fraction.getPercentage();
         double factor2 = 1 - factor;
 
         // start at a random location
-        double x = r.nextInt(width);
-        double y = r.nextInt(height);
+        double currentX = random.nextInt(width);
+        double currentY = random.nextInt(height);
 
         Vertex[] verticesArray = vertices.toArray(EMPTY_ARRAY);
         int numPoints = vertices.size();
 
         // throw away the first 50 points
-        Vertex last = null;
-        Vertex last2 = null;
+        Vertex previousVertex = null;
+        Vertex secondPreviousVertex = null;
         for (int i = 0; i < 50; i++) {
-            int rand = r.nextInt(numPoints);
+            int rand = random.nextInt(numPoints);
             Vertex vertex = verticesArray[rand];
-            x = x * factor + vertex.x * factor2;
-            y = y * factor + vertex.y * factor2;
-            last2 = last;
-            last = vertex;
+            currentX = currentX * factor + vertex.x * factor2;
+            currentY = currentY * factor + vertex.y * factor2;
+            secondPreviousVertex = previousVertex;
+            previousVertex = vertex;
         }
 
         int counter = 0;
         boolean restrictRepetition = restrict.isChecked();
         for (int i = 0; i < numIterations; i++) {
-            int rand = r.nextInt(numPoints);
+            int rand = random.nextInt(numPoints);
             Vertex vertex = verticesArray[rand];
-            if (restrictRepetition && vertex == last) {
+            if (restrictRepetition && vertex == previousVertex) {
                 continue;
             }
-            x = x * factor + vertex.x * factor2;
-            y = y * factor + vertex.y * factor2;
+            currentX = currentX * factor + vertex.x * factor2;
+            currentY = currentY * factor + vertex.y * factor2;
 
-            int index = (int) x + width * (int) y;
+            int index = (int) currentX + width * (int) currentY;
 
-            if (colorsValue == COLORS_LAST_BUT_TWO) {
-                destPixels[index] = last2.color;
-            } else if (colorsValue == COLORS_LAST_BUT_ONE) {
-                destPixels[index] = last.color;
-            } else {
-                destPixels[index] = vertex.color;
-            }
-            last2 = last;
-            last = vertex;
+            destPixels[index] = switch (colorsValue) {
+                case COLORS_LAST_BUT_TWO -> secondPreviousVertex.color;
+                case COLORS_LAST_BUT_ONE -> previousVertex.color;
+                default -> vertex.color;
+            };
+            secondPreviousVertex = previousVertex;
+            previousVertex = vertex;
 
-            counter++;
-            if (counter == workUnit) {
+            if (++counter == workUnit) {
                 counter = 0;
                 pt.unitDone();
             }
@@ -208,15 +209,15 @@ public class ChaosGame extends ParametrizedFilter {
     }
 
     private List<Vertex> createVertices(int numVertices, int colorsValue, int width, int height) {
-        Vertex.resetMaxMin();
-        List<Vertex> vertices = addBasicVertices(numVertices);
+        Vertex.resetMinMax();
+        List<Vertex> vertices = createBaseVertices(numVertices);
 
         if (midpointJump.isChecked()) {
             addMidPoints(vertices, numVertices);
         }
 
         if (centerJump.isChecked()) {
-            addCenterVertex(vertices, colorsValue);
+            addCentralPoint(vertices, colorsValue);
         }
 
         colorVertices(vertices, numVertices, colorsValue);
@@ -225,7 +226,7 @@ public class ChaosGame extends ParametrizedFilter {
         return vertices;
     }
 
-    private static List<Vertex> addBasicVertices(int numVertices) {
+    private static List<Vertex> createBaseVertices(int numVertices) {
         List<Vertex> vertices = new ArrayList<>();
         if (numVertices == 4) {
             // it looks better if the 4 vertices are in the corners
@@ -259,13 +260,11 @@ public class ChaosGame extends ParametrizedFilter {
         vertices.addAll(midPoints);
     }
 
-    private static void addCenterVertex(List<Vertex> vertices, int colorsValue) {
+    private static void addCentralPoint(List<Vertex> vertices, int colorsValue) {
         Vertex center = new Vertex(0.5, 0.5);
-        if (colorsValue == COLORS_BW) {
-            center.color = 0xFF_00_00_00;
-        } else {
-            center.color = 0xFF_00_40_00; // dark green
-        }
+        center.color = (colorsValue == COLORS_BW)
+            ? 0xFF_00_00_00
+            : 0xFF_00_40_00; // dark green
         vertices.add(center);
     }
 
@@ -292,12 +291,12 @@ public class ChaosGame extends ParametrizedFilter {
     private static void scaleVertices(List<Vertex> vertices, int width, int height) {
         // transform the vertex coordinates from the 0..1 space
         // to the actual image space
-        double xRange = Vertex.maxX - Vertex.minX;
-        double yRange = Vertex.maxY - Vertex.minY;
+        double horRange = Vertex.maxX - Vertex.minX;
+        double verRange = Vertex.maxY - Vertex.minY;
         double actualHMargin = Math.min(MARGIN, width / 3.0);
         double actualVMargin = Math.min(MARGIN, height / 3.0);
-        double hScale = (width - 2 * actualHMargin) / xRange;
-        double vScale = (height - 2 * actualVMargin) / yRange;
+        double hScale = (width - 2 * actualHMargin) / horRange;
+        double vScale = (height - 2 * actualVMargin) / verRange;
         for (Vertex p : vertices) {
             p.x = actualHMargin + hScale * (p.x - Vertex.minX);
             p.y = actualVMargin + vScale * (p.y - Vertex.minY);
@@ -307,23 +306,15 @@ public class ChaosGame extends ParametrizedFilter {
     private static void drawPolygon(BufferedImage dest, List<Vertex> vertices,
                                     int numVertices, boolean color) {
         Graphics2D g = dest.createGraphics();
-        if (color) {
-            g.setColor(Color.BLACK);
-        } else {
-            g.setColor(Color.RED);
-        }
-
+        g.setColor(color ? Color.BLACK : Color.RED);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setStroke(new BasicStroke(2.0f));
 
         for (int i = 0; i < numVertices; i++) {
             Vertex vertex = vertices.get(i);
-            Vertex lastVertex;
-            if (i > 0) {
-                lastVertex = vertices.get(i - 1);
-            } else {
-                lastVertex = vertices.get(numVertices - 1);
-            }
+            Vertex lastVertex = (i > 0)
+                ? vertices.get(i - 1)
+                : vertices.get(numVertices - 1);
             g.draw(new Line2D.Double(lastVertex.x, lastVertex.y, vertex.x, vertex.y));
         }
         if (color) {
@@ -376,7 +367,7 @@ public class ChaosGame extends ParametrizedFilter {
             return String.format("Vertex (x = %.2f, y = %.2f)", x, y);
         }
 
-        static void resetMaxMin() {
+        static void resetMinMax() {
             minX = Double.POSITIVE_INFINITY;
             minY = Double.POSITIVE_INFINITY;
             maxX = Double.NEGATIVE_INFINITY;

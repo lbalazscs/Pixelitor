@@ -474,7 +474,7 @@ public class TransformedTextPainter implements Debuggable {
             initialOffset = 0;
         }
 
-        Path2D result = new Path2D.Float();
+        Path2D result = new Path2D.Double();
         PathIterator it = new FlatteningPathIterator(path.getPathIterator(null), 1);
         double[] points = new double[6];
 

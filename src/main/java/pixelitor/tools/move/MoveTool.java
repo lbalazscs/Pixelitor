@@ -285,7 +285,7 @@ public class MoveTool extends DragTool {
         @Override
         public void paintIcon(Graphics2D g) {
             // the shape is based on move_tool.svg
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
             // start at the top
             shape.moveTo(14, 0);
             shape.lineTo(18, 5);

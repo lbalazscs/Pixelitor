@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,10 +26,10 @@ import static net.jafama.FastMath.tan;
  * Inspired by the Paint.net tile effect
  */
 public class TilesFilter extends RotatedEffectFilter {
-    private float sizeX;
-    private float sizeY;
-    private float curvatureX;
-    private float curvatureY;
+    private double sizeX;
+    private double sizeY;
+    private double curvatureX;
+    private double curvatureY;
     private double shiftX;
     private double shiftY;
 
@@ -37,26 +37,26 @@ public class TilesFilter extends RotatedEffectFilter {
         super(filterName);
     }
 
-    public void setSizeX(int size) {
-        sizeX = (float) (Math.PI / size);
+    public void setSizeX(double size) {
+        sizeX = Math.PI / size;
     }
 
-    public void setSizeY(int size) {
-        sizeY = (float) (Math.PI / size);
+    public void setSizeY(double size) {
+        sizeY = Math.PI / size;
     }
 
-    public void setCurvatureX(float curvature) {
-        curvatureX = curvature * curvature / 10.0f;
+    public void setCurvatureX(double curvature) {
+        curvatureX = curvature * curvature / 10.0;
     }
 
-    public void setCurvatureY(float curvature) {
-        curvatureY = curvature * curvature / 10.0f;
+    public void setCurvatureY(double curvature) {
+        curvatureY = curvature * curvature / 10.0;
     }
 
     @Override
-    protected void transformInverseUnRotated(double x, double y, double[] out) {
-        out[0] = x + curvatureX * tan(x * sizeX - shiftX / (double) sizeX);
-        out[1] = y + curvatureY * tan(y * sizeY - shiftY / (double) sizeY);
+    protected void coreTransformInverse(double x, double y, double[] out) {
+        out[0] = x + curvatureX * tan(x * sizeX - shiftX / sizeX);
+        out[1] = y + curvatureY * tan(y * sizeY - shiftY / sizeY);
     }
 
     public void setShiftX(double shiftX) {

@@ -272,7 +272,7 @@ public class ColorPickerTool extends Tool {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on color_picker_tool.svg
-            Path2D glassPath = new Path2D.Float();
+            Path2D glassPath = new Path2D.Double();
 
             glassPath.moveTo(15.487128, 10.694453);
             glassPath.lineTo(1.8488811, 24.332703);
@@ -289,7 +289,7 @@ public class ColorPickerTool extends Tool {
             g.setStroke(new BasicStroke(0.9106483f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(glassPath);
 
-            Path2D handlePath = new Path2D.Float();
+            Path2D handlePath = new Path2D.Double();
             handlePath.moveTo(13.668696, 7.966804);
             handlePath.lineTo(16.396345, 5.239154);
             handlePath.lineTo(18.214779, 7.057564);

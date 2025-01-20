@@ -972,7 +972,7 @@ public class ShapesTool extends DragTool {
         @Override
         public void paintIcon(Graphics2D g) {
             // the shape is based on shapes_tool.svg
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
 
             shape.moveTo(14.0, 5.134844);
             shape.curveTo(14, 5.134844, 15.964081, 1.4467101, 20.675045, 1.4467101);

@@ -396,7 +396,7 @@ public class PaintBucketTool extends Tool {
         @Override
         public void paintIcon(Graphics2D g) {
             // the shape is based on paint_bucket_tool.svg
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
 
             // bucket
             shape.moveTo(5.4289136, 12.759313);
@@ -409,7 +409,7 @@ public class PaintBucketTool extends Tool {
             g.draw(shape);
 
             // handle
-            shape = new Path2D.Float();
+            shape = new Path2D.Double();
             shape.moveTo(14.87057, 12.192133);
             shape.curveTo(14.87057, 12.192133, 11.7013235, 3.5592537, 13.550051, 2.5583534);
             shape.curveTo(15.398779, 1.5574434, 16.939384, 6.8122234, 16.939384, 6.8122234);
@@ -418,7 +418,7 @@ public class PaintBucketTool extends Tool {
             g.draw(shape);
 
             // paint
-            shape = new Path2D.Float();
+            shape = new Path2D.Double();
             shape.moveTo(8.19497, 10.853959);
             shape.curveTo(5.256423, 10.799759, 0.59281015, 13.51276, 0.6504288, 15.789537);
             shape.curveTo(0.70804787, 18.066315, 1.8028003, 18.152325, 2.8399348, 18.206568);

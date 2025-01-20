@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,10 +61,10 @@ public class GlassTiles extends ParametrizedFilter {
             filter = new TilesFilter(NAME);
         }
 
-        filter.setSizeX(size.getValue(0));
-        filter.setSizeY(size.getValue(1));
-        filter.setCurvatureX(curvature.getValue(0));
-        filter.setCurvatureY(curvature.getValue(1));
+        filter.setSizeX(size.getValueAsDouble(0));
+        filter.setSizeY(size.getValueAsDouble(1));
+        filter.setCurvatureX(curvature.getValueAsDouble(0));
+        filter.setCurvatureY(curvature.getValueAsDouble(1));
         filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

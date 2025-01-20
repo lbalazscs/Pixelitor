@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import pixelitor.filters.Slice;
  * The implementation of the {@link Slice} filter.
  */
 public class SliceFilter extends RotatedEffectFilter {
-    private double shiftHorizontal;
-    private double shiftVertical;
+    private double horizontalShift;
+    private double verticalShift;
     private int offset;
     private int size;
 
@@ -33,9 +33,9 @@ public class SliceFilter extends RotatedEffectFilter {
     }
 
     @Override
-    protected void transformInverseUnRotated(double x, double y, double[] out) {
-        out[0] = x + calcShift(y, shiftVertical);
-        out[1] = y + calcShift(x, shiftHorizontal);
+    protected void coreTransformInverse(double x, double y, double[] out) {
+        out[0] = x + calcShift(y, verticalShift);
+        out[1] = y + calcShift(x, horizontalShift);
     }
 
     private double calcShift(double coord, double shift) {
@@ -43,12 +43,12 @@ public class SliceFilter extends RotatedEffectFilter {
         return mod >= 0 ? offset : -offset;
     }
 
-    public void setShiftHorizontal(double t) {
-        shiftHorizontal = t * size;
+    public void setHorizontalShift(double t) {
+        horizontalShift = t * size;
     }
 
-    public void setShiftVertical(double t) {
-        shiftVertical = t * size;
+    public void setVerticalShift(double t) {
+        verticalShift = t * size;
     }
 
     public void setOffset(int offset) {

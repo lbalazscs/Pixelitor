@@ -32,7 +32,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
- * "Spirograph" shape filter
+ * The "Spirograph" filter.
  */
 public class Spirograph extends CurveFilter {
     @Serial
@@ -40,6 +40,8 @@ public class Spirograph extends CurveFilter {
 
     public static final String NAME = "Spirograph";
 
+    // Hypotrochoid and epitrochoid curves are produced
+    // when one circle rolls around/within another circle.
     private static final int TYPE_HYPOTROCHOID = 1;
     private static final int TYPE_EPITROCHOID = 2;
 
@@ -77,10 +79,10 @@ public class Spirograph extends CurveFilter {
         double R = radii.getValueAsDouble(1);
         double d = radii.getValueAsDouble(2);
 
-        double z = zoom.getValueAsDouble() / 100.0;
-        r *= z;
-        R *= z;
-        d *= z;
+        double scale = zoom.getPercentage();
+        r *= scale;
+        R *= scale;
+        d *= scale;
 
         double cx = transform.getCx(width);
         double cy = transform.getCy(height);
@@ -90,14 +92,11 @@ public class Spirograph extends CurveFilter {
             return null;
         }
 
-        double combinedR;
-        if (type.getValue() == TYPE_HYPOTROCHOID) {
-            combinedR = R - r;
-        } else if (type.getValue() == TYPE_EPITROCHOID) {
-            combinedR = R + r;
-        } else {
-            throw new IllegalStateException("type = " + type.getValue());
-        }
+        double combinedR = switch (type.getValue()) {
+            case TYPE_HYPOTROCHOID -> R - r;
+            case TYPE_EPITROCHOID -> R + r;
+            default -> throw new IllegalStateException("type = " + type.getValue());
+        };
 
         double dt = 0.05;
         double startX = combinedR + d;

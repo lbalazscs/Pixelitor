@@ -194,9 +194,9 @@ public class ZoomTool extends DragTool {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on zoom_tool.svg
+            g.setStroke(new BasicStroke(2.0f, CAP_BUTT, JOIN_MITER, 4));
 
             Ellipse2D circle = new Ellipse2D.Double(9, 1, 18, 18);
-            g.setStroke(new BasicStroke(2.0f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(circle);
 
             Line2D hor = new Line2D.Double(12.0, 10.0, 24.0, 10.0);
@@ -205,7 +205,7 @@ public class ZoomTool extends DragTool {
             Line2D ver = new Line2D.Double(18.0, 16.0, 18.0, 4.0);
             g.draw(ver);
 
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
             shape.moveTo(13.447782, 17.801485);
             shape.lineTo(4.73615, 26.041084);
             shape.curveTo(4.73615, 26.041084, 2.9090462, 26.923565, 1.9954941, 26.041084);
