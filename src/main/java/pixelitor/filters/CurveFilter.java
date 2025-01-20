@@ -70,7 +70,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
     private static final int FG_GRADIENT = 8;
     private static final int FG_TRANSPARENT = 9;
 
-    protected final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
+    protected final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final EffectsParam effectsParam = new EffectsParam("Effects");
 
     private final IntChoiceParam background = new IntChoiceParam("Background", new Item[]{
