@@ -801,7 +801,7 @@ public class WorkflowTest {
             .requireEnabled()
             .click();
         Utils.sleep(200, MILLISECONDS);
-        EDT.assertActiveToolIs(Tools.PEN);
+        EDT.assertActiveToolIs(Tools.NODE);
 
         keyboard.undoRedo("Convert Selection to Path");
     }
@@ -810,7 +810,7 @@ public class WorkflowTest {
         app.clickTool(Tools.BRUSH);
         pw.comboBox("typeCB").selectItem(brushType.toString());
 
-        app.clickTool(Tools.PEN);
+        app.clickTool(Tools.NODE);
         pw.button("toSelectionButton").requireEnabled();
 
         pw.button("traceWithBrush")

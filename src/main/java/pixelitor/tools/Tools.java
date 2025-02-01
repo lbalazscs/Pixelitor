@@ -27,7 +27,10 @@ import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.move.MoveTool;
+import pixelitor.tools.pen.NodeTool;
+import pixelitor.tools.pen.PathTool;
 import pixelitor.tools.pen.PenTool;
+import pixelitor.tools.pen.TransformPathTool;
 import pixelitor.tools.selection.LassoSelectionTool;
 import pixelitor.tools.selection.MagicWandSelectionTool;
 import pixelitor.tools.selection.MarqueeSelectionTool;
@@ -64,7 +67,11 @@ public class Tools {
     public static final GradientTool GRADIENT = new GradientTool();
     public static final PaintBucketTool PAINT_BUCKET = new PaintBucketTool();
     public static final ColorPickerTool COLOR_PICKER = new ColorPickerTool();
+
     public static final PenTool PEN = new PenTool();
+    public static final NodeTool NODE = new NodeTool();
+    public static final TransformPathTool TRANSFORM_PATH = new TransformPathTool();
+
     public static final ShapesTool SHAPES = new ShapesTool();
     public static final HandTool HAND = new HandTool();
     public static final ZoomTool ZOOM = new ZoomTool();
@@ -75,7 +82,8 @@ public class Tools {
         POLY_SELECTION, MAGIC_SELECTION,
         BRUSH, CLONE, ERASER,
         SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
-        PEN, SHAPES, HAND, ZOOM};
+        PEN, NODE, TRANSFORM_PATH,
+        SHAPES, HAND, ZOOM};
 
     public static Tool activeTool;
 
@@ -147,6 +155,10 @@ public class Tools {
         return activeTool == t;
     }
 
+    public static boolean activeIsPathTool() {
+        return activeTool instanceof PathTool;
+    }
+
     public static boolean isShapesDrawing() {
         return activeTool == SHAPES && SHAPES.shouldDrawOverLayer();
     }
@@ -180,6 +192,8 @@ public class Tools {
     }
 
     public static void compReplaced(Composition newComp, boolean reloaded) {
+        assert newComp.isActive();
+
         activeTool.compReplaced(newComp, reloaded);
     }
 

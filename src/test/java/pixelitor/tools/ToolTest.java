@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,6 @@ import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
-import pixelitor.tools.pen.PenTool;
 import pixelitor.utils.Texts;
 import pixelitor.utils.input.*;
 
@@ -101,7 +100,6 @@ public class ToolTest {
 
     @Before
     public void beforeEachTest() {
-        PenTool.path = null;
         Composition comp = TestHelper.createComp("ToolTest", 2, true);
         view = comp.getView();
         Tools.setActiveTool(tool);

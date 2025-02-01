@@ -27,7 +27,7 @@ import pixelitor.gui.utils.NamedAction;
 import pixelitor.layers.*;
 import pixelitor.selection.Selection;
 import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.PenTool;
+import pixelitor.tools.pen.PathTool;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.tools.selection.AbstractSelectionTool;
 import pixelitor.tools.transform.TransformBox;
@@ -65,8 +65,8 @@ public class PixelitorAssertions extends Assertions {
         return new PathAssert(actual);
     }
 
-    public static PenToolAssert assertThat(PenTool actual) {
-        return new PenToolAssert(actual);
+    public static PathToolAssert assertThat(PathTool actual) {
+        return new PathToolAssert(actual);
     }
 
     public static SelectionToolAssert assertThat(AbstractSelectionTool actual) {

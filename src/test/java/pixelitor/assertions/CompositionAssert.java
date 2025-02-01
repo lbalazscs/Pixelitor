@@ -23,6 +23,7 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerUI;
+import pixelitor.tools.pen.Path;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
@@ -339,6 +340,22 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         isNotNull();
 
         assertThat(actual.getActivePath()).isNotNull();
+
+        return this;
+    }
+
+    public CompositionAssert hasNoPath() {
+        isNotNull();
+
+        assertThat(actual.getActivePath()).isNull();
+
+        return this;
+    }
+
+    public CompositionAssert activePathIs(Path expected) {
+        isNotNull();
+
+        assertThat(actual.getActivePath()).isSameAs(expected);
 
         return this;
     }

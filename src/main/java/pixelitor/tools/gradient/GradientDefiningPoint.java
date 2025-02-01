@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,12 +50,12 @@ public class GradientDefiningPoint extends DraggablePoint {
     }
 
     @Override
-    public void setLocation(double x, double y) {
-        super.setLocation(x, y);
+    public void setLocation(double coX, double coY) {
+        super.setLocation(coX, coY);
 
         // also move the center point
-        double cx = (x + other.x) / 2.0;
-        double cy = (y + other.y) / 2.0;
+        double cx = (coX + other.x) / 2.0;
+        double cy = (coY + other.y) / 2.0;
         center.setLocationOnlyForThis(cx, cy);
     }
 

@@ -66,6 +66,7 @@ public class ToolsPanel extends JPanel {
         // manually register the hotkeys of the sharing tools
         setupSharedHotkey(Tools.RECTANGLE_SELECTION, Tools.ELLIPSE_SELECTION);
         setupSharedHotkey(Tools.LASSO_SELECTION, Tools.POLY_SELECTION);
+        setupSharedHotkey(Tools.PEN, Tools.NODE, Tools.TRANSFORM_PATH);
     }
 
     private void addColorSelector(PixelitorWindow pw) {

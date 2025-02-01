@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,8 +41,8 @@ import static java.lang.String.format;
  *
  * The x, y coordinates will be integers most of the time as they
  * originate from mouse events, but sometimes they can be
- * fractional values, for example when paths are created from selections
- * or when shape handles are rotated.
+ * fractional values, for example when paths are created from
+ * selections or when transform box handles are rotated.
  */
 public class DraggablePoint extends Point2D.Double {
     @Serial
@@ -88,11 +88,11 @@ public class DraggablePoint extends Point2D.Double {
     // a transform box is created to serve as reference points
     private Point2D imTransformRefPoint;
 
-    public DraggablePoint(String name, PPoint p, View view) {
+    public DraggablePoint(String name, PPoint pos, View view) {
         this.view = view;
         this.name = name;
 
-        setLocationOnlyForThis(p);
+        setLocationOnlyForThis(pos);
     }
 
     public void copyPositionFrom(DraggablePoint that) {
@@ -106,8 +106,8 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     @Override
-    public void setLocation(double x, double y) {
-        setLocationOnlyForThis(x, y);
+    public void setLocation(double coX, double coY) {
+        setLocationOnlyForThis(coX, coY);
     }
 
     /**
@@ -143,6 +143,9 @@ public class DraggablePoint extends Point2D.Double {
         setLocationOnlyForThis(p.getX(), p.getY());
     }
 
+    /**
+     * Sets the location based on image space coordinates.
+     */
     public void setImLocationOnlyForThis(Point2D p) {
         imX = p.getX();
         imY = p.getY();
@@ -171,14 +174,17 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     /**
-     * This implementation constrains it relative to its former position.
-     * Subclasses can choose a different pivot point by overriding this method.
+     * Sets a new location, constrained to the angle from the starting point.
+     * Subclasses can use a different pivot point by overriding this method.
      */
     public void setConstrainedLocation(double mouseX, double mouseY) {
         Point2D p = Utils.constrainToNearestAngle(dragStartX, dragStartY, mouseX, mouseY);
         setLocation(p.getX(), p.getY());
     }
 
+    /**
+     * Translates the point by the given deltas.
+     */
     public void translate(double dx, double dy) {
         setLocation(x + dx, y + dy);
     }
@@ -195,7 +201,7 @@ public class DraggablePoint extends Point2D.Double {
 
     /**
      * Stores the current location as a reference point
-     * for future affine transformations
+     * for future affine transformations.
      */
     public void saveImTransformRefPoint() {
         imTransformRefPoint = getImLocationCopy();
@@ -232,6 +238,9 @@ public class DraggablePoint extends Point2D.Double {
         setLocationOnlyForThis(transformed);
     }
 
+    /**
+     * Updates the shapes used for drawing the handle.
+     */
     private void updateShapes() {
         double shapeStartX = x - HANDLE_RADIUS;
         double shapeStartY = y - HANDLE_RADIUS;
@@ -265,11 +274,14 @@ public class DraggablePoint extends Point2D.Double {
             : DEFAULT_HANDLE_COLOR);
     }
 
-    public boolean handleContains(double x, double y) {
-        return x > this.x - HANDLE_RADIUS
-            && x < this.x + HANDLE_RADIUS
-            && y > this.y - HANDLE_RADIUS
-            && y < this.y + HANDLE_RADIUS;
+    /**
+     * Checks if the given component-space coordinates are within the handle's bounds.
+     */
+    public boolean contains(double coX, double coY) {
+        return coX > this.x - HANDLE_RADIUS
+            && coX < this.x + HANDLE_RADIUS
+            && coY > this.y - HANDLE_RADIUS
+            && coY < this.y + HANDLE_RADIUS;
     }
 
     public void mousePressed(double x, double y) {
@@ -319,6 +331,9 @@ public class DraggablePoint extends Point2D.Double {
         translate(key.getDeltaX(), key.getDeltaY());
     }
 
+    /**
+     * Activates or deactivates this point.
+     */
     public void setActive(boolean activate) {
         if (activate) {
             activePoint = this;
@@ -328,6 +343,9 @@ public class DraggablePoint extends Point2D.Double {
         }
     }
 
+    /**
+     * Checks if this point is currently active.
+     */
     public boolean isActive() {
         return this == activePoint;
     }
@@ -338,30 +356,31 @@ public class DraggablePoint extends Point2D.Double {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof DraggablePoint that)) {
-            return false;
-        }
-        return sameImPositionAs(that, 1.0);
-    }
-
-    public boolean sameImPositionAs(DraggablePoint that, double epsilon) {
+    /**
+     * Checks if this point has the same image-space position as another {@link DraggablePoint}.
+     */
+    public boolean hasSameImPosAs(DraggablePoint that, double epsilon) {
         return Math.abs(imX - that.imX) < epsilon
             && Math.abs(imY - that.imY) < epsilon;
     }
 
+    /**
+     * Creates a copy of the component-space location.
+     */
     public Point2D getCoLocationCopy() {
         return new Point2D.Double(x, y);
     }
 
+    /**
+     * Creates a copy of the image-space location.
+     */
     public Point2D getImLocationCopy() {
         return new Point2D.Double(imX, imY);
     }
 
+    /**
+     * Returns a copy of the location as a {@link PPoint}.
+     */
     public PPoint getLocationCopy() {
         return new PPoint(x, y, imX, imY, view);
     }
@@ -380,7 +399,10 @@ public class DraggablePoint extends Point2D.Double {
         return p;
     }
 
-    // this is supposed to be called after a mouse released event
+    /**
+     * Creates an undoable edit for the move, if the point has actually moved.
+     * This is supposed to be called after a mouse released event.
+     */
     public Optional<HandleMovedEdit> createMovedEdit(Composition comp) {
         if (x == origX && y == origY) {
             return Optional.empty();
@@ -419,31 +441,33 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DraggablePoint that)) {
+            return false;
+        }
+        return hasSameImPosAs(that, 1.0);
+    }
+
+    @Override
     public int hashCode() {
         return (int) (31 * x + y);
     }
 
-    public String toColoredString() {
-        return format("\u001B[32m%s\u001B[0m " +
-                "{x = \u001B[33m%.2f\u001B[0m, " +
-                "y = \u001B[33m%.2f\u001B[0m}" +
-                "{imX = \u001B[36m%.1f\u001B[0m, " +
-                "imY = \u001B[36m%.1f\u001B[0m}",
-            name, x, y, imX, imY);
-    }
-
-    private String toCoordsString() {
-        return format("co: (%.1f, %.1f) im:(%.1f, %.1f)", x, y, imX, imY);
-    }
-
     @Override
     public String toString() {
-        return format("%s {%s}", name, toCoordsString());
+        return format("%s {co: (%.1f, %.1f) im:(%.1f, %.1f)}", name, x, y, imX, imY);
     }
 
     public DebugNode createDebugNode() {
         var node = new DebugNode(name, this);
-        node.addString("coords", toCoordsString());
+        node.addDouble("co X", x);
+        node.addDouble("co Y", y);
+        node.addDouble("im X", imX);
+        node.addDouble("im Y", imY);
+
         if (imTransformRefPoint != null) {
             node.addDouble("ref X", imTransformRefPoint.getX());
             node.addDouble("ref Y", imTransformRefPoint.getY());

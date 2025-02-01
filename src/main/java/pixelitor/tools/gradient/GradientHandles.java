@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,14 +55,14 @@ public class GradientHandles implements ToolWidget, Debuggable {
     }
 
     @Override
-    public DraggablePoint findHandleAt(double x, double y) {
-        if (end.handleContains(x, y)) {
+    public DraggablePoint findHandleAt(double coX, double coY) {
+        if (end.contains(coX, coY)) {
             return end;
         }
-        if (start.handleContains(x, y)) {
+        if (start.contains(coX, coY)) {
             return start;
         }
-        if (middle.handleContains(x, y)) {
+        if (middle.contains(coX, coY)) {
             return middle;
         }
         return null;

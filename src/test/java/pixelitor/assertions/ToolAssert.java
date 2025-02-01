@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 
 /**
  * Custom AssertJ assertions for instances of {@link Tool} subclasses.
@@ -34,7 +35,9 @@ public class ToolAssert<S extends ToolAssert<S, T>, T extends Tool> extends Abst
         isNotNull();
 
         if (!actual.isActive()) {
-            throw new AssertionError("is not active");
+            throw new AssertionError(actual.getName()
+                + " is not active. The active tool is "
+                + Tools.getActive().getName() + ".");
         }
 
         return myself;

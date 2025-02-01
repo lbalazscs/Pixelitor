@@ -43,7 +43,7 @@ public class MovingPoint extends DraggablePoint {
 
     @Override
     public void paintHandle(Graphics2D g) {
-        throw new UnsupportedOperationException("should not be painted");
+        throw new IllegalStateException("should not be painted");
     }
 
     @Override

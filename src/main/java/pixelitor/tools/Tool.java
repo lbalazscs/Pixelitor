@@ -56,7 +56,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     private final String name;
     private final String shortName;
     private final String toolMessage;
-    private final char hotKey;
+    private final char hotkey;
     private final Cursor cursor;
 
     // a chain of handlers that can intercept
@@ -74,9 +74,9 @@ public abstract class Tool implements PresetOwner, Debuggable {
     // The actual snapping also depends on the Preferences setting.
     protected boolean pixelSnapping = false;
 
-    protected Tool(String name, char hotKey, String toolMessage, Cursor cursor) {
-        this.hotKey = hotKey;
-        assert Character.isUpperCase(hotKey);
+    protected Tool(String name, char hotkey, String toolMessage, Cursor cursor) {
+        this.hotkey = hotkey;
+        assert Character.isUpperCase(hotkey);
 
         this.shortName = name;
         this.name = name + " Tool";
@@ -117,6 +117,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
             toolButton.setSelected(true);
             toolButton.requestFocus();
         } else {
+            // if there is no GUI, then start the tool explicitly
             assert AppMode.isUnitTesting();
             Tools.start(this);
         }
@@ -227,14 +228,16 @@ public abstract class Tool implements PresetOwner, Debuggable {
         reset();
     }
 
-    public void viewActivated(View oldCV, View newCV) {
+    public void viewActivated(View oldView, View newView) {
         assert Tools.activeTool == this;
-        if (oldCV != null) {
-            oldCV.repaint();
+        if (oldView != null) {
+            oldView.repaint();
             reset();
         }
     }
 
+    // Called when a composition is replaced in the active view, but
+    // not when a composition is activated because of a new active view.
     public void compReplaced(Composition newComp, boolean reloaded) {
         // empty by default
     }
@@ -346,7 +349,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     public char getHotkey() {
-        return hotKey;
+        return hotkey;
     }
 
     /**
@@ -400,9 +403,13 @@ public abstract class Tool implements PresetOwner, Debuggable {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        DebugNode toolNode = new DebugNode(key, this);
-        toolNode.addString("name", getName());
-        return toolNode;
+        DebugNode node = new DebugNode(key, this);
+
+        node.addString("name", getName());
+        node.addBoolean("altDown", altDown);
+        node.addBoolean("pixelSnapping", pixelSnapping);
+
+        return node;
     }
 
     @Override

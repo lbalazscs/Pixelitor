@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,10 @@
 package pixelitor.utils.debug;
 
 import pixelitor.colors.Colors;
+import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.utils.Utils;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.awt.Color;
@@ -36,6 +39,20 @@ public class DebugNode extends DefaultMutableTreeNode {
     public DebugNode(String name, Object userObject) {
         super(userObject);
         this.name = name;
+    }
+
+    public void showInDialog(String title) {
+        JTree tree = new JTree(this);
+        new DialogBuilder()
+            .title(title)
+            .content(new JScrollPane(tree))
+            .okText("Copy")
+            .cancelText("Close")
+            .validator(d -> {
+                Utils.copyStringToClipboard(toJSON());
+                return false; // prevents the dialog from closing
+            })
+            .show();
     }
 
     @Override

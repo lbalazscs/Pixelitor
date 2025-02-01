@@ -101,9 +101,9 @@ public abstract class AbstractBrushTool extends Tool {
     private final BrushOutlinePainter brushPainter = new BrushOutlinePainter(DEFAULT_BRUSH_RADIUS);
     private boolean brushPainted = false;
 
-    AbstractBrushTool(String name, char hotKey, String toolMessage,
+    AbstractBrushTool(String name, char hotkey, String toolMessage,
                       Cursor cursor, boolean supportsSymmetry) {
-        super(name, hotKey, toolMessage, cursor);
+        super(name, hotkey, toolMessage, cursor);
         this.supportsSymmetry = supportsSymmetry;
         if (supportsSymmetry) {
             symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
@@ -474,18 +474,18 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void viewActivated(View oldCV, View newCV) {
+    public void viewActivated(View oldView, View newView) {
         reset();
-        brushPainter.setView(newCV);
+        brushPainter.setView(newView);
 
         // get rid of the outline on the old view
         // (important in "Internal Windows" mode)
-        if (oldCV != null) {
-            oldCV.repaint();
+        if (oldView != null) {
+            oldView.repaint();
         }
 
         // make sure that the mouse coordinates are correct relative to the new view
-        paintOutlineOnChangedView(newCV);
+        paintOutlineOnChangedView(newView);
     }
 
     @Override

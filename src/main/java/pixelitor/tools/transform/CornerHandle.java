@@ -85,11 +85,11 @@ public class CornerHandle extends PositionHandle {
     }
 
     @Override
-    public void setLocation(double x, double y) {
+    public void setLocation(double coX, double coY) {
         // This method doesn't move the related points because when
         // the point is transformed with a rotation transform,
         // AffineTransform.transform calls it, and expects the simple behavior.
-        super.setLocation(x, y);
+        super.setLocation(coX, coY);
     }
 
     @Override

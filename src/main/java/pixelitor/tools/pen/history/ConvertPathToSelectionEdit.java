@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.PenToolMode;
+import pixelitor.tools.pen.PathTool;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -29,16 +29,16 @@ import javax.swing.undo.CannotUndoException;
 public class ConvertPathToSelectionEdit extends PixelitorEdit {
     private final Path path;
     private final PixelitorEdit selectionEdit;
-    private final PenToolMode mode;
+    private final PathTool tool;
 
     public ConvertPathToSelectionEdit(Composition comp,
                                       Path path,
                                       PixelitorEdit selectionEdit,
-                                      PenToolMode mode) {
+                                      PathTool tool) {
         super("Convert Path to Selection", comp);
         this.path = path;
         this.selectionEdit = selectionEdit;
-        this.mode = mode;
+        this.tool = tool;
     }
 
     @Override
@@ -46,11 +46,9 @@ public class ConvertPathToSelectionEdit extends PixelitorEdit {
         super.undo();
 
         selectionEdit.undo();
-        comp.setActivePath(path);
 
-        Tools.PEN.setPath(path);
-        Tools.PEN.setModeInUI(mode);
-        Tools.PEN.activate();
+        comp.setActivePath(path);
+        tool.activate();
     }
 
     @Override
@@ -60,7 +58,7 @@ public class ConvertPathToSelectionEdit extends PixelitorEdit {
         selectionEdit.redo();
 
         comp.setActivePath(null);
-        Tools.PEN.reset();
+        tool.reset();
         Tools.LASSO_SELECTION.activate();
     }
 }

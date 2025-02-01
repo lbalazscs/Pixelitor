@@ -38,11 +38,13 @@ public class TilesFilter extends RotatedEffectFilter {
     }
 
     public void setSizeX(double size) {
-        sizeX = Math.PI / size;
+        // for some reason the effect looks nice only
+        // with the reduced double => float precision
+        sizeX = (float) (Math.PI / size);
     }
 
     public void setSizeY(double size) {
-        sizeY = Math.PI / size;
+        sizeY = (float) (Math.PI / size);
     }
 
     public void setCurvatureX(double curvature) {

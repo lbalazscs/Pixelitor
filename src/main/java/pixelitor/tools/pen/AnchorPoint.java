@@ -26,7 +26,7 @@ import pixelitor.tools.pen.history.SubPathEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.debug.Ansi;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
@@ -49,7 +49,7 @@ public class AnchorPoint extends DraggablePoint {
 
     private static final double SYMMETRY_THRESHOLD = 2.0;
     private static final double COLLINEARITY_THRESHOLD = 0.1;
-    private static final double RETRACTION_TOLERANCE = 1.0;
+    public static final double RETRACTION_TOLERANCE = 1.0;
 
     // an anchor point has two associated control points that define
     // the curvature of the path segments connected to this point
@@ -69,13 +69,13 @@ public class AnchorPoint extends DraggablePoint {
         this(new PPoint(coX, coY, view), view, subPath);
     }
 
-    public AnchorPoint(PPoint p, View view, SubPath subPath) {
-        super("AP" + idCounter++, p, view);
+    public AnchorPoint(PPoint pos, View view, SubPath subPath) {
+        super("AP" + idCounter++, pos, view);
 
         this.subPath = subPath;
 
-        ctrlIn = new ControlPoint("ctrlIn", p, view, this);
-        ctrlOut = new ControlPoint("ctrlOut", p, view, this);
+        ctrlIn = new ControlPoint("ctrlIn", pos, view, this);
+        ctrlOut = new ControlPoint("ctrlOut", pos, view, this);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
     }
@@ -103,10 +103,10 @@ public class AnchorPoint extends DraggablePoint {
 
         // paint non-active handles first
         if (paintIn && !ctrlIn.isRetracted()) {
-            paintControlPoint(ctrlIn, ctrlInActive, g);
+            paintControl(ctrlIn, ctrlInActive, g);
         }
         if (paintOut && !ctrlOut.isRetracted()) {
-            paintControlPoint(ctrlOut, ctrlOutActive, g);
+            paintControl(ctrlOut, ctrlOutActive, g);
         }
 
         paintHandle(g);
@@ -120,9 +120,9 @@ public class AnchorPoint extends DraggablePoint {
         }
     }
 
-    private void paintControlPoint(ControlPoint controlPoint,
-                                   boolean ctrlActive,
-                                   Graphics2D g) {
+    private void paintControl(ControlPoint controlPoint,
+                              boolean ctrlActive,
+                              Graphics2D g) {
         Shapes.drawVisibly(g, new Line2D.Double(x, y, controlPoint.x, controlPoint.y));
         if (!ctrlActive) {
             controlPoint.paintHandle(g);
@@ -130,11 +130,11 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     @Override
-    public void setLocation(double x, double y) {
-        double dx = x - this.x;
-        double dy = y - this.y;
+    public void setLocation(double coX, double coY) {
+        double dx = coX - this.x;
+        double dy = coY - this.y;
 
-        super.setLocation(x, y);
+        super.setLocation(coX, coY);
 
         // move the control points along with the anchor
         ctrlOut.translateOnlyThis(dx, dy);
@@ -176,13 +176,13 @@ public class AnchorPoint extends DraggablePoint {
     // checks the control handles first, so that
     // retracted handles can be dragged out with Alt-drag
     private DraggablePoint findControlHandleFirst(double x, double y) {
-        if (ctrlOut.handleContains(x, y)) {
+        if (ctrlOut.contains(x, y)) {
             return ctrlOut;
         }
-        if (ctrlIn.handleContains(x, y)) {
+        if (ctrlIn.contains(x, y)) {
             return ctrlIn;
         }
-        if (handleContains(x, y)) {
+        if (contains(x, y)) {
             return this;
         }
         return null;
@@ -190,13 +190,13 @@ public class AnchorPoint extends DraggablePoint {
 
     // checks the anchor handle first
     private DraggablePoint findAnchorHandleFirst(double x, double y) {
-        if (handleContains(x, y)) {
+        if (contains(x, y)) {
             return this;
         }
-        if (ctrlOut.handleContains(x, y)) {
+        if (ctrlOut.contains(x, y)) {
             return ctrlOut;
         }
-        if (ctrlIn.handleContains(x, y)) {
+        if (ctrlIn.contains(x, y)) {
             return ctrlIn;
         }
         return null;
@@ -207,7 +207,14 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public void setType(AnchorPointType type) {
+        if (this.type == type) {
+            return;
+        }
         this.type = type;
+        if (type == SMOOTH) {
+            ctrlIn.rememberDistFromAnchor();
+            ctrlOut.rememberDistFromAnchor();
+        }
     }
 
     public void changeTypeFromSymToSmooth() {
@@ -266,7 +273,7 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.add(new TaskAction("Retract Handles", this::retractHandles));
 
-        String flipName = subPath.getPath().getNumSubpaths() == 1
+        String flipName = subPath.isSingle()
             ? "Flip Path Direction"
             : "Flip Subpath Direction";
         popup.add(new TaskAction(flipName, () -> subPath.flipDirection(flipName)));
@@ -274,7 +281,10 @@ public class AnchorPoint extends DraggablePoint {
         popup.addSeparator();
 
         if (AppMode.isDevelopment()) {
-            popup.add(new TaskAction("Dump", this::dump));
+            popup.add(new TaskAction("Debug Anchor", this::showDebugDialog));
+            popup.add(new TaskAction("Debug Subpath", subPath::showDebugDialog));
+            popup.add(new TaskAction("Debug Path", () -> subPath.getPath().showDebugDialog()));
+            popup.addSeparator();
         }
 
         boolean singleSubPath = subPath.isSingle();
@@ -328,13 +338,13 @@ public class AnchorPoint extends DraggablePoint {
 
     public void delete() {
         SubPath backup = subPath.deepCopy(subPath.getPath(), view.getComp());
-        subPath.deletePoint(this);
+        subPath.deleteAnchor(this);
         History.add(new SubPathEdit(
             "Delete Anchor Point", backup, subPath));
         view.repaint();
     }
 
-    public boolean isRecentlyEdited() {
+    public boolean wasRecentlyEdited() {
         return this == recentlyEditedPoint;
     }
 
@@ -355,10 +365,38 @@ public class AnchorPoint extends DraggablePoint {
         return "Move Anchor Point";
     }
 
-    public void dump() {
-        System.out.println(Ansi.red(getType()));
-        System.out.println("    " + toColoredString());
-        System.out.println("    " + ctrlIn.toColoredString());
-        System.out.println("    " + ctrlOut.toColoredString());
+    void checkInvariants() {
+        if (ctrlIn.getAnchor() != this) {
+            throw new IllegalStateException("ctrlIn problem in " + name);
+        }
+        if (ctrlIn.getSibling() != ctrlOut) {
+            throw new IllegalStateException("ctrlIn problem in " + name);
+        }
+        if (ctrlOut.getAnchor() != this) {
+            throw new IllegalStateException("ctrlOut problem in " + name);
+        }
+        if (ctrlOut.getSibling() != ctrlIn) {
+            throw new IllegalStateException("ctrlOut problem in " + name);
+        }
+        if (ctrlIn == ctrlOut) {
+            throw new IllegalStateException("same controls in " + name);
+        }
+    }
+
+    private void showDebugDialog() {
+        createDebugNode().showInDialog("Anchor Point " + name);
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.addString("type", type.toString());
+        node.addBoolean("recently edited", wasRecentlyEdited());
+
+        node.add(ctrlIn.createDebugNode());
+        node.add(ctrlOut.createDebugNode());
+
+        return node;
     }
 }

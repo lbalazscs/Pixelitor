@@ -21,9 +21,11 @@ import pixelitor.Composition;
 import pixelitor.history.HandleMovedEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.TextLayer;
+import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.PenToolMode;
+import pixelitor.tools.pen.PathActions;
+import pixelitor.tools.pen.PathTool;
 import pixelitor.tools.transform.history.TransformBoxChangedEdit;
 
 import javax.swing.undo.CannotRedoException;
@@ -41,14 +43,14 @@ import java.util.List;
 public class PathEdit extends PixelitorEdit {
     private final Path before;
     private final Path after;
-    private final PenToolMode modeBefore;
+    private final PathTool toolBefore;
     private final List<TextLayer> formerUsers;
 
-    public PathEdit(String name, Composition comp, Path before, Path after) {
+    public PathEdit(String name, Composition comp, Path before, Path after, PathTool tool) {
         super(name, comp);
         this.before = before;
         this.after = after;
-        modeBefore = Tools.PEN.getMode();
+        this.toolBefore = tool;
 
         formerUsers = new ArrayList<>();
         comp.forEachNestedLayer(TextLayer.class, textLayer -> {
@@ -87,21 +89,22 @@ public class PathEdit extends PixelitorEdit {
     private void setPath(Path newPath) {
         comp.setActivePath(newPath);
 
-        if (Tools.PEN.isActive()) {
+        Tool activeTool = Tools.getActive();
+        if (activeTool instanceof PathTool activePathTool) {
+            Tools.PEN.setPath(newPath);
             if (newPath == null) {
-                Tools.PEN.removePath();
-            } else {
-                Tools.PEN.setPath(newPath);
-                if (Tools.PEN.modeIsNot(modeBefore)) {
-                    // if the new path is not null, return
-                    // to the mode before the edit
-                    Tools.PEN.activateMode(modeBefore, false);
-                }
+                Tools.PEN.activate();
+            }
+            PathActions.setActionsEnabled(newPath != null);
+
+            if (toolBefore != null && activePathTool != toolBefore) {
+                // return to the tool before the edit
+                toolBefore.activate();
             }
         }
     }
 
-    // whether this edit represents a path deletion event
+    // whether this edit represents a path deletion
     private boolean isPathDeletion() {
         return after == null;
     }

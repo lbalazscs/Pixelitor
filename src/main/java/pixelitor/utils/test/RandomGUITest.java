@@ -45,7 +45,7 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
-import pixelitor.tools.pen.PenTool;
+import pixelitor.tools.pen.PathActions;
 import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.input.Alt;
@@ -774,19 +774,19 @@ public class RandomGUITest {
 
     private void traceWithCurrentBrush() {
         if (canTrace()) {
-            runAction(PenTool.getTraceWithBrushAction());
+            runAction(PathActions.traceWithBrushAction);
         }
     }
 
     private void traceWithCurrentEraser() {
         if (canTrace()) {
-            runAction(PenTool.getTraceWithEraserAction());
+            runAction(PathActions.traceWithEraserAction);
         }
     }
 
     private void traceWithCurrentSmudge() {
         if (canTrace()) {
-            runAction(PenTool.getTraceWithSmudgeAction());
+            runAction(PathActions.traceWithSmudgeAction);
         }
     }
 

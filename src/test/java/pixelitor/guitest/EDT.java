@@ -35,8 +35,7 @@ import pixelitor.tools.DragToolState;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.PathTransformer;
-import pixelitor.tools.pen.PenTool;
+import pixelitor.tools.pen.TransformPathTool;
 import pixelitor.tools.selection.AbstractSelectionTool;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
@@ -118,18 +117,18 @@ public class EDT {
     public static void assertActiveToolIs(Tool expected) {
         Tool actual = call(Tools::getActive);
         if (actual != expected) {
-            throw new AssertionError("Expected " + expected + ", found " + actual);
+            throw new AssertionError("Expected " + expected + ", found " + actual + ".");
         }
     }
 
-    public static Path getPenToolPath() {
-        return call(() -> PenTool.path);
+    public static Path getActivePath() {
+        return active(Composition::getActivePath);
     }
 
     public static Point getPenToolBoxPos(int boxIndex,
                                          Function<TransformBox, DraggablePoint> pointFun) {
         return call(() -> {
-            PathTransformer mode = (PathTransformer) Tools.PEN.getMode();
+            TransformPathTool mode = Tools.TRANSFORM_PATH;
             TransformBox box = mode.getBox(boxIndex);
             return pointFun.apply(box).getScreenCoords();
         });

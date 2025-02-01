@@ -245,7 +245,7 @@ public class GradientTool extends DragTool {
             double x = e.getCoX();
             double y = e.getCoY();
             activePoint.mouseReleased(x, y, e.isShiftDown());
-            if (!activePoint.handleContains(x, y)) {
+            if (!activePoint.contains(x, y)) {
                 // we can get here if the handle has a
                 // constrained position
                 activePoint = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools.pen;
 
 import org.junit.jupiter.api.*;
+import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -37,14 +38,15 @@ import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
-import static pixelitor.tools.pen.PenToolMode.BUILD;
 
 @DisplayName("Pen Tool/PathBuilder tests")
 @TestMethodOrder(MethodOrderer.Random.class)
 class PathBuilderTest {
     private View view;
+    private Composition comp;
+
     private Graphics2D g;
-    private PathBuilder pb;
+    private PenTool pb;
 
     enum CtrlOrAlt {CTRL, ALT}
 
@@ -58,21 +60,20 @@ class PathBuilderTest {
     void beforeEachTest() {
         // A real composition that can store paths.
         // The layer type doesn't matter.
-        var comp = TestHelper.createRealComp("PathBuilderTest", ColorFillLayer.class);
+        comp = TestHelper.createRealComp("PathBuilderTest", ColorFillLayer.class);
 
         view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);
-        pb = BUILD;
+
+        Tools.PEN.setPath(null); // TODO should be reset?
+        pb = Tools.PEN;
 
         // reset the state between the tests
         Tools.PEN.removePath();
         History.clear();
 
-        assertThat(Tools.PEN)
-            .isActive()
-            .isConsistent()
-            .hasNoPath()
-            .modeIs(BUILD);
+        assertThat(Tools.PEN).isActive();
+        assertThat(comp).hasNoPath();
     }
 
     @Test
@@ -115,31 +116,27 @@ class PathBuilderTest {
     @DisplayName("undo after mouse press")
     void undoAfterMousePressed() {
         press(100, 100, DRAGGING_LAST_CONTROL);
-        Path path = PenTool.path;
+        Path path = comp.getActivePath();
         assertThat(path.getActiveSubpath()).numAnchorsIs(1);
 
         undo("Subpath Start", null);
-        assertThat(Tools.PEN).hasNoPath();
+        assertThat(comp).hasNoPath();
 
         drag(110, 100, null);
 
         // dragging state because the mouse is down
         redo("Subpath Start", DRAGGING_LAST_CONTROL);
-        assertThat(Tools.PEN)
-            .pathIs(path)
-            .isConsistent();
+        assertThat(comp).activePathIs(path);
 
         undo("Subpath Start", null);
-        assertThat(Tools.PEN).hasNoPath();
+        assertThat(comp).hasNoPath();
 
         // the difference is that this time the mouse is released after the undo
         release(100, 100, null);
 
         // moving state because the mouse is up
         redo("Subpath Start", MOVING_TO_NEXT_ANCHOR);
-        assertThat(Tools.PEN)
-            .pathIs(path)
-            .isConsistent();
+        assertThat(comp).activePathIs(path);
     }
 
     @Test
@@ -147,22 +144,20 @@ class PathBuilderTest {
     void undoAfterMouseClicked() {
         click(100, 100);
 
-        Path path = PenTool.path;
+        Path path = comp.getActivePath();
         assertThat(path.getActiveSubpath()).numAnchorsIs(1);
 
         undo("Subpath Start", null);
-        assertThat(Tools.PEN).hasNoPath();
+        assertThat(comp).hasNoPath();
 
         move(110, 100, null);
 
         // moving state because the mouse is up
         redo("Subpath Start", MOVING_TO_NEXT_ANCHOR);
-        assertThat(Tools.PEN)
-            .pathIs(path)
-            .isConsistent();
+        assertThat(comp).activePathIs(path);
 
         undo("Subpath Start", null);
-        assertThat(Tools.PEN).hasNoPath();
+        assertThat(comp).hasNoPath();
 
         // a mouse press would start a new path
     }
@@ -180,7 +175,7 @@ class PathBuilderTest {
         // press at the first anchor point
         press(p1x, p1y, DRAGGING_LAST_CONTROL);
 
-        Path path = PenTool.path;
+        Path path = comp.getActivePath();
         assertThat(path).isNotNull();
 
         SubPath subpath = path.getActiveSubpath();
@@ -264,7 +259,7 @@ class PathBuilderTest {
     void breakingOldHandlesWithAlt() {
         // add the first anchor point
         press(100, 100, DRAGGING_LAST_CONTROL);
-        Path path = PenTool.path;
+        Path path = comp.getActivePath();
         SubPath subpath = path.getActiveSubpath();
         assertThat(subpath).numAnchorsIs(1);
         AnchorPoint firstAnchor = subpath.getAnchor(0);
@@ -343,11 +338,12 @@ class PathBuilderTest {
         click(100, 100);
         shiftClick(300, 110);
 
-        assertThat(PenTool.path)
+        Path path = comp.getActivePath();
+        assertThat(path)
             .isNotNull()
             .numSubPathsIs(1)
             .isConsistent();
-        SubPath subpath = PenTool.path.getActiveSubpath();
+        SubPath subpath = path.getActiveSubpath();
         assertThat(subpath)
             .isNotFinished()
             .numAnchorsIs(2);
@@ -378,11 +374,11 @@ class PathBuilderTest {
         // Start a new subpath with shift-click.
         // As this is the first point on the subpath, it should not be constrained.
         shiftClick(511, 111);
-        assertThat(PenTool.path)
+        assertThat(path)
             .isNotNull()
             .numSubPathsIs(2)
             .isConsistent();
-        SubPath newSubPath = PenTool.path.getActiveSubpath();
+        SubPath newSubPath = path.getActiveSubpath();
         assertThat(newSubPath)
             .isNotFinished()
             .numAnchorsIs(1)
@@ -403,11 +399,12 @@ class PathBuilderTest {
         shiftRelease(350, 318, MOVING_TO_NEXT_ANCHOR);
 
         // Check the results so far
-        assertThat(PenTool.path)
+        Path path = comp.getActivePath();
+        assertThat(path)
             .isNotNull()
             .numSubPathsIs(1)
             .isConsistent();
-        SubPath subpath = PenTool.path.getActiveSubpath();
+        SubPath subpath = path.getActiveSubpath();
         assertThat(subpath)
             .isNotFinished()
             .numAnchorsIs(1);
@@ -438,7 +435,8 @@ class PathBuilderTest {
         // even tough the last relative coordinates are not yet initialized
         shiftClick(456, 654);
 
-        assertThat(PenTool.path.getActiveSubpath())
+        Path path = comp.getActivePath();
+        assertThat(path.getActiveSubpath())
             .isNotFinished()
             .numAnchorsIs(1)
             .firstAnchorIsAt(456, 654);
@@ -447,7 +445,7 @@ class PathBuilderTest {
     private void testSpecialDragPrevious(CtrlOrAlt modifier) {
         // click to add the first anchor point
         click(100, 100);
-        Path path = PenTool.path;
+        Path path = comp.getActivePath();
         SubPath subpath = path.getActiveSubpath();
         assertThat(subpath).numAnchorsIs(1);
         AnchorPoint firstAnchor = subpath.getAnchor(0);
@@ -548,7 +546,7 @@ class PathBuilderTest {
     private SubPath build3PointSubPath(boolean closed, boolean curved, int startX, int startY) {
         // first anchor point
         press(startX, startY, DRAGGING_LAST_CONTROL);
-        Path path = PenTool.path;
+        Path path = comp.getActivePath();
         assertThat(path).isNotNull();
         SubPath subpath = path.getActiveSubpath();
         assertThat(subpath).numAnchorsIs(1);
@@ -725,7 +723,7 @@ class PathBuilderTest {
         undo("Subpath Start", null);
         assertThat(subPath)
             .numAnchorsIs(1); // the edit removes the entire subpath
-        assertThat(Tools.PEN).hasNoPath();
+        assertThat(comp).hasNoPath();
         move(4, 4, null);
 
         // now redo until everything is redone
@@ -829,15 +827,11 @@ class PathBuilderTest {
     private void undo(String edit, BuildState state) {
         History.undo(edit);
         checkState(state);
-
-        assert PenTool.checkPathConsistency();
     }
 
     private void redo(String edit, BuildState state) {
         History.redo(edit);
         checkState(state);
-
-        assert PenTool.checkPathConsistency();
     }
 
     private void press(int x, int y, BuildState state) {
@@ -861,7 +855,7 @@ class PathBuilderTest {
         // because the undo uses its "mouseDown" state
         modifiers.dispatchPressedEvent(x, y, view);
         checkState(state);
-        pb.paint(g);
+        pb.paintOverView(g, null);
     }
 
     private void click(int x, int y) {
@@ -899,7 +893,7 @@ class PathBuilderTest {
     private void drag(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchDraggedEvent(x, y, view);
         checkState(state);
-        pb.paint(g);
+        pb.paintOverView(g, null);
     }
 
     private void release(int x, int y, BuildState state) {
@@ -917,7 +911,7 @@ class PathBuilderTest {
     private void release(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchReleasedEvent(x, y, view);
         checkState(state);
-        pb.paint(g);
+        pb.paintOverView(g, null);
     }
 
     private void move(int x, int y, BuildState state) {
@@ -939,15 +933,16 @@ class PathBuilderTest {
     private void move(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchMoveEvent(x, y, view);
         checkState(state);
-        pb.paint(g);
+        pb.paintOverView(g, null);
     }
 
     @SuppressWarnings("MethodMayBeStatic")
     private void checkState(BuildState expected) {
+        Path path = comp.getActivePath();
         if (expected == null) {
-            assert PenTool.path == null;
+            assert path == null;
         } else {
-            PenTool.path.assertStateIs(expected);
+            path.assertStateIs(expected);
         }
     }
 }

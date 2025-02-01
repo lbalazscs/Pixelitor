@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class SubPathStartEdit extends PixelitorEdit {
         assert path != null;
 
         this.path = path;
-        wasFirstSP = path.getNumSubpaths() == 1;
+        wasFirstSP = path.getNumSubPaths() == 1;
         this.subPath = subPath;
     }
 
@@ -68,10 +68,8 @@ public class SubPathStartEdit extends PixelitorEdit {
         subPath.setFinished(false);
         path.setBuildingInProgressState();
         if (wasFirstSP) {
+            Tools.PEN.setPath(path);
             comp.setActivePath(path);
-            if (comp.isActive()) {
-                Tools.PEN.setPath(path);
-            }
         }
         comp.repaint();
     }

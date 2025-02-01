@@ -127,9 +127,9 @@ public class CropBox implements ToolWidget {
     }
 
     @Override
-    public CropHandle findHandleAt(double x, double y) {
+    public CropHandle findHandleAt(double coX, double coY) {
         for (CropHandle handle : handles) {
-            if (handle.handleContains(x, y)) {
+            if (handle.contains(coX, coY)) {
                 return handle;
             }
         }

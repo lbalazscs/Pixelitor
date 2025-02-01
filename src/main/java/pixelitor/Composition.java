@@ -67,7 +67,6 @@ import static java.lang.String.format;
 import static pixelitor.io.FileUtils.removeExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
-import static pixelitor.tools.pen.PenToolMode.EDIT;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
@@ -1787,15 +1786,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Creates a path from the given shape, sets it to active and starts editing it with the Pen Tool.
      */
-    public void createPathFromShape(Shape shape, boolean addToHistory, boolean startEditing) {
+    public void createPathFromShape(Shape shape, boolean addToHistory) {
         Path origActivePath = getActivePath();
         Path newPath = Shapes.shapeToPath(shape, getView());
         setActivePath(newPath);
-        Tools.PEN.setPath(newPath);
-        if (startEditing) {
-            Tools.PEN.activateMode(EDIT, false);
-        }
-        Tools.PEN.activate();
+        Tools.NODE.activate();
 
         if (addToHistory) {
             History.add(new ConvertSelectionToPathEdit(this, shape, origActivePath));

@@ -2090,8 +2090,6 @@ public class MainGuiTest {
     private void testPenTool() {
         log(1, "pen tool");
 
-        app.clickTool(Tools.PEN);
-
         testPenToolBuildMode();
         testPenToolEditMode();
         testPenToolTransformMode();
@@ -2100,7 +2098,7 @@ public class MainGuiTest {
     }
 
     private void testPenToolBuildMode() {
-        pw.comboBox("modeSelector").selectItem("Build");
+        app.clickTool(Tools.PEN);
 
         pw.button("toSelectionButton").requireDisabled();
 
@@ -2112,7 +2110,7 @@ public class MainGuiTest {
         mouse.moveToCanvas(200, 200);
         mouse.click();
 
-        assertThat(EDT.getPenToolPath())
+        assertThat(EDT.getActivePath())
             .isNotNull()
             .numSubPathsIs(1)
             .numAnchorsIs(2);
@@ -2121,7 +2119,7 @@ public class MainGuiTest {
         keyboard.undo("Add Anchor Point");
         keyboard.undo("Subpath Start");
 
-        assertThat(EDT.getPenToolPath())
+        assertThat(EDT.getActivePath())
             .isNull();
 
         keyboard.redo("Subpath Start");
@@ -2136,14 +2134,15 @@ public class MainGuiTest {
         mouse.clickCanvas(700, 200);
         mouse.ctrlClickCanvas(700, 150);
 
-        assertThat(EDT.getPenToolPath())
+        assertThat(EDT.getActivePath())
             .isNotNull()
             .numSubPathsIs(2)
             .numAnchorsIs(6);
     }
 
     private void testPenToolEditMode() {
-        pw.comboBox("modeSelector").selectItem("Edit");
+        app.clickTool(Tools.NODE);
+
         mouse.moveToCanvas(600, 300);
         mouse.dragToCanvas(500, 400);
         keyboard.undoRedo("Move Anchor Point");
@@ -2180,8 +2179,8 @@ public class MainGuiTest {
         pw.button("toPathButton")
             .requireEnabled()
             .click();
-        EDT.assertActiveToolIs(Tools.PEN);
-        assertThat(EDT.getPenToolPath()).isNotNull();
+        EDT.assertActiveToolIs(Tools.NODE);
+        assertThat(EDT.getActivePath()).isNotNull();
 
         pw.button("traceWithSmudge")
             .requireEnabled()
@@ -2200,7 +2199,7 @@ public class MainGuiTest {
     }
 
     private void testPenToolTransformMode() {
-        pw.comboBox("modeSelector").selectItem("Transform");
+        app.clickTool(Tools.TRANSFORM_PATH);
 
         Point nw = EDT.getPenToolBoxPos(0, TransformBox::getNW);
         mouse.moveToScreen(nw.x, nw.y);

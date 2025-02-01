@@ -385,9 +385,9 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     }
 
     @Override
-    public DraggablePoint findHandleAt(double x, double y) {
+    public DraggablePoint findHandleAt(double coX, double coY) {
         for (DraggablePoint handle : handles) {
-            if (handle.handleContains(x, y)) {
+            if (handle.contains(coX, coY)) {
                 return handle;
             }
         }
@@ -455,7 +455,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             double x = e.getCoX();
             double y = e.getCoY();
             activePoint.mouseReleased(x, y);
-            if (!activePoint.handleContains(x, y)) {
+            if (!activePoint.contains(x, y)) {
                 // can happen if the handle has a constrained position
                 activePoint = null;
             }

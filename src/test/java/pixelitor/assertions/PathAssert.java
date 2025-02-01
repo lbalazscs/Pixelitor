@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
     public PathAssert numSubPathsIs(int n) {
         isNotNull();
 
-        int numSubpaths = actual.getNumSubpaths();
+        int numSubpaths = actual.getNumSubPaths();
         if (numSubpaths != n) {
             throw new AssertionError(String.format(
                 "Expected %d subpaths, found %d", n, numSubpaths));
@@ -56,7 +56,7 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
     public PathAssert isConsistent() {
         isNotNull();
 
-        actual.checkConsistency();
+        actual.checkInvariants();
 
         return this;
     }
@@ -64,7 +64,7 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
     public PathAssert numAnchorsIs(int expected) {
         isNotNull();
 
-        int numSubpaths = actual.getNumSubpaths();
+        int numSubpaths = actual.getNumSubPaths();
         int numPoints = 0;
         for (int i = 0; i < numSubpaths; i++) {
             SubPath subPath = actual.getSubPath(i);

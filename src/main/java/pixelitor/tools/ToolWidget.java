@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public interface ToolWidget {
      * If a {@link DraggablePoint}'s handle contains the given
      * component space location, return the point; otherwise return null.
      */
-    DraggablePoint findHandleAt(double x, double y);
+    DraggablePoint findHandleAt(double coX, double coY);
 
     /**
      * Paints the widget on the given Graphics2D,

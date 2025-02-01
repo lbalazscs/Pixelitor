@@ -49,9 +49,9 @@ public abstract class PositionHandle extends DraggablePoint {
     private Direction direction;
 
     protected PositionHandle(String name, TransformBox box,
-                             PPoint p, View view,
+                             PPoint pos, View view,
                              int cursorIndex, int cursorIndexIO) {
-        super(name, p, view);
+        super(name, pos, view);
         this.box = box;
         this.cursorIndex = cursorIndex;
         this.cursorIndexIO = cursorIndexIO;

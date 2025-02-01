@@ -27,7 +27,6 @@ import pixelitor.filters.util.Filters;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.AlignmentSelector;
-import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.FileUtils;
 import pixelitor.layers.*;
@@ -61,7 +60,6 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.Views.addNew;
 import static pixelitor.Views.findCompByName;
-import static pixelitor.tools.pen.PenToolMode.EDIT;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
@@ -330,9 +328,8 @@ public class Debug {
 
         Path path = Shapes.shapeToPath(shape, Views.getActive());
 
-        Tools.PEN.setPath(path);
-        Tools.PEN.activateMode(EDIT, false);
-        Tools.PEN.activate();
+        Views.getActiveComp().setActivePath(path);
+        Tools.NODE.activate();
     }
 
     public static void showAddTextLayerDialog() {
@@ -376,18 +373,7 @@ public class Debug {
     }
 
     public static void showTree(Debuggable debuggable, String name) {
-        DebugNode node = debuggable.createDebugNode(name);
-        JTree tree = new JTree(node);
-        new DialogBuilder()
-            .title("Internal State")
-            .content(new JScrollPane(tree))
-            .okText("Copy")
-            .cancelText("Close")
-            .validator(d -> {
-                Utils.copyStringToClipboard(node.toJSON());
-                return false; // prevents the dialog from closing
-            })
-            .show();
+        debuggable.createDebugNode(name).showInDialog("Internal State");
     }
 
     public static String pageFormatAsString(PageFormat pageFormat) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class AnchorPointChangeEdit extends PixelitorEdit {
         super.undo();
 
         SubPath subPath = after.getSubPath();
-        subPath.replacePoint(after, before);
+        subPath.replaceAnchor(after, before);
         comp.repaint();
     }
 
@@ -53,7 +53,7 @@ public class AnchorPointChangeEdit extends PixelitorEdit {
         super.redo();
 
         SubPath subPath = before.getSubPath();
-        subPath.replacePoint(before, after);
+        subPath.replaceAnchor(before, after);
         comp.repaint();
     }
 }

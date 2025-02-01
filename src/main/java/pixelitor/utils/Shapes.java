@@ -24,7 +24,6 @@ import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.PenToolMode;
 import pixelitor.tools.pen.SubPath;
 
 import java.awt.*;
@@ -68,7 +67,6 @@ public class Shapes {
             ? null
             : view.getComp();
         Path path = new Path(comp, comp != null);
-        path.setPreferredPenToolMode(PenToolMode.EDIT);
 
         PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];
@@ -96,9 +94,9 @@ public class Shapes {
             pathIterator.next();
         }
 
-        path.mergeOverlappingAnchors();
+        path.mergeCloseAnchors();
         path.setHeuristicTypes();
-        assert path.checkConsistency();
+        assert path.checkInvariants();
 
         return path;
     }

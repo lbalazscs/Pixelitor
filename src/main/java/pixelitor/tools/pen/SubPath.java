@@ -28,7 +28,6 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.debug.Ansi;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
@@ -36,7 +35,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
-import java.io.PrintStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
@@ -63,12 +61,12 @@ public class SubPath implements Serializable, Transformable {
 
     // unique identifier for debugging and equality comparisons
     private final String id;
-    private static long idCounter = 0;
+    private static long nextId = 0;
 
     private List<AnchorPoint> anchorPoints = new ArrayList<>();
 
     // temporary point used during path construction
-    private MovingPoint moving;
+    private transient MovingPoint moving;
 
     private final Path path;
     private final Composition comp;
@@ -79,31 +77,29 @@ public class SubPath implements Serializable, Transformable {
     // true if path construction is complete (no more points can be added)
     private boolean finished = false;
 
-    // caching the transform box ensures that its
-    // image-space coordinates are correct after undo
-    private transient TransformBox box;
-
     public SubPath(Path path, Composition comp) {
         assert path != null;
         this.path = path;
         this.comp = comp;
-        id = "SP" + idCounter++;
+        id = "SP" + nextId++;
     }
 
     public SubPath deepCopy(Path newParent, Composition newComp) {
+        assert !hasMovingPoint();
+
         SubPath copy = new SubPath(newParent, newComp);
         copy.closed = closed;
         copy.finished = finished;
 
-        for (AnchorPoint point : anchorPoints) {
-            var anchorCopy = new AnchorPoint(point, copy, true);
+        for (AnchorPoint anchor : anchorPoints) {
+            var anchorCopy = new AnchorPoint(anchor, copy, true);
             copy.anchorPoints.add(anchorCopy);
         }
 
         return copy;
     }
 
-    public void addFirstPoint(AnchorPoint p, boolean addToHistory) {
+    public void addStartingAnchor(AnchorPoint p, boolean addToHistory) {
         anchorPoints.add(p);
 
         if (addToHistory) {
@@ -131,7 +127,7 @@ public class SubPath implements Serializable, Transformable {
         return moving;
     }
 
-    public void setMovingPointLocation(double x, double y, boolean nullOK) {
+    public void moveMovingPointTo(double x, double y, boolean nullOK) {
         if (moving != null) {
             moving.setLocation(x, y);
         } else {
@@ -141,7 +137,7 @@ public class SubPath implements Serializable, Transformable {
         }
     }
 
-    public AnchorPoint addMovingPointAsAnchor() {
+    public AnchorPoint convertMovingPointToAnchor() {
         AnchorPoint newAnchor = moving.toAnchor();
         anchorPoints.add(newAnchor);
         setMovingPoint(null);
@@ -253,20 +249,20 @@ public class SubPath implements Serializable, Transformable {
     }
 
     /**
-     * Renders the path handles during the building phase.
+     * Renders the path handles in the Pen Tool (building mode).
      */
     public void paintHandlesForBuilding(Graphics2D g, BuildState state) {
-        assert checkConsistency();
+        assert checkInvariants();
 
         // paints all anchor points, showing the handles
         // only for recently edited points and their neighbors
-        int numPoints = anchorPoints.size();
-        for (int i = 0; i < numPoints; i++) {
-            AnchorPoint point = anchorPoints.get(i);
-            if (point.isRecentlyEdited()) {
-                paintRecentAnchor(g, point, i, numPoints);
+        int numAnchors = anchorPoints.size();
+        for (int i = 0; i < numAnchors; i++) {
+            AnchorPoint anchor = anchorPoints.get(i);
+            if (anchor.wasRecentlyEdited()) {
+                paintRecentAnchor(g, anchor, i, numAnchors);
             } else {
-                point.paintHandle(g);
+                anchor.paintHandle(g);
             }
         }
 
@@ -278,19 +274,19 @@ public class SubPath implements Serializable, Transformable {
         if (state == DRAGGING_LAST_CONTROL || state == MOVING_TO_NEXT_ANCHOR) {
             getLastAnchor().paintHandles(g, true, true);
 
-            if (numPoints >= 2) {
-                AnchorPoint lastButOne = anchorPoints.get(numPoints - 2);
+            if (numAnchors >= 2) {
+                AnchorPoint lastButOne = anchorPoints.get(numAnchors - 2);
                 lastButOne.paintHandles(g, false, true);
             }
         }
     }
 
-    private void paintRecentAnchor(Graphics2D g, AnchorPoint point, int i, int numPoints) {
+    private void paintRecentAnchor(Graphics2D g, AnchorPoint anchor, int i, int numPoints) {
         // paint the handles when any of the anchor or
         // its controls were recently edited
-        point.paintHandles(g, true, true);
+        anchor.paintHandles(g, true, true);
 
-        // also paint the "out" handle of the previous point...
+        // also paint the "out" handle of the previous anchor...
         if (i > 0) {
             AnchorPoint prev = anchorPoints.get(i - 1);
             prev.paintHandles(g, false, true);
@@ -299,7 +295,7 @@ public class SubPath implements Serializable, Transformable {
             prev.paintHandles(g, false, true);
         }
 
-        // ...and the "in" handle of the next point
+        // ...and the "in" handle of the next anchor
         if (i < numPoints - 1) {
             AnchorPoint next = anchorPoints.get(i + 1);
             next.paintHandles(g, true, false);
@@ -310,14 +306,14 @@ public class SubPath implements Serializable, Transformable {
     }
 
     /**
-     * Renders the path handles in Edit mode.
+     * Renders the path handles in the Node Tool (editing mode).
      * Shows all control points for all anchors.
      */
     public void paintHandlesForEditing(Graphics2D g) {
-        assert checkConsistency();
+        assert checkInvariants();
 
-        for (AnchorPoint point : anchorPoints) {
-            point.paintHandles(g, true, true);
+        for (AnchorPoint anchor : anchorPoints) {
+            anchor.paintHandles(g, true, true);
         }
     }
 
@@ -339,8 +335,8 @@ public class SubPath implements Serializable, Transformable {
      * This is a workaround for a JDK bug: when a path is created from shapes,
      * often two almost-overlapping anchors are created instead of one.
      */
-    public void mergeOverlappingAnchors() {
-        List<AnchorPoint> newPoints = new ArrayList<>();
+    public void mergeCloseAnchors() {
+        List<AnchorPoint> mergedPoints = new ArrayList<>();
         int numPoints = anchorPoints.size();
         int index = 0;
         boolean mergedWithFirst = false;
@@ -366,7 +362,7 @@ public class SubPath implements Serializable, Transformable {
                 }
                 index++; // skip the next
             }
-            newPoints.add(current);
+            mergedPoints.add(current);
             index++; // advance the while loop
         }
         if (mergedWithFirst) {
@@ -374,14 +370,14 @@ public class SubPath implements Serializable, Transformable {
             // tests it is important that the first point remains first
             // even if the shape is closed.
             // Remove the last and set it as first.
-            AnchorPoint removedLast = newPoints.removeLast();
-            newPoints.set(0, removedLast);
+            AnchorPoint removedLast = mergedPoints.removeLast();
+            mergedPoints.set(0, removedLast);
         }
-        anchorPoints = newPoints;
+        anchorPoints = mergedPoints;
     }
 
     private static boolean tryMerging(AnchorPoint ap1, AnchorPoint ap2) {
-        if (ap1.sameImPositionAs(ap2, 1.0)
+        if (ap1.hasSameImPosAs(ap2, 1.0)
             && ap1.ctrlOut.isRetracted()
             && ap2.ctrlIn.isRetracted()) {
             // the first will be kept, so copy the out ctrl of the second to the first
@@ -432,7 +428,7 @@ public class SubPath implements Serializable, Transformable {
     public void undoClosing() {
         setClosed(false);
         setFinished(false);
-        setMovingPoint(PenToolMode.BUILD.createMovingPoint(this));
+        setMovingPoint(Tools.PEN.createMovingPoint(this));
     }
 
     public void undoFinishing() {
@@ -442,24 +438,21 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void coCoordsChanged(View view) {
-        for (AnchorPoint point : anchorPoints) {
-            point.restoreCoordsFromImSpace(view);
-            point.ctrlIn.restoreCoordsFromImSpace(view);
-            point.ctrlOut.restoreCoordsFromImSpace(view);
+        for (AnchorPoint anchor : anchorPoints) {
+            anchor.restoreCoordsFromImSpace(view);
+            anchor.ctrlIn.restoreCoordsFromImSpace(view);
+            anchor.ctrlOut.restoreCoordsFromImSpace(view);
         }
     }
 
     public void imCoordsChanged(AffineTransform at) {
-        for (AnchorPoint point : anchorPoints) {
-            point.imTransform(at, false);
+        for (AnchorPoint anchor : anchorPoints) {
+            anchor.imTransform(at, false);
         }
     }
 
-    /**
-     * Checks whether all the objects are wired together correctly
-     */
     @SuppressWarnings("SameReturnValue")
-    private void checkWiring() {
+    public boolean checkInvariants() {
         int numPoints = anchorPoints.size();
         for (int i = 0; i < numPoints; i++) {
             AnchorPoint anchor = anchorPoints.get(i);
@@ -468,27 +461,8 @@ public class SubPath implements Serializable, Transformable {
                     + ": anchor subpath is " + anchor.getSubPath()
                     + ", this is " + this);
             }
-            if (anchor.ctrlIn.getAnchor() != anchor) {
-                throw new IllegalStateException("ctrlIn problem in anchor " + i);
-            }
-            if (anchor.ctrlIn.getSibling() != anchor.ctrlOut) {
-                throw new IllegalStateException("ctrlIn problem in anchor " + i);
-            }
-            if (anchor.ctrlOut.getAnchor() != anchor) {
-                throw new IllegalStateException("ctrlOut problem in anchor " + i);
-            }
-            if (anchor.ctrlOut.getSibling() != anchor.ctrlIn) {
-                throw new IllegalStateException("ctrlOut problem in anchor " + i);
-            }
-            if (anchor.ctrlIn == anchor.ctrlOut) {
-                throw new IllegalStateException("same controls in anchor " + i);
-            }
+            anchor.checkInvariants();
         }
-    }
-
-    @SuppressWarnings("SameReturnValue")
-    public boolean checkConsistency() {
-        checkWiring();
 
         if (closed && !finished) {
             throw new IllegalStateException(
@@ -501,35 +475,15 @@ public class SubPath implements Serializable, Transformable {
         return true;
     }
 
-    public void printDebugInfo() {
-        int numPoints = anchorPoints.size();
-        PrintStream out = System.out;
-        if (numPoints == 0) {
-            out.println("Empty path");
-        }
-        for (int i = 0; i < numPoints; i++) {
-            AnchorPoint point = anchorPoints.get(i);
-            out.print(Ansi.purple("Point " + i + " (" + point.getName() + "): "));
-            if (point == getFirstAnchor()) {
-                out.print("first ");
-            }
-            if (point == getLastAnchor()) {
-                out.print("last ");
-            }
-            point.dump();
-        }
-        out.println(Ansi.purple("Moving: ") + moving);
-    }
-
     public AnchorPoint getAnchor(int index) {
         return anchorPoints.get(index);
     }
 
-    public void replacePoint(AnchorPoint before, AnchorPoint after) {
+    public void replaceAnchor(AnchorPoint before, AnchorPoint after) {
         boolean replaced = false;
         for (int i = 0; i < anchorPoints.size(); i++) {
-            AnchorPoint point = anchorPoints.get(i);
-            if (point == before) { // has to be reference equality
+            AnchorPoint anchor = anchorPoints.get(i);
+            if (anchor == before) { // has to be reference equality
                 anchorPoints.set(i, after);
                 replaced = true;
                 break;
@@ -542,12 +496,12 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void setHeuristicTypes() {
-        for (AnchorPoint point : anchorPoints) {
-            point.setHeuristicType();
+        for (AnchorPoint anchor : anchorPoints) {
+            anchor.setHeuristicType();
         }
     }
 
-    public void deletePoint(AnchorPoint ap) {
+    public void deleteAnchor(AnchorPoint ap) {
         // doesn't use List.remove, because we want to delete by ==, not equals
         int index = -1;
         for (int i = 0; i < anchorPoints.size(); i++) {
@@ -561,7 +515,7 @@ public class SubPath implements Serializable, Transformable {
         comp.pathChanged();
     }
 
-    public void deleteLast() {
+    public void deleteLastAnchor() {
         anchorPoints.removeLast();
     }
 
@@ -582,7 +536,7 @@ public class SubPath implements Serializable, Transformable {
      * Return whether this subpath is the only subpath in the parent path
      */
     public boolean isSingle() {
-        return path.getNumSubpaths() == 1;
+        return path.getNumSubPaths() == 1;
     }
 
     public void delete() {
@@ -594,7 +548,6 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void flipDirection(String editName) {
-        // TODO: for closed paths the first point should stay first?
         Path backup = path.deepCopy(comp);
 
         anchorPoints = new ArrayList<>(anchorPoints);
@@ -606,7 +559,7 @@ public class SubPath implements Serializable, Transformable {
         comp.pathChanged();
         comp.repaint();
 
-        History.add(new PathEdit(editName, comp, backup, path));
+        History.add(new PathEdit(editName, comp, backup, path, null));
     }
 
     public Composition getComp() {
@@ -618,7 +571,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     private boolean shouldBeClosed(double x, double y) {
-        return getFirstAnchor().handleContains(x, y) && getNumAnchors() >= 2;
+        return getFirstAnchor().contains(x, y) && getNumAnchors() >= 2;
     }
 
     // return true if it could be closed
@@ -649,7 +602,7 @@ public class SubPath implements Serializable, Transformable {
         path.setBuildState(IDLE);
         if (comp != null) {
             comp.setActivePath(path);
-            Tools.PEN.setActionsEnabled(true);
+            PathActions.setActionsEnabled(true);
         }
 
         if (addToHistory) {
@@ -669,17 +622,15 @@ public class SubPath implements Serializable, Transformable {
         ControlPoint lastOut = getLastAnchor().ctrlOut;
         PPoint c1 = PPoint.lazyFromIm(c1x, c1y, view);
         lastOut.setLocationOnlyForThis(c1);
-        lastOut.afterMovingActionsForThis();
+        lastOut.rememberDistFromAnchor();
 
         PPoint nextLoc = PPoint.lazyFromIm(nextX, nextY, view);
         AnchorPoint next = new AnchorPoint(nextLoc, view, this);
         addPoint(next);
-        next.setType(SMOOTH);
 
-        ControlPoint nextIn = next.ctrlIn;
         PPoint c2 = PPoint.lazyFromIm(c2x, c2y, view);
-        nextIn.setLocationOnlyForThis(c2);
-        nextIn.afterMovingActionsForThis();
+        next.ctrlIn.setLocationOnlyForThis(c2);
+        next.setType(SMOOTH);
     }
 
     public void addQuadCurve(double cx, double cy,
@@ -705,24 +656,18 @@ public class SubPath implements Serializable, Transformable {
         double cp2y = qp2y + twoThirds * (qp1y - qp2y);
         PPoint cp2 = PPoint.lazyFromIm(cp2x, cp2y, view);
 
-        ControlPoint lastOut = last.ctrlOut;
-        lastOut.setLocationOnlyForThis(cp1);
-        lastOut.afterMovingActionsForThis();
+        last.ctrlOut.setLocationOnlyForThis(cp1);
+        last.ctrlOut.rememberDistFromAnchor();
 
         PPoint nextLoc = PPoint.lazyFromIm(nextX, nextY, view);
         AnchorPoint next = new AnchorPoint(nextLoc, view, this);
         addPoint(next);
-        next.setType(SMOOTH);
 
-        ControlPoint nextIn = next.ctrlIn;
-        nextIn.setLocationOnlyForThis(cp2);
-        nextIn.afterMovingActionsForThis();
+        next.ctrlIn.setLocationOnlyForThis(cp2);
+        next.setType(SMOOTH);
     }
 
     public TransformBox createTransformBox() {
-        if (box != null) {
-            return box;
-        }
         if (isEmpty()) {
             return null;
         }
@@ -738,8 +683,7 @@ public class SubPath implements Serializable, Transformable {
             return null;
         }
 
-        box = new TransformBox(coBoundingBox, comp.getView(), this, true);
-        return box;
+        return new TransformBox(coBoundingBox, comp.getView(), this, true);
     }
 
     public boolean isEmpty() {
@@ -748,8 +692,8 @@ public class SubPath implements Serializable, Transformable {
 
     @Override
     public void imTransform(AffineTransform at) {
-        for (AnchorPoint point : anchorPoints) {
-            point.imTransform(at, true);
+        for (AnchorPoint anchor : anchorPoints) {
+            anchor.imTransform(at, true);
         }
     }
 
@@ -762,8 +706,8 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void saveImTransformRefPoints() {
-        for (AnchorPoint point : anchorPoints) {
-            point.saveImTransformRefPoint();
+        for (AnchorPoint anchor : anchorPoints) {
+            anchor.saveImTransformRefPoint();
         }
     }
 
@@ -788,6 +732,10 @@ public class SubPath implements Serializable, Transformable {
         return path.getActiveSubpath() == this;
     }
 
+    public void showDebugDialog() {
+        createDebugNode(id).showInDialog("Subpath " + id);
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         // the index of the subpath inside the parent path is already in the key
@@ -802,8 +750,8 @@ public class SubPath implements Serializable, Transformable {
         node.addBoolean("finished", isFinished());
         node.addBoolean("has moving point", hasMovingPoint());
 
-        for (AnchorPoint point : anchorPoints) {
-            node.add(point.createDebugNode());
+        for (AnchorPoint anchor : anchorPoints) {
+            node.add(anchor.createDebugNode());
         }
 
         return node;

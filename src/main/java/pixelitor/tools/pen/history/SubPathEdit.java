@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public class SubPathEdit extends PixelitorEdit {
         // the zoom might have changed
         before.coCoordsChanged(comp.getView());
 
-        path.replaceSubPath(index, before);
+        path.replaceSubPathAt(index, before);
 
         comp.repaint();
     }
@@ -58,7 +58,7 @@ public class SubPathEdit extends PixelitorEdit {
         // the zoom might have changed
         after.coCoordsChanged(comp.getView());
 
-        path.replaceSubPath(index, after);
+        path.replaceSubPathAt(index, after);
 
         comp.repaint();
     }

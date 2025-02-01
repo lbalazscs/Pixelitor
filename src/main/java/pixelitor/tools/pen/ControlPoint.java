@@ -21,12 +21,16 @@ import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Utils;
-import pixelitor.utils.debug.Ansi;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.io.Serial;
+
+import static pixelitor.tools.pen.AnchorPoint.RETRACTION_TOLERANCE;
+import static pixelitor.tools.pen.AnchorPointType.CUSP;
+import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
 /**
  * A control point of an {@link AnchorPoint}.
@@ -44,8 +48,8 @@ public class ControlPoint extends DraggablePoint {
     // drifting for smooth anchors as rounding errors accumulate
     private double rememberedDistFromAnchor;
 
-    public ControlPoint(String name, PPoint p, View view, AnchorPoint anchor) {
-        super(name, p, view);
+    public ControlPoint(String name, PPoint pos, View view, AnchorPoint anchor) {
+        super(name, pos, view);
         this.anchor = anchor;
     }
 
@@ -59,8 +63,8 @@ public class ControlPoint extends DraggablePoint {
     }
 
     @Override
-    public void setLocation(double x, double y) {
-        super.setLocation(x, y);
+    public void setLocation(double coX, double coY) {
+        super.setLocation(coX, coY);
 
         // also update the sibling's position based on
         // the anchor point's type constraints
@@ -79,17 +83,13 @@ public class ControlPoint extends DraggablePoint {
 
     @Override
     protected void afterMouseReleasedActions() {
-        afterMovingActionsForThis();
         if (anchor.getType() == AnchorPointType.SMOOTH) {
+            rememberDistFromAnchor();
             sibling.rememberDistFromAnchor();
         }
     }
 
-    public void afterMovingActionsForThis() {
-        rememberDistFromAnchor();
-    }
-
-    private void rememberDistFromAnchor() {
+    public void rememberDistFromAnchor() {
         rememberedDistFromAnchor = distanceFrom(anchor);
     }
 
@@ -114,16 +114,24 @@ public class ControlPoint extends DraggablePoint {
     }
 
     public boolean isRetracted() {
-        return isRetracted(1.0);
+        return isRetracted(RETRACTION_TOLERANCE);
     }
 
     public boolean isRetracted(double epsilon) {
-        return sameImPositionAs(anchor, epsilon);
+        return hasSameImPosAs(anchor, epsilon);
     }
 
     void retract() {
         setLocationOnlyForThis(anchor.x, anchor.y);
         rememberedDistFromAnchor = 0;
+    }
+
+    /**
+     * Breaks the handle, except when it's retracted:
+     * then prepares dragging it out symmetrically.
+     */
+    public void breakOrDragOut() {
+        anchor.setType(isRetracted() ? SYMMETRIC : CUSP);
     }
 
     @Override
@@ -140,16 +148,19 @@ public class ControlPoint extends DraggablePoint {
     }
 
     @Override
-    public String toColoredString() {
-        return isRetracted()
-            ? super.toColoredString() + Ansi.red(" retracted!")
-            : super.toColoredString();
-    }
-
-    @Override
     public String toString() {
         return isRetracted()
             ? super.toString() + " retracted!"
             : super.toString();
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.addBoolean("retracted", isRetracted());
+        node.addDouble("cached dist from anchor", getRememberedDistFromAnchor());
+
+        return node;
     }
 }

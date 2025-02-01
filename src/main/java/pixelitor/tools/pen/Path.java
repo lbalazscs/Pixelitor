@@ -69,19 +69,17 @@ public class Path implements Serializable, Debuggable {
     private SubPath activeSubPath;
 
     private final String id; // unique identifier for debugging
-    private static long idCounter = 0;
+    private static long nextId = 0;
 
-    private transient BuildState buildState;
-    private transient BuildState prevBuildState;
-    private transient PenToolMode preferredPenToolMode;
+    private transient BuildState buildState = IDLE;
+    private transient BuildState prevBuildState = IDLE;
 
     public Path(Composition comp, boolean setAsActive) {
         this.comp = comp;
         if (setAsActive) {
             comp.setActivePath(this);
         }
-        id = "P" + idCounter++;
-        buildState = IDLE;
+        id = "P" + nextId++;
     }
 
     @Serial
@@ -90,10 +88,12 @@ public class Path implements Serializable, Debuggable {
 
         buildState = IDLE;
         prevBuildState = IDLE;
-        preferredPenToolMode = PenToolMode.BUILD;
     }
 
     public Path deepCopy(Composition newComp) {
+        assert buildState == IDLE : buildState.toString();
+        assert prevBuildState == IDLE : prevBuildState.toString();
+
         Path copy = new Path(newComp, false);
         for (SubPath subPath : subPaths) {
             SubPath subPathCopy = subPath.deepCopy(copy, newComp);
@@ -103,11 +103,13 @@ public class Path implements Serializable, Debuggable {
                 copy.activeSubPath = subPathCopy;
             }
         }
+
+        assert copy.checkInvariants();
         return copy;
     }
 
     /**
-     * Renders the path in building mode.
+     * Renders the path in the Pen Tool (building mode).
      */
     public void paintForBuilding(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
@@ -118,7 +120,7 @@ public class Path implements Serializable, Debuggable {
     }
 
     /**
-     * Renders the path in editing mode.
+     * Renders the path in the Node Tool (editing mode).
      */
     public void paintForEditing(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
@@ -129,7 +131,7 @@ public class Path implements Serializable, Debuggable {
     }
 
     /**
-     * Renders the path in transform mode.
+     * Renders the path in the transform tool.
      */
     public void paintForTransforming(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
@@ -172,7 +174,7 @@ public class Path implements Serializable, Debuggable {
         assert activeSubPath.getNumAnchors() == 1;
 
         subPaths.remove(lastIndex);
-        if (lastIndex == 0) {
+        if (lastIndex == 0) { // the last subpath was deleted
             return true;
         }
         activeSubPath = subPaths.get(lastIndex - 1);
@@ -184,9 +186,9 @@ public class Path implements Serializable, Debuggable {
         activeSubPath = subPath;
     }
 
-    public void mergeOverlappingAnchors() {
+    public void mergeCloseAnchors() {
         for (SubPath subPath : subPaths) {
-            subPath.mergeOverlappingAnchors();
+            subPath.mergeCloseAnchors();
         }
     }
 
@@ -212,7 +214,7 @@ public class Path implements Serializable, Debuggable {
         SubPath subPath = startNewSubpath();
         AnchorPoint first = new AnchorPoint(PPoint.lazyFromIm(x, y, view), subPath);
         first.setType(SMOOTH);
-        subPath.addFirstPoint(first, false);
+        subPath.addStartingAnchor(first, false);
         return subPath;
     }
 
@@ -241,7 +243,7 @@ public class Path implements Serializable, Debuggable {
         activeSubPath = subPaths.getLast();
         comp.repaint();
 
-        History.add(new PathEdit("Delete Subpath", comp, backup, this));
+        History.add(new PathEdit("Delete Subpath", comp, backup, this, null));
 
         assert comp.getActivePath() == this;
     }
@@ -251,13 +253,14 @@ public class Path implements Serializable, Debuggable {
 
         comp.setActivePath(null);
 
-        assert Tools.PEN.isActive();
+        assert Tools.activeIsPathTool();
+        PathTool tool = (PathTool) Tools.getActive();
 
         // create the edit before the actual removing
         // so that it can remember the pen tool mode
-        PathEdit edit = new PathEdit("Delete Path", comp, this, null);
+        PathEdit edit = new PathEdit("Delete Path", comp, this, null, tool);
 
-        Tools.PEN.removePath();
+        tool.removePath();
         comp.pathChanged(true);
         comp.repaint();
 
@@ -269,7 +272,7 @@ public class Path implements Serializable, Debuggable {
         History.add(edit);
     }
 
-    public void replaceSubPath(int index, SubPath subPath) {
+    public void replaceSubPathAt(int index, SubPath subPath) {
         subPaths.set(index, subPath);
         activeSubPath = subPath;
     }
@@ -293,11 +296,15 @@ public class Path implements Serializable, Debuggable {
         prevBuildState = buildState;
 
         if (newState == MOVING_TO_NEXT_ANCHOR && !hasMovingPoint()) {
-            MovingPoint m = PenToolMode.BUILD.createMovingPoint(activeSubPath);
-            activeSubPath.setMovingPoint(m);
+            MovingPoint mp = Tools.PEN.createMovingPoint(activeSubPath);
+            activeSubPath.setMovingPoint(mp);
         }
 
         buildState = newState;
+
+        if (newState == IDLE) {
+            prevBuildState = IDLE;
+        }
     }
 
     public BuildState getPrevBuildState() {
@@ -306,12 +313,9 @@ public class Path implements Serializable, Debuggable {
 
     // called only by the undo/redo mechanism
     public void setBuildingInProgressState() {
-        // such checks would not be necessary if tool switching
+        // this check would not be necessary if tool switching
         // and mode switching were recorded as events in the history
-        if (!Tools.PEN.isActive()) {
-            return;
-        }
-        if (Tools.PEN.modeIsNot(PenToolMode.BUILD)) {
+        if ((Tools.getActive() != Tools.PEN)) {
             return;
         }
 
@@ -323,7 +327,7 @@ public class Path implements Serializable, Debuggable {
         }
     }
 
-    void finishByCtrlClick(Composition comp) {
+    void finishSubPathByCtrlClick(Composition comp) {
         BuildState state = getBuildState();
         assert state == MOVING_TO_NEXT_ANCHOR
             || state == MOVE_EDITING_PREVIOUS : "state = " + state;
@@ -364,14 +368,6 @@ public class Path implements Serializable, Debuggable {
         }
     }
 
-    public PenToolMode getPreferredPenToolMode() {
-        return preferredPenToolMode;
-    }
-
-    public void setPreferredPenToolMode(PenToolMode preferredPenToolMode) {
-        this.preferredPenToolMode = preferredPenToolMode;
-    }
-
     public SubPath getActiveSubpath() {
         return activeSubPath;
     }
@@ -388,23 +384,23 @@ public class Path implements Serializable, Debuggable {
         return activeSubPath.getLastAnchor();
     }
 
-    public AnchorPoint addMovingPointAsAnchor() {
-        return activeSubPath.addMovingPointAsAnchor();
+    public AnchorPoint convertMovingPointToAnchor() {
+        return activeSubPath.convertMovingPointToAnchor();
     }
 
     public MovingPoint getMovingPoint() {
         return activeSubPath.getMovingPoint();
     }
 
-    public void setMovingPointLocation(double x, double y, boolean nullOK) {
-        activeSubPath.setMovingPointLocation(x, y, nullOK);
+    public void moveMovingPointTo(double x, double y, boolean nullOK) {
+        activeSubPath.moveMovingPointTo(x, y, nullOK);
     }
 
     public boolean hasMovingPoint() {
         return activeSubPath.hasMovingPoint();
     }
 
-    public int getNumSubpaths() {
+    public int getNumSubPaths() {
         return subPaths.size();
     }
 
@@ -412,25 +408,11 @@ public class Path implements Serializable, Debuggable {
         return subPaths.get(index);
     }
 
-    public void printDebugInfo() {
-        checkConsistency();
-        System.out.println("Path " + this);
-        for (SubPath subPath : subPaths) {
-            if (subPath.isClosed()) {
-                System.out.println("New closed subpath " + subPath.getId());
-            } else {
-                System.out.println("New unclosed subpath" + subPath.getId());
-            }
-
-            subPath.printDebugInfo();
-        }
-    }
-
     /**
      * Checks whether all the objects are wired together correctly
      */
     @SuppressWarnings("SameReturnValue")
-    public boolean checkConsistency() {
+    public boolean checkInvariants() {
         for (SubPath subPath : subPaths) {
             if (subPath.getPath() != this) {
                 throw new IllegalStateException("wrong parent in subpath " + subPath);
@@ -439,16 +421,21 @@ public class Path implements Serializable, Debuggable {
                 throw new IllegalStateException("wrong comp in subpath " + subPath);
             }
 
-            subPath.checkConsistency();
+            subPath.checkInvariants();
         }
         return true;
     }
 
+    public void showDebugDialog() {
+        createDebugNode(id).showInDialog("Path " + id);
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
+        checkInvariants();
         var node = new DebugNode(key, this);
 
-        int numSubpaths = getNumSubpaths();
+        int numSubpaths = getNumSubPaths();
         node.addInt("number of subpaths", numSubpaths);
         node.addAsString("build state", getBuildState());
 
