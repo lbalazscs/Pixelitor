@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.transform;
 
-import pixelitor.tools.util.DragDisplay;
+import pixelitor.tools.util.MeasurementOverlay;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.geom.Dimension2D;
@@ -97,11 +97,11 @@ public class EdgeHandle extends PositionHandle {
     }
 
     @Override
-    protected void drawDragDisplays(DragDisplay dd, Dimension2D imSize) {
+    protected void drawOverlays(MeasurementOverlay overlay, Dimension2D imSize) {
         if (horizontal) {
-            ch2.drawHeightDisplay(dd, imSize);
+            ch2.drawHeightOverlay(overlay, imSize);
         } else {
-            ch2.drawWidthDisplay(dd, imSize);
+            ch2.drawWidthOverlay(overlay, imSize);
         }
     }
 }

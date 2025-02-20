@@ -21,14 +21,14 @@ import pixelitor.utils.Cursors;
 
 import java.awt.Cursor;
 
-import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXELS;
-import static pixelitor.tools.util.DragDisplay.OFFSET_FROM_MOUSE;
-import static pixelitor.tools.util.DragDisplay.SINGLE_LINE_HEIGHT;
 import static pixelitor.tools.util.DraggablePoint.HANDLE_RADIUS;
+import static pixelitor.tools.util.MeasurementOverlay.BG_WIDTH_PIXELS;
+import static pixelitor.tools.util.MeasurementOverlay.OFFSET_FROM_MOUSE;
+import static pixelitor.tools.util.MeasurementOverlay.SINGLE_LINE_HEIGHT;
 
 /**
  * The direction of a corner or an edge in a {@link TransformBox}.
- * It determines the (rotation-dependent) cursors and drag display positions.
+ * It determines the (rotation-dependent) cursors and measurement overlay positions.
  */
 public enum Direction {
     NORTH(Cursors.N,
@@ -80,7 +80,7 @@ public enum Direction {
     // the cursor shown for a corner facing the current direction
     private final Cursor cursor;
 
-    // the relative distances needed for displaying the drag display
+    // the relative distances needed for displaying the measurement overlay
     final double dx;
     final double dy;
 

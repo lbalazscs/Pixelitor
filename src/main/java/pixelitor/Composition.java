@@ -1786,14 +1786,17 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Creates a path from the given shape, sets it to active and starts editing it with the Pen Tool.
      */
-    public void createPathFromShape(Shape shape, boolean addToHistory) {
+    public void createPathFromShape(Shape shape, boolean addToHistory, boolean activateNodeTool) {
         Path origActivePath = getActivePath();
         Path newPath = Shapes.shapeToPath(shape, getView());
         setActivePath(newPath);
-        Tools.NODE.activate();
 
         if (addToHistory) {
             History.add(new ConvertSelectionToPathEdit(this, shape, origActivePath));
+        }
+
+        if (activateNodeTool) {
+            Tools.NODE.activate();
         }
     }
 

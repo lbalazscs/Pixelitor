@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -594,56 +594,56 @@ public class Drag implements Serializable, Debuggable {
 
         double imWidth = imEndX - imStartX;
         double imHeight = imEndY - imStartY;
-        DragDisplay dd = new DragDisplay(g, DragDisplay.BG_WIDTH_PIXELS);
+        MeasurementOverlay overlay = new MeasurementOverlay(g, MeasurementOverlay.BG_WIDTH_PIXELS);
 
-        displayWidth(dd, imWidth, imHeight);
-        displayHeight(dd, imWidth, imHeight);
+        displayWidth(overlay, imWidth, imHeight);
+        displayHeight(overlay, imWidth, imHeight);
 
         if (startAdjusted) {
-            displayStartInfo(dd, imWidth, imHeight);
+            displayStartInfo(overlay, imWidth, imHeight);
         }
 
-        dd.cleanup();
+        overlay.cleanup();
     }
 
     // draw the width display
-    private void displayWidth(DragDisplay dd, double imWidth, double imHeight) {
+    private void displayWidth(MeasurementOverlay overlay, double imWidth, double imHeight) {
         float y;
         if (imHeight >= 0) {
             // display the width info below the mouse
-            y = (float) (coEndY + DragDisplay.OFFSET_FROM_MOUSE + DragDisplay.SINGLE_LINE_HEIGHT);
+            y = (float) (coEndY + MeasurementOverlay.OFFSET_FROM_MOUSE + MeasurementOverlay.SINGLE_LINE_HEIGHT);
         } else {
             // display the width info above the mouse
-            y = (float) (coEndY - DragDisplay.OFFSET_FROM_MOUSE);
+            y = (float) (coEndY - MeasurementOverlay.OFFSET_FROM_MOUSE);
         }
-        float x = (float) (coStartX + (coEndX - coStartX) / 2.0f - DragDisplay.BG_WIDTH_PIXELS / 2.0f);
-        String widthInfo = DragDisplay.formatWidthString(imWidth);
-        dd.drawOneLine(widthInfo, x, y);
+        float x = (float) (coStartX + (coEndX - coStartX) / 2.0f - MeasurementOverlay.BG_WIDTH_PIXELS / 2.0f);
+        String widthInfo = MeasurementOverlay.formatWidthString(imWidth);
+        overlay.drawOneLine(widthInfo, x, y);
     }
 
     // draw the height display
-    private void displayHeight(DragDisplay dd, double imWidth, double imHeight) {
+    private void displayHeight(MeasurementOverlay overlay, double imWidth, double imHeight) {
         float x;
         if (imWidth >= 0) {
             // display the height info on the right side of the mouse
-            x = (float) (coEndX + DragDisplay.OFFSET_FROM_MOUSE);
+            x = (float) (coEndX + MeasurementOverlay.OFFSET_FROM_MOUSE);
         } else {
             // display the height info on the left side of the mouse
-            x = (float) (coEndX - DragDisplay.BG_WIDTH_PIXELS - DragDisplay.OFFSET_FROM_MOUSE);
+            x = (float) (coEndX - MeasurementOverlay.BG_WIDTH_PIXELS - MeasurementOverlay.OFFSET_FROM_MOUSE);
         }
-        float y = (float) (coStartY + (coEndY - coStartY) / 2.0f + DragDisplay.SINGLE_LINE_HEIGHT / 2.0f);
-        String heightInfo = DragDisplay.formatHeightString(imHeight);
-        dd.drawOneLine(heightInfo, x, y);
+        float y = (float) (coStartY + (coEndY - coStartY) / 2.0f + MeasurementOverlay.SINGLE_LINE_HEIGHT / 2.0f);
+        String heightInfo = MeasurementOverlay.formatHeightString(imHeight);
+        overlay.drawOneLine(heightInfo, x, y);
     }
 
-    private void displayStartInfo(DragDisplay dd, double imWidth, double imHeight) {
+    private void displayStartInfo(MeasurementOverlay overlay, double imWidth, double imHeight) {
         // can be smaller because of the rounded rectangle
         // and because it is at a distance in both dimensions
-        int mouseDist = DragDisplay.OFFSET_FROM_MOUSE / 2;
+        int mouseDist = MeasurementOverlay.OFFSET_FROM_MOUSE / 2;
         float startInfoX;
         if (imWidth >= 0) {
             // display the start info to the left of the start
-            startInfoX = (float) (coStartX - DragDisplay.BG_WIDTH_PIXELS - mouseDist);
+            startInfoX = (float) (coStartX - MeasurementOverlay.BG_WIDTH_PIXELS - mouseDist);
         } else {
             // display the start info to the right of the start
             startInfoX = (float) (coStartX + mouseDist);
@@ -655,12 +655,12 @@ public class Drag implements Serializable, Debuggable {
             startInfoY = (float) (coStartY - mouseDist);
         } else {
             // display the start info below the start
-            startInfoY = (float) (coStartY + mouseDist + DragDisplay.DOUBLE_LINE_HEIGHT);
+            startInfoY = (float) (coStartY + mouseDist + MeasurementOverlay.DOUBLE_LINE_HEIGHT);
         }
 
         String xInfo = "x = " + (int) imStartX + " px";
         String yInfo = "y = " + (int) imStartY + " px";
-        dd.drawTwoLines(xInfo, yInfo, startInfoX, startInfoY);
+        overlay.drawTwoLines(xInfo, yInfo, startInfoX, startInfoY);
     }
 
     public void displayRelativeMovement(Graphics2D g) {
@@ -669,7 +669,7 @@ public class Drag implements Serializable, Debuggable {
         int imDy = (int) (imEndY - imStartY);
         // It's OK to mix co and im coordinates here, the co coordinates are
         // for the display's position, and im values are for the displayed value.
-        DragDisplay.displayRelativeMovement(g, imDx, imDy,
+        MeasurementOverlay.displayRelativeMovement(g, imDx, imDy,
             (float) (coEndX + 30), (float) (coEndY - 20));
     }
 
@@ -681,38 +681,38 @@ public class Drag implements Serializable, Debuggable {
 
         double x;
         boolean xDistIsSmall = false;
-        if (coDx >= DragDisplay.BG_WIDTH_PIXELS) {
+        if (coDx >= MeasurementOverlay.BG_WIDTH_PIXELS) {
             // display it on the right side of the mouse
-            x = coEndX + DragDisplay.OFFSET_FROM_MOUSE;
-        } else if (coDx <= -DragDisplay.BG_WIDTH_PIXELS) {
+            x = coEndX + MeasurementOverlay.OFFSET_FROM_MOUSE;
+        } else if (coDx <= -MeasurementOverlay.BG_WIDTH_PIXELS) {
             // display it on the left side of the mouse
-            x = coEndX - DragDisplay.OFFSET_FROM_MOUSE - DragDisplay.BG_WIDTH_PIXELS;
+            x = coEndX - MeasurementOverlay.OFFSET_FROM_MOUSE - MeasurementOverlay.BG_WIDTH_PIXELS;
         } else {
             xDistIsSmall = true;
             // display it so that it has no sudden jumps
-            x = coEndX - DragDisplay.BG_WIDTH_PIXELS / 2.0
-                + ((DragDisplay.BG_WIDTH_PIXELS / 2.0 + DragDisplay.OFFSET_FROM_MOUSE)
-                * coDx / DragDisplay.BG_WIDTH_PIXELS);
+            x = coEndX - MeasurementOverlay.BG_WIDTH_PIXELS / 2.0
+                + ((MeasurementOverlay.BG_WIDTH_PIXELS / 2.0 + MeasurementOverlay.OFFSET_FROM_MOUSE)
+                * coDx / MeasurementOverlay.BG_WIDTH_PIXELS);
         }
-        int yInterpolationLimit = DragDisplay.DOUBLE_LINE_HEIGHT;
+        int yInterpolationLimit = MeasurementOverlay.DOUBLE_LINE_HEIGHT;
         if (xDistIsSmall) {
             // if the x distance is small, don't try to smoothly interpolate
-            // the y position, because the drag display might cover the shape
+            // the y position, because the measurement overlay might cover the shape
             yInterpolationLimit = 0;
         }
 
         double y;
         if (coDy <= -yInterpolationLimit) {
             // display it above the mouse
-            y = coEndY - DragDisplay.OFFSET_FROM_MOUSE;
+            y = coEndY - MeasurementOverlay.OFFSET_FROM_MOUSE;
         } else if (coDy >= yInterpolationLimit) {
             // display it below the mouse
-            y = coEndY + DragDisplay.OFFSET_FROM_MOUSE + DragDisplay.DOUBLE_LINE_HEIGHT;
+            y = coEndY + MeasurementOverlay.OFFSET_FROM_MOUSE + MeasurementOverlay.DOUBLE_LINE_HEIGHT;
         } else {
             // display it so that it has no sudden jumps
-            y = coEndY + DragDisplay.DOUBLE_LINE_HEIGHT / 2.0
-                + ((DragDisplay.DOUBLE_LINE_HEIGHT / 2.0 + DragDisplay.OFFSET_FROM_MOUSE)
-                * coDy / DragDisplay.DOUBLE_LINE_HEIGHT);
+            y = coEndY + MeasurementOverlay.DOUBLE_LINE_HEIGHT / 2.0
+                + ((MeasurementOverlay.DOUBLE_LINE_HEIGHT / 2.0 + MeasurementOverlay.OFFSET_FROM_MOUSE)
+                * coDy / MeasurementOverlay.DOUBLE_LINE_HEIGHT);
         }
 
         int dragAngle = (int) Math.toDegrees(calcIntuitiveAngle());
@@ -721,9 +721,9 @@ public class Drag implements Serializable, Debuggable {
         int dragLength = (int) calcImLength();
         String distInfo = "d = " + dragLength + " px";
 
-        DragDisplay dd = new DragDisplay(g, DragDisplay.BG_WIDTH_PIXELS);
-        dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
-        dd.cleanup();
+        MeasurementOverlay overlay = new MeasurementOverlay(g, MeasurementOverlay.BG_WIDTH_PIXELS);
+        overlay.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
+        overlay.cleanup();
     }
 
     public void ensureCoCoords() {

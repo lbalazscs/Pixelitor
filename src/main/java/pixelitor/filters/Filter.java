@@ -40,8 +40,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
     private transient String name;
 
-    // used for making sure that there are no
-    // unnecessary filter executions triggered
+    // tracking counter to detect unnecessary filter executions
     public static long executionCount = 0;
 
     protected Filter() {
@@ -58,19 +57,21 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
      */
     public BufferedImage transformImage(BufferedImage src) {
         boolean grayConversion = false;
+
+        // handle grayscale images (in layer masks) if
+        // the filter doesn't support them directly
         if (isGrayscale(src) && !supportsGray()) {
-            // converting the image to RGB, because the filter
-            // doesn't support the grayscale image of a layer mask
+            // converting grayscale to RGB
             grayConversion = true;
             src = ImageUtils.toSysCompatibleImage(src);
         }
 
+        // create destination image if the filter requires it
         BufferedImage dest = createDefaultDestImg() ?
             ImageUtils.createImageWithSameCM(src) : null;
 
-        assert src.getType() != BufferedImage.TYPE_CUSTOM;
+        // apply the actual filter transformation
         dest = transform(src, dest);
-        assert dest.getType() != BufferedImage.TYPE_CUSTOM : "filter = " + getName();
 
         if (grayConversion) { // convert the result back
             dest = ImageUtils.convertToGrayscaleImage(dest);
@@ -86,7 +87,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     /**
      * Determines if a default destination image should be created
      * before running the filter.
-     * Override this method to return false if the filter creates
+     * Override to return false if the filter creates
      * the destination image itself.
      */
     protected boolean createDefaultDestImg() {
@@ -101,14 +102,15 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         if (name != null) {
             return name;
         }
-        // We cannot assume that a name always exists because the
-        // filter can be created directly without being put in a menu.
+        // Fall back to class name if no explicit name was set.
+        // This happens when filters are created directly rather than through menus.
         return getClass().getSimpleName();
     }
 
     /**
      * Whether this filter can process grayscale
      * images (TYPE_BYTE_GRAY) used in layer masks.
+     * Override to return false if the filter only works with RGB images.
      */
     public boolean supportsGray() {
         return true;
@@ -130,6 +132,9 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         return "";
     }
 
+    /**
+     * Serialization support using the serialization proxy pattern.
+     */
     @Serial
     protected Object writeReplace() {
         return new SerializationProxy(this);
@@ -142,19 +147,19 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        // overridden if the filter supports presets
+        // must be overridden if the filter supports presets
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        // overridden if the filter supports presets
+        // must be overridden if the filter supports presets
         throw new UnsupportedOperationException();
     }
 
     @Override
     public String getPresetDirName() {
-        // overridden if the filter supports presets
+        // must be overridden if the filter supports presets
         throw new UnsupportedOperationException();
     }
 
@@ -165,8 +170,8 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         }
 
         // Stateless filters can be shared.
-        // TODO a few filters do have settings, but no preset support.
-        //   Currently not a problem because they can't be smart filters.
+        // TODO some filters have state but no preset support.
+        //   Not currently a problem since they can't be smart filters.
         return this;
     }
 
@@ -187,7 +192,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         private final Class<? extends Filter> filterClass;
         private final String filterName;
 
-        // The serialized state of the filter in preset format
+        // the serialized state of the filter in preset format
         private String filterState;
 
         public SerializationProxy(Filter filter) {
@@ -199,18 +204,21 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
             }
         }
 
+        /**
+         * Reconstructs a filter from this serialization proxy.
+         */
         @Serial
         protected Object readResolve() {
-            // When deserializing, the filter constructor is called,
-            // and then the state is restored from the preset.
-            // Serializable filters must have a no-argument constructor.
             Filter filter = null;
             try {
+                // serializable filters must have a no-argument constructor
                 filter = filterClass.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 String msg = "Could not instantiate " + filterClass.getName();
                 Messages.showException(new RuntimeException(msg, e));
             }
+
+            // restore filter name and state
             filter.setName(filterName);
             if (filter.canHaveUserPresets() && filterState != null) {
                 UserPreset preset = new UserPreset("", null);

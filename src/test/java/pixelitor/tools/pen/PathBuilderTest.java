@@ -855,7 +855,7 @@ class PathBuilderTest {
         // because the undo uses its "mouseDown" state
         modifiers.dispatchPressedEvent(x, y, view);
         checkState(state);
-        pb.paintOverView(g, null);
+        pb.paintOverCanvas(g, comp);
     }
 
     private void click(int x, int y) {
@@ -893,7 +893,7 @@ class PathBuilderTest {
     private void drag(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchDraggedEvent(x, y, view);
         checkState(state);
-        pb.paintOverView(g, null);
+        pb.paintOverCanvas(g, comp);
     }
 
     private void release(int x, int y, BuildState state) {
@@ -911,7 +911,7 @@ class PathBuilderTest {
     private void release(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchReleasedEvent(x, y, view);
         checkState(state);
-        pb.paintOverView(g, null);
+        pb.paintOverCanvas(g, comp);
     }
 
     private void move(int x, int y, BuildState state) {
@@ -933,7 +933,7 @@ class PathBuilderTest {
     private void move(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchMoveEvent(x, y, view);
         checkState(state);
-        pb.paintOverView(g, null);
+        pb.paintOverCanvas(g, comp);
     }
 
     @SuppressWarnings("MethodMayBeStatic")

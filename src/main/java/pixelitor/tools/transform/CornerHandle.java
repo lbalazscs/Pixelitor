@@ -18,7 +18,7 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
-import pixelitor.tools.util.DragDisplay;
+import pixelitor.tools.util.MeasurementOverlay;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.geom.Dimension2D;
@@ -128,7 +128,7 @@ public class CornerHandle extends PositionHandle {
     }
 
     private Point2D getHorHalfPoint() {
-        // as this is used for placing the drag display, take
+        // as this is used for placing the measurement overlay, take
         // the rotation handle into account: for the NW-NE edge
         // return the rotation location instead of the edge center
         if (nextToRot && horNeighbor.nextToRot) {
@@ -151,26 +151,26 @@ public class CornerHandle extends PositionHandle {
     }
 
     @Override
-    protected void drawDragDisplays(DragDisplay dd, Dimension2D imSize) {
-        drawWidthDisplay(dd, imSize);
-        drawHeightDisplay(dd, imSize);
+    protected void drawOverlays(MeasurementOverlay overlay, Dimension2D imSize) {
+        drawWidthOverlay(overlay, imSize);
+        drawHeightOverlay(overlay, imSize);
     }
 
-    public void drawWidthDisplay(DragDisplay dd, Dimension2D imSize) {
+    public void drawWidthOverlay(MeasurementOverlay overlay, Dimension2D imSize) {
         Direction horEdgeDirection = getHorEdgeDirection();
-        String widthString = DragDisplay.formatWidthString(imSize.getWidth());
+        String widthString = MeasurementOverlay.formatWidthString(imSize.getWidth());
         Point2D horHalf = getHorHalfPoint();
         float horX = (float) (horHalf.getX() + horEdgeDirection.dx);
         float horY = (float) (horHalf.getY() + horEdgeDirection.dy);
-        dd.drawOneLine(widthString, horX, horY);
+        overlay.drawOneLine(widthString, horX, horY);
     }
 
-    public void drawHeightDisplay(DragDisplay dd, Dimension2D imSize) {
+    public void drawHeightOverlay(MeasurementOverlay overlay, Dimension2D imSize) {
         Direction verEdgeDirection = getVerEdgeDirection();
-        String heightString = DragDisplay.formatHeightString(imSize.getHeight());
+        String heightString = MeasurementOverlay.formatHeightString(imSize.getHeight());
         Point2D verHalf = getVerHalfPoint();
         float verX = (float) (verHalf.getX() + verEdgeDirection.dx);
         float verY = (float) (verHalf.getY() + verEdgeDirection.dy);
-        dd.drawOneLine(heightString, verX, verY);
+        overlay.drawOneLine(heightString, verX, verY);
     }
 }

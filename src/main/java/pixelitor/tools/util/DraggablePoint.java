@@ -103,6 +103,8 @@ public class DraggablePoint extends Point2D.Double {
 
         assert !isNaN(imX);
         assert !isNaN(imY);
+
+        updateShapes();
     }
 
     @Override
@@ -257,6 +259,16 @@ public class DraggablePoint extends Point2D.Double {
      */
     protected Shape createShape(double startX, double startY) {
         return new Rectangle2D.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
+    }
+
+    /**
+     * Checks whether the shape positions are in sync with the coordinates.
+     */
+    public boolean checkShapeBounds() {
+        if (shape.getBounds().contains(x, y)) {
+            return true; // OK
+        }
+        throw new IllegalStateException(name + ": x = " + x + ", y = " + y + ", shape bounds = " + shape.getBounds());
     }
 
     public void paintHandle(Graphics2D g) {
@@ -463,6 +475,9 @@ public class DraggablePoint extends Point2D.Double {
 
     public DebugNode createDebugNode() {
         var node = new DebugNode(name, this);
+
+        node.addBoolean("active", isActive());
+
         node.addDouble("co X", x);
         node.addDouble("co Y", y);
         node.addDouble("im X", imX);

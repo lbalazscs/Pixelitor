@@ -101,7 +101,7 @@ public final class SelectionActions {
     public static void selectionToPath(Composition comp, boolean addToHistory) {
         Shape shape = comp.getSelection().getShape();
         comp.deselect(false);
-        comp.createPathFromShape(shape, addToHistory);
+        comp.createPathFromShape(shape, addToHistory, true);
     }
 
     private static void showModifySelectionDialog() {

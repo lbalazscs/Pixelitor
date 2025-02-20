@@ -24,7 +24,7 @@ import pixelitor.Views;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
-import pixelitor.tools.util.DragDisplayType;
+import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -113,8 +113,8 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
 
 
     @Override
-    protected DragDisplayType getDragDisplayType() {
-        return DragDisplayType.NONE;
+    protected OverlayType getDragDisplayType() {
+        return OverlayType.NONE;
     }
 
     @Override

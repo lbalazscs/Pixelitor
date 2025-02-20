@@ -624,7 +624,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void paintOverView(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g2, Composition comp) {
         if (brushPainted) {
             brushPainter.paint(g2, outlineCoX, outlineCoY);
         }

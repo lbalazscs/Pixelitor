@@ -27,7 +27,7 @@ import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
 import pixelitor.io.FileIO;
 import pixelitor.io.IOTasks;
-import pixelitor.tools.util.DragDisplay;
+import pixelitor.tools.util.MeasurementOverlay;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Language;
 import pixelitor.utils.Messages;
@@ -164,7 +164,7 @@ public class Pixelitor {
     // after launching the GUI on the EDT, do the less urgent
     // initializations concurrently on the main thread
     private static void mainThreadInit() {
-        DragDisplay.initializeFont();
+        MeasurementOverlay.initializeFont();
 
         // Force the initialization of FastMath look-up tables now
         // on the main thread, so that later no unexpected delays happen.

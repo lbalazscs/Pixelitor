@@ -29,7 +29,7 @@ import pixelitor.tools.DragTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
-import pixelitor.tools.util.DragDisplayType;
+import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -166,7 +166,7 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    public void paintOverView(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g2, Composition comp) {
         if (transformBox != null) {
             transformBox.paint(g2);
             return;
@@ -181,12 +181,12 @@ public class MoveTool extends DragTool {
         }
 
         comp.drawMovementContours(g2, activeMode);
-        DragDisplayType.REL_MOUSE_POS.draw(g2, drag);
+        OverlayType.REL_MOUSE_POS.draw(g2, drag);
     }
 
     @Override
-    protected DragDisplayType getDragDisplayType() {
-        return DragDisplayType.REL_MOUSE_POS;
+    protected OverlayType getDragDisplayType() {
+        return OverlayType.REL_MOUSE_POS;
     }
 
     @Override

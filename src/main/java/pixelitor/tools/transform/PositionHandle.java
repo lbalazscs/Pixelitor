@@ -18,15 +18,15 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
-import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.MeasurementOverlay;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Dimension2D;
 import java.io.Serial;
 
-import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXELS;
+import static pixelitor.tools.util.MeasurementOverlay.BG_WIDTH_PIXELS;
 
 /**
  * The common functionality of corner and edge handles in a {@link TransformBox}.
@@ -90,13 +90,13 @@ public abstract class PositionHandle extends DraggablePoint {
 
         if (isActive()) {
             Dimension2D size = box.getRotatedImSize();
-            DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXELS);
+            MeasurementOverlay overlay = new MeasurementOverlay(g, BG_WIDTH_PIXELS);
 
-            drawDragDisplays(dd, size);
+            drawOverlays(overlay, size);
 
-            dd.cleanup();
+            overlay.cleanup();
         }
     }
 
-    protected abstract void drawDragDisplays(DragDisplay dd, Dimension2D imSize);
+    protected abstract void drawOverlays(MeasurementOverlay overlay, Dimension2D imSize);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.shapes;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.Drag;
-import pixelitor.tools.util.DragDisplayType;
+import pixelitor.tools.util.OverlayType;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.Shapes;
 
@@ -49,8 +49,8 @@ public enum ShapeType {
         }
 
         @Override
-        public DragDisplayType getDragDisplayType() {
-            return DragDisplayType.WIDTH_HEIGHT;
+        public OverlayType getOverlayType() {
+            return OverlayType.WIDTH_HEIGHT;
         }
 
         @Override
@@ -70,8 +70,8 @@ public enum ShapeType {
         }
 
         @Override
-        public DragDisplayType getDragDisplayType() {
-            return DragDisplayType.WIDTH_HEIGHT;
+        public OverlayType getOverlayType() {
+            return OverlayType.WIDTH_HEIGHT;
         }
     }, DIAMOND("Diamond", false, false, false) {
         @Override
@@ -86,8 +86,8 @@ public enum ShapeType {
         }
 
         @Override
-        public DragDisplayType getDragDisplayType() {
-            return DragDisplayType.WIDTH_HEIGHT;
+        public OverlayType getOverlayType() {
+            return OverlayType.WIDTH_HEIGHT;
         }
     }, LINE("Line", true, true, true) {
         @Override
@@ -105,8 +105,8 @@ public enum ShapeType {
         }
 
         @Override
-        public DragDisplayType getDragDisplayType() {
-            return DragDisplayType.ANGLE_DIST;
+        public OverlayType getOverlayType() {
+            return OverlayType.ANGLE_DIST;
         }
 
         @Override
@@ -150,8 +150,8 @@ public enum ShapeType {
         }
 
         @Override
-        public DragDisplayType getDragDisplayType() {
-            return DragDisplayType.WIDTH_HEIGHT;
+        public OverlayType getOverlayType() {
+            return OverlayType.WIDTH_HEIGHT;
         }
 
         @Override
@@ -181,8 +181,8 @@ public enum ShapeType {
         }
 
         @Override
-        public DragDisplayType getDragDisplayType() {
-            return DragDisplayType.WIDTH_HEIGHT;
+        public OverlayType getOverlayType() {
+            return OverlayType.WIDTH_HEIGHT;
         }
     }, ARROW("Arrow", true, false, false) {
         GeneralPath unitArrow = null;
@@ -219,8 +219,8 @@ public enum ShapeType {
         }
 
         @Override
-        public DragDisplayType getDragDisplayType() {
-            return DragDisplayType.ANGLE_DIST;
+        public OverlayType getOverlayType() {
+            return OverlayType.ANGLE_DIST;
         }
     }, CAT("Cat", false, false, true) {
         @Override
@@ -300,9 +300,9 @@ public enum ShapeType {
 
     public abstract Shape createShape(double x, double y, double width, double height);
 
-    public DragDisplayType getDragDisplayType() {
+    public OverlayType getOverlayType() {
         // overridden if necessary
-        return DragDisplayType.NONE;
+        return OverlayType.NONE;
     }
 
     public boolean isDirectional() {

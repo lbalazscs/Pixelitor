@@ -74,8 +74,8 @@ public class AnchorPoint extends DraggablePoint {
 
         this.subPath = subPath;
 
-        ctrlIn = new ControlPoint("ctrlIn", pos, view, this);
-        ctrlOut = new ControlPoint("ctrlOut", pos, view, this);
+        ctrlIn = new ControlPoint(name + " ctrlIn", pos, view, this);
+        ctrlOut = new ControlPoint(name + " ctrlOut", pos, view, this);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
     }
@@ -101,7 +101,7 @@ public class AnchorPoint extends DraggablePoint {
         boolean ctrlOutActive = ctrlOut.isActive();
         boolean ctrlInActive = ctrlIn.isActive();
 
-        // paint non-active handles first
+        // paint the lines and the inactive handles first
         if (paintIn && !ctrlIn.isRetracted()) {
             paintControl(ctrlIn, ctrlInActive, g);
         }
@@ -123,6 +123,9 @@ public class AnchorPoint extends DraggablePoint {
     private void paintControl(ControlPoint controlPoint,
                               boolean ctrlActive,
                               Graphics2D g) {
+        assert checkShapeBounds();
+        assert controlPoint.checkShapeBounds();
+
         Shapes.drawVisibly(g, new Line2D.Double(x, y, controlPoint.x, controlPoint.y));
         if (!ctrlActive) {
             controlPoint.paintHandle(g);
@@ -232,12 +235,12 @@ public class AnchorPoint extends DraggablePoint {
 
         if (inRetracted && outRetracted) {
             // so that they can be easily dragged out
-            type = SYMMETRIC;
+            setType(SYMMETRIC);
         } else if (inRetracted || outRetracted) {
             // so that dragging out the retraced doesn't cause surprises
-            type = CUSP;
+            setType(CUSP);
         } else {
-            type = calcHeuristicType();
+            setType(calcHeuristicType());
         }
     }
 

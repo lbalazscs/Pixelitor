@@ -19,7 +19,6 @@ package pixelitor.tools.pen;
 
 import pixelitor.Composition;
 import pixelitor.Views;
-import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.Tool;
@@ -87,7 +86,7 @@ public class TransformPathTool extends PathTool {
     }
 
     @Override
-    public void paintOverView(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g2, Composition comp) {
         Path path = comp.getActivePath();
         if (path == null) {
             return;
@@ -224,16 +223,6 @@ public class TransformPathTool extends PathTool {
 
     public TransformBox getBox(int index) {
         return boxes.get(index);
-    }
-
-    @Override
-    public void saveStateTo(UserPreset preset) {
-
-    }
-
-    @Override
-    public void loadUserPreset(UserPreset preset) {
-
     }
 
     @Override

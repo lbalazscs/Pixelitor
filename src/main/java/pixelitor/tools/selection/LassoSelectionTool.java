@@ -25,7 +25,7 @@ import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
-import pixelitor.tools.util.DragDisplayType;
+import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -155,8 +155,8 @@ public class LassoSelectionTool extends AbstractSelectionTool {
 
 
     @Override
-    protected DragDisplayType getDragDisplayType() {
-        return DragDisplayType.NONE;
+    protected OverlayType getDragDisplayType() {
+        return OverlayType.NONE;
     }
 
     @Override

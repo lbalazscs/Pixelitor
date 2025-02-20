@@ -334,6 +334,8 @@ public class SubPath implements Serializable, Transformable {
      * Merges anchor points that are very close to each other.
      * This is a workaround for a JDK bug: when a path is created from shapes,
      * often two almost-overlapping anchors are created instead of one.
+     * It also handles the case when a path is created from a closed
+     * shape, and the first and last anchors are actually identical.
      */
     public void mergeCloseAnchors() {
         List<AnchorPoint> mergedPoints = new ArrayList<>();
@@ -622,7 +624,6 @@ public class SubPath implements Serializable, Transformable {
         ControlPoint lastOut = getLastAnchor().ctrlOut;
         PPoint c1 = PPoint.lazyFromIm(c1x, c1y, view);
         lastOut.setLocationOnlyForThis(c1);
-        lastOut.rememberDistFromAnchor();
 
         PPoint nextLoc = PPoint.lazyFromIm(nextX, nextY, view);
         AnchorPoint next = new AnchorPoint(nextLoc, view, this);
@@ -630,7 +631,6 @@ public class SubPath implements Serializable, Transformable {
 
         PPoint c2 = PPoint.lazyFromIm(c2x, c2y, view);
         next.ctrlIn.setLocationOnlyForThis(c2);
-        next.setType(SMOOTH);
     }
 
     public void addQuadCurve(double cx, double cy,
@@ -657,14 +657,12 @@ public class SubPath implements Serializable, Transformable {
         PPoint cp2 = PPoint.lazyFromIm(cp2x, cp2y, view);
 
         last.ctrlOut.setLocationOnlyForThis(cp1);
-        last.ctrlOut.rememberDistFromAnchor();
 
         PPoint nextLoc = PPoint.lazyFromIm(nextX, nextY, view);
         AnchorPoint next = new AnchorPoint(nextLoc, view, this);
         addPoint(next);
 
         next.ctrlIn.setLocationOnlyForThis(cp2);
-        next.setType(SMOOTH);
     }
 
     public TransformBox createTransformBox() {

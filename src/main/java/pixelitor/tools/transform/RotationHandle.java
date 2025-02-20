@@ -18,8 +18,8 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
-import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.MeasurementOverlay;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
@@ -42,7 +42,7 @@ public class RotationHandle extends DraggablePoint {
     private double cx;
     private double rotStartAngle;
 
-    private static final int MOUSE_DISPLAY_CENTER_DISTANCE = 12 + DragDisplay.SINGLE_LINE_HEIGHT / 2;
+    private static final int MOUSE_DISPLAY_CENTER_DISTANCE = 12 + MeasurementOverlay.SINGLE_LINE_HEIGHT / 2;
 
     public RotationHandle(String name, TransformBox box, PPoint pos, View view) {
         super(name, pos, view);
@@ -114,9 +114,9 @@ public class RotationHandle extends DraggablePoint {
     public void paintHandle(Graphics2D g) {
         super.paintHandle(g);
         if (isActive()) {
-            // show the current angle in a drag display
-            int displayBgWidth = DragDisplay.BG_WIDTH_ANGLES;
-            DragDisplay dd = new DragDisplay(g, displayBgWidth);
+            // show the current angle in a measurement overlay
+            int displayBgWidth = MeasurementOverlay.BG_WIDTH_ANGLES;
+            MeasurementOverlay overlay = new MeasurementOverlay(g, displayBgWidth);
             int dragAngle = box.getAngleDegrees();
             String angleInfo = "∡ = " + dragAngle + " °";
 
@@ -128,9 +128,9 @@ public class RotationHandle extends DraggablePoint {
                 + displayBgWidth * 0.7 * sin);
             float drawY = (float) (y
                 - MOUSE_DISPLAY_CENTER_DISTANCE * cos
-                + DragDisplay.SINGLE_LINE_HEIGHT / 2.0f);
-            dd.drawOneLine(angleInfo, drawX, drawY);
-            dd.cleanup();
+                + MeasurementOverlay.SINGLE_LINE_HEIGHT / 2.0f);
+            overlay.drawOneLine(angleInfo, drawX, drawY);
+            overlay.cleanup();
         }
     }
 

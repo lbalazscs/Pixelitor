@@ -108,7 +108,7 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public void paintOverView(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g2, Composition comp) {
         if (state == IDLE) {
             return;
         }

@@ -452,13 +452,13 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void paintOverView(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g2, Composition comp) {
         if (!comp.getActiveLayer().isVisible()) {
             return;
         }
 
-        // the superclass draws the drag display
-        super.paintOverView(g2, comp);
+        // the superclass draws the measurement overlay
+        super.paintOverCanvas(g2, comp);
 
         if (handles != null) {
             handles.paint(g2);
@@ -472,13 +472,13 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    protected DragDisplayType getDragDisplayType() {
+    protected OverlayType getDragDisplayType() {
         if (handles == null) {
-            return DragDisplayType.ANGLE_DIST;
+            return OverlayType.ANGLE_DIST;
         }
-        // The handles have to paint their drag display separately,
+        // The handles have to paint their measurement overlay separately,
         // based on the handle positions, and not on the user drag
-        return DragDisplayType.NONE;
+        return OverlayType.NONE;
     }
 
     // cycle methods can't be put directly in the JComboBox,

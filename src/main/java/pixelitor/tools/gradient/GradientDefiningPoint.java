@@ -19,8 +19,8 @@ package pixelitor.tools.gradient;
 
 import pixelitor.gui.View;
 import pixelitor.tools.util.Drag;
-import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Utils;
 
@@ -72,7 +72,7 @@ public class GradientDefiningPoint extends DraggablePoint {
         super.paintHandle(g);
         if (isActive()) {
             Drag drag = gradientHandles.toDrag(this);
-            DragDisplayType.ANGLE_DIST.draw(g, drag);
+            OverlayType.ANGLE_DIST.draw(g, drag);
         }
     }
 }

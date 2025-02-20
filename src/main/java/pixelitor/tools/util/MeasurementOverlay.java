@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
  * in tools. All coordinates are in component space unless
  * they have the 'im' prefix (image space) in their name.
  */
-public class DragDisplay {
+public class MeasurementOverlay {
     private static final AlphaComposite BG_COMPOSITE = AlphaComposite.SrcOver.derive(0.65f);
     private static final BasicStroke BG_BORDER_STROKE = new BasicStroke(1.0f);
     private static final int BG_CORNER_RADIUS = 20;
@@ -47,7 +47,7 @@ public class DragDisplay {
     private final Shape origClip;
     private final int bgWidth;
 
-    public DragDisplay(Graphics2D g, int bgWidth) {
+    public MeasurementOverlay(Graphics2D g, int bgWidth) {
         this.g = g;
         origComposite = g.getComposite();
         origStroke = g.getStroke();
@@ -86,9 +86,9 @@ public class DragDisplay {
             ? "↓ = " + imDy + " px"
             : "↑ = " + (-imDy) + " px";
 
-        DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXELS);
-        dd.drawTwoLines(horMovement, verMovement, x, y);
-        dd.cleanup();
+        MeasurementOverlay overlay = new MeasurementOverlay(g, BG_WIDTH_PIXELS);
+        overlay.drawTwoLines(horMovement, verMovement, x, y);
+        overlay.cleanup();
     }
 
     /**
@@ -141,7 +141,7 @@ public class DragDisplay {
     }
 
     /**
-     * The first time {@link DragDisplay} is used, it triggers font
+     * The first time {@link MeasurementOverlay} is used, it triggers font
      * initialization (sun.font.CompositeFont.doDeferredInitialisation).
      * This method should be called before the GUI starts
      * to prevent blocking the EDT.
@@ -149,9 +149,9 @@ public class DragDisplay {
     public static void initializeFont() {
         BufferedImage tmp = ImageUtils.createSysCompatibleImage(10, 10);
         Graphics2D g2 = tmp.createGraphics();
-        DragDisplay dd = new DragDisplay(g2, BG_WIDTH_PIXELS);
+        MeasurementOverlay overlay = new MeasurementOverlay(g2, BG_WIDTH_PIXELS);
 
-        dd.drawOneLine("x", 0, 10);
+        overlay.drawOneLine("x", 0, 10);
 
         g2.dispose();
         tmp.flush();

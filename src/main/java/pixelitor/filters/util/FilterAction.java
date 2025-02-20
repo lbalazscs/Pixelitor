@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,33 +72,36 @@ public class FilterAction extends AbstractViewEnabledAction {
             () -> new SimpleForwardingFilter(op, supportsGray)).noGUI();
     }
 
+    /**
+     * Handles the action event when the filter is activated from the menu.
+     */
     @Override
     protected void onClick(Composition comp) {
         // invoke later to prevent "frozen" menus
         EventQueue.invokeLater(() ->
-            process(comp.getActiveLayer()));
+            applyFilterTo(comp.getActiveLayer()));
     }
 
-    private void process(Layer layer) {
+    private void applyFilterTo(Layer layer) {
         if (layer.isMaskEditing()) {
-            processFilterable(layer.getMask());
+            applyToFilterable(layer.getMask());
         } else if (layer instanceof SmartFilter smartFilter) {
             // Smart filters are Filterable, but the filter should be started on their smart object
-            processSmartObject(smartFilter.getSmartObject());
+            applyToSmartObject(smartFilter.getSmartObject());
         } else if (layer instanceof AdjustmentLayer) {
             // adjustment layers are Filterable, so this must be
             // checked first to prevent running unrelated filters on them.
             Dialogs.showErrorDialog("Adjustment Layer",
                 name + " can't be used on adjustment layers.");
         } else if (layer instanceof Filterable filterable) {
-            processFilterable(filterable);
+            applyToFilterable(filterable);
         } else if (layer instanceof SmartObject so) {
-            processSmartObject(so);
+            applyToSmartObject(so);
         } else if (layer.isRasterizable()) {
             boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
             if (rasterize) {
                 ImageLayer newImageLayer = layer.replaceWithRasterized();
-                processFilterable(newImageLayer);
+                applyToFilterable(newImageLayer);
             }
         } else if (layer instanceof LayerGroup group) {
             assert group.isPassThrough(); // isolated groups can be rasterized
@@ -108,22 +111,23 @@ public class FilterAction extends AbstractViewEnabledAction {
         }
     }
 
-    private void processSmartObject(SmartObject so) {
-        createCachedFilter();
+    private void applyToSmartObject(SmartObject so) {
+        ensureFilterCreated();
         // this logic is here and not in Filter because for
         // smart objects a new Filter instance is created
         if (!filter.canBeSmart()) {
             String msg = "<html>The filter <b>" + name + "</b> can't be used as a smart filter.";
-            Messages.showInfo("Dumb Filter", msg);
+            Messages.showInfo("Unsupported Filter", msg);
             return;
         }
 
-        Filter newFilter = createNewFilterInstance();
-        so.tryAddingSmartFilter(newFilter);
+        // create a new instance for the smart object to ensure independence
+        Filter newFilterInstance = createNewFilterInstance();
+        so.tryAddingSmartFilter(newFilterInstance);
     }
 
-    private void processFilterable(Filterable dr) {
-        createCachedFilter();
+    private void applyToFilterable(Filterable dr) {
+        ensureFilterCreated();
         dr.startFilter(filter, true);
     }
 
@@ -133,7 +137,7 @@ public class FilterAction extends AbstractViewEnabledAction {
         return newFilter;
     }
 
-    private void createCachedFilter() {
+    private void ensureFilterCreated() {
         if (filter == null) {
             filter = factory.get();
             filter.setName(name);
@@ -141,15 +145,17 @@ public class FilterAction extends AbstractViewEnabledAction {
     }
 
     public Filter getFilter() {
-        createCachedFilter();
+        ensureFilterCreated();
         return filter;
     }
 
-    // Overrides the constructor parameter.
-    // A bit ugly, but it simplifies the builders.
+    /**
+     * Configures this filter action to not display a GUI dialog.
+     * Overrides the constructor parameter for simplifying builders.
+     */
     public FilterAction noGUI() {
         hasDialog = false;
-        setText(name); // without the "..."
+        setText(name); // remove the "..." suffix
 
         return this;
     }
@@ -159,7 +165,7 @@ public class FilterAction extends AbstractViewEnabledAction {
             return false;
         }
 
-        createCachedFilter();
+        ensureFilterCreated();
         if (!(filter instanceof ParametrizedFilter pf)) {
             return false;
         }

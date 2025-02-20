@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,9 +22,9 @@ import pixelitor.tools.DragTool;
 import java.awt.Graphics2D;
 
 /**
- * Determines how {@link DragTool} subclasses draw the drag display
+ * Determines how {@link DragTool} subclasses draw the {@link MeasurementOverlay}.
  */
-public enum DragDisplayType {
+public enum OverlayType {
     NONE {
         @Override
         public void draw(Graphics2D g, Drag drag) {

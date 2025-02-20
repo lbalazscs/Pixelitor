@@ -461,10 +461,11 @@ public class PenTool extends PathTool {
     }
 
     @Override
-    public void paintOverView(Graphics2D g2, Composition comp) {
-        if (path != null) {
+    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+        Path compPath = comp.getActivePath();
+        if (compPath != null) {
             g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-            path.paintForBuilding(g2);
+            compPath.paintForBuilding(g2);
         }
     }
 
@@ -548,11 +549,16 @@ public class PenTool extends PathTool {
 
     @Override
     public void saveStateTo(UserPreset preset) {
+        super.saveStateTo(preset);
+
         preset.putBoolean(SHOW_RUBBER_BAND_TEXT, rubberBandCB.isSelected());
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
+        super.loadUserPreset(preset);
+        path = Views.getActivePath();
+
         rubberBandCB.setSelected(preset.getBoolean(SHOW_RUBBER_BAND_TEXT));
     }
 

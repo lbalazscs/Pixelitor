@@ -43,7 +43,7 @@ import pixelitor.tools.shapes.history.ConvertShapeToSelectionEdit;
 import pixelitor.tools.shapes.history.CreateBoxedShapeEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
-import pixelitor.tools.util.DragDisplayType;
+import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
@@ -528,15 +528,15 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void paintOverView(Graphics2D g, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         if (!comp.getActiveLayer().isVisible()) {
             return;
         }
 
         if (state == INITIAL_DRAG) {
             assert !hasBox();
-            // paint the drag display for the initial drag
-            super.paintOverView(g, comp);
+            // paint the measurement overlay for the initial drag
+            super.paintOverCanvas(g, comp);
         } else if (state == TRANSFORM) {
             assert hasBox();
             assert hasStyledShape();
@@ -545,9 +545,9 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    protected DragDisplayType getDragDisplayType() {
+    protected OverlayType getDragDisplayType() {
         assert state == INITIAL_DRAG : "state = " + state;
-        return getSelectedType().getDragDisplayType();
+        return getSelectedType().getOverlayType();
     }
 
     public boolean shouldDrawOverLayer() {

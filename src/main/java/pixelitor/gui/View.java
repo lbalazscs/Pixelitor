@@ -418,7 +418,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         comp.drawGuides(g2);
 
         if (isActive()) {
-            Tools.getActive().paintOverView(g2, comp);
+            Tools.getActive().paintOverCanvas(g2, comp);
         }
     }
 

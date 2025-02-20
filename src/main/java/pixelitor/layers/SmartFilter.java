@@ -199,6 +199,15 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
     }
 
+    @Override
+    public void setShowOriginal(boolean b) {
+        // otherwise the caching overrides the effect
+        // of swapping the filter settings in the superclass
+        invalidateAll();
+
+        super.setShowOriginal(b);
+    }
+
     /**
      * Invalidates the cache for this filter and all subsequent filters in the chain.
      */

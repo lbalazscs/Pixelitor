@@ -49,7 +49,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     // A copy created at the beginning of editing,
     // to support Cancel and Show Original.
-    private transient Filter lastFilter;
+    private transient Filter origFilter;
     private transient boolean showOriginal = false;
 
     private transient boolean tentative = false;
@@ -64,7 +64,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         isAdjustment = true;
-        lastFilter = null;
+        origFilter = null;
         showOriginal = false;
         tentative = false;
     }
@@ -136,7 +136,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void startPreviewing() {
-        lastFilter = filter.copy();
+        origFilter = filter.copy();
     }
 
     @Override
@@ -148,11 +148,13 @@ public class AdjustmentLayer extends Layer implements Filterable {
     public void setShowOriginal(boolean b) {
         showOriginal = b;
 
+        // Swaps the currently active filter object with the stored one.
+        // Toggling the checkbox off swaps them back.
         Filter tmp = filter;
-        filter = lastFilter;
-        lastFilter = tmp;
+        filter = origFilter;
+        origFilter = tmp;
 
-        holder.update();
+        holder.update(); // repaint with the currently active filter
     }
 
     @Override
@@ -169,36 +171,36 @@ public class AdjustmentLayer extends Layer implements Filterable {
     @Override
     public void onFilterDialogAccepted(String filterName) {
         if (showOriginal) {
-            filter = lastFilter;
+            filter = origFilter;
             holder.update();
         } else {
             if (!tentative) {
-                History.add(new FilterChangedEdit(this, lastFilter, null));
+                History.add(new FilterChangedEdit(this, origFilter, null));
             }
         }
 
-        lastFilter = null;
+        origFilter = null;
         showOriginal = false;
     }
 
     @Override
     public void onFilterDialogCanceled() {
         if (!showOriginal) {
-            filter = lastFilter;
+            filter = origFilter;
 
             // when the filter was copied, then it wasn't adjusted to the image size
             adaptToContext();
 
             holder.update();
         }
-        lastFilter = null;
+        origFilter = null;
         showOriginal = false;
     }
 
     protected boolean filterSettingsChanged() {
         // equals is overridden for parametrized filters to
         // compare the param values.
-        return !filter.equals(lastFilter);
+        return !filter.equals(origFilter);
     }
 
     public void adaptToContext() {

@@ -17,13 +17,17 @@
 
 package pixelitor.tools.pen;
 
+import com.bric.geom.ShapeStringUtils;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.utils.Messages;
 
 import java.awt.Cursor;
+import java.awt.Shape;
 import java.util.ResourceBundle;
 
 import static pixelitor.tools.pen.PathActions.setActionsEnabled;
@@ -98,5 +102,34 @@ public abstract class PathTool extends Tool {
         }
 
         setActionsEnabled(compPath != null);
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        Path path = Views.getActivePath();
+        if (path != null) {
+            preset.put("Path", ShapeStringUtils.toString(path.toImageSpaceShape()));
+        }
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        String pathString = preset.get("Path");
+        if (pathString != null) {
+            View view = Views.getActive();
+            if (view != null) {
+                Shape pathShape = ShapeStringUtils.createGeneralPath(pathString);
+                Composition comp = view.getComp();
+                if (comp.hasActivePath()) {
+                    boolean confirmed = Messages.showYesNoQuestion("Confirmation",
+                        "Overwrite existing path with the path loaded from the preset?");
+                    if (!confirmed) {
+                        return;
+                    }
+                }
+                comp.createPathFromShape(pathShape, false, false);
+                view.repaint();
+            }
+        }
     }
 }

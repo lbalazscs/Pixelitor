@@ -20,7 +20,7 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.tools.util.Drag;
-import pixelitor.tools.util.DragDisplayType;
+import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
 
@@ -129,7 +129,7 @@ public abstract class DragTool extends Tool {
     protected abstract void dragFinished(PMouseEvent e);
 
     @Override
-    public void paintOverView(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g2, Composition comp) {
         if (drag == null || !drag.isDragging()) {
             return;
         }
@@ -137,8 +137,8 @@ public abstract class DragTool extends Tool {
         getDragDisplayType().draw(g2, drag);
     }
 
-    protected DragDisplayType getDragDisplayType() {
-        return DragDisplayType.WIDTH_HEIGHT; // default to width/height display
+    protected OverlayType getDragDisplayType() {
+        return OverlayType.WIDTH_HEIGHT; // default to width/height display
     }
 
     public DragToolState getState() {

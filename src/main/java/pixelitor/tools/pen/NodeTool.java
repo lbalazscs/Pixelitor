@@ -20,7 +20,6 @@ package pixelitor.tools.pen;
 import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
-import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.Tool;
@@ -84,7 +83,7 @@ public class NodeTool extends PathTool {
     }
 
     @Override
-    public void paintOverView(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g2, Composition comp) {
         Path path = comp.getActivePath();
         if (path != null) {
             g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -207,16 +206,6 @@ public class NodeTool extends PathTool {
         }
 
         return false;
-    }
-
-    @Override
-    public void saveStateTo(UserPreset preset) {
-
-    }
-
-    @Override
-    public void loadUserPreset(UserPreset preset) {
-
     }
 
     @Override
