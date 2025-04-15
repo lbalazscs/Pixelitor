@@ -103,12 +103,12 @@ public class ToolTest {
         Composition comp = TestHelper.createComp("ToolTest", 2, true);
         view = comp.getView();
         Tools.setActiveTool(tool);
-        tool.toolActivated();
+        tool.toolActivated(view);
     }
 
     @After
     public void afterEachTest() {
-        tool.toolDeactivated();
+        tool.toolDeactivated(view);
         Views.setActiveView(null, false);
     }
 

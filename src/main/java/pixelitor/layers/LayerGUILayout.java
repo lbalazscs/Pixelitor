@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -105,12 +105,9 @@ public class LayerGUILayout implements LayoutManager {
     }
 
     public int getPreferredHeight() {
-        if (childrenPanel == null) {
-            return height;
-        } else {
-            // TODO the preferred height is 26 * num_filters?
-            return height + childrenPanel.getPreferredSize().height;
-        }
+        return childrenPanel == null
+            ? height
+            : height + childrenPanel.getPreferredSize().height;
     }
 
     @Override

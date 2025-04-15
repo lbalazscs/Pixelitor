@@ -147,13 +147,13 @@ public class ShapesLayer extends ContentLayer {
 
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
-        transform(comp.getCanvas().createImTransformToSize(newSize));
+        transform(comp.getCanvas().createImTransformToFit(newSize));
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
     public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
-        transform(Crop.createCanvasTransform(cropRect));
+        transform(Crop.createCropTransform(cropRect));
     }
 
     @Override
@@ -229,12 +229,12 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public void startMovement() {
-        super.startMovement();
+    public void prepareMovement() {
+        super.prepareMovement();
         if (hasShape() && transformBox != null) {
             View view = Views.getActive();
             transformBox.reInitialize(view, styledShape);
-            transformBox.startMovement();
+            transformBox.prepareMovement();
         }
     }
 
@@ -247,10 +247,10 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public PixelitorEdit endMovement() {
-        PixelitorEdit edit = super.endMovement();
+    public PixelitorEdit finalizeMovement() {
+        PixelitorEdit edit = super.finalizeMovement();
         if (hasShape() && transformBox != null) {
-            transformBox.endMovement();
+            transformBox.finalizeMovement();
         }
         return edit;
     }

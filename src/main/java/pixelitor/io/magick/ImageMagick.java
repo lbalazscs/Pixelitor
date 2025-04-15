@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,7 +88,7 @@ public class ImageMagick {
         CompletableFuture.runAsync(() -> exportImage(image, targetFile, settings), onIOThread)
             .thenRunAsync(() -> {
                 progressHandler.stopProgress();
-                comp.afterSuccessfulSaveActions(targetFile, true);
+                comp.handleSuccessfulSave(targetFile, true);
                 comp.setDirty(false);
             }, onEDT)
             .whenComplete((result, exception) -> {

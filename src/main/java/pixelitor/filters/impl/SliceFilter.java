@@ -22,7 +22,7 @@ import pixelitor.filters.Slice;
 /**
  * The implementation of the {@link Slice} filter.
  */
-public class SliceFilter extends RotatedEffectFilter {
+public class SliceFilter extends RotatingEffectFilter {
     private double horizontalShift;
     private double verticalShift;
     private int offset;

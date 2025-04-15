@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.assertions;
 import org.assertj.core.api.AbstractAssert;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -40,13 +41,9 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
 
     public S uiNameIs(String expected) {
         isNotNull();
-        assertThat(actual.getUI().getLayerName()).isEqualTo(expected);
-        return myself;
-    }
+        hasUI();
 
-    public S classIs(Class<? extends Layer> expected) {
-        isNotNull();
-        assertThat(actual.getClass()).isEqualTo(expected);
+        assertThat(actual.getUI().getLayerName()).isEqualTo(expected);
         return myself;
     }
 
@@ -74,6 +71,10 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         return myself;
     }
 
+    public S isVisible(boolean expected) {
+        return expected ? isVisible() : isNotVisible();
+    }
+
     public S uiIsVisible() {
         isNotNull();
         assertThat(actual.getUI().isEyeOpen()).isTrue();
@@ -84,6 +85,10 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         isNotNull();
         assertThat(actual.getUI().isEyeOpen()).isFalse();
         return myself;
+    }
+
+    public S uiIsVisible(boolean expected) {
+        return expected ? uiIsVisible() : uiIsNotVisible();
     }
 
     public S isActive() {
@@ -98,6 +103,10 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         return myself;
     }
 
+    public S isActive(boolean expected) {
+        return expected ? isActive() : isNotActive();
+    }
+
     public S hasUI() {
         isNotNull();
         assertThat(actual.hasUI()).isTrue();
@@ -110,6 +119,10 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         return myself;
     }
 
+    public S hasUI(boolean expected) {
+        return expected ? hasUI() : hasNoUI();
+    }
+
     public S hasMask() {
         isNotNull();
         assertThat(actual.hasMask()).isTrue();
@@ -120,6 +133,10 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         isNotNull();
         assertThat(actual.hasMask()).isFalse();
         return myself;
+    }
+
+    public S hasMask(boolean expected) {
+        return expected ? hasMask() : hasNoMask();
     }
 
     public S maskIsEnabled() {
@@ -143,6 +160,60 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
     public S maskIsNotLinked() {
         isNotNull();
         assertThat(actual.getMask().isLinked()).isFalse();
+        return myself;
+    }
+
+    public S isMaskEditing() {
+        isNotNull();
+        assertThat(actual.isMaskEditing()).isTrue();
+        return myself;
+    }
+
+    public S isNotMaskEditing() {
+        isNotNull();
+        assertThat(actual.isMaskEditing()).isFalse();
+        return myself;
+    }
+
+    public S isTopLevel() {
+        isNotNull();
+        assertThat(actual.isTopLevel()).isTrue();
+        return myself;
+    }
+
+    public S isNotTopLevel() {
+        isNotNull();
+        assertThat(actual.isTopLevel()).isFalse();
+        return myself;
+    }
+
+    public S holderIs(LayerHolder expected) {
+        isNotNull();
+        assertThat(actual.getHolder()).isEqualTo(expected);
+        return myself;
+    }
+
+    public S isRasterizable() {
+        isNotNull();
+        assertThat(actual.isRasterizable()).isTrue();
+        return myself;
+    }
+
+    public S isNotRasterizable() {
+        isNotNull();
+        assertThat(actual.isRasterizable()).isFalse();
+        return myself;
+    }
+
+    public S isConvertibleToSmartObject() {
+        isNotNull();
+        assertThat(actual.isConvertibleToSmartObject()).isTrue();
+        return myself;
+    }
+
+    public S isNotConvertibleToSmartObject() {
+        isNotNull();
+        assertThat(actual.isConvertibleToSmartObject()).isFalse();
         return myself;
     }
 }

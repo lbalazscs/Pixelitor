@@ -555,7 +555,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void deleteTemporarily(Layer layer) {
+    public void deleteInternal(Layer layer) {
         deleteSmartFilter((SmartFilter) layer, false, false);
     }
 
@@ -594,7 +594,7 @@ public class SmartObject extends CompositeLayer {
         }
 
         // recursively check nested smart objects within the content
-        return content.checkForAutoReload();
+        return content.checkForExternalModifications();
     }
 
     private CompletableFuture<Composition> reloadLinkedContentAsync() {
@@ -793,7 +793,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void moveActiveLayer(boolean up) {
+    public void reorderActiveLayer(boolean up) {
         SmartFilter smartFilter = getSelectedSmartFilter();
         if (smartFilter != null) {
             move(smartFilter, up);
@@ -1027,7 +1027,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public boolean containsLayer(Layer layer) {
+    public boolean listContainsLayer(Layer layer) {
         return filters.contains((SmartFilter) layer);
     }
 

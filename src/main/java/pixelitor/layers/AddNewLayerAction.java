@@ -54,7 +54,7 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
 
         try {
             Composition comp = Views.getActiveComp();
-            String layerName = comp.generateLayerName();
+            String layerName = comp.generateNewLayerName();
             comp.addNewEmptyImageLayer(layerName, ctrlPressed);
         } catch (Exception ex) {
             Messages.showException(ex);

@@ -459,9 +459,9 @@ public class Views {
         return getActiveLayer().getHolderForNewLayers().getNumLayers();
     }
 
-    public static Layer getActiveRoot() {
+    public static Layer getActiveTopLevelLayer() {
         if (activeView != null) {
-            return activeView.getComp().getActiveRoot();
+            return activeView.getComp().getActiveTopLevelLayer();
         }
 
         return null;
@@ -576,7 +576,7 @@ public class Views {
         for (View view : views) {
             // make sure that the next reload is not started
             // before the previous one is finished
-            cf = cf.thenCompose(comp -> view.checkForAutoReload());
+            cf = cf.thenCompose(comp -> view.checkForExternalModifications());
         }
     }
 

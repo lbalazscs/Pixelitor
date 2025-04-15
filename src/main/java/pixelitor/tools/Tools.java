@@ -54,12 +54,13 @@ public class Tools {
 
     public static final MoveTool MOVE = new MoveTool();
     public static final CropTool CROP = new CropTool();
-    //    public static final SelectionTool SELECTION = new SelectionTool();
+
     public static final MarqueeSelectionTool RECTANGLE_SELECTION = new MarqueeSelectionTool(SelectionType.RECTANGLE);
     public static final MarqueeSelectionTool ELLIPSE_SELECTION = new MarqueeSelectionTool(SelectionType.ELLIPSE);
     public static final LassoSelectionTool LASSO_SELECTION = new LassoSelectionTool();
     public static final PolygonalSelectionTool POLY_SELECTION = new PolygonalSelectionTool();
     public static final MagicWandSelectionTool MAGIC_SELECTION = new MagicWandSelectionTool();
+
     public static final BrushTool BRUSH = new BrushTool();
     public static final CloneTool CLONE = new CloneTool();
     public static final EraserTool ERASER = new EraserTool();
@@ -133,13 +134,14 @@ public class Tools {
             return;
         }
 
+        View view = Views.getActive();
         if (previousTool != null) {
-            previousTool.toolDeactivated();
+            previousTool.toolDeactivated(view);
             EventDispatcher.toolChanged(previousTool, newTool);
         }
 
         setActiveTool(newTool);
-        newTool.toolActivated();
+        newTool.toolActivated(view);
         ToolSettingsPanelContainer.get().showSettingsOf(newTool);
     }
 

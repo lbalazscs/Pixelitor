@@ -234,7 +234,7 @@ public class Gradient implements Serializable, Debuggable {
         drag = drag.imTransformedCopy(at);
     }
 
-    public void startMovement() {
+    public void prepareMovement() {
         origDrag = drag.copy();
     }
 
@@ -242,7 +242,7 @@ public class Gradient implements Serializable, Debuggable {
         drag = origDrag.imTranslatedCopy(x, y);
     }
 
-    public void endMovement() {
+    public void finalizeMovement() {
         // nothing to do
     }
 

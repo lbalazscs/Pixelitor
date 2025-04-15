@@ -17,10 +17,7 @@
 
 package pixelitor.tools.selection;
 
-import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
-import pixelitor.Views;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.SliderSpinner;
@@ -97,7 +94,7 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
                     try {
                         sb.updateDraftSelection(e, comp);
                         sb.combineShapes(comp);
-                        stopBuildingSelection();
+                        stopBuildingSelection(comp);
                     } catch (Exception e) {
                         cancelSelection(comp);
                     }
@@ -109,38 +106,9 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
         super.mouseClicked(e);
     }
 
-    private void cancelSelection(Composition comp) {
-        if (comp.hasSelection() || comp.hasDraftSelection()) {
-            comp.deselect(true);
-        }
-        assert !comp.hasDraftSelection() : "draft selection is = " + comp.getDraftSelection();
-        assert !comp.hasSelection() : "selection is = " + comp.getSelection();
-
-        altMeansSubtract = false;
-
-        if (AppMode.isDevelopment()) {
-            ConsistencyChecks.selectionActionsEnabledCheck(comp);
-        }
-    }
-
-    @Override
-    public void escPressed() {
-        // pressing Esc should work the same as clicking outside the selection
-        Views.onActiveComp(this::cancelSelection);
-    }
-
     @Override
     protected OverlayType getDragDisplayType() {
         return OverlayType.NONE;
-    }
-
-    @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
-
-        // otherwise in polygonal mode unfinished selections
-        // remain visible after switching to another tool
-        stopBuildingSelection();
     }
 
     public static int getTolerance() {

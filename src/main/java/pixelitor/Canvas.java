@@ -55,12 +55,14 @@ public class Canvas implements Serializable, Debuggable {
     private transient int coWidth;
     private transient int coHeight;
 
+    // cached thumbnail dimensions (calculated lazily)
     private transient Dimension thumbDimension;
 
     @Serial
     private static final long serialVersionUID = -1459254568616232274L;
 
     public Canvas(int imWidth, int imHeight) {
+        validateNewSize(imWidth, imHeight);
         width = imWidth;
         height = imHeight;
     }
@@ -76,15 +78,24 @@ public class Canvas implements Serializable, Debuggable {
         return new Canvas(this);
     }
 
+    private static void validateNewSize(int newWidth, int newHeight) {
+        if (newWidth <= 0 || newWidth > MAX_WIDTH || newHeight <= 0 || newHeight > MAX_HEIGHT) {
+            throw new IllegalArgumentException(String.format(
+                "Invalid size: %dx%d. Must be between 1x1 and %dx%d.",
+                newWidth, newWidth, MAX_WIDTH, MAX_HEIGHT));
+        }
+    }
+
     /**
-     * Changes the size using values given in image space.
+     * Resizes the canvas using values given in image space.
      */
-    public void resize(int newWidth, int newHeight, View view, boolean notify) {
+    public void resize(int newWidth, int newHeight, View view, boolean updateView) {
+        validateNewSize(newWidth, newHeight);
         width = newWidth;
         height = newHeight;
 
         thumbDimension = null; // invalidate cache
-        recalcCoSize(view, notify); // update the component space values
+        recalcCoSize(view, updateView);
         activeCanvasSizeChanged(this);
     }
 
@@ -92,13 +103,13 @@ public class Canvas implements Serializable, Debuggable {
      * Recalculates the component-space size.
      */
     public void recalcCoSize(View view, boolean updateView) {
-        double viewScale = view.getZoomScale();
+        double zoomScale = view.getZoomScale();
 
         int prevCoWidth = coWidth;
         int prevCoHeight = coHeight;
 
-        coWidth = (int) (viewScale * width);
-        coHeight = (int) (viewScale * height);
+        coWidth = (int) (zoomScale * width);
+        coHeight = (int) (zoomScale * height);
 
         if (updateView && (coWidth != prevCoWidth || coHeight != prevCoHeight)) {
             view.canvasCoSizeChanged();
@@ -106,8 +117,8 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Either a new composition (therefore, a new canvas)
-     * was activated or the active canvas size changed.
+     * Called when a new composition (and therefore a new canvas)
+     * was activated or when the active canvas size changed.
      */
     public static void activeCanvasSizeChanged(Canvas canvas) {
         // As long as only Symmetry needs to be notified,
@@ -123,29 +134,30 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Returns the component space bounds.
+     * Returns the bounds in component space.
      */
     public Rectangle getCoBounds(View view) {
+        // assumes that the canvas and view are fully initialized
         return new Rectangle(
             view.getCanvasStartX(), view.getCanvasStartY(), coWidth, coHeight);
     }
 
     /**
-     * Returns the size in image space.
+     * Returns the size in image space (image pixels).
      */
     public Dimension getSize() {
         return new Dimension(width, height);
     }
 
-    public String getSizeString() {
-        return width + "x" + height;
-    }
-
     /**
-     * Returns the size in component space.
+     * Returns the size in component space (screen pixels).
      */
     public Dimension getCoSize() {
         return new Dimension(coWidth, coHeight);
+    }
+
+    public String getSizeString() {
+        return width + "x" + height;
     }
 
     /**
@@ -162,10 +174,6 @@ public class Canvas implements Serializable, Debuggable {
         return height;
     }
 
-    public boolean hasImSize(int width, int height) {
-        return this.width == width && this.height == height;
-    }
-
     /**
      * Returns the width in component space.
      */
@@ -180,6 +188,9 @@ public class Canvas implements Serializable, Debuggable {
         return coHeight;
     }
 
+    /**
+     * Returns the center point in image space.
+     */
     public Point2D getImCenter() {
         return new Point2D.Double(width / 2.0, height / 2.0);
     }
@@ -188,12 +199,23 @@ public class Canvas implements Serializable, Debuggable {
         return width / (double) height;
     }
 
-    public AffineTransform createImTransformToSize(Dimension newSize) {
-        double sx = newSize.getWidth() / width;
-        double sy = newSize.getHeight() / height;
+    public boolean isLandscape() {
+        return width > height;
+    }
+
+    /**
+     * Creates an image-space AffineTransform to scale content
+     * from this canvas size to a target size.
+     */
+    public AffineTransform createImTransformToFit(Dimension targetSize) {
+        double sx = targetSize.getWidth() / width;
+        double sy = targetSize.getHeight() / height;
         return AffineTransform.getScaleInstance(sx, sy);
     }
 
+    /**
+     * Inverts the given shape with respect to the canvas bounds.
+     */
     public Shape invertShape(Shape shape) {
         Area shapeArea = new Area(shape);
         Area fullArea = new Area(getBounds());
@@ -234,10 +256,10 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Creates a temporary image with the size of this canvas.
+     * Creates a temporary, transparent image with the size of this canvas.
      */
     public BufferedImage createTmpImage() {
-        // it's important that the tmp image has transparency
+        // it's important that the tmp image has an alpha channel
         // even for layer masks, otherwise drawing is not possible
         return ImageUtils.createSysCompatibleImage(this);
     }
@@ -250,6 +272,13 @@ public class Canvas implements Serializable, Debuggable {
         return width != img.getWidth() || height != img.getHeight();
     }
 
+    public boolean hasImSize(int width, int height) {
+        return this.width == width && this.height == height;
+    }
+
+    /**
+     * Generates a random {@link PPoint} within the canvas boundaries.
+     */
     public PPoint genRandomPoint(View view) {
         return PPoint.lazyFromIm(Rnd.nextInt(width), Rnd.nextInt(height), view);
     }
@@ -260,10 +289,6 @@ public class Canvas implements Serializable, Debuggable {
                 width, height, Views.thumbSize, true);
         }
         return thumbDimension;
-    }
-
-    public boolean isLandscape() {
-        return width > height;
     }
 
     public String createSVGElement() {
@@ -287,6 +312,6 @@ public class Canvas implements Serializable, Debuggable {
 
     @Override
     public String toString() {
-        return "Canvas[" + width + ", " + height + ']';
+        return "Canvas[" + getSizeString() + ']';
     }
 }

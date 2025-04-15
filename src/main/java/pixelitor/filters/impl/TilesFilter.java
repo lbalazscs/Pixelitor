@@ -25,7 +25,7 @@ import static net.jafama.FastMath.tan;
  *
  * Inspired by the Paint.net tile effect
  */
-public class TilesFilter extends RotatedEffectFilter {
+public class TilesFilter extends RotatingEffectFilter {
     private double sizeX;
     private double sizeY;
     private double curvatureX;

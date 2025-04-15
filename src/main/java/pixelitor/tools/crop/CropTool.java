@@ -378,8 +378,8 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
         reset();
     }
 
@@ -445,7 +445,8 @@ public class CropTool extends DragTool {
             return false;
         }
 
-        Rectangle2D cropRect = getCropRect(Views.getActive()).getIm();
+        View view = Views.getActive();
+        Rectangle2D cropRect = getCropRect(view).getIm();
         if (cropRect.isEmpty()) {
             Messages.showInfo("Empty Crop Rectangle",
                 "Can't crop to %dx%d image.".formatted(
@@ -454,7 +455,7 @@ public class CropTool extends DragTool {
             return false;
         }
 
-        Crop.toolCropActiveImage(cropRect,
+        Crop.toolCrop(view.getComp(), cropRect,
             allowGrowingCB.isSelected(), deleteCroppedCB.isSelected());
         reset();
         return true;

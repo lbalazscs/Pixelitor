@@ -65,7 +65,6 @@ class PathBuilderTest {
         view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);
 
-        Tools.PEN.setPath(null); // TODO should be reset?
         pb = Tools.PEN;
 
         // reset the state between the tests

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,8 @@ package pixelitor.guides;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
+import pixelitor.gui.View;
+import pixelitor.gui.utils.DialogBuilder;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -30,12 +32,12 @@ import static java.awt.BorderLayout.SOUTH;
 import static java.awt.FlowLayout.LEFT;
 import static java.lang.String.format;
 
-class AddGridGuidesPanel extends JPanel {
+public class AddGridGuidesPanel extends JPanel {
     private final GroupedRangeParam guidesParam = new GroupedRangeParam(
         "Guides", 0, 3, 50, false);
     private final Guides.Builder builder;
 
-    public AddGridGuidesPanel(Guides.Builder builder) {
+    private AddGridGuidesPanel(Guides.Builder builder) {
         super(new BorderLayout());
 
         this.builder = builder;
@@ -53,7 +55,7 @@ class AddGridGuidesPanel extends JPanel {
         updatePreview.paramAdjusted(); // set initial preview
     }
 
-    public void createGuides(boolean preview) {
+    private void createGuides(boolean preview) {
         builder.build(preview, this::setup);
     }
 
@@ -71,5 +73,17 @@ class AddGridGuidesPanel extends JPanel {
 
     private int getNumVerDivisions() {
         return guidesParam.getValue(1) + 1;
+    }
+
+    public static void showAddGridDialog(View view) {
+        Guides.Builder builder = new Guides.Builder(view, true);
+        AddGridGuidesPanel panel = new AddGridGuidesPanel(builder);
+        new DialogBuilder()
+            .title("Add Grid Guides")
+            .content(panel)
+            .withScrollbars()
+            .okAction(() -> panel.createGuides(false))
+            .cancelAction(builder::resetOrigGuides)
+            .show();
     }
 }

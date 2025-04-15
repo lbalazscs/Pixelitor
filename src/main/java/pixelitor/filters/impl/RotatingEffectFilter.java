@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage;
  * in a way that leaves the undistorted pixels unaffected.
  * Not to be confused with {@link CenteredTransformFilter}.
  */
-public abstract class RotatedEffectFilter extends TransformFilter {
+public abstract class RotatingEffectFilter extends TransformFilter {
     private double centerX;
     private double centerY;
 
@@ -35,7 +35,7 @@ public abstract class RotatedEffectFilter extends TransformFilter {
     private double sin = 0;
     private double cos = 1;
 
-    protected RotatedEffectFilter(String filterName) {
+    protected RotatingEffectFilter(String filterName) {
         super(filterName);
     }
 

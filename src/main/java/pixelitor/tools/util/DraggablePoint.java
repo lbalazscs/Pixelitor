@@ -430,9 +430,7 @@ public class DraggablePoint extends Point2D.Double {
         return "Move Handle";
     }
 
-    // used only after deserializing from a pxc file
     public void setView(View view) {
-        assert view != null;
         this.view = view;
     }
 

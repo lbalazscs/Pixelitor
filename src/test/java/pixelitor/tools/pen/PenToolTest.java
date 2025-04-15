@@ -56,9 +56,8 @@ class PenToolTest {
         view = comp.getView(); // a mock view
         Tools.PEN.reset();
         Tools.PEN.activate();
-        Tools.PEN.toolActivated();
+        Tools.PEN.toolActivated(view);
 
-        Tools.PEN.setPath(null);
         assertThat(Tools.PEN)
             .isActive()
             .pathActionAreNotEnabled();
@@ -254,8 +253,6 @@ class PenToolTest {
 
         // there are no edits yet, because this was not created with the build API
         History.assertNumEditsIs(0);
-
-        Tools.PEN.setPath(path); // ensure that there are no errors while deactivating
 
         Tools.NODE.activate();
 

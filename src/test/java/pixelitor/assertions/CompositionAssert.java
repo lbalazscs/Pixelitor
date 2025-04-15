@@ -27,7 +27,10 @@ import pixelitor.tools.pen.Path;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -118,6 +121,19 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         }
 
         return this;
+    }
+
+    /**
+     * Verifies that the composition contains exactly the given direct child layers, in the specified order.
+     */
+    public CompositionAssert layersAre(Layer... expectedLayers) {
+        isNotNull();
+        List<Layer> actualLayers = actual.levelStream().collect(Collectors.toList());
+        assertThat(actualLayers)
+            .withFailMessage("Expected composition '%s' to contain exactly layers %s in order, but found %s.",
+                actual.getName(), Arrays.toString(expectedLayers), actualLayers)
+            .containsExactly(expectedLayers);
+        return myself;
     }
 
     public CompositionAssert layerNHasMask(int n) {

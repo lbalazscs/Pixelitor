@@ -86,10 +86,12 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     // the current width/height of the rotated rectangle in image space
     private final DDimension rotatedImSize;
 
-    // Keep track of the rotated status because pixel
-    // snapping should not work after rotating.
+    // a flag indicating if any rotation has been applied
+    // (used to disable pixel snapping when the box is rotated)
     private boolean rotated;
 
+    // the current rotation angle of the box relative to
+    // its original, unrotated state
     private double angle = 0.0;
     private double sin = 0.0;
     private double cos = 1.0;
@@ -146,8 +148,9 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             swLoc, view, SW_OFFSET, SW_OFFSET_IO);
 
         // initialize the rotation handle
-        Point2D center = Geometry.midPoint(ne, sw);
-        PPoint rotPos = new PPoint(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE, view);
+        double rotX = (nw.getX() + ne.getX()) / 2;
+        double rotY = ne.getY() - ROT_HANDLE_DISTANCE;
+        PPoint rotPos = new PPoint(rotX, rotY, view);
         rot = new RotationHandle("rot", this, rotPos, view);
 
         initBox();
@@ -259,26 +262,32 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         }
     }
 
-    // rotates the box to the given angle
+    /**
+     * Programmatically rotates the box to the given angle.
+     */
     public void rotateTo(double angle, AngleUnit unit) {
         saveState(); // so that transform works
         double rad = unit.toRadians(angle);
         double angleBefore = this.angle;
         setAngle(rad);
-        Point2D c = getCenter();
-        double cx = c.getX();
-        double cy = c.getY();
-        coTransform(AffineTransform.getRotateInstance(rad - angleBefore, cx, cy));
+        Point2D pivot = getPivot();
+        coTransform(AffineTransform.getRotateInstance(rad - angleBefore,
+            pivot.getX(), pivot.getY()));
         setRotated(true);
     }
 
     /**
-     * Returns an AffineTransform in image space that would transform
-     * the box from its original position into the current position
+     * Returns the AffineTransform in image space that is needed to map
+     * the box from its original position into the current position.
      */
     public AffineTransform calcImTransform() {
+        // The position of the pivot point is irrelevant here, because
+        // we don't care how the box reached its current state.
+        // The pivot point is used only for the rotation logic.
+
         AffineTransform at = new AffineTransform();
 
+        // uses the current North-West corner as a fixed reference point
         if (angle != 0) {
             // rotate with origin at NW
             at.rotate(angle, nw.imX, nw.imY);
@@ -321,6 +330,9 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         return rotatedImSize;
     }
 
+    /**
+     * Upates everything else after the corner handles have been moved/updated.
+     */
     public void cornerHandlesMoved() {
         updateEdgePositions();
 
@@ -347,6 +359,10 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         target.imTransform(calcImTransform());
     }
 
+    /**
+     * Ensures that the rotation handle is attached correctly
+     * above the (possibly rotated) top edge.
+     */
     private void updateRotLocation() {
         Point2D northCenter = Geometry.midPoint(nw, ne);
 
@@ -407,7 +423,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         } else {
             activePoint = null;
             if (contains(x, y)) {
-                startWholeBoxDrag(e.getCoX(), e.getCoY());
+                prepareWholeBoxDrag(e.getCoX(), e.getCoY());
                 return true;
             }
         }
@@ -415,6 +431,9 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         return false;
     }
 
+    /**
+     * Handles a mouse press event specifically on one of the box's handles.
+     */
     public void mousePressedOn(DraggablePoint handle, double x, double y) {
         View.toolSnappingChanged(!rotated && handle.shouldSnap(), false);
 
@@ -424,7 +443,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         view.repaint();
     }
 
-    public void startWholeBoxDrag(double coX, double coY) {
+    public void prepareWholeBoxDrag(double coX, double coY) {
         wholeBoxDrag = true;
         wholeBoxDragStartCoX = coX;
         wholeBoxDragStartCoY = coY;
@@ -559,7 +578,11 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         target.updateUI(view);
     }
 
-    public Point2D getCenter() {
+    /**
+     * Returns the pivot point for rotations.
+     */
+    public Point2D getPivot() {
+        // currently the pivot point is always at the center of the box
         return Geometry.midPoint(nw, se);
     }
 
@@ -760,8 +783,8 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         History.add(createMovementEdit(comp, editName));
     }
 
-    public void startMovement() {
-        startWholeBoxDrag(0, 0);
+    public void prepareMovement() {
+        prepareWholeBoxDrag(0, 0);
     }
 
     public void moveWhileDragging(double relImX, double relImY) {
@@ -771,7 +794,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         dragBox(scaling * relImX, scaling * relImY);
     }
 
-    public void endMovement() {
+    public void finalizeMovement() {
         // no need to record an undo event here, because
         // createMovementEdit() will take care of that
         wholeBoxDrag = false;

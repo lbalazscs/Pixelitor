@@ -120,11 +120,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public void updateChildrenPanel() {
-        if (!(layer instanceof LayerHolder holder)) {
+        if (!(layer instanceof CompositeLayer holder)) {
             if (childrenPanel != null) {
-                // Only layer holders should have a children panel.
+                // Only composite layers should have a children panel.
                 // However, after holder rasterization we could
-                // have one for other layers, so remove it.
+                // have one for the resulting image layer, so remove it.
                 remove(childrenPanel);
                 childrenPanel = null;
                 children.clear();
@@ -136,8 +136,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             // Ensure that we have an empty children panel.
             // The child GUIs will be added later.
             if (childrenPanel == null) {
-                VerticalLayout innerLayout = new VerticalLayout();
-                childrenPanel = new JPanel(innerLayout);
+                childrenPanel = new JPanel(new VerticalLayout());
             } else {
                 childrenPanel.removeAll();
             }
@@ -257,7 +256,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     public static void selectLayerIfIconClicked(MouseEvent e) {
         // By adding a mouse listener to the JLabel, it loses the
-        // ability to automatically transmit the mouse events to its
+        // ability to automatically forward the mouse events to its
         // parent, and therefore the layer cannot be selected anymore
         // by left-clicking on this label. This is the workaround.
         JLabel source = (JLabel) e.getSource();
@@ -444,6 +443,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         assert layer.hasRasterThumbnail();
 
         // the synchronous update avoids starting a filter twice
+        // TODO dubious design
         boolean synchronousUpdate = layer instanceof CompositeLayer;
 
         if (synchronousUpdate) {
@@ -624,7 +624,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (!layer.getTopLevelLayer().isActiveRoot()) {
+        if (!layer.getTopLevelLayer().isActiveTopLevel()) {
             // no custom painting if not selected or semi-selected
             return;
         }

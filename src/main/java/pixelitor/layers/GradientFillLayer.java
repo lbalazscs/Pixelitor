@@ -133,7 +133,7 @@ public class GradientFillLayer extends ContentLayer {
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
         if (gradient != null) {
-            AffineTransform at = comp.getCanvas().createImTransformToSize(newSize);
+            AffineTransform at = comp.getCanvas().createImTransformToFit(newSize);
             gradient.imTransform(at);
             cachedImage = null;
         }
@@ -211,10 +211,10 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public void startMovement() {
-        super.startMovement();
+    public void prepareMovement() {
+        super.prepareMovement();
         if (gradient != null) {
-            gradient.startMovement();
+            gradient.prepareMovement();
             backupGradient = gradient.copy();
         }
     }
@@ -228,10 +228,10 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public PixelitorEdit endMovement() {
-        PixelitorEdit edit = super.endMovement();
+    public PixelitorEdit finalizeMovement() {
+        PixelitorEdit edit = super.finalizeMovement();
         if (gradient != null) {
-            gradient.endMovement();
+            gradient.finalizeMovement();
             updateIconImage();
         }
         return edit;

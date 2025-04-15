@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,28 +44,28 @@ public class Messages {
         Messages.msgHandler = Objects.requireNonNull(msgHandler);
     }
 
-    public static void showInfo(String title, String message) {
-        msgHandler.showInfo(title, message, null);
+    public static void showInfo(String title, String msg) {
+        msgHandler.showInfo(title, msg, null);
     }
 
-    public static void showInfo(String title, String message, Component parent) {
-        msgHandler.showInfo(title, message, parent);
+    public static void showInfo(String title, String msg, Component parent) {
+        msgHandler.showInfo(title, msg, parent);
     }
 
-    public static void showWarning(String title, String message) {
-        msgHandler.showWarning(title, message, null);
+    public static void showWarning(String title, String msg) {
+        msgHandler.showWarning(title, msg, null);
     }
 
-    public static void showWarning(String title, String message, Component parent) {
-        msgHandler.showWarning(title, message, parent);
+    public static void showWarning(String title, String msg, Component parent) {
+        msgHandler.showWarning(title, msg, parent);
     }
 
-    public static void showError(String title, String message) {
-        msgHandler.showError(title, message, null);
+    public static void showError(String title, String msg) {
+        msgHandler.showError(title, msg, null);
     }
 
-    public static void showError(String title, String message, Component parent) {
-        msgHandler.showError(title, message, parent);
+    public static void showError(String title, String msg, Component parent) {
+        msgHandler.showError(title, msg, parent);
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -84,23 +84,8 @@ public class Messages {
         msgHandler.showException(exception, srcThread);
     }
 
-    public static void showSmartObjectUnsupportedWarning(String what) {
-        msgHandler.showInfo("Feature Not Supported",
-            what + " isn't yet supported if one of the layers is a smart object.", null);
-    }
-
-    public static void showFileOpenedMessage(Composition comp) {
-        showStatusMessage("<b>" + comp.getName() + "</b> ("
-            + comp.getCanvas().getSizeString() + ") was opened.");
-    }
-
-    public static void showFileSavedMessage(File file) {
-        showStatusMessage("<b>" + file.getAbsolutePath() + "</b> was saved.");
-    }
-
-    public static void showBulkSaveMessage(int numFiles, File dir) {
-        assert dir.isDirectory();
-        showStatusMessage(numFiles + " files saved to <b>" + dir.getAbsolutePath() + "</b>");
+    public static boolean showYesNoQuestion(String title, String msg) {
+        return msgHandler.showYesNoQuestion(title, msg);
     }
 
     /**
@@ -131,7 +116,7 @@ public class Messages {
         if (!RandomGUITest.isRunning()) {
             String msg = format("The active layer \"%s\" isn't an image layer.",
                 layer.getName());
-            showError("Not an image layer", msg);
+            showError("Not an Image Layer", msg);
         }
     }
 
@@ -139,10 +124,6 @@ public class Messages {
         String msg = format("The active layer \"%s\" isn't an image layer or mask.",
             layer.getName());
         showError("Not an image layer or mask", msg);
-    }
-
-    public static boolean showYesNoQuestion(String title, String msg) {
-        return msgHandler.showYesNoQuestion(title, msg);
     }
 
     // Shows a performance timing message in the status bar.
@@ -175,5 +156,24 @@ public class Messages {
             "<br><br>%s can't be used on layer groups." +
             "<br>Pass through groups can't even be rasterized.";
         showError("Layer Group", msg.formatted(group.getName(), name));
+    }
+
+    public static void showSmartObjectUnsupportedWarning(String what) {
+        msgHandler.showInfo("Feature Not Supported",
+            what + " isn't yet supported if one of the layers is a smart object.", null);
+    }
+
+    public static void showFileOpenedMessage(Composition comp) {
+        showStatusMessage("<b>" + comp.getName() + "</b> ("
+            + comp.getCanvas().getSizeString() + ") was opened.");
+    }
+
+    public static void showFileSavedMessage(File file) {
+        showStatusMessage("<b>" + file.getAbsolutePath() + "</b> was saved.");
+    }
+
+    public static void showBulkSaveMessage(int numFiles, File dir) {
+        assert dir.isDirectory();
+        showStatusMessage(numFiles + " files saved to <b>" + dir.getAbsolutePath() + "</b>");
     }
 }

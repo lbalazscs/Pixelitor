@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,7 +49,7 @@ public class BlendingModePanel extends JPanel {
     // to a layer group, which has an extra "Pass Through" blending mode)
     protected final ComboBoxModel<BlendingMode> layerModel;
 
-    public BlendingModePanel(boolean detailedLabel) {
+    public BlendingModePanel(boolean forTools) {
         super(new FlowLayout(LEFT));
 
         opacityLabel = new JLabel(OPACITY_LABEL_TEXT);
@@ -57,11 +57,7 @@ public class BlendingModePanel extends JPanel {
         opacityDDSlider = new DropDownSlider(0, 100, 100);
         add(opacityDDSlider);
 
-        if (detailedLabel) {
-            bmLabel = new JLabel("%, Blending Mode:", SwingConstants.LEFT);
-        } else {
-            bmLabel = new JLabel("%", SwingConstants.LEFT);
-        }
+        bmLabel = new JLabel(forTools ? "%, Blending Mode:" : "%", SwingConstants.LEFT);
         add(bmLabel);
 
         layerModel = new DefaultComboBoxModel<>(BlendingMode.LAYER_MODES);

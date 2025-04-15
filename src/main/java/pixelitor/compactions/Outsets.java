@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -84,6 +84,9 @@ public class Outsets {
         bottom = -bottom;
     }
 
+    /**
+     * Resizes the given canvas to accommodate these outsets.
+     */
     public void resizeCanvas(Canvas canvas, View view) {
         int newWidth = canvas.getWidth() + left + right;
         int newHeight = canvas.getHeight() + top + bottom;

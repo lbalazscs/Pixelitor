@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ import java.awt.geom.Point2D;
 import static java.lang.String.format;
 
 /**
- * The "Pixelitor Point" represents an immutable point on an image,
- * both in component (mouse) coordinates and image coordinates.
+ * The "Pixelitor Point" represents an immutable point on an image, both
+ * in component (mouse) space coordinates and image space coordinates.
  * <p>
  * Component coordinates are relative to the {@link View}, whereas
  * image coordinates are relative to the {@link Canvas} (not necessarily

@@ -17,12 +17,9 @@
 
 package pixelitor.tools.selection;
 
-import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
 import pixelitor.Views;
 import pixelitor.gui.utils.VectorIcon;
-import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.util.OverlayType;
@@ -75,40 +72,7 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        if (drag.isClick()) { // will be handled by mouseClicked
-            resetCombinator();
-            return;
-        }
-
-        Composition comp = e.getComp();
-        Selection draftSelection = comp.getDraftSelection();
-        if (draftSelection == null) {
-            // can happen, if we called stopBuildingSelection()
-            // for some exceptional reason
-            return;
-        }
-
-
-        notPolygonalDragFinished(e);
-
-        altMeansSubtract = false;
-
-        assert ConsistencyChecks.selectionShapeIsNotEmpty(comp) : "selection is empty";
-        assert ConsistencyChecks.selectionIsInsideCanvas(comp) : "selection is outside";
-    }
-
-    private void notPolygonalDragFinished(PMouseEvent e) {
-        Composition comp = e.getComp();
-        resetCombinator();
-
-        boolean startFromCenter = !altMeansSubtract && e.isAltDown();
-        drag.setExpandFromCenter(startFromCenter);
-
-        selectionBuilder.updateDraftSelection(drag, comp, e);
-        selectionBuilder.combineShapes(comp);
-        stopBuildingSelection();
-
-        assert !comp.hasDraftSelection();
+        marqueeLassoDragFinished(e);
     }
 
     @Override
@@ -117,26 +81,6 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
         super.mouseClicked(e);
 
         cancelSelection(comp);
-    }
-
-    private void cancelSelection(Composition comp) {
-        if (comp.hasSelection() || comp.hasDraftSelection()) {
-            comp.deselect(true);
-        }
-        assert !comp.hasDraftSelection() : "draft selection is = " + comp.getDraftSelection();
-        assert !comp.hasSelection() : "selection is = " + comp.getSelection();
-
-        altMeansSubtract = false;
-
-        if (AppMode.isDevelopment()) {
-            ConsistencyChecks.selectionActionsEnabledCheck(comp);
-        }
-    }
-
-    @Override
-    public void escPressed() {
-        // pressing Esc should work the same as clicking outside the selection
-        Views.onActiveComp(this::cancelSelection);
     }
 
     @Override
@@ -161,15 +105,6 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     @Override
     protected OverlayType getDragDisplayType() {
         return OverlayType.WIDTH_HEIGHT;
-    }
-
-    @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
-
-        // otherwise in polygonal mode unfinished selections
-        // remain visible after switching to another tool
-        stopBuildingSelection();
     }
 
     @Override

@@ -55,15 +55,10 @@ public interface LayerHolder extends Debuggable {
     Layer getLayer(int index);
 
     /**
-     * Adds a layer (only) to the list of layers maintained by this holder, at a specific index.
-     */
-    void addLayerToList(Layer newLayer, int index);
-
-    /**
      * Recursively checks if this layer holder contains
-     * the given layer at any nesting level.
+     * the given layer at the top nesting level.
      */
-    boolean containsLayer(Layer layer);
+    boolean listContainsLayer(Layer layer);
 
     /**
      * Recursively checks if this layer holder contains
@@ -87,7 +82,7 @@ public interface LayerHolder extends Debuggable {
     }
 
     /**
-     * Adds a layer to this holder.
+     * Adds a layer to this holder, updating the UI, but without history.
      */
     default void add(Layer newLayer) {
         adder().add(newLayer);
@@ -96,7 +91,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Moves the currently active layer up or down in the layer stack.
      */
-    default void moveActiveLayer(boolean up) {
+    default void reorderActiveLayer(boolean up) {
         assert isHolderOfActiveLayer();
         Layer activeLayer = getComp().getActiveLayer();
         String editName = up ? LayerMoveAction.RAISE_LAYER : LayerMoveAction.LOWER_LAYER;
@@ -134,8 +129,8 @@ public interface LayerHolder extends Debuggable {
      */
     default void moveLayerInto(Layer layer, LayerHolder targetHolder, int targetIndex, String editName) {
         assert targetHolder != this;
-        assert containsLayer(layer);
-        assert !targetHolder.containsLayer(layer);
+        assert listContainsLayer(layer);
+        assert !targetHolder.listContainsLayer(layer);
         assert targetIndex >= 0 && targetIndex <= targetHolder.getNumLayers();
 
         if (editName != null) {
@@ -221,22 +216,10 @@ public interface LayerHolder extends Debuggable {
      */
     void insertLayer(Layer layer, int index, boolean update);
 
-
-    /**
-     * Removes a layer (only) from the layer list.
-     */
-    void removeLayerFromList(Layer layer);
-
     /**
      * Deletes a layer from this holder.
      */
     void deleteLayer(Layer layer, boolean addToHistory);
-
-    /**
-     * This form of layer deletion allows to temporarily violate the
-     * constraint that some holders must always contain at least one layer.
-     */
-    void deleteTemporarily(Layer layer);
 
     /**
      * Returns whether this holder can be empty,
@@ -252,7 +235,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Selects the layer above the current one.
      */
-    default void raiseLayerSelection() {
+    default void selectLayerAbove() {
         Composition comp = getComp();
         Layer activeLayer = comp.getActiveLayer();
         Layer newTarget;
@@ -283,7 +266,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Selects the layer below the current one.
      */
-    default void lowerLayerSelection() {
+    default void selectLayerBelow() {
         Composition comp = getComp();
         int oldIndex = indexOf(comp.getActiveLayer());
         int newIndex = oldIndex - 1;
@@ -397,7 +380,7 @@ public interface LayerHolder extends Debuggable {
             movedLayers.add(getLayer(index));
         }
         for (Layer layer : movedLayers) {
-            deleteTemporarily(layer);
+            deleteInternal(layer);
         }
 
         LayerGroup newGroup;
@@ -418,7 +401,7 @@ public interface LayerHolder extends Debuggable {
         adder().atIndex(newIndex).add(newGroup);
 
         if (addHistory) {
-            History.add(new GroupingEdit(this, newGroup, indices, true));
+            History.add(new GroupingEdit(this, newGroup, indices, null, true));
         }
     }
 
@@ -433,4 +416,23 @@ public interface LayerHolder extends Debuggable {
     default LayerAdder adder() {
         return new LayerAdder(this);
     }
+
+    /**
+     * Adds a layer (only) to the list of layers maintained by this holder, at a specific index.
+     * This is just an internal helper method.
+     */
+    void addLayerToList(Layer newLayer, int index);
+
+    /**
+     * Removes a layer (only) from the layer list.
+     * This is just an internal helper method.
+     */
+    void removeLayerFromList(Layer layer);
+
+    /**
+     * This form of layer deletion allows to temporarily violate the
+     * constraint that some holders must always contain at least one layer.
+     * This is just an internal helper method.
+     */
+    void deleteInternal(Layer layer);
 }

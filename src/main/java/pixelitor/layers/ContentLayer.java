@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -100,10 +100,10 @@ public abstract class ContentLayer extends Layer {
     public abstract int getPixelAtPoint(Point p);
 
     @Override
-    public void startMovement() {
+    public void prepareMovement() {
         tmpTx = 0;
         tmpTy = 0;
-        super.startMovement();
+        super.prepareMovement();
     }
 
     @Override
@@ -114,7 +114,7 @@ public abstract class ContentLayer extends Layer {
     }
 
     @Override
-    public PixelitorEdit endMovement() {
+    public PixelitorEdit finalizeMovement() {
         int prevTx = translationX;
         int prevTy = translationY;
 

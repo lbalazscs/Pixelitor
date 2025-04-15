@@ -59,7 +59,7 @@ class CompositionTest {
     }
 
     @Test
-    void addNewEmptyLayer() {
+    void addNewEmptyImageLayer() {
         assertThat(comp)
             .isNotDirty()
             .numLayersIs(2)
@@ -138,7 +138,7 @@ class CompositionTest {
     }
 
     @Test
-    void addLayerInInitMode() {
+    void addLayerWithoutUI() {
         assertThat(comp)
             .isNotDirty()
             .numLayersIs(2);
@@ -333,14 +333,15 @@ class CompositionTest {
     }
 
     @Test
-    void movingTheActiveLayer() {
+    @DisplayName("move the active layer")
+    void moveActiveLayer() {
         // check initial state
         assertThat(comp)
             .isNotDirty()
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.getActiveHolder().moveActiveLayer(true);
+        comp.getActiveHolder().reorderActiveLayer(true);
         // nothing changes as the active layer is already at the top
         assertThat(comp)
             .isNotDirty()
@@ -348,7 +349,7 @@ class CompositionTest {
             .secondLayerIsActive();
         History.assertNumEditsIs(0);
 
-        comp.getActiveHolder().moveActiveLayer(false);
+        comp.getActiveHolder().reorderActiveLayer(false);
         assertThat(comp)
             .isDirty()
             .layerNamesAre("layer 2", "layer 1")
@@ -364,7 +365,7 @@ class CompositionTest {
             .layerNamesAre("layer 2", "layer 1")
             .firstLayerIsActive();
 
-        comp.getActiveHolder().moveActiveLayer(true);
+        comp.getActiveHolder().reorderActiveLayer(true);
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -426,6 +427,7 @@ class CompositionTest {
     }
 
     @Test
+    @DisplayName("lower/raise layer selection")
     void moveLayerSelection() {
         // initial state
         assertThat(comp)
@@ -433,7 +435,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.getActiveHolder().lowerLayerSelection(); // make the first layer active
+        comp.getActiveHolder().selectLayerBelow(); // make the first layer active
         assertThat(comp)
             .isDirty()
             .layerNamesAre("layer 1", "layer 2")
@@ -449,7 +451,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .firstLayerIsActive();
 
-        comp.getActiveHolder().raiseLayerSelection(); // make the second layer active
+        comp.getActiveHolder().selectLayerAbove(); // make the second layer active
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -466,10 +468,10 @@ class CompositionTest {
     }
 
     @Test
-    void generateLayerName() {
-        assertThat(comp.generateLayerName()).isEqualTo("layer 1");
-        assertThat(comp.generateLayerName()).isEqualTo("layer 2");
-        assertThat(comp.generateLayerName()).isEqualTo("layer 3");
+    void generateNewLayerName() {
+        assertThat(comp.generateNewLayerName()).isEqualTo("layer 1");
+        assertThat(comp.generateNewLayerName()).isEqualTo("layer 2");
+        assertThat(comp.generateNewLayerName()).isEqualTo("layer 3");
         assertThat(comp)
             .numLayersIs(2) // didn't change
             .invariantsAreOK();
@@ -548,13 +550,13 @@ class CompositionTest {
     }
 
     @Test
-    void addNewLayerFromComposite() {
+    void addNewLayerFromVisible() {
         assertThat(comp)
             .isNotDirty()
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.addNewLayerFromComposite();
+        comp.addNewLayerFromVisible();
 
         assertThat(comp)
             .isDirty()
@@ -621,7 +623,7 @@ class CompositionTest {
     }
 
     @Test
-    void createSelectionFromShape() {
+    void createSelectionFrom() {
         assertThat(comp).doesNotHaveSelection();
 
         Rectangle rect = new Rectangle(3, 3, 5, 5);
@@ -813,7 +815,7 @@ class CompositionTest {
     }
 
     @Test
-    void intersectSelection() {
+    void intersectSelectionWith() {
         var selectionShape = new Rectangle(4, 4, 8, 4);
         TestHelper.setSelection(comp, selectionShape);
         assertThat(comp)
@@ -821,13 +823,13 @@ class CompositionTest {
             .selectionBoundsIs(selectionShape);
 
         var cropRect = new Rectangle(2, 2, 4, 4);
-        comp.intersectSelection(cropRect);
+        comp.intersectSelectionWith(cropRect);
 
         assertThat(comp)
             .hasSelection()
             .selectionBoundsIs(new Rectangle(4, 4, 2, 2));
 
-        var tx = Crop.createCanvasTransform(cropRect);
+        var tx = Crop.createCropTransform(cropRect);
         comp.imCoordsChanged(tx, false, comp.getView());
 
         assertThat(comp)

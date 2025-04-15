@@ -252,8 +252,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void startMovement() {
-        super.startMovement();
+    public void prepareMovement() {
+        super.prepareMovement();
         if (painter.isOnPath()) {
             comp.getActivePath().getSubPath(0).saveImTransformRefPoints();
         }

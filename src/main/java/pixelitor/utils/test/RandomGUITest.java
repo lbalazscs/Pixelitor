@@ -630,8 +630,8 @@ public class RandomGUITest {
         if (rand.nextBoolean()) {
             view.setZoom(randomZoomLevel);
         } else {
-            Point mousePos = randomPointOn(view);
-            view.setZoom(randomZoomLevel, mousePos);
+            Point focusPos = randomCoPointOn(view);
+            view.setZoom(randomZoomLevel, focusPos);
         }
     }
 
@@ -645,17 +645,11 @@ public class RandomGUITest {
         return level;
     }
 
-    private static Point randomPointOn(View view) {
-        Rectangle vr = view.getVisibleRegion();
-        int randX = vr.x;
-        if (vr.width >= 2) {
-            randX = Rnd.intInRange(vr.x, vr.x + vr.width);
-        }
-        int randY = vr.y;
-        if (vr.height >= 2) {
-            randY = Rnd.intInRange(vr.y, vr.y + vr.height);
-        }
-        return new Point(randX, randY);
+    /**
+     * Generates a random component-space point inside the visible region of the given view.
+     */
+    private static Point randomCoPointOn(View view) {
+        return Rnd.pointInRect(view.getVisibleRegion());
     }
 
     private void randomZoomOut() {
@@ -666,7 +660,7 @@ public class RandomGUITest {
             if (rand.nextBoolean()) {
                 view.setZoom(newZoom);
             } else {
-                Point mousePos = randomPointOn(view);
+                Point mousePos = randomCoPointOn(view);
                 view.setZoom(newZoom, mousePos);
             }
         }
@@ -795,7 +789,7 @@ public class RandomGUITest {
         if (comp == null) {
             return false;
         }
-        return comp.hasActivePath() && comp.canDrawOnActiveLayer();
+        return comp.hasActivePath() && comp.canDrawOnActiveTarget();
     }
 
     private void randomRotateFlip() {
@@ -843,22 +837,22 @@ public class RandomGUITest {
 
     private void raiseLayerSelection(Composition comp) {
         log("layer selection change: raise selection");
-        comp.getActiveHolder().raiseLayerSelection();
+        comp.getActiveHolder().selectLayerAbove();
     }
 
     private void lowerLayerSelection(Composition comp) {
         log("layer selection change: lower selection");
-        comp.getActiveHolder().lowerLayerSelection();
+        comp.getActiveHolder().selectLayerBelow();
     }
 
     private void moveActiveLayerUp(Composition comp) {
         log("layer order change: active up");
-        comp.getActiveHolder().moveActiveLayer(true);
+        comp.getActiveHolder().reorderActiveLayer(true);
     }
 
     private void moveActiveLayerDown(Composition comp) {
         log("layer order change: active down");
-        comp.getActiveHolder().moveActiveLayer(false);
+        comp.getActiveHolder().reorderActiveLayer(false);
     }
 
     private void layerMerge() {

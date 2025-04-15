@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -116,7 +116,7 @@ public class Resize implements CompAction {
         assert view != null;
 
         Canvas newCanvas = newComp.getCanvas();
-        var canvasTransform = newCanvas.createImTransformToSize(newCanvasSize);
+        var canvasTransform = newCanvas.createImTransformToFit(newCanvasSize);
         newComp.imCoordsChanged(canvasTransform, false, view);
         newCanvas.resize(newCanvasSize.width, newCanvasSize.height, view, false);
 

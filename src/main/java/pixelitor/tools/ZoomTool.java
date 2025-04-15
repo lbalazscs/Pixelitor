@@ -131,8 +131,8 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
         reset();
     }
 

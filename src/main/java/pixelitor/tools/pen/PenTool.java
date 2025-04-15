@@ -23,7 +23,6 @@ import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.VectorIcon;
-import pixelitor.tools.Tool;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
@@ -61,8 +60,6 @@ public class PenTool extends PathTool {
     private final JCheckBox rubberBandCB = new JCheckBox("", true);
     private boolean showRubberBand = true;
 
-    private Path path; // the path being built
-
     // The last mouse position. Important when the moving point
     // has to be restored after an undo
     private double lastX;
@@ -93,14 +90,13 @@ public class PenTool extends PathTool {
     @Override
     public void reset() {
         Composition comp = Views.getActiveComp();
-        path = comp == null ? null : comp.getActivePath();
-        setActionsEnabled(path != null);
+        setActionsEnabled(comp == null ? false : comp.hasActivePath());
     }
 
     @Override
-    protected void toolActivated() {
-        super.toolActivated();
-        View view = Views.getActive();
+    protected void toolActivated(View view) {
+        super.toolActivated(view);
+        Path path = null;
         if (view != null) {
             Composition comp = view.getComp();
             path = comp.getActivePath();
@@ -118,33 +114,20 @@ public class PenTool extends PathTool {
     }
 
     @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
 
-        assert checkInvariants();
-
-        if (path != null && !path.getActiveSubpath().isFinished()) {
-            path.finishActiveSubpath(false);
-        } else {
-            assertStateIs(IDLE);
-        }
-
+        Path path = view.getComp().getActivePath();
         if (path != null) {
-            lastActive = null;
-            path = null;
-            Views.repaintActive(); // visually hide the path
-        }
-    }
+            assert path.checkInvariants();
+            if (!path.getActiveSubpath().isFinished()) {
+                path.finishActiveSubpath(false);
+            } else {
+                path.assertStateIs(IDLE);
+            }
 
-    private void assertStateIs(BuildState s) {
-        if (path == null) {
-            if (s != IDLE) {
-                throw new IllegalStateException("null path");
-            }
-        } else {
-            if (path.getBuildState() != s) {
-                throw new IllegalStateException("state = " + path.getBuildState());
-            }
+            lastActive = null;
+            Views.repaintActive(); // visually hide the path
         }
     }
 
@@ -154,15 +137,17 @@ public class PenTool extends PathTool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
+        Composition comp = e.getComp();
+        Path path = comp.getActivePath();
+
         if (path == null) {
-            assert !e.getComp().hasActivePath();
-            path = new Path(e.getComp(), true);
-            e.getComp().setActivePath(path);
+            path = new Path(comp, true);
+            comp.setActivePath(path);
         }
 
         BuildState state = path.getBuildState();
         if (state == DRAGGING_LAST_CONTROL) {
-            state = handleUnexpectedDragState("mousePressed", e.getView());
+            state = handleUnexpectedDragState("mousePressed", e.getView(), path);
         }
 
         double x = e.getCoX();
@@ -172,11 +157,11 @@ public class PenTool extends PathTool {
 
         if (state == IDLE) {
             if (e.isControlDown()) {
-                if (handleCtrlPressBeforeSubpath(e.isAltDown(), x, y)) {
+                if (handleCtrlPressBeforeSubpath(e.isAltDown(), x, y, path)) {
                     return;
                 }
             } else if (e.isAltDown()) {
-                if (handleAltPressBeforeSubpath(x, y)) {
+                if (handleAltPressBeforeSubpath(x, y, path)) {
                     return;
                 }
             }
@@ -191,7 +176,7 @@ public class PenTool extends PathTool {
             }
 
             if (e.isControlDown()) {
-                handleCtrlPressWhileMoving(e, e.isAltDown(), x, y);
+                handleCtrlPressWhileMoving(e, e.isAltDown(), x, y, path);
                 return;
             }
 
@@ -200,10 +185,10 @@ public class PenTool extends PathTool {
                 DraggablePoint handle = path.findHandleAt(x, y, true);
                 if (handle != null) {
                     if (handle instanceof ControlPoint cp) {
-                        breakAndStartMoving(cp, x, y);
+                        breakAndStartMoving(cp, x, y, path);
                         return;
                     } else if (handle instanceof AnchorPoint ap) {
-                        startDraggingOutNewHandles(ap, x, y);
+                        startDraggingOutNewHandles(ap, x, y, path);
                         return;
                     }
                 } else {
@@ -215,14 +200,14 @@ public class PenTool extends PathTool {
                 e.repaint();
                 return;
             }
-            finalizeMovingPoint(x, y, altDownHitNothing, e.isShiftDown());
+            finalizeMovingPoint(x, y, altDownHitNothing, e.isShiftDown(), path);
         }
 
         path.setBuildState(DRAGGING_LAST_CONTROL);
         assert path.checkInvariants();
     }
 
-    private void finalizeMovingPoint(double x, double y, boolean altDownHitNothing, boolean shiftDown) {
+    private static void finalizeMovingPoint(double x, double y, boolean altDownHitNothing, boolean shiftDown, Path path) {
         path.getMovingPoint().mouseReleased(x, y, shiftDown);
         AnchorPoint anchor = path.convertMovingPointToAnchor();
         if (altDownHitNothing) {
@@ -231,58 +216,58 @@ public class PenTool extends PathTool {
         anchor.ctrlOut.mousePressed(x, y);
     }
 
-    private boolean handleCtrlPressBeforeSubpath(boolean altDown,
-                                                 double x, double y) {
+    private static boolean handleCtrlPressBeforeSubpath(boolean altDown,
+                                                        double x, double y, Path path) {
         // if we are over an old point, just move it
         DraggablePoint handle = path.findHandleAt(x, y, altDown);
         if (handle != null) {
-            startMovingPrevious(handle, x, y);
+            startMovingPrevious(handle, x, y, path);
             return true;
         }
         return false;
     }
 
-    private boolean handleAltPressBeforeSubpath(double x, double y) {
+    private static boolean handleAltPressBeforeSubpath(double x, double y, Path path) {
         // if only alt is down, then break the control points
         DraggablePoint handle = path.findHandleAt(x, y, true);
         if (handle != null) {
             if (handle instanceof ControlPoint cp) {
-                breakAndStartMoving(cp, x, y);
+                breakAndStartMoving(cp, x, y, path);
                 return true;
             } else if (handle instanceof AnchorPoint ap) {
-                startDraggingOutNewHandles(ap, x, y);
+                startDraggingOutNewHandles(ap, x, y, path);
                 return true;
             }
         }
         return false;
     }
 
-    private void handleCtrlPressWhileMoving(PMouseEvent e, boolean altDown,
-                                            double x, double y) {
+    private static void handleCtrlPressWhileMoving(PMouseEvent e, boolean altDown,
+                                                   double x, double y, Path path) {
         DraggablePoint handle = path.findHandleAt(x, y, altDown);
         if (handle != null) {
-            startMovingPrevious(handle, x, y);
+            startMovingPrevious(handle, x, y, path);
         } else {
             // control is down, but nothing was hit
             path.finishSubPathByCtrlClick(e.getComp());
         }
     }
 
-    private void startDraggingOutNewHandles(AnchorPoint ap, double x, double y) {
+    private static void startDraggingOutNewHandles(AnchorPoint ap, double x, double y, Path path) {
         ap.retractHandles();
         // drag the retracted handles out
         ap.setType(SYMMETRIC);
-        startMovingPrevious(ap.ctrlOut, x, y);
+        startMovingPrevious(ap.ctrlOut, x, y, path);
     }
 
-    private void breakAndStartMoving(ControlPoint cp, double x, double y) {
+    private static void breakAndStartMoving(ControlPoint cp, double x, double y, Path path) {
         cp.breakOrDragOut();
 
         // after breaking, move it as usual
-        startMovingPrevious(cp, x, y);
+        startMovingPrevious(cp, x, y, path);
     }
 
-    private void startMovingPrevious(DraggablePoint point, double x, double y) {
+    private static void startMovingPrevious(DraggablePoint point, double x, double y, Path path) {
         point.setActive(true);
         point.mousePressed(x, y);
         path.setBuildState(DRAG_EDITING_PREVIOUS);
@@ -290,6 +275,9 @@ public class PenTool extends PathTool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
+        Composition comp = e.getComp();
+        Path path = comp.getActivePath();
+
         if (path == null) {
             return;
         }
@@ -299,7 +287,7 @@ public class PenTool extends PathTool {
         }
 
         if (state.isMoving()) {
-            state = handleUnexpectedMoveState("mouseDragged", e.getView(), state);
+            state = handleUnexpectedMoveState("mouseDragged", e.getView(), state, path);
             if (state == IDLE) {
                 return;
             }
@@ -331,6 +319,9 @@ public class PenTool extends PathTool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
+        Composition comp = e.getComp();
+        Path path = comp.getActivePath();
+
         if (path == null) {
             return;
         }
@@ -340,7 +331,7 @@ public class PenTool extends PathTool {
         }
 
         if (state.isMoving()) {
-            state = handleUnexpectedMoveState("mouseReleased", e.getView(), state);
+            state = handleUnexpectedMoveState("mouseReleased", e.getView(), state, path);
             if (state == IDLE) {
                 return;
             }
@@ -393,12 +384,15 @@ public class PenTool extends PathTool {
 
     @Override
     public void mouseMoved(MouseEvent e, View view) {
+        Composition comp = view.getComp();
+        Path path = comp.getActivePath();
+
         if (path == null) {
             return;
         }
         BuildState state = path.getBuildState();
         if (state == DRAGGING_LAST_CONTROL) {
-            state = handleUnexpectedDragState("mouseMoved", view);
+            state = handleUnexpectedDragState("mouseMoved", view, path);
         }
 
         int x = e.getX();
@@ -436,7 +430,7 @@ public class PenTool extends PathTool {
         view.repaint();
     }
 
-    private BuildState handleUnexpectedDragState(String where, View view) {
+    private static BuildState handleUnexpectedDragState(String where, View view, Path path) {
         if (AppMode.isDevelopment()) {
             System.out.printf("PathBuilder::handleUnexpectedDragState: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
@@ -446,7 +440,7 @@ public class PenTool extends PathTool {
         return path.getBuildState();
     }
 
-    private BuildState handleUnexpectedMoveState(String where, View view, BuildState state) {
+    private static BuildState handleUnexpectedMoveState(String where, View view, BuildState state, Path path) {
         if (AppMode.isDevelopment()) {
             System.out.printf("PathBuilder::handleUnexpectedMoveState: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
@@ -471,6 +465,8 @@ public class PenTool extends PathTool {
 
     @Override
     public void coCoordsChanged(View view) {
+        Path path = view.getComp().getActivePath();
+
         if (path != null) {
             path.coCoordsChanged(view);
         }
@@ -487,6 +483,7 @@ public class PenTool extends PathTool {
         if (view == null) {
             return false;
         }
+        Path path = view.getComp().getActivePath();
         if (path == null) {
             // there's nothing to nudge
             return false;
@@ -523,30 +520,6 @@ public class PenTool extends PathTool {
         return new MovingPoint(lastX, lastY, last, last.getView());
     }
 
-    public Path getPath() {
-        return path;
-    }
-
-    public void setPath(Path path) {
-        this.path = path;
-    }
-
-    private boolean checkInvariants() {
-        if (path != null) {
-            path.checkInvariants();
-        }
-        Path compPath = Views.getActivePath();
-        if (compPath != null) {
-            compPath.checkInvariants();
-        }
-        if (path != compPath) {
-            throw new AssertionError("tool path (%s) != comp path (%s)".formatted(
-                path == null ? "null" : path.getId(),
-                compPath == null ? "null" : compPath.getId()));
-        }
-        return true;
-    }
-
     @Override
     public void saveStateTo(UserPreset preset) {
         super.saveStateTo(preset);
@@ -557,7 +530,6 @@ public class PenTool extends PathTool {
     @Override
     public void loadUserPreset(UserPreset preset) {
         super.loadUserPreset(preset);
-        path = Views.getActivePath();
 
         rubberBandCB.setSelected(preset.getBoolean(SHOW_RUBBER_BAND_TEXT));
     }
@@ -567,7 +539,7 @@ public class PenTool extends PathTool {
         return new BuildPathToolIcon();
     }
 
-    private static class BuildPathToolIcon extends Tool.ToolIcon {
+    private static class BuildPathToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on pen_tool.svg

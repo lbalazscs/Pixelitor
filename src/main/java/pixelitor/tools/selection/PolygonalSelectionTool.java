@@ -17,10 +17,8 @@
 
 package pixelitor.tools.selection;
 
-import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.Views;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
@@ -68,7 +66,7 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
             selectionBuilder.updateDraftSelection(e, comp);
             if (e.isRight()) {
                 selectionBuilder.combineShapes(comp);
-                stopBuildingSelection();
+                stopBuildingSelection(comp);
             }
         }
 
@@ -84,46 +82,15 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
             // finish polygonal for double-click
             selectionBuilder.updateDraftSelection(e, comp);
             selectionBuilder.combineShapes(comp);
-            stopBuildingSelection();
+            stopBuildingSelection(comp);
         } else {
             // ignore otherwise: will be handled in mouse released
         }
     }
 
-
-    @Override
-    public void escPressed() {
-        // pressing Esc should work the same as clicking outside the selection
-        Views.onActiveComp(this::cancelSelection);
-    }
-
-    private void cancelSelection(Composition comp) {
-        if (comp.hasSelection() || comp.hasDraftSelection()) {
-            comp.deselect(true);
-        }
-        assert !comp.hasDraftSelection() : "draft selection is = " + comp.getDraftSelection();
-        assert !comp.hasSelection() : "selection is = " + comp.getSelection();
-
-        altMeansSubtract = false;
-
-        if (AppMode.isDevelopment()) {
-            ConsistencyChecks.selectionActionsEnabledCheck(comp);
-        }
-    }
-
-
     @Override
     protected OverlayType getDragDisplayType() {
         return OverlayType.NONE;
-    }
-
-    @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
-
-        // otherwise in polygonal mode unfinished selections
-        // remain visible after switching to another tool
-        stopBuildingSelection();
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.View;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
@@ -37,7 +39,7 @@ public class AddSingleGuidePanel extends JPanel {
 
     private final RangeParam percents;
 
-    public AddSingleGuidePanel(Guides.Builder builder, boolean horizontal) {
+    private AddSingleGuidePanel(Guides.Builder builder, boolean horizontal) {
         this.builder = builder;
         this.horizontal = horizontal;
 
@@ -60,7 +62,7 @@ public class AddSingleGuidePanel extends JPanel {
         updatePreview.paramAdjusted(); // trigger initial preview
     }
 
-    public void createGuides(boolean preview) {
+    private void createGuides(boolean preview) {
         builder.build(preview, this::setup);
     }
 
@@ -73,5 +75,19 @@ public class AddSingleGuidePanel extends JPanel {
             guides.addVerRelative(percentage);
             guides.setName(format("vertical at %.2f", percentage));
         }
+    }
+
+    public static void showDialog(View view,
+                                  boolean horizontal) {
+        Guides.Builder builder = new Guides.Builder(view, false);
+        AddSingleGuidePanel panel = new AddSingleGuidePanel(builder, horizontal);
+        String dialogTitle = horizontal ? "Add Horizontal Guide" : "Add Vertical Guide";
+        new DialogBuilder()
+            .title(dialogTitle)
+            .content(panel)
+            .withScrollbars()
+            .okAction(() -> panel.createGuides(false))
+            .cancelAction(builder::resetOrigGuides)
+            .show();
     }
 }

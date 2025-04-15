@@ -94,7 +94,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     /**
      * A hook for actions to be performed when the tool is activated.
      */
-    protected void toolActivated() {
+    protected void toolActivated(View view) {
         GlobalEvents.setActiveTool(this);
         Views.setCursorForAll(cursor);
         View.toolSnappingChanged(pixelSnapping, this == Tools.CROP);
@@ -103,7 +103,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     /**
      * A hook for actions to be performed when the tool is deactivated.
      */
-    protected void toolDeactivated() {
+    protected void toolDeactivated(View view) {
         DraggablePoint.activePoint = null;
         closeAllDialogs();
     }

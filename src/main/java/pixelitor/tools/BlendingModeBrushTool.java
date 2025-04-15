@@ -17,9 +17,9 @@
 
 package pixelitor.tools;
 
-import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.BlendingModePanel;
+import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -75,11 +75,11 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void toolActivated() {
-        super.toolActivated();
+    protected void toolActivated(View view) {
+        super.toolActivated(view);
 
-        Layer activeLayer = Views.getActiveLayer();
-        if (activeLayer != null) {
+        if (view != null) {
+            Layer activeLayer = view.getComp().getActiveLayer();
             maskEditingChanged(activeLayer.isMaskEditing());
         }
     }

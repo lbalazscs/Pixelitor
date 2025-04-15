@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -119,9 +119,9 @@ public class GMICFilterCreator {
                 filterNameTF.getText().trim(),
                 (String) reseedCB.getSelectedItem()).getOutput();
         } catch (RuntimeException e) {
-            String message = e.getMessage();
-            if (message.startsWith(COULD_NOT_PARSE_MSG)) {
-                Messages.showError("Error", message, dialogParent);
+            String msg = e.getMessage();
+            if (msg.startsWith(COULD_NOT_PARSE_MSG)) {
+                Messages.showError("Error", msg, dialogParent);
                 return "";
             } else {
                 throw e;

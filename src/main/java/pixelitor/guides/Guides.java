@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.compactions.Outsets;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.DebugNode;
@@ -69,17 +68,17 @@ public class Guides implements Serializable, Debuggable {
         return copy;
     }
 
-    public Guides copyFlipping(Flip.Direction direction, View view) {
+    public Guides copyFlipped(Flip.Direction direction, View view) {
         Guides copy = switch (direction) {
-            case HORIZONTAL -> copyFlippingHorizontally();
-            case VERTICAL -> copyFlippingVertically();
+            case HORIZONTAL -> copyFlippedHorizontally();
+            case VERTICAL -> copyFlippedVertically();
         };
 
         copy.regenerateLines(view);
         return copy;
     }
 
-    private Guides copyFlippingHorizontally() {
+    private Guides copyFlippedHorizontally() {
         Guides copy = createEmptyCopy();
         copy.horizontals.addAll(horizontals);
         for (Double vertical : verticals) {
@@ -88,7 +87,7 @@ public class Guides implements Serializable, Debuggable {
         return copy;
     }
 
-    private Guides copyFlippingVertically() {
+    private Guides copyFlippedVertically() {
         Guides copy = createEmptyCopy();
         copy.verticals.addAll(verticals);
         for (Double horizontal : horizontals) {
@@ -97,18 +96,18 @@ public class Guides implements Serializable, Debuggable {
         return copy;
     }
 
-    public Guides copyRotating(QuadrantAngle angle, View view) {
+    public Guides copyRotated(QuadrantAngle angle, View view) {
         Guides copy = switch (angle) {
-            case ANGLE_90 -> copyRotating90();
-            case ANGLE_180 -> copyRotating180();
-            case ANGLE_270 -> copyRotating270();
+            case ANGLE_90 -> copyRotated90();
+            case ANGLE_180 -> copyRotated180();
+            case ANGLE_270 -> copyRotated270();
         };
 
         copy.regenerateLines(view);
         return copy;
     }
 
-    private Guides copyRotating90() {
+    private Guides copyRotated90() {
         Guides copy = createEmptyCopy();
         for (Double horizontal : horizontals) {
             copy.verticals.add(1 - horizontal);
@@ -117,7 +116,7 @@ public class Guides implements Serializable, Debuggable {
         return copy;
     }
 
-    private Guides copyRotating180() {
+    private Guides copyRotated180() {
         Guides copy = createEmptyCopy();
         for (Double horizontal : horizontals) {
             copy.horizontals.add(1 - horizontal);
@@ -128,7 +127,7 @@ public class Guides implements Serializable, Debuggable {
         return copy;
     }
 
-    private Guides copyRotating270() {
+    private Guides copyRotated270() {
         Guides copy = createEmptyCopy();
         copy.verticals.addAll(horizontals);
         for (Double vertical : verticals) {
@@ -143,7 +142,7 @@ public class Guides implements Serializable, Debuggable {
         return copy;
     }
 
-    public Guides copyEnlarging(Outsets enlargement, View view, Canvas canvas) {
+    public Guides copyEnlarged(Outsets enlargement, View view, Canvas canvas) {
         Guides copy = new Guides();
         copy.setName("copy with enlargement: " + enlargement.toString());
 
@@ -182,7 +181,7 @@ public class Guides implements Serializable, Debuggable {
         }
     }
 
-    public Guides copyCropping(Rectangle cropRect, View view) {
+    public Guides copyCropped(Rectangle cropRect, View view) {
         Canvas canvas = view.getCanvas();
         int topMargin = cropRect.y;
         int leftMargin = cropRect.x;
@@ -192,33 +191,7 @@ public class Guides implements Serializable, Debuggable {
 
         // a crop is a negative enlargement
         margin.negate();
-        return copyEnlarging(margin, view, canvas);
-    }
-
-    public static void showAddGridDialog(View view) {
-        Builder builder = new Builder(view, true);
-        AddGridGuidesPanel panel = new AddGridGuidesPanel(builder);
-        new DialogBuilder()
-            .title("Add Grid Guides")
-            .content(panel)
-            .withScrollbars()
-            .okAction(() -> panel.createGuides(false))
-            .cancelAction(builder::resetOrigGuides)
-            .show();
-    }
-
-    public static void showAddSingleGuideDialog(View view,
-                                                boolean horizontal) {
-        Builder builder = new Builder(view, false);
-        AddSingleGuidePanel panel = new AddSingleGuidePanel(builder, horizontal);
-        String dialogTitle = horizontal ? "Add Horizontal Guide" : "Add Vertical Guide";
-        new DialogBuilder()
-            .title(dialogTitle)
-            .content(panel)
-            .withScrollbars()
-            .okAction(() -> panel.createGuides(false))
-            .cancelAction(builder::resetOrigGuides)
-            .show();
+        return copyEnlarged(margin, view, canvas);
     }
 
     public void addHorRelative(double rel) {
@@ -319,18 +292,20 @@ public class Guides implements Serializable, Debuggable {
     public DebugNode createDebugNode(String key) {
         var node = new DebugNode(key, this);
 
+        int i = 0;
         for (Double h : horizontals) {
-            node.addDouble("horizontal", h);
+            node.addDouble("hor[%d]".formatted(i++), h);
         }
+        i = 0;
         for (Double v : verticals) {
-            node.addDouble("vertical", v);
+            node.addDouble("ver[%d]".formatted(i++), v);
         }
 
         return node;
     }
 
     /**
-     * Code that is common for building both single-line and grid guides.
+     * A builder for building guides interactively.
      * Designed primarily for dialog sessions with previews.
      */
     public static class Builder {

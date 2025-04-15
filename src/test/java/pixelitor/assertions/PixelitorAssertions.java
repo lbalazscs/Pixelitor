@@ -24,6 +24,7 @@ import pixelitor.filters.RandomFilterSource;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.gui.utils.NamedAction;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.*;
 import pixelitor.selection.Selection;
 import pixelitor.tools.pen.Path;
@@ -69,6 +70,10 @@ public class PixelitorAssertions extends Assertions {
         return new PathToolAssert(actual);
     }
 
+    public static EditAssert assertThat(PixelitorEdit actual) {
+        return new EditAssert(actual);
+    }
+
     public static SelectionToolAssert assertThat(AbstractSelectionTool actual) {
         return new SelectionToolAssert(actual);
     }
@@ -106,6 +111,10 @@ public class PixelitorAssertions extends Assertions {
 
     public static SmartFilterAssert assertThat(SmartFilter actual) {
         return new SmartFilterAssert(actual);
+    }
+
+    public static GroupLayerAssert assertThat(LayerGroup actual) {
+        return new GroupLayerAssert(actual);
     }
 
     public static BufferedImageAssert assertThat(BufferedImage actual) {

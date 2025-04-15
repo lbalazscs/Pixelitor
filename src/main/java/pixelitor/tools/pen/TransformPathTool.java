@@ -56,10 +56,9 @@ public class TransformPathTool extends PathTool {
     }
 
     @Override
-    protected void toolActivated() {
-        super.toolActivated();
+    protected void toolActivated(View view) {
+        super.toolActivated(view);
 
-        View view = Views.getActive();
         if (view == null) {
             // allow the tool activation for now, the path
             // will be checked when there is an active view
@@ -79,10 +78,10 @@ public class TransformPathTool extends PathTool {
     }
 
     @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
 
-        Views.repaintActive(); // visually hide the path
+        view.repaint(); // visually hide the path
     }
 
     @Override
@@ -149,7 +148,7 @@ public class TransformPathTool extends PathTool {
 
         for (TransformBox box : boxes) {
             if (box.contains(x, y)) {
-                box.startWholeBoxDrag(x, y);
+                box.prepareWholeBoxDrag(x, y);
                 draggedBox = box;
                 lastActiveBox = box;
                 e.repaint();

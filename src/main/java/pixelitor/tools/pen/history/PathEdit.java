@@ -53,7 +53,7 @@ public class PathEdit extends PixelitorEdit {
         this.toolBefore = tool;
 
         formerUsers = new ArrayList<>();
-        comp.forEachNestedLayer(TextLayer.class, textLayer -> {
+        comp.forEachNestedLayerOfType(TextLayer.class, textLayer -> {
             if (textLayer.isOnPath()) {
                 formerUsers.add(textLayer);
             }
@@ -91,7 +91,6 @@ public class PathEdit extends PixelitorEdit {
 
         Tool activeTool = Tools.getActive();
         if (activeTool instanceof PathTool activePathTool) {
-            Tools.PEN.setPath(newPath);
             if (newPath == null) {
                 Tools.PEN.activate();
             }

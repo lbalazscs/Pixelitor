@@ -52,7 +52,8 @@ import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.gui.utils.ViewEnabledAction;
-import pixelitor.guides.Guides;
+import pixelitor.guides.AddGridGuidesPanel;
+import pixelitor.guides.AddSingleGuidePanel;
 import pixelitor.history.History;
 import pixelitor.history.RedoAction;
 import pixelitor.history.UndoAction;
@@ -325,7 +326,7 @@ public class MenuBar extends JMenuBar {
         // new layer from visible
         var newFromVisible = new ViewEnabledAction(
             texts.getString("new_from_visible"),
-            Composition::addNewLayerFromComposite);
+            Composition::addNewLayerFromVisible);
         newFromVisible.setToolTip(texts.getString("new_from_visible_tt"));
         layersMenu.add(newFromVisible, CTRL_SHIFT_ALT_E);
 
@@ -371,19 +372,19 @@ public class MenuBar extends JMenuBar {
 
         // raise layer selection
         var raiseLayerSelection = new ViewEnabledAction(RAISE_LAYER_SELECTION,
-            comp -> comp.getActiveHolder().raiseLayerSelection());
+            comp -> comp.getActiveHolder().selectLayerAbove());
         raiseLayerSelection.setToolTip(texts.getString("raise_layer_selection_tt"));
         sub.add(raiseLayerSelection, PAGE_UP);
 
         var lowerLayerSelection = new ViewEnabledAction(LOWER_LAYER_SELECTION,
-            comp -> comp.getActiveHolder().lowerLayerSelection());
+            comp -> comp.getActiveHolder().selectLayerBelow());
         lowerLayerSelection.setToolTip(texts.getString("lower_layer_selection_tt"));
         sub.add(lowerLayerSelection, PAGE_DOWN);
 
         sub.addSeparator();
 
         sub.add(new ViewEnabledAction("Isolate",
-            Composition::isolateRoot));
+            Composition::isolateActiveTopLevelLayer));
 
         return sub;
     }
@@ -1188,13 +1189,13 @@ public class MenuBar extends JMenuBar {
         viewMenu.addSeparator();
 
         viewMenu.add(new ViewEnabledAction("Add Horizontal Guide...",
-            comp -> Guides.showAddSingleGuideDialog(comp.getView(), true)));
+            comp -> AddSingleGuidePanel.showDialog(comp.getView(), true)));
 
         viewMenu.add(new ViewEnabledAction("Add Vertical Guide...",
-            comp -> Guides.showAddSingleGuideDialog(comp.getView(), false)));
+            comp -> AddSingleGuidePanel.showDialog(comp.getView(), false)));
 
         viewMenu.add(new ViewEnabledAction("Add Grid Guides...",
-            comp -> Guides.showAddGridDialog(comp.getView())));
+            comp -> AddGridGuidesPanel.showAddGridDialog(comp.getView())));
 
         viewMenu.add(new ViewEnabledAction("Clear Guides",
             Composition::clearGuides));

@@ -444,11 +444,10 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    protected void toolActivated() {
-        super.toolActivated();
+    protected void toolActivated(View view) {
+        super.toolActivated(view);
         reset();
 
-        View view = Views.getActive();
         if (view != null) {
             brushPainter.setView(view);
 
@@ -459,10 +458,9 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
 
-        View view = Views.getActive();
         if (view != null) {
             hideOutline(view);
         }

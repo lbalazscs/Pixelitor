@@ -43,7 +43,7 @@ public class TraceAction extends NamedAction.Checked {
     }
 
     private void trace(Composition comp) {
-        if (!comp.canDrawOnActiveLayer()) {
+        if (!comp.canDrawOnActiveTarget()) {
             Messages.showNotDrawableError(comp.getActiveLayer());
             return;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -326,7 +326,7 @@ public class Selection implements Debuggable, Transformable {
         return !disposed;
     }
 
-    public void startMovement() {
+    public void prepareMovement() {
         assert shape != null;
         origShape = shape;
     }
@@ -346,7 +346,7 @@ public class Selection implements Debuggable, Transformable {
         }
     }
 
-    public PixelitorEdit endMovement(boolean keepStartShape) {
+    public PixelitorEdit finalizeMovement(boolean keepStartShape) {
         Composition comp = view.getComp();
 
         shape = comp.clipToCanvasBounds(shape);

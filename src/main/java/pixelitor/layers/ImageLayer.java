@@ -896,8 +896,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public PixelitorEdit endMovement() {
-        PixelitorEdit edit = super.endMovement();
+    public PixelitorEdit finalizeMovement() {
+        PixelitorEdit edit = super.finalizeMovement();
         updateIconImage();
         return edit;
     }

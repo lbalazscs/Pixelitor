@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -144,13 +144,13 @@ class CompositionIOTest {
 
         tests.put("pxc_test_input.pxc", secondLayer ->
             assertThat(secondLayer)
-                .classIs(ImageLayer.class)
+                .isInstanceOf(ImageLayer.class)
                 .blendingModeIs(BlendingMode.MULTIPLY)
                 .opacityIs(0.75f));
 
         tests.put("pxc_file_w_layer_mask.pxc", secondLayer ->
             assertThat(secondLayer)
-                .classIs(ImageLayer.class)
+                .isInstanceOf(ImageLayer.class)
                 .hasMask()
                 .maskIsLinked()
                 .maskIsEnabled());
@@ -165,7 +165,7 @@ class CompositionIOTest {
 
         tests.put("pxc_file_w_adj_layer.pxc", secondLayer ->
             assertThat(secondLayer)
-                .classIs(AdjustmentLayer.class)
+                .isInstanceOf(AdjustmentLayer.class)
                 .hasNoMask());
 
         return tests;
@@ -200,7 +200,7 @@ class CompositionIOTest {
     void readWriteORA() throws IOException {
         Consumer<Layer> secondLayerValidator = secondLayer ->
             assertThat(secondLayer)
-                .classIs(ImageLayer.class)
+                .isInstanceOf(ImageLayer.class)
                 .blendingModeIs(BlendingMode.MULTIPLY)
                 .opacityIs(0.75f);
 

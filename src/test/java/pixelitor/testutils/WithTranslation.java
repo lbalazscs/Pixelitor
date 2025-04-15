@@ -43,7 +43,7 @@ public enum WithTranslation {
     }, YES(-4, -4) {
         @Override
         public void configure(Composition comp) {
-            comp.forEachNestedLayer(ContentLayer.class, contentLayer ->
+            comp.forEachNestedLayerOfType(ContentLayer.class, contentLayer ->
                 TestHelper.setTranslation(comp, contentLayer, this));
         }
 
@@ -55,9 +55,9 @@ public enum WithTranslation {
 
         @Override
         public void configure(ContentLayer layer) {
-            layer.startMovement();
+            layer.prepareMovement();
             layer.moveWhileDragging(-2, -2);
-            layer.endMovement();
+            layer.finalizeMovement();
         }
     };
 

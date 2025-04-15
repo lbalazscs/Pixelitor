@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -111,7 +111,7 @@ public enum MaskViewMode {
 
         assert canBeAssignedTo(layer);
 
-        boolean changed = view.setMaskViewMode(this);
+        boolean changed = view.setMaskViewModeInternal(this);
         layer.setMaskEditing(editMask);
         if (changed) {
             FgBgColors.maskEditingChanged(editMask);
@@ -142,7 +142,7 @@ public enum MaskViewMode {
         return showMask;
     }
 
-    public boolean showRuby() {
+    public boolean showRubylith() {
         return showRuby;
     }
 

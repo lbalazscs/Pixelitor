@@ -123,7 +123,7 @@ public class MoveTool extends DragTool {
                 return;
             }
         } else {
-            e.getComp().startMovement(
+            e.getComp().prepareMovement(
                 activeMode, e.isAltDown() || e.isRight());
         }
     }
@@ -145,14 +145,14 @@ public class MoveTool extends DragTool {
             if (transformBox.processMouseReleased(e)) {
                 Selection selection = e.getComp().getSelection();
                 if (selection != null) {
-                    selection.endMovement(true);
+                    selection.finalizeMovement(true);
                 }
             }
             return;
         }
 
         if (!freeTransformCheckBox.isSelected()) {
-            e.getComp().endMovement(activeMode);
+            e.getComp().finalizeMovement(activeMode);
         }
     }
 
@@ -160,9 +160,9 @@ public class MoveTool extends DragTool {
      * Programmatically moves the active layer and/or the selection.
      */
     public static void move(Composition comp, MoveMode mode, int imDx, int imDy) {
-        comp.startMovement(mode, false);
+        comp.prepareMovement(mode, false);
         comp.moveActiveContent(mode, imDx, imDy);
-        comp.endMovement(mode);
+        comp.finalizeMovement(mode);
     }
 
     @Override
@@ -228,16 +228,16 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    protected void toolActivated() {
-        super.toolActivated();
+    protected void toolActivated(View view) {
+        super.toolActivated(view);
         if (freeTransformCheckBox.isSelected()) {
             createTransformBox();
         }
     }
 
     @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
         transformBox = null;
     }
 
@@ -249,7 +249,7 @@ public class MoveTool extends DragTool {
             Rectangle boxSize = view.imageToComponentSpace(sel.getShapeBounds2D());
             boxSize.grow(10, 10); // make sure the rectangular selections are visible
             transformBox = new TransformBox(boxSize, view, sel, true);
-            sel.startMovement();
+            sel.prepareMovement();
         }
     }
 

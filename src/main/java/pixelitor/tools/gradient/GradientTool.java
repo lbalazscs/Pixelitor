@@ -501,18 +501,17 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    protected void toolActivated() {
-        super.toolActivated();
+    protected void toolActivated(View view) {
+        super.toolActivated(view);
 
-        Layer activeLayer = Views.getActiveLayer();
-        if (activeLayer != null) {
-            layerActivated(activeLayer);
+        if (view != null) {
+            layerActivated(view.getComp().getActiveLayer());
         }
     }
 
     @Override
-    protected void toolDeactivated() {
-        super.toolDeactivated();
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
 
         reset();
     }

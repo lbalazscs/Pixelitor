@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,7 +75,7 @@ public class EnlargeCanvas extends SimpleCompAction {
 
     @Override
     protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
-        return srcGuides.copyEnlarging(enlargement, view, srcCanvas);
+        return srcGuides.copyEnlarged(enlargement, view, srcCanvas);
     }
 
     @Override

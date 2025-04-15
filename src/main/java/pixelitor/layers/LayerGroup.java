@@ -102,12 +102,20 @@ public class LayerGroup extends CompositeLayer {
     }
 
     public void setLayers(List<Layer> layers) {
-        this.layers = layers;
+        this.layers = new ArrayList<>(layers);
         for (Layer layer : layers) {
             layer.setHolder(this);
         }
     }
 
+    /**
+     * In the "Pass Through" blending mode the layers within the group
+     * interact with all layers below the group in the layer stack as
+     * if the group didn't exist.
+     * If a group is isolated (not "Pass Through"), then the layers inside
+     * the group will first blend with each other, and then the resulting
+     * composite will blend with the layers below using the selected blending mode.
+     */
     public boolean isPassThrough() {
         return blendingMode == BlendingMode.PASS_THROUGH;
     }
@@ -327,7 +335,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public boolean containsLayer(Layer layer) {
+    public boolean listContainsLayer(Layer layer) {
         return layers.contains(layer);
     }
 
@@ -379,7 +387,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void deleteTemporarily(Layer layer) {
+    public void deleteInternal(Layer layer) {
         layers.remove(layer);
     }
 
@@ -468,7 +476,7 @@ public class LayerGroup extends CompositeLayer {
         boolean activeWasInside = !activeWasThis && contains(activeBefore);
 
         int indexInHolder = holder.indexOf(this);
-        holder.deleteTemporarily(this);
+        holder.deleteInternal(this);
 
         int numLayers = layers.size();
         int[] insertIndices = new int[numLayers];
@@ -489,16 +497,16 @@ public class LayerGroup extends CompositeLayer {
             activeBefore.activate();
         }
 
-        assert comp.getActiveRoot() != this;
+        assert comp.getActiveTopLevelLayer() != this;
 
         if (addToHistory) { // wasn't called from undo
-            History.add(new GroupingEdit(holder, this, insertIndices, false));
+            History.add(new GroupingEdit(holder, this, insertIndices, activeBefore, false));
         }
     }
 
     @Override
     public Rectangle getContentBounds(boolean includeTransparent) {
-        return Utils.calcContentBoundsUnion(layers, includeTransparent);
+        return Utils.calcCombinedBounds(layers, includeTransparent);
     }
 
     @Override
@@ -507,11 +515,11 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void startMovement() {
-        super.startMovement();
+    public void prepareMovement() {
+        super.prepareMovement();
 
         for (Layer layer : layers) {
-            layer.startMovement();
+            layer.prepareMovement();
         }
     }
 
@@ -527,14 +535,14 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public PixelitorEdit endMovement() {
+    public PixelitorEdit finalizeMovement() {
         MultiEdit fullEdit = new MultiEdit(ContentLayerMoveEdit.NAME, comp);
         PixelitorEdit maskEdit = createLinkedMovementEdit();
         if (maskEdit != null) {
             fullEdit.add(maskEdit);
         }
         for (Layer layer : layers) {
-            PixelitorEdit layerEdit = layer.endMovement();
+            PixelitorEdit layerEdit = layer.finalizeMovement();
             if (layerEdit != null) {
                 fullEdit.add(layerEdit);
             }

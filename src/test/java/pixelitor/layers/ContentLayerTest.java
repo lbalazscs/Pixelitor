@@ -93,7 +93,7 @@ public class ContentLayerTest {
     public void movingTheLayer() {
         assertThat(layer).translationIs(0, 0);
 
-        layer.startMovement();
+        layer.prepareMovement();
         assertThat(layer).translationIs(0, 0);
 
         layer.moveWhileDragging(2, 2);
@@ -102,25 +102,25 @@ public class ContentLayerTest {
         layer.moveWhileDragging(3, 3);
         assertThat(layer).translationIs(3, 3);
 
-        // endMovement is called on the composition
+        // finalizeMovement is called on the composition
         // so that we have history
-        comp.endMovement(MoveMode.MOVE_LAYER_ONLY);
+        comp.finalizeMovement(MoveMode.MOVE_LAYER_ONLY);
 
         checkTranslationAfterPositiveDrag();
         int expectedLayerIconUpdates = layerClass == ImageLayer.class ? 1 : 0;
         iconChecker.verifyUpdateCounts(expectedLayerIconUpdates, 1);
 
         // start another drag to the negative direction
-        layer.startMovement();
+        layer.prepareMovement();
         layer.moveWhileDragging(-1, -2);
 
         checkTranslationAfterNegativeDrag();
 
-        comp.endMovement(MoveMode.MOVE_LAYER_ONLY);
+        comp.finalizeMovement(MoveMode.MOVE_LAYER_ONLY);
 
         // No change:
         // ImageLayer: this time the layer was not enlarged
-        // TextLayer: endMovement does not change the tmpTranslation + translation sum
+        // TextLayer: finalizeMovement does not change the tmpTranslation + translation sum
         checkTranslationAfterNegativeDrag();
         expectedLayerIconUpdates = layerClass == ImageLayer.class ? 2 : 0;
         iconChecker.verifyUpdateCounts(expectedLayerIconUpdates, 2);
@@ -138,7 +138,7 @@ public class ContentLayerTest {
 
     private void checkTranslationAfterPositiveDrag() {
         if (layer instanceof ImageLayer) {
-            // the layer was enlarged in endMovement, and the translation reset to 0, 0
+            // the layer was enlarged in finalizeMovement, and the translation reset to 0, 0
             assertThat(layer).translationIs(0, 0);
         } else if (layer instanceof TextLayer) {
             // text layers can have positive translations

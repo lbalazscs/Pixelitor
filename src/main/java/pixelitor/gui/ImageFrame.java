@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.gui;
 
-import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.utils.Messages;
 
@@ -108,8 +107,7 @@ public class ImageFrame extends JInternalFrame
     }
 
     public void setToCanvasSize() {
-        Canvas canvas = view.getCanvas();
-        setSize(canvas.getCoWidth(), canvas.getCoHeight());
+        setSize(view.getCanvas().getCoSize());
     }
 
     @Override

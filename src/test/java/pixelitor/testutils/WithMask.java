@@ -41,6 +41,9 @@ public enum WithMask {
         }
     };
 
+    /**
+     * Configures the given layer for testing according to the enum constant.
+     */
     public abstract void configure(Layer layer);
 
     public void configure(Composition comp) {

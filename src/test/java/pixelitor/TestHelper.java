@@ -353,9 +353,9 @@ public class TestHelper {
 
     public static void move(Composition comp, int relX, int relY,
                             boolean makeDuplicateLayer) {
-        comp.startMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
+        comp.prepareMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
         comp.moveActiveContent(MOVE_LAYER_ONLY, relX, relY);
-        comp.endMovement(MOVE_LAYER_ONLY);
+        comp.finalizeMovement(MOVE_LAYER_ONLY);
     }
 
     public static void setTranslation(Composition comp,

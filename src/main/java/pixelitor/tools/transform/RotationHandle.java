@@ -38,8 +38,8 @@ public class RotationHandle extends DraggablePoint {
     private static final long serialVersionUID = 1L;
 
     private final TransformBox box;
-    private double cy;
-    private double cx;
+    private double pivotY;
+    private double pivotX;
     private double rotStartAngle;
 
     private static final int MOUSE_DISPLAY_CENTER_DISTANCE = 12 + MeasurementOverlay.SINGLE_LINE_HEIGHT / 2;
@@ -69,10 +69,11 @@ public class RotationHandle extends DraggablePoint {
     @Override
     public void mousePressed(double x, double y) {
         super.mousePressed(x, y); // sets dragStartX, dragStartY
-        updateCenter();
+
+        updatePivot();
 
         // recalculate because a flipping might have occurred
-        rotStartAngle = Math.atan2(this.y - cy, this.x - cx) + Math.PI / 2;
+        rotStartAngle = Math.atan2(this.y - pivotY, this.x - pivotX) + Math.PI / 2;
     }
 
     @Override
@@ -82,9 +83,11 @@ public class RotationHandle extends DraggablePoint {
         double newX = origX + dx;
         double newY = origY + dy;
 
-        double angle = recalcAngle(newX, newY, false);
+        double newAngle = recalcAngle(newX, newY, false);
 
-        box.coTransform(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
+        AffineTransform dragTransform = AffineTransform.getRotateInstance(
+            newAngle - rotStartAngle, pivotX, pivotY);
+        box.coTransform(dragTransform);
         box.setRotated(true);
     }
 
@@ -95,19 +98,19 @@ public class RotationHandle extends DraggablePoint {
         box.updateDirections();
     }
 
-    public double recalcAngle(double newX, double newY, boolean updateCenter) {
-        if (updateCenter) {
-            updateCenter();
+    public double recalcAngle(double newX, double newY, boolean updatePivot) {
+        if (updatePivot) {
+            updatePivot();
         }
-        double angle = Math.atan2(newY - cy, newX - cx) + Math.PI / 2;
+        double angle = Math.atan2(newY - pivotY, newX - pivotX) + Math.PI / 2;
         box.setAngle(angle);
         return angle;
     }
 
-    private void updateCenter() {
-        Point2D c = box.getCenter();
-        cx = c.getX();
-        cy = c.getY();
+    private void updatePivot() {
+        Point2D p = box.getPivot();
+        pivotX = p.getX();
+        pivotY = p.getY();
     }
 
     @Override

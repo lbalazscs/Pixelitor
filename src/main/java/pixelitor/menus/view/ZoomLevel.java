@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -169,8 +169,8 @@ public class ZoomLevel {
      * Calculates the optimal zoom level for the given canvas,
      * and possibly for a given auto zoom.
      */
-    public static ZoomLevel calcBestZoom(Canvas canvas, AutoZoom autoZoom,
-                                         boolean zoomInToFitSpace) {
+    public static ZoomLevel calcBestFitZoom(Canvas canvas, AutoZoom autoZoom,
+                                            boolean zoomInToFitSpace) {
         if (autoZoom == AutoZoom.ACTUAL_PIXELS) {
             return ACTUAL_SIZE;
         }

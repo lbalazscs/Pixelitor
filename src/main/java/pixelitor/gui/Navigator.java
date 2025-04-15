@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -191,9 +191,9 @@ public class Navigator extends JComponent
 
     public void recalculateSize(View view,
                                 boolean newView,
-                                boolean viewSizeChanged,
+                                boolean canvasSizeChanged,
                                 boolean navigatorResized) {
-        assert newView || viewSizeChanged || navigatorResized : "why did you call me?";
+        assert newView || canvasSizeChanged || navigatorResized : "why did you call me?";
 
         if (newView) {
             if (this.view != null) {
@@ -213,7 +213,7 @@ public class Navigator extends JComponent
 
         if (newView) {
             recalculateScaling(view, DEFAULT_SIZE, DEFAULT_SIZE);
-        } else if (viewSizeChanged || navigatorResized) {
+        } else if (canvasSizeChanged || navigatorResized) {
             recalculateScaling(view, getWidth(), getHeight());
         } else {
             throw new IllegalStateException();
@@ -230,7 +230,7 @@ public class Navigator extends JComponent
             scrollPane.getVerticalScrollBar().addAdjustmentListener(scrollSyncListener);
         }
 
-        if (viewSizeChanged) {
+        if (canvasSizeChanged) {
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window != null) {
                 window.pack();

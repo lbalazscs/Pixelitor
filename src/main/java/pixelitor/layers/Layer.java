@@ -387,8 +387,8 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
-    public boolean isActiveRoot() {
-        return comp.isActiveRoot(this);
+    public boolean isActiveTopLevel() {
+        return comp.isActiveTopLevelLayer(this);
     }
 
     public boolean isActive() {
@@ -396,20 +396,20 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public Layer getTopLevelLayer() {
-        Layer root = this;
-        while (!root.isTopLevel()) {
-            if (!(root.holder instanceof Layer)) {
-                throw new IllegalStateException("this = " + getName() + ", root.holder = " + root.holder.getName());
+        Layer top = this;
+        while (!top.isTopLevel()) {
+            if (!(top.holder instanceof Layer)) {
+                throw new IllegalStateException("this = " + getName() + ", top.holder = " + top.holder.getName());
             }
 
-            root = (Layer) root.holder;
+            top = (Layer) top.holder;
         }
 
-        if (root instanceof SmartFilter) {
+        if (top instanceof SmartFilter) {
             throw new IllegalStateException();
         }
 
-        return root;
+        return top;
     }
 
     public boolean isTopLevel() {
@@ -808,15 +808,15 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Starts a movement with the Move Tool.
-     * On this level startMovement, moveWhileDragging and endMovement
+     * Prepares a movement with the Move Tool.
+     * On this level prepareMovement(), moveWhileDragging and finalizeMovement
      * only care about the movement of the linked mask or owner.
      * This object's own movement is handled in {@link ContentLayer}.
      */
-    public void startMovement() {
+    public void prepareMovement() {
         Layer linked = getLinked();
         if (linked != null) {
-            linked.startMovement();
+            linked.prepareMovement();
         }
     }
 
@@ -830,7 +830,7 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Finishes a movement with the Move Tool and returns the edit that can undo it.
      */
-    public PixelitorEdit endMovement() {
+    public PixelitorEdit finalizeMovement() {
         // Handles the case of moving the layer mask of a layer without content.
         // Content layers should override it to also include their own edit.
         return createLinkedMovementEdit();
@@ -839,7 +839,7 @@ public abstract class Layer implements Serializable, Debuggable {
     protected PixelitorEdit createLinkedMovementEdit() {
         Layer linked = getLinked();
         if (linked != null) {
-            return linked.endMovement();
+            return linked.finalizeMovement();
         }
         return null;
     }
@@ -1087,7 +1087,7 @@ public abstract class Layer implements Serializable, Debuggable {
         node.addQuotedString("comp debug name", comp.getDebugName());
         node.addQuotedString("holder name", holder.getName());
 
-        node.addBoolean("active root", isActiveRoot());
+        node.addBoolean("active top-level", isActiveTopLevel());
         node.addBoolean("active", isActive());
 
         if (hasMask()) {

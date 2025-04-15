@@ -68,7 +68,6 @@ public abstract class PathTool extends Tool {
      */
     public void removePath() {
         Views.setActivePath(null);
-        Tools.PEN.setPath(null);
         if (this != Tools.PEN) {
             Tools.PEN.activate();
         }
@@ -93,8 +92,6 @@ public abstract class PathTool extends Tool {
                 Tools.PEN.activate();
                 return;
             }
-        } else if (this == Tools.PEN) {
-            Tools.PEN.setPath(compPath);
         }
 
         if (this == Tools.TRANSFORM_PATH) {

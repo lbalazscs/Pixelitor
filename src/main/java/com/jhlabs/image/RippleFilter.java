@@ -18,14 +18,14 @@ package com.jhlabs.image;
 
 import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
-import pixelitor.filters.impl.RotatedEffectFilter;
+import pixelitor.filters.impl.RotatingEffectFilter;
 
 /**
  * A filter which distorts an image by rippling it in the X or Y directions.
  * The amplitude and wavelength of rippling can be specified as well as whether
  * pixels going off the edges are wrapped or not.
  */
-public class RippleFilter extends RotatedEffectFilter {
+public class RippleFilter extends RotatingEffectFilter {
     private float xAmplitude, yAmplitude;
     private float xWavelength, yWavelength;
     private int waveType;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,7 +68,7 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         var canvasTransform = createCanvasTransform(newCanvas);
         newComp.imCoordsChanged(canvasTransform, false, view);
 
-        newComp.forEachNestedLayerAndMask(this::processLayer);
+        newComp.forEachNestedLayerAndMask(this::transformLayer);
 
         if (affectsCanvasSize) {
             updateCanvasSize(newCanvas, view);
@@ -99,14 +99,20 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         return CompletableFuture.completedFuture(newComp);
     }
 
-    private void processLayer(Layer layer) {
+    private void transformLayer(Layer layer) {
         if (layer instanceof ContentLayer contentLayer) {
             transform(contentLayer);
         }
     }
 
+    /**
+     * Updates the canvas size after applying the action.
+     */
     protected abstract void updateCanvasSize(Canvas newCanvas, View view);
 
+    /**
+     * Returns the name of the history edit.
+     */
     protected abstract String getEditName();
 
     /**
@@ -115,12 +121,14 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
     protected abstract void transform(ContentLayer contentLayer);
 
     /**
-     * Returns the change made by this action as a transform in
-     * image-space coordinates relative to the canvas
+     * Returns the transformation applied by this action as an
+     * AffineTransform in image-space coordinates relative to the canvas.
      */
     protected abstract AffineTransform createCanvasTransform(Canvas canvas);
 
-    // the srcCanvas is used by "Enlarge Canvas"
+    /**
+     * Creates the transformed guides.
+     */
     protected abstract Guides createTransformedGuides(
         Guides srcGuides, View view, Canvas srcCanvas);
 

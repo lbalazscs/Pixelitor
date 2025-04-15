@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.history;
 
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerGroup;
 import pixelitor.layers.LayerHolder;
 
@@ -30,14 +31,16 @@ public class GroupingEdit extends PixelitorEdit {
     private final LayerHolder holder;
     private final LayerGroup group;
     private final int[] prevIndices;
+    private final Layer activeLayerBefore;
     private final boolean isGrouping; // whether this is a grouping or ungrouping
 
-    public GroupingEdit(LayerHolder holder, LayerGroup group, int[] prevIndices, boolean isGrouping) {
+    public GroupingEdit(LayerHolder holder, LayerGroup group, int[] prevIndices, Layer activeLayerBefore, boolean isGrouping) {
         super(isGrouping ? "Grouping" : "Ungrouping", holder.getComp());
 
         this.holder = holder;
         this.group = group;
         this.prevIndices = prevIndices;
+        this.activeLayerBefore = activeLayerBefore;
         this.isGrouping = isGrouping;
     }
 
@@ -69,5 +72,10 @@ public class GroupingEdit extends PixelitorEdit {
 
     private void group() {
         holder.convertToGroup(prevIndices, group, false);
+
+        // restore the active layer that was active before
+        if (activeLayerBefore != null && comp.contains(activeLayerBefore)) {
+            comp.setActiveLayer(activeLayerBefore, false, null);
+        }
     }
 }
