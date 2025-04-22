@@ -2531,7 +2531,7 @@ public class MainGuiTest {
         }
 
         // not rectangular: test choosing "Only Crop"
-        app.findJOptionPane("Selection Crop Type")
+        app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Only Crop").click();
         undoRedoUndoSimpleSelectionCrop(origCanvasWidth, origCanvasHeight, selWidth, selHeight);
 
@@ -2541,7 +2541,7 @@ public class MainGuiTest {
 
         // not rectangular: test choosing "Only Hide"
         triggerTask.run();
-        app.findJOptionPane("Selection Crop Type")
+        app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Only Hide").click();
 
         EDT.assertThereIsNoSelection();
@@ -2556,7 +2556,7 @@ public class MainGuiTest {
 
         // not rectangular: test choosing "Crop and Hide"
         triggerTask.run();
-        app.findJOptionPane("Selection Crop Type")
+        app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Crop and Hide").click();
         checkAfterSelectionCrop(selWidth, selHeight);
         assert EDT.activeLayerHasMask();
@@ -2569,7 +2569,8 @@ public class MainGuiTest {
 
         // not rectangular: test choosing "Cancel"
         triggerTask.run();
-        app.findJOptionPane("Selection Crop Type").buttonWithText("Cancel").click();
+        app.findJOptionPane("Non-Rectangular Selection Crop")
+            .buttonWithText("Cancel").click();
 
         EDT.assertThereIsSelection();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);

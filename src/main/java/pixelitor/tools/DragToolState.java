@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.shapes.ShapesTool;
 
 /**
@@ -31,11 +32,21 @@ public enum DragToolState {
         public boolean isOK(ShapesTool tool) {
             return !tool.hasStyledShape() && !tool.hasBox();
         }
+
+        @Override
+        public boolean isOK(CropTool tool) {
+            return !tool.hasCropBox();
+        }
     },
     AFTER_FIRST_MOUSE_PRESS {
         @Override
         public boolean isOK(ShapesTool tool) {
             return tool.hasStyledShape() && !tool.hasBox();
+        }
+
+        @Override
+        public boolean isOK(CropTool tool) {
+            return !tool.hasCropBox();
         }
     },
     /**
@@ -46,6 +57,11 @@ public enum DragToolState {
         public boolean isOK(ShapesTool tool) {
             return tool.hasStyledShape() && !tool.hasBox();
         }
+
+        @Override
+        public boolean isOK(CropTool tool) {
+            return !tool.hasCropBox();
+        }
     },
     /**
      * The state when the handles are shown.
@@ -55,8 +71,15 @@ public enum DragToolState {
         public boolean isOK(ShapesTool tool) {
             return tool.hasStyledShape() && tool.hasBox();
         }
+
+        @Override
+        public boolean isOK(CropTool tool) {
+            return tool.hasCropBox();
+        }
     };
 
     // can be used in assertions
     public abstract boolean isOK(ShapesTool tool);
+
+    public abstract boolean isOK(CropTool tool);
 }
