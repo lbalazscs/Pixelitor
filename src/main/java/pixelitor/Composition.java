@@ -1300,7 +1300,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Removes the current selection, optionally adding history.
+     * Removes the current selection, optionally adding an undo/redo edit to the
+     * history. The edit is always returned, allowing callers to embed it into
+     * a composite edit. If there was no selection, then null is returned.
      */
     public DeselectEdit deselect(boolean addToHistory) {
         if (draftSelection != null) {

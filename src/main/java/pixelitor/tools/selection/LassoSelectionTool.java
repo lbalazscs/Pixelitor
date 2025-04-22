@@ -17,10 +17,7 @@
 
 package pixelitor.tools.selection;
 
-import pixelitor.Composition;
-import pixelitor.Views;
 import pixelitor.gui.utils.VectorIcon;
-import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
@@ -30,74 +27,51 @@ import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 
 /**
- * A selection tool that creates freehand selections.
+ * A tool that creates freehand selections by dragging.
  */
 public class LassoSelectionTool extends AbstractSelectionTool {
     public LassoSelectionTool() {
-        super("Freehand Selection", 'L', "Freehand selection: " +
-            "simply drag around the area that you want to select. " +
-            "<b>Shift-drag</b> adds to an existing selection, " +
-            "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.", Cursors.DEFAULT, false);
-        spaceDragStartPoint = true;
+        super("Freehand Selection", 'L',
+            "simply drag around the area that you want to select.",
+            Cursors.DEFAULT, false);
+        spaceDragStartPoint = false;
         pixelSnapping = true;
     }
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        setupCombinatorWithKeyModifiers(e);
+        initCombinatorAndBuilder(e, SelectionType.LASSO);
 
-        selectionBuilder = new SelectionBuilder(
-            SelectionType.LASSO, getCombinator(), e.getComp());
+        // add the starting point immediately?
+        // selectionBuilder.updateDraftSelection(drag, e.getComp(), e);
     }
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
         if (selectionBuilder == null) {
-            // the image was changed so start again
+            // can happen if the image changed mid-drag; restart the drag
             dragStarted(e);
         }
 
         altDown = e.isAltDown();
+        // if Alt is released mid-drag, it no longer means subtract for this drag
         if (!altDown) {
             altMeansSubtract = false;
         }
 
-        selectionBuilder.updateDraftSelection(drag, e.getComp(), e);
+        // add the current point to the lasso path
+        selectionBuilder.updateDraftSelection(drag);
     }
 
     @Override
     protected void dragFinished(PMouseEvent e) {
+        // common logic in the base class
         marqueeLassoDragFinished(e);
     }
 
     @Override
-    public void mouseClicked(PMouseEvent e) {
-        Composition comp = e.getComp();
-        super.mouseClicked(e);
-        cancelSelection(comp);
-    }
-
-    @Override
-    public void altPressed() {
-        if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
-            drag.setExpandFromCenter(true);
-            selectionBuilder.updateDraftSelection(drag, Views.getActiveComp(), null);
-        }
-        altDown = true;
-    }
-
-    @Override
-    public void altReleased() {
-        if (!altMeansSubtract && drag != null && drag.isDragging()) {
-            drag.setExpandFromCenter(false);
-            selectionBuilder.updateDraftSelection(drag, Views.getActiveComp(), null);
-        }
-        altDown = false;
-    }
-
-
-    @Override
     protected OverlayType getDragDisplayType() {
+        // no measurement overlay for freehand drawing
         return OverlayType.NONE;
     }
 

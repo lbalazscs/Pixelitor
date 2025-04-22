@@ -19,6 +19,7 @@ package pixelitor.tools.selection;
 
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
@@ -30,42 +31,53 @@ import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 
 /**
- * A selection tool that creates polygonal selections.
+ * A tool that creates polygonal selections by clicking points.
  */
 public class PolygonalSelectionTool extends AbstractSelectionTool {
     public PolygonalSelectionTool() {
-        super("Polygonal Selection", 'L', "Polygonal selection: " +
+        super("Polygonal Selection", 'L',
             "<b>click</b> to add points, " +
-            "<b>double-click</b> (or <b>right-click</b>) to close the selection." +
-            "<b>Shift</b> adds to an existing selection, " +
-            "<b>Alt</b> removes from it, <b>Shift+Alt</b> intersects.", Cursors.DEFAULT, false);
-        spaceDragStartPoint = true;
+                "<b>double-click</b> or <b>right-click</b> to close the selection.",
+            Cursors.DEFAULT, false);
+        spaceDragStartPoint = false;
         pixelSnapping = true;
     }
 
     @Override
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
+
+        // ensure unfinished selections are cancelled
+        // and don't remain visible after switching tools
+        stopBuildingSelection(view.getComp());
+    }
+
+    @Override
     protected void dragStarted(PMouseEvent e) {
-        // ignore mouse pressed
+        // ignored, polygon points are added on mouse release/click
     }
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
-        // ignore dragging
+        // ignored, dragging doesn't modify the polygon being built
     }
 
     @Override
     protected void dragFinished(PMouseEvent e) {
         Composition comp = e.getComp();
         if (selectionBuilder == null) {
+            // first click: start building the polygon
             setupCombinatorWithKeyModifiers(e);
             selectionBuilder = new SelectionBuilder(
                 SelectionType.POLYGONAL_LASSO, getCombinator(), comp);
-            selectionBuilder.updateDraftSelection(e, comp);
+            selectionBuilder.updateDraftSelection(e);
             resetCombinator();
         } else {
-            selectionBuilder.updateDraftSelection(e, comp);
+            // subsequent click: add another point
+            selectionBuilder.updateDraftSelection(e);
             if (e.isRight()) {
-                selectionBuilder.combineShapes(comp);
+                // right-click finishes the polygon
+                selectionBuilder.combineShapes();
                 stopBuildingSelection(comp);
             }
         }
@@ -74,22 +86,22 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
         assert ConsistencyChecks.selectionIsInsideCanvas(comp) : "selection is outside";
     }
 
-
     @Override
     public void mouseClicked(PMouseEvent e) {
         Composition comp = e.getComp();
+        // handle double-click to finish the polygon
         if (selectionBuilder != null && e.getClickCount() > 1) {
-            // finish polygonal for double-click
-            selectionBuilder.updateDraftSelection(e, comp);
-            selectionBuilder.combineShapes(comp);
+            // update with the final point (same as the double-clicked point)
+            selectionBuilder.updateDraftSelection(e);
+            selectionBuilder.combineShapes();
             stopBuildingSelection(comp);
-        } else {
-            // ignore otherwise: will be handled in mouse released
         }
+        // single clicks are handled in dragFinished
     }
 
     @Override
     protected OverlayType getDragDisplayType() {
+        // no drag overlay as we build point by point
         return OverlayType.NONE;
     }
 

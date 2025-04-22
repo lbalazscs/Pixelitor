@@ -26,15 +26,14 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.transform.Transformable;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Threads;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
 import static java.awt.BasicStroke.CAP_BUTT;
@@ -45,7 +44,7 @@ import static java.awt.Color.WHITE;
 /**
  * Represents a selection area on an image with animated "marching ants" border.
  */
-public class Selection implements Debuggable, Transformable {
+public class Selection implements Transformable {
     private static final double DASH_WIDTH = 1.0;
     private static final float DASH_LENGTH = 4.0f;
     private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
@@ -56,10 +55,10 @@ public class Selection implements Debuggable, Transformable {
     // The coordinates are in image space, relative to the canvas.
     private Shape shape;
 
-    // the original shape before a shape movement
-    private Shape origShape;
+    // backup of the shape before a selection drag started
+    private Shape shapeBeforeDrag;
 
-    private View view;
+    private View view; // the view displaying this selection
 
     // if true, then the "marching ants" are not marching
     private boolean frozen = false;
@@ -78,7 +77,7 @@ public class Selection implements Debuggable, Transformable {
         this.shape = shape;
         this.view = view;
 
-        // hack to prevent unit tests from starting the marching
+        // prevent marching in unit tests
         if (AppMode.isUnitTesting()) {
             frozen = true;
         }
@@ -89,11 +88,15 @@ public class Selection implements Debuggable, Transformable {
     // copy constructor
     public Selection(Selection orig, boolean shareView) {
         if (shareView) {
-            view = orig.view;
+            this.view = orig.view;
         }
 
-        // the shapes can be shared
-        shape = orig.shape;
+        // the shapes can be shared because all changes create new instances
+        this.shape = orig.shape;
+
+        this.shapeBeforeDrag = orig.shapeBeforeDrag;
+        this.frozen = orig.frozen;
+        this.hidden = orig.hidden;
 
         // The animation timer is not copied - will be started by setView if needed.
     }
@@ -108,7 +111,7 @@ public class Selection implements Debuggable, Transformable {
 
         marchingAntsTimer = new Timer(100, e -> {
             dashPhase += 1.0f / (float) view.getZoomScale();
-            repaint();
+            view.repaint();
         });
         marchingAntsTimer.start();
     }
@@ -124,9 +127,13 @@ public class Selection implements Debuggable, Transformable {
         return marchingAntsTimer != null;
     }
 
+    /**
+     * Paints the marching ants border onto the given Graphics2D.
+     * Assumes g2 is in image space.
+     */
     public void paintMarchingAnts(Graphics2D g2) {
         assert Threads.calledOnEDT() : Threads.threadInfo();
-        assert !disposed : "dead selection";
+        assert !disposed : "disposed selection";
 
         if (shape == null || hidden) {
             return;
@@ -134,28 +141,27 @@ public class Selection implements Debuggable, Transformable {
 
         Stroke origStroke = g2.getStroke();
 
-        // As the selection coordinates are in image space, this is
-        // called with a Graphics2D transformed into image space.
-        // The line width has to be scaled to compensate.
+        // Ensure that the border width doesn't depend on the zooming,
+        // considering that the graphics coordinates are in image space.
         double viewScale = view.getZoomScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
         float[] dash;
-        if (viewScale == 1.0) { // the most common case
+        if (viewScale == 1.0) { // optimize for common case
             dash = MARCHING_ANTS_DASH;
         } else {
             float scaledDashLength = (float) (DASH_LENGTH / viewScale);
             dash = new float[]{scaledDashLength, scaledDashLength};
         }
 
-        // Draw white segments
+        // draw white segments
         drawSegments(g2, WHITE, lineWidth, dash, dashPhase);
 
-        // Draw black segments
+        // draw black segments offset by half a dash length
         float blackPhase = (float) (dashPhase + DASH_LENGTH / viewScale);
         drawSegments(g2, BLACK, lineWidth, dash, blackPhase);
 
-        // Restore original stroke
+        // restore original stroke
         g2.setStroke(origStroke);
     }
 
@@ -166,31 +172,25 @@ public class Selection implements Debuggable, Transformable {
         g2.draw(shape);
     }
 
+    /**
+     * Releases resources and marks the selection as unusable.
+     */
     public void dispose() {
         assert AppMode.isUnitTesting() || Threads.calledOnEDT() : Threads.threadInfo();
         if (disposed) {
             return;
         }
         stopMarching();
-        repaint();
+        view.repaint();
         view = null;
         disposed = true;
     }
 
-    private void repaint() {
-//        Rectangle selBounds = shape.getBounds();
-//        view.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
+    public void setShape(Shape newShape) {
+        assert newShape != null;
+        assert !disposed;
 
-//        The above optimization isn't good; the previous positions should be also considered for the
-//        case when the selection is shrinking while dragging.
-//        But it doesn't seem to solve the pixel grid problem anyway.
-
-        view.repaint();
-    }
-
-    public void setShape(Shape currentShape) {
-        assert currentShape != null;
-        shape = currentShape;
+        shape = newShape;
     }
 
     /**
@@ -203,17 +203,19 @@ public class Selection implements Debuggable, Transformable {
         assert comp == view.getComp();
         if (shape != null) {
             shape = comp.clipToCanvasBounds(shape);
-            repaint();
+            view.repaint();
             return !shape.getBounds().isEmpty();
         }
         return false;
     }
 
     public Shape getShape() {
+        assert !disposed;
         return shape;
     }
 
     public boolean isRectangular() {
+        assert !disposed;
         return shape instanceof Rectangle2D;
     }
 
@@ -223,62 +225,48 @@ public class Selection implements Debuggable, Transformable {
      * (but relative to the canvas, not to the image)
      */
     public Rectangle getShapeBounds() {
+        assert !disposed;
         return shape.getBounds();
     }
 
     public Rectangle2D getShapeBounds2D() {
+        assert !disposed;
         return shape.getBounds2D();
     }
 
-    /**
-     * Modifies the selection shape using the given modification type and amount.
-     */
-    public void modify(SelectionModifyType type, float amount) {
-        Shape prevShape = shape;
-
-        // Create the modified shape
-        Stroke borderStroke = new BasicStroke(amount);
-        Shape borderShape = borderStroke.createStrokedShape(shape);
-        Area currentArea = new Area(shape);
-        Area borderArea = new Area(borderShape);
-        shape = type.modify(currentArea, borderArea);
-
-        // Handle the modification result
-        Composition comp = view.getComp();
-        boolean valid = clipToCanvasBounds(comp);
-        if (valid) {
-            var edit = new SelectionShapeChangeEdit(
-                "Modify Selection", comp, prevShape);
-            History.add(edit);
-        } else {
-            comp.deselect(true);
-        }
+    public void nudge(ArrowKey key) {
+        transformAndAddHistory(key.toTransform());
     }
 
-    public Shape transform(AffineTransform at) {
-        Shape backupShape = shape;
-        shape = at.createTransformedShape(shape);
-        return backupShape;
-    }
-
-    public void nudge(AffineTransform at) {
+    private void transformAndAddHistory(AffineTransform at) {
+        assert !disposed;
         Shape backupShape = transform(at);
         History.add(new SelectionShapeChangeEdit(
             "Nudge Selection", view.getComp(), backupShape));
+    }
+
+    /**
+     * Applies an affine transform to the selection shape.
+     * Returns the shape before transformation.
+     */
+    public Shape transform(AffineTransform at) {
+        assert !disposed;
+        Shape backupShape = shape;
+        shape = at.createTransformedShape(shape);
+        return backupShape;
     }
 
     public boolean isHidden() {
         return hidden;
     }
 
-    public void setHidden(boolean hide, boolean fromMenu) {
-        assert !disposed : "dead selection";
+    public void setHidden(boolean hide, boolean calledFromMenu) {
+        assert !disposed : "disposed selection";
+        assert view != null;
 
-        boolean change = hidden != hide;
-        if (!change) {
-            return;
+        if (hidden == hide) {
+            return; // no change
         }
-
         hidden = hide;
 
         if (hide) {
@@ -287,10 +275,9 @@ public class Selection implements Debuggable, Transformable {
             startMarching();
         }
 
-        repaint();
+        view.repaint();
 
-        // if not called from the menu, update the menu name
-        if (!fromMenu) {
+        if (!calledFromMenu) {
             SelectionActions.getShowHide().updateTextFrom(this);
         }
     }
@@ -300,6 +287,11 @@ public class Selection implements Debuggable, Transformable {
     }
 
     public void setFrozen(boolean b) {
+        assert !disposed;
+        if (this.frozen == b) {
+            return; // no change
+        }
+
         frozen = b;
         if (b) {
             stopMarching();
@@ -326,39 +318,63 @@ public class Selection implements Debuggable, Transformable {
         return !disposed;
     }
 
+    /**
+     * Prepares for a drag/move operation.
+     */
     public void prepareMovement() {
         assert shape != null;
-        origShape = shape;
+        assert !disposed;
+
+        shapeBeforeDrag = shape;
     }
 
-    public void transformWhileDragging(AffineTransform at) {
-        shape = at.createTransformedShape(origShape);
+    /**
+     * Applies a transformation relative to the shape stored before dragging started.
+     */
+    private void transformWhileDragging(AffineTransform at) {
+        assert !disposed;
+        assert shapeBeforeDrag != null;
+
+        shape = at.createTransformedShape(shapeBeforeDrag);
     }
 
+    /**
+     * Updates the selection shape during a drag operation by applying a translation delta.
+     */
     public void moveWhileDragging(double relImX, double relImY) {
-        if (origShape instanceof Rectangle2D startRect) {
+        assert !disposed;
+        assert shapeBeforeDrag != null;
+
+        if (shapeBeforeDrag instanceof Rectangle2D startRect) {
             // preserve the type information
             shape = new Rectangle2D.Double(
                 startRect.getX() + relImX, startRect.getY() + relImY,
                 startRect.getWidth(), startRect.getHeight());
         } else {
-            shape = Shapes.translate(origShape, relImX, relImY);
+            shape = Shapes.translate(shapeBeforeDrag, relImX, relImY);
         }
     }
 
-    public PixelitorEdit finalizeMovement(boolean keepStartShape) {
-        Composition comp = view.getComp();
+    /**
+     * Finalizes the movement of the selection shape after a drag operation.
+     * Returns an edit that can undo/redo the whole movement.
+     */
+    public PixelitorEdit finalizeMovement(boolean keepOrigShape) {
+        assert !disposed;
+        assert shapeBeforeDrag != null;
 
+        Composition comp = view.getComp();
         shape = comp.clipToCanvasBounds(shape);
-        if (shape.getBounds().isEmpty()) { // moved outside the canvas
+        if (shape.getBounds().isEmpty()) { // moved off-canvas
             comp.deselect(false);
-            return new DeselectEdit(comp, origShape);
+            return new DeselectEdit(comp, shapeBeforeDrag);
         }
 
+        // the selection shape was changed successfully
         var edit = new SelectionShapeChangeEdit(
-            MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, origShape);
-        if (!keepStartShape) {
-            origShape = null;
+            MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, shapeBeforeDrag);
+        if (!keepOrigShape) {
+            shapeBeforeDrag = null;
         }
         return edit;
     }

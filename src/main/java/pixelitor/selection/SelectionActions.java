@@ -17,17 +17,22 @@
 
 package pixelitor.selection;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TaskAction;
+import pixelitor.history.History;
+import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.menus.view.ShowHideSelectionAction;
+import pixelitor.utils.Threads;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
@@ -35,15 +40,14 @@ import java.awt.GridBagLayout;
 import java.awt.Shape;
 
 import static pixelitor.Views.getActiveComp;
-import static pixelitor.Views.getActiveSelection;
-import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.utils.Texts.i18n;
 
 /**
  * Static methods related to actions that should be enabled
- * only when there is a selection on the active composition.
+ * only when there is a selection in the active composition.
  */
 public final class SelectionActions {
+    // shape stored for copy/paste
     private static Shape copiedSelShape = null;
 
     private static final Action crop = new TaskAction(i18n("crop_selection"),
@@ -83,16 +87,21 @@ public final class SelectionActions {
         Views.addActivationListener(new ViewActivationListener() {
             @Override
             public void viewActivated(View oldView, View newView) {
+                // enable the paste selection menu only if a shape has been copied
                 pasteSel.setEnabled(copiedSelShape != null);
             }
 
             @Override
             public void allViewsClosed() {
+                // disable the paste selection menu when no views are open
                 pasteSel.setEnabled(false);
             }
         });
     }
 
+    /**
+     * Copies the active composition's selection shape to the internal clipboard.
+     */
     private static void copySelection() {
         copiedSelShape = getActiveComp().getSelectionShape();
         pasteSel.setEnabled(true);
@@ -105,45 +114,77 @@ public final class SelectionActions {
     }
 
     private static void showModifySelectionDialog() {
+        View view = Views.getActive();
+        Composition comp = view.getComp();
+        Selection selection = comp.getSelection();
+        Shape originalShape = selection.getShape();
+
         JPanel panel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(panel);
-        RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
-        EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
 
+        RangeParam amount = new RangeParam("Amount (pixels)", 0, 0, 100);
         gbh.addFullRow(amount.createGUI("amount"));
+
+        EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
         gbh.addLabelAndControl(GUIText.TYPE + ":", type.createGUI("type"));
 
-        new DialogBuilder()
+        DialogBuilder builder = new DialogBuilder()
             .content(panel)
-            .title(i18n("modify_sel"))
-            .okText("Change!")
-            .cancelText(CLOSE_DIALOG)
-            .validator(d -> {
-                modifySelection(type, amount);
+            .title(i18n("modify_sel"));
 
-                // return false so that clicking on Change doesn't close it
-                return false;
-            })
-            .show();
-    }
+        // listener for live preview
+        ParamAdjustmentListener previewUpdater = () -> {
+            Shape potentialShape = type.getSelected().modifyShape(originalShape,
+                amount.getValue());
+            potentialShape = comp.clipToCanvasBounds(potentialShape);
 
-    private static void modifySelection(EnumParam<SelectionModifyType> type,
-                                        RangeParam amount) {
-        var selection = getActiveSelection();
-        SelectionModifyType selectionModifyType = type.getSelected();
-        if (selection != null) {
-            selection.modify(selectionModifyType, amount.getValue());
-        } else {
-            // TODO - the selections was modified so much that it disappeared
-            // at least the change button should be disabled
-        }
+            // update the selection shape for preview (no history)
+            selection.setShape(potentialShape);
+            view.repaint();
+        };
+
+        amount.setAdjustmentListener(previewUpdater);
+        type.setAdjustmentListener(previewUpdater);
+
+        builder.okAction(() -> {
+            // calculate final shape based on dialog settings
+            Shape finalShape = type.getSelected().modifyShape(originalShape,
+                amount.getValue());
+            finalShape = comp.clipToCanvasBounds(finalShape);
+
+            if (finalShape.getBounds2D().isEmpty()) {
+                // result is empty, deselect and add history
+                selection.setShape(originalShape); // ensure correct undo
+                comp.deselect(true);
+            } else if (!amount.isZero()) {
+                // result is valid and different, update shape and add history
+                selection.setShape(finalShape);
+                var edit = new SelectionShapeChangeEdit(
+                    "Modify Selection", comp, originalShape);
+                History.add(edit);
+                view.repaint();
+            }
+            // else: shape is valid but same as original, do nothing
+        });
+
+        builder.cancelAction(() -> {
+            // restore original shape on cancel
+            selection.setShape(originalShape);
+            view.repaint();
+        });
+
+        // initial preview update
+        previewUpdater.paramAdjusted();
+
+        builder.show();
     }
 
     /**
-     * Selection actions must be enabled only if
-     * the active composition has a selection
+     * Enables or disables selection-related actions
+     * based on the active composition's selection state.
      */
     public static void update(Composition comp) {
+        assert Threads.calledOnEDT() || AppMode.isUnitTesting();
         assert comp == null || comp.isActive();
 
         boolean hasSelection = comp != null && comp.hasSelection();
@@ -154,10 +195,14 @@ public final class SelectionActions {
         modify.setEnabled(hasSelection);
         convertToPath.setEnabled(hasSelection);
         copySel.setEnabled(hasSelection);
+        // pasteSel is handled separately by its ViewActivationListener
     }
 
+    /**
+     * Returns true if selection-dependent actions (excluding paste) are currently enabled.
+     */
     public static boolean areEnabled() {
-        // or any other action, as they are updated together
+        // check any action updated by the update method
         return crop.isEnabled();
     }
 

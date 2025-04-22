@@ -228,7 +228,7 @@ public class PaintBucketTool extends Tool {
             int scanlineMinX = x - 1;
             int offset = y * imgWidth;
             while (scanlineMinX >= 0
-                && isSimilar(pixels[scanlineMinX + offset], rgbAtMouse, tolerance)) {
+                && ImageUtils.isSimilar(pixels[scanlineMinX + offset], rgbAtMouse, tolerance)) {
                 scanlineMinX--;
             }
             scanlineMinX++;
@@ -236,7 +236,7 @@ public class PaintBucketTool extends Tool {
             // find the last replaceable point to the right
             int scanlineMaxX = x + 1;
             while (scanlineMaxX < img.getWidth()
-                && isSimilar(pixels[scanlineMaxX + offset], rgbAtMouse, tolerance)) {
+                && ImageUtils.isSimilar(pixels[scanlineMaxX + offset], rgbAtMouse, tolerance)) {
                 scanlineMaxX++;
             }
             scanlineMaxX--;
@@ -274,7 +274,7 @@ public class PaintBucketTool extends Tool {
                 for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
                     int upIndex = i + upOffset;
                     boolean shouldBeReplaced = !checkedPixels[upIndex]
-                        && isSimilar(pixels[upIndex], rgbAtMouse, tolerance);
+                        && ImageUtils.isSimilar(pixels[upIndex], rgbAtMouse, tolerance);
 
                     if (!pointsInLine && shouldBeReplaced) {
                         Point inspectLater = new Point(i, y - 1);
@@ -294,7 +294,7 @@ public class PaintBucketTool extends Tool {
                 for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
                     int downIndex = i + downOffset;
                     boolean shouldBeReplaced = !checkedPixels[downIndex]
-                        && isSimilar(pixels[downIndex], rgbAtMouse, tolerance);
+                        && ImageUtils.isSimilar(pixels[downIndex], rgbAtMouse, tolerance);
 
                     if (!pointsInLine && shouldBeReplaced) {
                         Point inspectLater = new Point(i, y + 1);
@@ -316,37 +316,13 @@ public class PaintBucketTool extends Tool {
                                                 int rgbAtMouse, int newRGB) {
         int[] pixels = ImageUtils.getPixels(img);
         for (int i = 0; i < pixels.length; i++) {
-            if (isSimilar(pixels[i], rgbAtMouse, tolerance)) {
+            if (ImageUtils.isSimilar(pixels[i], rgbAtMouse, tolerance)) {
                 pixels[i] = newRGB;
             }
         }
 
         // Return the replaced area, which is the entire image.
         return new Rectangle(0, 0, img.getWidth(), img.getHeight());
-    }
-
-    /**
-     * Whether two colors are similar within the given tolerance.
-     */
-    private static boolean isSimilar(int color1, int color2, int tolerance) {
-        if (color1 == color2) {
-            return true;
-        }
-
-        int a1 = (color1 >>> 24) & 0xFF;
-        int r1 = (color1 >>> 16) & 0xFF;
-        int g1 = (color1 >>> 8) & 0xFF;
-        int b1 = color1 & 0xFF;
-
-        int a2 = (color2 >>> 24) & 0xFF;
-        int r2 = (color2 >>> 16) & 0xFF;
-        int g2 = (color2 >>> 8) & 0xFF;
-        int b2 = color2 & 0xFF;
-
-        return (r2 <= r1 + tolerance) && (r2 >= r1 - tolerance) &&
-            (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
-            (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
-            (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
     }
 
     @Override

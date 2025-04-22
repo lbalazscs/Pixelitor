@@ -37,94 +37,108 @@ import java.util.ResourceBundle;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 
 /**
- * A selection tool that creates selections based on color similarity.
+ * A tool that creates selections based on color similarity by clicking.
  */
 public class MagicWandSelectionTool extends AbstractSelectionTool {
-    private static final RangeParam magicWandToleranceParam = new RangeParam("Tolerance", 0, 20, 255);
-    private static final SliderSpinner magicWandToleranceSlider = new SliderSpinner(magicWandToleranceParam, WEST, false);
+    private static final String TOLERANCE_TEXT = "Tolerance";
+
+    private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
+    private final SliderSpinner toleranceSlider = new SliderSpinner(toleranceParam, WEST, false);
 
     public MagicWandSelectionTool() {
-        super("Magic Wand Selection", 'W', "MagicWand selection: " +
+        super("Magic Wand Selection", 'W',
             "<b>click</b> on the area you want to select. " +
-            "<b>right-click</b> to cancel the selection." +
-            "<b>Shift</b> adds to an existing selection, " +
-            "<b>Alt</b> removes from it, <b>Shift-Alt</b> intersects.", Cursors.DEFAULT, false);
-        spaceDragStartPoint = true;
-        pixelSnapping = true;
+                "<b>right-click</b> to cancel the selection.",
+            Cursors.DEFAULT, false);
+        spaceDragStartPoint = false;
+        pixelSnapping = false;
     }
 
     @Override
     public void initSettingsPanel(ResourceBundle resources) {
         super.initSettingsPanel(resources);
 
-        magicWandToleranceSlider.setEnabled(true);
-        settingsPanel.add(magicWandToleranceSlider);
+        settingsPanel.add(toleranceSlider);
     }
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        //ignore
+        // ignored, magic wand is click-based
     }
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
-        //ignore
+        // ignored, magic wand is click-based
     }
-
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        //ignore
+        // ignored, magic wand is click-based
     }
 
     @Override
     public void mouseClicked(PMouseEvent e) {
         Composition comp = e.getComp();
-        setupCombinatorWithKeyModifiers(e);
-        selectionBuilder = new SelectionBuilder(
-            SelectionType.SELECTION_MAGIC_WAND, getCombinator(), e.getComp());
+        initCombinatorAndBuilder(e, SelectionType.MAGIC_WAND);
 
         if (e.isRight()) {
+            // right-click always cancels
             cancelSelection(comp);
         } else if (selectionBuilder != null && e.getClickCount() == 1) {
-            SelectionBuilder sb = selectionBuilder;
-            SwingWorker<Void, Void> swingWorker = new SwingWorker<>() {
+            SelectionBuilder currentBuilder = selectionBuilder; // capture for use in worker
+            SwingWorker<Void, Void> worker = new SwingWorker<>() {
                 @Override
                 public Void doInBackground() {
                     try {
-                        sb.updateDraftSelection(e, comp);
-                        sb.combineShapes(comp);
-                        stopBuildingSelection(comp);
-                    } catch (Exception e) {
+                        // calculate the selection shape based on the click event
+                        currentBuilder.updateDraftSelection(e);
+                        // combine the new shape with any existing selection
+                        currentBuilder.combineShapes();
+                    } catch (Exception ex) {
                         cancelSelection(comp);
+                    } finally {
+                        // clean up the builder on the EDT after execution
+                        SwingUtilities.invokeLater(() -> {
+                            stopBuildingSelection(comp);
+                            resetCombinator(); // reset combinator after operation completes
+                        });
                     }
                     return null;
                 }
+
+                @Override
+                protected void done() {
+                    // show the final selection
+                    comp.getView().repaint();
+                }
             };
-            swingWorker.execute();
+            worker.execute();
         }
         super.mouseClicked(e);
     }
 
     @Override
     protected OverlayType getDragDisplayType() {
+        // no overlay needed for a click-based tool
         return OverlayType.NONE;
     }
 
-    public static int getTolerance() {
-        return magicWandToleranceParam.getValue();
+    public int getTolerance() {
+        return toleranceParam.getValue();
     }
 
     @Override
     public void saveStateTo(UserPreset preset) {
         super.saveStateTo(preset);
-        // TODO
+
+        preset.putInt(TOLERANCE_TEXT, getTolerance());
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
         super.loadUserPreset(preset);
-        // TODO
+
+        toleranceParam.setValue(preset.getInt(TOLERANCE_TEXT, 20));
     }
 
     @Override

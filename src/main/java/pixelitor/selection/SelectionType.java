@@ -20,7 +20,7 @@ package pixelitor.selection;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.selection.MagicWandSelectionTool;
+import pixelitor.tools.Tools;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.ImageUtils;
@@ -38,98 +38,133 @@ import java.util.Stack;
 import static pixelitor.utils.ImageUtils.isGrayscale;
 
 /**
- * The type of a new selection created interactively by the user.
- * Corresponds to the "Type" combo box in the Selection Tool.
+ * The different ways a selection shape can be created or updated interactively.
  */
 public enum SelectionType {
-    RECTANGLE("Rectangle", true) {
+    RECTANGLE("Rectangle") {
+        // Creates a rectangular shape based on the drag information.
         @Override
-        public Shape createShape(Object mouseInfo, Shape oldShape) {
-            Drag drag = (Drag) mouseInfo;
+        public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
+            // ignores oldShape, always creates a new rectangle from the drag
             return drag.createPositiveImRect();
         }
-    }, ELLIPSE("Ellipse", true) {
-        @Override
-        public Shape createShape(Object mouseInfo, Shape oldShape) {
-            Drag drag = (Drag) mouseInfo;
-            Rectangle2D dr = drag.createPositiveImRect();
-            return new Ellipse2D.Double(dr.getX(), dr.getY(), dr.getWidth(), dr.getHeight());
-        }
-    }, LASSO("Freehand", false) {
-        @Override
-        public Shape createShape(Object mouseInfo, Shape oldShape) {
-            Drag drag = (Drag) mouseInfo;
 
-            if (createNewShape(oldShape)) {
+        @Override
+        public Shape createShapeFromEvent(PMouseEvent event, Shape oldShape) {
+            throw new UnsupportedOperationException("Rectangle selection uses Drag info");
+        }
+    }, ELLIPSE("Ellipse") {
+        // Creates an elliptical shape based on the drag information.
+        @Override
+        public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
+            // ignores oldShape, always creates a new ellipse from the drag
+            Rectangle2D r = drag.createPositiveImRect();
+            return new Ellipse2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+        }
+
+        @Override
+        public Shape createShapeFromEvent(PMouseEvent event, Shape oldShape) {
+            throw new UnsupportedOperationException("Ellipse selection uses Drag info");
+        }
+    }, LASSO("Freehand") {
+        // Creates or extends a freehand path shape based on the drag information.
+        @Override
+        public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
+            if (oldShape instanceof GeneralPath gp) {
+                // append to the existing path
+                gp.lineTo(drag.getEndX(), drag.getEndY());
+                return gp;
+            } else {
+                // start a new path
                 GeneralPath p = new GeneralPath();
                 p.moveTo(drag.getStartX(), drag.getStartY());
                 p.lineTo(drag.getEndX(), drag.getEndY());
                 return p;
-            } else {
-                GeneralPath gp = (GeneralPath) oldShape;
-                gp.lineTo(drag.getEndX(), drag.getEndY());
-
-                return gp;
             }
         }
-    }, POLYGONAL_LASSO("Polygonal", false) {
-        @Override
-        public Shape createShape(Object mouseInfo, Shape oldShape) {
-            PMouseEvent pe = (PMouseEvent) mouseInfo;
 
-            if (createNewShape(oldShape)) {
+        @Override
+        public Shape createShapeFromEvent(PMouseEvent event, Shape oldShape) {
+            throw new UnsupportedOperationException("Lasso selection uses Drag info");
+        }
+    }, POLYGONAL_LASSO("Polygonal") {
+        @Override
+        public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
+            throw new UnsupportedOperationException("Polygonal Lasso uses PMouseEvent info");
+        }
+
+        // Creates or extends a polygonal path shape based on the mouse event position.
+        @Override
+        public Shape createShapeFromEvent(PMouseEvent pe, Shape oldShape) {
+            if (oldShape instanceof GeneralPath gp) {
+                // append to the existing path
+                gp.lineTo(pe.getImX(), pe.getImY());
+                return gp;
+            } else {
+                // start a new path
                 GeneralPath p = new GeneralPath();
                 p.moveTo(pe.getImX(), pe.getImY());
+                // first point only defines the start, no line yet
                 return p;
-            } else {
-                GeneralPath gp = (GeneralPath) oldShape;
-                gp.lineTo(pe.getImX(), pe.getImY());
-
-                return gp;
             }
         }
-    }, SELECTION_MAGIC_WAND("MagicWand", true){
+    }, MAGIC_WAND("Magic Wand") {
         @Override
-        public Shape createShape(Object mouseInfo, Shape oldShape) {
-            PMouseEvent pm = (PMouseEvent) mouseInfo;
-            Area newShape = selectPixelsInColorRange(pm);
+        public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
+            throw new UnsupportedOperationException("Magic Wand uses PMouseEvent info");
+        }
 
-            if(createNewShape(oldShape)){
-                return newShape;
+        // Creates or extends an area shape based on color similarity at the mouse event position.
+        @Override
+        public Shape createShapeFromEvent(PMouseEvent pm, Shape oldShape) {
+            // calculate the area selected by this specific click
+            Area newlySelectedArea = selectPixelsInColorRange(pm); // Existing private method
+            if (newlySelectedArea == null || newlySelectedArea.isEmpty()) {
+                // if nothing new selected, return the old shape or null
+                return oldShape;
+            }
+
+            if (oldShape instanceof Area area) {
+                // add the newly selected area to the existing area
+                area.add(newlySelectedArea);
+                return area;
             } else {
-                Area unitedArea = new Area(oldShape);
-                unitedArea.add(newShape);
-                return unitedArea;
+                // this is the first click, return the newly selected area
+                return newlySelectedArea;
             }
         }
 
-        private Area selectPixelsInColorRange(PMouseEvent pm) {
+        /**
+         * Selects contiguous pixels within a color tolerance using a scanline fill algorithm.
+         */
+        private static Area selectPixelsInColorRange(PMouseEvent pm) {
             Area selectedArea = new Area();
 
-            int x = (int) pm.getImX();
-            int y = (int) pm.getImY();
+            int imX = (int) pm.getImX();
+            int imY = (int) pm.getImY();
 
             Composition comp = pm.getComp();
             Drawable dr = comp.getActiveDrawableOrThrow();
-
-            int tx = dr.getTx();
-            int ty = dr.getTy();
-
-            x -= tx;
-            y -= ty;
-
-            int colorTolerance = MagicWandSelectionTool.getTolerance();
-
             BufferedImage image = dr.getImage();
             int imgHeight = image.getHeight();
             int imgWidth = image.getWidth();
+
+            // adjust click coordinates to be relative to the drawable's image
+            int x = imX - dr.getTx();
+            int y = imY - dr.getTy();
+
+            // check if the click is outside the drawable's bounds
             if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight) {
-                return null;
+                return new Area();
             }
+
+            int colorTolerance = Tools.MAGIC_WAND.getTolerance();
 
             boolean hasSelection = comp.hasSelection();
             boolean grayScale = isGrayscale(image);
 
+            // TODO optionally we should use the composite image
+            //   for color picking, as that's what the user sees
             BufferedImage workingImage;
             if (grayScale) {
                 workingImage = ImageUtils.toSysCompatibleImage(image);
@@ -139,8 +174,10 @@ public enum SelectionType {
                 workingImage = image;
             }
 
+            // tracks pixels already processed or added to the selection
             boolean [][] visited = new boolean[workingImage.getWidth()][workingImage.getHeight()];
-            int targetColor = getColorAtEvent(new Point(x, y), pm);
+
+            int targetColor = getColorAtPoint(new Point(x, y), pm);
 
             int finalX = x;
             int finalY = y;
@@ -151,9 +188,9 @@ public enum SelectionType {
             return selectedArea;
         }
 
-        private void selectArea(BufferedImage img, int x, int y, int tolerance,
-                                int rgbAtMouse, Area selectedArea, PMouseEvent pm,
-                                boolean[][] visited, int yOffset) {
+        private static void selectArea(BufferedImage img, int x, int y, int tolerance,
+                                       int rgbAtMouse, Area selectedArea, PMouseEvent pm,
+                                       boolean[][] visited, int yOffset) {
 
             Stack<Point> pixelsToProcess = new Stack<>();
             pixelsToProcess.push(new Point(x, y));
@@ -183,8 +220,8 @@ public enum SelectionType {
             }
         }
 
-        private int walkDirection(Point currentPixel, BufferedImage img, int rgbAtMouse, int tolerance, boolean[][] visited,
-                                  int xStep, Stack<Point> pixelsToProcess, PMouseEvent pm) {
+        private static int walkDirection(Point currentPixel, BufferedImage img, int rgbAtMouse, int tolerance, boolean[][] visited,
+                                         int xStep, Stack<Point> pixelsToProcess, PMouseEvent pm) {
 
             int startX = currentPixel.x;
             int startY = currentPixel.y;
@@ -207,28 +244,28 @@ public enum SelectionType {
             return currentX;
         }
 
-        private void selectPixelIfPossible(boolean canBeSelected, Stack<Point> pixelsToProcess, Point pointToSelect) {
+        private static void selectPixelIfPossible(boolean canBeSelected, Stack<Point> pixelsToProcess, Point pointToSelect) {
             if (canBeSelected) {
                 pixelsToProcess.push(pointToSelect);
             }
         }
 
-        private boolean canBeSelected(Point currentPixel, BufferedImage img,
-                                      int rgbAtMouse, int tolerance, boolean[][] visited, PMouseEvent pm) {
+        private static boolean canBeSelected(Point currentPixel, BufferedImage img,
+                                             int rgbAtMouse, int tolerance, boolean[][] visited, PMouseEvent pm) {
             int imgHeight = img.getHeight();
             int imgWidth = img.getWidth();
 
             int currentX = currentPixel.x;
             int currentY = currentPixel.y;
 
-            int targetColor = getColorAtEvent(currentPixel, pm);
+            int targetColor = getColorAtPoint(currentPixel, pm);
 
             return currentX >= 0 && currentX < imgWidth && currentY >= 0 && currentY < imgHeight &&
-                colorWithinTolerance(new Color(rgbAtMouse), new Color(targetColor), tolerance) &&
+                ImageUtils.isSimilar(rgbAtMouse, targetColor, tolerance) &&
                 !visited[currentX][currentY];
         }
 
-        private int getColorAtEvent(Point p, PMouseEvent pm) {
+        private static int getColorAtPoint(Point p, PMouseEvent pm) {
             int x = p.x;
             int y = p.y;
 
@@ -243,41 +280,27 @@ public enum SelectionType {
                 return Color.BLACK.getRGB();
             }
         }
-
-        private boolean colorWithinTolerance(Color c1, Color c2, int tolerance) {
-            return Math.abs(c1.getRed() - c2.getRed()) <= tolerance &&
-                    Math.abs(c1.getGreen() - c2.getGreen()) <= tolerance &&
-                    Math.abs(c1.getBlue() - c2.getBlue()) <= tolerance;
-        }
     };
 
     private final String displayName;
 
-    // whether this selection type should display width and height info
-    private final boolean displayWH;
-
-    SelectionType(String displayName, boolean displayWH) {
+    SelectionType(String displayName) {
         this.displayName = displayName;
-        this.displayWH = displayWH;
     }
 
-    public abstract Shape createShape(Object mouseInfo, Shape oldShape);
+    /**
+     * Creates or updates a selection shape based on drag input.
+     * Some tools (like Marquee and Lasso) primarily provide drag
+     * information (start/end points) encapsulated in a `Drag` object.
+     */
+    public abstract Shape createShapeFromDrag(Drag drag, Shape oldShape);
 
-    public boolean displayWidthHeight() {
-        return displayWH;
-    }
-
-    private static boolean createNewShape(Shape oldShape) {
-        boolean createNew;
-        if (oldShape == null) {
-            createNew = true;
-        } else if (oldShape instanceof GeneralPath) {
-            createNew = false;
-        } else { // it is an Area, meaning that a new shape has been started
-            createNew = true;
-        }
-        return createNew;
-    }
+    /**
+     * Creates or updates a selection shape based on mouse event input.
+     * Some tools (like Polygonal Lasso and Magic Wand) primarily operate
+     * based on individual mouse events.
+     */
+    public abstract Shape createShapeFromEvent(PMouseEvent event, Shape oldShape);
 
     @Override
     public String toString() {

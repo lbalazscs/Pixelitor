@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.selection;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.gui.GUIText;
 
+import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.geom.Area;
 
@@ -29,30 +30,30 @@ import java.awt.geom.Area;
 public enum SelectionModifyType {
     EXPAND("Expand") {
         @Override
-        public Shape modify(Area previousSelection, Area borderArea) {
+        protected Shape modifyArea(Area previousSelection, Area borderArea) {
             previousSelection.add(borderArea);
             return previousSelection;
         }
     }, CONTRACT("Contract") {
         @Override
-        public Shape modify(Area previousSelection, Area borderArea) {
+        protected Shape modifyArea(Area previousSelection, Area borderArea) {
             previousSelection.subtract(borderArea);
             return previousSelection;
         }
     }, BORDER("Border") {
         @Override
-        public Shape modify(Area previousSelection, Area borderArea) {
+        protected Shape modifyArea(Area previousSelection, Area borderArea) {
             return borderArea;
         }
     }, OUTWARD_BORDER("Border Outwards Only") {
         @Override
-        public Shape modify(Area previousSelection, Area borderArea) {
+        protected Shape modifyArea(Area previousSelection, Area borderArea) {
             borderArea.subtract(previousSelection);
             return borderArea;
         }
     }, INWARD_BORDER("Border Inwards Only") {
         @Override
-        public Shape modify(Area previousSelection, Area borderArea) {
+        protected Shape modifyArea(Area previousSelection, Area borderArea) {
             previousSelection.intersect(borderArea);
             return previousSelection;
         }
@@ -65,9 +66,17 @@ public enum SelectionModifyType {
     }
 
     /**
-     * Modifies a selection shape based on this modification type.
+     * Modifies a shape based on this modification type.
      */
-    public abstract Shape modify(Area previousSelection, Area borderArea);
+    public Shape modifyShape(Shape currentShape, float amount) {
+        BasicStroke borderStroke = new BasicStroke(amount);
+        Shape borderShape = borderStroke.createStrokedShape(currentShape);
+        Area currentArea = new Area(currentShape);
+        Area borderArea = new Area(borderShape);
+        return modifyArea(currentArea, borderArea);
+    }
+
+    protected abstract Shape modifyArea(Area previousSelection, Area borderArea);
 
     public static EnumParam<SelectionModifyType> asParam() {
         return new EnumParam<>(GUIText.TYPE, SelectionModifyType.class);
