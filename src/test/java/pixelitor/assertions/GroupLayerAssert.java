@@ -100,14 +100,4 @@ public class GroupLayerAssert extends ContentLayerAssert<GroupLayerAssert, Layer
             .containsExactly(expectedLayers);
         return myself;
     }
-
-    /**
-     * Allows chained assertions on a specific child layer by index.
-     */
-    public LayerAssert<?, Layer> layer(int index) {
-        isNotNull();
-        Layer layer = actual.getLayer(index);
-        // Return a basic LayerAssert; specific types would require more complex switching logic
-        return new LayerAssert<>(layer, LayerAssert.class);
-    }
 }

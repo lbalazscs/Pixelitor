@@ -30,11 +30,13 @@ import java.awt.Cursor;
 import java.awt.Shape;
 
 /**
- * An {@link AbstractBrushTool} tool that can have blending mode controls.
- * The blending mode controls are disabled when editing layer masks.
+ * Base class for brush tools that support blending modes and opacity controls.
+ * The blending mode/opacity controls are disabled when editing layer masks.
  */
 public abstract class BlendingModeBrushTool extends AbstractBrushTool {
-    private BlendingModePanel blendingModePanel;
+    private final BlendingModePanel blendingModePanel;
+
+    // tracks if this tool is currently editing a layer mask
     private boolean maskEditing;
 
     protected BlendingModeBrushTool(String name, char hotKey, String toolMessage,
@@ -42,6 +44,13 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         super(name, hotKey, toolMessage, cursor, addSymmetry);
         drawTarget = DrawTarget.DIRECT;
         maskEditing = false;
+
+        blendingModePanel = new BlendingModePanel(true);
+        blendingModePanel.addActionListener(e -> updateDrawTarget());
+    }
+
+    protected void addBlendingModePanel() {
+        settingsPanel.add(blendingModePanel);
     }
 
     @Override
@@ -86,6 +95,8 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
 
     @Override
     public void trace(Drawable dr, Shape shape) {
+        // ensure mask editing state is correct before tracing
+        // (necessary because this could be called when a path tool is active)
         maskEditingChanged(dr instanceof LayerMask);
         super.trace(dr, shape);
     }
@@ -93,12 +104,6 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     @Override
     protected Composite getComposite() {
         return blendingModePanel.getComposite();
-    }
-
-    protected void addBlendingModePanel() {
-        blendingModePanel = new BlendingModePanel(true);
-        settingsPanel.add(blendingModePanel);
-        blendingModePanel.addActionListener(e -> updateDrawTarget());
     }
 
     @Override

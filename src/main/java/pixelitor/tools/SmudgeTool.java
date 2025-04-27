@@ -47,6 +47,10 @@ public class SmudgeTool extends AbstractBrushTool {
 
     private EnumComboBoxModel<CopyBrushType> brushModel;
 
+    private final RangeParam strengthParam = new RangeParam("Strength", 1, 60, 100);
+    private SmudgeBrush smudgeBrush;
+    private JCheckBox fingerPaintingCB;
+
     public SmudgeTool() {
         super("Smudge", 'K',
             "<b>click and drag</b> to smudge. " +
@@ -55,10 +59,6 @@ public class SmudgeTool extends AbstractBrushTool {
 
         drawTarget = DrawTarget.DIRECT;
     }
-
-    private final RangeParam strengthParam = new RangeParam("Strength", 1, 60, 100);
-    private SmudgeBrush smudgeBrush;
-    private JCheckBox fingerPaintingCB;
 
     @Override
     protected void initBrushVariables() {
@@ -117,16 +117,15 @@ public class SmudgeTool extends AbstractBrushTool {
         // with the translation.
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
-        if (e.isShiftDown()) {
-            // if we *start* with a shift-click, then we must initialize,
-            // but otherwise don't re-initialize for shift-clicks
-            if (!smudgeBrush.isFirstPointInitialized()) {
-                initStroke(sourceImage, e);
-            }
-        } else {
+        // initialize the smudge brush state before starting the stroke
+        boolean lineConnect = e.isShiftDown() && smudgeBrush.isFirstPointInitialized();
+        if (!lineConnect) {
+            // initialize source image, start point, and strength for a new stroke segment
             initStroke(sourceImage, e);
         }
+        // else: for shift-click line connect, reuse the existing source/strength
 
+        // proceed with the standard brush stroke handling
         super.mousePressed(e);
     }
 

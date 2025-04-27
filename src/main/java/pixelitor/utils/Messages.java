@@ -123,7 +123,7 @@ public class Messages {
     public static void showNotDrawableError(Layer layer) {
         String msg = format("The active layer \"%s\" isn't an image layer or mask.",
             layer.getName());
-        showError("Not an image layer or mask", msg);
+        showError("Not an Image Layer or Mask", msg);
     }
 
     // Shows a performance timing message in the status bar.

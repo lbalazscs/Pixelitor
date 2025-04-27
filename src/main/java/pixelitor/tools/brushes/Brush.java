@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,33 +30,30 @@ import java.awt.Graphics2D;
  */
 public interface Brush extends Debuggable {
     /**
-     * The start of a new brush stroke.
+     * Starts a new brush stroke at the given point.
      */
     void startAt(PPoint p);
 
     /**
-     * The brush stroke should be continued to the given point.
+     * Continues the current brush stroke to the given point.
      */
     void continueTo(PPoint p);
 
     /**
-     * The brush stroke should be connected by a straight line
-     * to the given point (usually because a shift-click happened),
-     * even if it was already finished.
+     * Connects the last point of the stroke to the given point with a straight line.
      */
     void lineConnectTo(PPoint p);
 
     /**
-     * The brush stroke should be finished.
+     * Finishes the current brush stroke.
      */
     void finishBrushStroke();
 
     /**
-     * Returns whether the brush is currently drawing.
+     * Returns true if the brush is currently in an active drawing state.
      * This means that the mouse is down, except when automated (tracing, auto paint).
      *
-     * While "brush stroke" methods are from the user perspective,
-     * this is a low-level method, used only by delegating brushes.
+     * This is a low-level method, used only by delegating brushes.
      * In the case of shift-clicking, a single user-level brush stroke
      * is composed of multiple drawing sessions.
      */
@@ -69,10 +66,9 @@ public interface Brush extends Debuggable {
     void initDrawing(PPoint p);
 
     /**
-     * Manually free the resources used by this brush.
+     * Releases any resources held by the brush.
      */
-    default void dispose() {
-    }
+    void dispose();
 
     /**
      * Returns the previous position of the brush.
@@ -105,9 +101,9 @@ public interface Brush extends Debuggable {
 
     /**
      * Used to determine the area saved for the undo.
-     * Note that this can be bigger than the radius because
+     * This can be bigger than the radius because
      * some brushes use randomness and paint outside their radius.
-     * Since the radius can change during a brush stroke (vie keyboard),
+     * Since the radius can change during a brush stroke (via keyboard),
      * the maximum value must be returned.
      */
     double getMaxEffectiveRadius();

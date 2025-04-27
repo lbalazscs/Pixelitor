@@ -2602,7 +2602,7 @@ public class MainGuiTest {
     }
 
     private void testSelectionModifyMenu() {
-        app.runModifySelection(12, EXPAND, 2);
+        app.runModifySelection(EXPAND, 24);
 
         keyboard.undoRedoUndo("Modify Selection");
     }

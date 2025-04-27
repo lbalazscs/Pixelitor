@@ -25,6 +25,9 @@ import pixelitor.filters.gui.RangeParam;
 import javax.swing.*;
 import java.util.function.Consumer;
 
+/**
+ * Settings specific to the {@link ConnectBrush}.
+ */
 public class ConnectBrushSettings extends BrushSettings {
     private final EnumParam<Style> styleModel = Style.asParam();
     private final RangeParam densityModel = new RangeParam("Line Density (%)", 1, 50, 100);
@@ -52,12 +55,13 @@ public class ConnectBrushSettings extends BrushSettings {
     protected JPanel createConfigPanel() {
         BrushSettingsPanel p = new BrushSettingsPanel();
 
-        p.addParam(styleModel, "length");
+        p.addParam(styleModel, "style");
         p.addSlider(densityModel, "density");
         p.addSlider(widthModel, "width");
         p.addParam(resetForEachStroke, "resetForEach");
 
-        p.addFullWidthButton("Reset History",
+        // a button for manual history reset
+        p.addFullWidthButton("Reset History Now",
             e -> ConnectBrush.clearHistory(), "resetHistNow");
 
         return p;
@@ -72,21 +76,23 @@ public class ConnectBrushSettings extends BrushSettings {
     }
 
     public enum Style {
-        NORMAL("Normal", 0.0),
-        CHROME("Chrome", -0.2),
-        FUR("Fur", 0.2);
+        NORMAL("Normal", 0.0), // lines connect directly between points
+        CHROME("Chrome", -0.2), // lines are offset slightly inwards
+        FUR("Fur", 0.2); // lines are offset slightly outwards
 //        LONG_FUR("Long Fur", 0.5);
 
         private final String displayName;
-        private final double offset;
 
-        Style(String displayName, double offset) {
+        // the offset of connecting lines along the vector between points
+        private final double offsetFactor;
+
+        Style(String displayName, double offsetFactor) {
             this.displayName = displayName;
-            this.offset = offset;
+            this.offsetFactor = offsetFactor;
         }
 
-        public double getOffset() {
-            return offset;
+        public double getOffsetFactor() {
+            return offsetFactor;
         }
 
         @Override
@@ -95,7 +101,7 @@ public class ConnectBrushSettings extends BrushSettings {
         }
 
         public static EnumParam<Style> asParam() {
-            return new EnumParam<>("Length", Style.class);
+            return new EnumParam<>("Style", Style.class);
         }
     }
 }

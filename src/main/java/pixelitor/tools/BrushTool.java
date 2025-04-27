@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class BrushTool extends BlendingModeBrushTool {
 
         settingsPanel.addSeparator();
         addSizeSelector();
-        addSymmetryCombo();
+        addSymmetrySelector();
 
         settingsPanel.addSeparator();
         addBlendingModePanel();
@@ -74,13 +74,13 @@ public class BrushTool extends BlendingModeBrushTool {
     @Override
     protected void initBrushStroke() {
         // reinitialize the color for each stroke
-        brushStroke.setColor(drawingColor);
+        brushContext.setColor(drawingColor);
     }
 
     @Override
     protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         super.prepareProgrammaticBrushStroke(dr, start);
-        brushStroke.setColor(getFGColor());
+        brushContext.setColor(getFGColor());
     }
 
     private void initDrawingColor(PMouseEvent e) {

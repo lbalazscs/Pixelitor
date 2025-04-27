@@ -791,7 +791,8 @@ public class WorkflowTest {
     }
 
     private void expandSelection() {
-        app.runModifySelection(50, EXPAND, 3);
+        app.runModifySelection(EXPAND, 75);
+        app.runModifySelection(EXPAND, 75);
         keyboard.undoRedo("Modify Selection");
     }
 

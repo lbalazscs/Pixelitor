@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,26 +31,33 @@ import static java.awt.AlphaComposite.DST_OUT;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
-public class BrushStroke {
+/**
+ * Manages the graphics context and state for a single brush stroke.
+ */
+public class BrushContext {
     private final Graphics2D graphics;
     private final Drawable dr;
     private final DrawTarget drawTarget;
 
-    public BrushStroke(Drawable dr, DrawTarget drawTarget, Brush brush, Composite composite) {
+    /**
+     * Creates and initializes a graphics context for a new brush stroke.
+     */
+    public BrushContext(Drawable dr, DrawTarget drawTarget, Brush brush, Composite composite) {
         this.dr = dr;
         this.drawTarget = drawTarget;
 
+        // prepare the target drawable (e.g., backup image for direct drawing)
         drawTarget.prepareForBrushStroke(dr);
 
         Composition comp = dr.getComp();
 
-        // when editing masks, no tmp drawing layer should be used
+        // checking that masks are only drawn DIRECTly
         assert !(dr instanceof LayerMask)
             || drawTarget == DrawTarget.DIRECT :
             "dr is " + dr.getClass().getSimpleName()
                 + ", comp = " + comp.getName()
-                + ", tool = " + getClass().getSimpleName()
-                + ", drawDestination = " + drawTarget;
+                + ", tool = " + Tools.getActive().getName()
+                + ", drawTarget = " + drawTarget;
 
         graphics = drawTarget.createGraphics(dr, composite);
         comp.applySelectionClipping(graphics);
@@ -64,17 +71,20 @@ public class BrushStroke {
         graphics.setColor(color);
     }
 
-    public void setTransparentDrawing() {
+    public void setErasing() {
         // the color doesn't matter as long as AlphaComposite.DST_OUT is used
         graphics.setComposite(AlphaComposite.getInstance(DST_OUT));
     }
 
+    /**
+     * Disposes graphics resources and finalizes the drawing on the target drawable.
+     */
     public void finish(Drawable dr) {
         assert this.dr == dr;
 
         graphics.dispose();
 
-        drawTarget.finalizeBrushStroke(dr);
+        drawTarget.finishBrushStroke(dr);
         dr.update();
         dr.updateIconImage();
     }

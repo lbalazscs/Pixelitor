@@ -482,18 +482,14 @@ public class AppRunner {
         dialog.requireNotVisible();
     }
 
-    public void runModifySelection(int amount, SelectionModifyType type, int numClicks) {
+    public void runModifySelection(SelectionModifyType type, int amount) {
         runMenuCommand("Modify Selection...");
         var dialog = findDialogByTitle("Modify Selection");
 
         dialog.slider("amount").slideTo(amount);
         dialog.comboBox("type").selectItem(type.toString());
 
-        for (int i = 0; i < numClicks; i++) {
-            GUITestUtils.findButtonByText(dialog, "Change!").click();
-        }
-
-        GUITestUtils.findButtonByText(dialog, "Close").click();
+        dialog.button("ok").click();
         dialog.requireNotVisible();
     }
 

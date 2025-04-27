@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -191,7 +191,7 @@ public class MetaDataPanel extends JPanel {
                     "<b>%s</b><br>" +
                     "doesn't exist anymore.",
                 comp.getName(), file.getAbsolutePath());
-            Messages.showError("File not found", msg, comp.getDialogParent());
+            Messages.showError("File Not Found", msg, comp.getDialogParent());
             return false;
         }
         return true;

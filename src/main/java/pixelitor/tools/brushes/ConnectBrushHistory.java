@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,19 +32,31 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * The history of {@link ConnectBrush}. Not just for undo/redo,
- * the drawing is also based on connecting with older points.
+ * The global history of points drawn by {@link ConnectBrush}.
+ * Used not only for undo/redo, but also to draw connecting lines
+ * between new points and older points.
+ * Being global is useful in the case of symmetry brushes.
  */
 public class ConnectBrushHistory {
-    // a brush stroke is a list of points, and the history is a list of strokes
+    // factor influencing distance-based alpha (higher value = faster fade)
+    private static final double ALPHA_DISTANCE_FACTOR = 10000.0;
+
+    // stores all strokes; each stroke is a list of points
     private static final List<List<Point2D>> history = new ArrayList<>();
+
+    // the stroke currently being drawn
     private static List<Point2D> currentStroke;
+
+    // total number of points in the history
     private static int numPoints;
 
-    // index for the next stroke to be added (for undo/redo)
+    // Index for the next stroke to be added (for undo/redo).
+    // This is the number of active strokes in the history.
+    // Points beyond this index are for redo and are ignored for drawing.
     private static int nextAddIndex = 0;
 
     private ConnectBrushHistory() {
+        // prevent instantiation
     }
 
     public static void startNewBrushStroke(PPoint p) {
@@ -63,14 +75,22 @@ public class ConnectBrushHistory {
         numPoints++;
     }
 
+    /**
+     * Adds a point to the current stroke and draws lines connecting it to nearby historical points.
+     */
     public static void drawConnectingLines(Graphics2D targetG,
                                            ConnectBrushSettings settings,
                                            PPoint currentPoint, double diamSq) {
-        if (history.isEmpty()) {
-            nextAddIndex = 0;
-            return;
-        }
+        // we don't expect history clearing between new stroke start and this
+        assert !history.isEmpty();
+        assert currentStroke != null;
 
+//        if (history.isEmpty()) {
+//            nextAddIndex = 0;
+//            return;
+//        }
+
+        // add the current point to the ongoing stroke
         Point2D last = currentPoint.toImPoint2D();
         currentStroke.add(last);
         numPoints++;
@@ -78,12 +98,13 @@ public class ConnectBrushHistory {
         if (numPoints <= 2) {
             return; // not enough points to connect
         }
-        int baseColor = targetG.getColor().getRGB();
-        int baseColorNoAlpha = baseColor & 0x00_FF_FF_FF;
+        int baseColorRgb = targetG.getColor().getRGB();
+        int baseColorNoAlpha = baseColorRgb & 0x00_FF_FF_FF;
 
-        double offset = settings.getStyle().getOffset();
+        double offsetFactor = settings.getStyle().getOffsetFactor();
         double density = settings.getDensity();
 
+        // reuse line object for efficiency
         Line2D line = new Line2D.Double();
 
         // randomly connect with nearby old points
@@ -94,18 +115,24 @@ public class ConnectBrushHistory {
                 double dx = old.getX() - last.getX();
                 double dy = old.getY() - last.getY();
                 double distSq = dx * dx + dy * dy;
+
+                // connect if: within diameter, not the same point, and passes density check
                 if (distSq < diamSq && distSq > 0 && density > rnd.nextFloat()) {
-                    // calculate the line opacity based on distance
-                    int alpha = (int) Math.min(255.0, 10000 / distSq);
+                    // calculate alpha based on inverse squared distance, clamped to 0-255
+                    // closer points result in more opaque lines
+                    int alpha = (int) Math.min(255.0, ALPHA_DISTANCE_FACTOR / distSq);
 
-                    // combine the opacity with the base color
-                    int lineColor = alpha << 24 | baseColorNoAlpha;
+                    // combine calculated alpha with the original color's RGB
+                    int lineColorRgba = (alpha << 24) | baseColorNoAlpha;
+                    targetG.setColor(new Color(lineColorRgba, true));
 
-                    targetG.setColor(new Color(lineColor, true));
-                    double xOffset = dx * offset;
-                    double yOffset = dy * offset;
-                    line.setLine(last.getX() - xOffset, last.getY() - yOffset,
-                        old.getX() + xOffset, old.getY() + yOffset);
+                    double xOffset = dx * offsetFactor;
+                    double yOffset = dy * offsetFactor;
+                    line.setLine(
+                        last.getX() - xOffset,
+                        last.getY() - yOffset,
+                        old.getX() + xOffset,
+                        old.getY() + yOffset);
 
                     targetG.draw(line);
                 }
@@ -115,6 +142,7 @@ public class ConnectBrushHistory {
 
     public static void clear() {
         history.clear();
+        currentStroke = null;
         nextAddIndex = 0;
         numPoints = 0;
     }
@@ -123,15 +151,30 @@ public class ConnectBrushHistory {
         if (nextAddIndex > 0) {
             nextAddIndex--; // move back one step in the history
         }
+        recalculateNumPoints();
     }
 
     private static void redo() {
         nextAddIndex++; // move forward one step in the history
+        recalculateNumPoints();
     }
 
+    /**
+     * Recalculates the total number of points across all active strokes.
+     */
+    private static void recalculateNumPoints() {
+        numPoints = 0;
+        for (int i = 0; i < nextAddIndex; i++) {
+            numPoints += history.get(i).size();
+        }
+    }
+
+    /**
+     * Integrates this history with the application's history.
+     */
     public static class Edit extends PixelitorEdit {
         public Edit(Composition comp) {
-            super("Connect Brush History", comp);
+            super("Connect Brush Stroke", comp);
         }
 
         @Override

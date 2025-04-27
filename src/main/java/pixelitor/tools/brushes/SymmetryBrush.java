@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,19 +27,23 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Graphics2D;
 
 /**
- * A brush that delegates the work to other brushes
- * according to the symmetry and brush type settings.
+ * A brush implementing symmetry by delegating to multiple
+ * internal brushes based on the current symmetry settings.
  */
 public class SymmetryBrush implements Brush {
+    // maximum number of simultaneous brushes
     private static final int MAX_BRUSHES = 4;
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
+
+    // current number of active brushes based on symmetry setting
     private int numBrushes;
+
     private final Tool tool;
     private BrushType brushType;
     private Symmetry symmetry;
 
-    // the affected area is shared between all the brushes
+    // the affected area is shared between all the internal brushes
     private final AffectedArea affectedArea;
 
     public SymmetryBrush(Tool tool, BrushType brushType,
@@ -50,6 +54,8 @@ public class SymmetryBrush implements Brush {
         affectedArea = new AffectedArea();
         numBrushes = symmetry.getNumBrushes();
         assert numBrushes <= MAX_BRUSHES;
+
+        // initialize the internal brushes
         brushTypeChanged(brushType, radius);
     }
 
@@ -72,37 +78,51 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
+    public PPoint getPrevious() {
+        // the sub-brushes manage their own previous points
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setPrevious(PPoint previous) {
-        throw new IllegalStateException("should not be called");
+        // the sub-brushes manage their own previous points
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasPrevious() {
+        // it's the same for all brushes
+        return brushes[0].hasPrevious();
     }
 
     @Override
     public double getMaxEffectiveRadius() {
+        // all brushes have the same max effective radius
         return brushes[0].getMaxEffectiveRadius();
     }
 
     @Override
-    public PPoint getPrevious() {
-        return brushes[0].getPrevious();
+    public boolean isDrawing() {
+        // the drawing state is consistent across brushes
+        return brushes[0].isDrawing();
     }
 
     @Override
-    public boolean isDrawing() {
-        return brushes[0].isDrawing();
+    public double getPreferredSpacing() {
+        // all internal brushes have the same preferred spacing
+        return brushes[0].getPreferredSpacing();
     }
 
     @Override
     public void initDrawing(PPoint p) {
         for (int i = 0; i < numBrushes; i++) {
-            PPoint transformed;
-            if (i == 0) {
-                transformed = p;
-            } else {
-                transformed = symmetry.transform(p, i);
-            }
+            PPoint transformed = (i == 0) ? p : symmetry.transform(p, i);
             brushes[i].initDrawing(transformed);
         }
     }
+
+    // Delegate user actions to the Symmetry enum, which handles applying the
+    // action to the correct internal brushes with transformed coordinates.
 
     @Override
     public void startAt(PPoint p) {
@@ -121,16 +141,16 @@ public class SymmetryBrush implements Brush {
 
     @Override
     public void finishBrushStroke() {
-        symmetry.finish(this);
+        symmetry.finishBrushStroke(this);
     }
 
-    public void brushTypeChanged(BrushType brushType, double radius) {
-        this.brushType = brushType;
+    public void brushTypeChanged(BrushType newBrushType, double radius) {
+        this.brushType = newBrushType;
         for (int i = 0; i < numBrushes; i++) {
             if (brushes[i] != null) {
                 brushes[i].dispose();
             }
-            brushes[i] = brushType.createBrush(tool, radius);
+            brushes[i] = newBrushType.createBrush(tool, radius);
         }
     }
 
@@ -141,28 +161,45 @@ public class SymmetryBrush implements Brush {
         assert newNumBrushes <= MAX_BRUSHES;
 
         if (newNumBrushes > numBrushes) {
-            // we need to create more brushes of the same type
+            // create additional brushes if the new symmetry mode requires more
             PPoint previous0 = brushes[0].getPrevious();
             for (int i = numBrushes; i < newNumBrushes; i++) {
                 brushes[i] = brushType.createBrush(tool, radius);
 
-                // if the first brush has a previous point at the time of the
-                // symmetry change (it was already used), then propagate
-                // the previous coordinates to the newly created brushes
+                // if the primary brush was already used, propagate its
+                // last known position to the newly created brushes,
+                // applying the new symmetry transformation
                 if (previous0 != null) {
                     PPoint generatedPrevious = symmetry.transform(previous0, i);
                     brushes[i].setPrevious(generatedPrevious);
                 }
             }
         } else if (newNumBrushes < numBrushes) {
+            // dispose of surplus brushes if the new symmetry mode requires fewer
             for (int i = newNumBrushes; i < numBrushes; i++) {
                 brushes[i].dispose();
                 brushes[i] = null;
             }
         }
+        // else numBrushes == newNumBrushes, no structural change needed
+
         numBrushes = newNumBrushes;
     }
 
+    @Override
+    public void dispose() {
+        for (int i = 0; i < numBrushes; i++) {
+            brushes[i].dispose();
+            brushes[i] = null;
+        }
+        numBrushes = 0;
+    }
+
+    // Methods called by the Symmetry enum to perform actions on specific internal brushes.
+
+    /**
+     * Starts a brush stroke for a specific internal brush.
+     */
     public void startAt(int brushNo, PPoint p) {
         // the tracking of the shared affected area is done at this level
         if (brushNo == 0) {
@@ -171,41 +208,45 @@ public class SymmetryBrush implements Brush {
             affectedArea.updateWith(p);
         }
 
-        // do the actual painting
+        // do the actual drawing
         brushes[brushNo].startAt(p);
     }
 
+    /**
+     * Continues a brush stroke for a specific internal brush.
+     */
     public void continueTo(int brushNo, PPoint p) {
         affectedArea.updateWith(p);
         brushes[brushNo].continueTo(p);
     }
 
+    /**
+     * Connects the last point with a line for a specific internal brush.
+     */
     public void lineConnectTo(int brushNo, PPoint p) {
         affectedArea.updateWith(p);
         brushes[brushNo].lineConnectTo(p);
     }
 
-    public void finish(int brushNo) {
+    /**
+     * Finishes the brush stroke for a specific internal brush.
+     */
+    public void finishBrushStroke(int brushNo) {
         brushes[brushNo].finishBrushStroke();
-    }
-
-    @Override
-    public double getPreferredSpacing() {
-        return brushes[0].getPreferredSpacing();
     }
 
     @Override
     public DebugNode createDebugNode(String key) {
         var node = new DebugNode("symmetry brush", this);
 
+        node.addInt("numBrushes", numBrushes);
+        node.addAsString("type", brushType);
+        node.addAsString("symmetry", symmetry);
+
         for (int i = 0; i < numBrushes; i++) {
             node.add(brushes[i].createDebugNode("brush " + i));
         }
-
-        node.addAsString("type", brushType);
-        node.addAsString("symmetry", symmetry);
         node.add(affectedArea.createDebugNode("affected area"));
-
         return node;
     }
 }

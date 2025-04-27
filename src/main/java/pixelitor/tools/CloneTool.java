@@ -50,7 +50,7 @@ import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.tools.CloneTool.State.CLONING;
 import static pixelitor.tools.CloneTool.State.NO_SOURCE;
-import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED_FIRST_STROKE;
+import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED;
 
 /**
  * The clone stamp tool.
@@ -63,19 +63,21 @@ public class CloneTool extends BlendingModeBrushTool {
     private JCheckBox alignedCB;
     private JCheckBox sampleAllCB;
 
+    // the current state of the clone tool
     public enum State {
         NO_SOURCE,
-        SOURCE_DEFINED_FIRST_STROKE,
+        SOURCE_DEFINED,
         CLONING
     }
-
     private State state = NO_SOURCE;
+
     private boolean sampleAllLayers = false;
+    private boolean showUndefinedSourceDialog = false;
+
+    private CloneBrush cloneBrush;
 
     private JButton showTransformDialogButton;
     private JDialog transformDialog;
-
-    private CloneBrush cloneBrush;
 
     private final RangeParam scaleParam = new RangeParam(
         "Scale (%)", 10, 100, 400, true, NONE);
@@ -83,8 +85,6 @@ public class CloneTool extends BlendingModeBrushTool {
         "Rotate (Degrees)", -180, 0, 180, true, NONE);
     private final EnumParam<Mirror> mirrorParam = new EnumParam<>(
         "Mirror", Mirror.class);
-
-    private boolean showUndefinedSourceDialog;
 
     protected CloneTool() {
         super("Clone Stamp", 'S',
@@ -110,16 +110,21 @@ public class CloneTool extends BlendingModeBrushTool {
 
         settingsPanel.addSeparator();
         showTransformDialogButton = settingsPanel.addButton("Transform...",
-            e -> transformButtonPressed(),
+            e -> showTransformDialog(),
             "transformButton", "Transform while cloning");
         addLazyMouseDialogButton();
     }
 
-    private void transformButtonPressed() {
-        JPanel transformPanel = createTransformPanel();
+    private void showTransformDialog() {
+        if (transformDialog != null) {
+            // call this even if it's already visible to set its location
+            GUIUtils.showDialog(transformDialog, showTransformDialogButton);
+            return;
+        }
+
         transformDialog = new DialogBuilder()
             .title("Clone Transform")
-            .content(transformPanel)
+            .content(createTransformPanel())
             .notModal()
             .okText(CLOSE_DIALOG)
             .noCancelButton()
@@ -161,13 +166,14 @@ public class CloneTool extends BlendingModeBrushTool {
     public void mousePressed(PMouseEvent e) {
         if (e.isAltDown() || e.isRight()) {
             setCloningSource(e);
+            // don't call super.mousePressed, as source setting shouldn't draw
         } else {
             if (state == NO_SOURCE) {
-                noSourceInMousePressed(e);
-                return;
+                handleNoSourceInMousePressed(e);
+                return; // prevent further processing
             }
             boolean lineConnect = e.isShiftDown() && brush.hasPrevious();
-            startNewCloningStroke(e, lineConnect);
+            startCloningStroke(e, lineConnect);
 
             super.mousePressed(e);
         }
@@ -176,6 +182,8 @@ public class CloneTool extends BlendingModeBrushTool {
     @Override
     public void mouseReleased(PMouseEvent e) {
         super.mouseReleased(e);
+
+        // show the delayed error dialog if cloning was attempted without a source
         if (showUndefinedSourceDialog) {
             showUndefinedSourceDialog = false;
             String msg = "<html>Define a source point first with " +
@@ -184,13 +192,15 @@ public class CloneTool extends BlendingModeBrushTool {
                 msg += "<br><br>(For <b>Alt-Click</b> you might need to disable " +
                     "<br><b>Alt-Click</b> for window dragging in the window manager)";
             }
-            Messages.showError("No source point", msg, e.getView().getDialogParent());
+            Messages.showError("No Source Point", msg, e.getView().getDialogParent());
         }
     }
 
-    private void startNewCloningStroke(PPoint strokeStart, boolean lineConnect) {
-        state = CLONING;
+    // configures the brush for a new cloning stroke
+    private void startCloningStroke(PPoint strokeStart, boolean lineConnect) {
+        setState(CLONING);
 
+        // apply transform settings to the brush
         double scaleAbs = scaleParam.getPercentage();
         Mirror mirror = mirrorParam.getSelected();
         cloneBrush.setScale(
@@ -206,24 +216,25 @@ public class CloneTool extends BlendingModeBrushTool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        // make sure that the first source-setting stroke does not clone
         if (state == CLONING) {
             super.mouseDragged(e);
         }
+        // otherwise, ignore drags (e.g., if user is dragging after Alt-clicking source)
     }
 
-    private void noSourceInMousePressed(PMouseEvent e) {
+    // handles the case where user tries to clone without setting a source
+    private void handleNoSourceInMousePressed(PMouseEvent e) {
         if (RandomGUITest.isRunning()) {
-            // special case: don't show dialogs for RandomGUITest,
-            // just act as if this was an alt-click
+            // special case for testing: act as if source was set at the click point
             setCloningSource(e);
         } else {
-            // only set a flag that will be checked in mouseReleased,
-            // otherwise the modal dialog swallows the mouse released event
+            // set flag to show dialog on mouse release
+            // (otherwise the modal dialog swallows the mouse released event)
             showUndefinedSourceDialog = true;
         }
     }
 
+    // sets the source point for cloning based on the event coordinates
     private void setCloningSource(PPoint e) {
         var comp = e.getComp();
         BufferedImage sourceImage;
@@ -237,10 +248,8 @@ public class CloneTool extends BlendingModeBrushTool {
             dx = -dr.getTx();
             dy = -dr.getTy();
         }
-        double x = e.getImX();
-        double y = e.getImY();
-        cloneBrush.setSource(sourceImage, x + dx, y + dy);
-        state = SOURCE_DEFINED_FIRST_STROKE;
+        cloneBrush.setSource(sourceImage, e.getImX() + dx, e.getImY() + dy);
+        setState(SOURCE_DEFINED);
     }
 
     @Override
@@ -264,7 +273,7 @@ public class CloneTool extends BlendingModeBrushTool {
         PPoint randomPoint = dr.getComp().genRandomPointInCanvas();
         setCloningSource(randomPoint);
 
-        startNewCloningStroke(strokeStart, false);
+        startCloningStroke(strokeStart, false);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -90,6 +90,11 @@ public abstract class StrokeBrush extends AbstractBrush {
     @Override
     public double getPreferredSpacing() {
         return 0;
+    }
+
+    @Override
+    public void dispose() {
+        // do nothing
     }
 
     @Override
