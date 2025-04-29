@@ -204,11 +204,11 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     private void showBrushSettingsDialog() {
-        var brushType = getBrushType();
+        BrushType brushType = getBrushType();
         assert brushType.hasSettings();
         
         settingsDialog = new DialogBuilder()
-            .content(brushType.getConfigPanel(this))
+            .content(brushType.getSettings(this).getConfigPanel())
             .title("Settings for the " + brushType + " Brush")
             .notModal()
             .withScrollbars()
@@ -282,7 +282,7 @@ public abstract class AbstractBrushTool extends Tool {
         newMousePoint(e, false); // continue the stroke
 
         if (lazyMouse) {
-            PPoint drawLoc = lazyMouseBrush.getDrawLoc();
+            PPoint drawLoc = lazyMouseBrush.getDrawLocation();
             outlineCoX = (int) drawLoc.getCoX();
             outlineCoY = (int) drawLoc.getCoY();
         } else {
@@ -726,7 +726,7 @@ public abstract class AbstractBrushTool extends Tool {
         lazyMouseEnabled.loadStateFrom(preset);
         lazyMouseDist.loadStateFrom(preset);
         updateLazyMouseEnabledState();
-        LazyMouseBrush.setDist(lazyMouseDist.getValue());
+        LazyMouseBrush.setLazyDist(lazyMouseDist.getValue());
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,22 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.BrushType;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.util.PPoint;
 
-public abstract class OutlineBrush extends StrokeBrush {
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+
+import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.CAP_SQUARE;
+import static java.awt.BasicStroke.JOIN_BEVEL;
+import static java.awt.BasicStroke.JOIN_ROUND;
+
+public class OutlineBrush extends StrokeBrush {
+    private final BrushType brushType;
     private final OutlineBrushSettings settings;
     private double origRadius;
     private long prevTime;
@@ -28,8 +40,11 @@ public abstract class OutlineBrush extends StrokeBrush {
     private static final double MAX_SPEED_THRESHOLD = 2000;
     private static final double THRESHOLD_DIFF = MAX_SPEED_THRESHOLD - MIN_SPEED_THRESHOLD;
 
-    protected OutlineBrush(OutlineBrushSettings settings, double radius, int cap, int join) {
-        super(radius, StrokeType.OUTLINE, cap, join);
+    public OutlineBrush(BrushType brushType, double radius, OutlineBrushSettings settings) {
+        super(radius, StrokeType.OUTLINE,
+            brushType == BrushType.OUTLINE_SQUARE ? CAP_SQUARE : CAP_ROUND,
+            brushType == BrushType.OUTLINE_SQUARE ? JOIN_BEVEL : JOIN_ROUND);
+        this.brushType = brushType;
         this.settings = settings;
     }
 
@@ -43,6 +58,25 @@ public abstract class OutlineBrush extends StrokeBrush {
     public void startAt(PPoint p) {
         super.startAt(p);
         prevTime = System.nanoTime();
+    }
+
+    @Override
+    public void drawStartShape(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
+        Stroke savedStroke = targetG.getStroke();
+
+        targetG.setStroke(StrokeType.OUTLINE.getInnerStroke());
+
+        //noinspection EnumSwitchStatementWhichMissesCases
+        Shape shape = switch (brushType) {
+            case OUTLINE_CIRCLE -> new Ellipse2D.Double(x - radius, y - radius, diameter, diameter);
+            case OUTLINE_SQUARE -> new Rectangle2D.Double(x - radius, y - radius, diameter, diameter);
+            default -> throw new IllegalStateException();
+        };
+        targetG.draw(shape);
+
+        targetG.setStroke(savedStroke);
     }
 
     @Override
@@ -95,6 +129,8 @@ public abstract class OutlineBrush extends StrokeBrush {
         // use the maximum radius for the undo, even if the
         // speed-dependent drawing radius is smaller, see issue #57
         // A +1 safety is also necessary (rounding errors?)
-        return origRadius + 1;
+        return brushType == BrushType.OUTLINE_CIRCLE
+            ? origRadius + 1
+            : (origRadius * 1.42) + 1; // multiply with sqrt 2
     }
 }

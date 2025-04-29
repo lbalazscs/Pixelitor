@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,12 +20,15 @@ package pixelitor.tools.brushes;
 import pixelitor.filters.gui.UserPreset;
 
 /**
- * Determines the spacing distance between dabs.
+ * A strategy for determining the spacing distance between brush dabs.
  * Used by the {@link DabsStrategy} implementations.
  */
 public interface Spacing {
     double MIN_SPACING = 1.0;
 
+    /**
+     * Calculates the desired spacing in image pixels based on the current brush radius.
+     */
     double getSpacing(double radius);
 
     void saveStateTo(UserPreset preset);

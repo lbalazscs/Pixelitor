@@ -18,9 +18,9 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.layers.Drawable;
+import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Symmetry;
-import pixelitor.tools.Tool;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
@@ -39,14 +39,14 @@ public class SymmetryBrush implements Brush {
     // current number of active brushes based on symmetry setting
     private int numBrushes;
 
-    private final Tool tool;
+    private final AbstractBrushTool tool;
     private BrushType brushType;
     private Symmetry symmetry;
 
     // the affected area is shared between all the internal brushes
     private final AffectedArea affectedArea;
 
-    public SymmetryBrush(Tool tool, BrushType brushType,
+    public SymmetryBrush(AbstractBrushTool tool, BrushType brushType,
                          Symmetry symmetry, double radius) {
         this.tool = tool;
         this.brushType = brushType;
@@ -79,8 +79,9 @@ public class SymmetryBrush implements Brush {
 
     @Override
     public PPoint getPrevious() {
-        // the sub-brushes manage their own previous points
-        throw new UnsupportedOperationException();
+        // the sub-brushes manage their own previous points, but don't
+        // throw an exception, because the lazy mouse brush calls this
+        return null;
     }
 
     @Override

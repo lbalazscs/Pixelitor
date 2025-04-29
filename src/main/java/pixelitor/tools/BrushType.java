@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.tools;
 
 import pixelitor.tools.brushes.*;
 
-import javax.swing.*;
 import java.util.IdentityHashMap;
 import java.util.function.Supplier;
 
@@ -29,105 +28,68 @@ import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLED;
  * The brush types in the brush and eraser tools.
  */
 public enum BrushType {
-    HARD("Hard", false) {
+    HARD("Hard", null) {
         @Override
-        public Brush createBrush(Tool tool, double radius) {
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
             return new HardBrush(radius);
         }
-    }, SOFT("Soft", false) {
+    }, SOFT("Soft", null) {
         @Override
-        public Brush createBrush(Tool tool, double radius) {
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
             return new ImageDabsBrush(radius,
                 ImageBrushType.SOFT, 0.25, NOT_ANGLED);
         }
-    }, WOBBLE("Wobble", false) {
+    }, WOBBLE("Wobble", null) {
         @Override
-        public Brush createBrush(Tool tool, double radius) {
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
             return new WobbleBrush(radius);
         }
-    }, CALLIGRAPHY("Calligraphy", true) {
+    }, CALLIGRAPHY("Calligraphy", CalligraphyBrushSettings::new) {
         @Override
-        public Brush createBrush(Tool tool, double radius) {
-            return new CalligraphyBrush(radius, getSettings(tool));
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
+            return new CalligraphyBrush(radius, (CalligraphyBrushSettings) getSettings(tool));
         }
-
+    }, REALISTIC("Realistic", null) {
         @Override
-        public CalligraphyBrushSettings getSettings(Tool tool) {
-            return (CalligraphyBrushSettings) findSettings(
-                tool, CalligraphyBrushSettings::new);
-        }
-    }, REALISTIC("Realistic", false) {
-        @Override
-        public Brush createBrush(Tool tool, double radius) {
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
             return new ImageDabsBrush(radius,
                 ImageBrushType.REAL, 0.05, NOT_ANGLED);
         }
-    }, HAIR("Hair", false) {
+    }, HAIR("Hair", null) {
         @Override
-        public Brush createBrush(Tool tool, double radius) {
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
             return new ImageDabsBrush(radius,
                 ImageBrushType.HAIR, 0.02, NOT_ANGLED);
         }
-    }, SHAPE("Shapes", true) {
+    }, SHAPE("Shapes", ShapeDabsBrushSettings::new) {
         @Override
-        public Brush createBrush(Tool tool, double radius) {
-            return new ShapeDabsBrush(radius, getSettings(tool));
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
+            return new ShapeDabsBrush(radius, (ShapeDabsBrushSettings) getSettings(tool));
         }
-
+    }, SPRAY("Spray Shapes", SprayBrushSettings::new) {
         @Override
-        public ShapeDabsBrushSettings getSettings(Tool tool) {
-            return (ShapeDabsBrushSettings) findSettings(tool, ShapeDabsBrushSettings::new);
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
+            return new SprayBrush(radius, (SprayBrushSettings) getSettings(tool));
         }
-
-    }, SPRAY("Spray Shapes", true) {
+    }, CONNECT("Connect", ConnectBrushSettings::new) {
         @Override
-        public Brush createBrush(Tool tool, double radius) {
-            return new SprayBrush(radius, getSettings(tool));
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
+            return new ConnectBrush((ConnectBrushSettings) getSettings(tool), radius);
         }
-
+    }, OUTLINE_CIRCLE("Circles", OutlineBrushSettings::new) {
         @Override
-        public SprayBrushSettings getSettings(Tool tool) {
-            return (SprayBrushSettings) findSettings(tool, SprayBrushSettings::new);
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
+            return new OutlineBrush(this, radius, (OutlineBrushSettings) getSettings(tool));
         }
-    }, CONNECT("Connect", true) {
+    }, OUTLINE_SQUARE("Squares", OutlineBrushSettings::new) {
         @Override
-        public Brush createBrush(Tool tool, double radius) {
-            return new ConnectBrush(getSettings(tool), radius);
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
+            return new OutlineBrush(this, radius, (OutlineBrushSettings) getSettings(tool));
         }
-
+    }, ONE_PIXEL("One Pixel", OnePixelBrushSettings::new) {
         @Override
-        public ConnectBrushSettings getSettings(Tool tool) {
-            return (ConnectBrushSettings) findSettings(tool, ConnectBrushSettings::new);
-        }
-    }, OUTLINE_CIRCLE("Circles", true) {
-        @Override
-        public Brush createBrush(Tool tool, double radius) {
-            return new OutlineCircleBrush(radius, getSettings(tool));
-        }
-
-        @Override
-        public OutlineBrushSettings getSettings(Tool tool) {
-            return (OutlineBrushSettings) findSettings(tool, OutlineBrushSettings::new);
-        }
-    }, OUTLINE_SQUARE("Squares", true) {
-        @Override
-        public Brush createBrush(Tool tool, double radius) {
-            return new OutlineSquareBrush(radius, getSettings(tool));
-        }
-
-        @Override
-        public OutlineBrushSettings getSettings(Tool tool) {
-            return (OutlineBrushSettings) findSettings(tool, OutlineBrushSettings::new);
-        }
-    }, ONE_PIXEL("One Pixel", true) {
-        @Override
-        public Brush createBrush(Tool tool, double radius) {
-            return new OnePixelBrush(getSettings(tool));
-        }
-
-        @Override
-        public OnePixelBrushSettings getSettings(Tool tool) {
-            return (OnePixelBrushSettings) findSettings(tool, OnePixelBrushSettings::new);
+        public Brush createBrush(AbstractBrushTool tool, double radius) {
+            return new OnePixelBrush((OnePixelBrushSettings) getSettings(tool));
         }
 
         @Override
@@ -138,17 +100,19 @@ public enum BrushType {
 
     private final String displayName;
     private final boolean hasSettings;
+    private final Supplier<BrushSettings> settingsFactory;
 
     // The settings are shared between the symmetry-brushes of a
     // tool, but they are different between the different tools
-    private IdentityHashMap<Tool, BrushSettings> settingsByTool;
+    private IdentityHashMap<AbstractBrushTool, BrushSettings> settingsByTool;
 
-    BrushType(String displayName, boolean hasSettings) {
+    BrushType(String displayName, Supplier<BrushSettings> settingsFactory) {
         this.displayName = displayName;
-        this.hasSettings = hasSettings;
+        this.hasSettings = settingsFactory != null;
+        this.settingsFactory = settingsFactory;
     }
 
-    public abstract Brush createBrush(Tool tool, double radius);
+    public abstract Brush createBrush(AbstractBrushTool tool, double radius);
 
     @Override
     public String toString() {
@@ -163,25 +127,12 @@ public enum BrushType {
         return hasSettings;
     }
 
-    public JPanel getConfigPanel(Tool tool) {
-        assert hasSettings; // otherwise the button isn't enabled
-        assert settingsByTool != null; // already initialized
+    /**
+     * Returns the settings tied to the {@link AbstractBrushTool} and {@link BrushType} combination
+     */
+    public BrushSettings getSettings(AbstractBrushTool tool) {
+        assert hasSettings;
 
-        var settings = settingsByTool.get(tool);
-
-        assert settings != null; // already initialized
-
-        return settings.getConfigPanel();
-    }
-
-
-    public BrushSettings getSettings(Tool tool) {
-        // overridden for brush types with settings
-        throw new UnsupportedOperationException();
-    }
-
-    protected BrushSettings findSettings(Tool tool,
-                                         Supplier<BrushSettings> settingsFactory) {
         BrushSettings settings = null;
         if (settingsByTool == null) {
             settingsByTool = new IdentityHashMap<>();

@@ -24,7 +24,7 @@ import pixelitor.utils.debug.Debuggable;
 import java.awt.Graphics2D;
 
 /**
- * A brush.
+ * The behavior of a brush used for drawing on a {@link Drawable}.
  * The received coordinates correspond to the mouse events;
  * they are not translated with the brush radius.
  */
@@ -40,7 +40,7 @@ public interface Brush extends Debuggable {
     void continueTo(PPoint p);
 
     /**
-     * Connects the last point of the stroke to the given point with a straight line.
+     * Connects the last point of the stroke to the given point with a straight line segment.
      */
     void lineConnectTo(PPoint p);
 
@@ -81,16 +81,14 @@ public interface Brush extends Debuggable {
     void setPrevious(PPoint previous);
 
     /**
-     * Returns true if the brush has a previous position,
-     * and false if it has not been used yet.
+     * Returns true if the brush has a recorded previous position.
      */
     default boolean hasPrevious() {
         return getPrevious() != null;
     }
 
     /**
-     * Sets the {@link Drawable} and the Graphics2D object
-     * on which this brush will draw.
+     * Sets the target {@link Drawable} and Graphics2D for drawing.
      */
     void setTarget(Drawable dr, Graphics2D g);
 
@@ -100,16 +98,15 @@ public interface Brush extends Debuggable {
     void setRadius(double radius);
 
     /**
-     * Used to determine the area saved for the undo.
-     * This can be bigger than the radius because
-     * some brushes use randomness and paint outside their radius.
-     * Since the radius can change during a brush stroke (via keyboard),
-     * the maximum value must be returned.
+     * Returns the maximum effective radius used during the last stroke, for undo purposes.
+     * This can be bigger than the radius because some brushes paint
+     * outside their radius. Since the radius can change during a brush
+     * stroke (via keyboard), the maximum value must be returned.
      */
     double getMaxEffectiveRadius();
 
     /**
-     * Returns the space between the dabs.
+     * Returns the space between the between brush applications (dabs) in image-space pixels.
      *
      * If the brush doesn't use uniform spacing, it can return
      * any spacing that looks good, or 0 to skip the decision.

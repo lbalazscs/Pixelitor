@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import javax.swing.*;
 import java.util.function.Consumer;
 
 /**
- * The settings of a {@link DabsBrush}
+ * The settings of a {@link DabsBrush}.
  */
 public class DabsBrushSettings extends BrushSettings {
     private AngleSettings angleSettings;
@@ -45,6 +45,9 @@ public class DabsBrushSettings extends BrushSettings {
         notifyBrushes();
     }
 
+    /**
+     * Returns true if the brush angle should follow the stroke direction.
+     */
     public boolean isAngled() {
         return angleSettings.isAngled();
     }

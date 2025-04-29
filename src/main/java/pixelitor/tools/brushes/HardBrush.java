@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import java.awt.geom.Ellipse2D;
  * A brush that paints with vector-based circles
  */
 public class HardBrush extends StrokeBrush {
-
     public HardBrush(double radius) {
         super(radius, StrokeType.BASIC);
     }
@@ -36,7 +35,6 @@ public class HardBrush extends StrokeBrush {
         double x = p.getImX();
         double y = p.getImY();
 
-        Ellipse2D.Double circle = new Ellipse2D.Double(x - radius, y - radius, diameter, diameter);
-        targetG.fill(circle);
+        targetG.fill(new Ellipse2D.Double(x - radius, y - radius, diameter, diameter));
     }
 }

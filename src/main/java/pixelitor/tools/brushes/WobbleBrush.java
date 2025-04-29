@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.tools.brushes;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.util.PPoint;
 
-import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
 /**
@@ -44,8 +43,7 @@ public class WobbleBrush extends StrokeBrush {
         }
 
         targetG.setStroke(currentStroke);
-        Shape circle = new Ellipse2D.Double(p.getImX(), p.getImY(), 0.1, 0.1);
-        targetG.draw(circle);
+        targetG.draw(new Ellipse2D.Double(p.getImX(), p.getImY(), 0.1, 0.1));
     }
 
     @Override

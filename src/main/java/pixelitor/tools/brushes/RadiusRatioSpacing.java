@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.tools.brushes;
 import pixelitor.filters.gui.UserPreset;
 
 /**
- * A {@link Spacing} implementation where the spacing between the dabs
- * is proportional to the radius.
+ * A {@link Spacing} strategy where the distance between dabs
+ * is proportional to the brush radius.
  */
 public class RadiusRatioSpacing implements Spacing {
     private static final String RATIO_KEY = "Spacing Ratio";

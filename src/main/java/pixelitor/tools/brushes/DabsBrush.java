@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 /**
- * Abstract base class for brushes that apply dabs (small marks).
+ * Abstract base class for brushes that apply discrete dabs (marks).
  */
 public abstract class DabsBrush extends AbstractBrush {
     private final Spacing spacing;
@@ -115,7 +115,7 @@ public abstract class DabsBrush extends AbstractBrush {
         node.addBoolean("angled", settings.isAngled());
         node.addBoolean("jittered",
             settings.getAngleSettings().isJitterEnabled());
-        node.addDouble("spacing", spacing.getSpacing(radius));
+        node.addDouble("spacing", getPreferredSpacing());
 
         return node;
     }

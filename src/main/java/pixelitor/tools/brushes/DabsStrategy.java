@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.tools.brushes;
 import pixelitor.tools.util.PPoint;
 
 /**
- * Specifies how the dabs of a {@link DabsBrush}
- * are placed in response to mouse events.
+ * Defines how the dabs of a {@link DabsBrush} are placed along a
+ * brush stroke in response to input points (usually from mouse events).
  *
  * Unlike brush settings, these strategies can't be shared between
  * symmetry brushes because they interact with a specific brush instance.
@@ -43,7 +43,7 @@ public interface DabsStrategy {
     void settingsChanged();
 
     /**
-     * Remembers the previous point for calculations between stroke segments.
+     * Informs the strategy about the previous point.
      */
     void setPrevious(PPoint previous);
 }

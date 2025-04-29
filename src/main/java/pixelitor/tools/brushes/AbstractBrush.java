@@ -26,8 +26,7 @@ import java.awt.Graphics2D;
 import java.util.Objects;
 
 /**
- * An abstract base class for the brushes that are
- * "real" in the sense that they are not decorators
+ * Base implementation for brushes that directly apply marks, as opposed to decorators.
  */
 public abstract class AbstractBrush implements Brush {
     protected Graphics2D targetG;
@@ -35,6 +34,8 @@ public abstract class AbstractBrush implements Brush {
 
     protected double radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
     protected double diameter;
+
+    // tracks the maximum radius used during a stroke for undo bounds calculation
     private double maxRadiusDuringStroke = 0;
     protected PPoint previous;
 
@@ -56,7 +57,7 @@ public abstract class AbstractBrush implements Brush {
 
     @Override
     public double getMaxEffectiveRadius() {
-        // add one to make sure rounding errors don't ruin the undo
+        // add a small margin to account for potential rounding errors
         return maxRadiusDuringStroke + 1.0;
     }
 
@@ -66,12 +67,19 @@ public abstract class AbstractBrush implements Brush {
         targetG = Objects.requireNonNull(g);
     }
 
-    // always call it before rememberPrevious!
+    /**
+     * Requests a repaint of the view covering the area between the
+     * previous and current points, expanded by the brush diameter.
+     * Should be called *before* updating the previous point with {@link #setPrevious(PPoint)}.
+     */
     protected void repaintComp(PPoint p) {
         dr.repaintRegion(previous, p, diameter);
     }
 
-    // Always call this after repaintComp!
+    /**
+     * Sets the previous point.
+     * Should be called *after* any operations that require the old previous point, like {@link #repaintComp(PPoint)}.
+     */
     @Override
     public void setPrevious(PPoint p) {
         previous = p;
@@ -91,7 +99,7 @@ public abstract class AbstractBrush implements Brush {
 
         initDrawing(p);
 
-        // initialize at the beginning of the brush stroke
+        // reset at the beginning of the brush stroke
         maxRadiusDuringStroke = radius;
     }
 
@@ -134,7 +142,7 @@ public abstract class AbstractBrush implements Brush {
     }
 
     public void settingsChanged() {
-        // do nothing as a convenience for subclasses without settings
+        // subclasses can override this to react to settings changes
     }
 
     @Override
@@ -143,6 +151,8 @@ public abstract class AbstractBrush implements Brush {
         node.addClass();
         node.addDouble("radius", radius);
         node.addNullableDebuggable("previous", previous);
+        node.addBoolean("drawing", drawing);
+        node.addDouble("maxRadiusDuringStroke", maxRadiusDuringStroke);
 
         return node;
     }

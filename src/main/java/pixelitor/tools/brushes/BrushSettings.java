@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.util.List;
  */
 public abstract class BrushSettings extends Configurable {
     protected Tool tool;
+
+    // the symmetry brushes that share this settings object
     private final List<AbstractBrush> brushes = new ArrayList<>(4);
 
     public void setTool(Tool tool) {

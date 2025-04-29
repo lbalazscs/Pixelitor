@@ -65,13 +65,8 @@ public class SprayBrush extends AbstractBrush {
     public void setTarget(Drawable dr, Graphics2D g) {
         super.setTarget(dr, g);
 
-        // detect tool settings
-//        AlphaComposite currentComposite = (AlphaComposite) g.getComposite();
-//        isErasing = currentComposite.getRule() == AlphaComposite.DST_OUT;
-//        baseColor = g.getColor();
-
-        // the Graphics is not completely configured yet,
-        // so the above code doesn't work
+        // the Graphics2D is not completely configured yet, so we can't check
+        // its composite to see if this is called from the eraser tool
         isErasing = Tools.activeIs(Tools.ERASER);
         baseColor = FgBgColors.getFGColor();
     }

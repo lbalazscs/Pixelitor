@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,6 +62,6 @@ public class ShapeDabsBrush extends DabsBrush {
 
     @Override
     void initBrushStamp(PPoint p) {
-        // no setup is necessary for shape brushes
+        // no per-dab or per-segment initialization needed for shapes
     }
 }
