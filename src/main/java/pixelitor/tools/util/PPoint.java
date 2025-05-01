@@ -117,18 +117,6 @@ public class PPoint implements Debuggable {
         }
     }
 
-    public PPoint mirrorVertically(int canvasWidth) {
-        return fromIm(canvasWidth - getImX(), getImY(), view);
-    }
-
-    public PPoint mirrorHorizontally(int canvasHeight) {
-        return fromIm(getImX(), canvasHeight - getImY(), view);
-    }
-
-    public PPoint mirrorBoth(int canvasWidth, int canvasHeight) {
-        return fromIm(canvasWidth - getImX(), canvasHeight - getImY(), view);
-    }
-
     /**
      * Draws a line from this point to another point in image space.
      */

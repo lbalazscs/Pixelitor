@@ -52,53 +52,23 @@ public enum Symmetry {
         public PPoint transform(PPoint p, int brushNo) {
             throw new IllegalStateException("Should not be called, brushNo = " + brushNo);
         }
-    }, VERTICAL_MIRROR("Vertical", 2) {
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            brush.startAt(0, p);
-            brush.startAt(1, p.mirrorVertically(canvasWidth));
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            brush.continueTo(0, p);
-            brush.continueTo(1, p.mirrorVertically(canvasWidth));
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, p.mirrorVertically(canvasWidth));
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            brush.finishBrushStroke(0);
-            brush.finishBrushStroke(1);
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushNo) {
-            assert brushNo == 1 : "brushNo = " + brushNo;
-            return p.mirrorVertically(canvasWidth);
-        }
     }, HORIZONTAL_MIRROR("Horizontal", 2) {
         @Override
         public void startAt(SymmetryBrush brush, PPoint p) {
             brush.startAt(0, p);
-            brush.startAt(1, p.mirrorHorizontally(canvasHeight));
+            brush.startAt(1, mirrorHorizontally(p));
         }
 
         @Override
         public void continueTo(SymmetryBrush brush, PPoint p) {
             brush.continueTo(0, p);
-            brush.continueTo(1, p.mirrorHorizontally(canvasHeight));
+            brush.continueTo(1, mirrorHorizontally(p));
         }
 
         @Override
         public void lineConnectTo(SymmetryBrush brush, PPoint p) {
             brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, p.mirrorHorizontally(canvasHeight));
+            brush.lineConnectTo(1, mirrorHorizontally(p));
         }
 
         @Override
@@ -110,9 +80,39 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushNo) {
             assert brushNo == 1 : "brushNo = " + brushNo;
-            return p.mirrorHorizontally(canvasHeight);
+            return mirrorHorizontally(p);
         }
-    }, TWO_MIRRORS("Two Mirrors", 4) {
+    }, VERTICAL_MIRROR("Vertical", 2) {
+        @Override
+        public void startAt(SymmetryBrush brush, PPoint p) {
+            brush.startAt(0, p);
+            brush.startAt(1, mirrorVertically(p));
+        }
+
+        @Override
+        public void continueTo(SymmetryBrush brush, PPoint p) {
+            brush.continueTo(0, p);
+            brush.continueTo(1, mirrorVertically(p));
+        }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+            brush.lineConnectTo(1, mirrorVertically(p));
+        }
+
+        @Override
+        public void finishBrushStroke(SymmetryBrush brush) {
+            brush.finishBrushStroke(0);
+            brush.finishBrushStroke(1);
+        }
+
+        @Override
+        public PPoint transform(PPoint p, int brushNo) {
+            assert brushNo == 1 : "brushNo = " + brushNo;
+            return mirrorVertically(p);
+        }
+    }, TWO_MIRRORS("Horizontal + Vertical", 4) {
         @Override
         public void startAt(SymmetryBrush brush, PPoint p) {
             applyToAllBrushes(SymmetryBrush::startAt, brush, p);
@@ -138,37 +138,36 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushNo) {
             return switch (brushNo) {
-                case 1 -> p.mirrorVertically(canvasWidth);
-                case 2 -> p.mirrorHorizontally(canvasHeight);
-                case 3 -> p.mirrorBoth(canvasWidth, canvasHeight);
+                case 1 -> mirrorVertically(p);
+                case 2 -> mirrorHorizontally(p);
+                case 3 -> mirrorBoth(p);
                 default -> throw new IllegalArgumentException("brushNo = " + brushNo);
             };
         }
 
-        // Helper to apply a brush action to all brushes
         private void applyToAllBrushes(BrushAction action, SymmetryBrush brush, PPoint p) {
-            action.apply(brush, 0, p);             // original
-            action.apply(brush, 1, transform(p, 1)); // vertical mirror
-            action.apply(brush, 2, transform(p, 2)); // horizontal mirror
-            action.apply(brush, 3, transform(p, 3)); // both mirrors
+            action.apply(brush, 0, p); // original
+            action.apply(brush, 1, transform(p, 1)); // vertical
+            action.apply(brush, 2, transform(p, 2)); // horizontal
+            action.apply(brush, 3, transform(p, 3)); // both
         }
-    }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
+    }, DIAGONAL_MIRROR_A("Diagonal /", 2) {
         @Override
         public void startAt(SymmetryBrush brush, PPoint p) {
             brush.startAt(0, p);
-            brush.startAt(1, p.mirrorBoth(canvasWidth, canvasHeight));
+            brush.startAt(1, transform(p, 1));
         }
 
         @Override
         public void continueTo(SymmetryBrush brush, PPoint p) {
             brush.continueTo(0, p);
-            brush.continueTo(1, p.mirrorBoth(canvasWidth, canvasHeight));
+            brush.continueTo(1, transform(p, 1));
         }
 
         @Override
         public void lineConnectTo(SymmetryBrush brush, PPoint p) {
             brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, p.mirrorBoth(canvasWidth, canvasHeight));
+            brush.lineConnectTo(1, transform(p, 1));
         }
 
         @Override
@@ -180,11 +179,71 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushNo) {
             assert brushNo == 1 : "brushNo = " + brushNo;
-            return p.mirrorBoth(canvasWidth, canvasHeight);
+            return transformDiagonalA(p);
+        }
+    }, DIAGONAL_MIRROR_B("Diagonal \\", 2) {
+        @Override
+        public void startAt(SymmetryBrush brush, PPoint p) {
+            brush.startAt(0, p);
+            brush.startAt(1, transform(p, 1));
+        }
+
+        @Override
+        public void continueTo(SymmetryBrush brush, PPoint p) {
+            brush.continueTo(0, p);
+            brush.continueTo(1, transform(p, 1));
+        }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+            brush.lineConnectTo(1, transform(p, 1));
+        }
+
+        @Override
+        public void finishBrushStroke(SymmetryBrush brush) {
+            brush.finishBrushStroke(0);
+            brush.finishBrushStroke(1);
+        }
+
+        @Override
+        public PPoint transform(PPoint p, int brushNo) {
+            assert brushNo == 1 : "brushNo = " + brushNo;
+            return transformDiagonalB(p);
+        }
+    }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
+        @Override
+        public void startAt(SymmetryBrush brush, PPoint p) {
+            brush.startAt(0, p);
+            brush.startAt(1, mirrorBoth(p));
+        }
+
+        @Override
+        public void continueTo(SymmetryBrush brush, PPoint p) {
+            brush.continueTo(0, p);
+            brush.continueTo(1, mirrorBoth(p));
+        }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+            brush.lineConnectTo(1, mirrorBoth(p));
+        }
+
+        @Override
+        public void finishBrushStroke(SymmetryBrush brush) {
+            brush.finishBrushStroke(0);
+            brush.finishBrushStroke(1);
+        }
+
+        @Override
+        public PPoint transform(PPoint p, int brushNo) {
+            assert brushNo == 1 : "brushNo = " + brushNo;
+            return mirrorBoth(p);
         }
     }, CENTRAL_3("Central 3", 3) {
         private static final double COS_120 = -0.5;
-        private static final double SIN_120 = 0.8660254037844386;
+        private static final double SIN_120 = 0.8660254037844386; // sqrt(3)/2
         private static final double COS_240 = COS_120;
         private static final double SIN_240 = -SIN_120;
 
@@ -212,44 +271,28 @@ public enum Symmetry {
 
         @Override
         public PPoint transform(PPoint p, int brushNo) {
-            double x = p.getImX();
-            double y = p.getImY();
             // coordinates relative to the center
-            double relX = x - canvasCenterX;
-            double relY = canvasCenterY - y; // calculate in upwards looking coords
-
+            double relX = p.getImX() - canvasCenterX;
+            double relY = canvasCenterY - p.getImY(); // calculate in upwards looking coords
             View view = p.getView();
-            if (brushNo == 1) {
-                return getRotatedPoint(view, relX, relY, COS_120, SIN_120);
-            } else if (brushNo == 2) {
-                return getRotatedPoint(view, relX, relY, COS_240, SIN_240);
-            } else {
-                throw new IllegalArgumentException("brushNo = " + brushNo);
-            }
+
+            return switch (brushNo) {
+                case 1 -> getRotatedPoint(view, relX, relY, COS_120, SIN_120);
+                case 2 -> getRotatedPoint(view, relX, relY, COS_240, SIN_240);
+                default -> throw new IllegalArgumentException("brushNo = " + brushNo);
+            };
         }
 
-        // Helper to apply a brush action to all brushes
         private void applyToAllBrushes(BrushAction action, SymmetryBrush brush, PPoint p) {
-            action.apply(brush, 0, p);             // original point
+            action.apply(brush, 0, p); // original
             action.apply(brush, 1, transform(p, 1)); // 120 degree rotation
             action.apply(brush, 2, transform(p, 2)); // 240 degree rotation
         }
-
-        private static PPoint getRotatedPoint(View view, double relX, double relY, double cosTheta, double sinTheta) {
-            // rotate relative coordinates
-            double rotX = relX * cosTheta - relY * sinTheta;
-            double rotY = relX * sinTheta + relY * cosTheta;
-
-            // translate back to the original coordinate system
-            double finalX = canvasCenterX + rotX;
-            double finalY = canvasCenterY - rotY;
-            return PPoint.fromIm(finalX, finalY, view);
-        }
     };
 
-    // parameters of the *currently active* canvas
-    private static int canvasWidth;
-    private static int canvasHeight;
+    // parameters of the currently active canvas
+    private static double canvasWidth;
+    private static double canvasHeight;
     private static double canvasCenterX;
     private static double canvasCenterY;
 
@@ -271,7 +314,7 @@ public enum Symmetry {
         this.numBrushes = numBrushes;
     }
 
-    // Abstract methods defining the core symmetry operations delegated by SymmetryBrush
+    // abstract methods defining the core symmetry operations delegated by SymmetryBrush
 
     /**
      * Starts a brush stroke, applying symmetry.
@@ -304,6 +347,52 @@ public enum Symmetry {
      */
     public int getNumBrushes() {
         return numBrushes;
+    }
+
+    private static PPoint mirrorVertically(PPoint p) {
+        return PPoint.fromIm(canvasWidth - p.getImX(), p.getImY(), p.getView());
+    }
+
+    private static PPoint mirrorHorizontally(PPoint p) {
+        return PPoint.fromIm(p.getImX(), canvasHeight - p.getImY(), p.getView());
+    }
+
+    private static PPoint mirrorBoth(PPoint p) {
+        return PPoint.fromIm(canvasWidth - p.getImX(), canvasHeight - p.getImY(), p.getView());
+    }
+
+    private static PPoint transformDiagonalB(PPoint p) {
+        double imX = p.getImX();
+        double imY = p.getImY();
+        double den = canvasWidth * canvasWidth + canvasHeight * canvasHeight;
+        double mirrorImX = ((canvasWidth * canvasWidth - canvasHeight * canvasHeight) * imX + 2 * canvasWidth * canvasHeight * imY) / den;
+        double mirrorImY = (2 * canvasWidth * canvasHeight * imX + (canvasHeight * canvasHeight - canvasWidth * canvasWidth) * imY) / den;
+
+        return PPoint.fromIm(mirrorImX, mirrorImY, p.getView());
+    }
+
+    private static PPoint transformDiagonalA(PPoint p) {
+        double imX = p.getImX();
+        double imY = p.getImY();
+        double den = canvasWidth * canvasWidth + canvasHeight * canvasHeight;
+        double mirrorImX = ((canvasWidth * canvasWidth - canvasHeight * canvasHeight) * imX - 2 * canvasWidth * canvasHeight * imY + 2 * canvasHeight * canvasHeight * canvasWidth) / den;
+        double mirrorImY = (-2 * canvasWidth * canvasHeight * imX + (canvasHeight * canvasHeight - canvasWidth * canvasWidth) * imY + 2 * canvasWidth * canvasWidth * canvasHeight) / den;
+
+        return PPoint.fromIm(mirrorImX, mirrorImY, p.getView());
+    }
+
+    /**
+     * Calculates a rotated point around the canvas center.
+     */
+    private static PPoint getRotatedPoint(View view, double relX, double relY, double cosTheta, double sinTheta) {
+        // rotate relative coordinates
+        double rotX = relX * cosTheta - relY * sinTheta;
+        double rotY = relX * sinTheta + relY * cosTheta;
+
+        // translate back to the original coordinate system
+        double finalX = canvasCenterX + rotX;
+        double finalY = canvasCenterY - rotY;
+        return PPoint.fromIm(finalX, finalY, view);
     }
 
     @Override
