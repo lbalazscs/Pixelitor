@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.CheckFilter;
 import com.jhlabs.image.ImageMath;
+import pixelitor.colors.Colors;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
@@ -26,9 +27,9 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.Arrays;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
  * Checker Pattern filter based on the JHLabs CheckFilter
@@ -41,8 +42,9 @@ public class JHCheckerFilter extends ParametrizedFilter {
 
     private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 1, 10, 100, true);
     private final AngleParam angle = new AngleParam("Angle", 0);
-    private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, NO_TRANSPARENCY);
-    private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, NO_TRANSPARENCY);
+    private final ColorListParam colors = new ColorListParam("Colors", 2, 2,
+        Color.BLACK, Color.WHITE, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
+        Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET, Colors.CW_YELLOW);
     private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 0, 100);
     private final GroupedRangeParam distortion = new GroupedRangeParam(
         "Waves", new RangeParam[]{
@@ -58,8 +60,7 @@ public class JHCheckerFilter extends ParametrizedFilter {
         setParams(
             size.withAdjustedRange(1.0),
             angle,
-            color1,
-            color2,
+            colors,
             fuzziness,
             distortion.notLinkable(),
             bumpMap
@@ -73,8 +74,12 @@ public class JHCheckerFilter extends ParametrizedFilter {
         }
 
         filter.setFuzziness(fuzziness.getValue());
-        filter.setBackground(color1.getColor().getRGB());
-        filter.setForeground(color2.getColor().getRGB());
+
+        var intColors = Arrays.stream(colors.getColors())
+            .mapToInt(Color::getRGB)
+            .toArray();
+        filter.setColors(intColors);
+
         filter.setXScale(size.getValue(0));
         filter.setYScale(size.getValue(1));
         filter.setDistortion(distortion.getPercentage(0));
