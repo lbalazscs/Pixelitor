@@ -41,6 +41,8 @@ public class ColorWheel extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = -8398979151631397821L;
 
+    private static final double SPIRAL_EFFECT_SCALE = 0.0005;
+
     public enum ColorSpaceType {
         HSB {
             @Override
@@ -65,11 +67,13 @@ public class ColorWheel extends ParametrizedFilter {
     private final AngleParam hueRotParam = new AngleParam("Rotate", 0);
     private final RangeParam brgLumParam = new RangeParam("Brightness (%)", 0, 75, 100);
     private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 90, 100);
+    private final RangeParam spiralParam = new RangeParam("Spiral", -100, 0, 100);
 
     public ColorWheel() {
         super(false);
 
-        setParams(type, center, hueRotParam, brgLumParam, satParam);
+        setParams(type, center,
+            hueRotParam, brgLumParam, satParam, spiralParam);
     }
 
     @Override
@@ -88,13 +92,15 @@ public class ColorWheel extends ParametrizedFilter {
         double sat = satParam.getPercentage();
         double brgLum = brgLumParam.getPercentage();
 
+        double spiral = spiralParam.getValueAsDouble();
+
         var pt = new StatusBarProgressTracker(NAME, height);
 
         Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable rowTask = () -> processRow(
-                destPixels, width, finalY, cx, cy, hueRot, sat, brgLum, space);
+                destPixels, width, finalY, cx, cy, hueRot, sat, brgLum, space, spiral);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
         ThreadPool.waitFor(rowFutures, pt);
@@ -105,11 +111,19 @@ public class ColorWheel extends ParametrizedFilter {
 
     private static void processRow(int[] destPixels, int width, int y,
                                    double cx, double cy, double hueRot,
-                                   double saturation, double brightness, ColorSpaceType model) {
+                                   double saturation, double brightness,
+                                   ColorSpaceType model, double spiral) {
         for (int x = 0; x < width; x++) {
             double yDiff = cy - y;
             double xDiff = x - cx;
-            double angle = FastMath.atan2(yDiff, xDiff) + hueRot;
+            double baseAngle = FastMath.atan2(yDiff, xDiff);
+            double angle = baseAngle + hueRot;
+            if (spiral != 0.0) {
+                double radius = FastMath.hypot(xDiff, yDiff);
+                double spiralAngleOffset = spiral * radius * SPIRAL_EFFECT_SCALE;
+                angle += spiralAngleOffset;
+            }
+
             double hue = angle / (2 * Math.PI);
 
             destPixels[x + y * width] = model.toRGB((float) hue, (float) saturation, (float) brightness);
