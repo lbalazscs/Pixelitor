@@ -1654,6 +1654,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return false;
     }
 
+    /**
+     * Recursively checks if this composition contains
+     * a layer of the given type at any nesting level.
+     * Content compositions inside smart objects are not checked.
+     */
     @Override
     public boolean containsLayerOfType(Class<? extends Layer> type) {
         for (Layer layer : layerList) {

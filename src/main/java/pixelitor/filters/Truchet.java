@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,10 @@
 
 package pixelitor.filters;
 
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.QuadrantAngle;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -41,11 +41,11 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
-import static pixelitor.utils.QuadrantAngle.ANGLE_180;
-import static pixelitor.utils.QuadrantAngle.ANGLE_270;
-import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 
 /**
  * Render Truchet tiles filter

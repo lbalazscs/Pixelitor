@@ -19,13 +19,13 @@ package pixelitor.guides;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.compactions.Flip;
+import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.gui.View;
 import pixelitor.history.History;
-import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -68,7 +68,7 @@ public class Guides implements Serializable, Debuggable {
         return copy;
     }
 
-    public Guides copyFlipped(Flip.Direction direction, View view) {
+    public Guides copyFlipped(FlipDirection direction, View view) {
         Guides copy = switch (direction) {
             case HORIZONTAL -> copyFlippedHorizontally();
             case VERTICAL -> copyFlippedVertically();

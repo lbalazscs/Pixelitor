@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,16 +27,16 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import static java.awt.font.TextAttribute.*;
-import static java.text.AttributedCharacterIterator.Attribute;
 
 /**
- * Static utility methods related to random numbers
+ * Static utility methods related to random numbers and objects.
  */
 public class Rnd {
     private static final Random rand = new Random();
@@ -67,6 +67,9 @@ public class Rnd {
     }
 
     public static Point pointInRect(Rectangle bounds) {
+        if (bounds.width <= 0 || bounds.height <= 0) {
+            throw new IllegalArgumentException("width = " + bounds.width + ", height = " + bounds.height);
+        }
         int x = intInRange(bounds.x, bounds.x + bounds.width);
         int y = intInRange(bounds.y, bounds.y + bounds.height);
         return new Point(x, y);
@@ -121,12 +124,9 @@ public class Rnd {
         int g = rnd.nextInt(256);
         int b = rnd.nextInt(256);
 
-        if (randomAlpha) {
-            int a = rnd.nextInt(256);
-            return new Color(r, g, b, a);
-        }
-
-        return new Color(r, g, b);
+        return randomAlpha
+            ? new Color(r, g, b, rnd.nextInt(256)) // random transparency
+            : new Color(r, g, b); // opaque
     }
 
     public static String createRandomString(int length) {
@@ -140,22 +140,22 @@ public class Rnd {
     }
 
     public static AreaEffects createRandomEffects() {
-        var ae = new AreaEffects();
+        AreaEffects effects = new AreaEffects();
         float p = rand.nextFloat();
         if (p < 0.25f) {
-            ae.setNeonBorder(new NeonBorderEffect());
+            effects.setNeonBorder(new NeonBorderEffect());
         } else if (p < 0.5f) {
-            ae.setDropShadow(new ShadowPathEffect(1.0f));
+            effects.setDropShadow(new ShadowPathEffect(1.0f));
         } else if (p < 0.75f) {
-            ae.setInnerGlow(new InnerGlowPathEffect(1.0f));
+            effects.setInnerGlow(new InnerGlowPathEffect(1.0f));
         } else {
-            ae.setGlow(new GlowPathEffect(1.0f));
+            effects.setGlow(new GlowPathEffect(1.0f));
         }
-        return ae;
+        return effects;
     }
 
     public static Font createRandomFont() {
-        Map<Attribute, Object> attributes = new HashMap<>();
+        Map<TextAttribute, Object> attributes = new HashMap<>();
 
         attributes.put(SIZE, intInRange(10, 100));
         if (nextBoolean()) {

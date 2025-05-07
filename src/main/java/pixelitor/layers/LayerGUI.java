@@ -440,7 +440,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     @Override
     public void updateLayerIconImageAsync(Layer layer) {
         assert calledOnEDT() : threadInfo();
-        assert layer.hasRasterThumbnail();
+        assert layer.hasRasterIcon();
 
         // the synchronous update avoids starting a filter twice
         // TODO dubious design

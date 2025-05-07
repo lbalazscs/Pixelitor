@@ -144,20 +144,18 @@ public class AppRunner {
         }
 
         if (fileNames.length > 0) {
-            waitForImageLoading();
+            waitForImageLoading(fileNames.length);
             mouse.updateCanvasBounds();
         }
     }
 
-    private static void waitForImageLoading() {
+    private static void waitForImageLoading(int numImages) {
         // wait even after the frame is shown to
         // make sure that the image is also loaded
-        // TODO this is waiting for only one image, but
-        //   multiple images can be specified
-        var comp = EDT.getComp();
-        while (comp == null) {
+        int numOpenImages = EDT.call(Views::getNumViews);
+        while (numOpenImages < numImages) {
             Utils.sleep(1, SECONDS);
-            comp = EDT.getComp();
+            numOpenImages = EDT.call(Views::getNumViews);
         }
     }
 

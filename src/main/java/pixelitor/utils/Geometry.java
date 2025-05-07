@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class Geometry {
 
     /**
      * Calculates two points that form a perpendicular line through the center,
-     * maintaining a specified distance from the center.
+     * maintaining the given distance from the center.
      *
      * @param center    The point through which the perpendicular line passes
      * @param reference The reference point used to determine the perpendicular direction

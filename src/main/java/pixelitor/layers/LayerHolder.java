@@ -212,7 +212,7 @@ public interface LayerHolder extends Debuggable {
     void reorderLayerUI(int oldIndex, int newIndex);
 
     /**
-     * Inserts a layer at the specified index.
+     * Inserts a layer at the given index.
      */
     void insertLayer(Layer layer, int index, boolean update);
 
@@ -293,7 +293,7 @@ public interface LayerHolder extends Debuggable {
     }
 
     /**
-     * Merges the specified layer down into the layer below it.
+     * Merges the given layer down into the layer below it.
      * This method assumes that canMergeDown()  has previously returned true.
      */
     default void mergeDown(Layer layer) {

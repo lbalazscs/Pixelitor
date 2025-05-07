@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.lang.String.format;
@@ -61,7 +60,7 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Static methods related to the list of open views.
+ * Static methods for managing the collection of open views.
  */
 public class Views {
     private static final List<View> views = new ArrayList<>();
@@ -108,12 +107,12 @@ public class Views {
 
         views.remove(view);
         if (views.isEmpty()) {
-            onAllViewsClosed();
+            allViewsClosed();
         }
         ensureActiveViewExists();
     }
 
-    private static void onAllViewsClosed() {
+    private static void allViewsClosed() {
         setActiveView(null, false);
         activationListeners.forEach(ViewActivationListener::allViewsClosed);
         History.onAllViewsClosed();
@@ -122,7 +121,7 @@ public class Views {
         FramesUI.resetCascadeCount();
     }
 
-    // ensures that one of the open views is active
+    // ensures that an active view is set if there are any open views remaining
     private static void ensureActiveViewExists() {
         if (!views.isEmpty() && !views.contains(activeView)) {
             activate(views.getFirst());
@@ -133,6 +132,9 @@ public class Views {
         setActiveView(view, true);
     }
 
+    /**
+     * Sets the active view, optionally triggering full UI activation.
+     */
     public static void setActiveView(View view, boolean activate) {
         if (view == activeView) {
             return;
@@ -152,7 +154,7 @@ public class Views {
     }
 
     /**
-     * Changes the cursor for all views
+     * Changes the mouse cursor for all open views.
      */
     public static void setCursorForAll(Cursor cursor) {
         for (View view : views) {
@@ -240,6 +242,9 @@ public class Views {
     }
 
     public static View activateRandomView() {
+        if (views.isEmpty()) {
+            return null;
+        }
         View view = Rnd.chooseFrom(views);
         if (view != activeView) {
             activate(view);
@@ -269,6 +274,12 @@ public class Views {
             minimum, numViews, getOpenCompNamesAsString()));
     }
 
+    private static String getOpenCompNamesAsString() {
+        return views.stream()
+            .map(View::getName)
+            .collect(joining(", ", "[", "]"));
+    }
+
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
         if (activeView == null) {
             throw new AssertionError("no active view");
@@ -280,12 +291,9 @@ public class Views {
         }
     }
 
-    private static String getOpenCompNamesAsString() {
-        return views.stream()
-            .map(View::getName)
-            .collect(joining(", ", "[", "]"));
-    }
-
+    /**
+     * Closes the given view, prompting to save unsaved changes if necessary.
+     */
     public static void warnAndClose(View view) {
         if (RandomGUITest.isRunning()) {
             return;
@@ -314,6 +322,7 @@ public class Views {
                         throw new IllegalStateException("answer = " + answer);
                 }
             } else {
+                // no unsaved changes, close directly
                 view.close();
             }
         } catch (Exception ex) {
@@ -333,10 +342,11 @@ public class Views {
         warnAndCloseAllIf(view -> !view.getComp().isDirty());
     }
 
+    // close all views matching a predicate, prompting for unsaved changes
     private static void warnAndCloseAllIf(Predicate<View> condition) {
         // make a copy because items will be removed from the original while iterating
-        Iterable<View> tmpCopy = new ArrayList<>(views);
-        for (View view : tmpCopy) {
+        List<View> viewsToProcess = new ArrayList<>(views);
+        for (View view : viewsToProcess) {
             if (condition.test(view)) {
                 warnAndClose(view);
             }
@@ -379,19 +389,6 @@ public class Views {
         }
     }
 
-    public static <T> T fromActiveComp(Function<Composition, T> function) {
-        if (activeView != null) {
-            return function.apply(activeView.getComp());
-        }
-
-        // there is no open view
-        return null;
-    }
-
-    public static BufferedImage getActiveCompositeImage() {
-        return fromActiveComp(Composition::getCompositeImage);
-    }
-
     public static Optional<Composition> findCompByName(String name) {
         return views.stream()
             .map(View::getComp)
@@ -406,6 +403,9 @@ public class Views {
             .collect(toList());
     }
 
+    /**
+     * Adds a newly loaded composition to the application, sets it as active, and updates related UI.
+     */
     public static Composition addJustLoadedComp(Composition comp) {
         assert comp != null;
 
@@ -423,13 +423,13 @@ public class Views {
     }
 
     public static void addNewPasted(BufferedImage pastedImage) {
-        addNew(pastedImage, null, "Pasted Image " + pastedCount++);
+        String name = "Pasted Image " + pastedCount++;
+        addNew(Composition.fromImage(pastedImage, null, name));
     }
 
-    public static void addNew(BufferedImage image, File file, String name) {
-        addNew(Composition.fromImage(image, file, name));
-    }
-
+    /**
+     * Adds the given composition to the UI, creating and configuring a new view for it.
+     */
     public static void addNew(Composition comp) {
         try {
             assert comp.getView() == null : "already has a view";
@@ -459,14 +459,6 @@ public class Views {
         return getActiveLayer().getHolderForNewLayers().getNumLayers();
     }
 
-    public static Layer getActiveTopLevelLayer() {
-        if (activeView != null) {
-            return activeView.getComp().getActiveTopLevelLayer();
-        }
-
-        return null;
-    }
-
     public static Layer getActiveLayer() {
         if (activeView != null) {
             return activeView.getComp().getActiveLayer();
@@ -477,8 +469,7 @@ public class Views {
 
     public static void onActiveLayer(Consumer<Layer> action) {
         if (activeView != null) {
-            Layer activeLayer = activeView.getComp().getActiveLayer();
-            action.accept(activeLayer);
+            action.accept(activeView.getComp().getActiveLayer());
         }
     }
 
@@ -524,16 +515,6 @@ public class Views {
         return null;
     }
 
-    public static boolean activePathIs(Path path) {
-        if (activeView != null) {
-            Path activePath = activeView.getComp().getActivePath();
-            return activePath == path;
-        }
-
-        // there is no open view
-        return path == null;
-    }
-
     public static void setActivePath(Path path) {
         if (activeView != null) {
             activeView.getComp().setActivePath(path);
@@ -541,7 +522,7 @@ public class Views {
     }
 
     /**
-     * Checks if a file is already open and prompts the user for confirmation to proceed.
+     * Warns the user if a file is already open and prompts for confirmation to open it again.
      */
     public static boolean warnIfAlreadyOpen(File file) {
         View view = findViewByFile(file);
@@ -560,6 +541,7 @@ public class Views {
         return again;
     }
 
+    // finds an open view associated with the given file path
     private static View findViewByFile(File targetFile) {
         for (View view : views) {
             File file = view.getComp().getFile();
@@ -571,12 +553,12 @@ public class Views {
     }
 
     public static void appWindowActivated() {
-        // Check if any views need to be automatically reloaded
-        CompletableFuture<Composition> cf = CompletableFuture.completedFuture(null);
+        // check if any views need to be automatically reloaded due to external modifications
+        CompletableFuture<Composition> chainedChecks = CompletableFuture.completedFuture(null);
         for (View view : views) {
             // make sure that the next reload is not started
             // before the previous one is finished
-            cf = cf.thenCompose(comp -> view.checkForExternalModifications());
+            chainedChecks = chainedChecks.thenCompose(comp -> view.checkForExternalModifications());
         }
     }
 
@@ -598,5 +580,6 @@ public class Views {
     public static void clear() {
         views.clear();
         activeView = null;
+        pastedCount = 1;
     }
 }

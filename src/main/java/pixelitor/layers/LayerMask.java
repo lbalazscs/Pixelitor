@@ -209,14 +209,21 @@ public class LayerMask extends ImageLayer {
         Tools.SHAPES.paintOverActiveLayer(g);
     }
 
+    /**
+     * Returns an image representing the mask's transparency,
+     * potentially including a preview of active shape tool drawing.
+     */
     public BufferedImage getTransparencyImage() {
         if (!owner.isMaskEditing() || !Tools.isShapesDrawing()) {
             // simple case
             return transparencyImage;
-        } else { // drawing with the shapes tool while editing the mask
-
-            // Create a temporary image that shows how the image would look like
+        } else {
+            // drawing with the shapes tool while editing the mask:
+            // create a temporary image that shows how the image would look like
             // if the shapes tool would draw directly into the mask image
+
+            // we can use `image` instead of `getVisibleImage()` because shapes
+            // tool drawing and filter preview can't happen at the same time
             var tmpImg = new BufferedImage(
                 image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
             Graphics2D tmpG = tmpImg.createGraphics();
@@ -228,6 +235,11 @@ public class LayerMask extends ImageLayer {
             return new BufferedImage(TRANSPARENCY_COLOR_MODEL,
                 tmpImg.getRaster(), false, null);
         }
+    }
+
+    @Override
+    public Layer getLayer() {
+        return owner;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,7 +97,7 @@ public enum PasteTarget {
                 LayerMask mask = layer.getMask();
                 mask.replaceImage(bwImage, "Replace Mask");
             } else {
-                layer.addImageAsMask(bwImage, false, true,
+                layer.addImageAsMask(bwImage, true,
                     true, "Add Pasted Mask", false);
             }
         }

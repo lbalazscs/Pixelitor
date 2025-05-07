@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,8 +51,8 @@ public enum StrokeType {
         }
 
         @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return specifiedWidth / 2;
+        public double getExtraThickness(double defaultWidth) {
+            return defaultWidth / 2;
         }
     }, WOBBLE("Wobble", true) {
         private static final float SIZE_DIVIDING_FACTOR = 4.0f;
@@ -72,8 +72,8 @@ public enum StrokeType {
         }
 
         @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return specifiedWidth * 1.5;
+        public double getExtraThickness(double defaultWidth) {
+            return defaultWidth * 1.5;
         }
     }, CHARCOAL("Charcoal (can be slow!)", true) {
         @Override
@@ -165,10 +165,10 @@ public enum StrokeType {
     }
 
     /**
-     * Returns the additional thickness added to the specified
-     * width to determine the actual stroke thickness.
+     * Returns the additional thickness added to the given
+     * default width to determine the actual stroke thickness.
      */
-    public double getExtraThickness(double specifiedWidth) {
+    public double getExtraThickness(double defaultWidth) {
         return 0; // return 0 by default, can be overridden
     }
 

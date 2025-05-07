@@ -1558,7 +1558,7 @@ public class ImageUtils {
     }
 
     /**
-     * Checks if two colors are within the specified tolerance (per channel).
+     * Checks if two colors are within the given tolerance (per channel).
      */
     public static boolean isSimilar(int color1, int color2, int tolerance) {
         if (color1 == color2) {

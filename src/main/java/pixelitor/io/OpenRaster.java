@@ -153,7 +153,7 @@ public class OpenRaster {
                                    ZipOutputStream zipStream,
                                    ProgressTracker pt,
                                    StringBuilder stackXML) throws IOException {
-        TranslatedImage translatedImage = layer.getTranslatedImage();
+        ORAImageInfo imageInfo = layer.getORAImageInfo();
 
         String xml = format(Locale.ENGLISH,
             "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
@@ -163,14 +163,14 @@ public class OpenRaster {
             layer.getBlendingMode().toSVGName(),
             layer.getOpacity(),
             uniqueId,
-            translatedImage.tx(),
-            translatedImage.ty());
+            imageInfo.tx(),
+            imageInfo.ty());
         stackXML.append(xml);
 
         var entry = new ZipEntry(format("data/%d.png", uniqueId));
         zipStream.putNextEntry(entry);
 
-        TrackedIO.writeToStream(translatedImage.img(), zipStream, "PNG", pt);
+        TrackedIO.writeToStream(imageInfo.exportedImage(), zipStream, "PNG", pt);
 
         zipStream.closeEntry();
     }

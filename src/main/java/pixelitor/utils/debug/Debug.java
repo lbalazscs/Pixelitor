@@ -221,7 +221,7 @@ public class Debug {
 
         findCompByName(name).ifPresentOrElse(
             comp -> replaceImageInDebugComp(comp, copy),
-            () -> addNew(copy, null, name));
+            () -> addNew(Composition.fromImage(copy, null, name)));
 
         if (previousView != null) {
             Views.activate(previousView);

@@ -62,7 +62,7 @@ public class LayerGUILayout implements LayoutManager {
     private int height;
 
     public LayerGUILayout(Layer layer) {
-        layerIconShowsThumbnail = layer.hasRasterThumbnail();
+        layerIconShowsThumbnail = layer.hasRasterIcon();
         updateHeight(Views.thumbSize);
     }
 

@@ -31,7 +31,7 @@ import static com.jhlabs.image.ImageMath.SQRT_2;
 
 /**
  * Poisson disk sampling generates a set of randomly distributed points with
- * the constraint that no two points are closer than a specified minimum distance.
+ * the constraint that no two points are closer than a given minimum distance.
  *
  * This class implements "Fast Poisson Disk Sampling in Arbitrary Dimensions" by Robert Bridson.
  * If the useImprovedAlgorithm constructor argument is true,

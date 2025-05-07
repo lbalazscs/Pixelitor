@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
- * The action of copying an image from a specified {@link CopySource}
+ * The action of copying an image from a given {@link CopySource}
  * to the system clipboard.
  */
 public class CopyAction extends ViewEnabledAction {

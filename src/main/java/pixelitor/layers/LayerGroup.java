@@ -20,13 +20,13 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.CopyType;
-import pixelitor.compactions.Flip;
+import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
@@ -255,7 +255,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void flip(Flip.Direction direction) {
+    public void flip(FlipDirection direction) {
         // Do nothing for the group itself.
     }
 
@@ -303,7 +303,7 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public boolean containsLayerOfType(Class<? extends Layer> type) {
-        if (getClass() == type) {
+        if (type.isInstance(this)) {
             return true;
         }
         for (Layer layer : layers) {

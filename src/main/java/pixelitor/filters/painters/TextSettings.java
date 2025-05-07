@@ -48,7 +48,7 @@ import static java.awt.font.TextAttribute.KERNING;
 import static java.awt.font.TextAttribute.KERNING_ON;
 
 /**
- * Settings for the text filter and text layers.
+ * All the configurable properties of the text filter and text layers.
  * Edited by the {@link TextSettingsPanel}.
  */
 public class TextSettings implements Serializable, Debuggable {
@@ -79,7 +79,7 @@ public class TextSettings implements Serializable, Debuggable {
     private VerticalAlignment verticalAlignment;
     private HorizontalAlignment horizontalAlignment;
     private boolean watermark;
-    private int mlpAlignment;
+    private int mlpAlignment; // alignment for multiline text or text on a path
 
     private double rotation;
     private double sx;
@@ -88,7 +88,8 @@ public class TextSettings implements Serializable, Debuggable {
     private double shy;
     private double relLineHeight;
 
-    // in old pxc files this flag will not be present
+    // this flag indicates that some newer fields (sx, sy, etc.) are
+    // present in a serialized pxc file
     @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
     private boolean transformFieldsInPxc = true;
 
@@ -164,19 +165,23 @@ public class TextSettings implements Serializable, Debuggable {
         sy = other.sy;
         shx = other.shx;
         shy = other.shy;
+
+        this.transformFieldsInPxc = true; // always true for new objects
+        assert other.transformFieldsInPxc; // should be set by now anyway
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         guiUpdateCallback = null;
-        // migrate old pxc files
         if (!transformFieldsInPxc) {
+            // migrate old pxc files
             relLineHeight = 1.0;
             sx = 1.0;
             sy = 1.0;
             shx = 0.0;
             shy = 0.0;
+            transformFieldsInPxc = true; // the newer fields are initialized now
         }
         if (mlpAlignment == 0) {
             // field not found in old pxc files
@@ -188,9 +193,13 @@ public class TextSettings implements Serializable, Debuggable {
         return new TextSettings(this);
     }
 
+    /**
+     * Configures the given painter with these settings.
+     */
     public void configurePainter(TransformedTextPainter painter) {
         painter.setText(text);
         painter.setFont(font);
+        painter.setColor(color);
         painter.setEffects(areaEffects);
         painter.setBoxAlignment(horizontalAlignment, verticalAlignment);
         painter.setMLPAlignment(mlpAlignment);
@@ -198,12 +207,18 @@ public class TextSettings implements Serializable, Debuggable {
         painter.setAdvancedSettings(relLineHeight, sx, sy, shx, shy);
     }
 
+    /**
+     * Calculates a default font based on available system fonts and active composition.
+     */
     private static Font calcDefaultFont() {
         String[] fontNames = Utils.getAvailableFontNames();
         return new Font(fontNames[0], Font.PLAIN, calcDefaultFontSize())
             .deriveFont(Map.of(KERNING, KERNING_ON));
     }
 
+    /**
+     * Calculates a default font size based on the active composition's canvas height.
+     */
     private static int calcDefaultFontSize() {
         Composition comp = Views.getActiveComp();
         if (comp != null) {
@@ -214,7 +229,7 @@ public class TextSettings implements Serializable, Debuggable {
             }
             return size;
         } else {
-            return 100;
+            return 100; // default if no active composition
         }
     }
 
@@ -240,6 +255,9 @@ public class TextSettings implements Serializable, Debuggable {
         shy = -0.5 + Rnd.nextDouble();
     }
 
+    /**
+     * Saves the current settings to the given user preset.
+     */
     public void saveStateTo(UserPreset preset) {
         preset.put(PRESET_KEY_TEXT, Utils.encodeNewlines(text));
         preset.putColor(PRESET_KEY_COLOR, color);
@@ -248,7 +266,6 @@ public class TextSettings implements Serializable, Debuggable {
         preset.putInt(PRESET_KEY_MLP_ALIGN, mlpAlignment);
 
         new FontInfo(font).saveStateTo(preset);
-
         areaEffects.saveStateTo(preset);
 
         preset.putBoolean(PRESET_KEY_WATERMARK, watermark);
@@ -259,6 +276,9 @@ public class TextSettings implements Serializable, Debuggable {
         preset.putDouble(PRESET_KEY_SHY, shy);
     }
 
+    /**
+     * Loads the state from the given user preset and updates GUI if a callback is set.
+     */
     public void loadUserPreset(UserPreset preset) {
         text = Utils.decodeNewlines(preset.get(PRESET_KEY_TEXT));
         color = preset.getColor(PRESET_KEY_COLOR);
@@ -294,6 +314,9 @@ public class TextSettings implements Serializable, Debuggable {
         }
     }
 
+    /**
+     * Checks if the font used in these settings is installed on the system, showing an error if not.
+     */
     public void checkFontIsInstalled(TextLayer textLayer) {
         if (AppMode.isUnitTesting()) {
             // the fonts are not found when testing in the cloud, but that's OK
@@ -408,7 +431,19 @@ public class TextSettings implements Serializable, Debuggable {
         node.add(areaEffects.createDebugNode("effects"));
         node.addDouble("rotation", rotation);
         node.addBoolean("watermark", watermark);
+        node.addString("boxAlignment", getAlignment().toString());
         node.addInt("multiline/path alignment", mlpAlignment);
+
+        DebugNode transformNode = new DebugNode("transformations", this);
+        transformNode.addDouble("rotationRad", rotation);
+        transformNode.addDouble("relativeLineHeight", relLineHeight);
+        transformNode.addDouble("scaleX", sx);
+        transformNode.addDouble("scaleY", sy);
+        transformNode.addDouble("shearX", shx);
+        transformNode.addDouble("shearY", shy);
+        node.add(transformNode);
+
+        node.addBoolean("transformFieldsInPxc", transformFieldsInPxc);
 
         return node;
     }

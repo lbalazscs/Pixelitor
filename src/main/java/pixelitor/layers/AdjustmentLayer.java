@@ -25,7 +25,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.history.FilterChangedEdit;
 import pixelitor.history.History;
-import pixelitor.io.TranslatedImage;
+import pixelitor.io.ORAImageInfo;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Component;
@@ -102,7 +102,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    public boolean hasRasterThumbnail() {
+    public boolean hasRasterIcon() {
         return false;
     }
 
@@ -130,7 +130,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    public TranslatedImage getTranslatedImage() {
+    public ORAImageInfo getORAImageInfo() {
         throw new UnsupportedOperationException();
     }
 

@@ -19,8 +19,9 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.CopyType;
-import pixelitor.compactions.Flip;
+import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.UserPreset;
@@ -31,10 +32,9 @@ import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
-import pixelitor.io.TranslatedImage;
+import pixelitor.io.ORAImageInfo;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
@@ -81,9 +81,10 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
         this.settings = other.settings.copy();
 
-        // This copy constructor makes a copy of the painter instead of
-        // just calling applySettings so that flip/rotate see fully
-        // initialized internal data structures when they are applied.
+        // makes a copy of the painter instead of just calling
+        // applySettings so that flip/rotate see fully initialized
+        // internal data structures when they are applied
+        // TODO still needed? what about readObject, which calls applySettings?
         this.painter = other.painter.copy(settings);
 
         this.isAdjustment = other.isAdjustment;
@@ -93,20 +94,24 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        isAdjustment = settings.hasWatermark();
-
         painter = new TransformedTextPainter();
-        settings.configurePainter(painter);
         painter.setTranslation(getTx(), getTy());
+        applySettings(settings);
     }
 
+    /**
+     * Creates a new text layer with default settings and shows an editing dialog.
+     */
     public static TextLayer createNew(Composition comp) {
         return createNew(comp, new TextSettings());
     }
 
+    /**
+     * Creates a new text layer with the given settings and shows an editing dialog.
+     */
     public static TextLayer createNew(Composition comp, TextSettings settings) {
         if (comp == null) {
-            // It is possible to arrive here with no open images
+            // it's possible to arrive here with no open images
             // because the T hotkey is always active, see issue #77
             return null;
         }
@@ -116,6 +121,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         var textLayer = new TextLayer(comp, "", settings);
         var prevActiveLayer = comp.getActiveLayer();
         var prevViewMode = comp.getView().getMaskViewMode();
+
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
         holder.add(textLayer);
@@ -134,6 +140,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         return textLayer;
     }
 
+    /**
+     * Finalizes the creation of this text layer after the settings dialog is accepted.
+     */
     public void finalizeCreation(Layer prevActiveLayer, MaskViewMode prevViewMode) {
         updateLayerName();
 
@@ -142,6 +151,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             this, prevActiveLayer, prevViewMode));
     }
 
+    /**
+     * Shows a dialog to edit the settings of this text layer.
+     */
     @Override
     public boolean edit() {
         TextSettings prevSettings = getSettings();
@@ -159,13 +171,14 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .wasAccepted();
     }
 
-    // the layer name is updated and a history edit is added
-    // only after the user accepts the dialog
+    /**
+     * Commits the current settings after the edit dialog is accepted, updating history.
+     */
     public void commitSettings(TextSettings prevSettings) {
         if (settings == prevSettings) {
             // The settings object is replaced every time
             // the user changes something in the dialog.
-            // If it is still the same, in means that
+            // If it is still the same, it means that
             // nothing was changed.
             return;
         }
@@ -187,6 +200,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         return d;
     }
 
+    /**
+     * Checks if the font used by this layer is installed on the system.
+     */
     public void checkFontIsInstalled() {
         settings.checkFontIsInstalled(this);
     }
@@ -230,7 +246,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void paint(Graphics2D g, boolean firstVisibleLayer) {
-        painter.setColor(settings.getColor()); // TODO is this already set?
         painter.paint(g, comp.getCanvasWidth(), comp.getCanvasHeight(), comp);
     }
 
@@ -281,10 +296,18 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         painter.setTranslation(x, y);
     }
 
+    /**
+     * Applies the given text settings to this layer and reconfigures the painter.
+     */
     public void applySettings(TextSettings settings) {
         this.settings = settings;
 
+        // Dynamically changes the rendering behavior of a text layer
+        // based on whether the user has configured it as a watermark.
+        // A watermarking text layer doesn't just draw text; it adjusts
+        // the underlying image to embed the text as a watermark.
         isAdjustment = settings.hasWatermark();
+
         settings.configurePainter(painter);
     }
 
@@ -297,32 +320,40 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         applySettings(settings); // to re-configure the painter
     }
 
+    /**
+     * Updates the layer's name based on its current text content.
+     */
     public void updateLayerName() {
         if (settings != null) {
             setName(nameFromText(settings.getText()), false);
         }
     }
 
+    /**
+     * Generates a sanitized and shortened layer name from a given text string.
+     */
     public static String nameFromText(String rawText) {
         String cleaned = ALL_WHITESPACE.matcher(rawText.trim()).replaceAll(" ");
         return Utils.shorten(cleaned, 30);
     }
 
     /**
-     * This method ensures that the whole text is exported by ignoring
-     * the canvas and only exporting an image corresponding to the text's bounds.
+     * Ensures that the whole text (and only the text) is exported by ignoring
+     * the canvas and exporting an image corresponding to the text's bounds.
      */
     @Override
-    public TranslatedImage getTranslatedImage() {
+    public ORAImageInfo getORAImageInfo() {
         Rectangle textBounds = painter.getBoundingBox();
         BufferedImage img = painter.renderArea(textBounds);
-        return new TranslatedImage(img, textBounds.x, textBounds.y);
+        return new ORAImageInfo(img, textBounds.x, textBounds.y);
     }
 
     @Override
     public void enlargeCanvas(Outsets out) {
         BoxAlignment alignment = settings.getAlignment();
         if (alignment == BoxAlignment.PATH) {
+            // the path will handle the canvas enlargement
+            // and the text is glued to it => nothing to do
             return;
         }
 
@@ -342,7 +373,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void flip(Flip.Direction direction) {
+    public void flip(FlipDirection direction) {
         painter.flip(direction, comp.getCanvas());
     }
 
@@ -378,8 +409,13 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public boolean hasRasterThumbnail() {
+    public boolean hasRasterIcon() {
         return false;
+    }
+
+    @Override
+    public void updateIconImage() {
+        // do nothing, as text layers have a static and vector-based image
     }
 
     @Override
@@ -399,17 +435,15 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         return popup;
     }
 
+    /**
+     * Creates a selection in the composition based on the shape of the text.
+     */
     public void createSelectionFromText() {
         Shape shape = getTextShape();
         PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit != null) {
             History.add(selectionEdit);
         }
-    }
-
-    @Override
-    public void updateIconImage() {
-        // do nothing
     }
 
     private JMenuBar getMenuBar() {
@@ -441,6 +475,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         return "Text Layer";
     }
 
+    /**
+     * Handles changes to the path this text layer might be attached to.
+     */
     public void pathChanged(boolean deleted) {
         if (painter.isOnPath()) {
             painter.pathChanged();
@@ -453,6 +490,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         }
     }
 
+    /**
+     * Switches this text layer to use path-based alignment.
+     */
     public void usePathEditing() {
         settings.setAlignment(BoxAlignment.PATH);
         painter.setBoxAlignment(BoxAlignment.PATH);
@@ -461,6 +501,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         holder.invalidateImageCache();
     }
 
+    /**
+     * Checks if this text layer is currently aligned to a path.
+     */
     public boolean isOnPath() {
         return painter.isOnPath();
     }

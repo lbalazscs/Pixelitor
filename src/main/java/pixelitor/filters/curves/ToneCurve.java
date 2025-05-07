@@ -89,7 +89,7 @@ public class ToneCurve {
     }
 
     /**
-     * Adds a new, normalized point (knot) to the curve at the specified position.
+     * Adds a new, normalized point (knot) to the curve at the given position.
      * If allowReplace is true, replaces nearby points instead of adding.
      * Returns the index of the added or replaced knot, or -1 if not added.
      */
@@ -167,7 +167,7 @@ public class ToneCurve {
     }
 
     /**
-     * Checks if a point is within the draggable range of the specified knot index.
+     * Checks if a point is within the draggable range of the given knot index.
      *
      * @param index the knot index
      * @param point the point to check

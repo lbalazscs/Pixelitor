@@ -25,11 +25,11 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
-import pixelitor.compactions.Flip;
+import pixelitor.compactions.FlipDirection;
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.gui.utils.AlignmentSelector;
 import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
@@ -525,6 +525,7 @@ public class TransformedTextPainter implements Debuggable {
                             double x = lastX + ratio * dx;
                             double y = lastY + ratio * dy;
 
+                            // TODO it seems that the glyphs are rotated around left bottom instead of center bottom
                             at.setToTranslation(x, y);
                             at.rotate(angle + rotation);
                             if (scaleX != 1.0 || scaleY != 1.0) {
@@ -617,7 +618,7 @@ public class TransformedTextPainter implements Debuggable {
         }
     }
 
-    public void flip(Flip.Direction direction, Canvas canvas) {
+    public void flip(FlipDirection direction, Canvas canvas) {
         // TODO
 //        AffineTransform flipTransform = direction.createTransform(boundingBox.width, boundingBox.height);
 //        if (extraTransform == null) {

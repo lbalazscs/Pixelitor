@@ -19,8 +19,9 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.CopyType;
-import pixelitor.compactions.Flip;
+import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.history.GradientFillLayerChangeEdit;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
@@ -28,7 +29,6 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.Gradient;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.QuadrantAngle;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -149,7 +149,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public void flip(Flip.Direction direction) {
+    public void flip(FlipDirection direction) {
         if (gradient != null) {
             gradient.imTransform(direction.createCanvasTransform(comp.getCanvas()));
             cachedImage = null;

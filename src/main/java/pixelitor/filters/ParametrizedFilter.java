@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,7 +88,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     /**
-     * Inserts a parameter at a specified index in the filter's ParamSet.
+     * Inserts a parameter at the given index in the filter's ParamSet.
      */
     public void insertParam(FilterParam param, int index) {
         paramSet.insertParam(param, index);

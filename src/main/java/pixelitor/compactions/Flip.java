@@ -21,19 +21,17 @@ import pixelitor.Canvas;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
-import pixelitor.utils.Texts;
 
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 
 /**
  * Flips (mirrors) all content layers of a composition
  * either horizontally or vertically.
  */
 public class Flip extends SimpleCompAction {
-    private final Flip.Direction direction;
+    private final FlipDirection direction;
 
-    public Flip(Direction direction) {
+    public Flip(FlipDirection direction) {
         super(direction.getDisplayName(), false);
         this.direction = direction;
     }
@@ -67,67 +65,5 @@ public class Flip extends SimpleCompAction {
     @Override
     protected String getStatusBarMessage() {
         return direction.getStatusBarMessage();
-    }
-
-    /**
-     * The direction of the flip
-     */
-    public enum Direction {
-        HORIZONTAL("flip_horizontal") {
-            @Override
-            public String getStatusBarMessage() {
-                return "Image flipped horizontally";
-            }
-
-            @Override
-            public AffineTransform createTransform(int width, int height) {
-                var at = new AffineTransform();
-                at.translate(width, 0); // keeps the content visible
-                at.scale(-1, 1);
-                return at;
-            }
-        }, VERTICAL("flip_vertical") {
-            @Override
-            public String getStatusBarMessage() {
-                return "Image flipped vertically";
-            }
-
-            @Override
-            public AffineTransform createTransform(int width, int height) {
-                var at = new AffineTransform();
-                at.translate(0, height); // keeps the content visible
-                at.scale(1, -1);
-                return at;
-            }
-        };
-
-        private final String displayName;
-
-        Direction(String uiKey) {
-            this.displayName = Texts.i18n(uiKey);
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        public abstract String getStatusBarMessage();
-
-        public abstract AffineTransform createTransform(int width, int height);
-
-        /**
-         * Returns the transformation in image space, relative to the canvas.
-         * Needed for transforming the selection.
-         */
-        public AffineTransform createCanvasTransform(Canvas canvas) {
-            return createTransform(canvas.getWidth(), canvas.getHeight());
-        }
-
-        /**
-         * Returns the transformation for the image (image space, relative to the image).
-         */
-        public AffineTransform createImageTransform(BufferedImage image) {
-            return createTransform(image.getWidth(), image.getHeight());
-        }
     }
 }

@@ -21,8 +21,9 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.Views;
-import pixelitor.compactions.Flip;
+import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.gui.View;
@@ -32,7 +33,6 @@ import pixelitor.history.*;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileIO;
 import pixelitor.utils.Messages;
-import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Debug;
@@ -744,7 +744,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void flip(Flip.Direction direction) {
+    public void flip(FlipDirection direction) {
         AffineTransform flipTransform = direction.createImageTransform(image);
         int targetWidth = comp.getCanvasWidth();
         int targetHeight = comp.getCanvasHeight();
@@ -1070,6 +1070,24 @@ public class SmartObject extends CompositeLayer {
                 return true;
             }
         }
+        return false;
+    }
+
+    @Override
+    public boolean containsLayerOfType(Class<? extends Layer> type) {
+        // Check if the smart object itself is of the given type
+        if (type.isInstance(this)) {
+            return true;
+        }
+
+        // check if any of the smart filters are of the given type
+        for (SmartFilter filter : filters) {
+            if (filter.containsLayerOfType(type)) {
+                return true;
+            }
+        }
+
+        // stop here: don't check the content, because it's not needed by the callers
         return false;
     }
 

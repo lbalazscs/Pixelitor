@@ -67,13 +67,13 @@ import static java.awt.event.KeyEvent.*;
 import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.colors.FgBgColors.randomizeColors;
-import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
-import static pixelitor.compactions.Flip.Direction.VERTICAL;
+import static pixelitor.compactions.FlipDirection.HORIZONTAL;
+import static pixelitor.compactions.FlipDirection.VERTICAL;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
-import static pixelitor.utils.QuadrantAngle.ANGLE_180;
-import static pixelitor.utils.QuadrantAngle.ANGLE_270;
-import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 
 /**
  * Automated GUI testing utility that simulates random mouse

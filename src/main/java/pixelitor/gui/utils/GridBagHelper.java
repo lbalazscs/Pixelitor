@@ -179,8 +179,7 @@ public class GridBagHelper {
     }
 
     /**
-     * Adds the specified control to the right of the
-     * last label without stretching
+     * Adds the given control to the right of the last label without stretching.
      */
     public void addControlNoStretch(Component c) {
         COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 1;
@@ -192,7 +191,7 @@ public class GridBagHelper {
     }
 
     /**
-     * Adds the specified control to the right of the last control
+     * Adds the given control to the right of the last control
      */
     public void addNextControl(Component c) {
         COMPONENT_CONSTRAINTS.gridx++;

@@ -43,7 +43,7 @@ public class Fill extends Filter {
     }
 
     /**
-     * Fills the BufferedImage with the specified color
+     * Fills the BufferedImage with the given color
      */
     public static void fillImage(BufferedImage img, Color color) {
         int[] pixels = ImageUtils.getPixels(img);

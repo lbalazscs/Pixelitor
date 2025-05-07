@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ public class Screens {
     }
 
     /**
-     * Positions a window on the screen based on the specified alignment or custom location.
+     * Positions a window on the screen based on the given alignment or custom location.
      */
     public static void positionWindow(Window window, Align align, Point loc) {
         // exactly one must be non-null

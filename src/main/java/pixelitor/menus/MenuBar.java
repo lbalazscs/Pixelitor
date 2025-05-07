@@ -96,8 +96,11 @@ import static pixelitor.Views.repaintActive;
 import static pixelitor.colors.FillType.BACKGROUND;
 import static pixelitor.colors.FillType.FOREGROUND;
 import static pixelitor.colors.FillType.TRANSPARENT;
-import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
-import static pixelitor.compactions.Flip.Direction.VERTICAL;
+import static pixelitor.compactions.FlipDirection.HORIZONTAL;
+import static pixelitor.compactions.FlipDirection.VERTICAL;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.HAS_LAYER_MASK;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.LayerClassRestriction;
@@ -114,9 +117,6 @@ import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_DOWN;
 import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_UP;
 import static pixelitor.layers.LayerMoveAction.RAISE_LAYER_SELECTION;
 import static pixelitor.utils.Keys.*;
-import static pixelitor.utils.QuadrantAngle.ANGLE_180;
-import static pixelitor.utils.QuadrantAngle.ANGLE_270;
-import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 
 /**
  * The main menu bar of the app window.

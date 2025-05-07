@@ -69,7 +69,7 @@ public class PPoint implements Debuggable {
     }
 
     /**
-     * Constructs a fully initialized PPoint with specified coordinates.
+     * Constructs a fully initialized PPoint with the given coordinates.
      */
     public PPoint(double coX, double coY, double imX, double imY, View view) {
         this.coX = coX;

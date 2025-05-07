@@ -535,8 +535,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     @Override
     public final StyledShape clone() {
-        // this is used only for undo, it should be OK to share
-        // all the references
+        // TODO initially this was used only for undo, so it was
+        //   OK to share all the references, but now it's also
+        //   used by ShapesLayer.createTypeSpecificCopy
         assert checkInvariants();
         try {
             StyledShape clone = (StyledShape) super.clone();

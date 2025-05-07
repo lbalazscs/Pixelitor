@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,7 +68,7 @@ public class CompositionGuide {
 
     /**
      * Draws equally spaced vertical and horizontal lines dividing
-     * the rectangle according to the specified ratio.
+     * the rectangle according to the given ratio.
      */
     private void drawDivisionLines(Rectangle2D rect, double divisionRatio) {
         double sectionWidth = rect.getWidth() / divisionRatio;

@@ -139,18 +139,13 @@ public class GenericBlurredShape implements BlurredShape {
         int imgY = (int) (y - imgTy);
 
         // outside the image bounds we are definitely outside the shape
-        if (imgX < 0 || imgX > imgWidth || imgY < 0 || imgY > imgHeight) {
+        if (imgX < 0 || imgX >= imgWidth || imgY < 0 || imgY >= imgHeight) {
             return 1;
         }
 
         // inside the image bounds return the normalized pixel intensity
-        try {
-            int pixel = pixels[imgX + imgWidth * imgY];
-            // transform from unsigned byte to int
-            return (pixel & 0xff) / 255.0;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            // TODO this shouldn't happen as the outside case was already handled
-            return 1;
-        }
+        int pixel = pixels[imgX + imgWidth * imgY];
+        // transform from unsigned byte to int
+        return (pixel & 0xff) / 255.0;
     }
 }

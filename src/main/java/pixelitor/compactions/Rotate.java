@@ -21,7 +21,6 @@ import pixelitor.Canvas;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
-import pixelitor.utils.QuadrantAngle;
 
 import java.awt.geom.AffineTransform;
 

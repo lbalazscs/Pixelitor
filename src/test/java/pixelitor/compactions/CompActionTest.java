@@ -33,18 +33,17 @@ import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithSelection;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.Tools;
-import pixelitor.utils.QuadrantAngle;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
-import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.utils.QuadrantAngle.ANGLE_180;
-import static pixelitor.utils.QuadrantAngle.ANGLE_270;
-import static pixelitor.utils.QuadrantAngle.ANGLE_90;
+import static pixelitor.compactions.FlipDirection.HORIZONTAL;
+import static pixelitor.compactions.FlipDirection.VERTICAL;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
+import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
 
 @RunWith(Parameterized.class)
 public class CompActionTest {
@@ -334,7 +333,7 @@ public class CompActionTest {
         testFlip(VERTICAL, "Flip Vertical");
     }
 
-    private void testFlip(Flip.Direction direction, String editName) {
+    private void testFlip(FlipDirection direction, String editName) {
         checkOriginalState();
 
         Composition flipped = new Flip(direction).process(view.getComp()).join();
@@ -352,7 +351,7 @@ public class CompActionTest {
         checkStateAfterFlip(direction);
     }
 
-    private void checkStateAfterFlip(Flip.Direction direction) {
+    private void checkStateAfterFlip(FlipDirection direction) {
         var newComp = view.getComp();
 
         assertThat(newComp)

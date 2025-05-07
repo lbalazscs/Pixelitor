@@ -20,18 +20,18 @@ package pixelitor.layers;
 import pixelitor.Canvas;
 import pixelitor.*;
 import pixelitor.colors.Colors;
-import pixelitor.compactions.Flip;
+import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
+import pixelitor.io.ORAImageInfo;
 import pixelitor.io.PXCFormat;
-import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
@@ -53,7 +53,7 @@ import static java.util.Objects.requireNonNull;
 import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.Views.thumbSize;
-import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
+import static pixelitor.compactions.FlipDirection.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
 import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
@@ -370,8 +370,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public TranslatedImage getTranslatedImage() {
-        return new TranslatedImage(image, getTx(), getTy());
+    public ORAImageInfo getORAImageInfo() {
+        return new ORAImageInfo(image, getTx(), getTy());
     }
 
     @Override
@@ -657,7 +657,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void flip(Flip.Direction direction) {
+    public void flip(FlipDirection direction) {
         int newTx;
         int newTy;
         if (direction == HORIZONTAL) {
