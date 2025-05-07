@@ -78,10 +78,10 @@ public class AddSingleGuidePanel extends JPanel {
     }
 
     public static void showDialog(View view,
-                                  boolean horizontal) {
+                                  boolean horizontal,
+                                  String dialogTitle) {
         Guides.Builder builder = new Guides.Builder(view, false);
         AddSingleGuidePanel panel = new AddSingleGuidePanel(builder, horizontal);
-        String dialogTitle = horizontal ? "Add Horizontal Guide" : "Add Vertical Guide";
         new DialogBuilder()
             .title(dialogTitle)
             .content(panel)

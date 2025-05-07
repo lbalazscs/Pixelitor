@@ -340,7 +340,7 @@ public class Debug {
         AddLayerMaskAction.INSTANCE.actionPerformed(null);
         View view = Views.getActive();
         Layer layer = view.getComp().getActiveLayer();
-        MaskViewMode.SHOW_MASK.activate(view, layer);
+        MaskViewMode.VIEW_MASK.activate(view, layer);
     }
 
     public static void addNewImageWithMask() {
@@ -354,7 +354,7 @@ public class Debug {
         Messages.showStatusMessage("Internal state copied to the clipboard.");
     }
 
-    public static void showInternalState() {
+    public static void showInternalState(String dialogTitle) {
         AppNode node = new AppNode();
 
         JTree tree = new JTree(node);
@@ -369,7 +369,7 @@ public class Debug {
         form.add(new JScrollPane(tree), CENTER);
 
         GUIUtils.showCopyTextToClipboardDialog(form,
-            node::toJSON, "Internal State");
+            node::toJSON, dialogTitle);
     }
 
     public static void showTree(Debuggable debuggable, String name) {

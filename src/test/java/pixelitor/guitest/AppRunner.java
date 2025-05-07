@@ -256,7 +256,7 @@ public class AppRunner {
     }
 
     private static void testConnectBrushSettings(DialogFixture dialog) {
-        chooseRandomly(dialog.comboBox("length"));
+        chooseRandomly(dialog.comboBox("style"));
         slideRandomly(dialog.slider("density"));
         slideRandomly(dialog.slider("width"));
         checkRandomly(dialog.checkBox("resetForEach"));

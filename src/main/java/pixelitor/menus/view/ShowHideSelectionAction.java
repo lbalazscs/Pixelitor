@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,14 +23,12 @@ import pixelitor.selection.Selection;
 
 import javax.swing.*;
 
-import static pixelitor.utils.Texts.i18n;
-
 /**
  * The {@link Action} that toggles the visibility of the selection.
  */
 public class ShowHideSelectionAction extends ShowHideAction {
     public ShowHideSelectionAction() {
-        super(i18n("show_sel_edges"), i18n("hide_sel_edges"), null);
+        super("show_sel_edges", "hide_sel_edges", null);
     }
 
     @Override

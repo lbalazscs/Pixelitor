@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.Filters;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
+import pixelitor.utils.Texts;
 
 import java.util.Optional;
 
@@ -32,11 +33,11 @@ import static pixelitor.filters.util.Filters.getLastFilter;
  * Currently, only filters can be repeated.
  */
 public class RepeatLast extends DrawableAction {
+    private static final String REPEAT_LAST_DEFAULT_NAME = Texts.i18n("repeat_last_def");
+    private static final String SHOW_LAST_DEFAULT_NAME = Texts.i18n("show_last_def");
+
     public static final RepeatLast REPEAT_LAST_ACTION = new RepeatLast(false);
     public static final RepeatLast SHOW_LAST_ACTION = new RepeatLast(true);
-
-    private static final String REPEAT_LAST_DEFAULT_NAME = "Repeat Last";
-    private static final String SHOW_LAST_DEFAULT_NAME = "Show Last";
 
     private final boolean showDialog;
 
@@ -80,15 +81,17 @@ public class RepeatLast extends DrawableAction {
     }
 
     public static void update(Filter lastFilter) {
-        REPEAT_LAST_ACTION.setText("Repeat " + lastFilter.getName());
+        Object[] lastFilterNameArgs = {lastFilter.getName()};
+
+        REPEAT_LAST_ACTION.setText(Texts.formatI18N("repeat_last", lastFilterNameArgs));
         REPEAT_LAST_ACTION.setEnabled(true);
 
         if (lastFilter instanceof FilterWithGUI) {
-            SHOW_LAST_ACTION.setText("Show " + lastFilter.getName() + "...");
+            SHOW_LAST_ACTION.setText(Texts.formatI18N("show_last", lastFilterNameArgs) + "...");
             SHOW_LAST_ACTION.setEnabled(true);
         } else {
             // can't show a filter GUI for a filter without a GUI
-            SHOW_LAST_ACTION.setText(REPEAT_LAST_DEFAULT_NAME);
+            SHOW_LAST_ACTION.setText(SHOW_LAST_DEFAULT_NAME);
             SHOW_LAST_ACTION.setEnabled(false);
         }
     }

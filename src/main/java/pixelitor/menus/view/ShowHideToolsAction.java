@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import javax.swing.*;
  */
 public class ShowHideToolsAction extends ShowHideAction {
     public ShowHideToolsAction(WorkSpace workSpace) {
-        super("Show Tools", "Hide Tools", workSpace);
+        super("show_tools", "hide_tools", workSpace);
     }
 
     @Override

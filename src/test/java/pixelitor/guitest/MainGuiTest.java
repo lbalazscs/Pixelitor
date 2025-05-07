@@ -66,6 +66,7 @@ import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.Texts;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -149,6 +150,7 @@ public class MainGuiTest {
     private static final boolean FILTER_TESTS_WITH_WIDTH_1 = false;
 
     public static void main(String[] args) {
+        Texts.init();
         Utils.ensureAssertionsEnabled();
         FailOnThreadViolationRepaintManager.install();
 
@@ -183,7 +185,7 @@ public class MainGuiTest {
 
             testMagick();
         } else {
-            runMenuCommand("Set Default Workspace");
+            runMenuCommand("Reset Workspace");
 
             MaskMode[] maskModes = MaskMode.load();
             TestSuite testSuite = TestSuite.load();
@@ -1394,7 +1396,7 @@ public class MainGuiTest {
 
         testHistory();
 
-        runMenuCommand("Set Default Workspace");
+        runMenuCommand("Reset Workspace");
         assert EDT.call(StatusBar::isShown);
         assert !EDT.call(HistogramsPanel::isShown);
         assert EDT.call(LayersContainer::areLayersShown);
@@ -1442,7 +1444,7 @@ public class MainGuiTest {
         assert !EDT.call(LayersContainer::areLayersShown);
         assert !EDT.call(() -> PixelitorWindow.get().areToolsShown());
 
-        runMenuCommand("Show Hidden");
+        runMenuCommand("Restore Workspace");
         assert EDT.call(StatusBar::isShown);
         assert !EDT.call(HistogramsPanel::isShown);
         assert EDT.call(LayersContainer::areLayersShown);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.menus.view;
 
 import pixelitor.gui.WorkSpace;
 import pixelitor.gui.utils.NamedAction;
+import pixelitor.utils.Texts;
 
 import javax.swing.*;
 
@@ -30,9 +31,9 @@ public abstract class ShowHideAction extends NamedAction.Checked {
     private final String hideText;
     protected final WorkSpace workSpace;
 
-    protected ShowHideAction(String showText, String hideText, WorkSpace workSpace) {
-        this.showText = showText;
-        this.hideText = hideText;
+    protected ShowHideAction(String showKey, String hideKey, WorkSpace workSpace) {
+        this.showText = Texts.i18n(showKey);
+        this.hideText = Texts.i18n(hideKey);
         this.workSpace = workSpace;
 
         //noinspection AbstractMethodCallInConstructor

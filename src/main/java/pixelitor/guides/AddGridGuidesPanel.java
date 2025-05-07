@@ -75,11 +75,11 @@ public class AddGridGuidesPanel extends JPanel {
         return guidesParam.getValue(1) + 1;
     }
 
-    public static void showAddGridDialog(View view) {
+    public static void showAddGridDialog(View view, String dialogTitle) {
         Guides.Builder builder = new Guides.Builder(view, true);
         AddGridGuidesPanel panel = new AddGridGuidesPanel(builder);
         new DialogBuilder()
-            .title("Add Grid Guides")
+            .title(dialogTitle)
             .content(panel)
             .withScrollbars()
             .okAction(() -> panel.createGuides(false))

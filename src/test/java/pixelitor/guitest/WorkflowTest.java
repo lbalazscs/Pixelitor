@@ -57,7 +57,7 @@ import static pixelitor.guitest.GUITestUtils.findButtonByText;
 import static pixelitor.layers.MaskViewMode.EDIT_MASK;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.layers.MaskViewMode.RUBYLITH;
-import static pixelitor.layers.MaskViewMode.SHOW_MASK;
+import static pixelitor.layers.MaskViewMode.VIEW_MASK;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.tools.DragToolState.IDLE;
 import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
@@ -510,7 +510,7 @@ public class WorkflowTest {
 
         app.setMaskViewModeViaRightClick("Caustics", NORMAL);
         app.setMaskViewModeViaRightClick("Caustics", RUBYLITH);
-        app.setMaskViewModeViaRightClick("Caustics", SHOW_MASK);
+        app.setMaskViewModeViaRightClick("Caustics", VIEW_MASK);
         app.setMaskViewModeViaRightClick("Caustics", EDIT_MASK);
 
         app.deleteMaskViaRightClick("Caustics", true);

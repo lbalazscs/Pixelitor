@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import javax.swing.*;
 /**
  * The {@link Action} that toggles the visibility of the
  * histograms, layers, status bar, and tools at the same time.
+ * The show action only re-shows the UI elements hidden by this action.
  */
 public class ShowHideAllAction extends ShowHideAction {
     private boolean histogramsWereShown = false;
@@ -38,7 +39,7 @@ public class ShowHideAllAction extends ShowHideAction {
     private boolean allHidden = false;
 
     public ShowHideAllAction(WorkSpace workSpace) {
-        super("Show Hidden", "Hide All", workSpace);
+        super("restore_ws", "hide_all", workSpace);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class ShowHideAllAction extends ShowHideAction {
         }
 
         // If "Hide All" is running (show=false), then nothing should be shown.
-        // If "Show Hidden" is running (show=true), then show something
+        // If "Restore Workspace" is running (show=true), then show something
         // either because it was hidden by this action or because it is already shown.
         boolean showHistograms = show && (histogramsWereShown || histogramsAreShown);
         boolean showLayers = show && (layersWereShown || layersAreShown);

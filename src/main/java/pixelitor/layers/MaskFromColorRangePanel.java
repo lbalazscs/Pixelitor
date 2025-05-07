@@ -23,6 +23,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.*;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -56,7 +57,7 @@ import static pixelitor.utils.ImageUtils.isSubImage;
  * GUI panel for creating layer masks based on color similarity.
  */
 public class MaskFromColorRangePanel extends JPanel {
-    public static final String NAME = "Mask from Color Range";
+    public static final String NAME = Texts.i18n("lm_add_from_range");
     private static final int DEFAULT_THUMB_SIZE = 512;
     private static final String HELP_TEXT = "Select a color by clicking or dragging on the image";
 

@@ -536,12 +536,12 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 MaskViewMode.RUBYLITH.activate(view, layer);
             }
         } else if (altClick) {
-            // alt-click switches to SHOW_MASK
-            // except when it already is in SHOW_MASK
-            if (view.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
+            // alt-click switches to VIEW_MASK
+            // except when it already is in VIEW_MASK
+            if (view.getMaskViewMode() == MaskViewMode.VIEW_MASK) {
                 MaskViewMode.EDIT_MASK.activate(view, layer);
             } else {
-                MaskViewMode.SHOW_MASK.activate(view, layer);
+                MaskViewMode.VIEW_MASK.activate(view, layer);
             }
         } else if (shiftClick) {
             // shift-click toggles the enabled-disabled state

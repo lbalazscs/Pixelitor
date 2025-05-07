@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.util.Locale;
 import static pixelitor.layers.MaskViewMode.EDIT_MASK;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.layers.MaskViewMode.RUBYLITH;
-import static pixelitor.layers.MaskViewMode.SHOW_MASK;
+import static pixelitor.layers.MaskViewMode.VIEW_MASK;
 
 /**
  * The possible states of the active layer with regards to its mask.
@@ -119,12 +119,12 @@ enum MaskMode {
     /**
      * A mask is tested, while viewing the mask
      */
-    ON_MASK_VIEW_MASK(SHOW_MASK) {
+    ON_MASK_VIEW_MASK(VIEW_MASK) {
         @Override
         public void check() {
             if (EDT.activeLayerHasMask()) {
                 if (EDT.activeLayerIsMaskEditing()) {
-                    assertMaskViewModeIs(SHOW_MASK);
+                    assertMaskViewModeIs(VIEW_MASK);
                 } else {
                     throw new AssertionError("Not mask editing in " + EDT.activeLayerName());
                 }

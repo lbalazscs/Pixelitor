@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,11 +29,13 @@ public class FullPalette extends Palette {
     // are remembered between dialog sessions
     private static int lastRowCount = 11;
     private static int lastColumnCount = 7;
+    private final String dialogTitle;
 
     private int hueSteps;
 
-    public FullPalette() {
+    public FullPalette(String dialogTitle) {
         super(lastRowCount, lastColumnCount);
+        this.dialogTitle = dialogTitle;
 
         config = new HueSatPaletteConfig(0, 0.9f); // default saturation is 90%
     }
@@ -78,6 +80,6 @@ public class FullPalette extends Palette {
 
     @Override
     public String getDialogTitle() {
-        return "Color Palette";
+        return dialogTitle;
     }
 }

@@ -28,6 +28,7 @@ import pixelitor.history.History;
 import pixelitor.menus.PMenu;
 import pixelitor.menus.edit.FadeAction;
 import pixelitor.tools.Tools;
+import pixelitor.utils.Texts;
 import pixelitor.utils.test.Events;
 
 import javax.swing.*;
@@ -42,13 +43,13 @@ import static pixelitor.utils.Keys.CTRL_4;
  * and whether the mask editing is done in "rubylith" mode.
  */
 public enum MaskViewMode {
-    NORMAL("Show and Edit Layer", false, false, false,
+    NORMAL("lm_edit_layer", false, false, false,
         LayerRestriction.ALLOW_ALL, CTRL_1) {
-    }, SHOW_MASK("Show and Edit Mask", true, true, false,
+    }, VIEW_MASK("lm_view_mask", true, true, false,
         LayerRestriction.HAS_LAYER_MASK, CTRL_2) {
-    }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false,
+    }, EDIT_MASK("lm_edit_mask", false, true, false,
         LayerRestriction.HAS_LAYER_MASK, CTRL_3) {
-    }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true,
+    }, RUBYLITH("lm_ruby", false, true, true,
         LayerRestriction.HAS_LAYER_MASK, CTRL_4) {
     };
 
@@ -59,9 +60,9 @@ public enum MaskViewMode {
     private final boolean showMask;
     private final boolean editMask;
 
-    MaskViewMode(String displayName, boolean showMask, boolean editMask, boolean showRuby,
+    MaskViewMode(String displayKey, boolean showMask, boolean editMask, boolean showRuby,
                  LayerRestriction layerRestriction, KeyStroke keyStroke) {
-        this.displayName = displayName;
+        this.displayName = Texts.i18n(displayKey);
         this.showMask = showMask;
         this.editMask = editMask;
         this.showRuby = showRuby;
