@@ -33,7 +33,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 /**
- * The three handles that can be used to manipulate a gradient.
+ * A controller/container class for the three draggable
+ * handles that can be used to manipulate a gradient.
  */
 public class GradientHandles implements ToolWidget, Debuggable {
     private final GradientDefiningPoint start;
@@ -86,26 +87,28 @@ public class GradientHandles implements ToolWidget, Debuggable {
         return new Drag(startX, startY, endX, endY);
     }
 
-    public Drag toDrag(GradientDefiningPoint movingPoint) {
+    public Drag toOverlayDrag(GradientDefiningPoint movedPoint) {
         Drag drag;
-        if (movingPoint == end) {
+        if (movedPoint == end) {
             drag = new Drag();
             drag.setStart(start.getLocationCopy());
             drag.setEnd(end.getLocationCopy());
-        } else if (movingPoint == start) {
-            // if the user is moving the start point, then return
-            // a Drag that points backwards, but calculates
-            // the forward angle
+        } else if (movedPoint == start) {
+            // if the user is moving the start point, then return a Drag
+            // that points backwards, but calculates the forward angle,
+            // because the overlay measurement is shown near the
+            // Drag's end, but we want it to be near the moved start
             drag = new Drag() {
                 @Override
                 public double calcAngle() {
+                    // compensate for the fact that the Drag is backwards
                     return calcReversedAngle();
                 }
             };
             drag.setStart(end.getLocationCopy());
             drag.setEnd(start.getLocationCopy());
         } else {
-            throw new IllegalStateException("movingPoint = " + movingPoint);
+            throw new IllegalStateException("movedPoint = " + movedPoint);
         }
         return drag;
     }
@@ -116,16 +119,17 @@ public class GradientHandles implements ToolWidget, Debuggable {
             start.restoreCoordsFromImSpace(view);
             end.restoreCoordsFromImSpace(view);
             middle.restoreCoordsFromImSpace(view);
-        } else { // in random tests they can be different
+        } else {
             if (AppMode.isDevelopment()) {
-                System.out.println("GradientHandles::viewSizeChanged: different views, ui = "
-                    + ImageArea.getMode());
+                throw new IllegalStateException("different views, ui = " + ImageArea.getMode());
             }
         }
     }
 
     @Override
     public void imCoordsChanged(AffineTransform at, View view) {
+        assert view == this.view;
+
         start.imTransformOnlyThis(at, false);
         end.imTransformOnlyThis(at, false);
         middle.imTransformOnlyThis(at, false);
@@ -133,6 +137,9 @@ public class GradientHandles implements ToolWidget, Debuggable {
 
     @Override
     public void arrowKeyPressed(ArrowKey key, View view) {
+        assert view == this.view;
+
+        // arrow keys move the entire gradient by nudging the center point
         middle.arrowKeyPressed(key);
     }
 

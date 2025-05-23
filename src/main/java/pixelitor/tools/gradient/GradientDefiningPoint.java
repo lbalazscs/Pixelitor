@@ -71,7 +71,7 @@ public class GradientDefiningPoint extends DraggablePoint {
     public void paintHandle(Graphics2D g) {
         super.paintHandle(g);
         if (isActive()) {
-            Drag drag = gradientHandles.toDrag(this);
+            Drag drag = gradientHandles.toOverlayDrag(this);
             OverlayType.ANGLE_DIST.draw(g, drag);
         }
     }

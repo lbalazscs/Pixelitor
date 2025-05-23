@@ -179,7 +179,7 @@ public class Gradient implements Serializable, Debuggable {
      * Returns whether the gradient pixels fully cover the originals.
      * If true, then it should not be necessary to save the images for undo.
      */
-    public boolean isFullyCovering() {
+    public boolean isSolidOverlay() {
         return colorType != GradientColorType.FG_TO_TRANSPARENT
             && blendingMode == BlendingMode.NORMAL
             && opacity == 1.0f;

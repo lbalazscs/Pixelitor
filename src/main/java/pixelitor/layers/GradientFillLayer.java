@@ -45,7 +45,10 @@ public class GradientFillLayer extends ContentLayer {
     private static final long serialVersionUID = 109261602799761359L;
 
     private Gradient gradient;
+
+    // a snapshot of the gradient before a Move Tool operation
     private transient Gradient backupGradient;
+
     private transient BufferedImage cachedImage;
 
     private static int count;
@@ -74,7 +77,7 @@ public class GradientFillLayer extends ContentLayer {
     @Override
     protected GradientFillLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
         String copyName = copyType.createLayerCopyName(name);
-        var copy = new GradientFillLayer(comp, copyName);
+        var copy = new GradientFillLayer(newComp, copyName);
         if (gradient != null) {
             // could be shared, because it is overwritten
             // when editing, but make a copy for safety
@@ -85,29 +88,33 @@ public class GradientFillLayer extends ContentLayer {
 
     @Override
     public void paint(Graphics2D g, boolean firstVisibleLayer) {
-        if (gradient != null) {
-            int width = comp.getCanvasWidth();
-            int height = comp.getCanvasHeight();
-            // the custom blending modes don't work with gradients
-            boolean useCachedImage = g.getComposite().getClass() != AlphaComposite.class
-                // and custom gradients using transparency also have a problem
-                || gradient.hasCustomTransparency();
-            if (useCachedImage) {
-                if (cachedImage == null) {
-                    cachedImage = ImageUtils.createSysCompatibleImage(width, height);
-                    Graphics2D imgG = cachedImage.createGraphics();
-                    gradient.paintOnGraphics(imgG, width, height);
-                    imgG.dispose();
-                }
-                g.drawImage(cachedImage, 0, 0, null);
-            } else {
-                gradient.paintOnGraphics(g, width, height);
+        if (gradient == null) {
+            return;
+        }
+        int width = comp.getCanvasWidth();
+        int height = comp.getCanvasHeight();
+
+        // the custom blending modes don't work with gradients
+        boolean needsCache = g.getComposite().getClass() != AlphaComposite.class
+            // and custom gradients using transparency also have a problem
+            || gradient.hasCustomTransparency();
+
+        if (needsCache) {
+            if (cachedImage == null) {
+                cachedImage = ImageUtils.createSysCompatibleImage(width, height);
+                Graphics2D imgG = cachedImage.createGraphics();
+                gradient.paintOnGraphics(imgG, width, height);
+                imgG.dispose();
             }
+            g.drawImage(cachedImage, 0, 0, null);
+        } else {
+            gradient.paintOnGraphics(g, width, height);
         }
     }
 
     @Override
     protected BufferedImage transformImage(BufferedImage src) {
+        // gradient fill layers are not image adjustments
         throw new UnsupportedOperationException();
     }
 
@@ -135,7 +142,7 @@ public class GradientFillLayer extends ContentLayer {
         if (gradient != null) {
             AffineTransform at = comp.getCanvas().createImTransformToFit(newSize);
             gradient.imTransform(at);
-            cachedImage = null;
+            invalidateGradientCache();
         }
         return CompletableFuture.completedFuture(null);
     }
@@ -144,7 +151,7 @@ public class GradientFillLayer extends ContentLayer {
     public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
         if (gradient != null) {
             gradient.crop(cropRect);
-            cachedImage = null;
+            invalidateGradientCache();
         }
     }
 
@@ -152,7 +159,7 @@ public class GradientFillLayer extends ContentLayer {
     public void flip(FlipDirection direction) {
         if (gradient != null) {
             gradient.imTransform(direction.createCanvasTransform(comp.getCanvas()));
-            cachedImage = null;
+            invalidateGradientCache();
         }
     }
 
@@ -160,7 +167,7 @@ public class GradientFillLayer extends ContentLayer {
     public void rotate(QuadrantAngle angle) {
         if (gradient != null) {
             gradient.imTransform(angle.createCanvasTransform(comp.getCanvas()));
-            cachedImage = null;
+            invalidateGradientCache();
         }
     }
 
@@ -168,27 +175,31 @@ public class GradientFillLayer extends ContentLayer {
     public void enlargeCanvas(Outsets out) {
         if (gradient != null) {
             gradient.enlargeCanvas(out);
-            cachedImage = null;
+            invalidateGradientCache();
         }
+    }
+
+    private void invalidateGradientCache() {
+        cachedImage = null;
     }
 
     public Gradient getGradient() {
         return gradient;
     }
 
-    public void setGradient(Gradient gradient, boolean addHistory) {
-        // the gradient can be null if this is called while undoing the first gradient
-        assert gradient != null || !addHistory;
+    public void setGradient(Gradient newGradient, boolean addHistory) {
+        // the new gradient can be null if this is called while undoing the first gradient
+        assert newGradient != null || !addHistory;
 
         Gradient prevGradient = this.gradient;
 
-        this.gradient = gradient;
-        cachedImage = null;
+        this.gradient = newGradient;
+        invalidateGradientCache();
         holder.update();
         updateIconImage();
 
         if (addHistory) {
-            History.add(new GradientFillLayerChangeEdit(this, prevGradient, gradient));
+            History.add(new GradientFillLayerChangeEdit(this, prevGradient, newGradient));
         } else { // called from the undo/redo
             if (Tools.GRADIENT.isActive()) {
                 // the handles have to be updated by the tool
@@ -199,7 +210,7 @@ public class GradientFillLayer extends ContentLayer {
 
     @Override
     public Rectangle getContentBounds(boolean includeTransparent) {
-        // by returning null, the move tool shows no outline
+        // by returning null, the move tool shows no outline for the layer content
         return null;
     }
 
@@ -239,6 +250,8 @@ public class GradientFillLayer extends ContentLayer {
 
     @Override
     PixelitorEdit createMovementEdit(int prevTx, int prevTy) {
+        // prevTx and prevTy are for the ContentLayer's translation, not directly
+        // used here as gradient movement is handled via gradient state
         return new GradientFillLayerChangeEdit(this, backupGradient, gradient);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,10 @@ import pixelitor.tools.gradient.Gradient;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
+/**
+ * The modifications made to an existing gradient that has
+ * been applied to a {@link Drawable}.
+ */
 public class GradientChangeEdit extends PixelitorEdit {
     private final Drawable dr;
     private final Gradient before;
@@ -39,9 +43,12 @@ public class GradientChangeEdit extends PixelitorEdit {
         this.before = before;
         this.after = after;
 
-        imageEditNeeded = !before.isFullyCovering() || !after.isFullyCovering();
+        // if both gradients are solid overlays, then simply re-rendering
+        // the gradient is enough to perfectly restore the pixel state
+        imageEditNeeded = !before.isSolidOverlay() || !after.isSolidOverlay();
 
         if (imageEditNeeded) {
+            // capture the pixel data before the "after" gradient was applied
             imageEdit = ImageEdit.createEmbedded(dr);
         }
     }

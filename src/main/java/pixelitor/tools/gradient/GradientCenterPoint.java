@@ -39,12 +39,14 @@ public class GradientCenterPoint extends DraggablePoint {
 
     @Override
     public void setLocation(double coX, double coY) {
+        // calculate the delta before moving
         double dx = coX - this.x;
         double dy = coY - this.y;
 
+        // move this center point
         super.setLocation(coX, coY);
 
-        // also move the start and end points
+        // also move the start and end points by the same delta
         start.translateOnlyThis(dx, dy);
         end.translateOnlyThis(dx, dy);
     }
