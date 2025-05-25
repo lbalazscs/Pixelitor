@@ -255,6 +255,10 @@ public class Canvas implements Serializable, Debuggable {
         );
     }
 
+    public Rectangle2D intersect(Rectangle2D rectangle) {
+        return rectangle.createIntersection(getBounds());
+    }
+
     /**
      * Creates a temporary, transparent image with the size of this canvas.
      */

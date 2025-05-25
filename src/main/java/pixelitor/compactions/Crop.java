@@ -28,6 +28,7 @@ import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
 import pixelitor.history.MultiEdit;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.layers.SmartObject;
 import pixelitor.selection.Selection;
@@ -63,18 +64,21 @@ public class Crop implements CompAction {
 
     // whether a mask should be added to hide cropped areas
     private final boolean addMaskForHiding;
+    private final PixelitorEdit cropBoxRestorationEdit;
 
     /**
      * Configures a new crop operation.
      */
     public Crop(Rectangle2D imCropRect,
                 boolean fromSelection, boolean allowGrowing,
-                boolean deleteCroppedPixels, boolean addMaskForHiding) {
+                boolean deleteCroppedPixels, boolean addMaskForHiding,
+                PixelitorEdit cropBoxRestorationEdit) {
         this.imCropRect = imCropRect;
         this.fromSelection = fromSelection;
         this.allowGrowing = allowGrowing;
         this.deleteCroppedPixels = deleteCroppedPixels;
         this.addMaskForHiding = addMaskForHiding;
+        this.cropBoxRestorationEdit = cropBoxRestorationEdit;
     }
 
     /**
@@ -155,8 +159,17 @@ public class Crop implements CompAction {
         view.ensurePositiveLocation();
 
         String editName = addMaskForHiding ? "Crop and Hide" : "Crop";
-        History.add(new CompositionReplacedEdit(
-            editName, view, srcComp, croppedComp, canvasTransform, false));
+        CompositionReplacedEdit compReplacedEdit = new CompositionReplacedEdit(
+            editName, view, srcComp, croppedComp, canvasTransform, false);
+        if (cropBoxRestorationEdit != null) {
+            // this crop originated from the crop tool
+            History.add(new MultiEdit(editName, croppedComp,
+                cropBoxRestorationEdit, compReplacedEdit));
+        } else {
+            // crop from other sources (selection, content trim), no crop box to manage
+            History.add(compReplacedEdit);
+        }
+
         view.replaceComp(croppedComp);
 
         croppedComp.updateAllIconImages();
@@ -177,9 +190,11 @@ public class Crop implements CompAction {
     public static void toolCrop(Composition comp,
                                 Rectangle2D cropRect,
                                 boolean allowGrowing,
-                                boolean deleteCroppedPixels) {
+                                boolean deleteCroppedPixels,
+                                PixelitorEdit cropBoxRestorationEdit) {
         new Crop(cropRect, false, allowGrowing,
-            deleteCroppedPixels, false).process(comp);
+            deleteCroppedPixels, false,
+            cropBoxRestorationEdit).process(comp);
     }
 
     /**
@@ -194,7 +209,7 @@ public class Crop implements CompAction {
             Messages.showInfo("Nothing to Crop",
                 "<html><b>%s</b> has no transparent border pixels to remove.".formatted(comp.getName()));
         } else {
-            new Crop(bounds, false, false, true, false)
+            new Crop(bounds, false, false, true, false, null)
                 .process(comp);
         }
     }
@@ -265,7 +280,7 @@ public class Crop implements CompAction {
                                                  Selection sel,
                                                  boolean addHidingMask) {
         new Crop(sel.getShapeBounds2D(), true,
-            true, true, addHidingMask).process(comp);
+            true, true, addHidingMask, null).process(comp);
     }
 
     /**

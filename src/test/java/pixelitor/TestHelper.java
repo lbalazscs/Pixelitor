@@ -293,6 +293,9 @@ public class TestHelper {
         // when getComp() is called on the mock, then return the currentComp field
         when(view.getComp()).thenAnswer((Answer<Composition>) invocation -> currentComp);
 
+        // when getCanvas() is called on the mock, then return currentComp.getCanvas()
+        when(view.getCanvas()).thenAnswer((Answer<Canvas>) invocation -> currentComp.getCanvas());
+
         comp.setView(view);
 
         // set it to active only after the comp is set

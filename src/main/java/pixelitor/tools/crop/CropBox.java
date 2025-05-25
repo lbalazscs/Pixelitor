@@ -24,6 +24,9 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.DebugNodes;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -45,7 +48,7 @@ import static java.awt.Cursor.W_RESIZE_CURSOR;
 /**
  * The cropping widget with draggable handles for resizing the crop area.
  */
-public class CropBox implements ToolWidget {
+public class CropBox implements ToolWidget, Debuggable {
     // transformation modes for user interactions
     private static final int MODE_NONE = 0;
     private static final int MODE_MOVE = 1;
@@ -262,6 +265,14 @@ public class CropBox implements ToolWidget {
         return cropRect;
     }
 
+    /**
+     * Captures the internal state of this {@link CropBox}
+     * so that it can be returned to this state later.
+     */
+    public Rectangle2D getImCropRect() {
+        return (Rectangle2D) cropRect.getIm().clone();
+    }
+
     @Override
     public void coCoordsChanged(View view) {
         cropRect.coCoordsChanged(view);
@@ -441,6 +452,16 @@ public class CropBox implements ToolWidget {
             Rectangle co = view.imageToComponentSpace(im);
             rect.setRect(co);
         }
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.add(DebugNodes.createRectangle2DNode("cropRect im", cropRect.getIm()));
+        node.add(DebugNodes.createRectangleNode("cropRect co", cropRect.getCo()));
+
+        return node;
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import java.awt.Rectangle;
 import java.awt.color.ColorSpace;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.io.File;
 import java.util.Map;
@@ -181,6 +182,17 @@ public class DebugNodes {
         node.addInt("y", rect.y);
         node.addInt("width", rect.width);
         node.addInt("height", rect.height);
+
+        return node;
+    }
+
+    public static DebugNode createRectangle2DNode(String name, Rectangle2D rect) {
+        DebugNode node = new DebugNode(name, rect);
+
+        node.addDouble("x", rect.getX());
+        node.addDouble("y", rect.getY());
+        node.addDouble("width", rect.getWidth());
+        node.addDouble("height", rect.getHeight());
 
         return node;
     }

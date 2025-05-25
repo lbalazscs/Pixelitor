@@ -35,7 +35,7 @@ public enum DragToolState {
 
         @Override
         public boolean isOK(CropTool tool) {
-            return !tool.hasCropBox();
+            return !tool.hasCropBox() && !tool.isCropEnabled();
         }
     },
     AFTER_FIRST_MOUSE_PRESS {
@@ -74,7 +74,7 @@ public enum DragToolState {
 
         @Override
         public boolean isOK(CropTool tool) {
-            return tool.hasCropBox();
+            return tool.hasCropBox() && tool.isCropEnabled();
         }
     };
 

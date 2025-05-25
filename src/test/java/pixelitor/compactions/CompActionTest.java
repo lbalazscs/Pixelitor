@@ -418,7 +418,7 @@ public class CompActionTest {
     private void testCrop(boolean selectionCrop, boolean allowGrowing,
                           boolean deleteCroppedPixels, boolean addHidingMask) {
         var imCropRect = new Rectangle(10, 3, 15, 3);
-        Crop crop = new Crop(imCropRect, selectionCrop, allowGrowing, deleteCroppedPixels, addHidingMask);
+        Crop crop = new Crop(imCropRect, selectionCrop, allowGrowing, deleteCroppedPixels, addHidingMask, null);
         Composition cropped = crop.process(origComp).join();
         assert cropped != origComp;
         assert view.getComp() == cropped;
