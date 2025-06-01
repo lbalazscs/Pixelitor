@@ -11,7 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.12.2</junit.version>
+        <junit.version>5.13.0</junit.version>
         <twelvemonkeys.version>3.12.0</twelvemonkeys.version>
     </properties>
 
