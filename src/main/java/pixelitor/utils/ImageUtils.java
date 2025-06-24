@@ -30,6 +30,7 @@ import pixelitor.Canvas;
 import pixelitor.colors.Colors;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
@@ -1579,5 +1580,26 @@ public class ImageUtils {
             (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
             (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
             (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
+    }
+
+    public static int getPixelAt(ContentLayer layer, BufferedImage image, Point p) {
+        int x = p.x - layer.getTx();
+        int y = p.y - layer.getTy();
+        if (isWithinBounds(x, y, image)) {
+            if (layer.hasMask() && layer.isMaskEnabled()) {
+                int maskPixel = layer.getMask().getPixelAtPoint(p);
+                if (maskPixel != 0) {
+                    int imagePixel = image.getRGB(x, y);
+                    float maskAlpha = (maskPixel & 0xFF) / 255.0f;
+                    int imageAlpha = (imagePixel >> 24) & 0xFF;
+                    int effectiveAlpha = (int) (imageAlpha * maskAlpha);
+                    return Colors.setAlpha(imagePixel, effectiveAlpha);
+                }
+            }
+
+            return image.getRGB(x, y);
+        }
+
+        return 0x00_00_00_00;
     }
 }

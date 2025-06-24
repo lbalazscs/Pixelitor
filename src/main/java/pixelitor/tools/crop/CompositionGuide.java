@@ -34,43 +34,42 @@ import static pixelitor.utils.Geometry.createOrthogonalLine;
  * Compositional guides for cropping.
  */
 public class CompositionGuide {
-    private Graphics2D g2;
+    private static final int NUM_SPIRAL_SEGMENTS = 11;
+    private static final int GRID_CELL_SIZE = 50;
+
     private CompositionGuideType type = CompositionGuideType.NONE;
     private int orientation = 0;
     private final GuidesRenderer renderer;
-    private static final int NUM_SPIRAL_SEGMENTS = 11;
-    private static final int GRID_CELL_SIZE = 50;
 
     public CompositionGuide(GuidesRenderer renderer) {
         this.renderer = renderer;
     }
 
-    public void draw(Rectangle2D rect, Graphics2D g2) {
-        this.g2 = g2;
+    public void draw(Rectangle2D rect, Graphics2D g) {
         switch (type) {
             case NONE -> {
             }
-            case RULE_OF_THIRDS -> drawRuleOfThirds(rect);
-            case GOLDEN_SECTIONS -> drawGoldenSections(rect);
-            case GOLDEN_SPIRAL -> drawGoldenSpiral(rect);
-            case DIAGONALS -> drawDiagonals(rect);
-            case TRIANGLES -> drawTriangles(rect);
-            case GRID -> drawGrid(rect);
+            case RULE_OF_THIRDS -> drawRuleOfThirds(rect, g);
+            case GOLDEN_SECTIONS -> drawGoldenSections(rect, g);
+            case GOLDEN_SPIRAL -> drawGoldenSpiral(rect, g);
+            case DIAGONALS -> drawDiagonals(rect, g);
+            case TRIANGLES -> drawTriangles(rect, g);
+            case GRID -> drawGrid(rect, g);
         }
     }
 
     /**
      * Renders the given shapes using the guides renderer.
      */
-    private void renderShapes(Shape[] shapes) {
-        renderer.draw(g2, Arrays.asList(shapes));
+    private void renderShapes(Shape[] shapes, Graphics2D g) {
+        renderer.draw(g, Arrays.asList(shapes));
     }
 
     /**
      * Draws equally spaced vertical and horizontal lines dividing
      * the rectangle according to the given ratio.
      */
-    private void drawDivisionLines(Rectangle2D rect, double divisionRatio) {
+    private void drawDivisionLines(Rectangle2D rect, double divisionRatio, Graphics2D g) {
         double sectionWidth = rect.getWidth() / divisionRatio;
         double sectionHeight = rect.getHeight() / divisionRatio;
         Line2D[] lines = new Line2D.Double[4];
@@ -91,23 +90,23 @@ public class CompositionGuide {
         lines[2] = new Line2D.Double(x1, y1, x2, y1);
         lines[3] = new Line2D.Double(x1, y2, x2, y2);
 
-        renderShapes(lines);
+        renderShapes(lines, g);
     }
 
-    private void drawRuleOfThirds(Rectangle2D rect) {
-        drawDivisionLines(rect, 3);
+    private void drawRuleOfThirds(Rectangle2D rect, Graphics2D g) {
+        drawDivisionLines(rect, 3, g);
     }
 
-    private void drawGoldenSections(Rectangle2D rect) {
-        drawDivisionLines(rect, GOLDEN_RATIO);
+    private void drawGoldenSections(Rectangle2D rect, Graphics2D g) {
+        drawDivisionLines(rect, GOLDEN_RATIO, g);
     }
 
-    private void drawDiagonals(Rectangle2D rect) {
+    private void drawDiagonals(Rectangle2D rect, Graphics2D g) {
         Line2D[] lines = (rect.getWidth() >= rect.getHeight())
             ? createLandscapeDiagonals(rect)
             : createPortraitDiagonals(rect);
 
-        renderShapes(lines);
+        renderShapes(lines, g);
     }
 
     private static Line2D[] createLandscapeDiagonals(Rectangle2D rect) {
@@ -144,7 +143,7 @@ public class CompositionGuide {
         };
     }
 
-    private void drawGrid(Rectangle2D rect) {
+    private void drawGrid(Rectangle2D rect, Graphics2D g) {
         int horLineCount = 1 + 2 * (int) (rect.getHeight() / 2 / GRID_CELL_SIZE);
         int verLineCount = 1 + 2 * (int) (rect.getWidth() / 2 / GRID_CELL_SIZE);
 
@@ -170,10 +169,10 @@ public class CompositionGuide {
             lines[horLineCount + i] = new Line2D.Double(x, startY, x, endY);
         }
 
-        renderShapes(lines);
+        renderShapes(lines, g);
     }
 
-    private void drawTriangles(Rectangle2D rect) {
+    private void drawTriangles(Rectangle2D rect, Graphics2D g) {
         double startX, endX, startY, endY;
 
         if (orientation % 2 == 0) {
@@ -195,10 +194,10 @@ public class CompositionGuide {
         lines[1] = createOrthogonalLine(lines[0], new Point2D.Double(startX, endY));
         lines[2] = createOrthogonalLine(lines[0], new Point2D.Double(endX, startY));
 
-        renderShapes(lines);
+        renderShapes(lines, g);
     }
 
-    private void drawGoldenSpiral(Rectangle2D rect) {
+    private void drawGoldenSpiral(Rectangle2D rect, Graphics2D g) {
         Arc2D[] arcs = new Arc2D.Double[NUM_SPIRAL_SEGMENTS];
         double arcWidth = rect.getWidth() / GOLDEN_RATIO;
         double arcHeight = rect.getHeight();
@@ -210,7 +209,7 @@ public class CompositionGuide {
             case 3 -> createSpiral3(rect, arcs, arcWidth, arcHeight);
         }
 
-        renderShapes(arcs);
+        renderShapes(arcs, g);
     }
 
     private static void createSpiral0(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {

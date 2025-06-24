@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.awt.Shape;
 import java.util.List;
 
 /**
- * Renderer for both the crop composition guides and the normal guides.
+ * Renderer for both crop composition guides and normal guides.
  */
 public class GuidesRenderer {
     private final GuideStyle style;
@@ -39,6 +39,9 @@ public class GuidesRenderer {
         this.style = style;
     }
 
+    /**
+     * Draws the given shapes using the configured guide style.
+     */
     public void draw(Graphics2D g2, List<? extends Shape> shapes) {
         g2.setStroke(style.getStrokeA());
         g2.setColor(style.getColorA());

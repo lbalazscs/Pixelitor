@@ -19,7 +19,6 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.*;
-import pixelitor.colors.Colors;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
 import pixelitor.compactions.QuadrantAngle;
@@ -59,7 +58,6 @@ import static pixelitor.layers.ImageLayer.State.PREVIEW;
 import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.createThumbnail;
-import static pixelitor.utils.ImageUtils.isWithinBounds;
 import static pixelitor.utils.ImageUtils.replaceSelectedRegion;
 import static pixelitor.utils.Threads.onEDT;
 
@@ -607,24 +605,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public int getPixelAtPoint(Point p) {
-        int x = p.x - getTx();
-        int y = p.y - getTy();
-        if (isWithinBounds(x, y, image)) {
-            if (hasMask() && isMaskEnabled()) {
-                int maskPixel = getMask().getPixelAtPoint(p);
-                if (maskPixel != 0) {
-                    int imagePixel = image.getRGB(x, y);
-                    float maskAlpha = (maskPixel & 0xFF) / 255.0f;
-                    int imageAlpha = (imagePixel >> 24) & 0xFF;
-                    int effectiveAlpha = (int) (imageAlpha * maskAlpha);
-                    return Colors.setAlpha(imagePixel, effectiveAlpha);
-                }
-            }
-
-            return image.getRGB(x, y);
-        }
-
-        return 0x00_00_00_00;
+        return ImageUtils.getPixelAt(this, image, p);
     }
 
     private boolean imageDoesNotCoverCanvas() {

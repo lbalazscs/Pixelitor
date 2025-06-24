@@ -77,7 +77,8 @@ import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
  * Automated GUI testing utility that simulates random mouse
- * movements and actions using the AWT {@link Robot} class.
+ * movements and actions using the AWT {@link Robot} class
+ * in order to stress-test the app.
  *
  * WARNING: This test generates native mouse events that may affect
  * other applications if they accidentally receive focus during testing.
@@ -429,7 +430,7 @@ public class RandomGUITest {
             return;
         }
 
-        Filter filter = chooseRandomFilter();
+        Filter filter = chooseTestedFilter();
 
         log("filter: " + filter.getName());
 
@@ -489,7 +490,7 @@ public class RandomGUITest {
         }
     }
 
-    private Filter chooseRandomFilter() {
+    private Filter chooseTestedFilter() {
         Filter filter;
         if (preferredFilter == null) {
             filter = Filters.getRandomFilter(f ->

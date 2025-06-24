@@ -435,6 +435,7 @@ public class TransformedTextPainter implements Debuggable {
         return totalTextLength;
     }
 
+    // arranges the individual glyphs of a text along the given path
     private Path2D distributeGlyphsAlongPath(GlyphVector glyphVector, Path2D path) {
         double tracking = calcTracking();
 
@@ -458,7 +459,8 @@ public class TransformedTextPainter implements Debuggable {
         int startGlyphIndex = 0;
         int numGlyphs = glyphVector.getNumGlyphs();
         if (initialOffset < 0 && mlpAlignment != AlignmentSelector.LEFT) {
-            // calculate how many glyphs we need to skip
+            // calculate how many glyphs we need to skip so the visible
+            // part of the text starts at the beginning of the path
             double accumulatedWidth = 0;
             double overflow = -initialOffset;
             if (mlpAlignment == AlignmentSelector.CENTER) {
@@ -517,15 +519,21 @@ public class TransformedTextPainter implements Debuggable {
                     currentDist += distance;
 
                     if (currentDist >= thresholdDist) {
+                        // if the end of the current segment is beyond the
+                        // point where the current glyph should be placed:
                         double angle = Math.atan2(dy, dx);
                         while (glyphIndex < numGlyphs && currentDist >= thresholdDist) {
+                            // place all glyphs whose target positions fall within the current line segment
                             Shape glyph = glyphVector.getGlyphOutline(glyphIndex);
                             Point2D origGlyphPos = glyphVector.getGlyphPosition(glyphIndex);
                             double ratio = (thresholdDist - (currentDist - distance)) / distance;
                             double x = lastX + ratio * dx;
                             double y = lastY + ratio * dy;
 
-                            // TODO it seems that the glyphs are rotated around left bottom instead of center bottom
+                            // TODO the glyphs are rotated around left bottom instead of center bottom.
+                            //   The goal is to ensure that glyph's origin (its bottom-left point on
+                            //   the baseline) lands on the calculated path point (x,y) while the
+                            //   rotation happens around the local center-bottom pivot.
                             at.setToTranslation(x, y);
                             at.rotate(angle + rotation);
                             if (scaleX != 1.0 || scaleY != 1.0) {
@@ -555,6 +563,7 @@ public class TransformedTextPainter implements Debuggable {
         return result;
     }
 
+    // calculates extra spacing between glyphs based on font attributes and scaling
     private double calcTracking() {
         Float trackingValue = (Float) font.getAttributes().get(TRACKING);
         return trackingValue == null

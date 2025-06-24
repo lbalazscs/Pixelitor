@@ -218,6 +218,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     /**
      * Creates and returns a deep copy of this composition.
+     * The copy will have no view set.
+     * In the case of undo, the view will be transferred later.
+     * (Two comps should never point to the same view).
      */
     public Composition copy(CopyType copyType, boolean copySelection) {
         assert checkInvariants();
@@ -240,15 +243,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         compCopy.mode = mode;
 
         if (copySelection && selection != null) {
-            compCopy.setSelection(new Selection(selection, copyType == CopyType.UNDO));
+            compCopy.setSelection(new Selection(selection));
         }
         if (paths != null) {
             compCopy.paths = paths.deepCopy(compCopy);
         }
-
-        // In the case of undo, the view will be transferred later.
-        // At no time should two comps point to the same view.
-        compCopy.view = null;
 
         if (copyType == CopyType.UNDO) {
             compCopy.dirty = dirty;
@@ -503,9 +502,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert name != null;
         this.name = name;
 
-        // TODO isActive() should imply isOpen(), but apparently in a
-        //  unit test a composition can be active vithout having a view
-        if (isOpen() && isActive()) {
+        if (isActive() && !AppMode.isUnitTesting()) {
             view.updateTitle();
             PixelitorWindow.get().updateTitle(this);
         }
@@ -1735,13 +1732,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         // selection consistency
-        // TODO update unit tests
-//        if (selection != null && selection.getView() != view) {
-//            throw new AssertionError("bad view in selection");
-//        }
-//        if (draftSelection != null && draftSelection.getView() != view) {
-//            throw new AssertionError("bad view in draft selection");
-//        }
+        if (selection != null && selection.getView() != view) {
+            throw new AssertionError("bad view in selection");
+        }
+        if (draftSelection != null && draftSelection.getView() != view) {
+            throw new AssertionError("bad view in draft selection");
+        }
 
         return true; // all checks passed
     }

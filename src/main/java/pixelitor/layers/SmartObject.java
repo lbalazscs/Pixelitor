@@ -32,6 +32,7 @@ import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileIO;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
@@ -1111,7 +1112,10 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public int getPixelAtPoint(Point p) {
-        return 0; // TODO
+        if (image != null) {
+            return ImageUtils.getPixelAt(this, image, p);
+        }
+        return 0;
     }
 
     @Override

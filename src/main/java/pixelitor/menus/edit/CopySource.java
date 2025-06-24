@@ -40,14 +40,12 @@ public enum CopySource {
     LAYER_OR_MASK {
         @Override
         Result<BufferedImage, String> getImage(Composition comp) {
+            // use the active layer, or its mask if mask editing is active
             Layer src = comp.getActiveLayer();
             if (src.isMaskEditing()) {
                 src = src.getMask();
             }
 
-            // TODO Text layers are rasterized, but they should probably be copied
-            //   in other formats as well (as a string or a serialized object).
-            //   An internal clipboard could be implemented to handle such cases.
             BufferedImage layerImage = src.toImage(true, false);
             if (layerImage == null) {
                 return Result.error("this layer can't be copied");
@@ -83,39 +81,45 @@ public enum CopySource {
 
         Selection selection = comp.getSelection();
         Shape selectionShape = selection.getShape();
+
         if (selection.isRectangular()) {
-            // for rectangular selections a simple crop is needed
+            // for rectangular selections a simple crop is sufficient
             Rectangle2D selRect = (Rectangle2D) selectionShape;
             Rectangle selBounds = Shapes.roundRect(selRect);
             return cropToSelectionBounds(sourceImage, comp.getCanvas(), selBounds);
         }
 
-        // in the case of a non-rectangular selection,
-        // set the unselected parts to transparent with an AA border
+        // for a non-rectangular selection, set the
+        // unselected parts to transparent with an AA border
         Rectangle selBounds = selectionShape.getBounds();
 
-        BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(
+        // fill the new image first with a mask generated from the selection shape
+        BufferedImage selectedRegion = ImageUtils.createSysCompatibleImage(
             selBounds.width, selBounds.height);
         Graphics2D g2 = ImageUtils.createSoftSelectionMask(
-            tmpImg, selection.getShape(), selBounds.x, selBounds.y);
+            selectedRegion, selection.getShape(), selBounds.x, selBounds.y);
 
+        // draw the source image, offset to align with the selection bounds
         g2.drawImage(sourceImage, -selBounds.x, -selBounds.y, null);
         g2.dispose();
-        return Result.success(tmpImg);
+        return Result.success(selectedRegion);
     }
 
     private static Result<BufferedImage, String> cropToSelectionBounds(BufferedImage canvasSizedImage,
                                                                        Canvas canvas,
                                                                        Rectangle selBounds) {
-        // make sure that the bounds are inside the canvas
+        // clip the selection bounds to the canvas area
         selBounds = canvas.intersect(selBounds);
 
         if (selBounds.isEmpty()) {
-            return Result.error("the selection is outside the image");
+            return Result.error("the selection is completely outside the canvas");
         }
         return Result.success(ImageUtils.crop(canvasSizedImage, selBounds));
     }
 
+    /**
+     * Extracts an image from the composition to be copied to the clipboard.
+     */
     abstract Result<BufferedImage, String> getImage(Composition comp);
 
     abstract String getName();

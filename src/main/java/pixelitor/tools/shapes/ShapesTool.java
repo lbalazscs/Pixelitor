@@ -472,7 +472,7 @@ public class ShapesTool extends DragTool {
     private void setState(DragToolState newState) {
         state = newState;
 
-        assert state.isOK(this) : "state = " + state
+        assert state.checkInvariants(this) : "state = " + state
             + ", has styledShape = " + hasStyledShape()
             + ", hasBox = " + hasBox();
 

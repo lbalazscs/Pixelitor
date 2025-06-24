@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.PresetOwner;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.utils.ImageUtils;
@@ -164,14 +165,18 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     }
 
     public Filter copy() {
-        if (canHaveUserPresets()) {
+        if (canBeSmart()) {
             // the serialization proxy can also create deep copies
             return (Filter) new SerializationProxy(this).readResolve();
         }
 
-        // Stateless filters can be shared.
-        // TODO some filters have state but no preset support.
-        //   Not currently a problem since they can't be smart filters.
+        if (this instanceof FilterWithGUI) {
+            // These filters have state but no preset support.
+            // Not currently a problem since they can't be smart filters.
+            throw new UnsupportedOperationException();
+        }
+
+        // stateless filters can be shared
         return this;
     }
 

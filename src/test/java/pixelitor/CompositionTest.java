@@ -842,9 +842,6 @@ class CompositionTest {
 
     @Test
     void rename() {
-        comp.setView(null); // avoid the creation of the main window
-        assertThat(comp).hasName("CompositionTest").isNotOpen();
-
         comp.rename("CompositionTest", "CompositionTest New Name");
         assertThat(comp).hasName("CompositionTest New Name");
 

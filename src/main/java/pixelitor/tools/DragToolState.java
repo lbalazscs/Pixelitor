@@ -29,23 +29,23 @@ public enum DragToolState {
      */
     IDLE {
         @Override
-        public boolean isOK(ShapesTool tool) {
+        public boolean checkInvariants(ShapesTool tool) {
             return !tool.hasStyledShape() && !tool.hasBox();
         }
 
         @Override
-        public boolean isOK(CropTool tool) {
+        public boolean checkInvariants(CropTool tool) {
             return !tool.hasCropBox() && !tool.isCropEnabled();
         }
     },
     AFTER_FIRST_MOUSE_PRESS {
         @Override
-        public boolean isOK(ShapesTool tool) {
+        public boolean checkInvariants(ShapesTool tool) {
             return tool.hasStyledShape() && !tool.hasBox();
         }
 
         @Override
-        public boolean isOK(CropTool tool) {
+        public boolean checkInvariants(CropTool tool) {
             return !tool.hasCropBox();
         }
     },
@@ -54,12 +54,12 @@ public enum DragToolState {
      */
     INITIAL_DRAG {
         @Override
-        public boolean isOK(ShapesTool tool) {
+        public boolean checkInvariants(ShapesTool tool) {
             return tool.hasStyledShape() && !tool.hasBox();
         }
 
         @Override
-        public boolean isOK(CropTool tool) {
+        public boolean checkInvariants(CropTool tool) {
             return !tool.hasCropBox();
         }
     },
@@ -68,18 +68,18 @@ public enum DragToolState {
      */
     TRANSFORM {
         @Override
-        public boolean isOK(ShapesTool tool) {
+        public boolean checkInvariants(ShapesTool tool) {
             return tool.hasStyledShape() && tool.hasBox();
         }
 
         @Override
-        public boolean isOK(CropTool tool) {
+        public boolean checkInvariants(CropTool tool) {
             return tool.hasCropBox() && tool.isCropEnabled();
         }
     };
 
     // can be used in assertions
-    public abstract boolean isOK(ShapesTool tool);
+    public abstract boolean checkInvariants(ShapesTool tool);
 
-    public abstract boolean isOK(CropTool tool);
+    public abstract boolean checkInvariants(CropTool tool);
 }

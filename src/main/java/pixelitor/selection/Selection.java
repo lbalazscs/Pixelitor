@@ -85,12 +85,7 @@ public class Selection implements Transformable {
         startMarching();
     }
 
-    // copy constructor
-    public Selection(Selection orig, boolean shareView) {
-        if (shareView) {
-            this.view = orig.view;
-        }
-
+    public Selection(Selection orig) {
         // the shapes can be shared because all changes create new instances
         this.shape = orig.shape;
 
@@ -98,7 +93,14 @@ public class Selection implements Transformable {
         this.frozen = orig.frozen;
         this.hidden = orig.hidden;
 
+        this.view = null; // not copied - will be copied later
+
+        this.dashPhase = 0;
+        this.marchingAntsTimer = null;
         // The animation timer is not copied - will be started by setView if needed.
+
+        this.disposed = orig.disposed;
+        assert !orig.disposed;
     }
 
     public void startMarching() {
