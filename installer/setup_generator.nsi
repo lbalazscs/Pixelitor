@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PIXELITOR_NAME "Pixelitor"
-!define PIXELITOR_VERSION "4.3.1"
+!define PIXELITOR_VERSION "4.3.2"
 !define PIXELITOR_PUBLISHER "Laszlo Balazs-Csiki"
 !define PIXELITOR_WEB_SITE "https://pixelitor.sourceforge.io"
 !define PIXELITOR_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\pixelitor.exe"

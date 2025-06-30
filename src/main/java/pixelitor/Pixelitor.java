@@ -56,7 +56,7 @@ import static pixelitor.utils.Threads.threadInfo;
  * The main enty point for the app.
  */
 public class Pixelitor {
-    public static final String VERSION = "4.3.1";
+    public static final String VERSION = "4.3.2";
     public static Locale SYS_LOCALE;
 
     private Pixelitor() {
