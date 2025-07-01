@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,21 +25,27 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
+/**
+ * Manages a collection of particles, handling their lifecycle and updates.
+ */
 public class ParticleSystem<P extends Particle> {
     private final List<P> particles;
     private final List<Modifier<P>> modifiers;
     private final List<Modifier<P>> updaters;
-    private final Supplier<P> supplier;
+    private final Supplier<P> particleCreator;
 
+    /**
+     * Creates a new builder for a particle system.
+     */
     public static <P extends Particle> ParticleSystemBuilder<P> createSystem(int particles) {
         return new ParticleSystemBuilder<>(particles);
     }
 
-    private ParticleSystem(int particleCount, List<Modifier<P>> modifiers, List<Modifier<P>> updaters, Supplier<P> supplier) {
+    private ParticleSystem(int particleCount, List<Modifier<P>> modifiers, List<Modifier<P>> updaters, Supplier<P> particleCreator) {
         this.particles = new ArrayList<>(particleCount);
         this.modifiers = modifiers;
         this.updaters = updaters;
-        this.supplier = supplier;
+        this.particleCreator = particleCreator;
         for (int i = 0; i < particleCount; i++) {
             P particle = newParticle();
             initializeParticle(particle);
@@ -47,6 +53,9 @@ public class ParticleSystem<P extends Particle> {
         }
     }
 
+    /**
+     * Advances the simulation by a single step for all particles.
+     */
     public void step() {
         for (int i = 0, particlesSize = particles.size(); i < particlesSize; i++) {
             stepParticle(i, particles.get(i));
@@ -61,6 +70,9 @@ public class ParticleSystem<P extends Particle> {
         }
     }
 
+    /**
+     * Runs the simulation for a given number of iterations.
+     */
     public void iterate(int iterations) {
         for (int i = 0; i < iterations; i++) {
             step();
@@ -73,6 +85,9 @@ public class ParticleSystem<P extends Particle> {
         }
     }
 
+    /**
+     * Runs the simulation for a specified number of iterations using multiple threads.
+     */
     public Future<?>[] iterate(int iterations, int groupCount) {
         Future<?>[] futures = new Future[groupCount];
         int s = particles.size();
@@ -98,6 +113,9 @@ public class ParticleSystem<P extends Particle> {
         particle.update();
     }
 
+    /**
+     * Flushes all particles, forcing them to draw their final state.
+     */
     public void flush() {
         for (P particle : particles) {
             particle.flush();
@@ -105,43 +123,60 @@ public class ParticleSystem<P extends Particle> {
     }
 
     private P newParticle() {
-        return supplier.get();
+        return particleCreator.get();
     }
 
     private void initializeParticle(P particle) {
+        // apply initial state modifications first
         for (Modifier<P> modifier : modifiers) {
             modifier.modify(particle);
         }
+        // then reset the particle's internal state (e.g., last position)
         particle.reset();
     }
 
+    /**
+     * A builder for creating {@link ParticleSystem} instances.
+     */
     public static class ParticleSystemBuilder<P extends Particle> {
         private final List<Modifier<P>> modifiers = new ArrayList<>();
         private final List<Modifier<P>> updaters = new ArrayList<>();
-        private Supplier<P> supplier = () -> null;
+        private Supplier<P> particleCreator = () -> null;
         private final int particles;
 
         public ParticleSystemBuilder(int particles) {
             this.particles = particles;
         }
 
+        /**
+         * Sets the factory that creates new particles.
+         */
         public ParticleSystemBuilder<P> setParticleCreator(Supplier<P> supplier) {
-            this.supplier = supplier;
+            this.particleCreator = supplier;
             return this;
         }
 
+        /**
+         * Adds a modifier to be applied once when a particle is initialized or reset.
+         */
         public ParticleSystemBuilder<P> addModifier(Modifier<P> modifier) {
             modifiers.add(modifier);
             return this;
         }
 
+        /**
+         * Adds a modifier to be applied on every update step.
+         */
         public ParticleSystemBuilder<P> addUpdater(Modifier<P> modifier) {
             updaters.add(modifier);
             return this;
         }
 
+        /**
+         * Builds and returns the configured particle system.
+         */
         public ParticleSystem<P> build() {
-            return new ParticleSystem<>(particles, modifiers, updaters, supplier);
+            return new ParticleSystem<>(particles, modifiers, updaters, particleCreator);
         }
     }
 }

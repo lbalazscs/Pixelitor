@@ -53,7 +53,7 @@ public class JHKaleidoscope extends ParametrizedFilter {
         super(true);
 
         zoom.setPresetKey("Zoom (%)");
-        setParams(
+        initParams(
             center,
             angle,
             sides,

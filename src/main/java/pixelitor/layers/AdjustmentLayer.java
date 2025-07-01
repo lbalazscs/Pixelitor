@@ -47,11 +47,14 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     protected Filter filter;
 
-    // A copy created at the beginning of editing,
-    // to support Cancel and Show Original.
-    private transient Filter origFilter;
+    // a backup of the filter created at the beginning of an editing session
+    // to support "Cancel" and "Show Original" in the filter dialog
+    private transient Filter filterBackup;
+
+    // toggles between the current filter and the backup for previewing
     private transient boolean showOriginal = false;
 
+    // a smart filter is tentative when it's not yet part of the composition
     private transient boolean tentative = false;
 
     public AdjustmentLayer(Composition comp, String name, Filter filter) {
@@ -64,7 +67,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         isAdjustment = true;
-        origFilter = null;
+        filterBackup = null;
         showOriginal = false;
         tentative = false;
     }
@@ -72,18 +75,19 @@ public class AdjustmentLayer extends Layer implements Filterable {
     @Override
     protected AdjustmentLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
         String copyName = copyType.createLayerCopyName(name);
-        return new AdjustmentLayer(comp, copyName, filter.copy());
+        // the filter is copied to ensure the new layer has its own filter instance
+        return new AdjustmentLayer(newComp, copyName, filter.copy());
     }
 
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
-        // do nothing
+        // do nothing, as an adjustment layer has no content of its own
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
     public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
-        // do nothing
+        // do nothing, as an adjustment layer has no content of its own
     }
 
     @Override
@@ -93,11 +97,13 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void paint(Graphics2D g, boolean firstVisibleLayer) {
+        // adjustment layers don't paint directly; they transform the composite image
         throw new UnsupportedOperationException();
     }
 
     @Override
     public BufferedImage toImage(boolean applyMask, boolean applyOpacity) {
+        // an adjustment layer has no image content of its own
         return null;
     }
 
@@ -108,7 +114,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void updateIconImage() {
-        // do nothing
+        // do nothing, the icon is static
     }
 
     @Override
@@ -136,30 +142,33 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void startPreviewing() {
-        origFilter = filter.copy();
+        filterBackup = filter.copy();
     }
 
     @Override
     public void stopPreviewing() {
-        // do nothing
+        // cleanup is handled in onFilterDialogAccepted/Canceled
     }
 
     @Override
-    public void setShowOriginal(boolean b) {
-        showOriginal = b;
+    public void setShowOriginal(boolean show) {
+        assert showOriginal != show : "should toggle";
+        showOriginal = show;
 
         // Swaps the currently active filter object with the stored one.
         // Toggling the checkbox off swaps them back.
         Filter tmp = filter;
-        filter = origFilter;
-        origFilter = tmp;
+        filter = filterBackup;
+        filterBackup = tmp;
 
         holder.update(); // repaint with the currently active filter
     }
 
     @Override
-    public void startPreview(Filter filter, boolean firstPreview, Component busyCursorTarget) {
-        if (!firstPreview) {
+    public void startPreview(Filter filter, boolean initialPreview, Component busyCursorTarget) {
+        // the initial preview of an adjustment layer doesn't change anything,
+        // it only shows the initial settings, so no update is needed
+        if (!initialPreview) {
             holder.update();
         }
     }
@@ -171,38 +180,56 @@ public class AdjustmentLayer extends Layer implements Filterable {
     @Override
     public void onFilterDialogAccepted(String filterName) {
         if (showOriginal) {
-            filter = origFilter;
+            // We do not assume that clicking "Show Original" means
+            // that the user wants to revert to the backup.
+            // We switch the references, because filterBackup holds
+            // the modified state, and this is what we want to keep.
+            filter = filterBackup;
             holder.update();
         } else {
-            if (!tentative) {
-                History.add(new FilterChangedEdit(this, origFilter, null));
+            if (!tentative && filterSettingsChanged()) {
+                String editName = getName() + " Changed";
+                History.add(new FilterChangedEdit(editName, this, filterBackup, null));
             }
         }
 
-        origFilter = null;
+        // clean up the transient state from the editing session
+        filterBackup = null;
         showOriginal = false;
     }
 
     @Override
     public void onFilterDialogCanceled() {
+        // if showOriginal is true, filter already holds
+        // the original state, so no change is needed
         if (!showOriginal) {
-            filter = origFilter;
+            // restore the filter state from before the dialog was opened
+            filter = filterBackup;
 
             // when the filter was copied, then it wasn't adjusted to the image size
             adaptToContext();
 
             holder.update();
         }
-        origFilter = null;
+
+        // clean up the transient state from the editing session
+        filterBackup = null;
         showOriginal = false;
     }
 
+    /**
+     * Checks if the filter settings have changed during the editing session.
+     */
     protected boolean filterSettingsChanged() {
         // equals is overridden for parametrized filters to
         // compare the param values.
-        return !filter.equals(origFilter);
+        return !filter.equals(filterBackup);
     }
 
+    /**
+     * Adapts the filter's parameters to the current image
+     * if it's a parametrized filter.
+     */
     public void adaptToContext() {
         if (filter instanceof ParametrizedFilter pf) {
             pf.getParamSet().adaptToContext(this, false);
@@ -224,7 +251,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     // used only for undo/redo
-    public void setFilter(Filter filter) {
+    public void restoreFilter(Filter filter) {
         this.filter = filter;
 
         holder.update();

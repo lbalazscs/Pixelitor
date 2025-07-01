@@ -57,7 +57,7 @@ public class ColorThreshold extends ParametrizedFilter {
         threshold.setPresetKey("Threshold");
         diffusionStrengthParam.setupEnableOtherIfNotZero(ditheringMethodParam);
 
-        setParams(
+        initParams(
             threshold,
             diffusionStrengthParam,
             ditheringMethodParam

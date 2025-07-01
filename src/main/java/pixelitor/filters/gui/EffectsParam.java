@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,11 +27,11 @@ import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
 
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
- * A {@link FilterParam} for shape effects in a dialog
+ * A {@link FilterParam} for shape effects in a dialog.
  */
 public class EffectsParam extends AbstractFilterParam {
     private EffectsPanel effectsPanel;
@@ -53,7 +53,7 @@ public class EffectsParam extends AbstractFilterParam {
             var resetButton = new ResetButton(effectsPanel);
             effectsPanel.setResetButton(resetButton);
 
-            var configureParamGUI = new ConfigureParamGUI(
+            var configureParamGUI = new DialogLauncherGUI(
                 this::configureDialog, resetButton);
 
             paramGUI = configureParamGUI;
@@ -65,6 +65,9 @@ public class EffectsParam extends AbstractFilterParam {
         }
     }
 
+    /**
+     * Configures the effects dialog using the provided builder.
+     */
     public void configureDialog(DialogBuilder builder) {
         ensureEffectsPanelIsCreated();
         builder
@@ -76,9 +79,11 @@ public class EffectsParam extends AbstractFilterParam {
             .build();
     }
 
+    /**
+     * Gets the current effects configuration from the GUI panel.
+     */
     public AreaEffects getEffects() {
         ensureEffectsPanelIsCreated();
-
         return effectsPanel.getEffects();
     }
 
@@ -91,7 +96,11 @@ public class EffectsParam extends AbstractFilterParam {
         }
     }
 
+    /**
+     * Sets the effects configuration and updates the GUI panel.
+     */
     public void setEffects(AreaEffects effects) {
+        assert effectsPanel != null;
         if (effectsPanel == null) { // probably never true
             ensureEffectsPanelIsCreated();
         }

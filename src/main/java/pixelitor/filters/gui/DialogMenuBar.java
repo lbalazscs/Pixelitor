@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,14 +52,8 @@ public class DialogMenuBar extends JMenuBar {
         }
 
         if (OpenInBrowserAction.CAN_BROWSE && owner.hasHelp()) {
-            addHelpMenu(owner);
+            addHelpMenu();
         }
-    }
-
-    private void addHelpMenu(DialogMenuOwner owner) {
-        JMenu helpMenu = new JMenu(GUIText.HELP);
-        helpMenu.add(new OpenInBrowserAction("Wikipedia", owner.getHelpURL()));
-        add(helpMenu);
     }
 
     private void addPresetsMenu() {
@@ -69,7 +63,7 @@ public class DialogMenuBar extends JMenuBar {
             addBuiltInPresets();
         }
 
-        if (owner.canHaveUserPresets()) {
+        if (owner.shouldHaveUserPresetsMenu()) {
             addUserPresets();
         }
 
@@ -78,7 +72,7 @@ public class DialogMenuBar extends JMenuBar {
     }
 
     private void addUserPresets() {
-        // Add separator if we already have built-in presets
+        // add separator if we already have built-in presets
         if (owner.hasBuiltinPresets()) {
             presetsMenu.addSeparator();
         }
@@ -100,7 +94,7 @@ public class DialogMenuBar extends JMenuBar {
 
     private void addSavePresetMenuItem() {
         Action savePresetAction = owner.createSavePresetAction(presetsMenu,
-            preset -> addNewUserPreset(preset, owner),
+            this::addNewUserPreset,
             this::removeUserPreset);
         addPresetMenuItem(savePresetAction, "savePreset");
     }
@@ -122,9 +116,9 @@ public class DialogMenuBar extends JMenuBar {
         presetsMenu.add(owner.createManagePresetsAction());
     }
 
-    private void addNewUserPreset(UserPreset preset, PresetOwner owner) {
-        // If this is the first user preset, also adds the
-        // "Manage Presets" menu item and a separator.
+    private void addNewUserPreset(UserPreset preset) {
+        // if this is the first user preset, also adds the
+        // "Manage Presets" menu item and a separator
         if (userPresetCount == 0) {
             addManagePresetsMenu();
             presetsMenu.addSeparator();
@@ -155,5 +149,11 @@ public class DialogMenuBar extends JMenuBar {
                 }
             }
         }
+    }
+
+    private void addHelpMenu() {
+        JMenu helpMenu = new JMenu(GUIText.HELP);
+        helpMenu.add(new OpenInBrowserAction("Wikipedia", owner.getHelpURL()));
+        add(helpMenu);
     }
 }

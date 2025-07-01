@@ -45,7 +45,7 @@ public class JHGaussianBlur extends ParametrizedFilter {
     public JHGaussianBlur() {
         super(true);
 
-        setParams(
+        initParams(
             radius.withDecimalPlaces(1),
             hpSharpening
         );

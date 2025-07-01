@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,11 +46,11 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     private static final String STROKE_LENGTH_TEXT = "Average Stroke Length";
     private static final String STROKE_COUNT_TEXT = "Number of Strokes";
 
-    private final ListParam<Tool> toolsParam = new ListParam<>(
+    private final ChoiceParam<Tool> toolsParam = new ChoiceParam<>(
         "Tool", AutoPaint.SUPPORTED_TOOLS);
     private final JTextField strokeCountTF;
     private final JTextField strokeLengthTF;
-    private final ListParam<String> colorsParam = new ListParam<>(
+    private final ChoiceParam<String> colorsParam = new ChoiceParam<>(
         "Random Colors", COLOR_MODES);
 
     private final RangeParam lengthVariation = new RangeParam(
@@ -139,7 +139,7 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return true;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,17 +28,17 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * A composite {@link FilterParam} that groups child parameters
  * and displays them in a modal dialog.
  */
-public class DialogParam extends AbstractFilterParam {
+public class CompositeParam extends AbstractFilterParam {
     private final FilterParam[] children;
     private ResetButton resetButton;
 
-    public DialogParam(String name, FilterParam... children) {
+    public CompositeParam(String name, FilterParam... children) {
         super(name, ALLOW_RANDOMIZE);
         this.children = children;
     }
@@ -46,7 +46,7 @@ public class DialogParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         resetButton = new ResetButton(this);
-        paramGUI = new ConfigureParamGUI(this::configureDialog, resetButton);
+        paramGUI = new DialogLauncherGUI(this::configureDialog, resetButton);
         guiCreated();
         return (JComponent) paramGUI;
     }
@@ -100,7 +100,7 @@ public class DialogParam extends AbstractFilterParam {
     @Override
     public void saveStateTo(UserPreset preset) {
         for (FilterParam child : children) {
-            preset.put(child.getName(), child.copyState().toSaveString());
+            preset.put(child.getPresetKey(), child.copyState().toSaveString());
         }
     }
 
@@ -126,12 +126,12 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setEnabled(boolean b, EnabledReason reason) {
+    public void setEnabled(boolean enabled, EnabledReason reason) {
         // call super to set the enabled state of the launching button
-        super.setEnabled(b, reason);
+        super.setEnabled(enabled, reason);
 
         for (FilterParam child : children) {
-            child.setEnabled(b, reason);
+            child.setEnabled(enabled, reason);
         }
     }
 
@@ -153,9 +153,9 @@ public class DialogParam extends AbstractFilterParam {
         if (trigger) {
             adjustmentListener.paramAdjusted();
         } else {
-            // This class updates the reset button state
+            // this class updates the reset button state
             // by putting a decorator on the adjustment
-            // listeners, so this needs to be called here manually.
+            // listeners, so this needs to be called here manually
             updateResetButtonState();
         }
     }

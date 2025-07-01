@@ -84,7 +84,7 @@ public class Marble extends ParametrizedFilter {
 
         type.setPresetKey("Type");
         zoom.setPresetKey("Zoom");
-        setParams(
+        initParams(
             type,
             waveType,
             time,

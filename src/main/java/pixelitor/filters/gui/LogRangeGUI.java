@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,9 @@ import java.awt.GridBagLayout;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+/**
+ * A GUI for a {@link LogZoomParam}, displaying the raw log value and the calculated zoom percentage.
+ */
 public class LogRangeGUI extends JPanel implements ParamGUI {
     private final LogZoomParam model;
     private final JLabel valueLabel;
@@ -38,14 +41,14 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
 
     public LogRangeGUI(LogZoomParam model) {
         super(new GridBagLayout());
-        var gbh = new GridBagHelper(this);
-
         this.model = model;
 
         slider = new SliderSpinner(model, LabelPosition.NONE, true);
-        slider.addChangeListener(e -> sliderChanged());
+        slider.addChangeListener(e -> updateValueLabel());
 
+        var gbh = new GridBagHelper(this);
         gbh.addLabelAndControl("Log:", slider);
+
         valueLabel = new JLabel();
         updateValueLabel();
         gbh.addLabelAndControl("Value:", valueLabel);
@@ -54,13 +57,8 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
     }
 
     private void updateValueLabel() {
-        long zoomValue = (long) model.getZoomValue();
-
-        valueLabel.setText(format.format(zoomValue) + " %");
-    }
-
-    private void sliderChanged() {
-        updateValueLabel();
+        long zoomPercent = (long) model.getZoomPercent();
+        valueLabel.setText(format.format(zoomPercent) + " %");
     }
 
     @Override

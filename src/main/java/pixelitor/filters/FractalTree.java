@@ -38,7 +38,7 @@ import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
@@ -97,7 +97,7 @@ public class FractalTree extends ParametrizedFilter {
 
         zoom.setPresetKey("Zoom");
 
-        setParams(
+        initParams(
             iterations,
             zoom,
             randomnessParam,

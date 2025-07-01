@@ -49,12 +49,9 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
             resetButton = new ResetButton(model);
             add(resetButton);
 
-            // It is important to add here a change listener and not an
-            // action listener because we want to trigger this when the
-            // checkbox is changed by the default button.
-            // Swing is not consistent: in the case of JComboBox, action
-            // listeners are called when the component is changed indirectly,
-            // but not in the case of JCheckBox
+            // Use a ChangeListener to ensure that the reset button's state
+            // is also updated when the checkbox is changed programmatically
+            // (e.g., by reset). JCheckBox doesn't fire ActionEvents for such changes.
             checkBox.addChangeListener(e -> resetButton.updateState());
         }
 
@@ -81,7 +78,7 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
     public void setName(String name) {
         super.setName(name);
 
-        // help assertj-swing to find the checkBox
+        // help assertj-swing to find the checkBox in tests
         checkBox.setName(name);
 //        checkBox.setName(name + ".checkbox");
     }

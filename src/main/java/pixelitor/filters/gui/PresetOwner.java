@@ -33,13 +33,23 @@ import static pixelitor.filters.gui.UserPreset.PRESETS_DIR;
 
 /**
  * Represents a component (such as a filter or tool) that can
- * load (and possibly save) its current state as {@link Preset} objects.
+ * load and save its current state as {@link Preset} objects.
  */
 public interface PresetOwner {
     /**
-     * Determines if this component supports {@link UserPreset}s.
+     * Determines if this component supports saving and loading {@link UserPreset}s.
      */
-    boolean canHaveUserPresets();
+    boolean supportsUserPresets();
+
+    /**
+     * Determines if menu items related to {@link UserPreset}s should be added for this component.
+     * <p>
+     * Should return true only if {@link #supportsUserPresets()} returns true.
+     * Trivial filters might not have menu items even if they could support presets.
+     */
+    default boolean shouldHaveUserPresetsMenu() {
+        return supportsUserPresets();
+    }
 
     /**
      * Returns the directory name where this component's
@@ -50,7 +60,7 @@ public interface PresetOwner {
 
     /**
      * Creates a new user preset with the current state of this component.
-     * Should not be called if {@link #canHaveUserPresets()} returns false.
+     * Should not be called if {@link #supportsUserPresets()} returns false.
      */
     default UserPreset createUserPreset(String presetName) {
         UserPreset preset = new UserPreset(presetName, getPresetDirName());
@@ -70,6 +80,9 @@ public interface PresetOwner {
 
     /**
      * Loads a {@link FilterState} into this component.
+     * <p>
+     * This method is used to apply built-in presets or animation states,
+     * which are represented as {@link FilterState} objects.
      */
     default void loadFilterState(FilterState filterState, boolean reset) {
         // used only for parametrized filters
@@ -99,10 +112,10 @@ public interface PresetOwner {
                                           Consumer<UserPreset> menuAdder,
                                           Consumer<UserPreset> menuRemover) {
         return new TaskAction("Save Preset...", () ->
-            savePreset(parent, menuRemover, menuAdder));
+            savePreset(parent, menuAdder, menuRemover));
     }
 
-    private void savePreset(Component parent, Consumer<UserPreset> menuRemover, Consumer<UserPreset> menuAdder) {
+    private void savePreset(Component parent, Consumer<UserPreset> menuAdder, Consumer<UserPreset> menuRemover) {
         String presetName = Dialogs.showInputDialog(
             parent, "Preset Name", "Preset Name:");
         if (presetName == null || presetName.isBlank()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,44 +24,49 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
+/**
+ * A change to a filter on an {@link AdjustmentLayer}.
+ * This can be a change in the filter's parameters or a replacement of the filter itself.
+ */
 public class FilterChangedEdit extends PixelitorEdit {
     private final AdjustmentLayer layer;
-    private Filter backupFilter;
-    private String backupName;
+    private Filter prevFilter;
+    private String prevName;
 
-    public FilterChangedEdit(AdjustmentLayer layer, Filter backupFilter, String backupName) {
-        super(layer.getName() + " Changed", layer.getComp());
+    public FilterChangedEdit(String editName, AdjustmentLayer layer, Filter prevFilter, String prevName) {
+        super(editName, layer.getComp());
         this.layer = layer;
-        this.backupFilter = backupFilter;
-        this.backupName = backupName;
+        this.prevFilter = prevFilter;
+        this.prevName = prevName;
 
         // a backup name is needed only if the new filter has a different type
-        assert (backupName != null) ^ (backupFilter.getClass().equals(layer.getFilter().getClass()));
+        assert (prevName != null) ^ (prevFilter.getClass().equals(layer.getFilter().getClass()));
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        swapFilters();
+        swapState();
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        swapFilters();
+        swapState();
     }
 
-    private void swapFilters() {
-        Filter tmpFilter = layer.getFilter();
-        layer.setFilter(backupFilter);
-        backupFilter = tmpFilter;
+    private void swapState() {
+        Filter currentFilter = layer.getFilter();
+        layer.restoreFilter(prevFilter);
+        prevFilter = currentFilter;
 
-        if (backupName != null) {
+        // if the layer name also changed (e.g., filter replacement), swap it too
+        if (prevName != null) {
             String tmpName = layer.getName();
-            layer.setName(backupName, false);
-            backupName = tmpName;
+            layer.setName(prevName, false);
+            prevName = tmpName;
         }
     }
 
@@ -69,7 +74,7 @@ public class FilterChangedEdit extends PixelitorEdit {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.add(backupFilter.createDebugNode("backupFilter"));
+        node.add(prevFilter.createDebugNode("backupFilter"));
 
         return node;
     }

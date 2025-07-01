@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,13 +26,13 @@ import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BoxLayout.X_AXIS;
 
 /**
- * Displays a JComboBox as the GUI for subclasses of {@link ListParam}.
+ * The GUI for a {@link ChoiceParam}, consisting of a combo box and a reset button.
  */
-public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
+public class ChoiceParamGUI<E> extends JPanel implements ParamGUI {
     private final JComboBox<E> comboBox;
     private final ResetButton resetButton;
 
-    public ComboBoxParamGUI(ListParam<E> model, FilterButtonModel action) {
+    public ChoiceParamGUI(ChoiceParam<E> model, FilterButtonModel action) {
         resetButton = new ResetButton(model);
         comboBox = GUIUtils.createComboBox(model, e -> resetButton.updateState());
 

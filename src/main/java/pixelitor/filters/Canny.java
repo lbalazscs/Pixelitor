@@ -54,7 +54,7 @@ public class Canny extends ParametrizedFilter {
     public Canny() {
         super(true);
 
-        setParams(
+        initParams(
             lowThreshold,
             highThreshold,
             gaussianKernelWidth,

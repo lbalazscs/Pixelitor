@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.WaveType;
+import net.jafama.DoubleWrapper;
 import net.jafama.FastMath;
 import pixelitor.filters.AngularWaves;
 
@@ -37,21 +38,31 @@ public class AngularWavesFilter extends CenteredTransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
+        // translate to the center of the effect
         double dx = x - cx;
         double dy = y - cy;
-        double r = Math.sqrt(dx * dx + dy * dy);
+
+        // convert to polar coordinates
+        double r = FastMath.hypot(dx, dy);
         double angle = FastMath.atan2(dy, dx);
 
-        double na = r / radialWavelength - phase;
+        double waveInput = r / radialWavelength - phase;
+        double waveValue = WaveType.wave(waveInput, waveType);
 
-        double fa = WaveType.wave(na, waveType);
+        // distort the angle with the wave
+        angle += waveValue * amount;
 
-        angle += fa * amount;
+        // optimized sin/cos calculation
+        DoubleWrapper cosWrapper = new DoubleWrapper(); // must be local variable (multithreading)
+        double sin = FastMath.sinAndCos(angle, cosWrapper);
+        double cos = cosWrapper.value;
 
+        // apply zoom and convert back to cartesian coordinates
         double zoomedR = r / zoom;
-        double u = zoomedR * FastMath.cos(angle);
-        double v = zoomedR * FastMath.sin(angle);
+        double u = zoomedR * cos;
+        double v = zoomedR * sin;
 
+        // translate back to the image's coordinate system
         out[0] = (float) (u + cx);
         out[1] = (float) (v + cy);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,27 +28,27 @@ import java.io.Serial;
 import java.util.Objects;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
- * A filter parameter for selecting a color
+ * A filter parameter for selecting a color.
  */
 public class ColorParam extends AbstractFilterParam {
     private final Color defaultColor;
     private Color color;
-    private final TransparencyPolicy transparencyPolicy;
+    private final TransparencyMode transparencyMode;
 
     public ColorParam(String name, Color defaultColor) {
-        this(name, defaultColor, TransparencyPolicy.FREE_TRANSPARENCY);
+        this(name, defaultColor, TransparencyMode.ALPHA_ENABLED);
     }
 
     public ColorParam(String name, Color defaultColor,
-                      TransparencyPolicy transparencyPolicy) {
+                      TransparencyMode transparencyMode) {
         super(name, ALLOW_RANDOMIZE);
 
         this.defaultColor = defaultColor;
         color = defaultColor;
-        this.transparencyPolicy = transparencyPolicy;
+        this.transparencyMode = transparencyMode;
 
         ColorHistory.remember(defaultColor);
     }
@@ -84,17 +84,23 @@ public class ColorParam extends AbstractFilterParam {
     @Override
     protected void doRandomize() {
         setColor(Rnd.createRandomColor(
-            transparencyPolicy.randomizeTransparency()), false);
+            transparencyMode.randomizeTransparency()), false);
     }
 
     public Color getColor() {
         return color;
     }
 
+    /**
+     * Returns the color in the format expected by G'MIC.
+     */
     public String getColorStr() {
         return Colors.formatGMIC(color);
     }
 
+    /**
+     * Sets a new color and optionally triggers an adjustment event.
+     */
     public void setColor(Color newColor, boolean trigger) {
         assert newColor != null;
         if (Objects.equals(color, newColor)) {
@@ -121,7 +127,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     public boolean allowTransparency() {
-        return transparencyPolicy.allowTransparency();
+        return transparencyMode.allowTransparency();
     }
 
     @Override

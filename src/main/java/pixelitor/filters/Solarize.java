@@ -52,7 +52,7 @@ public class Solarize extends ParametrizedFilter {
 
         type.setPresetKey("Type");
 
-        setParams(
+        initParams(
             type,
             redThreshold,
             greenThreshold,

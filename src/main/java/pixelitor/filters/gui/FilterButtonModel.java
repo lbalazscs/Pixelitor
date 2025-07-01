@@ -28,7 +28,7 @@ import static java.lang.String.format;
  * When clicked, it performs an action and can optionally
  * trigger a filter preview update.
  */
-public class FilterButtonModel implements FilterSetting {
+public final class FilterButtonModel implements FilterSetting {
     private final Runnable action;
     private final Icon icon;
     private final String toolTipText;
@@ -40,8 +40,8 @@ public class FilterButtonModel implements FilterSetting {
     private boolean enabledByFilterLogic = true;
     private boolean enabledByAnimationSetting = true;
 
-    // most actions should be available in the final animation settings
-    private boolean ignoreFinalAnimationSettingMode = true;
+    // most buttons should be enabled in the final animation settings
+    private boolean affectedByAnimationMode = false;
 
     private final boolean shouldTriggerFilter;
 
@@ -79,7 +79,11 @@ public class FilterButtonModel implements FilterSetting {
                                                  String toolTip) {
         var filterAction = new FilterButtonModel(text, reseedTask,
             Icons.getReseedIcon(), toolTip, "reseed");
-        filterAction.setIgnoreFinalAnimationSettingMode(false);
+
+        // the user should be able to reseed only when
+        // configuring the initial state for the animation
+        filterAction.affectedByAnimationMode = true;
+
         return filterAction;
     }
 
@@ -91,6 +95,9 @@ public class FilterButtonModel implements FilterSetting {
         return createReseed(() -> {});
     }
 
+    /**
+     * Creates a filter button model for exporting to an SVG file.
+     */
     public static FilterButtonModel createExportSvg(Runnable exportAction) {
         return new FilterButtonModel("Export SVG...", exportAction,
             null, "Export the current image to an SVG file",
@@ -100,17 +107,12 @@ public class FilterButtonModel implements FilterSetting {
     @Override
     public JComponent createGUI() {
         button = new JButton(buttonText, icon);
-        if (shouldTriggerFilter) {
-            button.addActionListener(e -> {
-                // first perform the action...
-                action.run();
-                // ... and then trigger the filter preview
+        button.addActionListener(e -> {
+            action.run();
+            if (shouldTriggerFilter) {
                 adjustmentListener.paramAdjusted();
-            });
-        } else {
-            // just perform the action
-            button.addActionListener(e -> action.run());
-        }
+            }
+        });
 
         if (toolTipText != null) {
             button.setToolTipText(toolTipText);
@@ -124,15 +126,18 @@ public class FilterButtonModel implements FilterSetting {
         return button;
     }
 
+    /**
+     * Enables or disables the button for a specific reason.
+     */
     @Override
-    public void setEnabled(boolean b, EnabledReason reason) {
+    public void setEnabled(boolean enabled, EnabledReason reason) {
         switch (reason) {
-            case APP_LOGIC -> enabledByFilterLogic = b;
+            case FILTER_LOGIC -> enabledByFilterLogic = enabled;
             case ANIMATION_ENDING_STATE -> {
-                if (ignoreFinalAnimationSettingMode) {
+                if (!affectedByAnimationMode) {
                     return;
                 }
-                enabledByAnimationSetting = b;
+                enabledByAnimationSetting = enabled;
             }
         }
         if (button != null) {
@@ -142,10 +147,6 @@ public class FilterButtonModel implements FilterSetting {
 
     private boolean shouldBeEnabled() {
         return enabledByFilterLogic && enabledByAnimationSetting;
-    }
-
-    public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
-        this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
     }
 
     @Override

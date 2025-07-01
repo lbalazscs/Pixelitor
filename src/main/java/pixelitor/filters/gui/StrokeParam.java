@@ -30,7 +30,7 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.tools.shapes.StrokeType.BASIC;
 import static pixelitor.tools.shapes.StrokeType.SHAPE;
@@ -75,15 +75,15 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         resetButton = new ResetButton(this);
-        paramGUI = new ConfigureParamGUI(this::configureSettingsDialog, resetButton);
+        paramGUI = new DialogLauncherGUI(this::configureSettingsDialog, resetButton);
         guiCreated();
         return (JComponent) paramGUI;
     }
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        // ensures that any changes in the children params are propagated
-        // to the global reset button and to the preview panel.
+        // this listener updates the reset button and preview,
+        // then delegates to the original listener
         ParamAdjustmentListener decoratedListener = () -> {
             updateResetButtonState();
             if (previewer != null) {
@@ -113,8 +113,7 @@ public class StrokeParam extends AbstractFilterParam {
         assert randomness != 0.0f;
 
         float baseWidth = strokeWidthParam.getValueAsFloat();
-        // the value of the effective stroke will be
-        // between 50% and 150% of the gui setting
+        // calculate a random width between 50% and 150% of the base width
         float randomWidth = baseWidth / 2.0f + baseWidth * random.nextFloat();
         float finalWidth = ImageMath.lerp(randomness, baseWidth, randomWidth);
 
@@ -122,11 +121,10 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public float[] getDashPattern(float width) {
-        float[] dashFloats = null;
         if (hasDashes()) {
-            dashFloats = new float[]{2 * width, 2 * width};
+            return new float[]{2 * width, 2 * width};
         }
-        return dashFloats;
+        return null;
     }
 
     @Override
@@ -193,12 +191,12 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setEnabled(boolean b, EnabledReason reason) {
+    public void setEnabled(boolean enabled, EnabledReason reason) {
         // call super to set the enabled state of the launching button
-        super.setEnabled(b, reason);
+        super.setEnabled(enabled, reason);
 
         for (FilterParam param : allParams) {
-            param.setEnabled(b, reason);
+            param.setEnabled(enabled, reason);
         }
     }
 
@@ -211,14 +209,15 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public void reset(boolean trigger) {
         for (FilterParam param : allParams) {
-            // trigger only once, later
+            // trigger the listener only once at the end
             param.reset(false);
         }
+
         if (trigger) {
             adjustmentListener.paramAdjusted();
-            // the default button state is updated
-            // in the decorated adjustment listener
+            // the reset button state is updated in the decorated adjustment listener
         } else {
+            // if not triggered, the reset button state must be updated manually
             updateResetButtonState();
         }
     }

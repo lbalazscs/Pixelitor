@@ -271,7 +271,7 @@ public class MaskFromColorRangePanel extends JPanel {
     private MaskFromColorRangeFilter createFilterFromSettings(Color c) {
         MaskFromColorRangeFilter filter = new MaskFromColorRangeFilter(NAME);
 
-        int distMetric = ((Item) distMetricCombo.getSelectedItem()).getValue();
+        int distMetric = ((Item) distMetricCombo.getSelectedItem()).value();
         filter.setDistanceMetric(distMetric);
         filter.setReferenceColor(c);
         filter.setTolerance(tolerance.getValue(), softness.getPercentage());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,10 +42,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING_STATE;
-import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
-import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
-import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.FilterSetting.EnabledReason.FILTER_LOGIC;
+import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
+import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 
 /**
  * Checks whether different {@link FilterParam} implementations
@@ -82,11 +82,11 @@ public class FilterParamTest {
             {new ImagePositionParam("Param Name")},
             {new GradientParam("Param Name", BLACK, WHITE)},
             {new TextParam("Param Name", "default text", true)},
-            {new ColorParam("Param Name", BLACK, FREE_TRANSPARENCY)},
-            {new ColorParam("Param Name", WHITE, USER_ONLY_TRANSPARENCY)},
-            {new ColorParam("Param Name", BLUE, NO_TRANSPARENCY)},
+            {new ColorParam("Param Name", BLACK, ALPHA_ENABLED)},
+            {new ColorParam("Param Name", WHITE, MANUAL_ALPHA_ONLY)},
+            {new ColorParam("Param Name", BLUE, OPAQUE_ONLY)},
             {new ColorListParam("Param Name", 1, 1, BLACK, BLUE)},
-            {new GroupedColorsParam("Param Name", "Name 1", BLUE, "Name 2", BLUE, FREE_TRANSPARENCY, true, true)},
+            {new GroupedColorsParam("Param Name", "Name 1", BLUE, "Name 2", BLUE, ALPHA_ENABLED, true, true)},
             {new BooleanParam("Param Name", true)},
             {new AngleParam("Param Name", 0)},
             {new ElevationAngleParam("Param Name", 0)},
@@ -97,7 +97,7 @@ public class FilterParamTest {
             },
             {new StrokeParam("Param Name")},
             {new EffectsParam("Param Name")},
-            {new DialogParam("Param Name",
+            {new CompositeParam("Param Name",
                 new RangeParam("Child", 0, 50, 100),
                 new AngleParam("Child 2", 0),
                 new BooleanParam("Child 3", true))
@@ -148,14 +148,14 @@ public class FilterParamTest {
     @Test
     public void shouldHandleRandomization() {
         // Test allowed randomization
-        param.setRandomizePolicy(RandomizePolicy.ALLOW_RANDOMIZE);
+        param.setRandomizePolicy(RandomizeMode.ALLOW_RANDOMIZE);
         assertThat(param).shouldRandomize();
         param.randomize();
         verifyNoParamAdjustments();
 
         // Test ignored randomization
         Object origValue = param.getParamValue();
-        param.setRandomizePolicy(RandomizePolicy.IGNORE_RANDOMIZE);
+        param.setRandomizePolicy(RandomizeMode.IGNORE_RANDOMIZE);
         assertThat(param).shouldNotRandomize();
         param.randomize();
         assertThat(param).hasValue(origValue); // it didn't change
@@ -230,11 +230,11 @@ public class FilterParamTest {
         param.isAnimatable();
 
         // Test APP_LOGIC disable/enable
-        param.setEnabled(false, APP_LOGIC);
+        param.setEnabled(false, FILTER_LOGIC);
         assertThat(param).isDisabled();
         assertThat(gui.isEnabled()).isFalse();
 
-        param.setEnabled(true, APP_LOGIC);
+        param.setEnabled(true, FILTER_LOGIC);
         assertThat(param).isEnabled();
         assertThat(gui.isEnabled()).isTrue();
 

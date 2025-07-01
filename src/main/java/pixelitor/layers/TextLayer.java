@@ -451,7 +451,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return true;
     }
 

@@ -48,7 +48,7 @@ public class GridKaleidoscope extends ParametrizedFilter {
     public GridKaleidoscope() {
         super(true);
 
-        setParams(
+        initParams(
             gridSize,
             angle,
             center,

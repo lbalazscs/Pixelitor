@@ -44,7 +44,7 @@ public class JHMotionBlur extends ParametrizedFilter {
 
     public JHMotionBlur() {
         super(true);
-        setParams(
+        initParams(
             distance,
             angle,
             quality,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import javax.swing.*;
  * Can be either a {@link FilterButtonModel} for buttons
  * or a {@link FilterParam} for adjustable parameters.
  */
-public interface FilterSetting {
+public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
     /**
      * Returns the display name of this filter setting.
      */
@@ -56,13 +56,13 @@ public interface FilterSetting {
 
     /**
      * Enables or disables this setting for one of two possible reasons:
-     * (1) because of the app logic or (2) because non-animatable
+     * (1) because of the filter logic or (2) because non-animatable
      * parameters should be disabled in the final animation dialogs.
      */
-    void setEnabled(boolean b, EnabledReason reason);
+    void setEnabled(boolean enabled, EnabledReason reason);
 
-    default void setEnabled(boolean b) {
-        setEnabled(b, EnabledReason.APP_LOGIC);
+    default void setEnabled(boolean enabled) {
+        setEnabled(enabled, EnabledReason.FILTER_LOGIC);
     }
 
     boolean isEnabled();
@@ -71,6 +71,13 @@ public interface FilterSetting {
      * The possible reasons for enabling or disabling a filter setting.
      */
     enum EnabledReason {
-        APP_LOGIC, ANIMATION_ENDING_STATE
+        /**
+         * The enabled state is determined by the filter's internal logic.
+         */
+        FILTER_LOGIC,
+        /**
+         * The enabled state is determined by the animation configuration mode.
+         */
+        ANIMATION_ENDING_STATE
     }
 }

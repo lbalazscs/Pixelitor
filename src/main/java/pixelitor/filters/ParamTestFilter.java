@@ -32,21 +32,21 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 
 /**
  * A test {@link ParametrizedFilter} with all {@link FilterParam} objects
  */
-public class ParamTest extends ParametrizedFilter {
+public class ParamTestFilter extends ParametrizedFilter {
     public static final String NAME = "Param Test";
 
     @Serial
     private static final long serialVersionUID = 7920135228910788174L;
 
-    public ParamTest() {
+    public ParamTestFilter() {
         super(true);
 
-        setParams(getTestParams());
+        initParams(getTestParams());
     }
 
     @Override
@@ -77,8 +77,8 @@ public class ParamTest extends ParametrizedFilter {
                 new Item("value 1", 1),
                 new Item("value 2", 2),
             }),
-            new ColorParam("ColorParam", WHITE, FREE_TRANSPARENCY),
-            new GroupedColorsParam("GroupedColorsParam", "A", WHITE, "B", Color.YELLOW, FREE_TRANSPARENCY, true, false),
+            new ColorParam("ColorParam", WHITE, ALPHA_ENABLED),
+            new GroupedColorsParam("GroupedColorsParam", "A", WHITE, "B", Color.YELLOW, ALPHA_ENABLED, true, false),
             new AngleParam("AngleParam", 0),
             new ElevationAngleParam("ElevationAngleParam", 0),
             new BlendingModeParam(BlendingMode.values()),

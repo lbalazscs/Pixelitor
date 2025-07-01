@@ -38,7 +38,7 @@ public class BoxFitting extends GMICFilter {
     public BoxFitting() {
         maxSize.ensureHigherValueThan(minSize);
 
-        setParams(minSize, maxSize,
+        initParams(minSize, maxSize,
             density, minSpacing,
             transparency).withReseedGmicAction(this);
     }

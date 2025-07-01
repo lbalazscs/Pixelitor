@@ -49,7 +49,7 @@ public class BlurredShapeTester extends ParametrizedFilter {
     public BlurredShapeTester() {
         super(true);
 
-        setParams(
+        initParams(
             center,
             radius.withAdjustedRange(1.0),
             softness,

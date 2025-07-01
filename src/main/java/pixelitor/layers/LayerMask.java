@@ -159,7 +159,7 @@ public class LayerMask extends ImageLayer {
     protected void imageRefChanged() {
         updateTransparencyImage();
         if (owner instanceof SmartFilter sf) {
-            sf.layerLevelSettingsChanged(false);
+            sf.layerLevelPropertyChanged(false);
         }
     }
 
@@ -275,7 +275,7 @@ public class LayerMask extends ImageLayer {
     @Override
     public void update(boolean updateHistogram) {
         if (owner instanceof SmartFilter sf) {
-            sf.layerLevelSettingsChanged(false);
+            sf.layerLevelPropertyChanged(false);
         }
         holder.update(updateHistogram);
     }
@@ -283,7 +283,7 @@ public class LayerMask extends ImageLayer {
     @Override
     public void repaintRegion(PPoint start, PPoint end, double thickness) {
         if (owner instanceof SmartFilter sf) {
-            sf.layerLevelSettingsChanged(false);
+            sf.layerLevelPropertyChanged(false);
         }
         comp.repaintRegion(start, end, thickness);
     }
@@ -291,7 +291,7 @@ public class LayerMask extends ImageLayer {
     @Override
     public void repaintRegion(PRectangle area) {
         if (owner instanceof SmartFilter sf) {
-            sf.layerLevelSettingsChanged(false);
+            sf.layerLevelPropertyChanged(false);
         }
         comp.repaintRegion(area);
     }

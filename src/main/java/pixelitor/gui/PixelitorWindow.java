@@ -39,7 +39,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.awt.BorderLayout.CENTER;
@@ -92,7 +91,7 @@ public class PixelitorWindow extends JFrame {
     private void initWindow(Dimension screenSize) {
         AppPreferences.loadFramePreferences(this, screenSize);
         if (JVM.isWindows) {
-            // this is tricky code, and had problems on Linux
+            // this is tricky code that had problems on Linux
             setupRememberingLastBounds();
             setupFirstUnMaximization();
         }
@@ -156,7 +155,7 @@ public class PixelitorWindow extends JFrame {
 
     private void addSidePanel() {
         sidePanel = new JPanel(new BorderLayout());
-        HistogramsPanel histogramsPanel = HistogramsPanel.getInstance();
+        HistogramsPanel histogramsPanel = HistogramsPanel.get();
         Views.addActivationListener(histogramsPanel);
 
         if (workSpace.areHistogramsVisible()) {
@@ -189,14 +188,14 @@ public class PixelitorWindow extends JFrame {
         URL imgURL48 = findImageURL("pixelitor_icon48.png");
         URL imgURL256 = findImageURL("pixelitor_icon256.png");
 
-        List<Image> icons = new ArrayList<>(2);
-        icons.add(new ImageIcon(imgURL32).getImage());
-        icons.add(new ImageIcon(imgURL48).getImage());
         Image img256 = new ImageIcon(imgURL256).getImage();
-        icons.add(img256);
-        setIconImages(icons);
-
         setTaskbarIcon(img256);
+
+        setIconImages(List.of(
+            new ImageIcon(imgURL32).getImage(),
+            new ImageIcon(imgURL48).getImage(),
+            img256
+        ));
     }
 
     private static void setTaskbarIcon(Image image) {
@@ -212,7 +211,7 @@ public class PixelitorWindow extends JFrame {
      * Returns the single instance of the main window.
      */
     public static PixelitorWindow get() {
-        return PixelitorWindowHolder.field;
+        return PixelitorWindowHolder.INSTANCE;
     }
 
     /**
@@ -220,7 +219,7 @@ public class PixelitorWindow extends JFrame {
      * Uses initialization-on-demand holder idiom for thread-safe lazy initialization.
      */
     private static class PixelitorWindowHolder {
-        static final PixelitorWindow field = new PixelitorWindow();
+        static final PixelitorWindow INSTANCE = new PixelitorWindow();
     }
 
     public void setStatusBarVisible(boolean visible, boolean revalidate) {
@@ -236,7 +235,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     public void setHistogramsVisible(boolean visible, boolean revalidate) {
-        HistogramsPanel histogramsPanel = HistogramsPanel.getInstance();
+        HistogramsPanel histogramsPanel = HistogramsPanel.get();
         if (visible) {
             assert !HistogramsPanel.isShown();
             sidePanel.add(histogramsPanel, NORTH);
@@ -314,28 +313,22 @@ public class PixelitorWindow extends JFrame {
     }
 
     /**
-     * Iconifies a frame; the maximized bits are not affected.
+     * Iconifies the frame without affecting the maximized state.
      */
     public void iconify() {
         int state = getExtendedState();
-
-        // Set the iconified bit
+        // set the iconified bit
         state |= Frame.ICONIFIED;
-
-        // Iconify the frame
         setExtendedState(state);
     }
 
     /**
-     * Deiconifies a frame; the maximized bits are not affected.
+     * De-iconifies the frame without affecting the maximized state.
      */
     public void deiconify() {
         int state = getExtendedState();
-
-        // Clear the iconified bit
+        // clear the iconified bit
         state &= ~Frame.ICONIFIED;
-
-        // Deiconify the frame
         setExtendedState(state);
     }
 
@@ -344,10 +337,10 @@ public class PixelitorWindow extends JFrame {
     }
 
     public boolean isMaximized() {
-        return stateMaximized(getExtendedState());
+        return isStateMaximized(getExtendedState());
     }
 
-    private static boolean stateMaximized(int extState) {
+    private static boolean isStateMaximized(int extState) {
         return (extState & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
     }
 
@@ -395,8 +388,8 @@ public class PixelitorWindow extends JFrame {
             if (savedNormalBounds == null) {
                 return;
             }
-            boolean wasMaximized = stateMaximized(e.getOldState());
-            boolean isMaximized = stateMaximized(e.getNewState());
+            boolean wasMaximized = isStateMaximized(e.getOldState());
+            boolean isMaximized = isStateMaximized(e.getNewState());
 
             // the first time the window is un-maximized, use the saved bounds
             if (wasMaximized && !isMaximized) {

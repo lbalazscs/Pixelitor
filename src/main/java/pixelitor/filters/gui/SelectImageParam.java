@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,12 +32,12 @@ import static pixelitor.filters.gui.SelectImageParam.NamedImage;
  * A {@link FilterParam} that allows the user to select
  * an image from the list of currently opened images.
  */
-public class SelectImageParam extends ListParam<NamedImage> {
+public class SelectImageParam extends ChoiceParam<NamedImage> {
     public SelectImageParam(String name) {
         super(name,
             openImageInfos(),
             new NamedImage(Views.getActiveComp()),
-            RandomizePolicy.IGNORE_RANDOMIZE);
+            RandomizeMode.IGNORE_RANDOMIZE);
     }
 
     public BufferedImage getImage() {

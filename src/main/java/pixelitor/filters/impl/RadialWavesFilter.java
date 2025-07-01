@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,19 +47,25 @@ public class RadialWavesFilter extends CenteredTransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
+        // translate to the center of the effect
         double dx = x - cx;
         double dy = y - cy;
-        double r = Math.sqrt(dx * dx + dy * dy);
+
+        // convert to polar coordinates
+        double r = FastMath.hypot(dx, dy);
         double angle = FastMath.atan2(dy, dx);
 
-        double nr = angle * angularDivision - phase;
-        double fr = WaveType.wave(nr, waveType);
-        r += fr * radialAmplitude * r / maxSize;
+        // calculate the wave effect and apply it to the radius
+        double waveInput = angle * angularDivision - phase;
+        double waveValue = WaveType.wave(waveInput, waveType);
+        r += waveValue * radialAmplitude * r / maxSize;
 
+        // apply zoom and convert back to cartesian coordinates
         double zoomedR = r / zoom;
         double u = zoomedR * FastMath.cos(angle);
         double v = zoomedR * FastMath.sin(angle);
 
+        // translate back to the image's coordinate system
         out[0] = (float) (u + cx);
         out[1] = (float) (v + cy);
     }

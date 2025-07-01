@@ -114,7 +114,7 @@ public class ToolTest {
 
     @Test
     public void presets() {
-        if (tool.canHaveUserPresets()) {
+        if (tool.shouldHaveUserPresetsMenu()) {
             UserPreset preset = tool.createUserPreset("test");
             tool.loadUserPreset(preset);
         }

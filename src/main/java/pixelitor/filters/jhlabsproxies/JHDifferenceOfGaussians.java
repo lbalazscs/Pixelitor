@@ -46,7 +46,7 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
     public JHDifferenceOfGaussians() {
         super(true);
 
-        setParams(
+        initParams(
             radius1.withAdjustedRange(0.01),
             radius2.withAdjustedRange(0.01),
             normalize,

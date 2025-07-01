@@ -25,14 +25,13 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * A GUI component for selecting elevation (altitude)
- * angles between 0 and 90 degrees with the mouse.
+ * A GUI component for selecting elevation angles between 0 and 90 degrees with the mouse.
  */
 public class ElevationAngleUI extends AbstractAngleUI {
     public ElevationAngleUI(ElevationAngleParam param) {
         super(param);
 
-        // The rotation center is at the bottom-left corner.
+        // the rotation center is at the bottom-left corner
         centerX = 0;
         centerY = SELECTOR_SIZE;
     }
@@ -51,14 +50,14 @@ public class ElevationAngleUI extends AbstractAngleUI {
         g2.drawLine(0, 0, 0, SELECTOR_SIZE);
         g2.drawLine(0, SELECTOR_SIZE, SELECTOR_SIZE, SELECTOR_SIZE);
 
-        // Draw the elevation indicator arrow
+        // draw the elevation indicator arrow
         setupArrowColor(g2, darkTheme);
         double angle = model.getValueInRadians();
         float radius = SELECTOR_SIZE;
         float endX = (float) (centerX + radius * Math.cos(angle));
         float endY = (float) (centerY + radius * Math.sin(angle));
-        // The arrow is drawn from the direction of the mouse back
-        // to the rotation center, representing the incoming light.
+        // the arrow is drawn from the direction of the mouse back
+        // to the rotation center, representing the incoming light
         drawArrow(g2, Math.PI + angle, endX, endY, centerX, centerY);
     }
 }

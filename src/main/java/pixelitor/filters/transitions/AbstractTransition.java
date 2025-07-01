@@ -38,7 +38,7 @@ public abstract class AbstractTransition extends ParametrizedFilter {
 
         // invert is added in the subclasses because
         // the blind transition doesn't work with it
-        setParams(progress);
+        initParams(progress);
     }
 
     abstract Transition createTransition();
@@ -55,12 +55,5 @@ public abstract class AbstractTransition extends ParametrizedFilter {
         g2.dispose();
 
         return dest;
-    }
-
-    @Override
-    public boolean isComplex() {
-        // this class adds only one simple parameter,
-        // but subclasses are expected to add more
-        return true;
     }
 }

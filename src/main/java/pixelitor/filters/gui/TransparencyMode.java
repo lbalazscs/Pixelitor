@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,38 +18,42 @@
 package pixelitor.filters.gui;
 
 /**
- * Whether transparent colors are allowed in a color selector.
+ * The transparency behavior for a color selector.
  */
-public enum TransparencyPolicy {
+public enum TransparencyMode {
     /**
      * Transparent colors can't be selected.
      */
-    NO_TRANSPARENCY(false, false),
+    OPAQUE_ONLY(false, false),
 
     /**
-     * The user can select an alpha value, but randomizing will
-     * always create opaque colors.
+     * The user can select an alpha value, but randomizing will always create opaque colors.
      */
-    USER_ONLY_TRANSPARENCY(true, false),
+    MANUAL_ALPHA_ONLY(true, false),
 
     /**
-     * The user can select an alpha value, and randomizing will
-     * with randomize the alpha
+     * The user can select an alpha value, and randomizing will also randomize the alpha.
      */
-    FREE_TRANSPARENCY(true, true);
+    ALPHA_ENABLED(true, true);
 
     private final boolean allowTransparency;
     private final boolean randomizeTransparency;
 
-    TransparencyPolicy(boolean allowTransparency, boolean randomizeTransparency) {
+    TransparencyMode(boolean allowTransparency, boolean randomizeTransparency) {
         this.allowTransparency = allowTransparency;
         this.randomizeTransparency = randomizeTransparency;
     }
 
+    /**
+     * Whether the user is allowed to select a color with transparency.
+     */
     public boolean allowTransparency() {
         return allowTransparency;
     }
 
+    /**
+     * Whether the alpha channel should also be randomized.
+     */
     public boolean randomizeTransparency() {
         return randomizeTransparency;
     }

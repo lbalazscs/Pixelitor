@@ -72,7 +72,7 @@ public class Pixelitor {
         mainThreadInit();
     }
 
-    // register a global exception handler
+    // registers a global exception handler
     private static void initExceptionHandling() {
         ExceptionHandler.INSTANCE.addHandler((thread, exception) ->
             Messages.showException(exception, thread));
@@ -88,7 +88,7 @@ public class Pixelitor {
     }
 
     private static void configureLanguage() {
-        // Store system locale for number formatting
+        // store system locale for number formatting
         SYS_LOCALE = Locale.getDefault();
 
         if (!Language.isSupported(SYS_LOCALE.getLanguage())) {
@@ -141,9 +141,8 @@ public class Pixelitor {
         PixelitorWindow mainWindow = PixelitorWindow.get();
         Dialogs.setMainWindowInitialized(true);
 
-        // Make sure that at the end of GUI
-        // initialization the focus isn't grabbed by
-        // a textfield and the keyboard shortcuts work properly
+        // ensure the main window has focus after GUI initialization
+        // so that keyboard shortcuts work properly
         FgBgColors.getGUI().requestFocus();
 
         TipsOfTheDay.showTips(mainWindow, false);
@@ -151,25 +150,21 @@ public class Pixelitor {
         MouseZoomMethod.loadFromPreferences();
         PanMethod.loadFromPreferences();
 
-        // The IO-intensive preloading of fonts is scheduled
-        // to run after all the files have been opened,
-        // and on the same IO thread
-        openCommanLineFilesAsync(args)
+        // schedule IO-intensive font preloading to run after opening files
+        openCommandLineFilesAsync(args)
             .exceptionally(throwable -> null) // recover
             .thenAcceptAsync(v -> doPostStartupActions(), onEDT)
             .thenRunAsync(Utils::preloadFontNames, onIOThread)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    // after launching the GUI on the EDT, do the less urgent
-    // initializations concurrently on the main thread
+    // less urgent initializations on the main thread
     private static void mainThreadInit() {
         MeasurementOverlay.initializeFont();
 
-        // Force the initialization of FastMath look-up tables now
-        // on the main thread, so that later no unexpected delays happen.
-        // This is OK because static initializers are thread safe.
-        FastMath.cos(0.1);
+        // force look-up table initialization now
+        // to prevent unexpected delays later
+        FastMath.initTables();
     }
 
     private static void loadUIFonts(Theme theme) {
@@ -195,7 +190,7 @@ public class Pixelitor {
     }
 
     private static void applyCustomFont(Theme theme, Font customFont) {
-        FontUIResource fontUIResource = new FontUIResource(customFont);
+        var fontUIResource = new FontUIResource(customFont);
         UIManager.put("defaultFont", fontUIResource);
 
         if (theme.isNimbus()) {
@@ -206,7 +201,7 @@ public class Pixelitor {
     /**
      * Schedules the opening of the files given as command-line arguments
      */
-    private static CompletableFuture<Void> openCommanLineFilesAsync(String[] args) {
+    private static CompletableFuture<Void> openCommandLineFilesAsync(String[] args) {
         List<CompletableFuture<Composition>> fileOpeningTasks = new ArrayList<>();
 
         for (String fileName : args) {
@@ -225,15 +220,15 @@ public class Pixelitor {
     public static void exitApp(PixelitorWindow mainWindow) {
         assert calledOnEDT() : threadInfo();
 
-        if (hasOngoingWrite(mainWindow)) {
+        if (isExitBlockedByOngoingWrites(mainWindow)) {
             return;
         }
 
         checkUnsavedChangesAndExit(mainWindow);
     }
 
-    private static boolean hasOngoingWrite(PixelitorWindow mainWindow) {
-        var writePaths = IOTasks.getActiveWritePaths();
+    private static boolean isExitBlockedByOngoingWrites(PixelitorWindow mainWindow) {
+        Set<String> writePaths = IOTasks.getActiveWritePaths();
         if (writePaths.isEmpty()) {
             return false;
         }
@@ -248,16 +243,14 @@ public class Pixelitor {
     }
 
     private static boolean showOngoingWriteWarning(Set<String> writePaths) {
-        StringBuilder msg = new StringBuilder(
+        var msg = new StringBuilder(
             "<html>The following files are still being written. Exit anyway?<br><ul>");
         for (String path : writePaths) {
             msg.append("<li>").append(path);
         }
 
-        String warningMessage = msg.toString();
         String[] options = {"Wait 10 seconds", "Exit now"};
-        return Dialogs.showOKCancelWarningDialog(
-            warningMessage, "Warning", options, 0);
+        return Dialogs.showOKCancelWarningDialog(msg.toString(), "Warning", options, 0);
     }
 
     private static void scheduleExitRetry(PixelitorWindow mainWindow) {
@@ -273,12 +266,13 @@ public class Pixelitor {
         List<Composition> unsavedWork = Views.getUnsavedComps();
         if (unsavedWork.isEmpty()) {
             exit(mainWindow);
-        } else {
-            boolean proceedWithExit = Dialogs.showYesNoWarningDialog(mainWindow,
-                "Unsaved Changes", createUnsavedChangesMsg(unsavedWork));
-            if (proceedWithExit) {
-                exit(mainWindow);
-            }
+            return;
+        }
+
+        boolean proceedWithExit = Dialogs.showYesNoWarningDialog(mainWindow,
+            "Unsaved Changes", createUnsavedChangesMsg(unsavedWork));
+        if (proceedWithExit) {
+            exit(mainWindow);
         }
     }
 
@@ -289,19 +283,19 @@ public class Pixelitor {
     }
 
     private static String createUnsavedChangesMsg(List<Composition> unsavedComps) {
-        String msg;
         if (unsavedComps.size() == 1) {
-            msg = format("<html>There are unsaved changes in <b>%s</b>." +
+            return format("<html>There are unsaved changes in <b>%s</b>." +
                     "<br>Are you sure you want to exit?",
                 unsavedComps.getFirst().getName());
-        } else {
-            msg = "<html>There are unsaved changes. Are you sure you want to exit?" +
-                "<br>Unsaved images:<ul>";
-            for (Composition comp : unsavedComps) {
-                msg += "<li>" + comp.getName();
-            }
         }
-        return msg;
+
+        var msg = new StringBuilder(
+            "<html>There are unsaved changes. Are you sure you want to exit?" +
+                "<br>Unsaved images:<ul>");
+        for (Composition comp : unsavedComps) {
+            msg.append("<li>").append(comp.getName());
+        }
+        return msg.toString();
     }
 
     /**

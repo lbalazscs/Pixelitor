@@ -29,37 +29,37 @@ import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 /**
- * Base class for filter params that have a JComboBox as their GUI.
+ * Base class for filter parameters that have a JComboBox in their GUI.
  */
-public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E> {
+public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel<E> {
     protected List<E> choices;
     protected E defaultValue;
     protected E selectedValue;
     private final EventListenerList eventListeners = new EventListenerList();
 
-    public ListParam(String name, E[] choices) {
-        this(name, choices, RandomizePolicy.ALLOW_RANDOMIZE);
+    public ChoiceParam(String name, E[] choices) {
+        this(name, choices, RandomizeMode.ALLOW_RANDOMIZE);
     }
 
-    public ListParam(String name, E[] choices, E defaultValue) {
-        this(name, List.of(choices), defaultValue, RandomizePolicy.ALLOW_RANDOMIZE);
+    public ChoiceParam(String name, E[] choices, E defaultValue) {
+        this(name, List.of(choices), defaultValue, RandomizeMode.ALLOW_RANDOMIZE);
     }
 
-    public ListParam(String name, E[] choices, RandomizePolicy randomizePolicy) {
-        this(name, List.of(choices), choices[0], randomizePolicy);
+    public ChoiceParam(String name, E[] choices, RandomizeMode randomizeMode) {
+        this(name, List.of(choices), choices[0], randomizeMode);
     }
 
-    public ListParam(String name, List<E> choices, E defaultValue,
-                     RandomizePolicy randomizePolicy) {
-        super(name, randomizePolicy);
+    public ChoiceParam(String name, List<E> choices, E defaultValue,
+                       RandomizeMode randomizeMode) {
+        super(name, randomizeMode);
         this.choices = choices;
         this.defaultValue = defaultValue;
-        selectedValue = defaultValue;
+        this.selectedValue = defaultValue;
     }
 
     @Override
     public JComponent createGUI() {
-        var gui = new ComboBoxParamGUI<>(this, action);
+        var gui = new ChoiceParamGUI<>(this, action);
         paramGUI = gui;
         guiCreated();
         return gui;
@@ -77,8 +77,7 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
 
     @Override
     protected void doRandomize() {
-        E choice = Rnd.chooseFrom(choices);
-        setSelectedValue(choice, false);
+        setSelectedValue(Rnd.chooseFrom(choices), false);
     }
 
     private void setSelectedValue(E newChoice, boolean trigger) {
@@ -92,7 +91,7 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
     }
 
     /**
-     * Sets the the selected value and optionally triggers the adjustment listener.
+     * Sets the selected value and optionally triggers an adjustment event.
      */
     public void setSelectedItem(E item, boolean trigger) {
         assert item != null;
@@ -167,14 +166,14 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
     }
 
     @Override
-    public ListParamState<E> copyState() {
-        return new ListParamState<>(getSelected());
+    public ChoiceParamState<E> copyState() {
+        return new ChoiceParamState<>(getSelected());
     }
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         @SuppressWarnings("unchecked")
-        ListParamState<E> paramState = (ListParamState<E>) state;
+        ChoiceParamState<E> paramState = (ChoiceParamState<E>) state;
         setSelectedItem(paramState.value(), false);
     }
 
@@ -191,8 +190,7 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
     }
 
     /**
-     * Sets up the automatic enabling of another {@link FilterSetting}
-     * depending on the selected item of this one.
+     * Sets up the automatic enabling of another {@link FilterSetting} depending on the selected item.
      */
     public void setupEnableOtherIf(FilterSetting other,
                                    Predicate<E> condition) {
@@ -200,19 +198,17 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
     }
 
     /**
-     * Sets up the automatic disabling of another {@link FilterSetting}
-     * depending on the selected item of this one.
+     * Sets up the automatic disabling of another {@link FilterSetting} depending on the selected item.
      */
     public void setupDisableOtherIf(FilterSetting other,
                                     Predicate<E> condition) {
         setupOther(other, condition, false);
     }
 
-    @SuppressWarnings("unchecked")
     private void setupOther(FilterSetting other, Predicate<E> condition, boolean enable) {
         other.setEnabled(!enable);
         addOnChangeTask(() -> {
-            if (condition.test((E) getSelectedItem())) {
+            if (condition.test(getSelected())) {
                 other.setEnabled(enable);
             } else {
                 other.setEnabled(!enable);
@@ -221,8 +217,7 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
     }
 
     /**
-     * Sets up the automatic limiting of the given {@link RangeParam}
-     * to a maximum value that depends on the selected item in this {@link ListParam}.
+     * Sets up the automatic limiting of a {@link RangeParam} to a maximum value that depends on the selected item.
      */
     public void setupLimitOtherToMax(RangeParam other, ToIntFunction<E> mapper) {
         addOnChangeTask(() -> {
@@ -233,7 +228,9 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
         });
     }
 
-    // Adds a listener that will be notified when the selected value changes.
+    /**
+     * Adds a listener that will be notified when the selected value changes.
+     */
     private void addOnChangeTask(Runnable task) {
         addListDataListener(new ListDataListener() {
             @Override
@@ -252,14 +249,14 @@ public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E
     }
 
     /**
-     * Encapsulates the state of an {@link ListParam} as a memento object.
+     * Encapsulates the state of a {@link ChoiceParam} as a memento object.
      */
-    public record ListParamState<E>(E value) implements ParamState<ListParamState<E>> {
+    public record ChoiceParamState<E>(E value) implements ParamState<ChoiceParamState<E>> {
         @Serial
         private static final long serialVersionUID = 1L;
 
         @Override
-        public ListParamState<E> interpolate(ListParamState<E> endState, double progress) {
+        public ChoiceParamState<E> interpolate(ChoiceParamState<E> endState, double progress) {
             throw new UnsupportedOperationException();
         }
 

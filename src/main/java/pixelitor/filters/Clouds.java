@@ -33,7 +33,7 @@ import java.util.concurrent.Future;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
@@ -50,15 +50,15 @@ public class Clouds extends ParametrizedFilter {
     private final RangeParam scaleParam = new RangeParam(ZOOM, 3, 100, 300);
     private final RangeParam roughnessParam = new RangeParam("Roughness (%)", 0, 50, 100);
 
-    private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_TRANSPARENCY);
-    private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_TRANSPARENCY);
+    private final ColorParam color1 = new ColorParam("Color 1", BLACK, MANUAL_ALPHA_ONLY);
+    private final ColorParam color2 = new ColorParam("Color 2", WHITE, MANUAL_ALPHA_ONLY);
 
     public Clouds() {
         super(false);
 
         scaleParam.setPresetKey("Zoom");
 
-        setParams(
+        initParams(
             scaleParam.withAdjustedRange(0.3),
             roughnessParam,
             color1,

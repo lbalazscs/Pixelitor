@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,8 @@ import java.awt.Color;
 import java.io.Serial;
 import java.util.List;
 
-import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 public class Stroke extends GMICFilter {
     @Serial
@@ -54,14 +54,14 @@ public class Stroke extends GMICFilter {
     private final GroupedColorsParam strokeColor = new GroupedColorsParam("Stroke Color",
         "Start", Color.WHITE,
         "End", Color.WHITE,
-        USER_ONLY_TRANSPARENCY, true, true);
+        MANUAL_ALPHA_ONLY, true, true);
     private final GroupedColorsParam fillColor = new GroupedColorsParam("Fill Color",
         "Inside", Colors.TRANSPARENT_BLACK,
         "Outside", Colors.TRANSPARENT_BLACK,
-        FREE_TRANSPARENCY, true, true);
+        ALPHA_ENABLED, true, true);
 
     public Stroke() {
-        setParams(thickness,
+        initParams(thickness,
             threshold, smoothness, shape,
             strokeColor, fillColor,
             direction, zoom, shift.notLinkable());

@@ -50,7 +50,7 @@ public class JHWaterRipple extends ParametrizedFilter {
     public JHWaterRipple() {
         super(true);
 
-        setParams(
+        initParams(
             center,
             radius.withAdjustedRange(1.0),
             wavelength.withAdjustedRange(0.25),

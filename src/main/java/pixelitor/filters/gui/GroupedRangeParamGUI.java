@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,10 +29,10 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * The GUI for a {@link GroupedRangeParam}
+ * The GUI for a {@link GroupedRangeParam}.
  */
 public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
-    private final int numParams;
+    private final int numChildren;
     private final GroupedRangeParam model;
     private final GridBagHelper gbh;
     private final SliderSpinner[] sliders;
@@ -42,8 +42,8 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
         gbh = new GridBagHelper(this);
 
         this.model = model;
-        numParams = model.getNumParams();
-        sliders = new SliderSpinner[numParams];
+        numChildren = model.getNumChildren();
+        sliders = new SliderSpinner[numChildren];
 
         addSliderSpinners();
 
@@ -55,9 +55,9 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
     }
 
     private void addSliderSpinners() {
-        for (int i = 0; i < numParams; i++) {
+        for (int i = 0; i < numChildren; i++) {
             RangeParam param = model.getRangeParam(i);
-            // doesn't call param.createGUI because we don't want another border
+            // doesn't call param.createGUI() because we don't want another border
             sliders[i] = new SliderSpinner(param, NONE, true);
             sliders[i].setupTicks();
 
@@ -69,7 +69,7 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
 
     private void addLinkCheckBox() {
         JCheckBox linkedCB = GUIUtils.createLinkCheckBox(model);
-        gbh.addLabelAndControl(i18n("linked") + ":", linkedCB, numParams);
+        gbh.addLabelAndControl(i18n("linked") + ":", linkedCB, numChildren);
     }
 
     @Override

@@ -32,7 +32,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.IntPredicate;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
@@ -70,8 +70,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public RangeParam(String name, int min, double def, int max, boolean addResetButton,
-                      SliderSpinner.LabelPosition position, RandomizePolicy randomizePolicy) {
-        super(name, randomizePolicy);
+                      SliderSpinner.LabelPosition position, RandomizeMode randomizeMode) {
+        super(name, randomizeMode);
 
         minValue = min;
         maxValue = max;
@@ -487,7 +487,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         private boolean addResetButton = true;
         private int decimalPlaces = 0;
         private SliderSpinner.LabelPosition labelPosition = BORDER;
-        private RandomizePolicy randomizePolicy = ALLOW_RANDOMIZE;
+        private RandomizeMode randomizeMode = ALLOW_RANDOMIZE;
 
         public Builder(String name) {
             this.name = name;
@@ -523,14 +523,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             return this;
         }
 
-        public Builder randomizePolicy(RandomizePolicy randomizePolicy) {
-            this.randomizePolicy = randomizePolicy;
+        public Builder randomizePolicy(RandomizeMode randomizeMode) {
+            this.randomizeMode = randomizeMode;
             return this;
         }
 
         public RangeParam build() {
             RangeParam rp = new RangeParam(name, min, def, max,
-                addResetButton, labelPosition, randomizePolicy);
+                addResetButton, labelPosition, randomizeMode);
             rp.setDecimalPlaces(decimalPlaces);
             return rp;
         }

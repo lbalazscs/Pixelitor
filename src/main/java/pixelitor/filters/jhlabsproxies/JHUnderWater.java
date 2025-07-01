@@ -49,7 +49,7 @@ public class JHUnderWater extends ParametrizedFilter {
         super(true);
 
         var reseed = paramSet.createReseedNoiseAction();
-        setParams(
+        initParams(
             amount.withAdjustedRange(0.1),
             scale.withAdjustedRange(0.3),
             stretch,

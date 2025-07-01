@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class JHWaves extends ParametrizedFilter {
     public JHWaves() {
         super(true);
 
-        setParams(
+        initParams(
             waveType.configureWaveType(paramSet),
             wavelengthParam.withAdjustedRange(0.2).withDecimalPlaces(1),
             amplitudeParam.withAdjustedRange(0.2),

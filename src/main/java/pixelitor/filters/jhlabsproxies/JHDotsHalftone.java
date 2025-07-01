@@ -78,7 +78,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
     public JHDotsHalftone() {
         super(true);
 
-        setParams(
+        initParams(
             dotRadius,
             shapeParam,
             gridParam,

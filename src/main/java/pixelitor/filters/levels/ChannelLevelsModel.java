@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,15 +17,20 @@
 
 package pixelitor.filters.levels;
 
+import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.filters.lookup.GrayScaleLookup;
+import pixelitor.filters.util.Channel;
+import pixelitor.gui.utils.SliderSpinner;
 
-import java.awt.Color;
+import javax.swing.*;
+
+import static java.awt.Color.GRAY;
 
 /**
- * The model (the GUI-independent part) of the settings
- * for one channel in the Levels filter
+ * The model for the settings of a single channel in the Levels filter.
  */
 public class ChannelLevelsModel implements ParamAdjustmentListener {
     private static final int MAX_VALUE = 255;
@@ -53,66 +58,45 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
         outputLight = new RangeParam("Output Light", MIN_VALUE, LIGHT_DEFAULT, MAX_VALUE);
         params = new RangeParam[]{inputDark, inputLight, outputDark, outputLight};
 
-        ensureInputValueOrdering();
+        // ensure input dark and light levels don't cross
+        inputLight.ensureHigherValueThan(inputDark);
 
         for (RangeParam param : params) {
             param.setAdjustmentListener(this);
         }
     }
 
-    private void ensureInputValueOrdering() {
-        inputDark.addChangeListener(e -> {
-            int darkValue = inputDark.getValue();
-            int lightValue = inputLight.getValue();
-            if (lightValue <= darkValue) {
-                if (darkValue < MAX_VALUE) {
-                    inputLight.setValueNoTrigger(darkValue + 1);
-                } else {
-                    inputLight.setValueNoTrigger(MAX_VALUE);
-                }
-            }
-        });
-        inputLight.addChangeListener(e -> {
-            int darkValue = inputDark.getValue();
-            int lightValue = inputLight.getValue();
-            if (lightValue <= darkValue) {
-                if (lightValue > MIN_VALUE) {
-                    inputDark.setValueNoTrigger(lightValue - 1);
-                } else {
-                    inputDark.setValueNoTrigger(MIN_VALUE);
-                }
-            }
-        });
-    }
-
-    public Color getDarkColor() {
-        return channel.getDarkColor();
-    }
-
-    public Color getLightColor() {
-        return channel.getLightColor();
-    }
-
+    /**
+     * Returns the parameter for the input shadow level.
+     */
     public RangeParam getInputDark() {
         return inputDark;
     }
 
+    /**
+     * Returns the parameter for the input highlight level.
+     */
     public RangeParam getInputLight() {
         return inputLight;
     }
 
+    /**
+     * Returns the parameter for the output shadow level.
+     */
     public RangeParam getOutputDark() {
         return outputDark;
     }
 
+    /**
+     * Returns the parameter for the output highlight level.
+     */
     public RangeParam getOutputLight() {
         return outputLight;
     }
 
-    public String getChannelName() {
-        return channel.getName();
-    }
-
+    /**
+     * Returns the lookup table for this channel's level adjustments.
+     */
     public GrayScaleLookup getLookup() {
         return lookup;
     }
@@ -120,8 +104,7 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
     @Override
     public void paramAdjusted() {
         updateLookup();
-
-        mainModel.settingsChanged(false);
+        mainModel.settingsChanged();
     }
 
     private void updateLookup() {
@@ -136,7 +119,6 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
         for (RangeParam param : params) {
             param.reset(false);
         }
-
         updateLookup();
     }
 
@@ -159,7 +141,29 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
         return channel.getPresetKey() + " " + param.getName();
     }
 
+    /**
+     * Returns the channel represented by this model.
+     */
     public Channel getChannel() {
         return channel;
+    }
+
+    /**
+     * Returns the UI panel that can configure this model.
+     */
+    JPanel createPanel() {
+        var inputDarkSlider = new SliderSpinner(getInputDark(), GRAY, channel.getDarkColor());
+        var inputLightSlider = new SliderSpinner(getInputLight(), channel.getLightColor(), GRAY);
+        var outputDarkSlider = new SliderSpinner(getOutputDark(), GRAY, channel.getLightColor());
+        var outputLightSlider = new SliderSpinner(getOutputLight(), channel.getDarkColor(), GRAY);
+
+        JPanel panel = new JPanel(new VerticalLayout());
+        panel.add(inputDarkSlider);
+        panel.add(inputLightSlider);
+        panel.add(outputDarkSlider);
+        panel.add(outputLightSlider);
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        return panel;
     }
 }

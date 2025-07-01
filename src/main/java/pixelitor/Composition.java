@@ -1203,8 +1203,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         PixelitorEdit layerEdit = null;
         if (mode.movesLayer()) {
             Layer target = getActiveTarget();
-            // The target edit will be null if an adjustment
-            // layer without a mask was moved.
+
+            // will be null if a non-content layer without mask was moved
             layerEdit = target.finalizeMovement();
         }
 

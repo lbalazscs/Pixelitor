@@ -50,7 +50,7 @@ public class JHWrapAroundArc extends ParametrizedFilter {
     public JHWrapAroundArc() {
         super(true);
 
-        setParams(
+        initParams(
             radius.withAdjustedRange(1.0),
             thickness.withAdjustedRange(0.5),
             spread,

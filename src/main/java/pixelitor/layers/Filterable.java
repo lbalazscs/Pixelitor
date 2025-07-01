@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,9 +59,9 @@ public interface Filterable {
 
     void setShowOriginal(boolean b);
 
-    // if "firstPreview" is true, then the settings haven't yet changed,
+    // if "initialPreview" is true, then the settings haven't yet changed,
     // this is called only to trigger the first preview run of the filter
-    void startPreview(Filter filter, boolean firstPreview, Component busyCursorTarget);
+    void startPreview(Filter filter, boolean initialPreview, Component busyCursorTarget);
 
     void onFilterDialogAccepted(String filterName);
 

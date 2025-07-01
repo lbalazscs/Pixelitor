@@ -31,7 +31,7 @@ import java.util.SplittableRandom;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Filter for testing Poisson Disk Sampling
@@ -54,7 +54,7 @@ public class PoissonDiskTester extends ParametrizedFilter {
     public PoissonDiskTester() {
         super(false);
 
-        setParams(
+        initParams(
             distance,
             k,
             improved,

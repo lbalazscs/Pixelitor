@@ -24,10 +24,7 @@ import javax.swing.*;
 import java.io.Serial;
 
 /**
- * Abstract base class for filters with customizable GUI.
- *
- * Note that filters without a GUI can still use dialogs if
- * they are started from places like "Random Filter".
+ * An abstract base class for filters that have a customizable GUI panel.
  */
 public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     @Serial
@@ -49,16 +46,16 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     public abstract FilterGUI createGUI(Filterable layer, boolean reset);
 
     /**
-     * Randomizes filter parameters.
+     * Randomizes the filter's parameters.
      */
     public abstract void randomize();
 
     /**
-     * Returns a menu bar if help or presets are available; null otherwise.
+     * Returns a menu bar if help or presets are available, or null otherwise.
      */
     public JMenuBar getMenuBar() {
-        boolean addPresets = canHaveUserPresets() || hasBuiltinPresets();
-        if (!hasHelp() && !addPresets) {
+        boolean addPresets = shouldHaveUserPresetsMenu() || hasBuiltinPresets();
+        if (!addPresets && !hasHelp()) {
             return null;
         }
 
@@ -66,7 +63,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return true;
     }
 

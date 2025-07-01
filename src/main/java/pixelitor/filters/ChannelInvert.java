@@ -87,7 +87,7 @@ public class ChannelInvert extends ParametrizedFilter {
     public ChannelInvert() {
         super(true);
 
-        setParams(invertTypeSelector);
+        initParams(invertTypeSelector);
     }
 
     @Override

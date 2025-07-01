@@ -21,7 +21,7 @@ import com.jhlabs.image.PointFilter;
 import pd.fastnoise.FastNoiseLite;
 import pd.fastnoise.FastNoiseLite.*;
 import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.DialogParam;
+import pixelitor.filters.gui.CompositeParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 
@@ -82,7 +82,7 @@ public class OrganicNoise extends ParametrizedFilter {
         domainWarpType.setupEnableOtherIf(domainWarpAmp, domainWarpEnabled);
         domainWarpType.setupEnableOtherIf(domainWarpFractalType, domainWarpEnabled);
 
-        DialogParam cellDetails = new DialogParam("Cellular Details",
+        CompositeParam cellDetails = new CompositeParam("Cellular Details",
             cdf, cellularJitter, cellularReturnType);
         type.setupDisableOtherIf(cellDetails, t -> t != NoiseType.Cellular);
 
@@ -93,11 +93,11 @@ public class OrganicNoise extends ParametrizedFilter {
         fractalType.setupEnableOtherIf(weightedStrength, fractalEnabled);
         fractalType.setupEnableOtherIf(pingPongStrength, t -> t == FractalType.PingPong);
 
-        setParams(
+        initParams(
             type,
             cellDetails,
 
-            new DialogParam("Fractal",
+            new CompositeParam("Fractal",
                 fractalType,
                 octaves,
                 lacunarity,
@@ -110,7 +110,7 @@ public class OrganicNoise extends ParametrizedFilter {
             angle,
 //            colors,
 
-            new DialogParam("Distort",
+            new CompositeParam("Distort",
                 domainWarpType,
                 domainWarpAmp,
                 domainWarpFractalType
@@ -158,7 +158,7 @@ public class OrganicNoise extends ParametrizedFilter {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return false;
     }
 

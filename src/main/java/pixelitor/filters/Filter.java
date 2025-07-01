@@ -32,7 +32,7 @@ import java.io.Serializable;
 import static pixelitor.utils.ImageUtils.isGrayscale;
 
 /**
- * Base class for all filters and color adjustments in Pixelitor.
+ * Base class for all user-selectable filters and color adjustments.
  * A filter transforms an image into another image.
  */
 public abstract class Filter implements Serializable, PresetOwner, Debuggable {
@@ -48,13 +48,12 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     }
 
     /**
-     * The core image transformation logic.
+     * Applies the core image transformation logic.
      */
     protected abstract BufferedImage transform(BufferedImage src, BufferedImage dest);
 
     /**
-     * Executes the filter transformation while handling
-     * conversion for grayscale images if needed.
+     * Executes the filter, handling grayscale conversion if necessary.
      */
     public BufferedImage transformImage(BufferedImage src) {
         boolean grayConversion = false;
@@ -67,11 +66,11 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
             src = ImageUtils.toSysCompatibleImage(src);
         }
 
-        // create destination image if the filter requires it
+        // create a destination image if the filter requires it
         BufferedImage dest = createDefaultDestImg() ?
             ImageUtils.createImageWithSameCM(src) : null;
 
-        // apply the actual filter transformation
+        // apply the filter transformation
         dest = transform(src, dest);
 
         if (grayConversion) { // convert the result back
@@ -86,12 +85,10 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     }
 
     /**
-     * Determines if a default destination image should be created
-     * before running the filter.
-     * Override to return false if the filter creates
-     * the destination image itself.
+     * Returns true if a destination image should be created before the transformation.
      */
     protected boolean createDefaultDestImg() {
+        // override to return false if the filter creates the destination image itself
         return true;
     }
 
@@ -109,25 +106,26 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     }
 
     /**
-     * Whether this filter can process grayscale
-     * images (TYPE_BYTE_GRAY) used in layer masks.
-     * Override to return false if the filter only works with RGB images.
+     * Returns true if this filter can process grayscale (TYPE_BYTE_GRAY) images.
      */
     public boolean supportsGray() {
+        // override to return false if the filter only works with RGB images
         return true;
     }
 
     /**
-     * Whether this filter can be used as a smart filter.
+     * Returns true if this filter can be used as a smart filter.
      * One condition is that the filter must have a no-arg constructor.
      * Another condition is that is must support user presets.
+     * Some filters are excluded for other reasons (for example an
+     * experimental filter that should not be serialized).
      */
     public boolean canBeSmart() {
         return true;
     }
 
     /**
-     * Returns a string representation of the filter's current parameters.
+     * Returns a string representation of the filter's parameters.
      */
     public String paramsAsString() {
         return "";
@@ -142,7 +140,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return false;
     }
 
@@ -204,13 +202,13 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
             filterClass = filter.getClass();
             filterName = filter.getName();
 
-            if (filter.canHaveUserPresets()) {
-                filterState = filter.createUserPreset("").saveToString();
+            if (filter.supportsUserPresets()) {
+                filterState = filter.createUserPreset("").writeToString();
             }
         }
 
         /**
-         * Reconstructs a filter from this serialization proxy.
+         * Reconstructs and returns a Filter instance from this proxy.
          */
         @Serial
         protected Object readResolve() {
@@ -223,9 +221,9 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
                 Messages.showException(new RuntimeException(msg, e));
             }
 
-            // restore filter name and state
+            // restore the filter's name and state
             filter.setName(filterName);
-            if (filter.canHaveUserPresets() && filterState != null) {
+            if (filter.supportsUserPresets() && filterState != null) {
                 UserPreset preset = new UserPreset("", null);
                 preset.loadFromString(filterState);
                 filter.loadUserPreset(preset);

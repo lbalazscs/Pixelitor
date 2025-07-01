@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static pixelitor.filters.gui.ColorParamGUI.BUTTON_SIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 /**
- * The GUI for a {@link ColorParam}
+ * The GUI for a {@link ColorListParam}.
  */
 public class ColorListParamGUI extends JPanel implements ParamGUI {
     private final ColorListParam model;
@@ -54,19 +54,20 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         this.model = model;
         this.candidateColors = candidateColors;
 
-        Color[] colors = model.getColors();
-        this.numVisibleSwatches = colors.length;
+        Color[] initialColors = model.getColors();
+        this.numVisibleSwatches = initialColors.length;
 
         colorsPanel = new JPanel(new FlowLayout(LEFT));
 
         swatches = new ArrayList<>(numVisibleSwatches);
         for (int i = 0; i < numVisibleSwatches; i++) {
-            createAndAddSwatch(colors[i], i);
+            createAndAddSwatch(initialColors[i], i);
         }
 
         resetButton = new ResetButton(model);
 
-        RangeParam numColorsModel = new RangeParam("Number",
+        // the range name doesn't matter, because it will not be shown
+        RangeParam numColorsModel = new RangeParam(model.getName(),
             minNumColors, numVisibleSwatches, candidateColors.length);
         numColorsSlider = new SliderSpinner(numColorsModel, NONE, false);
         numColorsSlider.setupTicks(1, 0);
@@ -80,7 +81,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         setBorder(createTitledBorder(model.getName()));
     }
 
-    private ColorSwatch createAndAddSwatch(Color color, int index) {
+    private void createAndAddSwatch(Color color, int index) {
         ColorSwatch swatch = new ColorSwatch(color, BUTTON_SIZE);
         swatches.add(swatch);
         colorsPanel.add(swatch);
@@ -88,32 +89,35 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         GUIUtils.addClickAction(swatch, () -> showColorDialog(index));
         Colors.setupFilterColorsPopupMenu(this, swatch,
             () -> model.getColor(index), c -> updateColor(c, index));
-
-        return swatch;
     }
 
-    private void numColorsChanged(int newNum) {
-        changeNumVisibleSwatches(newNum);
+    private void numColorsChanged(int newNumColors) {
+        changeNumVisibleSwatches(newNumColors);
         updateModelColors();
     }
 
     private void changeNumVisibleSwatches(int newNum) {
         if (newNum == numVisibleSwatches) {
             return;
-        } else if (newNum < numVisibleSwatches) {
+        }
+
+        if (newNum < numVisibleSwatches) {
+            // hide surplus swatches
             for (int i = newNum; i < numVisibleSwatches; i++) {
                 swatches.get(i).setVisible(false);
             }
         } else { // newNum > numVisibleSwatches
-            int numInstantiated = swatches.size();
+            // show existing swatches or create new ones
             for (int i = numVisibleSwatches; i < newNum; i++) {
-                if (i < numInstantiated) {
+                if (i < swatches.size()) {
                     swatches.get(i).setVisible(true);
                 } else {
-                    ColorSwatch swatch = createAndAddSwatch(candidateColors[i], i);
-                    swatch.revalidate();
+                    createAndAddSwatch(candidateColors[i], i);
                 }
             }
+            // ensure the new swatches are displayed
+            colorsPanel.revalidate();
+            colorsPanel.repaint();
         }
         numVisibleSwatches = newNum;
     }
@@ -135,7 +139,9 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
     private void updateColor(Color color, int index) {
         ColorSwatch swatch = swatches.get(index);
         swatch.setForeground(color);
-        swatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
+
+        // swatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
+        swatch.repaint();
 
         model.setColor(index, color, true);
     }
@@ -171,7 +177,6 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         for (ColorSwatch swatch : swatches) {
             swatch.setToolTipText(tip);
         }
-
     }
 
     @Override

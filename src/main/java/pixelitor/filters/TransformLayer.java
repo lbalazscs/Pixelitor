@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.Features;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.AngleParam;
@@ -38,7 +37,7 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static pixelitor.colors.Colors.TRANSPARENT_BLACK;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
  * A filter for applying arbitrary affine transformations to an image.
@@ -51,7 +50,7 @@ public class TransformLayer extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
-    private final ColorParam bgColorParam = new ColorParam(GUIText.BG_COLOR, TRANSPARENT_BLACK, USER_ONLY_TRANSPARENCY);
+    private final ColorParam bgColorParam = new ColorParam(GUIText.BG_COLOR, TRANSPARENT_BLACK, MANUAL_ALPHA_ONLY);
     private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", -500, 100, 500);
     private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 0, 500, false);
 
@@ -61,7 +60,7 @@ public class TransformLayer extends ParametrizedFilter {
         bgColorParam.setPresetKey("Background Color");
         shearParam.setLinked(false);
 
-        setParams(
+        initParams(
             center,
             angleParam,
             scaleParam,
@@ -98,15 +97,12 @@ public class TransformLayer extends ParametrizedFilter {
     }
 
     private Point2D calcPivotPoint(BufferedImage src) {
-        int tx = 0;
-        int ty = 0;
-        // TODO if this can run as a smart filter, then it shouldn't
+        // TODO if this runs as a smart filter, then it shouldn't
         //   assume that the active layer is the owner of the image
-        if (!Features.enableExperimental) {
-            Drawable dr = Views.getActiveDrawable();
-            tx = -dr.getTx();
-            ty = -dr.getTy();
-        }
+        Drawable dr = Views.getActiveDrawable();
+        int tx = -dr.getTx();
+        int ty = -dr.getTy();
+
         double pivotX = (tx + src.getWidth()) * center.getRelativeX();
         double pivotY = (ty + src.getHeight()) * center.getRelativeY();
         return new Point2D.Double(pivotX, pivotY);

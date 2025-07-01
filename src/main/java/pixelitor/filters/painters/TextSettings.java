@@ -297,7 +297,7 @@ public class TextSettings implements Serializable, Debuggable {
             horizontalAlignment = alignment.getHorizontal();
             verticalAlignment = alignment.getVertical();
         }
-        mlpAlignment = preset.getInt(PRESET_KEY_MLP_ALIGN);
+        mlpAlignment = preset.getInt(PRESET_KEY_MLP_ALIGN, AlignmentSelector.LEFT);
 
         font = new FontInfo(preset).createFont();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,9 +23,18 @@ import pixelitor.utils.Rnd;
 import java.awt.Color;
 import java.util.Random;
 
+/**
+ * An interface for modifying a particle's properties.
+ */
 public interface Modifier<P extends Particle> {
+    /**
+     * Applies a modification to the given particle.
+     */
     void modify(P particle);
 
+    /**
+     * A modifier that sets a particle's position to a random location within a rectangle.
+     */
     record RandomizePosition<P extends Particle>(int x, int y, int width, int height,
                                                  Random random) implements Modifier<P> {
         public RandomizePosition(int width, int height, Random random) {
@@ -38,6 +47,9 @@ public interface Modifier<P extends Particle> {
         }
     }
 
+    /**
+     * A modifier that sets a particle's color to a random value.
+     */
     record RandomizeColor<P extends Particle>(Random random, boolean randomizeAlpha) implements Modifier<P> {
         public RandomizeColor(Random random) {
             this(random, true);
@@ -49,6 +61,9 @@ public interface Modifier<P extends Particle> {
         }
     }
 
+    /**
+     * A modifier that sets a particle's color using a golden ratio sequence.
+     */
     record RandomGoldenRatioColor<P extends Particle>(GoldenRatio goldenRatio) implements Modifier<P> {
         public RandomGoldenRatioColor(Random random, Color root, float colorRandomness) {
             this(new GoldenRatio(random, root, colorRandomness));

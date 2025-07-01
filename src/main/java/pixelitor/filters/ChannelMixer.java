@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.function.BooleanSupplier;
 
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.utils.Texts.i18n;
 
@@ -179,7 +179,7 @@ public class ChannelMixer extends ParametrizedFilter {
         autoBWParam.setToolTip("Link the sliders so that the image always stays black and white");
         preserveBrightnessParam.setToolTip("Preserve brightness by ensuring that the sum of percentages is around 100%");
 
-        setParams(
+        initParams(
             autoBWParam,
             preserveBrightnessParam,
             redPercentageGroup,

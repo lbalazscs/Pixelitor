@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.io.Serial;
 import java.util.SplittableRandom;
 
 import static java.awt.Color.GRAY;
-import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 
 /**
  * Brushed Metal filter based on the JHLabs BrushedMetalFilter
@@ -38,7 +38,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 5028460952633659329L;
 
-    private final ColorParam color = new ColorParam("Color", GRAY, NO_TRANSPARENCY);
+    private final ColorParam color = new ColorParam("Color", GRAY, OPAQUE_ONLY);
     private final RangeParam radius = new RangeParam("Length", 0, 100, 500);
     private final RangeParam amount = new RangeParam("Amount (%)", 0, 50, 100);
     private final RangeParam shine = new RangeParam("Shine (%)", 0, 10, 100);
@@ -46,7 +46,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
     public JHBrushedMetal() {
         super(false);
 
-        setParams(
+        initParams(
             color,
             radius.withAdjustedRange(0.5),
             amount,

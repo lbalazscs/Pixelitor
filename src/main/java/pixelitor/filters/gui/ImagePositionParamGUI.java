@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.util.function.BiConsumer;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.WEST;
@@ -31,7 +32,7 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NORTH;
  */
 public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     private static final int HORIZONTAL_GAP = 10;
-    
+
     private final ImagePositionParam model;
     private final RangeParam xSliderModel;
     private final RangeParam ySliderModel;
@@ -72,8 +73,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         add(verticalBox, CENTER);
 
         setupPreferredSize();
-
-        linkSliderChangesToModel(model);
+        linkSliderChangesToModel();
     }
 
     private void setupPreferredSize() {
@@ -84,32 +84,22 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
             currentSize.height));
     }
 
-    // if one of the sliders was moved by the users, update the
-    // image position selector and run the filter
-    private void linkSliderChangesToModel(ImagePositionParam model) {
-        xSliderModel.addChangeListener(e -> xSliderChanged(model));
-        ySliderModel.addChangeListener(e -> ySliderChanged(model));
+    // if one of the sliders was moved by the user,
+    // update the model and the position selector
+    private void linkSliderChangesToModel() {
+        xSliderModel.addChangeListener(e -> sliderChanged(xSliderModel, model::setRelativeX));
+        ySliderModel.addChangeListener(e -> sliderChanged(ySliderModel, model::setRelativeY));
     }
 
-    private void xSliderChanged(ImagePositionParam model) {
+    private void sliderChanged(RangeParam sliderModel, BiConsumer<Double, Boolean> modelUpdater) {
         if (sliderUpdatesEnabled) {
-            model.setRelativeX(xSliderModel.getPercentage(),
-                xSliderModel.getValueIsAdjusting());
-            positionSelector.repaint();
-        }
-    }
-
-    private void ySliderChanged(ImagePositionParam model) {
-        if (sliderUpdatesEnabled) {
-            model.setRelativeY(ySliderModel.getPercentage(),
-                ySliderModel.getValueIsAdjusting());
+            modelUpdater.accept(sliderModel.getPercentage(), sliderModel.getValueIsAdjusting());
             positionSelector.repaint();
         }
     }
 
     /**
-     * Updates the sliders based on the model changes.
-     * This doesn't trigger the running of the filter.
+     * Updates the sliders based on model changes without triggering filter execution.
      */
     public void updateSlidersFromModel() {
         sliderUpdatesEnabled = false;

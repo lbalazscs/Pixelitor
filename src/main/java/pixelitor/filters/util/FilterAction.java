@@ -116,8 +116,7 @@ public class FilterAction extends AbstractViewEnabledAction {
         // this logic is here and not in Filter because for
         // smart objects a new Filter instance is created
         if (!filter.canBeSmart()) {
-            String msg = "<html>The filter <b>" + name + "</b> can't be used as a smart filter.";
-            Messages.showInfo("Unsupported Filter", msg);
+            Messages.showFilterCantBeSmartMessage(name);
             return;
         }
 
@@ -170,9 +169,6 @@ public class FilterAction extends AbstractViewEnabledAction {
             return false;
         }
         if (!pf.supportsTweenAnimation()) {
-            return false;
-        }
-        if (!pf.getParamSet().isAnimatable()) {
             return false;
         }
         if (filter instanceof Fade && !History.canFade()) {

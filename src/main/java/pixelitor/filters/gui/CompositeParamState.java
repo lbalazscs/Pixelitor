@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,10 +35,16 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
 
     private final List<ParamState<?>> children;
 
+    /**
+     * Creates a composite state from a list of child states.
+     */
     public CompositeParamState(List<ParamState<?>> children) {
         this.children = children;
     }
 
+    /**
+     * Creates a composite state by copying the state of all animatable parameters.
+     */
     public CompositeParamState(FilterParam[] params) {
         children = Arrays.stream(params)
             .filter(FilterParam::isAnimatable)
@@ -75,7 +81,7 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
                 i, startChildState.getClass(), endChildState.getClass()));
         }
 
-        // The cast is safe because we checked the runtime types
+        // the cast is safe because we checked the runtime types
         T start = (T) startChildState;
         T end = (T) endChildState;
 

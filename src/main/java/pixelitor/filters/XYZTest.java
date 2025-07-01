@@ -47,7 +47,7 @@ public class XYZTest extends ParametrizedFilter {
     public XYZTest() {
         super(true);
 
-        setParams(
+        initParams(
             x,
             y,
             z,

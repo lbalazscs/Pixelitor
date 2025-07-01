@@ -66,16 +66,16 @@ public abstract class ContentLayer extends Layer {
     }
 
     /**
-     * Returns the X translation of the content
-     * relative to its default position
+     * Returns the X translation of the content relative to its default position.
+     * For image-based layers this is the X translation of the image relative to
+     * the canvas and it's always zero or negative because the image must cover the canvas.
      */
     public int getTx() {
         return translationX + tmpTx;
     }
 
     /**
-     * Returns the Y translation of the content
-     * relative to its default position
+     * Similar to {@link  #getTx()}, but for the Y translation.
      */
     public int getTy() {
         return translationY + tmpTy;

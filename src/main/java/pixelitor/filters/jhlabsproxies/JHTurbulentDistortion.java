@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,14 +17,13 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.MarbleFilter;
+import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-
-import static pixelitor.filters.gui.IntChoiceParam.EDGE_REPEAT_PIXELS;
 
 /**
  * Turbulent Distortion filter based on the JHLabs MarbleFilter
@@ -48,12 +47,12 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     public JHTurbulentDistortion() {
         super(true);
 
-        setParams(
+        initParams(
             scale.withAdjustedRange(0.1),
             amount.withAdjustedRange(0.07),
             turbulence,
             time,
-            edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS),
+            edgeAction.withDefaultChoice(TransformFilter.REPEAT_EDGE),
             interpolation
         ).withReseedNoiseAction();
     }

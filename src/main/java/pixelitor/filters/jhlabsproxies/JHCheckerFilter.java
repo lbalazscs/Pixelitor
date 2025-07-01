@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.Arrays;
 
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Checker Pattern filter based on the JHLabs CheckFilter
@@ -57,7 +57,7 @@ public class JHCheckerFilter extends ParametrizedFilter {
     public JHCheckerFilter() {
         super(true);
 
-        setParams(
+        initParams(
             size.withAdjustedRange(1.0),
             angle,
             colors,

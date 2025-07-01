@@ -57,7 +57,7 @@ public class BorderMask extends ParametrizedFilter {
     public BorderMask() {
         super(false);
 
-        setParams(
+        initParams(
             distanceParam,
             roundnessParam,
             angleParam,

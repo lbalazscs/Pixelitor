@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 
 /**
- * A range with a logarithmic scale
+ * A {@link FilterParam} for controlling zoom level on a logarithmic scale.
  */
 public class LogZoomParam extends RangeParam {
     /**
@@ -41,11 +41,17 @@ public class LogZoomParam extends RangeParam {
         return gui;
     }
 
-    public double getZoomValue() {
+    /**
+     * Returns the zoom level as a percentage.
+     */
+    public double getZoomPercent() {
         return Math.pow(10.0, getPercentage());
     }
 
+    /**
+     * Returns the zoom level as a ratio.
+     */
     public double getZoomRatio() {
-        return getZoomValue() / 100.0;
+        return getZoomPercent() / 100.0;
     }
 }

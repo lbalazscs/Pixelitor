@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -129,10 +129,6 @@ public class FilterState implements Preset {
     @Override
     public Action createAction(PresetOwner owner) {
         return new TaskAction(name, () -> owner.loadFilterState(this, shouldResetBeforeApplying));
-    }
-
-    public String toDebugString() {
-        return name + ": " + states;
     }
 
     @Override

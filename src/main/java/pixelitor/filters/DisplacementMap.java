@@ -39,7 +39,7 @@ public class DisplacementMap extends ParametrizedFilter {
     public DisplacementMap() {
         super(true);
 
-        setParams(
+        initParams(
             imageParam,
             tileParam,
             amount.withAdjustedRange(0.2),

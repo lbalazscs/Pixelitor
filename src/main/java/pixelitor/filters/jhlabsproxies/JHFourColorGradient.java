@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
  * Four Color Gradient filter based on the JHLabs FourColorFilter
@@ -39,13 +39,13 @@ public class JHFourColorGradient extends ParametrizedFilter {
     private static final long serialVersionUID = -3344171912935129684L;
 
     private final ColorParam northWestParam =
-        new ColorParam("Northwest", new Color(20, 128, 20), USER_ONLY_TRANSPARENCY);
+        new ColorParam("Northwest", new Color(20, 128, 20), MANUAL_ALPHA_ONLY);
     private final ColorParam northEastParam =
-        new ColorParam("Northeast", new Color(200, 200, 20), USER_ONLY_TRANSPARENCY);
+        new ColorParam("Northeast", new Color(200, 200, 20), MANUAL_ALPHA_ONLY);
     private final ColorParam southWestParam =
-        new ColorParam("Southwest", new Color(20, 20, 200), USER_ONLY_TRANSPARENCY);
+        new ColorParam("Southwest", new Color(20, 20, 200), MANUAL_ALPHA_ONLY);
     private final ColorParam southEastParam =
-        new ColorParam("Southeast", new Color(200, 20, 20), USER_ONLY_TRANSPARENCY);
+        new ColorParam("Southeast", new Color(200, 20, 20), MANUAL_ALPHA_ONLY);
 
     private final IntChoiceParam interpolation = new IntChoiceParam("Interpolation", new Item[]{
         new Item("Linear", FourColorFilter.INTERPOLATION_LINEAR),
@@ -69,7 +69,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
         var brightenAll = new FilterButtonModel("Brighter",
             this::brightenColors, "Brighten all colors");
 
-        setParams(
+        initParams(
             northWestParam,
             northEastParam,
             southWestParam,

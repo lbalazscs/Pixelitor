@@ -35,7 +35,7 @@ import java.io.Serial;
 
 import static java.awt.Color.BLACK;
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
-import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
@@ -52,7 +52,7 @@ public class JHDropShadow extends ParametrizedFilter {
     private final RangeParam opacity = new RangeParam(GUIText.OPACITY, 0, 90, 100);
     private final RangeParam softness = new RangeParam("Softness", 0, 10, 25);
     private final BooleanParam shadowOnly = new BooleanParam("Shadow Only");
-    private final ColorParam color = new ColorParam("Color", BLACK, NO_TRANSPARENCY);
+    private final ColorParam color = new ColorParam("Color", BLACK, OPAQUE_ONLY);
 
     private ShadowFilter filter;
 
@@ -61,7 +61,7 @@ public class JHDropShadow extends ParametrizedFilter {
 
         opacity.setPresetKey("Opacity (%)");
 
-        setParams(
+        initParams(
             angle,
             distance.withAdjustedRange(0.1),
             opacity,

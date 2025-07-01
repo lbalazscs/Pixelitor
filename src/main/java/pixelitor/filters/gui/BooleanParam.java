@@ -28,12 +28,11 @@ import java.util.List;
 import java.util.Locale;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
- * A filter parameter for managing a boolean value.
- * It's represented by a checkbox in the GUI.
+ * A filter parameter for managing a boolean value, represented by a checkbox in the GUI.
  */
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
@@ -49,12 +48,12 @@ public class BooleanParam extends AbstractFilterParam {
         this(name, defaultValue, ALLOW_RANDOMIZE);
     }
 
-    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy) {
-        this(name, defaultValue, randomizePolicy, false);
+    public BooleanParam(String name, boolean defaultValue, RandomizeMode randomizeMode) {
+        this(name, defaultValue, randomizeMode, false);
     }
 
-    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy, boolean addResetButton) {
-        super(name, randomizePolicy);
+    public BooleanParam(String name, boolean defaultValue, RandomizeMode randomizeMode, boolean addResetButton) {
+        super(name, randomizeMode);
 
         this.defaultValue = defaultValue;
         this.value = defaultValue;
@@ -68,11 +67,11 @@ public class BooleanParam extends AbstractFilterParam {
         guiCreated();
 
         if (pendingItemListeners != null) {
-            // The item listeners for the GUI were temporarily stored here.
+            // add any item listeners that were queued before the GUI was created
             for (ItemListener listener : pendingItemListeners) {
                 gui.addItemListener(listener);
             }
-            pendingItemListeners = null; 
+            pendingItemListeners = null;
         }
 
         return gui;
@@ -84,16 +83,14 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     /**
-     * Configures another  {@link FilterSetting} to be enabled
-     * when this one is checked.
+     * Configures another {@link FilterSetting} to be enabled when this one is checked.
      */
     public void setupEnableOtherIfChecked(FilterSetting other) {
         setupDependentOther(other, true);
     }
 
     /**
-     * Configures another  {@link FilterSetting} to be disabled
-     * when this one is checked.
+     * Configures another {@link FilterSetting} to be disabled when this one is checked.
      */
     public void setupDisableOtherIfChecked(FilterSetting other) {
         setupDependentOther(other, false);
@@ -134,6 +131,9 @@ public class BooleanParam extends AbstractFilterParam {
         return value;
     }
 
+    /**
+     * Returns the checked state in the format expected by G'MIC
+     */
     public String isCheckedStr() {
         return value ? "1" : "0";
     }

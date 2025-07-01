@@ -78,9 +78,9 @@ public class StrokeSettingsPanel extends JPanel {
 
         JComponent capSelector = capParam.createGUI("cap");
 
-        // Manually set the preferred width so that the layout aligns with
-        // the layout in the other panel. Doubling the width is about OK.
+        // manually set a preferred width to align the layout with the other panel
         Dimension dim = capSelector.getPreferredSize();
+        // doubling the width is about right
         dim.setSize(dim.getWidth() * 2, dim.getHeight());
         capSelector.setPreferredSize(dim);
 
@@ -105,55 +105,56 @@ public class StrokeSettingsPanel extends JPanel {
     }
 
     private static JPanel createStrokePreviewPanel(StrokeParam strokeParam) {
-        JComponent preview = createPreviewComponent(strokeParam);
-        strokeParam.setPreviewer(preview);
+        JComponent previewer = new StrokePreviewer(strokeParam);
+        strokeParam.setPreviewer(previewer);
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(preview, CENTER);
+        panel.add(previewer, CENTER);
         panel.setBorder(createTitledBorder("Stroke Preview"));
 
         return panel;
     }
 
-    private static JComponent createPreviewComponent(StrokeParam strokeParam) {
-        JComponent preview = new JComponent() {
-            // only the height matters, because the width will be stretched
-            final Dimension size = new Dimension(PREVIEW_SIZE, PREVIEW_SIZE);
+    private static class StrokePreviewer extends JComponent {
+        private static final Dimension PREFERRED_DIMENSION = new Dimension(PREVIEW_SIZE, PREVIEW_SIZE);
+        private final StrokeParam strokeParam;
 
-            @Override
-            protected void paintComponent(Graphics g) {
-                boolean darkTheme = Themes.getActive().isDark();
+        StrokePreviewer(StrokeParam strokeParam) {
+            this.strokeParam = strokeParam;
+        }
 
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        @Override
+        protected void paintComponent(Graphics g) {
+            boolean darkTheme = Themes.getActive().isDark();
 
-                // fill background
-                int width = getWidth();
-                int height = getHeight();
-                g2.setColor(darkTheme ? Color.BLACK : Color.WHITE);
-                g2.fillRect(0, 0, width, height);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-                // paint the stroke preview
-                QuadCurve2D.Double shape = new QuadCurve2D.Double(
-                    width * 0.1, height * 0.4,
-                    width * 0.5, height * 0.8,
-                    width * 0.9, height * 0.4
-                );
-                g2.setColor(darkTheme ? Color.WHITE : Color.BLACK);
-                g2.setStroke(strokeParam.createStroke());
-                g2.draw(shape);
-            }
+            // fill background
+            int width = getWidth();
+            int height = getHeight();
+            g2.setColor(darkTheme ? Color.BLACK : Color.WHITE);
+            g2.fillRect(0, 0, width, height);
 
-            @Override
-            public Dimension getMinimumSize() {
-                return size;
-            }
+            // paint the stroke preview
+            QuadCurve2D.Double shape = new QuadCurve2D.Double(
+                width * 0.1, height * 0.4,
+                width * 0.5, height * 0.8,
+                width * 0.9, height * 0.4
+            );
+            g2.setColor(darkTheme ? Color.WHITE : Color.BLACK);
+            g2.setStroke(strokeParam.createStroke());
+            g2.draw(shape);
+        }
 
-            @Override
-            public Dimension getPreferredSize() {
-                return size;
-            }
-        };
-        return preview;
+        @Override
+        public Dimension getMinimumSize() {
+            return PREFERRED_DIMENSION;
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return PREFERRED_DIMENSION;
+        }
     }
 }

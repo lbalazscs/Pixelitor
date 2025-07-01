@@ -19,7 +19,7 @@ package pixelitor.filters.curves;
 
 import com.jhlabs.image.Curve;
 import com.jhlabs.image.ImageMath;
-import pixelitor.filters.levels.Channel;
+import pixelitor.filters.util.Channel;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -38,13 +38,15 @@ import java.awt.geom.Point2D;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurve {
-    // Maximum allowed number of control points on the curve
+    // maximum allowed number of control points on the curve
     private static final int MAX_CONTROL_POINTS = 16;
 
-    // Radius for visual representation and hit detection
+    // radius for visual representation and hit detection of knots
     private static final int KNOT_RADIUS_PIXELS = 6;
-    private static final float KNOT_RADIUS = 0.04F;
-    private static final float KNOT_DETECTION_RADIUS = 0.08F;
+    // radius for knot hover detection, in normalized coordinates
+    private static final float KNOT_HOVER_RADIUS = 0.04f;
+    // radius for detecting proximity to an existing knot, in normalized coordinates
+    private static final float KNOT_PROXIMITY_RADIUS = 0.08f;
 
     public final Curve curveData = new Curve();
     private final Channel channel;
@@ -55,7 +57,7 @@ public class ToneCurve {
     private boolean curveUpdated = true;
     private boolean active = false;
 
-    // Stroke styles for drawing the curve and points
+    // stroke styles for drawing the curve and points
     private static final BasicStroke CURVE_STROKE = new BasicStroke(1);
     private static final BasicStroke POINT_STROKE = new BasicStroke(2);
 
@@ -83,8 +85,8 @@ public class ToneCurve {
      */
     private void updateCurvePlotData() {
         if (curveUpdated) {
-            curveUpdated = false;
             curvePlotData = curveData.makeTable();
+            curveUpdated = false;
         }
     }
 
@@ -94,46 +96,42 @@ public class ToneCurve {
      * Returns the index of the added or replaced knot, or -1 if not added.
      */
     public int addKnot(Point2D.Float p, boolean allowReplace) {
-        // clamp to boundaries [0,1]
         clampToBoundary(p);
 
-        int lastIndex = curveData.x.length - 1;
-        int index = curveData.findKnotPos(p.x);
+        int knotCount = curveData.x.length;
+        int insertionIndex = curveData.findKnotPos(p.x);
 
-        // Prevent adding knots at the edges
-        if (index <= 0 || index > lastIndex) {
+        // prevent adding knots at the edges
+        if (insertionIndex <= 0 || insertionIndex >= knotCount) {
             return -1;
         }
 
-        // If allowReplace is true, replace a nearby knot if is's too close
+        // if allowReplace is true, replace a nearby knot if it's too close
         if (allowReplace) {
-            int prevIndex = index - 1;
-            if (isClose(p, new Point2D.Float(curveData.x[prevIndex], curveData.y[prevIndex]))) {
+            int prevIndex = insertionIndex - 1;
+            if (isClose(p, curveData.x[prevIndex], curveData.y[prevIndex])) {
                 setKnotPosition(prevIndex, p);
                 return prevIndex;
-            } else if (isClose(p, new Point2D.Float(curveData.x[index], curveData.y[index]))) {
-                setKnotPosition(index, p);
-                return index;
+            } else if (isClose(p, curveData.x[insertionIndex], curveData.y[insertionIndex])) {
+                setKnotPosition(insertionIndex, p);
+                return insertionIndex;
             }
         }
 
-        if (curveData.x.length >= MAX_CONTROL_POINTS) {
-            return -1;  // can't add because the limit is reached
+        if (knotCount >= MAX_CONTROL_POINTS) {
+            return -1; // cannot add more knots
         }
 
         curveUpdated = true;
-        return curveData.addKnot(p.x, p.y); // adds the new knot
+        return curveData.addKnot(p.x, p.y);
     }
 
     /**
-     * Deletes a knot at the given index if within bounds.
+     * Deletes a knot at the given index.
      */
     public void deleteKnot(int index) {
-        if (index < 0 || index > curveData.x.length - 1) {
-            return;
-        }
-
-        if (curveData.x.length <= 2) {
+        // do not allow deleting the start and end knots
+        if (index <= 0 || index >= curveData.x.length - 1) {
             return;
         }
 
@@ -148,16 +146,15 @@ public class ToneCurve {
      * @param point the new position for the knot, normalized to [0,1] bounds
      */
     public void setKnotPosition(int index, Point2D.Float point) {
-        int lastIndex = curveData.x.length - 1;
-
-        if (index < 0 || index > lastIndex) {
+        // do not allow moving the start and end knots
+        if (index <= 0 || index >= curveData.x.length - 1) {
             return;
         }
 
-        // check prev/next index - knots can't change their index
-        if (index > 0 && point.x < curveData.x[index - 1]) {
+        // prevent knots from crossing over each other on the x-axis
+        if (point.x < curveData.x[index - 1]) {
             point.x = curveData.x[index - 1];
-        } else if (index < lastIndex && point.x > curveData.x[index + 1]) {
+        } else if (point.x > curveData.x[index + 1]) {
             point.x = curveData.x[index + 1];
         }
 
@@ -167,11 +164,7 @@ public class ToneCurve {
     }
 
     /**
-     * Checks if a point is within the draggable range of the given knot index.
-     *
-     * @param index the knot index
-     * @param point the point to check
-     * @return true if the point is out of range, false otherwise
+     * Checks if a knot is dragged far enough to be deleted.
      */
     public boolean isDraggedOutOfRange(int index, Point2D.Float point) {
         if (index <= 0 || index >= curveData.x.length - 1) {
@@ -189,32 +182,32 @@ public class ToneCurve {
      * @return true if the point is within the draggable range, false otherwise
      */
     public boolean isDraggedIn(int index, Point2D.Float point) {
-        if (index <= 0 || index > curveData.x.length - 1) {
+        if (index <= 0 || index >= curveData.x.length) {
             return false;
         }
 
         return point.x < curveData.x[index] && point.x > curveData.x[index - 1];
     }
 
-    private static boolean isOver(Point2D.Float p, Point2D.Float q) {
-        if (Math.abs(p.x - q.x) < KNOT_RADIUS) {
-            return Math.abs(p.y - q.y) < KNOT_RADIUS;
-        }
-        return false;
+    private static boolean isOver(float x1, float y1, float x2, float y2) {
+        return Math.abs(x1 - x2) < KNOT_HOVER_RADIUS && Math.abs(y1 - y2) < KNOT_HOVER_RADIUS;
     }
 
     public boolean isOverKnot(Point2D.Float p) {
         return getKnotIndexAt(p) >= 0;
     }
 
+    /**
+     * Checks if the knot at a given index overlaps with any other knot.
+     */
     public boolean isOverKnot(int index) {
-        var p = new Point2D.Float(curveData.x[index], curveData.y[index]);
+        float x = curveData.x[index];
+        float y = curveData.y[index];
         for (int i = 0; i < curveData.x.length; i++) {
-            if (i != index && isOver(p, new Point2D.Float(curveData.x[i], curveData.y[i]))) {
+            if (i != index && isOver(x, y, curveData.x[i], curveData.y[i])) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -224,11 +217,10 @@ public class ToneCurve {
 
     public int getKnotIndexAt(Point2D.Float p) {
         for (int i = 0; i < curveData.x.length; i++) {
-            if (isOver(p, new Point2D.Float(curveData.x[i], curveData.y[i]))) {
+            if (isOver(p.x, p.y, curveData.x[i], curveData.y[i])) {
                 return i;
             }
         }
-
         return -1;
     }
 
@@ -237,7 +229,7 @@ public class ToneCurve {
     }
 
     /**
-     * Draws the tone curve and, if active, the knots on the curve.
+     * Draws the tone curve and, if active, its knots.
      */
     public void draw(Graphics2D g, boolean darkTheme) {
         drawCurve(g, darkTheme);
@@ -247,12 +239,12 @@ public class ToneCurve {
     }
 
     /**
-     * Draws the curve based on precomputed curve plot data.
+     * Draws the curve line based on precomputed plot data.
      */
     private void drawCurve(Graphics2D g, boolean darkTheme) {
         updateCurvePlotData();
         Path2D path = new Path2D.Double();
-        path.moveTo(0, ((float) curvePlotData[0] / 255) * height);
+        path.moveTo(0, (curvePlotData[0] / 255.0) * height);
         for (int i = 0; i < curvePlotData.length; i++) {
             double x = (i / 255.0) * width;
             double y = (curvePlotData[i] / 255.0) * height;
@@ -265,8 +257,7 @@ public class ToneCurve {
     }
 
     /**
-     * Draws the knots on the curve if the curve is active,
-     * highlighting control points.
+     * Draws the circular handles for the knots on the curve.
      */
     private void drawKnots(Graphics2D g, boolean darkTheme) {
         g.setColor(darkTheme ? Color.WHITE : Color.BLACK);
@@ -290,7 +281,7 @@ public class ToneCurve {
             sb.append(curveData.x[i]);
             sb.append(",");
             sb.append(curveData.y[i]);
-            if (i != numPoints - 1) {
+            if (i < numPoints - 1) {
                 sb.append("#");
             }
         }
@@ -298,26 +289,42 @@ public class ToneCurve {
     }
 
     /**
-     * Restores the curve state from a previously saved string representation.
+     * Restores the curve state from a saved string representation.
      */
     public void setStateFrom(String savedValue) {
+        if (savedValue == null || savedValue.isEmpty()) {
+            return;
+        }
+
         String[] xyPairs = savedValue.split("#");
         int numPoints = xyPairs.length;
-        curveData.x = new float[numPoints];
-        curveData.y = new float[numPoints];
-        for (int i = 0; i < numPoints; i++) {
-            String pair = xyPairs[i];
-            int commaIndex = pair.indexOf(',');
-            String pairX = pair.substring(0, commaIndex);
-            String pairY = pair.substring(commaIndex + 1);
-            curveData.x[i] = Float.parseFloat(pairX);
-            curveData.y[i] = Float.parseFloat(pairY);
+        if (numPoints == 0) {
+            return;
         }
+
+        float[] newX = new float[numPoints];
+        float[] newY = new float[numPoints];
+
+        for (int i = 0; i < numPoints; i++) {
+            String[] pair = xyPairs[i].split(",");
+            if (pair.length != 2) {
+                return; // malformed data, abort
+            }
+            try {
+                newX[i] = Float.parseFloat(pair[0]);
+                newY[i] = Float.parseFloat(pair[1]);
+            } catch (NumberFormatException e) {
+                return; // malformed data, abort
+            }
+        }
+
+        curveData.x = newX;
+        curveData.y = newY;
         curveUpdated = true;
     }
 
     /**
-     * Clamps a point to within the [0,1] bounds for the curve.
+     * Clamps a point's coordinates to the [0,1] range.
      */
     private static void clampToBoundary(Point2D.Float p) {
         p.x = ImageMath.clamp01(p.x);
@@ -325,10 +332,10 @@ public class ToneCurve {
     }
 
     /**
-     * Checks if two points are close enough based on defined detection radius.
+     * Checks if two points are close based on the proximity radius.
      */
-    private static boolean isClose(Point2D p, Point2D q) {
-        return Math.abs(p.getX() - q.getX()) < KNOT_DETECTION_RADIUS
-            && Math.abs(p.getY() - q.getY()) < KNOT_DETECTION_RADIUS;
+    private static boolean isClose(Point2D.Float p, float qx, float qy) {
+        return Math.abs(p.x - qx) < KNOT_PROXIMITY_RADIUS
+            && Math.abs(p.y - qy) < KNOT_PROXIMITY_RADIUS;
     }
 }

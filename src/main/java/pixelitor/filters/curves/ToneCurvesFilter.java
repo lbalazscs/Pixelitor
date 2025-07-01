@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +20,7 @@ package pixelitor.filters.curves;
 import com.jhlabs.image.CurvesFilter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.filters.levels.Channel;
+import pixelitor.filters.util.Channel;
 import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
@@ -40,11 +39,11 @@ public class ToneCurvesFilter extends FilterWithGUI {
     @Serial
     private static final long serialVersionUID = 3679501445608294764L;
 
-    private CurvesFilter filter; // jhlabs curves filter
-    private final ToneCurves curves;  // the curve adjustments
+    private CurvesFilter filter; // the underlying JHLabs filter
+    private final ToneCurves curves;  // the data model for the tone curves
 
-    // Reference to the last-used GUI instance for this filter
-    private ToneCurvesGUI lastGUI;
+    // reference to the last-used GUI instance for this filter
+    private transient ToneCurvesGUI lastGUI;
 
     public ToneCurvesFilter() {
         helpURL = "https://en.wikipedia.org/wiki/Curve_(tonality)";
@@ -69,9 +68,6 @@ public class ToneCurvesFilter extends FilterWithGUI {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new CurvesFilter(NAME);
-        }
-        if (curves == null) {
-            return src;
         }
 
         filter.setCurves(

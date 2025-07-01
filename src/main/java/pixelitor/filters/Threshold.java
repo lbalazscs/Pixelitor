@@ -20,7 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.levels.Channel;
+import pixelitor.filters.util.Channel;
 import pixelitor.utils.Dithering;
 import pixelitor.utils.ImageUtils;
 
@@ -59,7 +59,7 @@ public class Threshold extends ParametrizedFilter {
 
         diffusionStrengthParam.setupEnableOtherIfNotZero(ditheringMethodParam);
 
-        setParams(
+        initParams(
             thresholdParam,
             channelParam,
             diffusionStrengthParam,
@@ -71,7 +71,7 @@ public class Threshold extends ParametrizedFilter {
         boolean dither = diffusionStrengthParam.getValue() != 0;
         double diffusionStrength = diffusionStrengthParam.getPercentage();
 
-        // the input array is modified during the error diffusion
+        // a copy of the input is needed because error diffusion modifies the pixel data
         BufferedImage input = dither ? ImageUtils.copyImage(src) : src;
 
         double threshold = thresholdParam.getValueAsDouble();

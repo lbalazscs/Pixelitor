@@ -171,7 +171,7 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return false;
     }
 

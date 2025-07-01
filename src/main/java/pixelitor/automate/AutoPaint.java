@@ -93,7 +93,7 @@ public class AutoPaint {
                 dr, backupImage, false));
 
             progressHandler.stopProgress();
-            Messages.showPlainStatusMessage(statusBarMessage + "finished.");
+            Messages.showPlainStatusMessage(statusBarMessage + " finished.");
 
             restoreOriginalColors(settings);
         }

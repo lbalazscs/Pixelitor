@@ -59,7 +59,7 @@ public class AddNoise extends ParametrizedFilter {
 
         opacityParam.setPresetKey("Opacity (%)");
 
-        setParams(
+        initParams(
             coverageParam,
             saturationParam,
             opacityParam,

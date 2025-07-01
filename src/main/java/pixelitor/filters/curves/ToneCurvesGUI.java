@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.curves;
 
 import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.levels.Channel;
+import pixelitor.filters.util.Channel;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
@@ -29,7 +29,7 @@ import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BoxLayout.PAGE_AXIS;
 
 /**
- * The GUI for the tone curve filter
+ * The {@link FilterGUI} for the {@link ToneCurvesFilter}.
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
@@ -47,7 +47,7 @@ public class ToneCurvesGUI extends FilterGUI {
         curvesPanel.addActionListener(e -> startPreview(false));
         add(curvesPanel);
 
-        add(createButtonsPanel(layer, curvesPanel));
+        add(createButtonsPanel(layer));
     }
 
     private JPanel createChannelPanel(Channel activeChannel) {
@@ -62,14 +62,14 @@ public class ToneCurvesGUI extends FilterGUI {
     }
 
     private JComboBox<Channel> createChannelsCombo(Channel activeChannel) {
-        var channelTypeCB = GUIUtils.createComboBox(Channel.values());
-        channelTypeCB.setSelectedItem(activeChannel);
-        channelTypeCB.addActionListener(e -> curvesPanel.setActiveCurve(
-            (Channel) channelTypeCB.getSelectedItem()));
-        return channelTypeCB;
+        var channelCB = GUIUtils.createComboBox(Channel.values());
+        channelCB.setSelectedItem(activeChannel);
+        channelCB.addActionListener(e -> curvesPanel.setActiveCurve(
+            (Channel) channelCB.getSelectedItem()));
+        return channelCB;
     }
 
-    private static JPanel createButtonsPanel(Filterable layer, ToneCurvesPanel curvesPanel) {
+    private JPanel createButtonsPanel(Filterable layer) {
         JPanel buttonsPanel = new JPanel(new FlowLayout(LEFT));
         buttonsPanel.add(createShowOriginalCB(layer));
         buttonsPanel.add(GUIUtils.createResetAllButton(e -> curvesPanel.resetAllCurves()));

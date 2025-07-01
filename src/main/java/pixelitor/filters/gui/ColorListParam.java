@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,11 +39,11 @@ public class ColorListParam extends AbstractFilterParam {
     private final Color[] defaultColors;
 
     public ColorListParam(String name, int defaultNumColors, int minNumColors, Color... candidateColors) {
-        super(name, RandomizePolicy.ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW_RANDOMIZE);
         this.minNumColors = minNumColors;
         this.candidateColors = candidateColors;
         this.colors = Arrays.copyOf(candidateColors, defaultNumColors);
-        this.defaultColors = Arrays.copyOf(candidateColors, defaultNumColors);
+        this.defaultColors = Arrays.copyOf(this.colors, defaultNumColors);
     }
 
     @Override
@@ -55,14 +55,23 @@ public class ColorListParam extends AbstractFilterParam {
         return gui;
     }
 
+    /**
+     * Returns the current list of colors.
+     */
     public Color[] getColors() {
         return colors;
     }
 
+    /**
+     * Returns the color at the given index.
+     */
     public Color getColor(int index) {
         return colors[index];
     }
 
+    /**
+     * Sets the color at the given index and optionally triggers an update.
+     */
     public void setColor(int index, Color newColor, boolean trigger) {
         Color oldColor = colors[index];
         if (oldColor.equals(newColor)) {
@@ -75,12 +84,15 @@ public class ColorListParam extends AbstractFilterParam {
         updateGUI(trigger);
     }
 
+    /**
+     * Sets the list of colors and optionally triggers an update.
+     */
     public void setColors(Color[] newColors, boolean trigger) {
-        boolean change = !Arrays.equals(colors, newColors);
-        colors = newColors;
-        if (change) {
-            updateGUI(trigger);
+        if (Arrays.equals(colors, newColors)) {
+            return;
         }
+        colors = newColors;
+        updateGUI(trigger);
     }
 
     private void updateGUI(boolean trigger) {
@@ -144,6 +156,9 @@ public class ColorListParam extends AbstractFilterParam {
         setColors(defCopy, trigger);
     }
 
+    /**
+     * The state of a {@link ColorListParam}.
+     */
     public record ColorListParamState(Color[] colors) implements ParamState<ColorListParamState> {
         @Serial
         private static final long serialVersionUID = 1L;

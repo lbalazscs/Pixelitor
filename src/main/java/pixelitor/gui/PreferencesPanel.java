@@ -22,8 +22,8 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Features;
 import pixelitor.Views;
 import pixelitor.colors.ColorPickerDialog;
+import pixelitor.filters.gui.ChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.ListParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.*;
 import pixelitor.gui.utils.SliderSpinner.LabelPosition;
@@ -169,7 +169,7 @@ public class PreferencesPanel extends JTabbedPane {
         RangeParam fontSize = new RangeParam("Font Size", minSize, currentSize, maxSize, true, LabelPosition.NONE);
         gbh.addParam(fontSize);
 
-        ListParam<String> fontType = new ListParam<>("Font Type", Utils.getAvailableFontNames(), font.getName());
+        ChoiceParam<String> fontType = new ChoiceParam<>("Font Type", Utils.getAvailableFontNames(), font.getName());
         gbh.addParam(fontType);
 
         fontSize.setAdjustmentListener(() -> {
@@ -427,7 +427,7 @@ public class PreferencesPanel extends JTabbedPane {
     }
 
     private void updateThumbSize() {
-        int newSize = ((Item) thumbSizeCB.getSelectedItem()).getValue();
+        int newSize = ((Item) thumbSizeCB.getSelectedItem()).value();
         Views.updateThumbSize(newSize);
     }
 

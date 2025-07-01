@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,11 +31,11 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
- * Two or more {@link RangeParam} objects that are grouped
- * visually in the GUI and can be linked to move together.
+ * Two or more {@link RangeParam} objects that are grouped visually,
+ * can be linked to move together, or can be auto-normalized.
  */
 public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     private final RangeParam[] children;
@@ -47,21 +47,21 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     private boolean autoNormalizing = false;
 
     /**
-     * Two linked children: "Horizontal" and "Vertical", with shared min/max/default values
+     * Two linked children: "Horizontal" and "Vertical", with shared min/max/default values.
      */
     public GroupedRangeParam(String name, int min, int def, int max) {
         this(name, min, def, max, true);
     }
 
     /**
-     * Two children: "Horizontal" and "Vertical", with shared min/max/default values
+     * Two children: "Horizontal" and "Vertical", with shared min/max/default values.
      */
     public GroupedRangeParam(String name, int min, int def, int max, boolean linked) {
         this(name, "Horizontal", "Vertical", min, def, max, linked);
     }
 
     /**
-     * Two children with custom names and shared min/max/default values
+     * Two children with custom names and shared min/max/default values.
      */
     public GroupedRangeParam(String name, String firstChildName, String secondChildName,
                              int min, int def, int max, boolean linked) {
@@ -69,7 +69,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     /**
-     * Any number of children with shared min/max/default values
+     * Any number of children with shared min/max/default values.
      */
     public GroupedRangeParam(String name, String[] childNames,
                              int min, int def, int max, boolean linked) {
@@ -77,9 +77,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     /**
-     * The most generic constructor: any number of children that can differ
-     * in their min/max/default values. Linking makes sense only if they
-     * have the same ranges.
+     * The most generic constructor for any number of children
+     * that can differ in their min/max/default values.
+     * Linking makes sense only if they have the same ranges.
      */
     public GroupedRangeParam(String name, RangeParam[] children, boolean linked) {
         super(name, ALLOW_RANDOMIZE);
@@ -129,14 +129,19 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     /**
-     * Ensures that the sum of values in the child {@link RangeParam}s
-     * is always 100, and therefore they can be interpreted as percentages.
+     * Enables auto-normalization to ensure child values sum to 100,
+     * and therefore they can be interpreted as percentages.
      */
     public GroupedRangeParam autoNormalized() {
+        // auto-normalization is mutually exclusive with linking
         assert !linkedByDefault;
-        assert calcSumOfValues() == 100;
-
         linkedModel = null;
+
+        // validate preconditions for the normalization algorithm to work correctly
+        assert calcSumOfValues() == 100;
+        assert checkRangesForAutoNormalization();
+
+        // enable auto-normalization
         for (RangeParam param : children) {
             param.addChangeListener(e -> autoNormalize(param));
         }
@@ -145,12 +150,25 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         return this;
     }
 
-    private void autoNormalize(RangeParam source) {
-        if (!autoNormalizationEnabled) {
-            return;
+    private boolean checkRangesForAutoNormalization() {
+        int sumOfMaximums = 0;
+        for (RangeParam param : children) {
+            if (param.getMinimum() > 0) {
+                throw new AssertionError("minimum for " + param.getName() + " is " + param.getMinimum());
+            }
+            sumOfMaximums += param.getMaximum();
         }
-        if (autoNormalizing) {
-            // avoid the scenario where the change listeners are calling each other
+
+        if (sumOfMaximums < 100) {
+            throw new AssertionError("sum of maximums = " + sumOfMaximums);
+        }
+
+        return true; // ranges are OK
+    }
+
+    private void autoNormalize(RangeParam source) {
+        if (!autoNormalizationEnabled || autoNormalizing) {
+            // avoid infinite recursion if change listeners call each other
             return;
         }
         autoNormalizing = true;
@@ -159,35 +177,33 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         int diff = sumOfAllValues - 100;
         if (diff == 0) {
             autoNormalizing = false;
-            return;
+            return; // nothing to do
         }
 
-        // The other sliders are moved by
-        // an amount proportional to the space they have left.
-        // The algorithm is described in more detail as the "weighted move" approach at
-        // https://softwareengineering.stackexchange.com/questions/261017/algorithm-for-a-ui-showing-x-percentage-sliders-whose-linked-values-always-total
+        runAutoNormalize(source, diff);
 
-        // The space left function depends on the direction of change.
-        ToDoubleFunction<RangeParam> spaceLeftFunc;
-        if (diff > 0) {
+        autoNormalizing = false;
+    }
+
+    // the other sliders are moved by an amount proportional to the space
+    // they have left, as described in the "weighted move" approach at
+    // https://softwareengineering.stackexchange.com/questions/261017/algorithm-for-a-ui-showing-x-percentage-sliders-whose-linked-values-always-total
+    private void runAutoNormalize(RangeParam source, int diff) {
+        // 1. define how to calculate "space left" based on the direction of change
+        ToDoubleFunction<RangeParam> spaceLeftFunc = (diff > 0)
             // the other sliders have to decrease their value
-            spaceLeftFunc = param -> param.getValueAsDouble() - param.getMinimum();
-        } else {
+            ? param -> param.getValueAsDouble() - param.getMinimum()
             // the other sliders have to increase their value
-            spaceLeftFunc = param -> param.getMaximum() - param.getValueAsDouble();
-        }
+            : param -> param.getMaximum() - param.getValueAsDouble();
 
-        // first pass: calculate the sum of spaces left
-        double sumOfSpacesLeft = 0;
-        for (RangeParam param : children) {
-            if (param != source) {
-                double spaceLeft = spaceLeftFunc.applyAsDouble(param);
-                sumOfSpacesLeft += spaceLeft;
-            }
-        }
+        // 2. first pass: calculate the sum of spaces left across all other sliders
+        double sumOfSpacesLeft = Arrays.stream(children)
+            .filter(param -> param != source)
+            .mapToDouble(spaceLeftFunc)
+            .sum();
+        assert sumOfSpacesLeft != 0; // should be true if the previous checks passed
 
-        // second pass: move the other sliders so that the difference is
-        // distributed among them proportional to their space left
+        // 3. second pass: distribute the correction proportionally to the other sliders
         for (RangeParam param : children) {
             if (param != source) {
                 double spaceLeft = spaceLeftFunc.applyAsDouble(param);
@@ -196,8 +212,6 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
                 param.setValue(newValue, false);
             }
         }
-
-        autoNormalizing = false;
     }
 
     private int calcSumOfValues() {
@@ -208,7 +222,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         return sumOfAllValues;
     }
 
-    private void normalizeNow() {
+    // this method is much simpler than {@link #autoNormalize}, but also
+    // limited: it can't be used interactively, and ignores the min/max values
+    private void normalizeAll() {
         int diff = calcSumOfValues() - 100;
         if (diff != 0) {
             double correction = diff / (double) children.length;
@@ -219,10 +235,14 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         }
     }
 
-    public void setAutoNormalizationEnabled(boolean enable, boolean force) {
+    /**
+     * Enables or disables auto-normalization, optionally
+     * normalizing values immediately if normalization is enabled.
+     */
+    public void setAutoNormalizationEnabled(boolean enable, boolean normalizeNow) {
         assert autoNormalizable;
-        if (!this.autoNormalizationEnabled && enable && force) {
-            normalizeNow();
+        if (!this.autoNormalizationEnabled && enable && normalizeNow) {
+            normalizeAll();
         }
         this.autoNormalizationEnabled = enable;
     }
@@ -291,23 +311,38 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         return true;
     }
 
+    /**
+     * Executes the given action while temporarily disabling auto-normalization.
+     */
+    private void withoutNormalization(Runnable action) {
+        if (!autoNormalizable) {
+            action.run();
+            return;
+        }
+        boolean wasEnabled = autoNormalizationEnabled;
+        autoNormalizationEnabled = false;
+        try {
+            action.run();
+        } finally {
+            autoNormalizationEnabled = wasEnabled;
+        }
+    }
+
     @Override
     public void reset(boolean trigger) {
-        boolean wasNormalized = autoNormalizationEnabled;
-        autoNormalizationEnabled = false;
+        withoutNormalization(() -> {
+            for (RangeParam child : children) {
+                // call the individual params without trigger...
+                child.reset(false);
+            }
 
-        for (RangeParam child : children) {
-            // call the individual params without trigger...
-            child.reset(false);
-        }
+            // ... and then trigger only once
+            if (trigger && adjustmentListener != null) {
+                adjustmentListener.paramAdjusted();
+            }
 
-        // ... and then trigger only once
-        if (trigger) {
-            adjustmentListener.paramAdjusted();
-        }
-
-        setLinked(linkedByDefault);
-        autoNormalizationEnabled = wasNormalized;
+            setLinked(linkedByDefault);
+        });
     }
 
     public RangeParam getRangeParam(int index) {
@@ -321,6 +356,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         }
     }
 
+    /**
+     * Adjusts the range of all child parameters by a given ratio.
+     */
     public GroupedRangeParam withAdjustedRange(double ratio) {
         for (RangeParam child : children) {
             child.withAdjustedRange(ratio);
@@ -332,10 +370,13 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         return children[index].getPercentage();
     }
 
-    public int getNumParams() {
+    public int getNumChildren() {
         return children.length;
     }
 
+    /**
+     * Makes this parameter group not linkable.
+     */
     public GroupedRangeParam notLinkable() {
         linkedModel = null;
         return this;
@@ -358,7 +399,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     @Override
     public GroupedRangeParamState copyState() {
         double[] values = Arrays.stream(children)
-            .mapToDouble(RangeParam::getValue)
+            .mapToDouble(RangeParam::getValueAsDouble)
             .toArray();
 
         return new GroupedRangeParamState(values, isLinked());
@@ -366,22 +407,19 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        boolean wasNormalized = autoNormalizationEnabled;
-        autoNormalizationEnabled = false;
-
-        GroupedRangeParamState grState = (GroupedRangeParamState) state;
-        setLinked(grState.linked());
-        double[] values = grState.values;
-        for (int i = 0; i < values.length; i++) {
-            double value = values[i];
-            if (updateGUI) {
-                children[i].setValueNoTrigger(value);
-            } else {
-                children[i].setValueNoGUI(value);
+        withoutNormalization(() -> {
+            GroupedRangeParamState grState = (GroupedRangeParamState) state;
+            setLinked(grState.linked());
+            double[] values = grState.values;
+            for (int i = 0; i < values.length; i++) {
+                double value = values[i];
+                if (updateGUI) {
+                    children[i].setValueNoTrigger(value);
+                } else {
+                    children[i].setValueNoGUI(value);
+                }
             }
-        }
-
-        autoNormalizationEnabled = wasNormalized;
+        });
     }
 
     @Override
@@ -433,6 +471,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         return true;
     }
 
+    /**
+     * The state of a {@link GroupedRangeParam}, including child values and linked status.
+     */
     public record GroupedRangeParamState(double[] values,
                                          boolean linked) implements ParamState<GroupedRangeParamState> {
         @Serial

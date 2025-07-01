@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.layers.BlendingMode;
 
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * A model for selecting blending modes from a combo box
@@ -30,8 +30,8 @@ public class BlendingModeParam extends IntChoiceParam {
         this(blendingModes, ALLOW_RANDOMIZE);
     }
 
-    public BlendingModeParam(BlendingMode[] blendingModes, RandomizePolicy randomizePolicy) {
-        super("Blending Mode", toValues(blendingModes), randomizePolicy);
+    public BlendingModeParam(BlendingMode[] blendingModes, RandomizeMode randomizeMode) {
+        super("Blending Mode", toValues(blendingModes), randomizeMode);
         this.blendingModes = blendingModes;
     }
 

@@ -28,7 +28,7 @@ import java.io.Serial;
 
 import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.sin;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**

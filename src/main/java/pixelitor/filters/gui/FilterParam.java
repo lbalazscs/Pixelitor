@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import pixelitor.utils.debug.Debuggable;
  * used outside of filters as models of GUI elements. In such cases,
  * only a subset of their functionality is used.
  */
-public interface FilterParam extends FilterSetting, Resettable, Debuggable {
+public non-sealed interface FilterParam extends FilterSetting, Resettable, Debuggable {
 
     /**
      * Sets a random value without triggering any filter update.
@@ -102,7 +102,7 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
     /**
      * Sets the randomization policy for this parameter.
      */
-    void setRandomizePolicy(RandomizePolicy policy);
+    void setRandomizePolicy(RandomizeMode policy);
 
     /**
      * Sets a tooltip message for the GUI widget associated with this parameter.

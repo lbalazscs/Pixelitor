@@ -32,7 +32,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * The "Flashlight" filter.
@@ -64,7 +64,7 @@ public class Flashlight extends ParametrizedFilter {
         opacity.setPresetKey("Opacity");
         radius.setPresetKey("Radius");
 
-        setParams(
+        initParams(
             center,
             radius.withAdjustedRange(1.0),
             softness,

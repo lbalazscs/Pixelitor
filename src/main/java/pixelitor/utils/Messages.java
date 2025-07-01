@@ -176,4 +176,9 @@ public class Messages {
         assert dir.isDirectory();
         showStatusMessage(numFiles + " files saved to <b>" + dir.getAbsolutePath() + "</b>");
     }
+
+    public static void showFilterCantBeSmartMessage(String filterName) {
+        String msg = "<html>The filter <b>" + filterName + "</b> can't be used as a smart filter.";
+        showInfo("Unsupported Filter", msg);
+    }
 }

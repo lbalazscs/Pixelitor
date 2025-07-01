@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * A {@link FilterParam} that allows selecting a point within an image using
@@ -99,11 +99,11 @@ public class ImagePositionParam extends AbstractFilterParam {
         }
     }
 
-    public void setRelativeX(double x, boolean isAdjusting) {
+    void setRelativeX(double x, boolean isAdjusting) {
         setRelativePosition(x, relativeY, false, isAdjusting, true);
     }
 
-    public void setRelativeY(double y, boolean isAdjusting) {
+    void setRelativeY(double y, boolean isAdjusting) {
         setRelativePosition(relativeX, y, false, isAdjusting, true);
     }
 
@@ -139,15 +139,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         ImagePositionParamState s = (ImagePositionParamState) state;
-        double newRelX = s.relativeX;
-        double newRelY = s.relativeY;
-
-        if (updateGUI) {
-            setRelativePosition(newRelX, newRelY, true, false, false);
-        } else {
-            this.relativeX = newRelX;
-            this.relativeY = newRelY;
-        }
+        setRelativePosition(s.relativeX, s.relativeY, updateGUI, false, false);
     }
 
     @Override
@@ -170,7 +162,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     public record ImagePositionParamState(double relativeX,
-                                           double relativeY) implements ParamState<ImagePositionParamState> {
+                                          double relativeY) implements ParamState<ImagePositionParamState> {
         @Serial
         private static final long serialVersionUID = 1L;
 
@@ -183,7 +175,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
         @Override
         public String toSaveString() {
-            // mandelbrot has 2 decimal places
+            // 4 because range param has max 2 digits after the decimal point
             return "%.4f,%.4f".formatted(relativeX, relativeY);
         }
     }

@@ -47,7 +47,7 @@ import static java.awt.Color.LIGHT_GRAY;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
  * The Render/Geometry/Cubes Pattern filter.
@@ -73,11 +73,11 @@ public class Cubes extends ParametrizedFilter {
     });
 
     private final RangeParam sizeParam = new RangeParam("Size", 5, 20, 200);
-    private final ColorParam topColorParam = new ColorParam("Top Color", WHITE, USER_ONLY_TRANSPARENCY);
-    private final ColorParam leftColorParam = new ColorParam("Left Color", LIGHT_GRAY, USER_ONLY_TRANSPARENCY);
-    private final ColorParam rightColorParam = new ColorParam("Right Color", GRAY, USER_ONLY_TRANSPARENCY);
+    private final ColorParam topColorParam = new ColorParam("Top Color", WHITE, MANUAL_ALPHA_ONLY);
+    private final ColorParam leftColorParam = new ColorParam("Left Color", LIGHT_GRAY, MANUAL_ALPHA_ONLY);
+    private final ColorParam rightColorParam = new ColorParam("Right Color", GRAY, MANUAL_ALPHA_ONLY);
     private final RangeParam edgeWidthParam = new RangeParam("Edge Width", 0, 0, 10);
-    private final ColorParam edgeColorParam = new ColorParam("Edge Color", BLACK, USER_ONLY_TRANSPARENCY);
+    private final ColorParam edgeColorParam = new ColorParam("Edge Color", BLACK, MANUAL_ALPHA_ONLY);
 
     private final Transform transform = new Transform();
 
@@ -86,7 +86,7 @@ public class Cubes extends ParametrizedFilter {
 
         edgeWidthParam.setupEnableOtherIfNotZero(edgeColorParam);
 
-        setParams(
+        initParams(
             typeParam,
             sizeParam,
             topColorParam,
@@ -152,7 +152,7 @@ public class Cubes extends ParametrizedFilter {
         Color rightColor = rightColorParam.getColor();
         Color leftColor = leftColorParam.getColor();
 
-        int type = typeParam.getSelected().getValue();
+        int type = typeParam.getValue();
         boolean interlocking = type == TYPE_INTERLOCKING;
 
         double size = sizeParam.getValueAsDouble();

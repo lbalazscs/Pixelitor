@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,6 +41,7 @@ import static java.awt.FlowLayout.LEFT;
  * This class acts as the {@link ParamGUI} for an {@link EffectsParam}.
  */
 public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
+    // padded with spaces for consistent tab width
     public static final String GLOW_TAB_NAME = "Glow               ";
     public static final String INNER_GLOW_TAB_NAME = "Inner Glow     ";
     public static final String NEON_BORDER_TAB_NAME = "Neon Border ";
@@ -77,6 +78,9 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         add(tabs, CENTER);
     }
 
+    /**
+     * Sets the listener to be notified of parameter adjustments.
+     */
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         assert listener != null;
         for (EffectPanel panel : panels) {
@@ -94,6 +98,9 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         }
     }
 
+    /**
+     * Updates the panel's controls to reflect the given effects configuration.
+     */
     public void setEffects(AreaEffects effects) {
         initGlowPanel(effects);
         initInnerGlowPanel(effects);
@@ -106,24 +113,17 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     }
 
     private void initGlowPanel(AreaEffects effects) {
-        boolean enable = false;
-        Color color = WHITE;
-        double width = 10;
-        float opacity = 1.0f;
-        if (effects != null) {
-            var effect = effects.getGlow();
-            if (effect != null) {
-                enable = true;
-                color = effect.getBrushColor();
-                width = effect.getEffectWidth();
-                opacity = effect.getOpacity();
-            }
-        }
+        var effect = (effects == null) ? null : effects.getGlow();
+        boolean enabled = (effect != null);
+        Color color = enabled ? effect.getBrushColor() : WHITE;
+        double width = enabled ? effect.getEffectWidth() : 10;
+        float opacity = enabled ? effect.getOpacity() : 1.0f;
+        
         if (glowPanel == null) { // first initialization
             glowPanel = new EffectWithWidthPanel(
-                "Glow", enable, color, width, opacity);
+                "Glow", enabled, color, width, opacity);
         } else {
-            glowPanel.setEffectEnabled(enable);
+            glowPanel.setEffectEnabled(enabled);
             glowPanel.setEffectWidth(width);
             glowPanel.setColor(color, false);
             glowPanel.setOpacity(opacity);
@@ -131,24 +131,17 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     }
 
     private void initInnerGlowPanel(AreaEffects effects) {
-        boolean enable = false;
-        Color color = RED;
-        double width = 10;
-        float opacity = 1.0f;
-        if (effects != null) {
-            var effect = effects.getInnerGlow();
-            if (effect != null) {
-                enable = true;
-                color = effect.getBrushColor();
-                width = effect.getEffectWidth();
-                opacity = effect.getOpacity();
-            }
-        }
+        var effect = (effects == null) ? null : effects.getInnerGlow();
+        boolean enabled = (effect != null);
+        Color color = enabled ? effect.getBrushColor() : RED;
+        double width = enabled ? effect.getEffectWidth() : 10;
+        float opacity = enabled ? effect.getOpacity() : 1.0f;
+        
         if (innerGlowPanel == null) { // first initialization
             innerGlowPanel = new EffectWithWidthPanel(
-                "Inner Glow", enable, color, width, opacity);
+                "Inner Glow", enabled, color, width, opacity);
         } else {
-            innerGlowPanel.setEffectEnabled(enable);
+            innerGlowPanel.setEffectEnabled(enabled);
             innerGlowPanel.setEffectWidth(width);
             innerGlowPanel.setColor(color, false);
             innerGlowPanel.setOpacity(opacity);
@@ -156,26 +149,18 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     }
 
     private void initNeonBorderPanel(AreaEffects effects) {
-        boolean enable = false;
-        Color color = GREEN;
-        Color innerColor = WHITE;
-        double width = 10;
-        float opacity = 1.0f;
-        if (effects != null) {
-            var effect = effects.getNeonBorder();
-            if (effect != null) {
-                enable = true;
-                color = effect.getEdgeColor();
-                innerColor = effect.getCenterColor();
-                width = effect.getEffectWidth();
-                opacity = effect.getOpacity();
-            }
-        }
+        var effect = (effects == null) ? null : effects.getNeonBorder();
+        boolean enabled = (effect != null);
+        Color color = enabled ? effect.getEdgeColor() : GREEN;
+        Color innerColor = enabled ? effect.getCenterColor() : WHITE;
+        double width = enabled ? effect.getEffectWidth() : 10;
+        float opacity = enabled ? effect.getOpacity() : 1.0f;
+        
         if (neonBorderPanel == null) { // first initialization
             neonBorderPanel = new NeonBorderPanel(
-                enable, color, innerColor, width, opacity);
+                enabled, color, innerColor, width, opacity);
         } else {
-            neonBorderPanel.setEffectEnabled(enable);
+            neonBorderPanel.setEffectEnabled(enabled);
             neonBorderPanel.setEffectWidth(width);
             neonBorderPanel.setColor(color, false);
             neonBorderPanel.setOpacity(opacity);
@@ -184,33 +169,27 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     }
 
     private void initDropShadowPanel(AreaEffects effects) {
-        boolean enable = false;
-        Color color = BLACK;
+        var effect = (effects == null) ? null : effects.getDropShadow();
+        boolean enabled = (effect != null);
+        Color color = enabled ? effect.getBrushColor() : BLACK;
+        float opacity = enabled ? effect.getOpacity() : 1.0f;
+        double spread = enabled ? effect.getEffectWidth() : 10;
+
         int distance = 10;
         double angle = 0.7;
-        double spread = 10;
-        float opacity = 1.0f;
-        if (effects != null) {
-            var effect = effects.getDropShadow();
-            if (effect != null) {
-                enable = true;
-                color = effect.getBrushColor();
-                opacity = effect.getOpacity();
-
-                Point2D offset = effect.getOffset();
-                double x = offset.getX();
-                double y = offset.getY();
-                distance = (int) Math.sqrt(x * x + y * y);
-                angle = Math.atan2(y, x);
-
-                spread = effect.getEffectWidth();
-            }
+        if (enabled) {
+            Point2D offset = effect.getOffset();
+            double x = offset.getX();
+            double y = offset.getY();
+            distance = (int) Math.sqrt(x * x + y * y);
+            angle = Math.atan2(y, x);
         }
+
         if (dropShadowPanel == null) { // first initialization
             dropShadowPanel = new DropShadowPanel(
-                enable, color, distance, angle, spread, opacity);
+                enabled, color, distance, angle, spread, opacity);
         } else {
-            dropShadowPanel.setEffectEnabled(enable);
+            dropShadowPanel.setEffectEnabled(enabled);
             dropShadowPanel.setEffectWidth(spread);
             dropShadowPanel.setColor(color, false);
             dropShadowPanel.setOpacity(opacity);
@@ -301,6 +280,9 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         effects.saveStateTo(preset);
     }
 
+    /**
+     * Returns an {@link AreaEffects} instance corresponding to the current GUI settings.
+     */
     public AreaEffects getEffects() {
         AreaEffects effects = new AreaEffects();
         updateEffectsFromGUI(effects);
@@ -344,12 +326,10 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
 
     @Override
     public void updateGUI() {
-
     }
 
     @Override
     public void setToolTip(String tip) {
-
     }
 
     @Override
@@ -357,4 +337,3 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         return 1;
     }
 }
-

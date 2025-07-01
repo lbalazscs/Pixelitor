@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.util.Objects;
 
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * A base class for implementations of {@link FilterParam}.
@@ -30,9 +30,9 @@ public abstract class AbstractFilterParam implements FilterParam {
     private final String name;
     protected ParamAdjustmentListener adjustmentListener;
     private boolean enabledByAnimation = true;
-    private boolean enabledByAppLogic = true;
+    private boolean enabledByFilterLogic = true;
     protected ParamGUI paramGUI;
-    private RandomizePolicy randomizePolicy;
+    private RandomizeMode randomizeMode;
     private String toolTip;
     private String presetKey;
 
@@ -41,13 +41,14 @@ public abstract class AbstractFilterParam implements FilterParam {
     // and it's enabled only for specific values of this filter parameter.
     protected FilterButtonModel action;
 
-    AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
+    AbstractFilterParam(String name, RandomizeMode randomizeMode) {
         this.name = Objects.requireNonNull(name);
-        this.randomizePolicy = randomizePolicy;
+        this.randomizeMode = randomizeMode;
     }
 
     /**
-     * Called only by subclasses, after initializing the GUI.
+     * Finalizes the GUI's setup by synchronizing its state with this model.
+     * Must be called by the subclasses, after creating the GUI.
      */
     protected void guiCreated() {
         updateGUIEnabledState();
@@ -87,23 +88,18 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     @Override
-    public void setEnabled(boolean b, EnabledReason reason) {
+    public void setEnabled(boolean enabled, EnabledReason reason) {
         switch (reason) {
-            case APP_LOGIC -> enabledByAppLogic = b;
+            case FILTER_LOGIC -> enabledByFilterLogic = enabled;
             case ANIMATION_ENDING_STATE -> {
+                // animation ending mode only affects non-animatable parameters
                 if (isAnimatable()) {
-                    // the purpose of the animation ending mode is to
-                    // disable/enable the filter params that can't be animated
                     return;
                 }
-                enabledByAnimation = b;
+                enabledByAnimation = enabled;
             }
         }
 
-        updateEnabledState();
-    }
-
-    protected void updateEnabledState() {
         if (paramGUI != null) {
             updateGUIEnabledState();
         }
@@ -115,12 +111,12 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public boolean isEnabled() {
-        return enabledByAppLogic && enabledByAnimation;
+        return enabledByFilterLogic && enabledByAnimation;
     }
 
     @Override
     public boolean shouldRandomize() {
-        return randomizePolicy == ALLOW_RANDOMIZE && enabledByAppLogic;
+        return randomizeMode == ALLOW_RANDOMIZE && enabledByFilterLogic;
     }
 
     @Override
@@ -137,8 +133,8 @@ public abstract class AbstractFilterParam implements FilterParam {
     protected abstract void doRandomize();
 
     @Override
-    public void setRandomizePolicy(RandomizePolicy policy) {
-        randomizePolicy = policy;
+    public void setRandomizePolicy(RandomizeMode policy) {
+        randomizeMode = policy;
     }
 
     @Override
@@ -146,7 +142,7 @@ public abstract class AbstractFilterParam implements FilterParam {
         if (paramGUI != null) {
             paramGUI.setToolTip(tip);
         } else {
-            // Store for later if the GUI is not created yet
+            // store for later if the GUI is not created yet
             toolTip = tip;
         }
     }
@@ -161,7 +157,6 @@ public abstract class AbstractFilterParam implements FilterParam {
         return false;
     }
 
-    // used to determine whether two filters are equal
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -171,6 +166,9 @@ public abstract class AbstractFilterParam implements FilterParam {
             return false;
         }
         AbstractFilterParam that = (AbstractFilterParam) o;
+
+        // two parameters are considered equal if their values are equal
+        // (this is used to compare filter states)
         return Objects.equals(getParamValue(), that.getParamValue());
     }
 

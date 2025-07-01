@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,8 +42,8 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
+import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
@@ -61,8 +61,8 @@ public class PhotoCollage extends ParametrizedFilter {
     private final RangeParam numPhotosParam = new RangeParam("Number of Photos", 1, 10, 101);
     private final RangeParam randomRotation = new RangeParam("Random Rotation Amount (%)", 0, 100, 100);
     private final BooleanParam allowOutside = new BooleanParam("Allow Outside", true);
-    private final ColorParam bgColor = new ColorParam(GUIText.BG_COLOR, BLACK, USER_ONLY_TRANSPARENCY);
-    private final ColorParam marginColor = new ColorParam("Margin Color", WHITE, NO_TRANSPARENCY);
+    private final ColorParam bgColor = new ColorParam(GUIText.BG_COLOR, BLACK, MANUAL_ALPHA_ONLY);
+    private final ColorParam marginColor = new ColorParam("Margin Color", WHITE, OPAQUE_ONLY);
     private final RangeParam shadowOpacityParam = new RangeParam("Shadow Opacity (%)", 0, 80, 100);
     private final AngleParam shadowAngleParam = new AngleParam("Shadow Angle", 315, INTUITIVE_DEGREES);
     private final RangeParam shadowDistance = new RangeParam("Shadow Distance", 0, 5, 20);
@@ -74,13 +74,13 @@ public class PhotoCollage extends ParametrizedFilter {
         bgColor.setPresetKey("Background Color");
         numPhotosParam.setPresetKey("Number of Images"); // former name
 
-        DialogParam shadowSettings = new DialogParam("Shadow Settings",
+        CompositeParam shadowSettings = new CompositeParam("Shadow Settings",
             shadowOpacityParam,
             shadowAngleParam,
             shadowDistance.withAdjustedRange(0.02),
             shadowBlur.withAdjustedRange(0.01));
 
-        setParams(
+        initParams(
             numPhotosParam,
             allowOutside,
             shapeTypeParam,

@@ -19,14 +19,12 @@ package pixelitor.filters;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.levels.RGBLookup;
-import pixelitor.filters.lookup.FastLookupOp;
+import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.utils.Dithering;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
-import java.awt.image.ShortLookupTable;
 import java.io.Serial;
 
 import static pixelitor.utils.Texts.i18n;
@@ -44,45 +42,45 @@ public class Posterize extends ParametrizedFilter {
     private final RangeParam greenLevels = new RangeParam(i18n("green"), 1, 2, 8);
     private final RangeParam blueLevels = new RangeParam(i18n("blue"), 1, 2, 8);
 
-    private final RangeParam diffusionStrengthParam = new RangeParam("Dithering Amount (%)", 0, 0, 100);
+    private final RangeParam ditheringAmountParam = new RangeParam("Dithering Amount (%)", 0, 0, 100);
     private final IntChoiceParam ditheringMethodParam = Dithering.createDitheringChoices();
 
     public Posterize() {
         super(true);
 
-        diffusionStrengthParam.setupEnableOtherIfNotZero(ditheringMethodParam);
+        ditheringAmountParam.setupEnableOtherIfNotZero(ditheringMethodParam);
 
-        setParams(
+        initParams(
             new GroupedRangeParam("Levels",
                 new RangeParam[]{
                     redLevels,
                     greenLevels,
                     blueLevels
                 }, true),
-            diffusionStrengthParam,
+            ditheringAmountParam,
             ditheringMethodParam
         );
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int numRedLevels = redLevels.getValue();
-        int numGreenLevels = greenLevels.getValue();
-        int numBlueLevels = blueLevels.getValue();
-        RGBLookup rgbLookup = new RGBLookup();
-        rgbLookup.initFromPosterize(numRedLevels, numGreenLevels, numBlueLevels);
+        RGBLookup posterizerLookup = RGBLookup.createForPosterize(
+            redLevels.getValue(), greenLevels.getValue(), blueLevels.getValue());
 
-        boolean dither = diffusionStrengthParam.getValue() != 0;
-        if (!dither) {
-            // simple case
-            BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) rgbLookup.getLookupOp());
-            filterOp.filter(src, dest);
-            return dest;
+        boolean ditheringEnabled = ditheringAmountParam.getValue() != 0;
+        if (ditheringEnabled) {
+            return posterizeAndDither(src, dest, posterizerLookup);
         }
 
-        double diffusionStrength = diffusionStrengthParam.getPercentage();
-        int ditheringMethod = ditheringMethodParam.getValue();
+        // simple case
+        BufferedImageOp filterOp = posterizerLookup.asFastLookupOp();
+        filterOp.filter(src, dest);
+        return dest;
+    }
 
+    private BufferedImage posterizeAndDither(BufferedImage src, BufferedImage dest, RGBLookup rgbLookup) {
+        double diffusionStrength = ditheringAmountParam.getPercentage();
+        int ditheringMethod = ditheringMethodParam.getValue();
 
         BufferedImage input = ImageUtils.copyImage(src);
         int[] inputPixels = ImageUtils.getPixels(input);
@@ -90,13 +88,13 @@ public class Posterize extends ParametrizedFilter {
         int[] destPixels = ImageUtils.getPixels(dest);
 
         int width = src.getWidth();
-        int length = inputPixels.length;
+        int numPixels = inputPixels.length;
 
         short[] redLUT = rgbLookup.getRedLUT();
         short[] greenLUT = rgbLookup.getGreenLUT();
         short[] blueLUT = rgbLookup.getBlueLUT();
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < numPixels; i++) {
             int inRGB = inputPixels[i];
             int a = srcPixels[i] & 0xFF_00_00_00;
             int r = (inRGB >>> 16) & 0xFF;
@@ -110,7 +108,7 @@ public class Posterize extends ParametrizedFilter {
             double errorR = (r - outR) * diffusionStrength;
             double errorG = (g - outG) * diffusionStrength;
             double errorB = (b - outB) * diffusionStrength;
-            Dithering.ditherRGB(ditheringMethod, inputPixels, i, width, length, errorR, errorG, errorB);
+            Dithering.ditherRGB(ditheringMethod, inputPixels, i, width, numPixels, errorR, errorG, errorB);
 
             destPixels[i] = a | outR << 16 | outG << 8 | outB;
         }

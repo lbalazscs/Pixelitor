@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 @DisplayName("ParamState tests")
@@ -60,8 +60,8 @@ class ParamStateTest {
         var imagePositionParamStart = new ImagePositionParam("ImagePositionParam", 0.1f, 0.0f);
         var imagePositionParamEnd = new ImagePositionParam("ImagePositionParam", 0.9f, 1.0f);
 
-        var colorParamStart = new ColorParam("ColorParam", RED, FREE_TRANSPARENCY);
-        var colorParamEnd = new ColorParam("ColorParam", BLUE, FREE_TRANSPARENCY);
+        var colorParamStart = new ColorParam("ColorParam", RED, ALPHA_ENABLED);
+        var colorParamEnd = new ColorParam("ColorParam", BLUE, ALPHA_ENABLED);
 
         return Stream.of(
             Arguments.of(angleParamStart.copyState(), angleParamEnd.copyState()),

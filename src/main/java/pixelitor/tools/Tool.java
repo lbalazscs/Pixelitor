@@ -387,7 +387,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return true;
     }
 

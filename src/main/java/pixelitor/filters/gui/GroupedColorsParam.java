@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,36 +37,39 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     private final ButtonModel linkedModel;
     private final boolean linkedByDefault;
 
-    private final TransparencyPolicy transparencyPolicy;
+    private final TransparencyMode transparencyMode;
 
     public GroupedColorsParam(String name,
                               String firstName, Color firstColor,
                               String secondName, Color secondColor,
-                              TransparencyPolicy transparencyPolicy,
+                              TransparencyMode transparencyMode,
                               boolean linkable, boolean linked) {
         this(name,
             new String[]{firstName, secondName},
             new Color[]{firstColor, secondColor},
-            transparencyPolicy, linkable, linked);
+            transparencyMode, linkable, linked);
     }
 
     public GroupedColorsParam(String name,
                               String[] names, Color[] colors,
-                              TransparencyPolicy transparencyPolicy,
+                              TransparencyMode transparencyMode,
                               boolean linkable, boolean linked) {
-        super(name, RandomizePolicy.ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW_RANDOMIZE);
 
         this.names = names;
-        this.transparencyPolicy = transparencyPolicy;
+        this.transparencyMode = transparencyMode;
 
         this.colors = colors;
-        this.defaultColors = colors.clone();
+
+        // it can be the same reference because any color
+        // change will change the colors array reference
+        this.defaultColors = colors;
 
         this.linkedModel = linkable ? new JToggleButton.ToggleButtonModel() : null;
         this.linkedByDefault = linked;
         setLinked(linked);
 
-        // if linked, then the default colors must be the same
+        // if linked, the default colors must be the same
         assert !linked || Utils.allElementsEqual(defaultColors);
     }
 
@@ -87,6 +90,9 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         return colors[index];
     }
 
+    /**
+     * Returns the color at the given index in the format expected by G'MIC.
+     */
     public String getColorStr(int index) {
         return Colors.formatGMIC(colors[index]);
     }
@@ -95,19 +101,22 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         return names[index];
     }
 
-    // sets a single color
-    public void setColor(Color newColor, int changedIndex, boolean trigger) {
-        Color[] newColors = new Color[colors.length];
-        for (int i = 0; i < newColors.length; i++) {
-            if (i == changedIndex || isLinked()) {
-                newColors[i] = newColor;
-            } else {
-                newColors[i] = colors[i]; // not changed
-            }
+    /**
+     * Sets a color, applying it to all swatches if they are linked.
+     */
+    public void setColor(Color newColor, int index, boolean trigger) {
+        Color[] newColors = colors.clone();
+        if (isLinked()) {
+            Arrays.fill(newColors, newColor);
+        } else {
+            newColors[index] = newColor;
         }
         setColors(newColors, trigger);
     }
 
+    /**
+     * Sets all colors in the group at once.
+     */
     public void setColors(Color[] newColors, boolean trigger) {
         if (Arrays.equals(colors, newColors)) {
             return;
@@ -145,11 +154,14 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        Color[] newColors = ((GroupedColorsParamState) state).colors();
+        var newState = (GroupedColorsParamState) state;
+        setLinked(newState.linked());
+
         if (updateGUI) {
-            setColors(newColors, false);
+            setColors(newState.colors(), false);
         } else {
-            colors = newColors;
+            // if there's no GUI, just update the model's internal state
+            this.colors = newState.colors();
         }
     }
 
@@ -159,15 +171,14 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         setLinked(Boolean.parseBoolean(st.nextToken()));
 
         Color[] newColors = new Color[colors.length];
-        for (int i = 0; i < colors.length; i++) {
-            Color newColor = Colors.fromHTMLHex(st.nextToken());
-            newColors[i] = newColor;
+        for (int i = 0; i < newColors.length; i++) {
+            newColors[i] = Colors.fromHTMLHex(st.nextToken());
         }
         setColors(newColors, false);
     }
 
     public boolean allowTransparency() {
-        return transparencyPolicy.allowTransparency();
+        return transparencyMode.allowTransparency();
     }
 
     @Override
@@ -188,7 +199,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     @Override
     protected void doRandomize() {
         int numColors = colors.length;
-        boolean randomAlpha = transparencyPolicy.randomizeTransparency();
+        boolean randomAlpha = transparencyMode.randomizeTransparency();
         Color firstNewColor = Rnd.createRandomColor(randomAlpha);
 
         Color[] newColors = new Color[numColors];
@@ -214,6 +225,9 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         return "Reset the color values";
     }
 
+    /**
+     * The state of a {@link GroupedColorsParam}.
+     */
     public record GroupedColorsParamState(Color[] colors,
                                           boolean linked) implements ParamState<GroupedColorsParamState> {
         @Override
@@ -224,6 +238,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
                 interpolatedColors[i] = Colors.interpolateRGB(
                     colors[i], endState.colors[i], progress);
             }
+            // the 'linked' state can't be interpolated
             return new GroupedColorsParamState(interpolatedColors, linked());
         }
 

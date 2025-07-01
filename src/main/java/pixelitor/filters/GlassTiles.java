@@ -45,7 +45,7 @@ public class GlassTiles extends ParametrizedFilter {
     public GlassTiles() {
         super(true);
 
-        setParams(
+        initParams(
             size.withAdjustedRange(0.5),
             curvature,
             phase.notLinkable(),
@@ -61,15 +61,13 @@ public class GlassTiles extends ParametrizedFilter {
             filter = new TilesFilter(NAME);
         }
 
-        filter.setSizeX(size.getValueAsDouble(0));
-        filter.setSizeY(size.getValueAsDouble(1));
+        filter.setSizeX(size.getValueAsDouble(0), phase.getPercentage(0));
+        filter.setSizeY(size.getValueAsDouble(1), phase.getPercentage(1));
         filter.setCurvatureX(curvature.getValueAsDouble(0));
         filter.setCurvatureY(curvature.getValueAsDouble(1));
         filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-        filter.setShiftX(phase.getPercentage(0));
-        filter.setShiftY(phase.getPercentage(1));
 
         return filter.filter(src, dest);
     }

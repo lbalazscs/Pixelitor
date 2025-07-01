@@ -67,7 +67,7 @@ public class HandTool extends Tool {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return false;
     }
 

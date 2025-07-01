@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,13 +29,14 @@ import javax.swing.event.EventListenerList;
 import java.io.Serial;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * A filter parameter for selecting an angle.
  */
 public class AngleParam extends AbstractFilterParam {
-    // as returned form Math.atan2, this is between -PI and PI
+    // the angles are stored internally in radians
+    // between -π and π, as returned form Math.atan2
     private double angle;
     private final double defaultAngle;
 
@@ -70,9 +71,9 @@ public class AngleParam extends AbstractFilterParam {
             fireStateChanged();
         }
         if (trigger && adjustmentListener != null) {
-            // Trigger even if the angle didn't change, because
-            // after the non-triggering drag events, we can have a
-            // triggering mouse up that didn't change the angle.
+            // trigger even if the angle didn't change, because
+            // after non-triggering drag events, we can have a
+            // triggering mouse up that didn't change the angle
             adjustmentListener.paramAdjusted();
         }
     }
@@ -87,14 +88,14 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     /**
-     * Returns the "Math.atan2" radians: the value between -PI and PI
+     * Returns the "Math.atan2" radians: the value between -π and π
      */
     public double getValueInRadians() {
         return angle;
     }
 
     /**
-     * Returns the value in the range of 0 and 2*PI, and in the intuitive direction
+     * Returns the value in the range of 0 and 2*π, and in the intuitive direction
      */
     public double getValueInIntuitiveRadians() {
         return Geometry.atan2ToIntuitive(angle);
@@ -133,7 +134,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        // Generate random angle in range [-PI, PI]
+        // generate a random angle in the range [-π, π]
         double randomAngle = Rnd.nextDouble() * 2 * Math.PI - Math.PI;
         setValue(randomAngle, false);
     }
@@ -169,7 +170,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public AngleParamState copyState() {
-        // Save the value in degrees to make the interpolation more intuitive.
+        // save the value in degrees to make the interpolation more intuitive
         return new AngleParamState(getValueInDegrees());
     }
 

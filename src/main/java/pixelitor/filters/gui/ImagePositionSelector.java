@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,7 +57,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
         if (AppMode.isUnitTesting()) {
             // Had spurious failures on Linux in createTumbnail().
-            // Should be fixed, but left the workaround for now.
+            // This workaround should no longer be necessary.
             return;
         }
 
@@ -87,30 +87,39 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         g.drawImage(thumb, 0, 0, null);
 
         // draws the position indicator, consisting of
-        // intersecting lines and a central square marker
+        // a crosshair and a central square marker
         int thumbWidth = thumb.getWidth();
-        int thumbHeight = thumb.getHeight() - 1;
+        int thumbHeight = thumb.getHeight();
+
         int x = (int) (model.getRelativeX() * thumbWidth);
         int y = (int) (model.getRelativeY() * thumbHeight);
-        drawLines(g2, x, y, thumbWidth, thumbHeight);
+
+        drawCrosshair(g2, x, y, thumbWidth, thumbHeight);
         drawCentralMarker(g2, x, y);
     }
 
-    private static void drawLines(Graphics2D g2, int x, int y, int width, int height) {
+    private static void drawCrosshair(Graphics2D g2, int x, int y, int width, int height) {
+        // draw a 1px white crosshair with a 1px black outline
         g2.setColor(BLACK);
-        g2.drawLine(x + 1, 0, x + 1, height); // vertical west
-        g2.drawLine(x - 1, 0, x - 1, height); // vertical east
-
-        if (y < height) {
-            g2.drawLine(0, y - 1, width, y - 1); // horizontal north
-            g2.drawLine(0, y + 1, width, y + 1); // horizontal south
+        // black outline for vertical line
+        if (x > 0) {
+            g2.drawLine(x - 1, 0, x - 1, height - 1); // west
+        }
+        if (x < width - 1) {
+            g2.drawLine(x + 1, 0, x + 1, height - 1); // east
+        }
+        // black outline for horizontal line
+        if (y > 0) {
+            g2.drawLine(0, y - 1, width - 1, y - 1); // north
+        }
+        if (y < height - 1) {
+            g2.drawLine(0, y + 1, width - 1, y + 1); // south
         }
 
         g2.setColor(WHITE);
-        g2.drawLine(x, 0, x, height); // vertical
-        if (y < height) {
-            g2.drawLine(0, y, width, y); // horizontal
-        }
+        // white center lines
+        g2.drawLine(x, 0, x, height - 1); // vertical
+        g2.drawLine(0, y, width - 1, y); // horizontal
     }
 
     private static void drawCentralMarker(Graphics2D g2, int x, int y) {
@@ -134,6 +143,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
             return;
         }
 
+        // doesn't clamp mouse coordinates to allow selecting positions outside the image
         double relX = ((double) e.getX()) / thumb.getWidth();
         double relY = ((double) e.getY()) / thumb.getHeight();
 

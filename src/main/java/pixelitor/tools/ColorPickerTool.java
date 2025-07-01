@@ -240,7 +240,7 @@ public class ColorPickerTool extends Tool {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return false;
     }
 

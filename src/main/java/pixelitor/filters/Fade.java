@@ -45,7 +45,7 @@ public class Fade extends ParametrizedFilter {
 
         opacityParam.setPresetKey("Opacity (%)");
 
-        setParams(opacityParam);
+        initParams(opacityParam);
     }
 
     @Override

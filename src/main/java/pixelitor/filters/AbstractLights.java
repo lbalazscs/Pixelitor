@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ import java.util.Random;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * The "Abstract Lights" filter.
@@ -81,18 +81,18 @@ public class AbstractLights extends ParametrizedFilter {
         whiteBlendParam.setupDisableOtherIf(hueParam, value -> value == 100);
         whiteBlendParam.setupDisableOtherIf(hueRandomnessParam, value -> value == 100);
 
-        DialogParam advancedParam = new DialogParam("Advanced",
+        CompositeParam advancedParam = new CompositeParam("Advanced",
             hueRandomnessParam, whiteBlendParam, blurParam, speedParam, bounceParam);
         advancedParam.setRandomizePolicy(IGNORE_RANDOMIZE);
 
-        DialogParam starSettingsParam = new DialogParam("Star Settings",
+        CompositeParam starSettingsParam = new CompositeParam("Star Settings",
             starSizeParam, starCenterParam);
         // show star settings only for star type
         typeParam.setupEnableOtherIf(starSettingsParam, type -> type.valueIs(TYPE_STAR));
         // disable bounce for frame type
         typeParam.setupDisableOtherIf(bounceParam, type -> type.valueIs(TYPE_FRAME));
 
-        setParams(
+        initParams(
             typeParam,
             starSettingsParam,
             iterationsParam,

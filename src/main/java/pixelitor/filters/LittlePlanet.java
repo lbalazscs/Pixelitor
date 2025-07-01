@@ -51,7 +51,7 @@ public class LittlePlanet extends ParametrizedFilter {
 
         zoom.setPresetKey("Zoom (%)");
 
-        setParams(
+        initParams(
             rotateResult,
             zoom,
             innerZoom,

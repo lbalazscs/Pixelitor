@@ -41,7 +41,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.lang.Math.PI;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.NO;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
@@ -79,7 +79,7 @@ public class ChaosGame extends ParametrizedFilter {
     public ChaosGame() {
         super(false);
 
-        setParams(
+        initParams(
             numVerticesParam,
             fraction,
             iterations,

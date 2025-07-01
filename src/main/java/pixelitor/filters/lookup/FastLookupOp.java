@@ -39,98 +39,108 @@ public class FastLookupOp implements BufferedImageOp {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        boolean packedInt = ImageUtils.hasPackedIntArray(src);
-        if (packedInt) {
-            if (dst == null) {
-                dst = ImageUtils.createImageWithSameCM(src);
-            }
-            boolean notPremultiplied = !src.isAlphaPremultiplied();
-
-            int[] srcPixels = ((DataBufferInt) src.getRaster()
-                .getDataBuffer()).getData();
-
-            int[] destPixels = ((DataBufferInt) dst.getRaster()
-                .getDataBuffer()).getData();
-
-            int numPixels = srcPixels.length;
-            assert numPixels == destPixels.length;
-
-            short[][] table = lut.getTable();
-
-            for (int i = 0; i < numPixels; i++) {
-                int rgb = srcPixels[i];
-                int a = (rgb >>> 24) & 0xFF;
-                int r = (rgb >>> 16) & 0xFF;
-                int g = (rgb >>> 8) & 0xFF;
-                int b = rgb & 0xFF;
-
-                if (a == 255 || notPremultiplied) {
-                    r = table[0][r];
-                    g = table[1][g];
-                    b = table[2][b];
-                } else if (a == 0) {
-                    r = 0;
-                    g = 0;
-                    b = 0;
-                } else {
-                    // unpremultiply
-                    float f = 255.0f / a;
-                    int ur = (int) (r * f);
-                    int ug = (int) (g * f);
-                    int ub = (int) (b * f);
-
-                    if (ur > 255) {
-                        ur = 255;
-                    }
-                    if (ug > 255) {
-                        ug = 255;
-                    }
-                    if (ub > 255) {
-                        ub = 255;
-                    }
-
-                    // lookup
-                    ur = table[0][ur];
-                    ug = table[1][ug];
-                    ub = table[2][ub];
-
-                    // premultiply
-                    float f2 = a * (1.0f / 255.0f);
-                    r = (int) (ur * f2);
-                    g = (int) (ug * f2);
-                    b = (int) (ub * f2);
-
-                    r = PixelUtils.clamp(r);
-                    g = PixelUtils.clamp(g);
-                    b = PixelUtils.clamp(b);
-                }
-                destPixels[i] = a << 24 | r << 16 | g << 8 | b;
-            }
-        } else if (src.getColorModel() instanceof IndexColorModel) {
-            short[][] table = lut.getTable();
-            return new FilterPalette(src) {
-                @Override
-                protected int changeRed(int r) {
-                    return table[0][r];
-                }
-
-                @Override
-                protected int changeGreen(int g) {
-                    return table[1][g];
-                }
-
-                @Override
-                protected int changeBlue(int b) {
-                    return table[2][b];
-                }
-            }.filter();
-        } else { // fall back to a normal LookupOp
-            dst = ImageUtils.createImageWithSameCM(src);
-            BufferedImageOp lookupOp = new LookupOp(lut, null);
-            lookupOp.filter(src, dst);
+        if (ImageUtils.hasPackedIntArray(src)) {
+            return filterIntPacked(src, dst);
         }
 
+        if (src.getColorModel() instanceof IndexColorModel) {
+            return filterIndexed(src);
+        }
+
+        // for all other image types, fall back to the standard LookupOp
+        dst = ImageUtils.createImageWithSameCM(src);
+        BufferedImageOp lookupOp = new LookupOp(lut, null);
+        lookupOp.filter(src, dst);
         return dst;
+    }
+
+    private BufferedImage filterIntPacked(BufferedImage src, BufferedImage dst) {
+        if (dst == null) {
+            dst = ImageUtils.createImageWithSameCM(src);
+        }
+        boolean notPremultiplied = !src.isAlphaPremultiplied();
+
+        int[] srcPixels = ((DataBufferInt) src.getRaster()
+            .getDataBuffer()).getData();
+
+        int[] destPixels = ((DataBufferInt) dst.getRaster()
+            .getDataBuffer()).getData();
+
+        int numPixels = srcPixels.length;
+        assert numPixels == destPixels.length;
+
+        short[][] table = lut.getTable();
+
+        for (int i = 0; i < numPixels; i++) {
+            int rgb = srcPixels[i];
+            int a = (rgb >>> 24) & 0xFF;
+            int r = (rgb >>> 16) & 0xFF;
+            int g = (rgb >>> 8) & 0xFF;
+            int b = rgb & 0xFF;
+
+            if (a == 255 || notPremultiplied) {
+                r = table[0][r];
+                g = table[1][g];
+                b = table[2][b];
+            } else if (a == 0) {
+                r = 0;
+                g = 0;
+                b = 0;
+            } else {
+                // unpremultiply
+                float f = 255.0f / a;
+                int ur = (int) (r * f);
+                int ug = (int) (g * f);
+                int ub = (int) (b * f);
+
+                if (ur > 255) {
+                    ur = 255;
+                }
+                if (ug > 255) {
+                    ug = 255;
+                }
+                if (ub > 255) {
+                    ub = 255;
+                }
+
+                // lookup
+                ur = table[0][ur];
+                ug = table[1][ug];
+                ub = table[2][ub];
+
+                // premultiply
+                float f2 = a * (1.0f / 255.0f);
+                r = (int) (ur * f2);
+                g = (int) (ug * f2);
+                b = (int) (ub * f2);
+
+                r = PixelUtils.clamp(r);
+                g = PixelUtils.clamp(g);
+                b = PixelUtils.clamp(b);
+            }
+            destPixels[i] = a << 24 | r << 16 | g << 8 | b;
+        }
+        return dst;
+    }
+
+    private BufferedImage filterIndexed(BufferedImage src) {
+        short[][] table = lut.getTable();
+        return new FilterPalette(src) {
+            @Override
+            protected int changeRed(int r) {
+                return table[0][r];
+            }
+
+            @Override
+            protected int changeGreen(int g) {
+                return table[1][g];
+            }
+
+            @Override
+            protected int changeBlue(int b) {
+                return table[2][b];
+            }
+        }.filter();
     }
 
     @Override

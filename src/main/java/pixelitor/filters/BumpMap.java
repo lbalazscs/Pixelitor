@@ -41,7 +41,7 @@ public class BumpMap extends ParametrizedFilter {
     public BumpMap() {
         super(true);
 
-        setParams(
+        initParams(
             imageParam,
             tileParam,
             lightDirection,

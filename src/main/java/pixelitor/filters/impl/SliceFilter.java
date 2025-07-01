@@ -16,7 +16,6 @@
  */
 package pixelitor.filters.impl;
 
-import com.jhlabs.image.ImageMath;
 import pixelitor.filters.Slice;
 
 /**
@@ -34,13 +33,15 @@ public class SliceFilter extends RotatingEffectFilter {
 
     @Override
     protected void coreTransformInverse(double x, double y, double[] out) {
-        out[0] = x + calcShift(y, verticalShift);
-        out[1] = y + calcShift(x, horizontalShift);
+        out[0] = x + calcDisplacement(y, verticalShift);
+        out[1] = y + calcDisplacement(x, horizontalShift);
     }
 
-    private double calcShift(double coord, double shift) {
-        double mod = ImageMath.mod(coord - shift, 2 * size) - size;
-        return mod >= 0 ? offset : -offset;
+    private double calcDisplacement(double coord, double phase) {
+        // determine which band the coordinate falls into
+        int bandIndex = (int) Math.floor((coord - phase) / size);
+        // alternate the offset for odd and even bands to create the slice effect
+        return (bandIndex & 1) == 1 ? offset : -offset;
     }
 
     public void setHorizontalShift(double t) {

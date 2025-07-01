@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,13 +89,7 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
         } else if (layer instanceof ImageLayer imageLayer) {
             process(imageLayer);
         } else if (layer instanceof SmartObject so) {
-            if (!allowSmartObjects) {
-                boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
-                if (rasterize) {
-                    ImageLayer newImageLayer = so.replaceWithRasterized();
-                    process(newImageLayer);
-                }
-            }
+            handleSmartObject(so);
         } else if (layer.isRasterizable()) {
             if (RandomGUITest.isRunning()) {
                 return;
@@ -111,6 +105,8 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
                 ImageLayer newImageLayer = layer.replaceWithRasterized();
                 process(newImageLayer);
             }
+        } else if (layer instanceof SmartFilter smartFilter) {
+            handleSmartObject(smartFilter.getSmartObject());
         } else if (layer instanceof AdjustmentLayer) {
             Dialogs.showErrorDialog("Adjustment Layer",
                 name + " can't be used on adjustment layers.");
@@ -120,6 +116,22 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
         } else {
             throw new IllegalStateException("layer is " + layer.getClass().getSimpleName());
         }
+    }
+
+    private void handleSmartObject(SmartObject so) {
+        if (allowSmartObjects) {
+            applyToSmartObject(so);
+            return;
+        }
+        boolean rasterize = Dialogs.showRasterizeDialog(so, name);
+        if (rasterize) {
+            ImageLayer newImageLayer = so.replaceWithRasterized();
+            process(newImageLayer);
+        }
+    }
+
+    protected void applyToSmartObject(SmartObject so) {
+        // do nothing by default
     }
 
     public String getName() {

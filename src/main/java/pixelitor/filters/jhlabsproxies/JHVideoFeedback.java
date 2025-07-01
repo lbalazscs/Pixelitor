@@ -46,7 +46,7 @@ public class JHVideoFeedback extends ParametrizedFilter {
     public JHVideoFeedback() {
         super(true);
 
-        setParams(
+        initParams(
             iterations,
             center,
             zoom,

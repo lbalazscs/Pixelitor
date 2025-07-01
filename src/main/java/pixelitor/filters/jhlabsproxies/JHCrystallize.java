@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 
 /**
  * Crystallize filter based on the JHLabs CrystallizeFilter
@@ -42,7 +42,7 @@ public class JHCrystallize extends ParametrizedFilter {
 
     private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);
     private final RangeParam size = new RangeParam("Size", 1, 20, 200);
-    private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, FREE_TRANSPARENCY);
+    private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, ALPHA_ENABLED);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Edges");
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 0, 100);
     private final IntChoiceParam gridType = IntChoiceParam.forGridType("Shape", randomness);
@@ -52,7 +52,7 @@ public class JHCrystallize extends ParametrizedFilter {
     public JHCrystallize() {
         super(true);
 
-        setParams(
+        initParams(
             size.withAdjustedRange(0.2),
             edgeThickness,
             gridType,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.io.Serial;
 import java.util.List;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * A filter parameter for text input.
@@ -34,13 +34,12 @@ public class TextParam extends AbstractFilterParam {
     private final String defaultValue;
 
     // If true, the filter is not executed after every edit.
-    // Instead, there is a "Run" button in the GUI for that purpose.
+    // Instead, there is a "Run" button in the GUI for manual execution.
     private final boolean command;
 
     private String value;
-    private TextParamGUI gui;
 
-    // in the case of commands the random values have to be listed explicitly
+    // a list of explicit values to use for randomization when in command mode
     private List<String> randomCommands;
 
     public TextParam(String name, String defaultValue, boolean command) {
@@ -52,10 +51,9 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        gui = new TextParamGUI(this, value, adjustmentListener);
-        paramGUI = gui;
+        paramGUI = new TextParamGUI(this, value, adjustmentListener);
         guiCreated();
-        return gui;
+        return (JComponent) paramGUI;
     }
 
     @Override
@@ -114,8 +112,8 @@ public class TextParam extends AbstractFilterParam {
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         String newValue = Utils.decodeNewlines(((TextParamState) state).value());
         value = newValue;
-        if (updateGUI) {
-            gui.setText(newValue);
+        if (updateGUI && paramGUI != null) {
+            paramGUI.updateGUI();
         }
     }
 

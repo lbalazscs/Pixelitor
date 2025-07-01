@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.FlowLayout;
 import static java.awt.FlowLayout.LEFT;
 
 /**
- * The GUI for a {@link TextParam}
+ * The GUI for a {@link TextParam}.
  */
 public class TextParamGUI extends JPanel implements ParamGUI {
     private final TextParam model;
@@ -89,7 +89,7 @@ public class TextParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void updateGUI() {
-        setText(model.getValue());
+        textComponent.setText(model.getValue());
     }
 
     @Override
@@ -104,10 +104,6 @@ public class TextParamGUI extends JPanel implements ParamGUI {
 
     public String getText() {
         return textComponent.getText().trim();
-    }
-
-    public void setText(String s) {
-        textComponent.setText(s);
     }
 
     @Override

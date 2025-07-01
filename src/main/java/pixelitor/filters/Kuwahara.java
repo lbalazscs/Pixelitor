@@ -25,7 +25,6 @@ import pixelitor.utils.StatusBarProgressTracker;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-import java.util.Arrays;
 
 /**
  * Kuwahara filter.
@@ -44,115 +43,107 @@ public class Kuwahara extends ParametrizedFilter {
 
         helpURL = "https://en.wikipedia.org/wiki/Kuwahara_filter";
 
-        setParams(
+        initParams(
             radiusParam
         );
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
+        // ensure the destination image is a distinct copy of the source
         dest = ImageUtils.copyImage(src);
 
         int radius = radiusParam.getValue();
+        int width = src.getWidth();
+        int height = src.getHeight();
 
+        int[] srcPixels = ImageUtils.getPixels(src);
         int[] destPixels = ImageUtils.getPixels(dest);
-        filterKuwahara(destPixels, dest.getWidth(), dest.getHeight(), radius);
+
+        apply(srcPixels, destPixels, width, height, radius);
+
         return dest;
     }
 
-    private static void filterKuwahara(int[] array, int imgWidth, int imgHeight, int radius) {
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, imgHeight);
-
-        int[] result = new int[array.length]; // stores the filtered image
+    /**
+     * Applies the Kuwahara filter, reading from the source pixels and writing to the destination pixels.
+     */
+    private static void apply(int[] srcPixels, int[] destPixels, int width, int height, int radius) {
+        ProgressTracker pt = new StatusBarProgressTracker(NAME, height);
         float[] hsv = new float[3];
 
-        for (int y = 0; y < imgHeight; y++) {
-            for (int x = 0; x < imgWidth; x++) {
-                int index = y * imgWidth + x; // the index of the current pixel
-                rgbToHsv(array[index], hsv);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                // find the mean brightness of the most homogeneous sub-region around the current pixel
+                float bestMean = findBestRegionMean(srcPixels, width, height, x, y, radius);
 
-                // get the brightness values in the four
-                // sub-regions around the current pixel
-                float[][] subRegions = getSubRegions(array, imgWidth, imgHeight, x, y, radius);
-
-                // the central pixel will take the mean value of the sub-region
-                // that is most homogenous (has the smallest variance)
-                float minVariance = Float.MAX_VALUE;
-                float minVarianceMean = 0;
-                for (float[] subRegion : subRegions) {
-                    if (subRegion.length == 0) {
-                        continue; // skip empty subregions
-                    }
-                    float mean = calcMean(subRegion);
-                    float variance = calcVariance(subRegion, mean);
-
-                    if (variance < minVariance) {
-                        minVariance = variance;
-                        minVarianceMean = mean;
-                    }
-                }
-
-                hsv[2] = minVarianceMean;
-                result[index] = hsvToRgb(hsv);
+                // preserve the original hue and saturation, but use the new brightness
+                int index = y * width + x;
+                rgbToHsv(srcPixels[index], hsv);
+                hsv[2] = bestMean;
+                destPixels[index] = hsvToRgb(hsv);
             }
             pt.unitDone();
         }
-
-        // copy the filtered image back to the original array
-        System.arraycopy(result, 0, array, 0, array.length);
         pt.finished();
     }
 
-    private static float[][] getSubRegions(int[] array, int imgWidth, int imgHeight, int x, int y, int radius) {
-        float[][] regions = new float[4][];
-
-        int offsetArea = (radius + 1) * (radius + 1);
-
-        // starting coordinates for each sub-region
-        int[][] startCoords = {
-            {x - radius, y - radius}, {x, y - radius},
-            {x - radius, y}, {x, y}
+    /**
+     * Calculates the mean brightness of the sub-region with the lowest variance.
+     */
+    private static float findBestRegionMean(int[] pixels, int width, int height, int cx, int cy, int radius) {
+        // defines the top-left corners of the four overlapping sub-regions
+        int[][] regionOrigins = {
+            {cx - radius, cy - radius}, {cx, cy - radius},
+            {cx - radius, cy}, {cx, cy}
         };
 
-        // iterate through each sub-region
-        for (int regionIndex = 0; regionIndex < 4; regionIndex++) {
-            float[] regionValues = new float[offsetArea];
-            int validCount = 0;
+        float minVariance = Float.MAX_VALUE;
+        float bestMean = 0.0f;
 
-            for (int i = 0; i <= radius; i++) {
-                for (int j = 0; j <= radius; j++) {
-                    // the coordinates of the current pixel in the sub-region
-                    int currentX = startCoords[regionIndex][0] + i;
-                    int currentY = startCoords[regionIndex][1] + j;
+        // analyze each of the four sub-regions
+        for (int[] origin : regionOrigins) {
+            float sum = 0.0f;
+            float sumSq = 0.0f;
+            int count = 0;
 
-                    if (currentX >= 0 && currentX < imgWidth && currentY >= 0 && currentY < imgHeight) {
-                        int index = currentY * imgWidth + currentX;
-                        regionValues[validCount++] = rgbToBightness(array[index]);
+            // iterate over the pixels in the current sub-region
+            for (int y = 0; y <= radius; y++) {
+                for (int x = 0; x <= radius; x++) {
+                    int px = origin[0] + x;
+                    int py = origin[1] + y;
+
+                    // ensure the pixel is within the image bounds
+                    if (px >= 0 && px < width && py >= 0 && py < height) {
+                        int index = py * width + px;
+                        float brightness = rgbToBrightness(pixels[index]);
+                        sum += brightness;
+                        sumSq += brightness * brightness;
+                        count++;
                     }
                 }
             }
 
-            // trim to actual size
-            regions[regionIndex] = Arrays.copyOf(regionValues, validCount);
-        }
-        return regions;
-    }
+            if (count == 0) {
+                continue; // skip empty regions at image edges
+            }
 
-    private static float calcMean(float[] values) {
-        float sum = 0;
-        for (float value : values) {
-            sum += value;
-        }
-        return values.length > 0 ? sum / values.length : 0;
-    }
+            float mean = sum / count;
+            // variance = E[X^2] - (E[X])^2
+            float variance = (sumSq / count) - (mean * mean);
 
-    private static float calcVariance(float[] values, float mean) {
-        float sumSquaredDifferences = 0;
-        for (float value : values) {
-            float diff = value - mean;
-            sumSquaredDifferences += diff * diff;
+            if (variance < minVariance) {
+                minVariance = variance;
+                bestMean = mean;
+            }
         }
-        return values.length > 0 ? sumSquaredDifferences / values.length : 0;
+
+        // if all regions were empty, fall back to the original pixel's brightness
+        if (minVariance == Float.MAX_VALUE) {
+            return rgbToBrightness(pixels[cy * width + cx]);
+        }
+
+        return bestMean;
     }
 
     private static void rgbToHsv(int rgb, float[] hsv) {
@@ -162,17 +153,13 @@ public class Kuwahara extends ParametrizedFilter {
         Color.RGBtoHSB(red, green, blue, hsv);
     }
 
-    private static float rgbToBightness(int rgb) {
+    private static float rgbToBrightness(int rgb) {
         int r = (rgb >> 16) & 0xFF;
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        int max = Math.max(r, g);
-        if (b > max) {
-            max = b;
-        }
-
-        return ((float) max) / 255.0f;
+        // brightness is the 'value' component of the HSV/HSB color model
+        return Math.max(r, Math.max(g, b)) / 255.0f;
     }
 
     private static int hsvToRgb(float[] hsv) {

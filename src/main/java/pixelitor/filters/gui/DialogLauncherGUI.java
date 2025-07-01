@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,15 +30,15 @@ import static java.awt.BorderLayout.EAST;
 /**
  * A panel that shows a "Configure..." button which opens a dialog when clicked.
  * It is the GUI of the params with dialog, such as
- * {@link DialogParam}, {@link EffectsParam}, {@link StrokeParam}.
+ * {@link CompositeParam}, {@link EffectsParam}, {@link StrokeParam}.
  */
-public class ConfigureParamGUI extends JPanel implements ParamGUI {
+public class DialogLauncherGUI extends JPanel implements ParamGUI {
     private static final String CONFIGURE_BUTTON_TEXT = "Configure...";
     
     private final JButton configureButton;
     private final ResetButton resetButton;
 
-    public ConfigureParamGUI(Consumer<DialogBuilder> dialogConfigurator,
+    public DialogLauncherGUI(Consumer<DialogBuilder> dialogConfigurator,
                              ResetButton resetButton) {
         super(new BorderLayout());
         this.resetButton = resetButton;

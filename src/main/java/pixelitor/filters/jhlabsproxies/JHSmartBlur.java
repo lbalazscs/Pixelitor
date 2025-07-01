@@ -45,7 +45,7 @@ public class JHSmartBlur extends ParametrizedFilter {
     public JHSmartBlur() {
         super(true);
 
-        setParams(
+        initParams(
             radiusParam,
             threshold,
             hpSharpening

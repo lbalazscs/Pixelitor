@@ -299,7 +299,7 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         }
     }
 
-    public static HistogramsPanel getInstance() {
+    public static HistogramsPanel get() {
         return INSTANCE;
     }
 

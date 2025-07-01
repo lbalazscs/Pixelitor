@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,13 +35,12 @@ import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * Represents a gradient.
  */
 public class GradientParam extends AbstractFilterParam {
-    private GradientParamGUI gui;
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
     private float[] thumbPositions;
@@ -61,8 +60,8 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     public GradientParam(String name, float[] defaultThumbPositions,
-                         Color[] defaultColors, RandomizePolicy randomizePolicy) {
-        super(name, randomizePolicy);
+                         Color[] defaultColors, RandomizeMode randomizeMode) {
+        super(name, randomizeMode);
         this.defaultThumbPositions = defaultThumbPositions;
         this.defaultColors = defaultColors;
 
@@ -78,7 +77,7 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        gui = new GradientParamGUI(this);
+        GradientParamGUI gui = new GradientParamGUI(this);
         paramGUI = gui;
         guiCreated();
         return gui;
@@ -107,9 +106,9 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     private int interpolatedColorAt(float pos) {
-        // Interpolate here, replicating the getValue(pos) logic in
+        // interpolate here, replicating the getValue(pos) logic in
         // GradientSlider, because this code might be called in cases
-        // when there is no GUI instantiated (testing, smart filters).
+        // when there is no GUI instantiated (testing, smart filters)
         for (int i = 0; i < thumbPositions.length - 1; i++) {
             if (thumbPositions[i] <= pos && pos <= thumbPositions[i + 1]) {
                 float t = (pos - thumbPositions[i]) / (thumbPositions[i + 1] - thumbPositions[i]);
@@ -141,32 +140,8 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public boolean hasDefault() {
-        return !areThumbPositionsChanged() && !areColorsChanged();
-    }
-
-    private boolean areThumbPositionsChanged() {
-        if (thumbPositions.length != defaultThumbPositions.length) {
-            return true;
-        }
-        for (int i = 0; i < thumbPositions.length; i++) {
-            if (thumbPositions[i] != defaultThumbPositions[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean areColorsChanged() {
-        if (colors.length != defaultColors.length) {
-            return true;
-        }
-
-        for (int i = 0; i < defaultColors.length; i++) {
-            if (!defaultColors[i].equals(colors[i])) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.equals(thumbPositions, defaultThumbPositions)
+            && Arrays.equals(colors, defaultColors);
     }
 
     @Override
@@ -239,13 +214,13 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     public record GradientParamState(float[] thumbPositions,
-                                      Color[] colors) implements ParamState<GradientParamState> {
+                                     Color[] colors) implements ParamState<GradientParamState> {
         @Serial
         private static final long serialVersionUID = 1L;
 
         @Override
         public GradientParamState interpolate(GradientParamState endState, double progress) {
-            // This will not work if the number of thumbs changes
+            // this will not work if the number of thumbs changes
             float[] interpolatedPositions = interpolatePositions((float) progress, endState);
             Color[] interpolatedColors = interpolateColors((float) progress, endState);
 

@@ -257,7 +257,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean supportsUserPresets() {
         return true;
     }
 

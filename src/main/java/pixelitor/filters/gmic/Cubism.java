@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class Cubism extends GMICFilter {
     private final RangeParam smoothness = new RangeParam("Smoothness", 0, 0, 5);
 
     public Cubism() {
-        setParams(iterations, density,
+        initParams(iterations, density,
             thickness, angle, opacity, smoothness).withReseedGmicAction(this);
     }
 

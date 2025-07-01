@@ -72,7 +72,7 @@ public class ColorWheel extends ParametrizedFilter {
     public ColorWheel() {
         super(false);
 
-        setParams(type, center,
+        initParams(type, center,
             hueRotParam, brgLumParam, satParam, spiralParam);
     }
 

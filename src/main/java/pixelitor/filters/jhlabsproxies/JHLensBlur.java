@@ -46,7 +46,7 @@ public class JHLensBlur extends ParametrizedFilter {
     public JHLensBlur() {
         super(true);
 
-        setParams(
+        initParams(
             amount.withDecimalPlaces(1),
             numSides,
             bloomFactor,

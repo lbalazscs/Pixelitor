@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ import java.io.Serial;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
  * Stamp filter based on the JHLabs StampFilter
@@ -44,8 +44,8 @@ public class JHStamp extends ParametrizedFilter {
     private final RangeParam lightDarkBalance = new RangeParam("Light/Dark Balance (%)", 0, 50, 100);
     private final RangeParam smoothness = new RangeParam("Smoothness", 0, 25, 50);
     private final RangeParam soften = new RangeParam("Soften", 0, 3, 100);
-    private final ColorParam darkColor = new ColorParam("Dark Color", BLACK, USER_ONLY_TRANSPARENCY);
-    private final ColorParam brightColor = new ColorParam("Bright Color", WHITE, USER_ONLY_TRANSPARENCY);
+    private final ColorParam darkColor = new ColorParam("Dark Color", BLACK, MANUAL_ALPHA_ONLY);
+    private final ColorParam brightColor = new ColorParam("Bright Color", WHITE, MANUAL_ALPHA_ONLY);
 
     private final IntChoiceParam blurMethod = new IntChoiceParam("Blur Method",
         new Item[]{
@@ -59,7 +59,7 @@ public class JHStamp extends ParametrizedFilter {
     public JHStamp() {
         super(true);
 
-        setParams(
+        initParams(
             lightDarkBalance,
             smoothness.withAdjustedRange(0.05),
             soften,

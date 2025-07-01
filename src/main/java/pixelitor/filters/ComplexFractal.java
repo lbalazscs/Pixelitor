@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.io.Serial;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Common superclass for the Julia and Mandelbrot sets
@@ -73,7 +73,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
         zoomParam.setPresetKey("Zoom");
 
         zoomCenter = new ImagePositionParam("Zoom Center", zoomX, 0.5f);
-        setParams(zoomParam,
+        initParams(zoomParam,
             zoomCenter.withDecimalPlaces(2),
             iterationsParam,
             colorsParam,

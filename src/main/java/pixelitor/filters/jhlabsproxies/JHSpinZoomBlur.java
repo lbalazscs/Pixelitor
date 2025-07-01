@@ -46,7 +46,7 @@ public class JHSpinZoomBlur extends ParametrizedFilter {
     public JHSpinZoomBlur() {
         super(true);
 
-        setParams(
+        initParams(
             rotation,
             zoom,
             center,

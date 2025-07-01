@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class Random3DObjects extends GMICFilter {
     private final RangeParam opacity = new RangeParam("Opacity", 0, 100, 100);
 
     public Random3DObjects() {
-        setParams(
+        initParams(
             type,
             density,
             size,

@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import com.jhlabs.math.Noise;
-import net.jafama.FastMath;
 import pd.OpenSimplex2F;
 import pixelitor.ThreadPool;
 import pixelitor.colors.Colors;
@@ -50,8 +49,8 @@ import static net.jafama.FastMath.pow;
 import static net.jafama.FastMath.sin;
 import static net.jafama.FastMath.toRange;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 public class FlowField extends ParametrizedFilter {
@@ -238,8 +237,8 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam numParticlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final BooleanParam antiAliasParam = new BooleanParam("Use Antialiasing");
-    private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
-    private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
+    private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), ALPHA_ENABLED);
+    private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), ALPHA_ENABLED);
     private final EnumParam<ColorSource> initialColorsParam = new EnumParam<>("Initialize Colors", ColorSource.class);
     private final BooleanParam startFlowFromSourceParam = new BooleanParam("Start Flow from Source Image", false, IGNORE_RANDOMIZE);
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
@@ -254,12 +253,12 @@ public class FlowField extends ParametrizedFilter {
             revolveParam
         }, false).autoNormalized();
 
-        DialogParam noiseAdjustmentParam = new DialogParam("Noise", zoomParam, varianceParam, turbulenceParam, windParam);
+        CompositeParam noiseAdjustmentParam = new CompositeParam("Noise", zoomParam, varianceParam, turbulenceParam, windParam);
         noiseParam.setupEnableOtherIfNotZero(noiseAdjustmentParam);
 
-        DialogParam advancedParam = new DialogParam("Advanced", forceModeParam, maxVelocityParam, pathLengthParam);
+        CompositeParam advancedParam = new CompositeParam("Advanced", forceModeParam, maxVelocityParam, pathLengthParam);
 
-        setParams(
+        initParams(
             forceMixerParam,
             noiseAdjustmentParam,
 
@@ -413,7 +412,7 @@ public class FlowField extends ParametrizedFilter {
         float zoom = zoomParam.getValue() * 0.25f;
         float variance = varianceParam.getValue() / 10.0f;
         int turbulence = turbulenceParam.getValue();
-        float zFactor = windParam.getValueAsFloat() / 10000;
+        float wind = windParam.getValueAsFloat() / 10000;
 
         ForceMode forceMode = forceModeParam.getSelected();
         float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
@@ -490,7 +489,7 @@ public class FlowField extends ParametrizedFilter {
 
         GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
         FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1,
-            fieldDensity, bounds, tolerance, maximumVelocitySq, zFactor, zoom,
+            fieldDensity, bounds, tolerance, maximumVelocitySq, wind, zoom,
             turbulence, noise, multiplierNoise, startAngle, variantPI, forceMode, goldenRatio, fieldColors, imgWidth, sourcePixels);
 
         if (useColorField) {
@@ -714,10 +713,10 @@ public class FlowField extends ParametrizedFilter {
         public void update() {
             Vector2D oldVel = new Vector2D(vel.x, vel.y);
 
-            if (meta.zFactor != 0) {
+            if (meta.wind != 0) {
                 double sampleX = pos.getX() / meta.zoom;
                 double sampleY = pos.getY() / meta.zoom;
-                double sampleZ = meta.zFactor * iterationIndex;
+                double sampleZ = meta.wind * iterationIndex;
                 Vector2D noiseDelta = new Vector2D();
                 createNoiseForce(meta.multiplierNoise, meta.startAngle, meta.variantPI,
                     sampleX, sampleY, sampleZ, meta.turbulence, meta.noise, noiseDelta);
@@ -742,17 +741,17 @@ public class FlowField extends ParametrizedFilter {
         }
 
         public int getFieldX() {
-            return FastMath.toRange(0, meta.fieldWidth, (int) pos.getX());
+            return toRange(0, meta.fieldWidth, (int) pos.getX());
         }
 
         public int getFieldY() {
-            return FastMath.toRange(0, meta.fieldHeight, (int) pos.getY());
+            return toRange(0, meta.fieldHeight, (int) pos.getY());
         }
     }
 
     public record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds,
                                 double tolerance,
-                                float maximumVelocitySq, double zFactor, double zoom, int turbulence,
+                                float maximumVelocitySq, double wind, double zoom, int turbulence,
                                 OpenSimplex2F noise, float multiplierNoise, float startAngle, float variantPI,
                                 ForceMode forceMode, GoldenRatio goldenRatio,
                                 Color[][] fieldColors, int imgWidth, int[] sourcePixels) {

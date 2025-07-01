@@ -162,14 +162,14 @@ public class ConcentricShapes extends ParametrizedFilter {
         shapeTypeParam.setupEnableOtherIf(tuning, ConcentricShapeType::hasTuning);
         randomnessParam.setupEnableOtherIfNotZero(reseedAction);
 
-        setParams(
+        initParams(
             arrangementParam,
             shapeTypeParam,
             sides,
             tuning,
             distanceParam,
             colorsParam,
-            new DialogParam("Transform", center, scale, rotate),
+            new CompositeParam("Transform", center, scale, rotate),
             randomnessParam.withAction(reseedAction)
         ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
     }

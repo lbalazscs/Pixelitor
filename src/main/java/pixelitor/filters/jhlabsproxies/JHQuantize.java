@@ -46,7 +46,7 @@ public class JHQuantize extends ParametrizedFilter {
         // enable serpentine only if dither is checked
         dither.setupEnableOtherIfChecked(serpentine);
 
-        setParams(
+        initParams(
             numColors,
             dither,
             serpentine

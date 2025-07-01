@@ -82,7 +82,7 @@ public class JHPixelate extends ParametrizedFilter {
 
         typeParam.setPresetKey("Type");
 
-        setParams(
+        initParams(
             cellSizeParam.withAdjustedRange(0.2),
             typeParam,
             styleParam

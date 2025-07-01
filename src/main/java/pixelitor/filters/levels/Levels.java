@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,21 +20,19 @@ package pixelitor.filters.levels;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.filters.levels.gui.LevelsGUI;
-import pixelitor.filters.lookup.FastLookupOp;
+import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.Rnd;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
-import java.awt.image.ShortLookupTable;
 import java.io.Serial;
 import java.util.Objects;
 
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * The Levels filter
+ * The Levels filter, adjusting the tonal range of an image.
  */
 public class Levels extends FilterWithGUI {
     public static final String NAME = i18n("levels");
@@ -55,6 +53,8 @@ public class Levels extends FilterWithGUI {
         if (reset) {
             levelsModel.resetAll();
         }
+        // ensure the lookup is initialized for the preview
+        levelsModel.updateFilterLookup();
         return gui;
     }
 
@@ -65,11 +65,11 @@ public class Levels extends FilterWithGUI {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (rgbLookup == null) {
-            throw new IllegalStateException("rgbLookup not initialized");
+            // this can happen if transform is called before the GUI is created or a preset is loaded
+            levelsModel.updateFilterLookup();
         }
 
-        ShortLookupTable lut = (ShortLookupTable) rgbLookup.getLookupOp();
-        BufferedImageOp filterOp = new FastLookupOp(lut);
+        BufferedImageOp filterOp = rgbLookup.asFastLookupOp();
         dest = filterOp.filter(src, dest);
 
         return dest;
@@ -77,12 +77,18 @@ public class Levels extends FilterWithGUI {
 
     @Override
     public void randomize() {
-        int inputDark = Rnd.nextInt(255);
-        int inputLight = Rnd.nextInt(255);
-        int outputDark = Rnd.nextInt(255);
-        int outputLight = Rnd.nextInt(255);
-        var g = new GrayScaleLookup(inputDark, inputLight, outputDark, outputLight);
-        rgbLookup = new RGBLookup(g, g, g, g);
+        levelsModel.resetAll();
+
+        // randomize the input levels of the main RGB channel for a simple, common adjustment
+        int inputDark = Rnd.nextInt(128);
+        int inputLight = Rnd.nextInt(128) + 128;
+
+        ChannelLevelsModel rgbModel = levelsModel.getRgbModel();
+        rgbModel.getInputDark().setValueNoTrigger(inputDark);
+        rgbModel.getInputLight().setValueNoTrigger(inputLight);
+
+        // manually trigger an update of the model and filter
+        rgbModel.paramAdjusted();
     }
 
     @Override

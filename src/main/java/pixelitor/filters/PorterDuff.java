@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,19 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static java.awt.AlphaComposite.*;
+import static java.awt.AlphaComposite.CLEAR;
+import static java.awt.AlphaComposite.DST;
+import static java.awt.AlphaComposite.DST_ATOP;
+import static java.awt.AlphaComposite.DST_IN;
+import static java.awt.AlphaComposite.DST_OUT;
+import static java.awt.AlphaComposite.DST_OVER;
+import static java.awt.AlphaComposite.SRC;
+import static java.awt.AlphaComposite.SRC_ATOP;
+import static java.awt.AlphaComposite.SRC_IN;
+import static java.awt.AlphaComposite.SRC_OUT;
+import static java.awt.AlphaComposite.SRC_OVER;
+import static java.awt.AlphaComposite.XOR;
+import static java.awt.AlphaComposite.getInstance;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
@@ -70,7 +82,7 @@ public class PorterDuff extends ParametrizedFilter {
     public PorterDuff() {
         super(true);
 
-        setParams(rule, mode, alpha);
+        initParams(rule, mode, alpha);
     }
 
     @Override

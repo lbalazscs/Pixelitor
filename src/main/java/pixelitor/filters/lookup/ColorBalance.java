@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,28 +23,33 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
-import pixelitor.filters.levels.RGBLookup;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.ShortLookupTable;
 import java.io.Serial;
 
-import static java.awt.Color.*;
+import static java.awt.Color.BLUE;
+import static java.awt.Color.CYAN;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.MAGENTA;
+import static java.awt.Color.RED;
+import static java.awt.Color.YELLOW;
 import static pixelitor.utils.Texts.i18n;
 
 /**
  * Color balance filter
  */
 public class ColorBalance extends ParametrizedFilter {
-    public static final String NAME = i18n("color_balance");
-
     @Serial
     private static final long serialVersionUID = 8496579363272349016L;
+
+    public static final String NAME = i18n("color_balance");
 
     private static final int EVERYTHING = 0;
     private static final int SHADOWS = 1;
     private static final int MIDTONES = 2;
     private static final int HIGHLIGHTS = 4;
+
+    private static final int LUT_TABLE_SIZE = 256;
 
     private final IntChoiceParam affect = new IntChoiceParam("Affect", new Item[]{
         new Item("Everything", EVERYTHING),
@@ -67,17 +72,12 @@ public class ColorBalance extends ParametrizedFilter {
         magentaGreen.setPresetKey("Magenta-Green");
         yellowBlue.setPresetKey("Yellow-Blue");
 
-        setParams(
+        initParams(
             affect,
             cyanRed,
             magentaGreen,
             yellowBlue
         );
-    }
-
-    @Override
-    protected boolean createDefaultDestImg() {
-        return false;
     }
 
     @Override
@@ -88,115 +88,95 @@ public class ColorBalance extends ParametrizedFilter {
         float mg = magentaGreen.getValueAsFloat();
         float yb = yellowBlue.getValueAsFloat();
 
-        if (cr == 0 && mg == 0 && yb == 0) {
+        if (cr == 0 && mg == 0 && yb == 0) { // no change
             return src;
         }
 
-        var rgbLookup = new LookupHelper(cr, mg, yb, affect.getValue())
-            .getLookup();
+        var lookup = createLookup(cr, mg, yb, affect.getValue());
+        var filterOp = lookup.asFastLookupOp();
 
-        var filterOp = new FastLookupOp(
-            (ShortLookupTable) rgbLookup.getLookupOp());
-
-        dest = filterOp.filter(src, null);
-
-        return dest;
+        return filterOp.filter(src, null);
     }
 
-    private static class LookupHelper {
-        private final float cyanRed;
-        private final float magentaGreen;
-        private final float yellowBlue;
-        private final int affect;
-
-        private static final int LUT_TABLE_SIZE = 256;
-
-        final short[] redMapping = new short[LUT_TABLE_SIZE];
-        final short[] greenMapping = new short[LUT_TABLE_SIZE];
-        final short[] blueMapping = new short[LUT_TABLE_SIZE];
-
-        public LookupHelper(float cyanRed, float magentaGreen, float yellowBlue, int affect) {
-            this.cyanRed = cyanRed;
-            this.magentaGreen = magentaGreen;
-            this.yellowBlue = yellowBlue;
-            this.affect = affect;
-        }
-
-        public RGBLookup getLookup() {
-            if (affect == EVERYTHING) {
-                setupMappingsForTotallyAffected();
-            } else {
-                setupMappingsForPartiallyAffected();
-            }
-
-            return new RGBLookup(redMapping, greenMapping, blueMapping);
-        }
-
-        private void setupMappingsForTotallyAffected() {
-            for (short i = 0; i < LUT_TABLE_SIZE; i++) {
-                short r = (short) (i + cyanRed - magentaGreen / 2 - yellowBlue / 2);
-                r = PixelUtils.clamp(r);
-                redMapping[i] = r;
-
-                short g = (short) (i + magentaGreen - cyanRed / 2 - yellowBlue / 2);
-                g = PixelUtils.clamp(g);
-                greenMapping[i] = g;
-
-                short b = (short) (i + yellowBlue - magentaGreen / 2 - cyanRed / 2);
-                b = PixelUtils.clamp(b);
-                blueMapping[i] = b;
-            }
-        }
-
-        private void setupMappingsForPartiallyAffected() {
-            float[] affectFactor = calcAffectFactor(affect);
-            for (short i = 0; i < LUT_TABLE_SIZE; i++) {
-                short r = (short) (i + affectFactor[i] * (cyanRed - magentaGreen / 2 - yellowBlue / 2));
-                r = PixelUtils.clamp(r);
-                redMapping[i] = r;
-
-                short g = (short) (i + affectFactor[i] * (magentaGreen - cyanRed / 2 - yellowBlue / 2));
-                g = PixelUtils.clamp(g);
-                greenMapping[i] = g;
-
-                short b = (short) (i + affectFactor[i] * (yellowBlue - magentaGreen / 2 - cyanRed / 2));
-                b = PixelUtils.clamp(b);
-                blueMapping[i] = b;
-            }
-        }
-
-        private static float[] calcAffectFactor(int affect) {
-            float[] affectFactor = new float[LUT_TABLE_SIZE];
-            for (int i = 0; i < LUT_TABLE_SIZE; i++) {
-                affectFactor[i] = switch (affect) {
-                    case SHADOWS -> calcAffectForShadows(i);
-                    case HIGHLIGHTS -> calcAffectForHighlights(i);
-                    case MIDTONES -> calcAffectForMidtones(i);
-                    default -> 1.0f; // should not get here
-                };
-            }
-            return affectFactor;
-        }
-
-        private static float calcAffectForMidtones(int i) {
-            if (i <= LUT_TABLE_SIZE / 2) {
-                return 2.0f * (calcAffectForHighlights(i));
-            } else {
-                return 2.0f * (calcAffectForShadows(i));
-            }
-        }
-
-        private static float calcAffectForHighlights(int i) {
-            return (1.0f * i) / LUT_TABLE_SIZE;
-        }
-
-        private static float calcAffectForShadows(int i) {
-            return 1.0f - calcAffectForHighlights(i);
-        }
+    @Override
+    protected boolean createDefaultDestImg() {
+        return false;
     }
 
     @Override
     public boolean supportsGray() {
         return false;
+    }
+
+    private static RGBLookup createLookup(float cyanRed, float magentaGreen, float yellowBlue, int affect) {
+        short[] redMapping = new short[LUT_TABLE_SIZE];
+        short[] greenMapping = new short[LUT_TABLE_SIZE];
+        short[] blueMapping = new short[LUT_TABLE_SIZE];
+
+        setupMappings(redMapping, greenMapping, blueMapping,
+            cyanRed, magentaGreen, yellowBlue, affect);
+
+        return new RGBLookup(redMapping, greenMapping, blueMapping);
+    }
+
+    private static void setupMappings(short[] redMap, short[] greenMap, short[] blueMap,
+                                      float cyanRed, float magentaGreen, float yellowBlue, int affect) {
+        // pre-calculate the color adjustments for each channel
+        float rAdj = cyanRed - magentaGreen / 2.0f - yellowBlue / 2.0f;
+        float gAdj = magentaGreen - cyanRed / 2.0f - yellowBlue / 2.0f;
+        float bAdj = yellowBlue - cyanRed / 2.0f - magentaGreen / 2.0f;
+
+        float[] affectFactor = createAffectLut(affect);
+
+        for (int i = 0; i < LUT_TABLE_SIZE; i++) {
+            float factor = (affectFactor == null) ? 1.0f : affectFactor[i];
+
+            // calculate the new color value, clamp it to the 0-255 range, and store in the map
+            redMap[i] = (short) PixelUtils.clamp((int) (i + rAdj * factor));
+            greenMap[i] = (short) PixelUtils.clamp((int) (i + gAdj * factor));
+            blueMap[i] = (short) PixelUtils.clamp((int) (i + bAdj * factor));
+        }
+    }
+
+    private static float[] createAffectLut(int affect) {
+        return switch (affect) {
+            case EVERYTHING -> null;
+            case SHADOWS -> calcAffectLutForShadows();
+            case MIDTONES -> calcAffectLutForMidtones();
+            case HIGHLIGHTS -> calcAffectLutForHighlights();
+            default -> throw new IllegalArgumentException("affect = " + affect);
+        };
+    }
+
+    // creates a linear ramp from 1.0 to 0.0, affecting shadows more
+    private static float[] calcAffectLutForShadows() {
+        float[] affectFactor = new float[LUT_TABLE_SIZE];
+        for (int i = 0; i < LUT_TABLE_SIZE; i++) {
+            affectFactor[i] = 1.0f - ((float) i / (LUT_TABLE_SIZE - 1));
+        }
+        return affectFactor;
+    }
+
+    // creates a triangular ramp that peaks at mid-gray
+    private static float[] calcAffectLutForMidtones() {
+        float[] affectFactor = new float[LUT_TABLE_SIZE];
+        for (int i = 0; i < LUT_TABLE_SIZE; i++) {
+            float highlightFactor = (float) i / (LUT_TABLE_SIZE - 1);
+            if (i <= LUT_TABLE_SIZE / 2) {
+                affectFactor[i] = 2.0f * highlightFactor;
+            } else {
+                affectFactor[i] = 2.0f * (1.0f - highlightFactor);
+            }
+        }
+        return affectFactor;
+    }
+
+    // creates a linear ramp from 0.0 to 1.0, affecting highlights more
+    private static float[] calcAffectLutForHighlights() {
+        float[] affectFactor = new float[LUT_TABLE_SIZE];
+        for (int i = 0; i < LUT_TABLE_SIZE; i++) {
+            affectFactor[i] = (float) i / (LUT_TABLE_SIZE - 1);
+        }
+        return affectFactor;
     }
 }

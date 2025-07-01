@@ -1114,7 +1114,6 @@ public class RandomGUITest {
     private ParametrizedFilter getRandomTweenFilter() {
         if (preferredTweenFilter != null) {
             assert preferredTweenFilter.supportsTweenAnimation();
-            assert preferredTweenFilter.getParamSet().isAnimatable();
             return preferredTweenFilter;
         }
         FilterAction filterAction = Filters.getRandomAnimationFilter();

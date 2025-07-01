@@ -38,8 +38,8 @@ public class Transform {
         distortType.setupEnableOtherIf(distortAmount, NonlinTransform::hasAmount);
     }
 
-    public DialogParam createDialogParam() {
-        return new DialogParam("Transform", distortType, distortAmount, center, rotate, scale);
+    public CompositeParam createDialogParam() {
+        return new CompositeParam("Transform", distortType, distortAmount, center, rotate, scale);
     }
 
     public Distortion createDistortion(int width, int height) {

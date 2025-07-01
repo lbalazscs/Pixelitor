@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.DiffuseFilter;
+import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterButtonModel;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -24,8 +25,6 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-
-import static pixelitor.filters.gui.IntChoiceParam.EDGE_REPEAT_PIXELS;
 
 /**
  * Frosted Glass filter based on the JHLabs DiffuseFilter
@@ -45,9 +44,9 @@ public class JHFrostedGlass extends ParametrizedFilter {
     public JHFrostedGlass() {
         super(true);
 
-        setParams(amount.withAdjustedRange(0.1),
+        initParams(amount.withAdjustedRange(0.1),
             interpolation,
-            edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS)
+            edgeAction.withDefaultChoice(TransformFilter.REPEAT_EDGE)
         ).withAction(FilterButtonModel.createNoOpReseed());
     }
 

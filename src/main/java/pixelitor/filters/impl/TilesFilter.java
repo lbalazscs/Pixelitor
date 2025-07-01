@@ -30,21 +30,31 @@ public class TilesFilter extends RotatingEffectFilter {
     private double sizeY;
     private double curvatureX;
     private double curvatureY;
-    private double shiftX;
-    private double shiftY;
+    private double phaseAngleX;
+    private double phaseAngleY;
 
     public TilesFilter(String filterName) {
         super(filterName);
     }
 
-    public void setSizeX(double size) {
+    @Override
+    protected void coreTransformInverse(double x, double y, double[] out) {
+        out[0] = x + curvatureX * tan(x * sizeX - phaseAngleX);
+        out[1] = y + curvatureY * tan(y * sizeY - phaseAngleY);
+    }
+
+    public void setSizeX(double size, double shiftX) {
         // for some reason the effect looks nice only
         // with the reduced double => float precision
         sizeX = (float) (Math.PI / size);
+
+        phaseAngleX = shiftX / sizeX;
     }
 
-    public void setSizeY(double size) {
+    public void setSizeY(double size, double shiftY) {
         sizeY = (float) (Math.PI / size);
+
+        phaseAngleY = shiftY / sizeY;
     }
 
     public void setCurvatureX(double curvature) {
@@ -53,19 +63,5 @@ public class TilesFilter extends RotatingEffectFilter {
 
     public void setCurvatureY(double curvature) {
         curvatureY = curvature * curvature / 10.0;
-    }
-
-    @Override
-    protected void coreTransformInverse(double x, double y, double[] out) {
-        out[0] = x + curvatureX * tan(x * sizeX - shiftX / sizeX);
-        out[1] = y + curvatureY * tan(y * sizeY - shiftY / sizeY);
-    }
-
-    public void setShiftX(double shiftX) {
-        this.shiftX = shiftX;
-    }
-
-    public void setShiftY(double shiftY) {
-        this.shiftY = shiftY;
     }
 }

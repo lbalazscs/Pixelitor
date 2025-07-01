@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.ORANGE;
 import static java.awt.Color.RED;
 import static java.awt.Color.YELLOW;
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * Plasma filter based on the JHLabs PlasmaFilter
@@ -67,7 +67,7 @@ public class JHPlasma extends ParametrizedFilter {
 
         type.setupEnableOtherIf(gradient, v -> v.valueIs(GRADIENT_COLORS));
 
-        setParams(
+        initParams(
             turbulence,
             type,
             gradient

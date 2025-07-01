@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.io.Serial;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.RED;
 import static java.awt.Color.YELLOW;
-import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 
 /**
  * Tritone filter based on the JHLabs TritoneFilter
@@ -38,16 +38,16 @@ public class JHTriTone extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 7244953260858845197L;
 
-    private final ColorParam shadowColor = new ColorParam("Shadow Color", BLACK, NO_TRANSPARENCY);
-    private final ColorParam midtonesColor = new ColorParam("Midtones Color", RED, NO_TRANSPARENCY);
-    private final ColorParam highlightsColor = new ColorParam("Highlights Color", YELLOW, NO_TRANSPARENCY);
+    private final ColorParam shadowColor = new ColorParam("Shadow Color", BLACK, OPAQUE_ONLY);
+    private final ColorParam midtonesColor = new ColorParam("Midtones Color", RED, OPAQUE_ONLY);
+    private final ColorParam highlightsColor = new ColorParam("Highlights Color", YELLOW, OPAQUE_ONLY);
 
     private TritoneFilter filter;
 
     public JHTriTone() {
         super(true);
 
-        setParams(shadowColor, midtonesColor, highlightsColor);
+        initParams(shadowColor, midtonesColor, highlightsColor);
     }
 
     @Override

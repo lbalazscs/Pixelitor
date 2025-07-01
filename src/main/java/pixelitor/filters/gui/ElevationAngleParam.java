@@ -21,9 +21,8 @@ import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Rnd;
 
 /**
- * A specialized angle parameter for selecting elevation (altitude)
- * angles. Unlike the regular AngleParam which allows full 360-degree
- * rotation, this is constrained to angles between 0 and 90 degrees.
+ * A specialized angle parameter for selecting elevation angles,
+ * constrained to the range [0, 90] degrees.
  */
 public class ElevationAngleParam extends AngleParam {
     public ElevationAngleParam(String name, double def) {
@@ -47,7 +46,7 @@ public class ElevationAngleParam extends AngleParam {
     @Override
     public void setValue(double r, boolean trigger) {
         if (r >= 1.5 * Math.PI) {
-            // values between 1.5*PI and 2*PI are coming
+            // values between 1.5*π and 2*π are coming
             // when the user drags the slider, they are OK
         } else if (r > 0) {
             r = 0; // clamp to horizontal

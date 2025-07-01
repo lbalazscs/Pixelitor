@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 
 /**
  * Pointillize filter based on the JHLabs PointillizeFilter
@@ -43,7 +43,7 @@ public class JHPointillize extends ParametrizedFilter {
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);
     private final RangeParam dotSize = new RangeParam("Dot Relative Size (%)", 0, 45, 100);
     private final RangeParam fuzziness = new RangeParam("Fill Fuzziness (%)", 0, 0, 100);
-    private final ColorParam edgeColor = new ColorParam("Fill Color", BLACK, FREE_TRANSPARENCY);
+    private final ColorParam edgeColor = new ColorParam("Fill Color", BLACK, ALPHA_ENABLED);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Instead of Fill", true);
 
     private final RangeParam randomness = new RangeParam("Grid Randomness (%)", 0, 0, 100);
@@ -54,7 +54,7 @@ public class JHPointillize extends ParametrizedFilter {
     public JHPointillize() {
         super(true);
 
-        setParams(
+        initParams(
             gridSize.withAdjustedRange(0.2),
             gridType,
             randomness,

@@ -40,7 +40,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
  * Fill with Starburst filter
@@ -54,7 +54,7 @@ public class Starburst extends ParametrizedFilter {
 
     private final RangeParam numRaysParam = new RangeParam("Number of Rays", 2, 12, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
+    private final ColorParam bgColor = new ColorParam("Background Color", BLACK, MANUAL_ALPHA_ONLY);
     private final ColorListParam rayColorsParam = new ColorListParam("Ray Colors",
         1, 1, WHITE, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
         Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET, Colors.CW_YELLOW);
@@ -64,7 +64,7 @@ public class Starburst extends ParametrizedFilter {
     public Starburst() {
         super(false);
 
-        setParams(
+        initParams(
             numRaysParam,
             bgColor,
             rayColorsParam,

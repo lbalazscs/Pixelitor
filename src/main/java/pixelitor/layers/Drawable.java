@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,8 +71,16 @@ public interface Drawable extends Filterable {
 
     void updateIconImage();
 
+    /**
+     * Returns the X translation of the underlying BufferedImage
+     * relative to the canvas (always zero or negative).
+     */
     int getTx();
 
+    /**
+     * Returns the Y translation of the underlying BufferedImage
+     * relative to the canvas (always zero or negative).
+     */
     int getTy();
 
     boolean isMaskEditing();
@@ -82,7 +90,7 @@ public interface Drawable extends Filterable {
     void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context);
 
     @Override
-    default void startPreview(Filter filter, boolean firstPreview, Component busyCursorTarget) {
+    default void startPreview(Filter filter, boolean initialPreview, Component busyCursorTarget) {
         startFilter(filter, FilterContext.PREVIEWING, busyCursorTarget);
     }
 

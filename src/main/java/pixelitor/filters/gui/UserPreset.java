@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,8 +41,8 @@ import java.util.*;
  */
 public class UserPreset implements Preset {
     private final String name;
-    private File file;
-    private final String presetDirName;
+    private File file; // can be null for new or built-in presets
+    private final String directoryName; // subdirectory for this type of preset
     private boolean loaded; // whether the preset is in the memory
     private final Map<String, String> content = new LinkedHashMap<>();
 
@@ -56,28 +56,30 @@ public class UserPreset implements Preset {
     }
 
     /**
-     * Can be used for built-in presets.
+     * Creates a preset for a built-in configuration.
+     * This preset is not associated with a file.
      */
     public UserPreset(String name) {
         this(name, null);
     }
 
     /**
-     * Used when a new preset is created by the user
+     * Creates a new preset from user settings, ready to be saved.
      */
-    public UserPreset(String name, String presetDirName) {
+    public UserPreset(String name, String directoryName) {
         this.name = name;
-        this.presetDirName = presetDirName;
+        this.directoryName = directoryName;
         loaded = true;
     }
 
     /**
-     * Used when the existence of a preset file is detected
+     * Creates a preset object for an existing preset file on disk.
+     * The preset's content is not loaded until it's first accessed.
      */
-    public UserPreset(File file, String presetDirName) {
+    public UserPreset(File file, String directoryName) {
         this.name = FileUtils.removeExtension(file.getName());
         this.file = file;
-        this.presetDirName = presetDirName;
+        this.directoryName = directoryName;
         loaded = false;
     }
 
@@ -86,7 +88,7 @@ public class UserPreset implements Preset {
     }
 
     /**
-     * Returns a setting value by key.
+     * Returns the setting value for a given key.
      */
     public String get(String key) {
         String value = content.get(key);
@@ -130,18 +132,20 @@ public class UserPreset implements Preset {
 
     public int getInt(String key, int defaultValue) {
         String value = get(key);
-        if (value != null) {
-            return Integer.parseInt(value);
+        try {
+            return value != null ? Integer.parseInt(value) : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
         }
-        return defaultValue;
     }
 
     public long getLong(String key, long defaultValue) {
         String value = get(key);
-        if (value != null) {
-            return Long.parseLong(value);
+        try {
+            return value != null ? Long.parseLong(value) : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
         }
-        return defaultValue;
     }
 
     public void putInt(String key, int value) {
@@ -166,9 +170,9 @@ public class UserPreset implements Preset {
 
     public float getFloat(String key, float defaultValue) {
         String value = get(key);
-        if (value != null) {
-            return Float.parseFloat(value);
-        } else {
+        try {
+            return (value != null) ? Float.parseFloat(value) : defaultValue;
+        } catch (NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -183,9 +187,9 @@ public class UserPreset implements Preset {
 
     public double getDouble(String key, double defaultValue) {
         String value = get(key);
-        if (value != null) {
-            return Double.parseDouble(value);
-        } else {
+        try {
+            return (value != null) ? Double.parseDouble(value) : defaultValue;
+        } catch (NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -200,10 +204,11 @@ public class UserPreset implements Preset {
 
     public Color getColor(String key, Color defaultValue) {
         String color = get(key);
-        if (color != null) {
-            return Colors.fromHTMLHex(color);
+        try {
+            return (color != null) ? Colors.fromHTMLHex(color) : defaultValue;
+        } catch (IllegalArgumentException e) {
+            return defaultValue;
         }
-        return defaultValue;
     }
 
     public void putColor(String key, Color c) {
@@ -225,11 +230,12 @@ public class UserPreset implements Preset {
             }
         }
 
-        // Default to first value
+        // default to the first enum constant if no match is found
         return enumConstants[0];
     }
 
-    // not using Properties because it is ugly to escape the spaces in keys
+    // we use a simple key=value format; not using
+    // java.util.Properties to avoid escaping spaces in keys
     private void loadFromFile() throws IOException {
         assert !loaded;
         InputStream input = new FileInputStream(file);
@@ -268,26 +274,27 @@ public class UserPreset implements Preset {
         assert file == null;
         assert loaded;
 
-        File outFile = getSaveFile(true);
-        try (PrintWriter writer = new PrintWriter(outFile, StandardCharsets.UTF_8)) {
-            saveTo(writer);
+        File presetFile = getSaveFile(true);
+        try (PrintWriter writer = new PrintWriter(presetFile, StandardCharsets.UTF_8)) {
+            writeTo(writer);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
 
-        Messages.showStatusMessage("Preset saved to <b>" + outFile.getAbsolutePath() + "</b>");
+        this.file = presetFile;
+        Messages.showStatusMessage("Preset saved to <b>" + presetFile.getAbsolutePath() + "</b>");
     }
 
-    private void saveTo(PrintWriter writer) {
+    private void writeTo(PrintWriter writer) {
         for (Map.Entry<String, String> entry : content.entrySet()) {
             writer.println(entry.getKey() + "=" + entry.getValue());
         }
     }
 
-    public String saveToString() {
+    public String writeToString() {
         StringWriter writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
-        saveTo(printWriter);
+        writeTo(printWriter);
         printWriter.flush();
         return writer.toString();
     }
@@ -307,8 +314,8 @@ public class UserPreset implements Preset {
     }
 
     /**
-     * Detects all presets in the given directory, based on the
-     * names of the files found. They are not loaded.
+     * Detects all presets in the given directory by listing files.
+     * The presets' contents are not loaded into memory.
      */
     public static List<UserPreset> detectPresetNames(String presetDirName) {
         File presetsDir = getSaveDir(presetDirName);
@@ -334,7 +341,7 @@ public class UserPreset implements Preset {
     }
 
     private File getSaveFile(boolean createDirs) {
-        File dir = getSaveDir(presetDirName);
+        File dir = getSaveDir(directoryName);
         if (createDirs && !dir.exists()) {
             dir.mkdirs();
         }

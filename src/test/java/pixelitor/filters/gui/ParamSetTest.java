@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.verification.VerificationMode;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.filters.ParamTest;
+import pixelitor.filters.ParamTestFilter;
 import pixelitor.layers.ImageLayer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,9 +46,9 @@ class ParamSetTest {
     @BeforeEach
     void beforeEachTest() {
         params = new ParamSet();
-        params.addParams(ParamTest.getTestParams());
+        params.addParams(ParamTestFilter.getTestParams());
         params.withReseedAction();
-        params.addCommonActions(true);
+        params.addCommonActions();
 
         mockAdjustmentListener = mock(ParamAdjustmentListener.class);
         params.setAdjustmentListener(mockAdjustmentListener);

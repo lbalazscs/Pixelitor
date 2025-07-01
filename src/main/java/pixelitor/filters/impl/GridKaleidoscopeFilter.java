@@ -107,25 +107,17 @@ public class GridKaleidoscopeFilter extends TransformFilter {
         }
 
         // add sine wave distortion
-        double rxCopy = rx;
+        double undistortedRx = rx;
         if (distortionX != 0) {
             rx += distortionX * Math.sin(ry / gridSizeY * Math.PI);
         }
         if (distortionY != 0) {
-            ry += distortionY * Math.sin(rxCopy / gridSizeX * Math.PI);
+            ry += distortionY * Math.sin(undistortedRx / gridSizeX * Math.PI);
         }
 
-        double gridX = switch (style) {
-            case STYLE_MIRROR -> ImageMath.triangle(rx / gridSizeX);
-            case STYLE_REPEAT -> ImageMath.mod(2 * rx / gridSizeX, 1);
-            default -> throw new IllegalStateException("Unexpected value: " + style);
-        };
-
-        double gridY = switch (style) {
-            case STYLE_MIRROR -> ImageMath.triangle(ry / gridSizeY);
-            case STYLE_REPEAT -> ImageMath.mod(2 * ry / gridSizeY, 1);
-            default -> throw new IllegalStateException("Unexpected value: " + style);
-        };
+        // map the coordinates into a single grid cell of size [0,1] x [0,1]
+        double gridX = mapToGrid(rx / gridSizeX);
+        double gridY = mapToGrid(ry / gridSizeY);
 
         // map the normalized grid coordinates back to image coordinates
         double imgX = gridX * gridSizeX;
@@ -139,5 +131,13 @@ public class GridKaleidoscopeFilter extends TransformFilter {
             out[0] = (float) (cx + imgX);
             out[1] = (float) (cy + imgY);
         }
+    }
+
+    private double mapToGrid(double value) {
+        return switch (style) {
+            case STYLE_MIRROR -> ImageMath.triangle(value);
+            case STYLE_REPEAT -> ImageMath.mod(2 * value, 1);
+            default -> throw new IllegalStateException("Unexpected value: " + style);
+        };
     }
 }

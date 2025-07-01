@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,14 +21,17 @@ import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.filters.lookup.GrayScaleLookup;
+import pixelitor.filters.lookup.RGBLookup;
+import pixelitor.filters.util.Channel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static pixelitor.filters.levels.Channel.BLUE;
-import static pixelitor.filters.levels.Channel.GREEN;
-import static pixelitor.filters.levels.Channel.RED;
-import static pixelitor.filters.levels.Channel.RGB;
+import static pixelitor.filters.util.Channel.BLUE;
+import static pixelitor.filters.util.Channel.GREEN;
+import static pixelitor.filters.util.Channel.RED;
+import static pixelitor.filters.util.Channel.RGB;
 
 public class LevelsModel {
     private final ChannelLevelsModel rgbModel;
@@ -39,8 +42,7 @@ public class LevelsModel {
     private FilterGUI lastGUI;
 
     /**
-     * Contains the sub-models in the order they should appear in
-     * the GUI
+     * Contains the sub-models in the order they should appear in the GUI.
      */
     private final ChannelLevelsModel[] subModels;
 
@@ -59,30 +61,34 @@ public class LevelsModel {
         this.lastGUI = lastGUI;
     }
 
-    public void settingsChanged(boolean first) {
-        collectLookup();
+    /**
+     * Updates the filter and notifies the GUI to refresh the preview.
+     */
+    public void settingsChanged() {
+        updateFilterLookup();
 
         if (lastGUI == null) {
-            return; // it's null when loading a smart filter
+            return; // lastGUI is null when loading a smart filter or running non-interactively
         }
-        lastGUI.startPreview(first);
+        lastGUI.startPreview(false);
     }
 
-    public void collectLookup() {
+    /**
+     * Builds the combined lookup table from all channel models and applies it to the filter.
+     */
+    public void updateFilterLookup() {
         GrayScaleLookup rgb = rgbModel.getLookup();
-
         GrayScaleLookup r = rModel.getLookup();
         GrayScaleLookup g = gModel.getLookup();
         GrayScaleLookup b = bModel.getLookup();
 
-        RGBLookup unifiedLookup = new RGBLookup(rgb, r, g, b);
-        filter.setRGBLookup(unifiedLookup);
+        RGBLookup combinedLookup = new RGBLookup(rgb, r, g, b);
+        filter.setRGBLookup(combinedLookup);
     }
 
     public void resetAllAndRun() {
         resetAll();
-
-        settingsChanged(false);
+        settingsChanged();
     }
 
     public void resetAll() {
@@ -92,14 +98,21 @@ public class LevelsModel {
     }
 
     public void resetChannelToDefault(Channel channel) {
+        getModelForChannel(channel).resetToDefaults();
+        settingsChanged();
+    }
+
+    private ChannelLevelsModel getModelForChannel(Channel channel) {
         for (ChannelLevelsModel model : subModels) {
             if (model.getChannel() == channel) {
-                model.resetToDefaults();
-                break;
+                return model;
             }
         }
+        throw new IllegalArgumentException("channel: " + channel);
+    }
 
-        settingsChanged(false);
+    public ChannelLevelsModel getRgbModel() {
+        return rgbModel;
     }
 
     public ChannelLevelsModel[] getSubModels() {
@@ -130,6 +143,6 @@ public class LevelsModel {
         for (ChannelLevelsModel model : subModels) {
             model.loadUserPreset(preset);
         }
-        settingsChanged(false);
+        settingsChanged();
     }
 }

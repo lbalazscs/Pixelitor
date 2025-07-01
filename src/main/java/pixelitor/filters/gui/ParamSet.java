@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,6 @@ public class ParamSet implements Debuggable {
     private ParamAdjustmentListener adjustmentListener;
     private Runnable afterResetAction;
     private Preset[] builtinPresets;
-    private boolean nonTrivialFilter;
 
     // reseed support
     private static final String SEED_KEY = "Seed";
@@ -101,8 +100,10 @@ public class ParamSet implements Debuggable {
         return this;
     }
 
-    public void addCommonActions(boolean nonTrivial) {
-        nonTrivialFilter = nonTrivial;
+    /**
+     * Adds actions that are common to all filters.
+     */
+    public void addCommonActions() {
         addRandomizeAction();
         addResetAllAction();
     }
@@ -154,13 +155,18 @@ public class ParamSet implements Debuggable {
         assert before == after : "before = " + before + ", after = " + after;
     }
 
-    // programmatically triggers filter execution
+    /**
+     * Programmatically triggers a filter execution by notifying the listener.
+     */
     public void runFilter() {
         if (adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
     }
 
+    /**
+     * Sets the listener that is notified when a parameter is adjusted.
+     */
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         adjustmentListener = listener;
 
@@ -172,6 +178,9 @@ public class ParamSet implements Debuggable {
         }
     }
 
+    /**
+     * Adapts parameter ranges and choices to the current context, such as image size.
+     */
     public void adaptToContext(Filterable layer, boolean changeValue) {
         for (FilterParam param : params) {
             param.adaptToContext(layer, changeValue);
@@ -180,7 +189,7 @@ public class ParamSet implements Debuggable {
 
     /**
      * A ParamSet can be animated if at least
-     * one contained filter parameter can be
+     * one contained filter parameter can be.
      */
     public boolean isAnimatable() {
         for (FilterParam param : params) {
@@ -200,6 +209,9 @@ public class ParamSet implements Debuggable {
         }
     }
 
+    /**
+     * Returns true if any parameter is a gradient parameter.
+     */
     public boolean hasGradient() {
         for (FilterParam param : params) {
             if (param instanceof GradientParam) {
@@ -217,12 +229,15 @@ public class ParamSet implements Debuggable {
         return params;
     }
 
+    /**
+     * Creates a snapshot of the current state of the parameters.
+     */
     public FilterState copyState(boolean animOnly) {
         return new FilterState(this, animOnly);
     }
 
     /**
-     * Sets the state without triggering the filter.
+     * Loads parameter values from a {@link FilterState} without triggering the filter.
      */
     public void setState(FilterState newState, boolean forAnimation) {
         for (FilterParam param : params) {
@@ -238,6 +253,10 @@ public class ParamSet implements Debuggable {
         }
     }
 
+    /**
+     * Loads parameter values from a {@link FilterState}
+     * and executes the filter with the new parameters.
+     */
     public void applyState(FilterState preset, boolean reset) {
         if (reset) {
             reset();
@@ -246,6 +265,10 @@ public class ParamSet implements Debuggable {
         runFilter();
     }
 
+    /**
+     * Loads parameter values from a {@link UserPreset}
+     * and executes the filter with the new parameters.
+     */
     public void loadUserPreset(UserPreset preset) {
         long executionsBefore = Filter.executionCount;
 
@@ -267,6 +290,9 @@ public class ParamSet implements Debuggable {
         runFilter();
     }
 
+    /**
+     * Saves the current parameter values to a {@link UserPreset}.
+     */
     public void saveStateTo(UserPreset preset) {
         Locale locale = Locale.getDefault(FORMAT);
         try {
@@ -282,6 +308,9 @@ public class ParamSet implements Debuggable {
         }
     }
 
+    /**
+     * Sets the value of a parameter by its name from a string representation.
+     */
     public void set(String paramName, String value) {
         FilterParam modified = null;
         for (FilterParam param : params) {
@@ -307,20 +336,39 @@ public class ParamSet implements Debuggable {
         return builtinPresets != null;
     }
 
-    public boolean isNonTrivial() {
-        return nonTrivialFilter;
+    /**
+     * Returns true if the filter is considered complex, which means
+     * it has multiple parameters or a single, complex parameter.
+     * This affects whether user presets are enabled.
+     */
+    public boolean isComplex() {
+        assert !params.isEmpty();
+        if (params.size() > 1) {
+            return true;
+        }
+        FilterParam singleParam = params.getFirst();
+        return singleParam.isComplex();
     }
 
     // reseed support methods form here
 
+    /**
+     * Adds a "Reseed" action button.
+     */
     public ParamSet withReseedAction() {
         return withAction(createReseedAction());
     }
 
+    /**
+     * Adds a "Reseed" action button for reseeding {@link Noise}.
+     */
     public ParamSet withReseedNoiseAction() {
         return withAction(createReseedNoiseAction());
     }
 
+    /**
+     * Adds a "Reseed" action button for a GMIC filter.
+     */
     public ParamSet withReseedGmicAction(GMICFilter filter) {
         return withAction(createReseedGmicAction(filter));
     }
@@ -402,6 +450,9 @@ public class ParamSet implements Debuggable {
         }, text, toolTip);
     }
 
+    /**
+     * Creates a "Reseed" button model for both {@link CachedFloatRandom} and {@link Noise}.
+     */
     public FilterButtonModel createReseedCachedAndNoiseAction() {
         initReseedSupport(true);
 
@@ -417,21 +468,33 @@ public class ParamSet implements Debuggable {
         });
     }
 
+    /**
+     * Creates a standard "Reseed" button model.
+     */
     public FilterButtonModel createReseedAction() {
         initReseedSupport(true);
         return FilterButtonModel.createReseed(this::reseed);
     }
 
+    /**
+     * Creates a standard "Reseed" button model with custom text.
+     */
     public FilterButtonModel createReseedAction(String name, String toolTipText) {
         initReseedSupport(true);
         return FilterButtonModel.createReseed(this::reseed, name, toolTipText);
     }
 
+    /**
+     * Creates a "Reseed" button model for simplex noise.
+     */
     public FilterButtonModel createReseedSimplexAction() {
         initReseedSupport(true);
         return FilterButtonModel.createReseed(this::reseedSimplex);
     }
 
+    /**
+     * Creates a "Reseed" button model with a custom seed change handler.
+     */
     public FilterButtonModel createReseedAction(LongConsumer seedChangedAction) {
         initReseedSupport(false);
 

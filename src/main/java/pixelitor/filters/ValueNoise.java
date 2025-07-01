@@ -35,7 +35,7 @@ import java.util.concurrent.Future;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
@@ -67,14 +67,14 @@ public class ValueNoise extends ParametrizedFilter {
     private final EnumParam<NoiseInterpolation> interpolation
         = new EnumParam<>("Interpolation", NoiseInterpolation.class);
 
-    private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_TRANSPARENCY);
-    private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_TRANSPARENCY);
+    private final ColorParam color1 = new ColorParam("Color 1", BLACK, MANUAL_ALPHA_ONLY);
+    private final ColorParam color2 = new ColorParam("Color 2", WHITE, MANUAL_ALPHA_ONLY);
 
     public ValueNoise() {
         super(false);
 
         scale.setPresetKey("Zoom");
-        setParams(
+        initParams(
             scale.withAdjustedRange(0.3),
             angleParam,
             details,

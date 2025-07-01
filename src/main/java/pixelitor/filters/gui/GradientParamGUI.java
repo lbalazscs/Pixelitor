@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
+import java.util.Set;
 
 import static com.bric.swing.MultiThumbSlider.HORIZONTAL;
 
@@ -31,8 +32,12 @@ import static com.bric.swing.MultiThumbSlider.HORIZONTAL;
  */
 class GradientParamGUI extends JPanel implements ParamGUI {
     private static final String USE_BEVEL = "GradientSlider.useBevel";
+    private static final Set<String> IGNORED_PROPERTIES = Set.of(
+        "ancestor", "selected thumb", "enabled", "preferredSize",
+        "graphicsConfiguration", "UI", USE_BEVEL
+    );
 
-    private GradientSlider gradientSlider;
+    private final GradientSlider gradientSlider;
     private final GradientParam model;
     private final ResetButton resetButton;
 
@@ -40,18 +45,18 @@ class GradientParamGUI extends JPanel implements ParamGUI {
         super(new FlowLayout());
         this.model = model;
 
-        addGradientSlider(model);
-        resetButton = new ResetButton(model);
-        add(resetButton);
-    }
-
-    private void addGradientSlider(GradientParam model) {
-        gradientSlider = new GradientSlider(HORIZONTAL,
+        // first, create and assign the gradient slider instance
+        this.gradientSlider = new GradientSlider(HORIZONTAL,
             model.getThumbPositions(), model.getColors());
+
+        // now that the field is assigned, configure it
         gradientSlider.addPropertyChangeListener(this::sliderPropertyChanged);
         gradientSlider.putClientProperty(USE_BEVEL, "true");
         gradientSlider.setPreferredSize(new Dimension(250, 30));
         add(gradientSlider);
+
+        this.resetButton = new ResetButton(model);
+        add(resetButton);
     }
 
     private void sliderPropertyChanged(PropertyChangeEvent evt) {
@@ -61,14 +66,10 @@ class GradientParamGUI extends JPanel implements ParamGUI {
     }
 
     private boolean shouldNotifyModel(PropertyChangeEvent evt) {
-        if (!gradientSlider.isValueAdjusting()) {
-            return switch (evt.getPropertyName()) {
-                case "ancestor", "selected thumb", "enabled", "preferredSize",
-                    "graphicsConfiguration", "UI", USE_BEVEL -> false;
-                default -> true;
-            };
+        if (gradientSlider.isValueAdjusting()) {
+            return false;
         }
-        return false;
+        return !IGNORED_PROPERTIES.contains(evt.getPropertyName());
     }
 
     @Override
@@ -98,8 +99,4 @@ class GradientParamGUI extends JPanel implements ParamGUI {
     public int getNumLayoutColumns() {
         return 2;
     }
-
-//    public Color getColor(float pos) {
-//        return (Color) gradientSlider.getValue(pos);
-//    }
 }

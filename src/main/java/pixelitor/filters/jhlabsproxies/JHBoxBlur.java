@@ -46,7 +46,7 @@ public class JHBoxBlur extends ParametrizedFilter {
     public JHBoxBlur() {
         super(true);
 
-        setParams(
+        initParams(
             radius,
             numIterations,
             hpSharpening

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,8 +26,8 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
@@ -40,7 +40,7 @@ public class JHCaustics extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = -3698792722591414685L;
 
-    private final ColorParam bgColor = new ColorParam("Background", new Color(0, 200, 175), USER_ONLY_TRANSPARENCY);
+    private final ColorParam bgColor = new ColorParam("Background", new Color(0, 200, 175), MANUAL_ALPHA_ONLY);
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
     private final RangeParam brightness = new RangeParam("Brightness", 0, 7, 20);
     private final RangeParam focus = new RangeParam("Focus", 0, 50, 100);
@@ -56,7 +56,7 @@ public class JHCaustics extends ParametrizedFilter {
         super(false);
 
         zoom.setPresetKey("Zoom (%)");
-        setParams(
+        initParams(
             bgColor,
             zoom,
             brightness,

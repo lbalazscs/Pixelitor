@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ public interface DialogMenuOwner extends PresetOwner {
     }
 
     default Preset[] getBuiltinPresets() {
-        // the subclasses override this if they have built-in presets
+        // should be overridden by subclasses that have built-in presets
         throw new UnsupportedOperationException();
     }
 
@@ -36,7 +36,7 @@ public interface DialogMenuOwner extends PresetOwner {
     }
 
     default String getHelpURL() {
-        // the subclasses override this if they have a help URL
+        // should be overridden by subclasses that have a help URL
         throw new UnsupportedOperationException();
     }
 }

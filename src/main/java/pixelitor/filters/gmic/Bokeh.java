@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.Color;
 import java.io.Serial;
 import java.util.List;
 
-import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 
 public class Bokeh extends GMICFilter {
     @Serial
@@ -50,7 +50,7 @@ public class Bokeh extends GMICFilter {
     private final GroupedColorsParam colors = new GroupedColorsParam("Color",
         "Start", new Color(210, 210, 80, 160),
         "End", new Color(170, 130, 20, 110),
-        FREE_TRANSPARENCY, true, false);
+        ALPHA_ENABLED, true, false);
 
     private final GroupedRangeParam density = new GroupedRangeParam("Density",
         "Start", "End", 1, 30, 256, false);
@@ -86,7 +86,7 @@ public class Bokeh extends GMICFilter {
         }, false);
 
     public Bokeh() {
-        setParams(scales, shape, colors,
+        initParams(scales, shape, colors,
             density, radius, outline, innerShade,
             smoothness, colorDispersion).withReseedGmicAction(this);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.GroupedColorsParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.TransparencyPolicy;
+import pixelitor.filters.gui.TransparencyMode;
 import pixelitor.utils.Geometry;
 
 import java.awt.BasicStroke;
@@ -71,7 +71,7 @@ public class Penrose extends ParametrizedFilter {
             new Color(143, 255, 115),
             new Color(252, 255, 75),
             Color.BLACK},
-        TransparencyPolicy.NO_TRANSPARENCY, false, false);
+        TransparencyMode.OPAQUE_ONLY, false, false);
 
     private final RangeParam edgeWidth = new RangeParam("Edge Width", 0, 1, 5);
     private final RangeParam zoom = new RangeParam("Zoom", 10, 100, 200);
@@ -145,7 +145,7 @@ public class Penrose extends ParametrizedFilter {
 
         helpURL = "https://en.wikipedia.org/wiki/Penrose_tiling";
 
-        setParams(
+        initParams(
             startType,
             iterations,
             colors,

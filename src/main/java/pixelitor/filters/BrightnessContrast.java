@@ -46,7 +46,7 @@ public class BrightnessContrast extends ParametrizedFilter {
         brightnessParam.setPresetKey("Brightness");
         contrastParam.setPresetKey("Contrast");
 
-        setParams(
+        initParams(
             brightnessParam,
             contrastParam
         );

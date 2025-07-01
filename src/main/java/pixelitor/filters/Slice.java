@@ -47,7 +47,7 @@ public class Slice extends ParametrizedFilter {
     public Slice() {
         super(true);
 
-        setParams(
+        initParams(
             size.withAdjustedRange(0.25),
             offset.withAdjustedRange(0.25),
             shift,

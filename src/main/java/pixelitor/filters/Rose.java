@@ -41,7 +41,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
  * The Render/Geometry/Rose filter, generating a polar rose curve.
@@ -54,15 +54,15 @@ public class Rose extends ParametrizedFilter {
 
     private final RangeParam nParam = new RangeParam("n", 1, 4, 20);
     private final RangeParam dParam = new RangeParam("d", 1, 7, 20);
-    private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
-    private final ColorParam fgColor = new ColorParam("Foreground Color", WHITE, USER_ONLY_TRANSPARENCY);
+    private final ColorParam bgColor = new ColorParam("Background Color", BLACK, MANUAL_ALPHA_ONLY);
+    private final ColorParam fgColor = new ColorParam("Foreground Color", WHITE, MANUAL_ALPHA_ONLY);
 
     private final Transform transform = new Transform();
 
     public Rose() {
         super(false);
 
-        setParams(
+        initParams(
             nParam,
             dParam,
             bgColor,

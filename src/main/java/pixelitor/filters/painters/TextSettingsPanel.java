@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
@@ -138,7 +138,7 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addLastControl(textArea);
 
         gbh.addLabel("Color:", 0, 1);
-        color = new ColorParam("Color", settings.getColor(), USER_ONLY_TRANSPARENCY);
+        color = new ColorParam("Color", settings.getColor(), MANUAL_ALPHA_ONLY);
         color.setAdjustmentListener(this);
 
         JPanel colorRotPanel = new JPanel(new FlowLayout(LEFT));
@@ -407,7 +407,7 @@ public class TextSettingsPanel extends FilterGUI
     private void applySettingsToTarget(TextSettings settings) {
         if (isUsingFilter()) {
             ((TextFilter) filter).setSettings(settings);
-            startPreview(false); // TODO currently always false
+            startPreview(false);
         } else {
             assert textLayer != null;
             textLayer.applySettings(settings);

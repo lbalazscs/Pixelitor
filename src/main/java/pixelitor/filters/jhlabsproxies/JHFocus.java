@@ -51,7 +51,7 @@ public class JHFocus extends ParametrizedFilter {
     public JHFocus() {
         super(true);
 
-        setParams(
+        initParams(
             center.withDecimalPlaces(0),
             radius,
             softness,

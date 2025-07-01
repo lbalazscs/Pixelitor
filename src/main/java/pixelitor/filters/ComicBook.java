@@ -46,7 +46,7 @@ public class ComicBook extends ParametrizedFilter {
     public ComicBook() {
         super(true);
 
-        setParams(stepsParam, detailParam, edgesParam, thresholdParam);
+        initParams(stepsParam, detailParam, edgesParam, thresholdParam);
     }
 
     @Override

@@ -87,20 +87,20 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
         g2.setStroke(ARROW_STROKE);
         g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
-        // Draw main arrow line
+        // draw main arrow line
         g2.draw(new Line2D.Float(startX, startY, endX, endY));
 
-        // The arrowhead angles are calculated relative to the main arrow's angle.
+        // the arrowhead angles are calculated relative to the main arrow's angle
         double backAngle1 = 2.8797926 + angle;
         double backAngle2 = 3.4033926 + angle;
         int arrowRadius = 10;
 
-        // Draw the first line of the arrow head
+        // draw the first line of the arrow head
         float arrowEnd1X = (float) (endX + arrowRadius * Math.cos(backAngle1));
         float arrowEnd1Y = (float) (endY + arrowRadius * Math.sin(backAngle1));
         g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
 
-        // Draw the second line of the arrow head
+        // draw the second line of the arrow head
         float arrowEnd2X = (float) (endX + arrowRadius * Math.cos(backAngle2));
         float arrowEnd2Y = (float) (endY + arrowRadius * Math.sin(backAngle2));
         g2.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
@@ -119,8 +119,7 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
         }
         double angle = Math.atan2(mouseY - centerY, mouseX - centerX);
 
-        // try to update the selector UI before a potential
-        // execution of the filter
+        // try to update the selector UI before a potential execution of the filter
         repaint();
 
         model.setValue(angle, trigger);

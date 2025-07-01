@@ -47,7 +47,7 @@ public class Magnify extends ParametrizedFilter {
     public Magnify() {
         super(true);
 
-        setParams(
+        initParams(
             magnification,
             outerRadius.withAdjustedRange(1.0),
             softness,

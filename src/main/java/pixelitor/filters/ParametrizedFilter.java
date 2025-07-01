@@ -22,7 +22,6 @@ import pixelitor.layers.Filterable;
 import pixelitor.utils.debug.DebugNode;
 
 import java.io.Serial;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -55,20 +54,20 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     /**
-     * Sets the filter parameters from a single {@link FilterParam}.
+     * Initializes the filter parameters from a single {@link FilterParam}.
      */
-    public ParamSet setParams(FilterParam param) {
+    public ParamSet initParams(FilterParam param) {
         paramSet.addParam(param);
-        paramSet.addCommonActions(isComplex());
+        paramSet.addCommonActions();
         return paramSet;
     }
 
     /**
-     * Sets the filter parameters from multiple {@link FilterParam}s.
+     * Initializes the filter parameters from multiple {@link FilterParam}s.
      */
-    public ParamSet setParams(FilterParam... params) {
+    public ParamSet initParams(FilterParam... params) {
         paramSet.addParams(params);
-        paramSet.addCommonActions(isComplex());
+        paramSet.addCommonActions();
         return paramSet;
     }
 
@@ -102,7 +101,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
      * Returns true if this filter supports tween animations.
      */
     public boolean supportsTweenAnimation() {
-        return true;
+        return paramSet.isAnimatable();
     }
 
     @Override
@@ -116,10 +115,10 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
+    public boolean shouldHaveUserPresetsMenu() {
         // trivial filters don't have a "Save Preset" menu
         // option, but they still might be smart filters
-        return paramSet.isNonTrivial();
+        return paramSet.isComplex();
     }
 
     @Override
@@ -146,19 +145,6 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     public void set(String paramName, String value) {
         paramSet.set(paramName, value);
-    }
-
-    /**
-     * Checks if this filter has multiple parameters or a single complex one.
-     */
-    public boolean isComplex() {
-        List<FilterParam> params = paramSet.getParams();
-        if (params.size() > 1) {
-            return true;
-        }
-
-        FilterParam singleParam = params.getFirst();
-        return singleParam.isComplex();
     }
 
     @Override

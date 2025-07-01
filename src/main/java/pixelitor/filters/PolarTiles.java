@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class PolarTiles extends ParametrizedFilter {
 
         var reseedRandomness = paramSet.createReseedNoiseAction("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseedRandomness);
-        setParams(
+        initParams(
             modeParam,
             center,
             numAngDivisions,
@@ -66,7 +66,7 @@ public class PolarTiles extends ParametrizedFilter {
             curvature.withAdjustedRange(0.02),
             rotateEffect,
             randomness.withAction(reseedRandomness),
-            new DialogParam("Background", zoom, rotateImage),
+            new CompositeParam("Background", zoom, rotateImage),
             edgeAction,
             interpolation
         );

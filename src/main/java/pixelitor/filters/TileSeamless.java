@@ -53,7 +53,7 @@ public class TileSeamless extends ParametrizedFilter {
 
         helpText = "Modifies an image to make it \"seamless,\" meaning it can be tiled (repeated) without visible edges or discontinuities.";
 
-        setParams(
+        initParams(
 //            showParam,
             center
         );

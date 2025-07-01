@@ -21,7 +21,9 @@ import pixelitor.FilterContext;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.Filters;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.SmartObject;
 import pixelitor.menus.DrawableAction;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Texts;
 
 import java.util.Optional;
@@ -42,16 +44,26 @@ public class RepeatLast extends DrawableAction {
     private final boolean showDialog;
 
     private RepeatLast(boolean showDialog) {
-        // TODO This should be available for smart objects; however, some technical
-        // problems currently prevent it. Smart objects are handled in
-        // FilterAction (because it might need to create a new filter instance),
-        // but here we have a Filter that isn't guaranteed to have
-        // an action (deserialized smart filter). Perhaps an action could be searched
-        // by the filter name.
         super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME,
-            showDialog, false);
+            showDialog, true);
         this.showDialog = showDialog;
         setEnabled(false);
+    }
+
+    @Override
+    protected void applyToSmartObject(SmartObject so) {
+        // if the active layer is a smart object, then add
+        // the last filter as a new smart filter
+        Optional<Filter> lastFilterOpt = getLastFilter();
+        if (lastFilterOpt.isPresent()) {
+            Filter lastFilter = lastFilterOpt.get();
+            if (lastFilter.canBeSmart()) {
+                Filter newInstance = lastFilter.copy();
+                so.tryAddingSmartFilter(newInstance);
+            } else {
+                Messages.showFilterCantBeSmartMessage(name);
+            }
+        }
     }
 
     @Override

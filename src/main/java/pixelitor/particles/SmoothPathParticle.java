@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,16 +25,22 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An abstract particle that records its trajectory and draws it as a smooth path.
+ */
 public abstract class SmoothPathParticle extends Particle {
     private final List<Point2D> pathPoints;
     private Graphics2D g2 = null;
-    protected final Graphics2D[] gc;
+    private final Graphics2D[] gc;
 
     protected SmoothPathParticle(Graphics2D[] gc) {
         this.pathPoints = new ArrayList<>();
         this.gc = gc;
     }
 
+    /**
+     * Adds a point to the particle's path.
+     */
     public void addPoint(Point2D point) {
         pathPoints.add(point);
     }
@@ -50,6 +56,7 @@ public abstract class SmoothPathParticle extends Particle {
     }
 
     private boolean isPathReady() {
+        // a path needs at least 3 points to be drawn smoothly
         return pathPoints.size() >= 3;
     }
 
@@ -57,6 +64,9 @@ public abstract class SmoothPathParticle extends Particle {
         return Shapes.smoothConnect(pathPoints, 0.5);
     }
 
+    /**
+     * Gets the graphics context for this particle, lazily initialized for multithreading.
+     */
     protected Graphics2D getGraphics() {
         if (g2 != null) {
             return g2;
@@ -65,6 +75,6 @@ public abstract class SmoothPathParticle extends Particle {
                 return g2 = gc[groupIndex];
             }
         }
-        throw new IllegalStateException("Either Graphics2D or it's array has to be non-null!");
+        throw new IllegalStateException("Graphics context is not available for this particle.");
     }
 }

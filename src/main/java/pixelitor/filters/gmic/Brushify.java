@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -66,7 +66,7 @@ public class Brushify extends GMICFilter {
     private final RangeParam angleDispersion = new RangeParam("Angle Dispersion", 0, 20, 100);
 
     public Brushify() {
-        setParams(shape, ratio,
+        initParams(shape, ratio,
             numberOfSizes, maximalSize, minimalSize,
             numberOfOrientations, fuzziness, smoothness,
             lightType, lightStrength, opacity,

@@ -26,7 +26,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 import static pixelitor.gui.GUIText.BRIGHTNESS;
 import static pixelitor.gui.GUIText.COLOR;
 import static pixelitor.utils.Texts.i18n;
@@ -43,7 +43,7 @@ public class Colorize extends ParametrizedFilter {
     private final RangeParam brightnessParam = new RangeParam(
         BRIGHTNESS, -100, 0, 100);
     private final ColorParam colorParam = new ColorParam(
-        COLOR, new Color(255, 207, 119), NO_TRANSPARENCY);
+        COLOR, new Color(255, 207, 119), OPAQUE_ONLY);
     private final RangeParam opacityParam = new RangeParam(
         "Amount (%)", 0, 100, 100);
 
@@ -53,7 +53,7 @@ public class Colorize extends ParametrizedFilter {
         brightnessParam.setPresetKey("Brightness");
         colorParam.setPresetKey("Color");
 
-        setParams(
+        initParams(
             colorParam,
             brightnessParam,
             opacityParam

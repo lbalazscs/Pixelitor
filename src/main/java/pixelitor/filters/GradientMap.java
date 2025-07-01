@@ -39,7 +39,7 @@ public class GradientMap extends ParametrizedFilter {
     public GradientMap() {
         super(true);
 
-        setParams(gradient);
+        initParams(gradient);
     }
 
     @Override

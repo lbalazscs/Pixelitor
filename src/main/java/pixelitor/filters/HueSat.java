@@ -60,7 +60,7 @@ public class HueSat extends ParametrizedFilter {
         saturation.setPresetKey("Saturation");
         brightness.setPresetKey("Brightness");
 
-        setParams(
+        initParams(
             hue,
             saturation,
             brightness

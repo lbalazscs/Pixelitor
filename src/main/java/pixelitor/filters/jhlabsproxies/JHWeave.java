@@ -32,7 +32,7 @@ import static com.jhlabs.image.WeaveFilter.BASKET_PATTERN;
 import static com.jhlabs.image.WeaveFilter.CROWFOOT_PATTERN;
 import static com.jhlabs.image.WeaveFilter.PLAIN_PATTERN;
 import static com.jhlabs.image.WeaveFilter.TWILL_PATTERN;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Weave filter based on the JHLabs WeaveFilter
@@ -60,7 +60,7 @@ public class JHWeave extends ParametrizedFilter {
     public JHWeave() {
         super(true);
 
-        setParams(
+        initParams(
             pattern,
             size.withAdjustedRange(0.4),
             gap.withAdjustedRange(0.4),

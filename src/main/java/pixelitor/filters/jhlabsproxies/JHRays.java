@@ -32,7 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.OPACITY;
 
 /**
@@ -59,7 +59,7 @@ public class JHRays extends ParametrizedFilter {
 
         opacity.setPresetKey("Opacity (%)");
 
-        setParams(
+        initParams(
             center,
             length,
             threshold,

@@ -68,7 +68,7 @@ public class ToolButton extends JToggleButton {
             }
         });
 
-        if (tool.canHaveUserPresets()) {
+        if (tool.shouldHaveUserPresetsMenu()) {
             initPresetsPopup(tool);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,9 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.ColorParamGUI.BUTTON_SIZE;
 import static pixelitor.utils.Texts.i18n;
 
+/**
+ * The GUI for a {@link GroupedColorsParam}.
+ */
 public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
     private final GroupedColorsParam model;
     private final ResetButton resetButton;
@@ -59,19 +62,25 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
         }
 
         if (model.isLinkable()) {
-            addLinkCheckBox();
+            addLinkedCheckBox();
         }
 
         resetButton = new ResetButton(model);
         add(resetButton);
     }
 
+    /**
+     * Shows the color chooser dialog for a specific color swatch.
+     */
     private void showColorDialog(int index) {
         Colors.selectColorWithDialog(this, model.getName(),
             model.getColor(index), model.allowTransparency(),
             color -> updateColor(index, color));
     }
 
+    /**
+     * Updates a color in the model and GUI after a user change.
+     */
     private void updateColor(int index, Color color) {
         swatches[index].setForeground(color);
         swatches[index].paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
@@ -88,14 +97,14 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
         resetButton.updateState();
     }
 
-    private void addLinkCheckBox() {
+    private void addLinkedCheckBox() {
         add(new JLabel(i18n("linked") + ":"));
         add(GUIUtils.createLinkCheckBox(model));
     }
 
     @Override
     public void setToolTip(String tip) {
-
+        setToolTipText(tip);
     }
 
     @Override

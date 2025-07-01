@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public class Rodilius extends GMICFilter {
     private final IntChoiceParam valueAction = GMICFilter.createValueAction();
 
     public Rodilius() {
-        setParams(amplitude, thickness, sharpness, orientations, offset, smoothness, colormode, channel, valueAction);
+        initParams(amplitude, thickness, sharpness, orientations, offset, smoothness, colormode, channel, valueAction);
     }
 
     @Override

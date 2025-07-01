@@ -187,7 +187,7 @@ public class GMICFilterCreator {
     private void createConstructor() {
         addNewLine();
         addLine("public " + className + "() {", 1);
-        addLine("setParams(", 2);
+        addLine("initParams(", 2);
         for (int i = 0; i < paramInfos.size(); i++) {
             ParamInfo paramInfo = paramInfos.get(i);
             String line = paramInfo.name();

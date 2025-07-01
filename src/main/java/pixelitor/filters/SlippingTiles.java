@@ -18,8 +18,8 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.ChoiceParam;
 import pixelitor.filters.gui.EnumParam;
-import pixelitor.filters.gui.ListParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Graphics2D;
@@ -112,13 +112,13 @@ public class SlippingTiles extends ParametrizedFilter {
     private final EnumParam<Distributor> distributionParam = new EnumParam<>("Distribution", Distributor.class);
     private final RangeParam slipDisplacementParam = new RangeParam("Slip Length", 1, 50, 99);
     private final RangeParam centerTilePositionParam = new RangeParam("Center Tile Position", 1, 50, 99);
-    private final ListParam<String> isVerticalParam = new ListParam<>("Cut Direction", new String[]{"Vertical", "Horizontal"});
+    private final ChoiceParam<String> isVerticalParam = new ChoiceParam<>("Cut Direction", new String[]{"Vertical", "Horizontal"});
     private final EnumParam<SlipDirection> slipDirectionParam = new EnumParam<>("Slip Direction", SlipDirection.class);
 
     public SlippingTiles() {
         super(true);
 
-        setParams(
+        initParams(
             centerTileSizeParam,
             isCenterTileSizeAutomaticallyCalculatedParam,
             numberOfTilesParam,

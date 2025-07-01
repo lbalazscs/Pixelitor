@@ -49,11 +49,11 @@ public class AngleUI extends AbstractAngleUI {
 
         boolean darkTheme = Themes.getActive().isDark();
 
-        // Draw the outer circle
+        // draw the outer circle
         setupOuterColor(g2, darkTheme);
         g2.draw(new Ellipse2D.Float(0, 0, SELECTOR_SIZE, SELECTOR_SIZE));
 
-        // Draw the direction arrow
+        // draw the direction arrow
         setupArrowColor(g2, darkTheme);
         double angle = model.getValueInRadians();
         float radius = SELECTOR_SIZE / 2.0f;

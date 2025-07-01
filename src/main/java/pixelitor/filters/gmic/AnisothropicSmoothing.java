@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class AnisothropicSmoothing extends GMICFilter {
     private final IntChoiceParam channel = GMICFilter.createChannelChoice();
 
     public AnisothropicSmoothing() {
-        setParams(amplitude, sharpness, anisotropy,
+        initParams(amplitude, sharpness, anisotropy,
             gradientSmoothness, tensorSmoothness,
             spatialPrecision, angularPrecision, valuePrecision,
             interpolation, fastApproximation, iterations, channel);

@@ -44,8 +44,8 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
 import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
 import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
  * Render Truchet tiles filter
@@ -145,8 +145,8 @@ public class Truchet extends ParametrizedFilter {
     });
     private final RangeParam sizeParam = new RangeParam("Tile Size", 2, 20, 100);
     private final RangeParam widthParam = new RangeParam("Line Width", 1, 3, 20);
-    private final ColorParam bgColor = new ColorParam("Background Color", WHITE, USER_ONLY_TRANSPARENCY);
-    private final ColorParam fgColor = new ColorParam("Foreground Color", BLACK, USER_ONLY_TRANSPARENCY);
+    private final ColorParam bgColor = new ColorParam("Background Color", WHITE, MANUAL_ALPHA_ONLY);
+    private final ColorParam fgColor = new ColorParam("Foreground Color", BLACK, MANUAL_ALPHA_ONLY);
     private final BooleanParam showBoundary = new BooleanParam("Show Tile Boundary", false, IGNORE_RANDOMIZE);
 
     // the arrays are from https://openprocessing.org/sketch/162169
@@ -354,9 +354,9 @@ public class Truchet extends ParametrizedFilter {
         typeParam.setupEnableOtherIf(widthParam, type -> type != TileType.TRIANGLES);
         FilterButtonModel reseedAction = paramSet.createReseedAction();
         List<Integer> randomPatterns = List.of(PATTERN_RANDOM, PATTERN_RANDOM_EXTENDED);
-        patternParam.setupDisableOtherIf(reseedAction, item -> !randomPatterns.contains(item.getValue()));
+        patternParam.setupDisableOtherIf(reseedAction, item -> !randomPatterns.contains(item.value()));
 
-        setParams(
+        initParams(
             typeParam,
             patternParam.withAction(reseedAction),
             sizeParam,

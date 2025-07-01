@@ -59,7 +59,7 @@ public class ExtractChannel extends ParametrizedFilter {
     public ExtractChannel() {
         super(true);
 
-        setParams(
+        initParams(
             channelParam,
             bwParam);
     }

@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
  * Sparkle filter based on the JHLabs SparkleFilter
@@ -41,7 +41,7 @@ public class JHSparkle extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final BooleanParam lightOnly = new BooleanParam("Light Only");
-    private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_TRANSPARENCY);
+    private final ColorParam color = new ColorParam("Color", WHITE, MANUAL_ALPHA_ONLY);
     private final RangeParam numRays = new RangeParam("Number of Rays", 1, 200, 501);
     private final RangeParam radius = new RangeParam("High Intensity Radius", 1, 50, 500);
     private final RangeParam shine = new RangeParam("Shine", 0, 50, 100);
@@ -54,7 +54,7 @@ public class JHSparkle extends ParametrizedFilter {
 
         var reseed = paramSet.createReseedAction("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseed);
-        setParams(
+        initParams(
             center,
             lightOnly,
             color,

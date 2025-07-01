@@ -47,7 +47,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Abstract superclass for the "Render/Curves" filters.
@@ -98,7 +98,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
     protected CurveFilter() {
         super(false);
 
-        setParams(
+        initParams(
             background,
             foreground,
             waterMark,

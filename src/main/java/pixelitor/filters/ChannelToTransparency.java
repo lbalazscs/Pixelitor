@@ -57,7 +57,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
     public ChannelToTransparency() {
         super(true);
 
-        setParams(
+        initParams(
             channel,
             invertParam,
             keepParam

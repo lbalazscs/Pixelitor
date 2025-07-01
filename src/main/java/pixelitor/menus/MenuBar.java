@@ -1474,7 +1474,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new TaskAction("Create All Filters", Filters::createAllFilters));
 
-        sub.addFilter(ParamTest.NAME, ParamTest::new);
+        sub.addFilter(ParamTestFilter.NAME, ParamTestFilter::new);
 
         sub.add(new TaskAction("Random GUI Test", () ->
             RandomGUITest.get().start()), CTRL_R);

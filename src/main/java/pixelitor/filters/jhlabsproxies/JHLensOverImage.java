@@ -49,7 +49,7 @@ public class JHLensOverImage extends ParametrizedFilter {
     public JHLensOverImage() {
         super(true);
 
-        setParams(
+        initParams(
             center,
             radius.withAdjustedRange(1.0),
             refractionIndex,

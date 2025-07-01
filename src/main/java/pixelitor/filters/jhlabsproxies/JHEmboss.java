@@ -54,7 +54,7 @@ public class JHEmboss extends ParametrizedFilter {
     public JHEmboss() {
         super(true);
 
-        setParams(
+        initParams(
             lightDirection,
             lightElevation,
             depth,
