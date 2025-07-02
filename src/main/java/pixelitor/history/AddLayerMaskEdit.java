@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,8 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         this.layer = layer;
         layerMask = layer.getMask();
+
+        assert layer.isActive() || AppMode.isUnitTesting() : genNotActiveLayerErrorMsg();
     }
 
     @Override
@@ -50,7 +52,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         // called, we don't know yet the mode before the undo
         newMode = comp.getView().getMaskViewMode();
 
-        assert layer.isActive() || AppMode.isUnitTesting();
+        assert layer.isActive() || AppMode.isUnitTesting() : genNotActiveLayerErrorMsg();
 
         layer.deleteMask(false);
     }
@@ -63,6 +65,11 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         assert newMode != null;
         newMode.activate(comp, layer);
+    }
+
+    private String genNotActiveLayerErrorMsg() {
+        return "%s '%s' in '%s' is not active".formatted(
+            layer.getTypeString(), layer.getName(), comp.getName());
     }
 
     @Override

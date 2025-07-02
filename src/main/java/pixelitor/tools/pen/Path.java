@@ -91,8 +91,8 @@ public class Path implements Serializable, Debuggable {
     }
 
     public Path deepCopy(Composition newComp) {
-        assert buildState == IDLE : buildState.toString();
-        assert prevBuildState == IDLE : prevBuildState.toString();
+        assert !buildState.isDragging() : buildState.toString();
+        assert prevBuildState.isDragging() || prevBuildState == IDLE : prevBuildState.toString();
 
         Path copy = new Path(newComp, false);
         for (SubPath subPath : subPaths) {

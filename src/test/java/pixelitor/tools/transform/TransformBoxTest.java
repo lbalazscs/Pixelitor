@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.tools.transform;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
+import pixelitor.layers.ColorFillLayer;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.input.Modifiers;
 
@@ -63,7 +64,7 @@ class TransformBoxTest {
 
     @BeforeEach
     void beforeEachTest() {
-        var comp = TestHelper.createMockComp("TransformBoxTest");
+        var comp = TestHelper.createRealComp("TransformBoxTest", ColorFillLayer.class);
         view = comp.getView();
     }
 

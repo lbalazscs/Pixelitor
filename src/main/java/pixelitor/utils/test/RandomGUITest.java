@@ -18,7 +18,10 @@
 package pixelitor.utils.test;
 
 import com.bric.util.JVM;
-import pixelitor.*;
+import pixelitor.AppMode;
+import pixelitor.Composition;
+import pixelitor.ConsistencyChecks;
+import pixelitor.Views;
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
@@ -90,6 +93,11 @@ public class RandomGUITest {
     private static final boolean ENABLE_MEMORY_LOGGING = false;
     private static final boolean NO_HIDE_SHOW = false;
     private static final boolean ENABLE_COPY_PASTE = false;
+    private static final boolean TEST_ADJ_LAYERS = false;
+
+    private static final boolean RUN_FOREVER = true;
+    private static final int NUM_TESTS = 8000; // must be > 100 if not running forever
+
     private final boolean VERBOSE = "true".equals(System.getProperty("verbose"));
 
     private final DateTimeFormatter timestampFormatter
@@ -185,7 +193,7 @@ public class RandomGUITest {
         );
         stopRunning = false;
 
-        // This key not only stops the testing, but also exits the app
+        // this key not only stops the testing, but also exits the app
         GlobalEvents.registerHotkey(EXIT_KEY_CHAR, new TaskAction(() -> {
             System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
                 EXIT_KEY_CHAR);
@@ -219,20 +227,17 @@ public class RandomGUITest {
         return new SwingWorker<>() {
             @Override
             public Void doInBackground() {
-                return backgroundRunner(robot);
+                return runTestLoop(robot);
             }
         };
     }
 
-    private Void backgroundRunner(Robot robot) {
-        int numTests = 8000;  // must be > 100
-        int onePercent = numTests / 100;
+    private Void runTestLoop(Robot robot) {
+        int onePercent = NUM_TESTS / 100;
+        int maxRounds = RUN_FOREVER ? Integer.MAX_VALUE : NUM_TESTS;
 
-        boolean forever = true;
-        int max = forever ? Integer.MAX_VALUE : numTests;
-
-        for (int roundNr = 0; roundNr < max; roundNr++) {
-            printProgressPercentage(numTests, onePercent, roundNr);
+        for (int roundNr = 0; roundNr < maxRounds; roundNr++) {
+            printProgressPercentage(onePercent, roundNr);
 
             if (!GUIUtils.isAppFocused()) {
                 tryRegainingWindowFocus(3);
@@ -261,20 +266,21 @@ public class RandomGUITest {
                 }
             });
         }
-        System.out.println("\nRandomGUITest.runTest FINISHED at " + LocalDateTime.now());
+        System.out.println("\nRandomGUITest.runTestLoop FINISHED at " + LocalDateTime.now());
         finishRunning();
         Toolkit.getDefaultToolkit().beep();
 
         return null;
     }
 
-    private static void printProgressPercentage(int numTests, int onePercent, int roundNr) {
+    private static void printProgressPercentage(int onePercent, int roundNr) {
         if (roundNr % onePercent == 0) {
-            int percent = 100 * roundNr / numTests;
+            int percent = 100 * roundNr / NUM_TESTS;
             System.out.print(percent + "% ");
             if (ENABLE_MEMORY_LOGGING) {
                 System.out.println(new MemoryInfo());
             } else {
+                // add a newline every 20 percent
                 if ((percent + 1) % 20 == 0) {
                     System.out.println();
                 }
@@ -282,8 +288,8 @@ public class RandomGUITest {
         }
     }
 
-    private static void tryRegainingWindowFocus(int attempts) {
-        if (attempts <= 0) {
+    private static void tryRegainingWindowFocus(int maxAttempts) {
+        if (maxAttempts <= 0) {
             return; // give up
         }
 
@@ -297,13 +303,13 @@ public class RandomGUITest {
         if (!GUIUtils.isAppFocused()) {
             Utils.sleep(1, TimeUnit.SECONDS);
             //noinspection TailRecursion
-            tryRegainingWindowFocus(attempts - 1);
+            tryRegainingWindowFocus(maxAttempts - 1);
         }
     }
 
     /**
-     * Generates a random point in screen coordinates within
-     * safe boundaries of the main window.
+     * Generates a random point in screen coordinates
+     * within safe boundaries of the main window.
      */
     private Point genSafeRandomPoint() {
         Rectangle currentBounds = PixelitorWindow.get().getBounds();
@@ -326,12 +332,10 @@ public class RandomGUITest {
 
         if (maxX <= 0 || maxY <= 0) {
             // probably the mouse was moved, and the window is too small
-            System.out.printf("RandomGUITest::generateRandomPoint: " +
-                    "minX = %d, minY = %d, maxX = %d, maxY = %d, " +
-                    "currentBounds = %s%n",
-                minX, minY, maxX, maxY, currentBounds);
             stop();
-            throw new IllegalStateException("small window");
+            throw new IllegalStateException(String.format("small window: " +
+                    "minX = %d, minY = %d, maxX = %d, maxY = %d, currentBounds = %s",
+                minX, minY, maxX, maxY, currentBounds));
         }
 
         return Rnd.pointInRect(minX, maxX, minY, maxY);
@@ -576,23 +580,16 @@ public class RandomGUITest {
     private final int[] keyCodes = {VK_1,
         VK_ENTER, VK_ESCAPE, VK_BACK_SPACE,
         // skip A, because it's the stop keystroke
-        VK_B, VK_C,
-        VK_D, VK_E, VK_F,
-        VK_G, VK_H, VK_I,
-        VK_J, VK_K, VK_L,
-        VK_M, VK_N, VK_O,
-        VK_P,
+        VK_B, VK_C, VK_D, VK_E, VK_F,
+        VK_G, VK_H, VK_I, VK_J, VK_K,
+        VK_L, VK_M, VK_N, VK_O, VK_P,
         // skip Q, because it's the exit keystroke
         VK_R, VK_S,
         // skip T, because it brings up the text layer dialog
         VK_U,
         // skip V, because too much Move Tool consumes all the memory
-        VK_W,
-        VK_Z,
-        VK_X,
-        VK_Y,
-        VK_TAB,
-        VK_COMMA, VK_HOME,
+        VK_W, VK_Z, VK_X, VK_Y,
+        VK_TAB, VK_COMMA, VK_HOME,
         VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN
     };
 
@@ -667,9 +664,8 @@ public class RandomGUITest {
         }
     }
 
-    private void repeat() {
+    private void repeatLastFilter() {
         log("repeat (dispatch Ctrl-F)");
-
         dispatchKey(VK_F, 'F', Ctrl.PRESSED);
     }
 
@@ -735,8 +731,8 @@ public class RandomGUITest {
         }
     }
 
-    private void changeImageArea() {
-        log("change image area from " + ImageArea.getMode());
+    private void toggleImageAreaMode() {
+        log("toggle image area from " + ImageArea.getMode());
         ImageArea.toggleUI();
     }
 
@@ -794,15 +790,14 @@ public class RandomGUITest {
     }
 
     private void randomRotateFlip() {
-        int r = rand.nextInt(5);
-        switch (r) {
-            case 0 -> runAction(new Rotate(ANGLE_90));
-            case 1 -> runAction(new Rotate(ANGLE_180));
-            case 2 -> runAction(new Rotate(ANGLE_270));
-            case 3 -> runAction(new Flip(HORIZONTAL));
-            case 4 -> runAction(new Flip(VERTICAL));
-            default -> throw new IllegalStateException("r = " + r);
-        }
+        Action[] actions = {
+            new Rotate(ANGLE_90),
+            new Rotate(ANGLE_180),
+            new Rotate(ANGLE_270),
+            new Flip(HORIZONTAL),
+            new Flip(VERTICAL)
+        };
+        runAction(Rnd.chooseFrom(actions));
     }
 
     private void activateRandomView() {
@@ -812,18 +807,17 @@ public class RandomGUITest {
         }
     }
 
-    private void layerOrderChange() {
+    private void randomLayerOrderChange() {
         var comp = Views.getActiveComp();
-        int r = rand.nextInt(6);
-        switch (r) {
-            case 0 -> moveActiveLayerToTop(comp);
-            case 1 -> moveActiveLayerToBottom(comp);
-            case 2 -> raiseLayerSelection(comp);
-            case 3 -> lowerLayerSelection(comp);
-            case 4 -> moveActiveLayerUp(comp);
-            case 5 -> moveActiveLayerDown(comp);
-            default -> throw new IllegalStateException("Unexpected value: " + r);
-        }
+        Runnable[] actions = {
+            () -> moveActiveLayerToTop(comp),
+            () -> moveActiveLayerToBottom(comp),
+            () -> raiseLayerSelection(comp),
+            () -> lowerLayerSelection(comp),
+            () -> moveActiveLayerUp(comp),
+            () -> moveActiveLayerDown(comp)
+        };
+        Rnd.chooseFrom(actions).run();
     }
 
     private void moveActiveLayerToTop(Composition comp) {
@@ -856,7 +850,7 @@ public class RandomGUITest {
         comp.getActiveHolder().reorderActiveLayer(false);
     }
 
-    private void layerMerge() {
+    private void randomLayerMerge() {
         var comp = Views.getActiveComp();
 
         if (rand.nextBoolean()) {
@@ -871,7 +865,7 @@ public class RandomGUITest {
         }
     }
 
-    private void layerAddDelete() {
+    private void randomLayerAddOrDelete() {
         if (rand.nextBoolean()) {
             if (AddNewLayerAction.INSTANCE.isEnabled()) {
                 runAction(AddNewLayerAction.INSTANCE);
@@ -883,21 +877,19 @@ public class RandomGUITest {
         }
     }
 
-    private void randomHideShow() {
+    private void randomlyTogglePanelVisibility() {
         if (NO_HIDE_SHOW) {
             return;
         }
-
         WorkSpace workSpace = PixelitorWindow.get().getWorkSpace();
-        int r = rand.nextInt(5);
-        switch (r) {
-            case 0 -> runAction(workSpace.getHistogramsAction());
-            case 1 -> runAction(workSpace.getToolsAction());
-            case 2 -> runAction(workSpace.getLayersAction());
-            case 3 -> runAction(workSpace.getStatusBarAction());
-            case 4 -> runAction(workSpace.getAllAction());
-            default -> throw new IllegalStateException("r = " + r);
-        }
+        Action[] actions = {
+            workSpace.getHistogramsAction(),
+            workSpace.getToolsAction(),
+            workSpace.getLayersAction(),
+            workSpace.getStatusBarAction(),
+            workSpace.getAllAction()
+        };
+        runAction(Rnd.chooseFrom(actions));
     }
 
     private void randomCopy() {
@@ -984,7 +976,7 @@ public class RandomGUITest {
         } else {
             tool = Tools.getRandomTool();
 
-            // The move tool can cause out of memory errors, so don't test it
+            // the move tool can cause out of memory errors, so don't test it
             if (tool == Tools.MOVE) {
                 return;
             }
@@ -1084,7 +1076,7 @@ public class RandomGUITest {
         dispatchKey(keyCode, keyChar, Ctrl.PRESSED);
     }
 
-    // (add, delete, apply, link)
+    // a random action on a layer mask (add, delete, apply, link/unlink)
     private void randomLayerMaskAction() {
         Layer layer = Views.getActiveLayer();
         if (!layer.hasMask()) {
@@ -1093,6 +1085,7 @@ public class RandomGUITest {
         } else {
             assert !AddLayerMaskAction.INSTANCE.isEnabled();
             if (rand.nextFloat() < 0.2 && layer instanceof ContentLayer) {
+                // 20% chance to toggle link status
                 LayerMask mask = layer.getMask();
                 if (mask.isLinked()) {
                     log("unlink layer mask");
@@ -1102,8 +1095,8 @@ public class RandomGUITest {
                     mask.setLinked(true, true);
                 }
             } else if (layer instanceof ImageLayer imageLayer) {
-                double d = rand.nextDouble();
-                if (d > 0.5) {
+                // for image layers, either apply or delete the mask
+                if (rand.nextBoolean()) {
                     log("apply layer mask");
                     imageLayer.applyLayerMask(true);
                 } else {
@@ -1111,6 +1104,7 @@ public class RandomGUITest {
                     imageLayer.deleteMask(true);
                 }
             } else {
+                // for other layer types, just delete the mask
                 log("delete layer mask");
                 layer.deleteMask(true);
             }
@@ -1170,9 +1164,11 @@ public class RandomGUITest {
         }
     }
 
-    // prevents paths from growing too large
-    private void setPathsToNull() {
-        log("set paths to null");
+    /**
+     * Clears paths on inactive views to prevent them from growing too large.
+     */
+    private void clearPaths() {
+        log("clear paths");
         Views.forEach(view -> {
             // don't touch the active, as its path might be edited just now
             if (!view.isActive()) {
@@ -1183,6 +1179,9 @@ public class RandomGUITest {
         History.clear();
     }
 
+    /**
+     * Dispatches a key-pressed event to the main window.
+     */
     private static void dispatchKey(int keyCode, char keyChar, Ctrl ctrl) {
         int modifiers = ctrl.modify(0);
         var pw = PixelitorWindow.get();
@@ -1196,13 +1195,13 @@ public class RandomGUITest {
         actionCaller.registerAction(10, () -> randomMove(robot));
         actionCaller.registerAction(20, () -> randomDrag(robot));
         actionCaller.registerAction(5, () -> randomClick(robot));
-        actionCaller.registerAction(2, this::repeat);
+        actionCaller.registerAction(2, this::repeatLastFilter);
         actionCaller.registerAction(5, this::randomUndoRedo);
         actionCaller.registerAction(1, this::randomCrop);
         actionCaller.registerAction(1, this::randomFade);
         actionCaller.registerAction(2, this::randomizeToolSettings);
         actionCaller.registerAction(1, this::arrangeWindows);
-        actionCaller.registerAction(3, this::changeImageArea);
+        actionCaller.registerAction(3, this::toggleImageAreaMode);
         actionCaller.registerAction(1, this::randomColors);
         actionCaller.registerAction(3, this::randomFilter);
         actionCaller.registerAction(1, this::randomTween);
@@ -1221,10 +1220,10 @@ public class RandomGUITest {
         actionCaller.registerAction(1, this::traceWithCurrentSmudge);
         actionCaller.registerAction(1, this::randomRotateFlip);
         actionCaller.registerAction(5, this::activateRandomView);
-        actionCaller.registerAction(1, this::layerOrderChange);
-        actionCaller.registerAction(5, this::layerMerge);
-        actionCaller.registerAction(3, this::layerAddDelete);
-        actionCaller.registerAction(1, this::randomHideShow);
+        actionCaller.registerAction(1, this::randomLayerOrderChange);
+        actionCaller.registerAction(5, this::randomLayerMerge);
+        actionCaller.registerAction(3, this::randomLayerAddOrDelete);
+        actionCaller.registerAction(1, this::randomlyTogglePanelVisibility);
         if (ENABLE_COPY_PASTE) {
             actionCaller.registerAction(1, this::randomCopy);
             actionCaller.registerAction(1, this::randomPaste);
@@ -1242,9 +1241,9 @@ public class RandomGUITest {
         actionCaller.registerAction(1, this::convertToSmartObject);
         actionCaller.registerAction(5, this::randomRasterizeLayer);
         actionCaller.registerAction(4, this::randomGuides);
-        actionCaller.registerAction(4, this::setPathsToNull);
+        actionCaller.registerAction(4, this::clearPaths);
 
-        if (Features.enableExperimental) {
+        if (TEST_ADJ_LAYERS) {
             actionCaller.registerAction(2, this::randomNewAdjustmentLayer);
         }
 

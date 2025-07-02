@@ -41,6 +41,8 @@ class AdjustmentLayerTest {
         comp.addLayerWithoutUI(layer);
         comp.getCompositeImage();
         assert filter.getNumTransformCalls() == 1;
+
+        filter.resetNumTransformCalls();
     }
 
     @Test
@@ -57,8 +59,7 @@ class AdjustmentLayerTest {
     }
 
     private void checkFilterRuns(int expected) {
-        // once it was run during setup
-        int actual = filter.getNumTransformCalls() - 1;
+        int actual = filter.getNumTransformCalls();
         if (actual != expected) {
             throw new AssertionError("Expected " + expected + ", found " + actual);
         }

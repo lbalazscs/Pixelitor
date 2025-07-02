@@ -17,7 +17,6 @@
 
 package pixelitor;
 
-import org.mockito.stubbing.Answer;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.compactions.Resize;
@@ -43,6 +42,7 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Mockito.any;
@@ -58,10 +58,15 @@ import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
 
+/**
+ * Static utility methods for the unit tests.
+ */
 public class TestHelper {
-    // Default dimensions for test compositions
+    // default dimensions for test compositions
     public static final int TEST_WIDTH = 20;
     public static final int TEST_HEIGHT = 10;
+
+    private static final String DEFAULT_LAYER_NAME = "layer 1";
 
     private static Composition currentComp;
     private static Selection currentSel;
@@ -120,16 +125,15 @@ public class TestHelper {
         when(comp.getView()).thenReturn(view);
 
         currentSel = null;
-        // when setSelectionRef() is called on the mock, then store the received
-        // Selection argument in the currentSel field
+        // when setSelection() is called, store the argument in the currentSel field
         doAnswer(invocation -> {
-            currentSel = (Selection) invocation.getArguments()[0];
+            currentSel = invocation.getArgument(0);
             return null;
         }).when(comp).setSelection(any(Selection.class));
 
-        // when getSelection() is called on the mock, then return the currentSel field
-        when(comp.getSelection()).thenAnswer((Answer<Selection>) invocation -> currentSel);
-        when(comp.hasSelection()).thenAnswer((Answer<Boolean>) invocation -> currentSel != null);
+        // when getSelection() is called, return the currentSel field
+        when(comp.getSelection()).thenAnswer(invocation -> currentSel);
+        when(comp.hasSelection()).thenAnswer(invocation -> currentSel != null);
 
         return comp;
     }
@@ -163,28 +167,19 @@ public class TestHelper {
         return comp;
     }
 
-    public static Layer createLayer(Class<? extends Layer> layerClass,
-                                    Composition comp) {
-        Layer layer;
-        if (layerClass == ImageLayer.class) {
-            layer = createEmptyImageLayer(comp, "layer 1");
-        } else if (layerClass == TextLayer.class) {
-            layer = createTextLayer(comp, "layer 1");
-        } else if (layerClass == AdjustmentLayer.class) {
-            layer = createAdjustmentLayer(comp, "layer 1", new Invert());
-        } else if (layerClass == ColorFillLayer.class) {
-            layer = createColorFillLayer(comp, "layer 1");
-        } else if (layerClass == GradientFillLayer.class) {
-            layer = createGradientFillLayer(comp, "layer 1");
-        } else if (layerClass == ShapesLayer.class) {
-            layer = createShapesLayer(comp, "layer 1");
-        } else if (layerClass == SmartObject.class) {
-            layer = createSmartObject(comp, "layer 1");
-        } else if (layerClass == SmartFilter.class) {
-            layer = createSmartFilter(comp, "layer 1");
-        } else {
-            throw new IllegalStateException("unexpected class " + layerClass.getSimpleName());
-        }
+    public static Layer createLayer(Class<? extends Layer> layerClass, Composition comp) {
+        Layer layer = switch (layerClass.getSimpleName()) {
+            case "ImageLayer" -> createEmptyImageLayer(comp, DEFAULT_LAYER_NAME);
+            case "TextLayer" -> createTextLayer(comp, DEFAULT_LAYER_NAME);
+            case "AdjustmentLayer" -> createAdjustmentLayer(comp, DEFAULT_LAYER_NAME, new Invert());
+            case "ColorFillLayer" -> createColorFillLayer(comp, DEFAULT_LAYER_NAME);
+            case "GradientFillLayer" -> createGradientFillLayer(comp, DEFAULT_LAYER_NAME);
+            case "ShapesLayer" -> createShapesLayer(comp, DEFAULT_LAYER_NAME);
+            case "SmartObject" -> createSmartObject(comp, DEFAULT_LAYER_NAME);
+            case "SmartFilter" -> createSmartFilter(comp, DEFAULT_LAYER_NAME);
+            default -> throw new IllegalStateException("unexpected class " + layerClass.getSimpleName());
+        };
+
         if (!layer.hasUI()) {
             layer.createUI();
         }
@@ -227,7 +222,7 @@ public class TestHelper {
         return layer;
     }
 
-    public static SmartObject createSmartObject(Composition comp, String name) {
+    private static SmartObject createSmartObject(Composition comp, String name) {
         Composition content = createComp(comp.getName() + " Content", 1, false, true);
         SmartObject so = new SmartObject(comp, content);
         so.setName(name, false);
@@ -235,15 +230,15 @@ public class TestHelper {
         return so;
     }
 
-    public static ColorFillLayer createColorFillLayer(Composition comp, String name) {
+    private static ColorFillLayer createColorFillLayer(Composition comp, String name) {
         return new ColorFillLayer(comp, name, Color.WHITE);
     }
 
-    public static GradientFillLayer createGradientFillLayer(Composition comp, String name) {
+    private static GradientFillLayer createGradientFillLayer(Composition comp, String name) {
         return new GradientFillLayer(comp, name);
     }
 
-    public static SmartFilter createSmartFilter(Composition comp, String name) {
+    private static SmartFilter createSmartFilter(Composition comp, String name) {
         SmartObject so = createSmartObject(comp, "smart object");
         SmartFilter smartFilter = new SmartFilter(new Invert(), comp, so);
         so.addSmartFilter(smartFilter, false, false);
@@ -268,38 +263,36 @@ public class TestHelper {
     public static View setupMockViewFor(Composition comp) {
         View view = createMockViewWithoutComp();
 
-//        when(view.getComp()).thenReturn(comp);
-
         // The view should be able to return the *new* composition
-        // after a replaceComp call, therefore it always returns the
-        // currentComp field, which initially is set to comp.
-        // This trick works only if there's a single comp per test!
+        // after a replaceComp call, so it always returns the currentComp
+        // field, which is initially set to comp.
+        // This trick works only if there's a single comp per test.
         currentComp = comp;
 
-        // when replaceComp() is called on the mock, then store the received
-        // Composition argument in the currentComp field
-        doAnswer(invocation -> {
-            currentComp = (Composition) invocation.getArguments()[0];
+        // this consumer updates currentComp when replaceComp() is called on the mock view
+        Consumer<Composition> updateCurrentComp = newComp -> {
+            currentComp = newComp;
             currentComp.setView(view);
+        };
+
+        doAnswer(invocation -> {
+            updateCurrentComp.accept(invocation.getArgument(0));
             return null;
         }).when(view).replaceComp(any(Composition.class));
 
         doAnswer(invocation -> {
-            currentComp = (Composition) invocation.getArguments()[0];
-            currentComp.setView(view);
+            updateCurrentComp.accept(invocation.getArgument(0));
             return null;
         }).when(view).replaceComp(any(Composition.class), any(MaskViewMode.class), anyBoolean());
 
-        // when getComp() is called on the mock, then return the currentComp field
-        when(view.getComp()).thenAnswer((Answer<Composition>) invocation -> currentComp);
-
-        // when getCanvas() is called on the mock, then return currentComp.getCanvas()
-        when(view.getCanvas()).thenAnswer((Answer<Canvas>) invocation -> currentComp.getCanvas());
+        // when getComp() or getCanvas() is called, delegate to the currentComp field
+        when(view.getComp()).thenAnswer(invocation -> currentComp);
+        when(view.getCanvas()).thenAnswer(invocation -> currentComp.getCanvas());
 
         comp.setView(view);
 
-        // set it to active only after the comp is set
-        // because the active view should return non-null in view.getComp()
+        // set it to active only after the comp is set, because
+        // the active view should return non-null in view.getComp()
         Views.setActiveView(view, false);
 
         return view;
@@ -312,13 +305,11 @@ public class TestHelper {
         when(view.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
         when(view.componentToImageSpace(any(Rectangle2D.class))).then(returnsFirstArg());
 
-        // can't just return the argument because this method returns a
-        // Rectangle (subclass) from a Rectangle2D (superclass)
+        // can't just return the argument because this method returns
+        // a Rectangle (a subclass) from a Rectangle2D (a superclass)
         when(view.imageToComponentSpace(any(Rectangle2D.class))).thenAnswer(invocation -> {
             Rectangle2D in = invocation.getArgument(0);
-            return new Rectangle(
-                (int) in.getX(), (int) in.getY(),
-                (int) in.getWidth(), (int) in.getHeight());
+            return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
         });
 
         when(view.componentXToImageSpace(anyDouble())).then(returnsFirstArg());
@@ -346,9 +337,7 @@ public class TestHelper {
 
     public static void setSelection(Composition comp, Shape shape) {
         if (mockingDetails(comp).isMock()) {
-            Selection selection = new Selection(shape, comp.getView());
-            when(comp.getSelection()).thenReturn(selection);
-            when(comp.hasSelection()).thenReturn(true);
+            comp.setSelection(new Selection(shape, comp.getView()));
         } else {
             comp.createSelectionFrom(shape);
         }
@@ -364,7 +353,7 @@ public class TestHelper {
     public static void setTranslation(Composition comp,
                                       ContentLayer layer,
                                       WithTranslation translation) {
-        // Composition only allows to move the active layer
+        // Composition only allows moving the active layer,
         // so if the given layer is not active, activate it temporarily
         Layer activeLayerBefore = comp.getActiveLayer();
         boolean activeLayerChanged = false;
@@ -389,32 +378,35 @@ public class TestHelper {
 
     public static Composition resize(Composition comp, int targetWidth, int targetHeight) {
         assert comp.getView() != null;
-        return new Resize(targetWidth, targetHeight)
-            .process(comp)
-            .join();
+        return new Resize(targetWidth, targetHeight).process(comp).join();
     }
 
+    /**
+     * Asserts that the history contains exactly the given edit names.
+     */
     public static void assertHistoryEditsAre(String... values) {
         List<String> edits = History.getEditNames();
         assertThat(edits).containsExactly(values);
     }
 
-    public static void initTool(Tool tool, ResourceBundle resources) throws InvocationTargetException, InterruptedException {
+    public static void initToolSettings(Tool tool, ResourceBundle resources) throws InvocationTargetException, InterruptedException {
         if (!tool.hasSettingsPanel()) {
             tool.setSettingsPanel(new ToolSettingsPanel());
             SwingUtilities.invokeAndWait(() -> tool.initSettingsPanel(resources));
         }
     }
 
+    /**
+     * Configures the application for unit testing.
+     */
     public static void setUnitTestingMode() {
         if (AppMode.isUnitTesting()) {
-            // unit testing mode is already set
-            return;
+            return; // already in unit testing mode
         }
         AppMode.setUnitTestingMode();
 
         if (Texts.getResources() == null) {
-            Texts.init(); // needed for the views initialization
+            Texts.init(); // needed for view initialization
         }
         Views.clear();
 

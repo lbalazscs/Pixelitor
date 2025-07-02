@@ -82,7 +82,7 @@ public class Canvas implements Serializable, Debuggable {
         if (newWidth <= 0 || newWidth > MAX_WIDTH || newHeight <= 0 || newHeight > MAX_HEIGHT) {
             throw new IllegalArgumentException(String.format(
                 "Invalid size: %dx%d. Must be between 1x1 and %dx%d.",
-                newWidth, newWidth, MAX_WIDTH, MAX_HEIGHT));
+                newWidth, newHeight, MAX_WIDTH, MAX_HEIGHT));
         }
     }
 

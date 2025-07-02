@@ -25,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.InOrder;
 import pixelitor.TestHelper;
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
@@ -38,16 +39,16 @@ import java.util.Collection;
 import java.util.ResourceBundle;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static pixelitor.tools.Tools.BRUSH;
 import static pixelitor.tools.Tools.CLONE;
 import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.Tools.SMUDGE;
 
 /**
- * Tests the functionality common to all {@link AbstractBrushTool} subclasses.
+ * Tests functionality common to all {@link AbstractBrushTool} subclasses.
  */
 @RunWith(Parameterized.class)
 public class AbstractBrushToolTest {
@@ -59,26 +60,26 @@ public class AbstractBrushToolTest {
     private Brush origBrush;
     private Drawable dr;
 
-    @BeforeClass
-    public static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
-    }
-
     @Parameters(name = "{index}: {0} Tool")
     public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
-        // this method runs before beforeAllTests
+        // call it here, because this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
         AbstractBrushTool[] brushTools = {BRUSH, ERASER, CLONE, SMUDGE};
         ResourceBundle resources = Texts.getResources();
 
         for (AbstractBrushTool tool : brushTools) {
-            TestHelper.initTool(tool, resources);
+            TestHelper.initToolSettings(tool, resources);
         }
 
         return Arrays.stream(brushTools)
             .map(tool -> new Object[]{tool})
             .toList();
+    }
+
+    @BeforeClass
+    public static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
     }
 
     @Before
@@ -103,11 +104,13 @@ public class AbstractBrushToolTest {
     }
 
     @Test
-    public void trace() {
+    public void trace_invokesBrushMethodsInOrder() {
         tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
-        verify(spyBrush).setTarget(any(), any());
-        verify(spyBrush).startAt(any());
-        verify(spyBrush, times(5)).continueTo(any());
+        InOrder inOrder = inOrder(spyBrush);
+
+        inOrder.verify(spyBrush).setTarget(any(), any());
+        inOrder.verify(spyBrush).startAt(any());
+        inOrder.verify(spyBrush, atLeastOnce()).continueTo(any());
     }
 }

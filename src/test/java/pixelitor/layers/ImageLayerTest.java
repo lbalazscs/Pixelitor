@@ -104,18 +104,18 @@ public class ImageLayerTest {
     @Test
     public void getSetImage() {
         // setImage is called already in the ImageLayer constructor
-        int expectedImageChangedCalls = 1;
+        int expectedCacheInvalidations = 1;
         if (withMask.isTrue()) {
             // plus the mask constructor
-            expectedImageChangedCalls++;
+            expectedCacheInvalidations++;
         }
         if (withTranslation.isTrue()) {
-            expectedImageChangedCalls++;
+            expectedCacheInvalidations++;
         }
         if (withMask.isTrue() && withTranslation.isTrue()) {
-            expectedImageChangedCalls++;
+            expectedCacheInvalidations++;
         }
-        verify(comp, times(expectedImageChangedCalls)).invalidateImageCache();
+        verify(comp, times(expectedCacheInvalidations)).invalidateImageCache();
 
         BufferedImage image = layer.getImage();
         assertThat(image).isNotNull();
@@ -124,7 +124,7 @@ public class ImageLayerTest {
         layer.setImage(testImage);
 
         // called one more time
-        verify(comp, times(expectedImageChangedCalls + 1)).invalidateImageCache();
+        verify(comp, times(expectedCacheInvalidations + 1)).invalidateImageCache();
 
         // actually setImage should not update the icon image
         iconChecker.verifyUpdateCounts(0, 0);

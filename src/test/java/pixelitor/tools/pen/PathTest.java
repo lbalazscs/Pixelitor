@@ -21,6 +21,7 @@ import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
+import pixelitor.layers.TextLayer;
 import pixelitor.utils.Shapes;
 
 import java.awt.Rectangle;
@@ -42,7 +43,7 @@ class PathTest {
 
     @BeforeEach
     void beforeEachTest() {
-        var comp = TestHelper.createMockComp("PathTest");
+        var comp = TestHelper.createRealComp("PathTest", TextLayer.class);
         view = comp.getView();
     }
 

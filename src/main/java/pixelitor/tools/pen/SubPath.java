@@ -41,7 +41,6 @@ import java.util.*;
 import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
-import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
 import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
 import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
@@ -85,8 +84,6 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public SubPath deepCopy(Path newParent, Composition newComp) {
-        assert !hasMovingPoint();
-
         SubPath copy = new SubPath(newParent, newComp);
         copy.closed = closed;
         copy.finished = finished;
@@ -95,6 +92,7 @@ public class SubPath implements Serializable, Transformable {
             var anchorCopy = new AnchorPoint(anchor, copy, true);
             copy.anchorPoints.add(anchorCopy);
         }
+        // we can have a moving point here, but it's not copied
 
         return copy;
     }

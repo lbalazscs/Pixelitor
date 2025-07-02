@@ -20,6 +20,7 @@ package pixelitor.tools.selection;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.SelectionBuilder;
@@ -109,7 +110,10 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
                 @Override
                 protected void done() {
                     // show the final selection
-                    comp.getView().repaint();
+                    View view = comp.getView();
+                    if (view != null) {
+                        view.repaint();
+                    }
                 }
             };
             worker.execute();

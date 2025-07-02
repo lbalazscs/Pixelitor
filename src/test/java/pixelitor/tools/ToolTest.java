@@ -81,7 +81,7 @@ public class ToolTest {
         ResourceBundle resources = Texts.getResources();
 
         for (Tool tool : tools) {
-            TestHelper.initTool(tool, resources);
+            TestHelper.initToolSettings(tool, resources);
 
             // for each combination create an independent test run
             for (Alt alt : Alt.values()) {
