@@ -24,6 +24,7 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.lookup.GrayScaleLookup;
 import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.filters.util.Channel;
+import pixelitor.utils.Rnd;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,5 +145,19 @@ public class LevelsModel {
             model.loadUserPreset(preset);
         }
         settingsChanged();
+    }
+
+    public void randomizeAndRun() {
+        resetAll();
+
+        // randomize the input levels of the main RGB channel for a simple, common adjustment
+        int inputDark = Rnd.nextInt(128);
+        int inputLight = Rnd.nextInt(128) + 128;
+
+        rgbModel.getInputDark().setValueNoTrigger(inputDark);
+        rgbModel.getInputLight().setValueNoTrigger(inputLight);
+
+        // manually trigger an update of the model and filter
+        rgbModel.paramAdjusted();
     }
 }

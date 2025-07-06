@@ -39,6 +39,12 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     // the ToneCurves instance this panel represents
     public final ToneCurves toneCurves;
 
+    // the fixed size of the drawing area for the curves:
+    // grid(255px) + curvePadding(2*10px) + scales(20px)
+    private static final int DRAWING_AREA_SIZE = 295;
+    private static final Dimension MIN_SIZE = new Dimension(
+        DRAWING_AREA_SIZE, DRAWING_AREA_SIZE);
+
     private int mouseKnotIndex = -1; // index of the knot being dragged
     private int deletedKnotIndex = -1; // index of a knot deleted by dragging it out of bounds
     private final EventListenerList actionListenerList = new EventListenerList();
@@ -46,11 +52,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     public ToneCurvesPanel(ToneCurves toneCurves) {
         this.toneCurves = toneCurves;
 
-        // size: grid(255px) + curvePadding(2*10px) + scales(20px)
-        Dimension panelSize = new Dimension(295, 295);
-        setPreferredSize(panelSize);
-        toneCurves.setSize(panelSize.width, panelSize.height);
-
+        toneCurves.setSize(DRAWING_AREA_SIZE, DRAWING_AREA_SIZE);
         addMouseMotionListener(this);
         addMouseListener(this);
     }
@@ -73,7 +75,13 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        toneCurves.draw((Graphics2D) g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        try {
+            g2d.translate(getDrawingOffsetX(), getDrawingOffsetY());
+            toneCurves.draw(g2d);
+        } finally {
+            g2d.dispose();
+        }
     }
 
     public void stateChanged() {
@@ -83,7 +91,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     }
 
     private Point2D.Float normalizeMousePos(MouseEvent e) {
-        var mousePos = new Point2D.Float(e.getX(), e.getY());
+        var mousePos = new Point2D.Float(e.getX() - getDrawingOffsetX(), e.getY() - getDrawingOffsetY());
         toneCurves.normalizePoint(mousePos);
         return mousePos;
     }
@@ -95,6 +103,11 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
     public void resetActiveCurve() {
         toneCurves.getActiveCurve().reset();
+        stateChanged();
+    }
+
+    public void randomize() {
+        toneCurves.randomize();
         stateChanged();
     }
 
@@ -194,5 +207,23 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
                 stateChanged();
             }
         }
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return MIN_SIZE;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return MIN_SIZE;
+    }
+
+    private int getDrawingOffsetX() {
+        return (getWidth() - DRAWING_AREA_SIZE) / 2;
+    }
+
+    private int getDrawingOffsetY() {
+        return (getHeight() - DRAWING_AREA_SIZE) / 2;
     }
 }

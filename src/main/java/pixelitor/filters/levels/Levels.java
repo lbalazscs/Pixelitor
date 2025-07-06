@@ -22,7 +22,6 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.layers.Filterable;
-import pixelitor.utils.Rnd;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -77,18 +76,7 @@ public class Levels extends FilterWithGUI {
 
     @Override
     public void randomize() {
-        levelsModel.resetAll();
-
-        // randomize the input levels of the main RGB channel for a simple, common adjustment
-        int inputDark = Rnd.nextInt(128);
-        int inputLight = Rnd.nextInt(128) + 128;
-
-        ChannelLevelsModel rgbModel = levelsModel.getRgbModel();
-        rgbModel.getInputDark().setValueNoTrigger(inputDark);
-        rgbModel.getInputLight().setValueNoTrigger(inputLight);
-
-        // manually trigger an update of the model and filter
-        rgbModel.paramAdjusted();
+        levelsModel.randomizeAndRun();
     }
 
     @Override

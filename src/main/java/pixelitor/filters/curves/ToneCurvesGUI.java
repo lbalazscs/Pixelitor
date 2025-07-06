@@ -23,10 +23,12 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
 import javax.swing.*;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
-import static java.awt.FlowLayout.LEFT;
-import static javax.swing.BoxLayout.PAGE_AXIS;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
 
 /**
  * The {@link FilterGUI} for the {@link ToneCurvesFilter}.
@@ -38,20 +40,21 @@ public class ToneCurvesGUI extends FilterGUI {
 
     public ToneCurvesGUI(ToneCurvesFilter filter, Filterable layer) {
         super(filter, layer);
-        setLayout(new BoxLayout(this, PAGE_AXIS));
+        setLayout(new BorderLayout());
         ToneCurves curves = filter.getCurves();
 
-        add(createChannelPanel(curves.getActiveChannel()));
+        add(createChannelPanel(curves.getActiveChannel()), NORTH);
 
         curvesPanel = new ToneCurvesPanel(curves);
         curvesPanel.addActionListener(e -> startPreview(false));
-        add(curvesPanel);
+        add(curvesPanel, CENTER);
+//        curvesPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
 
-        add(createButtonsPanel(layer));
+        add(createButtonsPanel(layer), SOUTH);
     }
 
     private JPanel createChannelPanel(Channel activeChannel) {
-        JPanel channelPanel = new JPanel(new FlowLayout(LEFT));
+        JPanel channelPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         channelPanel.add(new JLabel("Channel:"));
         channelPanel.add(createChannelsCombo(activeChannel));
@@ -70,9 +73,14 @@ public class ToneCurvesGUI extends FilterGUI {
     }
 
     private JPanel createButtonsPanel(Filterable layer) {
-        JPanel buttonsPanel = new JPanel(new FlowLayout(LEFT));
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
         buttonsPanel.add(createShowOriginalCB(layer));
-        buttonsPanel.add(GUIUtils.createResetAllButton(e -> curvesPanel.resetAllCurves()));
+        buttonsPanel.add(GUIUtils.createRandomizeSettingsButton(e ->
+            curvesPanel.randomize()));
+        buttonsPanel.add(GUIUtils.createResetAllButton(e ->
+            curvesPanel.resetAllCurves()));
+
         return buttonsPanel;
     }
 

@@ -39,6 +39,8 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING
  * build the user interface of a {@link ParametrizedFilter}
  */
 public class ParamSet implements Debuggable {
+    public static final String RANDOMIZE_BUTTON_TOOLTIP = "Randomize the settings for this filter.";
+
     private final List<FilterParam> params = new ArrayList<>();
     private final List<FilterButtonModel> actions = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
@@ -112,7 +114,7 @@ public class ParamSet implements Debuggable {
         var randomizeAction = new FilterButtonModel("Randomize Settings",
             this::randomize,
             Icons.getRandomizeIcon(),
-            "Randomize the settings for this filter.",
+            RANDOMIZE_BUTTON_TOOLTIP,
             "randomize");
         actions.add(randomizeAction);
     }

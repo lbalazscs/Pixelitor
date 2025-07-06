@@ -82,7 +82,8 @@ public class ToneCurvesFilter extends FilterWithGUI {
 
     @Override
     public void randomize() {
-        // not supported yet
+        curves.randomize();
+        stateChanged();
     }
 
     @Override
@@ -100,6 +101,10 @@ public class ToneCurvesFilter extends FilterWithGUI {
             curves.getCurve(channel).setStateFrom(saveString);
         }
 
+        stateChanged();
+    }
+
+    private void stateChanged() {
         if (lastGUI != null) { // it's null when loading a smart filter
             lastGUI.stateChanged();
         }

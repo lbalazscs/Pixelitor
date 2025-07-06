@@ -100,6 +100,9 @@ public class LevelsGUI extends FilterGUI {
         showOriginalCB.addActionListener(e -> layer.setShowOriginal(showOriginalCB.isSelected()));
         southPanel.add(showOriginalCB);
 
+        southPanel.add(GUIUtils.createRandomizeSettingsButton(e ->
+            model.randomizeAndRun()));
+
         southPanel.add(GUIUtils.createResetAllButton(e ->
             model.resetAllAndRun()));
 

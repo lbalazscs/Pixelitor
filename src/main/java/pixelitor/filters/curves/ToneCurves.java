@@ -106,6 +106,11 @@ public class ToneCurves {
         }
     }
 
+    public void randomize() {
+        reset();
+        getCurve(Channel.RGB).randomize();
+    }
+
     /**
      * Converts panel coordinates to normalized curve coordinates (0-1).
      */

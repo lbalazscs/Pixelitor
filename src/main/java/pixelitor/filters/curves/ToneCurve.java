@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Represents a single tone curve for a color channel,
@@ -77,6 +78,20 @@ public class ToneCurve {
         curveData.x = new float[]{0, 1};
         curveData.y = new float[]{0, 1};
         curveUpdated = true;
+    }
+
+    public void randomize() {
+        // the curve is assumed to be in its reset state
+
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+
+        float x1 = (float) rnd.nextDouble(0.1, 0.4);
+        float y1 = (float) rnd.nextDouble(0.1, 0.4);
+        addKnot(new Point2D.Float(x1, y1), false);
+
+        float x2 = (float) rnd.nextDouble(0.6, 0.9);
+        float y2 = (float) rnd.nextDouble(0.6, 0.9);
+        addKnot(new Point2D.Float(x2, y2), false);
     }
 
     /**
