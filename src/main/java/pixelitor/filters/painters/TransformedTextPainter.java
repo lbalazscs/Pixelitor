@@ -36,10 +36,7 @@ import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.debug.Debuggable;
 
 import java.awt.*;
-import java.awt.font.FontRenderContext;
-import java.awt.font.GlyphVector;
-import java.awt.font.LineMetrics;
-import java.awt.font.TextAttribute;
+import java.awt.font.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
@@ -85,7 +82,7 @@ public class TransformedTextPainter implements Debuggable {
     private String text = "";
     private String[] textLines;
 
-    private int effectsWidth; // width added to accommodate effects
+    private int effectsPadding; // extra space around the text for effects
 
     private AreaEffects effects;
 
@@ -99,7 +96,6 @@ public class TransformedTextPainter implements Debuggable {
 
     private TransformedRectangle transformedRect;
     private Rectangle boundingBox;
-    private Shape baseShape;
     private Shape textShape;
     private float lineHeight;
     private double relLineHeight;
@@ -109,8 +105,6 @@ public class TransformedTextPainter implements Debuggable {
     private SoftReference<BufferedImage> renderCache;
 
     private boolean invalidLayout = true;
-    private boolean invalidShape = true;
-    private boolean invalidShapeTransform = true;
 
     // debug settings
     private static final boolean DISABLE_CACHE = false;
@@ -221,7 +215,11 @@ public class TransformedTextPainter implements Debuggable {
         return rect;
     }
 
-    private Rectangle calcBoundingBox(int textWidth, int textHeight, int width, int height, Graphics2D g) {
+    /**
+     * Calculates the final bounding box for the text, accounting
+     * for transformations, translation, and padding for effects.
+     */
+    private Rectangle calcBoundingBox(int textWidth, int textHeight, int width, int height) {
         if (hasNoTransform()) {
             Rectangle layout = calcAlignment(textWidth, textHeight, width, height);
             transformedRect = null;
@@ -229,19 +227,21 @@ public class TransformedTextPainter implements Debuggable {
             // support the Move tool
             layout.translate(translationX, translationY);
 
-            // The effect width is added only after considering
+            // The effect padding is added only after considering
             // the alignment. This means that in non-centered positions
             // the effects don't fit into the canvas, but the text
             // itself isn't shifted as effects are added.
-            if (effectsWidth != 0) {
-                layout.grow(effectsWidth, effectsWidth);
+            if (effectsPadding != 0) {
+                layout.grow(effectsPadding, effectsPadding);
             }
 
             return layout;
         }
 
-        // first calculate a transformed rectangle starting at 0, 0
-        transformedRect = new TransformedRectangle(0, 0, textWidth, textHeight, rotation, scaleX, scaleY, shearX, shearY);
+        // first, calculate a transformed rectangle starting at 0, 0
+        // (ignoring the effects) to get its bounds
+        transformedRect = new TransformedRectangle(0, 0,
+            textWidth, textHeight, rotation, scaleX, scaleY, shearX, shearY);
         Rectangle transformedBounds = transformedRect.getBoundingBox();
 
         // use the transformed bounds to calculate the correct layout
@@ -250,24 +250,24 @@ public class TransformedTextPainter implements Debuggable {
         // support the Move tool
         layout.translate(translationX, translationY);
 
-        if (effectsWidth == 0) {
-            // Also correct the transformed rectangle,
-            // because it will be useful later.
+        if (effectsPadding == 0) {
+            // also correct the transformed rectangle's position,
+            // as it will be used for painting
             transformedRect.align(layout, transformedBounds);
             return layout;
         }
-        // If we still didn't return, it means that we have both
-        // transformation and effects. 
 
-        // re-create the transformed rectangle to grow it
+        // if we have both transformation and effects, we need to
+        // recalculate the transformed rectangle to include
+        // the padding for the effects
         transformedRect = new TransformedRectangle(
-            -effectsWidth, -effectsWidth,
-            textWidth + 2 * effectsWidth,
-            textHeight + 2 * effectsWidth,
+            -effectsPadding, -effectsPadding,
+            textWidth + 2 * effectsPadding,
+            textHeight + 2 * effectsPadding,
             rotation, scaleX, scaleY, shearX, shearY);
         transformedRect.align(layout, transformedBounds);
 
-        layout.grow(effectsWidth, effectsWidth);
+        layout.grow(effectsPadding, effectsPadding);
 
         return layout;
     }
@@ -279,57 +279,29 @@ public class TransformedTextPainter implements Debuggable {
     private void paintText(Graphics2D g, AffineTransform origTransform) {
         g.setColor(color);
 
+        boolean hasEffects = effects != null && effects.hasEnabledEffects();
+
         if (isOnPath()) {
             g.fill(textShape);
-            if (effects != null && effects.hasEnabledEffects()) {
+            if (hasEffects) {
                 effects.apply(g, textShape);
             }
             return;
         }
 
-        FontMetrics metrics = g.getFontMetrics(font);
         transformGraphics(g);
 
-        // Draw the lines relative to the bounding box.
-        // Use the ascent, because drawY is relative to the baseline.
-        float drawY = (float) (metrics.getAscent() + effectsWidth);
-        if (textLines.length == 1) {
-            g.drawString(text, effectsWidth, drawY);
-        } else {
-            for (String line : textLines) {
-                float drawX = switch (mlpAlignment) {
-                    case AlignmentSelector.LEFT -> effectsWidth;
-                    case AlignmentSelector.CENTER ->
-                        (origTextWidth + 2 * effectsWidth) / 2.0f - metrics.stringWidth(line) / 2.0f;
-                    case AlignmentSelector.RIGHT ->
-                        (origTextWidth + 2 * effectsWidth) - metrics.stringWidth(line) - effectsWidth;
-                    default -> throw new IllegalStateException("alignment: " + mlpAlignment);
-                };
-                g.drawString(line, drawX, drawY);
-                drawY += lineHeight;
-            }
-        }
+        Shape baseShape = calcUntransformedTextShape(g);
+        g.fill(baseShape);
 
-        // Paint the effects of an explicitly transformed shape
-        // instead of simply painting them on the transformed graphics
-        // so that the direction of the drop shadow effect doesn't rotate.
+        // paint the effects
         var tx = g.getTransform();
-
-        //provideShape must be called with untransformed Graphics
         g.setTransform(origTransform);
 
-        if (effects != null && effects.hasEnabledEffects()) {
-            if (invalidShape) {
-                baseShape = calcUntransformedTextShape(g);
-                invalidShape = false;
-                invalidShapeTransform = true; // implied
-            }
-            if (invalidShapeTransform) {
-                tx.translate(effectsWidth, effectsWidth);
-                textShape = tx.createTransformedShape(baseShape);
-                invalidShapeTransform = false;
-            }
-
+        if (hasEffects) {
+            // Transform the local shape into the final screen/cache coordinates.
+            textShape = tx.createTransformedShape(baseShape);
+            // Apply effects to the final, transformed shape.
             effects.apply(g, textShape);
         }
     }
@@ -386,23 +358,38 @@ public class TransformedTextPainter implements Debuggable {
         }
 
         FontMetrics metrics = g.getFontMetrics(font);
-        int textWidth = 0;
-        double fontLineHeight = metrics.getStringBounds(textLines[0], g).getHeight();
+        FontRenderContext frc = g.getFontRenderContext();
+
+        // the line height is needed for both height calculation and painting
+        double fontLineHeight = metrics.getHeight();
         lineHeight = (float) (fontLineHeight * relLineHeight);
 
-        // doesn't count the adjustment of the last line
-        int textHeight = (int) (fontLineHeight + lineHeight * (textLines.length - 1));
-
+        // calculate the visual width of the entire text block
+        Map<TextAttribute, ?> attributes = font.getAttributes();
+        boolean hasKerning = KERNING_ON.equals(attributes.get(KERNING));
+        boolean hasLigatures = LIGATURES_ON.equals(attributes.get(LIGATURES));
+        double maxVisualWidth = 0;
         for (String line : textLines) {
-            int lineWidth = metrics.stringWidth(line);
-            if (lineWidth > textWidth) {
-                textWidth = lineWidth;
-            }
+            Shape lineShape = getLineShape(line, frc, metrics, hasKerning, hasLigatures, false, false);
+            maxVisualWidth = Math.max(maxVisualWidth, lineShape.getBounds2D().getWidth());
         }
-        boundingBox = calcBoundingBox(textWidth, textHeight, width, height, g);
-        invalidLayout = false;
+        origTextWidth = (int) Math.ceil(maxVisualWidth);
 
-        origTextWidth = textWidth;
+        // calculate the final text block dimensions using font metrics
+        int textWidth = origTextWidth;
+        int textHeight;
+        if (textLines.length == 0) {
+            textHeight = 0;
+        } else {
+            // height is from the top of the first line's ascent to the bottom of the last line's descent
+            float ascent = metrics.getAscent();
+            float descent = metrics.getDescent();
+            textHeight = (int) Math.ceil(ascent + ((textLines.length - 1) * lineHeight) + descent);
+        }
+
+        // calculate the final bounding box, which includes padding for effects
+        boundingBox = calcBoundingBox(textWidth, textHeight, width, height);
+        invalidLayout = false;
     }
 
     private void renderOnPath(Path2D path, Graphics2D g2) {
@@ -413,7 +400,7 @@ public class TransformedTextPainter implements Debuggable {
         textShape = distributeGlyphsAlongPath(glyphVector, path);
 
         Rectangle textShapeBounds = textShape.getBounds();
-        textShapeBounds.grow(effectsWidth, effectsWidth);
+        textShapeBounds.grow(effectsPadding, effectsPadding);
         boundingBox = textShapeBounds;
 
         // text on path handles its own transformations: make sure
@@ -439,126 +426,109 @@ public class TransformedTextPainter implements Debuggable {
     private Path2D distributeGlyphsAlongPath(GlyphVector glyphVector, Path2D path) {
         double tracking = calcTracking();
 
-        double pathLength = 0;
-        double textLength = 0;
-        if (mlpAlignment != AlignmentSelector.LEFT) {
-            // they need to be calculated
-            pathLength = Shapes.calcPathLength(path);
-            textLength = calcTextLength(glyphVector, tracking);
-        }
-
-        // calculate the initial offset based on alignment
-        double initialOffset = switch (mlpAlignment) {
-            case AlignmentSelector.LEFT -> 0;
-            case AlignmentSelector.CENTER -> (pathLength - textLength) / 2;
-            case AlignmentSelector.RIGHT -> pathLength - textLength;
-            default -> throw new IllegalStateException("Unexpected value: " + mlpAlignment);
-        };
+        double initialOffset = calcPathStartOffset(glyphVector, path, tracking);
+        int numGlyphs = glyphVector.getNumGlyphs();
 
         // handle text overflow for right or center alignment
         int startGlyphIndex = 0;
-        int numGlyphs = glyphVector.getNumGlyphs();
-        if (initialOffset < 0 && mlpAlignment != AlignmentSelector.LEFT) {
+        if (initialOffset < 0) {
             // calculate how many glyphs we need to skip so the visible
             // part of the text starts at the beginning of the path
-            double accumulatedWidth = 0;
-            double overflow = -initialOffset;
-            if (mlpAlignment == AlignmentSelector.CENTER) {
-                overflow = overflow / 2;
-            }
-            while (startGlyphIndex < numGlyphs && accumulatedWidth < overflow) {
-                accumulatedWidth += glyphVector.getGlyphMetrics(startGlyphIndex).getAdvance() * Math.abs(scaleX);
-                if (startGlyphIndex < numGlyphs - 1) {
-                    accumulatedWidth += tracking;
-                }
-                startGlyphIndex++;
-            }
+            startGlyphIndex = findStartGlyphForOverflow(
+                glyphVector, -initialOffset, numGlyphs, tracking);
             initialOffset = 0;
         }
 
         Path2D result = new Path2D.Double();
-        PathIterator it = new FlatteningPathIterator(path.getPathIterator(null), 1);
+        PathIterator pathIterator = new FlatteningPathIterator(path.getPathIterator(null), 1);
         double[] points = new double[6];
 
-        // the coordinates of the starting point of a path segment
-        double moveX = 0, moveY = 0;
-
-        // the coordinates of the last processed point
+        // coordinates of the last processed point
         double lastX = 0, lastY = 0;
 
-        // the coordinates of the current point
-        double thisX, thisY;
+        double currentPathDist = 0;
+        double segmentDist = 0;
+        double dx = 0, dy = 0;
 
-        int type;
-        double currentDist = 0;
-        double thresholdDist = initialOffset;
+        // the distance along the path where the left edge of the current glyph should be
+        double nextGlyphLeftEdgeDist = initialOffset;
 
-        int glyphIndex = startGlyphIndex;
-        AffineTransform at = new AffineTransform();
+        // prime the iterator to get the first segment
+        if (!pathIterator.isDone()) {
+            pathIterator.currentSegment(points);
+            lastX = points[0];
+            lastY = points[1];
+            pathIterator.next();
+        }
 
-        while (glyphIndex < numGlyphs && !it.isDone()) {
-            type = it.currentSegment(points);
-            switch (type) {
-                case PathIterator.SEG_MOVETO:
-                    moveX = lastX = points[0];
-                    moveY = lastY = points[1];
-                    result.moveTo(moveX, moveY);
-                    break;
+        // iterate through each glyph and find its place on the path.
+        for (int glyphIndex = startGlyphIndex; glyphIndex < numGlyphs; glyphIndex++) {
+            GlyphMetrics metrics = glyphVector.getGlyphMetrics(glyphIndex);
+            double advance = metrics.getAdvance() * Math.abs(scaleX);
+            double halfAdvance = advance / 2.0;
 
-                case PathIterator.SEG_CLOSE:
-                    points[0] = moveX;
-                    points[1] = moveY;
-                    // fall through
+            // calculate the target distance for the glyph's center
+            double centerTargetDist = nextGlyphLeftEdgeDist + halfAdvance;
 
-                case PathIterator.SEG_LINETO:
-                    thisX = points[0];
-                    thisY = points[1];
-                    double dx = thisX - lastX;
-                    double dy = thisY - lastY;
-                    double distance = Math.sqrt(dx * dx + dy * dy);
-                    currentDist += distance;
+            // advance along the path until we find the segment containing the center point
+            while (!pathIterator.isDone() && currentPathDist + segmentDist < centerTargetDist) {
+                currentPathDist += segmentDist;
 
-                    if (currentDist >= thresholdDist) {
-                        // if the end of the current segment is beyond the
-                        // point where the current glyph should be placed:
-                        double angle = Math.atan2(dy, dx);
-                        while (glyphIndex < numGlyphs && currentDist >= thresholdDist) {
-                            // place all glyphs whose target positions fall within the current line segment
-                            Shape glyph = glyphVector.getGlyphOutline(glyphIndex);
-                            Point2D origGlyphPos = glyphVector.getGlyphPosition(glyphIndex);
-                            double ratio = (thresholdDist - (currentDist - distance)) / distance;
-                            double x = lastX + ratio * dx;
-                            double y = lastY + ratio * dy;
-
-                            // TODO the glyphs are rotated around left bottom instead of center bottom.
-                            //   The goal is to ensure that glyph's origin (its bottom-left point on
-                            //   the baseline) lands on the calculated path point (x,y) while the
-                            //   rotation happens around the local center-bottom pivot.
-                            at.setToTranslation(x, y);
-                            at.rotate(angle + rotation);
-                            if (scaleX != 1.0 || scaleY != 1.0) {
-                                at.scale(scaleX, scaleY);
-                            }
-                            if (shearX != 0 || shearY != 0) {
-                                at.shear(-shearX, -shearY);
-                            }
-                            at.translate(-origGlyphPos.getX(), -origGlyphPos.getY());
-                            result.append(at.createTransformedShape(glyph), false);
-
-                            // calculate next threshold
-                            double advance = glyphVector.getGlyphMetrics(glyphIndex).getAdvance() * Math.abs(scaleX);
-                            if (glyphIndex < numGlyphs - 1) {
-                                advance += tracking;
-                            }
-                            thresholdDist += advance;
-                            glyphIndex++;
-                        }
-                    }
-                    lastX = thisX;
-                    lastY = thisY;
-                    break;
+                int type = pathIterator.currentSegment(points);
+                if (type == PathIterator.SEG_LINETO) {
+                    dx = points[0] - lastX;
+                    dy = points[1] - lastY;
+                    segmentDist = Math.sqrt(dx * dx + dy * dy);
+                    lastX = points[0];
+                    lastY = points[1];
+                } else if (type == PathIterator.SEG_MOVETO) {
+                    // handle disjoint paths: reset distance calculation for the new sub-path
+                    dx = 0;
+                    dy = 0;
+                    segmentDist = 0;
+                    lastX = points[0];
+                    lastY = points[1];
+                }
+                pathIterator.next();
             }
-            it.next();
+
+            // if we ran out of path, stop placing glyphs
+            if (centerTargetDist > currentPathDist + segmentDist) {
+                break;
+            }
+
+            // calculate the anchor point and angle on the current segment
+            double distIntoSegment = centerTargetDist - currentPathDist;
+            double ratio = (segmentDist == 0) ? 0 : distIntoSegment / segmentDist;
+
+            double x = lastX - dx + (ratio * dx); // anchor point X
+            double y = lastY - dy + (ratio * dy); // anchor point Y
+            double tangentAngle = Math.atan2(dy, dx);
+
+            // build the transformation for the glyph
+            AffineTransform glyphTX = new AffineTransform();
+            glyphTX.setToTranslation(x, y);
+            glyphTX.rotate(tangentAngle + rotation);
+            if (scaleX != 1.0 || scaleY != 1.0) {
+                glyphTX.scale(scaleX, scaleY);
+            }
+            if (shearX != 0 || shearY != 0) {
+                glyphTX.shear(-shearX, -shearY);
+            }
+
+            // translate the glyph locally so its baseline-center is at the origin
+            Point2D origGlyphPos = glyphVector.getGlyphPosition(glyphIndex);
+            double unscaledHalfAdvance = metrics.getAdvance() / 2.0;
+            glyphTX.translate(-(origGlyphPos.getX() + unscaledHalfAdvance), -origGlyphPos.getY());
+
+            Shape glyph = glyphVector.getGlyphOutline(glyphIndex);
+            result.append(glyphTX.createTransformedShape(glyph), false);
+
+            // update the position for the next glyph's left edge
+            nextGlyphLeftEdgeDist += advance;
+            if (glyphIndex < numGlyphs - 1) {
+                nextGlyphLeftEdgeDist += tracking;
+            }
         }
         return result;
     }
@@ -569,6 +539,49 @@ public class TransformedTextPainter implements Debuggable {
         return trackingValue == null
             ? 0.0
             : trackingValue * font.getSize() * Math.abs(scaleX);
+    }
+
+    /**
+     * Calculates the initial distance along the path where the
+     * text should begin, based on the current alignment setting.
+     */
+    private double calcPathStartOffset(GlyphVector glyphVector, Path2D path, double tracking) {
+        if (mlpAlignment == AlignmentSelector.LEFT) {
+            return 0;
+        }
+
+        double pathLength = Shapes.calcPathLength(path);
+        double textLength = calcTextLength(glyphVector, tracking);
+
+        return switch (mlpAlignment) {
+            case AlignmentSelector.CENTER -> (pathLength - textLength) / 2;
+            case AlignmentSelector.RIGHT -> pathLength - textLength;
+            default -> throw new IllegalStateException("Unexpected value: " + mlpAlignment);
+        };
+    }
+
+    /**
+     * Determines the index of the first glyph to render when the text
+     * overflows the path, effectively clipping the beginning of the text.
+     */
+    private int findStartGlyphForOverflow(GlyphVector glyphVector, double overflow, int numGlyphs, double tracking) {
+        int startGlyphIndex = 0;
+        double accumulatedWidth = 0;
+
+        // for centered text, the overflow is on both sides,
+        // so we only need to account for half of it
+        if (mlpAlignment == AlignmentSelector.CENTER) {
+            overflow /= 2;
+        }
+
+        while (startGlyphIndex < numGlyphs && accumulatedWidth < overflow) {
+            accumulatedWidth += glyphVector.getGlyphMetrics(startGlyphIndex).getAdvance() * Math.abs(scaleX);
+            if (startGlyphIndex < numGlyphs - 1) {
+                accumulatedWidth += tracking;
+            }
+            startGlyphIndex++;
+        }
+        return startGlyphIndex;
     }
 
     public Shape getTextShape() {
@@ -592,20 +605,17 @@ public class TransformedTextPainter implements Debuggable {
         return at.createTransformedShape(shape);
     }
 
-    public void setTranslation(int translationX, int translationY) {
-        this.translationX = translationX;
-        this.translationY = translationY;
+    public void setTranslation(int newTranslationX, int newTranslationY) {
+        this.translationX = newTranslationX;
+        this.translationY = newTranslationY;
         invalidLayout = true;
-        invalidShapeTransform = true;
     }
 
     public void setRotation(double newRotation) {
-        boolean change = this.rotation != newRotation;
-        this.rotation = newRotation;
-        if (change) {
+        if (this.rotation != newRotation) {
+            this.rotation = newRotation;
             clearCache();
             invalidLayout = true;
-            invalidShape = true;
         }
     }
 
@@ -623,7 +633,6 @@ public class TransformedTextPainter implements Debuggable {
             this.shearY = shearY;
             clearCache();
             invalidLayout = true;
-            invalidShape = true;
         }
     }
 
@@ -663,7 +672,6 @@ public class TransformedTextPainter implements Debuggable {
 
         copy.transformedRect = transformedRect;
         copy.boundingBox = boundingBox;
-        copy.baseShape = baseShape;
         copy.textShape = textShape;
 
         return copy;
@@ -677,33 +685,34 @@ public class TransformedTextPainter implements Debuggable {
         Map<TextAttribute, ?> attributes = font.getAttributes();
         boolean hasKerning = KERNING_ON.equals(attributes.get(KERNING));
         boolean hasLigatures = LIGATURES_ON.equals(attributes.get(LIGATURES));
-        boolean hasStrikeThrough = STRIKETHROUGH_ON.equals(attributes.get(STRIKETHROUGH));
         boolean hasUnderline = UNDERLINE_ON.equals(attributes.get(UNDERLINE));
+        boolean hasStrikeThrough = STRIKETHROUGH_ON.equals(attributes.get(STRIKETHROUGH));
 
-        if (textLines.length == 1) {
-            return getLineShape(textLines[0], frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
-        }
+        GeneralPath fullShape = new GeneralPath();
 
-        assert textLines.length > 1;
-        Area fullShape = null;
-        for (int i = 0; i < textLines.length; i++) {
-            String line = textLines[i];
+        float currentY = effectsPadding + metrics.getAscent();
+
+        for (String line : textLines) {
             Shape lineShape = getLineShape(line, frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
-            double tx = switch (mlpAlignment) {
-                case AlignmentSelector.LEFT -> 0;
-                case AlignmentSelector.CENTER -> origTextWidth / 2.0 - metrics.stringWidth(line) / 2.0;
-                case AlignmentSelector.RIGHT -> origTextWidth - metrics.stringWidth(line);
+            Rectangle2D lineBounds = lineShape.getBounds2D();
+
+            float drawX = switch (mlpAlignment) {
+                case AlignmentSelector.LEFT -> effectsPadding;
+                case AlignmentSelector.CENTER ->
+                    effectsPadding + (origTextWidth - (float) lineBounds.getWidth()) / 2.0f;
+                case AlignmentSelector.RIGHT -> effectsPadding + origTextWidth - (float) lineBounds.getWidth();
                 default -> throw new IllegalStateException("alignment: " + mlpAlignment);
             };
-            if (i == 0) {
-                if (tx != 0) {
-                    lineShape = Shapes.translate(lineShape, tx, 0);
-                }
-                fullShape = new Area(lineShape);
-            } else {
-                lineShape = Shapes.translate(lineShape, tx, i * lineHeight);
-                fullShape.add(new Area(lineShape));
-            }
+
+            AffineTransform lineTransform = AffineTransform.getTranslateInstance(
+                drawX - lineBounds.getX(),
+                currentY
+            );
+
+            Shape positionedLineShape = lineTransform.createTransformedShape(lineShape);
+            fullShape.append(positionedLineShape.getPathIterator(null), false);
+
+            currentY += lineHeight;
         }
         return fullShape;
     }
@@ -723,48 +732,60 @@ public class TransformedTextPainter implements Debuggable {
                 chars.length, Font.LAYOUT_LEFT_TO_RIGHT);
         }
 
-        Shape glyphsOutline = glyphs.getOutline(0.0f, metrics.getAscent());
+        // The y-parameter to getOutline is the baseline. By setting it to 0,
+        // we make the shape's coordinate system's origin align with the baseline.
+        Shape glyphsOutline = glyphs.getOutline(0.0f, 0.0f);
 
         if (!hasUnderline && !hasStrikeThrough) {
             // simple case: the glyphs contain all of the shape
             return glyphsOutline;
         }
 
-        LineMetrics lineMetrics = font.getLineMetrics(line, frc);
-        float ascent = lineMetrics.getAscent();
+        // uses Area instead of GeneralPath.append to ensure that
+        // self-intersecting paths don't create unfilled holes
+        // and effects are painted as if the underline/strikethrough
+        // was part of the font
         Area combinedOutline = new Area(glyphsOutline);
+
+        LineMetrics lineMetrics = font.getLineMetrics(line, frc);
         int stringWidth = metrics.stringWidth(line);
 
         if (hasUnderline) {
             combinedOutline.add(
-                createUnderlineShape(lineMetrics, ascent, stringWidth));
+                createUnderlineShape(lineMetrics, stringWidth));
         }
 
         if (hasStrikeThrough) {
             combinedOutline.add(
-                createStrikethroughShape(lineMetrics, ascent, stringWidth));
+                createStrikethroughShape(lineMetrics, stringWidth));
         }
 
         return combinedOutline;
     }
 
-    private static Area createUnderlineShape(LineMetrics lineMetrics, float ascent, int stringWidth) {
+    /**
+     * Generates the rectangular shape for an underline.
+     */
+    private static Area createUnderlineShape(LineMetrics lineMetrics, int stringWidth) {
         float underlineOffset = lineMetrics.getUnderlineOffset();
         float underlineThickness = lineMetrics.getUnderlineThickness();
         Shape underLineShape = new Rectangle2D.Float(
             0.0f,
-            ascent + underlineOffset - underlineThickness / 2.0f,
+            underlineOffset - underlineThickness / 2.0f,
             stringWidth,
             underlineThickness);
         return new Area(underLineShape);
     }
 
-    private static Area createStrikethroughShape(LineMetrics lineMetrics, float ascent, int stringWidth) {
+    /**
+     * Generates the rectangular shape for a strikethrough.
+     */
+    private static Area createStrikethroughShape(LineMetrics lineMetrics, int stringWidth) {
         float strikethroughOffset = lineMetrics.getStrikethroughOffset();
         float strikethroughThickness = lineMetrics.getStrikethroughThickness();
         Shape strikethroughShape = new Rectangle2D.Float(
             0.0f,
-            ascent + strikethroughOffset - strikethroughThickness / 2.0f,
+            strikethroughOffset - strikethroughThickness / 2.0f,
             stringWidth,
             strikethroughThickness);
         return new Area(strikethroughShape);
@@ -782,7 +803,6 @@ public class TransformedTextPainter implements Debuggable {
             this.verticalAlignment = newVerAlignment;
             clearCache();
             invalidLayout = true;
-            invalidShape = true;
         }
     }
 
@@ -791,7 +811,7 @@ public class TransformedTextPainter implements Debuggable {
         if (change) {
             this.mlpAlignment = mlpAlignment;
             clearCache();
-            invalidShape = true;
+            invalidLayout = true;
         }
     }
 
@@ -808,12 +828,8 @@ public class TransformedTextPainter implements Debuggable {
         if (change) {
             this.text = newText == null ? "" : newText;
             textLines = newText.split("\n");
-            for (int i = 0; i < textLines.length; i++) {
-                textLines[i] = textLines[i].trim();
-            }
             clearCache();
             invalidLayout = true;
-            invalidShape = true;
         }
     }
 
@@ -823,7 +839,6 @@ public class TransformedTextPainter implements Debuggable {
         if (change) {
             clearCache();
             invalidLayout = true;
-            invalidShape = true;
         }
     }
 
@@ -834,13 +849,10 @@ public class TransformedTextPainter implements Debuggable {
             clearCache();
             invalidLayout = true;
 
-            // the translation of the shape depends on the effect width
-            invalidShapeTransform = true;
-
             if (effects != null && effects.hasEnabledEffects()) {
-                effectsWidth = (int) Math.ceil(effects.calcMaxEffectThickness());
+                effectsPadding = (int) Math.ceil(effects.calcMaxEffectThickness());
             } else {
-                effectsWidth = 0;
+                effectsPadding = 0;
             }
         }
     }
@@ -852,6 +864,7 @@ public class TransformedTextPainter implements Debuggable {
     public void pathChanged() {
         assert isOnPath();
         clearCache();
+        invalidLayout = true;
     }
 
     public BufferedImage createWatermark(BufferedImage src, Composition comp) {
