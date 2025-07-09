@@ -20,7 +20,6 @@ package pixelitor.filters;
 import net.jafama.FastMath;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
-import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.AlphaComposite;
@@ -36,6 +35,7 @@ import java.util.Random;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.filters.AbstractLights.Type.STAR;
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
@@ -49,19 +49,44 @@ public class AbstractLights extends ParametrizedFilter {
 
     public static final String NAME = "Abstract Lights";
 
-    private static final int TYPE_CHAOS = 1;
-    private static final int TYPE_STAR = 2;
-    private static final int TYPE_FRAME = 3;
+    private static final int DEFAULT_NUM_ITERATIONS = 1000;
 
-    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Item[]{
-        new Item("Chaos", TYPE_CHAOS),
-        new Item("Star", TYPE_STAR),
-        new Item("Frame", TYPE_FRAME),
-    });
+    public enum Type {
+        // random particles connected in a closed chain
+        CHAOS("Chaos"),
+
+        // all particles are connected to a central particle,
+        // which orbits around a center point
+        STAR("Star"),
+
+        // particles move along the image border, turning at
+        // each corner to form a rectangular path
+        FRAME("Frame"),
+
+        // all particles orbit on an ellipse that touches the image edges
+        ELLIPTIC("Elliptic");
+
+        private final String displayName;
+
+        Type(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public boolean canBounce() {
+            return this == CHAOS || this == STAR;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    private final EnumParam<Type> typeParam = new EnumParam<>("Type", Type.class);
     private final GroupedRangeParam starSizeParam = new GroupedRangeParam("Size", 0, 20, 100);
     private final ImagePositionParam starCenterParam = new ImagePositionParam("Center");
 
-    private final RangeParam iterationsParam = new RangeParam("Iterations", 1, 1000, 5000);
+    private final RangeParam iterationsParam = new RangeParam("Iterations", 1, DEFAULT_NUM_ITERATIONS, 5000);
     private final RangeParam complexityParam = new RangeParam("Complexity", 1, 10, 20);
     private final RangeParam brightnessParam = new RangeParam("Brightness", 1, 6, 10);
     private final AngleParam hueParam = new AngleParam("Hue", 0);
@@ -87,10 +112,11 @@ public class AbstractLights extends ParametrizedFilter {
 
         CompositeParam starSettingsParam = new CompositeParam("Star Settings",
             starSizeParam, starCenterParam);
-        // show star settings only for star type
-        typeParam.setupEnableOtherIf(starSettingsParam, type -> type.valueIs(TYPE_STAR));
-        // disable bounce for frame type
-        typeParam.setupDisableOtherIf(bounceParam, type -> type.valueIs(TYPE_FRAME));
+
+        // show star settings only for the star type
+        typeParam.setupEnableOtherIf(starSettingsParam, type -> type == STAR);
+        // disable bounce if the type doesn't allow it
+        typeParam.setupDisableOtherIf(bounceParam, type -> !type.canBounce());
 
         initParams(
             typeParam,
@@ -107,11 +133,10 @@ public class AbstractLights extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Random random = paramSet.getLastSeedRandom();
         int iterations = iterationsParam.getValue();
-
-        var pt = new StatusBarProgressTracker(NAME, iterations);
         int width = dest.getWidth();
         int height = dest.getHeight();
 
+        var pt = new StatusBarProgressTracker(NAME, iterations);
         Graphics2D g2 = dest.createGraphics();
 
         double lineWidth = blurParam.getValueAsDouble() + 1.0;
@@ -133,16 +158,24 @@ public class AbstractLights extends ParametrizedFilter {
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
+        // if we increased alpha, we must compensate by reducing the color's brightness
         float colorBri = 1.0f / darkening;
-        List<Particle> particles = createParticles(width, height, random, colorBri);
 
+        List<Particle> particles = createParticles(width, height, random, colorBri);
+        connectParticles(particles, width, height);
+
+        Line2D.Double reusableLine = new Line2D.Double();
         for (int i = 0; i < iterations; i++) {
             for (Particle particle : particles) {
                 particle.update(width, height);
-                particle.draw(g2);
+            }
+            for (Particle particle : particles) {
+                particle.draw(g2, reusableLine);
             }
             pt.unitDone();
         }
+
+        g2.dispose();
         pt.finished();
 
         return dest;
@@ -155,61 +188,92 @@ public class AbstractLights extends ParametrizedFilter {
 
         boolean bounce = bounceParam.isChecked();
         double speed = speedParam.getValueAsDouble();
-        int type = typeParam.getValue();
+        Type type = typeParam.getSelected();
 
         List<Particle> particles = new ArrayList<>();
         for (int i = 0; i < numParticles; i++) {
+            // each particle is given a random starting position,
+            // a random direction of movement, and a random color
             int x = random.nextInt(width);
             int y = random.nextInt(height);
             Color color = generateParticleColor(random, bri, baseHue, hueRandomness);
-            double angle = 2 * random.nextDouble() * Math.PI;
+            double rnd = random.nextDouble();
+            double angle = 2 * rnd * Math.PI;
 
-            if (type == TYPE_FRAME) {
-                particles.add(new FrameParticle(i % 4, speed, angle, color, bounce, x, y, width, height));
-            } else {
-                particles.add(new Particle(x, y, speed, angle, color, bounce));
+            switch (type) {
+                case CHAOS, STAR -> particles.add(new Particle(x, y, speed, angle, color, bounce));
+                case FRAME -> particles.add(new EdgeParticle(i % 4, speed, angle, color, bounce, x, y, width, height));
+                case ELLIPTIC -> {
+                    double cx = width / 2.0;
+                    double cy = height / 2.0;
+                    particles.add(new OrbitingParticle(cx, cy, cx, cy, speed, color, angle));
+                }
             }
         }
-
-        connectParticles(width, height, numParticles, speed, particles);
 
         return particles;
     }
 
-    private void connectParticles(int width, int height, int numParticles, double speed, List<Particle> particles) {
-        int connect = typeParam.getValue();
-        switch (connect) {
-            case TYPE_CHAOS, TYPE_FRAME -> connectInChain(particles, numParticles);
-            case TYPE_STAR -> connectToStar(particles, width, height, numParticles, speed);
-            default -> throw new IllegalStateException("connect = " + connect);
+    /**
+     * Connects particles to each other based on the selected type.
+     */
+    private void connectParticles(List<Particle> particles, int width, int height) {
+        Type connectionType = typeParam.getSelected();
+
+        if (connectionType == STAR) {
+            connectToStar(particles, width, height);
+        } else {
+            connectInChain(particles);
         }
     }
 
-    private static void connectInChain(List<Particle> particles, int numParticles) {
+    /**
+     * Connects each particle to the previous one in the list, forming a chain.
+     */
+    private static void connectInChain(List<Particle> particles) {
+        int numParticles = particles.size();
         for (int i = 0; i < numParticles; i++) {
-            int siblingIndex = (i == 0) ? numParticles - 1 : i - 1;
+            int siblingIndex = (i > 0) ? i - 1 : numParticles - 1;
             particles.get(i).sibling = particles.get(siblingIndex);
         }
     }
 
-    private void connectToStar(List<Particle> particles, int width, int height, int numParticles, double speed) {
-        // replace the first particle with a star particle
+    /**
+     * Connects all particles to a central orbiting "star" particle.
+     */
+    private void connectToStar(List<Particle> particles, int width, int height) {
+        // replace the first particle with an orbiting particle
         Color c = particles.getFirst().color;
-        StarParticle centerStar = new StarParticle(0, 0, speed, c, starSizeParam, width, height, starCenterParam);
+        OrbitingParticle centerStar = createCenterStarParticle(width, height, c);
         particles.set(0, centerStar);
 
+        int numParticles = particles.size();
         for (int i = 1; i < numParticles; i++) {
             particles.get(i).sibling = centerStar;
         }
     }
 
+    private OrbitingParticle createCenterStarParticle(int width, int height, Color c) {
+        double speed = speedParam.getValueAsDouble();
+        double maxRadius = Math.min(width, height) / 2.0;
+        double radiusX = maxRadius * starSizeParam.getPercentage(0);
+        double radiusY = maxRadius * starSizeParam.getPercentage(1);
+        double cx = width * starCenterParam.getRelativeX();
+        double cy = height * starCenterParam.getRelativeY();
+
+        return new OrbitingParticle(cx, cy, radiusX, radiusY, speed, c, 0.0);
+    }
+
+    /**
+     * Generates a random color for a particle.
+     */
     private Color generateParticleColor(Random random, float bri, int baseHue, int hueRandomness) {
         int hue;
         if (hueRandomness > 0) {
             hue = (baseHue + random.nextInt(hueRandomness) - hueRandomness / 2) % 360;
         } else {
             hue = baseHue;
-            random.nextInt(); // maintain random sequence
+            random.nextInt(); // consume a random number to maintain random sequence
         }
 
         Color color = Color.getHSBColor(hue / 360.0f, 1.0f, bri);
@@ -220,12 +284,14 @@ public class AbstractLights extends ParametrizedFilter {
     }
 
     private static class Particle {
-        protected double x;
-        protected double y;
+        protected double x, y; // position
         protected final double speed;
-        protected double vx, vy;
+        protected double vx, vy; // velocity vector
         private final Color color;
+
+        // each particle is connected to a sibling, and lines are drawn between them
         public Particle sibling;
+
         private final boolean bounce;
 
         public Particle(int x, int y, double speed, double angle, Color color, boolean bounce) {
@@ -238,6 +304,9 @@ public class AbstractLights extends ParametrizedFilter {
             this.bounce = bounce;
         }
 
+        /**
+         * Updates the particle's position for the next iteration.
+         */
         public void update(int width, int height) {
             x += vx;
             y += vy;
@@ -250,61 +319,75 @@ public class AbstractLights extends ParametrizedFilter {
                     vy = -vy;
                 }
             }
-
         }
 
-        public void draw(Graphics2D g) {
+        /**
+         * Draws a line from this particle to its "sibling".
+         */
+        public void draw(Graphics2D g, Line2D.Double line) {
             if (sibling == null) {
                 return;
             }
             g.setColor(color);
-            g.draw(new Line2D.Double(x, y, sibling.x, sibling.y));
+            line.setLine(x, y, sibling.x, sibling.y);
+            g.draw(line);
         }
     }
 
-    private static class StarParticle extends Particle {
-        double angle = 0;
+    /**
+     * A type of particle that moves in a central, elliptical orbit.
+     */
+    private static class OrbitingParticle extends Particle {
+        private double angle;
         private final double cx, cy;
         private final double radiusX;
         private final double radiusY;
         private final double angleIncrement;
 
-        public StarParticle(int x, int y, double speed, Color color, GroupedRangeParam starSize, int width, int height, ImagePositionParam starCenterParam) {
-            super(x, y, speed, 0, color, false);
-            double maxRadius = Math.min(width, height) / 2.0;
-            radiusX = maxRadius * starSize.getPercentage(0);
-            radiusY = maxRadius * starSize.getPercentage(1);
-            cx = width * starCenterParam.getRelativeX();
-            cy = height * starCenterParam.getRelativeY();
+        public OrbitingParticle(double cx, double cy, double radiusX, double radiusY,
+                                double speed, Color color, double initialAngle) {
+            // the initial x, y, and angle passed to super() are not used, as this
+            // particle's movement is determined by its elliptical path, not a velocity vector
+            super(0, 0, speed, 0, color, false);
+            this.cx = cx;
+            this.cy = cy;
+            this.radiusX = radiusX;
+            this.radiusY = radiusY;
+            this.angle = initialAngle;
+            this.angleIncrement = 2 * Math.PI * speed / DEFAULT_NUM_ITERATIONS;
 
-            // For small angles the particle moves approximately
-            // a distance of radius * angle pixels.
-            angleIncrement = speed / Math.max(radiusX, radiusY);
+            // set initial position on the ellipse
+            updatePosition();
+        }
+
+        private void updatePosition() {
+            x = cx + radiusX * FastMath.cos(angle);
+            y = cy + radiusY * FastMath.sin(angle);
         }
 
         @Override
         public void update(int width, int height) {
-            if (radiusX == 0 && radiusY == 0) {
-                x = cx;
-                y = cy;
-            } else {
-                angle += angleIncrement;
-                x = cx + radiusX * FastMath.cos(angle);
-                y = cy + radiusY * FastMath.sin(angle);
-            }
+            angle += angleIncrement;
+
+            updatePosition();
         }
     }
 
-    private static class FrameParticle extends AbstractLights.Particle {
+    /**
+     * A type of particle that is restricted to moving only along the four edges of the image.
+     */
+    private static class EdgeParticle extends Particle {
         private static final int STATE_TOP = 0;
         private static final int STATE_RIGHT = 1;
         private static final int STATE_BOTTOM = 2;
         private static final int STATE_LEFT = 3;
         private int state;
 
-        public FrameParticle(int initialState, double speed, double angle, Color color, boolean bounce, int x, int y, int width, int height) {
+        public EdgeParticle(int initialState, double speed, double angle, Color color, boolean bounce, int x, int y, int width, int height) {
             super(x, y, speed, angle, color, bounce);
             state = initialState;
+
+            // snaps the particle to its edge and initializes its velocity
             switch (state) {
                 case STATE_TOP -> {
                     this.y = 0;
@@ -336,28 +419,28 @@ public class AbstractLights extends ParametrizedFilter {
             y += vy;
             switch (state) {
                 case STATE_TOP -> {
-                    if (x >= width) {
+                    if (x >= width) { // right edge reached
                         state = STATE_RIGHT;
                         vx = 0;
                         vy = speed;
                     }
                 }
                 case STATE_RIGHT -> {
-                    if (y >= height) {
+                    if (y >= height) { // bottom edge reached
                         state = STATE_BOTTOM;
                         vx = -speed;
                         vy = 0;
                     }
                 }
                 case STATE_BOTTOM -> {
-                    if (x <= 0) {
+                    if (x <= 0) { // left edge reached
                         state = STATE_LEFT;
                         vx = 0;
                         vy = -speed;
                     }
                 }
                 case STATE_LEFT -> {
-                    if (y <= 0) {
+                    if (y <= 0) { // top edge reached
                         state = STATE_TOP;
                         vx = speed;
                         vy = 0;

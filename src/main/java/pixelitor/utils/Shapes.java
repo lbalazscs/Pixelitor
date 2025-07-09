@@ -108,12 +108,12 @@ public class Shapes {
     public static void drawVisibly(Graphics2D g, Shape shape) {
         assert shape != null;
 
-        // Draw with a thick black outline.
+        // draw with a thick black outline
         g.setStroke(BIG_STROKE);
         g.setColor(BLACK);
         g.draw(shape);
 
-        // Draw with a thinner white stroke inside.
+        // draw with a thinner white stroke inside
         g.setStroke(SMALL_STROKE);
         g.setColor(WHITE);
         g.draw(shape);
@@ -153,18 +153,18 @@ public class Shapes {
      * on the arrow's length.
      */
     public static Shape createFixedWidthArrow(double startX, double startY, double endX, double endY) {
-        // Configurable properties
-        double arrowWidth = 10.0;  // Width of the arrow shaft
-        double arrowheadSize = 20.0;  // Size of the arrowhead
+        // configurable properties
+        double arrowWidth = 10.0;  // width of the arrow shaft
+        double arrowheadSize = 20.0;  // size of the arrowhead
 
         Path2D.Double path = new Path2D.Double();
 
-        // Calculate direction and length
+        // calculate direction and length
         double dx = endX - startX;
         double dy = endY - startY;
         boolean isVertical = Math.abs(dy) > Math.abs(dx);
 
-        if (isVertical) { // Vertical arrow (pointing up or down)
+        if (isVertical) { // vertical arrow (pointing up or down)
             double halfWidth = arrowWidth / 2.0;
             double arrowheadBase = endY + (dy > 0 ? -1 : 1) * arrowheadSize;
 
@@ -176,7 +176,7 @@ public class Shapes {
             path.lineTo(startX + halfWidth, arrowheadBase);
             path.lineTo(startX + halfWidth, startY);
             path.closePath();
-        } else { // Horizontal arrow (pointing left or right)
+        } else { // horizontal arrow (pointing left or right)
             double halfWidth = arrowWidth / 2.0;
             double arrowheadBase = endX + (dx > 0 ? -1 : 1) * arrowheadSize;
 
@@ -1479,7 +1479,7 @@ public class Shapes {
         return path;
     }
 
-    public static Shape createHeart(double x, double y, double width, double height) {
+    public static Path2D createHeart(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double maxX = x + width;
@@ -1984,20 +1984,20 @@ public class Shapes {
 
     private static void calculateControlPoint(Point2D B, Point2D P, Point2D Q,
                                               double AB, double BC, double smoothness) {
-        // A temporary point T calculated such that
-        // * For A=points[i-1], B=points[i] and C = points[i+1]
-        //   * For midpoint of AB, P=centers[i-1] and midpoint of BC, Q=centers[i]
-        //     * It lies on the line joining P and Q
+        // a temporary point T calculated such that
+        // * for A=points[i-1], B=points[i] and C = points[i+1]
+        //   * for midpoint of AB, P=centers[i-1] and midpoint of BC, Q=centers[i]
+        //     * it lies on the line joining P and Q
         //     * PT / AB == TQ / BC       - (1)
         //
-        // Mathematically, with the given data,
+        // mathematically, with the given data,
         //
-        // * Using section formula (on Vectors)
+        // * using section formula (on Vectors)
         //   * T = (P * n + Q * m) / (m + n)
         //   * T = P * n / (m + n) + Q * m / (m + n)
         //   * T = P * TQ / PQ + Q * PT / PQ
         //
-        // * Using Componendo rule on (1)
+        // * using componendo rule on (1)
         //   * T = P * AB / (AB + BC) + Q * BC / (AB + BC)
         //   * T = (P * AB + Q * BC) / (AB + BC)
         //
@@ -2005,12 +2005,12 @@ public class Shapes {
 
         Geometry.calcDivisionPoint(P, Q, AB, BC, T);
 
-        // Converting point vectors P and Q to show relative displacement from T
+        // converting point vectors P and Q to show relative displacement from T
         // P = P - T, Q = Q - T
         Geometry.subtract(P, T, P);
         Geometry.subtract(Q, T, Q);
 
-        // Scaling the point vectors P and Q about origin
+        // scaling the point vectors P and Q about origin
         if (smoothness != 1) {
             Geometry.scale(P, smoothness);
             Geometry.scale(Q, smoothness);
@@ -2168,7 +2168,7 @@ public class Shapes {
         return points;
     }
 
-    public static double calcPathLength(Path2D path) {
+    public static double calcPathLength(Shape path) {
         double pathLength = 0;
         double[] points = new double[6];
         PathIterator pathIt = new FlatteningPathIterator(path.getPathIterator(null), 1);
