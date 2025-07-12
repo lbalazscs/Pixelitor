@@ -197,8 +197,8 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public Boolean getParamValue() {
-        return isChecked();
+    public String getParamValue() {
+        return String.valueOf(isChecked());
     }
 
     @Override

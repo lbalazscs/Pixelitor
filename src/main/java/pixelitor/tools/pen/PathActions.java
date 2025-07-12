@@ -89,7 +89,7 @@ public class PathActions {
     }
 
     public static void setActionsEnabled(boolean newEnabled) {
-        assert Threads.calledOnEDT() || AppMode.isUnitTesting() : Threads.threadInfo();
+        assert Threads.calledOnEDT() || AppMode.isUnitTesting() : Threads.callInfo();
 
         if (enabled == newEnabled) {
             return;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,13 +25,16 @@ import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
 
 /**
- * Defines what happens when a color swatch button is clicked
+ * Handles user clicks on a color swatch.
  */
+@FunctionalInterface
 public interface ColorSwatchClickHandler {
+    /**
+     * Processes a click on a color swatch.
+     */
     void handle(Color newColor, MouseEvent e);
 
-    // The standard click handler sets the foreground color
-    // for left clicks and the background color for right clicks
+    // sets the foreground color for left-clicks and the background color for right-clicks
     ColorSwatchClickHandler STANDARD = (newColor, e) -> {
         if (isRightMouseButton(e)) {
             setBGColor(newColor);
@@ -42,8 +45,8 @@ public interface ColorSwatchClickHandler {
 
     String STANDARD_HTML_HELP = "<b>click</b> to set the foreground color, "
         + "<b>right-click</b> to set the background color, "
-        + "<b>Ctrl-click</b> to clear the marking";
+        + "<b>Ctrl-click</b> to clear the marking.";
 
     String FILTER_HTML_HELP = "<b>click</b> to set the filter color, "
-        + "<b>Ctrl-click</b> to clear the marking";
+        + "<b>Ctrl-click</b> to clear the marking.";
 }

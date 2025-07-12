@@ -116,8 +116,8 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
-    public Object getParamValue() {
-        return selectedValue;
+    public String getParamValue() {
+        return selectedValue.toString();
     }
 
     @Override

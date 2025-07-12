@@ -35,11 +35,9 @@ import pixelitor.tools.DragToolState;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.TransformPathTool;
 import pixelitor.tools.selection.AbstractSelectionTool;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
-import pixelitor.utils.test.Events;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -125,12 +123,11 @@ public class EDT {
         return active(Composition::getActivePath);
     }
 
-    public static Point getPenToolBoxPos(int boxIndex,
-                                         Function<TransformBox, DraggablePoint> pointFun) {
+    public static Point getTransformPathToolBoxPos(int boxIndex,
+                                                   Function<TransformBox, DraggablePoint> handleSelector) {
         return call(() -> {
-            TransformPathTool mode = Tools.TRANSFORM_PATH;
-            TransformBox box = mode.getBox(boxIndex);
-            return pointFun.apply(box).getScreenCoords();
+            TransformBox box = Tools.TRANSFORM_PATH.getBox(boxIndex);
+            return handleSelector.apply(box).getScreenCoords();
         });
     }
 
@@ -156,10 +153,6 @@ public class EDT {
 
     public static void assertEditToBeRedoneNameIs(String expected) {
         run(() -> History.assertEditToBeRedoneNameIs(expected));
-    }
-
-    public static void postAssertJEvent(String evt) {
-        run(() -> Events.postAssertJEvent(evt));
     }
 
     public static void zoomIn() {

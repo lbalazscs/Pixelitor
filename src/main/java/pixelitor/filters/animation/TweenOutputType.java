@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.io.File;
 import java.nio.file.Files;
 
 /**
- * The output formats of the tween animation.
+ * The output formats for the tween animation.
  */
 public enum TweenOutputType {
     PNG_FILE_SEQUENCE("PNG File Sequence", true) {
@@ -41,7 +41,7 @@ public enum TweenOutputType {
 
         @Override
         public FileNameExtensionFilter getFileFilter() {
-            return null; // Directory selection doesn't use file filters
+            return null; // directory selection doesn't use file filters
         }
     }, ANIM_GIF("Animated GIF File", false) {
         @Override
@@ -88,49 +88,36 @@ public enum TweenOutputType {
     private static ValidationResult checkFile(File outputFile,
                                               TweenOutputType type,
                                               String fileType) {
-        if (outputFile.exists()) {
-            if (outputFile.isDirectory()) {
-                String msg = String.format("%s is a folder." +
-                        "<br>For the \"%s\" output type, " +
-                        "select a (new or existing) %s file in an existing folder.",
-                    outputFile.getAbsolutePath(), type, fileType);
-                return ValidationResult.invalid(msg);
-            }
-        } else { // if it doesn't exist, we still expect the parent directory to exist
-            File parentDir = outputFile.getParentFile();
-            if (parentDir == null) {
-                return ValidationResult.invalid(
-                    String.format("Folder %s not found", parentDir.getAbsolutePath()));
-            }
-            if (!parentDir.exists()) {
-                String msg = String.format("The folder %s of the %s file does not exist." +
-                        "<br>For the \"%s\" output type, " +
-                        "select a (new or existing) %s file in an existing folder.",
-                    parentDir.getName(), outputFile.getAbsolutePath(),
-                    type, fileType);
-                return ValidationResult.invalid(msg);
-            }
+        if (outputFile.exists() && outputFile.isDirectory()) {
+            return ValidationResult.invalid(String.format(
+                "<b>%s</b> is a folder." +
+                    "<br>A %s file is required for the <b>%s</b> output type.",
+                outputFile.getAbsolutePath(), fileType, type));
         }
+
+        File parentDir = outputFile.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            return ValidationResult.invalid(String.format(
+                "The parent folder does not exist:<br><b>%s</b>", parentDir.getAbsolutePath()));
+        }
+
         return ValidationResult.valid();
     }
 
     private static ValidationResult checkDir(File outputDir, TweenOutputType type) {
         if (!outputDir.exists()) {
-            return ValidationResult.invalid(outputDir.getAbsolutePath() + " doesn't exist.");
+            return ValidationResult.invalid(String.format(
+                "Folder <b>%s</b> does not exist.", outputDir.getAbsolutePath()));
         }
-
         if (!outputDir.isDirectory()) {
-            String msg = String.format("\"<b>%s</b>\" isn't a folder." +
-                    "<br>For the \"%s\" output type, select an existing folder.",
-                outputDir.getAbsolutePath(), type);
-            return ValidationResult.invalid(msg);
+            return ValidationResult.invalid(String.format(
+                "<b>%s</b> is not a folder.<br>Please select an existing folder for the <b>%s</b> output type.",
+                outputDir.getAbsolutePath(), type));
         }
-
         if (!Files.isWritable(outputDir.toPath())) {
-            return ValidationResult.invalid(
-                String.format("Folder '%s' is not writable.", outputDir));
+            return ValidationResult.invalid(String.format(
+                "Folder <b>%s</b> is not writable.", outputDir.getAbsolutePath()));
         }
-
         return ValidationResult.valid();
     }
 

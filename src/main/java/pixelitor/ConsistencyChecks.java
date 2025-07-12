@@ -23,7 +23,6 @@ import pixelitor.layers.*;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Threads;
 import pixelitor.utils.debug.Debug;
-import pixelitor.utils.test.Events;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -95,8 +94,6 @@ public final class ConsistencyChecks {
     }
 
     private static void differentSizeForFade(BufferedImage currentImg, BufferedImage previousImg, Composition comp) {
-        Events.postProgramError("fade would not work", comp, null);
-
         Debug.debugImage(currentImg, "current");
         Debug.debugImage(previousImg, "previous");
 

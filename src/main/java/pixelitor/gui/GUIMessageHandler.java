@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,8 @@ import pixelitor.utils.ProgressHandler;
 import java.awt.Component;
 import java.awt.EventQueue;
 
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * GUI-based implementation of MessageHandler.
@@ -37,14 +37,14 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showInStatusBar(String msg) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         StatusBar.get().updateMessage(msg);
     }
 
     @Override
     public ProgressHandler startProgress(String msg, int maxValue) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         return StatusBar.get().startProgress(msg, maxValue);
     }

@@ -25,9 +25,9 @@ import pixelitor.layers.Filterable;
 import javax.swing.*;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
@@ -181,9 +181,9 @@ public class CompositeParam extends AbstractFilterParam {
     }
 
     @Override
-    public List<Object> getParamValue() {
+    public String getParamValue() {
         return Stream.of(children)
             .map(FilterParam::getParamValue)
-            .collect(toList());
+            .collect(Collectors.joining(", ", "[", "]"));
     }
 }

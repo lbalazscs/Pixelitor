@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,8 +32,8 @@ import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * A dialog with OK and Cancel buttons at the bottom.
@@ -49,7 +49,7 @@ public abstract class OKCancelDialog extends JDialog {
     protected OKCancelDialog(JComponent content, Frame owner,
                              String title, String okButtonText) {
         super(owner, title, true);
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         this.content = content;
 
@@ -120,24 +120,40 @@ public abstract class OKCancelDialog extends JDialog {
         dispose();
     }
 
-    public void setHeaderMessage(String msg) {
-        if (headerMsgLabel != null) { // there was a message before
-            remove(headerMsgLabel);
+    /**
+     * Sets or updates the header message text.
+     */
+    public void setHeaderMessage(String text) {
+        // if text is null or empty, remove the header
+        if (text == null || text.isEmpty()) {
+            if (headerMsgLabel != null) {
+                remove(headerMsgLabel);
+                headerMsgLabel = null;
+                revalidate();
+                repaint();
+            }
+            return;
         }
-        headerMsgLabel = new JLabel(msg);
-        headerMsgLabel.setBorder(createEmptyBorder(0, 5, 0, 5));
-        add(headerMsgLabel, NORTH);
+
+        if (headerMsgLabel == null) {
+            // create label if it doesn't exist
+            headerMsgLabel = new JLabel();
+            headerMsgLabel.setBorder(createEmptyBorder(0, 5, 0, 5));
+            add(headerMsgLabel, NORTH);
+        }
+        headerMsgLabel.setText(text);
         revalidate();
     }
 
-    public void updateContent(JComponent content) {
-        if (scrollPane != null) {
-            remove(scrollPane);
-        } else {
-            remove(this.content);
-        }
-        this.content = content;
-        addContent(this.content);
+    /**
+     * Replaces the main content of the dialog with a new component.
+     */
+    public void updateContent(JComponent newContent) {
+        remove(scrollPane);
+
+        this.content = newContent;
+        addContent(newContent);
+
         revalidate();
     }
 

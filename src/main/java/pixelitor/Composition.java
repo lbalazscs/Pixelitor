@@ -67,10 +67,10 @@ import static java.lang.String.format;
 import static pixelitor.io.FileUtils.removeExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
-import static pixelitor.utils.Threads.threadInfo;
 import static pixelitor.utils.Utils.createCopyName;
 import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
 
@@ -88,7 +88,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private final List<Layer> layerList = new ArrayList<>();
 
-    // The currently selected layer, potentially nested within groups or smart objects.
+    // the currently selected layer, potentially nested within groups or smart objects
     private Layer activeLayer;
 
     // The top-level ancestor layer of the activeLayer.
@@ -131,8 +131,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private transient Selection selection;
 
-    // A temporary selection that is currently being created
-    // by dragging, but it's not finalized yet.
+    // a temporary selection that is currently being created
+    // by dragging, but it's not finalized yet
     private transient Selection draftSelection;
 
     /**
@@ -208,7 +208,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         activeTopLevelLayer = activeLayer.getTopLevelLayer();
 
-        // Perform actions that need a full canvas and also
+        // perform actions that need a full canvas and also
         // (re)load the contents of linked smart objects
         forEachNestedLayerOfType(CompositeLayer.class, CompositeLayer::afterDeserialization);
 
@@ -375,8 +375,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Checks if this {@link Composition} is the content of any {@link SmartObject}.
      */
     public boolean isSmartObjectContent() {
-        // If a content file is opened independently of its parent,
-        // then this will return false, even for PXC files!
+        // if a content file is opened independently of its parent,
+        // then this will return false, even for PXC files
         return owners != null;
     }
 
@@ -509,8 +509,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Create a file name that will be suggested as the default
-     * file name in the save dialog.
+     * Creates a file name to suggest in the save dialog.
      */
     public String suggestFileName(String extension) {
         if (file == null) {
@@ -546,7 +545,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             return;
         }
         setName(newName);
-        History.add(new CompositionRenamedEdit(this, oldName, newName));
+        History.add(new CompositionRenameEdit(this, oldName, newName));
     }
 
     public String getDebugName() {
@@ -660,6 +659,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             return;
         }
 
+        // create the new flattened layer from the composite of visible layers
         BufferedImage flattenedImg = getCompositeImage();
         Layer flattenedLayer = new ImageLayer(this, flattenedImg, "flattened");
 
@@ -865,8 +865,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         Layer prevActiveLayer = this.activeLayer;
         this.activeLayer = layer;
 
-        // After ungrouping a group with a single active layer,
-        // the active layer could change without a change in the target.
+        // after ungrouping a group with a single active layer,
+        // the active layer could change without a change in the target
         setActiveTopLevelLayer(layer.getTopLevelLayer());
 
         if (this.activeLayer == prevActiveLayer) {
@@ -1015,8 +1015,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Applies an action to all nested layers.
-     * Traverses both layer group hierarchy and smart object content hierarchy.
+     * Applies an action to all nested layers, traversing groups and smart objects.
      */
     public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
         for (Layer layer : layerList) {
@@ -1054,7 +1053,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         Point pixelLoc = new Point((int) p.getX(), (int) p.getY());
 
-        // iterate in reverse order (we need to search layers from top to bottom)
+        // iterate in reverse order to search layers from top to bottom
         ListIterator<Layer> li = layerList.listIterator(layerList.size());
         while (li.hasPrevious()) {
             Layer layer = li.previous();
@@ -1099,7 +1098,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Returns the active mask or image layer or null
+     * Returns the active {@link Drawable} (layer or mask), or null if none is active.
      */
     public Drawable getActiveDrawable() {
         assert checkInvariants();
@@ -1112,6 +1111,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
+    /**
+     * Returns the active {@link Filterable} (layer or mask), or null if none is active.
+     */
     public Filterable getActiveFilterable() {
         assert checkInvariants();
         if (activeLayer.isMaskEditing()) {
@@ -1124,8 +1126,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Returns the active mask or image layer.
-     * Calling this method assumes that the active layer is a {@link Drawable}.
+     * Returns the active {@link Drawable} (layer or mask), or throws an exception if none is active.
      */
     public Drawable getActiveDrawableOrThrow() {
         Drawable dr = getActiveDrawable();
@@ -1503,15 +1504,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * might not be open in a view.
      */
     public void imCoordsChanged(AffineTransform at, boolean isUndoRedo, View view) {
-        // The selection is explicitly reset to a backup shape
-        // when something is undone/redone.
+        // the selection is explicitly reset to a backup shape
+        // when something is undone/redone
         if (selection != null && !isUndoRedo) {
             selection.transform(at);
         }
-        // The paths and the tool widgets are transformed even for undo/redo.
-        // The advantage is simpler code, the disadvantage is that
-        // rounding errors could accumulate if the same operation is
-        // undone/redone many times.
+
+        // the paths and the tool widgets are transformed even for undo/redo
         if (paths != null) {
             paths.imCoordsChanged(at);
         }
@@ -1616,9 +1615,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Fits the canvas to the combined bounds of all content layers.
-     * If any content layer is larger than the current canvas, the
-     * canvas will be enlarged to fully contain all content layers.
+     * Enlarges the canvas to fit the content of all layers.
      */
     public void fitCanvasToLayers() {
         Outsets enlargement = Outsets.createZero();
@@ -1747,7 +1744,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
                                              boolean addToRecentFiles) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         // prevent concurrent processing of the same file path
         File targetFile = saveSettings.file();
@@ -1759,7 +1756,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
         IOTasks.markPathForWriting(filePath);
 
-        // Set to not dirty already at the beginning of the saving process,
+        // set to not dirty already at the beginning of the saving process,
         // so that subsequent closing doesn't trigger another save.
         boolean wasDirty = isDirty();
         clearDirtyFlagsRecursively();
@@ -1786,7 +1783,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Actions to perform on the EDT after a successful save.
      */
     public void handleSuccessfulSave(File file, boolean addToRecentFiles) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         setFile(file);
         if (addToRecentFiles) {
@@ -1796,8 +1793,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         Messages.showFileSavedMessage(file);
 
         if (isSmartObjectContent()) {
-            // Otherwise the changes might not be propagated when deactivating,
-            // because this isn't dirty after saving even if it's changed.
+            // otherwise the changes might not be propagated when deactivating,
+            // because this isn't dirty after saving even if it's changed
             for (SmartObject owner : owners) {
                 owner.propagateContentChanges(this, true);
 
@@ -1914,7 +1911,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * need to be reloaded due to external file modifications.
      */
     public CompletableFuture<Composition> checkForExternalModifications() {
-        // check only the open compositions here - hidden
+        // check only the open compositions here; hidden
         // smart object contents will be checked later
         if (file != null && isOpen()) {
             long currentFileTimestamp = file.lastModified();

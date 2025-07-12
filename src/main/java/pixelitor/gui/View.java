@@ -55,9 +55,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
@@ -172,7 +172,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * Handles a successfully reloaded composition by replacing the current one.
      */
     private Composition handleReloadedComp(Composition newComp) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         assert newComp != comp;
         assert !newComp.hasSelection();
 
@@ -894,7 +894,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         // can be cast outside unit tests
         LayerGUI layerGUI = (LayerGUI) newLayer.createUI();
@@ -930,7 +930,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public void repaintNavigator(boolean canvasSizeChanged) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         if (navigator == null) {
             return;

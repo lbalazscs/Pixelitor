@@ -35,10 +35,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onPool;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Resizes all layers of a {@link Composition} to the given dimensions.
@@ -110,7 +110,7 @@ public class Resize implements CompAction {
                                                   Composition newComp,
                                                   Dimension newCanvasSize,
                                                   ProgressHandler progressHandler) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         View view = srcComp.getView();
         assert view != null;

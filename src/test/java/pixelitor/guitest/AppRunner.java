@@ -52,7 +52,6 @@ import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.utils.Language;
 import pixelitor.utils.Utils;
-import pixelitor.utils.test.PixelitorEventListener;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -79,8 +78,8 @@ import static pixelitor.guitest.GUITestUtils.slideRandomly;
 import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOutsideEDT;
-import static pixelitor.utils.Threads.threadInfo;
 import static pixelitor.utils.Utils.toPercentage;
 
 /**
@@ -120,7 +119,6 @@ public class AppRunner {
             .withArgs(filePaths)
             .start();
 
-        new PixelitorEventListener().register();
         rememberInitialSettings();
 
         pw = WindowFinder.findFrame(PixelitorWindow.class)
@@ -325,7 +323,7 @@ public class AppRunner {
     }
 
     void runMenuCommand(String text) {
-        assert calledOutsideEDT() : threadInfo();
+        assert calledOutsideEDT() : callInfo();
 
         findMenuItemByText(text)
             .requireEnabled()

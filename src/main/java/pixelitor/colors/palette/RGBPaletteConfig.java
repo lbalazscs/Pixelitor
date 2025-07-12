@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,15 +18,12 @@
 package pixelitor.colors.palette;
 
 import javax.swing.*;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 
-import static pixelitor.colors.palette.PaletteConfig.createSlider;
+import static pixelitor.colors.palette.PaletteConfig.addSliderRow;
 
 /**
- * A palette configuration for RGB color mixing, containing
- * a cyan-red, a magenta-green and a yellow-blue slider.
+ * Configuration for RGB color mixing with cyan-red, magenta-green, and yellow-blue sliders.
  */
 public class RGBPaletteConfig implements PaletteConfig {
     private float cyanRed = 0.5f;
@@ -37,9 +34,6 @@ public class RGBPaletteConfig implements PaletteConfig {
 
     private float yellowBlue = 0.5f;
     private JSlider ybSlider;
-
-    public RGBPaletteConfig() {
-    }
 
     public float getCyanRed() {
         return cyanRed;
@@ -55,42 +49,19 @@ public class RGBPaletteConfig implements PaletteConfig {
 
     @Override
     public JPanel createConfigPanel(PalettePanel palettePanel) {
-        JPanel p = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout());
 
-        crSlider = createSlider(cyanRed, "Cyan-red shift");
-        crSlider.addChangeListener(e -> redChanged(palettePanel));
+        crSlider = addSliderRow("C-R:", "Cyan-red shift",
+            e -> cyanRedChanged(palettePanel), cyanRed, panel, 0);
+        mgSlider = addSliderRow("M-G:", "Magenta-green shift",
+            e -> magentaGreenChanged(palettePanel), magentaGreen, panel, 1);
+        ybSlider = addSliderRow("Y-B:", "Yellow-blue shift",
+            e -> yellowBlueChanged(palettePanel), yellowBlue, panel, 2);
 
-        mgSlider = createSlider(magentaGreen, "Magenta-green shift");
-        mgSlider.addChangeListener(e -> greenChanged(palettePanel));
-
-        ybSlider = createSlider(yellowBlue, "Yellow-blue shift");
-        ybSlider.addChangeListener(e -> blueChanged(palettePanel));
-
-        Insets insets = new Insets(2, 4, 2, 4);
-        var labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
-            GridBagConstraints.CENTER,
-            GridBagConstraints.NONE, insets, 0, 0);
-        var sliderCtr = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
-            GridBagConstraints.EAST,
-            GridBagConstraints.HORIZONTAL, insets, 0, 0);
-
-        p.add(new JLabel("C-R:"), labelCtr);
-        p.add(crSlider, sliderCtr);
-
-        labelCtr.gridy = 1;
-        p.add(new JLabel("M-G:"), labelCtr);
-        sliderCtr.gridy = 1;
-        p.add(mgSlider, sliderCtr);
-
-        labelCtr.gridy = 2;
-        p.add(new JLabel("Y-B:"), labelCtr);
-        sliderCtr.gridy = 2;
-        p.add(ybSlider, sliderCtr);
-
-        return p;
+        return panel;
     }
 
-    private void redChanged(PalettePanel panel) {
+    private void cyanRedChanged(PalettePanel panel) {
         float oldValue = cyanRed;
         cyanRed = crSlider.getValue() / 100.0f;
         if (oldValue != cyanRed) {
@@ -98,7 +69,7 @@ public class RGBPaletteConfig implements PaletteConfig {
         }
     }
 
-    private void greenChanged(PalettePanel panel) {
+    private void magentaGreenChanged(PalettePanel panel) {
         float oldValue = magentaGreen;
         magentaGreen = mgSlider.getValue() / 100.0f;
         if (oldValue != magentaGreen) {
@@ -106,7 +77,7 @@ public class RGBPaletteConfig implements PaletteConfig {
         }
     }
 
-    private void blueChanged(PalettePanel panel) {
+    private void yellowBlueChanged(PalettePanel panel) {
         float oldValue = yellowBlue;
         yellowBlue = ybSlider.getValue() / 100.0f;
         if (oldValue != yellowBlue) {

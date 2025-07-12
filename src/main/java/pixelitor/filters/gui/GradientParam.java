@@ -26,7 +26,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.io.Serial;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -196,8 +195,8 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public List<Color> getParamValue() {
-        return List.of(colors);
+    public String getParamValue() {
+        return Colors.formatForDebugging(colors);
     }
 
     public float[] getThumbPositions() {

@@ -98,7 +98,7 @@ public class EnlargeCanvas extends SimpleCompAction {
             .title(NAME)
             .menuBar(new DialogMenuBar(panel))
             .content(panel)
-            .okAction(() -> panel.getCompAction(comp.getCanvas()).process(comp))
+            .okAction(() -> panel.createCompAction(comp.getCanvas()).process(comp))
             .show();
     }
 }

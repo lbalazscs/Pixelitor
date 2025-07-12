@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,8 +25,8 @@ import java.awt.FileDialog;
 import java.io.File;
 
 import static pixelitor.io.FileChooserConfig.SelectableFormats.SINGLE;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 public class AWTFilePicker implements FilePicker {
     private FileDialog openDialog;
@@ -90,14 +90,14 @@ public class AWTFilePicker implements FilePicker {
     }
 
     private void initOpenPicker() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         if (openDialog == null) {
             openDialog = new FileDialog(PixelitorWindow.get(), "Open File", FileDialog.LOAD);
         }
     }
 
     private void initSavePicker() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         if (saveDialog == null) {
             saveDialog = new FileDialog(PixelitorWindow.get(), "Save File", FileDialog.SAVE);
             File lastSaveDir = Dirs.getLastSave();

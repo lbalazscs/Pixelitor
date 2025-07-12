@@ -134,7 +134,7 @@ public class Selection implements Transformable {
      * Assumes g2 is in image space.
      */
     public void paintMarchingAnts(Graphics2D g2) {
-        assert Threads.calledOnEDT() : Threads.threadInfo();
+        assert Threads.calledOnEDT() : Threads.callInfo();
         assert !disposed : "disposed selection";
 
         if (shape == null || hidden) {
@@ -178,7 +178,7 @@ public class Selection implements Transformable {
      * Releases resources and marks the selection as unusable.
      */
     public void dispose() {
-        assert AppMode.isUnitTesting() || Threads.calledOnEDT() : Threads.threadInfo();
+        assert AppMode.isUnitTesting() || Threads.calledOnEDT() : Threads.callInfo();
         if (disposed) {
             return;
         }

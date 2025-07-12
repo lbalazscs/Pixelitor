@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,24 +17,27 @@
 
 package pixelitor.colors.palette;
 
+import java.awt.Color;
+import java.util.List;
+
 /**
- * Base class for color palette generators.
- * A {@link Palette} is the data model for a {@link PalettePanel}.
+ * A data model that provides a list of colors for a {@link PalettePanel}.
+ * The palette can be either dynamic (colors are generated based on grid size)
+ * or static (a fixed list of colors is provided).
  */
-public abstract class Palette {
-    protected int rowCount;
-    protected int columnCount;
+public abstract sealed class Palette permits DynamicPalette, StaticPalette {
     protected PaletteConfig config;
 
-    protected Palette(int rowCount, int columnCount) {
-        setGridSize(rowCount, columnCount);
-    }
+    /**
+     * Provides the list of colors for the palette.
+     * For dynamic palettes, this list is regenerated based on the current grid size.
+     * For static palettes, this returns a fixed list.
+     */
+    public abstract List<Color> getColors();
 
     /**
-     * Populates the given panel with color swatches arranged in a grid.
+     * A hook for subclasses to react to configuration changes.
      */
-    public abstract void addButtons(PalettePanel panel);
-
     public void onConfigChanged() {
     }
 
@@ -42,24 +45,15 @@ public abstract class Palette {
         return config;
     }
 
-    public void setGridSize(int rows, int columns) {
-        this.columnCount = columns;
-        this.rowCount = rows;
-    }
-
-    public int getColumnCount() {
-        return columnCount;
-    }
-
-    public int getRowCount() {
-        return rowCount;
-    }
-
     public abstract String getDialogTitle();
 
     public String getHelpText() {
-        return getDialogTitle() + ": enlarge for more colors, "
+        String resizeHelp = switch (this) {
+            case DynamicPalette d -> "enlarge for more colors";
+            case StaticPalette s -> "resize the dialog to reflow the colors";
+        };
+
+        return getDialogTitle() + ": " + resizeHelp + ", "
             + ColorSwatchClickHandler.STANDARD_HTML_HELP;
     }
 }
-

@@ -93,14 +93,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
     private transient BufferedImage previewImage;
 
     /**
-     * The source image passed to the filters.
-     * It's different from the layer's image if there is a selection.
+     * The source image for filters, which can differ
+     * from the layer's image if there is a selection.
      */
     private transient BufferedImage filterSourceImage;
 
     /**
-     * Whether the preview image is different from the normal image
-     * It makes sense only in PREVIEW mode
+     * Whether the preview image is different from the normal image.
+     * Relevant only in {@link PREVIEW} state.
      */
     private transient boolean imageContentChanged = false;
 
@@ -113,7 +113,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     /**
-     * Creates a new layer with the given image
+     * Creates a new layer with the given image and translation.
      */
     public ImageLayer(Composition comp, BufferedImage image,
                       String name, int tx, int ty) {
@@ -127,7 +127,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     /**
-     * Creates a new empty layer
+     * Creates a new empty (transparent) layer.
      */
     public static ImageLayer createEmpty(Composition comp, String name) {
         ImageLayer imageLayer = new ImageLayer(comp, name);
@@ -141,7 +141,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     /**
      * Creates an image layer from an external (pasted or drag-and-dropped)
-     * image, which can have a different size than the canvas.
+     * image, which can have a different size than the canvas. The new layer
+     * is sized and positioned to center the external image on the canvas.
      */
     public static ImageLayer fromExternalImage(BufferedImage externalImg,
                                                Composition comp,
@@ -152,7 +153,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         BufferedImage newImage = layer.calcNewImageFromExternal(externalImg);
         layer.setImage(newImage);
 
-        layer.setTranslationForExternal(externalImg);
+        // set the translation to center the new layer image on the canvas
+        layer.centerExternalImage(externalImg);
 
         return layer;
     }
@@ -160,11 +162,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
     private BufferedImage calcNewImageFromExternal(BufferedImage img) {
         Canvas canvas = comp.getCanvas();
 
+        // if the external image is already large enough to
+        // cover the canvas, then it doesn't have to be enlarged
         if (canvas.isFullyCoveredBy(img)) {
             return ImageUtils.toSysCompatibleImage(img);
         }
 
-        // the external image is too small: center it in a new image
+        // the external image is smaller than the canvas in at least one
+        // dimension, so create a new image that is at least canvas-sized
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
         int imgWidth = img.getWidth();
@@ -173,11 +178,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int newWidth = Math.max(canvasWidth, imgWidth);
         int newHeight = Math.max(canvasHeight, imgHeight);
         BufferedImage newImage = createEmptyLayerImage(newWidth, newHeight);
-        Graphics2D g = newImage.createGraphics();
 
+        // draw the external image centered within the new image buffer
+        Graphics2D g = newImage.createGraphics();
         int drawX = Math.max((canvasWidth - imgWidth) / 2, 0);
         int drawY = Math.max((canvasHeight - imgHeight) / 2, 0);
-
         g.drawImage(img, drawX, drawY, null);
         g.dispose();
 
@@ -185,8 +190,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     // if the external image is bigger than the canvas, then add a
-    // translation to it in order to make it centered around the canvas
-    private void setTranslationForExternal(BufferedImage img) {
+    // translation to it in order to make it centered on the canvas
+    private void centerExternalImage(BufferedImage img) {
         int canvasWidth = comp.getCanvasWidth();
         int canvasHeight = comp.getCanvasHeight();
         int imgWidth = img.getWidth();
@@ -245,17 +250,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void setShowOriginal(boolean b) {
-        if (b) {
-            if (state == SHOW_ORIGINAL) {
-                return;
-            }
-            setState(SHOW_ORIGINAL);
-        } else {
-            if (state == PREVIEW) {
-                return;
-            }
-            setState(PREVIEW);
+        State targetState = b ? SHOW_ORIGINAL : PREVIEW;
+        if (state == targetState) {
+            return;
         }
+
+        setState(targetState);
         imageRefChanged();
         holder.update(false);
     }
@@ -328,7 +328,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             comp.getCanvasWidth(), comp.getCanvasHeight());
     }
 
-    public BufferedImage getCanvasSizedVisibleImage() {
+    private BufferedImage getCanvasSizedVisibleImage() {
         if (!isBigLayer()) {
             return getVisibleImage();
         }
@@ -351,10 +351,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return visibleImage;
     }
 
-    // Every image creation in this class should use this method,
-    // which is overridden by the LayerMask subclass,
-    // because normal image layers are enlarged with transparent pixels
-    // and layer masks are enlarged with white pixels.
+    /**
+     * Returns a transparent image, but it's overridden in the
+     * {@link LayerMask} subclass to return a white image.
+     */
     protected BufferedImage createEmptyLayerImage(int width, int height) {
         return ImageUtils.createSysCompatibleImage(width, height);
     }
@@ -483,18 +483,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void startTweening() {
-        assert state == NORMAL;
-        startPreviewing();
-    }
-
-    @Override
-    public void endTweening() {
-        assert state == PREVIEW;
-        stopPreviewing();
-    }
-
-    @Override
     public void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context) {
         if (state == NORMAL) {
             throw new IllegalStateException(format(
@@ -536,7 +524,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         comp.setDirty(true);
 
-        // A filter without dialog should never return the original image...
+        // a filter without dialog should never return the original image...
         if (filteredImage == image) {
             // ...unless "Repeat Last" or "Batch Filter" starts a filter
             // with settings without its dialog
@@ -934,7 +922,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     /**
      * Returns true if the layer image is bigger than the canvas
      */
-    public boolean isBigLayer() {
+    private boolean isBigLayer() {
         return image.getWidth() > comp.getCanvasWidth()
             || image.getHeight() > comp.getCanvasHeight();
     }
@@ -991,7 +979,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
                                         BufferedImage visibleImage,
                                         boolean firstVisibleLayer) {
         if (firstVisibleLayer) {
-            // Create a copy of the graphics, because we don't want to
+            // create a copy of the graphics, because we don't want to
             // mess with the clipping of the original
             Graphics2D gCopy = (Graphics2D) g.create();
             gCopy.drawImage(visibleImage, getTx(), getTy(), null);

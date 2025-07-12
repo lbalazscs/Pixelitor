@@ -85,9 +85,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     private Shape origShape; // the original shape, in image-space
     private Shape shape; // the current transformed shape, in image-space
 
-    // The original drag is kept even after the transform box appears
+    // the original drag is kept even after the transform box appears
     // because it could be needed when regenerating the original shape
-    // (if the user changes the shape type).
+    // (if the user changes the shape type)
     private Drag origDrag;
 
     // this is transformed as the box is manipulated, so that
@@ -100,7 +100,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     private transient Stroke stroke;
 
-    // Not needed for the rendering, but needed
+    // not needed for the rendering, but needed
     // to restore the stroke GUI state
     private StrokeSettings strokeSettings;
 
@@ -128,8 +128,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         in.defaultReadObject();
 
         if (strokePaint != NONE) {
-            // A stroke might be needed before this object
-            // has a chance to load it from the tool.
+            // a stroke might be needed before this object
+            // has a chance to load it from the tool
             StrokeParam p = new StrokeParam("");
             p.loadStateFrom(strokeSettings, false);
             stroke = p.createStroke();
@@ -157,7 +157,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         if (transformedDrag.isImClick()) {
             // if the mouse dragging comes back exactly to the starting
-            // point, then there is a shape object, but it's empty.
+            // point, then there is a shape object, but it's empty
             return;
         }
 
@@ -239,7 +239,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     private void paintStrokeOutlineEffects(Graphics2D g) {
         if (stroke instanceof WobbleStroke) {
-            // be careful and consistent with the behavior above
+            // consistent with the behavior above
             effects.apply(g, shape);
         } else {
             // apply the effects on the stroke outline
@@ -287,8 +287,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         drag.setExpandFromCenter(altDown);
         if (shapeType.isDirectional()) {
-            // For directional shapes it's useful to have the
-            // ability to drag exactly horizontally or vertically.
+            // for directional shapes it's useful to have the
+            // ability to drag exactly horizontally or vertically
             drag.setAngleConstrained(shiftDown);
         } else {
             drag.setEnforceEqualDimensions(shiftDown);
@@ -351,8 +351,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     private void updateStrokePaint(ShapesTool tool) {
         this.strokePaint = tool.getSelectedStrokePaint();
         if (stroke == null) { // can happen after deserialization
-            // This ignores the deserialized strokeSettings, but it's not a problem:
-            // if there is no stroke, then the disabled stroke settings aren't important.
+            // this ignores the deserialized strokeSettings, but it's not a problem:
+            // if there is no stroke, then the disabled stroke settings aren't important
             updateStroke(tool);
         }
     }
@@ -386,8 +386,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         }
         assert origShape != null;
 
-        // Should always be non-null, unless the user somehow manages to change the
-        // type via keyboard during the initial drag, but leave the check for safety.
+        // should always be non-null, unless the user somehow manages to change the
+        // type via keyboard during the initial drag, but leave the check for safety
         if (box != null) {
             // also recreate the transformed shape
             box.applyTransform();

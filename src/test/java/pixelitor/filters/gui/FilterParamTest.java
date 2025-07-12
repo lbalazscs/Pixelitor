@@ -154,7 +154,7 @@ public class FilterParamTest {
         verifyNoParamAdjustments();
 
         // Test ignored randomization
-        Object origValue = param.getParamValue();
+        String origValue = param.getParamValue();
         param.setRandomizePolicy(RandomizeMode.IGNORE_RANDOMIZE);
         assertThat(param).shouldNotRandomize();
         param.randomize();
@@ -178,7 +178,7 @@ public class FilterParamTest {
         // from 0 to 2*pi, which confuses this test
         param.reset(false);
 
-        Object defaultValue = param.getParamValue();
+        String defaultValue = param.getParamValue();
         // we can change the value in a general way only
         // through randomize
         if (!param.shouldRandomize()) {
@@ -210,7 +210,7 @@ public class FilterParamTest {
 
     @Test
     public void shouldPreserveStateWhenCopiedAndRestored() {
-        Object origValue = param.getParamValue();
+        String origValue = param.getParamValue();
 
         ParamState<?> paramState = param.copyState();
         assertThat(paramState).isNotNull();

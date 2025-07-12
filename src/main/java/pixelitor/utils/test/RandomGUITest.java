@@ -149,7 +149,6 @@ public class RandomGUITest {
 
         PixelitorWindow.get().setAlwaysOnTop(true);
 
-        new PixelitorEventListener().register();
         GlobalEvents.enableMouseEventDebugging(true);
 
         pastedImagesCount = 0;
@@ -358,7 +357,6 @@ public class RandomGUITest {
         if (VERBOSE) {
             System.out.println(msg);
         }
-        Events.postRandomTestEvent(msg);
     }
 
     private void randomMove(Robot robot) {
@@ -536,7 +534,7 @@ public class RandomGUITest {
         paramSet.setState(intermediateState, true);
 
         // run everything without showing a modal dialog
-        dr.startTweening();
+        dr.startPreviewing();
 
         try {
             dr.startFilter(filter, PREVIEWING);
@@ -551,7 +549,7 @@ public class RandomGUITest {
             throw new IllegalStateException(msg, e);
         }
 
-        dr.endTweening();
+        dr.stopPreviewing();
 
         if (Filter.executionCount != executionsBefore + 1) {
             throw new IllegalStateException(

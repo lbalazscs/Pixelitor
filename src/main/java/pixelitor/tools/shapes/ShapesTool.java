@@ -105,8 +105,8 @@ public class ShapesTool extends DragTool {
 
     private final StrokeParam strokeParam = new StrokeParam("");
 
-    // During a single mouse drag, only one stroke should be created
-    // This is particularly important for "random shape"
+    // During a single mouse drag, only one stroke should be created.
+    // This is particularly important for "random shape".
     private Stroke stroke = strokeParam.createStroke();
 
     private JButton showStrokeDialogButton;
@@ -383,9 +383,8 @@ public class ShapesTool extends DragTool {
         updateStyledShapeFromDrag(e);
 
         transformBox = styledShape.createBox(e.getView());
-        if (transformBox == null) {
-            // The box could not be created.
-            // Cancel just as for empty clicks.
+        if (transformBox == null) { // the box could not be created
+            // cancel just as for empty clicks.
             setIdleState();
             e.getView().repaint();
             return;

@@ -185,7 +185,7 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    public AreaEffects getParamValue() {
-        return getEffects();
+    public String getParamValue() {
+        return getEffects().toString();
     }
 }

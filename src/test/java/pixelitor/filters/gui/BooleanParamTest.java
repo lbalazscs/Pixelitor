@@ -41,7 +41,7 @@ class BooleanParamTest {
         var param = new BooleanParam("Test", true, IGNORE_RANDOMIZE);
         for (int i = 0; i < 10; i++) {
             param.randomize();
-            assertThat(param).hasValue(true);
+            assertThat(param).hasValue("true");
         }
     }
 
@@ -50,23 +50,23 @@ class BooleanParamTest {
         var param = new BooleanParam("Test", true);
         assertThat(param)
             .isAtDefaultValue()
-            .hasValue(true);
+            .hasValue("true");
 
         var adjListener = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(adjListener);
 
         param.setValue(true, false, true);
-        assertThat(param).hasValue(true);
+        assertThat(param).hasValue("true");
         // expect no triggering because the value didn't change
         verify(adjListener, never()).paramAdjusted();
 
         param.setValue(false, false, true);
-        assertThat(param).hasValue(false);
+        assertThat(param).hasValue("false");
         // expect one triggering
         verify(adjListener, times(1)).paramAdjusted();
 
         param.setValue(true, false, false);
-        assertThat(param).hasValue(true);
+        assertThat(param).hasValue("true");
         // expect no new triggering, because triggering was set to false
         verify(adjListener, times(1)).paramAdjusted();
     }

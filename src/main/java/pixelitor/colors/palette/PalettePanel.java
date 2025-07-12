@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,147 +20,144 @@ package pixelitor.colors.palette;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
- * The panel containing the color swatch buttons in a grid.
+ * A panel that displays color swatches in a grid. It can display both
+ * dynamically generated palettes and static, fixed-size palettes.
  */
-public class PalettePanel extends JPanel {
-    private static final int GAP = 2; // Spacing between swatches
+public class PalettePanel extends JPanel implements Scrollable {
+    private static final int GAP = 2; // spacing between swatches
     private final Palette palette;
     private final ColorSwatchClickHandler clickHandler;
 
     private int numCols;
     private int numRows;
 
-    // vertical lists in a horizontal list
-    private final List<List<ColorSwatchButton>> grid;
+    // a horizontal list of columns, where each column is a vertical list of buttons
+    private final List<List<ColorSwatchButton>> grid = new ArrayList<>();
 
     private PalettePanel(Palette palette, ColorSwatchClickHandler clickHandler) {
         this.palette = palette;
         this.clickHandler = clickHandler;
 
-        numCols = palette.getColumnCount();
-        numRows = palette.getRowCount();
-
         setLayout(null); // manual button positioning
 
-        grid = new ArrayList<>();
-        for (int i = 0; i < numCols; i++) {
-            grid.add(new ArrayList<>());
+        // initial setup based on palette type
+        if (palette instanceof DynamicPalette dynamicPalette) {
+            numCols = dynamicPalette.getColumnCount();
+            numRows = dynamicPalette.getRowCount();
+        } else {
+            // For static palettes, start with a reasonable default column count.
+            // It will be immediately recalculated on first display/resize.
+            numCols = 10;
+            numRows = (int) Math.ceil((double) palette.getColors().size() / numCols);
         }
 
-        regenerate(numRows, numCols);
+        updateGrid();
 
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                // Calculate new grid dimensions based on available space and button size
-                int newNumRows = (getHeight() - GAP) / (ColorSwatchButton.SIZE + GAP);
-                int newNumCols = (getWidth() - GAP) / (ColorSwatchButton.SIZE + GAP);
-                setGridSize(newNumRows, newNumCols);
+                handleResize();
             }
         });
     }
 
-    private void setGridSize(int newNumRows, int newNumCols) {
+    private void handleResize() {
+        switch (palette) {
+            case StaticPalette s -> handleStaticPaletteResize();
+            case DynamicPalette d -> handleDynamicPaletteResize();
+        }
+    }
+
+    // static palette: reflow the existing colors
+    private void handleStaticPaletteResize() {
+        int newNumCols = Math.max(1, (getWidth() - GAP) / (ColorSwatchButton.SIZE + GAP));
+        if (newNumCols != numCols) {
+            numCols = newNumCols;
+            int totalColors = palette.getColors().size();
+            numRows = (totalColors == 0) ? 0 : (int) Math.ceil((double) totalColors / numCols);
+            updateGrid();
+            revalidate(); // update preferred size for scrollbars
+        }
+    }
+
+    // dynamic palette: regenerate colors based on new grid size
+    private void handleDynamicPaletteResize() {
+        int newNumRows = Math.max(1, (getHeight() - GAP) / (ColorSwatchButton.SIZE + GAP));
+        int newNumCols = Math.max(1, (getWidth() - GAP) / (ColorSwatchButton.SIZE + GAP));
+
         if (newNumRows != numRows || newNumCols != numCols) {
-            palette.setGridSize(newNumRows, newNumCols);
-            regenerate(newNumRows, newNumCols);
+            numRows = newNumRows;
+            numCols = newNumCols;
+            ((DynamicPalette) palette).setGridSize(newNumRows, newNumCols);
+            updateGrid();
         }
     }
 
     public void onConfigChanged() {
         palette.onConfigChanged();
-        regenerate(numRows, numCols);
+        updateGrid();
+    }
+
+    private void updateGrid() {
+        ColorSwatchButton.lastClickedSwatch = null;
+        // clear the panel and the internal grid structure
+        removeAll();
+        grid.clear();
+
+        List<Color> colors = palette.getColors();
+        if (colors.isEmpty()) {
+            repaint();
+            return;
+        }
+
+        // populate the grid with new buttons
+        for (int i = 0; i < colors.size(); i++) {
+            int col = i % numCols;
+            int row = i / numCols;
+            addButton(col, row, colors.get(i));
+        }
+
+        revalidate();
         repaint();
     }
 
-    private void regenerate(int newNumRows, int newNumCols) {
-        ColorSwatchButton.lastClickedSwatch = null;
+    // adds a new button
+    private void addButton(int col, int row, Color c) {
+        ColorSwatchButton button = new ColorSwatchButton(c, clickHandler, col, row);
 
-        // If shrinking the palette, remove only
-        // the buttons that are outside the new grid.
-        if (newNumRows < numRows || newNumCols < numCols) {
-            int count = getComponentCount();
-            for (int i = count - 1; i >= 0; i--) {
-                var swatch = (ColorSwatchButton) getComponent(i);
-                if (swatch.getGridX() >= newNumCols || swatch.getGridY() >= newNumRows) {
-                    remove(i);
-                }
-            }
+        // ensure column list exists
+        while (grid.size() <= col) {
+            grid.add(new ArrayList<>());
         }
-
-        // update grid dimensions
-        numRows = newNumRows;
-        numCols = newNumCols;
-
-        // add new buttons or change the color of the existing ones
-        // according to the palette's rules
-        palette.addButtons(this);
-    }
-
-    /**
-     * Returns the swatch at the given grid position or null if not found.
-     */
-    private ColorSwatchButton getButton(int col, int row) {
-        if (col < grid.size()) { // check if the column exists
-            List<ColorSwatchButton> verticalSwatches = grid.get(col);
-            if (row < verticalSwatches.size()) { // check if the row exists
-                return verticalSwatches.get(row);
-            }
-        }
-        return null;
-    }
-
-    private void addNewButtonToGrid(ColorSwatchButton button, int col, int row) {
-        List<ColorSwatchButton> column;
-        if (col < grid.size()) {
-            // use the already existing column
-            column = grid.get(col);
-
-            // ensure we're adding at the end
-            assert row >= column.size();
-        } else {
-            // start a new column
-            column = new ArrayList<>();
-            grid.add(column);
-        }
+        List<ColorSwatchButton> column = grid.get(col);
+        // buttons should be added in order
+        assert row == column.size();
         column.add(button);
-    }
 
-    // adds a new button or changes the color of an existing button
-    public void addButton(int col, int row, Color c) {
-        ColorSwatchButton button = getButton(col, row);
-        if (button == null) {
-            button = new ColorSwatchButton(c, clickHandler, col, row);
-            addNewButtonToGrid(button, col, row);
+        int x = GAP + col * (ColorSwatchButton.SIZE + GAP);
+        int y = GAP + row * (ColorSwatchButton.SIZE + GAP);
+        button.setLocation(x, y);
+        button.setSize(button.getPreferredSize());
 
-            int x = GAP + col * (ColorSwatchButton.SIZE + GAP);
-            int y = GAP + row * (ColorSwatchButton.SIZE + GAP);
-            button.setLocation(x, y);
-            button.setSize(button.getPreferredSize());
-        } else {
-            button.setColor(c);
-        }
-
-        if (button.getParent() == null) {
-            add(button);
-        }
+        add(button);
     }
 
     @Override
@@ -168,6 +165,36 @@ public class PalettePanel extends JPanel {
         int width = GAP + numCols * (ColorSwatchButton.SIZE + GAP);
         int height = GAP + numRows * (ColorSwatchButton.SIZE + GAP);
         return new Dimension(width, height);
+    }
+
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        return getPreferredSize();
+    }
+
+    @Override
+    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+        // scroll by one swatch at a time
+        return ColorSwatchButton.SIZE + GAP;
+    }
+
+    @Override
+    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        // scroll by a page (the height of the viewport)
+        return visibleRect.height;
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportWidth() {
+        // ensure that a static palette's panel shrinks when the
+        // dialog shrinks, triggering a reflow
+        return palette instanceof StaticPalette;
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportHeight() {
+        // never track viewport height, so the vertical scrollbar can appear
+        return false;
     }
 
     public static void showVariationsDialog(PixelitorWindow pw, boolean fg) {
@@ -195,17 +222,34 @@ public class PalettePanel extends JPanel {
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
+    public static void showStaticPaletteDialog(Window window, String title) {
+        List<Color> colors = IntStream.range(0, 100)
+            .mapToObj(i -> Rnd.createRandomColor())
+            .toList();
+
+        var palette = new StaticPalette(title, colors);
+        showDialog(window, palette, ColorSwatchClickHandler.STANDARD);
+    }
+
     public static void showDialog(Window window, Palette palette,
                                   ColorSwatchClickHandler clickHandler) {
         assert window != null;
 
         var palettePanel = new PalettePanel(palette, clickHandler);
 
-        JPanel fullPanel = new JPanel(new BorderLayout());
+        JComponent content = palettePanel;
+        // for static palettes, wrap the panel in a scroll pane
+        // (dynamic palettes adapt to the available space)
+        if (palette instanceof StaticPalette) {
+            JScrollPane scrollPane = new JScrollPane(palettePanel,
+                VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            content = scrollPane;
+        }
 
-        fullPanel.add(palette.getConfig()
-            .createConfigPanel(palettePanel), NORTH);
-        fullPanel.add(palettePanel, CENTER);
+        JPanel fullPanel = new JPanel(new BorderLayout());
+        fullPanel.add(palette.getConfig().createConfigPanel(palettePanel), NORTH);
+        fullPanel.add(content, CENTER);
 
         new DialogBuilder()
             .title(palette.getDialogTitle())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.animation;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.gui.utils.*;
 import pixelitor.io.Dirs;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -39,7 +38,7 @@ import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
 import static pixelitor.utils.Utils.parseLocalizedDouble;
 
 /**
- * The settings for the tweening animation output
+ * A panel for configuring tweening animation output settings.
  */
 public class TweenOutputSettingsPanel extends ValidatedPanel {
     private final JTextField numSecondsTF = new JTextField("2", 5);
@@ -79,7 +78,6 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
     @SuppressWarnings("unchecked")
     private void addOutputTypeSelector(GridBagHelper gbh) {
         var model = new EnumComboBoxModel<>(TweenOutputType.class);
-
         outputTypeCB = new JComboBox<>(model);
         outputTypeCB.addActionListener(e -> outputTypeChanged());
         outputTypeChanged(); // initial setup
@@ -109,8 +107,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
 
     @SuppressWarnings("unchecked")
     private void addInterpolationSelector(GridBagHelper gbh) {
-        EnumComboBoxModel<TimeInterpolation> ipCBM
-            = new EnumComboBoxModel<>(TimeInterpolation.class);
+        var ipCBM = new EnumComboBoxModel<>(TimeInterpolation.class);
         ipCB = new JComboBox<>(ipCBM);
 
         gbh.addLabelAndControlNoStretch("Interpolation:", ipCB);
@@ -118,7 +115,6 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
 
     private void addPingPongSelector(GridBagHelper gbh) {
         gbh.addLabelAndControl("Ping Pong:", pingPongCB);
-
         pingPongCB.addActionListener(e -> updateCalculations());
     }
 
@@ -148,27 +144,28 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
 
     private void updateCalculations() {
         try {
-            numFramesLabel.setText(calculateNumFramesText());
+            double numSeconds = parseLocalizedDouble(numSecondsTF.getText().trim());
+            double currentFps = parseLocalizedDouble(fpsTF.getText().trim());
+
+            // update instance fields only on successful parsing
+            this.fps = currentFps;
+            this.numFrames = (int) (numSeconds * currentFps);
+
+            numFramesLabel.setText(formatNumFramesText());
         } catch (ParseException e) {
-            // expected behaviour, ignore the exception
-            numFramesLabel.setText("??");
-        } catch (Exception e) {
-            Messages.showException(e);
+            // expected when the user is typing in the text fields
             numFramesLabel.setText("??");
         }
     }
 
-    private String calculateNumFramesText() throws ParseException {
-        double numSeconds = parseLocalizedDouble(numSecondsTF.getText().trim());
-        fps = parseLocalizedDouble(fpsTF.getText().trim());
-        numFrames = (int) (numSeconds * fps);
+    private String formatNumFramesText() {
         String labelText = String.valueOf(numFrames);
 
-        if (pingPongCB.isSelected()) {
+        if (pingPongCB.isSelected() && numFrames > 1) {
+            // for ping-pong, we have forward and reverse frames, minus two duplicate end frames
             int totalFrames = 2 * numFrames - 2;
             double totalSeconds = totalFrames / fps;
-            labelText += format(" (with PP: %d frames, %.2f seconds)",
-                totalFrames, totalSeconds);
+            labelText += format(" (ping-pong: %d frames, %.2f s)", totalFrames, totalSeconds);
         }
         return labelText;
     }

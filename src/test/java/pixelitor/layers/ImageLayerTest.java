@@ -180,39 +180,6 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void tweenCalculatingStarted() {
-        assertThat(layer)
-            .stateIs(NORMAL)
-            .previewImageIs(null);
-
-        layer.startTweening();
-
-        assertThat(layer)
-            .stateIs(PREVIEW)
-            .previewImageIsNot(null);
-        iconChecker.verifyUpdateCounts(0, 0);
-    }
-
-    @Test
-    public void tweenCalculatingEnded_Fail() {
-        // fails because the tween calculation was not started
-        assertThrows(AssertionError.class, () ->
-            layer.endTweening());
-    }
-
-    @Test
-    public void tweenCalculatingEnded_OK() {
-        layer.startTweening(); // make sure that the layer is in PREVIEW mode
-
-        layer.endTweening();
-
-        assertThat(layer)
-            .stateIs(NORMAL)
-            .previewImageIs(null);
-        iconChecker.verifyUpdateCounts(0, 0);
-    }
-
-    @Test
     public void changePreviewImage_Fail() {
         assertThrows(IllegalStateException.class, () ->
             layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING));

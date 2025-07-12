@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,7 +68,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onPageShown(OKCancelDialog dialog) {
+        public void onPageShown(Wizard wizard, OKCancelDialog dialog) {
             JButton okButton = dialog.getOkButton();
 
             okButton.setEnabled(false);

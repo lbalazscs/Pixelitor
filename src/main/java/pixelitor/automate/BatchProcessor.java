@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,10 +33,10 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 import static pixelitor.utils.Threads.onEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Handles the batch processing of compositions.
@@ -68,7 +68,7 @@ public class BatchProcessor {
      * using the given {@link CompAction}.
      */
     public void processFiles() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         List<File> filesToProcess = FileUtils.listSupportedInputFiles(inputDir);
         if (filesToProcess.isEmpty()) {
@@ -123,7 +123,7 @@ public class BatchProcessor {
     }
 
     private CompletableFuture<Void> saveAndClose(Composition comp) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         var format = FileFormat.getLastSaved();
         File outputFile = createOutputPath(comp, format);

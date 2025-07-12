@@ -24,8 +24,8 @@ import java.awt.Component;
 import java.io.File;
 
 import static java.nio.file.Files.isWritable;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * A tweening animation that interpolates filter parameters between two states.
@@ -104,13 +104,10 @@ public class TweenAnimation {
     }
 
     /**
-     * A final warning if something might get overwritten because
-     * the selected file exists or the selected directory is not empty
-     *
-     * @return true if the rendering can proceed
+     * Warns the user about overwriting existing files and returns whether to proceed.
      */
     public boolean checkOverwrite(Component dialogParent) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         if (outputType.needsDirectory()) {
             return checkOverwriteForDirectory(dialogParent);
@@ -120,7 +117,10 @@ public class TweenAnimation {
     }
 
     private boolean checkOverwriteForDirectory(Component dialogParent) {
-        if (outputLocation.list().length == 0) {
+        assert outputLocation.isDirectory() : outputLocation.getAbsolutePath();
+
+        String[] files = outputLocation.list();
+        if (files == null || files.length == 0) {
             return true; // empty directory: OK
         } else {
             return showFolderNotEmptyDialog(dialogParent);
@@ -129,6 +129,8 @@ public class TweenAnimation {
 
     private boolean checkOverwriteForFile(Component dialogParent) {
         if (outputLocation.exists()) {
+            assert outputLocation.isFile() : outputLocation.getAbsolutePath();
+
             boolean overwrite = showFileExistsDialog(dialogParent);
             if (overwrite) {
                 if (isWritable(outputLocation.toPath())) {
@@ -148,7 +150,7 @@ public class TweenAnimation {
     private boolean showFolderNotEmptyDialog(Component dialogParent) {
         return Dialogs.showYesNoWarningDialog(dialogParent, "Folder Not Empty",
             String.format("<html>The folder <b>%s</b> is not empty. " +
-                    "<br>Some files might be overwritten. Are sure you want to continue?",
+                    "<br>Some files might be overwritten. Are you sure you want to continue?",
                 outputLocation.getAbsolutePath()));
     }
 

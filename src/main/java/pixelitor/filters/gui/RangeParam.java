@@ -456,8 +456,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public Double getParamValue() {
-        return value;
+    public String getParamValue() {
+        return String.valueOf(value);
     }
 
     public boolean checkInvariants() {

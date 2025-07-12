@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,16 +24,15 @@ import java.awt.Color;
 import java.util.function.Consumer;
 
 /**
- * Color picker dialog helper, makes using {@link ColorSwatch} easier.
- * When the user selects a new color, the provided action is performed.
+ * Simplifies color picker dialog integration with {@link ColorSwatch} components.
  */
-public class ColorPickerDialog {
+public class ColorPickerHelper {
     private final ColorSwatch colorSwatch;
-    private final Consumer<Color> action;
+    private final Consumer<Color> onColorChanged;
 
-    public ColorPickerDialog(ColorSwatch colorSwatch, Consumer<Color> action) {
+    public ColorPickerHelper(ColorSwatch colorSwatch, Consumer<Color> onColorChanged) {
         this.colorSwatch = colorSwatch;
-        this.action = action;
+        this.onColorChanged = onColorChanged;
         GUIUtils.addClickAction(colorSwatch, this::showColorDialog);
     }
 
@@ -42,7 +41,7 @@ public class ColorPickerDialog {
             colorSwatch.getForeground(), false,
             color -> {
                 colorSwatch.setForeground(color);
-                action.accept(color);
+                onColorChanged.accept(color);
             }
         );
     }

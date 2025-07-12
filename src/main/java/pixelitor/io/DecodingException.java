@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ public class DecodingException extends RuntimeException {
     private final File file;
     private final boolean magick;
 
-    // Private constructor to enforce factory method usage
+    // private constructor to enforce factory method usage
     private DecodingException(File file, boolean magick, Exception cause) {
         super(generateErrorMessage(file, magick, cause), cause);
         this.file = file;

@@ -127,12 +127,12 @@ public enum Channel {
     }
 
     /**
-     * Returns the dark color for the channel's gradient.
+     * Returns the dark color for the channel's gradient in the "Levels" filter.
      */
     public abstract Color getDarkColor();
 
     /**
-     * Returns the light color for the channel's gradient.
+     * Returns the light color for the channel's gradient in the "Levels" filter.
      */
     public abstract Color getLightColor();
 

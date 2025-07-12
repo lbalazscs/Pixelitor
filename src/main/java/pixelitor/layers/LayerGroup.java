@@ -244,29 +244,29 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
-        // Do nothing for the layer group itself.
-        // The mask and layers are resized via forEachNestedLayer.
+        // do nothing for the layer group itself
+        // (the mask and layers are resized via forEachNestedLayer)
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
     public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
-        // Do nothing for the group itself.
+        // do nothing for the group itself
     }
 
     @Override
     public void flip(FlipDirection direction) {
-        // Do nothing for the group itself.
+        // do nothing for the group itself
     }
 
     @Override
     public void rotate(QuadrantAngle angle) {
-        // Do nothing for the group itself.
+        // do nothing for the group itself
     }
 
     @Override
     public void enlargeCanvas(Outsets out) {
-        // Do nothing for the group itself.
+        // do nothing for the group itself
     }
 
     @Override
@@ -275,8 +275,8 @@ public class LayerGroup extends CompositeLayer {
             layer.forEachNestedLayer(action, includeMasks);
         }
 
-        // Run on itself only after the childern.
-        // This ordering is needed for initialization actions.
+        // run on itself only after the childern
+        // (this ordering is needed for initialization)
         action.accept(this);
         if (includeMasks && hasMask()) {
             action.accept(getMask());
@@ -492,7 +492,7 @@ public class LayerGroup extends CompositeLayer {
         }
 
         if (activeWasInside) {
-            // Inserting the layers into the parent will make
+            // inserting the layers into the parent will make
             // the last inserted layer active
             activeBefore.activate();
         }

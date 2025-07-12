@@ -66,8 +66,7 @@ public class SmartObject extends CompositeLayer {
     private static final String NAME_PREFIX = "smart ";
     private Composition content;
 
-    // Only used for a deserialization check.
-    // The field is not present in very old pxc versions.
+    // only used for migrating from very old pxc versions where the field is not present
     @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
     private boolean newVersion = true;
 
@@ -78,7 +77,7 @@ public class SmartObject extends CompositeLayer {
     // timestamp of the last known modification to the linked content file
     private transient long linkedContentTimestamp;
 
-    // "Legacy" fields from Pixelitor 4.3.0, they are only
+    // "legacy" fields from Pixelitor 4.3.0, they are only
     // used for automatic migration of old pxc files
     private boolean smartFilterIsVisible = true;
     private List<Filter> smartFilters = new ArrayList<>();
@@ -101,9 +100,9 @@ public class SmartObject extends CompositeLayer {
 
     private transient boolean imageNeedsRefresh = false;
 
-    // It's important to call updateIconImage() only when we are
+    // it's important to call updateIconImage() only when we are
     // sure that the smart object's image is up-to-date, because otherwise
-    // the filters could be started concurrently on different threads.
+    // the filters could be started concurrently on different threads
     private transient boolean iconImageNeedsRefresh = false;
 
     // constructor for converting a layer into a smart object

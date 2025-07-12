@@ -47,10 +47,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The main enty point for the app.
@@ -128,7 +128,7 @@ public class Pixelitor {
     }
 
     private static void createAndShowGUI(String[] args) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         Messages.setHandler(new GUIMessageHandler());
 
@@ -141,8 +141,8 @@ public class Pixelitor {
         PixelitorWindow mainWindow = PixelitorWindow.get();
         Dialogs.setMainWindowInitialized(true);
 
-        // ensure the main window has focus after GUI initialization
-        // so that keyboard shortcuts work properly
+        // ensure that after GUI initialization the focus isn't grabbed
+        // by a textfield, and keyboard shortcuts work properly
         FgBgColors.getGUI().requestFocus();
 
         TipsOfTheDay.showTips(mainWindow, false);
@@ -158,12 +158,11 @@ public class Pixelitor {
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    // less urgent initializations on the main thread
+    // less urgent initializations on the main thread after starting the GUI on the EDT
     private static void mainThreadInit() {
         MeasurementOverlay.initializeFont();
 
-        // force look-up table initialization now
-        // to prevent unexpected delays later
+        // force look-up table initialization now to prevent unexpected delays later
         FastMath.initTables();
     }
 
@@ -218,7 +217,7 @@ public class Pixelitor {
     }
 
     public static void exitApp(PixelitorWindow mainWindow) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         if (isExitBlockedByOngoingWrites(mainWindow)) {
             return;

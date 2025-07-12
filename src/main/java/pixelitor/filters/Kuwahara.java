@@ -129,7 +129,7 @@ public class Kuwahara extends ParametrizedFilter {
             }
 
             float mean = sum / count;
-            // variance = E[X^2] - (E[X])^2
+            // variance = E[X²] - (E[X])²
             float variance = (sumSq / count) - (mean * mean);
 
             if (variance < minVariance) {

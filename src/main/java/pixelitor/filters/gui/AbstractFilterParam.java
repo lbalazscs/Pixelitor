@@ -182,7 +182,7 @@ public abstract class AbstractFilterParam implements FilterParam {
         DebugNode node = new DebugNode(key, this);
 
         node.addString("name", name);
-        node.addString("value", getParamValue().toString());
+        node.addString("value", getParamValue());
 
         return node;
     }

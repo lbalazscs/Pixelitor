@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.AppMode;
+import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.layers.BlendingMode;
@@ -25,13 +26,26 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
+import static java.awt.RenderingHints.KEY_RENDERING;
+import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
+import static java.awt.RenderingHints.VALUE_RENDER_QUALITY;
+import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB;
 import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 
 /**
@@ -55,7 +69,48 @@ public class ParamTestFilter extends ParametrizedFilter {
             System.out.println("ParamTest.transform CALLED");
         }
 
-        return ImageUtils.copyImage(src);
+        List<FilterParam> testParams = paramSet.getParams();
+        List<String> lines = new ArrayList<>();
+        for (FilterParam param : testParams) {
+            String name = param.getName();
+            String value = param.getParamValue();
+            String line = name + " = " + value;
+            lines.add(line);
+        }
+
+        dest = ImageUtils.copyImage(src);
+        Graphics2D g = dest.createGraphics();
+
+        g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_RENDERING, VALUE_RENDER_QUALITY);
+        g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
+
+        int width = dest.getWidth();
+        int height = dest.getHeight();
+        Colors.fillWith(BLACK, g, width, height);
+        g.setColor(WHITE);
+
+        Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 24);
+        g.setFont(font);
+        FontMetrics fm = g.getFontMetrics(font);
+        int maxLineWidth = 0;
+        for (String line : lines) {
+            maxLineWidth = Math.max(maxLineWidth, fm.stringWidth(line));
+        }
+        int blockHeight = lines.size() * fm.getHeight();
+
+        // draw the strings, centering each line horizontally
+        int startY = (height - blockHeight) / 2 + fm.getAscent();
+        int currentY = startY;
+        for (String line : lines) {
+            int lineX = (width - fm.stringWidth(line)) / 2;
+            g.drawString(line, lineX, currentY);
+            currentY += fm.getHeight();
+        }
+
+        g.dispose();
+        return dest;
     }
 
     public static FilterParam[] getTestParams() {

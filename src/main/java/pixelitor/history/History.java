@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.layers.Drawable;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.event.UndoableEditListener;
@@ -90,17 +89,11 @@ public class History {
         editSupport.postEdit(edit);
 
         if (AppMode.isDevelopment()) {
-            Events.postAddToHistoryEvent(edit);
-
             ConsistencyChecks.checkAll(edit.getComp());
         }
     }
 
     public static void undo() {
-        if (AppMode.isDevelopment()) {
-            Events.postUndoEvent(undoManager.getEditToBeUndone());
-        }
-
         try {
             // increase it before calling undoManager.undo()
             // so that the result of undo is not fadeable
@@ -112,10 +105,6 @@ public class History {
     }
 
     public static void redo() {
-        if (AppMode.isDevelopment()) {
-            Events.postRedoEvent(undoManager.getEditToBeRedone());
-        }
-
         try {
             numUndoneEdits--; // after redo we should be fadeable again
             undoManager.redo();

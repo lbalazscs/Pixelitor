@@ -161,8 +161,8 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public Color getParamValue() {
-        return color;
+    public String getParamValue() {
+        return Colors.formatForDebugging(color);
     }
 
     @Override

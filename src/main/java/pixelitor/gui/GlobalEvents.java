@@ -23,7 +23,6 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Keys;
 import pixelitor.utils.debug.Debug;
-import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,8 +50,8 @@ import static java.awt.event.KeyEvent.VK_LEFT;
 import static java.awt.event.KeyEvent.VK_RIGHT;
 import static java.awt.event.KeyEvent.VK_SPACE;
 import static java.awt.event.KeyEvent.VK_UP;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Manages global keyboard and mouse event handling.
@@ -234,7 +233,7 @@ public class GlobalEvents {
 
     // keeps track of dialog nesting
     public static void dialogOpened(String dialogTitle) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         modalDialogCount++;
         if (modalDialogCount == 1) {
@@ -244,7 +243,7 @@ public class GlobalEvents {
 
     // keeps track of dialog nesting
     public static void dialogClosed(String dialogTitle) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         modalDialogCount--;
         assert modalDialogCount >= 0;
@@ -268,11 +267,7 @@ public class GlobalEvents {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             MouseEvent e = (MouseEvent) event;
             String msg = Tools.getActive().getName() + ": " + Debug.mouseEventAsString(e);
-            if (postEvents) {
-                Events.postMouseEvent(msg);
-            } else {
-                System.out.println(msg);
-            }
+            System.out.println(msg);
         }, AWTEvent.MOUSE_EVENT_MASK
             | AWTEvent.MOUSE_MOTION_EVENT_MASK
             | AWTEvent.MOUSE_WHEEL_EVENT_MASK);

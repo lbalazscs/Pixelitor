@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,13 +26,13 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.Window;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.LinkedHashSet;
+import java.util.SequencedSet;
 
 import static javax.swing.BorderFactory.createEmptyBorder;
 
 /**
- * The recently used foreground, background and filter colors in a FIFO queue.
+ * A FIFO collection of recently used foreground, background and filter colors.
  */
 public class ColorHistory {
     public static final ColorHistory INSTANCE = new ColorHistory();
@@ -40,22 +40,20 @@ public class ColorHistory {
     private static final int MAX_HISTORY_CAPACITY = 200;
     private static final int SWATCHES_PER_ROW = 10;
 
-    private final Queue<Color> colors;
+    private final SequencedSet<Color> colors;
 
     private ColorHistory() {
-        colors = new ArrayDeque<>();
+        // provides O(1) add/contains and maintains insertion order
+        colors = new LinkedHashSet<>();
     }
 
+    /**
+     * Adds a color to the history, respecting capacity and avoiding duplicates.
+     */
     private void add(Color newColor) {
-        int newRGB = newColor.getRGB();
-        for (Color color : colors) {
-            if (color.getRGB() == newRGB) {
-                return;
-            }
-        }
-        colors.add(newColor);
-        if (colors.size() > MAX_HISTORY_CAPACITY) {
-            colors.remove(); // Remove oldest color
+        boolean added = colors.add(newColor);
+        if (added && colors.size() > MAX_HISTORY_CAPACITY) {
+            colors.removeFirst();
         }
     }
 
@@ -63,6 +61,9 @@ public class ColorHistory {
         INSTANCE.add(newColor);
     }
 
+    /**
+     * Shows a modeless dialog with the color history.
+     */
     public void showDialog(Window window,
                            ColorSwatchClickHandler clickHandler,
                            boolean filterMode) {
@@ -71,9 +72,10 @@ public class ColorHistory {
 
         JPanel swatchPanel = createSwatchPanel(clickHandler);
 
-        Messages.showStatusMessage("Color History: " + (filterMode ?
-            ColorSwatchClickHandler.FILTER_HTML_HELP :
-            ColorSwatchClickHandler.STANDARD_HTML_HELP));
+        String helpText = filterMode
+            ? ColorSwatchClickHandler.FILTER_HTML_HELP
+            : ColorSwatchClickHandler.STANDARD_HTML_HELP;
+        Messages.showStatusMessage("Color History: " + helpText);
 
         new DialogBuilder()
             .title("Color History")

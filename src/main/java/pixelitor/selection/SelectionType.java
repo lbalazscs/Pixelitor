@@ -42,7 +42,6 @@ import static pixelitor.utils.ImageUtils.isGrayscale;
  */
 public enum SelectionType {
     RECTANGLE("Rectangle") {
-        // Creates a rectangular shape based on the drag information.
         @Override
         public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
             // ignores oldShape, always creates a new rectangle from the drag
@@ -54,7 +53,6 @@ public enum SelectionType {
             throw new UnsupportedOperationException("Rectangle selection uses Drag info");
         }
     }, ELLIPSE("Ellipse") {
-        // Creates an elliptical shape based on the drag information.
         @Override
         public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
             // ignores oldShape, always creates a new ellipse from the drag
@@ -67,11 +65,10 @@ public enum SelectionType {
             throw new UnsupportedOperationException("Ellipse selection uses Drag info");
         }
     }, LASSO("Freehand") {
-        // Creates or extends a freehand path shape based on the drag information.
         @Override
         public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
             if (oldShape instanceof GeneralPath gp) {
-                // append to the existing path
+                // extend the existing path
                 gp.lineTo(drag.getEndX(), drag.getEndY());
                 return gp;
             } else {
@@ -93,11 +90,10 @@ public enum SelectionType {
             throw new UnsupportedOperationException("Polygonal Lasso uses PMouseEvent info");
         }
 
-        // Creates or extends a polygonal path shape based on the mouse event position.
         @Override
         public Shape createShapeFromEvent(PMouseEvent pe, Shape oldShape) {
             if (oldShape instanceof GeneralPath gp) {
-                // append to the existing path
+                // extend the existing path
                 gp.lineTo(pe.getImX(), pe.getImY());
                 return gp;
             } else {
@@ -114,7 +110,6 @@ public enum SelectionType {
             throw new UnsupportedOperationException("Magic Wand uses PMouseEvent info");
         }
 
-        // Creates or extends an area shape based on color similarity at the mouse event position.
         @Override
         public Shape createShapeFromEvent(PMouseEvent pm, Shape oldShape) {
             // calculate the area selected by this specific click

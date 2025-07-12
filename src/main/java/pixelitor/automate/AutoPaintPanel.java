@@ -24,14 +24,13 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner.LabelPosition;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
-import pixelitor.tools.Tool;
+import pixelitor.tools.AbstractBrushTool;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
 
 import static java.lang.Integer.parseInt;
 import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
-import static pixelitor.tools.Tools.BRUSH;
 
 /**
  * Configuration panel for the "Auto Paint".
@@ -46,11 +45,11 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     private static final String STROKE_LENGTH_TEXT = "Average Stroke Length";
     private static final String STROKE_COUNT_TEXT = "Number of Strokes";
 
-    private final ChoiceParam<Tool> toolsParam = new ChoiceParam<>(
+    private final ChoiceParam<AbstractBrushTool> toolsParam = new ChoiceParam<>(
         "Tool", AutoPaint.SUPPORTED_TOOLS);
     private final JTextField strokeCountTF;
     private final JTextField strokeLengthTF;
-    private final ChoiceParam<String> colorsParam = new ChoiceParam<>(
+    private final ChoiceParam<String> colorMode = new ChoiceParam<>(
         "Random Colors", COLOR_MODES);
 
     private final RangeParam lengthVariation = new RangeParam(
@@ -85,20 +84,22 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
 
         gbh.addParam(lengthVariation);
         gbh.addParam(curvature);
-        gbh.addParam(colorsParam, "colorsCB");
+        gbh.addParam(colorMode, "colorsCB");
 
-        toolsParam.setupEnableOtherIf(colorsParam, AutoPaintPanel::useColors);
+        toolsParam.setupEnableOtherIf(colorMode, AutoPaint::useColors);
     }
 
-    private static boolean useColors(Tool selectedTool) {
-        return selectedTool == BRUSH;
-    }
-
+    /**
+     * Creates an {@link AutoPaintSettings} object from the current UI state.
+     */
     public AutoPaintSettings getSettings() {
-        boolean colorsEnabled = colorsParam.isEnabled();
-        String colors = colorsParam.getSelected();
-        boolean randomColors = colorsEnabled && colors.equals(COLOR_MODE_RANDOM);
-        boolean interpolatedColors = colorsEnabled && colors.equals(COLOR_MODE_INTERPOLATED);
+        boolean randomColors = false;
+        boolean interpolatedColors = false;
+        if (colorMode.isEnabled()) {
+            String selectedMode = colorMode.getSelected();
+            randomColors = selectedMode.equals(COLOR_MODE_RANDOM);
+            interpolatedColors = selectedMode.equals(COLOR_MODE_INTERPOLATED);
+        }
 
         return new AutoPaintSettings(getSelectedTool(),
             getStrokeCount(), getStrokeLength(), strokeDirection.getValue(),
@@ -106,7 +107,7 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
             lengthVariation.getPercentage(), curvature.getPercentage());
     }
 
-    private Tool getSelectedTool() {
+    private AbstractBrushTool getSelectedTool() {
         return toolsParam.getSelected();
     }
 
@@ -120,22 +121,9 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
 
     @Override
     public ValidationResult validateSettings() {
-        var retVal = ValidationResult.valid();
-        try {
-            int ns = getStrokeCount();
-            retVal = retVal.validateNonZero(ns, STROKE_COUNT_TEXT);
-            retVal = retVal.validatePositive(ns, STROKE_COUNT_TEXT);
-        } catch (NumberFormatException e) {
-            retVal = retVal.withError("\"" + STROKE_COUNT_TEXT + "\" must be an integer.");
-        }
-        try {
-            int ln = getStrokeLength();
-            retVal = retVal.validateNonZero(ln, STROKE_LENGTH_TEXT);
-            retVal = retVal.validatePositive(ln, STROKE_LENGTH_TEXT);
-        } catch (NumberFormatException e) {
-            retVal = retVal.withError("\"" + STROKE_LENGTH_TEXT + "\" must be an integer.");
-        }
-        return retVal;
+        return ValidationResult.valid()
+            .validatePositiveInt(strokeCountTF.getText(), STROKE_COUNT_TEXT)
+            .validatePositiveInt(strokeLengthTF.getText(), STROKE_LENGTH_TEXT);
     }
 
     @Override
@@ -153,9 +141,9 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
 
         lengthVariation.saveStateTo(preset);
         curvature.saveStateTo(preset);
-        colorsParam.saveStateTo(preset);
+        colorMode.saveStateTo(preset);
 
-        if (useColors(getSelectedTool())) {
+        if (AutoPaint.useColors(getSelectedTool())) {
             FgBgColors.saveStateTo(preset);
         }
     }
@@ -170,9 +158,9 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
 
         lengthVariation.loadStateFrom(preset);
         curvature.loadStateFrom(preset);
-        colorsParam.loadStateFrom(preset);
+        colorMode.loadStateFrom(preset);
 
-        if (useColors(getSelectedTool())) {
+        if (AutoPaint.useColors(getSelectedTool())) {
             FgBgColors.loadStateFrom(preset);
         }
     }

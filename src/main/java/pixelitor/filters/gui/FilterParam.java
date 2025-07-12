@@ -110,9 +110,9 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     void setToolTip(String tip);
 
     /**
-     * Returns the parameter value as an Object (useful for testing, debugging).
+     * Returns the parameter value as a String (useful for testing, debugging).
      */
-    Object getParamValue();
+    String getParamValue();
 
     /**
      * Returns true if the filter should have presets

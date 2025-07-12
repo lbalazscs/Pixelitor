@@ -17,7 +17,6 @@
 
 package pixelitor.io.magick;
 
-import com.bric.util.JVM;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.GUIText;
@@ -25,18 +24,18 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.*;
 import pixelitor.io.FileChooserConfig.SelectableFormats;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static pixelitor.utils.AppPreferences.magickDirName;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
@@ -68,7 +67,7 @@ public class ImageMagick {
 
         File targetFile = FileChoosers.showSaveDialog(new FileChooserConfig(
             suggestedFileName, null, SelectableFormats.ANY));
-        if (targetFile == null) { // canceled
+        if (targetFile == null) { // user canceled save dialog
             return;
         }
 
@@ -93,6 +92,7 @@ public class ImageMagick {
             }, onEDT)
             .whenComplete((result, exception) -> {
                 if (exception != null) {
+                    progressHandler.stopProgressOnEDT();
                     Messages.showExceptionOnEDT(exception);
                 }
             });
@@ -135,7 +135,7 @@ public class ImageMagick {
         }
 
         var progressHandler = Messages.startProgress("Importing with ImageMagick", -1);
-        CompletableFuture.supplyAsync(() -> importImage(file), onIOThread)
+        CompletableFuture.supplyAsync(() -> decodeImage(file), onIOThread)
             .thenAcceptAsync(img -> {
                 // called if there were no exceptions while importing
                 Composition comp = Composition.fromImage(img, file, null);
@@ -143,7 +143,7 @@ public class ImageMagick {
                 Views.addJustLoadedComp(comp);
             }, onEDT)
             .whenComplete((result, exception) -> {
-                // always called
+                // always called, handles exceptions
                 if (exception != null) {
                     progressHandler.stopProgressOnEDT();
                     FileIO.handleFileReadErrors(exception);
@@ -155,19 +155,24 @@ public class ImageMagick {
                                    ExportSettings settings) {
         List<String> command = createExportCommand(outFile, settings);
 
-        // a process that reads a png file from the standard input,
-        // and converts it to the given file
+        // a process that reads a png file from its standard input,
+        // and converts it to the given target file
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
         pb.redirectInput(ProcessBuilder.Redirect.PIPE);
 
         try {
             Process process = pb.start();
             FileIO.writeToCommandLineProcess(img, process);
-            process.waitFor();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                // ignore: for some reason ImageMagick exits with 1 after successful write
+                // throw new IOException("ImageMagick exited with code " + exitCode);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("ImageMagick export was interrupted", e);
         }
     }
 
@@ -176,7 +181,7 @@ public class ImageMagick {
         command.add(magickExecutable.getAbsolutePath());
         command.add("convert");
 
-// this setting doesn't seem to have an effect on the speed
+// this setting doesn't seem to have an effect on speed
 //        command.add("-define");
 //        command.add("stream:buffer-size=0");
 
@@ -188,28 +193,25 @@ public class ImageMagick {
         return command;
     }
 
-    private static BufferedImage importImage(File file) {
-        // a process that reads the given file,
-        // and writes it as png (depth=8 bit) to the standard output
+    private static BufferedImage decodeImage(File file) {
+        // a process that reads the given file and writes it as 8-bit png to its standard output
         ProcessBuilder pb = new ProcessBuilder(
             magickExecutable.getAbsolutePath(), "convert", file.getAbsolutePath(),
             "-depth", "8", // don't send 16-bit data
             "-quality", "1", // importing is faster with minimal compression
             "png:-");
-        BufferedImage img;
+
         try {
             Process process = pb.start();
-
             // read the image as png after ImageMagick did the conversion
-            img = FileIO.readFromCommandLineProcess(process);
+            BufferedImage img = FileIO.readFromCommandLineProcess(process);
+            if (img == null) {
+                throw DecodingException.forMagickImport(file, null);
+            }
+            return img;
         } catch (IOException e) {
             throw DecodingException.forMagickImport(file, e);
         }
-        if (img == null) {
-            throw DecodingException.forMagickImport(file, null);
-        }
-
-        return img;
     }
 
     public static void main(String[] args) throws IOException {
@@ -241,38 +243,21 @@ public class ImageMagick {
     }
 
     private static boolean checkImageMagickInstalled() {
-        magickExecutable = Utils.findExecutable(magickDirName, "magick");
-        if (magickExecutable != null) {
-            return true; // executable found
-        }
-
-        // try to find it in the PATH
-        String searchCommand = JVM.isWindows ? "where" : "which";
-
-        ProcessBuilder pb = new ProcessBuilder(searchCommand, "magick");
-        try {
-            Process process = pb.start();
-            // read the first line of the standard output
-            String magickFullPath;
-            try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), UTF_8))) {
-                magickFullPath = reader.readLine();
-            }
-            int exitValue = process.waitFor();
-            if (exitValue == 0 && magickFullPath != null) {
-                magickExecutable = new File(magickFullPath);
-                magickDirName = magickExecutable.getParent();
-            }
-            return exitValue == 0;
-        } catch (InterruptedException | IOException e) {
+        File foundExecutable = FileUtils.locateExecutable(magickDirName, "magick");
+        if (foundExecutable == null) {
             return false;
         }
+
+        magickExecutable = foundExecutable;
+        // if found, also update the preference to point to the containing directory
+        magickDirName = magickExecutable.getParent();
+        return true;
     }
 
     private static void showNotInstalledDialog() {
         Dialogs.showInfoDialog("ImageMagick 7 Not Found",
             "<html>ImageMagick 7 was not found in the PATH" +
-                "<br>or in the folder configured in the Preferences." +
+                "<br>or in the folder configured in Preferences." +
                 "<br><br>It can be downloaded from https://imagemagick.org");
     }
 }

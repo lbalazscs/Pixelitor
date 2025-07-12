@@ -82,10 +82,10 @@ import static pixelitor.tools.Tools.PEN;
 import static pixelitor.tools.Tools.SHAPES;
 import static pixelitor.tools.Tools.ZOOM;
 import static pixelitor.tools.Tools.getRandomTool;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOn;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.calledOutsideEDT;
-import static pixelitor.utils.Threads.threadInfo;
 import static pixelitor.utils.Threads.threadName;
 import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
 import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
@@ -164,7 +164,7 @@ public class RandomToolTest {
 
     // the main loop is the test loop with pause-resume support
     private void mainLoop() {
-        assert calledOn("main") : threadInfo();
+        assert calledOn("main") : callInfo();
 
         while (true) {
             try {
@@ -983,7 +983,7 @@ public class RandomToolTest {
     }
 
     private void pauseKeyPressed() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         if (paused) {
             System.err.println(PAUSE_KEY_CHAR + " pressed, starting again.");
             paused = false;
@@ -1008,7 +1008,7 @@ public class RandomToolTest {
     }
 
     private void exitKeyPressed() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         System.err.println("\nexiting because '" + EXIT_KEY_CHAR + "' was pressed");
 
         // we are on the EDT now, and before exiting

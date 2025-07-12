@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ public class FgBgColors {
     private FgBgColors() {
     }
 
-    // during testing this is set to a mocked value
+    // during unit testing this is set to a mocked value
     public static void setUI(FgBgColorSelector selector) {
         FgBgColors.selector = selector;
     }
@@ -81,8 +81,8 @@ public class FgBgColors {
         selector.setDefaultColors();
     }
 
-    public static void maskEditingChanged(boolean b) {
-        selector.maskEditingChanged(b);
+    public static void maskEditingChanged(boolean maskEditing) {
+        selector.maskEditingChanged(maskEditing);
     }
 
     public static void saveStateTo(UserPreset preset) {

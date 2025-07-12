@@ -36,9 +36,11 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
@@ -74,50 +76,35 @@ public class Colors {
      * Full opacity is assumed.
      */
     public static Color averageRGB(Color c1, Color c2) {
-        int rgb1 = c1.getRGB();
-        int rgb2 = c2.getRGB();
-
-        int r1 = (rgb1 >>> 16) & 0xFF;
-        int g1 = (rgb1 >>> 8) & 0xFF;
-        int b1 = rgb1 & 0xFF;
-
-        int r2 = (rgb2 >>> 16) & 0xFF;
-        int g2 = (rgb2 >>> 8) & 0xFF;
-        int b2 = rgb2 & 0xFF;
-
-        int r = (r1 + r2) / 2;
-        int g = (g1 + g2) / 2;
-        int b = (b1 + b2) / 2;
+        int r = (c1.getRed() + c2.getRed()) / 2;
+        int g = (c1.getGreen() + c2.getGreen()) / 2;
+        int b = (c1.getBlue() + c2.getBlue()) / 2;
 
         return new Color(r, g, b);
     }
 
     /**
-     * A linear interpolation for hue values,
-     * taking their circular nature into account
+     * Linearly interpolates between two hue values, taking their circular nature into account.
      */
     public static float lerpHue(float mixFactor, float hue1, float hue2) {
         float diff = hue1 - hue2;
-        if (diff < 0.5f && diff > -0.5f) {
-            return ImageMath.lerp(mixFactor, hue1, hue2);
-        } else if (diff >= 0.5f) { // hue1 is big, hue2 is small
+
+        // take the shortest path around the color wheel
+        if (diff > 0.5f) {
+            // hue1 is big, hue2 is small, so wrap hue2 up
             hue2 += 1.0f;
-            float mix = ImageMath.lerp(mixFactor, hue1, hue2);
-            if (mix > 1.0f) {
-                mix -= 1.0f;
-            }
-            return mix;
-        } else if (diff <= 0.5f) { // hue2 is big, hue1 is small
+        } else if (diff < -0.5f) {
+            // hue2 is big, hue1 is small, so wrap hue1 up
             hue1 += 1.0f;
-            float mix = ImageMath.lerp(mixFactor, hue1, hue2);
-            if (mix > 1.0f) {
-                mix -= 1.0f;
-            }
-            return mix;
-        } else {
-            throw new IllegalStateException(
-                format("hue1 = %.2f, hue2 = %.2f, mixFactor = %.2f", hue1, hue2, mixFactor));
         }
+
+        float mix = ImageMath.lerp(mixFactor, hue1, hue2);
+
+        // wrap around if the result is >= 1.0
+        if (mix >= 1.0f) {
+            mix -= 1.0f;
+        }
+        return mix;
     }
 
     public static String packedIntToString(int rgb) {
@@ -133,12 +120,7 @@ public class Colors {
     }
 
     public static Color toGray(Color c) {
-        int rgb = c.getRGB();
-        int r = (rgb >>> 16) & 0xFF;
-        int g = (rgb >>> 8) & 0xFF;
-        int b = rgb & 0xFF;
-
-        int gray = (r + r + g + g + g + b) / 6;
+        int gray = (2 * c.getRed() + 3 * c.getGreen() + c.getBlue()) / 6;
 
         return new Color(0xFF_00_00_00 | gray << 16 | gray << 8 | gray);
     }
@@ -147,17 +129,17 @@ public class Colors {
         return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
     }
 
-    public static int HSBAtoARGB(float[] hsb_col, int alpha) {
-        int col = Color.HSBtoRGB(hsb_col[0], hsb_col[1], hsb_col[2]);
+    public static int HSBAtoARGB(float[] hsb, int alpha) {
+        int col = Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
         return setAlpha(col, alpha);
     }
 
     public static String toHTMLHex(Color c, boolean includeAlpha) {
         if (includeAlpha) {
-            String argb = format(Locale.ENGLISH, "%08X", c.getRGB());
-            String rgba = argb.substring(2) + argb.substring(0, 2);
-            return rgba;
+            // RRGGBBAA format
+            return format(Locale.ENGLISH, "%02X%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
         } else {
+            // RRGGBB format
             return format(Locale.ENGLISH, "%06X", 0x00_FF_FF_FF & c.getRGB());
         }
     }
@@ -214,31 +196,36 @@ public class Colors {
     }
 
     public static Color getColorFromClipboard() {
-        var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         String text;
         try {
+            var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             text = (String) clipboard.getData(DataFlavor.stringFlavor);
         } catch (UnsupportedFlavorException | IOException e) {
             return null;
         }
 
         text = text.trim();
-        text = text.startsWith("#") ? text.substring(1) : text;
+        if (text.startsWith("#")) {
+            text = text.substring(1);
+        }
 
-        // try HTML hex format
-        if (text.length() == 6) {
+        // try HTML hex format (RRGGBB or RRGGBBAA)
+        if (text.length() == 6 || text.length() == 8) {
             return fromHTMLHex(text);
         }
 
         // try rgb(163, 69, 151) format
-        if (text.startsWith("rgb(") && text.endsWith(")")) {
-            text = text.substring(4, text.length() - 1);
-            String[] strings = text.split("\\s*,\\s*");
-            if (strings.length == 3) {
-                return new Color(
-                    parseInt(strings[0]),
-                    parseInt(strings[1]),
-                    parseInt(strings[2]));
+        if (text.toLowerCase(Locale.ENGLISH).startsWith("rgb(") && text.endsWith(")")) {
+            try {
+                String[] components = text.substring(4, text.length() - 1).split("\\s*,\\s*");
+                if (components.length == 3) {
+                    return new Color(
+                        parseInt(components[0].trim()),
+                        parseInt(components[1].trim()),
+                        parseInt(components[2].trim()));
+                }
+            } catch (NumberFormatException e) {
+                return null;
             }
         }
 
@@ -330,7 +317,7 @@ public class Colors {
     }
 
     /**
-     * Sets the alpha channel of the given ARGB packed int to the given 0..255 value.
+     * Sets the alpha channel of the given ARGB packed int to the given 0-255 value.
      */
     public static int setAlpha(int rgb, int newAlpha) {
         // discard the original alpha and set it to the new value
@@ -347,9 +334,20 @@ public class Colors {
     }
 
     /**
-     * Format a color's value in the format expected by G'MIC
+     * Format a color's value in the format expected by G'MIC.
      */
     public static String formatGMIC(Color color) {
         return "%d,%d,%d,%d".formatted(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    }
+
+    public static String formatForDebugging(Color color) {
+        return "(r=%d, g=%d, b=%d, a=%d)".formatted(
+            color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    }
+
+    public static String formatForDebugging(Color[] colors) {
+        return Arrays.stream(colors)
+            .map(Colors::formatForDebugging)
+            .collect(Collectors.joining(", ", "[", "]"));
     }
 }

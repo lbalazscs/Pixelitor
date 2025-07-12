@@ -47,18 +47,18 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.isWritable;
 import static pixelitor.io.FileChoosers.svgFilter;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Utility class with static methods related to opening and saving files.
  */
 public class FileIO {
     private FileIO() {
-        // Prevent instantiation
+        // prevent instantiation
     }
 
     /**
@@ -78,8 +78,8 @@ public class FileIO {
      * Asynchronously loads a {@link Composition} from a file.
      */
     public static CompletableFuture<Composition> loadCompAsync(File file) {
-        // If the file format isn't recognized, this will still try to
-        // read it in a single-layered format, which doesn't have to be JPG.
+        // if the file format isn't recognized, this will still try to
+        // read it in a single-layered format, which doesn't have to be JPG
         FileFormat format = FileFormat.fromFile(file).orElse(FileFormat.JPG);
         return format.readAsync(file);
     }
@@ -242,7 +242,7 @@ public class FileIO {
      * Exports all layers of a composition as separate PNG files asynchronously.
      */
     public static void exportLayersToPNGAsync(Composition comp) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         boolean directorySelected = DirectoryChooser.selectOutputDir();
         if (!directorySelected) {
@@ -388,8 +388,8 @@ public class FileIO {
             out = readFromCommandLineProcess(process);
 
             String errorMsg = null;
-            if (out == null) {
-                // There was an error. Try to get the error message.
+            if (out == null) { // there was an error
+                // try to get the error message
                 try (InputStream processError = process.getErrorStream()) {
                     errorMsg = new String(processError.readAllBytes(), UTF_8);
                 }

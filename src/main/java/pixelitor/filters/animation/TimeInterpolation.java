@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,16 +29,19 @@ public enum TimeInterpolation {
     }, EASE_IN("Ease In (Slow Start)") {
         @Override
         double time2progress(double time) {
+            // quadratic easing in: f(t) = t²
             return time * time;
         }
     }, EASE_OUT("Ease Out (Slow Stop)") {
         @Override
         double time2progress(double time) {
+            // quadratic easing out: f(t) = 1 - (1-t)²
             return -time * (time - 2);
         }
     }, EASE_IN_OUT("Ease In and Out") {
         @Override
         double time2progress(double time) {
+            // cubic easing in/out (smoothstep): f(t) = 3t² - 2t³
             return time * time * (3 - 2 * time);
         }
     };
@@ -52,9 +55,6 @@ public enum TimeInterpolation {
     /**
      * Transforms a linear time value (0.0 to 1.0) into a progress
      * value that determines the actual interpolation between states.
-     *
-     * @param time a value between 0 and 1
-     * @return a value between 0 and 1
      */
     abstract double time2progress(double time);
 

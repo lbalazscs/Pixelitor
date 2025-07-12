@@ -25,11 +25,10 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Stroke;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.joining;
 import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.tools.shapes.StrokeType.BASIC;
@@ -301,10 +300,10 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public List<Object> getParamValue() {
+    public String getParamValue() {
         return Stream.of(allParams)
             .map(FilterParam::getParamValue)
-            .collect(toList());
+            .collect(joining(", ", "[", "]"));
     }
 
     @Override

@@ -155,7 +155,11 @@ public class ConnectBrushHistory {
     }
 
     private static void redo() {
-        nextAddIndex++; // move forward one step in the history
+        // don't advance nextAddIndex if there is no corresponding stroke
+        // in the history list (because the history was cleared before redo)
+        if (nextAddIndex < history.size()) {
+            nextAddIndex++; // move forward one step in the history
+        }
         recalculateNumPoints();
     }
 

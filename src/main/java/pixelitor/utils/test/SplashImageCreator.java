@@ -60,9 +60,9 @@ import static java.awt.font.TextAttribute.LIGATURES_ON;
 import static java.lang.String.format;
 import static pixelitor.layers.BlendingMode.NORMAL;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Static methods for creating and saving splash images.
@@ -80,7 +80,7 @@ public class SplashImageCreator {
     }
 
     public static void saveSplashImages(int numImages) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         if (!DirectoryChooser.selectOutputDir(FileFormat.PNG)) {
             return;
@@ -124,7 +124,7 @@ public class SplashImageCreator {
     }
 
     public static Composition createSplashComp() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         FgBgColors.setFGColor(WHITE);
         FgBgColors.setBGColor(Rnd.createRandomColor().darker().darker().darker());

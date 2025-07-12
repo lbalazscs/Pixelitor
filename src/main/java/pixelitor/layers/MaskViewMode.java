@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
@@ -29,7 +28,6 @@ import pixelitor.menus.PMenu;
 import pixelitor.menus.edit.FadeAction;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Texts;
-import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 
@@ -105,10 +103,6 @@ public enum MaskViewMode {
     public void activate(View view, Layer layer) {
         assert view != null;
         assert layer.isActive();
-
-        if (AppMode.isDevelopment()) {
-            Events.postMaskViewActivate(this, view, layer);
-        }
 
         assert canBeAssignedTo(layer);
 

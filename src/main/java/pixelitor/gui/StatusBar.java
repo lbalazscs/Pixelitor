@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createEtchedBorder;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The status bar of the app.
@@ -71,7 +71,7 @@ public class StatusBar extends JPanel {
      * Creates and starts a new progress bar in the status bar.
      */
     public ProgressHandler startProgress(String msg, int max) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         assert msg != null;
 
         // each progress handler will add its own label 
@@ -101,7 +101,7 @@ public class StatusBar extends JPanel {
         private final boolean determinate;
 
         public StatusBarProgressHandler(JPanel container, String msg, int max) {
-            assert calledOnEDT() : threadInfo();
+            assert calledOnEDT() : callInfo();
 
             this.container = container;
             determinate = max > 0;
@@ -125,7 +125,7 @@ public class StatusBar extends JPanel {
 
         @Override
         public void updateProgress(int currentValue) {
-            assert calledOnEDT() : threadInfo();
+            assert calledOnEDT() : callInfo();
             assert determinate;
 
             progressBar.setValue(currentValue);
@@ -134,7 +134,7 @@ public class StatusBar extends JPanel {
 
         @Override
         public void stopProgress() {
-            assert calledOnEDT() : threadInfo();
+            assert calledOnEDT() : callInfo();
 
             if (!determinate) {
                 progressBar.setValue(100);

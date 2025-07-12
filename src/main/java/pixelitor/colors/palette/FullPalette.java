@@ -18,17 +18,18 @@
 package pixelitor.colors.palette;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * The full color palette tries to show as many colors
- * as possible (as opposed to other palettes that concentrate
- * on specific mixes or variations).
+ * A palette that shows as many colors as possible (as opposed to
+ * other palettes that concentrate on specific mixes or variations).
  */
-public class FullPalette extends Palette {
-    // static palette-specific variables so that they
-    // are remembered between dialog sessions
+public class FullPalette extends DynamicPalette {
+    // static palette-specific fields are remembered between dialog sessions
     private static int lastRowCount = 11;
     private static int lastColumnCount = 7;
+
     private final String dialogTitle;
 
     private int hueSteps;
@@ -43,39 +44,42 @@ public class FullPalette extends Palette {
     @Override
     public void setGridSize(int rows, int columns) {
         super.setGridSize(rows, columns);
-        hueSteps = rows - 1;
+
+        // one row is for grayscale, the rest for hues
+        hueSteps = Math.max(1, rows - 1);
         lastColumnCount = columns;
         lastRowCount = rows;
     }
 
     @Override
-    public void addButtons(PalettePanel panel) {
+    public List<Color> getColors() {
         var hsConfig = (HueSatPaletteConfig) config;
         float hueOffset = hsConfig.getHueOffset();
         float saturation = hsConfig.getSaturation();
+
+        List<Color> colors = new ArrayList<>(rowCount * columnCount);
 
         for (int row = 0; row < rowCount; row++) {
             float hue = calcHue(row, hueOffset);
             for (int col = 0; col < columnCount; col++) {
                 Color color;
-                if (row == 0) { // first, grayscale row
+                if (row == 0) { // first row is grayscale
                     float bri = (col + 1) / (float) columnCount;
                     color = Color.getHSBColor(0, 0, bri);
-                } else { // color rows
+                } else { // subsequent rows are colored
                     float bri = (col + 1) / (float) columnCount;
                     color = Color.getHSBColor(hue, saturation, bri);
                 }
-                panel.addButton(col, row, color);
+                colors.add(color);
             }
         }
+        return colors;
     }
 
+    // calculates hue for a given row, skipping the first (grayscale) row
     private float calcHue(int row, float hueOffset) {
         float hue = hueOffset + (row - 1) / (float) hueSteps;
-        if (hue > 1.0f) {
-            hue = hue - 1.0f;
-        }
-        return hue;
+        return hue % 1.0f;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import javax.swing.*;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * A panel that can show or hide a {@link JProgressBar}.
@@ -57,7 +57,7 @@ public class ProgressPanel extends JPanel {
     }
 
     public void paintImmediately() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         GUIUtils.paintImmediately(progressBar);
     }

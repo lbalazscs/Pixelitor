@@ -79,7 +79,6 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.tools.brushes.CopyBrush;
 import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
-import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
 import pixelitor.utils.test.SplashImageCreator;
 
@@ -179,7 +178,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.add(new DrawableAction(i18n.getString("export_tweening_animation")) {
             @Override
             protected void process(Drawable dr) {
-                new TweenWizard(dr).showDialog(pw);
+                new TweenWizard(dr).start(pw);
             }
         });
 
@@ -246,7 +245,7 @@ public class MenuBar extends JMenuBar {
         automateMenu.add(new DrawableAction(batchFilterText) {
             @Override
             protected void process(Drawable dr) {
-                new BatchFilterWizard(dr, batchFilterText).showDialog(pw);
+                new BatchFilterWizard(dr, batchFilterText).start(pw);
             }
         });
 
@@ -1188,6 +1187,10 @@ public class MenuBar extends JMenuBar {
             PalettePanel.showDialog(pw, new FullPalette(colorPaletteText),
                 ColorSwatchClickHandler.STANDARD)));
 
+        // static palette
+        viewMenu.add(new TaskAction("Static Palette", () ->
+            PalettePanel.showStaticPaletteDialog(pw, "Static Palette")));
+
         viewMenu.addSeparator();
 
         WorkSpace workSpace = pw.getWorkSpace();
@@ -1344,9 +1347,6 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new ViewEnabledAction("Enable Mouse Debugging",
             comp -> GlobalEvents.enableMouseEventDebugging(false)));
-
-        sub.add(new ViewEnabledAction("Dump Event Queue",
-            comp -> Events.dumpAll()));
 
         sub.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK) {
             @Override

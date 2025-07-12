@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import static pixelitor.utils.ImageUtils.createThumbnail;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOutsideEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Utility class for image input/output with progress tracking.
@@ -95,7 +95,7 @@ public class TrackedIO {
                                   String formatName,
                                   ProgressTracker tracker,
                                   Consumer<ImageWriteParam> customizer) throws IOException {
-        assert calledOutsideEDT() : threadInfo();
+        assert calledOutsideEDT() : callInfo();
         assert ios != null;
 
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(formatName);

@@ -41,10 +41,6 @@ public interface Drawable extends Filterable {
      */
     void setImage(BufferedImage newImage);
 
-    void startTweening();
-
-    void endTweening();
-
     void changeImageForUndoRedo(BufferedImage img, boolean ignoreSelection);
 
     TmpLayer createTmpLayer(Composite c, boolean softSelection);

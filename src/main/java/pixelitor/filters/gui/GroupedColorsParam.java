@@ -187,8 +187,8 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     }
 
     @Override
-    public Object getParamValue() {
-        return colors;
+    public String getParamValue() {
+        return Colors.formatForDebugging(colors);
     }
 
     @Override

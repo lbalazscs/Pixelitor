@@ -151,8 +151,8 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public Point2D getParamValue() {
-        return new Point2D.Double(getRelativeX(), getRelativeY());
+    public String getParamValue() {
+        return new Point2D.Double(getRelativeX(), getRelativeY()).toString();
     }
 
     @Override

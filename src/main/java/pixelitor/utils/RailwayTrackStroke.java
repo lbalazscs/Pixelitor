@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -114,11 +114,11 @@ public class RailwayTrackStroke implements Stroke {
 
         double halfRailDist = railDistance / 2;
 
-        // Calculate all rail points
+        // calculate all rail points
         List<Point2D> leftPoints = new ArrayList<>();
         List<Point2D> rightPoints = new ArrayList<>();
 
-        // Handle first point
+        // handle first point
         Point2D first = points.get(0);
         Point2D second = points.get(1);
         Point2D firstLeft = new Point2D.Double();
@@ -127,19 +127,19 @@ public class RailwayTrackStroke implements Stroke {
         leftPoints.add(firstLeft);
         rightPoints.add(firstRight);
 
-        // Process intermediate points
+        // process intermediate points
         for (int i = 1, s = points.size() - 1; i < s; i++) {
             Point2D prev = points.get(i - 1);
             Point2D current = points.get(i);
             Point2D next = points.get(i + 1);
 
-            // Temporary points for storing perpendicular vectors
+            // temporary points for storing perpendicular vectors
             var prevPerp1 = new Point2D.Double();
             var prevPerp2 = new Point2D.Double();
             var nextPerp1 = new Point2D.Double();
             var nextPerp2 = new Point2D.Double();
 
-            // Calculate perpendicular points for both segments meeting at current point
+            // calculate perpendicular points for both segments meeting at current point
             Geometry.calcPerpendicularPoints(current, prev, halfRailDist, prevPerp1, prevPerp2);
             Geometry.calcPerpendicularPoints(current, next, halfRailDist, nextPerp1, nextPerp2);
 
@@ -148,16 +148,9 @@ public class RailwayTrackStroke implements Stroke {
 
             leftPoints.add(nextPerp1);
             rightPoints.add(nextPerp2);
-
-//            // Average the perpendicular vectors to create smooth transitions
-//            Point2D avgLeft = Geometry.midPoint(prevPerp2, nextPerp1);
-//            Point2D avgRight = Geometry.midPoint(prevPerp1, nextPerp2);
-//
-//            leftPoints.add(avgLeft);
-//            rightPoints.add(avgRight);
         }
 
-        // Handle last point
+        // handle last point
         Point2D last = points.getLast();
         Point2D secondToLast = points.get(points.size() - 2);
         Point2D lastRight = new Point2D.Double();
@@ -166,7 +159,7 @@ public class RailwayTrackStroke implements Stroke {
         leftPoints.add(lastLeft);
         rightPoints.add(lastRight);
 
-        // Draw the rails
+        // draw the rails
         for (int i = 0; i < leftPoints.size(); i++) {
             Point2D lp = leftPoints.get(i);
             Point2D rp = rightPoints.get(i);
@@ -180,11 +173,11 @@ public class RailwayTrackStroke implements Stroke {
             }
         }
 
-        // Add the stroked rails
+        // add the stroked rails
         result.append(railStroke.createStrokedShape(leftRail), false);
         result.append(railStroke.createStrokedShape(rightRail), false);
 
-        // Calculate total path length and add crossties
+        // calculate total path length and add crossties
         double totalLength = 0;
         for (int i = 0; i < points.size() - 1; i++) {
             Point2D curr = points.get(i);

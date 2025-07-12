@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,7 +57,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onPageShown(OKCancelDialog dialog) {
+        public void onPageShown(Wizard wizard, OKCancelDialog dialog) {
             JButton okButton = dialog.getOkButton();
 
             okButton.setEnabled(false);
@@ -67,7 +67,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public void onWizardCanceled(Drawable dr) {
-            // No cleanup needed
+            // no cleanup needed
         }
 
         @Override
@@ -92,8 +92,13 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
             dr.startPreviewing();
-
+            // the panel is created, but the filter is not run yet
             return getFilter(wizard).createGUI(dr, true);
+        }
+
+        @Override
+        public void onPageShown(Wizard wizard, OKCancelDialog dialog) {
+            getFilter(wizard).getParamSet().runFilter();
         }
 
         @Override
@@ -112,8 +117,8 @@ public enum TweenWizardPage implements WizardPage {
             String color = Themes.getActive().isDark() ? "#5DCF6E" : "blue";
             String text = "<html><b><font color=" + color + " size=+1>Final</font></b> settings for the <i>"
                 + getFilter(wizard).getName() + "</i> filter.";
-            boolean hasGradient = getFilter(wizard).getParamSet().hasGradient();
-            if (hasGradient) {
+
+            if (getFilter(wizard).getParamSet().hasGradient()) {
                 text += "<br>Note: Only modify gradient thumb colors and positions, not the number of thumbs.";
             }
             return text;
@@ -126,13 +131,13 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            // The following lines are necessary because otherwise,
-            // the image position selectors will show the result of
-            // the initial filter and not the original image.
-            dr.stopPreviewing(); // stop the initial one
-            dr.startPreviewing(); // start the final one
-
             return getFilter(wizard).createGUI(dr, false);
+        }
+
+        @Override
+        public void onPageShown(Wizard wizard, OKCancelDialog dialog) {
+            // do nothing: there's no need to re-run the filter,
+            // because we have a correct preview from the previous page
         }
 
         @Override
@@ -167,7 +172,7 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
             if (outputSettingsPanel == null) {
-                // keeps the output settings by caching the panel
+                // cache the panel to preserve output settings between page views
                 outputSettingsPanel = new TweenOutputSettingsPanel();
             }
             return outputSettingsPanel;

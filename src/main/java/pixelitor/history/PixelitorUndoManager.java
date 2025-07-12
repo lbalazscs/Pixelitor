@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
     private JDialog historyDialog;
     private PixelitorEdit selectedEdit;
 
-    // Indicates that a selection change was initiated by the user
+    // indicates that a selection change was initiated by the user
     // through the history GUI, and not through addEdit, undo, redo calls
     private boolean userInitiatedSelection = true;
 
@@ -230,7 +230,7 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
     }
 
     public void showHistoryDialog() {
-        assert Threads.calledOnEDT() : Threads.threadInfo();
+        assert Threads.calledOnEDT() : Threads.callInfo();
 
         if (historyDialog == null) {
             createHistoryDialog();

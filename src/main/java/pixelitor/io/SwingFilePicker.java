@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,8 +38,8 @@ import static pixelitor.io.FileChooserConfig.SelectableFormats.SINGLE;
 import static pixelitor.io.FileChoosers.OPEN_FILTERS;
 import static pixelitor.io.FileChoosers.SAVE_FILTERS;
 import static pixelitor.utils.Texts.i18n;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 public class SwingFilePicker implements FilePicker {
     private JFileChooser openChooser;
@@ -126,7 +126,7 @@ public class SwingFilePicker implements FilePicker {
     }
 
     private void initOpenChooser() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         if (openChooser != null) {
             return;
         }
@@ -163,7 +163,7 @@ public class SwingFilePicker implements FilePicker {
     }
 
     private void initSaveChooser() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         if (saveChooser == null) {
             saveChooser = new SaveFileChooser(Dirs.getLastSave());

@@ -145,10 +145,13 @@ public class MainGuiTest {
     private boolean colorsTested = false;
     private boolean viewMenuTested = false;
 
-    // Whether filters should be tested with images with a width or height of 1 pixel.
+    // whether filters should be tested with images with a width or height of 1 pixel
     private static final boolean FILTER_TESTS_WITH_HEIGHT_1 = false;
     private static final boolean FILTER_TESTS_WITH_WIDTH_1 = false;
 
+    /**
+     * The entry point for this GUI test.
+     */
     public static void main(String[] args) {
         Texts.init();
         Utils.ensureAssertionsEnabled();
@@ -175,7 +178,8 @@ public class MainGuiTest {
         mouse = app.getMouse();
 
         if (EDT.call(FileChoosers::useNativeDialogs)) {
-            System.out.println("MainGuiTest::MainGuiTest: native dialogs, exiting");
+            // we can't test if mative file choosers are enabled
+            System.out.println("MainGuiTest: native dialogs, exiting");
             System.exit(0);
         }
 
@@ -189,9 +193,7 @@ public class MainGuiTest {
 
             MaskMode[] maskModes = MaskMode.load();
             TestSuite testSuite = TestSuite.load();
-            System.out.println("Quick = " + quick
-                + ", test suite = " + testSuite
-                + ", mask modes = " + Arrays.toString(maskModes));
+            printTestConfiguration(testSuite, maskModes);
 
             for (int i = 0; i < maskModes.length; i++) {
                 MaskMode mode = maskModes[i];
@@ -210,13 +212,22 @@ public class MainGuiTest {
         app.exit();
     }
 
+    private static void printTestConfiguration(TestSuite testSuite, MaskMode[] maskModes) {
+        System.out.println("Quick = " + quick
+            + ", test suite = " + testSuite
+            + ", mask modes = " + Arrays.toString(maskModes));
+    }
+
+    /**
+     * Resets the application state to a known baseline for a new test run.
+     */
     private void resetState() {
         if (EDT.call(Views::getNumViews) > 0) {
             app.closeAll();
         }
         openFileWithDialog(inputDir, "a.jpg");
 
-        clickAndResetSelectTool();
+        clickAndResetRectSelectTool();
         clickAndResetShapesTool();
     }
 
@@ -225,7 +236,7 @@ public class MainGuiTest {
         maskMode.apply(this);
     }
 
-    private void clickAndResetSelectTool() {
+    private void clickAndResetRectSelectTool() {
         pw.toggleButton("Rectangle Selection Tool Button").click();
         pw.comboBox("combinatorCB").selectItem("Replace");
     }
@@ -234,6 +245,9 @@ public class MainGuiTest {
         pw.toggleButton("Shapes Tool Button").click();
     }
 
+    /**
+     * Configures and runs a specific test suite with a given mask mode.
+     */
     private void runTests(TestSuite testSuite, MaskMode maskMode) {
         this.maskMode = maskMode;
         maskMode.apply(this);
@@ -245,6 +259,9 @@ public class MainGuiTest {
         app.runTests(() -> testSuite.run(this));
     }
 
+    /**
+     * Runs all tests.
+     */
     void testAll() {
         testTools();
         testFileMenu();
@@ -258,18 +275,22 @@ public class MainGuiTest {
         testLayers();
     }
 
+    /**
+     * Tests all tools.
+     */
     void testTools() {
         log(0, "tools");
 
         // make sure we have a big enough canvas for the tool tests
         keyboard.actualPixels();
 
+        // test mask-independent tools only once, or randomly 5% of the time, to save time
         if (!maskIndependentToolsTested || Rnd.nextDouble() < 0.05) {
             testMoveTool();
             testCropTool();
-            testSelectionToolAndMenus();
+            testSelectionToolsAndMenus();
 
-            testPenTool();
+            testPathTools();
             testHandTool();
             testZoomTool();
             testColorSelector();
@@ -291,6 +312,9 @@ public class MainGuiTest {
         checkConsistency();
     }
 
+    /**
+     * Tests layer-related operations from the layers panel and menus.
+     */
     void testLayers() {
         log(0, "layers");
         maskMode.apply(this);
@@ -319,6 +343,9 @@ public class MainGuiTest {
         checkConsistency();
     }
 
+    /**
+     * Tests adding a new empty image layer.
+     */
     private void testAddLayer() {
         log(1, "add layer");
 
@@ -353,7 +380,7 @@ public class MainGuiTest {
         app.changeLayerOpacity(0.75f);
         checkConsistency();
 
-        app.changeLayerBlendingMode(BlendingMode.MULTIPLY);
+        app.changeLayerBlendingMode(Rnd.chooseFrom(BlendingMode.LAYER_MODES));
         checkConsistency();
     }
 
@@ -507,35 +534,37 @@ public class MainGuiTest {
     }
 
     private void testLayerMaskIconPopupMenus() {
-        // test delete
+        // test simple undoable actions
+        testUndoablePopupAction("Delete", "Delete Layer Mask");
+        testUndoablePopupAction("Apply", "Apply Layer Mask");
+
+        // test toggleable actions
+        testToggleablePopupAction("Disable", "Disable Layer Mask", "Enable", "Enable Layer Mask");
+        testToggleablePopupAction("Unlink", "Unlink Layer Mask", "Link", "Link Layer Mask");
+    }
+
+    /**
+     * Tests a simple, non-toggleable action from the layer mask popup menu.
+     */
+    private void testUndoablePopupAction(String action, String historyName) {
         var popupMenu = pw.label("maskIcon").showPopupMenu();
-        clickPopupMenu(popupMenu, "Delete");
-        keyboard.undoRedoUndo("Delete Layer Mask");
+        clickPopupMenu(popupMenu, action);
+        keyboard.undoRedoUndo(historyName);
+    }
 
-        // test apply
-        popupMenu = pw.label("maskIcon").showPopupMenu();
-        clickPopupMenu(popupMenu, "Apply");
-        keyboard.undoRedoUndo("Apply Layer Mask");
+    /**
+     * Tests a pair of toggleable actions from the layer mask popup menu.
+     */
+    private void testToggleablePopupAction(String action1, String history1, String action2, String history2) {
+        // test the first action (e.g., Disable) and its undo/redo
+        var popupMenu = pw.label("maskIcon").showPopupMenu();
+        clickPopupMenu(popupMenu, action1);
+        keyboard.undoRedo(history1);
 
-        // test disable
+        // test the second action (e.g., Enable) and its undo/redo
         popupMenu = pw.label("maskIcon").showPopupMenu();
-        clickPopupMenu(popupMenu, "Disable");
-        keyboard.undoRedo("Disable Layer Mask");
-
-        // test enable - after the redo we should find a menu item called "Enable"
-        popupMenu = pw.label("maskIcon").showPopupMenu();
-        clickPopupMenu(popupMenu, "Enable");
-        keyboard.undoRedo("Enable Layer Mask");
-
-        // test unlink
-        popupMenu = pw.label("maskIcon").showPopupMenu();
-        clickPopupMenu(popupMenu, "Unlink");
-        keyboard.undoRedo("Unlink Layer Mask");
-
-        // test link - after the redo we should find a menu item called "Link"
-        popupMenu = pw.label("maskIcon").showPopupMenu();
-        clickPopupMenu(popupMenu, "Link");
-        keyboard.undoRedo("Link Layer Mask");
+        clickPopupMenu(popupMenu, action2);
+        keyboard.undoRedo(history2);
     }
 
     private void testMaskFromColorRange() {
@@ -623,6 +652,9 @@ public class MainGuiTest {
         checkConsistency();
     }
 
+    /**
+     * Finds a layer's UI component by its name.
+     */
     private LayerGUIFixture findLayerButton(String layerName) {
         return new LayerGUIFixture(robot, robot.finder()
             .find(new GenericTypeMatcher<>(LayerGUI.class) {
@@ -750,7 +782,7 @@ public class MainGuiTest {
         testFade();
 
         // select for crop
-        clickAndResetSelectTool();
+        clickAndResetRectSelectTool();
 
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(400, 400);
@@ -797,25 +829,25 @@ public class MainGuiTest {
             dialog.tabbedPane().selectTab("UI");
         }
 
-        // Test "Images In"
+        // test "Images In"
         testPreferencesUIChooser(dialog);
 
-        // Test "Layer/Mask Thumb Sizes"
+        // test "Layer/Mask Thumb Sizes"
         var thumbSizeCB = dialog.comboBox("thumbSizeCB");
         thumbSizeCB.selectItem(3);
         thumbSizeCB.selectItem(0);
 
-        // Test the Mouse tab
+        // test the Mouse tab
 
-        // Test the Guides tab
+        // test the Guides tab
         dialog.tabbedPane().selectTab("Guides");
         GuideStrokeType[] guideStyles = GuideStrokeType.values();
         dialog.comboBox("guideStyleCB").selectItem(Rnd.chooseFrom(guideStyles).toString());
         dialog.comboBox("cropGuideStyleCB").selectItem(Rnd.chooseFrom(guideStyles).toString());
 
-        // Test the Advanced tab
+        // test the Advanced tab
         dialog.tabbedPane().selectTab("Advanced");
-        testpreferencesUndoLevels(dialog);
+        testPreferencesUndoLevels(dialog);
 
         dialog.button("ok").click();
         // this time the preferences dialog should close
@@ -837,7 +869,7 @@ public class MainGuiTest {
         }
     }
 
-    private void testpreferencesUndoLevels(DialogFixture dialog) {
+    private void testPreferencesUndoLevels(DialogFixture dialog) {
         var undoLevelsTF = dialog.textBox("undoLevelsTF");
         boolean undoWas5 = undoLevelsTF.text().equals("5");
         undoLevelsTF.deleteText().enterText("n");
@@ -1301,18 +1333,16 @@ public class MainGuiTest {
                 continue;
             }
             if (tool == Tools.BRUSH) {
-                for (String colorSetting : AutoPaintPanel.COLOR_MODES) {
-                    EDT.postAssertJEvent("auto paint with Brush, colorSetting = " + colorSetting);
-                    testAutoPaintWithTool(tool, colorSetting);
+                for (String colorMode : AutoPaintPanel.COLOR_MODES) {
+                    testAutoPaintWithTool(tool, colorMode);
                 }
             } else {
-                EDT.postAssertJEvent("auto paint with " + tool);
                 testAutoPaintWithTool(tool, null);
             }
         }
     }
 
-    private void testAutoPaintWithTool(Tool tool, String colorsSetting) {
+    private void testAutoPaintWithTool(Tool tool, String colorMode) {
         runMenuCommand("Auto Paint...");
         var dialog = findDialogByTitle("Auto Paint");
 
@@ -1327,9 +1357,9 @@ public class MainGuiTest {
         }
 
         var colorsCB = dialog.comboBox("colorsCB");
-        if (colorsSetting != null) {
+        if (colorMode != null) {
             colorsCB.requireEnabled();
-            colorsCB.selectItem(colorsSetting);
+            colorsCB.selectItem(colorMode);
         } else {
             colorsCB.requireDisabled();
         }
@@ -2089,17 +2119,16 @@ public class MainGuiTest {
         checkConsistency();
     }
 
-    private void testPenTool() {
-        log(1, "pen tool");
-
-        testPenToolBuildMode();
-        testPenToolEditMode();
-        testPenToolTransformMode();
+    private void testPathTools() {
+        testPenTool();
+        testNodeTool();
+        testTransformPathTool();
 
         checkConsistency();
     }
 
-    private void testPenToolBuildMode() {
+    private void testPenTool() {
+        log(1, "pen tool");
         app.clickTool(Tools.PEN);
 
         pw.button("toSelectionButton").requireDisabled();
@@ -2142,7 +2171,8 @@ public class MainGuiTest {
             .numAnchorsIs(6);
     }
 
-    private void testPenToolEditMode() {
+    private void testNodeTool() {
+        log(1, "node tool");
         app.clickTool(Tools.NODE);
 
         mouse.moveToCanvas(600, 300);
@@ -2200,14 +2230,15 @@ public class MainGuiTest {
         keyboard.undoRedo("Brush Tool");
     }
 
-    private void testPenToolTransformMode() {
+    private void testTransformPathTool() {
+        log(1, "transform path tool");
         app.clickTool(Tools.TRANSFORM_PATH);
 
-        Point nw = EDT.getPenToolBoxPos(0, TransformBox::getNW);
+        Point nw = EDT.getTransformPathToolBoxPos(0, TransformBox::getNW);
         mouse.moveToScreen(nw.x, nw.y);
         mouse.dragToScreen(nw.x - 100, nw.y - 50);
 
-        Point rot = EDT.getPenToolBoxPos(1, TransformBox::getRot);
+        Point rot = EDT.getTransformPathToolBoxPos(1, TransformBox::getRot);
         mouse.moveToScreen(rot.x, rot.y);
         mouse.dragToScreen(rot.x + 100, rot.y + 100);
 
@@ -2412,8 +2443,8 @@ public class MainGuiTest {
         keyboard.undoRedo("Clone Stamp Tool");
     }
 
-    private void testSelectionToolAndMenus() {
-        log(1, "selection tool and the selection menus");
+    private void testSelectionToolsAndMenus() {
+        log(1, "selection tools and the selection menus");
 
         // make sure we are at 100%
         keyboard.actualPixels();
@@ -2697,7 +2728,7 @@ public class MainGuiTest {
             mouse.dragToCanvas(200, 300);
 
             if (mode.movesLayer()) {
-                // The translations will have these values only if we are at 100% zoom!
+                // the translations will have these values only if we are at 100% zoom
                 assert view.getZoomLevel() == ZoomLevel.ACTUAL_SIZE : "zoom is " + view.getZoomLevel();
                 assert dr.getTx() == -200 : "tx = " + dr.getTx();
                 assert dr.getTy() == -100 : "ty = " + dr.getTy();
@@ -2960,7 +2991,6 @@ public class MainGuiTest {
 
     private void runWithSelectionAndTranslation(Runnable task) {
         log(1, "simple test");
-        EDT.postAssertJEvent("simple test");
         keyboard.deselect();
         task.run();
 
@@ -2969,7 +2999,6 @@ public class MainGuiTest {
         }
 
         log(1, "test with selection");
-        EDT.postAssertJEvent("test with selection");
         addSelection();
         task.run();
         keyboard.deselect();
@@ -2979,7 +3008,6 @@ public class MainGuiTest {
         }
 
         log(1, "test with translation");
-        EDT.postAssertJEvent("test with translation");
         addTranslation();
         task.run();
 
@@ -2988,7 +3016,6 @@ public class MainGuiTest {
         }
 
         log(1, "test with selection+translation");
-        EDT.postAssertJEvent("test with selection+translation");
         addSelection();
         task.run();
         keyboard.undo("Create Selection");

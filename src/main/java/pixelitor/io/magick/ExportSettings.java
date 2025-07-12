@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,23 +29,24 @@ public interface ExportSettings {
     ExportSettings DEFAULTS = new ExportSettings() {
         @Override
         public void addMagickOptions(List<String> command) {
-            // do nothing
+            // no extra options added
         }
 
         @Override
         public String getFormatName() {
+            // has no GUI => this method should not be called
             throw new UnsupportedOperationException();
         }
     };
 
     /**
-     * Add options to the ImageMagick command line.
+     * Adds format-specific options to the ImageMagick command line.
      */
     void addMagickOptions(List<String> command);
 
     /**
-     * Return the ImageMagick format specifier or an
-     * empty string for the default extension-based format.
+     * Returns the ImageMagick format specifier (such as "png32:)
+     * or an empty string for the default extension-based format.
      */
     default String getFormatSpecifier() {
         return "";

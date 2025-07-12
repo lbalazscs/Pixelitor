@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,14 +21,14 @@ import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.tools.Tool;
+import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.geom.Point2D;
 import java.util.SplittableRandom;
 
 /**
- * The parameters that control the auto-painting.
+ * The settings that control the auto-painting.
  */
 public class AutoPaintSettings {
     public static final int DIRECTION_RANDOM = 0;
@@ -37,7 +37,9 @@ public class AutoPaintSettings {
     public static final int DIRECTION_NOISE = 3;
     private final int strokeDirection;
 
-    private final Tool tool;
+    private static final float NOISE_SCALE = 3.0f;
+
+    private final AbstractBrushTool tool;
     private final int numStrokes;
     private final double maxCurvature;
     private final int minStrokeLength;
@@ -45,27 +47,24 @@ public class AutoPaintSettings {
     private final boolean useRandomColors;
     private final boolean useInterpolatedColors;
 
-    AutoPaintSettings(Tool tool, int numStrokes, int baseStrokeLength, int strokeDirection,
+    AutoPaintSettings(AbstractBrushTool tool, int numStrokes, int baseStrokeLength, int strokeDirection,
                       boolean useRandomColors, boolean useInterpolatedColors,
                       double lengthVariation, double maxCurvature) {
         this.tool = tool;
         this.numStrokes = numStrokes;
         this.maxCurvature = maxCurvature;
         this.strokeDirection = strokeDirection;
-
-        if (lengthVariation == 0.0f) {
-            minStrokeLength = baseStrokeLength;
-            maxStrokeLength = baseStrokeLength;
-        } else {
-            double variation = lengthVariation * baseStrokeLength;
-            minStrokeLength = (int) (baseStrokeLength - variation);
-            maxStrokeLength = (int) (baseStrokeLength + variation);
-        }
-
         this.useRandomColors = useRandomColors;
         this.useInterpolatedColors = useInterpolatedColors;
+
+        double variation = lengthVariation * baseStrokeLength;
+        this.minStrokeLength = (int) (baseStrokeLength - variation);
+        this.maxStrokeLength = (int) (baseStrokeLength + variation);
     }
 
+    /**
+     * Generates a random end point for a stroke starting at the given point.
+     */
     public PPoint genRandomEndPoint(PPoint start, Composition comp, SplittableRandom rand) {
         Canvas canvas = comp.getCanvas();
         double angle = switch (strokeDirection) {
@@ -75,7 +74,7 @@ public class AutoPaintSettings {
             case DIRECTION_NOISE -> {
                 float nx = (float) (start.getImX() * canvas.getAspectRatio() / canvas.getWidth());
                 float ny = (float) (start.getImY() / canvas.getHeight());
-                yield Noise.noise2(nx * 3.0f, ny * 3.0f) * Math.PI;
+                yield Noise.noise2(nx * NOISE_SCALE, ny * NOISE_SCALE) * Math.PI;
             }
             default -> throw new IllegalStateException("Unexpected value: " + strokeDirection);
         };
@@ -86,6 +85,9 @@ public class AutoPaintSettings {
         return PPoint.lazyFromIm(endX, endY, comp.getView());
     }
 
+    /**
+     * Calculates the angle from the canvas center to the given point.
+     */
     private static double getRadialAngle(PPoint point, Canvas canvas) {
         Point2D center = canvas.getImCenter();
         return FastMath.atan2(point.getImY() - center.getY(),
@@ -96,7 +98,7 @@ public class AutoPaintSettings {
         return maxCurvature;
     }
 
-    public Tool getTool() {
+    public AbstractBrushTool getTool() {
         return tool;
     }
 
@@ -105,11 +107,7 @@ public class AutoPaintSettings {
     }
 
     private int genStrokeLength(SplittableRandom rand) {
-        if (minStrokeLength == maxStrokeLength) {
-            return minStrokeLength;
-        } else {
-            return rand.nextInt(minStrokeLength, maxStrokeLength + 1);
-        }
+        return rand.nextInt(minStrokeLength, maxStrokeLength + 1);
     }
 
     public boolean useRandomColors() {

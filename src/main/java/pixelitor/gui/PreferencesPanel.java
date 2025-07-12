@@ -21,7 +21,7 @@ import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Features;
 import pixelitor.Views;
-import pixelitor.colors.ColorPickerDialog;
+import pixelitor.colors.ColorPickerHelper;
 import pixelitor.filters.gui.ChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -278,7 +278,7 @@ public class PreferencesPanel extends JTabbedPane {
         gbh.addLabelAndControlNoStretch("Guide Color: ", guideColorSwatch);
         gbh.addLabelAndControlNoStretch("Guide Style: ", guideStyleCB);
 
-        new ColorPickerDialog(guideColorSwatch, e -> {
+        new ColorPickerHelper(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
             ImageArea.getUI().repaint();
         });
@@ -300,7 +300,7 @@ public class PreferencesPanel extends JTabbedPane {
         gbh.addLabelAndControlNoStretch("Cropping Guide Color: ", guideColorSwatch);
         gbh.addLabelAndControlNoStretch("Cropping Guide Style: ", cropGuideStyleCB);
 
-        new ColorPickerDialog(guideColorSwatch, e -> {
+        new ColorPickerHelper(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
             ImageArea.getUI().repaint();
         });

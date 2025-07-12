@@ -42,8 +42,8 @@ import java.util.List;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The selectable and draggable component representing
@@ -85,9 +85,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     private DragReorderHandler dragReorderHandler;
 
-    // Most often false, but when opening serialized pxc files,
+    // most often false, but when opening serialized pxc files,
     // the mask/smart filter label might be added before the drag handler,
-    // and in unit tests the drag handler isn't added at all.
+    // and in unit tests the drag handler isn't added at all
     private boolean delayedDragHandler;
 
     /**
@@ -96,7 +96,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private int staticY;
 
     public LayerGUI(Layer layer) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         assert !AppMode.isUnitTesting() : "Swing component in unit test";
 
         this.layer = layer;
@@ -192,8 +192,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 if (e.isPopupTrigger()) {
                     layerPopupTriggered(e);
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
-                    // by putting it into mouse pressed, it is consistent
-                    // with the mask clicks
+                    // by putting it into mouse pressed, it is
+                    // consistent with the mask clicks
                     selectLayerIfIconClicked(e);
                 }
             }
@@ -234,7 +234,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
     }
 
-    // Called when one of the icons is clicked
+    // called when one of the icons is clicked
     private void activateLayerNow() {
         // the layer would be activated anyway, but only in an invokeLater,
         // and the mask activation expects events to be coming from the active layer
@@ -439,7 +439,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public void updateLayerIconImageAsync(Layer layer) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         assert layer.hasRasterIcon();
 
         // the synchronous update avoids starting a filter twice
@@ -467,7 +467,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     private void updateIconOnEDT(Layer layer, BufferedImage thumb) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
         if (layer instanceof LayerMask mask) {
             if (!hasMaskIcon()) {
                 return;

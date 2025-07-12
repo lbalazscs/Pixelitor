@@ -23,14 +23,12 @@ import pixelitor.layers.Filterable;
 import javax.swing.*;
 import java.io.Serial;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
@@ -460,10 +458,10 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     @Override
-    public List<Double> getParamValue() {
+    public String getParamValue() {
         return Stream.of(children)
             .map(RangeParam::getParamValue)
-            .collect(toList());
+            .collect(joining(", ", "[", "]"));
     }
 
     @Override

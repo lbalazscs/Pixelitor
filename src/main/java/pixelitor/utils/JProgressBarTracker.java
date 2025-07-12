@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,8 @@ import pixelitor.gui.utils.GUIUtils;
 import java.awt.Container;
 import java.awt.Cursor;
 
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * A {@link ThresholdProgressTracker} that tracks the progress
@@ -54,7 +54,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
 
     @Override
     protected void onProgressStart() {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         originalCursor = topContainer.getCursor();
         topContainer.setCursor(Cursors.BUSY);
@@ -64,7 +64,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
 
     @Override
     protected void onProgressUpdate(int percentComplete) {
-        assert calledOnEDT() : threadInfo();
+        assert calledOnEDT() : callInfo();
 
         progressPanel.setProgress(percentComplete);
         progressPanel.paintImmediately();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,24 +30,40 @@ import java.util.Optional;
  */
 public interface WizardPage {
     /**
-     * Returns the HTML help text to be displayed for this page.
-     */
-    String getHelpText(Wizard wizard);
-
-    /**
-     * Determines the next page in the wizard sequence.
-     */
-    Optional<WizardPage> getNextPage();
-
-    /**
-     * Creates and returns the UI panel for this page.
+     * Creates the UI panel for this page.
      */
     JComponent createPanel(Wizard wizard, Drawable dr);
 
     /**
-     * Called if the wizard was canceled while on this page.
+     * Returns the HTML help text for this page.
      */
-    void onWizardCanceled(Drawable dr);
+    String getHelpText(Wizard wizard);
+
+    /**
+     * Returns the next page in the wizard sequence.
+     */
+    Optional<WizardPage> getNextPage();
+
+    /**
+     * Checks if this is the final page of the wizard.
+     */
+    default boolean isFinalPage() {
+        return getNextPage().isEmpty();
+    }
+
+    /**
+     * Performs initialization when the page is shown.
+     */
+    default void onPageShown(Wizard wizard, OKCancelDialog dialog) {
+        // empty by default
+    }
+
+    /**
+     * Validates the current page's state before proceeding.
+     */
+    default boolean validatePage(Wizard wizard, Component dialogParent) {
+        return true;
+    }
 
     /**
      * Performs completion actions for this page before transitioning to the next.
@@ -55,23 +71,7 @@ public interface WizardPage {
     void onComplete(Wizard wizard, Drawable dr);
 
     /**
-     * Validates the current page state.
+     * Called if the wizard was canceled while on this page.
      */
-    default boolean validatePage(Wizard wizard, Component dialogParent) {
-        return true;
-    }
-
-    /**
-     * Checks if this is the final page in the wizard sequence.
-     */
-    default boolean isFinalPage() {
-        return getNextPage().isEmpty();
-    }
-
-    /**
-     * Called when the page is about to be displayed in the dialog.
-     * Allows for any necessary initialization or setup.
-     */
-    default void onPageShown(OKCancelDialog dialog) {
-    }
+    void onWizardCanceled(Drawable dr);
 }

@@ -237,6 +237,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             }
             // There is no pixel-perfect hit detection for text layers, this value
             // signals that auto-select should select in the entire bounding box.
+            // TODO actually there should be an image cache in the painter
             return 0xFF_FF_FF_FF;
         } else {
             // signal that auto-select should ignore this layer

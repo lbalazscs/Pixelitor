@@ -75,31 +75,18 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
 
     @Override
     public ValidationResult validateSettings() {
-        var result = ValidationResult.valid();
-
-        // validate width
-        int width = 0;
-        try {
-            width = getSelectedWidth();
-            result = result.validateNonZero(width, "Width");
-            result = result.validatePositive(width, "Width");
-        } catch (NumberFormatException e) {
-            result = result.withError("The width must be an integer.");
-        }
-
-        // validate height
-        int height = 0;
-        try {
-            height = getSelectedHeight();
-            result = result.validateNonZero(height, "Height");
-            result = result.validatePositive(height, "Height");
-        } catch (NumberFormatException e) {
-            result = result.withError("The height must be an integer.");
-        }
+        var result = ValidationResult.valid()
+            .validatePositiveInt(widthTF.getText(), "Width")
+            .validatePositiveInt(heightTF.getText(), "Height");
 
         if (!result.isValid()) {
             return result;
         }
+
+        // we know parsing will succeed here because the validation passed
+        int width = getSelectedWidth();
+        int height = getSelectedHeight();
+
         // issue #49: check approximately whether the image
         // would even fit into the available memory
         long numPixels = ((long) width) * height;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,13 +31,15 @@ import java.awt.event.MouseEvent;
  */
 public class ColorSwatchButton extends JComponent {
     public static final int SIZE = 32;
+    private static final Dimension SIZE_DIM = new Dimension(SIZE, SIZE);
+
+    // tracks the last-clicked swatch across all instances
     public static ColorSwatchButton lastClickedSwatch = null;
 
-    // Grid positions.
+    // the coordinates of this swatch in its grid
     private final int gridX;
     private final int gridY;
 
-    private static final Dimension size = new Dimension(SIZE, SIZE);
     private Color color;
     private boolean raised = true;
     private boolean marked = false;
@@ -49,31 +51,22 @@ public class ColorSwatchButton extends JComponent {
         this.gridY = gridY;
         setColor(color);
 
-        setPreferredSize(size);
-        setMinimumSize(size);
+        setPreferredSize(SIZE_DIM);
+        setMinimumSize(SIZE_DIM);
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isControlDown()) {
+                    // ctrl-click unmarks the swatch
                     marked = false;
                 } else {
+                    // regular click marks the swatch and triggers the click action
                     marked = true;
-                    regularClick(e);
+                    performClickAction(e, clickHandler);
                 }
                 raised = false;
                 repaint();
-            }
-
-            private void regularClick(MouseEvent e) {
-                ColorSwatchButton prev = lastClickedSwatch;
-                lastClickedSwatch = ColorSwatchButton.this;
-                if (prev != null) {
-                    prev.repaint();
-                }
-
-                Color newColor = ColorSwatchButton.this.color;
-                clickHandler.handle(newColor, e);
             }
 
             @Override
@@ -82,6 +75,16 @@ public class ColorSwatchButton extends JComponent {
                 repaint();
             }
         });
+    }
+
+    private void performClickAction(MouseEvent e, ColorSwatchClickHandler clickHandler) {
+        ColorSwatchButton previouslyClicked = lastClickedSwatch;
+        lastClickedSwatch = this;
+        if (previouslyClicked != null) {
+            previouslyClicked.repaint();
+        }
+
+        clickHandler.handle(this.color, e);
     }
 
     public void setColor(Color color) {
@@ -109,6 +112,7 @@ public class ColorSwatchButton extends JComponent {
     }
 
     private static void paintMark(Graphics g) {
+        // draws a small rectangle in the top-left corner
         g.setColor(LayerGUI.SELECTED_COLOR);
         g.fillRect(1, 1, 7, 7);
         g.setColor(LayerGUI.UNSELECTED_COLOR);

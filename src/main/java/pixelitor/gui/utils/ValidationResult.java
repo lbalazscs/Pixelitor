@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ public class ValidationResult {
     private final boolean isValid;
     private final String errorMsg;
 
-    // The OK result has no error message, therefore it can be shared
+    // the OK result has no error message, therefore it can be shared
     private static final ValidationResult VALID_RESULT
         = new ValidationResult(true, null);
 
@@ -46,14 +46,14 @@ public class ValidationResult {
     }
 
     /**
-     * Factory method for the OK result
+     * Factory method for the OK result.
      */
     public static ValidationResult valid() {
         return VALID_RESULT;
     }
 
     /**
-     * Factory method for an error
+     * Factory method for an error.
      */
     public static ValidationResult invalid(String errorMsg) {
         return new ValidationResult(false, errorMsg);
@@ -121,11 +121,34 @@ public class ValidationResult {
     }
 
     /**
-     * Validates that a numeric value is positive.
+     * Validates that a numeric value is not negative (0 is allowed).
+     */
+    public ValidationResult validateNonNegative(int value, String fieldName) {
+        return withErrorIf(value < 0,
+            format("<b>%s</b> must not be negative", fieldName));
+    }
+
+    /**
+     * Validates that a numeric value is positive (0 is not allowed).
      */
     public ValidationResult validatePositive(int value, String fieldName) {
-        return withErrorIf(value < 0,
+        return withErrorIf(value <= 0,
             format("<b>%s</b> must be positive", fieldName));
+    }
+
+    /**
+     * Validates that a string can be parsed as a positive integer.
+     */
+    public ValidationResult validatePositiveInt(String text, String fieldName) {
+        ValidationResult resultForThisCheck;
+        try {
+            int value = Integer.parseInt(text.trim());
+            resultForThisCheck = valid().validatePositive(value, fieldName);
+        } catch (NumberFormatException e) {
+            resultForThisCheck = invalid(format("<b>%s</b> must be an integer.", fieldName));
+        }
+        // combine the result of this check with the previous result
+        return this.and(resultForThisCheck);
     }
 
     /**

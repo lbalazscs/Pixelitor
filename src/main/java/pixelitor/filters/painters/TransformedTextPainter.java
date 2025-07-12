@@ -74,6 +74,8 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 public class TransformedTextPainter implements Debuggable {
     private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
     private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
+
+    // alignment for multiline text or text on a path
     private int mlpAlignment = AlignmentSelector.LEFT;
 
     private Font font = null;
@@ -100,7 +102,8 @@ public class TransformedTextPainter implements Debuggable {
     private float lineHeight;
     private double relLineHeight;
 
-    private int origTextWidth;  // max width before rotation
+    // max width of the text block before transformations
+    private int origTextWidth;
 
     private SoftReference<BufferedImage> renderCache;
 
@@ -136,14 +139,13 @@ public class TransformedTextPainter implements Debuggable {
 
         Rectangle bounds = getBoundingBox();
         if (bounds.isEmpty()) {
-            // A zero-width bounding box can happen
-            // for some fonts like "EmojiOne Color".
+            // a zero-width bounding box can happen for some fonts like "EmojiOne Color"
             return;
         }
 
         BufferedImage cachedImg = renderCache == null ? null : renderCache.get();
         if (cachedImg == null) {
-            // Create the cached image containing the rendered text and effects
+            // create the cached image containing the rendered text and effects
             cachedImg = GraphicsUtilities.createCompatibleTranslucentImage(bounds.width, bounds.height);
             Graphics2D cacheG = cachedImg.createGraphics();
 
@@ -181,7 +183,7 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     /**
-     * Return the last painted bounding box for the rendered text.
+     * Returns the last painted bounding box for the rendered text.
      * Note that this is an approximation.
      */
     public Rectangle getBoundingBox() {
@@ -189,12 +191,16 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     /**
-     * Return last painted shape of the rendered text's bounding box.
+     * Returns last painted shape of the rendered text's bounding box.
      */
     public Shape getBoundingShape() {
         return transformedRect != null ? transformedRect.asShape() : boundingBox;
     }
 
+    /**
+     * Calculates the position and size of a content area within
+     * a container based on the painter's alignment settings.
+     */
     private Rectangle calcAlignment(int contentWidth, int contentHeight,
                                     int width, int height) {
         Rectangle rect = new Rectangle();
@@ -276,6 +282,9 @@ public class TransformedTextPainter implements Debuggable {
         return rotation == 0 && scaleX == 1.0 && scaleY == 1.0 && shearX == 0 && shearY == 0;
     }
 
+    /**
+     * Renders the text, with all transformations and effects, onto the given Graphics2D.
+     */
     private void paintText(Graphics2D g, AffineTransform origTransform) {
         g.setColor(color);
 
@@ -405,7 +414,7 @@ public class TransformedTextPainter implements Debuggable {
 
         // text on path handles its own transformations: make sure
         // that a leftover transformed rectangle is not interfering
-        // when calculating the rectangle covered by the cached image.
+        // when calculating the rectangle covered by the cached image
         transformedRect = null;
     }
 
@@ -717,6 +726,10 @@ public class TransformedTextPainter implements Debuggable {
         return fullShape;
     }
 
+    /**
+     * Creates the combined shape for a single line of text, including
+     * its glyphs and any active decorations like underlines or strikethroughs.
+     */
     private Shape getLineShape(String line, FontRenderContext frc, FontMetrics metrics, boolean hasKerning, boolean hasLigatures, boolean hasUnderline, boolean hasStrikeThrough) {
         GlyphVector glyphs;
         if (!hasKerning && !hasLigatures && font.getSize() <= 100) {

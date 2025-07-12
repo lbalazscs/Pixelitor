@@ -26,8 +26,6 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
-import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.sound.midi.MidiChannel;
@@ -40,7 +38,6 @@ import java.io.File;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static java.lang.String.format;
@@ -309,18 +306,11 @@ public class Dialogs {
             return;
         }
 
-        // avoid the mixing of the stack trace with
-        // the event dumps
-        Utils.sleep(2, TimeUnit.SECONDS);
-
-        if (randomGUITest) {
-            Events.dumpAll();
-        }
         Toolkit.getDefaultToolkit().beep();
         playWarningSound();
     }
 
-    public static void playWarningSound() {
+    private static void playWarningSound() {
         try {
             int maxVolume = 90;
             int sound = 65;

@@ -185,8 +185,8 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public Double getParamValue() {
-        return angle;
+    public String getParamValue() {
+        return String.valueOf(angle);
     }
 
     @Override
