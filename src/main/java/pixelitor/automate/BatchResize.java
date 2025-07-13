@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import static javax.swing.BoxLayout.Y_AXIS;
 import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
 
 /**
- * The batch resize functionality
+ * The batch resize functionality.
  */
 public class BatchResize {
     private BatchResize() { // do not instantiate
@@ -44,18 +44,18 @@ public class BatchResize {
             .show();
     }
 
-    private static void dialogAccepted(BatchResizePanel p) {
-        p.saveValues();
+    private static void dialogAccepted(BatchResizePanel panel) {
+        panel.rememberSettings();
 
-        int maxWidth = p.getNewWidth();
-        int maxHeight = p.getNewHeight();
+        int maxWidth = panel.getNewWidth();
+        int maxHeight = panel.getNewHeight();
 
         var resizeAction = new Resize(maxWidth, maxHeight, true);
         new BatchProcessor(resizeAction, "Batch Resize...").processFiles();
     }
 
     /**
-     * The GUI for batch resize
+     * The panel for batch resize settings.
      */
     static class BatchResizePanel extends ValidatedPanel {
         private final OpenSaveDirsPanel openSaveDirsPanel;
@@ -64,14 +64,16 @@ public class BatchResize {
 
         private static final int DEFAULT_WIDTH = 300;
         private static final int DEFAULT_HEIGHT = 300;
+        private static final String WIDTH_LABEL = "Max Width";
+        private static final String HEIGHT_LABEL = "Max Height";
 
         private BatchResizePanel() {
             var sizePanel = new JPanel();
 
             IntDocumentFilter documentFilter = new IntDocumentFilter();
 
-            widthTF = addTextField("Max Width:", "widthTF", DEFAULT_WIDTH, sizePanel, documentFilter);
-            heightTF = addTextField("Max Height:", "heightTF", DEFAULT_HEIGHT, sizePanel, documentFilter);
+            widthTF = addTextField(WIDTH_LABEL + ":", "widthTF", DEFAULT_WIDTH, sizePanel, documentFilter);
+            heightTF = addTextField(HEIGHT_LABEL + ":", "heightTF", DEFAULT_HEIGHT, sizePanel, documentFilter);
 
             setLayout(new BoxLayout(this, Y_AXIS));
             add(sizePanel);
@@ -84,7 +86,8 @@ public class BatchResize {
 
             JTextField tf = new JTextField(String.valueOf(defaultValue), 5);
             tf.setName(name);
-            sizePanel.add(createPositiveIntLayer(label, tf, false));
+            // the JLayer shows immediate visual feedback for invalid input
+            sizePanel.add(createPositiveIntLayer(label, tf));
             documentFilter.applyOn(tf);
 
             return tf;
@@ -93,32 +96,22 @@ public class BatchResize {
         @Override
         public ValidationResult validateSettings() {
             return openSaveDirsPanel.validateSettings()
-                .withErrorIf(widthTF.getText().trim().isEmpty(),
-                    "The \"width\" field is empty")
-                .withErrorIf(heightTF.getText().trim().isEmpty(),
-                    "The \"height\" field is empty");
+                .requirePositiveInt(widthTF.getText(), WIDTH_LABEL)
+                .requirePositiveInt(heightTF.getText(), HEIGHT_LABEL);
         }
 
-        private void saveValues() {
-            openSaveDirsPanel.rememberValues();
+        private void rememberSettings() {
+            openSaveDirsPanel.rememberSettings();
         }
 
         private int getNewWidth() {
-            try {
-                return Integer.parseInt(widthTF.getText());
-            } catch (NumberFormatException e) {
-                widthTF.setText(String.valueOf(DEFAULT_WIDTH));
-                return DEFAULT_WIDTH;
-            }
+            // validation already ensured this is a valid positive integer
+            return Integer.parseInt(widthTF.getText().trim());
         }
 
         private int getNewHeight() {
-            try {
-                return Integer.parseInt(heightTF.getText());
-            } catch (NumberFormatException e) {
-                heightTF.setText(String.valueOf(DEFAULT_HEIGHT));
-                return DEFAULT_HEIGHT;
-            }
+            // validation already ensured this is a valid positive integer
+            return Integer.parseInt(heightTF.getText().trim());
         }
     }
 }

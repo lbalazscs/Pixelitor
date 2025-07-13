@@ -18,11 +18,12 @@
 package pixelitor.gui.utils;
 
 import java.awt.Component;
+import java.io.File;
 
 import static java.lang.String.format;
 
 /**
- * Represents the result of a validation operation as an immutable objct.
+ * Represents the result of a validation as an immutable object.
  * It supports chaining multiple validations and combining their results.
  */
 public class ValidationResult {
@@ -83,72 +84,77 @@ public class ValidationResult {
             assert this == VALID_RESULT;
             assert !other.isValid() || other == VALID_RESULT;
 
+            // if this one is valid, the result is determined by the other one
             return other;
-        } else {
-            if (other.isValid()) {
-                return this; // with our error message
-            } else {
-                return invalid(combineErrorMessages(errorMsg, other.errorMsg));
-            }
         }
+        if (other.isValid) {
+            return this;
+        }
+        // both are invalid, so combine the error messages
+        return invalid(combineErrorMessages(errorMsg, other.errorMsg));
     }
 
     /**
      * Adds a new error message to this validation result.
      */
-    public ValidationResult withError(String newErrorMsg) {
+    public ValidationResult addError(String newErrorMsg) {
         if (isValid) {
             assert this == VALID_RESULT;
             return invalid(newErrorMsg);
-        } else {
-            return invalid(combineErrorMessages(this.errorMsg, newErrorMsg));
         }
+        return invalid(combineErrorMessages(this.errorMsg, newErrorMsg));
     }
 
     /**
      * Conditionally adds an error message.
      */
-    public ValidationResult withErrorIf(boolean condition, String newErrorMsg) {
-        return condition ? withError(newErrorMsg) : this;
-    }
-
-    /**
-     * Validates that a numeric value is not zero.
-     */
-    public ValidationResult validateNonZero(int value, String fieldName) {
-        return withErrorIf(value == 0,
-            format("<b>%s</b> cannot be zero", fieldName));
+    public ValidationResult addErrorIf(boolean condition, String newErrorMsg) {
+        return condition ? addError(newErrorMsg) : this;
     }
 
     /**
      * Validates that a numeric value is not negative (0 is allowed).
      */
-    public ValidationResult validateNonNegative(int value, String fieldName) {
-        return withErrorIf(value < 0,
+    public ValidationResult requireNonNegative(int value, String fieldName) {
+        return addErrorIf(value < 0,
             format("<b>%s</b> must not be negative", fieldName));
     }
 
     /**
      * Validates that a numeric value is positive (0 is not allowed).
      */
-    public ValidationResult validatePositive(int value, String fieldName) {
-        return withErrorIf(value <= 0,
+    public ValidationResult requirePositive(int value, String fieldName) {
+        return addErrorIf(value <= 0,
             format("<b>%s</b> must be positive", fieldName));
     }
 
     /**
-     * Validates that a string can be parsed as a positive integer.
+     * Validates that a string represents a positive integer.
      */
-    public ValidationResult validatePositiveInt(String text, String fieldName) {
-        ValidationResult resultForThisCheck;
+    public ValidationResult requirePositiveInt(String text, String fieldName) {
         try {
             int value = Integer.parseInt(text.trim());
-            resultForThisCheck = valid().validatePositive(value, fieldName);
+            return this.requirePositive(value, fieldName);
         } catch (NumberFormatException e) {
-            resultForThisCheck = invalid(format("<b>%s</b> must be an integer.", fieldName));
+            return this.addError(format("<b>%s</b> must be an integer.", fieldName));
         }
-        // combine the result of this check with the previous result
-        return this.and(resultForThisCheck);
+    }
+
+    /**
+     * Validates that a given File is a directory and it exists.
+     */
+    public ValidationResult requireExistingDir(File dir, String description) {
+        if (!dir.exists()) {
+            return addError(format("The selected %s folder <b>%s</b> doesn't exist.",
+                description, dir.getAbsolutePath()));
+        }
+
+        if (!dir.isDirectory()) {
+            return addError(format("The selected %s <b>%s</b> is not a folder.",
+                description, dir.getAbsolutePath()));
+        }
+
+        return this;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,12 +28,10 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.io.File;
 
-import static java.lang.String.format;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
- * A panel for selecting an input folder,
- * an output folder, and a saving file format.
+ * A panel for selecting input/output folders and the save file format.
  */
 class OpenSaveDirsPanel extends ValidatedPanel {
     private final BrowseFilesSupport inputChooser
@@ -74,30 +72,17 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         File inputDir = inputChooser.getSelectedFile();
         File outputDir = outputChooser.getSelectedFile();
 
-        var result = ValidationResult.valid();
-        result = validateDirExists(result, inputDir, "input");
-        result = validateDirExists(result, outputDir, "output");
-
-        if (inputDir.equals(outputDir)) {
-            ValidationResult sameDirError = ValidationResult.invalid(
+        return ValidationResult.valid()
+            .requireExistingDir(inputDir, "input")
+            .requireExistingDir(outputDir, "output")
+            .addErrorIf(inputDir.equals(outputDir),
                 "The input and output folders must be different.");
-            return result.and(sameDirError);
-        }
-        return result;
     }
 
-    private static ValidationResult validateDirExists(ValidationResult currentResult,
-                                                      File dir,
-                                                      String directoryType) {
-        if (!dir.exists()) {
-            String msg = format("The selected %s folder %s doesn't exist.",
-                directoryType, dir.getAbsolutePath());
-            currentResult = currentResult.and(ValidationResult.invalid(msg));
-        }
-        return currentResult;
-    }
-
-    public void rememberValues() {
+    /**
+     * Saves the chosen directories and format for future use.
+     */
+    public void rememberSettings() {
         Dirs.setLastOpen(inputChooser.getSelectedFile());
         Dirs.setLastSave(outputChooser.getSelectedFile());
         FileFormat.setLastSaved(getSelectedFormat());

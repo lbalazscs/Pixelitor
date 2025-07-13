@@ -148,7 +148,7 @@ public class LayerAnimation {
             settingsPanel.add(new JLabel("Delay Between Frames (Milliseconds):"));
             delayTF = new JTextField("200", 4);
             settingsPanel.add(TextFieldValidator.createPositiveIntLayer(
-                "Delay", delayTF, false));
+                "Delay", delayTF));
 
             add(settingsPanel);
 
@@ -172,7 +172,7 @@ public class LayerAnimation {
         @Override
         public ValidationResult validateSettings() {
             return ValidationResult.valid()
-                .validatePositiveInt(delayTF.getText(), "Delay");
+                .requirePositiveInt(delayTF.getText(), "Delay");
         }
     }
 }

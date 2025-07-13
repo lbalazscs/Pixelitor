@@ -336,8 +336,8 @@ public class PreferencesPanel extends JTabbedPane {
         undoLevelsTF.setName("undoLevelsTF");
         undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
         gbh.addLabelAndControl(UNDO_LEVELS_LABEL + ": ",
-            TextFieldValidator.createPositiveIntLayer(UNDO_LEVELS_LABEL,
-                undoLevelsTF, true));
+            TextFieldValidator.createNonNegativeIntLayer(UNDO_LEVELS_LABEL,
+                undoLevelsTF));
     }
 
     private void addMagickDirField(GridBagHelper gbh) {

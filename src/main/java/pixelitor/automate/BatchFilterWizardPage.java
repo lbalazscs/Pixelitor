@@ -59,9 +59,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
             var mainPanel = new JPanel(new VerticalLayout());
             mainPanel.add(searchPanel);
-            if (openSaveDirsPanel == null) {
-                openSaveDirsPanel = new OpenSaveDirsPanel();
-            }
+            openSaveDirsPanel = new OpenSaveDirsPanel();
             mainPanel.add(openSaveDirsPanel);
 
             return mainPanel;
@@ -88,7 +86,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
             ((BatchFilterWizard) wizard).setFilter(filter);
 
-            openSaveDirsPanel.rememberValues();
+            openSaveDirsPanel.rememberSettings();
         }
     }, FILTER_GUI {
         @Override
@@ -105,8 +103,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         public JComponent createPanel(Wizard wizard, Drawable dr) {
             Filter filter = ((BatchFilterWizard) wizard).getFilter();
 
-            // This page will be shown only if
-            // the selected filter is a filter with GUI.
+            // this page is shown only if the selected filter has a GUI
             FilterWithGUI guiFilter = (FilterWithGUI) filter;
 
             dr.startPreviewing();
@@ -121,8 +118,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public void onComplete(Wizard wizard, Drawable dr) {
-            // cancel the previewing
-            onWizardCanceled(dr);
+            dr.stopPreviewing();
         }
     }
 }

@@ -24,7 +24,6 @@ import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.*;
 import pixelitor.utils.ResizeUnit;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -34,12 +33,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 
 import static java.awt.FlowLayout.LEFT;
-import static java.lang.Integer.parseInt;
 import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
 
 /**
@@ -47,7 +43,6 @@ import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
  */
 @SuppressWarnings("SuspiciousNameCombination")
 public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener, DialogMenuOwner {
-    private static final NumberFormat PERCENT_FORMAT = new DecimalFormat("#0.00");
     private static final int INPUT_FIELD_COLUMNS = 5;
 
     // shared model for the two comboboxes
@@ -63,10 +58,8 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     private int targetWidth;
     private int targetHeight;
-    private double targetWidthPercent;
-    private double targetHeightPercent;
 
-    private final Validator widthdValidator = new Validator("Width");
+    private final Validator widthValidator = new Validator("Width");
     private final Validator heightValidator = new Validator("Height");
     private final TitledBorder border;
 
@@ -77,8 +70,6 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
         targetWidth = origWidth;
         targetHeight = origHeight;
-        targetWidthPercent = 100.0;
-        targetHeightPercent = 100.0;
 
         unitSelectorModel = new DefaultComboBoxModel<>(ResizeUnit.values());
         var inputPanel = new JPanel(new GridBagLayout());
@@ -89,7 +80,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         widthTF.addKeyListener(this);
         updateWidthText(ResizeUnit.PIXELS);
         var unitChooser1 = new JComboBox<>(unitSelectorModel);
-        var widthLayer = wrapWithValidation(widthTF, widthdValidator);
+        var widthLayer = wrapWithValidation(widthTF, widthValidator);
         gbh.addLabelAndTwoControls("Width:", widthLayer, unitChooser1);
 
         heightTF = new JTextField(INPUT_FIELD_COLUMNS);
@@ -123,19 +114,8 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         return (ResizeUnit) unitSelectorModel.getSelectedItem();
     }
 
-    private boolean usePixelUnit() {
-        return unitSelectorModel.getSelectedItem() == ResizeUnit.PIXELS;
-    }
-
     private boolean keepProportions() {
         return keepProportionsCB.isSelected();
-    }
-
-    private static double parseDouble(String s) throws ParseException {
-        if (s.isEmpty()) {
-            return 0;
-        }
-        return Utils.parseLocalizedDouble(s);
     }
 
     // a combo box or a checkbox was used
@@ -151,14 +131,16 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     private void keepProportionsByAdjustingHeight() {
-        targetHeight = (int) (targetWidth / origAspectRatio);
-        targetHeightPercent = targetWidthPercent;
+        targetHeight = (int) Math.round(targetWidth / origAspectRatio);
+        if (targetHeight == 0) {
+            targetHeight = 1;
+        }
         updateHeightText(getUnit());
     }
 
     private void unitChanged() {
         ResizeUnit newUnit = getUnit();
-        widthdValidator.setUnit(newUnit);
+        widthValidator.setUnit(newUnit);
         heightValidator.setUnit(newUnit);
         updateWidthText(newUnit);
         updateHeightText(newUnit);
@@ -174,105 +156,74 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (e.getSource() == widthTF) {
-            keyReleasedInWidthTF();
-            updateBorderText();
-        } else if (e.getSource() == heightTF) {
-            keyReleasedInHeightTF();
+        Object source = e.getSource();
+        if (source == widthTF || source == heightTF) {
+            textFieldChanged((JTextField) source);
             updateBorderText();
         }
     }
 
-    private void keyReleasedInWidthTF() {
-        if (usePixelUnit()) {
-            try {
-                targetWidth = parseInt(getWidthText());
-                targetWidthPercent = ((double) targetWidth) * 100 / origWidth;
-                if (keepProportions()) {
-                    targetHeight = (int) (targetWidth / origAspectRatio);
-                    if (targetHeight == 0) {
-                        targetHeight = 1;
-                    }
-                    updateHeightText(ResizeUnit.PIXELS);
-                    targetHeightPercent = targetWidthPercent;
-                }
-            } catch (NumberFormatException ex) {
-                resetWidth(ResizeUnit.PIXELS);
+    /**
+     * Handles a change in one of the text fields.
+     */
+    private void textFieldChanged(JTextField source) {
+        boolean isWidth = source == widthTF;
+        try {
+            updateModelFromText(source.getText().trim(), isWidth);
+            if (keepProportions()) {
+                recalculateOtherDimension(isWidth);
             }
-        } else { // unit is percentage
-            try {
-                targetWidthPercent = parseDouble(getWidthText());
-                targetWidth = (int) (origWidth * targetWidthPercent / 100);
-                if (keepProportions()) {
-                    targetHeight = (int) (targetWidth / origAspectRatio);
-                    targetHeightPercent = targetWidthPercent;
-                    updateHeightText(ResizeUnit.PERCENTAGE);
-                }
-            } catch (ParseException e) {
-                resetWidth(ResizeUnit.PERCENTAGE);
+        } catch (NumberFormatException | ParseException e) {
+            // mark the value as invalid, which causes the border text to show "??"
+            if (isWidth) {
+                targetWidth = -1;
+            } else {
+                targetHeight = -1;
             }
         }
     }
 
-    private void resetWidth(ResizeUnit unit) {
-        if (isWidthFieldEmpty()) {
-            targetWidth = -1;
-        } else if (targetWidth > 0) {
-            updateWidthText(unit);
+    /**
+     * Updates the model from the text in the source text field.
+     */
+    private void updateModelFromText(String text, boolean isWidthField) throws ParseException, NumberFormatException {
+        ResizeUnit unit = getUnit();
+        double value = unit.parse(text);
+
+        if (isWidthField) {
+            targetWidth = unit.toPixels(value, origWidth);
+        } else { // height field
+            targetHeight = unit.toPixels(value, origHeight);
         }
     }
 
-    private void keyReleasedInHeightTF() {
-        if (usePixelUnit()) {
-            try {
-                targetHeight = parseInt(getHeightText());
-                targetHeightPercent = ((double) targetHeight) * 100 / origHeight;
-                if (keepProportions()) {
-                    targetWidth = (int) (targetHeight * origAspectRatio);
-                    if (targetWidth == 0) {
-                        targetWidth = 1;
-                    }
-                    updateWidthText(ResizeUnit.PIXELS);
-                    targetWidthPercent = targetHeightPercent;
-                }
-            } catch (NumberFormatException ex) {
-                resetHeight(ResizeUnit.PIXELS);
+    /**
+     * Recalculates the other dimension to keep proportions.
+     */
+    private void recalculateOtherDimension(boolean changedWidth) {
+        if (changedWidth) {
+            targetHeight = (int) Math.round(targetWidth / origAspectRatio);
+            if (targetHeight == 0) {
+                targetHeight = 1;
             }
-        } else {  // unit is percent
-            try {
-                targetHeightPercent = parseDouble(getHeightText());
-                targetHeight = (int) (origHeight * targetHeightPercent / 100);
-                if (keepProportions()) {
-                    targetWidth = (int) (targetHeight * origAspectRatio);
-                    targetWidthPercent = targetHeightPercent;
-                    updateWidthText(ResizeUnit.PERCENTAGE);
-                }
-            } catch (ParseException e) {
-                resetHeight(ResizeUnit.PERCENTAGE);
+            updateHeightText(getUnit());
+        } else { // changed height
+            targetWidth = (int) Math.round(targetHeight * origAspectRatio);
+            if (targetWidth == 0) {
+                targetWidth = 1;
             }
-        }
-    }
-
-    private void resetHeight(ResizeUnit unit) {
-        if (isHeightFieldEmpty()) {
-            targetHeight = -1;
-        } else if (targetHeight > 0) {
-            updateHeightText(unit);
+            updateWidthText(getUnit());
         }
     }
 
     private void updateWidthText(ResizeUnit unit) {
-        widthTF.setText(switch (unit) {
-            case PIXELS -> String.valueOf(targetWidth);
-            case PERCENTAGE -> PERCENT_FORMAT.format(targetWidthPercent);
-        });
+        double valueInUnit = unit.fromPixels(targetWidth, origWidth);
+        widthTF.setText(unit.format(valueInUnit));
     }
 
     private void updateHeightText(ResizeUnit unit) {
-        heightTF.setText(switch (unit) {
-            case PIXELS -> String.valueOf(targetHeight);
-            case PERCENTAGE -> PERCENT_FORMAT.format(targetHeightPercent);
-        });
+        double valueInUnit = unit.fromPixels(targetHeight, origHeight);
+        heightTF.setText(unit.format(valueInUnit));
     }
 
     private void updateBorderText() {
@@ -288,7 +239,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     @Override
     public ValidationResult validateSettings() {
-        return widthdValidator.check(widthTF)
+        return widthValidator.check(widthTF)
             .and(heightValidator.check(heightTF));
     }
 
@@ -296,16 +247,9 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         return widthTF.getText().trim();
     }
 
+
     private String getHeightText() {
         return heightTF.getText().trim();
-    }
-
-    private boolean isWidthFieldEmpty() {
-        return getWidthText().isEmpty();
-    }
-
-    private boolean isHeightFieldEmpty() {
-        return getHeightText().isEmpty();
     }
 
     private int getTargetWidth() {
@@ -333,7 +277,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.putBoolean("Pixels", usePixelUnit());
+        preset.putBoolean("Pixels", getUnit() == ResizeUnit.PIXELS);
         preset.putBoolean("Constrain", keepProportions());
         preset.put("Width", getWidthText());
         preset.put("Height", getHeightText());
@@ -352,10 +296,10 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         heightTF.setText(preset.get("Height"));
         widthTF.setText(preset.get("Width"));
 
-        if (keep) {
-            // Ensure that the values are consistent with the current image size.
-            // The height will be adjusted to match the width.
-            keyReleasedInWidthTF();
+        // update model from text fields
+        textFieldChanged(widthTF);
+        if (!keep) {
+            textFieldChanged(heightTF);
         }
         updateBorderText();
     }
@@ -384,7 +328,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         @Override
         public ValidationResult check(JTextField textField) {
             if (pixelMode) {
-                return TextFieldValidator.hasPositiveInt(textField, label, false);
+                return TextFieldValidator.hasPositiveInt(textField, label);
             } else {
                 return TextFieldValidator.hasPositiveDouble(textField, label);
             }

@@ -68,7 +68,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
         var tf = new JTextField(String.valueOf(value));
         tf.setName(name);
         gbh.addLabelAndTwoControls(label,
-            TextFieldValidator.createPositiveIntLayer(label, tf, false),
+            TextFieldValidator.createPositiveIntLayer(label, tf),
             new JLabel("pixels"));
         return tf;
     }
@@ -76,8 +76,8 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
     @Override
     public ValidationResult validateSettings() {
         var result = ValidationResult.valid()
-            .validatePositiveInt(widthTF.getText(), "Width")
-            .validatePositiveInt(heightTF.getText(), "Height");
+            .requirePositiveInt(widthTF.getText(), "Width")
+            .requirePositiveInt(heightTF.getText(), "Height");
 
         if (!result.isValid()) {
             return result;
@@ -92,7 +92,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
         long numPixels = ((long) width) * height;
         if (numPixels > Integer.MAX_VALUE) {
             // theoretical limit, as the pixels ultimately will be stored in an array
-            return result.withError(format(
+            return result.addError(format(
                 "Pixelitor doesn't support images with more than %d pixels." +
                     "<br>%dx%d would be %d pixels.",
                 Integer.MAX_VALUE, width, height, numPixels));
@@ -101,7 +101,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
             long allocatedMemory = rt.totalMemory() - rt.freeMemory();
             long availableMemory = rt.maxMemory() - allocatedMemory;
             if (numPixels * 4 > availableMemory) {
-                return result.withError(format(
+                return result.addError(format(
                     "The image would not fit into memory." +
                         "<br>An image of %dx%d pixels needs at least %d megabytes." +
                         "<br>Available memory is at most %d megabytes.",

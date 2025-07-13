@@ -75,12 +75,11 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
         strokeCountTF.setName("strokeCountTF");
         gbh.addLabelAndControl(STROKE_COUNT_TEXT + ":",
             createPositiveIntLayer(
-                STROKE_COUNT_TEXT, strokeCountTF, false));
+                STROKE_COUNT_TEXT, strokeCountTF));
 
         strokeLengthTF = new JTextField("100");
         gbh.addLabelAndControl(STROKE_LENGTH_TEXT + ":",
-            createPositiveIntLayer(
-                STROKE_LENGTH_TEXT, strokeLengthTF, false));
+            createPositiveIntLayer(STROKE_LENGTH_TEXT, strokeLengthTF));
 
         gbh.addParam(lengthVariation);
         gbh.addParam(curvature);
@@ -122,8 +121,8 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     @Override
     public ValidationResult validateSettings() {
         return ValidationResult.valid()
-            .validatePositiveInt(strokeCountTF.getText(), STROKE_COUNT_TEXT)
-            .validatePositiveInt(strokeLengthTF.getText(), STROKE_LENGTH_TEXT);
+            .requirePositiveInt(strokeCountTF.getText(), STROKE_COUNT_TEXT)
+            .requirePositiveInt(strokeLengthTF.getText(), STROKE_LENGTH_TEXT);
     }
 
     @Override
