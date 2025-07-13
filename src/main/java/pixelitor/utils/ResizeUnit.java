@@ -22,14 +22,14 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 
 public enum ResizeUnit {
-    PIXELS("pixels") {
+    PIXELS("pixels", false) {
         @Override
-        public int toPixels(double value, int originalSize) {
+        public int toPixels(double value, int originalSize, int dpi) {
             return (int) Math.round(value);
         }
 
         @Override
-        public double fromPixels(int pixelValue, int originalSize) {
+        public double fromPixels(int pixelValue, int originalSize, int dpi) {
             return pixelValue;
         }
 
@@ -40,22 +40,18 @@ public enum ResizeUnit {
 
         @Override
         public double parse(String text) throws NumberFormatException {
-            if (text.isEmpty()) {
-                return 0;
-            }
-            return Integer.parseInt(text);
+            return text.isEmpty() ? 0 : Integer.parseInt(text);
         }
-    },
-    PERCENTAGE("percent") {
+    }, PERCENTAGE("percent", false) {
         private static final NumberFormat PERCENT_FORMAT = new DecimalFormat("#0.00");
 
         @Override
-        public int toPixels(double value, int originalSize) {
+        public int toPixels(double value, int originalSize, int dpi) {
             return (int) Math.round(originalSize * value / 100.0);
         }
 
         @Override
-        public double fromPixels(int pixelValue, int originalSize) {
+        public double fromPixels(int pixelValue, int originalSize, int dpi) {
             return ((double) pixelValue) * 100.0 / originalSize;
         }
 
@@ -66,17 +62,65 @@ public enum ResizeUnit {
 
         @Override
         public double parse(String text) throws ParseException {
-            if (text.isEmpty()) {
-                return 0;
-            }
-            return Utils.parseLocalizedDouble(text);
+            return text.isEmpty() ? 0 : Utils.parseLocalizedDouble(text);
+        }
+    }, CENTIMETERS("cm", true) {
+        private static final NumberFormat FORMAT = new DecimalFormat("#0.00");
+        private static final double INCH_TO_CM = 2.54;
+
+        @Override
+        public int toPixels(double value, int originalSize, int dpi) {
+            return (int) Math.round(value / INCH_TO_CM * dpi);
+        }
+
+        @Override
+        public double fromPixels(int pixelValue, int originalSize, int dpi) {
+            return ((double) pixelValue) / dpi * INCH_TO_CM;
+        }
+
+        @Override
+        public String format(double value) {
+            return FORMAT.format(value);
+        }
+
+        @Override
+        public double parse(String text) throws ParseException {
+            return text.isEmpty() ? 0 : Utils.parseLocalizedDouble(text);
+        }
+    }, INCHES("inches", true) {
+        private static final NumberFormat FORMAT = new DecimalFormat("#0.00");
+
+        @Override
+        public int toPixels(double value, int originalSize, int dpi) {
+            return (int) Math.round(value * dpi);
+        }
+
+        @Override
+        public double fromPixels(int pixelValue, int originalSize, int dpi) {
+            return ((double) pixelValue) / dpi;
+        }
+
+        @Override
+        public String format(double value) {
+            return FORMAT.format(value);
+        }
+
+        @Override
+        public double parse(String text) throws ParseException {
+            return text.isEmpty() ? 0 : Utils.parseLocalizedDouble(text);
         }
     };
 
     private final String displayName;
+    private final boolean physical;
 
-    ResizeUnit(String displayName) {
+    ResizeUnit(String displayName, boolean physical) {
         this.displayName = displayName;
+        this.physical = physical;
+    }
+
+    public boolean isPhysical() {
+        return physical;
     }
 
     @Override
@@ -87,12 +131,12 @@ public enum ResizeUnit {
     /**
      * Converts a value from this unit to pixels.
      */
-    public abstract int toPixels(double value, int originalSize);
+    public abstract int toPixels(double value, int originalSize, int dpi);
 
     /**
      * Converts a pixel value to this unit.
      */
-    public abstract double fromPixels(int pixelValue, int originalSize);
+    public abstract double fromPixels(int pixelValue, int originalSize, int dpi);
 
     /**
      * Formats a value in this unit for display.

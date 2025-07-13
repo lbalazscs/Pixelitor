@@ -41,9 +41,12 @@ import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
 /**
  * The GUI for the resize settings.
  */
-@SuppressWarnings("SuspiciousNameCombination")
 public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener, DialogMenuOwner {
     private static final int INPUT_FIELD_COLUMNS = 5;
+
+    private static final Integer DEFAULT_DPI = 300;
+    private static final Integer[] DPI_VALUES = {150, DEFAULT_DPI, 600};
+    private int currentDpi = DEFAULT_DPI;
 
     // shared model for the two comboboxes
     private final DefaultComboBoxModel<ResizeUnit> unitSelectorModel;
@@ -51,6 +54,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private final JCheckBox keepProportionsCB;
     private final JTextField heightTF;
     private final JTextField widthTF;
+    private final JComboBox<Integer> dpiChooser;
 
     private final double origAspectRatio;
     private final int origWidth;
@@ -59,8 +63,8 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private int targetWidth;
     private int targetHeight;
 
-    private final Validator widthValidator = new Validator("Width");
-    private final Validator heightValidator = new Validator("Height");
+    private final DimensionValidator widthValidator = new DimensionValidator("Width");
+    private final DimensionValidator heightValidator = new DimensionValidator("Height");
     private final TitledBorder border;
 
     private ResizePanel(Canvas canvas) {
@@ -75,43 +79,56 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         var inputPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(inputPanel);
 
-        widthTF = new JTextField(INPUT_FIELD_COLUMNS);
-        widthTF.setName("widthTF");
-        widthTF.addKeyListener(this);
-        updateWidthText(ResizeUnit.PIXELS);
-        var unitChooser1 = new JComboBox<>(unitSelectorModel);
-        var widthLayer = wrapWithValidation(widthTF, widthValidator);
-        gbh.addLabelAndTwoControls("Width:", widthLayer, unitChooser1);
-
-        heightTF = new JTextField(INPUT_FIELD_COLUMNS);
-        heightTF.setName("heightTF");
-        updateHeightText(ResizeUnit.PIXELS);
-        heightTF.addKeyListener(this);
-        var unitChooser2 = new JComboBox<>(unitSelectorModel);
-        var heightLayer = wrapWithValidation(heightTF, heightValidator);
-        gbh.addLabelAndTwoControls("Height:", heightLayer, unitChooser2);
-
-        unitChooser1.addItemListener(this);
-        unitChooser2.addItemListener(this);
+        widthTF = createTextField("Width:", "widthTF", widthValidator, gbh);
+        heightTF = createTextField("Height:", "heightTF", heightValidator, gbh);
 
         border = BorderFactory.createTitledBorder("");
         updateBorderText();
         inputPanel.setBorder(border);
-        Box verticalBox = Box.createVerticalBox();
-        verticalBox.add(inputPanel);
 
         JPanel optionsPanel = new JPanel(new FlowLayout(LEFT));
         keepProportionsCB = new JCheckBox("Keep Proportions");
         keepProportionsCB.setSelected(true);
         keepProportionsCB.addItemListener(this);
         optionsPanel.add(keepProportionsCB);
-        verticalBox.add(optionsPanel);
 
+        JPanel dpiPanel = new JPanel(new FlowLayout(LEFT));
+        dpiPanel.add(new JLabel("DPI:"));
+        dpiChooser = new JComboBox<>(DPI_VALUES);
+        dpiChooser.setSelectedItem(DEFAULT_DPI);
+        dpiChooser.addItemListener(this);
+        dpiChooser.setEnabled(false);
+        dpiPanel.add(dpiChooser);
+
+        Box verticalBox = Box.createVerticalBox();
+        verticalBox.add(inputPanel);
+        verticalBox.add(optionsPanel);
+        verticalBox.add(dpiPanel);
         add(verticalBox);
+
+        updateWidthText(ResizeUnit.PIXELS);
+        updateHeightText(ResizeUnit.PIXELS);
+    }
+
+    private JTextField createTextField(String labelText, String name,
+                                       DimensionValidator validator,
+                                       GridBagHelper gbh) {
+        JTextField textField = new JTextField(INPUT_FIELD_COLUMNS);
+        textField.setName(name);
+        textField.addKeyListener(this);
+        var unitChooser = new JComboBox<>(unitSelectorModel);
+        var jLayer = wrapWithValidation(textField, validator);
+        gbh.addLabelAndTwoControls(labelText, jLayer, unitChooser);
+        unitChooser.addItemListener(this);
+        return textField;
     }
 
     private ResizeUnit getUnit() {
         return (ResizeUnit) unitSelectorModel.getSelectedItem();
+    }
+
+    private int getDpi() {
+        return (int) dpiChooser.getSelectedItem();
     }
 
     private boolean keepProportions() {
@@ -121,27 +138,55 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     // a combo box or a checkbox was used
     @Override
     public void itemStateChanged(ItemEvent e) {
-        if (e.getSource() == keepProportionsCB) {
+        Object source = e.getSource();
+        if (e.getStateChange() != ItemEvent.SELECTED) {
+            return;
+        }
+
+        if (source == keepProportionsCB) {
             if (keepProportions()) {
-                keepProportionsByAdjustingHeight();
+                adjustHeightToKeepProportions();
             }
-        } else { // one of the combo boxes was selected
+        } else if (source == dpiChooser) {
+            dpiChanged();
+        } else { // one of the unit combo boxes was selected
             unitChanged();
         }
     }
 
-    private void keepProportionsByAdjustingHeight() {
-        targetHeight = (int) Math.round(targetWidth / origAspectRatio);
-        if (targetHeight == 0) {
-            targetHeight = 1;
+    private void dpiChanged() {
+        int oldDpi = currentDpi;
+        int newDpi = getDpi();
+        currentDpi = newDpi;
+
+        // When DPI changes, the physical size should be preserved.
+        // To avoid precision loss from reading the rounded values in the text fields,
+        // we recalculate the target pixel dimensions directly.
+        targetWidth = (int) Math.round(((double) targetWidth / oldDpi) * newDpi);
+        if (targetWidth == 0) {
+            targetWidth = 1;
         }
-        updateHeightText(getUnit());
+
+        if (keepProportions()) {
+            adjustHeightToKeepProportions();
+        } else {
+            // if not keeping proportions, update height independently
+            targetHeight = (int) Math.round(((double) targetHeight / oldDpi) * newDpi);
+            if (targetHeight == 0) {
+                targetHeight = 1;
+            }
+        }
+
+        updateBorderText();
     }
 
     private void unitChanged() {
         ResizeUnit newUnit = getUnit();
         widthValidator.setUnit(newUnit);
         heightValidator.setUnit(newUnit);
+
+        dpiChooser.setEnabled(newUnit.isPhysical());
+
         updateWidthText(newUnit);
         updateHeightText(newUnit);
     }
@@ -189,11 +234,12 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private void updateModelFromText(String text, boolean isWidthField) throws ParseException, NumberFormatException {
         ResizeUnit unit = getUnit();
         double value = unit.parse(text);
+        int dpi = getDpi();
 
         if (isWidthField) {
-            targetWidth = unit.toPixels(value, origWidth);
+            targetWidth = unit.toPixels(value, origWidth, dpi);
         } else { // height field
-            targetHeight = unit.toPixels(value, origHeight);
+            targetHeight = unit.toPixels(value, origHeight, dpi);
         }
     }
 
@@ -202,27 +248,35 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
      */
     private void recalculateOtherDimension(boolean changedWidth) {
         if (changedWidth) {
-            targetHeight = (int) Math.round(targetWidth / origAspectRatio);
-            if (targetHeight == 0) {
-                targetHeight = 1;
-            }
-            updateHeightText(getUnit());
+            adjustHeightToKeepProportions();
         } else { // changed height
-            targetWidth = (int) Math.round(targetHeight * origAspectRatio);
-            if (targetWidth == 0) {
-                targetWidth = 1;
-            }
-            updateWidthText(getUnit());
+            adjustWidthToKeepProportions();
         }
     }
 
+    private void adjustHeightToKeepProportions() {
+        targetHeight = (int) Math.round(targetWidth / origAspectRatio);
+        if (targetHeight == 0) {
+            targetHeight = 1;
+        }
+        updateHeightText(getUnit());
+    }
+
+    private void adjustWidthToKeepProportions() {
+        targetWidth = (int) Math.round(targetHeight * origAspectRatio);
+        if (targetWidth == 0) {
+            targetWidth = 1;
+        }
+        updateWidthText(getUnit());
+    }
+
     private void updateWidthText(ResizeUnit unit) {
-        double valueInUnit = unit.fromPixels(targetWidth, origWidth);
+        double valueInUnit = unit.fromPixels(targetWidth, origWidth, getDpi());
         widthTF.setText(unit.format(valueInUnit));
     }
 
     private void updateHeightText(ResizeUnit unit) {
-        double valueInUnit = unit.fromPixels(targetHeight, origHeight);
+        double valueInUnit = unit.fromPixels(targetHeight, origHeight, getDpi());
         heightTF.setText(unit.format(valueInUnit));
     }
 
@@ -277,7 +331,8 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.putBoolean("Pixels", getUnit() == ResizeUnit.PIXELS);
+        preset.put("Unit", getUnit().toString());
+        preset.putInt("DPI", getDpi());
         preset.putBoolean("Constrain", keepProportions());
         preset.put("Width", getWidthText());
         preset.put("Height", getHeightText());
@@ -285,14 +340,13 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        boolean pixels = preset.getBoolean("Pixels");
-        unitSelectorModel.setSelectedItem(pixels
-            ? ResizeUnit.PIXELS
-            : ResizeUnit.PERCENTAGE);
+        unitSelectorModel.setSelectedItem(preset.getEnum("Unit", ResizeUnit.class));
+        dpiChooser.setSelectedItem(preset.getInt("DPI"));
 
         boolean keep = preset.getBoolean("Constrain");
         keepProportionsCB.setSelected(keep);
 
+        // set text fields first, then update the model from them
         heightTF.setText(preset.get("Height"));
         widthTF.setText(preset.get("Width"));
 
@@ -310,14 +364,13 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     /**
-     * A textfield validator that can validate
-     * either int or double textfields.
+     * Validates text fields for positive numeric values based on the current unit.
      */
-    static class Validator implements TextFieldValidator {
+    static class DimensionValidator implements TextFieldValidator {
         private boolean pixelMode = true;
         private final String label;
 
-        public Validator(String label) {
+        public DimensionValidator(String label) {
             this.label = label;
         }
 
