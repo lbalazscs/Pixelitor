@@ -359,6 +359,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         listenerList.remove(ChangeListener.class, x);
     }
 
+    public void removeAllChangeListeners() {
+        for (ChangeListener listener : listenerList.getListeners(ChangeListener.class)) {
+            listenerList.remove(ChangeListener.class, listener);
+        }
+    }
+
     private void fireStateChanged() {
         Object[] listeners = listenerList.getListenerList();
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
