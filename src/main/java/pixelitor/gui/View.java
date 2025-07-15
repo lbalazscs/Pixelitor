@@ -726,6 +726,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         repaint();
     }
 
+    // recalculates coordinates when the view's layout changes
     private void updateCanvasLocation() {
         int viewWidth = getWidth();
         int viewHeight = getHeight();

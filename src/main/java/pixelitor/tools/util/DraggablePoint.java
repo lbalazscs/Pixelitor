@@ -20,6 +20,9 @@ package pixelitor.tools.util;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.history.HandleMovedEdit;
+import pixelitor.tools.pen.AnchorPoint;
+import pixelitor.tools.pen.ControlPoint;
+import pixelitor.tools.pen.Path;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
@@ -340,7 +343,38 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public void arrowKeyPressed(ArrowKey key) {
-        translate(key.getDeltaX(), key.getDeltaY());
+        // calculate the new position in image space
+        double newImX = imX + key.getDeltaX();
+        double newImY = imY + key.getDeltaY();
+
+        // convert the new image-space position to component-space
+        double newCoX = view.imageXToComponentSpace(newImX);
+        double newCoY = view.imageYToComponentSpace(newImY);
+
+        // setLocation updates both coordinate systems and is
+        // overridable by subclasses to move related points.
+        setLocation(newCoX, newCoY);
+    }
+
+    // nudge an anchor or control point of a path with undo support
+    public boolean nudge(ArrowKey key) {
+        assert (this instanceof AnchorPoint) || (this instanceof ControlPoint);
+
+        if (view == null) {
+            return false;
+        }
+        Composition comp = view.getComp();
+        Path path = comp.getActivePath();
+        if (path == null) {
+            return false;
+        }
+
+        mousePressed(this.x, this.y); // save current position as drag start
+        arrowKeyPressed(key);
+        createMovedEdit(comp).ifPresent(path::handleMoved);
+        view.repaint();
+
+        return true;
     }
 
     /**

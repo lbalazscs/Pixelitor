@@ -110,7 +110,7 @@ public interface Filterable {
 
             FilterGUI gui = fwg.createGUI(this, reset);
 
-            MouseZoomMethod.ACTIVE.installOnOther(gui, getComp().getView());
+            MouseZoomMethod.ACTIVE.installOnOther(gui);
             ZoomMenu.setupZoomKeys(gui);
 
             DialogBuilder dialogBuilder = new DialogBuilder()

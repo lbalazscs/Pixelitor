@@ -50,10 +50,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.*;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static com.jhlabs.image.ImageMath.HALF_SQRT_3;
@@ -1601,5 +1599,32 @@ public class ImageUtils {
         }
 
         return 0x00_00_00_00;
+    }
+
+    /**
+     * Finds the topmost content layer that is opaque at a given point.
+     */
+    public static ContentLayer findOpaqueLayerAtPoint(List<? extends Layer> layers, Point p) {
+        // iterate in reverse order to search layers from top to bottom
+        ListIterator<? extends Layer> li = layers.listIterator(layers.size());
+        while (li.hasPrevious()) {
+            Layer layer = li.previous();
+            if (!(layer instanceof ContentLayer contentLayer)) {
+                continue;
+            }
+            // a small opacity makes the layer effectively invisible for hit-testing
+            if (!layer.isVisible() || layer.getOpacity() < 0.05f) {
+                continue;
+            }
+
+            int pixel = contentLayer.getPixelAtPoint(p);
+
+            int pixelAlphaThreshold = 30;
+            if (((pixel >> 24) & 0xFF) > pixelAlphaThreshold) {
+                return contentLayer;
+            }
+        }
+
+        return null;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that is enabled only if at least one view is opened.
+ * An action that is enabled only if at least one view is open.
  */
 public abstract class AbstractViewEnabledAction extends NamedAction implements ViewActivationListener {
     protected AbstractViewEnabledAction(String name) {
@@ -41,7 +41,9 @@ public abstract class AbstractViewEnabledAction extends NamedAction implements V
     }
 
     private void init() {
+        // created at startup, when no views are open
         setEnabled(false);
+
         Views.addActivationListener(this);
     }
 
@@ -64,5 +66,8 @@ public abstract class AbstractViewEnabledAction extends NamedAction implements V
         }
     }
 
+    /**
+     * Executes the action on the active {@link Composition}.
+     */
     protected abstract void onClick(Composition comp);
 }

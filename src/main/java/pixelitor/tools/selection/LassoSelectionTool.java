@@ -66,7 +66,7 @@ public class LassoSelectionTool extends AbstractSelectionTool {
     @Override
     protected void dragFinished(PMouseEvent e) {
         // common logic in the base class
-        marqueeLassoDragFinished(e);
+        finalizeDragBasedSelection(e);
     }
 
     @Override

@@ -26,19 +26,19 @@ import pixelitor.menus.DrawableAction;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Texts;
 
-import java.util.Optional;
-
 import static pixelitor.filters.util.Filters.getLastFilter;
 
 /**
- * The "Repeat" action, which repeats the last edit.
- * Currently, only filters can be repeated.
+ * The action that repeats the last used filter, either with or without its dialog.
  */
 public class RepeatLast extends DrawableAction {
     private static final String REPEAT_LAST_DEFAULT_NAME = Texts.i18n("repeat_last_def");
     private static final String SHOW_LAST_DEFAULT_NAME = Texts.i18n("show_last_def");
 
+    // an instance that repeats the last filter without showing its dialog
     public static final RepeatLast REPEAT_LAST_ACTION = new RepeatLast(false);
+
+    // an instance that shows the dialog of the last used filter
     public static final RepeatLast SHOW_LAST_ACTION = new RepeatLast(true);
 
     private final boolean showDialog;
@@ -50,48 +50,53 @@ public class RepeatLast extends DrawableAction {
         setEnabled(false);
     }
 
+    /**
+     * Adds the last used filter as a smart filter to the smart object.
+     */
     @Override
     protected void applyToSmartObject(SmartObject so) {
-        // if the active layer is a smart object, then add
-        // the last filter as a new smart filter
-        Optional<Filter> lastFilterOpt = getLastFilter();
-        if (lastFilterOpt.isPresent()) {
-            Filter lastFilter = lastFilterOpt.get();
+        // if the active layer is a smart object, add the last filter as a new smart filter
+        getLastFilter().ifPresent(lastFilter -> {
             if (lastFilter.canBeSmart()) {
-                Filter newInstance = lastFilter.copy();
-                so.tryAddingSmartFilter(newInstance);
+                so.tryAddingSmartFilter(lastFilter.copy());
             } else {
-                Messages.showFilterCantBeSmartMessage(name);
+                Messages.showFilterCantBeSmartMessage(getName());
             }
-        }
+        });
     }
 
+    /**
+     * Applies the last used filter to the drawable.
+     */
     @Override
     protected void process(Drawable dr) {
-        Optional<Filter> lastFilter = getLastFilter();
-        if (showDialog) {
-            lastFilter.ifPresent(filter -> dr.startFilter(filter, false));
-        } else {
-            lastFilter.ifPresent(filter -> dr.startFilter(filter, FilterContext.REPEAT_LAST));
-        }
+        getLastFilter().ifPresent(filter -> {
+            if (showDialog) {
+                // shows the filter's configuration dialog before applying
+                dr.startFilter(filter, false);
+            } else {
+                // re-applies the filter with the last used settings
+                dr.startFilter(filter, FilterContext.REPEAT_LAST);
+            }
+        });
     }
 
+    /**
+     * Enables or disables the action based on whether a last filter is available.
+     */
     @Override
     public void setEnabled(boolean newValue) {
-        // This is called both when images are opened/closed AND when filters are running
         if (newValue) {
-            boolean hasLast;
-            if (showDialog) {
-                hasLast = Filters.hasLastGUIFilter();
-            } else {
-                hasLast = Filters.hasLastFilter();
-            }
-            super.setEnabled(hasLast);
+            boolean hasLastFilter = showDialog ? Filters.hasLastGUIFilter() : Filters.hasLastFilter();
+            super.setEnabled(hasLastFilter);
         } else {
             super.setEnabled(false);
         }
     }
 
+    /**
+     * Updates the action's text and enabled state after a filter has been used.
+     */
     public static void update(Filter lastFilter) {
         Object[] lastFilterNameArgs = {lastFilter.getName()};
 
@@ -102,7 +107,7 @@ public class RepeatLast extends DrawableAction {
             SHOW_LAST_ACTION.setText(Texts.formatI18N("show_last", lastFilterNameArgs) + "...");
             SHOW_LAST_ACTION.setEnabled(true);
         } else {
-            // can't show a filter GUI for a filter without a GUI
+            // can't show a dialog for a filter without a GUI
             SHOW_LAST_ACTION.setText(SHOW_LAST_DEFAULT_NAME);
             SHOW_LAST_ACTION.setEnabled(false);
         }

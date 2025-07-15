@@ -24,13 +24,12 @@ import pixelitor.layers.*;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
-import javax.swing.*;
 import java.awt.EventQueue;
 import java.util.function.Consumer;
 
 /**
- * An {@link Action} that can be done with {@link Drawable}
- * objects (image layers or masks)
+ * An action that operates on a {@link Drawable}, and can optionally
+ * rasterize other layer types or apply to smart objects.
  */
 public abstract class DrawableAction extends AbstractViewEnabledAction {
     protected final String name;
@@ -38,10 +37,6 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
 
     protected DrawableAction(String name) {
         this(name, true, false);
-    }
-
-    protected DrawableAction(String name, boolean hasDialog) {
-        this(name, hasDialog, true);
     }
 
     protected DrawableAction(String name, boolean hasDialog, boolean allowSmartObjects) {
@@ -55,7 +50,7 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
     }
 
     /**
-     * Runs the given task if the active layer is drawable
+     * Runs the given task on the active layer if it is a {@link Drawable}.
      */
     public static void run(String taskName, Consumer<Drawable> task) {
         var action = new DrawableAction(taskName) {
@@ -67,14 +62,13 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
         // Invoke later, because this is typically called from a GUI listener
         // and showing a dialog right now can cause weird things (the combo box
         // remains opened, the dialog button has to be pressed twice).
-        // Also, it is nice to be sure that the effects of original GUI change are done.
+        // Also, it is good practice to ensure that the effects of original GUI change are complete.
         EventQueue.invokeLater(() -> action.actionPerformed(null));
     }
 
     /**
-     * This callback method represents the task that has to be done.
-     * It gets called only if we know that the active layer is
-     * a {@link Drawable} or if it was rasterized into a {@link Drawable}.
+     * Defines the core task for this action, which operates on a {@link Drawable}
+     * that is either the original active layer or a newly rasterized one.
      */
     protected abstract void process(Drawable dr);
 
@@ -84,37 +78,60 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
     }
 
     private void startOnLayer(Layer layer) {
+        // if we are editing a mask, the action applies to the mask
         if (layer.isMaskEditing()) {
             process(layer.getMask());
-        } else if (layer instanceof ImageLayer imageLayer) {
-            process(imageLayer);
-        } else if (layer instanceof SmartObject so) {
+            return;
+        }
+
+        // if the layer itself is a drawable, process it directly
+        if (layer instanceof Drawable dr) {
+            process(dr);
+            return;
+        }
+
+        // handle layers that can be rasterized or have special handling
+        if (layer instanceof SmartObject so) {
             handleSmartObject(so);
-        } else if (layer.isRasterizable()) {
-            if (RandomGUITest.isRunning()) {
-                return;
-            }
-
-            // special case: gradient tool is allowed on Gradient Fill Layers
-            if (layer.getClass() == GradientFillLayer.class && name.equals("Gradient Tool")) {
-                return;
-            }
-
-            boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
-            if (rasterize) {
-                ImageLayer newImageLayer = layer.replaceWithRasterized();
-                process(newImageLayer);
-            }
         } else if (layer instanceof SmartFilter smartFilter) {
+            // for a smart filter, the action applies to its parent smart object
             handleSmartObject(smartFilter.getSmartObject());
-        } else if (layer instanceof AdjustmentLayer) {
+        } else if (layer.isRasterizable()) {
+            handleRasterizableLayer(layer);
+        } else {
+            handleUnsupportedLayer(layer);
+        }
+    }
+
+    private void handleRasterizableLayer(Layer layer) {
+        if (RandomGUITest.isRunning()) {
+            return;
+        }
+
+        // special case: the gradient tool is handled by activating the tool
+        // itself, so this action should do nothing on a gradient fill layer
+        if (layer.getClass() == GradientFillLayer.class && name.equals("Gradient Tool")) {
+            return;
+        }
+
+        boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
+        if (rasterize) {
+            ImageLayer rasterizedLayer = layer.replaceWithRasterized();
+            process(rasterizedLayer);
+        }
+    }
+
+    private void handleUnsupportedLayer(Layer layer) {
+        if (layer instanceof AdjustmentLayer) {
             Dialogs.showErrorDialog("Adjustment Layer",
                 name + " can't be used on adjustment layers.");
         } else if (layer instanceof LayerGroup group) {
-            assert group.isPassThrough(); // isolated groups can be rasterized
+            // isolated groups can be rasterized and are handled by handleRasterizableLayer
+            assert group.isPassThrough();
             Messages.showUnrasterizableLayerGroupError(group, name);
         } else {
-            throw new IllegalStateException("layer is " + layer.getClass().getSimpleName());
+            // this should not be reached if all layer types are handled
+            throw new IllegalStateException("unsupported layer type: " + layer.getClass().getSimpleName());
         }
     }
 
@@ -125,8 +142,8 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
         }
         boolean rasterize = Dialogs.showRasterizeDialog(so, name);
         if (rasterize) {
-            ImageLayer newImageLayer = so.replaceWithRasterized();
-            process(newImageLayer);
+            ImageLayer rasterizedLayer = so.replaceWithRasterized();
+            process(rasterizedLayer);
         }
     }
 

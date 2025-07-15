@@ -58,7 +58,6 @@ import java.awt.image.IndexColorModel;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -316,14 +315,16 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         this.view = view;
 
         if (view != null) {
-            canvas.recalcCoSize(view, true);
-
+            // propagate the new view reference to all child objects
             if (selection != null) {
                 selection.setView(view);
             }
             if (paths != null) {
                 paths.setView(view);
             }
+
+            // now that all children are initialized, it's safe to trigger updates
+            canvas.recalcCoSize(view, true);
         } else { // the new view can be null when closing or reloading
             if (selection != null) {
                 disposeSelection();
@@ -1053,26 +1054,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         Point pixelLoc = new Point((int) p.getX(), (int) p.getY());
 
-        // iterate in reverse order to search layers from top to bottom
-        ListIterator<Layer> li = layerList.listIterator(layerList.size());
-        while (li.hasPrevious()) {
-            Layer layer = li.previous();
-            if (!(layer instanceof ContentLayer contentLayer)) {
-                continue;
-            }
-            if (!layer.isVisible() || layer.getOpacity() < 0.05f) {
-                continue;
-            }
-
-            int pixel = contentLayer.getPixelAtPoint(pixelLoc);
-
-            int pixelAlphaThreshold = 30;
-            if (((pixel >> 24) & 0xFF) > pixelAlphaThreshold) {
-                return layer;
-            }
-        }
-
-        return null;
+        return ImageUtils.findOpaqueLayerAtPoint(layerList, pixelLoc);
     }
 
     public Rectangle2D calcContentBounds(boolean includeTransparent) {

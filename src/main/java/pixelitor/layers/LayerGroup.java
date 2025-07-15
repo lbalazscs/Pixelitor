@@ -511,7 +511,17 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public int getPixelAtPoint(Point p) {
-        return 0;
+        if (isPassThrough()) {
+            // for a pass-through group, find the first opaque pixel from its layers
+            ContentLayer opaqueLayer = ImageUtils.findOpaqueLayerAtPoint(layers, p);
+            if (opaqueLayer == null) {
+                return 0;
+            }
+            return opaqueLayer.getPixelAtPoint(p);
+        } else {
+            // for an isolated group, get the pixel from its cached composite image
+            return ImageUtils.getPixelAt(this, getCachedImage(), p);
+        }
     }
 
     @Override

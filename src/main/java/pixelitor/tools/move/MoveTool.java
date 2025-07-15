@@ -219,8 +219,8 @@ public class MoveTool extends DragTool {
         return true;
     }
 
-    private void setFreeTransformMode(boolean b) {
-        if (b) {
+    private void setFreeTransformMode(boolean enabled) {
+        if (enabled) {
             createTransformBox();
         } else {
             transformBox = null;

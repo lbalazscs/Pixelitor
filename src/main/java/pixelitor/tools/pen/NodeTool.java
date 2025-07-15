@@ -55,21 +55,20 @@ public class NodeTool extends PathTool {
         super.toolActivated(view);
 
         if (view == null) {
-            // allow the tool activation for now, the path
-            // will be checked when there is an active view
+            // allow tool activation for now, the path
+            // will be checked when a view becomes active
             setActionsEnabled(false);
             return;
         }
 
-        Composition comp = view.getComp();
-        Path compPath = comp.getActivePath();
-        if (compPath == null) {
+        if (!view.getComp().hasActivePath()) {
+            // if there is no path, switch to the Pen tool to create one
             Tools.PEN.activate();
             return;
         }
 
         coCoordsChanged(view);
-        setActionsEnabled(compPath != null);
+        setActionsEnabled(true);
     }
 
     @Override
@@ -162,6 +161,7 @@ public class NodeTool extends PathTool {
 
         double x = e.getCoX();
         double y = e.getCoY();
+
         if (e.isPopupTrigger() && activePoint instanceof AnchorPoint ap) {
             ap.showPopup((int) x, (int) y);
         } else {
@@ -183,11 +183,14 @@ public class NodeTool extends PathTool {
         }
 
         DraggablePoint handle = path.findHandleAt(e.getX(), e.getY(), e.isAltDown());
-        if (handle != null) {
-            handle.setActive(true);
-            view.repaint();
-        } else if (activePoint != null) {
-            activePoint.setActive(false);
+        if (handle != activePoint) {
+            if (activePoint != null) {
+                activePoint.setActive(false);
+            }
+            if (handle != null) {
+                handle.setActive(true);
+            }
+            // repaint only if the hovered handle has changed
             view.repaint();
         }
     }
@@ -195,12 +198,10 @@ public class NodeTool extends PathTool {
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (activePoint != null) {
-            activePoint.arrowKeyPressed(key);
-            return true;
+            return activePoint.nudge(key);
         }
         if (lastActive != null) {
-            lastActive.arrowKeyPressed(key);
-            return true;
+            return lastActive.nudge(key);
         }
 
         return false;

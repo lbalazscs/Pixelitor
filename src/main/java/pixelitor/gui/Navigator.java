@@ -76,7 +76,7 @@ public class Navigator extends JComponent
     private int thumbWidth;
     private int thumbHeight;
 
-    private final AdjustmentListener scrollSyncListener;
+    private final AdjustmentListener viewScrollListener;
     private static JDialog dialog;
     private JPopupMenu contextMenu;
 
@@ -87,7 +87,7 @@ public class Navigator extends JComponent
     private static Navigator instance;
 
     private Navigator(View view) {
-        scrollSyncListener = e ->
+        viewScrollListener = e ->
             SwingUtilities.invokeLater(this::syncViewBoxPosition);
 
         recalculateSize(view, true, true, true);
@@ -113,10 +113,10 @@ public class Navigator extends JComponent
         contextMenu.add(new TaskAction("View Box Color...", () ->
             Colors.selectColorWithDialog(this,
                 "View Box Color", viewBoxColor, true,
-                this::setNewViewBoxColor)));
+                this::setViewBoxColor)));
     }
 
-    private void setNewViewBoxColor(Color newColor) {
+    private void setViewBoxColor(Color newColor) {
         viewBoxColor = newColor;
         repaint();
     }
@@ -156,7 +156,7 @@ public class Navigator extends JComponent
     }
 
     private void addZoomingSupport() {
-        MouseZoomMethod.ACTIVE.installOnOther(this, view);
+        MouseZoomMethod.ACTIVE.installOnOther(this);
         ZoomMenu.setupZoomKeys(this);
     }
 
@@ -186,22 +186,24 @@ public class Navigator extends JComponent
         }
         assert instance != null;
         assert instance.view != null;
-        newZoomMethod.installOnOther(instance, instance.view);
+        newZoomMethod.installOnOther(instance);
     }
 
-    public void recalculateSize(View view,
+    /**
+     * Recalculates the navigator size and the scaling factors when the view or canvas changes.
+     */
+    public void recalculateSize(View sourceView,
                                 boolean newView,
                                 boolean canvasSizeChanged,
                                 boolean navigatorResized) {
         assert newView || canvasSizeChanged || navigatorResized : "why did you call me?";
 
         if (newView) {
-            if (this.view != null) {
-                releaseImage();
-            }
+            attachToView(sourceView);
+        }
 
-            this.view = view;
-            scrollPane = view.getViewContainer().getScrollPane();
+        if (newView) {
+            attachToView(sourceView);
         }
 
         if (fixedZoom == null) {
@@ -212,9 +214,9 @@ public class Navigator extends JComponent
         }
 
         if (newView) {
-            recalculateScaling(view, DEFAULT_SIZE, DEFAULT_SIZE);
+            updateThumbnailMetrics(sourceView, DEFAULT_SIZE, DEFAULT_SIZE);
         } else if (canvasSizeChanged || navigatorResized) {
-            recalculateScaling(view, getWidth(), getHeight());
+            updateThumbnailMetrics(sourceView, getWidth(), getHeight());
         } else {
             throw new IllegalStateException();
         }
@@ -223,12 +225,6 @@ public class Navigator extends JComponent
         preferredHeight = thumbHeight;
 
         syncViewBoxPosition();
-
-        if (newView) {
-            view.setNavigator(this);
-            scrollPane.getHorizontalScrollBar().addAdjustmentListener(scrollSyncListener);
-            scrollPane.getVerticalScrollBar().addAdjustmentListener(scrollSyncListener);
-        }
 
         if (canvasSizeChanged) {
             Window window = SwingUtilities.getWindowAncestor(this);
@@ -240,10 +236,22 @@ public class Navigator extends JComponent
         repaint();
     }
 
-    private void releaseImage() {
+    private void attachToView(View newView) {
+        if (this.view != null) {
+            detachFromView();
+        }
+
+        this.view = newView;
+        scrollPane = newView.getViewContainer().getScrollPane();
+        view.setNavigator(this);
+        scrollPane.getHorizontalScrollBar().addAdjustmentListener(viewScrollListener);
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(viewScrollListener);
+    }
+
+    private void detachFromView() {
         view.setNavigator(null);
-        scrollPane.getHorizontalScrollBar().removeAdjustmentListener(scrollSyncListener);
-        scrollPane.getVerticalScrollBar().removeAdjustmentListener(scrollSyncListener);
+        scrollPane.getHorizontalScrollBar().removeAdjustmentListener(viewScrollListener);
+        scrollPane.getVerticalScrollBar().removeAdjustmentListener(viewScrollListener);
 
         view = null;
     }
@@ -326,22 +334,23 @@ public class Navigator extends JComponent
     public void mousePressed(MouseEvent e) {
         if (e.isPopupTrigger()) {
             showPopup(e);
-        } else {
-            Point point = e.getPoint();
-            if (view != null) {
-                if (e.isControlDown()) {
-                    areaZooming = true;
-                    dragging = true;
-                    targetBoxRect = new Rectangle(viewBoxRect);
-                } else if (viewBoxRect.contains(point)) {
-                    areaZooming = false;
-                    dragging = true;
-                }
+            return;
+        }
 
-                if (dragging) {
-                    dragStartPoint = point;
-                    origRectLoc = viewBoxRect.getLocation();
-                }
+        Point point = e.getPoint();
+        if (view != null) {
+            if (e.isControlDown()) {
+                areaZooming = true;
+                dragging = true;
+                targetBoxRect = new Rectangle(viewBoxRect);
+            } else if (viewBoxRect.contains(point)) {
+                areaZooming = false;
+                dragging = true;
+            }
+
+            if (dragging) {
+                dragStartPoint = point;
+                origRectLoc = viewBoxRect.getLocation();
             }
         }
     }
@@ -431,7 +440,7 @@ public class Navigator extends JComponent
         repaint();
     }
 
-    private void recalculateScaling(View view, int width, int height) {
+    private void updateThumbnailMetrics(View view, int width, int height) {
         Canvas canvas = view.getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -481,7 +490,7 @@ public class Navigator extends JComponent
 
     @Override
     public void allViewsClosed() {
-        releaseImage();
+        detachFromView();
         repaint();
     }
 

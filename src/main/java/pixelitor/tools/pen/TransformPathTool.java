@@ -60,14 +60,15 @@ public class TransformPathTool extends PathTool {
         super.toolActivated(view);
 
         if (view == null) {
-            // allow the tool activation for now, the path
-            // will be checked when there is an active view
+            // allow tool activation for now, the path
+            // will be checked when a view becomes active
             setActionsEnabled(false);
             return;
         }
         Composition comp = view.getComp();
         Path compPath = comp.getActivePath();
         if (compPath == null) {
+            // if there is no path, switch to the Pen tool to create one
             Tools.PEN.activate();
             return;
         }
@@ -130,29 +131,28 @@ public class TransformPathTool extends PathTool {
         double x = e.getOrigCoX();
         double y = e.getOrigCoY();
 
-        boolean handleFound = false;
+        // check for a handle press on any box
         for (TransformBox box : boxes) {
             DraggablePoint handle = box.findHandleAt(x, y);
             if (handle != null) {
-                handleFound = true;
                 draggedBox = box;
                 lastActiveBox = box;
                 box.mousePressedOn(handle, x, y);
-                break;
+                return;
             }
         }
-        if (handleFound) {
-            return;
-        }
+
+        // no handle was pressed
         activePoint = null;
 
+        // check for a whole-box drag
         for (TransformBox box : boxes) {
             if (box.contains(x, y)) {
-                box.prepareWholeBoxDrag(x, y);
                 draggedBox = box;
                 lastActiveBox = box;
+                box.prepareWholeBoxDrag(x, y);
                 e.repaint();
-                break;
+                return;
             }
         }
     }
@@ -174,33 +174,32 @@ public class TransformPathTool extends PathTool {
 
     @Override
     public void mouseMoved(MouseEvent e, View view) {
-        boolean hit = false;
+        // check if the mouse is over any handle
         for (TransformBox box : boxes) {
             if (box.processMouseMoved(e)) {
-                hit = true;
-                break;
+                // cursor is set by processMouseMoved, so we are done
+                return;
             }
         }
-        if (!hit) {
-            if (activePoint != null) {
-                activePoint = null;
-                view.repaint();
-            }
-            updateMoveCursor(e, view);
-        }
-    }
 
-    private void updateMoveCursor(MouseEvent e, View view) {
+        // if not over a handle, clear the active point
+        if (activePoint != null) {
+            activePoint = null;
+            view.repaint();
+        }
+
+        // check if we are inside a box to set the MOVE cursor
         int x = e.getX();
         int y = e.getY();
-        boolean insideBox = false;
         for (TransformBox box : boxes) {
             if (box.contains(x, y)) {
-                insideBox = true;
-                break;
+                view.setCursor(MOVE);
+                return;
             }
         }
-        view.setCursor(insideBox ? MOVE : DEFAULT);
+
+        // otherwise, set the default cursor
+        view.setCursor(DEFAULT);
     }
 
     @Override
@@ -212,10 +211,12 @@ public class TransformPathTool extends PathTool {
         return false;
     }
 
+    /**
+     * Creates transform boxes for all subpaths of the active path.
+     */
     public void initBoxes(Composition comp) {
-        // We assume that as long as this tool is active, there is no
-        // way for the paths to change (other than via the boxes), so
-        // we don't have to listen to external path changes.
+        // we assume that paths don't change externally while this tool
+        // is active, so we don't need to listen for path changes
         boxes = comp.getActivePath().createTransformBoxes();
         lastActiveBox = boxes.isEmpty() ? null : boxes.getFirst();
     }

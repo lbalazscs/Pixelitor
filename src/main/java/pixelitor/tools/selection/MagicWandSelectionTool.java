@@ -100,7 +100,7 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
                     } finally {
                         // clean up the builder on the EDT after execution
                         SwingUtilities.invokeLater(() -> {
-                            stopBuildingSelection(comp);
+                            cancelSelectionBuilder();
                             resetCombinator(); // reset combinator after operation completes
                         });
                     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,8 +35,8 @@ public enum MouseZoomMethod {
         }
 
         @Override
-        public void installOnOther(JComponent component, View view) {
-            component.addMouseWheelListener(e -> otherZoomed(view, e));
+        public void installOnOther(JComponent component) {
+            component.addMouseWheelListener(MouseZoomMethod::otherZoomed);
         }
     }, CTRL_WHEEL("Ctrl + Mouse Wheel", "ctrl-wheel") {
         @Override
@@ -51,10 +51,10 @@ public enum MouseZoomMethod {
         }
 
         @Override
-        public void installOnOther(JComponent component, View view) {
+        public void installOnOther(JComponent component) {
             component.addMouseWheelListener(e -> {
                 if (e.isControlDown()) {
-                    otherZoomed(view, e);
+                    otherZoomed(e);
                 }
             });
         }
@@ -74,7 +74,7 @@ public enum MouseZoomMethod {
 
     // used on other components, like the Navigator, where the
     // exact mouse position doesn't matter
-    public abstract void installOnOther(JComponent component, View view);
+    public abstract void installOnOther(JComponent component);
 
     private static void viewZoomed(View view, MouseWheelEvent e) {
         if (e.getWheelRotation() < 0) { // up, away from the user
@@ -84,9 +84,10 @@ public enum MouseZoomMethod {
         }
     }
 
-    private static void otherZoomed(View view, MouseWheelEvent e) {
+    private static void otherZoomed(MouseWheelEvent e) {
+        View view = Views.getActive();
         if (view == null) {
-            return; // all images are closed
+            return; // all views are closed
         }
         if (e.getWheelRotation() < 0) { // up, away from the user
             view.zoomIn();

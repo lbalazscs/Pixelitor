@@ -49,7 +49,7 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
 
         // ensure unfinished selections are cancelled
         // and don't remain visible after switching tools
-        stopBuildingSelection(view.getComp());
+        cancelSelectionBuilder();
     }
 
     @Override
@@ -78,7 +78,7 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
             if (e.isRight()) {
                 // right-click finishes the polygon
                 selectionBuilder.combineShapes();
-                stopBuildingSelection(comp);
+                cancelSelectionBuilder();
             }
         }
 
@@ -94,7 +94,7 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
             // update with the final point (same as the double-clicked point)
             selectionBuilder.updateDraftSelection(e);
             selectionBuilder.combineShapes();
-            stopBuildingSelection(comp);
+            cancelSelectionBuilder();
         }
         // single clicks are handled in dragFinished
     }

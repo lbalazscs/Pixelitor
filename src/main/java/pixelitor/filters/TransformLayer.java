@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.Features;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.AngleParam;
@@ -100,8 +101,12 @@ public class TransformLayer extends ParametrizedFilter {
         // TODO if this runs as a smart filter, then it shouldn't
         //   assume that the active layer is the owner of the image
         Drawable dr = Views.getActiveDrawable();
-        int tx = -dr.getTx();
-        int ty = -dr.getTy();
+        int tx = dr != null ? -dr.getTx() : 0;
+        int ty = dr != null ? -dr.getTy() : 0;
+        if (Features.enableExperimental) {
+            tx = 0;
+            ty = 0;
+        }
 
         double pivotX = (tx + src.getWidth()) * center.getRelativeX();
         double pivotY = (ty + src.getHeight()) * center.getRelativeY();

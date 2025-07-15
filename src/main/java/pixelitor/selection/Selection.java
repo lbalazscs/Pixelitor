@@ -42,7 +42,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 
 /**
- * Represents a selection area on an image with animated "marching ants" border.
+ * Represents a selection area on an image with an animated "marching ants" border.
  */
 public class Selection implements Transformable {
     private static final double DASH_WIDTH = 1.0;
@@ -51,22 +51,22 @@ public class Selection implements Transformable {
     private float dashPhase;
     private Timer marchingAntsTimer;
 
-    // The shape of the selection.
-    // The coordinates are in image space, relative to the canvas.
+    // the shape of the selection, in image-space coordinates relative to the canvas
     private Shape shape;
 
     // backup of the shape before a selection drag started
     private Shape shapeBeforeDrag;
 
-    private View view; // the view displaying this selection
+    // the view displaying this selection
+    private View view;
 
-    // if true, then the "marching ants" are not marching
+    // if true, the "marching ants" are not marching
     private boolean frozen = false;
 
-    // if true, then the "marching ants" are not painted at all
+    // if true, the "marching ants" are not painted at all
     private boolean hidden = false;
 
-    // if true, then this object should not be used anymore
+    // if true, this object should not be used anymore
     private boolean disposed = false;
 
     public Selection(Shape shape, View view) {
@@ -82,30 +82,37 @@ public class Selection implements Transformable {
             frozen = true;
         }
 
-        startMarching();
+        if (shape != null) {
+            startMarching();
+        }
     }
 
     public Selection(Selection orig) {
-        // the shapes can be shared because all changes create new instances
+        // the shape can be shared because all changes create new instances
         this.shape = orig.shape;
-
         this.shapeBeforeDrag = orig.shapeBeforeDrag;
+
         this.frozen = orig.frozen;
         this.hidden = orig.hidden;
-
-        this.view = null; // not copied - will be copied later
-
-        this.dashPhase = 0;
-        this.marchingAntsTimer = null;
-        // The animation timer is not copied - will be started by setView if needed.
-
         this.disposed = orig.disposed;
         assert !orig.disposed;
+
+        // the view is not copied directly; it will be set later
+        this.view = null;
+
+        // the animation timer is not copied; it will be started by setView if needed
+        this.dashPhase = 0;
+        this.marchingAntsTimer = null;
     }
 
+    /**
+     * Starts the "marching ants" animation timer.
+     */
     public void startMarching() {
         assert !disposed : "disposed selection";
         assert view != null : "no view in selection";
+        assert !isMarching();
+        assert shape != null;
 
         if (frozen || hidden) {
             return;
@@ -130,8 +137,8 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Paints the marching ants border onto the given Graphics2D.
-     * Assumes g2 is in image space.
+     * Paints the marching ants border onto the given Graphics2D,
+     * which is assumed to be in image space.
      */
     public void paintMarchingAnts(Graphics2D g2) {
         assert Threads.calledOnEDT() : Threads.callInfo();
@@ -143,8 +150,8 @@ public class Selection implements Transformable {
 
         Stroke origStroke = g2.getStroke();
 
-        // Ensure that the border width doesn't depend on the zooming,
-        // considering that the graphics coordinates are in image space.
+        // ensure that the border width doesn't depend on the zooming,
+        // considering that the graphics coordinates are in image space
         double viewScale = view.getZoomScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
@@ -179,6 +186,7 @@ public class Selection implements Transformable {
      */
     public void dispose() {
         assert AppMode.isUnitTesting() || Threads.calledOnEDT() : Threads.callInfo();
+        assert !disposed;
         if (disposed) {
             return;
         }
@@ -188,27 +196,19 @@ public class Selection implements Transformable {
         disposed = true;
     }
 
+    /**
+     * Sets the shape of the selection.
+     */
     public void setShape(Shape newShape) {
         assert newShape != null;
         assert !disposed;
 
+        boolean hadNoShape = (shape == null);
         shape = newShape;
-    }
 
-    /**
-     * Ensures the selection shape stays within canvas bounds.
-     * This must be always called for new or changed selections.
-     *
-     * @return true if the selection shape is valid
-     */
-    private boolean clipToCanvasBounds(Composition comp) {
-        assert comp == view.getComp();
-        if (shape != null) {
-            shape = comp.clipToCanvasBounds(shape);
-            view.repaint();
-            return !shape.getBounds().isEmpty();
+        if (hadNoShape) {
+            startMarching();
         }
-        return false;
     }
 
     public Shape getShape() {
@@ -222,9 +222,7 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Returns the shape bounds of the selection
-     * Like everything else in this class, this is in image coordinates
-     * (but relative to the canvas, not to the image)
+     * Returns the bounds of the selection shape in image-space coordinates.
      */
     public Rectangle getShapeBounds() {
         assert !disposed;
@@ -248,8 +246,8 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Applies an affine transform to the selection shape.
-     * Returns the shape before transformation.
+     * Applies an affine transform to the selection shape
+     * and returns the shape before the transformation.
      */
     public Shape transform(AffineTransform at) {
         assert !disposed;
@@ -262,6 +260,9 @@ public class Selection implements Transformable {
         return hidden;
     }
 
+    /**
+     * Sets whether the selection border is hidden.
+     */
     public void setHidden(boolean hide, boolean calledFromMenu) {
         assert !disposed : "disposed selection";
         assert view != null;
@@ -271,7 +272,7 @@ public class Selection implements Transformable {
         }
         hidden = hide;
 
-        if (hide) {
+        if (hidden) {
             stopMarching();
         } else {
             startMarching();
@@ -288,23 +289,27 @@ public class Selection implements Transformable {
         return frozen;
     }
 
-    public void setFrozen(boolean b) {
+    /**
+     * Sets whether the marching ants animation is frozen.
+     */
+    public void setFrozen(boolean frozen) {
         assert !disposed;
-        if (this.frozen == b) {
+        if (this.frozen == frozen) {
             return; // no change
         }
 
-        frozen = b;
-        if (b) {
+        this.frozen = frozen;
+        if (this.frozen) {
             stopMarching();
-        } else if (!hidden) {
+        } else {
             startMarching();
         }
     }
 
-    // called when the composition is duplicated
     public void setView(View view) {
         assert view != null;
+        assert !isMarching();
+
         this.view = view;
         startMarching();
     }
@@ -321,7 +326,7 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Prepares for a drag/move operation.
+     * Prepares for a drag/move operation by backing up the current shape.
      */
     public void prepareMovement() {
         assert shape != null;
@@ -358,8 +363,8 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Finalizes the movement of the selection shape after a drag operation.
-     * Returns an edit that can undo/redo the whole movement.
+     * Finalizes the movement of the selection shape after
+     * a drag operation and returns an edit for undo/redo.
      */
     public PixelitorEdit finalizeMovement(boolean keepOrigShape) {
         assert !disposed;

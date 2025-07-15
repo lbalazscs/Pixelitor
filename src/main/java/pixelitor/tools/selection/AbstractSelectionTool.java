@@ -121,6 +121,9 @@ public abstract class AbstractSelectionTool extends DragTool {
     }
 
     protected void cancelSelection(Composition comp) {
+        // if a selection is being built, cancel it first
+        cancelSelectionBuilder();
+
         if (comp.hasSelection() || comp.hasDraftSelection()) {
             comp.deselect(true);
         }
@@ -137,7 +140,7 @@ public abstract class AbstractSelectionTool extends DragTool {
     /**
      * Stops the current selection building process if one is active.
      */
-    protected void stopBuildingSelection(Composition comp) {
+    protected void cancelSelectionBuilder() {
         if (selectionBuilder != null) {
             selectionBuilder.cancelIfNotFinished();
             selectionBuilder = null;
@@ -175,7 +178,7 @@ public abstract class AbstractSelectionTool extends DragTool {
     /**
      * Finalizes the selection after a drag operation for Marquee or Lasso tools.
      */
-    protected void marqueeLassoDragFinished(PMouseEvent e) {
+    protected void finalizeDragBasedSelection(PMouseEvent e) {
         if (drag.isClick()) { // clicks are handled by mouseClicked
             // reset combinator if modifier keys were pressed but resulted in a click
             resetCombinator();
@@ -185,7 +188,7 @@ public abstract class AbstractSelectionTool extends DragTool {
         Composition comp = e.getComp();
         Selection draftSelection = comp.getDraftSelection();
         if (draftSelection == null) {
-            // can happen, if we called stopBuildingSelection()
+            // can happen, if we called cancelSelectionBuilder()
             // for some exceptional reason
             return;
         }
@@ -196,7 +199,7 @@ public abstract class AbstractSelectionTool extends DragTool {
         drag.setExpandFromCenter(expandFromCenter);
         selectionBuilder.updateDraftSelection(drag);
         selectionBuilder.combineShapes();
-        stopBuildingSelection(comp);
+        cancelSelectionBuilder();
         assert !comp.hasDraftSelection();
 
         // reset state for the next operation
