@@ -69,13 +69,30 @@ public class Kuwahara extends ParametrizedFilter {
      * Applies the Kuwahara filter, reading from the source pixels and writing to the destination pixels.
      */
     private static void apply(int[] srcPixels, int[] destPixels, int width, int height, int radius) {
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, height);
+        ProgressTracker pt = new StatusBarProgressTracker(NAME, height + 2);
+
+        // 1. pre-calculate brightness for all pixels
+        float[][] brightnesses = new float[height][width];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                brightnesses[y][x] = rgbToBrightness(srcPixels[y * width + x]);
+            }
+        }
+        pt.unitDone();
+
+        // 2. pre-compute integral images for sum and sum-of-squares.
+        double[][] integralSum = new double[height + 1][width + 1];
+        double[][] integralSumSq = new double[height + 1][width + 1];
+        computeIntegralImages(brightnesses, width, height, integralSum, integralSumSq);
+        pt.unitDone();
+
         float[] hsv = new float[3];
 
+        // 3. main filter loop
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 // find the mean brightness of the most homogeneous sub-region around the current pixel
-                float bestMean = findBestRegionMean(srcPixels, width, height, x, y, radius);
+                float bestMean = findBestRegionMean(integralSum, integralSumSq, width, height, x, y, radius);
 
                 // preserve the original hue and saturation, but use the new brightness
                 int index = y * width + x;
@@ -89,10 +106,44 @@ public class Kuwahara extends ParametrizedFilter {
     }
 
     /**
-     * Calculates the mean brightness of the sub-region with the lowest variance.
+     * Computes integral images for both the sum and the sum of squares of brightness values.
      */
-    private static float findBestRegionMean(int[] pixels, int width, int height, int cx, int cy, int radius) {
-        // defines the top-left corners of the four overlapping sub-regions
+    private static void computeIntegralImages(float[][] brightnesses, int width, int height, double[][] integralSum, double[][] integralSumSq) {
+        for (int y = 0; y < height; y++) {
+            double rowSum = 0.0;
+            double rowSumSq = 0.0;
+            for (int x = 0; x < width; x++) {
+                float b = brightnesses[y][x];
+                rowSum += b;
+                rowSumSq += b * b;
+                // uses padded (height+1, width+1) arrays to simplify boundary checks later
+                integralSum[y + 1][x + 1] = rowSum + integralSum[y][x + 1];
+                integralSumSq[y + 1][x + 1] = rowSumSq + integralSumSq[y][x + 1];
+            }
+        }
+    }
+
+    /**
+     * Calculates the sum of values within a given rectangular region in O(1) time
+     * using a pre-computed integral image.
+     *
+     * @param integralImage The padded (height+1, width+1) integral image.
+     * @param x1            The starting x-coordinate of the region (inclusive).
+     * @param y1            The starting y-coordinate of the region (inclusive).
+     * @param x2            The ending x-coordinate of the region (inclusive).
+     * @param y2            The ending y-coordinate of the region (inclusive).
+     * @return The sum of values in the specified rectangle.
+     */
+    private static double getRegionSum(double[][] integralImage, int x1, int y1, int x2, int y2) {
+        // I[y+1][x+1] corresponds to the sum of the rectangle from origin to original pixel (x,y)
+        return integralImage[y2 + 1][x2 + 1] - integralImage[y1][x2 + 1] - integralImage[y2 + 1][x1] + integralImage[y1][x1];
+    }
+
+    /**
+     * Calculates the mean brightness of the sub-region with the lowest variance using integral images.
+     */
+    private static float findBestRegionMean(double[][] integralSum, double[][] integralSumSq, int width, int height, int cx, int cy, int radius) {
+        // the top-left corners of the four overlapping sub-regions
         int[][] regionOrigins = {
             {cx - radius, cy - radius}, {cx, cy - radius},
             {cx - radius, cy}, {cx, cy}
@@ -103,44 +154,34 @@ public class Kuwahara extends ParametrizedFilter {
 
         // analyze each of the four sub-regions
         for (int[] origin : regionOrigins) {
-            float sum = 0.0f;
-            float sumSq = 0.0f;
-            int count = 0;
+            // define the sub-region boundaries, clamped to the image dimensions
+            int x1 = Math.max(0, origin[0]);
+            int y1 = Math.max(0, origin[1]);
+            int x2 = Math.min(width - 1, origin[0] + radius);
+            int y2 = Math.min(height - 1, origin[1] + radius);
 
-            // iterate over the pixels in the current sub-region
-            for (int y = 0; y <= radius; y++) {
-                for (int x = 0; x <= radius; x++) {
-                    int px = origin[0] + x;
-                    int py = origin[1] + y;
-
-                    // ensure the pixel is within the image bounds
-                    if (px >= 0 && px < width && py >= 0 && py < height) {
-                        int index = py * width + px;
-                        float brightness = rgbToBrightness(pixels[index]);
-                        sum += brightness;
-                        sumSq += brightness * brightness;
-                        count++;
-                    }
-                }
+            // skip if the region is entirely outside the image
+            if (x1 > x2 || y1 > y2) {
+                continue;
             }
 
+            int count = (x2 - x1 + 1) * (y2 - y1 + 1);
             if (count == 0) {
-                continue; // skip empty regions at image edges
+                continue;
             }
 
-            float mean = sum / count;
+            // calculate sum and sum of squares in O(1) using the integral images
+            double sum = getRegionSum(integralSum, x1, y1, x2, y2);
+            double sumSq = getRegionSum(integralSumSq, x1, y1, x2, y2);
+
+            float mean = (float) (sum / count);
             // variance = E[X²] - (E[X])²
-            float variance = (sumSq / count) - (mean * mean);
+            float variance = (float) (sumSq / count) - (mean * mean);
 
             if (variance < minVariance) {
                 minVariance = variance;
                 bestMean = mean;
             }
-        }
-
-        // if all regions were empty, fall back to the original pixel's brightness
-        if (minVariance == Float.MAX_VALUE) {
-            return rgbToBrightness(pixels[cy * width + cx]);
         }
 
         return bestMean;
