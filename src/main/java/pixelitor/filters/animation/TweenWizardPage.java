@@ -109,7 +109,7 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public void onComplete(Wizard wizard, Drawable dr) {
             getAnimation(wizard).captureInitialState();
-            getFilter(wizard).getParamSet().setFinalAnimationMode(true);
+            getFilter(wizard).getParamSet().setAnimationEndStateMode(true);
         }
     }, ENDING_FILTER_STATE {
         @Override

@@ -447,8 +447,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         // 3) Rotate the box (an implicitly the shape) forwards.
 
         double dragLength = transformedDrag.calcImLength();
-        double dragStartX = transformedDrag.getStartXFromCenter();
-        double dragStartY = transformedDrag.getStartYFromCenter();
+        double dragStartX = transformedDrag.getOriginX();
+        double dragStartY = transformedDrag.getOriginY();
         Rectangle2D horBoxImBounds = new Rectangle2D.Double(
             dragStartX,
             dragStartY - dragLength * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
@@ -498,8 +498,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         Drawable dr = comp.getActiveDrawable();
         if (dr != null) { // a text layer could be active
             Rectangle shapeBounds = shape.getBounds();
-            int thickness = 1 + (int) tool.calcExtraThickness();
-            shapeBounds.grow(thickness, thickness);
+            int padding = 1 + (int) tool.calcExtraPadding();
+            shapeBounds.grow(padding, padding);
 
             if (!shapeBounds.isEmpty()) {
                 BufferedImage originalImage = dr.getImage();

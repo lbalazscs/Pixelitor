@@ -57,7 +57,7 @@ public class EffectsParam extends AbstractFilterParam {
                 this::configureDialog, resetButton);
 
             paramGUI = configureParamGUI;
-            guiCreated();
+            syncWithGui();
             return configureParamGUI;
         } else {
             effectsPanel.setBorder(createTitledBorder("Effects"));
@@ -170,9 +170,9 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         if (effectsPanel != null) {
-            return effectsPanel.hasDefault();
+            return effectsPanel.isAtDefault();
         }
         return true;
     }
@@ -185,7 +185,7 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return getEffects().toString();
     }
 }

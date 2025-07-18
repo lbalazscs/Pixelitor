@@ -92,7 +92,7 @@ public class GradientTool extends DragTool {
                 "<b>Shift-drag</b> to constrain the direction. " +
                 "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
             Cursors.DEFAULT, true);
-        spaceDragStartPoint = true;
+        repositionOnSpace = true;
         pixelSnapping = true;
     }
 
@@ -458,7 +458,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    protected OverlayType getDragDisplayType() {
+    protected OverlayType getOverlayType() {
         if (handles == null) {
             // for the initial drag, show angle and distance
             return OverlayType.ANGLE_DIST;

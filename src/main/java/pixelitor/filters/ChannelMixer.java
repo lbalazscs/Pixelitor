@@ -257,11 +257,11 @@ public class ChannelMixer extends ParametrizedFilter {
     // Replace the adjustment listeners with custom versions that
     // change other values before triggering the filter.
     public void replaceAdjustmentListeners() {
-        autoBWParam.setAdjustmentListener(this::updateAutoBW);
-        preserveBrightnessParam.setAdjustmentListener(this::updatePreserveBrightness);
+        autoBWParam.setAdjustmentListener(this::autoBWChanged);
+        preserveBrightnessParam.setAdjustmentListener(this::preserveBrightnessChanged);
     }
 
-    private void updateAutoBW() {
+    private void autoBWChanged() {
         boolean autoBW = autoBWParam.isChecked();
         enablePresets();
 
@@ -296,7 +296,7 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     }
 
-    private void updatePreserveBrightness() {
+    private void preserveBrightnessChanged() {
         boolean preserveBrightness = preserveBrightnessParam.isChecked();
         boolean autoBW = autoBWParam.isChecked();
 

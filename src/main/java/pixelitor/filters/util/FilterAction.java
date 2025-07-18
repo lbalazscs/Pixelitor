@@ -61,19 +61,23 @@ public class FilterAction extends AbstractViewEnabledAction {
         this.factory = factory;
 
         if (!name.equals(Fade.NAME)) {
-            Filters.addFilter(this);
+            Filters.register(this);
         }
     }
 
+    /**
+     * Creates a a {@link FilterAction} for a simple filter type
+     * that just wraps an {@link AbstractBufferedImageOp}.
+     */
     public static FilterAction forwarding(String name,
                                           Supplier<AbstractBufferedImageOp> op,
                                           boolean supportsGray) {
         return new FilterAction(name,
-            () -> new SimpleForwardingFilter(op, supportsGray)).noGUI();
+            () -> new SimpleForwardingFilter(op, supportsGray)).withoutDialog();
     }
 
     /**
-     * Handles the action event when the filter is activated from the menu.
+     * Called when the menu item associated with this action is clicked.
      */
     @Override
     protected void onClick(Composition comp) {
@@ -86,11 +90,11 @@ public class FilterAction extends AbstractViewEnabledAction {
         if (layer.isMaskEditing()) {
             applyToFilterable(layer.getMask());
         } else if (layer instanceof SmartFilter smartFilter) {
-            // Smart filters are Filterable, but the filter should be started on their smart object
+            // smart filters are Filterable, but the filter should be started on their smart object
             applyToSmartObject(smartFilter.getSmartObject());
         } else if (layer instanceof AdjustmentLayer) {
             // adjustment layers are Filterable, so this must be
-            // checked first to prevent running unrelated filters on them.
+            // checked first to prevent running unrelated filters on them
             Dialogs.showErrorDialog("Adjustment Layer",
                 name + " can't be used on adjustment layers.");
         } else if (layer instanceof Filterable filterable) {
@@ -111,6 +115,12 @@ public class FilterAction extends AbstractViewEnabledAction {
         }
     }
 
+    private void applyToFilterable(Filterable dr) {
+        ensureFilterCreated();
+        dr.startFilter(filter, true);
+    }
+
+    // adds this filter as a new, non-destructive smart filter
     private void applyToSmartObject(SmartObject so) {
         ensureFilterCreated();
         // this logic is here and not in Filter because for
@@ -120,20 +130,27 @@ public class FilterAction extends AbstractViewEnabledAction {
             return;
         }
 
-        // create a new instance for the smart object to ensure independence
+        // a new filter instance is created for each smart filter
+        // to ensure that its parameters are independent
         Filter newFilterInstance = createNewFilterInstance();
         so.tryAddingSmartFilter(newFilterInstance);
     }
 
-    private void applyToFilterable(Filterable dr) {
-        ensureFilterCreated();
-        dr.startFilter(filter, true);
-    }
-
+    /**
+     * Creates a new, independent instance of the filter.
+     */
     public Filter createNewFilterInstance() {
         Filter newFilter = factory.get();
         newFilter.setName(name);
         return newFilter;
+    }
+
+    /**
+     * Returns the lazily-initialized, shared filter instance.
+     */
+    public Filter getFilter() {
+        ensureFilterCreated();
+        return filter;
     }
 
     private void ensureFilterCreated() {
@@ -143,16 +160,11 @@ public class FilterAction extends AbstractViewEnabledAction {
         }
     }
 
-    public Filter getFilter() {
-        ensureFilterCreated();
-        return filter;
-    }
-
     /**
      * Configures this filter action to not display a GUI dialog.
      * Overrides the constructor parameter for simplifying builders.
      */
-    public FilterAction noGUI() {
+    public FilterAction withoutDialog() {
         hasDialog = false;
         setText(name); // remove the "..." suffix
 
@@ -168,7 +180,7 @@ public class FilterAction extends AbstractViewEnabledAction {
         if (!(filter instanceof ParametrizedFilter pf)) {
             return false;
         }
-        if (!pf.supportsTweenAnimation()) {
+        if (!pf.isAnimatable()) {
             return false;
         }
         if (filter instanceof Fade && !History.canFade()) {

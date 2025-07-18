@@ -28,13 +28,11 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 
 /**
- * An abstract base class for tools that only care about the mouse drag
- * start and end positions, and not about the intermediate mouse positions.
- * The start and end points of the drag gesture are
- * continuously updated in the {@link Drag} object.
+ * An abstract base class for tools that operate based on a "drag" gesture,
+ * defined by a start point (mouse press) and an end point (mouse release).
  */
 public abstract class DragTool extends Tool {
-    // encapsulates the start and end points of the drag
+    // encapsulates the current start and end points of the drag
     protected Drag drag;
 
     // the current state of the drag tool (managed by concrete subclasses)
@@ -44,7 +42,7 @@ public abstract class DragTool extends Tool {
     private boolean endPointInitialized = false;
 
     // whether the starting point is adjusted when space is pressed during drag
-    protected boolean spaceDragStartPoint = false;
+    protected boolean repositionOnSpace = false;
 
     // whether movement is constrained to multiples
     // of 45 degree angles when Shift is pressed
@@ -78,7 +76,7 @@ public abstract class DragTool extends Tool {
         if (drag.isCanceled()) {
             return;
         }
-        if (spaceDragStartPoint) {
+        if (repositionOnSpace) {
             drag.saveEndValues();
         }
         if (shiftConstrains) {
@@ -87,9 +85,9 @@ public abstract class DragTool extends Tool {
 
         drag.setEnd(e);
 
-        if (spaceDragStartPoint) {
+        if (repositionOnSpace) {
             if (endPointInitialized && GlobalEvents.isSpaceDown()) {
-                drag.adjustStartForSpaceDownDrag(e.getView());
+                drag.panStartPoint(e.getView());
             }
 
             endPointInitialized = true;
@@ -134,10 +132,10 @@ public abstract class DragTool extends Tool {
             return;
         }
 
-        getDragDisplayType().draw(g2, drag);
+        getOverlayType().draw(g2, drag);
     }
 
-    protected OverlayType getDragDisplayType() {
+    protected OverlayType getOverlayType() {
         return OverlayType.WIDTH_HEIGHT; // default to width/height display
     }
 

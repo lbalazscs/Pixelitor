@@ -110,8 +110,8 @@ class ParamSetTest {
 
     @Test
     void setFinalAnimationMode() {
-        params.setFinalAnimationMode(false);
-        params.setFinalAnimationMode(true);
+        params.setAnimationEndStateMode(false);
+        params.setAnimationEndStateMode(true);
 
         verifyFilterNotExecuted();
     }

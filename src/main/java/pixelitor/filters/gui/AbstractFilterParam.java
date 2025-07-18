@@ -39,7 +39,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     // If this is not null, it's the model of an additional action button
     // to the right of the normal GUI. Typically it's used for randomization,
     // and it's enabled only for specific values of this filter parameter.
-    protected FilterButtonModel action;
+    protected FilterButtonModel sideButtonModel;
 
     AbstractFilterParam(String name, RandomizeMode randomizeMode) {
         this.name = Objects.requireNonNull(name);
@@ -50,9 +50,11 @@ public abstract class AbstractFilterParam implements FilterParam {
      * Finalizes the GUI's setup by synchronizing its state with this model.
      * Must be called by the subclasses, after creating the GUI.
      */
-    protected void guiCreated() {
+    protected void syncWithGui() {
         updateGUIEnabledState();
         if (toolTip != null) {
+            // if a tooltip was set before the GUI was created,
+            // apply that stored tooltip to the newly created GUI
             paramGUI.setToolTip(toolTip);
         }
     }
@@ -60,13 +62,13 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         adjustmentListener = listener;
-        if (action != null) {
-            action.setAdjustmentListener(listener);
+        if (sideButtonModel != null) {
+            sideButtonModel.setAdjustmentListener(listener);
         }
     }
 
-    public FilterParam withAction(FilterButtonModel action) {
-        this.action = action;
+    public FilterParam withSideButton(FilterButtonModel action) {
+        this.sideButtonModel = action;
         return this;
     }
 
@@ -78,6 +80,8 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public String getPresetKey() {
         if (presetKey != null) {
+            // using a separate key allows the display name
+            // to be changed without breaking users' saved presets
             return presetKey;
         }
         return getName();
@@ -133,8 +137,8 @@ public abstract class AbstractFilterParam implements FilterParam {
     protected abstract void doRandomize();
 
     @Override
-    public void setRandomizePolicy(RandomizeMode policy) {
-        randomizeMode = policy;
+    public void setRandomizeMode(RandomizeMode mode) {
+        randomizeMode = mode;
     }
 
     @Override
@@ -169,12 +173,12 @@ public abstract class AbstractFilterParam implements FilterParam {
 
         // two parameters are considered equal if their values are equal
         // (this is used to compare filter states)
-        return Objects.equals(getParamValue(), that.getParamValue());
+        return getValueAsString().equals(that.getValueAsString());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getParamValue());
+        return getValueAsString().hashCode();
     }
 
     @Override
@@ -182,7 +186,7 @@ public abstract class AbstractFilterParam implements FilterParam {
         DebugNode node = new DebugNode(key, this);
 
         node.addString("name", name);
-        node.addString("value", getParamValue());
+        node.addString("value", getValueAsString());
 
         return node;
     }

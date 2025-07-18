@@ -64,11 +64,13 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
 
     @Override
     public boolean supportsUserPresets() {
+        // most filters with a GUI are expected to support user presets
         return true;
     }
 
     @Override
     public String getPresetDirName() {
+        // uses the filter's name as the directory name for storing presets
         return getName();
     }
 

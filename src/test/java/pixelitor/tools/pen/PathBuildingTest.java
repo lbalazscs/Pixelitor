@@ -39,14 +39,14 @@ import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
 
-@DisplayName("Pen Tool/PathBuilder tests")
+@DisplayName("Pen Tool: path building tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-class PathBuilderTest {
+class PathBuildingTest {
     private View view;
     private Composition comp;
 
     private Graphics2D g;
-    private PenTool pb;
+    private PenTool penTool;
 
     enum CtrlOrAlt {CTRL, ALT}
 
@@ -65,7 +65,7 @@ class PathBuilderTest {
         view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);
 
-        pb = Tools.PEN;
+        penTool = Tools.PEN;
 
         // reset the state between the tests
         Tools.PEN.removePath();
@@ -854,7 +854,7 @@ class PathBuilderTest {
         // because the undo uses its "mouseDown" state
         modifiers.dispatchPressedEvent(x, y, view);
         checkState(state);
-        pb.paintOverCanvas(g, comp);
+        penTool.paintOverCanvas(g, comp);
     }
 
     private void click(int x, int y) {
@@ -892,7 +892,7 @@ class PathBuilderTest {
     private void drag(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchDraggedEvent(x, y, view);
         checkState(state);
-        pb.paintOverCanvas(g, comp);
+        penTool.paintOverCanvas(g, comp);
     }
 
     private void release(int x, int y, BuildState state) {
@@ -910,7 +910,7 @@ class PathBuilderTest {
     private void release(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchReleasedEvent(x, y, view);
         checkState(state);
-        pb.paintOverCanvas(g, comp);
+        penTool.paintOverCanvas(g, comp);
     }
 
     private void move(int x, int y, BuildState state) {
@@ -932,16 +932,15 @@ class PathBuilderTest {
     private void move(int x, int y, BuildState state, Modifiers modifiers) {
         modifiers.dispatchMoveEvent(x, y, view);
         checkState(state);
-        pb.paintOverCanvas(g, comp);
+        penTool.paintOverCanvas(g, comp);
     }
 
-    @SuppressWarnings("MethodMayBeStatic")
     private void checkState(BuildState expected) {
         Path path = comp.getActivePath();
         if (expected == null) {
-            assert path == null;
+            assertThat(path).isNull();
         } else {
-            path.assertStateIs(expected);
+            assertThat(penTool.getBuildState()).isEqualTo(expected);
         }
     }
 }

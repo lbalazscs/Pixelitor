@@ -26,8 +26,10 @@ import java.util.Objects;
 
 /**
  * Abstract filter class that uses a {@link ParamSet} to manage
- * its settings. Subclasses only need to define a ParamSet,
+ * its settings. Subclasses need only to define their parameters,
  * and the GUI will be built automatically.
+ *
+ * @noinspection TransientFieldNotInitialized
  */
 public abstract class ParametrizedFilter extends FilterWithGUI {
     @Serial
@@ -35,7 +37,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     protected final transient ParamSet paramSet;
 
-    // true if a "Show Original" checkbox should be available.
+    // true if a "Show Original" checkbox should be added to the UI
     private final transient boolean addShowOriginal;
 
     protected ParametrizedFilter(boolean addShowOriginal) {
@@ -100,7 +102,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     /**
      * Returns true if this filter supports tween animations.
      */
-    public boolean supportsTweenAnimation() {
+    public boolean isAnimatable() {
         return paramSet.isAnimatable();
     }
 
@@ -138,9 +140,9 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     @Override
     public String paramsAsString() {
-        UserPreset preset = new UserPreset(getName(), "Debug");
-        paramSet.saveStateTo(preset);
-        return preset.toString();
+        UserPreset tmpPreset = new UserPreset(getName(), "Debug");
+        paramSet.saveStateTo(tmpPreset);
+        return tmpPreset.toString();
     }
 
     public void set(String paramName, String value) {

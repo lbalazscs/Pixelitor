@@ -35,7 +35,7 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
         super(selectionType.toString() + " Selection", 'M',
             "<b>click and drag</b> creates a selection, " +
                 "<b>Space-drag</b> moves it.", Cursors.DEFAULT, false);
-        spaceDragStartPoint = true; // allow moving the start point with space down
+        repositionOnSpace = true; // allow moving the start point with space down
         pixelSnapping = true;
         this.selectionType = selectionType;
     }

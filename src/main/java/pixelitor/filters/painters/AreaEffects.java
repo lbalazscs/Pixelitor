@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
     public AreaEffect[] getEnabledEffects() {
         List<AreaEffect> enabledEffects = new ArrayList<>(2);
 
-        // Drop shadow must be first to render behind other effects
+        // drop shadow must be first to render behind other effects
         if (dropShadowEffect != null) {
             enabledEffects.add(dropShadowEffect);
         }
@@ -87,29 +87,30 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
      * Calculates the maximum additional space needed around
      * the shape to accommodate all effects.
      */
-    public double calcMaxEffectThickness() {
-        // Inner glow is not considered here as it doesn't
-        // extend beyond the shape's bounds.
-        double maxThickness = 0;
+    public double calcMaxEffectPadding() {
+        // inner glow is not considered here as it doesn't
+        // extend beyond the shape's bounds
+        double maxPadding = 0;
         
         if (glowEffect != null) {
-            maxThickness = Math.max(maxThickness,
+            maxPadding = Math.max(maxPadding,
                 glowEffect.getEffectWidth() / 2.0);
         }
         if (neonBorderEffect != null) {
-            maxThickness = Math.max(maxThickness,
+            maxPadding = Math.max(maxPadding,
                 neonBorderEffect.getEffectWidth() / 2.0);
         }
         if (dropShadowEffect != null) {
-            double thickness = dropShadowEffect.getEffectWidth() / 2.0;
+            double padding = dropShadowEffect.getEffectWidth() / 2.0;
             Point2D offset = dropShadowEffect.getOffset();
 
-            maxThickness = Math.max(maxThickness,
-                thickness + Math.abs(offset.getX()));
-            maxThickness = Math.max(maxThickness,
-                thickness + Math.abs(offset.getY()));
+            maxPadding = Math.max(maxPadding,
+                padding + Math.abs(offset.getX()));
+            maxPadding = Math.max(maxPadding,
+                padding + Math.abs(offset.getY()));
         }
-        return maxThickness;
+
+        return Math.ceil(maxPadding);
     }
 
     public void setDropShadow(ShadowPathEffect dropShadow) {

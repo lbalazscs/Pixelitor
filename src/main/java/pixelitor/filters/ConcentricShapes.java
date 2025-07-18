@@ -170,7 +170,7 @@ public class ConcentricShapes extends ParametrizedFilter {
             distanceParam,
             colorsParam,
             new CompositeParam("Transform", center, scale, rotate),
-            randomnessParam.withAction(reseedAction)
+            randomnessParam.withSideButton(reseedAction)
         ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
     }
 

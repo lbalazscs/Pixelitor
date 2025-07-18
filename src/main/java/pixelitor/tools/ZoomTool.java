@@ -51,7 +51,7 @@ public class ZoomTool extends DragTool {
                 "<b>right-click</b> (or <b>Alt-click</b>) to zoom out. " +
                 "<b>Drag</b> to select an area.",
             Cursors.HAND, false);
-        spaceDragStartPoint = true;
+        repositionOnSpace = true;
     }
 
     @Override

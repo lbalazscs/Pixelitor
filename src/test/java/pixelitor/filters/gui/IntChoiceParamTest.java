@@ -58,7 +58,7 @@ class IntChoiceParamTest {
         var param = new IntChoiceParam("Test", new Item[]{v1, v2});
 
         assertThat(param)
-            .isAtDefaultValue()
+            .isAtDefault()
             .valueIs(1)
             .selectedAsStringIs("Item 1");
 
@@ -67,7 +67,7 @@ class IntChoiceParamTest {
 
         param.setSelectedItem(v1, true);
         assertThat(param)
-            .isAtDefaultValue()
+            .isAtDefault()
             .valueIs(1)
             .selectedAsStringIs("Item 1");
         // expect no triggering because the value didn't change
@@ -75,7 +75,7 @@ class IntChoiceParamTest {
 
         param.setSelectedItem(v2, true);
         assertThat(param)
-            .isNotAtDefaultValue()
+            .isNotAtDefault()
             .valueIs(2)
             .selectedAsStringIs("Item 2");
         // expect one triggering
@@ -83,7 +83,7 @@ class IntChoiceParamTest {
 
         param.setSelectedItem(v1, false);
         assertThat(param)
-            .isAtDefaultValue()
+            .isAtDefault()
             .valueIs(1)
             .selectedAsStringIs("Item 1");
         // expect no new triggering, because triggering was set to false

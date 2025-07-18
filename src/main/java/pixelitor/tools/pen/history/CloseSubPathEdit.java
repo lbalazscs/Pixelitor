@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.tools.pen.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.Tools;
 import pixelitor.tools.pen.SubPath;
 
 import javax.swing.undo.CannotRedoException;
@@ -39,7 +40,7 @@ public class CloseSubPathEdit extends PixelitorEdit {
         super.undo();
 
         subPath.undoClosing();
-        subPath.getPath().setBuildState(MOVING_TO_NEXT_ANCHOR);
+        Tools.PEN.setBuildState(MOVING_TO_NEXT_ANCHOR);
         comp.repaint();
     }
 

@@ -59,14 +59,14 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
 
     @Override
     public JComponent createGUI() {
-        var gui = new ChoiceParamGUI<>(this, action);
+        var gui = new ChoiceParamGUI<>(this, sideButtonModel);
         paramGUI = gui;
-        guiCreated();
+        syncWithGui();
         return gui;
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return defaultValue.equals(selectedValue);
     }
 
@@ -116,7 +116,7 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return selectedValue.toString();
     }
 

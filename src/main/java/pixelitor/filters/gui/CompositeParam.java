@@ -47,7 +47,7 @@ public class CompositeParam extends AbstractFilterParam {
     public JComponent createGUI() {
         resetButton = new ResetButton(this);
         paramGUI = new DialogLauncherGUI(this::configureDialog, resetButton);
-        guiCreated();
+        syncWithGui();
         return (JComponent) paramGUI;
     }
 
@@ -69,9 +69,9 @@ public class CompositeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void adaptToContext(Filterable layer, boolean changeValue) {
+    public void adaptToContext(Filterable layer, boolean applyNewDefault) {
         for (FilterParam child : children) {
-            child.adaptToContext(layer, changeValue);
+            child.adaptToContext(layer, applyNewDefault);
         }
     }
 
@@ -136,9 +136,9 @@ public class CompositeParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         for (FilterParam child : children) {
-            if (!child.hasDefault()) {
+            if (!child.isAtDefault()) {
                 return false;
             }
         }
@@ -181,9 +181,9 @@ public class CompositeParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return Stream.of(children)
-            .map(FilterParam::getParamValue)
+            .map(FilterParam::getValueAsString)
             .collect(Collectors.joining(", ", "[", "]"));
     }
 }

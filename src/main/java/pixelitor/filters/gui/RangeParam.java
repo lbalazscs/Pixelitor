@@ -36,9 +36,10 @@ import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
- * A numeric parameter with minimum, maximum, and default values.
+ * A data model that represents a numeric parameter constrained
+ * within a specific range (minimum and maximum).
  * Primarily used as the model for a {@link SliderSpinner}, but it
- * can also be used as a model of a simple JSlider.
+ * can also be used as a model of a JSlider.
  */
 public class RangeParam extends AbstractFilterParam implements BoundedRangeModel {
     private int minValue;
@@ -46,7 +47,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double defaultValue;
     private int decimalPlaces = 0;
 
-    // Stored as double to support animation interpolation
+    // stored as double to support animation interpolation
     private double value;
 
     private boolean adjusting;
@@ -56,7 +57,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
 
-    // Image-size dependent range adjustment
+    // image-size dependent range adjustment
     private boolean adjustRangeToCanvasSize = false;
     private double maxToCanvasSizeRatio;
 
@@ -87,11 +88,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public JComponent createGUI() {
         var sliderSpinner = new SliderSpinner(this, labelPosition, addResetButton);
         paramGUI = sliderSpinner;
-        guiCreated();
+        syncWithGui();
 
-        return action == null
+        return sideButtonModel == null
             ? sliderSpinner
-            : new ParamGUIWithAction(sliderSpinner, action);
+            : new ParamGUIWithAction(sliderSpinner, sideButtonModel);
     }
 
     /**
@@ -170,7 +171,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return Math.abs(getValueAsDouble() - defaultValue) < 0.005;
     }
 
@@ -383,7 +384,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * of the canvas if range adjustment is enabled.
      */
     @Override
-    public void adaptToContext(Filterable layer, boolean changeValue) {
+    public void adaptToContext(Filterable layer, boolean applyNewDefault) {
         if (!adjustRangeToCanvasSize) {
             return;
         }
@@ -402,7 +403,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         maxValue += (4 - (maxValue - minValue) % 4);
 
         setDefaultValue((int) (defaultToMaxRatio * maxValue));
-        if (changeValue) {
+        if (applyNewDefault) {
             value = defaultValue;
         }
     }
@@ -462,7 +463,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return String.valueOf(value);
     }
 
@@ -529,7 +530,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             return this;
         }
 
-        public Builder randomizePolicy(RandomizeMode randomizeMode) {
+        public Builder randomizeMode(RandomizeMode randomizeMode) {
             this.randomizeMode = randomizeMode;
             return this;
         }

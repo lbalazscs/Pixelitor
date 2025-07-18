@@ -54,7 +54,7 @@ public class SpiderWeb extends CurveFilter {
             numBranchesParam,
             numConnectionsParam,
             curvatureParam,
-            randomnessParam.withAction(reseedAction)
+            randomnessParam.withSideButton(reseedAction)
         );
     }
 

@@ -40,20 +40,20 @@ public class FilterParamAssert<S extends FilterParamAssert<S, T>, T extends Filt
         return myself;
     }
 
-    public S isAtDefaultValue() {
+    public S isAtDefault() {
         isNotNull();
 
-        assertThat(actual.hasDefault())
+        assertThat(actual.isAtDefault())
             .as("default state")
             .isTrue();
 
         return myself;
     }
 
-    public S isNotAtDefaultValue() {
+    public S isNotAtDefault() {
         isNotNull();
 
-        assertThat(actual.hasDefault())
+        assertThat(actual.isAtDefault())
             .as("non-default state")
             .isFalse();
 
@@ -100,10 +100,10 @@ public class FilterParamAssert<S extends FilterParamAssert<S, T>, T extends Filt
         return myself;
     }
 
-    public S hasValue(String expectedValue) {
+    public S valueAsStringIs(String expectedValue) {
         isNotNull();
 
-        assertThat(actual.getParamValue())
+        assertThat(actual.getValueAsString())
             .as("value")
             .isEqualTo(expectedValue);
 

@@ -39,7 +39,7 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
      * Can be used to adapt the offered ranges/choices to the active
      * layer, composition or the list of open compositions.
      */
-    default void adaptToContext(Filterable layer, boolean changeValue) {
+    default void adaptToContext(Filterable layer, boolean applyNewDefault) {
         // by default does nothing, as most controls are unaffected
     }
 
@@ -100,9 +100,9 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     boolean shouldRandomize();
 
     /**
-     * Sets the randomization policy for this parameter.
+     * Sets the randomization mode for this parameter.
      */
-    void setRandomizePolicy(RandomizeMode policy);
+    void setRandomizeMode(RandomizeMode mode);
 
     /**
      * Sets a tooltip message for the GUI widget associated with this parameter.
@@ -112,7 +112,7 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     /**
      * Returns the parameter value as a String (useful for testing, debugging).
      */
-    String getParamValue();
+    String getValueAsString();
 
     /**
      * Returns true if the filter should have presets

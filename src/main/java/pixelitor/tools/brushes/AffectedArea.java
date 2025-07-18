@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,10 +62,14 @@ public class AffectedArea implements Debuggable {
     public DebugNode createDebugNode(String key) {
         var node = new DebugNode(key, this);
 
-        node.addDouble("min x", boundingBox.getMinX());
-        node.addDouble("min y", boundingBox.getMinY());
-        node.addDouble("max x", boundingBox.getMaxX());
-        node.addDouble("max y", boundingBox.getMaxY());
+        if (boundingBox.isInitialized()) {
+            node.addDouble("min x", boundingBox.getMinX());
+            node.addDouble("min y", boundingBox.getMinY());
+            node.addDouble("max x", boundingBox.getMaxX());
+            node.addDouble("max y", boundingBox.getMaxY());
+        } else {
+            node.addBoolean("initialized", false);
+        }
 
         return node;
     }

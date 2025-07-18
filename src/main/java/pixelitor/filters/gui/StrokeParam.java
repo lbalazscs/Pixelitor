@@ -75,7 +75,7 @@ public class StrokeParam extends AbstractFilterParam {
     public JComponent createGUI() {
         resetButton = new ResetButton(this);
         paramGUI = new DialogLauncherGUI(this::configureSettingsDialog, resetButton);
-        guiCreated();
+        syncWithGui();
         return (JComponent) paramGUI;
     }
 
@@ -200,9 +200,9 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return Arrays.stream(allParams)
-            .allMatch(Resettable::hasDefault);
+            .allMatch(Resettable::isAtDefault);
     }
 
     @Override
@@ -300,9 +300,9 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return Stream.of(allParams)
-            .map(FilterParam::getParamValue)
+            .map(FilterParam::getValueAsString)
             .collect(joining(", ", "[", "]"));
     }
 

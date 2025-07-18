@@ -47,10 +47,6 @@ import java.util.Random;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
-import static pixelitor.tools.pen.BuildState.IDLE;
-import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
 
 /**
  * A path contains the same information as a {@link PathIterator},
@@ -71,9 +67,6 @@ public class Path implements Serializable, Debuggable {
     private final String id; // unique identifier for debugging
     private static long nextId = 0;
 
-    private transient BuildState buildState = IDLE;
-    private transient BuildState prevBuildState = IDLE;
-
     public Path(Composition comp, boolean setAsActive) {
         this.comp = comp;
         if (setAsActive) {
@@ -85,15 +78,9 @@ public class Path implements Serializable, Debuggable {
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-
-        buildState = IDLE;
-        prevBuildState = IDLE;
     }
 
     public Path deepCopy(Composition newComp) {
-        assert !buildState.isDragging() : buildState.toString();
-        assert prevBuildState.isDragging() || prevBuildState == IDLE : prevBuildState.toString();
-
         Path copy = new Path(newComp, false);
         for (SubPath subPath : subPaths) {
             SubPath subPathCopy = subPath.deepCopy(copy, newComp);
@@ -111,7 +98,7 @@ public class Path implements Serializable, Debuggable {
     /**
      * Renders the path in the Pen Tool (building mode).
      */
-    public void paintForBuilding(Graphics2D g) {
+    public void paintForBuilding(Graphics2D g, BuildState buildState) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
 
         for (SubPath subPath : subPaths) {
@@ -288,50 +275,7 @@ public class Path implements Serializable, Debuggable {
         return boxes;
     }
 
-    public void setBuildState(BuildState newState) {
-        if (buildState == newState) {
-            return;
-        }
-
-        prevBuildState = buildState;
-
-        if (newState == MOVING_TO_NEXT_ANCHOR && !hasMovingPoint()) {
-            MovingPoint mp = Tools.PEN.createMovingPoint(activeSubPath);
-            activeSubPath.setMovingPoint(mp);
-        }
-
-        buildState = newState;
-
-        if (newState == IDLE) {
-            prevBuildState = IDLE;
-        }
-    }
-
-    public BuildState getPrevBuildState() {
-        return prevBuildState;
-    }
-
-    // called only by the undo/redo mechanism
-    public void setBuildingInProgressState() {
-        // this check would not be necessary if tool switching
-        // and mode switching were recorded as events in the history
-        if ((Tools.getActive() != Tools.PEN)) {
-            return;
-        }
-
-        boolean mouseDown = Tools.EventDispatcher.isMouseDown();
-        if (mouseDown) {
-            setBuildState(DRAGGING_LAST_CONTROL);
-        } else {
-            setBuildState(MOVING_TO_NEXT_ANCHOR);
-        }
-    }
-
     void finishSubPathByCtrlClick(Composition comp) {
-        BuildState state = getBuildState();
-        assert state == MOVING_TO_NEXT_ANCHOR
-            || state == MOVE_EDITING_PREVIOUS : "state = " + state;
-
         activeSubPath.finishByCtrlClick(comp);
     }
 
@@ -339,19 +283,9 @@ public class Path implements Serializable, Debuggable {
         return subPaths.indexOf(subPath);
     }
 
-    public BuildState getBuildState() {
-        return buildState;
-    }
-
     // return true if it could be closed
     boolean tryClosing(double x, double y) {
         return activeSubPath.tryClosing(x, y);
-    }
-
-    public void assertStateIs(BuildState state) {
-        if (buildState != state) {
-            throw new AssertionError("Expected " + state + ", found " + buildState);
-        }
     }
 
     public String getId() {
@@ -437,7 +371,6 @@ public class Path implements Serializable, Debuggable {
 
         int numSubpaths = getNumSubPaths();
         node.addInt("number of subpaths", numSubpaths);
-        node.addAsString("build state", getBuildState());
 
         for (int i = 0; i < numSubpaths; i++) {
             var subPath = getSubPath(i);

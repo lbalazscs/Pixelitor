@@ -73,7 +73,7 @@ public class ParamTestFilter extends ParametrizedFilter {
         List<String> lines = new ArrayList<>();
         for (FilterParam param : testParams) {
             String name = param.getName();
-            String value = param.getParamValue();
+            String value = param.getValueAsString();
             String line = name + " = " + value;
             lines.add(line);
         }

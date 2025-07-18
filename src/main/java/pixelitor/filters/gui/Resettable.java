@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ public interface Resettable {
     /**
      * Checks if this {@link Resettable} is currently set to its default value.
      */
-    boolean hasDefault();
+    boolean isAtDefault();
 
     /**
      * Resets this {@link Resettable} to its default value.
@@ -37,7 +37,7 @@ public interface Resettable {
     void reset(boolean trigger);
 
     /**
-     * Returns a tooltip for the reset functionality specific to this {@link Resettable}.
+     * Returns a tooltip for the UI component (like a {@link ResetButton}) that triggers the reset action.
      */
     String getResetToolTip();
 }

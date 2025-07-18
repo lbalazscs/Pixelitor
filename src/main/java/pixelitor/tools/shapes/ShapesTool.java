@@ -132,7 +132,7 @@ public class ShapesTool extends DragTool {
                 "<b>Alt</b>-drag from the center, <b>Shift</b>-drag to constrain. " +
                 "<b>Space</b>-drag while drawing to move. ",
             Cursors.DEFAULT, false);
-        spaceDragStartPoint = true;
+        repositionOnSpace = true;
         convertToSelectionAction.setEnabled(false);
         typeSettingsMap = new EnumMap<>(ShapeType.class);
         pixelSnapping = true;
@@ -177,7 +177,7 @@ public class ShapesTool extends DragTool {
     }
 
     private void strokeSettingsChanged() {
-        recreateStroke();
+        updateStrokeFromSettings();
         settingsChanged(EDIT_STROKE_SETTINGS);
     }
 
@@ -238,7 +238,7 @@ public class ShapesTool extends DragTool {
         return strokeParam.copyState();
     }
 
-    private void recreateStroke() {
+    private void updateStrokeFromSettings() {
         stroke = strokeParam.createStroke();
     }
 
@@ -278,7 +278,7 @@ public class ShapesTool extends DragTool {
     /**
      * Sets the GUI values based on the given {@link StyledShape}.
      */
-    private void setGUIValuesFrom(StyledShape styledShape) {
+    private void updateUIFromShape(StyledShape styledShape) {
         // as this is used as part of undo/redo, don't regenerate the shape
         shouldRegenerateShape = false;
         try {
@@ -303,25 +303,24 @@ public class ShapesTool extends DragTool {
             assert hasBox();
             assert hasStyledShape();
             if (transformBox.processMousePressed(e)) {
-                return;
+                return; // drag started on a handle, the box will manage it
             }
-            if (!isEditingShapesLayer()) {
-                // if the mouse was pressed outside the
-                // transform box, rasterize the existing shape
+
+            // if the mouse was pressed outside the transform box:
+            if (isEditingShapesLayer()) {
+                return; // do nothing
+            } else {
                 rasterizeShape(e.getComp());
             }
         }
 
+        // if we are here, we are starting a new shape
+        startNewShape();
         if (isEditingShapesLayer()) {
-            if (styledShape == null) {
-                startNewShape();
-                shapesLayer.setStyledShape(styledShape);
-            } else {
-                assert state == TRANSFORM : "state = " + state;
-            }
-        } else {
-            startNewShape();
+            // if we are on an empty shapes layer, the new shape belongs to it
+            shapesLayer.setStyledShape(styledShape);
         }
+
         assert state != IDLE : "state = " + state;
     }
 
@@ -544,7 +543,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    protected OverlayType getDragDisplayType() {
+    protected OverlayType getOverlayType() {
         assert state == INITIAL_DRAG : "state = " + state;
         return getSelectedType().getOverlayType();
     }
@@ -684,7 +683,7 @@ public class ShapesTool extends DragTool {
         FgBgColors.setFGColor(styledShape.getFgColor(), false);
         FgBgColors.setBGColor(styledShape.getBgColor(), false);
 
-        setGUIValuesFrom(styledShape);
+        updateUIFromShape(styledShape);
     }
 
     @Override
@@ -786,29 +785,23 @@ public class ShapesTool extends DragTool {
     }
 
     /**
-     * Calculate the extra thickness around the shape for the undo area
+     * Calculates the extra padding around the shape that is needed
+     * to define a safe zone for creating undo history snapshots.
      */
-    public double calcExtraThickness() {
-        double thickness = 0;
-        double extraStrokeThickness = 0;
-        if (hasStroke()) {
-            thickness = strokeParam.getStrokeWidth();
+    public double calcExtraPadding() {
+        double totalPadding = 0;
 
+        if (hasStroke()) {
+            double strokeWidth = strokeParam.getStrokeWidth();
             StrokeType strokeType = strokeParam.getStrokeType();
-            extraStrokeThickness = strokeType.getExtraThickness(thickness);
-            thickness += extraStrokeThickness;
+            totalPadding = strokeWidth + strokeType.getExtraThickness(strokeWidth);
         }
         if (effects.hasEnabledEffects()) {
-            double effectThickness = effects.calcMaxEffectThickness();
-            // the extra stroke thickness must be added
-            // because the effect can be on the stroke
-            effectThickness += extraStrokeThickness;
-            if (effectThickness > thickness) {
-                thickness = effectThickness;
-            }
+            // must be added because the effect can be on the stroke
+            totalPadding += effects.calcMaxEffectPadding();
         }
 
-        return thickness;
+        return totalPadding;
     }
 
     private boolean isEditingShapesLayer() {
@@ -835,21 +828,21 @@ public class ShapesTool extends DragTool {
 
     private void layerActivated(Layer layer) {
         if (layer.isMaskEditing()) {
-            startEditingRasterLayer(layer);
+            switchToRasterEditing(layer);
         } else {
             if (layer instanceof ShapesLayer newShapesLayer) {
                 if (newShapesLayer == shapesLayer) {
-                    return; // not a new layer
+                    return; // already editing this layer
                 }
                 shapesLayer = newShapesLayer;
-                startEditingShapesLayer();
+                switchToShapesLayerEditing();
             } else {
-                startEditingRasterLayer(layer);
+                switchToRasterEditing(layer);
             }
         }
     }
 
-    private void startEditingShapesLayer() {
+    private void switchToShapesLayerEditing() {
         styledShape = shapesLayer.getStyledShape();
         if (styledShape == null || !styledShape.hasShape()) {
             setIdleState();
@@ -873,7 +866,7 @@ public class ShapesTool extends DragTool {
         shapesLayer.getComp().repaint();
     }
 
-    private void startEditingRasterLayer(Layer layer) {
+    private void switchToRasterEditing(Layer layer) {
         boolean wasShapesLayer = isEditingShapesLayer();
         shapesLayer = null;
         if (wasShapesLayer) {
@@ -922,7 +915,7 @@ public class ShapesTool extends DragTool {
             preset.getEnum("Stroke", TwoPointPaintType.class));
 
         strokeParam.loadStateFrom(preset);
-        recreateStroke();
+        updateStrokeFromSettings();
 
         effectsParam.loadStateFrom(preset);
         updateEffects();

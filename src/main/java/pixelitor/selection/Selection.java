@@ -106,7 +106,7 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Starts the "marching ants" animation timer.
+     * Starts the marching ants animation.
      */
     public void startMarching() {
         assert !disposed : "disposed selection";
@@ -182,7 +182,7 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Releases resources and marks the selection as unusable.
+     * Releases resources and marks this selection as unusable.
      */
     public void dispose() {
         assert AppMode.isUnitTesting() || Threads.calledOnEDT() : Threads.callInfo();
@@ -196,9 +196,6 @@ public class Selection implements Transformable {
         disposed = true;
     }
 
-    /**
-     * Sets the shape of the selection.
-     */
     public void setShape(Shape newShape) {
         assert newShape != null;
         assert !disposed;
@@ -246,8 +243,7 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Applies an affine transform to the selection shape
-     * and returns the shape before the transformation.
+     * Transforms the selection shape and returns the original shape.
      */
     public Shape transform(AffineTransform at) {
         assert !disposed;
@@ -261,11 +257,12 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Sets whether the selection border is hidden.
+     * Hides or shows the selection border.
      */
-    public void setHidden(boolean hide, boolean calledFromMenu) {
+    public void setHidden(boolean hide) {
         assert !disposed : "disposed selection";
         assert view != null;
+        assert shape != null;
 
         if (hidden == hide) {
             return; // no change
@@ -279,10 +276,6 @@ public class Selection implements Transformable {
         }
 
         view.repaint();
-
-        if (!calledFromMenu) {
-            SelectionActions.getShowHide().updateTextFrom(this);
-        }
     }
 
     public boolean isFrozen() {
@@ -290,7 +283,7 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Sets whether the marching ants animation is frozen.
+     * Freezes or unfreezes the marching ants animation.
      */
     public void setFrozen(boolean frozen) {
         assert !disposed;
@@ -319,14 +312,14 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Returns whether this selection is still active and usable.
+     * Returns true if this selection is still active and usable.
      */
     public boolean isUsable() {
         return !disposed;
     }
 
     /**
-     * Prepares for a drag/move operation by backing up the current shape.
+     * Prepares for a drag operation by backing up the current shape.
      */
     public void prepareMovement() {
         assert shape != null;
@@ -336,7 +329,7 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Applies a transformation relative to the shape stored before dragging started.
+     * Applies a transformation relative to the shape before the drag.
      */
     private void transformWhileDragging(AffineTransform at) {
         assert !disposed;
@@ -346,7 +339,7 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Updates the selection shape during a drag operation by applying a translation delta.
+     * Moves the selection shape during a drag operation.
      */
     public void moveWhileDragging(double relImX, double relImY) {
         assert !disposed;

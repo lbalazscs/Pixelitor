@@ -124,7 +124,7 @@ public class JHOilPainting extends ParametrizedFilter {
     }
 
     @Override
-    public boolean supportsTweenAnimation() {
+    public boolean isAnimatable() {
         return false;
     }
 }

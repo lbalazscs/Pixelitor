@@ -793,7 +793,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     @Override
     public void reorderLayerUI(int oldIndex, int newIndex) {
-        view.reorderLayerInUI(oldIndex, newIndex);
+        view.reorderLayerUI(oldIndex, newIndex);
     }
 
     @Override
@@ -906,11 +906,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public int getActiveLayerIndex() {
-        return layerList.indexOf(activeTopLevelLayer);
-    }
-
-    @Override
     public int indexOf(Layer layer) {
         return layerList.indexOf(layer);
     }
@@ -926,7 +921,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public Stream<? extends Layer> levelStream() {
+    public Stream<? extends Layer> directChildrenStream() {
         return layerList.stream();
     }
 
@@ -954,9 +949,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Calculates the total number of images in this composition including any mask images.
+     * Counts the total number of images in this composition including any mask images.
      */
-    public int calcNumImages() {
+    public int countImages() {
         int count = 0;
         for (Layer layer : layerList) {
             if (layer instanceof ImageLayer) {
@@ -1368,7 +1363,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
         Shape origShape = selection.getShape();
         selection.setShape(combinator.combine(origShape, newShape));
-        selection.setHidden(false, false);
+        selection.setHidden(false);
 
         return new SelectionShapeChangeEdit("Selection Change", this, origShape);
     }
@@ -1414,7 +1409,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         this.selection = selection;
         if (isActive()) {
             SelectionActions.update(this);
-            SelectionActions.getShowHide().updateTextFrom(selection);
         }
     }
 

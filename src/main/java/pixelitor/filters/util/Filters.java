@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import java.util.function.Predicate;
 import static java.util.Comparator.comparing;
 
 /**
- * A utility class with static methods for managing filters
+ * A utility class with static methods for managing filters.
  */
 public class Filters {
     private static final List<FilterAction> allFilters = new ArrayList<>();
@@ -43,7 +43,7 @@ public class Filters {
     private static final FilterAction[] EMPTY_FA_ARRAY = new FilterAction[0];
 
     private static Filter lastFilter = null;
-    private static boolean finishedAdding = false;
+    private static boolean finishedRegistering = false;
 
     private Filters() {
         // there are only static utility functions in this class
@@ -51,34 +51,34 @@ public class Filters {
 
     // it returns an array because JComboBox does not accept Lists as constructor arguments
     public static FilterAction[] getAllFilters() {
-        assert finishedAdding;
+        assert finishedRegistering;
         return allFilters.toArray(EMPTY_FA_ARRAY);
     }
 
+    // used only for debugging
     public static void forEachSmartFilter(Consumer<? super Filter> action) {
-        assert finishedAdding;
-        // all filters can be serialized, but only those
-        // with a no-arg constructor can be deserialized
+        assert finishedRegistering;
         allFilters.stream()
             .map(FilterAction::getFilter)
             .filter(Filter::canBeSmart)
             .forEach(action);
     }
 
+    // used only for testing
     public static FilterAction getRandomAnimationFilter() {
-        assert finishedAdding;
+        assert finishedRegistering;
         return Rnd.chooseFrom(getAnimationFilters());
     }
 
     public static FilterAction[] getAnimationFilters() {
-        assert finishedAdding;
+        assert finishedRegistering;
         return allFilters.stream()
             .filter(FilterAction::isAnimationFilter)
             .toArray(FilterAction[]::new);
     }
 
     public static Filter getRandomFilter(Predicate<Filter> conditions) {
-        assert finishedAdding;
+        assert finishedRegistering;
 
         // tries to avoid the instantiation of filters
         FilterAction filterAction;
@@ -110,32 +110,33 @@ public class Filters {
         return Optional.ofNullable(lastFilter);
     }
 
-    public static void addFilter(FilterAction filter) {
-        assert !finishedAdding;
+    public static void register(FilterAction filter) {
+        assert !finishedRegistering;
         allFilters.add(filter);
     }
 
-    public static void finishedAdding() {
-        finishedAdding = true;
+    public static void finishedRegistering() {
+        finishedRegistering = true;
         allFilters.sort(comparing(FilterAction::getName));
     }
 
+    // only used for testing
     public static void createAllFilters() {
-        assert finishedAdding;
+        assert finishedRegistering;
 
         long startTime = System.nanoTime();
 
         allFilters.forEach(FilterAction::getFilter);
 
-        double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-        System.out.printf("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'%n", estimatedSeconds);
+        double elapsedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
+        System.out.printf("FilterUtils::createAllFilters: elapsedSeconds = '%.2f'%n", elapsedSeconds);
     }
 
     /**
-     * Test whether all the filters have a no-argument constructor
+     * Tests whether all filters that can be smart have a no-argument constructor.
      */
     public static void testFilterConstructors() {
-        assert finishedAdding;
+        assert finishedRegistering;
 
         List<String> problems = new ArrayList<>();
         for (FilterAction action : allFilters) {
@@ -143,7 +144,7 @@ public class Filters {
             if (filter.canBeSmart()) {
                 try {
                     filter.getClass().getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
+                } catch (ReflectiveOperationException e) {
                     problems.add(filter.getName());
                 }
             }
@@ -152,11 +153,11 @@ public class Filters {
     }
 
     public static FilterAction getFilterActionByName(String filterName) {
-        assert finishedAdding;
+        assert finishedRegistering;
 
-        for (FilterAction filter : allFilters) {
-            if (filter.getName().equals(filterName)) {
-                return filter;
+        for (FilterAction action : allFilters) {
+            if (action.getName().equals(filterName)) {
+                return action;
             }
         }
         return null;

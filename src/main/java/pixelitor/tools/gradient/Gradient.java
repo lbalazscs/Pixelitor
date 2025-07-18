@@ -66,10 +66,6 @@ public class Gradient implements Serializable, Debuggable {
     private final Color fgColor;
     private final Color bgColor;
 
-    // helper variable, used when a gradient
-    // fill layer is moved using the move tool
-    private transient Drag origDrag;
-
     public Gradient(Drag drag, GradientType type,
                     CycleMethod cycleMethod, GradientColorType colorType,
                     boolean reversed, BlendingMode blendingMode, float opacity) {
@@ -234,24 +230,20 @@ public class Gradient implements Serializable, Debuggable {
         drag = drag.imTransformedCopy(at);
     }
 
-    public void prepareMovement() {
-        origDrag = drag.copy();
-    }
-
-    public void moveWhileDragging(double x, double y) {
-        drag = origDrag.imTranslatedCopy(x, y);
-    }
-
-    public void finalizeMovement() {
-        // nothing to do
-    }
-
     public boolean hasTransparency() {
         return colorType.hasTransparency();
     }
 
     public boolean hasCustomTransparency() {
         return colorType.hasTransparency() && isCustom();
+    }
+
+    public Drag getDrag() {
+        return drag;
+    }
+
+    public void setDrag(Drag drag) {
+        this.drag = drag;
     }
 
     private boolean isCustom() {

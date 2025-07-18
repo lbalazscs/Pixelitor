@@ -185,9 +185,10 @@ public final class SelectionActions {
      */
     public static void update(Composition comp) {
         assert Threads.calledOnEDT() || AppMode.isUnitTesting();
-        assert comp == null || comp.isActive();
 
-        boolean hasSelection = comp != null && comp.hasSelection();
+        Selection selection = comp == null ? null : comp.getSelection();
+        boolean hasSelection = selection != null;
+
         crop.setEnabled(hasSelection);
         deselect.setEnabled(hasSelection);
         invert.setEnabled(hasSelection);
@@ -196,6 +197,14 @@ public final class SelectionActions {
         convertToPath.setEnabled(hasSelection);
         copySel.setEnabled(hasSelection);
         // pasteSel is handled separately by its ViewActivationListener
+
+        if (comp != null) {
+            if (comp.isActive()) {
+                showHide.updateTextFrom(selection);
+            } else {
+                throw new IllegalStateException();
+            }
+        }
     }
 
     /**

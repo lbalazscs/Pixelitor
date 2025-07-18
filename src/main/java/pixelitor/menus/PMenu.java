@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,12 +48,12 @@ public class PMenu extends JMenu {
     }
 
     public void addFilterWithoutGUI(String name, Supplier<Filter> supplier) {
-        add(new FilterAction(name, supplier).noGUI());
+        add(new FilterAction(name, supplier).withoutDialog());
     }
 
     public void addFilterWithoutGUI(String name, Supplier<Filter> supplier,
                                     KeyStroke keyStroke) {
-        add(new FilterAction(name, supplier).noGUI(), keyStroke);
+        add(new FilterAction(name, supplier).withoutDialog(), keyStroke);
     }
 
     public void addFilter(String name, Supplier<Filter> supplier, KeyStroke keyStroke) {

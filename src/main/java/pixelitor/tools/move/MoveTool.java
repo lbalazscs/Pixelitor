@@ -185,7 +185,7 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    protected OverlayType getDragDisplayType() {
+    protected OverlayType getOverlayType() {
         return OverlayType.REL_MOUSE_POS;
     }
 

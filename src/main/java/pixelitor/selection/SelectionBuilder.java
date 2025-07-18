@@ -65,7 +65,7 @@ public class SelectionBuilder {
             // point (Replace Selection).
             // Therefore, we don't deselect yet (the selection information
             // will be needed when the mouse will be released), only hide.
-            existingSelection.setHidden(true, true);
+            existingSelection.setHidden(true);
         } else {
             existingSelection.setFrozen(true);
         }

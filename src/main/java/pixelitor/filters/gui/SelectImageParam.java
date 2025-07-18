@@ -45,7 +45,7 @@ public class SelectImageParam extends ChoiceParam<NamedImage> {
     }
 
     @Override
-    public void adaptToContext(Filterable layer, boolean changeValue) {
+    public void adaptToContext(Filterable layer, boolean applyNewDefault) {
         this.choices = openImageInfos();
         NamedImage activeImage = findActiveNamedImage(choices, layer);
         // if there is more than one open image,

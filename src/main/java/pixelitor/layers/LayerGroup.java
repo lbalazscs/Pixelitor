@@ -315,11 +315,6 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public int getActiveLayerIndex() {
-        return layers.indexOf(comp.getActiveLayer());
-    }
-
-    @Override
     public int indexOf(Layer layer) {
         return layers.indexOf(layer);
     }
@@ -340,7 +335,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public Stream<? extends Layer> levelStream() {
+    public Stream<? extends Layer> directChildrenStream() {
         return layers.stream();
     }
 

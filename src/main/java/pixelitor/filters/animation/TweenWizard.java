@@ -48,7 +48,7 @@ public class TweenWizard extends Wizard {
     protected void performCleanup() {
         ParametrizedFilter filter = animation.getFilter();
         if (filter != null) { // a filter was already selected on the first page
-            filter.getParamSet().setFinalAnimationMode(false);
+            filter.getParamSet().setAnimationEndStateMode(false);
         }
     }
 

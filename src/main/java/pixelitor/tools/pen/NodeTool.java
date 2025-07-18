@@ -69,6 +69,8 @@ public class NodeTool extends PathTool {
 
         coCoordsChanged(view);
         setActionsEnabled(true);
+
+        view.repaint(); // show the path
     }
 
     @Override
@@ -76,7 +78,7 @@ public class NodeTool extends PathTool {
         super.toolDeactivated(view);
 
         lastActive = null;
-        view.repaint(); // visually hide the path
+        view.repaint(); // hide the path
     }
 
     @Override

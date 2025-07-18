@@ -61,7 +61,7 @@ public class JHSparkle extends ParametrizedFilter {
             numRays,
             radius.withAdjustedRange(1.0),
             shine,
-            randomness.withAction(reseed)
+            randomness.withSideButton(reseed)
         );
     }
 

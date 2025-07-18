@@ -38,6 +38,10 @@ public enum DragToolState {
             return !tool.hasCropBox() && !tool.isCropEnabled();
         }
     },
+    /**
+     * A transient state after the mouse is pressed but before a drag has officially started.
+     * Can be useful for distinguishing between a click and a drag.
+     */
     AFTER_FIRST_MOUSE_PRESS {
         @Override
         public boolean checkInvariants(ShapesTool tool) {
@@ -78,7 +82,7 @@ public enum DragToolState {
         }
     };
 
-    // can be used in assertions
+    // These are used for assertions to verify that the tool's internal state is consistent
     public abstract boolean checkInvariants(ShapesTool tool);
 
     public abstract boolean checkInvariants(CropTool tool);

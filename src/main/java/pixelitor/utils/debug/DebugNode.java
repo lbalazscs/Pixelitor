@@ -18,6 +18,7 @@
 package pixelitor.utils.debug;
 
 import pixelitor.colors.Colors;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.utils.Utils;
 
@@ -46,8 +47,8 @@ public class DebugNode extends DefaultMutableTreeNode {
         new DialogBuilder()
             .title(title)
             .content(new JScrollPane(tree))
-            .okText("Copy")
-            .cancelText("Close")
+            .okText(GUIText.COPY_AS_JSON)
+            .cancelText(GUIText.CLOSE_DIALOG)
             .validator(d -> {
                 Utils.copyStringToClipboard(toJSON());
                 return false; // prevents the dialog from closing

@@ -55,7 +55,7 @@ public class Transform {
         double scaleX = scale.getPercentage(0);
         double scaleY = scale.getPercentage(1);
 
-        boolean hasRotation = !rotate.hasDefault();
+        boolean hasRotation = !rotate.isAtDefault();
         boolean hasScaling = scaleX != 1.0 || scaleY != 1.0;
 
         if (!hasRotation && !hasScaling) {

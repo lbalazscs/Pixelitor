@@ -67,7 +67,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
             .min(2)
             .def(defaultIterations)
             .max(998)
-            .randomizePolicy(IGNORE_RANDOMIZE)
+            .randomizeMode(IGNORE_RANDOMIZE)
             .build();
 
         zoomParam.setPresetKey("Zoom");

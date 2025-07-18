@@ -56,7 +56,7 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         paramGUI = new AngleParamGUI(this);
-        guiCreated();
+        syncWithGui();
         return (JComponent) paramGUI;
     }
 
@@ -102,7 +102,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return angle == defaultAngle;
     }
 
@@ -185,7 +185,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return String.valueOf(angle);
     }
 

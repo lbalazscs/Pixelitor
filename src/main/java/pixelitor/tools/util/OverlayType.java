@@ -33,17 +33,17 @@ public enum OverlayType {
     }, WIDTH_HEIGHT {
         @Override
         public void draw(Graphics2D g, Drag drag) {
-            drag.displayWidthHeight(g);
+            drag.drawWidthHeightOverlay(g);
         }
     }, REL_MOUSE_POS {
         @Override
         public void draw(Graphics2D g, Drag drag) {
-            drag.displayRelativeMovement(g);
+            drag.drawRelativeMovementOverlay(g);
         }
     }, ANGLE_DIST {
         @Override
         public void draw(Graphics2D g, Drag drag) {
-            drag.displayAngleAndDist(g);
+            drag.drawAngleDistanceOverlay(g);
         }
     };
 

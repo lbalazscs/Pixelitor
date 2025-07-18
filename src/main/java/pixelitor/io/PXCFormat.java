@@ -117,7 +117,7 @@ public class PXCFormat {
     public static void write(Composition comp, File file) {
         mainPT = new StatusBarProgressTracker(
             "Writing " + file.getName(), 100);
-        int numImages = comp.calcNumImages();
+        int numImages = comp.countImages();
         if (numImages > 0) {
             workRatioForOneImage = 1.0 / numImages;
         } else {

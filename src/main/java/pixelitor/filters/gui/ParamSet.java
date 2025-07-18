@@ -35,8 +35,8 @@ import static java.util.Locale.Category.FORMAT;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING_STATE;
 
 /**
- * All the information needed to automatically
- * build the user interface of a {@link ParametrizedFilter}
+ * A container/model for all the configurable elements of a {@link ParametrizedFilter}.
+ * The GUI of the filter can be built automatically based on the contents of this class.
  */
 public class ParamSet implements Debuggable {
     public static final String RANDOMIZE_BUTTON_TOOLTIP = "Randomize the settings for this filter.";
@@ -110,6 +110,9 @@ public class ParamSet implements Debuggable {
         addResetAllAction();
     }
 
+    /**
+     * Adds the "Randomize Settings" button model to the action list.
+     */
     private void addRandomizeAction() {
         var randomizeAction = new FilterButtonModel("Randomize Settings",
             this::randomize,
@@ -119,6 +122,9 @@ public class ParamSet implements Debuggable {
         actions.add(randomizeAction);
     }
 
+    /**
+     * Adds the "Reset All" button model to the action list.
+     */
     private void addResetAllAction() {
         var resetAllAction = new FilterButtonModel("Reset All",
             this::reset,
@@ -129,14 +135,15 @@ public class ParamSet implements Debuggable {
     }
 
     /**
-     * Allows registering an action that will run after "reset all"
+     * Registers an action that will be executed after
+     * the {@link #reset()} method has finished resetting all parameters.
      */
     public void setAfterResetAllAction(Runnable afterResetAction) {
         this.afterResetAction = afterResetAction;
     }
 
     /**
-     * Resets all params without triggering the filter
+     * Resets all parameters to their default values without triggering a filter preview update.
      */
     public void reset() {
         for (FilterParam param : params) {
@@ -147,6 +154,9 @@ public class ParamSet implements Debuggable {
         }
     }
 
+    /**
+     * Randomizes the values of all parameters without triggering a filter preview update.
+     */
     public void randomize() {
         long before = Filter.executionCount;
 
@@ -158,7 +168,7 @@ public class ParamSet implements Debuggable {
     }
 
     /**
-     * Programmatically triggers a filter execution by notifying the listener.
+     * Programmatically triggers a filter execution by notifying the registered {@link ParamAdjustmentListener}.
      */
     public void runFilter() {
         if (adjustmentListener != null) {
@@ -183,14 +193,14 @@ public class ParamSet implements Debuggable {
     /**
      * Adapts parameter ranges and choices to the current context, such as image size.
      */
-    public void adaptToContext(Filterable layer, boolean changeValue) {
+    public void adaptToContext(Filterable layer, boolean applyNewDefault) {
         for (FilterParam param : params) {
-            param.adaptToContext(layer, changeValue);
+            param.adaptToContext(layer, applyNewDefault);
         }
     }
 
     /**
-     * A ParamSet can be animated if at least
+     * A {@link ParamSet} can be animated if at least
      * one contained filter parameter can be.
      */
     public boolean isAnimatable() {
@@ -202,12 +212,16 @@ public class ParamSet implements Debuggable {
         return false;
     }
 
-    public void setFinalAnimationMode(boolean b) {
+    /**
+     * Enables or disables UI controls based on whether the user
+     * is configuring the end state of a tweening animation.
+     */
+    public void setAnimationEndStateMode(boolean endState) {
         for (FilterParam param : params) {
-            param.setEnabled(!b, ANIMATION_ENDING_STATE);
+            param.setEnabled(!endState, ANIMATION_ENDING_STATE);
         }
         for (FilterButtonModel action : actions) {
-            action.setEnabled(!b, ANIMATION_ENDING_STATE);
+            action.setEnabled(!endState, ANIMATION_ENDING_STATE);
         }
     }
 
@@ -259,11 +273,11 @@ public class ParamSet implements Debuggable {
      * Loads parameter values from a {@link FilterState}
      * and executes the filter with the new parameters.
      */
-    public void applyState(FilterState preset, boolean reset) {
+    public void applyState(FilterState state, boolean reset) {
         if (reset) {
             reset();
         }
-        setState(preset, false);
+        setState(state, false);
         runFilter();
     }
 
@@ -339,7 +353,7 @@ public class ParamSet implements Debuggable {
     }
 
     /**
-     * Returns true if the filter is considered complex, which means
+     * Returns true if the filter is considered "complex", which means
      * it has multiple parameters or a single, complex parameter.
      * This affects whether user presets are enabled.
      */

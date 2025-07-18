@@ -211,7 +211,7 @@ public class SubPath implements Serializable, Transformable {
         AnchorPoint last = getLastAnchor();
 
         // handle the "rubber band "preview of the next point during path construction
-        if (moving != null && path.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
+        if (moving != null && Tools.PEN.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
             double movingX = toX.applyAsDouble(moving);
             double movingY = toY.applyAsDouble(moving);
             gp.curveTo(
@@ -434,7 +434,7 @@ public class SubPath implements Serializable, Transformable {
     public void undoFinishing() {
         assert finished : "was not finished";
         setFinished(false);
-        path.setBuildingInProgressState();
+        Tools.PEN.setBuildingInProgressState();
     }
 
     public void coCoordsChanged(View view) {
@@ -599,7 +599,7 @@ public class SubPath implements Serializable, Transformable {
         assert !finished;
 
         setFinished(true);
-        path.setBuildState(IDLE);
+        Tools.PEN.setBuildState(IDLE);
         if (comp != null) {
             comp.setActivePath(path);
             PathActions.setActionsEnabled(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ public class BoundingBox {
     private double minY = Double.MAX_VALUE;
     private double maxX = Double.MIN_VALUE;
     private double maxY = Double.MIN_VALUE;
+    private boolean initialized = false;
 
     public double getMinX() {
         return minX;
@@ -63,6 +64,7 @@ public class BoundingBox {
         if (y < minY) {
             minY = y;
         }
+        initialized = true;
     }
 
     public void add(Point2D point) {
@@ -78,6 +80,12 @@ public class BoundingBox {
         minY = Double.MAX_VALUE;
         maxX = Double.MIN_VALUE;
         maxY = Double.MIN_VALUE;
+
+        initialized = false;
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     public Rectangle2D toRectangle2D() {

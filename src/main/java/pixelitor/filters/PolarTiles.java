@@ -65,7 +65,7 @@ public class PolarTiles extends ParametrizedFilter {
             numRadDivisions,
             curvature.withAdjustedRange(0.02),
             rotateEffect,
-            randomness.withAction(reseedRandomness),
+            randomness.withSideButton(reseedRandomness),
             new CompositeParam("Background", zoom, rotateImage),
             edgeAction,
             interpolation

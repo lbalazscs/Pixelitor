@@ -93,7 +93,7 @@ public class GroupLayerAssert extends ContentLayerAssert<GroupLayerAssert, Layer
      */
     public GroupLayerAssert layersAre(Layer... expectedLayers) {
         isNotNull();
-        List<Layer> actualLayers = actual.levelStream().collect(Collectors.toList());
+        List<Layer> actualLayers = actual.directChildrenStream().collect(Collectors.toList());
         assertThat(actualLayers)
             .withFailMessage("Expected layer group '%s' to contain exactly layers %s in order, but found %s.",
                 actual.getName(), Arrays.toString(expectedLayers), actualLayers)

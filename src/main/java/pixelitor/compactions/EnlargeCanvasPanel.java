@@ -106,12 +106,6 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
             param.addChangeListener(listener);
         }
 
-        //        private ListenerSubscription(RangeParam param, ChangeListener listener) {
-//            this.param = param;
-//            this.listener = listener;
-//            param.addChangeListener(listener);
-//        }
-
         void unsubscribe() {
             param.removeChangeListener(listener);
         }
@@ -244,13 +238,8 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         String cardName = switch (newUnit) {
             case PIXELS -> PIXEL_CARD;
             case PERCENTAGE -> PERCENT_CARD;
-            case CENTIMETERS -> null;
-            case INCHES -> null;
+            case CENTIMETERS, INCHES -> throw new IllegalArgumentException("newUnit = " + newUnit);
         };
-        if (cardName == null) {
-            // TODO: not supported yet
-            throw new IllegalArgumentException("newUnit = " + newUnit);
-        }
 
         showCard(northCardPanel, cardName);
         showCard(eastCardPanel, cardName);

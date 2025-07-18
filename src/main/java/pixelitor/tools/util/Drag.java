@@ -49,7 +49,7 @@ public class Drag implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Image-space coordinates (relative to the canvas, adjusted for zooming)
+    // image-space coordinates (relative to the canvas, adjusted for zooming)
     private double imStartX;
     private double imStartY;
     private double imEndX;
@@ -57,7 +57,7 @@ public class Drag implements Serializable, Debuggable {
 
     // transient variables from here
 
-    // Component-space coordinates (relative to the View component)
+    // component-space coordinates (relative to the View component)
     private transient double coStartX;
     private transient double coEndX;
     private transient double coStartY;
@@ -233,7 +233,7 @@ public class Drag implements Serializable, Debuggable {
         return imStartY;
     }
 
-    public double getStartXFromCenter() {
+    public double getOriginX() {
         if (expandFromCenter) {
             return imStartX - (imEndX - imStartX);
         } else {
@@ -241,7 +241,7 @@ public class Drag implements Serializable, Debuggable {
         }
     }
 
-    public double getStartYFromCenter() {
+    public double getOriginY() {
         if (expandFromCenter) {
             return imStartY - (imEndY - imStartY);
         } else {
@@ -272,7 +272,7 @@ public class Drag implements Serializable, Debuggable {
         return new Point2D.Double(cx, cy);
     }
 
-    public Drag getCenterDrag() {
+    public Drag createDragFromCenterToEnd() {
         Point2D center = getCenterPoint();
         return new Drag(center.getX(), center.getY(), getEndX(), getEndY());
     }
@@ -343,7 +343,7 @@ public class Drag implements Serializable, Debuggable {
         prevCoEndY = coEndY;
     }
 
-    public void adjustStartForSpaceDownDrag(View view) {
+    public void panStartPoint(View view) {
         assert hasCoCoords;
         double dx = coEndX - prevCoEndX;
         double dy = coEndY - prevCoEndY;
@@ -455,7 +455,7 @@ public class Drag implements Serializable, Debuggable {
      *
      * @return a Rectangle where the width and height can be < 0
      */
-    public Rectangle2D createPossiblyEmptyImRect() {
+    public Rectangle2D createSignedImRect() {
         double x;
         double y;
         double width;
@@ -589,25 +589,25 @@ public class Drag implements Serializable, Debuggable {
         return Math.atan2(x - imStartX, y - imStartY);
     }
 
-    public void displayWidthHeight(Graphics2D g) {
+    public void drawWidthHeightOverlay(Graphics2D g) {
         assert hasCoCoords;
 
         double imWidth = imEndX - imStartX;
         double imHeight = imEndY - imStartY;
         MeasurementOverlay overlay = new MeasurementOverlay(g, MeasurementOverlay.BG_WIDTH_PIXELS);
 
-        displayWidth(overlay, imWidth, imHeight);
-        displayHeight(overlay, imWidth, imHeight);
+        drawWidth(overlay, imWidth, imHeight);
+        drawHeight(overlay, imWidth, imHeight);
 
         if (startAdjusted) {
-            displayStartInfo(overlay, imWidth, imHeight);
+            drawStartInfo(overlay, imWidth, imHeight);
         }
 
         overlay.cleanup();
     }
 
-    // draw the width display
-    private void displayWidth(MeasurementOverlay overlay, double imWidth, double imHeight) {
+    // draw the width overlay
+    private void drawWidth(MeasurementOverlay overlay, double imWidth, double imHeight) {
         float y;
         if (imHeight >= 0) {
             // display the width info below the mouse
@@ -621,8 +621,8 @@ public class Drag implements Serializable, Debuggable {
         overlay.drawOneLine(widthInfo, x, y);
     }
 
-    // draw the height display
-    private void displayHeight(MeasurementOverlay overlay, double imWidth, double imHeight) {
+    // draw the height overlay
+    private void drawHeight(MeasurementOverlay overlay, double imWidth, double imHeight) {
         float x;
         if (imWidth >= 0) {
             // display the height info on the right side of the mouse
@@ -636,7 +636,7 @@ public class Drag implements Serializable, Debuggable {
         overlay.drawOneLine(heightInfo, x, y);
     }
 
-    private void displayStartInfo(MeasurementOverlay overlay, double imWidth, double imHeight) {
+    private void drawStartInfo(MeasurementOverlay overlay, double imWidth, double imHeight) {
         // can be smaller because of the rounded rectangle
         // and because it is at a distance in both dimensions
         int mouseDist = MeasurementOverlay.OFFSET_FROM_MOUSE / 2;
@@ -663,7 +663,7 @@ public class Drag implements Serializable, Debuggable {
         overlay.drawTwoLines(xInfo, yInfo, startInfoX, startInfoY);
     }
 
-    public void displayRelativeMovement(Graphics2D g) {
+    public void drawRelativeMovementOverlay(Graphics2D g) {
         assert hasCoCoords;
         int imDx = (int) (imEndX - imStartX);
         int imDy = (int) (imEndY - imStartY);
@@ -673,7 +673,7 @@ public class Drag implements Serializable, Debuggable {
             (float) (coEndX + 30), (float) (coEndY - 20));
     }
 
-    public void displayAngleAndDist(Graphics2D g) {
+    public void drawAngleDistanceOverlay(Graphics2D g) {
         assert hasCoCoords;
 
         double coDx = coEndX - coStartX;

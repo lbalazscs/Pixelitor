@@ -290,9 +290,9 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         for (EffectPanel panel : panels) {
-            if (!panel.hasDefault()) {
+            if (!panel.isAtDefault()) {
                 return false;
             }
         }

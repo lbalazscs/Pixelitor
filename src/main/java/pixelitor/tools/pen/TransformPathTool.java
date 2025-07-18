@@ -76,13 +76,15 @@ public class TransformPathTool extends PathTool {
         initBoxes(comp);
         setActionsEnabled(comp.hasActivePath());
         coCoordsChanged(view);
+
+        view.repaint(); // show the path
     }
 
     @Override
     protected void toolDeactivated(View view) {
         super.toolDeactivated(view);
 
-        view.repaint(); // visually hide the path
+        view.repaint(); // hide the path
     }
 
     @Override

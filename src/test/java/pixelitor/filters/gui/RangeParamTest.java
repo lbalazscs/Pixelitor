@@ -52,23 +52,23 @@ class RangeParamTest {
     void setValue() {
         var param = new RangeParam("Test", 0, 50, 100);
         assertThat(param.getValue()).isEqualTo(50);
-        assertThat(param).isAtDefaultValue();
+        assertThat(param).isAtDefault();
 
         var adjListener = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(adjListener);
 
         param.setValue(50, true);
-        assertThat(param).isAtDefaultValue();
+        assertThat(param).isAtDefault();
         // expect no triggering because the value didn't change
         verify(adjListener, never()).paramAdjusted();
 
         param.setValue(60, true);
-        assertThat(param).isNotAtDefaultValue();
+        assertThat(param).isNotAtDefault();
         // expect one triggering
         verify(adjListener, times(1)).paramAdjusted();
 
         param.setValue(50, false);
-        assertThat(param).isAtDefaultValue();
+        assertThat(param).isAtDefault();
         // expect no new triggering, because triggering was set to false
         verify(adjListener, times(1)).paramAdjusted();
     }

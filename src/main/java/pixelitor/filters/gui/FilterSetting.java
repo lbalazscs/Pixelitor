@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 
 /**
- * The model of a widget that appears in a filter GUI.
+ * The model of all UI controls in a filter's dialog.
  * Can be either a {@link FilterButtonModel} for buttons
  * or a {@link FilterParam} for adjustable parameters.
  */
@@ -31,7 +31,7 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
     String getName();
 
     /**
-     * Creates the GUI component that corresponds to this model.
+     * Creates the GUI component that represents this model in the UI.
      *
      * If this is an instance of {@link FilterParam},
      * the returned component must also implement {@link ParamGUI}.
@@ -43,14 +43,14 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
      * The GUI component's name is used for lookup during automatic
      * GUI testing and it's not the same as the display name.
      */
-    default JComponent createGUI(String name) {
+    default JComponent createGUI(String lookupName) {
         JComponent gui = createGUI();
-        gui.setName(name);
+        gui.setName(lookupName);
         return gui;
     }
 
     /**
-     * Sets the listener that will be notified when this filter setting is adjusted.
+     * Sets the listener that will be notified whenever this filter setting is changed or activated.
      */
     void setAdjustmentListener(ParamAdjustmentListener listener);
 
@@ -65,10 +65,14 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
         setEnabled(enabled, EnabledReason.FILTER_LOGIC);
     }
 
+    /**
+     * Returns true if the setting is currently enabled,
+     * considering all possible reasons for it to be disabled.
+     */
     boolean isEnabled();
 
     /**
-     * The possible reasons for enabling or disabling a filter setting.
+     * The distinct reasons for enabling or disabling a filter setting.
      */
     enum EnabledReason {
         /**
@@ -76,7 +80,8 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
          */
         FILTER_LOGIC,
         /**
-         * The enabled state is determined by the animation configuration mode.
+         * The enabled state is determined by the app's animation mode
+         * (disabling non-animatable parameters when configuting an animation's end frame).
          */
         ANIMATION_ENDING_STATE
     }

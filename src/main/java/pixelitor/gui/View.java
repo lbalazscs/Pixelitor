@@ -350,9 +350,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     /**
-     * Reorders a layer's UI representation in the layers panel.
+     * Reorders a top-level layer's UI representation in the layers panel.
      */
-    public void reorderLayerInUI(int oldIndex, int newIndex) {
+    public void reorderLayerUI(int oldIndex, int newIndex) {
         layersPanel.reorderLayer(oldIndex, newIndex);
     }
 
@@ -894,16 +894,16 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return viewContainer.getScrollPane().getViewport().getViewRect();
     }
 
-    public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
+    public void addLayerToGUI(Layer layer, int index) {
         assert calledOnEDT() : callInfo();
 
         // can be cast outside unit tests
-        LayerGUI layerGUI = (LayerGUI) newLayer.createUI();
+        LayerGUI layerGUI = (LayerGUI) layer.createUI();
 
         try {
             // otherwise loading multi-layer files makes the comp dirty
             layerGUI.setReactToItemEvents(false);
-            layersPanel.addLayerGUI(layerGUI, newLayerIndex);
+            layersPanel.addLayerGUI(layerGUI, index);
             layerGUI.updateSelectionState();
         } finally {
             layerGUI.setReactToItemEvents(true);

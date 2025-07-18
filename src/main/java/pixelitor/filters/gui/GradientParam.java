@@ -78,7 +78,7 @@ public class GradientParam extends AbstractFilterParam {
     public JComponent createGUI() {
         GradientParamGUI gui = new GradientParamGUI(this);
         paramGUI = gui;
-        guiCreated();
+        syncWithGui();
         return gui;
     }
 
@@ -138,7 +138,7 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return Arrays.equals(thumbPositions, defaultThumbPositions)
             && Arrays.equals(colors, defaultColors);
     }
@@ -195,7 +195,7 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return Colors.formatForDebugging(colors);
     }
 

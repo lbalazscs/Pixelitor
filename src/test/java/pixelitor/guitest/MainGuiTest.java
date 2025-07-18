@@ -705,7 +705,7 @@ public class MainGuiTest {
     private void testInternalState() {
         runMenuCommand("Internal State...");
         var dialog = findDialogByTitle("Internal State");
-        findButtonByText(dialog, "Copy as Text to the Clipboard").click();
+        findButtonByText(dialog, "Copy as JSON").click();
         findButtonByText(dialog, "Close").click();
         dialog.requireNotVisible();
     }

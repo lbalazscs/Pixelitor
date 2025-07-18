@@ -55,16 +55,16 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        var gui = new ColorParamGUI(this, action, true);
+        var gui = new ColorParamGUI(this, sideButtonModel, true);
         paramGUI = gui;
-        guiCreated();
+        syncWithGui();
 
         return gui;
     }
 
     public ColorParam withRandomizeAction() {
         String toolTip = "<html>Randomize the color of <b>" + getName() + "</b>";
-        action = new FilterButtonModel("",
+        sideButtonModel = new FilterButtonModel("",
             this::randomize, Icons.getRandomizeIcon(),
             toolTip, null);
 
@@ -72,7 +72,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return Objects.equals(color, defaultColor);
     }
 
@@ -161,7 +161,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return Colors.formatForDebugging(color);
     }
 

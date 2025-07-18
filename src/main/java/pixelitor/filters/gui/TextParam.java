@@ -52,12 +52,12 @@ public class TextParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         paramGUI = new TextParamGUI(this, value, adjustmentListener);
-        guiCreated();
+        syncWithGui();
         return (JComponent) paramGUI;
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return defaultValue.equals(getValue());
     }
 
@@ -127,7 +127,7 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return getValue();
     }
 

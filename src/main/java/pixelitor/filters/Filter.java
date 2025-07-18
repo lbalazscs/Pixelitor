@@ -125,7 +125,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     }
 
     /**
-     * Returns a string representation of the filter's parameters.
+     * Returns a string representation of the filter's parameters (for debugging).
      */
     public String paramsAsString() {
         return "";
@@ -187,6 +187,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
     /**
      * Serialization proxy pattern as described in the "Effective Java" book.
+     * It decouples a filter's serialized form from its internal fields.
      */
     private static class SerializationProxy implements Serializable {
         @Serial

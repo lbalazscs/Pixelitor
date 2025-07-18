@@ -90,7 +90,7 @@ public final class GUIUtils {
                                                      Supplier<String> textSupplier,
                                                      String title) {
         new DialogBuilder()
-            .okText("Copy as Text to the Clipboard")
+            .okText(GUIText.COPY_AS_JSON)
             .cancelText(CLOSE_DIALOG)
             .validator(d -> {
                 Utils.copyStringToClipboard(textSupplier.get()); // OK action

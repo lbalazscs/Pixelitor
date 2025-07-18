@@ -143,7 +143,7 @@ public class SlippingTiles extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        var isVertical = isVerticalParam.getParamValue().equals("Vertical");
+        var isVertical = isVerticalParam.getValueAsString().equals("Vertical");
 
         // Size of image perpendicular to the cut
         int sizePerpCut = isVertical ? src.getWidth() : src.getHeight();

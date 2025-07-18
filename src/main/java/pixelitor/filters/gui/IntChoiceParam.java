@@ -159,7 +159,7 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
         setupEnableOtherIf(reseedNoise,
             selected -> selected.valueIs(WaveType.NOISE));
 
-        return withAction(reseedNoise);
+        return withSideButton(reseedNoise);
     }
 
     public static IntChoiceParam forGridType(String name, RangeParam randomnessParam) {

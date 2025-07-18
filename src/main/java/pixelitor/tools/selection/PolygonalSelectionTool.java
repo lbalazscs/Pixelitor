@@ -39,7 +39,7 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
             "<b>click</b> to add points, " +
                 "<b>double-click</b> or <b>right-click</b> to close the selection.",
             Cursors.DEFAULT, false);
-        spaceDragStartPoint = false;
+        repositionOnSpace = false;
         pixelSnapping = true;
     }
 
@@ -100,7 +100,7 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    protected OverlayType getDragDisplayType() {
+    protected OverlayType getOverlayType() {
         // no drag overlay as we build point by point
         return OverlayType.NONE;
     }

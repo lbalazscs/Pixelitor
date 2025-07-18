@@ -36,7 +36,7 @@ import static pixelitor.selection.ShapeCombinator.REPLACE;
 
 @DisplayName("Pen Tool tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-class PenToolTest {
+class PathToolTest {
     private View view;
     private Composition comp;
 

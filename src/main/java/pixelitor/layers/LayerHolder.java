@@ -35,11 +35,6 @@ import java.util.stream.Stream;
  */
 public interface LayerHolder extends Debuggable {
     /**
-     * Returns the index of the currently active layer within this holder.
-     */
-    int getActiveLayerIndex();
-
-    /**
      * Returns the index of the given layer within this holder.
      */
     int indexOf(Layer layer);
@@ -50,13 +45,12 @@ public interface LayerHolder extends Debuggable {
     int getNumLayers();
 
     /**
-     * Returns the layer at the given index within this holder.
+     * Returns the layer at the given index from this holder's list of direct children.
      */
     Layer getLayer(int index);
 
     /**
-     * Recursively checks if this layer holder contains
-     * the given layer at the top nesting level.
+     * Checks if the given layer is a direct child of this holder.
      */
     boolean listContainsLayer(Layer layer);
 
@@ -65,6 +59,25 @@ public interface LayerHolder extends Debuggable {
      * a layer of the given type at any nesting level.
      */
     boolean containsLayerOfType(Class<? extends Layer> type);
+
+    /**
+     * Returns a Stream of the direct child layers of this holder.
+     */
+    Stream<? extends Layer> directChildrenStream();
+
+    /**
+     * Returns whether this holder is allowed to have zero child layers.
+     * A {@link Composition} cannot be empty, but a {@link LayerGroup} can.
+     */
+    boolean canBeEmpty();
+
+    /**
+     * Checks if this holder is the direct parent of the
+     * currently active layer in the entire composition.
+     */
+    default boolean isHolderOfActiveLayer() {
+        return getComp().getActiveHolder() == this;
+    }
 
     /**
      * Adds a layer to this holder without adding it to the UI.
@@ -89,7 +102,19 @@ public interface LayerHolder extends Debuggable {
     }
 
     /**
+     * Inserts a layer at the given index.
+     * The update flag controls whether this is a full-featured insertion
+     * (with UI updates and history) or just a low-level list modification.
+     */
+    void insertLayer(Layer layer, int index, boolean update);
+
+    default LayerAdder adder() {
+        return new LayerAdder(this);
+    }
+
+    /**
      * Moves the currently active layer up or down in the layer stack.
+     * Handles moving layers into or out of adjacent {@link LayerGroup}s automatically.
      */
     default void reorderActiveLayer(boolean up) {
         assert isHolderOfActiveLayer();
@@ -104,7 +129,7 @@ public interface LayerHolder extends Debuggable {
                 LayerHolder groupHolder = group.getHolder();
                 int groupIndex = groupHolder.indexOf(group);
                 int targetIndex = up ? groupIndex + 1 : groupIndex;
-                moveLayerInto(activeLayer, groupHolder, targetIndex, editName);
+                transferLayerToHolder(activeLayer, groupHolder, targetIndex, editName);
                 return;
             }
         }
@@ -117,7 +142,7 @@ public interface LayerHolder extends Debuggable {
             // special case: move the layer into the group
 
             int groupIndex = up ? 0 : group.getNumLayers();
-            moveLayerInto(activeLayer, group, groupIndex, editName);
+            transferLayerToHolder(activeLayer, group, groupIndex, editName);
         } else {
             reorderLayer(index, newIndex, true, editName);
         }
@@ -127,7 +152,7 @@ public interface LayerHolder extends Debuggable {
      * Transfers the given layer from this holder to the given target
      * holder at the given index.
      */
-    default void moveLayerInto(Layer layer, LayerHolder targetHolder, int targetIndex, String editName) {
+    default void transferLayerToHolder(Layer layer, LayerHolder targetHolder, int targetIndex, String editName) {
         assert targetHolder != this;
         assert listContainsLayer(layer);
         assert !targetHolder.listContainsLayer(layer);
@@ -212,20 +237,9 @@ public interface LayerHolder extends Debuggable {
     void reorderLayerUI(int oldIndex, int newIndex);
 
     /**
-     * Inserts a layer at the given index.
-     */
-    void insertLayer(Layer layer, int index, boolean update);
-
-    /**
      * Deletes a layer from this holder.
      */
     void deleteLayer(Layer layer, boolean addToHistory);
-
-    /**
-     * Returns whether this holder can be empty,
-     * i.e. whether it can contain zero layers.
-     */
-    boolean canBeEmpty();
 
     /**
      * Replaces a layer with another, while keeping its position, mask, ui
@@ -294,7 +308,7 @@ public interface LayerHolder extends Debuggable {
 
     /**
      * Merges the given layer down into the layer below it.
-     * This method assumes that canMergeDown()  has previously returned true.
+     * This method assumes that {@link #canMergeDown(Layer)}  has previously returned true.
      */
     default void mergeDown(Layer layer) {
         int layerIndex = indexOf(layer);
@@ -322,44 +336,47 @@ public interface LayerHolder extends Debuggable {
     }
 
     /**
-     * Checks if the current active layer belongs to this holder.
+     * Signals a change in the holder's content, requiring a visual update.
+     * Implementations must invalidate cached images and trigger a re-rendering of the main composition.
      */
-    default boolean isHolderOfActiveLayer() {
-        return getComp().getActiveHolder() == this;
-    }
-
     void update(boolean updateHistogram);
 
+    /**
+     * A convenience method that always updates the histogram as well.
+     */
     void update();
 
     /**
-     * Callback invoked when a smart object belonging to this holder has been changed.
-     */
-    void smartObjectChanged(boolean linked);
-
-    String getORAStackXML();
-
-    Composition getComp();
-
-    String getName();
-
-    /**
-     * Recursively invalidate the image caches in the direction
+     * Recursively invalidates the image caches in the direction
      * of the root of the holder tree until the composition's image
      * cache is also invalidated.
      */
     void invalidateImageCache();
 
     /**
-     * Return a Stream of layers at this level.
+     * Callback invoked when a smart object belonging to this holder has been changed.
      */
-    Stream<? extends Layer> levelStream();
+    void smartObjectChanged(boolean linked);
+
+    /**
+     * Used during export to the OpenRaster (.ora) file format.
+     * It returns the opening XML tag for the layer stack represented by this holder.
+     */
+    String getORAStackXML();
+
+    /**
+     * Returns the root {@link Composition} object.
+     */
+    Composition getComp();
+
+    String getName();
+
 
     /**
      * Converts the visible layers in this holder to a new layer group.
      */
     default void convertVisibleLayersToGroup() {
-        int[] indices = levelStream()
+        int[] indices = directChildrenStream()
             .filter(Layer::isVisible)
             .mapToInt(this::indexOf)
             .toArray();
@@ -411,10 +428,6 @@ public interface LayerHolder extends Debuggable {
     default void addEmptyGroup() {
         LayerGroup group = new LayerGroup(getComp(), LayerGroup.generateName());
         addWithHistory(group, "New Layer Group");
-    }
-
-    default LayerAdder adder() {
-        return new LayerAdder(this);
     }
 
     /**

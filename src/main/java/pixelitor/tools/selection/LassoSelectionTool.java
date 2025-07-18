@@ -34,7 +34,7 @@ public class LassoSelectionTool extends AbstractSelectionTool {
         super("Freehand Selection", 'L',
             "simply drag around the area that you want to select.",
             Cursors.DEFAULT, false);
-        spaceDragStartPoint = false;
+        repositionOnSpace = false;
         pixelSnapping = true;
     }
 
@@ -70,7 +70,7 @@ public class LassoSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    protected OverlayType getDragDisplayType() {
+    protected OverlayType getOverlayType() {
         // no measurement overlay for freehand drawing
         return OverlayType.NONE;
     }

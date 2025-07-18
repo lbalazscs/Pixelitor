@@ -19,6 +19,7 @@ package pixelitor.tools.pen.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.Tools;
 import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.SubPath;
@@ -58,7 +59,7 @@ public class AddAnchorPointEdit extends PixelitorEdit {
 
         // the subpath could be finished in the meantime without a history event
         if (!subPath.isFinished()) {
-            subPath.getPath().setBuildingInProgressState();
+            Tools.PEN.setBuildingInProgressState();
         }
 
         comp.repaint();

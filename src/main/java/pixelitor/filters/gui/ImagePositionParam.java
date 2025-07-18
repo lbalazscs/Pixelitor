@@ -55,7 +55,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     public JComponent createGUI() {
         var gui = new ImagePositionParamGUI(this, defaultRelativeX, defaultRelativeY);
         paramGUI = gui;
-        guiCreated();
+        syncWithGui();
         paramGUI.updateGUI();
         return gui;
     }
@@ -108,7 +108,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return relativeX == defaultRelativeX && relativeY == defaultRelativeY;
     }
 
@@ -151,7 +151,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return new Point2D.Double(getRelativeX(), getRelativeY()).toString();
     }
 

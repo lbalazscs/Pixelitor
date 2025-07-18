@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class ResetButton extends JButton {
     }
 
     public void updateState() {
-        boolean isDefault = resettable.hasDefault();
+        boolean isDefault = resettable.isAtDefault();
         setArrowIcon(isDefault);
         setEnabled(!isDefault);
     }
@@ -59,6 +59,6 @@ public class ResetButton extends JButton {
 
     @Override
     public void setEnabled(boolean b) {
-        super.setEnabled(b && !resettable.hasDefault());
+        super.setEnabled(b && !resettable.isAtDefault());
     }
 }

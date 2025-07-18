@@ -50,7 +50,7 @@ public class ColorListParam extends AbstractFilterParam {
     public JComponent createGUI() {
         var gui = new ColorListParamGUI(this, candidateColors, minNumColors);
         paramGUI = gui;
-        guiCreated();
+        syncWithGui();
 
         return gui;
     }
@@ -141,12 +141,12 @@ public class ColorListParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return Colors.formatForDebugging(colors);
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return Arrays.equals(colors, defaultColors);
     }
 

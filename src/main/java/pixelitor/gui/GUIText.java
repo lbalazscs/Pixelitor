@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,6 +46,7 @@ public class GUIText {
     public static final String BG_COLOR = i18n("bg_color");
 
     public static final String HELP = i18n("help");
+    public static final String COPY_AS_JSON = "Copy as JSON";
 
     private GUIText() {
     }

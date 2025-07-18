@@ -67,7 +67,7 @@ public class JHQuantize extends ParametrizedFilter {
     }
 
     @Override
-    public boolean supportsTweenAnimation() {
+    public boolean isAnimatable() {
         return false;
     }
 }

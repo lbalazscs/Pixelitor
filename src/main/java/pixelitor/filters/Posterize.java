@@ -117,7 +117,7 @@ public class Posterize extends ParametrizedFilter {
     }
 
     @Override
-    public boolean supportsTweenAnimation() {
+    public boolean isAnimatable() {
         return false;
     }
 

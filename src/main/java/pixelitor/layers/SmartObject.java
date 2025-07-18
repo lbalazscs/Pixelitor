@@ -1015,15 +1015,6 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public int getActiveLayerIndex() {
-        SmartFilter sf = getSelectedSmartFilter();
-        if (sf != null) {
-            return filters.indexOf(sf);
-        }
-        return -1;
-    }
-
-    @Override
     public int indexOf(Layer layer) {
         return filters.indexOf((SmartFilter) layer);
     }
@@ -1044,7 +1035,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public Stream<? extends Layer> levelStream() {
+    public Stream<SmartFilter> directChildrenStream() {
         return filters.stream();
     }
 

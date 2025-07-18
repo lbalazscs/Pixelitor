@@ -76,7 +76,7 @@ public enum ShapeType {
     }, DIAMOND("Diamond", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            Rectangle2D r = drag.createSignedImRect();
             return Shapes.createDiamond(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
@@ -116,7 +116,7 @@ public enum ShapeType {
     }, HEART("Heart", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            Rectangle2D r = drag.createSignedImRect();
             return Shapes.createHeart(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
@@ -170,7 +170,7 @@ public enum ShapeType {
             }
             lastDrag = drag;
 
-            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            Rectangle2D r = drag.createSignedImRect();
             return new RandomStarShape(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
@@ -193,7 +193,7 @@ public enum ShapeType {
                 unitArrow = Shapes.createUnitArrow();
             }
 
-            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            Rectangle2D r = drag.createSignedImRect();
 
             double length = drag.calcImLength();
             var transform = AffineTransform.getTranslateInstance(r.getX(), r.getY());
@@ -225,7 +225,7 @@ public enum ShapeType {
     }, CAT("Cat", false, false, true) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            Rectangle2D r = drag.createSignedImRect();
             return Shapes.createCat(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
@@ -236,7 +236,7 @@ public enum ShapeType {
     }, KIWI("Kiwi", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            Rectangle2D r = drag.createSignedImRect();
             return Shapes.createKiwi(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
@@ -247,7 +247,7 @@ public enum ShapeType {
     }, BAT("Bat", false, false, true) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            Rectangle2D r = drag.createSignedImRect();
             return Shapes.createBat(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
@@ -258,7 +258,7 @@ public enum ShapeType {
     }, RABBIT("Rabbit", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            Rectangle2D r = drag.createSignedImRect();
             return Shapes.createRabbit(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 

@@ -62,9 +62,9 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        var gui = new BooleanParamGUI(this, addResetButton, action);
+        var gui = new BooleanParamGUI(this, addResetButton, sideButtonModel);
         paramGUI = gui;
-        guiCreated();
+        syncWithGui();
 
         if (pendingItemListeners != null) {
             // add any item listeners that were queued before the GUI was created
@@ -113,7 +113,7 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return defaultValue == value;
     }
 
@@ -197,7 +197,7 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return String.valueOf(isChecked());
     }
 

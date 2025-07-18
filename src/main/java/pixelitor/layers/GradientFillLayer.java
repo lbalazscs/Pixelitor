@@ -28,6 +28,7 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.Gradient;
+import pixelitor.tools.util.Drag;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
@@ -52,6 +53,9 @@ public class GradientFillLayer extends ContentLayer {
     private transient BufferedImage cachedImage;
 
     private static int count;
+
+    // helper for Move Tool support
+    private transient Drag origDrag;
 
     public GradientFillLayer(Composition comp, String name) {
         super(comp, name);
@@ -225,7 +229,7 @@ public class GradientFillLayer extends ContentLayer {
     public void prepareMovement() {
         super.prepareMovement();
         if (gradient != null) {
-            gradient.prepareMovement();
+            origDrag = gradient.getDrag().copy();
             backupGradient = gradient.copy();
         }
     }
@@ -234,7 +238,8 @@ public class GradientFillLayer extends ContentLayer {
     public void moveWhileDragging(double imDx, double imDy) {
         super.moveWhileDragging(imDx, imDy);
         if (gradient != null) {
-            gradient.moveWhileDragging(imDx, imDy);
+            Drag newDrag = origDrag.imTranslatedCopy(imDx, imDy);
+            gradient.setDrag(newDrag);
         }
     }
 
@@ -242,7 +247,6 @@ public class GradientFillLayer extends ContentLayer {
     public PixelitorEdit finalizeMovement() {
         PixelitorEdit edit = super.finalizeMovement();
         if (gradient != null) {
-            gradient.finalizeMovement();
             updateIconImage();
         }
         return edit;

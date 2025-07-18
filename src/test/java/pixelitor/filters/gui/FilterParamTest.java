@@ -148,17 +148,17 @@ public class FilterParamTest {
     @Test
     public void shouldHandleRandomization() {
         // Test allowed randomization
-        param.setRandomizePolicy(RandomizeMode.ALLOW_RANDOMIZE);
+        param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
         assertThat(param).shouldRandomize();
         param.randomize();
         verifyNoParamAdjustments();
 
         // Test ignored randomization
-        String origValue = param.getParamValue();
-        param.setRandomizePolicy(RandomizeMode.IGNORE_RANDOMIZE);
+        String origValue = param.getValueAsString();
+        param.setRandomizeMode(RandomizeMode.IGNORE_RANDOMIZE);
         assertThat(param).shouldNotRandomize();
         param.randomize();
-        assertThat(param).hasValue(origValue); // it didn't change
+        assertThat(param).valueAsStringIs(origValue); // it didn't change
         verifyNoParamAdjustments();
     }
 
@@ -167,7 +167,7 @@ public class FilterParamTest {
         param.reset(false);
 
         verifyNoParamAdjustments();
-        assertThat(param).isAtDefaultValue();
+        assertThat(param).isAtDefault();
     }
 
     @Test
@@ -178,22 +178,22 @@ public class FilterParamTest {
         // from 0 to 2*pi, which confuses this test
         param.reset(false);
 
-        String defaultValue = param.getParamValue();
+        String defaultValue = param.getValueAsString();
         // we can change the value in a general way only
         // through randomize
         if (!param.shouldRandomize()) {
             param.reset(true);
-            assertThat(param).isAtDefaultValue();
+            assertThat(param).isAtDefault();
             return;
         }
 
         // Randomize until we get a non-default value
-        while (param.hasDefault()) {
+        while (param.isAtDefault()) {
             param.randomize();
             verifyNoParamAdjustments();
         }
 
-        assertThat(param.getParamValue())
+        assertThat(param.getValueAsString())
             .isNotNull()
             .isNotEqualTo(defaultValue);
 
@@ -201,8 +201,8 @@ public class FilterParamTest {
         param.reset(true);
 
         assertThat(param)
-            .isAtDefaultValue()
-            .hasValue(defaultValue);
+            .isAtDefault()
+            .valueAsStringIs(defaultValue);
 
         // check that it was triggered once
         verify(mockAdjustmentListener, times(1)).paramAdjusted();
@@ -210,13 +210,13 @@ public class FilterParamTest {
 
     @Test
     public void shouldPreserveStateWhenCopiedAndRestored() {
-        String origValue = param.getParamValue();
+        String origValue = param.getValueAsString();
 
         ParamState<?> paramState = param.copyState();
         assertThat(paramState).isNotNull();
 
         param.loadStateFrom(paramState, false);
-        assertThat(param).hasValue(origValue);
+        assertThat(param).valueAsStringIs(origValue);
 
         verifyNoParamAdjustments();
     }

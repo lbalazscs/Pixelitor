@@ -104,7 +104,7 @@ public class CropTool extends DragTool {
                 "<b>Double-click</b> to crop, <b>Esc</b> to cancel.",
             Cursors.DEFAULT, false);
 
-        spaceDragStartPoint = true; // allow moving the initial rectangle with spacebar
+        repositionOnSpace = true; // allow moving the initial rectangle with spacebar
         pixelSnapping = true; // always snaps to pixels
 
         compositionGuide = new CompositionGuide(GuidesRenderer.CROP_GUIDES_INSTANCE.get());

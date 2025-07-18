@@ -128,7 +128,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
      */
     public CompositionAssert layersAre(Layer... expectedLayers) {
         isNotNull();
-        List<Layer> actualLayers = actual.levelStream().collect(Collectors.toList());
+        List<Layer> actualLayers = actual.directChildrenStream().collect(Collectors.toList());
         assertThat(actualLayers)
             .withFailMessage("Expected composition '%s' to contain exactly layers %s in order, but found %s.",
                 actual.getName(), Arrays.toString(expectedLayers), actualLayers)
@@ -157,7 +157,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert activeLayerIndexIs(int expected) {
         isNotNull();
 
-        int actualIndex = actual.getActiveLayerIndex();
+        int actualIndex = actual.indexOf(actual.getActiveTopLevelLayer());
         if (actualIndex != expected) {
             failWithMessage("""
                     

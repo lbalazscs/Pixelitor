@@ -83,7 +83,7 @@ public class AbstractLights extends ParametrizedFilter {
 
         CompositeParam advancedParam = new CompositeParam("Advanced",
             hueRandomnessParam, whiteBlendParam, blurParam, speedParam, bounceParam);
-        advancedParam.setRandomizePolicy(IGNORE_RANDOMIZE);
+        advancedParam.setRandomizeMode(IGNORE_RANDOMIZE);
 
         CompositeParam starSettingsParam = new CompositeParam("Star Settings",
             starSizeParam, starCenterParam);

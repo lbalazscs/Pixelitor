@@ -863,7 +863,7 @@ public class TransformedTextPainter implements Debuggable {
             invalidLayout = true;
 
             if (effects != null && effects.hasEnabledEffects()) {
-                effectsPadding = (int) Math.ceil(effects.calcMaxEffectThickness());
+                effectsPadding = (int) effects.calcMaxEffectPadding();
             } else {
                 effectsPadding = 0;
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,8 +48,8 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
         JPanel leftPanel = GUIUtils.createVerticalPanel(paramSet);
         JPanel rightPanel = createPresetsPanel(presets);
 
-        // This is a right place to do this, because when this code is
-        // called, the default adjustment listener is already set.
+        // this is a right place to do this, because when this code is
+        // called, the default adjustment listener is already set
         ((ChannelMixer) this.filter).replaceAdjustmentListeners();
 
         upperPanel.add(leftPanel, CENTER);

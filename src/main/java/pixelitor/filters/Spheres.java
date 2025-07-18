@@ -90,7 +90,7 @@ public class Spheres extends ParametrizedFilter {
         layout.setupEnableOtherIf(reseedAction, layoutType -> layoutType == Layout.RANDOM);
 
         initParams(
-            layout.withAction(reseedAction),
+            layout.withSideButton(reseedAction),
             minRadius.withAdjustedRange(0.1),
             maxRadius.withAdjustedRange(0.1),
             density,

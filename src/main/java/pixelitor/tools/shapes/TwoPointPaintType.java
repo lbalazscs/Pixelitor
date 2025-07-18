@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,8 +69,8 @@ public enum TwoPointPaintType {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new GradientPaint(
-                (float) drag.getStartXFromCenter(),
-                (float) drag.getStartYFromCenter(),
+                (float) drag.getOriginX(),
+                (float) drag.getOriginY(),
                 fgColor,
                 (float) drag.getEndX(),
                 (float) drag.getEndY(),
@@ -92,19 +92,19 @@ public enum TwoPointPaintType {
     }, ANGLE_GRADIENT("Angle Gradient", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
-            return new AngleGradientPaint(drag.getCenterDrag(),
+            return new AngleGradientPaint(drag.createDragFromCenterToEnd(),
                 fgColor, bgColor, NO_CYCLE);
         }
     }, SPIRAL_GRADIENT("Spiral Gradient", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
-            return new SpiralGradientPaint(true, drag.getCenterDrag(),
+            return new SpiralGradientPaint(true, drag.createDragFromCenterToEnd(),
                 fgColor, bgColor, NO_CYCLE);
         }
     }, DIAMOND_GRADIENT("Diamond Gradient", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
-            return new DiamondGradientPaint(drag.getCenterDrag(),
+            return new DiamondGradientPaint(drag.createDragFromCenterToEnd(),
                 fgColor, bgColor, NO_CYCLE);
         }
     };

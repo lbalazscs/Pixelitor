@@ -84,7 +84,7 @@ public class JHSmartBlur extends ParametrizedFilter {
     }
 
     @Override
-    public boolean supportsTweenAnimation() {
+    public boolean isAnimatable() {
         return false;
     }
 }

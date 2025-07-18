@@ -95,7 +95,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     public JComponent createGUI() {
         var gui = new GroupedRangeParamGUI(this);
         paramGUI = gui;
-        guiCreated();
+        syncWithGui();
         return gui;
     }
 
@@ -298,12 +298,12 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         if (isLinked() != linkedByDefault) {
             return false;
         }
         for (RangeParam child : children) {
-            if (!child.hasDefault()) {
+            if (!child.isAtDefault()) {
                 return false;
             }
         }
@@ -349,9 +349,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     @Override
-    public void adaptToContext(Filterable layer, boolean changeValue) {
+    public void adaptToContext(Filterable layer, boolean applyNewDefault) {
         for (RangeParam child : children) {
-            child.adaptToContext(layer, changeValue);
+            child.adaptToContext(layer, applyNewDefault);
         }
     }
 
@@ -459,9 +459,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return Stream.of(children)
-            .map(RangeParam::getParamValue)
+            .map(RangeParam::getValueAsString)
             .collect(joining(", ", "[", "]"));
     }
 

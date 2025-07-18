@@ -52,7 +52,7 @@ public class ShowHideSelectionAction extends ShowHideAction {
         if (comp != null) {
             Selection selection = comp.getSelection();
             if (selection != null) {
-                selection.setHidden(!value, true);
+                selection.setHidden(!value);
             }
         }
     }

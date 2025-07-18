@@ -51,7 +51,7 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
             "<b>click</b> on the area you want to select. " +
                 "<b>right-click</b> to cancel the selection.",
             Cursors.DEFAULT, false);
-        spaceDragStartPoint = false;
+        repositionOnSpace = false;
         pixelSnapping = false;
     }
 
@@ -122,7 +122,7 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    protected OverlayType getDragDisplayType() {
+    protected OverlayType getOverlayType() {
         // no overlay needed for a click-based tool
         return OverlayType.NONE;
     }

@@ -358,7 +358,7 @@ public class Truchet extends ParametrizedFilter {
 
         initParams(
             typeParam,
-            patternParam.withAction(reseedAction),
+            patternParam.withSideButton(reseedAction),
             sizeParam,
             widthParam,
             bgColor,

@@ -77,7 +77,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     public JComponent createGUI() {
         var gui = new GroupedColorsParamGUI(this);
         paramGUI = gui;
-        guiCreated();
+        syncWithGui();
 
         return gui;
     }
@@ -187,12 +187,12 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     }
 
     @Override
-    public String getParamValue() {
+    public String getValueAsString() {
         return Colors.formatForDebugging(colors);
     }
 
     @Override
-    public boolean hasDefault() {
+    public boolean isAtDefault() {
         return Arrays.equals(colors, defaultColors);
     }
 

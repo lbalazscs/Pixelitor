@@ -61,7 +61,7 @@ public class JHSmear extends ParametrizedFilter {
 
         initParams(
             distance.withAdjustedRange(0.1),
-            shape.withAction(paramSet.createReseedAction()),
+            shape.withSideButton(paramSet.createReseedAction()),
             angle,
             density,
             mix

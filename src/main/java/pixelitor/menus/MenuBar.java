@@ -139,7 +139,7 @@ public class MenuBar extends JMenuBar {
 
         add(createHelpMenu(pw, i18n));
 
-        Filters.finishedAdding();
+        Filters.finishedRegistering();
     }
 
     private static JMenu createFileMenu(PixelitorWindow pw, ResourceBundle i18n) {

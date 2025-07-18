@@ -71,7 +71,7 @@ public class Kuwahara extends ParametrizedFilter {
     private static void apply(int[] srcPixels, int[] destPixels, int width, int height, int radius) {
         ProgressTracker pt = new StatusBarProgressTracker(NAME, height + 2);
 
-        // 1. pre-calculate brightness for all pixels
+        // pre-calculate brightness for all pixels
         float[][] brightnesses = new float[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -80,7 +80,7 @@ public class Kuwahara extends ParametrizedFilter {
         }
         pt.unitDone();
 
-        // 2. pre-compute integral images for sum and sum-of-squares.
+        // pre-compute integral images for sum and sum-of-squares
         double[][] integralSum = new double[height + 1][width + 1];
         double[][] integralSumSq = new double[height + 1][width + 1];
         computeIntegralImages(brightnesses, width, height, integralSum, integralSumSq);
@@ -88,7 +88,7 @@ public class Kuwahara extends ParametrizedFilter {
 
         float[] hsv = new float[3];
 
-        // 3. main filter loop
+        // main filter loop
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 // find the mean brightness of the most homogeneous sub-region around the current pixel
