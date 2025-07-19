@@ -20,6 +20,9 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.WholeImageFilter;
 import pixelitor.filters.Morphology;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /**
  * The implementation of the {@link Morphology} filter.
  */
@@ -52,43 +55,33 @@ public class MorphologyFilter extends WholeImageFilter {
 
     @Override
     protected int[] filterPixels(int width, int height, int[] inPixels) {
-        int numPixels = inPixels.length;
-        short[] inA = new short[numPixels];
-        short[] inR = new short[numPixels];
-        short[] inG = new short[numPixels];
-        short[] inB = new short[numPixels];
+        // uses one array as the source and the other as the destination
+        // for the first iteration, then swap them so the previous destination
+        // becomes the new source for the second iteration, and so on
         int[] outPixels = new int[width * height];
+        int[] srcPixels = inPixels;
+        int[] dstPixels = outPixels;
 
         pt = createProgressTracker(iterations);
         for (int it = 0; it < iterations; it++) {
-            if (it > 0) {
-                // use output pixels from previous iteration as input for this iteration
-                System.arraycopy(outPixels, 0, inPixels, 0, numPixels);
-            }
-
-            // extract the color channels
-            for (int i = 0; i < numPixels; i++) {
-                int rgb = inPixels[i];
-                inA[i] = (short) ((rgb >> 24) & 0xFF);
-                inR[i] = (short) ((rgb >> 16) & 0xFF);
-                inG[i] = (short) ((rgb >> 8) & 0xFF);
-                inB[i] = (short) (rgb & 0xFF);
-            }
-
             int index = 0; // the index of the processed pixel
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     // the final alpha, red, green, blue values
-                    short a = 0xFF;
-                    short r = 0xFF;
-                    short g = 0xFF;
-                    short b = 0xFF;
+                    int a, r, g, b;
 
                     if (op == OP_DILATE) {
-                        // initialize them with 0
+                        // initialize with the minimum value for the max operation
+                        a = 0;
                         r = 0;
                         g = 0;
                         b = 0;
+                    } else { // OP_ERODE
+                        // initialize with the maximum value for the min operation
+                        a = 0xFF;
+                        r = 0xFF;
+                        g = 0xFF;
+                        b = 0xFF;
                     }
 
                     // examine neighboring pixels
@@ -111,36 +104,41 @@ public class MorphologyFilter extends WholeImageFilter {
                                 if (0 <= nx && nx < width) {
                                     int neighborIndex = xOffset + nx;
 
+                                    // read from the source array for the current iteration
+                                    int neighborRgb = srcPixels[neighborIndex];
+                                    int neighborA = (neighborRgb >> 24) & 0xFF;
+                                    int neighborR = (neighborRgb >> 16) & 0xFF;
+                                    int neighborG = (neighborRgb >> 8) & 0xFF;
+                                    int neighborB = neighborRgb & 0xFF;
+
                                     if (op == OP_ERODE) {
-                                        a = min(a, inA[neighborIndex]);
-                                        r = min(r, inR[neighborIndex]);
-                                        g = min(g, inG[neighborIndex]);
-                                        b = min(b, inB[neighborIndex]);
-                                    } else {
-                                        a = max(a, inA[neighborIndex]);
-                                        r = max(r, inR[neighborIndex]);
-                                        g = max(g, inG[neighborIndex]);
-                                        b = max(b, inB[neighborIndex]);
+                                        a = min(a, neighborA);
+                                        r = min(r, neighborR);
+                                        g = min(g, neighborG);
+                                        b = min(b, neighborB);
+                                    } else { // OP_DILATE
+                                        a = max(a, neighborA);
+                                        r = max(r, neighborR);
+                                        g = max(g, neighborG);
+                                        b = max(b, neighborB);
                                     }
                                 }
                             }
                         }
                     }
-                    outPixels[index++] = a << 24 | r << 16 | g << 8 | b;
+                    // write to the destination array for the current iteration
+                    dstPixels[index++] = a << 24 | r << 16 | g << 8 | b;
                 }
             }
             pt.unitDone();
+
+            // swap the source and destination arrays for the next iteration
+            int[] temp = srcPixels;
+            srcPixels = dstPixels;
+            dstPixels = temp;
         }
         finishProgressTracker();
-        return outPixels;
-    }
 
-    private static short min(short a, short b) {
-        return (a <= b) ? a : b;
-    }
-
-    private static short max(short a, short b) {
-        return (a >= b) ? a : b;
+        return srcPixels; // this always contains the final, correct pixel data
     }
 }
-
