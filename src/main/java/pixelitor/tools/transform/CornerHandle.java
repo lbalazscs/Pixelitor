@@ -160,17 +160,17 @@ public class CornerHandle extends PositionHandle {
         Direction horEdgeDirection = getHorEdgeDirection();
         String widthString = MeasurementOverlay.formatWidthString(imSize.getWidth());
         Point2D horHalf = getHorHalfPoint();
-        float horX = (float) (horHalf.getX() + horEdgeDirection.dx);
-        float horY = (float) (horHalf.getY() + horEdgeDirection.dy);
-        overlay.drawOneLine(widthString, horX, horY);
+        double posX = horHalf.getX() + horEdgeDirection.dx;
+        double posY = horHalf.getY() + horEdgeDirection.dy;
+        overlay.drawOneLine(widthString, new Point2D.Double(posX, posY));
     }
 
     public void drawHeightOverlay(MeasurementOverlay overlay, Dimension2D imSize) {
         Direction verEdgeDirection = getVerEdgeDirection();
         String heightString = MeasurementOverlay.formatHeightString(imSize.getHeight());
         Point2D verHalf = getVerHalfPoint();
-        float verX = (float) (verHalf.getX() + verEdgeDirection.dx);
-        float verY = (float) (verHalf.getY() + verEdgeDirection.dy);
-        overlay.drawOneLine(heightString, verX, verY);
+        double posX = verHalf.getX() + verEdgeDirection.dx;
+        double posY = verHalf.getY() + verEdgeDirection.dy;
+        overlay.drawOneLine(heightString, new Point2D.Double(posX, posY));
     }
 }

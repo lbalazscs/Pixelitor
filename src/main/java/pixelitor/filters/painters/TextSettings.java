@@ -90,7 +90,6 @@ public class TextSettings implements Serializable, Debuggable {
 
     // this flag indicates that some newer fields (sx, sy, etc.) are
     // present in a serialized pxc file
-    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
     private boolean transformFieldsInPxc = true;
 
     private transient Consumer<TextSettings> guiUpdateCallback;

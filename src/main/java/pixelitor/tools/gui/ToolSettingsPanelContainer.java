@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.util.ResourceBundle;
  * The {@link ToolSettingsPanel}s for each tool in a CardLayout
  */
 public class ToolSettingsPanelContainer extends JPanel {
-    private static ToolSettingsPanelContainer instance;
+    private static ToolSettingsPanelContainer instance = new ToolSettingsPanelContainer();
 
     private ToolSettingsPanelContainer() {
         super(new CardLayout());
@@ -46,12 +46,10 @@ public class ToolSettingsPanelContainer extends JPanel {
     }
 
     public static ToolSettingsPanelContainer get() {
-        if (instance == null) {
-            instance = new ToolSettingsPanelContainer();
-        }
         return instance;
     }
 
+    // used by unit tests to set a mock instance
     public static void setInstance(ToolSettingsPanelContainer instance) {
         ToolSettingsPanelContainer.instance = instance;
     }

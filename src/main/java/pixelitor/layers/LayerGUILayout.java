@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Views;
 import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
+import pixelitor.utils.Threads;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -62,11 +63,15 @@ public class LayerGUILayout implements LayoutManager {
     private int height;
 
     public LayerGUILayout(Layer layer) {
+        assert Threads.calledOnEDT();
+
         layerIconShowsThumbnail = layer.hasRasterIcon();
         updateHeight(Views.thumbSize);
     }
 
     public void updateHeight(int newThumbSize) {
+        assert Threads.calledOnEDT();
+
         if (layerIconShowsThumbnail) {
             height = newThumbSize + 2 * GAP;
         } else {
@@ -77,34 +82,34 @@ public class LayerGUILayout implements LayoutManager {
 
     @Override
     public void addLayoutComponent(String name, Component c) {
-        synchronized (c.getTreeLock()) {
-            switch (name) {
-                case CHECKBOX -> checkBox = (JCheckBox) c;
-                case LAYER -> layerLabel = (JLabel) c;
-                case MASK -> maskLabel = (JLabel) c;
-                case NAME_EDITOR -> nameEditor = c;
-                case CHILDREN -> childrenPanel = (JPanel) c;
-                default -> throw new IllegalStateException();
-            }
+        assert Threads.calledOnEDT();
+
+        switch (name) {
+            case CHECKBOX -> checkBox = (JCheckBox) c;
+            case LAYER -> layerLabel = (JLabel) c;
+            case MASK -> maskLabel = (JLabel) c;
+            case NAME_EDITOR -> nameEditor = c;
+            case CHILDREN -> childrenPanel = (JPanel) c;
+            default -> throw new IllegalStateException();
         }
     }
 
     @Override
     public void removeLayoutComponent(Component c) {
+        assert Threads.calledOnEDT();
+
         if (c == maskLabel) {
-            synchronized (c.getTreeLock()) {
-                maskLabel = null;
-            }
+            maskLabel = null;
         } else if (c == childrenPanel) {
-            synchronized (c.getTreeLock()) {
-                childrenPanel = null;
-            }
+            childrenPanel = null;
         } else {
             throw new IllegalStateException();
         }
     }
 
     public int getPreferredHeight() {
+        assert Threads.calledOnEDT();
+
         return childrenPanel == null
             ? height
             : height + childrenPanel.getPreferredSize().height;
@@ -112,73 +117,77 @@ public class LayerGUILayout implements LayoutManager {
 
     @Override
     public Dimension preferredLayoutSize(Container parent) {
-        synchronized (parent.getTreeLock()) {
-            return new Dimension(100, getPreferredHeight());
-        }
+        assert Threads.calledOnEDT();
+
+        return new Dimension(100, getPreferredHeight());
     }
 
     @Override
     public Dimension minimumLayoutSize(Container parent) {
+        assert Threads.calledOnEDT();
+
         return preferredLayoutSize(parent);
     }
 
     @Override
     public void layoutContainer(Container parent) {
-        synchronized (parent.getTreeLock()) {
-            int startX = GAP;
+        assert Threads.calledOnEDT();
 
-            // lay out the checkbox
-            Dimension cbPrefSize = checkBox.getPreferredSize();
-            if (cbPrefSize.width != CHECKBOX_WIDTH || cbPrefSize.height != CHECKBOX_HEIGHT) {
-                throw new IllegalStateException("width = " + cbPrefSize.width + ", height = " + cbPrefSize.height);
-            }
-            checkBox.setBounds(startX, (height - CHECKBOX_HEIGHT) / 2, CHECKBOX_WIDTH, CHECKBOX_HEIGHT);
-            startX += (CHECKBOX_WIDTH + GAP - LayerGUI.BORDER_WIDTH);
+        int startX = GAP;
 
-            // lay out the layer icon
-            int layerIconStartX = startX;
-            int labelStartY = GAP - LayerGUI.BORDER_WIDTH;
-            if (layerIconShowsThumbnail) {
-                layerLabel.setBounds(startX, labelStartY, labelSize, labelSize);
-                startX += labelSize;
-            } else {
-                layerLabel.setBounds(startX, (height - SMALL_THUMB_SIZE) / 2, SMALL_THUMB_SIZE, SMALL_THUMB_SIZE);
-                startX += SMALL_THUMB_SIZE;
-            }
+        // lay out the checkbox
+        Dimension cbPrefSize = checkBox.getPreferredSize();
+        if (cbPrefSize.width != CHECKBOX_WIDTH || cbPrefSize.height != CHECKBOX_HEIGHT) {
+            throw new IllegalStateException("width = " + cbPrefSize.width + ", height = " + cbPrefSize.height);
+        }
+        checkBox.setBounds(startX, (height - CHECKBOX_HEIGHT) / 2, CHECKBOX_WIDTH, CHECKBOX_HEIGHT);
+        startX += (CHECKBOX_WIDTH + GAP - LayerGUI.BORDER_WIDTH);
 
-            // lay out the mask
-            if (maskLabel != null) {
-                // no need to add distance between the layer and mask icons
-                // because there will be a visual distance due to the borders
-                maskLabel.setBounds(startX, labelStartY, labelSize, labelSize);
-                startX += (labelSize + GAP);
-            } else {
-                startX += GAP; // the distance between the layer icon and the text field
-            }
+        // lay out the layer icon
+        int layerIconStartX = startX;
+        int labelStartY = GAP - LayerGUI.BORDER_WIDTH;
+        if (layerIconShowsThumbnail) {
+            layerLabel.setBounds(startX, labelStartY, labelSize, labelSize);
+            startX += labelSize;
+        } else {
+            layerLabel.setBounds(startX, (height - SMALL_THUMB_SIZE) / 2, SMALL_THUMB_SIZE, SMALL_THUMB_SIZE);
+            startX += SMALL_THUMB_SIZE;
+        }
 
-            int editorHeight = (int) nameEditor.getPreferredSize().getHeight();
+        // lay out the mask
+        if (maskLabel != null) {
+            // no need to add distance between the layer and mask icons
+            // because there will be a visual distance due to the borders
+            maskLabel.setBounds(startX, labelStartY, labelSize, labelSize);
+            startX += (labelSize + GAP);
+        } else {
+            startX += GAP; // the distance between the layer icon and the text field
+        }
 
-            int remainingWidth = parent.getWidth() - startX;
-            // the textfield in Nimbus has two invisible pixels around it
-            int adjustment = isNimbus ? 2 : 0;
-            nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - GAP + 2 * adjustment, editorHeight);
+        int editorHeight = (int) nameEditor.getPreferredSize().getHeight();
 
-            if (childrenPanel != null) {
-                Dimension sfSize = childrenPanel.getPreferredSize();
-                int sfX = layerIconStartX - adjustment;
-                int sfY = height;
-                int sfWidth = parent.getWidth() - sfX;
-                int sfHeight = sfSize.height;
-                childrenPanel.setBounds(sfX, sfY, sfWidth, sfHeight);
-            }
+        int remainingWidth = parent.getWidth() - startX;
+        // the textfield in Nimbus has two invisible pixels around it
+        int adjustment = isNimbus ? 2 : 0;
+        nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - GAP + 2 * adjustment, editorHeight);
+
+        if (childrenPanel != null) {
+            Dimension sfSize = childrenPanel.getPreferredSize();
+            int sfX = layerIconStartX - adjustment;
+            int sfY = height;
+            int sfWidth = parent.getWidth() - sfX;
+            int sfHeight = sfSize.height;
+            childrenPanel.setBounds(sfX, sfY, sfWidth, sfHeight);
         }
     }
 
     public static int getThumbSize() {
+        assert Threads.calledOnEDT();
         return Views.thumbSize;
     }
 
     public static void themeChanged(Theme theme) {
+        assert Threads.calledOnEDT();
         isNimbus = theme.isNimbus();
     }
 }

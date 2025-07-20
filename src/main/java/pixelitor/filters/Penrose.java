@@ -42,7 +42,7 @@ import static java.lang.Math.toRadians;
 import static java.util.stream.Collectors.toList;
 
 public class Penrose extends ParametrizedFilter {
-    public static String NAME = "Penrose Tiling";
+    public static final String NAME = "Penrose Tiling";
 
     private static final int START_SUN = 0;
     private static final int START_STAR = 1;
@@ -77,9 +77,12 @@ public class Penrose extends ParametrizedFilter {
     private final RangeParam zoom = new RangeParam("Zoom", 10, 100, 200);
 
     // a single tile in the Penrose P2 pattern
-    static class Tile {
-        double x, y, angle, size;
-        Type type;
+    static final class Tile {
+        final double x;
+        final double y;
+        final double angle;
+        final double size;
+        final Type type;
         private static final double DIST_EPSILON = 0.01;
         private static final double ANGLE_EPSILON = 0.1;
 

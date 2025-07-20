@@ -88,7 +88,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         linkedByDefault = linked;
         setLinked(linkedByDefault);
 
-        linkChildren();
+        initLinking();
     }
 
     @Override
@@ -108,17 +108,20 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         return children;
     }
 
-    private void linkChildren() {
-        if (!isLinked()) {
-            return;
-        }
+    private void initLinking() {
         for (RangeParam child : children) {
-            child.addChangeListener(e -> copyValueToAll(child));
+            child.addChangeListener(e -> propagateValueIfLinked(child));
         }
     }
 
-    // set the value of every other child to the value of the changed child
-    private void copyValueToAll(RangeParam source) {
+    private void propagateValueIfLinked(RangeParam source) {
+        if (!isLinked()) {
+            // this dynamic check is required because
+            // the change listeners are always attached
+            return;
+        }
+
+        // set the value of every other child to the value of the changed child
         double srcValue = source.getValueAsDouble();
         for (RangeParam other : children) {
             if (other != source) {

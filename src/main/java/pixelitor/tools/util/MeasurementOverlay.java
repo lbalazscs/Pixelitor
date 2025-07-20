@@ -20,6 +20,7 @@ package pixelitor.tools.util;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -77,7 +78,7 @@ public class MeasurementOverlay {
      */
     public static void displayRelativeMovement(Graphics2D g,
                                                int imDx, int imDy,
-                                               float x, float y) {
+                                               Point2D pos) {
         String horMovement = (imDx >= 0)
             ? "→ = " + imDx + " px"
             : "← = " + (-imDx) + " px";
@@ -87,22 +88,21 @@ public class MeasurementOverlay {
             : "↑ = " + (-imDy) + " px";
 
         MeasurementOverlay overlay = new MeasurementOverlay(g, BG_WIDTH_PIXELS);
-        overlay.drawTwoLines(horMovement, verMovement, x, y);
+        overlay.drawTwoLines(horMovement, verMovement, pos);
         overlay.cleanup();
     }
 
     /**
      * Draws the semi-transparent background rectangle with border.
      *
-     * @param x      Left coordinate of the background
-     * @param y      Bottom coordinate of the background
+     * @param pos    Bottom-left coordinate of the background
      * @param height Height of the background rectangle
      */
-    private void drawBackground(float x, float y, int height) {
+    private void drawBackground(Point2D pos, int height) {
         g.setComposite(BG_COMPOSITE);
         g.setColor(Color.BLACK);
-        RoundRectangle2D rect = new RoundRectangle2D.Float(
-            x, y - height, bgWidth, height, BG_CORNER_RADIUS, BG_CORNER_RADIUS);
+        RoundRectangle2D rect = new RoundRectangle2D.Double(
+            pos.getX(), pos.getY() - height, bgWidth, height, BG_CORNER_RADIUS, BG_CORNER_RADIUS);
         g.fill(rect);
         g.setColor(Color.WHITE);
         g.draw(rect);
@@ -113,12 +113,13 @@ public class MeasurementOverlay {
      * Draws a single-line message at the given position.
      *
      * @param text Text to display
-     * @param x Left coordinate of the background
-     * @param y Bottom coordinate of the background
+     * @param pos    Bottom-left coordinate of the background
      */
-    public void drawOneLine(String text, float x, float y) {
-        drawBackground(x, y, SINGLE_LINE_HEIGHT);
-        g.drawString(text, x + TEXT_HOR_PADDING, y - TEXT_VER_PADDING);
+    public void drawOneLine(String text, Point2D pos) {
+        drawBackground(pos, SINGLE_LINE_HEIGHT);
+        float drawX = (float) (pos.getX() + TEXT_HOR_PADDING);
+        float drawY = (float) (pos.getY() - TEXT_VER_PADDING);
+        g.drawString(text, drawX, drawY);
     }
 
     /**
@@ -129,10 +130,15 @@ public class MeasurementOverlay {
      * @param x     Left coordinate of the background
      * @param y     Bottom coordinate of the background
      */
-    public void drawTwoLines(String line1, String line2, float x, float y) {
-        drawBackground(x, y, DOUBLE_LINE_HEIGHT);
-        g.drawString(line1, x + TEXT_HOR_PADDING, y - 23 - TEXT_VER_PADDING);
-        g.drawString(line2, x + TEXT_HOR_PADDING, y - TEXT_VER_PADDING);
+    public void drawTwoLines(String line1, String line2, Point2D pos) {
+        drawBackground(pos, DOUBLE_LINE_HEIGHT);
+
+        float drawX = (float) (pos.getX() + TEXT_HOR_PADDING);
+        float drawYBottom = (float) (pos.getY() - TEXT_VER_PADDING);
+        float drawYTop = drawYBottom - 23.0f;
+
+        g.drawString(line1, drawX, drawYTop);
+        g.drawString(line2, drawX, drawYBottom);
     }
 
     public void cleanup() {
@@ -151,7 +157,7 @@ public class MeasurementOverlay {
         Graphics2D g2 = tmp.createGraphics();
         MeasurementOverlay overlay = new MeasurementOverlay(g2, BG_WIDTH_PIXELS);
 
-        overlay.drawOneLine("x", 0, 10);
+        overlay.drawOneLine("x", new Point2D.Double(0, 0));
 
         g2.dispose();
         tmp.flush();

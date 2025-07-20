@@ -39,7 +39,6 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.PathTool;
 import pixelitor.tools.selection.AbstractSelectionTool;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.StrokeCap;
@@ -361,13 +360,6 @@ public class RandomToolTest {
     private void randomizeToolSettings(Tool tool) {
         log("randomize the settings of " + tool.getName());
         EDT.run(ToolSettingsPanelContainer.get()::randomizeToolSettings);
-
-        if (tool instanceof PathTool && !(Views.getActivePath() != null)) {
-            // error dialog when switching to Edit or Transform mode
-            if (EDT.getModalDialogCount() > 0) {
-                app.findJOptionPane(null).okButton().click();
-            }
-        }
     }
 
     private void initActions() {

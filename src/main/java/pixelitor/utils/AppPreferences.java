@@ -344,7 +344,7 @@ public final class AppPreferences {
         mainPrefs.putInt(THUMB_SIZE_KEY, LayerGUILayout.getThumbSize());
     }
 
-    public static GuideStyle getGuideStyle() {
+    public static synchronized GuideStyle getGuideStyle() {
         if (guideStyle == null) {
             int colorRGB = mainPrefs.getInt(GUIDE_COLOR_KEY, Color.BLACK.getRGB());
             int strokeId = mainPrefs.getInt(GUIDE_STROKE_KEY, GuideStrokeType.DASHED.ordinal());
@@ -356,7 +356,7 @@ public final class AppPreferences {
         return guideStyle;
     }
 
-    public static GuideStyle getCropGuideStyle() {
+    public static synchronized GuideStyle getCropGuideStyle() {
         if (cropGuideStyle == null) {
             int colorRGB = mainPrefs.getInt(CROP_GUIDE_COLOR_KEY, Color.BLACK.getRGB());
             int strokeId = mainPrefs.getInt(CROP_GUIDE_STROKE_KEY, GuideStrokeType.SOLID.ordinal());

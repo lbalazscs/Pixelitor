@@ -35,8 +35,6 @@ public abstract class WholeImageFilter extends AbstractBufferedImageOp {
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         int width = src.getWidth();
         int height = src.getHeight();
-//		int type = src.getType();
-//		WritableRaster srcRaster = src.getRaster();
 
         if (dst == null) {
             ColorModel dstCM = src.getColorModel();
@@ -44,7 +42,6 @@ public abstract class WholeImageFilter extends AbstractBufferedImageOp {
                     .createCompatibleWritableRaster(width, height), dstCM
                     .isAlphaPremultiplied(), null);
         }
-//		WritableRaster dstRaster = dst.getRaster();
 
         int[] inPixels = getRGB(src, 0, 0, width, height, null);
         inPixels = filterPixels(width, height, inPixels);

@@ -290,6 +290,7 @@ public class SmartObject extends CompositeLayer {
         if (layer instanceof LayerGroup group) {
             // flatten the contents of the group
             int numLayers = group.getNumLayers();
+            assert numLayers > 0;
             for (int i = 0; i < numLayers; i++) {
                 Layer layerCopy = group.getLayer(i).copy(CopyType.UNDO, true, newContent);
                 newContent.addLayerWithoutUI(layerCopy);

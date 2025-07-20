@@ -132,7 +132,7 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public boolean isConvertibleToSmartObject() {
-        return !isPassThrough();
+        return !isPassThrough() && !layers.isEmpty();
     }
 
     @Override

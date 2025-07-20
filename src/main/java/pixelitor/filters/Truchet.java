@@ -500,8 +500,8 @@ public class Truchet extends ParametrizedFilter {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {
                 Path2D triangle = new Path2D.Double();
-                double firsts = Math.floor(tileSize / 2d);
-                double thirds = Math.ceil(3 * tileSize / 2d);
+                double firsts = Math.floor(tileSize / 2.0);
+                double thirds = Math.ceil(3 * tileSize / 2.0);
                 triangle.moveTo(thirds, firsts);
                 triangle.lineTo(thirds, thirds);
                 triangle.lineTo(firsts, thirds);
@@ -514,7 +514,7 @@ public class Truchet extends ParametrizedFilter {
                 if (isBlank) {
                     return null;
                 }
-                return new Rectangle2D.Double(Math.floor(tileSize / 2d), Math.floor(tileSize / 2d),
+                return new Rectangle2D.Double(Math.floor(tileSize / 2.0), Math.floor(tileSize / 2.0),
                     tileSize, tileSize);
             }
 
@@ -542,10 +542,10 @@ public class Truchet extends ParametrizedFilter {
                 Shape shape;
                 if (isBlank) {
                     Path2D lines = new Path2D.Double();
-                    lines.moveTo(tileSize, tileSize / 2d);
-                    lines.lineTo(tileSize, 3 * tileSize / 2d);
-                    lines.moveTo(tileSize / 2d, tileSize);
-                    lines.lineTo(3 * tileSize / 2d, tileSize);
+                    lines.moveTo(tileSize, tileSize / 2.0);
+                    lines.lineTo(tileSize, 3 * tileSize / 2.0);
+                    lines.moveTo(tileSize / 2.0, tileSize);
+                    lines.lineTo(3 * tileSize / 2.0, tileSize);
                     shape = lines;
                 } else {
                     Path2D path = new Path2D.Double();
@@ -578,15 +578,15 @@ public class Truchet extends ParametrizedFilter {
         }, DIAGONALS("Diagonals") {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {
-                Line2D line = new Line2D.Double(tileSize / 2d, tileSize / 2d, 3 * tileSize / 2d, 3 * tileSize / 2d);
+                Line2D line = new Line2D.Double(tileSize / 2.0, tileSize / 2.0, 3 * tileSize / 2.0, 3 * tileSize / 2.0);
                 BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
                 return stroke.createStrokedShape(line);
             }
 
             @Override
             public Shape createBlankArea(int tileSize, int lineWidth, boolean isBlank) {
-                double firsts = Math.floor(tileSize / 2d);
-                double thirds = Math.ceil(3 * tileSize / 2d);
+                double firsts = Math.floor(tileSize / 2.0);
+                double thirds = Math.ceil(3 * tileSize / 2.0);
                 double offset = isBlank ? firsts : thirds;
                 double onset = isBlank ? thirds : firsts;
                 Path2D lines = new Path2D.Double();

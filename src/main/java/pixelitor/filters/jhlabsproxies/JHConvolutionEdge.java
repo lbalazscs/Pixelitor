@@ -41,16 +41,16 @@ public class JHConvolutionEdge extends ParametrizedFilter {
     private final IntChoiceParam horizontalMethod = new IntChoiceParam("Horizontal Edges", new Item[]{
         new Item("Sobel", METHOD_SOBEL),
         new Item("Prewitt", METHOD_PREWITT),
-        new Item("Roberts", METHOD_ROBERTS),
         new Item("Frei-Chen", METHOD_FREI_CHEN),
+        new Item("Roberts /", METHOD_ROBERTS),
         new Item("None", METHOD_NONE),
     });
 
     private final IntChoiceParam verticalMethod = new IntChoiceParam("Vertical Edges", new Item[]{
         new Item("Sobel", METHOD_SOBEL),
         new Item("Prewitt", METHOD_PREWITT),
-        new Item("Roberts", METHOD_ROBERTS),
         new Item("Frei-Chen", METHOD_FREI_CHEN),
+        new Item("Roberts \\", METHOD_ROBERTS),
         new Item("None", METHOD_NONE),
     });
 

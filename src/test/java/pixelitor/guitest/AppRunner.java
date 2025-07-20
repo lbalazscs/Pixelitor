@@ -360,7 +360,7 @@ public class AppRunner {
         openDialog.approve();
 
         // make sure that the opening task is started
-        Utils.sleep(200, TimeUnit.MILLISECONDS);
+        Utils.sleep(200, MILLISECONDS);
 
         // wait until the async open completes
         IOTasks.waitForIdle();
@@ -1020,6 +1020,6 @@ public class AppRunner {
     public enum ExpectConfirmation {
         YES,
         NO,
-        UNKNOWN;
+        UNKNOWN
     }
 }

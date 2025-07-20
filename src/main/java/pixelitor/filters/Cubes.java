@@ -20,9 +20,8 @@ package pixelitor.filters;
 import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.FilterButtonModel;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
@@ -33,7 +32,6 @@ import pixelitor.utils.Transform;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
@@ -58,20 +56,30 @@ public class Cubes extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final int TYPE_BASIC = 0;
-    private static final int TYPE_CORNER_CUT = 1;
-    private static final int TYPE_CORNER_CUT2 = 2;
-    private static final int TYPE_CORNER_CUT3 = 3;
-    private static final int TYPE_INTERLOCKING = 4;
+    private enum CubeType {
+        BASIC("Basic", 0, false),
+        CORNER_CUT("Corner Cut", 1, false),
+        CORNER_CUT2("Corner Cut 2", 2, false),
+        CORNER_CUT3("Corner Cut 3", 3, false),
+        INTERLOCKING("Interlocking", 0, true);
 
-    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Item[]{
-        new Item("Basic", TYPE_BASIC),
-        new Item("Corner Cut", TYPE_CORNER_CUT),
-        new Item("Corner Cut 2", TYPE_CORNER_CUT2),
-        new Item("Corner Cut 3", TYPE_CORNER_CUT3),
-        new Item("Interlocking", TYPE_INTERLOCKING),
-    });
+        private final String displayName;
+        private final int numCornerCuts;
+        private final boolean isInterlocking;
 
+        CubeType(String displayName, int numCornerCuts, boolean isInterlocking) {
+            this.displayName = displayName;
+            this.numCornerCuts = numCornerCuts;
+            this.isInterlocking = isInterlocking;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    private final EnumParam<CubeType> typeParam = new EnumParam<>("Type", CubeType.class);
     private final RangeParam sizeParam = new RangeParam("Size", 5, 20, 200);
     private final ColorParam topColorParam = new ColorParam("Top Color", WHITE, MANUAL_ALPHA_ONLY);
     private final ColorParam leftColorParam = new ColorParam("Left Color", LIGHT_GRAY, MANUAL_ALPHA_ONLY);
@@ -133,6 +141,9 @@ public class Cubes extends ParametrizedFilter {
         return dest;
     }
 
+    /**
+     * Creates the list of shapes and applies nonlinear distortion if configured.
+     */
     private List<ShapeWithColor> createDistortedShapes(int width, int height) {
         List<ShapeWithColor> shapes = createShapes(width, height);
 
@@ -145,6 +156,9 @@ public class Cubes extends ParametrizedFilter {
         return shapes;
     }
 
+    /**
+     * Creates the list of shapes for the cube pattern.
+     */
     private List<ShapeWithColor> createShapes(int width, int height) {
         List<ShapeWithColor> shapes = new ArrayList<>();
 
@@ -152,34 +166,31 @@ public class Cubes extends ParametrizedFilter {
         Color rightColor = rightColorParam.getColor();
         Color leftColor = leftColorParam.getColor();
 
-        int type = typeParam.getValue();
-        boolean interlocking = type == TYPE_INTERLOCKING;
+        CubeType type = typeParam.getSelected();
+        boolean interlocking = type.isInterlocking;
 
         double size = sizeParam.getValueAsDouble();
-        double longer = size * Math.cos(Math.PI / 6);
-        double shorter = size * Math.sin(Math.PI / 6);
+        // isometric projection constants
+        double longer = size * Math.cos(Math.PI / 6.0);
+        double shorter = size * Math.sin(Math.PI / 6.0);
 
-        double horizontalSpacing = interlocking ? 3 * longer : 2 * longer;
+        double horizontalSpacing = interlocking ? 3.0 * longer : 2.0 * longer;
         double verticalSpacing = interlocking ? size * 0.75 : (size + shorter);
 
+        // add a buffer to ensure the pattern covers the entire image, even when offset
         int numCubesX = (int) (width / horizontalSpacing) + 2;
         int numCubesY = (int) (height / verticalSpacing) + (interlocking ? 3 : 2);
-
-        int numCornerCuts = switch (type) {
-            case TYPE_BASIC, TYPE_INTERLOCKING -> 0;
-            case TYPE_CORNER_CUT -> 1;
-            case TYPE_CORNER_CUT2 -> 2;
-            case TYPE_CORNER_CUT3 -> 3;
-            default -> throw new IllegalStateException("Unexpected value: " + type);
-        };
 
         double moveHorOffset = transform.getHorOffset(width);
         double moveVerOffset = transform.getVerOffset(height);
 
-        double verOffset = moveVerOffset + (interlocking ? -size / 2 : 0);
+        // special y-offset for interlocking to align rows correctly
+        double verOffset = moveVerOffset + (interlocking ? -size / 2.0 : 0);
         for (int row = 0; row < numCubesY; row++) {
+            // offset every other row for a staggered pattern
             double horOffset = moveHorOffset + (row % 2 == 0 ? 0 : longer);
             if (interlocking) {
+                // interlocking pattern requires additional horizontal shift
                 horOffset *= 1.5;
             }
 
@@ -187,98 +198,159 @@ public class Cubes extends ParametrizedFilter {
                 double baseX = horOffset + col * horizontalSpacing;
                 double baseY = verOffset + row * verticalSpacing;
 
-                addCubeShapes(shapes, baseX, baseY, longer, shorter, interlocking, size,
-                    topColor, rightColor, leftColor, numCornerCuts);
+                addCubeShapes(shapes, baseX, baseY, longer, shorter, size, type,
+                    topColor, rightColor, leftColor);
             }
         }
 
         return shapes;
     }
 
-    private void addCubeShapes(List<ShapeWithColor> shapes,
-                               double baseX, double baseY,
-                               double longer, double shorter,
-                               boolean interlocking, double size,
-                               Color topColor, Color rightColor, Color leftColor,
-                               int numCornerCuts) {
+    private record CubeFaces(Path2D top, Path2D right, Path2D left) {
+    }
 
-        Path2D topFace = createTop(baseX, baseY, longer, shorter, interlocking, size);
-        Path2D rightFace = createRight(baseX, baseY, longer, shorter, interlocking, size);
-        Path2D leftFace = createLeft(baseX, baseY, longer, shorter, interlocking, size);
+    /**
+     * Adds the faces for a single cube, including any corner cuts, to the list of shapes.
+     */
+    private static void addCubeShapes(List<ShapeWithColor> shapes,
+                                      double baseX, double baseY,
+                                      double longer, double shorter, double size,
+                                      CubeType type,
+                                      Color topColor, Color rightColor, Color leftColor) {
 
-        shapes.add(new ShapeWithColor(topFace, topColor));
-        shapes.add(new ShapeWithColor(rightFace, rightColor));
-        shapes.add(new ShapeWithColor(leftFace, leftColor));
+        CubeFaces faces = createCubeFaces(baseX, baseY, longer, shorter, size, type.isInterlocking);
 
-        for (int cut = 0; cut < numCornerCuts; cut++) {
-            double cutRatio = 1.0 - (double) (cut + 1) / (numCornerCuts + 1);
+        shapes.add(new ShapeWithColor(faces.top, topColor));
+        shapes.add(new ShapeWithColor(faces.right, rightColor));
+        shapes.add(new ShapeWithColor(faces.left, leftColor));
 
-            AffineTransform carvedCube = new AffineTransform();
-            carvedCube.translate(baseX, baseY);
-            if (cut % 2 == 0) {
-                carvedCube.rotate(Math.PI);
+        // add smaller, transformed copies of the faces for a carved effect
+        int numCornerCuts = type.numCornerCuts;
+        for (int i = 0; i < numCornerCuts; i++) {
+            double cutRatio = 1.0 - (double) (i + 1) / (numCornerCuts + 1);
+
+            AffineTransform cutTransform = new AffineTransform();
+            cutTransform.translate(baseX, baseY);
+            // alternate rotation for a carved effect
+            if (i % 2 == 0) {
+                cutTransform.rotate(Math.PI);
             }
-            carvedCube.scale(cutRatio, cutRatio);
-            carvedCube.translate(-baseX, -baseY);
+            cutTransform.scale(cutRatio, cutRatio);
+            cutTransform.translate(-baseX, -baseY);
 
-            Shape miniTopFace = carvedCube.createTransformedShape(topFace);
-            Shape miniRightFace = carvedCube.createTransformedShape(rightFace);
-            Shape miniLeftFace = carvedCube.createTransformedShape(leftFace);
-
-            shapes.add(new ShapeWithColor(miniTopFace, topColor));
-            shapes.add(new ShapeWithColor(miniRightFace, rightColor));
-            shapes.add(new ShapeWithColor(miniLeftFace, leftColor));
+            shapes.add(new ShapeWithColor(cutTransform.createTransformedShape(faces.top), topColor));
+            shapes.add(new ShapeWithColor(cutTransform.createTransformedShape(faces.right), rightColor));
+            shapes.add(new ShapeWithColor(cutTransform.createTransformedShape(faces.left), leftColor));
         }
     }
 
-    private static Path2D createTop(double baseX, double baseY, double longer, double shorter, boolean interlocking, double size) {
+    /**
+     * Creates the three visible faces of a single cube.
+     */
+    private static CubeFaces createCubeFaces(double baseX, double baseY, double longer, double shorter, double size, boolean interlocking) {
+        Path2D topFace;
+        Path2D rightFace;
+        Path2D leftFace;
+
+        if (interlocking) {
+            topFace = createInterlockingTop(baseX, baseY, longer, shorter, size);
+            rightFace = createInterlockingRight(baseX, baseY, longer, shorter, size);
+            leftFace = createInterlockingLeft(baseX, baseY, longer, shorter, size);
+        } else {
+            topFace = createBasicTop(baseX, baseY, longer, shorter, size);
+            rightFace = createBasicRight(baseX, baseY, longer, shorter, size);
+            leftFace = createBasicLeft(baseX, baseY, longer, shorter, size);
+        }
+        return new CubeFaces(topFace, rightFace, leftFace);
+    }
+
+    /**
+     * Creates the path for the top face of a basic cube.
+     */
+    private static Path2D createBasicTop(double baseX, double baseY, double longer, double shorter, double size) {
         Path2D top = new Path2D.Double();
         top.moveTo(baseX, baseY);
         top.lineTo(baseX - longer, baseY - shorter);
-        if (interlocking) {
-            top.lineTo(baseX - longer / 2, baseY - size / 2 - shorter / 2);
-            top.lineTo(baseX, baseY - shorter);
-            top.lineTo(baseX + longer / 2, baseY - size / 2 - shorter / 2);
-        } else {
-            top.lineTo(baseX, baseY - size);
-        }
+        top.lineTo(baseX, baseY - size);
         top.lineTo(baseX + longer, baseY - shorter);
         top.closePath();
         return top;
     }
 
-    private static Path2D createRight(double baseX, double baseY, double longer, double shorter, boolean interlocking, double size) {
+    /**
+     * Creates the path for the right face of a basic cube.
+     */
+    private static Path2D createBasicRight(double baseX, double baseY, double longer, double shorter, double size) {
         Path2D right = new Path2D.Double();
         right.moveTo(baseX, baseY);
         right.lineTo(baseX + longer, baseY - shorter);
-        if (interlocking) {
-            right.lineTo(baseX + longer, baseY - shorter + size / 2);
-            right.lineTo(baseX + longer / 2, baseY + 0.25 * size);
-            right.lineTo(baseX + longer / 2, baseY - shorter / 2 + size);
-        } else {
-            right.lineTo(baseX + longer, baseY - shorter + size);
-        }
+        right.lineTo(baseX + longer, baseY - shorter + size);
         right.lineTo(baseX, baseY + size);
         right.closePath();
         return right;
     }
 
-    private static Path2D createLeft(double baseX, double baseY, double longer, double shorter, boolean interlocking, double size) {
+    /**
+     * Creates the path for the left face of a basic cube.
+     */
+    private static Path2D createBasicLeft(double baseX, double baseY, double longer, double shorter, double size) {
         Path2D left = new Path2D.Double();
         left.moveTo(baseX, baseY);
         left.lineTo(baseX - longer, baseY - shorter);
-        if (interlocking) {
-            left.lineTo(baseX - longer, baseY - shorter + size / 2);
-            left.lineTo(baseX - longer / 2, baseY + 0.25 * size);
-            left.lineTo(baseX - longer / 2, baseY - shorter / 2 + size);
-        } else {
-            left.lineTo(baseX - longer, baseY - shorter + size);
-        }
+        left.lineTo(baseX - longer, baseY - shorter + size);
         left.lineTo(baseX, baseY + size);
         left.closePath();
         return left;
     }
 
+    /**
+     * Creates the path for the top face of an interlocking cube.
+     */
+    private static Path2D createInterlockingTop(double baseX, double baseY, double longer, double shorter, double size) {
+        Path2D top = new Path2D.Double();
+        top.moveTo(baseX, baseY);
+        top.lineTo(baseX - longer, baseY - shorter);
+        top.lineTo(baseX - longer / 2.0, baseY - size / 2.0 - shorter / 2.0);
+        top.lineTo(baseX, baseY - shorter);
+        top.lineTo(baseX + longer / 2.0, baseY - size / 2.0 - shorter / 2.0);
+        top.lineTo(baseX + longer, baseY - shorter);
+        top.closePath();
+        return top;
+    }
+
+    /**
+     * Creates the path for the right face of an interlocking cube.
+     */
+    private static Path2D createInterlockingRight(double baseX, double baseY, double longer, double shorter, double size) {
+        Path2D right = new Path2D.Double();
+        right.moveTo(baseX, baseY);
+        right.lineTo(baseX + longer, baseY - shorter);
+        right.lineTo(baseX + longer, baseY - shorter + size / 2.0);
+        right.lineTo(baseX + longer / 2.0, baseY + 0.25 * size);
+        right.lineTo(baseX + longer / 2.0, baseY - shorter / 2.0 + size);
+        right.lineTo(baseX, baseY + size);
+        right.closePath();
+        return right;
+    }
+
+    /**
+     * Creates the path for the left face of an interlocking cube.
+     */
+    private static Path2D createInterlockingLeft(double baseX, double baseY, double longer, double shorter, double size) {
+        Path2D left = new Path2D.Double();
+        left.moveTo(baseX, baseY);
+        left.lineTo(baseX - longer, baseY - shorter);
+        left.lineTo(baseX - longer, baseY - shorter + size / 2.0);
+        left.lineTo(baseX - longer / 2.0, baseY + 0.25 * size);
+        left.lineTo(baseX - longer / 2.0, baseY - shorter / 2.0 + size);
+        left.lineTo(baseX, baseY + size);
+        left.closePath();
+        return left;
+    }
+
+    /**
+     * Exports the generated pattern to an SVG file.
+     */
     private void exportSVG() {
         Canvas canvas = Views.getActiveComp().getCanvas();
         int width = canvas.getWidth();

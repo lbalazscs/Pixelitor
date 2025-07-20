@@ -18,6 +18,7 @@
 package pixelitor.filters.lookup;
 
 import java.awt.image.ShortLookupTable;
+import java.util.Arrays;
 
 /**
  * A lookup table for each of the red, green, and blue color channels.
@@ -103,9 +104,7 @@ public class RGBLookup {
         short[] lut = new short[ARRAY_LENGTH];
         if (numLevels <= 1) {
             // for a single level, map all colors to the middle value
-            for (int i = 0; i < ARRAY_LENGTH; i++) {
-                lut[i] = ARRAY_LENGTH / 2;
-            }
+            Arrays.fill(lut, (short) (ARRAY_LENGTH / 2));
         } else {
             for (int i = 0; i < ARRAY_LENGTH; i++) {
                 // map input value i (0-255) to a discrete level

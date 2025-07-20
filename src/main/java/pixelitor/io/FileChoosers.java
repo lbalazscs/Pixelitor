@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,15 +28,15 @@ import java.io.File;
 import java.util.Optional;
 
 public class FileChoosers {
-    private static boolean useNativeDialogs = AppPreferences.loadNativeChoosers();
+    private static boolean useNativeDialogs;
 
     static {
-        setUseNativeDialogs(useNativeDialogs);
+        setUseNativeDialogs(AppPreferences.loadNativeChoosers());
     }
 
     private static FilePicker picker;
 
-    // File filters for different image file formats
+    // file filters for different image file formats
     public static final FileNameExtensionFilter bmpFilter = new FileNameExtensionFilter(
         "BMP files", "bmp");
     public static final FileNameExtensionFilter gifFilter = new FileNameExtensionFilter(

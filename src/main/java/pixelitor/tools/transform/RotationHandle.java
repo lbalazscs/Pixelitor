@@ -126,13 +126,10 @@ public class RotationHandle extends DraggablePoint {
             double sin = box.getSin();
             double cos = box.getCos();
 
-            float drawX = (float) (x
-                - displayBgWidth / 2.0f
-                + displayBgWidth * 0.7 * sin);
-            float drawY = (float) (y
-                - MOUSE_DISPLAY_CENTER_DISTANCE * cos
-                + MeasurementOverlay.SINGLE_LINE_HEIGHT / 2.0f);
-            overlay.drawOneLine(angleInfo, drawX, drawY);
+            double posX = x - displayBgWidth / 2.0f + displayBgWidth * 0.7 * sin;
+            double posY = y - MOUSE_DISPLAY_CENTER_DISTANCE * cos
+                + MeasurementOverlay.SINGLE_LINE_HEIGHT / 2.0f;
+            overlay.drawOneLine(angleInfo, new Point2D.Double(posX, posY));
             overlay.cleanup();
         }
     }

@@ -67,6 +67,9 @@ public final class SelectionActions {
     private static final Action copySel = new TaskAction(i18n("copy_sel"),
         SelectionActions::copySelection);
 
+    /**
+     * @noinspection NonFinalStaticVariableUsedInClassInitialization
+     */
     private static final Action pasteSel = new TaskAction(i18n("paste_sel"), () ->
         getActiveComp().changeSelection(copiedSelShape));
 

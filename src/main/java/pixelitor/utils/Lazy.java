@@ -20,9 +20,9 @@ package pixelitor.utils;
 import java.util.function.Supplier;
 
 /**
- * A memoizing Supplier
+ * A thread-safe, memoizing supplier that computes a value on the first access.
  */
-public class Lazy<T> implements Supplier<T> {
+public final class Lazy<T> implements Supplier<T> {
     private final Supplier<T> supplier;
     private volatile T cachedValue;
 
@@ -36,20 +36,34 @@ public class Lazy<T> implements Supplier<T> {
 
     @Override
     public T get() {
-        if (cachedValue != null) {
-            return cachedValue;
+        // use double-checked locking to avoid synchronizing every call
+        T result = cachedValue;
+        if (result == null) { // first check (no locking)
+            //noinspection SynchronizeOnThis
+            synchronized (this) {
+                result = cachedValue;
+                if (result == null) { // second check (with locking)
+                    result = supplier.get();
+                    // this class does not support null-returning suppliers
+                    assert result != null;
+                    cachedValue = result;
+                }
+            }
         }
-        cachedValue = supplier.get();
-        if (cachedValue == null) {
-            throw new IllegalStateException();
-        }
-        return cachedValue;
+        return result;
     }
 
     /**
-     * Make sure that the value is re-calculated the next time
+     * Invalidates the cached value, forcing re-computation on the next access.
      */
-    public void invalidate() {
+    public synchronized void invalidate() {
         cachedValue = null;
+    }
+
+    @Override
+    public String toString() {
+        // read the volatile field only once for a consistent view
+        T value = cachedValue;
+        return "Lazy[" + (value == null ? "not yet computed" : value) + "]";
     }
 }
