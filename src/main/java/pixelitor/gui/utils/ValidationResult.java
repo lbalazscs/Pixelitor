@@ -60,15 +60,15 @@ public class ValidationResult {
         return new ValidationResult(false, errorMsg);
     }
 
-    static ValidationResult invalidZero(String name) {
+    public static ValidationResult invalidZero(String name) {
         return invalid("<b>" + name + "</b> can't be zero.");
     }
 
-    static ValidationResult invalidNegative(String name) {
+    public static ValidationResult invalidNegative(String name) {
         return invalid("<b>" + name + "</b> must be positive.");
     }
 
-    static ValidationResult invalidEmpty(String name) {
+    public static ValidationResult invalidEmpty(String name) {
         return invalid("<b>" + name + "</b> can't be empty.");
     }
 
@@ -129,12 +129,33 @@ public class ValidationResult {
     }
 
     /**
+     * Validates that a numeric value is not larger than the given maximum value.
+     */
+    public ValidationResult requireMax(int value, String fieldName, int maxValue) {
+        return addErrorIf(value > maxValue,
+            format("<b>%s</b> must be smaller than %d", fieldName, maxValue));
+    }
+
+    /**
      * Validates that a string represents a positive integer.
      */
     public ValidationResult requirePositiveInt(String text, String fieldName) {
         try {
             int value = Integer.parseInt(text.trim());
             return this.requirePositive(value, fieldName);
+        } catch (NumberFormatException e) {
+            return this.addError(format("<b>%s</b> must be an integer.", fieldName));
+        }
+    }
+
+    /**
+     * Validates that a string represents a positive integer with a maximum value.
+     */
+    public ValidationResult requireBoundedPositiveInt(String text, String fieldName, int maxValue) {
+        try {
+            int value = Integer.parseInt(text.trim());
+            return requirePositive(value, fieldName)
+                .requireMax(value, fieldName, maxValue);
         } catch (NumberFormatException e) {
             return this.addError(format("<b>%s</b> must be an integer.", fieldName));
         }

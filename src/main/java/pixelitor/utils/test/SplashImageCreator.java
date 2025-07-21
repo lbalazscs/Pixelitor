@@ -130,7 +130,7 @@ public class SplashImageCreator {
         FgBgColors.setBGColor(Rnd.createRandomColor().darker().darker().darker());
 
         Composition comp = NewImage.addNewImage(FillType.WHITE,
-            SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
+            SPLASH_WIDTH, SPLASH_HEIGHT, "Splash", Composition.DEFAULT_DPI);
         ImageLayer baseLayer = (ImageLayer) comp.getLayer(0);
 
         baseLayer.replaceWithSmartObject();

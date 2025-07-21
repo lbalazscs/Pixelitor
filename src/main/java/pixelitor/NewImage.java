@@ -22,9 +22,11 @@ import pixelitor.filters.Fill;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.NewImagePanel;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.DimensionHelper;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ResizeUnit;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -40,25 +42,30 @@ public final class NewImage {
     private static final String NEW_IMAGE_STRING = i18n("new_image");
     private static int untitledCount = 1;
 
-    public static final Dimension lastSize = AppPreferences.getNewImageSize();
+    // last used settings for the "New Image" dialog
+    private static Dimension lastSize = AppPreferences.loadNewImageSize();
+
+    private static ResizeUnit lastUnit = ResizeUnit.PIXELS;
+    private static int lastDpi = Composition.DEFAULT_DPI;
+
     public static int lastFillTypeIndex = 0; // currently not restored after a restart
 
     private NewImage() {
     }
 
-    public static Composition addNewImage(FillType bg, int width, int height, String title) {
-        var comp = createNewComposition(bg, width, height, title);
+    public static Composition addNewImage(FillType bg, int width, int height, String title, int dpi) {
+        var comp = createNewComposition(bg, width, height, title, dpi);
         Views.addNew(comp);
         return comp;
     }
 
-    public static Composition createNewComposition(FillType bg, int width, int height, String name) {
+    public static Composition createNewComposition(FillType bg, int width, int height, String name, int dpi) {
         BufferedImage newImage = ImageUtils.createSysCompatibleImage(width, height);
         if (bg != TRANSPARENT) {
             Fill.fillImage(newImage, bg.getColor());
         }
 
-        return Composition.fromImage(newImage, null, name);
+        return Composition.fromImage(newImage, null, name, dpi);
     }
 
     private static void showInDialog() {
@@ -67,8 +74,32 @@ public final class NewImage {
             .title(NEW_IMAGE_STRING)
             .menuBar(new DialogMenuBar(panel))
             .validatedContent(panel)
-            .okAction(panel::okPressedInDialog)
+            .okAction(panel::dialogAccepted)
             .show();
+    }
+
+    public static Dimension getLastSize() {
+        return lastSize;
+    }
+
+    public static void setLastSize(Dimension d) {
+        lastSize = d;
+    }
+
+    public static ResizeUnit getLastUnit() {
+        return lastUnit;
+    }
+
+    public static void setLastUnit(ResizeUnit lastUnit) {
+        NewImage.lastUnit = lastUnit;
+    }
+
+    public static int getLastDpi() {
+        return lastDpi;
+    }
+
+    public static void setLastDpi(int lastDpi) {
+        NewImage.lastDpi = lastDpi;
     }
 
     public static Action getAction() {
@@ -76,7 +107,11 @@ public final class NewImage {
     }
 
     public static String generateTitle() {
-        return "Untitled " + untitledCount++;
+        return "Untitled " + untitledCount;
+    }
+
+    public static void incrementUntitledCount() {
+        untitledCount++;
     }
 }
 

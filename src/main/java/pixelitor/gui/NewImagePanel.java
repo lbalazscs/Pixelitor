@@ -21,29 +21,35 @@ import pixelitor.NewImage;
 import pixelitor.colors.FillType;
 import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.utils.DimensionHelper;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
+import pixelitor.utils.ResizeUnit;
 
-import javax.swing.*;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
-import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.utils.MemoryInfo.NUM_BYTES_IN_MEGABYTE;
 
 /**
- * The panel in the "New Image" dialog
+ * The panel in the "New Image" dialog.
  */
-public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
-    private static final int PANEL_PADDING = 5;
+public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner, KeyListener, ItemListener, DimensionHelper.DimensionChangeCallback {
+    private static final int PANEL_PADDING = 7;
 
     private final JTextField nameTF;
-    private final JTextField widthTF;
-    private final JTextField heightTF;
     private final JComboBox<FillType> fillSelector;
+
+    private final DimensionHelper dimensions;
 
     public NewImagePanel() {
         super(new GridBagLayout());
@@ -55,87 +61,134 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
         nameTF.setName("nameTF");
         gbh.addLabelAndLastControl("Name", nameTF);
 
-        widthTF = addDimensionField("widthTF", "Width:", NewImage.lastSize.width, gbh);
-        heightTF = addDimensionField("heightTF", "Height:", NewImage.lastSize.height, gbh);
+        ResizeUnit[] units = {ResizeUnit.PIXELS, ResizeUnit.CENTIMETERS, ResizeUnit.INCHES};
+        Dimension lastSize = NewImage.getLastSize();
+        int lastDpi = NewImage.getLastDpi();
+
+        // originalSize is 1, as it's only used by PERCENTAGE unit, which is not present here
+        dimensions = new DimensionHelper(this, units,
+            lastSize.width, lastSize.height, lastDpi, 1, 1);
+
+        gbh.addVerticalSpace(PANEL_PADDING);
+
+        var widthLayer = dimensions.createWidthTextField(this);
+        var widthUnitChooser = dimensions.createUnitChooser(this);
+        gbh.addLabelAndTwoControls("Width:", widthLayer, widthUnitChooser);
+
+        var heightLayer = dimensions.createHeightTextField(this);
+        var heightUnitChooser = dimensions.createUnitChooser(this);
+        gbh.addLabelAndTwoControls("Height:", heightLayer, heightUnitChooser);
+
+        var dpiChooser = dimensions.getDpiChooser();
+        dpiChooser.addItemListener(this);
+        gbh.addLabelAndLastControl("DPI:", dpiChooser);
+        gbh.addVerticalSpace(PANEL_PADDING);
 
         fillSelector = new JComboBox<>(FillType.values());
         fillSelector.setSelectedIndex(NewImage.lastFillTypeIndex);
         gbh.addLabelAndLastControl("Fill:", fillSelector);
+
+        dimensions.getUnitSelectorModel().setSelectedItem(NewImage.getLastUnit());
+        dimensions.setInitialValues();
     }
 
-    private static JTextField addDimensionField(String name, String label,
-                                                int value, GridBagHelper gbh) {
-        var tf = new JTextField(String.valueOf(value));
-        tf.setName(name);
-        gbh.addLabelAndTwoControls(label,
-            TextFieldValidator.createPositiveIntLayer(label, tf),
-            new JLabel("pixels"));
-        return tf;
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() != ItemEvent.SELECTED) {
+            return;
+        }
+        // forward events from DPI and unit choosers to the helper
+        dimensions.itemStateChanged(e);
+    }
+
+    @Override
+    public void dpiChanged() {
+        // when DPI changes, physical size is preserved, so both pixel values change
+        dimensions.updateWidthText();
+        dimensions.updateHeightText();
+    }
+
+    @Override
+    public void dimensionChanged(boolean isWidthChanged) {
+        // no-op, no proportions to keep or border to update
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        dimensions.keyReleased(e);
     }
 
     @Override
     public ValidationResult validateSettings() {
-        var result = ValidationResult.valid()
-            .requirePositiveInt(widthTF.getText(), "Width")
-            .requirePositiveInt(heightTF.getText(), "Height");
+        ValidationResult result = dimensions.checkWidthAndHeight();
 
         if (!result.isValid()) {
             return result;
         }
 
         // we know parsing will succeed here because the validation passed
-        int width = getSelectedWidth();
-        int height = getSelectedHeight();
+        return validateMemoryFootprint(dimensions.getTargetWidth(), dimensions.getTargetHeight());
+    }
 
-        // issue #49: check approximately whether the image
-        // would even fit into the available memory
-        long numPixels = ((long) width) * height;
+    private static ValidationResult validateMemoryFootprint(long width, long height) {
+        // issue #49: check approximately whether the image would fit into available memory
+        long numPixels = width * height;
+
         if (numPixels > Integer.MAX_VALUE) {
             // theoretical limit, as the pixels ultimately will be stored in an array
-            return result.addError(format(
+            return ValidationResult.invalid(format(
                 "Pixelitor doesn't support images with more than %d pixels." +
                     "<br>%dx%d would be %d pixels.",
                 Integer.MAX_VALUE, width, height, numPixels));
-        } else if (numPixels > 1_000_000) { // don't check for smaller images
+        }
+
+        if (numPixels > 1_000_000) { // don't check for smaller images
             Runtime rt = Runtime.getRuntime();
             long allocatedMemory = rt.totalMemory() - rt.freeMemory();
             long availableMemory = rt.maxMemory() - allocatedMemory;
-            if (numPixels * 4 > availableMemory) {
-                return result.addError(format(
+            long requiredMemory = numPixels * 4;
+
+            if (requiredMemory > availableMemory) {
+                return ValidationResult.invalid(format(
                     "The image would not fit into memory." +
                         "<br>An image of %dx%d pixels needs at least %d megabytes." +
                         "<br>Available memory is at most %d megabytes.",
                     width, height,
-                    numPixels * 4 / NUM_BYTES_IN_MEGABYTE,
+                    requiredMemory / NUM_BYTES_IN_MEGABYTE,
                     availableMemory / NUM_BYTES_IN_MEGABYTE));
             }
         }
 
-        return result;
+        return ValidationResult.valid();
     }
 
-    public void okPressedInDialog() {
-        int selectedWidth = getSelectedWidth();
-        int selectedHeight = getSelectedHeight();
+    public void dialogAccepted() {
         FillType bg = getSelectedFill();
 
-        NewImage.addNewImage(bg, selectedWidth, selectedHeight, getTitle());
+        int width = dimensions.getTargetWidth();
+        int height = dimensions.getTargetHeight();
+        int dpi = dimensions.getDpi();
 
-        NewImage.lastSize.width = selectedWidth;
-        NewImage.lastSize.height = selectedHeight;
+        NewImage.addNewImage(bg, width, height, getTitle(), dpi);
+
+        NewImage.setLastSize(new Dimension(width, height));
+        NewImage.setLastUnit(dimensions.getUnit());
+        NewImage.setLastDpi(dpi);
         NewImage.lastFillTypeIndex = fillSelector.getSelectedIndex();
+
+        NewImage.incrementUntitledCount();
     }
 
     private String getTitle() {
         return nameTF.getText().trim();
-    }
-
-    private int getSelectedWidth() {
-        return parseInt(widthTF.getText().trim());
-    }
-
-    private int getSelectedHeight() {
-        return parseInt(heightTF.getText().trim());
     }
 
     private FillType getSelectedFill() {
@@ -149,16 +202,16 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.putInt("Width", getSelectedWidth());
-        preset.putInt("Height", getSelectedHeight());
+        dimensions.saveStateTo(preset);
+
         preset.put("Fill", getSelectedFill().toString());
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        widthTF.setText(String.valueOf(preset.getInt("Width")));
-        heightTF.setText(String.valueOf(preset.getInt("Height")));
         fillSelector.setSelectedItem(preset.getEnum("Fill", FillType.class));
+
+        dimensions.loadUserPreset(preset, false);
     }
 
     @Override

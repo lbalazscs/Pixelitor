@@ -83,6 +83,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private static long debugIdCounter = 0;
 
+    public static final int DEFAULT_DPI = 300;
+
     private String name;
 
     private final List<Layer> layerList = new ArrayList<>();
@@ -101,6 +103,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     private Paths paths;
     private Guides guides;
     private ImageMode mode;
+    private int dpi;
 
     //
     // transient variables from here
@@ -138,16 +141,21 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Private constructor. Use static factory methods
      * or deserialization to create instances.
      */
-    private Composition(Canvas canvas, ImageMode mode) {
+    private Composition(Canvas canvas, ImageMode mode, int dpi) {
         assert canvas != null;
         this.canvas = canvas;
         this.mode = mode;
+        this.dpi = dpi;
+    }
+
+    public static Composition fromImage(BufferedImage img, File file, String name) {
+        return fromImage(img, file, name, DEFAULT_DPI);
     }
 
     /**
      * Creates a single-layered composition from the given image.
      */
-    public static Composition fromImage(BufferedImage img, File file, String name) {
+    public static Composition fromImage(BufferedImage img, File file, String name, int dpi) {
         assert img != null;
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
 
@@ -159,7 +167,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             img = ImageUtils.toSysCompatibleImage(img);
         }
 
-        var comp = new Composition(canvas, mode);
+        var comp = new Composition(canvas, mode, dpi);
         comp.addBaseLayer(img);
 
         if (file != null) {
@@ -179,7 +187,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public static Composition createEmpty(int width, int height, ImageMode mode) {
         Canvas canvas = new Canvas(width, height);
-        return new Composition(canvas, mode);
+        return new Composition(canvas, mode, DEFAULT_DPI);
     }
 
     /**
@@ -205,6 +213,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         in.defaultReadObject();
 
+        if (dpi == 0) { // migrate old pxc files
+            dpi = DEFAULT_DPI;
+        }
+
         activeTopLevelLayer = activeLayer.getTopLevelLayer();
 
         // perform actions that need a full canvas and also
@@ -223,7 +235,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public Composition copy(CopyType copyType, boolean copySelection) {
         assert checkInvariants();
-        var compCopy = new Composition(canvas.copy(), mode);
+        var compCopy = new Composition(canvas.copy(), mode, dpi);
 
         // copy layers recursively
         for (Layer layer : layerList) {
@@ -379,6 +391,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // if a content file is opened independently of its parent,
         // then this will return false, even for PXC files
         return owners != null;
+    }
+
+    public int getDpi() {
+        return dpi;
+    }
+
+    public void setDpi(int dpi) {
+        this.dpi = dpi;
     }
 
     public Canvas getCanvas() {
@@ -1936,7 +1956,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public void replaceWithSmartObject() {
         // create the new outer composition
-        Composition newOuterComp = new Composition(canvas.copy(), mode);
+        Composition newOuterComp = new Composition(canvas.copy(), mode, dpi);
         if (file != null) {
             newOuterComp.setFile(file);
             setFile(null);
@@ -1977,7 +1997,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         // create the new content composition
-        Composition content = new Composition(canvas.copy(), mode);
+        Composition content = new Composition(canvas.copy(), mode, dpi);
         content.setName("visible");
 
         // create a copy of the current composition to become the new main one
@@ -2026,6 +2046,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         DebugNode node = new DebugNode(name, this);
 
         node.add(canvas.createDebugNode("canvas"));
+        node.addInt("dpi", dpi);
 
         node.add(activeTopLevelLayer.createDebugNode("active top-level layer"));
         node.add(activeLayer.createDebugNode("active layer"));

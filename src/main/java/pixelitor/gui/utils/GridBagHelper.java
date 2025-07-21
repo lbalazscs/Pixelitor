@@ -243,4 +243,13 @@ public class GridBagHelper {
             }
         }
     }
+
+    public void addVerticalSpace(int height) {
+        LABEL_CONSTRAINTS.gridx = 0;
+        LABEL_CONSTRAINTS.gridy = currentRow;
+
+        container.add(Box.createVerticalStrut(height), LABEL_CONSTRAINTS);
+
+        currentRow++;
+    }
 }

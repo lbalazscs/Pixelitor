@@ -344,7 +344,7 @@ public class Debug {
     }
 
     public static void addNewImageWithMask() {
-        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
+        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test", Composition.DEFAULT_DPI);
         Views.getActiveLayer().addMask(LayerMaskAddType.PATTERN);
     }
 

@@ -76,7 +76,6 @@ public final class AppPreferences {
 
     private static final String NEW_IMAGE_WIDTH = "new_image_width";
     private static final String NEW_IMAGE_HEIGHT = "new_image_height";
-    private static Dimension newImageSize = null;
 
     private static final String UI_KEY = "ui";
     private static final String NATIVE_CHOOSERS_KEY = "native_choosers";
@@ -213,14 +212,7 @@ public final class AppPreferences {
         mainPrefs.putBoolean(MAXIMIZED_KEY, maximized);
     }
 
-    public static Dimension getNewImageSize() {
-        if (newImageSize == null) {
-            loadNewImageSize();
-        }
-        return newImageSize;
-    }
-
-    private static void loadNewImageSize() {
+    public static Dimension loadNewImageSize() {
         int defaultWidth = 600;
         int defaultHeight = 400;
         Dimension desktopSize = ImageArea.getSize();
@@ -231,14 +223,13 @@ public final class AppPreferences {
         }
         int width = mainPrefs.getInt(NEW_IMAGE_WIDTH, defaultWidth);
         int height = mainPrefs.getInt(NEW_IMAGE_HEIGHT, defaultHeight);
-        newImageSize = new Dimension(width, height);
+        return new Dimension(width, height);
     }
 
     private static void saveNewImageSize() {
-        if (NewImage.lastSize != null) {
-            mainPrefs.putInt(NEW_IMAGE_WIDTH, NewImage.lastSize.width);
-            mainPrefs.putInt(NEW_IMAGE_HEIGHT, NewImage.lastSize.height);
-        }
+        Dimension lastSize = NewImage.getLastSize();
+        mainPrefs.putInt(NEW_IMAGE_WIDTH, lastSize.width);
+        mainPrefs.putInt(NEW_IMAGE_HEIGHT, lastSize.height);
     }
 
     public static BoundedUniqueList<RecentFileEntry> loadRecentFiles() {

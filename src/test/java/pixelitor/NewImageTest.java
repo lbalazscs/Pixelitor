@@ -36,7 +36,8 @@ class NewImageTest {
     @ParameterizedTest(name = "filled with {0}")
     @EnumSource(FillType.class)
     void createNewComposition(FillType fillType) {
-        var comp = NewImage.createNewComposition(fillType, 20, 20, "NewImageTest");
+        var comp = NewImage.createNewComposition(fillType,
+            20, 20, "NewImageTest", Composition.DEFAULT_DPI);
         assert comp.checkInvariants();
         assertThat(comp)
             .numLayersIs(1)
