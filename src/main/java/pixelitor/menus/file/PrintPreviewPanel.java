@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,10 +45,13 @@ public class PrintPreviewPanel extends JPanel {
         this.pageFormat = pageFormat;
         this.printable = printable;
 
-        updatePageFormat(pageFormat);
+        recalcLayout(pageFormat);
     }
 
-    private void updatePageFormat(PageFormat pageFormat) {
+    /**
+     * Recalculates the layout and scaling for the page preview.
+     */
+    private void recalcLayout(PageFormat pageFormat) {
         this.pageFormat = pageFormat;
 
         // the paper is within the margin, centered
@@ -56,11 +59,11 @@ public class PrintPreviewPanel extends JPanel {
         double maxContentSize = SIZE - 2 * MARGIN;
         
         if (aspectRatio > 1) { // fit to the width
-            double rectWith = maxContentSize;
-            double rectHeight = rectWith / aspectRatio;
+            double rectWidth = maxContentSize;
+            double rectHeight = rectWidth / aspectRatio;
             paperBounds = new Rectangle2D.Double(
-                MARGIN, (SIZE - rectHeight) / 2, rectWith, rectHeight);
-            scaling = rectWith / pageFormat.getWidth();
+                MARGIN, (SIZE - rectHeight) / 2, rectWidth, rectHeight);
+            scaling = rectWidth / pageFormat.getWidth();
         } else { // fit to the height
             double rectHeight = maxContentSize;
             double rectWidth = rectHeight * aspectRatio;
@@ -71,7 +74,7 @@ public class PrintPreviewPanel extends JPanel {
     }
 
     public void updatePage(PageFormat pageFormat) {
-        updatePageFormat(pageFormat);
+        recalcLayout(pageFormat);
         repaint();
     }
 
@@ -95,9 +98,9 @@ public class PrintPreviewPanel extends JPanel {
             printable.print(g2, pageFormat, 0);
         } catch (PrinterException e) {
             Messages.showException(e);
+        } finally {
+            g2.setTransform(origTransform);
         }
-
-        g2.setTransform(origTransform);
     }
 
     @Override

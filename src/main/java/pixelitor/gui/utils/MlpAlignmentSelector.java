@@ -26,7 +26,11 @@ import java.awt.geom.Path2D;
 import static pixelitor.gui.utils.VectorIcon.LIGHT_FG;
 import static pixelitor.tools.gui.ToolButton.darkThemeSelectedColor;
 
-public class AlignmentSelector extends JPanel {
+/**
+ * A panel for selecting a horizontal text alignment option
+ * for multiline text or text on path.
+ */
+public class MlpAlignmentSelector extends JPanel {
     private final JToggleButton leftAlign;
     private final JToggleButton centerAlign;
     private final JToggleButton rightAlign;
@@ -41,7 +45,7 @@ public class AlignmentSelector extends JPanel {
 
     private static Shape[] iconShapes;
 
-    public AlignmentSelector(int defaultAlignment, ParamAdjustmentListener adjustmentListener) {
+    public MlpAlignmentSelector(int defaultAlignment, ParamAdjustmentListener adjustmentListener) {
         setLayout(new GridLayout(1, 3, 0, 0));
 
         if (iconShapes == null) {

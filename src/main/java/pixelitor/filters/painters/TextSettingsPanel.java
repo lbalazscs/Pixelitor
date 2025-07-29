@@ -80,7 +80,7 @@ public class TextSettingsPanel extends FilterGUI
 
     // multiline/path alignment settings
     private boolean hasMLPAlign = true;
-    private AlignmentSelector mlpAlignmentSelector;
+    private MlpAlignmentSelector mlpAlignmentSelector;
     private JLabel mlpLabel;
 
     /**
@@ -174,7 +174,7 @@ public class TextSettingsPanel extends FilterGUI
         alignPanel.add(boxAlignmentCB);
         mlpLabel = new JLabel("     Multiline/Path Alignment:");
         alignPanel.add(mlpLabel);
-        mlpAlignmentSelector = new AlignmentSelector(settings.getMLPAlignment(), this);
+        mlpAlignmentSelector = new MlpAlignmentSelector(settings.getMLPAlignment(), this);
         alignPanel.add(mlpAlignmentSelector);
         updateMLPAlignEnabled();
 

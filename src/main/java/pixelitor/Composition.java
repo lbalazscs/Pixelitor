@@ -103,6 +103,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     private Paths paths;
     private Guides guides;
     private ImageMode mode;
+
+    // defines the intended physical size of the image when printed
     private int dpi;
 
     //

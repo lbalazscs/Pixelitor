@@ -27,8 +27,8 @@ import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.QuadrantAngle;
-import pixelitor.gui.utils.AlignmentSelector;
 import pixelitor.gui.utils.BoxAlignment;
+import pixelitor.gui.utils.MlpAlignmentSelector;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
@@ -76,7 +76,7 @@ public class TransformedTextPainter implements Debuggable {
     private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
 
     // alignment for multiline text or text on a path
-    private int mlpAlignment = AlignmentSelector.LEFT;
+    private int mlpAlignment = MlpAlignmentSelector.LEFT;
 
     private Font font = null;
     private Color color;
@@ -555,7 +555,7 @@ public class TransformedTextPainter implements Debuggable {
      * text should begin, based on the current alignment setting.
      */
     private double calcPathStartOffset(GlyphVector glyphVector, Path2D path, double tracking) {
-        if (mlpAlignment == AlignmentSelector.LEFT) {
+        if (mlpAlignment == MlpAlignmentSelector.LEFT) {
             return 0;
         }
 
@@ -563,8 +563,8 @@ public class TransformedTextPainter implements Debuggable {
         double textLength = calcTextLength(glyphVector, tracking);
 
         return switch (mlpAlignment) {
-            case AlignmentSelector.CENTER -> (pathLength - textLength) / 2;
-            case AlignmentSelector.RIGHT -> pathLength - textLength;
+            case MlpAlignmentSelector.CENTER -> (pathLength - textLength) / 2;
+            case MlpAlignmentSelector.RIGHT -> pathLength - textLength;
             default -> throw new IllegalStateException("Unexpected value: " + mlpAlignment);
         };
     }
@@ -579,7 +579,7 @@ public class TransformedTextPainter implements Debuggable {
 
         // for centered text, the overflow is on both sides,
         // so we only need to account for half of it
-        if (mlpAlignment == AlignmentSelector.CENTER) {
+        if (mlpAlignment == MlpAlignmentSelector.CENTER) {
             overflow /= 2;
         }
 
@@ -706,10 +706,10 @@ public class TransformedTextPainter implements Debuggable {
             Rectangle2D lineBounds = lineShape.getBounds2D();
 
             float drawX = switch (mlpAlignment) {
-                case AlignmentSelector.LEFT -> effectsPadding;
-                case AlignmentSelector.CENTER ->
+                case MlpAlignmentSelector.LEFT -> effectsPadding;
+                case MlpAlignmentSelector.CENTER ->
                     effectsPadding + (origTextWidth - (float) lineBounds.getWidth()) / 2.0f;
-                case AlignmentSelector.RIGHT -> effectsPadding + origTextWidth - (float) lineBounds.getWidth();
+                case MlpAlignmentSelector.RIGHT -> effectsPadding + origTextWidth - (float) lineBounds.getWidth();
                 default -> throw new IllegalStateException("alignment: " + mlpAlignment);
             };
 

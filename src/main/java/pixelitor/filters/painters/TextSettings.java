@@ -23,8 +23,8 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.gui.utils.AlignmentSelector;
 import pixelitor.gui.utils.BoxAlignment;
+import pixelitor.gui.utils.MlpAlignmentSelector;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
@@ -135,7 +135,7 @@ public class TextSettings implements Serializable, Debuggable {
         text = DEFAULT_TEXT;
         verticalAlignment = VerticalAlignment.CENTER;
         watermark = false;
-        mlpAlignment = AlignmentSelector.LEFT;
+        mlpAlignment = MlpAlignmentSelector.LEFT;
 
         rotation = 0;
         relLineHeight = 1.0;
@@ -185,7 +185,7 @@ public class TextSettings implements Serializable, Debuggable {
         }
         if (mlpAlignment == 0) {
             // field not found in old pxc files
-            mlpAlignment = AlignmentSelector.LEFT;
+            mlpAlignment = MlpAlignmentSelector.LEFT;
         }
     }
 
@@ -241,9 +241,9 @@ public class TextSettings implements Serializable, Debuggable {
         horizontalAlignment = Rnd.chooseFrom(HorizontalAlignment.values());
         verticalAlignment = Rnd.chooseFrom(VerticalAlignment.values());
         mlpAlignment = Rnd.chooseFrom(new int[]{
-            AlignmentSelector.LEFT,
-            AlignmentSelector.CENTER,
-            AlignmentSelector.RIGHT
+            MlpAlignmentSelector.LEFT,
+            MlpAlignmentSelector.CENTER,
+            MlpAlignmentSelector.RIGHT
         });
 
         watermark = Rnd.nextBoolean();
@@ -297,7 +297,7 @@ public class TextSettings implements Serializable, Debuggable {
             horizontalAlignment = alignment.getHorizontal();
             verticalAlignment = alignment.getVertical();
         }
-        mlpAlignment = preset.getInt(PRESET_KEY_MLP_ALIGN, AlignmentSelector.LEFT);
+        mlpAlignment = preset.getInt(PRESET_KEY_MLP_ALIGN, MlpAlignmentSelector.LEFT);
 
         font = new FontInfo(preset).createFont();
 

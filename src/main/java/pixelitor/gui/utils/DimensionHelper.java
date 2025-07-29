@@ -18,7 +18,6 @@
 package pixelitor.gui.utils;
 
 import pixelitor.Canvas;
-import pixelitor.Composition;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.utils.DimensionValidator;
 import pixelitor.utils.ResizeUnit;
@@ -39,7 +38,7 @@ import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
  */
 public class DimensionHelper {
     private static final int INPUT_FIELD_COLUMNS = 5;
-    private static final Integer[] DPI_VALUES = {150, DEFAULT_DPI, 600};
+    public static final Integer[] DPI_VALUES = {150, DEFAULT_DPI, 600};
 
     private final JTextField widthTF;
     private final JTextField heightTF;
