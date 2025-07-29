@@ -22,7 +22,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.util.OverlayType;
@@ -34,6 +33,7 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 
@@ -146,13 +146,8 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new MagicWandToolIcon();
-    }
-
-    private static class MagicWandToolIcon extends ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on magic_wand_tool.svg
             Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
 
@@ -182,6 +177,6 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
             g.setStroke(new BasicStroke(1.5f));
 
             g.draw(path);
-        }
+        };
     }
 }

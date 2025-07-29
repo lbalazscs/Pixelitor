@@ -22,7 +22,6 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
@@ -35,6 +34,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -167,13 +167,8 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new SmudgeToolIcon();
-    }
-
-    private static class SmudgeToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on smudge_tool.svg
 
             Path2D shape = new Path2D.Double();
@@ -202,6 +197,6 @@ public class SmudgeTool extends AbstractBrushTool {
 
             g.setStroke(new BasicStroke(1.1584814f, CAP_ROUND, JOIN_ROUND, 4));
             g.draw(shape);
-        }
+        };
     }
 }

@@ -26,14 +26,12 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DropDownSlider;
 import pixelitor.gui.utils.Themes;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.GradientFillLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.DragTool;
-import pixelitor.tools.Tool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
 import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
 import pixelitor.tools.gradient.history.NewGradientEdit;
@@ -52,6 +50,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
@@ -614,11 +613,6 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new GradientToolIcon();
-    }
-
-    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
@@ -634,15 +628,15 @@ public class GradientTool extends DragTool {
         return node;
     }
 
-    private static class GradientToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    @Override
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             Color startColor = Color.BLACK;
-            Color endColor = Themes.getActive().isDark() ? color : Color.WHITE;
+            Color endColor = Themes.getActive().isDark() ? g.getColor() : Color.WHITE;
             Paint gradient = new GradientPaint(0, 0, startColor,
                 ToolButton.ICON_SIZE, 0, endColor);
             g.setPaint(gradient);
             g.fillRect(0, 0, ToolButton.ICON_SIZE, ToolButton.ICON_SIZE);
-        }
+        };
     }
 }

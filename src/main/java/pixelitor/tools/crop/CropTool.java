@@ -26,7 +26,6 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.guides.GuidesRenderer;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
@@ -49,6 +48,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
@@ -834,13 +834,8 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new CropToolIcon();
-    }
-
-    private static class CropToolIcon extends ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // the shape is based on crop_tool.svg
             Path2D shape = new Path2D.Double();
 
@@ -877,6 +872,6 @@ public class CropTool extends DragTool {
             shape.closePath();
 
             g.fill(shape);
-        }
+        };
     }
 }

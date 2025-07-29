@@ -82,7 +82,7 @@ public class ToolButton extends JToggleButton {
     }
 
     private void setupIcons(Tool tool) {
-        VectorIcon toolIcon = tool.createIcon();
+        VectorIcon toolIcon = VectorIcon.createToolIcon(tool.createIconPainter());
         setIcon(toolIcon);
 
         VectorIcon selectedIcon = Themes.getActive().isDark()

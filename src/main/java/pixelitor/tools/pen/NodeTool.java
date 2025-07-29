@@ -20,8 +20,6 @@ package pixelitor.tools.pen;
 import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.VectorIcon;
-import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -32,6 +30,7 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
@@ -210,13 +209,8 @@ public class NodeTool extends PathTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new EditPathToolIcon();
-    }
-
-    private static class EditPathToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on path_edit_tool.svg
 
             g.setStroke(new BasicStroke(1.5f, CAP_BUTT, JOIN_MITER, 4));
@@ -241,6 +235,6 @@ public class NodeTool extends PathTool {
             rightPath.moveTo(23.5, 21.5);
             rightPath.curveTo(23.5, 21.5, 23.5, 4.5, 16.25, 4.500000);
             g.draw(rightPath);
-        }
+        };
     }
 }

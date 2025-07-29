@@ -20,8 +20,6 @@ package pixelitor.tools.pen;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.VectorIcon;
-import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
@@ -36,6 +34,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
@@ -228,13 +227,8 @@ public class TransformPathTool extends PathTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new TransformPathToolIcon();
-    }
-
-    private static class TransformPathToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on transfrom_tool.svg
             Path2D shape = new Path2D.Double();
 
@@ -258,6 +252,6 @@ public class TransformPathTool extends PathTool {
 
             g.setStroke(new BasicStroke(1.5f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(shape);
-        }
+        };
     }
 }

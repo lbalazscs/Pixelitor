@@ -29,7 +29,10 @@ import pixelitor.filters.painters.AreaEffects;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.*;
+import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Drawable;
@@ -37,7 +40,6 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.ShapesLayer;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.DragToolState;
-import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.history.ConvertShapeToSelectionEdit;
 import pixelitor.tools.shapes.history.CreateBoxedShapeEdit;
@@ -59,6 +61,7 @@ import java.awt.geom.Path2D;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
 import static pixelitor.tools.DragToolState.IDLE;
@@ -955,13 +958,8 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new ShapesToolIcon();
-    }
-
-    private static class ShapesToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // the shape is based on shapes_tool.svg
             Path2D shape = new Path2D.Double();
 
@@ -976,7 +974,7 @@ public class ShapesTool extends DragTool {
 
             g.setStroke(new BasicStroke(1.5f));
             g.draw(shape);
-        }
+        };
     }
 }
 

@@ -20,7 +20,6 @@ package pixelitor.tools.selection;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.util.OverlayType;
@@ -29,6 +28,7 @@ import pixelitor.utils.Cursors;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
+import java.util.function.Consumer;
 
 /**
  * A tool that creates polygonal selections by clicking points.
@@ -111,13 +111,8 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new PolyToolIcon();
-    }
-
-    private static class PolyToolIcon extends ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on poly_tool.svg
             Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
 
@@ -148,7 +143,7 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
             path.closePath();
 
             g.fill(path);
-        }
+        };
     }
 }
 

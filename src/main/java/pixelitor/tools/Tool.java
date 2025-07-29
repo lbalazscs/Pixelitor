@@ -24,8 +24,6 @@ import pixelitor.filters.gui.PresetOwner;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.Themes;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.tools.gui.ToolButton;
@@ -43,8 +41,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ResourceBundle;
-
-import static java.awt.Color.BLACK;
+import java.util.function.Consumer;
 
 /**
  * Abstract base class for all tools.
@@ -135,10 +132,9 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Creates the tool's icon. Tools create their icons using
-     * vector graphics so they look good on HiDPI screens.
+     * Creates the painter for the tool's icon.
      */
-    public abstract VectorIcon createIcon();
+    public abstract Consumer<Graphics2D> createIconPainter();
 
     /**
      * Allows tools to paint additional content over the canvas/composition,
@@ -415,15 +411,5 @@ public abstract class Tool implements PresetOwner, Debuggable {
     @Override
     public String toString() {
         return shortName; // so that they can be selected from a JComboBox
-    }
-
-    /**
-     * Abstract base class for tool icons.
-     */
-    protected abstract static class ToolIcon extends VectorIcon {
-        protected ToolIcon() {
-            super(Themes.getActive().isDark() ? Themes.LIGHT_ICON_COLOR : BLACK,
-                ToolButton.ICON_SIZE, ToolButton.ICON_SIZE);
-        }
     }
 }

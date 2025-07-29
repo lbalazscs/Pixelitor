@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -26,6 +25,7 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -82,13 +82,8 @@ public class HandTool extends Tool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new HandToolIcon();
-    }
-
-    private static class HandToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on hand_tool.svg
             Path2D shape = new Path2D.Double();
 
@@ -117,6 +112,6 @@ public class HandTool extends Tool {
 
             g.setStroke(new BasicStroke(1.1522429f, CAP_ROUND, JOIN_ROUND, 4));
             g.draw(shape);
-        }
+        };
     }
 }

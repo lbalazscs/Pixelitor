@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
@@ -35,6 +34,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
@@ -186,13 +186,8 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new ZoomToolIcon();
-    }
-
-    private static class ZoomToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on zoom_tool.svg
             g.setStroke(new BasicStroke(2.0f, CAP_BUTT, JOIN_MITER, 4));
 
@@ -214,6 +209,6 @@ public class ZoomTool extends DragTool {
 
             g.setStroke(new BasicStroke(1.7017335f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(shape);
-        }
+        };
     }
 }

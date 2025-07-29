@@ -20,7 +20,6 @@ package pixelitor.tools;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
@@ -31,6 +30,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
@@ -108,13 +108,8 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new BrushToolIcon();
-    }
-
-    private static class BrushToolIcon extends Tool.ToolIcon {
-        @Override
-        protected void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on brush_tool.svg
             Path2D shape = new Path2D.Double();
 
@@ -172,6 +167,6 @@ public class BrushTool extends BlendingModeBrushTool {
             shape.closePath();
 
             g.fill(shape);
-        }
+        };
     }
 }

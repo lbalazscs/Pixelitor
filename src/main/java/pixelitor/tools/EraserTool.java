@@ -17,12 +17,12 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.utils.Cursors;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 /**
  * The eraser tool.
@@ -52,13 +52,8 @@ public class EraserTool extends AbstractBrushTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new EraserToolIcon();
-    }
-
-    private static class EraserToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on eraser_tool.svg
             Path2D shape = new Path2D.Double();
 
@@ -106,6 +101,6 @@ public class EraserTool extends AbstractBrushTool {
             shape.closePath();
 
             g.fill(shape);
-        }
+        };
     }
 }

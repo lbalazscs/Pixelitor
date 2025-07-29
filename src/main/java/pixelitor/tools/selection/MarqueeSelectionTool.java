@@ -17,13 +17,13 @@
 
 package pixelitor.tools.selection;
 
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
+import java.util.function.Consumer;
 
 /**
  * A tool that creates rectangular or elliptical selections by dragging.
@@ -102,45 +102,39 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
+    public Consumer<Graphics2D> createIconPainter() {
         return selectionType == SelectionType.RECTANGLE
-            ? new RectangleSelectionToolIcon()
-            : new EllipseSelectionToolIcon();
+            ? MarqueeSelectionTool::paintRectangleSelectionIconShape
+            : MarqueeSelectionTool::paintEllipseSelectionIconShape;
     }
 
-    private static class EllipseSelectionToolIcon extends ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
-            // draws a dashed ellipse
-            g.setStroke(new BasicStroke(2,
-                BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
-                0, new float[]{4.1888f, 4.1888f}, 0));
-            g.drawOval(2, 2, 24, 24);
-        }
+    private static void paintRectangleSelectionIconShape(Graphics2D g) {
+        // based on selection_tool.svg
+
+        // north
+        g.fillRect(1, 1, 4, 2);
+        g.fillRect(9, 1, 4, 2);
+        g.fillRect(17, 1, 4, 2);
+        // east
+        g.fillRect(25, 1, 2, 4);
+        g.fillRect(25, 9, 2, 4);
+        g.fillRect(25, 17, 2, 4);
+        // south
+        g.fillRect(7, 25, 4, 2);
+        g.fillRect(15, 25, 4, 2);
+        g.fillRect(23, 25, 4, 2);
+        // west
+        g.fillRect(1, 7, 2, 4);
+        g.fillRect(1, 15, 2, 4);
+        g.fillRect(1, 23, 2, 4);
     }
 
-    private static class RectangleSelectionToolIcon extends ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
-            // based on selection_tool.svg
-
-            // north
-            g.fillRect(1, 1, 4, 2);
-            g.fillRect(9, 1, 4, 2);
-            g.fillRect(17, 1, 4, 2);
-            // east
-            g.fillRect(25, 1, 2, 4);
-            g.fillRect(25, 9, 2, 4);
-            g.fillRect(25, 17, 2, 4);
-            // south
-            g.fillRect(7, 25, 4, 2);
-            g.fillRect(15, 25, 4, 2);
-            g.fillRect(23, 25, 4, 2);
-            // west
-            g.fillRect(1, 7, 2, 4);
-            g.fillRect(1, 15, 2, 4);
-            g.fillRect(1, 23, 2, 4);
-        }
+    private static void paintEllipseSelectionIconShape(Graphics2D g) {
+        // draws a dashed ellipse
+        g.setStroke(new BasicStroke(2,
+            BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
+            0, new float[]{4.1888f, 4.1888f}, 0));
+        g.drawOval(2, 2, 24, 24);
     }
 }
 

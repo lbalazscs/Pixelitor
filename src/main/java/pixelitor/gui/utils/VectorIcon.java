@@ -17,19 +17,23 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.tools.gui.ToolButton;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.function.Consumer;
 
+import static java.awt.Color.BLACK;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_STROKE_CONTROL;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 
 /**
- * An abstract superclass for vector icons, which look good
- * on HiDPI screens with any scaling.
+ * A vector icon.
+ * Vector icons are used because the look good on HiDPI screens with any scaling.
  */
-public abstract class VectorIcon implements Icon, Cloneable {
+public class VectorIcon implements Icon, Cloneable {
     protected Color color;
     private final int width;
     private final int height;
@@ -38,10 +42,13 @@ public abstract class VectorIcon implements Icon, Cloneable {
     private static final Color DARK_BG = new Color(42, 42, 42);
     public static final Color LIGHT_FG = new Color(19, 30, 43);
 
-    protected VectorIcon(Color color, int width, int height) {
+    private final Consumer<Graphics2D> painter;
+
+    public VectorIcon(Color color, int width, int height, Consumer<Graphics2D> painter) {
         this.color = color;
         this.width = width;
         this.height = height;
+        this.painter = painter;
     }
 
     @Override
@@ -53,10 +60,8 @@ public abstract class VectorIcon implements Icon, Cloneable {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
-        paintIcon(g2);
+        painter.accept(g2);
     }
-
-    protected abstract void paintIcon(Graphics2D g);
 
     @Override
     public final int getIconWidth() {
@@ -84,27 +89,28 @@ public abstract class VectorIcon implements Icon, Cloneable {
     }
 
     public static VectorIcon createNonTransparentThemed(Shape shape) {
-        return new VectorIcon(Color.WHITE, 24, 24) {
-            @Override
-            protected void paintIcon(Graphics2D g) {
-                boolean darkTheme = Themes.getActive().isDark();
-                g.setColor(darkTheme ? DARK_BG : LIGHT_BG);
-                g.fillRect(0, 0, 24, 24);
+        Consumer<Graphics2D> painter = g -> {
+            boolean darkTheme = Themes.getActive().isDark();
+            g.setColor(darkTheme ? DARK_BG : LIGHT_BG);
+            g.fillRect(0, 0, 24, 24);
 
-                g.setColor(darkTheme ? Themes.LIGHT_ICON_COLOR : LIGHT_FG);
+            g.setColor(darkTheme ? Themes.LIGHT_ICON_COLOR : LIGHT_FG);
 
-                g.fill(shape);
-            }
+            g.fill(shape);
         };
+        return new VectorIcon(Color.WHITE, 24, 24, painter);
+    }
+
+    public static VectorIcon createToolIcon(Consumer<Graphics2D> painter) {
+        Color c = Themes.getActive().isDark() ? Themes.LIGHT_ICON_COLOR : BLACK;
+        return new VectorIcon(c, ToolButton.ICON_SIZE, ToolButton.ICON_SIZE, painter);
     }
 
     public static VectorIcon createFilled(Shape shape, Color color, int width, int height) {
-        return new VectorIcon(color, width, height) {
-            @Override
-            protected void paintIcon(Graphics2D g) {
-                g.setColor(color);
-                g.fill(shape);
-            }
+        Consumer<Graphics2D> painter = g -> {
+            g.setColor(color);
+            g.fill(shape);
         };
+        return new VectorIcon(color, width, height, painter);
     }
 }

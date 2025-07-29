@@ -22,7 +22,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.tools.util.PMouseEvent;
@@ -40,6 +39,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
@@ -262,17 +262,13 @@ public class ColorPickerTool extends Tool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new ColorPickerToolIcon();
-    }
+    public Consumer<Graphics2D> createIconPainter() {
+        Color GLASS_COLOR = new Color(0x68_00_00_00, true);
 
-    private static class ColorPickerToolIcon extends Tool.ToolIcon {
-        private static final Color GLASS_COLOR = new Color(0x68_00_00_00, true);
-
-        @Override
-        public void paintIcon(Graphics2D g) {
+        return g -> {
             // based on color_picker_tool.svg
             Path2D glassPath = new Path2D.Double();
+            Color color = g.getColor();
 
             glassPath.moveTo(15.487128, 10.694453);
             glassPath.lineTo(1.8488811, 24.332703);
@@ -305,6 +301,6 @@ public class ColorPickerTool extends Tool {
             g.fill(handlePath);
             g.setStroke(new BasicStroke(0.90921646f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(handlePath);
-        }
+        };
     }
 }

@@ -22,7 +22,6 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -39,6 +38,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
@@ -676,13 +676,8 @@ public class PenTool extends PathTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new BuildPathToolIcon();
-    }
-
-    private static class BuildPathToolIcon extends ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on pen_tool.svg
             g.setStroke(new BasicStroke(1.5f, CAP_BUTT, JOIN_MITER, 4));
 
@@ -707,6 +702,6 @@ public class PenTool extends PathTool {
 
             Ellipse2D circle = new Ellipse2D.Double(9, 14.375, 4.8, 4.8);
             g.draw(circle);
-        }
+        };
     }
 }

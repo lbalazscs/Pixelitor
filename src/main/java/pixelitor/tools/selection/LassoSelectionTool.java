@@ -17,7 +17,6 @@
 
 package pixelitor.tools.selection;
 
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
@@ -25,6 +24,7 @@ import pixelitor.utils.Cursors;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
+import java.util.function.Consumer;
 
 /**
  * A tool that creates freehand selections by dragging.
@@ -81,13 +81,8 @@ public class LassoSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new LassoToolIcon();
-    }
-
-    private static class LassoToolIcon extends ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on lasso_tool.svg
             Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
 
@@ -118,6 +113,6 @@ public class LassoSelectionTool extends AbstractSelectionTool {
             path.closePath();
 
             g.fill(path);
-        }
+        };
     }
 }

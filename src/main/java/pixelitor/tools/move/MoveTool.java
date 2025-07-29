@@ -22,11 +22,9 @@ import pixelitor.Features;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.tools.DragTool;
-import pixelitor.tools.Tool;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.OverlayType;
@@ -41,6 +39,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 /**
  * The move tool.
@@ -277,13 +276,8 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new MoveToolIcon();
-    }
-
-    private static class MoveToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // the shape is based on move_tool.svg
             Path2D shape = new Path2D.Double();
             // start at the top
@@ -322,6 +316,6 @@ public class MoveTool extends DragTool {
             shape.closePath();
 
             g.fill(shape);
-        }
+        };
     }
 }

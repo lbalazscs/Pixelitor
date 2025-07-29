@@ -21,7 +21,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
@@ -37,6 +36,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
@@ -364,13 +364,8 @@ public class PaintBucketTool extends Tool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new PaintBucketToolIcon();
-    }
-
-    private static class PaintBucketToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // the shape is based on paint_bucket_tool.svg
             Path2D shape = new Path2D.Double();
 
@@ -404,6 +399,6 @@ public class PaintBucketTool extends Tool {
             shape.closePath();
 
             g.fill(shape);
-        }
+        };
     }
 }

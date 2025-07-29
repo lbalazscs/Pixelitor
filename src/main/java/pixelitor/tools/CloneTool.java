@@ -25,7 +25,6 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
@@ -43,6 +42,7 @@ import java.awt.GridBagLayout;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -323,13 +323,8 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public VectorIcon createIcon() {
-        return new CloneToolIcon();
-    }
-
-    private static class CloneToolIcon extends Tool.ToolIcon {
-        @Override
-        public void paintIcon(Graphics2D g) {
+    public Consumer<Graphics2D> createIconPainter() {
+        return g -> {
             // based on clone_tool.svg
 
             // body
@@ -364,6 +359,6 @@ public class CloneTool extends BlendingModeBrushTool {
             shape.curveTo(19.552193, 10.422222, 15.397608, 15.648266, 15.397608, 15.648266);
 
             g.draw(shape);
-        }
+        };
     }
 }

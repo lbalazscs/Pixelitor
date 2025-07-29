@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,7 +74,10 @@ public class FilterSearchPanel extends JPanel {
 
         // add placeholder behavior and left-aligned search icon
         PromptSupport.setFocusBehavior(SHOW_PROMPT, searchTF);
-        JLabel searchBuddy = new JLabel(new SearchIcon());
+
+        Color searchIconColor = Themes.getActive().isDark() ? Themes.LIGHT_ICON_COLOR : LayerGUI.SELECTED_COLOR;
+        VectorIcon searchIcon = new VectorIcon(searchIconColor, 20, 14, FilterSearchPanel::paintSearchIcon);
+        JLabel searchBuddy = new JLabel(searchIcon);
         searchBuddy.setForeground(Color.GRAY);
         BuddySupport.addLeft(searchBuddy, searchTF);
 
@@ -261,25 +264,18 @@ public class FilterSearchPanel extends JPanel {
         return panel.getSelectedFilter();
     }
 
-    private static class SearchIcon extends VectorIcon {
-        public SearchIcon() {
-            super(Themes.getActive().isDark() ? Themes.LIGHT_ICON_COLOR : LayerGUI.SELECTED_COLOR, 20, 14);
-        }
+    private static void paintSearchIcon(Graphics2D g) {
+        // the shape is based on search.svg
+        Path2D shape = new Path2D.Double();
+        shape.moveTo(7.897525, 8.923619);
+        shape.lineTo(12.009847, 12.81312);
+        shape.curveTo(12.009847, 12.81312, 12.87233, 13.229692, 13.303571, 12.81312);
+        shape.curveTo(13.734813, 12.396544, 13.303571, 11.563393, 13.303571, 11.563393);
+        shape.lineTo(9.032443, 7.5904202);
 
-        @Override
-        protected void paintIcon(Graphics2D g) {
-            // the shape is based on search.svg
-            Path2D shape = new Path2D.Double();
-            shape.moveTo(7.897525, 8.923619);
-            shape.lineTo(12.009847, 12.81312);
-            shape.curveTo(12.009847, 12.81312, 12.87233, 13.229692, 13.303571, 12.81312);
-            shape.curveTo(13.734813, 12.396544, 13.303571, 11.563393, 13.303571, 11.563393);
-            shape.lineTo(9.032443, 7.5904202);
+        g.fill(shape);
+        g.draw(shape);
 
-            g.fill(shape);
-            g.draw(shape);
-
-            g.draw(new Ellipse2D.Double(1.0, 1.0, 8.5, 8.5));
-        }
+        g.draw(new Ellipse2D.Double(1.0, 1.0, 8.5, 8.5));
     }
 }
