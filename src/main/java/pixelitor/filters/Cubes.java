@@ -58,7 +58,8 @@ public class Cubes extends ParametrizedFilter {
         CORNER_CUT("Corner Cut", 1, false),
         CORNER_CUT2("Corner Cut 2", 2, false),
         CORNER_CUT3("Corner Cut 3", 3, false),
-        INTERLOCKING("Interlocking", 0, true);
+        INTERLOCKING("Interlocking", 0, true),
+        SUPERCUBE("Supercube", 0, false);
 
         private final String displayName;
         private final int numCornerCuts;
@@ -157,13 +158,17 @@ public class Cubes extends ParametrizedFilter {
      * Creates the list of shapes for the cube pattern.
      */
     private List<ShapeWithColor> createShapes(int width, int height) {
+        CubeType type = typeParam.getSelected();
+        if (type == CubeType.SUPERCUBE) {
+            return createSupercubeShapes(width, height);
+        }
+
         List<ShapeWithColor> shapes = new ArrayList<>();
 
         Color topColor = topColorParam.getColor();
         Color rightColor = rightColorParam.getColor();
         Color leftColor = leftColorParam.getColor();
 
-        CubeType type = typeParam.getSelected();
         boolean interlocking = type.isInterlocking;
 
         double size = sizeParam.getValueAsDouble(0);
@@ -201,6 +206,77 @@ public class Cubes extends ParametrizedFilter {
 
                 addCubeShapes(shapes, baseX, baseY, longer, shorter, size, ratio, type,
                     topColor, rightColor, leftColor);
+            }
+        }
+
+        return shapes;
+    }
+
+    /**
+     * Creates the list of shapes for the "Supercube" cube pattern.
+     * This pattern is centered and represents the outer layer of a "cube of cubes".
+     */
+    private List<ShapeWithColor> createSupercubeShapes(int width, int height) {
+        List<ShapeWithColor> shapes = new ArrayList<>();
+
+        Color topColor = topColorParam.getColor();
+        Color rightColor = rightColorParam.getColor();
+        Color leftColor = leftColorParam.getColor();
+        double size = sizeParam.getValueAsDouble(0);
+        double verSize = sizeParam.getValueAsDouble(1);
+        double ratio = verSize / size;
+
+        // isometric projection constants for a single cube
+        double longer = size * Math.cos(Math.PI / 6.0);
+        double shorter = size * Math.sin(Math.PI / 6.0);
+
+        // the step from one cube's center vertex to the next
+        final double stepFactor = 1.5; // size + gap = 1.5 * size
+
+        // calculate the dimension of the "super-cube" (dim x dim x dim)
+        // so that it fits reasonably well within the canvas
+        double stepHor = stepFactor * longer;
+        // for vertical fit, consider both downward (k-axis) and upward (i/j axes) movement
+        double stepVerDown = stepFactor * size * ratio;
+        double stepVerUp = stepFactor * shorter * ratio;
+
+        // calculate how many steps fit from the center to each edge
+        int dimX = (stepHor > 0) ? (int) (width / 2.0 / stepHor) + 1 : Integer.MAX_VALUE;
+        int dimYDown = (stepVerDown > 0) ? (int) (height / 2.0 / stepVerDown) + 1 : Integer.MAX_VALUE;
+        int dimYUp = (stepVerUp > 0) ? (int) (height / 2.0 / stepVerUp) + 1 : Integer.MAX_VALUE;
+
+        int dim = Math.min(dimX, Math.min(dimYDown, dimYUp));
+        dim = Math.max(1, dim); // ensure at least one cube is drawn
+
+        // define the 3D-to-2D displacement vectors for one step along each axis
+        double dx_i = stepFactor * longer;
+        double dy_i = -stepFactor * shorter * ratio;
+
+        double dx_j = -stepFactor * longer;
+        double dy_j = -stepFactor * shorter * ratio;
+
+        double dx_k = 0;
+        double dy_k = stepFactor * size * ratio;
+
+        // the user-selected center is the center of the pattern
+        double centerX = transform.getCx(width);
+        double centerY = transform.getCy(height);
+
+        // loop from back to front to ensure correct drawing order (painter's algorithm)
+        for (int k = dim - 1; k >= 0; k--) {
+            for (int j = dim - 1; j >= 0; j--) {
+                for (int i = dim - 1; i >= 0; i--) {
+                    // only draw cubes on the three visible outer faces of the super-cube
+                    if (i == 0 || j == 0 || k == 0) {
+                        // calculate the screen position (baseX, baseY) for the cube's front vertex
+                        double baseX = centerX + i * dx_i + j * dx_j + k * dx_k;
+                        double baseY = centerY + i * dy_i + j * dy_j + k * dy_k;
+
+                        // pass CubeType.BASIC because we want the simple cube shape
+                        addCubeShapes(shapes, baseX, baseY, longer, shorter, size, ratio,
+                            CubeType.BASIC, topColor, rightColor, leftColor);
+                    }
+                }
             }
         }
 
