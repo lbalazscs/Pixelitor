@@ -19,6 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.WeaveFilter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -51,6 +52,8 @@ public class JHWeave extends ParametrizedFilter {
     });
     private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 0, 16, 100, true);
     private final GroupedRangeParam gap = new GroupedRangeParam("Gap", 0, 6, 100);
+    private final AngleParam angle = new AngleParam("Rotate", 0);
+
     private final BooleanParam roundThreads = new BooleanParam("Round Threads");
     private final BooleanParam shadeCrossings = new BooleanParam("Shade Crossings", true);
     private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", true, IGNORE_RANDOMIZE);
@@ -64,6 +67,7 @@ public class JHWeave extends ParametrizedFilter {
             pattern,
             size.withAdjustedRange(0.4),
             gap.withAdjustedRange(0.4),
+            angle,
             roundThreads,
             shadeCrossings,
             useImageColors
@@ -81,6 +85,7 @@ public class JHWeave extends ParametrizedFilter {
         filter.setYWidth(size.getValue(1));
         filter.setXGap(gap.getValue(0));
         filter.setYGap(gap.getValue(1));
+        filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setUseImageColors(useImageColors.isChecked());
         filter.setRoundThreads(roundThreads.isChecked());
         filter.setShadeCrossings(shadeCrossings.isChecked());

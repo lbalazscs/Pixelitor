@@ -419,6 +419,23 @@ public class ImageMath {
         return (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
     }
 
+    // mix colors with double precision
+    public static int mixColors(double t, int rgb1, int rgb2) {
+        int a1 = (rgb1 >> 24) & 0xff;
+        int r1 = (rgb1 >> 16) & 0xff;
+        int g1 = (rgb1 >> 8) & 0xff;
+        int b1 = rgb1 & 0xff;
+        int a2 = (rgb2 >> 24) & 0xff;
+        int r2 = (rgb2 >> 16) & 0xff;
+        int g2 = (rgb2 >> 8) & 0xff;
+        int b2 = rgb2 & 0xff;
+        a1 = lerp(t, a1, a2);
+        r1 = lerp(t, r1, r2);
+        g1 = lerp(t, g1, g2);
+        b1 = lerp(t, b1, b2);
+        return (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
+    }
+
     /**
      * Bilinear interpolation of ARGB values.
      *
