@@ -161,6 +161,9 @@ public class ImagePositionParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 
+    /**
+     * Encapsulates the state of a {@link ImagePositionParam} as a memento object.
+     */
     public record ImagePositionParamState(double relativeX,
                                           double relativeY) implements ParamState<ImagePositionParamState> {
         @Serial

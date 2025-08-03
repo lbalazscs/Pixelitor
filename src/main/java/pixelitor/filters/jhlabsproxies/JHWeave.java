@@ -19,20 +19,13 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.WeaveFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.List;
 
-import static com.jhlabs.image.WeaveFilter.BASKET_PATTERN;
-import static com.jhlabs.image.WeaveFilter.CROWFOOT_PATTERN;
-import static com.jhlabs.image.WeaveFilter.PLAIN_PATTERN;
-import static com.jhlabs.image.WeaveFilter.TWILL_PATTERN;
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
@@ -44,12 +37,36 @@ public class JHWeave extends ParametrizedFilter {
 
     public static final String NAME = Texts.i18n("weave");
 
-    private final IntChoiceParam pattern = new IntChoiceParam("Pattern", new Item[]{
-        new Item("Plain", PLAIN_PATTERN),
-        new Item("Basket", BASKET_PATTERN),
-        new Item("Twill", TWILL_PATTERN),
-        new Item("Crowfoot", CROWFOOT_PATTERN),
-    });
+    public static final List<GridParam.Preset> WEAVE_PRESETS = List.of(
+        new GridParam.Preset("Plain", new int[][]{
+            {0, 1, 0, 1},
+            {1, 0, 1, 0},
+            {0, 1, 0, 1},
+            {1, 0, 1, 0}
+        }),
+        new GridParam.Preset("Basket", new int[][]{
+            {1, 1, 0, 0},
+            {1, 1, 0, 0},
+            {0, 0, 1, 1},
+            {0, 0, 1, 1}
+        }),
+        new GridParam.Preset("Twill", new int[][]{
+            {0, 0, 0, 1},
+            {0, 0, 1, 0},
+            {0, 1, 0, 0},
+            {1, 0, 0, 0}
+        }),
+        new GridParam.Preset("Crowfoot", new int[][]{
+            {0, 1, 1, 1},
+            {1, 0, 1, 1},
+            {1, 1, 0, 1},
+            {1, 1, 1, 0}
+        })
+    );
+
+    private final GridParam pattern = new GridParam("Pattern",
+        WEAVE_PRESETS, GridCellPainter.createForWeave());
+
     private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 0, 16, 100, true);
     private final GroupedRangeParam gap = new GroupedRangeParam("Gap", 0, 6, 100);
     private final AngleParam angle = new AngleParam("Rotate", 0);
@@ -80,7 +97,7 @@ public class JHWeave extends ParametrizedFilter {
             filter = new WeaveFilter(NAME);
         }
 
-        filter.setPattern(pattern.getValue());
+        filter.setPattern(pattern.getData());
         filter.setXWidth(size.getValue(0));
         filter.setYWidth(size.getValue(1));
         filter.setXGap(gap.getValue(0));

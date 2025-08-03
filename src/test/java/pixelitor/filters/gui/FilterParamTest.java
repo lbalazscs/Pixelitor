@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.TestHelper;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.jhlabsproxies.JHWeave;
 
 import javax.swing.*;
 import java.util.Arrays;
@@ -102,7 +103,8 @@ public class FilterParamTest {
                 new AngleParam("Child 2", 0),
                 new BooleanParam("Child 3", true))
             },
-            {new LogZoomParam("Param Name", 200, 200, 1000)}
+            {new LogZoomParam("Param Name", 200, 200, 1000)},
+            {new GridParam("Param Name", JHWeave.WEAVE_PRESETS, GridCellPainter.createForWeave())}
         });
     }
 

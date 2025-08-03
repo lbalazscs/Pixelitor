@@ -109,6 +109,12 @@ public class GridBagHelper {
         currentRow++;
     }
 
+    public void addLabelAndTwoControlsNoStretch(String labelText, Component c1, Component c2) {
+        addLabel(labelText, 0, currentRow);
+        addTwoControlsNoStretch(c1, c2);
+        currentRow++;
+    }
+
     public void addTwoLabels(String text1, String text2) {
         addLabelAndControl(text1, new JLabel(text2));
     }
@@ -161,12 +167,6 @@ public class GridBagHelper {
         currentRow++;
     }
 
-    public void addTwoControlsNoStretch(Component c1, Component c2) {
-        COMPONENT_CONSTRAINTS.fill = NONE;
-        addTwoControls(c1, c2, currentRow);
-        currentRow++;
-    }
-
     public void addTwoControls(Component c1, Component c2, int row) {
         LABEL_CONSTRAINTS.gridx = 0;
         LABEL_CONSTRAINTS.gridy = row;
@@ -186,6 +186,18 @@ public class GridBagHelper {
         COMPONENT_CONSTRAINTS.gridy = LABEL_CONSTRAINTS.gridy;
         COMPONENT_CONSTRAINTS.fill = NONE;
         container.add(c, COMPONENT_CONSTRAINTS);
+
+        COMPONENT_CONSTRAINTS.fill = HORIZONTAL; // reset
+    }
+
+    public void addTwoControlsNoStretch(Component c1, Component c2) {
+        COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 1;
+        COMPONENT_CONSTRAINTS.gridy = LABEL_CONSTRAINTS.gridy;
+        COMPONENT_CONSTRAINTS.fill = NONE;
+        container.add(c1, COMPONENT_CONSTRAINTS);
+
+        COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 2;
+        container.add(c2, COMPONENT_CONSTRAINTS);
 
         COMPONENT_CONSTRAINTS.fill = HORIZONTAL; // reset
     }

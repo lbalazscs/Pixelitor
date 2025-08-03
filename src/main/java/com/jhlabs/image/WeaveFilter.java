@@ -29,53 +29,28 @@ public class WeaveFilter extends PointFilter {
     private float yWidth = 16;
     private float xGap = 6;
     private float yGap = 6;
-    private int rows = 4;
-    private int cols = 4;
-    private static final int X_THREAD_COLOR = 0xffff8080;
-    private static final int Y_THREAD_COLOR = 0xff8080ff;
+    private int rows;
+    private int cols;
+    public static final int H_THREAD_COLOR = 0xff8080ff;
+    public static final int V_THREAD_COLOR = 0xffff8080;
     private boolean useImageColors = true;
     private boolean roundThreads = false;
     private boolean shadeCrossings = true;
     private boolean antiAliasing = true;
 
-    public static final int PLAIN_PATTERN = 0;
-    private final int[][] PLAIN = {
+    private int[][] matrix;
+
+    // A default pattern for initialization before the GUI model provides one.
+    private static final int[][] DEFAULT_PLAIN_PATTERN = {
         {0, 1, 0, 1},
         {1, 0, 1, 0},
         {0, 1, 0, 1},
         {1, 0, 1, 0},
     };
-
-    public static final int BASKET_PATTERN = 1;
-    public static final int[][] BASKET = {
-        {1, 1, 0, 0},
-        {1, 1, 0, 0},
-        {0, 0, 1, 1},
-        {0, 0, 1, 1},
-    };
-
-    public static final int TWILL_PATTERN = 2;
-    public static final int[][] TWILL = {
-        {0, 0, 0, 1},
-        {0, 0, 1, 0},
-        {0, 1, 0, 0},
-        {1, 0, 0, 0},
-    };
-
-    public static final int CROWFOOT_PATTERN = 3;
-    public static final int[][] CROWFOOT = {
-        {0, 1, 1, 1},
-        {1, 0, 1, 1},
-        {1, 1, 0, 1},
-        {1, 1, 1, 0},
-    };
-
-    private final int[][][] ALL_PATTERNS = {PLAIN, BASKET, TWILL, CROWFOOT};
-
-    private int[][] matrix = PLAIN;
 
     public WeaveFilter(String filterName) {
         super(filterName);
+        setPattern(DEFAULT_PLAIN_PATTERN);
     }
 
     @Override
@@ -108,7 +83,7 @@ public class WeaveFilter extends PointFilter {
         int matrixRow = ImageMath.mod(gridY, rows);
         int matrixCol = ImageMath.mod(gridX, cols);
         int patternValue = matrix[matrixRow][matrixCol];
-        boolean isXThreadOnTop = (patternValue == 1);
+        boolean isVerThreadOnTop = (patternValue == 0);
 
         // calculate roundness factor for threads
         double dX = 0, dY = 0;
@@ -130,8 +105,8 @@ public class WeaveFilter extends PointFilter {
         if (useImageColors) {
             baseColorX = baseColorY = rgb;
         } else {
-            baseColorX = X_THREAD_COLOR;
-            baseColorY = Y_THREAD_COLOR;
+            baseColorX = V_THREAD_COLOR;
+            baseColorY = H_THREAD_COLOR;
         }
 
         // determine if we are at a horizontal or vertical crossing
@@ -143,12 +118,12 @@ public class WeaveFilter extends PointFilter {
         if (shadeCrossings) {
             if (isVerticalCrossing) {
                 double shade = cY;
-                if (!isXThreadOnTop) { // x thread is underneath
+                if (!isVerThreadOnTop) {
                     shade = 1.0 - shade;
                 }
                 shade *= 0.5;
                 finalColorX = ImageMath.mixColors(shade, finalColorX, 0xff000000);
-            } else if (!isXThreadOnTop) { // not a crossing, but x thread is underneath
+            } else if (!isVerThreadOnTop) {
                 finalColorX = ImageMath.mixColors(0.5, finalColorX, 0xff000000);
             }
         }
@@ -161,12 +136,12 @@ public class WeaveFilter extends PointFilter {
         if (shadeCrossings) {
             if (isHorizontalCrossing) {
                 double shade = cX;
-                if (isXThreadOnTop) { // y thread is underneath
+                if (isVerThreadOnTop) {
                     shade = 1.0 - shade;
                 }
                 shade *= 0.5;
                 finalColorY = ImageMath.mixColors(shade, finalColorY, 0xff000000);
-            } else if (isXThreadOnTop) { // not a crossing, but y thread is underneath
+            } else if (isVerThreadOnTop) {
                 finalColorY = ImageMath.mixColors(0.5, finalColorY, 0xff000000);
             }
         }
@@ -187,7 +162,7 @@ public class WeaveFilter extends PointFilter {
         // layer the threads according to the weave pattern
         int topColor, bottomColor;
         float topCoverage, bottomCoverage;
-        if (isXThreadOnTop) {
+        if (isVerThreadOnTop) {
             topColor = finalColorX;
             bottomColor = finalColorY;
             topCoverage = fx;
@@ -253,16 +228,22 @@ public class WeaveFilter extends PointFilter {
     }
 
     /**
-     * Sets the weave pattern from a set of predefined patterns.
+     * Sets the weave pattern from a 2D integer matrix.
+     * The matrix defines the over-under sequence of threads.
+     * A '1' indicates the horizontal (X) thread is on top, and
+     * a '0' indicates the vertical (Y) thread is on top.
      */
-    public void setPattern(int pattern) {
-        setCrossings(ALL_PATTERNS[pattern]);
-    }
-
-    private void setCrossings(int[][] matrix) {
+    public void setPattern(int[][] matrix) {
         this.matrix = matrix;
-        cols = matrix.length;
-        rows = matrix.length;
+        if (matrix != null && matrix.length > 0 && matrix[0].length > 0) {
+            this.rows = matrix.length;
+            this.cols = matrix[0].length;
+        } else {
+            // fallback to a safe default to prevent runtime errors
+            this.matrix = new int[][]{{0}};
+            this.rows = 1;
+            this.cols = 1;
+        }
     }
 
     /**
