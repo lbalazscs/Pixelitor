@@ -77,6 +77,9 @@ public class NodeTool extends PathTool {
         super.toolDeactivated(view);
 
         lastActive = null;
+        if (view == null) {
+            return;
+        }
         view.repaint(); // hide the path
     }
 

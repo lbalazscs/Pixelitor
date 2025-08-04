@@ -132,6 +132,9 @@ public class PenTool extends PathTool {
     @Override
     protected void toolDeactivated(View view) {
         super.toolDeactivated(view);
+        if (view == null) {
+            return;
+        }
 
         Path path = view.getComp().getActivePath();
         if (path != null) {

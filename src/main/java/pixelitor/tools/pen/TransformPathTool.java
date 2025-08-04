@@ -83,6 +83,9 @@ public class TransformPathTool extends PathTool {
     protected void toolDeactivated(View view) {
         super.toolDeactivated(view);
 
+        if (view == null) {
+            return;
+        }
         view.repaint(); // hide the path
     }
 

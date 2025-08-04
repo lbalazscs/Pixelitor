@@ -44,6 +44,7 @@ import pixelitor.utils.ViewActivationListener;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.util.List;
 
 /**
  * Tool-related static utility methods
@@ -233,6 +234,17 @@ public class Tools {
 
     public static void maskEditingChanged(boolean maskEditing) {
         activeTool.maskEditingChanged(maskEditing);
+    }
+
+    /**
+     * Returns the tool groups where a single hotkey is used to cycle through the tools.
+     */
+    public static List<Tool[]> getSharedHotkeyGroups() {
+        return List.of(
+            new Tool[]{RECTANGLE_SELECTION, ELLIPSE_SELECTION}, // M
+            new Tool[]{LASSO_SELECTION, POLY_SELECTION}, // L
+            new Tool[]{PEN, NODE, TRANSFORM_PATH} // P
+        );
     }
 
     public static class EventDispatcher {

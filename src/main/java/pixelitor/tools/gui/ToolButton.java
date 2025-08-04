@@ -59,7 +59,7 @@ public class ToolButton extends JToggleButton {
         setToolTipText("<html>" + tool.getName()
             + " (<b>" + tool.getHotkey() + "</b>)");
 
-        // Adds a listener to activate the tool when the button is selected.
+        // Activates the tool when the button is selected.
         // An item listener is better than an action listener because it
         // is also triggered by keyboard focus traversal selections.
         addItemListener(e -> {
@@ -75,6 +75,7 @@ public class ToolButton extends JToggleButton {
 
     @Override
     public void updateUI() {
+        // this method can be called by the super constructor before 'tool' is initialized
         if (tool != null) { // changing the theme
             setupIcons(tool);
         }
@@ -91,6 +92,10 @@ public class ToolButton extends JToggleButton {
         setSelectedIcon(selectedIcon);
     }
 
+    /**
+     * Creates a right-click popup menu that can be used to save, load,
+     * and manage configuration presets for the tool represented by this button.
+     */
     private void initPresetsPopup(Tool tool) {
         List<UserPreset> startupPresets = UserPreset.detectPresetNames(tool.getPresetDirName());
         numPresets = startupPresets.size();
@@ -106,6 +111,7 @@ public class ToolButton extends JToggleButton {
         presetsMenu.add(tool.createSavePresetAction(this,
             this::addPresetMenuItem, this::removePresetMenuItem));
 
+        // if any existing presets were detected, add them to the menu
         if (!startupPresets.isEmpty()) {
             if (GUIUtils.CAN_USE_FILE_MANAGER) {
                 presetsMenu.add(tool.createManagePresetsAction());
@@ -119,17 +125,28 @@ public class ToolButton extends JToggleButton {
         setComponentPopupMenu(presetsMenu);
     }
 
+    /**
+     * Callback to dynamically add a new menu item to the presets
+     * menu after a user has successfully saved a new preset.
+     */
     private void addPresetMenuItem(UserPreset preset) {
         if (numPresets == 0) {
+            // if this is the very first preset being added, then this
+            // was not added during initialization, so add it now
             if (GUIUtils.CAN_USE_FILE_MANAGER) {
                 presetsMenu.add(tool.createManagePresetsAction());
             }
             presetsMenu.addSeparator();
         }
+
         presetsMenu.add(preset.createAction(tool));
         numPresets++;
     }
 
+    /**
+     * Callback to dynamically remove the old menu item
+     * when the user overwrites an existing preset.
+     */
     private void removePresetMenuItem(UserPreset preset) {
         Component[] menuComponents = presetsMenu.getComponents();
         for (Component item : menuComponents) {

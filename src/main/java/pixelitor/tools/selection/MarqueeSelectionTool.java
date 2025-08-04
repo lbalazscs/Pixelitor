@@ -97,11 +97,6 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    public boolean hasSharedHotkey() {
-        return true;
-    }
-
-    @Override
     public Consumer<Graphics2D> createIconPainter() {
         return selectionType == SelectionType.RECTANGLE
             ? MarqueeSelectionTool::paintRectangleSelectionIconShape

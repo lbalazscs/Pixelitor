@@ -76,11 +76,6 @@ public class LassoSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    public boolean hasSharedHotkey() {
-        return true;
-    }
-
-    @Override
     public Consumer<Graphics2D> createIconPainter() {
         return g -> {
             // based on lasso_tool.svg

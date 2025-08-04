@@ -106,11 +106,6 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    public boolean hasSharedHotkey() {
-        return true;
-    }
-
-    @Override
     public Consumer<Graphics2D> createIconPainter() {
         return g -> {
             // based on poly_tool.svg

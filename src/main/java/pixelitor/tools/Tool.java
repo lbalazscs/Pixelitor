@@ -348,15 +348,6 @@ public abstract class Tool implements PresetOwner, Debuggable {
         return hotkey;
     }
 
-    /**
-     * Returns whether this tool shares its hotkey with other tools.
-     * A tool shares its key when it's part of a tool group where
-     * multiple tools can be activated by the same keyboard shortcut.
-     */
-    public boolean hasSharedHotkey() {
-        return false;
-    }
-
     public boolean hasPixelSnapping() {
         return pixelSnapping;
     }

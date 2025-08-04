@@ -314,8 +314,8 @@ public class UserPreset implements Preset {
     }
 
     /**
-     * Detects all presets in the given directory by listing files.
-     * The presets' contents are not loaded into memory.
+     * Detects all presets in the given directory by listing files
+     * ending in ".txt". The presets' contents are not loaded into memory.
      */
     public static List<UserPreset> detectPresetNames(String presetDirName) {
         File presetsDir = getSaveDir(presetDirName);

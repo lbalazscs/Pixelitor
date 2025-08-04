@@ -115,7 +115,9 @@ public interface PresetOwner {
             savePreset(parent, menuAdder, menuRemover));
     }
 
-    private void savePreset(Component parent, Consumer<UserPreset> menuAdder, Consumer<UserPreset> menuRemover) {
+    private void savePreset(Component parent,
+                            Consumer<UserPreset> menuAdder,
+                            Consumer<UserPreset> menuRemover) {
         String presetName = Dialogs.showInputDialog(
             parent, "Preset Name", "Preset Name:");
         if (presetName == null || presetName.isBlank()) {
@@ -130,11 +132,12 @@ public interface PresetOwner {
             if (!overwrite) {
                 return;
             }
-            // remove the overwritten preset from the menus
+            // if the user overwrites an existing preset,
+            // remove the old menu item before adding the new one
             menuRemover.accept(preset);
         }
         preset.save();
-        menuAdder.accept(preset);
+        menuAdder.accept(preset); // add the new preset to the menu
     }
 
     private static boolean confirmOverwrite(Component parent, String presetName) {

@@ -21,6 +21,8 @@ import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.StatusBar;
+import pixelitor.gui.WorkSpace;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.tools.Tool;
@@ -30,6 +32,10 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The panel with the tool buttons and the color selector
@@ -38,41 +44,69 @@ public class ToolsPanel extends JPanel {
     public ToolsPanel(PixelitorWindow pw, Dimension screenSize) {
         Dimension buttonSize = calcToolButtonSize(screenSize, pw);
 
-        // We need to give a hint to the layout manager, but at
-        // this point neither the panel nor the window size is known.
-        int heightHint = Math.max(screenSize.height - 168, 0);
+        JComponent colorSelector = createColorSelector(pw);
+        int heightHint = calcHeightHint(pw, colorSelector, buttonSize);
 
         JPanel buttonsPanel = new JPanel(new ToolButtonsLayout(buttonSize.width, buttonSize.height, 0, heightHint));
         addToolButtons(buttonsPanel);
 
         setLayout(new BorderLayout());
         add(buttonsPanel, BorderLayout.CENTER);
-        addColorSelector(pw);
+        add(colorSelector, BorderLayout.SOUTH);
 
         setupTShortCut();
     }
 
-    private static void addToolButtons(JPanel toolsPanel) {
+    private static int calcHeightHint(PixelitorWindow pw, JComponent colorSelector, Dimension buttonSize) {
+        // get the preferred heights of all other components that take up vertical space.
+        int menuBarHeight = pw.getJMenuBar().getPreferredSize().height;
+        WorkSpace workSpace = pw.getWorkSpace();
+        int toolSettingsHeight = workSpace.areToolsVisible() ? ToolSettingsPanelContainer.get().getPreferredSize().height : 0;
+        int statusBarHeight = workSpace.isStatusBarVisible() ? StatusBar.get().getPreferredSize().height : 0;
+        int colorSelectorHeight = colorSelector.getPreferredSize().height;
+
+        // the window's insets include the title bar
+        int windowInsetsHeight = pw.getInsets().top + pw.getInsets().bottom;
+
+        // sum of all vertical space NOT available to the buttons panel
+        int totalOtherHeight = menuBarHeight + toolSettingsHeight + statusBarHeight + colorSelectorHeight + windowInsetsHeight;
+
+        // the total window height minus all other components
+        int heightHint = pw.getHeight() - totalOtherHeight;
+
+        // ensure the hint is a positive value
+        heightHint = Math.max(heightHint, buttonSize.height);
+        return heightHint;
+    }
+
+    private static void addToolButtons(JPanel buttonContainer) {
         ButtonGroup group = new ButtonGroup();
-        Tool[] tools = Tools.getAll();
-        for (Tool tool : tools) {
+
+        List<Tool[]> sharedHotkeyGroups = Tools.getSharedHotkeyGroups();
+        for (Tool[] toolGroup : sharedHotkeyGroups) {
+            setupSharedHotkey(toolGroup);
+        }
+
+        Set<Tool> toolsWithSharedHotkeys = new HashSet<>();
+        for (Tool[] toolGroup : sharedHotkeyGroups) {
+            Collections.addAll(toolsWithSharedHotkeys, toolGroup);
+        }
+
+        for (Tool tool : Tools.getAll()) {
             ToolButton toolButton = new ToolButton(tool);
-            toolsPanel.add(toolButton);
+            buttonContainer.add(toolButton);
             group.add(toolButton);
-            if (!tool.hasSharedHotkey()) {
+
+            if (!toolsWithSharedHotkeys.contains(tool)) {
                 setupHotkey(tool);
             }
         }
-        // manually register the hotkeys of the sharing tools
-        setupSharedHotkey(Tools.RECTANGLE_SELECTION, Tools.ELLIPSE_SELECTION);
-        setupSharedHotkey(Tools.LASSO_SELECTION, Tools.POLY_SELECTION);
-        setupSharedHotkey(Tools.PEN, Tools.NODE, Tools.TRANSFORM_PATH);
     }
 
-    private void addColorSelector(PixelitorWindow pw) {
+    private static JComponent createColorSelector(PixelitorWindow pw) {
         FgBgColorSelector colorSelector = new FgBgColorSelector(pw);
         FgBgColors.setUI(colorSelector);
-        add(colorSelector, BorderLayout.SOUTH);
+        return colorSelector;
     }
 
     private static void setupTShortCut() {
@@ -103,17 +137,17 @@ public class ToolsPanel extends JPanel {
     }
 
     private static void setupHotkey(Tool tool) {
-        Action activateAction = new TaskAction(() -> {
+        Action activateToolAction = new TaskAction(() -> {
             if (Tools.activeTool != tool) {
                 tool.activate();
             }
         });
 
-        GlobalEvents.registerHotkey(tool.getHotkey(), activateAction);
+        GlobalEvents.registerHotkey(tool.getHotkey(), activateToolAction);
     }
 
     private static void setupSharedHotkey(Tool... sharingTools) {
-        Action multiToolAction = new AbstractAction() {
+        Action cycleToolsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int activeIndex = -1;
@@ -130,7 +164,8 @@ public class ToolsPanel extends JPanel {
                 sharingTools[nextIndex].activate();
             }
         };
+        // all tools in a group are expected to have the same hotkey
         char key = sharingTools[0].getHotkey();
-        GlobalEvents.registerHotkey(key, multiToolAction);
+        GlobalEvents.registerHotkey(key, cycleToolsAction);
     }
 }

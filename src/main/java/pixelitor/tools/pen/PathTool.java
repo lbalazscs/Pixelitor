@@ -58,11 +58,6 @@ public abstract class PathTool extends Tool {
             "Delete the path");
     }
 
-    @Override
-    public boolean hasSharedHotkey() {
-        return true;
-    }
-
     /**
      * Removes a path from the composition, without adding a history edit.
      */
