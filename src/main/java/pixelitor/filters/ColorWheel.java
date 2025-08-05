@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+
 import net.jafama.FastMath;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.ThreadPool;
@@ -24,6 +25,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ColorSpaces;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -33,7 +35,7 @@ import java.io.Serial;
 import java.util.concurrent.Future;
 
 /**
- * Renders a color wheel
+ * Renders a color wheel.
  */
 public class ColorWheel extends ParametrizedFilter {
     public static final String NAME = "Color Wheel";
@@ -44,22 +46,39 @@ public class ColorWheel extends ParametrizedFilter {
     private static final double SPIRAL_EFFECT_SCALE = 0.0005;
 
     public enum ColorSpaceType {
-        HSB {
+        Oklch {
             @Override
-            int toRGB(float hue, float sat, float bri) {
-                return Color.HSBtoRGB(hue, sat, bri);
+            int toRGB(double angle, double sat, double bri) {
+                float L = (float) bri;
+                // map saturation 0-1 to chroma 0-0.4, a reasonable range for C
+                float C = (float) (sat * 0.4);
+                float h_deg = (float) Math.toDegrees(angle);
+                if (h_deg < 0) {
+                    h_deg += 360.0f;
+                }
+
+                float[] oklch = {L, C, h_deg};
+                return ColorSpaces.oklchToSrgbPrecise(oklch);
             }
-        },
-        HSL {
+        }, HSB {
             @Override
-            int toRGB(float hue, float sat, float bri) {
+            int toRGB(double angle, double sat, double bri) {
+                // HSBtoRGB handles hue wrapping automatically
+                float hue = (float) (angle / (2 * Math.PI));
+                return Color.HSBtoRGB(hue, (float) sat, (float) bri);
+            }
+        }, HSL {
+            @Override
+            int toRGB(double angle, double sat, double bri) {
+                float hue = (float) (angle / (2 * Math.PI));
                 int[] buffer = new int[3];
-                ColorUtilities.HSLtoRGB((hue - (float) Math.floor(hue)), sat, bri, buffer);
+                // HSL hue is also 0-1
+                ColorUtilities.HSLtoRGB((hue - (float) Math.floor(hue)), (float) sat, (float) bri, buffer);
                 return 0xFF_00_00_00 | (buffer[0] << 16) | (buffer[1] << 8) | buffer[2];
             }
         };
 
-        abstract int toRGB(float hue, float sat, float bri);
+        abstract int toRGB(double angle, double sat, double bri);
     }
 
     private final EnumParam<ColorSpaceType> type = new EnumParam<>("Color Space", ColorSpaceType.class);
@@ -124,9 +143,9 @@ public class ColorWheel extends ParametrizedFilter {
                 angle += spiralAngleOffset;
             }
 
-            double hue = angle / (2 * Math.PI);
-
-            destPixels[x + y * width] = model.toRGB((float) hue, (float) saturation, (float) brightness);
+            // Pass the angle directly, not the normalized hue.
+            // The ColorSpaceType enum is responsible for interpreting the angle.
+            destPixels[x + y * width] = model.toRGB(angle, saturation, brightness);
         }
     }
 
