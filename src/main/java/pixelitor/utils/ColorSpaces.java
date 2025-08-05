@@ -153,7 +153,7 @@ public class ColorSpaces {
         return oklabToSrgbPrecise(oklab);
     }
 
-    private static float[] linearSrgbToOklab(double r, double g, double b) {
+    public static float[] linearSrgbToOklab(double r, double g, double b) {
         double l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
         double m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
         double s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
@@ -169,7 +169,7 @@ public class ColorSpaces {
         };
     }
 
-    private static double[] oklabToLinearSrgb(float[] c) {
+    public static double[] oklabToLinearSrgb(float[] c) {
         double l_ = (double) c[0] + 0.3963377774 * c[1] + 0.2158037573 * c[2];
         double m_ = (double) c[0] - 0.1055613458 * c[1] - 0.0638541728 * c[2];
         double s_ = (double) c[0] - 0.0894841775 * c[1] - 1.2914855480 * c[2];

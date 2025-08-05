@@ -55,8 +55,9 @@ public class JHFourColorGradient extends ParametrizedFilter {
     });
 
     private final IntChoiceParam space = new IntChoiceParam("Color Space", new Item[]{
-        new Item("Linear RGB", FourColorFilter.SPACE_LINEAR),
-        new Item("sRGB", FourColorFilter.SPACE_SRGB),
+        new Item("Oklab", FourColorFilter.SPACE_OKLAB),
+        new Item("Linear RGB", FourColorFilter.SPACE_LINEAR_RGB),
+        new Item("sRGB", FourColorFilter.SPACE_SRGB)
     });
 
     private FourColorFilter filter;
@@ -104,7 +105,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
         filter.setColorSW(southWestParam.getColor().getRGB());
         filter.setColorSE(southEastParam.getColor().getRGB());
         filter.setInterpolation(interpolation.getValue());
-        filter.setLinearSpace(space.getValue() == FourColorFilter.SPACE_LINEAR);
+        filter.setColorSpace(space.getValue());
 
         return filter.filter(src, dest);
     }

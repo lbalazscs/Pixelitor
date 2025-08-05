@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ColorSpaces;
+
 /**
  * A filter which draws a gradient interpolated between four colors defined at the corners of the image.
  */
@@ -24,20 +26,28 @@ public class FourColorFilter extends PointFilter {
     public static final int INTERPOLATION_CUBIC = 1;
     public static final int INTERPOLATION_QUINTIC = 2;
     public static final int INTERPOLATION_SEPTIC = 3;
-    private int interpolation = INTERPOLATION_LINEAR;
 
-    public static final int SPACE_SRGB = 0;
-    public static final int SPACE_LINEAR = 1;
-    private boolean linearSpace = true;
+    public static final int SPACE_OKLAB = 0;
+    public static final int SPACE_LINEAR_RGB = 1;
+    public static final int SPACE_SRGB = 2;
+
+    private int interpolation = INTERPOLATION_LINEAR;
+    private int colorSpace = SPACE_LINEAR_RGB;
 
     private int width;
     private int height;
 
-    // A, R, G, B components in the corners
+    // a, R, G, B components in the corners
     private int aNW, rNW, gNW, bNW;
     private int aNE, rNE, gNE, bNE;
     private int aSW, rSW, gSW, bSW;
     private int aSE, rSE, gSE, bSE;
+
+    // corner colors in the working color space
+    private final float[] cNW = new float[3];
+    private final float[] cNE = new float[3];
+    private final float[] cSW = new float[3];
+    private final float[] cSE = new float[3];
 
     public FourColorFilter(String filterName) {
         super(filterName);
@@ -48,6 +58,9 @@ public class FourColorFilter extends PointFilter {
         setColorSE(0xff00ffff);
     }
 
+    /**
+     * Sets the color at the North-West corner.
+     */
     public void setColorNW(int color) {
         aNW = (color >> 24) & 0xff;
         rNW = (color >> 16) & 0xff;
@@ -55,6 +68,9 @@ public class FourColorFilter extends PointFilter {
         bNW = color & 0xff;
     }
 
+    /**
+     * Sets the color at the North-East corner.
+     */
     public void setColorNE(int color) {
         aNE = (color >> 24) & 0xff;
         rNE = (color >> 16) & 0xff;
@@ -62,6 +78,9 @@ public class FourColorFilter extends PointFilter {
         bNE = color & 0xff;
     }
 
+    /**
+     * Sets the color at the South-West corner.
+     */
     public void setColorSW(int color) {
         aSW = (color >> 24) & 0xff;
         rSW = (color >> 16) & 0xff;
@@ -69,6 +88,9 @@ public class FourColorFilter extends PointFilter {
         bSW = color & 0xff;
     }
 
+    /**
+     * Sets the color at the South-East corner.
+     */
     public void setColorSE(int color) {
         aSE = (color >> 24) & 0xff;
         rSE = (color >> 16) & 0xff;
@@ -76,19 +98,68 @@ public class FourColorFilter extends PointFilter {
         bSE = color & 0xff;
     }
 
+    /**
+     * Sets the interpolation type.
+     */
     public void setInterpolation(int interpolation) {
         this.interpolation = interpolation;
     }
 
-    public void setLinearSpace(boolean linearSpace) {
-        this.linearSpace = linearSpace;
+    /**
+     * Sets the color space for interpolation.
+     */
+    public void setColorSpace(int colorSpace) {
+        this.colorSpace = colorSpace;
     }
 
     @Override
     public void setDimensions(int width, int height) {
         this.width = width;
         this.height = height;
+        convertCornerColors();
         super.setDimensions(width, height);
+    }
+
+    private void convertCornerColors() {
+        switch (colorSpace) {
+            case SPACE_SRGB -> {
+                setCorner(cNW, rNW, gNW, bNW);
+                setCorner(cNE, rNE, gNE, bNE);
+                setCorner(cSW, rSW, gSW, bSW);
+                setCorner(cSE, rSE, gSE, bSE);
+            }
+            case SPACE_LINEAR_RGB -> {
+                setCornerLinear(cNW, rNW, gNW, bNW);
+                setCornerLinear(cNE, rNE, gNE, bNE);
+                setCornerLinear(cSW, rSW, gSW, bSW);
+                setCornerLinear(cSE, rSE, gSE, bSE);
+            }
+            case SPACE_OKLAB -> {
+                setCornerOklab(cNW, (aNW << 24) | (rNW << 16) | (gNW << 8) | bNW);
+                setCornerOklab(cNE, (aNE << 24) | (rNE << 16) | (gNE << 8) | bNE);
+                setCornerOklab(cSW, (aSW << 24) | (rSW << 16) | (gSW << 8) | bSW);
+                setCornerOklab(cSE, (aSE << 24) | (rSE << 16) | (gSE << 8) | bSE);
+            }
+        }
+    }
+
+    private static void setCorner(float[] corner, int r, int g, int b) {
+        corner[0] = r;
+        corner[1] = g;
+        corner[2] = b;
+    }
+
+    private static void setCornerLinear(float[] corner, int r, int g, int b) {
+        corner[0] = (float) ColorSpaces.SRGB_TO_LINEAR_LUT[r];
+        corner[1] = (float) ColorSpaces.SRGB_TO_LINEAR_LUT[g];
+        corner[2] = (float) ColorSpaces.SRGB_TO_LINEAR_LUT[b];
+    }
+
+    private static void setCornerOklab(float[] corner, int srgb) {
+        float[] oklab = ColorSpaces.srgbToOklab(srgb);
+        corner[0] = oklab[0];
+        corner[1] = oklab[1];
+        corner[2] = oklab[2];
     }
 
     private float interpolate(float a, float b, float ratio) {
@@ -98,19 +169,6 @@ public class FourColorFilter extends PointFilter {
             case INTERPOLATION_SEPTIC -> septic(a, b, ratio);
             default -> a * (1 - ratio) + b * ratio;
         };
-    }
-
-    private float gammaInterpolate(float a, float b, float ratio) {
-        if (!linearSpace) {
-            return interpolate(a, b, ratio);
-        }
-
-        // approximated gamma calculation, use 2 instead of 2.2
-        float aLinear = a * a / 65025.0f; // 255 * 255 = 65025
-        float bLinear = b * b / 65025.0f;
-        float resultLinear = interpolate(aLinear, bLinear, ratio);
-
-        return (float) (Math.sqrt(resultLinear) * 255.0f);
     }
 
     private static float qubic(float a, float b, float ratio) {
@@ -148,24 +206,43 @@ public class FourColorFilter extends PointFilter {
         float fy = (float) y / height;
         float p, q;
 
-        // interpolate each component horizontally, then vertically
+        // alpha is always interpolated in a linear way
         p = interpolate(aNW, aNE, fx);
         q = interpolate(aSW, aSE, fx);
         int a = (int) (interpolate(p, q, fy) + 0.5f);
 
-        p = gammaInterpolate(rNW, rNE, fx);
-        q = gammaInterpolate(rSW, rSE, fx);
-        int r = (int) (gammaInterpolate(p, q, fy) + 0.5f);
+        // interpolate color components in the chosen space
+        p = interpolate(cNW[0], cNE[0], fx);
+        q = interpolate(cSW[0], cSE[0], fx);
+        float c1 = interpolate(p, q, fy);
 
-        p = gammaInterpolate(gNW, gNE, fx);
-        q = gammaInterpolate(gSW, gSE, fx);
-        int g = (int) (gammaInterpolate(p, q, fy) + 0.5f);
+        p = interpolate(cNW[1], cNE[1], fx);
+        q = interpolate(cSW[1], cSE[1], fx);
+        float c2 = interpolate(p, q, fy);
 
-        p = gammaInterpolate(bNW, bNE, fx);
-        q = gammaInterpolate(bSW, bSE, fx);
-        int b = (int) (gammaInterpolate(p, q, fy) + 0.5f);
+        p = interpolate(cNW[2], cNE[2], fx);
+        q = interpolate(cSW[2], cSE[2], fx);
+        float c3 = interpolate(p, q, fy);
 
-        return (a << 24) | (r << 16) | (g << 8) | b;
+        return switch (colorSpace) {
+            case SPACE_SRGB -> {
+                int r = ImageMath.clamp((int) (c1 + 0.5f), 0, 255);
+                int g = ImageMath.clamp((int) (c2 + 0.5f), 0, 255);
+                int b = ImageMath.clamp((int) (c3 + 0.5f), 0, 255);
+                yield (a << 24) | (r << 16) | (g << 8) | b;
+            }
+            case SPACE_LINEAR_RGB -> {
+                int r = ColorSpaces.linearToSRGBInt(c1);
+                int g = ColorSpaces.linearToSRGBInt(c2);
+                int b = ColorSpaces.linearToSRGBInt(c3);
+                yield (a << 24) | (r << 16) | (g << 8) | b;
+            }
+            case SPACE_OKLAB -> {
+                int srgb = ColorSpaces.oklabToSrgb(new float[]{c1, c2, c3});
+                yield (a << 24) | (srgb & 0x00FFFFFF);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + colorSpace);
+        };
     }
 
     @Override
