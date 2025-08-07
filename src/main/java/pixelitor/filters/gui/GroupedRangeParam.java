@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 /**
  * Two or more {@link RangeParam} objects that are grouped visually,
@@ -83,6 +84,11 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         super(name, ALLOW_RANDOMIZE);
         this.children = children;
 
+        for (RangeParam child : children) {
+            child.setAddResetButton(true);
+            child.setLabelPosition(NONE);
+        }
+
         linkedModel = new JToggleButton.ToggleButtonModel();
 
         linkedByDefault = linked;
@@ -97,6 +103,17 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         paramGUI = gui;
         syncWithGui();
         return gui;
+    }
+
+    public void updateGUIAppearance() {
+        if (paramGUI != null) {
+            for (RangeParam child : children) {
+                child.updateGUIAppearance(true);
+            }
+            GroupedRangeParamGUI gui = (GroupedRangeParamGUI) paramGUI;
+            gui.revalidate();
+            gui.repaint();
+        }
     }
 
     private static RangeParam[] createChildren(String[] names,

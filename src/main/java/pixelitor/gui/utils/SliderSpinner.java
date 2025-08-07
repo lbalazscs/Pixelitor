@@ -50,7 +50,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
  * It optionally includes a {@link ResetButton} for restoring the default value.
  */
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
-    private final JLabel label;
+    private JLabel label;
     private final LabelPosition labelPosition;
     private final JPanel controlPanel;
 
@@ -390,7 +390,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
      * Updates the visual appearance of the component based on its model's current state.
      * This includes the title, colors, and gradients.
      */
-    public void updateAppearance() {
+    public void updateAppearance(boolean revalidate) {
         if (labelPosition == LabelPosition.BORDER) {
             if (model instanceof RangeWithColorsParam rwcParam) {
                 this.startColor = rwcParam.getLeftColor();
@@ -409,8 +409,15 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
         updateResetButton();
 
-        revalidate();
-        repaint();
+        if (revalidate) {
+            revalidate();
+            repaint();
+        }
+    }
+
+    // sets an independently created label reference
+    public void setLabel(JLabel label) {
+        this.label = label;
     }
 
     @Override

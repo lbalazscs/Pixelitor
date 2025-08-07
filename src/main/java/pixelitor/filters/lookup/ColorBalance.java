@@ -56,6 +56,9 @@ public class ColorBalance extends ParametrizedFilter {
     private static final int HIGHLIGHTS = 4;
 
     private static final int LUT_TABLE_SIZE = 256;
+    private static final String CYAN_RED_TEXT = i18n("cyan") + "-" + i18n("red");
+    private static final String MAGENTA_GREEN_TEXT = i18n("magenta") + "-" + i18n("green");
+    private static final String YELLOW_BLUE_TEXT = i18n("yellow") + "-" + i18n("blue");
 
     private final EnumParam<ColorSpace> colorSpace = ColorSpace.asParam();
 
@@ -67,11 +70,11 @@ public class ColorBalance extends ParametrizedFilter {
     });
 
     private final RangeWithColorsParam range1 = new RangeWithColorsParam(CYAN, RED,
-        "p1", -100, 0, 100);
+        CYAN_RED_TEXT, -100, 0, 100);
     private final RangeWithColorsParam range2 = new RangeWithColorsParam(MAGENTA, GREEN,
-        "p2", -100, 0, 100);
+        MAGENTA_GREEN_TEXT, -100, 0, 100);
     private final RangeWithColorsParam range3 = new RangeWithColorsParam(YELLOW, BLUE,
-        "p3", -100, 0, 100);
+        YELLOW_BLUE_TEXT, -100, 0, 100);
 
     public ColorBalance() {
         super(true);
@@ -88,31 +91,30 @@ public class ColorBalance extends ParametrizedFilter {
             range3
         );
 
-        colorSpace.addOnChangeTask(this::updateSliderParams);
-        updateSliderParams(); // initial setup
+        colorSpace.addOnChangeTask(this::updateSliders);
     }
 
-    private void updateSliderParams() {
+    private void updateSliders() {
         switch (colorSpace.getSelected()) {
             case SRGB -> updateSlidersForSRGB();
             case OKLAB -> updateSlidersForOKLAB();
         }
 
-        range1.updateGUIAppearance();
-        range2.updateGUIAppearance();
-        range3.updateGUIAppearance();
+        range1.updateGUIAppearance(true);
+        range2.updateGUIAppearance(true);
+        range3.updateGUIAppearance(true);
     }
 
     private void updateSlidersForSRGB() {
-        range1.setName(i18n("cyan") + "-" + i18n("red"));
+        range1.setName(CYAN_RED_TEXT);
         range1.setLeftColor(CYAN);
         range1.setRightColor(RED);
 
-        range2.setName(i18n("magenta") + "-" + i18n("green"));
+        range2.setName(MAGENTA_GREEN_TEXT);
         range2.setLeftColor(MAGENTA);
         range2.setRightColor(GREEN);
 
-        range3.setName(i18n("yellow") + "-" + i18n("blue"));
+        range3.setName(YELLOW_BLUE_TEXT);
         range3.setLeftColor(YELLOW);
         range3.setRightColor(BLUE);
     }

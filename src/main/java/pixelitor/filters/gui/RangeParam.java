@@ -51,8 +51,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double value;
 
     private boolean adjusting;
-    private final boolean addResetButton;
-    private final SliderSpinner.LabelPosition labelPosition;
+    private boolean addResetButton;
+    private SliderSpinner.LabelPosition labelPosition;
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
@@ -156,9 +156,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             other.getValueAsDouble() / multiplier));
     }
 
-    public void updateGUIAppearance() {
+    public void updateGUIAppearance(boolean revalidate) {
         if (paramGUI != null) {
-            ((SliderSpinner) paramGUI).updateAppearance();
+            ((SliderSpinner) paramGUI).updateAppearance(revalidate);
         }
     }
 
@@ -256,6 +256,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     public boolean isZero() {
         return getValue() == 0;
+    }
+
+    public boolean isNotZero() {
+        return getValue() != 0;
     }
 
     @Override
@@ -422,6 +426,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     public void setDefaultValue(double newDefault) {
         defaultValue = Math.clamp(newDefault, minValue, maxValue);
+    }
+
+    public void setAddResetButton(boolean addResetButton) {
+        this.addResetButton = addResetButton;
+    }
+
+    public void setLabelPosition(SliderSpinner.LabelPosition labelPosition) {
+        this.labelPosition = labelPosition;
     }
 
     @Override

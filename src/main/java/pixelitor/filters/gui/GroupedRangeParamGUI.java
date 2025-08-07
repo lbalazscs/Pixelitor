@@ -25,7 +25,6 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -57,13 +56,15 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
     private void addSliderSpinners() {
         for (int i = 0; i < numChildren; i++) {
             RangeParam param = model.getRangeParam(i);
-            // doesn't call param.createGUI() because we don't want another border
-            sliders[i] = new SliderSpinner(param, NONE, true);
+            sliders[i] = (SliderSpinner) param.createGUI();
             sliders[i].setupTicks();
 
             String name = param.getName();
             sliders[i].setName(name);
-            gbh.addLabelAndControl(name + ":", sliders[i], i);
+
+            JLabel label = new JLabel(name + ":", SwingConstants.RIGHT);
+            sliders[i].setLabel(label);
+            gbh.addTwoControls(label, sliders[i], i);
         }
     }
 

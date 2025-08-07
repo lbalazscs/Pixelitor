@@ -167,7 +167,7 @@ public class GridBagHelper {
         currentRow++;
     }
 
-    private void addTwoControls(Component c1, Component c2, int row) {
+    public void addTwoControls(Component c1, Component c2, int row) {
         LABEL_CONSTRAINTS.gridx = 0;
         LABEL_CONSTRAINTS.gridy = row;
         container.add(c1, LABEL_CONSTRAINTS);
