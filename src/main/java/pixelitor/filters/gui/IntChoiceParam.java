@@ -55,6 +55,10 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
         return selectedValue.value();
     }
 
+    public boolean valueIs(int value) {
+        return selectedValue.valueIs(value);
+    }
+
     /**
      * Sets the default choice by its integer value.
      */

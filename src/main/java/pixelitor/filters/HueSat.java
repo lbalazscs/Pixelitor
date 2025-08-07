@@ -17,8 +17,12 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
+import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ColorSpaces;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -29,7 +33,7 @@ import static pixelitor.gui.GUIText.HUE;
 import static pixelitor.gui.GUIText.SATURATION;
 
 /**
- * Hue-Saturation filter
+ * The Hue-Saturation filter.
  */
 public class HueSat extends ParametrizedFilter {
     public static final String NAME = HUE + "/" + SATURATION;
@@ -49,6 +53,13 @@ public class HueSat extends ParametrizedFilter {
     private static final int MAX_BRI = 100;
     private static final int DEFAULT_BRI = 0;
 
+    private static final int COLOR_SPACE_HSV = 0;
+    private static final int COLOR_SPACE_OKLCH = 1;
+
+    private final IntChoiceParam colorSpace = new IntChoiceParam("Color Space", new Item[]{
+        new Item("HSV (Faster)", COLOR_SPACE_HSV),
+        new Item("Oklch (Better)", COLOR_SPACE_OKLCH),
+    });
     private final RangeParam hue = new RangeParam(HUE, MIN_HUE, DEFAULT_HUE, MAX_HUE);
     private final RangeParam saturation = new RangeParam(SATURATION, MIN_SAT, DEFAULT_SAT, MAX_SAT);
     private final RangeParam brightness = new RangeParam(BRIGHTNESS, MIN_BRI, DEFAULT_BRI, MAX_BRI);
@@ -61,6 +72,7 @@ public class HueSat extends ParametrizedFilter {
         brightness.setPresetKey("Brightness");
 
         initParams(
+            colorSpace,
             hue,
             saturation,
             brightness
@@ -69,29 +81,91 @@ public class HueSat extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int hueP = hue.getValue();
-        int satP = saturation.getValue();
-        int briP = brightness.getValue();
-
-        if (hueP == 0 && satP == 0 && briP == 0) {
+        if (hue.isZero() && saturation.isZero() && brightness.isZero()) {
             return src;
         }
 
+        if (colorSpace.valueIs(COLOR_SPACE_OKLCH)) {
+            float hueShift = hue.getValueAsFloat();
+            // satFactor is a multiplier, e.g., 1.5 for a 50% increase
+            float satFactor = 1.0f + (float) saturation.getPercentage();
+            float briShift = (float) brightness.getPercentage();
+
+            dest = new OklchImpl(hueShift, satFactor, briShift).filter(src, dest);
+            return dest;
+        }
+
+        // HSV color space
         float satShift = (float) saturation.getPercentage();
         float briShift = (float) brightness.getPercentage();
         float hueRot = hue.getValueAsFloat() / 360.0f;
 
-        dest = new Impl(hueRot, satShift, briShift).filter(src, dest);
+        dest = new HsvImpl(hueRot, satShift, briShift).filter(src, dest);
 
         return dest;
     }
 
-    private static class Impl extends PointFilter {
+    /**
+     * An implementation of the filter that works in the Oklch color space.
+     */
+    private static class OklchImpl extends PointFilter {
+        private final float hueShift;
+        private final float satFactor;
+        private final float briShift;
+
+        protected OklchImpl(float hueShift, float satFactor, float briShift) {
+            super(NAME);
+            this.hueShift = hueShift;
+            this.satFactor = satFactor;
+            this.briShift = briShift;
+        }
+
+        @Override
+        public int processPixel(int x, int y, int rgb) {
+            int a = rgb & 0xFF_00_00_00;
+
+            // for the multithreaded performance it's better to
+            // create this array here instead of reusing it as a class field
+            float[] oklch = ColorSpaces.srgbToOklch(rgb);
+
+            // L is in [0, 1], C is >= 0, h is in [0, 360)
+            float l = oklch[0];
+            float c = oklch[1];
+            float h = oklch[2];
+
+            // apply adjustments
+            h += hueShift;
+            // normalize hue to be in the range [0, 360)
+            if (h < 0.0f) {
+                h += 360.0f;
+            }
+            if (h >= 360.0f) {
+                h -= 360.0f;
+            }
+
+            c *= satFactor;
+            // chroma can't be negative
+            c = Math.max(0.0f, c);
+
+            l += briShift;
+            // clamp lightness to [0, 1]
+            l = ImageMath.clamp01(l);
+
+            oklch[0] = l;
+            oklch[1] = c;
+            oklch[2] = h;
+
+            int newRGB = ColorSpaces.oklchToSrgb(oklch);
+            return a | (newRGB & 0x00_FF_FF_FF);
+        }
+    }
+
+    private static class HsvImpl extends PointFilter {
         private final float hueRot;
         private final float satShift;
         private final float briShift;
 
-        protected Impl(float hueRot, float satShift, float briShift) {
+        protected HsvImpl(float hueRot, float satShift, float briShift) {
             super(NAME);
             this.hueRot = hueRot;
             this.satShift = satShift;
@@ -111,30 +185,19 @@ public class HueSat extends ParametrizedFilter {
 
             tmpHSBArray = Color.RGBtoHSB(r, g, b, tmpHSBArray);
 
-            float shiftedHue = tmpHSBArray[0] + hueRot;
-            float shiftedSat = tmpHSBArray[1] + satShift;
-            float shiftedBri = tmpHSBArray[2] + briShift;
+            float newHue = tmpHSBArray[0] + hueRot;
+            float newSat = tmpHSBArray[1] + satShift;
+            float newBri = tmpHSBArray[2] + briShift;
 
-            if (shiftedSat < 0.0f) {
-                shiftedSat = 0.0f;
-            }
-            if (shiftedSat > 1.0f) {
-                shiftedSat = 1.0f;
-            }
+            newSat = ImageMath.clamp01(newSat);
+            newBri = ImageMath.clamp01(newBri);
 
-            if (shiftedBri < 0.0f) {
-                shiftedBri = 0.0f;
-            }
-            if (shiftedBri > 1.0f) {
-                shiftedBri = 1.0f;
-            }
-
-            if (shiftedHue < 0 && shiftedHue > -0.00000003) {
+            if (newHue < 0 && newHue > -0.00000003) {
                 // workaround for a bug in Color.HSBtoRGB, see issue #87
-                shiftedHue = 0;
+                newHue = 0;
             }
 
-            int newRGB = Color.HSBtoRGB(shiftedHue, shiftedSat, shiftedBri);  // alpha is 255 here
+            int newRGB = Color.HSBtoRGB(newHue, newSat, newBri);  // alpha is 255 here
             newRGB &= 0x00_FF_FF_FF;  // set alpha to 0
             return a | newRGB; // add the real alpha
         }
