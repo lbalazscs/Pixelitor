@@ -156,6 +156,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             other.getValueAsDouble() / multiplier));
     }
 
+    public void updateGUIAppearance() {
+        if (paramGUI != null) {
+            ((SliderSpinner) paramGUI).updateAppearance();
+        }
+    }
+
     public int getDecimalPlaces() {
         return decimalPlaces;
     }

@@ -17,21 +17,27 @@
 
 package pixelitor.filters.lookup;
 
+import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PixelUtils;
+import com.jhlabs.image.PointFilter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
+import pixelitor.filters.util.ColorSpace;
+import pixelitor.utils.ColorSpaces;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
+import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.CYAN;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.MAGENTA;
 import static java.awt.Color.RED;
+import static java.awt.Color.WHITE;
 import static java.awt.Color.YELLOW;
 import static pixelitor.utils.Texts.i18n;
 
@@ -51,6 +57,8 @@ public class ColorBalance extends ParametrizedFilter {
 
     private static final int LUT_TABLE_SIZE = 256;
 
+    private final EnumParam<ColorSpace> colorSpace = ColorSpace.asParam();
+
     private final IntChoiceParam affect = new IntChoiceParam("Affect", new Item[]{
         new Item("Everything", EVERYTHING),
         new Item("Shadows", SHADOWS),
@@ -58,44 +66,94 @@ public class ColorBalance extends ParametrizedFilter {
         new Item("Highlights", HIGHLIGHTS),
     });
 
-    private final RangeParam cyanRed = new RangeWithColorsParam(CYAN, RED,
-        i18n("cyan") + "-" + i18n("red"), -100, 0, 100);
-    private final RangeParam magentaGreen = new RangeWithColorsParam(MAGENTA, GREEN,
-        i18n("magenta") + "-" + i18n("green"), -100, 0, 100);
-    private final RangeParam yellowBlue = new RangeWithColorsParam(YELLOW, BLUE,
-        i18n("yellow") + "-" + i18n("blue"), -100, 0, 100);
+    private final RangeWithColorsParam range1 = new RangeWithColorsParam(CYAN, RED,
+        "p1", -100, 0, 100);
+    private final RangeWithColorsParam range2 = new RangeWithColorsParam(MAGENTA, GREEN,
+        "p2", -100, 0, 100);
+    private final RangeWithColorsParam range3 = new RangeWithColorsParam(YELLOW, BLUE,
+        "p3", -100, 0, 100);
 
     public ColorBalance() {
         super(true);
 
-        cyanRed.setPresetKey("Cyan-Red");
-        magentaGreen.setPresetKey("Magenta-Green");
-        yellowBlue.setPresetKey("Yellow-Blue");
+        range1.setPresetKey("Cyan-Red");
+        range2.setPresetKey("Magenta-Green");
+        range3.setPresetKey("Yellow-Blue");
 
         initParams(
+            colorSpace,
             affect,
-            cyanRed,
-            magentaGreen,
-            yellowBlue
+            range1,
+            range2,
+            range3
         );
+
+        colorSpace.addOnChangeTask(this::updateSliderParams);
+        updateSliderParams(); // initial setup
+    }
+
+    private void updateSliderParams() {
+        switch (colorSpace.getSelected()) {
+            case SRGB -> updateSlidersForSRGB();
+            case OKLAB -> updateSlidersForOKLAB();
+        }
+
+        range1.updateGUIAppearance();
+        range2.updateGUIAppearance();
+        range3.updateGUIAppearance();
+    }
+
+    private void updateSlidersForSRGB() {
+        range1.setName(i18n("cyan") + "-" + i18n("red"));
+        range1.setLeftColor(CYAN);
+        range1.setRightColor(RED);
+
+        range2.setName(i18n("magenta") + "-" + i18n("green"));
+        range2.setLeftColor(MAGENTA);
+        range2.setRightColor(GREEN);
+
+        range3.setName(i18n("yellow") + "-" + i18n("blue"));
+        range3.setLeftColor(YELLOW);
+        range3.setRightColor(BLUE);
+    }
+
+    private void updateSlidersForOKLAB() {
+        range1.setName("Green-Red (a)");
+        range1.setLeftColor(GREEN);
+        range1.setRightColor(RED);
+
+        range2.setName("Blue-Yellow (b)");
+        range2.setLeftColor(BLUE);
+        range2.setRightColor(YELLOW);
+
+        range3.setName("Dark-Light (L)");
+        range3.setLeftColor(BLACK);
+        range3.setRightColor(WHITE);
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         assert dest == null;
 
-        float cr = cyanRed.getValueAsFloat();
-        float mg = magentaGreen.getValueAsFloat();
-        float yb = yellowBlue.getValueAsFloat();
+        float p1 = range1.getValueAsFloat();
+        float p2 = range2.getValueAsFloat();
+        float p3 = range3.getValueAsFloat();
 
-        if (cr == 0 && mg == 0 && yb == 0) { // no change
+        if (p1 == 0 && p2 == 0 && p3 == 0) { // no change
             return src;
         }
 
-        var lookup = createLookup(cr, mg, yb, affect.getValue());
-        var filterOp = lookup.asFastLookupOp();
-
-        return filterOp.filter(src, null);
+        return switch (colorSpace.getSelected()) {
+            case SRGB -> {
+                var lookup = createLookup(p1, p2, p3, affect.getValue());
+                var filterOp = lookup.asFastLookupOp();
+                yield filterOp.filter(src, null);
+            }
+            case OKLAB -> {
+                var filter = new OklabPointFilter(p1, p2, p3, affect.getValue());
+                yield filter.filter(src, null);
+            }
+        };
     }
 
     @Override
@@ -178,5 +236,49 @@ public class ColorBalance extends ParametrizedFilter {
             affectFactor[i] = (float) i / (LUT_TABLE_SIZE - 1);
         }
         return affectFactor;
+    }
+
+    private static float getAffectFactor(float l, int affect) {
+        return switch (affect) {
+            case EVERYTHING -> 1.0f;
+            case SHADOWS -> 1.0f - l;
+            case MIDTONES -> 1.0f - 2.0f * Math.abs(l - 0.5f);
+            case HIGHLIGHTS -> l;
+            default -> throw new IllegalArgumentException("affect = " + affect);
+        };
+    }
+
+    private static class OklabPointFilter extends PointFilter {
+        private final float aAdj;
+        private final float bAdj;
+        private final float lAdj;
+        private final int affect;
+
+        public OklabPointFilter(float greenRed, float blueYellow, float darkLight, int affect) {
+            super(NAME);
+            // scale [-100, 100] to a reasonable adjustment range for Oklab channels
+            this.aAdj = greenRed / 1000.0f;   // maps to [-0.1, 0.1]
+            this.bAdj = blueYellow / 1000.0f; // maps to [-0.1, 0.1]
+            this.lAdj = darkLight / 500.0f;   // maps to [-0.2, 0.2]
+            this.affect = affect;
+        }
+
+        @Override
+        public int processPixel(int x, int y, int rgb) {
+            float[] oklab = ColorSpaces.srgbToOklab(rgb);
+
+            float l = oklab[0];
+            float affectFactor = getAffectFactor(l, affect);
+
+            // apply adjustments to L, a, b channels
+            oklab[0] += lAdj * affectFactor;
+            oklab[1] += aAdj * affectFactor;
+            oklab[2] += bAdj * affectFactor;
+
+            // clamp lightness to its valid [0, 1] range
+            oklab[0] = ImageMath.clamp(oklab[0], 0.0f, 1.0f);
+
+            return ColorSpaces.oklabToSrgb(oklab);
+        }
     }
 }

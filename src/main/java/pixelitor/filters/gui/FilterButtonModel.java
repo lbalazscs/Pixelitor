@@ -160,6 +160,11 @@ public final class FilterButtonModel implements FilterSetting {
     }
 
     @Override
+    public void setName(String displayName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isEnabled() {
         return enabledByFilterLogic && enabledByAnimationSetting;
     }

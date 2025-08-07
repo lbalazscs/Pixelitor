@@ -24,11 +24,11 @@ import java.awt.Color;
 
 /**
  * A range where the endpoints correspond to colors.
- * Its {@link ParamGUI} is a colorized SliderSpinner
+ * Its {@link ParamGUI} is a colorized {@link SliderSpinner}.
  */
 public class RangeWithColorsParam extends RangeParam {
-    private final Color leftColor;
-    private final Color rightColor;
+    private Color leftColor;
+    private Color rightColor;
 
     public RangeWithColorsParam(Color leftColor, Color rightColor, String name, int min, int def, int max) {
         super(name, min, def, max);
@@ -42,5 +42,21 @@ public class RangeWithColorsParam extends RangeParam {
         paramGUI = sliderSpinner;
         syncWithGui();
         return sliderSpinner;
+    }
+
+    public Color getLeftColor() {
+        return leftColor;
+    }
+
+    public void setLeftColor(Color leftColor) {
+        this.leftColor = leftColor;
+    }
+
+    public Color getRightColor() {
+        return rightColor;
+    }
+
+    public void setRightColor(Color rightColor) {
+        this.rightColor = rightColor;
     }
 }

@@ -231,7 +231,7 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     /**
      * Adds a listener that will be notified when the selected value changes.
      */
-    private void addOnChangeTask(Runnable task) {
+    public void addOnChangeTask(Runnable task) {
         addListDataListener(new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {

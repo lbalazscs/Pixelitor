@@ -27,7 +27,7 @@ import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
  * A base class for implementations of {@link FilterParam}.
  */
 public abstract class AbstractFilterParam implements FilterParam {
-    private final String name;
+    private String name;
     protected ParamAdjustmentListener adjustmentListener;
     private boolean enabledByAnimation = true;
     private boolean enabledByFilterLogic = true;
@@ -75,6 +75,11 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void setName(String displayName) {
+        this.name = displayName;
     }
 
     @Override

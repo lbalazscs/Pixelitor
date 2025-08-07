@@ -31,6 +31,11 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
     String getName();
 
     /**
+     * Sets the display name of this filter setting.
+     */
+    void setName(String displayName);
+
+    /**
      * Creates the GUI component that represents this model in the UI.
      *
      * If this is an instance of {@link FilterParam},

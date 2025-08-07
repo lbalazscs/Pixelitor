@@ -19,6 +19,7 @@ package pixelitor.gui.utils;
 
 import pixelitor.filters.gui.ParamGUI;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.gui.ResetButton;
 
 import javax.swing.*;
@@ -383,6 +384,33 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
                 isSliderAdjusting = false;
             }
         }
+    }
+
+    /**
+     * Updates the visual appearance of the component based on its model's current state.
+     * This includes the title, colors, and gradients.
+     */
+    public void updateAppearance() {
+        if (labelPosition == LabelPosition.BORDER) {
+            if (model instanceof RangeWithColorsParam rwcParam) {
+                this.startColor = rwcParam.getLeftColor();
+                this.endColor = rwcParam.getRightColor();
+            }
+
+            if (hasGradient) {
+                Border gradientBorder = new GradientBorder(startColor, endColor);
+                setBorder(createTitledBorder(gradientBorder, model.getName()));
+            } else {
+                setBorder(createTitledBorder(model.getName()));
+            }
+        } else if (label != null) {
+            label.setText(model.getName() + ": ");
+        }
+
+        updateResetButton();
+
+        revalidate();
+        repaint();
     }
 
     @Override
