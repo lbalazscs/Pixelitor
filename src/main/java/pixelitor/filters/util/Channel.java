@@ -17,10 +17,13 @@
 
 package pixelitor.filters.util;
 
+import pixelitor.colors.Colors;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.lookup.LuminanceLookup;
+import pixelitor.gui.GUIText;
 
 import java.awt.Color;
+import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -99,6 +102,51 @@ public enum Channel {
         public double getIntensity(int r, int g, int b) {
             return b;
         }
+    }, OK_L(GUIText.LIGHTNESS, "L", BLACK) {
+        @Override
+        public Color getDarkColor() {
+            return BLACK;
+        }
+
+        @Override
+        public Color getLightColor() {
+            return WHITE;
+        }
+
+        @Override
+        public double getIntensity(int r, int g, int b) {
+            throw new UnsupportedOperationException();
+        }
+    }, OK_A(GUIText.RED_GREEN_A, "a", BLACK) {
+        @Override
+        public Color getDarkColor() {
+            return Color.RED;
+        }
+
+        @Override
+        public Color getLightColor() {
+            return Colors.CW_GREEN;
+        }
+
+        @Override
+        public double getIntensity(int r, int g, int b) {
+            throw new UnsupportedOperationException();
+        }
+    }, OK_B(GUIText.BLUE_YELLOW_B, "b", BLACK) {
+        @Override
+        public Color getDarkColor() {
+            return Color.BLUE;
+        }
+
+        @Override
+        public Color getLightColor() {
+            return Color.YELLOW;
+        }
+
+        @Override
+        public double getIntensity(int r, int g, int b) {
+            throw new UnsupportedOperationException();
+        }
     };
 
     private static final int INACTIVE_ALPHA = 100;
@@ -158,7 +206,22 @@ public enum Channel {
         return name;
     }
 
-    public static EnumParam<Channel> asParam() {
-        return new EnumParam<>("Channel", Channel.class);
+    public static List<Channel> getRGBChoices() {
+        return List.of(RGB, RED, GREEN, BLUE);
+    }
+
+    public static List<Channel> getLABChoices() {
+        return List.of(OK_A, OK_B, OK_L);
+    }
+
+    public static Channel[] getRGBValues() {
+        return new Channel[]{RGB, RED, GREEN, BLUE};
+    }
+
+    public static EnumParam<Channel> asParam(ColorSpace startingSpace) {
+        return switch (startingSpace) {
+            case SRGB -> new EnumParam<>("Channel", getRGBChoices());
+            case OKLAB -> new EnumParam<>("Channel", getLABChoices());
+        };
     }
 }

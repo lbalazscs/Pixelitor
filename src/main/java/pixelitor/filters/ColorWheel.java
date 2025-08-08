@@ -91,6 +91,8 @@ public class ColorWheel extends ParametrizedFilter {
     public ColorWheel() {
         super(false);
 
+        helpURL = "https://en.wikipedia.org/wiki/Color_wheel";
+
         initParams(type, center,
             hueRotParam, brgLumParam, satParam, spiralParam);
     }

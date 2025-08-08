@@ -26,6 +26,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.util.ColorSpace;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ColorSpaces;
 
 import java.awt.image.BufferedImage;
@@ -120,11 +121,11 @@ public class ColorBalance extends ParametrizedFilter {
     }
 
     private void updateSlidersForOKLAB() {
-        range1.setName("Green-Red (a)");
+        range1.setName(GUIText.RED_GREEN_A);
         range1.setLeftColor(GREEN);
         range1.setRightColor(RED);
 
-        range2.setName("Blue-Yellow (b)");
+        range2.setName(GUIText.BLUE_YELLOW_B);
         range2.setLeftColor(BLUE);
         range2.setRightColor(YELLOW);
 

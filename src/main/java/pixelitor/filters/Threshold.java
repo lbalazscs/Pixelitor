@@ -21,6 +21,7 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.util.Channel;
+import pixelitor.filters.util.ColorSpace;
 import pixelitor.utils.Dithering;
 import pixelitor.utils.ImageUtils;
 
@@ -47,7 +48,7 @@ public class Threshold extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 3739055511694844941L;
 
-    private final EnumParam<Channel> channelParam = Channel.asParam();
+    private final EnumParam<Channel> channelParam = Channel.asParam(ColorSpace.SRGB);
     private final RangeParam thresholdParam = new RangeParam(THRESHOLD, 0, 128, 255);
     private final RangeParam diffusionStrengthParam = new RangeParam("Dithering Amount (%)", 0, 0, 100);
     private final IntChoiceParam ditheringMethodParam = Dithering.createDitheringChoices();
@@ -68,7 +69,7 @@ public class Threshold extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        boolean dither = diffusionStrengthParam.getValue() != 0;
+        boolean dither = diffusionStrengthParam.isNotZero();
         double diffusionStrength = diffusionStrengthParam.getPercentage();
 
         // a copy of the input is needed because error diffusion modifies the pixel data

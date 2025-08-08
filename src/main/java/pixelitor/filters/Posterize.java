@@ -23,6 +23,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.filters.util.ColorSpace;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ColorSpaces;
 import pixelitor.utils.Dithering;
 import pixelitor.utils.ImageUtils;
@@ -81,13 +82,14 @@ public class Posterize extends ParametrizedFilter {
                 levels3.setName(i18n("blue"));
             }
             case OKLAB -> {
-                levels1.setName("Green-Red (a)");
-                levels2.setName("Blue-Yellow (b)");
-                levels3.setName("Lightness");
+                levels1.setName(GUIText.RED_GREEN_A);
+                levels2.setName(GUIText.BLUE_YELLOW_B);
+                levels3.setName(GUIText.LIGHTNESS);
             }
         }
         levelsParam.updateGUIAppearance();
     }
+
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {

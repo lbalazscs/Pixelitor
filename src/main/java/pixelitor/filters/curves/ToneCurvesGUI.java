@@ -65,7 +65,7 @@ public class ToneCurvesGUI extends FilterGUI {
     }
 
     private JComboBox<Channel> createChannelsCombo(Channel activeChannel) {
-        var channelCB = GUIUtils.createComboBox(Channel.values());
+        var channelCB = GUIUtils.createComboBox(Channel.getRGBValues());
         channelCB.setSelectedItem(activeChannel);
         channelCB.addActionListener(e -> curvesPanel.setActiveCurve(
             (Channel) channelCB.getSelectedItem()));

@@ -17,10 +17,11 @@
 
 package pixelitor.filters.levels;
 
-import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.Filter;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.util.Channel;
+import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
@@ -38,8 +39,7 @@ import static java.awt.BorderLayout.SOUTH;
  * The {@link FilterGUI} for the {@link Levels} filter.
  */
 public class LevelsGUI extends FilterGUI {
-    private final EnumComboBoxModel<Channel> channelsModel
-        = new EnumComboBoxModel<>(Channel.class);
+    private final EnumParam<Channel> channelsModel = Channel.asParam(ColorSpace.SRGB);
 
     private final JPanel cardPanel;
     private JCheckBox showOriginalCB;
@@ -61,7 +61,6 @@ public class LevelsGUI extends FilterGUI {
         model.updateFilterLookup();
     }
 
-    @SuppressWarnings("unchecked")
     private JPanel createNorthPanel(LevelsModel model) {
         var northPanel = new JPanel(new FlowLayout());
         northPanel.add(new JLabel("Channel:"));
@@ -76,7 +75,7 @@ public class LevelsGUI extends FilterGUI {
         northPanel.add(selector);
 
         JButton resetChannelButton = GUIUtils.createResetChannelButton(
-            e -> model.resetChannelToDefault(channelsModel.getSelectedItem()));
+            e -> model.resetChannelToDefault(channelsModel.getSelected()));
         northPanel.add(resetChannelButton);
 
         return northPanel;

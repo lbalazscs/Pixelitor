@@ -106,6 +106,26 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
         }
     }
 
+    public void setChoices(List<E> newChoices, boolean keepSelection) {
+        if (newChoices == null || newChoices.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        E oldSelection = selectedValue;
+        this.choices = List.copyOf(newChoices);
+
+        if (keepSelection && oldSelection != null && choices.contains(oldSelection)) {
+            selectedValue = oldSelection;
+        } else {
+            selectedValue = choices.getFirst();
+        }
+
+        fireContentsChanged(this, 0, getSize() - 1);
+
+        if (adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
+        }
+    }
+
     @Override
     public Object getSelectedItem() {
         return selectedValue;

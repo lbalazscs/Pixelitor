@@ -60,10 +60,6 @@ public class ToneCurvesFilter extends FilterWithGUI {
         return lastGUI;
     }
 
-    public ToneCurves getCurves() {
-        return curves;
-    }
-
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
@@ -86,6 +82,12 @@ public class ToneCurvesFilter extends FilterWithGUI {
         stateChanged();
     }
 
+    private void stateChanged() {
+        if (lastGUI != null) { // it's null when loading a smart filter
+            lastGUI.stateChanged();
+        }
+    }
+
     @Override
     public void saveStateTo(UserPreset preset) {
         for (Channel channel : Channel.values()) {
@@ -104,9 +106,7 @@ public class ToneCurvesFilter extends FilterWithGUI {
         stateChanged();
     }
 
-    private void stateChanged() {
-        if (lastGUI != null) { // it's null when loading a smart filter
-            lastGUI.stateChanged();
-        }
+    public ToneCurves getCurves() {
+        return curves;
     }
 }

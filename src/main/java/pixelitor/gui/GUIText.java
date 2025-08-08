@@ -48,6 +48,11 @@ public class GUIText {
     public static final String HELP = i18n("help");
     public static final String COPY_AS_JSON = "Copy as JSON";
 
+    // LAB color labels
+    public static final String RED_GREEN_A = "Green-Red (a)";
+    public static final String BLUE_YELLOW_B = "Blue-Yellow (b)";
+    public static final String LIGHTNESS = "Lightness";
+
     private GUIText() {
     }
 }

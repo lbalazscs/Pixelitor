@@ -70,7 +70,7 @@ public class ColorThreshold extends ParametrizedFilter {
         int greenTh = greenThreshold.getValue();
         int blueTh = blueThreshold.getValue();
 
-        boolean dither = diffusionStrengthParam.getValue() != 0;
+        boolean dither = diffusionStrengthParam.isNotZero();
         double diffusionStrength = diffusionStrengthParam.getPercentage();
         int ditheringMethod = ditheringMethodParam.getValue();
 

@@ -17,12 +17,18 @@
 
 package pixelitor.filters.gui;
 
+import java.util.List;
+
 /**
  * A {@link ChoiceParam} for choosing a value from an enum.
  */
 public class EnumParam<E extends Enum<E>> extends ChoiceParam<E> {
     public EnumParam(String name, Class<E> enumClass) {
         super(name, enumClass.getEnumConstants(), RandomizeMode.ALLOW_RANDOMIZE);
+    }
+
+    public EnumParam(String name, List<E> choices) {
+        super(name, choices, choices.getFirst(), RandomizeMode.ALLOW_RANDOMIZE);
     }
 
     public EnumParam<E> withDefault(E item) {
