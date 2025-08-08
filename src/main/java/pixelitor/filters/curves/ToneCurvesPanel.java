@@ -97,8 +97,11 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     }
 
     public void setActiveCurve(Channel channel) {
-        toneCurves.setActiveChannel(channel);
-        stateChanged();
+        // prevent duplicate filter executions when changing the color space
+        if (toneCurves.getActiveChannel() != channel) {
+            toneCurves.setActiveChannel(channel);
+            stateChanged();
+        }
     }
 
     public void resetActiveCurve() {

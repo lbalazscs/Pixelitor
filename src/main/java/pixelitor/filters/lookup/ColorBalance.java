@@ -25,6 +25,7 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeWithColorsParam;
+import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ColorSpaces;
@@ -122,12 +123,12 @@ public class ColorBalance extends ParametrizedFilter {
 
     private void updateSlidersForOKLAB() {
         range1.setName(GUIText.RED_GREEN_A);
-        range1.setLeftColor(GREEN);
-        range1.setRightColor(RED);
+        range1.setLeftColor(Channel.OK_A.getDarkColor());
+        range1.setRightColor(Channel.OK_A.getLightColor());
 
         range2.setName(GUIText.BLUE_YELLOW_B);
-        range2.setLeftColor(BLUE);
-        range2.setRightColor(YELLOW);
+        range2.setLeftColor(Channel.OK_B.getDarkColor());
+        range2.setRightColor(Channel.OK_B.getLightColor());
 
         range3.setName("Dark-Light (L)");
         range3.setLeftColor(BLACK);
@@ -153,7 +154,7 @@ public class ColorBalance extends ParametrizedFilter {
                 yield filterOp.filter(src, null);
             }
             case OKLAB -> {
-                var filter = new OklabPointFilter(p1, p2, p3, affect.getValue());
+                var filter = new OklabColorBalanceFilter(p1, p2, p3, affect.getValue());
                 yield filter.filter(src, null);
             }
         };
@@ -251,18 +252,19 @@ public class ColorBalance extends ParametrizedFilter {
         };
     }
 
-    private static class OklabPointFilter extends PointFilter {
+    private static class OklabColorBalanceFilter extends PointFilter {
         private final float aAdj;
         private final float bAdj;
         private final float lAdj;
         private final int affect;
 
-        public OklabPointFilter(float greenRed, float blueYellow, float darkLight, int affect) {
+        public OklabColorBalanceFilter(float greenRed, float blueYellow, float darkLight, int affect) {
             super(NAME);
             // scale [-100, 100] to a reasonable adjustment range for Oklab channels
-            this.aAdj = greenRed / 1000.0f;   // maps to [-0.1, 0.1]
-            this.bAdj = blueYellow / 1000.0f; // maps to [-0.1, 0.1]
-            this.lAdj = darkLight / 500.0f;   // maps to [-0.2, 0.2]
+            this.aAdj = greenRed / 250.0f;   // maps to [-0.4, 0.4]
+            this.bAdj = blueYellow / 250.0f; // maps to [-0.4, 0.4]
+            this.lAdj = darkLight / 125.0f;   // maps to [-0.8, 0.8]
+
             this.affect = affect;
         }
 

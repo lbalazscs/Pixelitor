@@ -17,7 +17,6 @@
 
 package pixelitor.filters.util;
 
-import pixelitor.colors.Colors;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.gui.GUIText;
@@ -120,12 +119,12 @@ public enum Channel {
     }, OK_A(GUIText.RED_GREEN_A, "a", BLACK) {
         @Override
         public Color getDarkColor() {
-            return Color.RED;
+            return OK_GREEN;
         }
 
         @Override
         public Color getLightColor() {
-            return Colors.CW_GREEN;
+            return OK_RED;
         }
 
         @Override
@@ -135,12 +134,12 @@ public enum Channel {
     }, OK_B(GUIText.BLUE_YELLOW_B, "b", BLACK) {
         @Override
         public Color getDarkColor() {
-            return Color.BLUE;
+            return OK_BLUE;
         }
 
         @Override
         public Color getLightColor() {
-            return Color.YELLOW;
+            return OK_YELLOW;
         }
 
         @Override
@@ -162,6 +161,12 @@ public enum Channel {
     private static final Color DARK_PURPLE = new Color(128, 0, 128);
     private static final Color DARK_YELLOW_GREEN = new Color(128, 128, 0);
 
+    // Oklab gradient colors
+    private static final Color OK_GREEN = new Color(0, 157, 113);
+    private static final Color OK_RED = new Color(213, 63, 63);
+    private static final Color OK_BLUE = new Color(66, 0, 254);
+    private static final Color OK_YELLOW = new Color(254, 157, 0);
+
     private final String name;
     private final String presetKey;
     private final Color color;
@@ -175,12 +180,12 @@ public enum Channel {
     }
 
     /**
-     * Returns the dark color for the channel's gradient in the "Levels" filter.
+     * Returns the dark gradient color used in the "Levels" filter.
      */
     public abstract Color getDarkColor();
 
     /**
-     * Returns the light color for the channel's gradient in the "Levels" filter.
+     * Returns the light gradient color used in the "Levels" filter.
      */
     public abstract Color getLightColor();
 
@@ -211,17 +216,21 @@ public enum Channel {
     }
 
     public static List<Channel> getLABChoices() {
-        return List.of(OK_A, OK_B, OK_L);
+        return List.of(OK_L, OK_A, OK_B);
     }
 
     public static Channel[] getRGBValues() {
         return new Channel[]{RGB, RED, GREEN, BLUE};
     }
 
-    public static EnumParam<Channel> asParam(ColorSpace startingSpace) {
-        return switch (startingSpace) {
-            case SRGB -> new EnumParam<>("Channel", getRGBChoices());
-            case OKLAB -> new EnumParam<>("Channel", getLABChoices());
+    public static List<Channel> getChoices(ColorSpace space) {
+        return switch (space) {
+            case SRGB -> getRGBChoices();
+            case OKLAB -> getLABChoices();
         };
+    }
+
+    public static EnumParam<Channel> asParam(ColorSpace startingSpace) {
+        return new EnumParam<>("Channel", getChoices(startingSpace));
     }
 }

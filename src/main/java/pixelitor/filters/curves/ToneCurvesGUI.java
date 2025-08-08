@@ -17,8 +17,8 @@
 
 package pixelitor.filters.curves;
 
+import pixelitor.filters.gui.ChannelSelectorPanel;
 import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.util.Channel;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
@@ -37,39 +37,29 @@ import static java.awt.BorderLayout.SOUTH;
  */
 public class ToneCurvesGUI extends FilterGUI {
     private final ToneCurvesPanel curvesPanel;
+    private final ToneCurves curves;
 
     public ToneCurvesGUI(ToneCurvesFilter filter, Filterable layer) {
         super(filter, layer);
         setLayout(new BorderLayout());
-        ToneCurves curves = filter.getCurves();
-
-        add(createChannelPanel(curves.getActiveChannel()), NORTH);
+        this.curves = filter.getCurves();
 
         curvesPanel = new ToneCurvesPanel(curves);
         curvesPanel.addActionListener(e -> startPreview(false));
+
+        var channelSelectorPanel = new ChannelSelectorPanel(
+            curvesPanel::setActiveCurve,
+            e -> curvesPanel.resetActiveCurve()
+        );
+
+        channelSelectorPanel.addColorSpaceChangedListener(colorSpace -> {
+            curves.setColorSpace(colorSpace);
+            curvesPanel.stateChanged();
+        });
+
+        add(channelSelectorPanel, NORTH);
         add(curvesPanel, CENTER);
-//        curvesPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
-
         add(createButtonsPanel(layer), SOUTH);
-    }
-
-    private JPanel createChannelPanel(Channel activeChannel) {
-        JPanel channelPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
-        channelPanel.add(new JLabel("Channel:"));
-        channelPanel.add(createChannelsCombo(activeChannel));
-        channelPanel.add(GUIUtils.createResetChannelButton(e ->
-            curvesPanel.resetActiveCurve()));
-
-        return channelPanel;
-    }
-
-    private JComboBox<Channel> createChannelsCombo(Channel activeChannel) {
-        var channelCB = GUIUtils.createComboBox(Channel.getRGBValues());
-        channelCB.setSelectedItem(activeChannel);
-        channelCB.addActionListener(e -> curvesPanel.setActiveCurve(
-            (Channel) channelCB.getSelectedItem()));
-        return channelCB;
     }
 
     private JPanel createButtonsPanel(Filterable layer) {
@@ -96,6 +86,6 @@ public class ToneCurvesGUI extends FilterGUI {
     }
 
     public ToneCurves getCurves() {
-        return curvesPanel.toneCurves;
+        return curves;
     }
 }

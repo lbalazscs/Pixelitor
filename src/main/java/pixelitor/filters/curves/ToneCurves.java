@@ -19,6 +19,7 @@ package pixelitor.filters.curves;
 
 import pixelitor.colors.Colors;
 import pixelitor.filters.util.Channel;
+import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.utils.Themes;
 
 import java.awt.BasicStroke;
@@ -35,12 +36,14 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * Manages and renders RGB and individual color channel curves.
+ * Manages and renders tone curves for sRGB and Oklab color spaces.
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurves {
-    private final Map<Channel, ToneCurve> curvesByChannel = new EnumMap<>(Channel.class);
+    private final Map<Channel, ToneCurve> srgbCurvesByChannel = new EnumMap<>(Channel.class);
+    private final Map<Channel, ToneCurve> oklabCurvesByChannel = new EnumMap<>(Channel.class);
+    private ColorSpace activeColorSpace = ColorSpace.SRGB;
     private Channel activeChannel;
 
     private int panelWidth = 295;
@@ -55,19 +58,32 @@ public class ToneCurves {
     private static final BasicStroke GRID_STROKE = new BasicStroke(1);
 
     public ToneCurves() {
-        // initializes curves for each channel
-        for (Channel channel : Channel.values()) {
-            curvesByChannel.put(channel, new ToneCurve(channel));
+        // initialize curves for each channel
+        for (Channel channel : Channel.getRGBChoices()) {
+            srgbCurvesByChannel.put(channel, new ToneCurve(channel));
+        }
+        for (Channel channel : Channel.getLABChoices()) {
+            oklabCurvesByChannel.put(channel, new ToneCurve(channel));
         }
         setActiveChannel(Channel.RGB);
     }
 
+    private Map<Channel, ToneCurve> getActiveCurveMap() {
+        return switch (activeColorSpace) {
+            case SRGB -> srgbCurvesByChannel;
+            case OKLAB -> oklabCurvesByChannel;
+        };
+    }
+
     public ToneCurve getCurve(Channel channel) {
-        return curvesByChannel.get(channel);
+        if (srgbCurvesByChannel.containsKey(channel)) {
+            return srgbCurvesByChannel.get(channel);
+        }
+        return oklabCurvesByChannel.get(channel);
     }
 
     public ToneCurve getActiveCurve() {
-        return curvesByChannel.get(activeChannel);
+        return getActiveCurveMap().get(activeChannel);
     }
 
     public void setActiveChannel(Channel newActiveChannel) {
@@ -75,19 +91,40 @@ public class ToneCurves {
             return;
         }
 
-        if (activeChannel != null) {
+        if (activeChannel != null && getActiveCurveMap().containsKey(activeChannel)) {
             getActiveCurve().setActive(false); // deactivate the previous
         }
         activeChannel = newActiveChannel;
-        getActiveCurve().setActive(true);
+        if (getActiveCurveMap().containsKey(activeChannel)) {
+            getActiveCurve().setActive(true);
+        }
     }
 
     public Channel getActiveChannel() {
         return activeChannel;
     }
 
+    public void setColorSpace(ColorSpace colorSpace) {
+        if (this.activeColorSpace == colorSpace) {
+            return;
+        }
+        // deactivate old curve
+        if (activeChannel != null && getActiveCurve() != null) {
+            getActiveCurve().setActive(false);
+        }
+
+        this.activeColorSpace = colorSpace;
+
+        // set a default active channel for the new space
+        setActiveChannel(colorSpace.getPrimaryChannel());
+    }
+
+    public ColorSpace getColorSpace() {
+        return activeColorSpace;
+    }
+
     /**
-     * Sets the dimensions of the panel and recalculates the curve area size.
+     * Sets the panel dimensions and recalculates the curve area size.
      */
     public void setSize(int newPanelWidth, int newPanelHeight) {
         this.panelWidth = newPanelWidth;
@@ -95,20 +132,29 @@ public class ToneCurves {
         curveWidth = newPanelWidth - 2 * CURVE_PADDING - AXIS_PADDING;
         curveHeight = newPanelHeight - 2 * CURVE_PADDING - AXIS_PADDING;
 
-        for (ToneCurve curve : curvesByChannel.values()) {
+        for (ToneCurve curve : srgbCurvesByChannel.values()) {
+            curve.setSize(curveWidth, curveHeight);
+        }
+        for (ToneCurve curve : oklabCurvesByChannel.values()) {
             curve.setSize(curveWidth, curveHeight);
         }
     }
 
     public void reset() {
-        for (ToneCurve curve : curvesByChannel.values()) {
+        for (ToneCurve curve : srgbCurvesByChannel.values()) {
+            curve.reset();
+        }
+        for (ToneCurve curve : oklabCurvesByChannel.values()) {
             curve.reset();
         }
     }
 
     public void randomize() {
-        reset();
-        getCurve(Channel.RGB).randomize();
+        for (ToneCurve curve : getActiveCurveMap().values()) {
+            curve.reset();
+        }
+        // randomize only the primary channel of the active color space
+        getCurve(activeColorSpace.getPrimaryChannel()).randomize();
     }
 
     /**
@@ -125,7 +171,7 @@ public class ToneCurves {
     }
 
     /**
-     * Draws the grid, scales, and curves for all channels.
+     * Draws the grid, scales, and all relevant curves.
      */
     public void draw(Graphics2D g) {
         boolean darkTheme = Themes.getActive().isDark();
@@ -135,7 +181,7 @@ public class ToneCurves {
         // clear background
         Colors.fillWith(darkTheme ? Color.BLACK : Color.WHITE, g, panelWidth, panelHeight);
 
-        // apply padding and adjust for y-axis inversion
+        // apply padding and transform for a bottom-left origin
         var origTransform = g.getTransform();
         g.translate(CURVE_PADDING + AXIS_PADDING, CURVE_PADDING);
         g.translate(0, curveHeight);
@@ -192,13 +238,32 @@ public class ToneCurves {
      * Draws the gradient scales along the horizontal and vertical axes.
      */
     private void drawScales(Graphics2D g) {
-        Color gradientEndColor = (activeChannel == Channel.RGB)
-            ? Color.WHITE
-            : activeChannel.getDrawColor(true, false);
+        Color startColor = null;
+        Color endColor = null;
+
+        // The activeChannel is initialized in the constructor and should not be null here.
+        // A switch over an enum is exhaustive, so no default case is needed.
+        switch (activeChannel) {
+            case OK_A, OK_B -> {
+                // Bipolar gradients for Oklab 'a' and 'b' channels
+                startColor = activeChannel.getDarkColor();
+                endColor = activeChannel.getLightColor();
+            }
+            case RGB, OK_L -> {
+                // Unipolar gradients for master channels
+                startColor = Color.BLACK;
+                endColor = Color.WHITE;
+            }
+            case RED, GREEN, BLUE -> {
+                // Unipolar gradients for sRGB color channels
+                startColor = Color.BLACK;
+                endColor = activeChannel.getDrawColor(true, false);
+            }
+        }
 
         // horizontal gradient
         var rectHor = new Rectangle2D.Float(0, -AXIS_PADDING, curveWidth, AXIS_SIZE);
-        var gradientHor = new GradientPaint(0, 0, Color.BLACK, curveWidth, 0, gradientEndColor);
+        var gradientHor = new GradientPaint(0, 0, startColor, curveWidth, 0, endColor);
         g.setPaint(gradientHor);
         g.fill(rectHor);
         g.setColor(Color.LIGHT_GRAY);
@@ -206,7 +271,7 @@ public class ToneCurves {
 
         // vertical gradient
         var rectVer = new Rectangle2D.Float(-AXIS_PADDING, 0, AXIS_SIZE, curveHeight);
-        var gradientVer = new GradientPaint(0, 0, Color.BLACK, 0, curveHeight, gradientEndColor);
+        var gradientVer = new GradientPaint(0, 0, startColor, 0, curveHeight, endColor);
         g.setPaint(gradientVer);
         g.fill(rectVer);
         g.setColor(Color.LIGHT_GRAY);
@@ -217,14 +282,16 @@ public class ToneCurves {
      * Draws the curve for each channel, with the active one on top.
      */
     private void drawCurves(Graphics2D g, boolean darkTheme) {
-        // draw the inactive curves first
-        for (var entry : curvesByChannel.entrySet()) {
+        // draw the inactive curves of the active colorspace first
+        for (var entry : getActiveCurveMap().entrySet()) {
             if (entry.getKey() != activeChannel) {
                 entry.getValue().draw(g, darkTheme);
             }
         }
 
         // then draw the active curve on top
-        getActiveCurve().draw(g, darkTheme);
+        if (getActiveCurve() != null) {
+            getActiveCurve().draw(g, darkTheme);
+        }
     }
 }

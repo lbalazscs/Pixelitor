@@ -19,14 +19,27 @@ package pixelitor.filters.util;
 
 import pixelitor.filters.gui.EnumParam;
 
+/**
+ * Represents a supported, non-cylindrical color space.
+ */
 public enum ColorSpace {
-    SRGB("sRGB (Faster)"),
-    OKLAB("Oklab (Better)");
+    SRGB("sRGB (Faster)", Channel.RGB),
+    OKLAB("Oklab (Better)", Channel.OK_L);
 
     private final String displayName;
+    private final Channel mainChannel;
 
-    ColorSpace(String displayName) {
+    ColorSpace(String displayName, Channel mainChannel) {
         this.displayName = displayName;
+        this.mainChannel = mainChannel;
+    }
+
+    /**
+     * Returns the primary channel for this color space.
+     * Used as the default and randomized channel in the GUI.
+     */
+    public Channel getPrimaryChannel() {
+        return mainChannel;
     }
 
     @Override
@@ -34,6 +47,9 @@ public enum ColorSpace {
         return displayName;
     }
 
+    /**
+     * Creates an {@link EnumParam} for selecting an enum value.
+     */
     public static EnumParam<ColorSpace> asParam() {
         return new EnumParam<>("Color Space", ColorSpace.class);
     }
