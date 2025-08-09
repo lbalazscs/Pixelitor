@@ -162,4 +162,8 @@ public class FastLookupOp implements BufferedImageOp {
     public RenderingHints getRenderingHints() {
         return null;
     }
+
+    public ShortLookupTable getLookupTable() {
+        return lut;
+    }
 }

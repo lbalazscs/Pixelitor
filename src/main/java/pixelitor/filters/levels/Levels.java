@@ -20,7 +20,6 @@ package pixelitor.filters.levels;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
@@ -39,7 +38,7 @@ public class Levels extends FilterWithGUI {
     @Serial
     private static final long serialVersionUID = 1780232770405846617L;
 
-    private RGBLookup rgbLookup;
+    private BufferedImageOp filterOp;
     private final LevelsModel levelsModel;
 
     public Levels() {
@@ -57,18 +56,21 @@ public class Levels extends FilterWithGUI {
         return gui;
     }
 
-    public void setRGBLookup(RGBLookup rgbLookup) {
-        this.rgbLookup = Objects.requireNonNull(rgbLookup);
+    public void setFilterOp(BufferedImageOp op) {
+        this.filterOp = Objects.requireNonNull(op);
+    }
+
+    public BufferedImageOp getFilterOp() {
+        return filterOp;
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (rgbLookup == null) {
+        if (filterOp == null) {
             // this can happen if transform is called before the GUI is created or a preset is loaded
             levelsModel.updateFilterLookup();
         }
 
-        BufferedImageOp filterOp = rgbLookup.asFastLookupOp();
         dest = filterOp.filter(src, dest);
 
         return dest;

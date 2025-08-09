@@ -58,6 +58,10 @@ public class GrayScaleLookup {
         return lut[input];
     }
 
+    public short[] getTable() {
+        return lut;
+    }
+
     /**
      * Returns a shared instance of an identity lookup table where output equals input.
      */

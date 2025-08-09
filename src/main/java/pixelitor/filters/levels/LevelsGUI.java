@@ -18,10 +18,9 @@
 package pixelitor.filters.levels;
 
 import pixelitor.filters.Filter;
-import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.ChannelSelectorPanel;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.util.Channel;
-import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
@@ -29,7 +28,6 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ItemEvent;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
@@ -39,10 +37,9 @@ import static java.awt.BorderLayout.SOUTH;
  * The {@link FilterGUI} for the {@link Levels} filter.
  */
 public class LevelsGUI extends FilterGUI {
-    private final EnumParam<Channel> channelsModel = Channel.asParam(ColorSpace.SRGB);
-
     private final JPanel cardPanel;
     private JCheckBox showOriginalCB;
+    private Channel currentChannel;
 
     public LevelsGUI(Filter filter, Filterable layer, LevelsModel model) {
         super(filter, layer);
@@ -50,10 +47,19 @@ public class LevelsGUI extends FilterGUI {
 
         setLayout(new BorderLayout());
 
-        add(createNorthPanel(model), NORTH);
-
+        // create center panel first, so it exists when the callback
+        // is fired from ChannelSelectorPanel's constructor
         cardPanel = createCenterPanel(model);
         add(cardPanel, CENTER);
+
+        ChannelSelectorPanel channelSelectorPanel = new ChannelSelectorPanel(
+            this::showChannelPanel,
+            e -> model.resetChannelToDefault(currentChannel)
+        );
+        add(channelSelectorPanel, NORTH);
+
+        channelSelectorPanel.addColorSpaceChangedListener(colorSpace ->
+            model.setColorSpace(colorSpace, true));
 
         add(createSouthPanel(model, layer), SOUTH);
 
@@ -61,24 +67,12 @@ public class LevelsGUI extends FilterGUI {
         model.updateFilterLookup();
     }
 
-    private JPanel createNorthPanel(LevelsModel model) {
-        var northPanel = new JPanel(new FlowLayout());
-        northPanel.add(new JLabel("Channel:"));
-
-        var selector = new JComboBox<Channel>(channelsModel);
-        selector.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                var cl = (CardLayout) cardPanel.getLayout();
-                cl.show(cardPanel, ((Channel) e.getItem()).getName());
-            }
-        });
-        northPanel.add(selector);
-
-        JButton resetChannelButton = GUIUtils.createResetChannelButton(
-            e -> model.resetChannelToDefault(channelsModel.getSelected()));
-        northPanel.add(resetChannelButton);
-
-        return northPanel;
+    private void showChannelPanel(Channel channel) {
+        this.currentChannel = channel;
+        if (cardPanel != null) {
+            var cl = (CardLayout) cardPanel.getLayout();
+            cl.show(cardPanel, channel.getName());
+        }
     }
 
     private static JPanel createCenterPanel(LevelsModel model) {

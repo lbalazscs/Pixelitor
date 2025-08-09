@@ -241,21 +241,13 @@ public class ToneCurves {
         Color startColor = null;
         Color endColor = null;
 
-        // The activeChannel is initialized in the constructor and should not be null here.
-        // A switch over an enum is exhaustive, so no default case is needed.
+        // the activeChannel is initialized in the constructor and should not be null here.
         switch (activeChannel) {
-            case OK_A, OK_B -> {
-                // Bipolar gradients for Oklab 'a' and 'b' channels
+            case OK_A, OK_B, RGB, OK_L -> {
                 startColor = activeChannel.getDarkColor();
                 endColor = activeChannel.getLightColor();
             }
-            case RGB, OK_L -> {
-                // Unipolar gradients for master channels
-                startColor = Color.BLACK;
-                endColor = Color.WHITE;
-            }
             case RED, GREEN, BLUE -> {
-                // Unipolar gradients for sRGB color channels
                 startColor = Color.BLACK;
                 endColor = activeChannel.getDrawColor(true, false);
             }

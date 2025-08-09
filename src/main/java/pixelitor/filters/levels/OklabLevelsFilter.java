@@ -15,17 +15,19 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.curves;
+package pixelitor.filters.levels;
 
-import com.jhlabs.image.Curve;
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
+import pixelitor.filters.curves.OklabCurvesFilter;
+import pixelitor.filters.lookup.GrayScaleLookup;
 import pixelitor.utils.ColorSpaces;
 
 /**
- * A PointFilter that applies curves in the Oklab color space.
+ * A PointFilter that applies levels in the Oklab color space.
+ * It's similar to {@link OklabCurvesFilter}.
  */
-public class OklabCurvesFilter extends PointFilter {
+public class OklabLevelsFilter extends PointFilter {
     /**
      * Domain for the 'a' and 'b' channels of Oklab that comfortably covers the sRGB gamut.
      */
@@ -33,15 +35,15 @@ public class OklabCurvesFilter extends PointFilter {
     private static final float AB_CHANNEL_MAX = 0.5f;
     private static final float AB_CHANNEL_RANGE = AB_CHANNEL_MAX - AB_CHANNEL_MIN;
 
-    private final int[] lTable;
-    private final int[] aTable;
-    private final int[] bTable;
+    private final short[] lTable;
+    private final short[] aTable;
+    private final short[] bTable;
 
-    public OklabCurvesFilter(Curve lCurve, Curve aCurve, Curve bCurve) {
-        super("Oklab Curves");
-        this.lTable = lCurve.makeTable();
-        this.aTable = aCurve.makeTable();
-        this.bTable = bCurve.makeTable();
+    public OklabLevelsFilter(GrayScaleLookup lLookup, GrayScaleLookup aLookup, GrayScaleLookup bLookup) {
+        super("Oklab Levels");
+        this.lTable = lLookup.getTable();
+        this.aTable = aLookup.getTable();
+        this.bTable = bLookup.getTable();
     }
 
     @Override
@@ -52,7 +54,7 @@ public class OklabCurvesFilter extends PointFilter {
         float a = oklab[1];
         float b = oklab[2];
 
-        // 2. apply curves via lookup tables
+        // 2. apply levels via lookup tables
         // L channel is normalized to [0, 1]
         int lIndex = ImageMath.clamp((int) (l * 255.0f + 0.5f), 0, 255);
         float newL = lTable[lIndex] / 255.0f;
@@ -71,7 +73,7 @@ public class OklabCurvesFilter extends PointFilter {
     /**
      * Applies a curve to an Oklab 'a' or 'b' channel value.
      */
-    private static float applyAbCurve(float channelValue, int[] table) {
+    private static float applyAbCurve(float channelValue, short[] table) {
         // normalize the value from its domain to [0, 1] for LUT lookup
         float normalized = (channelValue - AB_CHANNEL_MIN) / AB_CHANNEL_RANGE;
         int index = ImageMath.clamp((int) (normalized * 255.0f + 0.5f), 0, 255);

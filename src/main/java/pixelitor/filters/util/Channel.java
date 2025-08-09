@@ -180,12 +180,12 @@ public enum Channel {
     }
 
     /**
-     * Returns the dark gradient color used in the "Levels" filter.
+     * Returns the dark gradient color used in the UI.
      */
     public abstract Color getDarkColor();
 
     /**
-     * Returns the light gradient color used in the "Levels" filter.
+     * Returns the light gradient color used in the UI.
      */
     public abstract Color getLightColor();
 
