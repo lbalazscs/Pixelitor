@@ -767,6 +767,7 @@ public class MenuBar extends JMenuBar {
         colorsMenu.addFilterWithoutGUI(Invert.NAME, Invert::new, CTRL_I);
         colorsMenu.addFilter(ChannelInvert.NAME, ChannelInvert::new);
         colorsMenu.addFilter(ChannelMixer.NAME, ChannelMixer::new);
+        colorsMenu.addFilter(Equalize.NAME, Equalize::new);
 
         colorsMenu.add(createExtractChannelsSubmenu());
         colorsMenu.add(createReduceColorsSubmenu());

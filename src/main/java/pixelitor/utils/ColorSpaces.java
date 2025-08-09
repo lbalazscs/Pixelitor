@@ -136,9 +136,28 @@ public class ColorSpaces {
     public static void oklabToSrgbBulk(float[] src, int[] dst) {
         for (int si = 0, i = 0; i < dst.length; i++, si += 3) {
             double[] linear = oklabToLinearRGB(src, si);
+
             int r = linearToSRGBInt(linear[0]);
             int g = linearToSRGBInt(linear[1]);
             int b = linearToSRGBInt(linear[2]);
+
+            dst[i] = 0xFF000000 | (r << 16) | (g << 8) | b;
+        }
+    }
+
+    public static void oklabToSrgbBulkPrecise(float[] src, int[] dst) {
+        for (int si = 0, i = 0; i < dst.length; i++, si += 3) {
+            double[] linear = oklabToLinearRGB(src, si);
+
+            // precise version, doesn't call linearToSRGBInt
+            double rLin = ImageMath.clamp01(linear[0]);
+            double gLin = ImageMath.clamp01(linear[1]);
+            double bLin = ImageMath.clamp01(linear[2]);
+
+            int r = (int) (255.0 * linearToSrgbExact(rLin) + 0.5);
+            int g = (int) (255.0 * linearToSrgbExact(gLin) + 0.5);
+            int b = (int) (255.0 * linearToSrgbExact(bLin) + 0.5);
+
             dst[i] = 0xFF000000 | (r << 16) | (g << 8) | b;
         }
     }
