@@ -527,16 +527,21 @@ public class ImageMath {
     }
 
     /**
-     * Return the NTSC gray level of an RGB value.
-     *
-     * @param rgb1 the input pixel
-     * @return the gray level (0-255)
+     * Returns the ITU-R BT.601 luminance of an sRGB value.
      */
-    public static int brightnessNTSC(int rgb) {
+    public static float calcLuminance(int rgb) {
         int r = (rgb >> 16) & 0xff;
         int g = (rgb >> 8) & 0xff;
         int b = rgb & 0xff;
-        return (int) (r * 0.299f + g * 0.587f + b * 0.114f);
+        return 0.299f * r + 0.587f * g + 0.114f * b;
+    }
+
+    public static float[] calcLuminance(int[] inPixels) {
+        float[] luma = new float[inPixels.length];
+        for (int i = 0; i < inPixels.length; i++) {
+            luma[i] = calcLuminance(inPixels[i]);
+        }
+        return luma;
     }
 
     // Catmull-Rom splines

@@ -38,6 +38,11 @@ public class JHConvolutionEdge extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 6728675248520735379L;
 
+    private final IntChoiceParam channel = new IntChoiceParam("Channel", new Item[]{
+        new Item("R, G, B", EdgeFilter.CHANNEL_RGB),
+        new Item("Luminance", EdgeFilter.CHANNEL_LUMINANCE),
+    });
+
     private final IntChoiceParam horizontalMethod = new IntChoiceParam("Horizontal Edges", new Item[]{
         new Item("Sobel", METHOD_SOBEL),
         new Item("Prewitt", METHOD_PREWITT),
@@ -71,6 +76,7 @@ public class JHConvolutionEdge extends ParametrizedFilter {
         super(true);
 
         initParams(
+            channel,
             horizontalMethod,
             verticalMethod,
             invertImage
@@ -82,6 +88,8 @@ public class JHConvolutionEdge extends ParametrizedFilter {
         if (filter == null) {
             filter = new EdgeFilter(NAME);
         }
+
+        filter.setChannel(channel.getValue());
 
         int horizontal = horizontalMethod.getValue();
         switch (horizontal) {

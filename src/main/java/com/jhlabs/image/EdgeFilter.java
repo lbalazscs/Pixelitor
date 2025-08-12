@@ -20,64 +20,73 @@ package com.jhlabs.image;
  * An edge-detection filter.
  */
 public class EdgeFilter extends WholeImageFilter {
-    public static final float R2 = (float) Math.sqrt(2);
+    private static final float SQRT2 = (float) Math.sqrt(2);
 
     // Roberts cross vertical and horizontal edge detection matrices
     // https://en.wikipedia.org/wiki/Roberts_cross
     public static final float[] ROBERTS_V = {
-            0, 0, -1,
-            0, 1, 0,
-            0, 0, 0,
+        0, 0, -1,
+        0, 1, 0,
+        0, 0, 0,
     };
     public static final float[] ROBERTS_H = {
-            -1, 0, 0,
-            0, 1, 0,
-            0, 0, 0,
+        -1, 0, 0,
+        0, 1, 0,
+        0, 0, 0,
     };
 
     // Prewitt vertical and horizontal edge detection matrices
     // https://en.wikipedia.org/wiki/Prewitt_operator
     public static final float[] PREWITT_V = {
-            -1, 0, 1,
-            -1, 0, 1,
-            -1, 0, 1,
+        -1, 0, 1,
+        -1, 0, 1,
+        -1, 0, 1,
     };
     public static final float[] PREWITT_H = {
-            -1, -1, -1,
-            0, 0, 0,
-            1, 1, 1,
+        -1, -1, -1,
+        0, 0, 0,
+        1, 1, 1,
     };
 
     // Sobel vertical and horizontal edge detection matrices
     // https://en.wikipedia.org/wiki/Sobel_operator
     public static final float[] SOBEL_V = {
-            -1, 0, 1,
-            -2, 0, 2,
-            -1, 0, 1,
+        -1, 0, 1,
+        -2, 0, 2,
+        -1, 0, 1,
     };
     public static final float[] SOBEL_H = {
-            -1, -2, -1,
-            0, 0, 0,
-            1, 2, 1,
+        -1, -2, -1,
+        0, 0, 0,
+        1, 2, 1,
     };
 
     // Frei-Chen vertical and horizontal edge detection matrices
     public static final float[] FREI_CHEN_V = {
-            -1, 0, 1,
-            -R2, 0, R2,
-            -1, 0, 1,
+        -1, 0, 1,
+        -SQRT2, 0, SQRT2,
+        -1, 0, 1,
     };
-    public static float[] FREI_CHEN_H = {
-            -1, -R2, -1,
-            0, 0, 0,
-            1, R2, 1,
+    public static final float[] FREI_CHEN_H = {
+        -1, -SQRT2, -1,
+        0, 0, 0,
+        1, SQRT2, 1,
     };
+
+    public static final int CHANNEL_RGB = 0;
+    public static final int CHANNEL_LUMINANCE = 1;
+
+    private int channel = CHANNEL_RGB;
 
     private float[] vEdgeMatrix = SOBEL_V;
     private float[] hEdgeMatrix = SOBEL_H;
 
     public EdgeFilter(String filterName) {
         super(filterName);
+    }
+
+    public void setChannel(int channel) {
+        this.channel = channel;
     }
 
     public void setVEdgeMatrix(float[] vEdgeMatrix) {
@@ -92,8 +101,64 @@ public class EdgeFilter extends WholeImageFilter {
     protected int[] filterPixels(int width, int height, int[] inPixels) {
         pt = createProgressTracker(height);
 
-        int index = 0;
+        int[] outPixels = switch (channel) {
+            case CHANNEL_LUMINANCE -> findEdgesLuma(width, height, inPixels);
+            case CHANNEL_RGB -> findEdgesRGB(width, height, inPixels);
+            default -> throw new IllegalStateException("channel = " + channel);
+        };
+
+        finishProgressTracker();
+        return outPixels;
+    }
+
+    private int[] findEdgesLuma(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
+
+        // pre-process to get luma values
+        float[] luma = ImageMath.calcLuminance(inPixels);
+
+        for (int y = 0; y < height; y++) {
+            int current_row_offset = y * width;
+            for (int x = 0; x < width; x++) {
+                float ih = 0, iv = 0;
+
+                // convolve the 3x3 neighborhood around the current pixel
+                for (int row = -1; row <= 1; row++) {
+                    int iy = y + row;
+                    int ioffset;
+                    if (0 <= iy && iy < height) {
+                        ioffset = iy * width;
+                    } else {
+                        ioffset = y * width; // use current row for out-of-bounds
+                    }
+                    int moffset = 3 * (row + 1) + 1;
+                    for (int col = -1; col <= 1; col++) {
+                        int ix = x + col;
+                        if (!(0 <= ix && ix < width)) {
+                            ix = x; // use current column for out-of-bounds
+                        }
+                        float pixelLuma = luma[ioffset + ix];
+                        float h = hEdgeMatrix[moffset + col];
+                        float v = vEdgeMatrix[moffset + col];
+
+                        ih += h * pixelLuma;
+                        iv += v * pixelLuma;
+                    }
+                }
+
+                int i = (int) (Math.sqrt(ih * ih + iv * iv) / 1.8);
+                i = PixelUtils.clamp(i);
+                int a = inPixels[current_row_offset + x] & 0xff000000;
+                outPixels[current_row_offset + x] = a | (i << 16) | (i << 8) | i;
+            }
+            pt.unitDone();
+        }
+        return outPixels;
+    }
+
+    private int[] findEdgesRGB(int width, int height, int[] inPixels) {
+        int[] outPixels = new int[width * height];
+        int index = 0;
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -142,7 +207,6 @@ public class EdgeFilter extends WholeImageFilter {
             }
             pt.unitDone();
         }
-        finishProgressTracker();
         return outPixels;
     }
 
