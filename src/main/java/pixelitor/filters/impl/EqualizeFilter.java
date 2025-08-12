@@ -19,6 +19,7 @@ package pixelitor.filters.impl;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.WholeImageFilter;
+import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.utils.ColorSpaces;
 
 import java.awt.Color;
@@ -35,6 +36,35 @@ public class EqualizeFilter extends WholeImageFilter {
      * Defines the color space/channel combination used for equalization.
      */
     public enum Equalizer {
+        /**
+         * Equalizes the Y (luma) channel of YCbCr.
+         */
+        YCBCR("YCbCr/Y", 0) {
+            @Override
+            public float[] toColorSpace(int[] inPixels, int numPixels) {
+                float[] ycbcrPixels = new float[numPixels * 3];
+                for (int i = 0, j = 0; i < numPixels; i++, j += 3) {
+                    float[] ycbcr = ColorSpaces.srgbToYCbCr(inPixels[i]);
+                    // normalize Y from [0, 255] to [0, 1]
+                    ycbcrPixels[j] = ycbcr[0] / 255.0f;
+                    ycbcrPixels[j + 1] = ycbcr[1];
+                    ycbcrPixels[j + 2] = ycbcr[2];
+                }
+                return ycbcrPixels;
+            }
+
+            @Override
+            public void toSrgb(float[] ycbcrPixels, int[] outPixels, int numPixels) {
+                float[] ycbcr = new float[3];
+                for (int i = 0, j = 0; i < numPixels; i++, j += 3) {
+                    // de-normalize Y from [0, 1] back to [0, 255]
+                    ycbcr[0] = ycbcrPixels[j] * 255.0f;
+                    ycbcr[1] = ycbcrPixels[j + 1];
+                    ycbcr[2] = ycbcrPixels[j + 2];
+                    outPixels[i] = ColorSpaces.ycbcrToSrgb(ycbcr);
+                }
+            }
+        },
         /**
          * Equalizes the V (value) channel of HSV.
          */
@@ -57,6 +87,31 @@ public class EqualizeFilter extends WholeImageFilter {
             public void toSrgb(float[] hsvPixels, int[] outPixels, int numPixels) {
                 for (int i = 0, j = 0; i < numPixels; i++, j += 3) {
                     outPixels[i] = Color.HSBtoRGB(hsvPixels[j], hsvPixels[j + 1], hsvPixels[j + 2]);
+                }
+            }
+        },
+        /**
+         * Equalizes the L (luminance) channel of HSL.
+         */
+        HSL("HSL/L", 2) {
+            @Override
+            public float[] toColorSpace(int[] inPixels, int numPixels) {
+                float[] hslPixels = new float[numPixels * 3];
+                float[] hsl = new float[3];
+                for (int i = 0, j = 0; i < numPixels; i++, j += 3) {
+                    int rgb = inPixels[i];
+                    ColorUtilities.RGBtoHSL((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF, hsl);
+                    hslPixels[j] = hsl[0];
+                    hslPixels[j + 1] = hsl[1];
+                    hslPixels[j + 2] = hsl[2];
+                }
+                return hslPixels;
+            }
+
+            @Override
+            public void toSrgb(float[] hslPixels, int[] outPixels, int numPixels) {
+                for (int i = 0, j = 0; i < numPixels; i++, j += 3) {
+                    outPixels[i] = ColorUtilities.HSLtoRGB(hslPixels[j], hslPixels[j + 1], hslPixels[j + 2]).getRGB();
                 }
             }
         },

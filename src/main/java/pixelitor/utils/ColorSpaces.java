@@ -19,6 +19,9 @@ package pixelitor.utils;
 
 import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
+import pixelitor.colors.Colors;
+
+import java.awt.Color;
 
 /**
  * Utility methods for color space conversions.
@@ -311,5 +314,103 @@ public class ColorSpaces {
             C * (float) FastMath.cos(hRad),
             C * (float) FastMath.sin(hRad)
         };
+    }
+
+    /**
+     * Converts an sRGB color (packed as int) to YCbCr.
+     */
+    public static float[] srgbToYCbCr(int srgb) {
+        int r = (srgb >> 16) & 0xFF;
+        int g = (srgb >> 8) & 0xFF;
+        int b = srgb & 0xFF;
+
+        // ITU-R BT.601 conversion for "analog YPbPr"
+        float y = 0.299f * r + 0.587f * g + 0.114f * b; // between 0 and 255
+        float cb = -0.168736f * r - 0.331264f * g + 0.5f * b; // between -127.5 and 127.5
+        float cr = 0.5f * r - 0.418688f * g - 0.081312f * b; // between -127.5 and 127.5
+
+        return new float[]{y, cb, cr};
+    }
+
+    /**
+     * Converts YCbCr color to sRGB (packed as int).
+     */
+    public static int ycbcrToSrgb(float[] ycbcr) {
+        float y = ycbcr[0];
+        float cb = ycbcr[1];
+        float cr = ycbcr[2];
+
+        float r = y + 1.402f * cr;
+        float g = y - 0.34414f * cb - 0.71414f * cr;
+        float b = y + 1.772f * cb;
+
+        // clamp values to [0, 255] and convert to int
+        int ri = Math.max(0, Math.min(255, Math.round(r)));
+        int gi = Math.max(0, Math.min(255, Math.round(g)));
+        int bi = Math.max(0, Math.min(255, Math.round(b)));
+
+        // pack into single int (full alpha)
+        return 0xFF_00_00_00 | (ri << 16) | (gi << 8) | bi;
+    }
+
+    /**
+     * Test method to verify round-trip conversion accuracy
+     */
+    public static void main(String[] args) {
+        record NamedColor(Color color, String name) {
+        }
+
+        NamedColor[] testColors = {
+            new NamedColor(Color.RED, "red"),
+            new NamedColor(Color.GREEN, "green"),
+            new NamedColor(Color.BLUE, "blue"),
+            new NamedColor(Color.CYAN, "cyan"),
+            new NamedColor(Color.MAGENTA, "magenta"),
+            new NamedColor(Color.YELLOW, "yellow"),
+            new NamedColor(Color.WHITE, "white"),
+            new NamedColor(Color.BLACK, "black"),
+            new NamedColor(Color.GRAY, "gray"),
+            new NamedColor(Colors.CW_BLUE, "cw blue"),
+            new NamedColor(Colors.CW_GREEN, "cw green"),
+            new NamedColor(Colors.CW_ORANGE, "cw orange"),
+            new NamedColor(Colors.CW_RED, "cw red"),
+            new NamedColor(Colors.CW_TEAL, "cw teal"),
+            new NamedColor(Colors.CW_VIOLET, "cw violet"),
+            new NamedColor(Colors.CW_YELLOW, "cw yellow")
+        };
+
+        // initialize variables to track component ranges
+        float minY = Float.MAX_VALUE, maxY = Float.MIN_VALUE;
+        float minCb = Float.MAX_VALUE, maxCb = Float.MIN_VALUE;
+        float minCr = Float.MAX_VALUE, maxCr = Float.MIN_VALUE;
+
+        System.out.println("Testing round-trip conversion:");
+        for (NamedColor namedColor : testColors) {
+            int input = namedColor.color().getRGB();
+
+            // convert
+            float[] ycbcr = srgbToYCbCr(input);
+            int recovered = ycbcrToSrgb(ycbcr);
+
+            // update component ranges
+            minY = Math.min(minY, ycbcr[0]);
+            maxY = Math.max(maxY, ycbcr[0]);
+            minCb = Math.min(minCb, ycbcr[1]);
+            maxCb = Math.max(maxCb, ycbcr[1]);
+            minCr = Math.min(minCr, ycbcr[2]);
+            maxCr = Math.max(maxCr, ycbcr[2]);
+
+            System.out.printf("Original: 0x%06X (%s) -> YCbCr: [%.1f, %.1f, %.1f] -> Recovered: 0x%06X%n",
+                input, namedColor.name(), ycbcr[0], ycbcr[1], ycbcr[2], recovered);
+
+            if (input != recovered) {
+                throw new IllegalStateException("Round-trip conversion failed for color: " + namedColor.name());
+            }
+        }
+
+        System.out.println("\nYCbCr component ranges:");
+        System.out.printf("Y:  [%.1f, %.1f]%n", minY, maxY);
+        System.out.printf("Cb: [%.1f, %.1f]%n", minCb, maxCb);
+        System.out.printf("Cr: [%.1f, %.1f]%n", minCr, maxCr);
     }
 }
