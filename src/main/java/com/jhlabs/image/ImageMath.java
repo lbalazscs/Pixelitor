@@ -55,7 +55,6 @@ public class ImageMath {
      * @return the output value
      */
     public static float bias(float a, float b) {
-//		return (float)Math.pow(a, Math.log(b) / Math.log(0.5));
         return a / ((1.0f / b - 2) * (1.0f - a) + 1);
     }
 
@@ -67,18 +66,6 @@ public class ImageMath {
      * @return the output value
      */
     public static float gain(float a, float b) {
-/*
-        float p = (float)Math.log(1.0 - b) / (float)Math.log(0.5);
-
-		if (a < .001)
-			return 0.0f;
-		else if (a > .999)
-			return 1.0f;
-		if (a < 0.5)
-			return (float)Math.pow(2 * a, p) / 2;
-		else
-			return 1.0f - (float)Math.pow(2 * (1. - a), p) / 2;
-*/
         float c = (1.0f / b - 2.0f) * (1.0f - 2.0f * a);
         if (a < 0.5) {
             return a / (c + 1.0f);
@@ -524,6 +511,60 @@ public class ImageMath {
         int b = (int) (cy * m0 + y * m1);
 
         return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    /**
+     * Performs a 1D cubic interpolation between 4 points for each color channel.
+     * This is based on the Catmull-Rom spline.
+     *
+     * @param p0 the first point
+     * @param p1 the second point (interpolation starts here)
+     * @param p2 the third point (interpolation ends here)
+     * @param p3 the fourth point
+     * @param t  the interpolation parameter (0..1)
+     * @return the interpolated ARGB value
+     */
+    private static int cubicInterpolate(int p0, int p1, int p2, int p3, float t) {
+        int v = 0;
+        for (int i = 0; i < 4; i++) {
+            int shift = i * 8;
+            float k0 = (p0 >> shift) & 0xff;
+            float k1 = (p1 >> shift) & 0xff;
+            float k2 = (p2 >> shift) & 0xff;
+            float k3 = (p3 >> shift) & 0xff;
+
+            float c3 = m00 * k0 + m01 * k1 + m02 * k2 + m03 * k3;
+            float c2 = m10 * k0 + m11 * k1 + m12 * k2 + m13 * k3;
+            float c1 = m20 * k0 + m21 * k1 + m22 * k2 + m23 * k3;
+            float c0 = m30 * k0 + m31 * k1 + m32 * k2 + m33 * k3;
+            float result = ((c3 * t + c2) * t + c1) * t + c0;
+
+            int n = (int) result;
+            if (n < 0) {
+                n = 0;
+            } else if (n > 255) {
+                n = 255;
+            }
+            v |= n << shift;
+        }
+        return v;
+    }
+
+    /**
+     * Bicubic interpolation of ARGB values.
+     *
+     * @param x the X interpolation parameter 0..1
+     * @param y the y interpolation parameter 0..1
+     * @param p a 4x4 grid of ARGB values
+     * @return the interpolated value
+     */
+    public static int bicubicInterpolate(float x, float y, int[][] p) {
+        int[] a = new int[4];
+        a[0] = cubicInterpolate(p[0][0], p[0][1], p[0][2], p[0][3], x);
+        a[1] = cubicInterpolate(p[1][0], p[1][1], p[1][2], p[1][3], x);
+        a[2] = cubicInterpolate(p[2][0], p[2][1], p[2][2], p[2][3], x);
+        a[3] = cubicInterpolate(p[3][0], p[3][1], p[3][2], p[3][3], x);
+        return cubicInterpolate(a[0], a[1], a[2], a[3], y);
     }
 
     /**

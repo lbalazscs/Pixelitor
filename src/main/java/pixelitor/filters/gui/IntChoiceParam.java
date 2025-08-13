@@ -127,8 +127,9 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
     }
 
     private static final Item[] interpolationMethods = {
-        new Item("Bilinear (Better)", TransformFilter.BILINEAR),
-        new Item("Nearest Neighbour (Faster)", TransformFilter.NEAREST_NEIGHBOUR),
+        new Item("Bilinear (Smooth, Balanced)", TransformFilter.BILINEAR),
+        new Item("Nearest Neighbour (Fastest)", TransformFilter.NEAREST_NEIGHBOUR),
+        new Item("Bicubic (High Quality)", TransformFilter.BICUBIC),
     };
 
     public static IntChoiceParam forInterpolation() {

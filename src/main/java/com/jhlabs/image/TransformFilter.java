@@ -45,6 +45,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     // Interpolation methods for sampling between pixel centers
     public static final int NEAREST_NEIGHBOUR = 0;
     public static final int BILINEAR = 1;
+    public static final int BICUBIC = 2;
     protected int interpolation = BILINEAR;
 
     protected TransformFilter(String filterName) {
@@ -63,7 +64,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     /**
      * Sets the interpolation method used when sampling between pixel centers.
      *
-     * @param interpolation one of NEAREST_NEIGHBOUR or BILINEAR
+     * @param interpolation one of NEAREST_NEIGHBOUR, BILINEAR, or BICUBIC
      */
     public void setInterpolation(int interpolation) {
         this.interpolation = interpolation;
@@ -86,13 +87,14 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         if (dst == null) {
             ColorModel dstCM = src.getColorModel();
             dst = new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(0, 0), dstCM
-                    .isAlphaPremultiplied(), null);
+                .isAlphaPremultiplied(), null);
         }
 
         int[] inPixels = getRGB(src, 0, 0, srcWidth, srcHeight, null);
 
         return switch (interpolation) {
             case BILINEAR -> filterPixelsBilinear(dst, srcWidth, srcHeight, inPixels);
+            case BICUBIC -> filterPixelsBicubic(dst, srcWidth, srcHeight, inPixels);
             case NEAREST_NEIGHBOUR -> filterPixelsNN(dst, srcWidth, srcHeight, inPixels);
             default -> throw new IllegalStateException("should not get here");
         };
@@ -177,6 +179,65 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                         se = sampleBL(inPixels, srcX + 1, srcY + 1, srcWidth, srcHeight);
                     }
                     outLine[x] = ImageMath.bilinearInterpolate(xWeight, yWeight, nw, ne, sw, se);
+                }
+                return outLine;
+            };
+
+            rowFutures[finalY] = ThreadPool.submit2(rowTask);
+        }
+
+        ThreadPool.waitFor2(rowFutures, dst, width, pt);
+        finishProgressTracker();
+
+        return dst;
+    }
+
+    /**
+     * Applies the transform using bicubic interpolation.
+     */
+    private BufferedImage filterPixelsBicubic(BufferedImage dst, int width, int height, int[] inPixels) {
+        pt = createProgressTracker(height);
+        @SuppressWarnings("unchecked")
+        Future<int[]>[] rowFutures = new Future[height];
+
+        // process each output line in parallel
+        for (int y = 0; y < height; y++) {
+            float[] out = new float[2];
+            int finalY = y;
+
+            Callable<int[]> rowTask = () -> {
+                int[] outLine = new int[width];
+                int[][] p = new int[4][4];
+                for (int x = 0; x < width; x++) {
+                    transformInverse(x, finalY, out);
+
+                    float srcX_f = out[0];
+                    float srcY_f = out[1];
+                    int srcX = (int) FastMath.floor(srcX_f);
+                    int srcY = (int) FastMath.floor(srcY_f);
+                    float xWeight = srcX_f - srcX;
+                    float yWeight = srcY_f - srcY;
+
+                    // check if the 4x4 neighborhood is completely within the image
+                    if (srcX >= 1 && srcX < srcWidth - 2 && srcY >= 1 && srcY < srcHeight - 2) {
+                        // fast path
+                        int i = (srcWidth * (srcY - 1)) + srcX - 1;
+                        for (int row = 0; row < 4; row++) {
+                            p[row][0] = inPixels[i];
+                            p[row][1] = inPixels[i + 1];
+                            p[row][2] = inPixels[i + 2];
+                            p[row][3] = inPixels[i + 3];
+                            i += srcWidth;
+                        }
+                    } else {
+                        // slow path with edge handling
+                        for (int row = 0; row < 4; row++) {
+                            for (int col = 0; col < 4; col++) {
+                                p[row][col] = sampleBL(inPixels, srcX - 1 + col, srcY - 1 + row, srcWidth, srcHeight);
+                            }
+                        }
+                    }
+                    outLine[x] = ImageMath.bicubicInterpolate(xWeight, yWeight, p);
                 }
                 return outLine;
             };
