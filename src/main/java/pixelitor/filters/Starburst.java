@@ -28,6 +28,7 @@ import pixelitor.utils.Shapes;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -43,7 +44,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
- * Fill with Starburst filter
+ * Starburst filter.
  */
 public class Starburst extends ParametrizedFilter {
     public static final String NAME = "Starburst";
@@ -106,8 +107,9 @@ public class Starburst extends ParametrizedFilter {
         double cy = height * center.getRelativeY();
 
         int numRays = numRaysParam.getValue();
-        double sliceWidthAngle = Math.PI / numRays;
-        double sliceAngle = rotate.getValueInRadians();
+        double rayWidthInRadians = Math.PI / numRays;
+        double currentAngle = rotate.getValueInRadians();
+        double angleStep = 2 * rayWidthInRadians;
 
         double radius = width + height; // should be enough even if the center is outside the image
         double spiral = spiralParam.getPercentage();
@@ -116,54 +118,58 @@ public class Starburst extends ParametrizedFilter {
         int numRayColors = rayColors.length;
 
         for (int i = 0; i < numRays; i++) {
-            var slice = new Path2D.Double();
-            slice.moveTo(cx, cy);
-
-            if (spiral == 0) {
-                double p1x = cx + radius * Math.cos(sliceAngle);
-                double p1y = cy + radius * Math.sin(sliceAngle);
-                slice.lineTo(p1x, p1y);
-            } else {
-                List<Point2D> points = calcSpiralPathPoints(cx, cy,
-                    sliceAngle, radius, SPIRAL_RESOLUTION, spiral);
-                Shapes.smoothConnect(points, slice);
-            }
-
-            sliceAngle += sliceWidthAngle; // move to the slice's other side
-
-            if (spiral == 0) {
-                double p2x = cx + radius * Math.cos(sliceAngle);
-                double p2y = cy + radius * Math.sin(sliceAngle);
-                slice.lineTo(p2x, p2y);
-            } else {
-                List<Point2D> points = calcSpiralPathPoints(cx, cy,
-                    sliceAngle, radius, SPIRAL_RESOLUTION, spiral);
-                Collections.reverse(points);
-                Point2D first = points.getFirst();
-                slice.lineTo(first.getX(), first.getY());
-                Shapes.smoothConnect(points, slice);
-            }
-            slice.closePath();
-
-            shapes.add(new ShapeWithColor(slice, rayColors[i % numRayColors]));
-            sliceAngle += sliceWidthAngle; // leave out a slice
+            Shape ray = createRayShape(cx, cy, currentAngle, rayWidthInRadians, radius, spiral);
+            shapes.add(new ShapeWithColor(ray, rayColors[i % numRayColors]));
+            currentAngle += angleStep;
         }
 
         return shapes;
     }
 
-    @Override
-    protected boolean createDefaultDestImg() {
-        return false;
+    private static Shape createRayShape(double cx, double cy, double startAngle, double rayWidthInRadians, double radius, double spiral) {
+        var slice = new Path2D.Double();
+        slice.moveTo(cx, cy);
+
+        // first edge of the ray
+        if (spiral == 0) {
+            double p1x = cx + radius * Math.cos(startAngle);
+            double p1y = cy + radius * Math.sin(startAngle);
+            slice.lineTo(p1x, p1y);
+        } else {
+            List<Point2D> points = calcSpiralPathPoints(cx, cy,
+                startAngle, radius, spiral);
+            Shapes.smoothConnect(points, slice);
+        }
+
+        double endAngle = startAngle + rayWidthInRadians;
+
+        // second edge of the ray
+        if (spiral == 0) {
+            double p2x = cx + radius * Math.cos(endAngle);
+            double p2y = cy + radius * Math.sin(endAngle);
+            slice.lineTo(p2x, p2y);
+        } else {
+            List<Point2D> points = calcSpiralPathPoints(cx, cy,
+                endAngle, radius, spiral);
+            Collections.reverse(points);
+            Point2D first = points.getFirst();
+            slice.lineTo(first.getX(), first.getY());
+            Shapes.smoothConnect(points, slice);
+        }
+        slice.closePath();
+        return slice;
     }
 
+    /**
+     * Calculates the points for one curved edge of a spiral ray.
+     */
     private static List<Point2D> calcSpiralPathPoints(double cx, double cy,
                                                       double startAngle, double radius,
-                                                      int resolution, double spiral) {
+                                                      double spiral) {
         List<Point2D> points = new ArrayList<>();
         points.add(new Point2D.Double(cx, cy));
-        for (int j = 1; j <= resolution; j++) {
-            double r = j * radius / resolution;
+        for (int j = 1; j <= SPIRAL_RESOLUTION; j++) {
+            double r = j * radius / SPIRAL_RESOLUTION;
             double a = spiral * j / SPIRAL_RESOLUTION;
             double x = cx + r * Math.cos(startAngle + a);
             double y = cy + r * Math.sin(startAngle + a);
@@ -177,5 +183,10 @@ public class Starburst extends ParametrizedFilter {
         List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight());
         String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, bgColor.getColor());
         FileIO.saveSVG(svgContent, "starburst.svg");
+    }
+
+    @Override
+    protected boolean createDefaultDestImg() {
+        return false;
     }
 }

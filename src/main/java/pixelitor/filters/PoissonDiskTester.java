@@ -27,7 +27,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -65,7 +65,7 @@ public class PoissonDiskTester extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        SplittableRandom rand = paramSet.getLastSeedSRandom();
+        RandomGenerator rand = paramSet.getLastSeedSRandom();
 
         Graphics2D g2 = dest.createGraphics();
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

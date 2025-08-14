@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import net.jafama.FastMath;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -68,7 +69,7 @@ public class Spiral extends CurveFilter {
         typeParam.setupEnableOtherIf(sidesParam, type ->
             type.valueIs(TYPE_POLYGON));
 
-        helpURL = "https://en.wikipedia.org/wiki/Spiral";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Spiral");
     }
 
     @Override

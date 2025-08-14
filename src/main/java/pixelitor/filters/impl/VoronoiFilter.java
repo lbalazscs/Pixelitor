@@ -28,7 +28,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -48,13 +48,13 @@ public class VoronoiFilter extends PointFilter {
     private PoissonDiskSampling sampling;
     private int[] colors;
 
-    private SplittableRandom rand;
+    private RandomGenerator rand;
 
     public VoronoiFilter(String filterName) {
         super(filterName);
     }
 
-    public void setRand(SplittableRandom rand) {
+    public void setRand(RandomGenerator rand) {
         this.rand = rand;
     }
 

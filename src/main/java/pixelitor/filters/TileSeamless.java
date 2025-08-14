@@ -20,6 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.OffsetFilter;
 import com.jhlabs.image.PointFilter;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.utils.ImageUtils;
 
@@ -51,7 +52,7 @@ public class TileSeamless extends ParametrizedFilter {
     public TileSeamless() {
         super(true);
 
-        helpText = "Modifies an image to make it \"seamless,\" meaning it can be tiled (repeated) without visible edges or discontinuities.";
+        help = Help.fromHTML("Modifies an image to make it \"seamless,\" meaning it can be tiled (repeated) without visible edges or discontinuities.");
 
         initParams(
 //            showParam,

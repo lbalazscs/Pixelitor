@@ -17,9 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Texts;
 
 import javax.swing.*;
@@ -51,8 +49,8 @@ public class DialogMenuBar extends JMenuBar {
             addPresetsMenu();
         }
 
-        if (OpenInBrowserAction.CAN_BROWSE && owner.hasHelp()) {
-            addHelpMenu();
+        if (owner.hasHelp()) {
+            add(this.owner.getHelp().createMenu());
         }
     }
 
@@ -151,9 +149,4 @@ public class DialogMenuBar extends JMenuBar {
         }
     }
 
-    private void addHelpMenu() {
-        JMenu helpMenu = new JMenu(GUIText.HELP);
-        helpMenu.add(new OpenInBrowserAction("Wikipedia", owner.getHelpURL()));
-        add(helpMenu);
-    }
 }

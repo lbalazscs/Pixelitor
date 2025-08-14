@@ -65,7 +65,7 @@ public class Voronoi extends ParametrizedFilter {
             paramSet.addParams(new FilterParam[]{debugGrid});
         }
 
-        helpURL = "https://en.wikipedia.org/wiki/Voronoi_diagram";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Voronoi_diagram");
     }
 
     @Override

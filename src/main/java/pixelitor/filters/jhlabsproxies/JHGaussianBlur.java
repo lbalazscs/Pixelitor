@@ -21,6 +21,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.GaussianFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
@@ -50,7 +51,7 @@ public class JHGaussianBlur extends ParametrizedFilter {
             hpSharpening
         );
 
-        helpURL = "https://en.wikipedia.org/wiki/Gaussian_blur";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Gaussian_blur");
     }
 
     @Override

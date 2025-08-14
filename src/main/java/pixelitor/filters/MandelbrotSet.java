@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.impl.ComplexFractalImpl;
 
 import java.awt.image.BufferedImage;
@@ -36,7 +37,7 @@ public class MandelbrotSet extends ComplexFractal {
     public MandelbrotSet() {
         super(100, 0.2028f);
 
-        helpURL = "https://en.wikipedia.org/wiki/Mandelbrot_set";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Mandelbrot_set");
     }
 
     @Override

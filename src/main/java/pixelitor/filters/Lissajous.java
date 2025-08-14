@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import net.jafama.FastMath;
 import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
@@ -47,7 +48,7 @@ public class Lissajous extends CurveFilter {
             time
         );
 
-        helpURL = "https://en.wikipedia.org/wiki/Lissajous_curve";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Lissajous_curve");
     }
 
     @Override

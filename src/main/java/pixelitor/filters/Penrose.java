@@ -17,10 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.GroupedColorsParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.TransparencyMode;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.Geometry;
 
 import java.awt.BasicStroke;
@@ -146,7 +143,7 @@ public class Penrose extends ParametrizedFilter {
     public Penrose() {
         super(false);
 
-        helpURL = "https://en.wikipedia.org/wiki/Penrose_tiling";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Penrose_tiling");
 
         initParams(
             startType,

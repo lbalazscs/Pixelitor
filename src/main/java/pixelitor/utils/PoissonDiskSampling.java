@@ -25,7 +25,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
 import static com.jhlabs.image.ImageMath.SQRT_2;
 
@@ -55,7 +55,7 @@ public class PoissonDiskSampling {
     private final double cellHeight;
 
     public PoissonDiskSampling(int width, int height, double minDist, int k,
-                               boolean improved, SplittableRandom rnd) {
+                               boolean improved, RandomGenerator rnd) {
         this.width = width;
         this.height = height;
         this.r = minDist;

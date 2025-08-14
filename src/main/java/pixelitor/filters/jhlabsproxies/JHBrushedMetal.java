@@ -24,7 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
 import static java.awt.Color.GRAY;
 import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
@@ -56,12 +56,11 @@ public class JHBrushedMetal extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        SplittableRandom rand = paramSet.getLastSeedSRandom();
+        RandomGenerator rand = paramSet.getLastSeedOf("Xoroshiro128PlusPlus");
 
         var filter = new BrushedMetalFilter(color.getColor().getRGB(),
             radius.getValue(),
             (float) amount.getPercentage(),
-            true,
             (float) shine.getPercentage(),
             NAME);
 

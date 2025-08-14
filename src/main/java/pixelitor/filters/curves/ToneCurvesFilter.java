@@ -19,6 +19,7 @@ package pixelitor.filters.curves;
 
 import com.jhlabs.image.CurvesFilter;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
@@ -48,7 +49,7 @@ public class ToneCurvesFilter extends FilterWithGUI {
     private transient ToneCurvesGUI lastGUI;
 
     public ToneCurvesFilter() {
-        helpURL = "https://en.wikipedia.org/wiki/Curve_(tonality)";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Curve_(tonality)");
         curves = new ToneCurves();
     }
 

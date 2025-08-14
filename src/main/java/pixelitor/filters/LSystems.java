@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import net.jafama.FastMath;
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Shapes;
 
@@ -296,7 +297,7 @@ public class LSystems extends CurveFilter {
             iterations
         );
 
-        helpURL = "https://en.wikipedia.org/wiki/L-system";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/L-system");
     }
 
     @Override

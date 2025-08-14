@@ -19,7 +19,7 @@ package com.jhlabs.image;
 import net.jafama.FastMath;
 
 import java.awt.image.BufferedImage;
-import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
 /**
  * A filter which produces an image simulating brushed metal.
@@ -29,8 +29,7 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
     private float amount = 0.1f;
     private int color = 0xff888888;
     private float shine = 0.1f;
-    private boolean monochrome = true;
-    private SplittableRandom random;
+    private RandomGenerator random;
 
     /**
      * Constructs a BrushedMetalFilter object.
@@ -42,19 +41,17 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
     /**
      * Constructs a BrushedMetalFilter object.
      *
-     * @param color      an int specifying the metal color
-     * @param radius     an int specifying the blur size
-     * @param amount     a float specifying the amount of texture
-     * @param monochrome a boolean -- true for monochrome texture
-     * @param shine      a float specifying the shine to add
+     * @param color  an int specifying the metal color
+     * @param radius an int specifying the blur size
+     * @param amount a float specifying the amount of texture
+     * @param shine  a float specifying the shine to add
      */
-    public BrushedMetalFilter(int color, int radius, float amount, boolean monochrome, float shine, String filterName) {
+    public BrushedMetalFilter(int color, int radius, float amount, float shine, String filterName) {
         super(filterName);
 
         this.color = color;
         this.radius = radius;
         this.amount = amount;
-        this.monochrome = monochrome;
         this.shine = shine;
     }
 
@@ -97,12 +94,8 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
                     tg += f;
                     tb += f;
                 }
-                if (monochrome) {
-                    int n = (int) (255 * (2 * random.nextDouble() - 1) * amount);
-                    inPixels[x] = a | (clamp(tr + n) << 16) | (clamp(tg + n) << 8) | clamp(tb + n);
-                } else {
-                    inPixels[x] = a | (random(tr) << 16) | (random(tg) << 8) | random(tb);
-                }
+                int n = (int) (255 * (2 * random.nextDouble() - 1) * amount);
+                inPixels[x] = a | (clamp(tr + n) << 16) | (clamp(tg + n) << 8) | clamp(tb + n);
             }
 
             if (radius != 0) {
@@ -230,16 +223,7 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
         this.color = color;
     }
 
-    /**
-     * Set the type of noise to add.
-     *
-     * @param monochrome true for monochrome noise
-     */
-    public void setMonochrome(boolean monochrome) {
-        this.monochrome = monochrome;
-    }
-
-    public void setRandom(SplittableRandom random) {
+    public void setRandom(RandomGenerator random) {
         this.random = random;
     }
 

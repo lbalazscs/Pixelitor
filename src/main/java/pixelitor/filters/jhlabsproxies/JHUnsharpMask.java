@@ -19,6 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.UnsharpFilter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
@@ -49,7 +50,7 @@ public class JHUnsharpMask extends ParametrizedFilter {
             threshold
         );
 
-        helpURL = "https://en.wikipedia.org/wiki/Unsharp_masking";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Unsharp_masking");
     }
 
     @Override

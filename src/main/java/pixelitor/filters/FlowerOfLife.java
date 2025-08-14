@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -58,7 +59,7 @@ public class FlowerOfLife extends CurveFilter {
             iterations,
             grid);
 
-        helpURL = "https://en.wikipedia.org/wiki/Overlapping_circles_grid";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Overlapping_circles_grid");
     }
 
     @Override

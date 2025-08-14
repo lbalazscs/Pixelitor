@@ -21,6 +21,7 @@ import com.jhlabs.image.DoGFilter;
 import pixelitor.filters.Invert;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
@@ -53,7 +54,7 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
             invert
         );
 
-        helpURL = "https://en.wikipedia.org/wiki/Difference_of_Gaussians";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Difference_of_Gaussians");
     }
 
     @Override

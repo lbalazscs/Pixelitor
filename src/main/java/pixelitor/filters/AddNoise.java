@@ -27,7 +27,7 @@ import pixelitor.utils.ProgressTracker;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
 import static pixelitor.gui.GUIText.OPACITY;
 import static pixelitor.utils.ImageUtils.isGrayscale;
@@ -69,18 +69,15 @@ public class AddNoise extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        SplittableRandom rand = paramSet.getLastSeedSRandom();
+        RandomGenerator rand = paramSet.getLastSeedSRandom();
 
-        if (isGrayscale(src)) {
-            return addNoiseToGray(src, dest, rand);
-        }
-
-        boolean coverageAnim = method.getValue() == METHOD_COVERAGE_ANIM;
-        return addNoiseToRGB(src, dest, coverageAnim, rand);
+        return isGrayscale(src)
+            ? addNoiseToGray(src, dest, rand)
+            : addNoiseToRGB(src, dest, rand);
     }
 
-    private BufferedImage addNoiseToRGB(BufferedImage src, BufferedImage dest,
-                                        boolean coverageAnim, SplittableRandom rand) {
+    private BufferedImage addNoiseToRGB(BufferedImage src, BufferedImage dest, RandomGenerator rand) {
+        boolean coverageAnim = method.getValue() == METHOD_COVERAGE_ANIM;
         int[] srcPixels = ImageUtils.getPixels(src);
         int[] destPixels = ImageUtils.getPixels(dest);
         int numPixels = destPixels.length;
@@ -124,8 +121,8 @@ public class AddNoise extends ParametrizedFilter {
             }
 
             if (!coverageAnim) {
-                // If coverage animation isn't a requirement, then it is faster
-                // to generate the random values only here, for the covered pixels.
+                // if coverage animation isn't a requirement, then it is faster
+                // to generate the random values only here, for the covered pixels
                 randomInt = rand.nextInt();
             }
 
@@ -135,11 +132,11 @@ public class AddNoise extends ParametrizedFilter {
 
                 if (fullOpacity) {
                     // if we have full saturation (the default), then we can
-                    // just use the random pixel as it is - if the opacity is also 100.
+                    // just use the random pixel as it is - if the opacity is also 100
                     destPixels[i] = randomInt;
                 } else {
-                    // ...or mix the random pixel with the source according to
-                    // the opacity
+                    // ...or mix the random pixel with the source
+                    // according to the opacity
                     destPixels[i] = ImageMath.mixColors(opacity, srcRGB, randomInt);
                 }
             } else { // desaturate the random pixel
@@ -167,7 +164,7 @@ public class AddNoise extends ParametrizedFilter {
     }
 
     private BufferedImage addNoiseToGray(BufferedImage src, BufferedImage dest,
-                                         SplittableRandom rand) {
+                                         RandomGenerator rand) {
         byte[] srcPixels = ImageUtils.getGrayPixels(src);
         byte[] destPixels = ImageUtils.getGrayPixels(dest);
 

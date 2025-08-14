@@ -30,6 +30,8 @@ import pixelitor.utils.debug.Debuggable;
 
 import java.util.*;
 import java.util.function.LongConsumer;
+import java.util.random.RandomGenerator;
+import java.util.random.RandomGeneratorFactory;
 
 import static java.util.Locale.Category.FORMAT;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING_STATE;
@@ -411,8 +413,23 @@ public class ParamSet implements Debuggable {
         return random;
     }
 
-    public SplittableRandom getLastSeedSRandom() {
+    /**
+     * Returns a non thread-safe random number generator that is
+     * faster than {@link Random}, seeded to the last value.
+     */
+    public RandomGenerator getLastSeedSRandom() {
+        // apparently this is a bit faster than "Xoroshiro128PlusPlus"
+        // in the case of "Add Noise"
         return new SplittableRandom(seed);
+    }
+
+    private static final Map<String, RandomGeneratorFactory> rndFactoryMap = new HashMap<>();
+
+    public RandomGenerator getLastSeedOf(String className) {
+        RandomGeneratorFactory factory = rndFactoryMap.computeIfAbsent(
+            className,
+            s -> RandomGeneratorFactory.of(className));
+        return factory.create(seed);
     }
 
     /**

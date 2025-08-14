@@ -32,11 +32,12 @@ public interface DialogMenuOwner extends PresetOwner {
     }
 
     default boolean hasHelp() {
+        // should be overridden by subclasses that have help
         return false;
     }
 
-    default String getHelpURL() {
-        // should be overridden by subclasses that have a help URL
+    default Help getHelp() {
+        // should be overridden by subclasses that have help
         throw new UnsupportedOperationException();
     }
 }

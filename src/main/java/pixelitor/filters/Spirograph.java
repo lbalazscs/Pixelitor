@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -70,7 +71,7 @@ public class Spirograph extends CurveFilter {
             zoom
         );
 
-        helpURL = "https://en.wikipedia.org/wiki/Spirograph";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Spirograph");
     }
 
     @Override

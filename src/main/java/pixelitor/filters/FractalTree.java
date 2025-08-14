@@ -31,7 +31,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-import java.util.SplittableRandom;
 import java.util.random.RandomGenerator;
 
 import static java.awt.BasicStroke.CAP_ROUND;
@@ -57,7 +56,7 @@ public class FractalTree extends ParametrizedFilter {
 
     private final RangeParam iterations = new RangeParam("Age (Iterations)", 1, 10, 17);
     private final RangeParam angle = new RangeParam("Angle", 1, 20, 45);
-    private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 40, 100);
+    private final RangeParam randomness = new RangeParam("Randomness", 0, 40, 100);
     private final GroupedRangeParam width = new GroupedRangeParam("Width",
         new RangeParam[]{
             new RangeParam("Overall", 50, 100, 300),
@@ -100,7 +99,7 @@ public class FractalTree extends ParametrizedFilter {
         initParams(
             iterations,
             zoom,
-            randomnessParam,
+            randomness,
             curvedness,
             angle,
             physics.notLinkable(),
@@ -112,13 +111,14 @@ public class FractalTree extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        SplittableRandom rand = paramSet.getLastSeedSRandom();
+        RandomGenerator rand = paramSet.getLastSeedSRandom();
 
+        // initialize alternating branch drawing order
         leftFirst = true;
 
         defaultLength = src.getHeight() * zoom.getPercentage() / 100.0;
-        double randPercent = randomnessParam.getValue() / 100.0;
-        hasRandomness = randomnessParam.getValue() > 0;
+        double randPercent = randomness.getValue() / 100.0;
+        hasRandomness = randomness.getValue() > 0;
         lengthDeviation = defaultLength * randPercent;
         angleDeviation = 10.0 * randPercent;
 
@@ -142,17 +142,13 @@ public class FractalTree extends ParametrizedFilter {
         }
 
         for (int depth = 1; depth <= maxDepth; depth++) {
-            double w1 = depth * width.getPercentage(0);
-            double trunkWidth = width.getPercentage(1);
-            double base = Math.pow(trunkWidth, 1.0 / (maxDepth - 1));
-            double w2 = Math.pow(base, depth - 1);
-            float strokeWidth = (float) (w1 * w2);
+            float strokeWidth = calcStrokeWidthAtDepth(depth, maxDepth);
             float zoomedStrokeWidth = (strokeWidth * zoom.getValue()) / (float) zoom.getDefaultValue();
             strokeLookup[depth] = new BasicStroke(zoomedStrokeWidth, CAP_ROUND, JOIN_ROUND);
 
             // colors
-            float where = ((float) depth) / iterations.getValue();
-            int rgb = colors.getColorMap().getColor(1.0f - where);
+            float depthRatio = ((float) depth) / maxDepth;
+            int rgb = colors.getColorMap().getColor(1.0f - depthRatio);
             colorLookup[depth] = new Color(rgb);
 
             if (doPhysics) {
@@ -160,20 +156,19 @@ public class FractalTree extends ParametrizedFilter {
             }
         }
 
-        double c = curvedness.getPercentage();
+        double initialCurvature = curvedness.getPercentage();
         if (rand.nextBoolean()) {
-            c = -c;
+            initialCurvature = -initialCurvature;
         }
 
-        int drawTreeCalls = 2;
-        for (int i = 1; i < maxDepth; i++) {
-            drawTreeCalls *= 2;
-        }
-        drawTreeCalls--;
+        // the drawTree calls form a perfect binary tree, and
+        // this is the number of nodes in it
+        int drawTreeCalls = (1 << maxDepth) - 1;
+
         pt = new StatusBarProgressTracker(NAME, drawTreeCalls);
 
         drawTree(g, src.getWidth() / 2.0, src.getHeight(),
-            270 + genAngleRandomness(rand), maxDepth, rand, c);
+            270 + genAngleRandomness(rand), maxDepth, rand, initialCurvature);
 
         g.dispose();
         pt.finished();
@@ -181,6 +176,20 @@ public class FractalTree extends ParametrizedFilter {
         return dest;
     }
 
+    private float calcStrokeWidthAtDepth(int depth, int maxDepth) {
+        // w1 provides linear scaling and w2 provides exponential scaling with depth
+        // the combination creates branches that are thicker near the trunk
+        double w1 = depth * width.getPercentage(0);
+        double trunkWidth = width.getPercentage(1);
+        double base = Math.pow(trunkWidth, 1.0 / (maxDepth - 1));
+        double w2 = Math.pow(base, depth - 1);
+        float strokeWidth = (float) (w1 * w2);
+        return strokeWidth;
+    }
+
+    /**
+     * Recursively draws a branch and its children.
+     */
     private void drawTree(Graphics2D g, double startX, double startY,
                           double angle, int depth,
                           RandomGenerator rand, double curvature) {
@@ -222,6 +231,7 @@ public class FractalTree extends ParametrizedFilter {
 
         pt.unitDone();
 
+        // alternate which branch is drawn first for a more natural look
         leftFirst = !leftFirst;
         if (leftFirst) {
             drawTree(g, endX, endY, leftBranchAngle, nextDepth, rand, curvature);
@@ -232,12 +242,14 @@ public class FractalTree extends ParametrizedFilter {
         }
     }
 
+    /**
+     * Adjusts a branch's angle based on physics.
+     */
     private double adjustPhysics(double angle, int depth) {
         assert doPhysics;
 
-        // ensure the angle is within the range 0-360
-        angle += 720;
-        angle = angle % 360;
+        // normalize angle to [0, 360)
+        angle = (angle % 360.0 + 360.0) % 360.0;
 
         Physics p = physicsLookup[depth];
 
@@ -260,6 +272,9 @@ public class FractalTree extends ParametrizedFilter {
         return angle;
     }
 
+    /**
+     * Draws a possibly curved line between two points.
+     */
     private static void connectPoints(Graphics2D g, double curvature,
                                       double startX, double startY,
                                       double endX, double endY) {
@@ -284,14 +299,21 @@ public class FractalTree extends ParametrizedFilter {
         }
     }
 
+    /**
+     * Generates a random angle deviation.
+     */
     private double genAngleRandomness(RandomGenerator rand) {
         if (!hasRandomness) {
             return 0;
         }
 
+        // returns a uniform deviation in [-angleDeviation, angleDeviation]
         return -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
     }
 
+    /**
+     * Generates a random length for a branch segment.
+     */
     private double genRandomLength(RandomGenerator rand) {
         if (!hasRandomness) {
             return defaultLength;
@@ -299,15 +321,20 @@ public class FractalTree extends ParametrizedFilter {
 
         double minLength = defaultLength - lengthDeviation;
 
+        // returns a uniform length in [defaultLength - lengthDeviation, defaultLength + lengthDeviation]
         return (minLength + 2 * lengthDeviation * rand.nextDouble());
     }
 
+    /**
+     * Holds pre-calculated physics values for a given tree depth.
+     */
     private static class Physics {
         public final double gravityStrength;
         public final double windStrength;
 
-        private Physics(int gravity, int wind, float strokeWidth2) {
-            double effectStrength = 0.02 / strokeWidth2;
+        private Physics(int gravity, int wind, float strokeWidth) {
+            // make thinner branches more affected by physics
+            double effectStrength = 0.02 / strokeWidth;
 
             gravityStrength = effectStrength * gravity;
             windStrength = effectStrength * wind;

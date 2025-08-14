@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.composite.MultiplyComposite;
 import com.jhlabs.image.BoxBlurFilter;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -48,7 +49,7 @@ public class Orton extends ParametrizedFilter {
             amount
         );
 
-        helpURL = "https://en.wikipedia.org/wiki/Orton_(photography)";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Orton_(photography)");
     }
 
     @Override

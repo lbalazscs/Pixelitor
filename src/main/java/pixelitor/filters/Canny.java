@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pd.CannyEdgeDetector;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
@@ -64,7 +65,7 @@ public class Canny extends ParametrizedFilter {
         );
         highThreshold.ensureHigherValueThan(lowThreshold);
 
-        helpURL = "https://en.wikipedia.org/wiki/Canny_edge_detector";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Canny_edge_detector");
     }
 
     @Override

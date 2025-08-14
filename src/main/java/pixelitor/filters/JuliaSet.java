@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.ComplexFractalImpl;
 
@@ -46,7 +47,7 @@ public class JuliaSet extends ComplexFractal {
 
         insertParam(cParam.notLinkable().withDecimalPlaces(2), 3);
 
-        helpURL = "https://en.wikipedia.org/wiki/Julia_set";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Julia_set");
     }
 
     @Override

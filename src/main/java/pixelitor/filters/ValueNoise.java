@@ -19,10 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.ThreadPool;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.EnumParam;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.util.NoiseInterpolation;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -84,7 +81,7 @@ public class ValueNoise extends ParametrizedFilter {
             color2
         ).withAction(paramSet.createReseedAction(this::reseed));
 
-        helpURL = "https://en.wikipedia.org/wiki/Value_noise";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Value_noise");
 
         reseed(paramSet.getLastSeed());
     }

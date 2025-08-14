@@ -349,7 +349,7 @@ public class Truchet extends ParametrizedFilter {
     public Truchet() {
         super(false);
 
-        helpURL = "https://en.wikipedia.org/wiki/Truchet_tiles";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Truchet_tiles");
 
         typeParam.setupEnableOtherIf(widthParam, type -> type != TileType.TRIANGLES);
         FilterButtonModel reseedAction = paramSet.createReseedAction();

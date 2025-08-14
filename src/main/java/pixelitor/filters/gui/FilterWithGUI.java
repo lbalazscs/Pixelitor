@@ -30,8 +30,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     @Serial
     private static final long serialVersionUID = -7575676579160980928L;
 
-    protected transient String helpURL;
-    protected transient String helpText;
+    protected transient Help help;
 
     protected FilterWithGUI() {
     }
@@ -76,11 +75,11 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
 
     @Override
     public boolean hasHelp() {
-        return helpURL != null;
+        return help != null;
     }
 
     @Override
-    public String getHelpURL() {
-        return helpURL;
+    public Help getHelp() {
+        return help;
     }
 }

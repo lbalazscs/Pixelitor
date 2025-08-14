@@ -22,6 +22,7 @@ import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.FilterButtonModel;
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
@@ -70,7 +71,7 @@ public class Rose extends ParametrizedFilter {
             transform.createDialogParam()
         ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
 
-        helpURL = "https://en.wikipedia.org/wiki/Rose_(mathematics)";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Rose_(mathematics)");
     }
 
     @Override

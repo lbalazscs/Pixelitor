@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
@@ -41,7 +42,7 @@ public class Kuwahara extends ParametrizedFilter {
     public Kuwahara() {
         super(true);
 
-        helpURL = "https://en.wikipedia.org/wiki/Kuwahara_filter";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Kuwahara_filter");
 
         initParams(
             radiusParam

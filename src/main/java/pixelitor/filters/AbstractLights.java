@@ -99,7 +99,7 @@ public class AbstractLights extends ParametrizedFilter {
     public AbstractLights() {
         super(false);
 
-        // disable hue variation when complexity is 1 (single particle)
+        // disable hue variation when complexity is 1 (two particles)
         complexityParam.setupDisableOtherIf(hueRandomnessParam, value -> value == 1);
 
         // disable hue controls when fully white blend is selected
@@ -197,8 +197,7 @@ public class AbstractLights extends ParametrizedFilter {
             int x = random.nextInt(width);
             int y = random.nextInt(height);
             Color color = generateParticleColor(random, bri, baseHue, hueRandomness);
-            double rnd = random.nextDouble();
-            double angle = 2 * rnd * Math.PI;
+            double angle = 2 * random.nextDouble() * Math.PI;
 
             switch (type) {
                 case CHAOS, STAR -> particles.add(new Particle(x, y, speed, angle, color, bounce));
@@ -228,13 +227,13 @@ public class AbstractLights extends ParametrizedFilter {
     }
 
     /**
-     * Connects each particle to the previous one in the list, forming a chain.
+     * Connects particles in a closed chain, where each particle is linked to the previous one.
      */
     private static void connectInChain(List<Particle> particles) {
         int numParticles = particles.size();
         for (int i = 0; i < numParticles; i++) {
-            int siblingIndex = (i > 0) ? i - 1 : numParticles - 1;
-            particles.get(i).sibling = particles.get(siblingIndex);
+            int prevIndex = (i > 0) ? i - 1 : numParticles - 1;
+            particles.get(i).sibling = particles.get(prevIndex);
         }
     }
 

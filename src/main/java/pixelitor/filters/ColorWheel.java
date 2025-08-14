@@ -21,10 +21,7 @@ package pixelitor.filters;
 import net.jafama.FastMath;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.ThreadPool;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.EnumParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.ColorSpaces;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -91,7 +88,7 @@ public class ColorWheel extends ParametrizedFilter {
     public ColorWheel() {
         super(false);
 
-        helpURL = "https://en.wikipedia.org/wiki/Color_wheel";
+        help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Color_wheel");
 
         initParams(type, center,
             hueRotParam, brgLumParam, satParam, spiralParam);
