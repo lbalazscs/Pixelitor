@@ -1143,6 +1143,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Penrose.NAME, Penrose::new);
         sub.addFilter(Rose.NAME, Rose::new);
         sub.addFilter(Starburst.NAME, Starburst::new);
+        sub.addFilter(Stripes.NAME, Stripes::new);
         sub.addFilter(Truchet.NAME, Truchet::new);
 
         return sub;

@@ -1747,6 +1747,7 @@ public class MainGuiTest {
         testFilterWithDialog("Checker Pattern", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Starburst", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Stripes", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Truchet Tiles", Randomize.YES, Reseed.NO, ShowOriginal.NO);
     }
 
