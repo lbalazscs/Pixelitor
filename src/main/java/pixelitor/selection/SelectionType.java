@@ -30,7 +30,7 @@ import java.awt.Point;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
@@ -67,13 +67,13 @@ public enum SelectionType {
     }, LASSO("Freehand") {
         @Override
         public Shape createShapeFromDrag(Drag drag, Shape oldShape) {
-            if (oldShape instanceof GeneralPath gp) {
+            if (oldShape instanceof Path2D path) {
                 // extend the existing path
-                gp.lineTo(drag.getEndX(), drag.getEndY());
-                return gp;
+                path.lineTo(drag.getEndX(), drag.getEndY());
+                return path;
             } else {
                 // start a new path
-                GeneralPath p = new GeneralPath();
+                Path2D p = new Path2D.Double();
                 p.moveTo(drag.getStartX(), drag.getStartY());
                 p.lineTo(drag.getEndX(), drag.getEndY());
                 return p;
@@ -92,13 +92,13 @@ public enum SelectionType {
 
         @Override
         public Shape createShapeFromEvent(PMouseEvent pe, Shape oldShape) {
-            if (oldShape instanceof GeneralPath gp) {
+            if (oldShape instanceof Path2D path) {
                 // extend the existing path
-                gp.lineTo(pe.getImX(), pe.getImY());
-                return gp;
+                path.lineTo(pe.getImX(), pe.getImY());
+                return path;
             } else {
                 // start a new path
-                GeneralPath p = new GeneralPath();
+                Path2D p = new Path2D.Double();
                 p.moveTo(pe.getImX(), pe.getImY());
                 // first point only defines the start, no line yet
                 return p;

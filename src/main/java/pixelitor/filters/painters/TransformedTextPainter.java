@@ -697,7 +697,7 @@ public class TransformedTextPainter implements Debuggable {
         boolean hasUnderline = UNDERLINE_ON.equals(attributes.get(UNDERLINE));
         boolean hasStrikeThrough = STRIKETHROUGH_ON.equals(attributes.get(STRIKETHROUGH));
 
-        GeneralPath fullShape = new GeneralPath();
+        Path2D fullShape = new Path2D.Float();
 
         float currentY = effectsPadding + metrics.getAscent();
 
@@ -754,7 +754,7 @@ public class TransformedTextPainter implements Debuggable {
             return glyphsOutline;
         }
 
-        // uses Area instead of GeneralPath.append to ensure that
+        // uses Area instead of Path2D.append to ensure that
         // self-intersecting paths don't create unfilled holes
         // and effects are painted as if the underline/strikethrough
         // was part of the font

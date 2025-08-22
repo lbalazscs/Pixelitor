@@ -21,7 +21,7 @@ import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.FlatteningPathIterator;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ public class RailwayTrackStroke implements Stroke {
     public Shape createStrokedShape(Shape shape) {
         double[] coords = new double[6];
 
-        GeneralPath outline = new GeneralPath();
+        Path2D outline = new Path2D.Double();
         List<Point2D> points = new ArrayList<>();
 
         var it = new FlatteningPathIterator(shape.getPathIterator(null), 1);
@@ -101,7 +101,7 @@ public class RailwayTrackStroke implements Stroke {
         return outline;
     }
 
-    private void createSubpathOutline(List<Point2D> points, GeneralPath result) {
+    private void createSubpathOutline(List<Point2D> points, Path2D result) {
         if (points.size() < 2) {
             return;
         }
@@ -109,8 +109,8 @@ public class RailwayTrackStroke implements Stroke {
         BasicStroke railStroke = new BasicStroke((float) railWidth);
         BasicStroke crosstieStroke = new BasicStroke((float) crosstieWidth);
 
-        GeneralPath leftRail = new GeneralPath();
-        GeneralPath rightRail = new GeneralPath();
+        Path2D leftRail = new Path2D.Double();
+        Path2D rightRail = new Path2D.Double();
 
         double halfRailDist = railDistance / 2;
 
@@ -205,7 +205,7 @@ public class RailwayTrackStroke implements Stroke {
             double t = remainingDist / segmentLength;
             Point2D crosstieCenter = Geometry.interpolate(p1, p2, t);
 
-            GeneralPath crosstie = new GeneralPath();
+            Path2D crosstie = new Path2D.Double();
             Point2D leftEnd = new Point2D.Double();
             Point2D rightEnd = new Point2D.Double();
 

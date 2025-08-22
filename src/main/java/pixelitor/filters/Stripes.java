@@ -30,7 +30,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -57,6 +57,9 @@ public class Stripes extends ParametrizedFilter {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    // an approximation of a sine-like arc using a cubic Bezier curve
+    private static final double BEZIER_CONTROL_FACTOR = 0.552284749831;
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
         new Item("Straight", TYPE_STRAIGHT),
@@ -174,7 +177,7 @@ public class Stripes extends ParametrizedFilter {
 
         // create a prototype centerline path for the chevron
         // it needs to be long enough to span the diagonal, so we add a buffer
-        GeneralPath centerline = new GeneralPath();
+        Path2D centerline = new Path2D.Double();
         double startX = -diagonal / 2.0 - wavelength;
         double endX = diagonal / 2.0 + wavelength;
         double currentX = startX;
@@ -189,7 +192,6 @@ public class Stripes extends ParametrizedFilter {
             goUp = !goUp;
         }
 
-        // use BasicStroke to create a thick shape from the centerline
         Shape protoChevron = createStrokedShape(centerline, thickness);
 
         return generateStripes(width, height, period, protoChevron);
@@ -212,9 +214,7 @@ public class Stripes extends ParametrizedFilter {
         double diagonal = Math.sqrt(width * width + height * height);
 
         // create a prototype centerline path for the wave using Bezier curves
-        GeneralPath centerline = new GeneralPath();
-        // this constant provides a good approximation of a sine-like arc using a cubic Bezier curve
-        final double BEZIER_CONTROL_FACTOR = 0.552284749831;
+        Path2D centerline = new Path2D.Double();
 
         double halfWavelength = wavelength / 2.0;
         double controlXOffset = halfWavelength * BEZIER_CONTROL_FACTOR;
@@ -247,9 +247,10 @@ public class Stripes extends ParametrizedFilter {
         return generateStripes(width, height, period, protoWave);
     }
 
-    private static Shape createStrokedShape(GeneralPath centerPath, int thickness) {
-        // use BasicStroke to create a thick shape from the centerPath
-        BasicStroke stroke = new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    // Creates a thick shape from a centerline.
+    private static Shape createStrokedShape(Path2D centerPath, int thickness) {
+        // use a large miter limit to ensure that Chevron always has proper spikes
+        BasicStroke stroke = new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 100.0f);
         return stroke.createStrokedShape(centerPath);
     }
 

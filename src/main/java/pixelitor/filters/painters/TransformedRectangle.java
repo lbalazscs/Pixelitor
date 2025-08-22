@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
 import static java.lang.Math.max;
@@ -56,7 +56,7 @@ public class TransformedRectangle implements Debuggable {
     private double bottomLeftY;
 
     // Cached shape and bounding box of the transformed rectangle
-    private GeneralPath cachedShape;
+    private Path2D cachedShape;
     private Rectangle cachedBox;
 
     public TransformedRectangle(Rectangle r,
@@ -137,7 +137,7 @@ public class TransformedRectangle implements Debuggable {
             return cachedShape;
         }
 
-        cachedShape = new GeneralPath();
+        cachedShape = new Path2D.Double();
         cachedShape.moveTo(topLeftX, topLeftY);
         cachedShape.lineTo(topRightX, topRightY);
         cachedShape.lineTo(bottomRightX, bottomRightY);

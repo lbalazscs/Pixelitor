@@ -102,7 +102,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     private int cursorOffset = 0;
 
     // the box shape in component coordinates
-    private GeneralPath coBoxShape;
+    private Path2D coBoxShape;
 
     private transient boolean wholeBoxDrag = false;
     private transient double wholeBoxDragStartCoX;
@@ -391,7 +391,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     }
 
     private void updateBoxShape() {
-        coBoxShape = new GeneralPath();
+        coBoxShape = new Path2D.Double();
         coBoxShape.moveTo(nw.getX(), nw.getY());
         coBoxShape.lineTo(ne.getX(), ne.getY());
         coBoxShape.lineTo(se.getX(), se.getY());

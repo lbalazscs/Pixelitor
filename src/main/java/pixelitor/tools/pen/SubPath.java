@@ -33,7 +33,7 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serial;
 import java.io.Serializable;
@@ -158,21 +158,21 @@ public class SubPath implements Serializable, Transformable {
         return anchorPoints.size();
     }
 
-    public Shape toComponentSpaceShape() {
-        GeneralPath gp = new GeneralPath();
-        addToComponentSpaceShape(gp);
-        return gp;
+    private Shape toComponentSpaceShape() {
+        Path2D p = new Path2D.Double();
+        addToComponentSpaceShape(p);
+        return p;
     }
 
-    public void addToComponentSpaceShape(GeneralPath path) {
+    public void addToComponentSpaceShape(Path2D path) {
         addToShape(path, p -> p.x, p1 -> p1.y);
     }
 
-    public void addToImageSpaceShape(GeneralPath path) {
+    public void addToImageSpaceShape(Path2D path) {
         addToShape(path, p -> p.imX, p1 -> p1.imY);
     }
 
-    private void addToShape(GeneralPath gp,
+    private void addToShape(Path2D p,
                             ToDoubleFunction<DraggablePoint> toX,
                             ToDoubleFunction<DraggablePoint> toY) {
         if (anchorPoints.isEmpty()) {
@@ -180,8 +180,8 @@ public class SubPath implements Serializable, Transformable {
         }
 
         AnchorPoint first = getFirstAnchor();
-        // moveTo marks the beginning of a new subpath in GeneralPath
-        gp.moveTo(toX.applyAsDouble(first), toY.applyAsDouble(first));
+        // moveTo marks the beginning of a new subpath in Path2D
+        p.moveTo(toX.applyAsDouble(first), toY.applyAsDouble(first));
         AnchorPoint prev = first;
 
         // add each curve segment
@@ -192,12 +192,12 @@ public class SubPath implements Serializable, Transformable {
 
             if (prevCtrlOut.isRetracted() && currCtrlIn.isRetracted()) {
                 // both control points are retracted - use a straight line
-                gp.lineTo(
+                p.lineTo(
                     toX.applyAsDouble(curr),
                     toY.applyAsDouble(curr));
             } else {
                 // use a cubic Bézier curve with both control points
-                gp.curveTo(
+                p.curveTo(
                     toX.applyAsDouble(prevCtrlOut),
                     toY.applyAsDouble(prevCtrlOut),
                     toX.applyAsDouble(currCtrlIn),
@@ -214,7 +214,7 @@ public class SubPath implements Serializable, Transformable {
         if (moving != null && Tools.PEN.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
             double movingX = toX.applyAsDouble(moving);
             double movingY = toY.applyAsDouble(moving);
-            gp.curveTo(
+            p.curveTo(
                 toX.applyAsDouble(last.ctrlOut),
                 toY.applyAsDouble(last.ctrlOut),
                 movingX, // the "ctrl in" of the moving is "retracted"
@@ -228,11 +228,11 @@ public class SubPath implements Serializable, Transformable {
             ControlPoint lastCtrlOut = last.ctrlOut;
             ControlPoint firstCtrlIn = first.ctrlIn;
             if (lastCtrlOut.isRetracted() && firstCtrlIn.isRetracted()) {
-                gp.lineTo(
+                p.lineTo(
                     toX.applyAsDouble(first),
                     toY.applyAsDouble(first));
             } else {
-                gp.curveTo(
+                p.curveTo(
                     toX.applyAsDouble(lastCtrlOut),
                     toY.applyAsDouble(lastCtrlOut),
                     toX.applyAsDouble(firstCtrlIn),
@@ -242,7 +242,7 @@ public class SubPath implements Serializable, Transformable {
             }
             // We reached the first point again,
             // however call this to add a clean SEG_CLOSE.
-            gp.closePath();
+            p.closePath();
         }
     }
 
@@ -279,7 +279,7 @@ public class SubPath implements Serializable, Transformable {
         }
     }
 
-    private void paintRecentAnchor(Graphics2D g, AnchorPoint anchor, int i, int numPoints) {
+    private void paintRecentAnchor(Graphics2D g, AnchorPoint anchor, int i, int numAnchors) {
         // paint the handles when any of the anchor or
         // its controls were recently edited
         anchor.paintHandles(g, true, true);
@@ -289,12 +289,12 @@ public class SubPath implements Serializable, Transformable {
             AnchorPoint prev = anchorPoints.get(i - 1);
             prev.paintHandles(g, false, true);
         } else if (closed) {
-            AnchorPoint prev = anchorPoints.get(numPoints - 1);
+            AnchorPoint prev = anchorPoints.get(numAnchors - 1);
             prev.paintHandles(g, false, true);
         }
 
         // ...and the "in" handle of the next anchor
-        if (i < numPoints - 1) {
+        if (i < numAnchors - 1) {
             AnchorPoint next = anchorPoints.get(i + 1);
             next.paintHandles(g, true, false);
         } else if (closed) {
@@ -337,16 +337,16 @@ public class SubPath implements Serializable, Transformable {
      */
     public void mergeCloseAnchors() {
         List<AnchorPoint> mergedPoints = new ArrayList<>();
-        int numPoints = anchorPoints.size();
+        int numAnchors = anchorPoints.size();
         int index = 0;
         boolean mergedWithFirst = false;
 
-        while (index < numPoints) {
+        while (index < numAnchors) {
             AnchorPoint current = anchorPoints.get(index);
             AnchorPoint next;
             boolean comparingWithFirst = false;
 
-            if (index < numPoints - 1) {
+            if (index < numAnchors - 1) {
                 next = anchorPoints.get(index + 1);
             } else if (closed) {
                 next = anchorPoints.getFirst();
@@ -453,8 +453,8 @@ public class SubPath implements Serializable, Transformable {
 
     @SuppressWarnings("SameReturnValue")
     public boolean checkInvariants() {
-        int numPoints = anchorPoints.size();
-        for (int i = 0; i < numPoints; i++) {
+        int numAnchors = anchorPoints.size();
+        for (int i = 0; i < numAnchors; i++) {
             AnchorPoint anchor = anchorPoints.get(i);
             if (anchor.getSubPath() != this) {
                 throw new IllegalStateException("wrong subpath in anchor " + i

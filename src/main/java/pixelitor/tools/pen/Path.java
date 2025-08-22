@@ -34,7 +34,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.io.IOException;
@@ -135,7 +134,7 @@ public class Path implements Serializable, Debuggable {
     }
 
     public Path2D toImageSpaceShape() {
-        GeneralPath path = new GeneralPath();
+        Path2D path = new Path2D.Double();
         for (SubPath subPath : subPaths) {
             subPath.addToImageSpaceShape(path);
         }
@@ -143,7 +142,7 @@ public class Path implements Serializable, Debuggable {
     }
 
     public Shape toComponentSpaceShape() {
-        GeneralPath path = new GeneralPath();
+        Path2D path = new Path2D.Double();
         for (SubPath subPath : subPaths) {
             subPath.addToComponentSpaceShape(path);
         }

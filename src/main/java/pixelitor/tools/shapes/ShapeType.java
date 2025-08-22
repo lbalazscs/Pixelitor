@@ -185,7 +185,7 @@ public enum ShapeType {
             return OverlayType.WIDTH_HEIGHT;
         }
     }, ARROW("Arrow", true, false, false) {
-        GeneralPath unitArrow = null;
+        Path2D unitArrow = null;
 
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {

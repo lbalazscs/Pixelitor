@@ -109,7 +109,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
      * Returns true if this filter can process grayscale (TYPE_BYTE_GRAY) images.
      */
     public boolean supportsGray() {
-        // override to return false if the filter only works with RGB images
+        // override to return false if the filter only works with ARGB images
         return true;
     }
 

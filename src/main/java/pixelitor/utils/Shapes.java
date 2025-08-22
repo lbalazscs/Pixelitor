@@ -52,7 +52,7 @@ import static net.jafama.FastMath.sin;
 public class Shapes {
     private static final Stroke BIG_STROKE = new BasicStroke(3);
     private static final Stroke SMALL_STROKE = new BasicStroke(1);
-    public static final float UNIT_ARROW_HEAD_WIDTH = 0.7f;
+    public static final double UNIT_ARROW_HEAD_WIDTH = 0.7;
 
     private Shapes() {
         // do not instantiate
@@ -223,20 +223,20 @@ public class Shapes {
      * Creates a horizontal, arrow-shaped path around the X axis, with a length of 1.0.
      */
     @SuppressWarnings("SuspiciousNameCombination")
-    public static GeneralPath createUnitArrow() {
-        float arrowWidth = 0.3f;
-        float arrowHeadStart = 0.6f;
+    public static Path2D createUnitArrow() {
+        double arrowWidth = 0.3;
+        double arrowHeadStart = 0.6;
 
-        float halfArrowWidth = arrowWidth / 2.0f;
-        float halfArrowHeadWidth = UNIT_ARROW_HEAD_WIDTH / 2;
+        double halfArrowWidth = arrowWidth / 2.0;
+        double halfArrowHeadWidth = UNIT_ARROW_HEAD_WIDTH / 2;
 
-        GeneralPath path = new GeneralPath();
+        Path2D path = new Path2D.Double();
 
-        path.moveTo(0.0f, -halfArrowWidth);
-        path.lineTo(0.0f, halfArrowWidth);
+        path.moveTo(0.0, -halfArrowWidth);
+        path.lineTo(0.0, halfArrowWidth);
         path.lineTo(arrowHeadStart, halfArrowWidth);
         path.lineTo(arrowHeadStart, halfArrowHeadWidth);
-        path.lineTo(1.0f, 0.0f);
+        path.lineTo(1.0, 0.0);
         path.lineTo(arrowHeadStart, -halfArrowHeadWidth);
         path.lineTo(arrowHeadStart, -halfArrowWidth);
         path.closePath();

@@ -1632,6 +1632,7 @@ public class MainGuiTest {
             Reseed.NO, ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
             "R -> G -> B -> R", "R -> B -> G -> R",
             "Average BW", "Luminosity BW", "Sepia");
+        testFilterWithDialog("Equalize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Extract Channel", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Luminosity");
         testNoDialogFilter("Value = max(R,G,B)");
@@ -1686,6 +1687,7 @@ public class MainGuiTest {
     private void testDisplaceFilters() {
         testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Grid Kaleidoscope", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog(JHKaleidoscope.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog(Mirror.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Offset", Randomize.NO, Reseed.NO, ShowOriginal.YES);
@@ -1745,6 +1747,8 @@ public class MainGuiTest {
         testFilterWithDialog("Border Mask", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Concentric Shapes", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Checker Pattern", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Cubes Pattern", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Penrose Tiling", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Starburst", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Stripes", Randomize.YES, Reseed.NO, ShowOriginal.NO);

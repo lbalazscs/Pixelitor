@@ -22,7 +22,7 @@ import net.jafama.FastMath;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.FlatteningPathIterator;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class TaperingStroke implements Stroke {
 
     @Override
     public Shape createStrokedShape(Shape shape) {
-        GeneralPath taperedOutline = new GeneralPath();
+        Path2D taperedOutline = new Path2D.Double();
 
         // collect points along the path before processing
         List<Point2D> points = new ArrayList<>();
@@ -104,7 +104,7 @@ public class TaperingStroke implements Stroke {
 
     // creates the tapered outline for a subpath,
     // always starting from the full width and going to zero
-    private void createSubpathOutline(List<Point2D> points, GeneralPath result) {
+    private void createSubpathOutline(List<Point2D> points, Path2D result) {
         if (points.size() < 2) {
             return;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public class RandomStarShape implements Shape {
         randomizeStarParameters();
     }
 
-    private GeneralPath path = null;
+    private Path2D path = null;
 
     public static void randomizeStarParameters() {
         numPoints = 2 * (4 + Rnd.nextInt(6));
@@ -83,7 +83,7 @@ public class RandomStarShape implements Shape {
             double pointY = centerY + heightToWidthRatio * offsetY;
 
             if (path == null) {
-                path = new GeneralPath();
+                path = new Path2D.Double();
                 path.moveTo(pointX, pointY);
             } else {
                 path.lineTo(pointX, pointY);
