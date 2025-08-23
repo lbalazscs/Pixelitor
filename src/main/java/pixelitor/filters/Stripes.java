@@ -42,7 +42,6 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.IntChoiceParam.Item;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
@@ -51,23 +50,94 @@ import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 public class Stripes extends ParametrizedFilter {
     public static final String NAME = "Stripes";
 
-    private static final int TYPE_STRAIGHT = 0;
-    private static final int TYPE_CHEVRON = 1;
-    private static final int TYPE_CURVED = 2;
-
     @Serial
     private static final long serialVersionUID = 1L;
 
     // an approximation of a sine-like arc using a cubic Bezier curve
     private static final double BEZIER_CONTROL_FACTOR = 0.552284749831;
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
-        new Item("Straight", TYPE_STRAIGHT),
-        new Item("Chevron", TYPE_CHEVRON),
-        new Item("Curved", TYPE_CURVED),
-    });
+    enum Type {
+        STRAIGHT("Straight") {
+            @Override
+            public double calcPeriod(int thickness, int gap, double wavelength, double amplitude) {
+                return thickness + gap;
+            }
+
+            @Override
+            public Shape createPrototypeShape(double diagonal, int thickness, double wavelength, double amplitude) {
+                // for straight stripes, the prototype is a simple horizontal rectangle
+                return new Rectangle2D.Double(
+                    -diagonal / 2.0,
+                    -thickness / 2.0,
+                    diagonal,
+                    thickness
+                );
+            }
+        },
+        CHEVRON("Chevron") {
+            @Override
+            public double calcPeriod(int thickness, int gap, double wavelength, double amplitude) {
+                return calculateWavyPeriod(thickness, gap, wavelength, amplitude);
+            }
+
+            @Override
+            public Shape createPrototypeShape(double diagonal, int thickness, double wavelength, double amplitude) {
+                Path2D centerline = createChevronCenterline(diagonal, wavelength, amplitude);
+                return createStrokedShape(centerline, thickness);
+            }
+        },
+        CURVED("Curved") {
+            @Override
+            public double calcPeriod(int thickness, int gap, double wavelength, double amplitude) {
+                return calculateWavyPeriod(thickness, gap, wavelength, amplitude);
+            }
+
+            @Override
+            public Shape createPrototypeShape(double diagonal, int thickness, double wavelength, double amplitude) {
+                Path2D centerline = createCurvedCenterline(diagonal, wavelength, amplitude);
+                return createStrokedShape(centerline, thickness);
+            }
+        },
+        SQUARE_WAVE("Square Wave") {
+            @Override
+            public double calcPeriod(int thickness, int gap, double wavelength, double amplitude) {
+                // for square waves, the vertical period includes the wave's full height
+                return thickness + gap + 2 * amplitude;
+            }
+
+            @Override
+            public Shape createPrototypeShape(double diagonal, int thickness, double wavelength, double amplitude) {
+                Path2D centerline = createSquareWaveCenterline(diagonal, wavelength, amplitude);
+                return createStrokedShape(centerline, thickness);
+            }
+        };
+
+        private final String displayName;
+
+        Type(String displayName) {
+            this.displayName = displayName;
+        }
+
+        /**
+         * Calculates the period (vertical distance between stripe centerlines).
+         */
+        public abstract double calcPeriod(int thickness, int gap, double wavelength, double amplitude);
+
+        /**
+         * Creates the prototype shape for a single stripe.
+         */
+        public abstract Shape createPrototypeShape(double diagonal, int thickness, double wavelength, double amplitude);
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    private final EnumParam<Type> type = new EnumParam<>("Type", Type.class);
     private final RangeParam thicknessParam = new RangeParam("Thickness", 2, 20, 200);
-    private final RangeParam wavelengthParam = new RangeParam("Wavelength", 10, 50, 500);
+    private final RangeParam gapParam = new RangeParam("Gap", 2, 20, 200);
+    private final RangeParam wavelengthParam = new RangeParam("Wavelength", 10, 80, 500);
     private final RangeParam amplitudeParam = new RangeParam("Amplitude", 10, 20, 500);
     private final ColorParam bgColor = new ColorParam("Background Color", BLACK, MANUAL_ALPHA_ONLY);
     private final ColorListParam colorsParam = new ColorListParam("Colors",
@@ -79,13 +149,15 @@ public class Stripes extends ParametrizedFilter {
         super(false);
 
         // enable wavelength and amplitude only when the selected type is not straight
-        Predicate<Item> notStraight = item -> item.valueIsNot(TYPE_STRAIGHT);
+        Predicate<Type> notStraight = selected -> selected != Type.STRAIGHT;
         type.setupEnableOtherIf(wavelengthParam, notStraight);
         type.setupEnableOtherIf(amplitudeParam, notStraight);
 
         initParams(
             type,
-            thicknessParam,
+            new GroupedRangeParam("Stripe", new RangeParam[]{
+                thicknessParam, gapParam
+            }, true),
             new GroupedRangeParam("Wave", new RangeParam[]{
                 wavelengthParam, amplitudeParam
             }, false).notLinkable(),
@@ -98,6 +170,8 @@ public class Stripes extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Color selectedBg = bgColor.getColor();
+        // if the background is fully opaque, we can create a new blank image;
+        // otherwise, we need to draw over the existing image
         if (selectedBg.getAlpha() == 255) {
             dest = ImageUtils.createImageWithSameCM(src);
         } else {
@@ -125,165 +199,29 @@ public class Stripes extends ParametrizedFilter {
      * Creates a list of shapes with their associated colors based on the selected type.
      */
     private List<ShapeWithColor> createShapes(int width, int height) {
-        return switch (type.getValue()) {
-            case TYPE_STRAIGHT -> createStraightShapes(width, height);
-            case TYPE_CHEVRON -> createChevronShapes(width, height);
-            case TYPE_CURVED -> createCurvedShapes(width, height);
-            default -> throw new IllegalStateException("Unexpected value: " + type.getValue());
-        };
-    }
-
-    /**
-     * Creates shapes for straight, parallel stripes.
-     */
-    private List<ShapeWithColor> createStraightShapes(int width, int height) {
+        Type selectedType = type.getSelected();
         int thickness = thicknessParam.getValue();
-        if (thickness <= 0) {
-            return new ArrayList<>();
-        }
-
-        // a period consists of one stripe and one gap of the same thickness
-        double period = 2.0 * thickness;
-
-        // the diagonal is the longest possible line, ensuring stripes cover the entire canvas
-        double diagonal = Math.sqrt(width * width + height * height);
-
-        // create a horizontal rectangle centered at (0, 0) that is long enough to span the diagonal
-        Rectangle2D.Double prototype = new Rectangle2D.Double(
-            -diagonal / 2.0,
-            -thickness / 2.0,
-            diagonal,
-            thickness
-        );
-
-        return generateStripes(width, height, period, prototype);
-    }
-
-    /**
-     * Creates shapes for chevron (zigzag) stripes.
-     */
-    private List<ShapeWithColor> createChevronShapes(int width, int height) {
-        int thickness = thicknessParam.getValue();
-        if (thickness <= 0) {
-            return new ArrayList<>();
-        }
-
+        int gap = gapParam.getValue();
         double wavelength = wavelengthParam.getValue();
         double amplitude = amplitudeParam.getValue();
 
-        double period = calculatePeriod(thickness, wavelength, amplitude);
-
+        // the diagonal is the longest possible line, ensuring stripes cover the entire image
         double diagonal = Math.sqrt(width * width + height * height);
 
-        // create a prototype centerline path for the chevron
-        // it needs to be long enough to span the diagonal, so we add a buffer
-        Path2D centerline = new Path2D.Double();
-        double startX = -diagonal / 2.0 - wavelength;
-        double endX = diagonal / 2.0 + wavelength;
-        double currentX = startX;
-        boolean goUp = true;
+        double period = selectedType.calcPeriod(thickness, gap, wavelength, amplitude);
+        Shape prototype = selectedType.createPrototypeShape(diagonal, thickness, wavelength, amplitude);
 
-        // start at a trough to create a consistent zigzag
-        centerline.moveTo(currentX, -amplitude);
-        while (currentX < endX) {
-            currentX += wavelength / 2.0;
-            double y = goUp ? amplitude : -amplitude; // alternate between peak and trough
-            centerline.lineTo(currentX, y);
-            goUp = !goUp;
-        }
-
-        Shape protoChevron = createStrokedShape(centerline, thickness);
-
-        return generateStripes(width, height, period, protoChevron);
-    }
-
-    /**
-     * Creates sinusoidal shapes for curved stripes.
-     */
-    private List<ShapeWithColor> createCurvedShapes(int width, int height) {
-        int thickness = thicknessParam.getValue();
-        if (thickness <= 0) {
-            return new ArrayList<>();
-        }
-
-        double wavelength = wavelengthParam.getValue();
-        double amplitude = amplitudeParam.getValue();
-
-        double period = calculatePeriod(thickness, wavelength, amplitude);
-
-        double diagonal = Math.sqrt(width * width + height * height);
-
-        // create a prototype centerline path for the wave using Bezier curves
-        Path2D centerline = new Path2D.Double();
-
-        double halfWavelength = wavelength / 2.0;
-        double controlXOffset = halfWavelength * BEZIER_CONTROL_FACTOR;
-
-        double startX = -diagonal / 2.0 - wavelength;
-        double endX = diagonal / 2.0 + wavelength;
-        double currentX = startX;
-        boolean goUp = true; // start from a trough
-
-        // start at a trough to create a consistent wave
-        centerline.moveTo(currentX, -amplitude);
-        while (currentX < endX) {
-            double startY = goUp ? -amplitude : amplitude;
-            double endY = goUp ? amplitude : -amplitude;
-
-            double cp1x = currentX + controlXOffset;
-            double cp1y = startY;
-            double cp2x = currentX + halfWavelength - controlXOffset;
-            double cp2y = endY;
-            double endPointX = currentX + halfWavelength;
-
-            centerline.curveTo(cp1x, cp1y, cp2x, cp2y, endPointX, endY);
-
-            currentX = endPointX; // use the exact end point to avoid floating point drift
-            goUp = !goUp;
-        }
-
-        Shape protoWave = createStrokedShape(centerline, thickness);
-
-        return generateStripes(width, height, period, protoWave);
-    }
-
-    // Creates a thick shape from a centerline.
-    private static Shape createStrokedShape(Path2D centerPath, int thickness) {
-        // use a large miter limit to ensure that Chevron always has proper spikes
-        BasicStroke stroke = new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 100.0f);
-        return stroke.createStrokedShape(centerPath);
-    }
-
-    /**
-     * Calculates the vertical period between stripe centerlines.
-     */
-    private static double calculatePeriod(double thickness, double wavelength, double amplitude) {
-        // To maintain equal visual thickness for stripes and gaps, the period
-        // (vertical distance between centerlines) must be adjusted based
-        // on the angle of the segments.
-        // The perpendicular distance between centerlines should be 2 * thickness.
-        // period = (2 * thickness) / cos(alpha), where alpha is the angle of the segment.
-        // The average slope m = dy/dx = (2 * amplitude) / (wavelength / 2) = 4 * amplitude / wavelength.
-        // period = 2 * thickness * sqrt(1 + m^2).
-        if (wavelength > 0) {
-            double slope = (4.0 * amplitude) / wavelength;
-            return 2.0 * thickness * Math.sqrt(1.0 + slope * slope);
-        } else {
-            // avoid division by zero; treat as horizontal lines
-            return 2.0 * thickness;
-        }
+        return generateStripes(width, height, period, prototype, diagonal);
     }
 
     /**
      * Generates a list of stripe shapes from a prototype shape.
      */
-    private List<ShapeWithColor> generateStripes(int width, int height, double period, Shape prototypeShape) {
+    private List<ShapeWithColor> generateStripes(int width, int height, double period, Shape prototypeShape, double diagonal) {
         List<ShapeWithColor> shapes = new ArrayList<>();
         Color[] colors = colorsParam.getColors();
         int numColors = colors.length;
         double angle = rotate.getValueInRadians();
-
-        double diagonal = Math.sqrt(width * width + height * height);
 
         // create a transform to rotate the stripes around the center of the image
         AffineTransform at = new AffineTransform();
@@ -304,12 +242,104 @@ public class Stripes extends ParametrizedFilter {
             // apply the main rotation and translation transform
             Shape finalShape = at.createTransformedShape(translatedShape);
 
-            // assign color cyclically
+            // assign color cyclically; offset i to ensure the index is non-negative
             int colorIndex = (i + numStripesPerSide) % numColors;
             shapes.add(new ShapeWithColor(finalShape, colors[colorIndex]));
         }
 
         return shapes;
+    }
+
+    /**
+     * Calculates the vertical period for wavy stripes (Chevron, Curved).
+     */
+    private static double calculateWavyPeriod(double thickness, double gap, double wavelength, double amplitude) {
+        // To maintain a consistent visual thickness, the vertical period
+        // between centerlines is adjusted based on the stripe's slope.
+        // The period is calculated using the slope of a chevron segment,
+        // which is also a good approximation for curved stripes.
+        if (wavelength > 0) {
+            double slope = (4.0 * amplitude) / wavelength;
+            return (thickness + gap) * Math.sqrt(1.0 + slope * slope);
+        } else {
+            // avoid division by zero; treat as horizontal lines
+            return thickness + gap;
+        }
+    }
+
+    /**
+     * Creates the centerline path for a chevron (zigzag) stripe.
+     */
+    private static Path2D createChevronCenterline(double diagonal, double wavelength, double amplitude) {
+        // it needs to be long enough to span the diagonal, so we add a buffer
+        Path2D centerline = new Path2D.Double();
+        double startX = -diagonal / 2.0 - wavelength;
+        double endX = diagonal / 2.0 + wavelength;
+        double currentX = startX;
+        boolean goUp = true;
+
+        // start at a trough to create a consistent zigzag
+        centerline.moveTo(currentX, -amplitude);
+        while (currentX < endX) {
+            currentX += wavelength / 2.0;
+            double y = goUp ? amplitude : -amplitude;
+            centerline.lineTo(currentX, y);
+            goUp = !goUp; // alternate between peak and trough
+        }
+        return centerline;
+    }
+
+    /**
+     * Creates the centerline path for a curved (sinusoidal) stripe.
+     */
+    private static Path2D createCurvedCenterline(double diagonal, double wavelength, double amplitude) {
+        Path2D centerline = new Path2D.Double();
+        double halfWavelength = wavelength / 2.0;
+        double controlXOffset = halfWavelength * BEZIER_CONTROL_FACTOR;
+        double startX = -diagonal / 2.0 - wavelength;
+        double endX = diagonal / 2.0 + wavelength;
+        double currentX = startX;
+        boolean goUp = true;
+
+        // start at a trough to create a consistent wave
+        centerline.moveTo(currentX, -amplitude);
+        while (currentX < endX) {
+            double startY = goUp ? -amplitude : amplitude;
+            double endY = goUp ? amplitude : -amplitude;
+            double cp1x = currentX + controlXOffset;
+            double cp1y = startY;
+            double cp2x = currentX + halfWavelength - controlXOffset;
+            double cp2y = endY;
+            double endPointX = currentX + halfWavelength;
+            centerline.curveTo(cp1x, cp1y, cp2x, cp2y, endPointX, endY);
+            currentX = endPointX; // use the exact end point to avoid floating point drift
+            goUp = !goUp;
+        }
+        return centerline;
+    }
+
+    private static Path2D createSquareWaveCenterline(double diagonal, double wavelength, double amplitude) {
+        Path2D centerline = new Path2D.Double();
+        double halfWavelength = wavelength / 2.0;
+        double startX = -diagonal / 2.0 - wavelength;
+        double endX = diagonal / 2.0 + wavelength;
+        double currentX = startX;
+        boolean goUp = true;
+
+        centerline.moveTo(currentX, -amplitude);
+        while (currentX < endX) {
+            double nextY = goUp ? amplitude : -amplitude;
+            centerline.lineTo(currentX, nextY);
+            currentX += halfWavelength;
+            centerline.lineTo(currentX, nextY);
+            goUp = !goUp;
+        }
+        return centerline;
+    }
+
+    private static Shape createStrokedShape(Path2D centerPath, int thickness) {
+        BasicStroke stroke = new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 100.0f);
+        return stroke.createStrokedShape(centerPath);
     }
 
     private void exportSVG() {

@@ -107,8 +107,9 @@ public class ColorListParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        Color[] newColors = new Color[colors.length];
-        for (int i = 0; i < colors.length; i++) {
+        int numNewColors = Rnd.intInRange(1, candidateColors.length);
+        Color[] newColors = new Color[numNewColors];
+        for (int i = 0; i < numNewColors; i++) {
             newColors[i] = Rnd.createRandomColor();
         }
         setColors(newColors, false);
