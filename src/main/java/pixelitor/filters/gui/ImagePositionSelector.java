@@ -23,6 +23,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -81,6 +82,15 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void paintComponent(Graphics g) {
+        int thumbWidth = thumb.getWidth();
+        int thumbHeight = thumb.getHeight();
+
+        if (!isEnabled()) {
+            g.setColor(Color.GRAY);
+            g.drawRect(0, 0, thumbWidth - 1, thumbHeight - 1);
+            return;
+        }
+
         // no anti-aliasing is needed, because everything
         // is perfectly horizontal or vertical
         Graphics2D g2 = (Graphics2D) g;
@@ -88,9 +98,6 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
         // draws the position indicator, consisting of
         // a crosshair and a central square marker
-        int thumbWidth = thumb.getWidth();
-        int thumbHeight = thumb.getHeight();
-
         int x = (int) (model.getRelativeX() * thumbWidth);
         int y = (int) (model.getRelativeY() * thumbHeight);
 

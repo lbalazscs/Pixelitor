@@ -20,6 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.HalftoneFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -50,9 +51,6 @@ public class JHDotsHalftone extends ParametrizedFilter {
     private static final int SHAPE_OCTAGON = 7;
     private static final int SHAPE_STAR = 8;
 
-    private static final int GRID_TRIANGLE = 0;
-    private static final int GRID_SQUARE = 1;
-
     private static final double SQRT_2 = 1.4142135623730951;
     private static final double SQRT_3 = 1.7320508075688772;
 
@@ -70,9 +68,12 @@ public class JHDotsHalftone extends ParametrizedFilter {
     });
 
     private final IntChoiceParam gridParam = new IntChoiceParam("Dot Grid", new Item[]{
-        new Item("Triangle", GRID_TRIANGLE),
-        new Item("Square", GRID_SQUARE),
+        new Item("Triangle", HalftoneFilter.GRID_TRIANGLE),
+        new Item("Square", HalftoneFilter.GRID_SQUARE),
+        new Item("Rings", HalftoneFilter.GRID_RINGS),
     });
+
+    private final ImagePositionParam center = new ImagePositionParam("Rings Center");
 
     private final BooleanParam monochrome = new BooleanParam("Monochrome", true);
     private final BooleanParam invert = new BooleanParam("Invert Pattern");
@@ -81,10 +82,14 @@ public class JHDotsHalftone extends ParametrizedFilter {
     public JHDotsHalftone() {
         super(true);
 
+        // enable the center selector only if the rings grid is selected
+        gridParam.setupEnableOtherIf(center, item -> item.valueIs(HalftoneFilter.GRID_RINGS));
+
         initParams(
             dotRadius,
             shapeParam,
             gridParam,
+            center,
             softness,
             monochrome,
             invert
@@ -107,7 +112,8 @@ public class JHDotsHalftone extends ParametrizedFilter {
         filter.setMonochrome(monochrome.isChecked());
         filter.setSoftness((float) softness.getPercentage());
         filter.setInvert(invert.isChecked());
-        filter.setTriangleGrid(gridParam.getValue() == GRID_TRIANGLE);
+        filter.setGridType(gridParam.getValue());
+        filter.setCenter(center.getAbsolutePoint(src));
 
         return filter.filter(src, dest);
     }
