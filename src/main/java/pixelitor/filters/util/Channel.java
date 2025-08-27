@@ -22,7 +22,6 @@ import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
-import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -32,7 +31,7 @@ import static pixelitor.utils.Texts.i18n;
  * Represents the currently edited color channel(s).
  */
 public enum Channel {
-    RGB("RGB", "rgb", BLACK) {
+    RGB("RGB", "rgb", BLACK, ColorSpace.SRGB) {
         @Override
         public Color getDarkColor() {
             return BLACK;
@@ -56,7 +55,7 @@ public enum Channel {
                 return super.getDrawColor(active, darkTheme);
             }
         }
-    }, RED(i18n("red"), "red", Color.RED) {
+    }, RED(i18n("red"), "red", Color.RED, ColorSpace.SRGB) {
         @Override
         public Color getDarkColor() {
             return DARK_CYAN;
@@ -71,7 +70,7 @@ public enum Channel {
         public double getIntensity(int r, int g, int b) {
             return r;
         }
-    }, GREEN(i18n("green"), "green", Color.GREEN) {
+    }, GREEN(i18n("green"), "green", Color.GREEN, ColorSpace.SRGB) {
         @Override
         public Color getDarkColor() {
             return DARK_PURPLE;
@@ -86,7 +85,7 @@ public enum Channel {
         public double getIntensity(int r, int g, int b) {
             return g;
         }
-    }, BLUE(i18n("blue"), "blue", Color.BLUE) {
+    }, BLUE(i18n("blue"), "blue", Color.BLUE, ColorSpace.SRGB) {
         @Override
         public Color getDarkColor() {
             return DARK_YELLOW_GREEN;
@@ -101,7 +100,7 @@ public enum Channel {
         public double getIntensity(int r, int g, int b) {
             return b;
         }
-    }, OK_L(GUIText.LIGHTNESS, "L", BLACK) {
+    }, OK_L(GUIText.LIGHTNESS, "L", BLACK, ColorSpace.OKLAB) {
         @Override
         public Color getDarkColor() {
             return BLACK;
@@ -116,7 +115,7 @@ public enum Channel {
         public double getIntensity(int r, int g, int b) {
             throw new UnsupportedOperationException();
         }
-    }, OK_A(GUIText.RED_GREEN_A, "a", BLACK) {
+    }, OK_A(GUIText.RED_GREEN_A, "a", BLACK, ColorSpace.OKLAB) {
         @Override
         public Color getDarkColor() {
             return OK_GREEN;
@@ -131,7 +130,7 @@ public enum Channel {
         public double getIntensity(int r, int g, int b) {
             throw new UnsupportedOperationException();
         }
-    }, OK_B(GUIText.BLUE_YELLOW_B, "b", BLACK) {
+    }, OK_B(GUIText.BLUE_YELLOW_B, "b", BLACK, ColorSpace.OKLAB) {
         @Override
         public Color getDarkColor() {
             return OK_BLUE;
@@ -171,12 +170,14 @@ public enum Channel {
     private final String presetKey;
     private final Color color;
     private final Color inactiveColor;
+    private final ColorSpace colorSpace;
 
-    Channel(String name, String presetKey, Color color) {
+    Channel(String name, String presetKey, Color color, ColorSpace colorSpace) {
         this.name = name;
         this.presetKey = presetKey;
         this.color = color;
         this.inactiveColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), INACTIVE_ALPHA);
+        this.colorSpace = colorSpace;
     }
 
     /**
@@ -198,6 +199,13 @@ public enum Channel {
      */
     public abstract double getIntensity(int r, int g, int b);
 
+    /**
+     * Returns the {@link ColorSpace} this {@link Channel} belongs to.
+     */
+    public ColorSpace getColorSpace() {
+        return colorSpace;
+    }
+
     public String getName() {
         return name;
     }
@@ -211,26 +219,10 @@ public enum Channel {
         return name;
     }
 
-    public static List<Channel> getRGBChoices() {
-        return List.of(RGB, RED, GREEN, BLUE);
+    public static EnumParam<Channel> asParam(ColorSpace colorSpace) {
+        return new EnumParam<>(GUIText.CHANNEL, Channel.PRESET_KEY, colorSpace.getChannels());
     }
 
-    public static List<Channel> getLABChoices() {
-        return List.of(OK_L, OK_A, OK_B);
-    }
-
-    public static Channel[] getRGBValues() {
-        return new Channel[]{RGB, RED, GREEN, BLUE};
-    }
-
-    public static List<Channel> getChoices(ColorSpace space) {
-        return switch (space) {
-            case SRGB -> getRGBChoices();
-            case OKLAB -> getLABChoices();
-        };
-    }
-
-    public static EnumParam<Channel> asParam(ColorSpace startingSpace) {
-        return new EnumParam<>("Channel", getChoices(startingSpace));
-    }
+    // the preset key for any channel-related filter param
+    public static final String PRESET_KEY = "Channel";
 }

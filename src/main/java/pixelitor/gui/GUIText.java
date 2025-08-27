@@ -53,6 +53,9 @@ public class GUIText {
     public static final String BLUE_YELLOW_B = "Blue-Yellow (b)";
     public static final String LIGHTNESS = "Lightness";
 
+    public static final String COLOR_SPACE = "Color Space";
+    public static final String CHANNEL = "Channel";
+
     private GUIText() {
     }
 }

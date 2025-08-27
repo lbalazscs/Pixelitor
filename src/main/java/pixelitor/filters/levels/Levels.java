@@ -23,9 +23,7 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.io.Serial;
-import java.util.Objects;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -38,11 +36,10 @@ public class Levels extends FilterWithGUI {
     @Serial
     private static final long serialVersionUID = 1780232770405846617L;
 
-    private BufferedImageOp filterOp;
     private final LevelsModel levelsModel;
 
     public Levels() {
-        levelsModel = new LevelsModel(this);
+        levelsModel = new LevelsModel();
     }
 
     @Override
@@ -56,24 +53,9 @@ public class Levels extends FilterWithGUI {
         return gui;
     }
 
-    public void setFilterOp(BufferedImageOp op) {
-        this.filterOp = Objects.requireNonNull(op);
-    }
-
-    public BufferedImageOp getFilterOp() {
-        return filterOp;
-    }
-
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filterOp == null) {
-            // this can happen if transform is called before the GUI is created or a preset is loaded
-            levelsModel.updateFilterLookup();
-        }
-
-        dest = filterOp.filter(src, dest);
-
-        return dest;
+        return levelsModel.apply(src, dest);
     }
 
     @Override

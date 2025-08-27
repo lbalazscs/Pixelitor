@@ -37,7 +37,6 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class ToneCurvesFilter extends FilterWithGUI {
     public static final String NAME = i18n("curves");
-    private static final String PRESET_KEY_COLOR_SPACE = "colorSpace";
 
     @Serial
     private static final long serialVersionUID = 3679501445608294764L;
@@ -79,20 +78,19 @@ public class ToneCurvesFilter extends FilterWithGUI {
         }
 
         filter.setCurves(
-            curves.getCurve(Channel.RGB).curveData,
-            curves.getCurve(Channel.RED).curveData,
-            curves.getCurve(Channel.GREEN).curveData,
-            curves.getCurve(Channel.BLUE).curveData
+            curves.getCurve(ColorSpace.SRGB, Channel.RGB).curveData,
+            curves.getCurve(ColorSpace.SRGB, Channel.RED).curveData,
+            curves.getCurve(ColorSpace.SRGB, Channel.GREEN).curveData,
+            curves.getCurve(ColorSpace.SRGB, Channel.BLUE).curveData
         );
         return filter.filter(src, dest);
     }
 
     private BufferedImage transformOklab(BufferedImage src, BufferedImage dest) {
-        // use a dedicated filter for Oklab processing
         OklabCurvesFilter oklabFilter = new OklabCurvesFilter(
-            curves.getCurve(Channel.OK_L).curveData,
-            curves.getCurve(Channel.OK_A).curveData,
-            curves.getCurve(Channel.OK_B).curveData
+            curves.getCurve(ColorSpace.OKLAB, Channel.OK_L).curveData,
+            curves.getCurve(ColorSpace.OKLAB, Channel.OK_A).curveData,
+            curves.getCurve(ColorSpace.OKLAB, Channel.OK_B).curveData
         );
         return oklabFilter.filter(src, dest);
     }
@@ -112,30 +110,27 @@ public class ToneCurvesFilter extends FilterWithGUI {
     @Override
     public void saveStateTo(UserPreset preset) {
         ColorSpace activeSpace = curves.getColorSpace();
-        preset.put(PRESET_KEY_COLOR_SPACE, activeSpace.name());
+        preset.put(ColorSpace.PRESET_KEY, activeSpace.name());
 
         // only save the curves for the currently active color space
-        for (Channel channel : Channel.getChoices(activeSpace)) {
-            String saveString = curves.getCurve(channel).toSaveString();
+        for (Channel channel : activeSpace.getChannels()) {
+            String saveString = curves.getCurve(activeSpace, channel).toSaveString();
             preset.put(channel.getPresetKey(), saveString);
         }
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        String csName = preset.get(PRESET_KEY_COLOR_SPACE);
-        // default to sRGB for legacy presets that don't have this key
-        ColorSpace colorSpace = (csName != null) ? ColorSpace.valueOf(csName) : ColorSpace.SRGB;
+        ColorSpace colorSpace = preset.getEnum(ColorSpace.PRESET_KEY, ColorSpace.class);
         curves.setColorSpace(colorSpace);
 
-        // reset all curves to clear state from other color spaces before loading
         curves.reset();
 
-        // load curves for all channels defined in the preset
-        for (Channel channel : Channel.values()) {
+        // load curves for the active color space
+        for (Channel channel : colorSpace.getChannels()) {
             String saveString = preset.get(channel.getPresetKey());
             if (saveString != null) {
-                curves.getCurve(channel).setStateFrom(saveString);
+                curves.getCurve(colorSpace, channel).setStateFrom(saveString);
             }
         }
 

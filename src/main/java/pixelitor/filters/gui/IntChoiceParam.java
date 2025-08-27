@@ -39,6 +39,11 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
         this(name, choices, ALLOW_RANDOMIZE);
     }
 
+    public IntChoiceParam(String name, String presetKey, Item[] choices) {
+        this(name, choices, ALLOW_RANDOMIZE);
+        setPresetKey(presetKey);
+    }
+
     public IntChoiceParam(String name, Item[] choices, RandomizeMode randomizeMode) {
         super(name, choices, randomizeMode);
     }

@@ -20,6 +20,8 @@ package pixelitor.filters;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.EqualizeFilter;
+import pixelitor.filters.util.Channel;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -34,7 +36,7 @@ public class Equalize extends ParametrizedFilter {
     private static final long serialVersionUID = 1L;
 
     private final EnumParam<EqualizeFilter.Equalizer> channel
-        = new EnumParam<>("Channel", EqualizeFilter.Equalizer.class);
+        = new EnumParam<>(GUIText.CHANNEL, Channel.PRESET_KEY, EqualizeFilter.Equalizer.class);
     private final RangeParam details = new RangeParam("Brightness Levels", 1, 8, 10);
 
     public Equalize() {

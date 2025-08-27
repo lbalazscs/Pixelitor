@@ -18,20 +18,28 @@
 package pixelitor.filters.util;
 
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.gui.GUIText;
+
+import java.util.List;
 
 /**
  * Represents a supported, non-cylindrical color space.
  */
 public enum ColorSpace {
-    SRGB("sRGB (Faster)", Channel.RGB),
-    OKLAB("Oklab (Better)", Channel.OK_L);
+    SRGB("sRGB (Faster)"),
+    OKLAB("Oklab (Better)");
 
     private final String displayName;
-    private final Channel mainChannel;
 
-    ColorSpace(String displayName, Channel mainChannel) {
+    ColorSpace(String displayName) {
         this.displayName = displayName;
-        this.mainChannel = mainChannel;
+    }
+
+    public List<Channel> getChannels() {
+        return switch (this) {
+            case SRGB -> List.of(Channel.RGB, Channel.RED, Channel.GREEN, Channel.BLUE);
+            case OKLAB -> List.of(Channel.OK_L, Channel.OK_A, Channel.OK_B);
+        };
     }
 
     /**
@@ -39,7 +47,10 @@ public enum ColorSpace {
      * Used as the default and randomized channel in the GUI.
      */
     public Channel getPrimaryChannel() {
-        return mainChannel;
+        return switch (this) {
+            case SRGB -> Channel.RGB;
+            case OKLAB -> Channel.OK_L;
+        };
     }
 
     @Override
@@ -51,6 +62,9 @@ public enum ColorSpace {
      * Creates an {@link EnumParam} for selecting an enum value.
      */
     public static EnumParam<ColorSpace> asParam() {
-        return new EnumParam<>("Color Space", ColorSpace.class);
+        return new EnumParam<>(GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, ColorSpace.class);
     }
+
+    // the preset key for any color-space-related filter param
+    public static final String PRESET_KEY = "color_space";
 }

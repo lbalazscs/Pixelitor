@@ -22,6 +22,7 @@ import pixelitor.TestHelper;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.filters.lookup.RGBLookup;
+import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
 
 import java.awt.image.BufferedImageOp;
@@ -50,11 +51,12 @@ class LevelsTest {
     @BeforeEach
     void beforeEachTest() {
         levels = new Levels();
-        model = new LevelsModel(levels);
+        model = new LevelsModel();
         filterGUI = mock(FilterGUI.class);
-        model.setLastGUI(filterGUI);
-        rgbPage = model.getSubModels()[0];
-        rPage = model.getSubModels()[1];
+        model.setFilterGUI(filterGUI);
+
+        rgbPage = model.getModelForChannel(Channel.RGB);
+        rPage = model.getModelForChannel(Channel.RED);
     }
 
     @Test
@@ -161,12 +163,12 @@ class LevelsTest {
     @Test
     @DisplayName("Oklab, page L, input dark = 100")
     void pageOklabL_inputDark100() {
-        model.setColorSpace(ColorSpace.OKLAB, false);
+        model.setColorSpace(ColorSpace.OKLAB, true);
         // the Oklab L model is the 5th one (index 4)
-        ChannelLevelsModel okLPage = model.getSubModels()[4];
+        ChannelLevelsModel okLPage = model.getModelForChannel(Channel.OK_L);
         okLPage.getInputDark().setValue(100);
 
-        BufferedImageOp op = levels.getFilterOp();
+        BufferedImageOp op = model.getFilterOp();
         assertInstanceOf(OklabLevelsFilter.class, op, "FilterOp should be an OklabLevelsFilter");
         OklabLevelsFilter oklabFilter = (OklabLevelsFilter) op;
 
@@ -196,8 +198,8 @@ class LevelsTest {
         // This is triggered by the setValue() calls in the test methods.
         verify(filterGUI, atLeastOnce()).startPreview(false);
 
-        // get the BufferedImageOp that the model configured on the real Levels instance
-        BufferedImageOp op = levels.getFilterOp();
+        // get the BufferedImageOp that the model configured
+        BufferedImageOp op = model.getFilterOp();
         assertNotNull(op, "FilterOp should have been set by the model");
         assertInstanceOf(FastLookupOp.class, op, "FilterOp should be a FastLookupOp for sRGB tests");
 

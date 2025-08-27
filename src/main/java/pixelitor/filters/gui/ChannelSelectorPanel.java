@@ -34,33 +34,34 @@ import java.util.function.Consumer;
 public class ChannelSelectorPanel extends JPanel {
     private final EnumParam<ColorSpace> colorSpaceParam;
     private final EnumParam<Channel> channelParam;
+    private final GridBagHelper gbh;
 
-    /**
-     * Creates a panel that notifies callbacks on channel change or reset.
-     */
-    public ChannelSelectorPanel(Consumer<Channel> channelChangedCallback, ActionListener resetListener) {
+    public ChannelSelectorPanel(Consumer<Channel> channelChangedCallback) {
         super(new GridBagLayout());
 
         this.colorSpaceParam = ColorSpace.asParam();
         this.channelParam = Channel.asParam(colorSpaceParam.getSelected());
 
-        GridBagHelper gbh = new GridBagHelper(this);
+        gbh = new GridBagHelper(this);
 
         // first row: color space
         gbh.addLabelAndControl(colorSpaceParam.getName() + ":", new JComboBox<>(colorSpaceParam));
 
-        // second row: channel label + combo + reset
+        // second row: channel label + combo
         JComboBox<Channel> channelCombo = new JComboBox<>(channelParam);
         gbh.addLabelAndControl(channelParam.getName() + ":", channelCombo);
-        gbh.addNextControl(GUIUtils.createResetChannelButton(resetListener));
 
         wireComboBoxes(channelChangedCallback);
+    }
+
+    public void addResetButton(ActionListener resetListener) {
+        gbh.addNextControl(GUIUtils.createResetChannelButton(resetListener));
     }
 
     private void wireComboBoxes(Consumer<Channel> channelChangedCallback) {
         // when the color space changes, update the list of available channels
         colorSpaceParam.addOnChangeTask(() -> {
-            List<Channel> newChoices = Channel.getChoices(colorSpaceParam.getSelected());
+            List<Channel> newChoices = colorSpaceParam.getSelected().getChannels();
             // updating choices implicitly selects the first, triggering the channel change listener
             channelParam.setChoices(newChoices, false);
             revalidate();
@@ -79,5 +80,9 @@ public class ChannelSelectorPanel extends JPanel {
      */
     public void addColorSpaceChangedListener(Consumer<ColorSpace> listener) {
         colorSpaceParam.addOnChangeTask(() -> listener.accept(colorSpaceParam.getSelected()));
+    }
+
+    public Channel getSelectedChannel() {
+        return channelParam.getSelected();
     }
 }

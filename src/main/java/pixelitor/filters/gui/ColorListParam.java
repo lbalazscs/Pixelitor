@@ -88,6 +88,10 @@ public class ColorListParam extends AbstractFilterParam {
      * Sets the list of colors and optionally triggers an update.
      */
     public void setColors(Color[] newColors, boolean trigger) {
+        if (newColors.length < minNumColors) {
+            throw new IllegalArgumentException("Expected min " + minNumColors + ", got " + newColors.length);
+        }
+
         if (Arrays.equals(colors, newColors)) {
             return;
         }
@@ -107,7 +111,7 @@ public class ColorListParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        int numNewColors = Rnd.intInRange(1, candidateColors.length);
+        int numNewColors = Rnd.intInRange(minNumColors, candidateColors.length);
         Color[] newColors = new Color[numNewColors];
         for (int i = 0; i < numNewColors; i++) {
             newColors[i] = Rnd.createRandomColor();

@@ -21,6 +21,8 @@ import com.jhlabs.image.FourColorFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.util.ColorSpace;
+import pixelitor.gui.GUIText;
 import pixelitor.layers.Filterable;
 
 import java.awt.Color;
@@ -54,7 +56,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
         new Item("Septic", FourColorFilter.INTERPOLATION_SEPTIC),
     });
 
-    private final IntChoiceParam space = new IntChoiceParam("Color Space", new Item[]{
+    private final IntChoiceParam space = new IntChoiceParam(GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, new Item[]{
         new Item("Oklab", FourColorFilter.SPACE_OKLAB),
         new Item("Linear RGB", FourColorFilter.SPACE_LINEAR_RGB),
         new Item("sRGB", FourColorFilter.SPACE_SRGB)

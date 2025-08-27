@@ -23,6 +23,8 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.util.Channel;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -38,7 +40,7 @@ public class JHConvolutionEdge extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 6728675248520735379L;
 
-    private final IntChoiceParam channel = new IntChoiceParam("Channel", new Item[]{
+    private final IntChoiceParam channel = new IntChoiceParam(GUIText.CHANNEL, Channel.PRESET_KEY, new Item[]{
         new Item("R, G, B", EdgeFilter.CHANNEL_RGB),
         new Item("Luminance", EdgeFilter.CHANNEL_LUMINANCE),
     });

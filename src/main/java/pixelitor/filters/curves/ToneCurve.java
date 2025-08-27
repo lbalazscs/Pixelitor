@@ -196,7 +196,7 @@ public class ToneCurve {
      * @param point the normalized point to check
      * @return true if the point is within the draggable range, false otherwise
      */
-    public boolean isDraggedIn(int index, Point2D.Float point) {
+    public boolean canBeDraggedIn(int index, Point2D.Float point) {
         if (index <= 0 || index >= curveData.x.length) {
             return false;
         }

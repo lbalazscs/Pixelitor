@@ -22,6 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.MorphologyFilter;
+import pixelitor.filters.util.Channel;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -47,12 +48,11 @@ public class Morphology extends ParametrizedFilter {
     private static final int OP_TOP_HAT = 13;
     private static final int OP_BOTTOM_HAT = 14;
 
-    private final IntChoiceParam channel = new IntChoiceParam("Channel", new Item[]{
+    private final IntChoiceParam channel = new IntChoiceParam(GUIText.CHANNEL, Channel.PRESET_KEY, new Item[]{
         new Item("R, G, B", MorphologyFilter.CHANNEL_RGB),
         new Item("YCbCr/Y", MorphologyFilter.CHANNEL_YCBCR),
         new Item("HSV/V", MorphologyFilter.CHANNEL_HSV),
     });
-
     private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 1, 21);
     private final IntChoiceParam kernel = new IntChoiceParam("Kernel Shape", new Item[]{
         new Item("Diamond", MorphologyFilter.KERNEL_DIAMOND),

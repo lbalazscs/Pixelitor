@@ -22,6 +22,8 @@ import net.jafama.FastMath;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.*;
+import pixelitor.filters.util.ColorSpace;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ColorSpaces;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -78,10 +80,10 @@ public class ColorWheel extends ParametrizedFilter {
         abstract int toRGB(double angle, double sat, double bri);
     }
 
-    private final EnumParam<ColorSpaceType> type = new EnumParam<>("Color Space", ColorSpaceType.class);
+    private final EnumParam<ColorSpaceType> type = new EnumParam<>(GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, ColorSpaceType.class);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam hueRotParam = new AngleParam("Rotate", 0);
-    private final RangeParam brgLumParam = new RangeParam("Brightness (%)", 0, 75, 100);
+    private final RangeParam briParam = new RangeParam("Brightness (%)", 0, 75, 100);
     private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 90, 100);
     private final RangeParam spiralParam = new RangeParam("Spiral", -100, 0, 100);
 
@@ -90,8 +92,13 @@ public class ColorWheel extends ParametrizedFilter {
 
         help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Color_wheel");
 
-        initParams(type, center,
-            hueRotParam, brgLumParam, satParam, spiralParam);
+        initParams(
+            type,
+            center,
+            hueRotParam,
+            briParam,
+            satParam,
+            spiralParam);
     }
 
     @Override
@@ -108,7 +115,7 @@ public class ColorWheel extends ParametrizedFilter {
 
         double hueRot = hueRotParam.getValueInRadians();
         double sat = satParam.getPercentage();
-        double brgLum = brgLumParam.getPercentage();
+        double bri = briParam.getPercentage();
 
         double spiral = spiralParam.getValueAsDouble();
 
@@ -118,7 +125,7 @@ public class ColorWheel extends ParametrizedFilter {
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable rowTask = () -> processRow(
-                destPixels, width, finalY, cx, cy, hueRot, sat, brgLum, space, spiral);
+                destPixels, width, finalY, cx, cy, hueRot, sat, bri, space, spiral);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
         ThreadPool.waitFor(rowFutures, pt);

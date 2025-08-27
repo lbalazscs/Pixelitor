@@ -458,6 +458,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public void loadStateFrom(String savedValue) {
+        if (savedValue == null) {
+            throw new IllegalArgumentException("null saved value for the key \"" + getPresetKey() + "\"");
+        }
         try {
             double v = Double.parseDouble(savedValue);
             setValueNoTrigger(v);

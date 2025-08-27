@@ -119,6 +119,8 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
         for (RangeParam param : params) {
             param.reset(false);
         }
+        // the channel-level lookup has to be updated first, even if
+        // the combined lookup is always updated after calling this
         updateLookup();
     }
 

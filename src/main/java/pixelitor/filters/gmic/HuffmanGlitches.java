@@ -20,6 +20,8 @@ package pixelitor.filters.gmic;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.util.ColorSpace;
+import pixelitor.gui.GUIText;
 
 import java.io.Serial;
 import java.util.List;
@@ -39,7 +41,7 @@ public class HuffmanGlitches extends GMICFilter {
     });
     private final RangeParam blocSize = new RangeParam("Bloc Size", 0, 25, 100);
     private final RangeParam patchOverlap = new RangeParam("Patch Overlap", 0, 0, 50);
-    private final IntChoiceParam colorSpace = new IntChoiceParam("Color Space", new Item[] {
+    private final IntChoiceParam colorSpace = new IntChoiceParam(GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, new Item[]{
         new Item("RGB", 0),
         new Item("CMYK", 1),
         new Item("HCY", 2),

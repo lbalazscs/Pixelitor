@@ -47,11 +47,8 @@ public class ToneCurvesGUI extends FilterGUI {
         curvesPanel = new ToneCurvesPanel(curves);
         curvesPanel.addActionListener(e -> startPreview(false));
 
-        var channelSelectorPanel = new ChannelSelectorPanel(
-            curvesPanel::setActiveCurve,
-            e -> curvesPanel.resetActiveCurve()
-        );
-
+        var channelSelectorPanel = new ChannelSelectorPanel(curvesPanel::setActiveCurve);
+        channelSelectorPanel.addResetButton(e -> curvesPanel.resetActiveCurve());
         channelSelectorPanel.addColorSpaceChangedListener(colorSpace -> {
             curves.setColorSpace(colorSpace);
             curvesPanel.stateChanged();

@@ -41,8 +41,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurves {
-    private final Map<Channel, ToneCurve> srgbCurvesByChannel = new EnumMap<>(Channel.class);
-    private final Map<Channel, ToneCurve> oklabCurvesByChannel = new EnumMap<>(Channel.class);
+    private final Map<ColorSpace, Map<Channel, ToneCurve>> curvesBySpace = new EnumMap<>(ColorSpace.class);
     private ColorSpace activeColorSpace = ColorSpace.SRGB;
     private Channel activeChannel;
 
@@ -58,28 +57,23 @@ public class ToneCurves {
     private static final BasicStroke GRID_STROKE = new BasicStroke(1);
 
     public ToneCurves() {
-        // initialize curves for each channel
-        for (Channel channel : Channel.getRGBChoices()) {
-            srgbCurvesByChannel.put(channel, new ToneCurve(channel));
-        }
-        for (Channel channel : Channel.getLABChoices()) {
-            oklabCurvesByChannel.put(channel, new ToneCurve(channel));
+        // initialize curves for each color space and channel
+        for (ColorSpace space : ColorSpace.values()) {
+            Map<Channel, ToneCurve> curvesByChannel = new EnumMap<>(Channel.class);
+            for (Channel channel : space.getChannels()) {
+                curvesByChannel.put(channel, new ToneCurve(channel));
+            }
+            curvesBySpace.put(space, curvesByChannel);
         }
         setActiveChannel(Channel.RGB);
     }
 
     private Map<Channel, ToneCurve> getActiveCurveMap() {
-        return switch (activeColorSpace) {
-            case SRGB -> srgbCurvesByChannel;
-            case OKLAB -> oklabCurvesByChannel;
-        };
+        return curvesBySpace.get(activeColorSpace);
     }
 
-    public ToneCurve getCurve(Channel channel) {
-        if (srgbCurvesByChannel.containsKey(channel)) {
-            return srgbCurvesByChannel.get(channel);
-        }
-        return oklabCurvesByChannel.get(channel);
+    public ToneCurve getCurve(ColorSpace colorSpace, Channel channel) {
+        return curvesBySpace.get(colorSpace).get(channel);
     }
 
     public ToneCurve getActiveCurve() {
@@ -132,20 +126,18 @@ public class ToneCurves {
         curveWidth = newPanelWidth - 2 * CURVE_PADDING - AXIS_PADDING;
         curveHeight = newPanelHeight - 2 * CURVE_PADDING - AXIS_PADDING;
 
-        for (ToneCurve curve : srgbCurvesByChannel.values()) {
-            curve.setSize(curveWidth, curveHeight);
-        }
-        for (ToneCurve curve : oklabCurvesByChannel.values()) {
-            curve.setSize(curveWidth, curveHeight);
+        for (Map<Channel, ToneCurve> channelMap : curvesBySpace.values()) {
+            for (ToneCurve curve : channelMap.values()) {
+                curve.setSize(curveWidth, curveHeight);
+            }
         }
     }
 
     public void reset() {
-        for (ToneCurve curve : srgbCurvesByChannel.values()) {
-            curve.reset();
-        }
-        for (ToneCurve curve : oklabCurvesByChannel.values()) {
-            curve.reset();
+        for (Map<Channel, ToneCurve> channelMap : curvesBySpace.values()) {
+            for (ToneCurve curve : channelMap.values()) {
+                curve.reset();
+            }
         }
     }
 
@@ -154,7 +146,7 @@ public class ToneCurves {
             curve.reset();
         }
         // randomize only the primary channel of the active color space
-        getCurve(activeColorSpace.getPrimaryChannel()).randomize();
+        getCurve(activeColorSpace, activeColorSpace.getPrimaryChannel()).randomize();
     }
 
     /**

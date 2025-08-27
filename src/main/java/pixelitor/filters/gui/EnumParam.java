@@ -27,8 +27,18 @@ public class EnumParam<E extends Enum<E>> extends ChoiceParam<E> {
         super(name, enumClass.getEnumConstants(), RandomizeMode.ALLOW_RANDOMIZE);
     }
 
+    public EnumParam(String name, String presetKey, Class<E> enumClass) {
+        this(name, enumClass);
+        setPresetKey(presetKey);
+    }
+
     public EnumParam(String name, List<E> choices) {
         super(name, choices, choices.getFirst(), RandomizeMode.ALLOW_RANDOMIZE);
+    }
+
+    public EnumParam(String name, String presetKey, List<E> choices) {
+        super(name, choices, choices.getFirst(), RandomizeMode.ALLOW_RANDOMIZE);
+        setPresetKey(presetKey);
     }
 
     public EnumParam<E> withDefault(E item) {

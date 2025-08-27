@@ -25,6 +25,12 @@ import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.utils.Rnd;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
+
 import static pixelitor.filters.util.Channel.BLUE;
 import static pixelitor.filters.util.Channel.GREEN;
 import static pixelitor.filters.util.Channel.OK_A;
@@ -34,43 +40,46 @@ import static pixelitor.filters.util.Channel.RED;
 import static pixelitor.filters.util.Channel.RGB;
 
 public class LevelsModel {
-    private final ChannelLevelsModel rgbModel;
-    private final ChannelLevelsModel rModel;
-    private final ChannelLevelsModel gModel;
-    private final ChannelLevelsModel bModel;
-    private final ChannelLevelsModel okLModel;
-    private final ChannelLevelsModel okAModel;
-    private final ChannelLevelsModel okBModel;
+    private final Map<Channel, ChannelLevelsModel> channelModels;
 
-    private final Levels filter;
-    private FilterGUI lastGUI;
+    private FilterGUI filterGUI;
+    private BufferedImageOp filterOp;
 
     private ColorSpace colorSpace = ColorSpace.SRGB;
 
-    /**
-     * Contains the sub-models in the order they should appear in the GUI.
-     */
-    private final ChannelLevelsModel[] subModels;
+    public LevelsModel() {
+        channelModels = new EnumMap<>(Channel.class);
 
-    public LevelsModel(Levels filter) {
-        this.filter = filter;
-        rgbModel = new ChannelLevelsModel(RGB, this);
-        rModel = new ChannelLevelsModel(RED, this);
-        gModel = new ChannelLevelsModel(GREEN, this);
-        bModel = new ChannelLevelsModel(BLUE, this);
-
-        okLModel = new ChannelLevelsModel(OK_L, this);
-        okAModel = new ChannelLevelsModel(OK_A, this);
-        okBModel = new ChannelLevelsModel(OK_B, this);
-
-        subModels = new ChannelLevelsModel[]{
-            rgbModel, rModel, gModel, bModel,
-            okLModel, okAModel, okBModel
-        };
+        for (Channel channel : Channel.values()) {
+            channelModels.put(channel, new ChannelLevelsModel(channel, this));
+        }
     }
 
-    public void setLastGUI(FilterGUI lastGUI) {
-        this.lastGUI = lastGUI;
+    public void setFilterGUI(FilterGUI filterGUI) {
+        this.filterGUI = filterGUI;
+    }
+
+    /**
+     * Applies the configured filter operation to the source image.
+     *
+     * @param src  the source image
+     * @param dest the destination image, or null
+     * @return the filtered image
+     */
+    public BufferedImage apply(BufferedImage src, BufferedImage dest) {
+        if (filterOp == null) {
+            // this can happen if this method is called before
+            // the GUI is created or a preset is loaded
+            updateFilterLookup();
+        }
+        return filterOp.filter(src, dest);
+    }
+
+    /**
+     * Returns the current filter operation. Used for testing purposes.
+     */
+    BufferedImageOp getFilterOp() {
+        return filterOp;
     }
 
     /**
@@ -79,10 +88,10 @@ public class LevelsModel {
     public void settingsChanged() {
         updateFilterLookup();
 
-        if (lastGUI == null) {
-            return; // lastGUI is null when loading a smart filter or running non-interactively
+        if (filterGUI == null) {
+            return; // it's null when loading a smart filter or running non-interactively
         }
-        lastGUI.startPreview(false);
+        filterGUI.startPreview(false);
     }
 
     /**
@@ -96,18 +105,18 @@ public class LevelsModel {
     }
 
     private void updateSrgbFilterLookup() {
-        GrayScaleLookup rgb = rgbModel.getLookup();
-        GrayScaleLookup r = rModel.getLookup();
-        GrayScaleLookup g = gModel.getLookup();
-        GrayScaleLookup b = bModel.getLookup();
-        filter.setFilterOp(new RGBLookup(rgb, r, g, b).asFastLookupOp());
+        GrayScaleLookup rgb = getLookupForChannel(RGB);
+        GrayScaleLookup r = getLookupForChannel(RED);
+        GrayScaleLookup g = getLookupForChannel(GREEN);
+        GrayScaleLookup b = getLookupForChannel(BLUE);
+        this.filterOp = new RGBLookup(rgb, r, g, b).asFastLookupOp();
     }
 
     private void updateOklabFilterLookup() {
-        GrayScaleLookup l = okLModel.getLookup();
-        GrayScaleLookup a = okAModel.getLookup();
-        GrayScaleLookup b = okBModel.getLookup();
-        filter.setFilterOp(new OklabLevelsFilter(l, a, b));
+        GrayScaleLookup l = getLookupForChannel(OK_L);
+        GrayScaleLookup a = getLookupForChannel(OK_A);
+        GrayScaleLookup b = getLookupForChannel(OK_B);
+        this.filterOp = new OklabLevelsFilter(l, a, b);
     }
 
     public void resetAllAndRun() {
@@ -118,7 +127,7 @@ public class LevelsModel {
     public void resetAll() {
         this.colorSpace = ColorSpace.SRGB;
 
-        for (ChannelLevelsModel model : subModels) {
+        for (ChannelLevelsModel model : getSubModels()) {
             model.resetToDefaults();
         }
     }
@@ -128,64 +137,67 @@ public class LevelsModel {
         settingsChanged();
     }
 
-    private ChannelLevelsModel getModelForChannel(Channel channel) {
-        return switch (channel) {
-            case RGB -> rgbModel;
-            case RED -> rModel;
-            case GREEN -> gModel;
-            case BLUE -> bModel;
-            case OK_L -> okLModel;
-            case OK_A -> okAModel;
-            case OK_B -> okBModel;
-        };
+    public ChannelLevelsModel getModelForChannel(Channel channel) {
+        return channelModels.get(channel);
     }
 
-    public ChannelLevelsModel[] getSubModels() {
-        return subModels;
+    private GrayScaleLookup getLookupForChannel(Channel channel) {
+        return channelModels.get(channel).getLookup();
+    }
+
+    public Collection<ChannelLevelsModel> getSubModels() {
+        return channelModels.values();
     }
 
     public void saveToUserPreset(UserPreset preset) {
-        preset.put("Color Space", colorSpace.toString());
-        for (ChannelLevelsModel model : subModels) {
-            model.saveToUserPreset(preset);
+        preset.put(ColorSpace.PRESET_KEY, colorSpace.toString());
+        for (var entry : channelModels.entrySet()) {
+            Channel channel = entry.getKey();
+            if (channel.getColorSpace() == colorSpace) {
+                ChannelLevelsModel channelModel = entry.getValue();
+                channelModel.saveToUserPreset(preset);
+            }
         }
     }
 
     public void loadUserPreset(UserPreset preset) {
-        // will default to sRGB for old presets that don't have this key
-        ColorSpace targetSpace = preset.getEnum("Color Space", ColorSpace.class);
+        ColorSpace targetSpace = preset.getEnum(ColorSpace.PRESET_KEY, ColorSpace.class);
         setColorSpace(targetSpace, false);
 
-        for (ChannelLevelsModel model : subModels) {
-            model.loadUserPreset(preset);
+        for (var entry : channelModels.entrySet()) {
+            Channel channel = entry.getKey();
+            if (channel.getColorSpace() == colorSpace) {
+                ChannelLevelsModel channelModel = entry.getValue();
+                channelModel.loadUserPreset(preset);
+            }
         }
+
         settingsChanged();
     }
 
     public void randomizeAndRun() {
         resetAll();
 
-        // Get the primary channel for the current color space
         Channel primaryChannel = colorSpace.getPrimaryChannel();
         ChannelLevelsModel primaryModel = getModelForChannel(primaryChannel);
 
-        // randomize the input levels of the main RGB channel for a simple, common adjustment
+        // randomize the input levels of the primary channel for a simple, common adjustment
         int inputDark = Rnd.nextInt(128);
         int inputLight = Rnd.nextInt(128) + 128;
 
         primaryModel.getInputDark().setValueNoTrigger(inputDark);
         primaryModel.getInputLight().setValueNoTrigger(inputLight);
 
-        // manually trigger an update of the model and filter
+        // trigger an update of the model and filter
         primaryModel.paramAdjusted();
     }
 
-    public void setColorSpace(ColorSpace colorSpace, boolean trigger) {
+    public void setColorSpace(ColorSpace colorSpace, boolean triggerFilter) {
         if (this.colorSpace == colorSpace) {
             return;
         }
         this.colorSpace = colorSpace;
-        if (trigger) {
+        if (triggerFilter) {
             settingsChanged();
         }
     }

@@ -21,6 +21,8 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.lookup.FastLookupOp;
+import pixelitor.filters.util.Channel;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -46,7 +48,7 @@ public class ExtractChannel extends ParametrizedFilter {
     private static final int BLUE_CHANNEL = 5;
     private static final int REMOVE_BLUE_CHANNEL = 6;
 
-    private final IntChoiceParam channelParam = new IntChoiceParam("Channel", new Item[]{
+    private final IntChoiceParam channelParam = new IntChoiceParam(GUIText.CHANNEL, Channel.PRESET_KEY, new Item[]{
         new Item("Red", RED_CHANNEL),
         new Item("Remove Red", REMOVE_RED_CHANNEL),
         new Item("Green", GREEN_CHANNEL),

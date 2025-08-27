@@ -135,7 +135,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
             stateChanged();
         } else if (deletedKnotIndex >= 0) { // a knot was just deleted by dragging
             Point2D.Float mousePos = normalizeMousePos(e);
-            if (toneCurves.getActiveCurve().isDraggedIn(deletedKnotIndex, mousePos)) {
+            if (toneCurves.getActiveCurve().canBeDraggedIn(deletedKnotIndex, mousePos)) {
                 // restore the recently deleted knot if dragged back into range
                 mouseKnotIndex = toneCurves.getActiveCurve().addKnot(mousePos, false);
                 deletedKnotIndex = -1;

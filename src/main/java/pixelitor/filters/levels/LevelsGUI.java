@@ -39,11 +39,10 @@ import static java.awt.BorderLayout.SOUTH;
 public class LevelsGUI extends FilterGUI {
     private final JPanel cardPanel;
     private JCheckBox showOriginalCB;
-    private Channel currentChannel;
 
     public LevelsGUI(Filter filter, Filterable layer, LevelsModel model) {
         super(filter, layer);
-        model.setLastGUI(this);
+        model.setFilterGUI(this);
 
         setLayout(new BorderLayout());
 
@@ -52,15 +51,13 @@ public class LevelsGUI extends FilterGUI {
         cardPanel = createCenterPanel(model);
         add(cardPanel, CENTER);
 
-        ChannelSelectorPanel channelSelectorPanel = new ChannelSelectorPanel(
-            this::showChannelPanel,
-            e -> model.resetChannelToDefault(currentChannel)
-        );
-        add(channelSelectorPanel, NORTH);
-
+        ChannelSelectorPanel channelSelectorPanel = new ChannelSelectorPanel(this::showChannelPanel);
+        channelSelectorPanel.addResetButton(e ->
+            model.resetChannelToDefault(channelSelectorPanel.getSelectedChannel()));
         channelSelectorPanel.addColorSpaceChangedListener(colorSpace ->
             model.setColorSpace(colorSpace, true));
 
+        add(channelSelectorPanel, NORTH);
         add(createSouthPanel(model, layer), SOUTH);
 
         // ensure the lookup is initialized for the preview
@@ -68,7 +65,6 @@ public class LevelsGUI extends FilterGUI {
     }
 
     private void showChannelPanel(Channel channel) {
-        this.currentChannel = channel;
         if (cardPanel != null) {
             var cl = (CardLayout) cardPanel.getLayout();
             cl.show(cardPanel, channel.getName());

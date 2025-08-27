@@ -23,6 +23,8 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.lookup.LuminanceLookup;
+import pixelitor.filters.util.Channel;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -41,7 +43,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
     private static final int GREEN = 3;
     private static final int BLUE = 4;
 
-    private final IntChoiceParam channel = new IntChoiceParam("Channel", new Item[]{
+    private final IntChoiceParam channel = new IntChoiceParam(GUIText.CHANNEL, Channel.PRESET_KEY, new Item[]{
 //        new Item(GUIText.BRIGHTNESS, LUMINOSITY),
 //        new Item(i18n("red"), RED),
 //        new Item(i18n("green"), GREEN),

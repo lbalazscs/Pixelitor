@@ -22,6 +22,8 @@ import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.util.ColorSpace;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ColorSpaces;
 
 import java.awt.Color;
@@ -56,7 +58,7 @@ public class HueSat extends ParametrizedFilter {
     private static final int COLOR_SPACE_HSV = 0;
     private static final int COLOR_SPACE_OKLCH = 1;
 
-    private final IntChoiceParam colorSpace = new IntChoiceParam("Color Space", new Item[]{
+    private final IntChoiceParam colorSpace = new IntChoiceParam(GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, new Item[]{
         new Item("HSV (Faster)", COLOR_SPACE_HSV),
         new Item("Oklch (Better)", COLOR_SPACE_OKLCH),
     });
