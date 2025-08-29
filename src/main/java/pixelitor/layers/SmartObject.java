@@ -503,7 +503,7 @@ public class SmartObject extends CompositeLayer {
             invalidateImageCache();
             iconImageNeedsRefresh = true;
             holder.update();
-            numFiltersChanged();
+            layerCountChanged();
         } else if (activate) {
             comp.setActiveLayer(newFilter);
         }
@@ -520,7 +520,7 @@ public class SmartObject extends CompositeLayer {
 
         filter.setNext(null);
 
-        numFiltersChanged();
+        layerCountChanged();
         if (addToHistory) {
             History.add(new DeleteLayerEdit(this, filter, index));
         }
@@ -558,11 +558,11 @@ public class SmartObject extends CompositeLayer {
         deleteSmartFilter((SmartFilter) layer, false, false);
     }
 
-    private void numFiltersChanged() {
+    private void layerCountChanged() {
         // notify the delete action only if not the whole
         // smart object is selected and not during construction
         if (!isActive() && hasUI()) {
-            Layers.numLayersChanged(this, filters.size());
+            LayerEvents.fireLayerCountChanged(this, filters.size());
         }
     }
 
@@ -877,8 +877,6 @@ public class SmartObject extends CompositeLayer {
         lowestChanged.invalidateChain();
         invalidateImageCache();
         holder.update();
-
-        Layers.layersReordered(this);
     }
 
     public boolean containsSmartFilter(SmartFilter filter) {

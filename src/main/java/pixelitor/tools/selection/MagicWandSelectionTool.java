@@ -137,12 +137,13 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     }
 
     /**
-     * Creates a "Magic Wand" selection path, based on the algorithm described at
-     * https://losingfight.com/blog/2007/08/28/how-to-implement-a-magic-wand-tool/
+     * Creates a selection path based on color similarity using a flood-fill algorithm.
      */
     public static Path2D createSelectionPath(PMouseEvent pm) {
+        // this implementation is based on the algorithm described at
+        // https://losingfight.com/blog/2007/08/28/how-to-implement-a-magic-wand-tool/
         Composition comp = pm.getComp();
-        // the Magic Wand operates on the composite image
+        // the magic wand operates on the composite image
         BufferedImage image = comp.getCompositeImage();
 
         int width = image.getWidth();
@@ -175,15 +176,14 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     }
 
     /**
-     * Converts a boolean mask into a {@link Path2D} outline.
+     * Converts a boolean pixel mask into a vector path that outlines the selected areas.
      */
     private static Path2D createPathFromMask(boolean[] mask, int width, int height) {
-        Path2D.Double path = new Path2D.Double();
-        Map<Point, List<Line2D.Double>> edgeMap = new HashMap<>();
-
-        // find all edge segments by checking neighbors
+        // phase 1: find all edge segments of the selected regions
+        Map<Point, List<Line2D>> edgeMap = new HashMap<>();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                // an edge exists between a selected pixel and a non-selected neighbor
                 if (mask[y * width + x]) {
                     // check top neighbor
                     if (y == 0 || !mask[(y - 1) * width + x]) {
@@ -205,11 +205,11 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
             }
         }
 
-        // connect the edge segments to form closed paths
+        // phase 2: connect the edge segments to form closed paths
+        Path2D path = new Path2D.Double();
         while (!edgeMap.isEmpty()) {
             Point startPoint = edgeMap.keySet().iterator().next();
-            List<Line2D.Double> segments = edgeMap.get(startPoint);
-            Line2D.Double currentLine = segments.getFirst();
+            Line2D currentLine = edgeMap.get(startPoint).getFirst();
 
             path.moveTo(startPoint.x, startPoint.y);
             Point currentPoint = startPoint;
@@ -218,14 +218,14 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
                 Point nextPoint = getOtherEndpoint(currentLine, currentPoint);
                 path.lineTo(nextPoint.x, nextPoint.y);
 
-                // remove the used line segment from the map
+                // remove the used line segment from the map to avoid reprocessing
                 removeLine(edgeMap, currentLine, currentPoint);
                 removeLine(edgeMap, currentLine, nextPoint);
 
                 currentPoint = nextPoint;
 
                 // find the next connected segment
-                List<Line2D.Double> nextSegments = edgeMap.get(currentPoint);
+                List<Line2D> nextSegments = edgeMap.get(currentPoint);
                 if (nextSegments == null || nextSegments.isEmpty()) {
                     break; // path is complete
                 }
@@ -237,20 +237,21 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     }
 
     /**
-     * Helper to add a line segment to the edge map.
+     * Adds a line segment to the edge map, indexed by both of its endpoints.
      */
-    private static void addEdge(Map<Point, List<Line2D.Double>> edgeMap, Point p1, Point p2) {
-        Line2D.Double line = new Line2D.Double(p1, p2);
+    private static void addEdge(Map<Point, List<Line2D>> edgeMap, Point p1, Point p2) {
+        Line2D line = new Line2D.Double(p1, p2);
         edgeMap.computeIfAbsent(p1, k -> new ArrayList<>()).add(line);
         edgeMap.computeIfAbsent(p2, k -> new ArrayList<>()).add(line);
     }
 
     /**
-     * Helper to get the other endpoint of a line, given one endpoint.
+     * Returns the other endpoint of a line, given one of its endpoints.
      */
-    private static Point getOtherEndpoint(Line2D.Double line, Point p) {
+    private static Point getOtherEndpoint(Line2D line, Point p) {
         Point2D p1 = line.getP1();
         Point2D p2 = line.getP2();
+        // assumes p is one of the endpoints of the line
         if (p1.getX() == p.x && p1.getY() == p.y) {
             // p matches p1, so return p2
             return new Point((int) p2.getX(), (int) p2.getY());
@@ -261,10 +262,10 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     }
 
     /**
-     * Helper to remove a line segment from the map for a specific point.
+     * Removes a line segment associated with a specific endpoint from the edge map.
      */
-    private static void removeLine(Map<Point, List<Line2D.Double>> edgeMap, Line2D.Double line, Point p) {
-        List<Line2D.Double> segments = edgeMap.get(p);
+    private static void removeLine(Map<Point, List<Line2D>> edgeMap, Line2D line, Point p) {
+        List<Line2D> segments = edgeMap.get(p);
         if (segments != null) {
             segments.remove(line);
             if (segments.isEmpty()) {

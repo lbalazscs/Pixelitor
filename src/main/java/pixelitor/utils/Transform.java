@@ -35,6 +35,7 @@ public class Transform {
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     public Transform() {
+        // enable the amount slider only if the selected nonlinear distortion type has an amount property
         distortType.setupEnableOtherIf(distortAmount, NonlinTransform::hasAmount);
     }
 

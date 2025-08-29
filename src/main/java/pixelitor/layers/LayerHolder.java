@@ -224,7 +224,6 @@ public interface LayerHolder extends Debuggable {
 
         reorderLayerUI(oldIndex, newIndex);
         update();
-        Layers.layersReordered(this);
 
         if (addToHistory) {
             History.add(new LayerOrderChangeEdit(editName, this, oldIndex, newIndex));

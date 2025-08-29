@@ -37,10 +37,7 @@ public class KMeansClustering {
      * Performs color quantization for a fixed number of iterations.
      */
     public int[] cluster(int[] pixels, boolean useKMeansPlusPlus, ProgressTracker pt) {
-        // initialize centroids using either k-means++ or random selection
-        int[] centroids = useKMeansPlusPlus
-            ? initializeKMeansPlusPlusCentroids(pixels)
-            : initializeRandomCentroids(pixels);
+        int[] centroids = initCentroids(pixels, useKMeansPlusPlus);
 
         pt.unitDone();
 
@@ -50,7 +47,7 @@ public class KMeansClustering {
             IntList[] clusters = assignPixelsToClusters(pixels, centroids);
 
             // calculate new centroids as the average of assigned colors
-            int[] newCentroids = recalculateCentroids(clusters);
+            int[] newCentroids = recalcCentroids(clusters);
 
             // a convergence check could be added here, but for simplicity
             // we run for a fixed number of iterations.
@@ -65,10 +62,16 @@ public class KMeansClustering {
         return centroids;
     }
 
+    private int[] initCentroids(int[] pixels, boolean useKMeansPlusPlus) {
+        return useKMeansPlusPlus
+            ? initKMeansPlusPlusCentroids(pixels)
+            : initRandomCentroids(pixels);
+    }
+
     /**
      * Initializes centroids by randomly selecting pixels from the input image.
      */
-    private int[] initializeRandomCentroids(int[] pixels) {
+    private int[] initRandomCentroids(int[] pixels) {
         int[] centroids = new int[numClusters];
         for (int i = 0; i < numClusters; i++) {
             centroids[i] = (pixels[random.nextInt(pixels.length)]);
@@ -79,7 +82,7 @@ public class KMeansClustering {
     /**
      * Initializes centroids using the k-means++ algorithm for better initial placement.
      */
-    private int[] initializeKMeansPlusPlusCentroids(int[] pixels) {
+    private int[] initKMeansPlusPlusCentroids(int[] pixels) {
         int[] centroids = new int[numClusters];
 
         // choose the first centroid randomly
@@ -88,7 +91,7 @@ public class KMeansClustering {
         // choose the remaining centroids based on a weighted probability distribution
         for (int i = 1; i < numClusters; i++) {
             double[] distances = new double[pixels.length];
-            double sumDistances = calculateKMeansPlusPlusWeights(pixels, i, centroids, distances);
+            double sumDistances = calcKMeansPlusPlusWeights(pixels, i, centroids, distances);
 
             // choose the next centroid
             selectNextCentroidFromWeights(pixels, sumDistances, distances, centroids, i);
@@ -100,18 +103,18 @@ public class KMeansClustering {
     /**
      * Calculates distance-based weights for k-means++ initialization.
      */
-    private static double calculateKMeansPlusPlusWeights(int[] pixels, int numExistingCentroids, int[] centroids, double[] distances) {
+    private static double calcKMeansPlusPlusWeights(int[] pixels, int numExistingCentroids, int[] centroids, double[] distances) {
         double sumDistances = 0;
         for (int j = 0; j < pixels.length; j++) {
             // for each pixel, find the squared distance to the nearest existing centroid
-            double minSquaredDistance = Double.MAX_VALUE;
+            double minSquaredDist = Double.MAX_VALUE;
             for (int l = 0; l < numExistingCentroids; l++) {
-                double squaredDistance = calcSquaredRgbDistance(pixels[j], centroids[l]);
-                if (squaredDistance < minSquaredDistance) {
-                    minSquaredDistance = squaredDistance;
+                double squaredDist = calcSquaredRgbDistance(pixels[j], centroids[l]);
+                if (squaredDist < minSquaredDist) {
+                    minSquaredDist = squaredDist;
                 }
             }
-            distances[j] = minSquaredDistance;
+            distances[j] = minSquaredDist;
             sumDistances += distances[j];
         }
         return sumDistances;
@@ -152,7 +155,7 @@ public class KMeansClustering {
     /**
      * Calculates new centroid positions as the average of all colors in each cluster.
      */
-    private int[] recalculateCentroids(IntList[] clusters) {
+    private int[] recalcCentroids(IntList[] clusters) {
         int[] newCentroids = new int[numClusters];
 
         for (int i = 0; i < numClusters; i++) {
@@ -188,13 +191,13 @@ public class KMeansClustering {
      */
     public static int findClosestCentroidIndex(int rgb, int[] centroids) {
         int closestIndex = 0;
-        double closestDistance = Double.MAX_VALUE;
+        double closestDist = Double.MAX_VALUE;
 
         for (int i = 0; i < centroids.length; i++) {
-            double distance = calcSquaredRgbDistance(rgb, centroids[i]);
-            if (distance < closestDistance) {
+            double dist = calcSquaredRgbDistance(rgb, centroids[i]);
+            if (dist < closestDist) {
                 closestIndex = i;
-                closestDistance = distance;
+                closestDist = dist;
             }
         }
         return closestIndex;

@@ -38,7 +38,10 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -529,7 +532,7 @@ public abstract class Layer implements Serializable, Debuggable {
         maskChanged();
         holder.update();
 
-        Layers.maskAdded(this); // notify global mask listeners
+        LayerEvents.fireMaskAdded(this); // notify global mask listeners
 
         PixelitorEdit edit = new AddLayerMaskEdit(editName, comp, this);
         if (deselect) {
@@ -584,7 +587,7 @@ public abstract class Layer implements Serializable, Debuggable {
             maskChanged();
             holder.update();
             if (isActive()) {
-                Layers.maskAdded(this);
+                LayerEvents.fireMaskAdded(this);
             }
         } else {
             comp.invalidateImageCache();
@@ -603,7 +606,7 @@ public abstract class Layer implements Serializable, Debuggable {
         mask = null;
 
         ui.removeMaskIcon();
-        Layers.maskDeleted(this); // notify global mask listeners
+        LayerEvents.fireMaskDeleted(this); // notify global mask listeners
 
         // call this only after AddLayerMaskAction is notified,
         // because in some cases it might trigger a consistency check
@@ -656,38 +659,12 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     public PixelitorEdit hideWithMask(Shape shape, boolean createEdit) {
         if (hasMask()) {
-            return modifyMaskToHide(shape, createEdit);
+            return mask.modifyToHide(shape, createEdit);
         } else {
             // create a new mask that reveals only the shape area
             var maskImage = REVEAL_SELECTION.createBWImage(this, shape);
             return addImageAsMask(maskImage, createEdit, false,
                 "Add Layer Mask", false);
-        }
-    }
-
-    // helper to modify an existing mask to hide areas outside the shape
-    private PixelitorEdit modifyMaskToHide(Shape shape, boolean createEdit) {
-        BufferedImage maskImage = mask.getImage();
-        BufferedImage maskImageBackup = null;
-        if (createEdit) {
-            maskImageBackup = ImageUtils.copyImage(maskImage);
-        }
-        Graphics2D g = maskImage.createGraphics();
-
-        // Fill the unselected part with black to hide it.
-        // The rest remains as it was.
-        Shape unselectedPart = comp.getCanvas().invertShape(shape);
-        g.setColor(Color.BLACK);
-        g.fill(unselectedPart);
-        g.dispose();
-
-        mask.updateTransparencyImage();
-
-        if (createEdit) {
-            return new ImageEdit("Modify Mask",
-                comp, mask, maskImageBackup, true);
-        } else {
-            return null;
         }
     }
 

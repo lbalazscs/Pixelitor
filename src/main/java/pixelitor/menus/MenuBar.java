@@ -1467,14 +1467,6 @@ public class MenuBar extends JMenuBar {
         sub.add(new ViewEnabledAction("Update Histograms",
             HistogramsPanel::updateFrom));
 
-        sub.add(new RestrictedLayerAction("Update Mask Transparency from BW", HAS_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.getMask().updateTransparencyImage();
-                layer.update();
-            }
-        });
-
         return sub;
     }
 

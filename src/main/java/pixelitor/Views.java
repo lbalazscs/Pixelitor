@@ -191,7 +191,7 @@ public class Views {
         }
 
         // assume that the new view has a proper mask view mode set up
-        Layers.activeCompChanged(comp, false);
+        LayerEvents.fireActiveCompChanged(comp, false);
 
         boolean maskEditing = view.getMaskViewMode().editMask();
         Tools.maskEditingChanged(maskEditing);

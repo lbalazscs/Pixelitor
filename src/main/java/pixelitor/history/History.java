@@ -43,6 +43,8 @@ public class History {
     private static final PixelitorUndoManager undoManager = new PixelitorUndoManager();
     private static int numUndoneEdits = 0;
 
+    private static HistoryChecker checker;
+
     // quietly ignores new edits if true
     private static boolean ignoreEdits = false;
 
@@ -60,6 +62,10 @@ public class History {
      * Adds a new edit to the history.
      */
     public static void add(PixelitorEdit edit) {
+        if (checker != null) {
+            checker.registerAdd(edit.getName());
+        }
+
         assert edit != null;
         if (rejectEdits) {
             // TODO we can get here if undoing something activates a view, and this in turn
@@ -342,12 +348,24 @@ public class History {
     }
 
     public static void undo(String editName) {
+        if (checker != null) {
+            checker.registerUndo(editName);
+        }
         assertEditToBeUndoneNameIs(editName);
+
         undo();
     }
 
     public static void redo(String editName) {
+        if (checker != null) {
+            checker.registerRedo(editName);
+        }
         assertEditToBeRedoneNameIs(editName);
+
         redo();
+    }
+
+    public static void setChecker(HistoryChecker checker) {
+        History.checker = checker;
     }
 }

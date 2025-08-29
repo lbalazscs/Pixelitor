@@ -20,17 +20,16 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.colors.Colors;
 import pixelitor.history.History;
+import pixelitor.history.ImageEdit;
 import pixelitor.history.LinkLayerMaskEdit;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
@@ -117,7 +116,7 @@ public class LayerMask extends ImageLayer {
     /**
      * Updates the cached transparency image to reflect changes in the mask.
      */
-    public void updateTransparencyImage() {
+    private void updateTransparencyImage() {
         assert isGrayscale(image);
         assert image.getColorModel() != TRANSPARENCY_COLOR_MODEL;
 
@@ -234,6 +233,33 @@ public class LayerMask extends ImageLayer {
             // ... and return a transparency image based on it
             return new BufferedImage(TRANSPARENCY_COLOR_MODEL,
                 tmpImg.getRaster(), false, null);
+        }
+    }
+
+    /**
+     * Modifies this mask to hide areas outside the given shape.
+     */
+    public PixelitorEdit modifyToHide(Shape shape, boolean createEdit) {
+        BufferedImage maskImageBackup = null;
+        if (createEdit) {
+            maskImageBackup = ImageUtils.copyImage(image);
+        }
+        Graphics2D g = image.createGraphics();
+
+        // fill the unselected part with black to hide it
+        Shape unselectedPart = comp.getCanvas().invertShape(shape);
+        g.setColor(Color.BLACK);
+        g.fill(unselectedPart);
+        g.dispose();
+
+        updateTransparencyImage();
+        updateIconImage();
+
+        if (createEdit) {
+            return new ImageEdit("Modify Mask",
+                comp, this, maskImageBackup, true);
+        } else {
+            return null;
         }
     }
 

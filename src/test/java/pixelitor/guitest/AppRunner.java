@@ -34,13 +34,12 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.history.History;
+import pixelitor.history.HistoryChecker;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.IOTasks;
-import pixelitor.layers.BlendingMode;
-import pixelitor.layers.ColorFillLayer;
-import pixelitor.layers.LayerGUI;
-import pixelitor.layers.MaskViewMode;
+import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.BrushType;
@@ -106,8 +105,13 @@ public class AppRunner {
     private static File initialOpenDir;
     private static File initialSaveDir;
 
-    public AppRunner(File inputDir, String... fileNames) {
+    private final HistoryChecker historyChecker;
+
+    public AppRunner(HistoryChecker historyChecker, File inputDir, String... fileNames) {
+        this.historyChecker = historyChecker;
         robot = BasicRobot.robotWithNewAwtHierarchy();
+
+        History.setChecker(historyChecker);
 
         // Converts filenames to full paths
         String[] filePaths = Stream.of(fileNames)
@@ -125,7 +129,7 @@ public class AppRunner {
             .withTimeout(APP_START_TIMEOUT, SECONDS)
             .using(robot);
         mouse = new Mouse(pw, robot);
-        keyboard = new Keyboard(pw, robot, this);
+        keyboard = new Keyboard(pw, robot, this, historyChecker);
         layersContainer = new LayersContainerFixture(robot);
 
         if (Language.getActive() != Language.ENGLISH) {
@@ -322,6 +326,14 @@ public class AppRunner {
         checkNumLayersIs(1);
     }
 
+    void duplicateLayer(boolean undoRedo) {
+        runMenuCommand("Duplicate Layer");
+
+        if (undoRedo) {
+            keyboard.undoRedo("Duplicate Layer");
+        }
+    }
+
     void runMenuCommand(String text) {
         assert calledOutsideEDT() : callInfo();
 
@@ -472,6 +484,8 @@ public class AppRunner {
         dialog.requireNotVisible();
 
         Utils.sleep(5, SECONDS);
+
+        keyboard.undoRedo("Resize");
     }
 
     public void enlargeCanvas(int north, int west, int east, int south) {
@@ -496,6 +510,8 @@ public class AppRunner {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
+
+        keyboard.undoRedo("Modify Selection");
     }
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
@@ -773,6 +789,8 @@ public class AppRunner {
             .click()
             .requireDisabled();
         assert EDT.activeLayerHasMask();
+
+        keyboard.undoRedo("Add Layer Mask");
     }
 
     private void undoRedoNewLayer(int numLayersBefore, String editName) {
@@ -864,6 +882,7 @@ public class AppRunner {
         runMenuCommand("New Color Fill Layer...");
         var colorSelector = findDialogByTitle("Add Color Fill Layer");
         GUITestUtils.findButtonByText(colorSelector, "OK").click();
+        keyboard.undoRedo("Add Color Fill Layer");
 
         EDT.run(() -> ((ColorFillLayer) Views.getActiveLayer()).changeColor(c, true));
 
@@ -900,13 +919,20 @@ public class AppRunner {
         EDT.setFgBgColors(fgColor, bgColor);
         mouse.drag(dragLocation);
 
-        keyboard.pressEsc(); // hide the gradient handles
+        if (EDT.isActiveLayerType(GradientFillLayer.class)) {
+            keyboard.undoRedo("Gradient Fill Layer Change");
+            // gradient fill layers don't hide handles
+        } else {
+            keyboard.undoRedo("Create Gradient");
+
+            keyboard.pressEsc(); // hide the gradient handles
+            keyboard.undoRedo("Hide Gradient Handles");
+        }
     }
 
-    public void drawGradient(GradientType gradientType) {
+    public void drawGradientFromCenter(GradientType gradientType) {
         clickTool(Tools.GRADIENT);
 
-        // draw a radial gradient
         pw.comboBox("typeCB").selectItem(gradientType.toString());
         pw.checkBox("reverseCB").check();
 
@@ -916,7 +942,10 @@ public class AppRunner {
         }
 
         mouse.dragFromCanvasCenterToTheRight();
+        keyboard.undoRedo("Create Gradient");
+
         keyboard.pressEsc(); // hide the gradient handles
+        keyboard.undoRedo("Hide Gradient Handles");
     }
 
     public void addShapesLayer(ShapeType shapeType, CanvasDrag shapeLocation) {
@@ -949,12 +978,24 @@ public class AppRunner {
     }
 
     public void addAdjustmentLayer(String filterName, Consumer<DialogFixture> customizer) {
+        if (historyChecker != null) {
+            historyChecker.setMaxUntestedEdits(2);
+        }
+
         pw.button("addAdjLayer").click();
         JPopupMenuFixture popup = new JPopupMenuFixture(robot, robot.findActivePopupMenu());
         clickPopupMenu(popup, "New " + filterName, true);
         DialogFixture dialog = findDialogByTitle(filterName);
         customizer.accept(dialog);
         dialog.button("ok").click();
+
+        keyboard.undo(filterName + " Changed");
+        keyboard.undoRedo("New Adjustment Layer");
+        keyboard.redo(filterName + " Changed");
+
+        if (historyChecker != null) {
+            historyChecker.setMaxUntestedEdits(1);
+        }
     }
 
     public void changeLayerBlendingMode(BlendingMode blendingMode) {
@@ -998,6 +1039,12 @@ public class AppRunner {
                 return "layerOpacity".equals(c.getParent().getName());
             }
         });
+    }
+
+    public void setMaxUntestedEdits(int newLimit) {
+        if (historyChecker != null) {
+            historyChecker.setMaxUntestedEdits(newLimit);
+        }
     }
 
     public Robot getRobot() {

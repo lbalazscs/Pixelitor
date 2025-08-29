@@ -250,7 +250,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private void updateUIForNewComp(Composition newComp, MaskViewMode newMaskViewMode, boolean reloaded) {
         LayersContainer.showLayersFor(this);
 
-        Layers.activeCompChanged(newComp, reloaded);
+        LayerEvents.fireActiveCompChanged(newComp, reloaded);
 
         // is this needed?
         newMaskViewMode.activate(this, newComp.getActiveLayer());
@@ -910,7 +910,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
 
         if (isActive() && comp.isHolderOfActiveLayer()) {
-            Layers.numLayersChanged(comp, comp.getNumLayers());
+            LayerEvents.fireLayerCountChanged(comp, comp.getNumLayers());
         }
     }
 

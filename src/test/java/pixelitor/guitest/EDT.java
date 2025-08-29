@@ -93,6 +93,10 @@ public class EDT {
         return call(Views::getActiveLayer);
     }
 
+    public static boolean isActiveLayerType(Class<? extends Layer> type) {
+        return call(() -> Views.getActiveLayer().getClass().equals(type));
+    }
+
     public static void assertThereIsSelection() {
         if (getActiveSelection() == null) {
             throw new AssertionError("no selection found");

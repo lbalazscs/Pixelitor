@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import org.assertj.swing.fixture.AbstractWindowFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Views;
 import pixelitor.colors.FgBgColors;
+import pixelitor.history.HistoryChecker;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
@@ -50,18 +51,23 @@ public class Keyboard {
     private final FrameFixture pw;
     private final Robot robot;
     private final AppRunner app;
+    private final HistoryChecker historyChecker;
 
     private boolean ctrlDown = false;
     private boolean altDown = false;
     private boolean shiftDown = false;
 
-    public Keyboard(FrameFixture pw, Robot robot, AppRunner app) {
+    public Keyboard(FrameFixture pw, Robot robot, AppRunner app, HistoryChecker historyChecker) {
         this.pw = pw;
         this.robot = robot;
         this.app = app;
+        this.historyChecker = historyChecker;
     }
 
     void undo(String editName) {
+        if (historyChecker != null) {
+            historyChecker.registerUndo(editName);
+        }
         EDT.assertEditToBeUndoneNameIs(editName);
 
         if (USE_OS_LEVEL_EVENTS) {
@@ -86,6 +92,9 @@ public class Keyboard {
     }
 
     void redo(String editName) {
+        if (historyChecker != null) {
+            historyChecker.registerRedo(editName);
+        }
         EDT.assertEditToBeRedoneNameIs(editName);
         if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-Shift-Z

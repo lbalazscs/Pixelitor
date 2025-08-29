@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ public class DeleteActiveLayerAction extends AbstractViewEnabledAction
             Icons.loadThemed("delete_layer.gif", ThemedImageIcon.RED));
 
         setToolTip("Deletes the active layer.");
-        Layers.addHolderListener(this);
+        LayerEvents.addHolderListener(this);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class DeleteActiveLayerAction extends AbstractViewEnabledAction
     }
 
     @Override
-    public void numLayersChanged(LayerHolder holder, int newLayerCount) {
+    public void layerCountChanged(LayerHolder holder, int newLayerCount) {
         enableDisable(holder, newLayerCount);
     }
 
@@ -64,11 +64,6 @@ public class DeleteActiveLayerAction extends AbstractViewEnabledAction
     public void layerActivated(Layer layer) {
         LayerHolder holder = layer.getHolder();
         enableDisable(holder, holder.getNumLayers());
-    }
-
-    @Override
-    public void layersReordered(LayerHolder holder) {
-
     }
 
     private void enableDisable(LayerHolder holder, int layerCount) {

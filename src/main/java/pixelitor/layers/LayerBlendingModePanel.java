@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
         bmCombo.setName("layerBM");
 
         Views.addActivationListener(this);
-        Layers.addHolderListener(this);
+        LayerEvents.addHolderListener(this);
 
         opacityDDSlider.addActionListener(e -> {
             if (userInteractionChange) {
@@ -90,14 +90,6 @@ public class LayerBlendingModePanel extends BlendingModePanel
     @Override
     public void viewActivated(View oldView, View newView) {
         setEnabled(true);
-    }
-
-    @Override
-    public void numLayersChanged(LayerHolder holder, int newLayerCount) {
-    }
-
-    @Override
-    public void layersReordered(LayerHolder holder) {
     }
 
     @Override

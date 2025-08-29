@@ -68,6 +68,7 @@ import pixelitor.utils.Geometry;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Texts;
 import pixelitor.utils.Utils;
+import pixelitor.utils.input.Modifiers;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
@@ -170,7 +171,8 @@ public class MainGuiTest {
     private MainGuiTest() {
         long startMillis = System.currentTimeMillis();
 
-        app = new AppRunner(inputDir, "a.jpg");
+//        app = new AppRunner(new HistoryChecker(), inputDir, "a.jpg");
+        app = new AppRunner(null, inputDir, "a.jpg");
 
         robot = app.getRobot();
         pw = app.getPW();
@@ -178,7 +180,7 @@ public class MainGuiTest {
         mouse = app.getMouse();
 
         if (EDT.call(FileChoosers::useNativeDialogs)) {
-            // we can't test if mative file choosers are enabled
+            // we can't test if native file choosers are enabled
             System.out.println("MainGuiTest: native dialogs, exiting");
             System.exit(0);
         }
@@ -237,12 +239,12 @@ public class MainGuiTest {
     }
 
     private void clickAndResetRectSelectTool() {
-        pw.toggleButton("Rectangle Selection Tool Button").click();
+        app.clickTool(Tools.RECTANGLE_SELECTION);
         pw.comboBox("combinatorCB").selectItem("Replace");
     }
 
     private void clickAndResetShapesTool() {
-        pw.toggleButton("Shapes Tool Button").click();
+        app.clickTool(Tools.SHAPES);
     }
 
     /**
@@ -292,7 +294,7 @@ public class MainGuiTest {
 
             testPathTools();
             testHandTool();
-            testZoomTool();
+            testZooming();
             testColorSelector();
             maskIndependentToolsTested = true;
         }
@@ -331,6 +333,8 @@ public class MainGuiTest {
         testActiveLayerChangeFromMenu();
         testLayerToCanvasSize();
         testLayerMenusChangingNumLayers();
+
+        testRotateFlip(false);
 
         testLayerMasks();
         testTextLayers();
@@ -371,7 +375,7 @@ public class MainGuiTest {
         layer2Button.requireSelected();
         maskMode.apply(this);
 
-        app.drawGradient(GradientType.SPIRAL_CW);
+        app.drawGradientFromCenter(GradientType.SPIRAL_CW);
     }
 
     private void testChangeLayerOpacityAndBM() {
@@ -670,6 +674,8 @@ public class MainGuiTest {
             }));
     }
 
+//<editor-fold desc="help menu">
+
     void testHelpMenu() {
         if (helpMenuTested && Rnd.nextDouble() > 0.05) {
             return;
@@ -710,6 +716,34 @@ public class MainGuiTest {
         dialog.requireNotVisible();
     }
 
+    private void testCheckForUpdate() {
+        runMenuCommand("Check for Updates...");
+        try {
+            // the title is either "Pixelitor Is Up to Date"
+            // or "New Version Available"
+            app.findJOptionPane(null).buttonWithText("Close").click();
+        } catch (ComponentLookupException e) {
+            // if a close button was not found, then it must be the up to date dialog
+            app.findJOptionPane("Pixelitor Is Up to Date").okButton().click();
+        }
+    }
+
+    private void testAbout() {
+        runMenuCommand("About Pixelitor");
+        var dialog = findDialogByTitle("About Pixelitor");
+
+        var tabbedPane = dialog.tabbedPane();
+        tabbedPane.requireTabTitles("About", "Credits", "System Info");
+        tabbedPane.selectTab("Credits");
+        tabbedPane.selectTab("System Info");
+        tabbedPane.selectTab("About");
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+    }
+//</editor-fold>
+//<editor-fold desc="colors">
+
     void testColors() {
         if (colorsTested && Rnd.nextDouble() > 0.05) {
             return;
@@ -746,31 +780,8 @@ public class MainGuiTest {
         dialog.requireNotVisible();
     }
 
-    private void testCheckForUpdate() {
-        runMenuCommand("Check for Updates...");
-        try {
-            // the title is either "Pixelitor Is Up to Date"
-            // or "New Version Available"
-            app.findJOptionPane(null).buttonWithText("Close").click();
-        } catch (ComponentLookupException e) {
-            // if a close button was not found, then it must be the up to date dialog
-            app.findJOptionPane("Pixelitor Is Up to Date").okButton().click();
-        }
-    }
-
-    private void testAbout() {
-        runMenuCommand("About Pixelitor");
-        var dialog = findDialogByTitle("About Pixelitor");
-
-        var tabbedPane = dialog.tabbedPane();
-        tabbedPane.requireTabTitles("About", "Credits", "System Info");
-        tabbedPane.selectTab("Credits");
-        tabbedPane.selectTab("System Info");
-        tabbedPane.selectTab("About");
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-    }
+//</editor-fold>
+//<editor-fold desc="edit menu">
 
     void testEditMenu() {
         log(0, "edit menu");
@@ -780,20 +791,6 @@ public class MainGuiTest {
         runMenuCommand("Undo Invert");
         runMenuCommand("Redo Invert");
         testFade();
-
-        // select for crop
-        clickAndResetRectSelectTool();
-
-        mouse.moveToCanvas(200, 200);
-        mouse.dragToCanvas(400, 400);
-        EDT.assertThereIsSelection();
-
-        testCropSelection(() -> runMenuCommand("Crop Selection"),
-            false, 200.0, 200.0);
-
-        EDT.assertThereIsSelection();
-        keyboard.deselect();
-        EDT.assertThereIsNoSelection();
 
         testCopyPaste();
 
@@ -815,6 +812,34 @@ public class MainGuiTest {
         dialog.button("ok").click();
 
         keyboard.undoRedoUndo("Fade");
+    }
+
+    private void testCopyPaste() {
+        log(1, "copy-paste");
+
+        EDT.assertNumOpenImagesIs(1);
+        app.checkNumLayersIs(1);
+
+        runMenuCommand("Copy Layer/Mask");
+        runMenuCommand("Paste as New Layer");
+
+        app.checkNumLayersIs(2);
+
+        runMenuCommand("Copy Composite");
+        runMenuCommand("Paste as New Image");
+        EDT.assertNumOpenImagesIs(2);
+
+        // close the pasted image
+        app.closeCurrentView(ExpectConfirmation.NO);
+        EDT.assertNumOpenImagesIs(1);
+
+        // delete the pasted layer
+        app.checkNumLayersIs(2);
+        assert DeleteActiveLayerAction.INSTANCE.isEnabled();
+        runMenuCommand("Delete Layer");
+        app.checkNumLayersIs(1);
+
+        maskMode.apply(this);
     }
 
     private void testPreferences() {
@@ -886,6 +911,9 @@ public class MainGuiTest {
         }
     }
 
+//</editor-fold>
+//<editor-fold desc="image menu">
+
     void testImageMenu() {
         log(0, "image menu");
 
@@ -893,10 +921,17 @@ public class MainGuiTest {
         EDT.assertNumOpenImagesIs(1);
         app.checkNumLayersIs(1);
 
+        testCropSelection();
+
         // add more layer types
-        app.addGradientFillLayer(GradientType.ANGLE);
-        app.addColorFillLayer(Color.BLUE);
-        app.addShapesLayer(ShapeType.BAT, new CanvasDrag(20, 380, 100));
+        // TODO set to false, because currently not all layer types
+        // create undo edits when used with the move tool
+        boolean addExtraLayers = false;
+        if (addExtraLayers) {
+            app.addGradientFillLayer(GradientType.ANGLE);
+            app.addColorFillLayer(Color.BLUE);
+            app.addShapesLayer(ShapeType.BAT, new CanvasDrag(20, 380, 100));
+        }
 
         testDuplicateImage();
 
@@ -905,20 +940,38 @@ public class MainGuiTest {
         runWithSelectionAndTranslation(() -> {
             testResize();
             testEnlargeCanvas();
-            testRotateFlip();
+            testRotateFlip(true);
         });
 
-        // delete the 3 extra layers
-        pw.button("deleteLayer")
-            .requireEnabled()
-            .click()
-            .click()
-            .click();
-        app.checkNumLayersIs(1);
+        if (addExtraLayers) {
+            // delete the 3 extra layers
+            pw.button("deleteLayer")
+                .requireEnabled()
+                .click()
+                .click()
+                .click();
+            app.checkNumLayersIs(1);
+        }
 
         maskMode.apply(this);
         maskMode.check();
         checkConsistency();
+    }
+
+    private void testCropSelection() {
+        // create the selection that will be cropped
+        clickAndResetRectSelectTool();
+
+        mouse.moveToCanvas(200, 200);
+        mouse.dragToCanvas(400, 400);
+        EDT.assertThereIsSelection();
+
+        testCropSelection(() -> runMenuCommand("Crop Selection"),
+            false, 200.0, 200.0);
+
+        EDT.assertThereIsSelection();
+        keyboard.deselect();
+        EDT.assertThereIsNoSelection();
     }
 
     private void testDuplicateImage() {
@@ -939,7 +992,7 @@ public class MainGuiTest {
         log(2, "resize");
         app.resize(622);
 
-        keyboard.undoRedoUndo("Resize");
+        keyboard.undo("Resize");
     }
 
     private void testEnlargeCanvas() {
@@ -948,52 +1001,8 @@ public class MainGuiTest {
         keyboard.undoRedoUndo("Enlarge Canvas");
     }
 
-    private void testRotateFlip() {
-        log(2, "rotate and flip");
-
-        runMenuCommandByName("comp_rot_90");
-        keyboard.undoRedoUndo("Rotate 90° CW");
-
-        runMenuCommandByName("comp_rot_180");
-        keyboard.undoRedoUndo("Rotate 180°");
-
-        runMenuCommandByName("comp_rot_270");
-        keyboard.undoRedoUndo("Rotate 90° CCW");
-
-        runMenuCommandByName("comp_flip_hor");
-        keyboard.undoRedoUndo("Flip Horizontal");
-
-        runMenuCommandByName("comp_flip_ver");
-        keyboard.undoRedoUndo("Flip Vertical");
-    }
-
-    private void testCopyPaste() {
-        log(1, "copy-paste");
-
-        EDT.assertNumOpenImagesIs(1);
-        app.checkNumLayersIs(1);
-
-        runMenuCommand("Copy Layer/Mask");
-        runMenuCommand("Paste as New Layer");
-
-        app.checkNumLayersIs(2);
-
-        runMenuCommand("Copy Composite");
-        runMenuCommand("Paste as New Image");
-        EDT.assertNumOpenImagesIs(2);
-
-        // close the pasted image
-        app.closeCurrentView(ExpectConfirmation.NO);
-        EDT.assertNumOpenImagesIs(1);
-
-        // delete the pasted layer
-        app.checkNumLayersIs(2);
-        assert DeleteActiveLayerAction.INSTANCE.isEnabled();
-        runMenuCommand("Delete Layer");
-        app.checkNumLayersIs(1);
-
-        maskMode.apply(this);
-    }
+//</editor-fold>
+//<editor-fold desc="file menu">
 
     void testFileMenu() {
         if (fileMenuTested && Rnd.nextDouble() > 0.05) {
@@ -1064,8 +1073,6 @@ public class MainGuiTest {
         String fileName = "saved." + extension;
         File file = new File(baseDir, fileName);
 
-        System.out.println("MainGuiTest::testSave: found file chooser, file = " + file);
-
         boolean fileExistsAlready = file.exists();
 
         String compName = EDT.active(Composition::getName);
@@ -1083,8 +1090,6 @@ public class MainGuiTest {
         }
         Utils.sleep(500, MILLISECONDS);
         assertThat(file).exists().isFile();
-
-        System.out.println("MainGuiTest::testSave: run Save, expect no file chooser");
 
         // now that the file is saved, save again:
         // no file chooser should appear
@@ -1413,6 +1418,8 @@ public class MainGuiTest {
 
         checkConsistency();
     }
+//</editor-fold>
+//<editor-fold desc="view menu">
 
     void testViewMenu() {
         if (viewMenuTested && Rnd.nextDouble() > 0.05) {
@@ -1538,10 +1545,11 @@ public class MainGuiTest {
     private void testHistory() {
         // before testing make sure that we have something
         // in the history even if this is running alone
-        pw.toggleButton("Brush Tool Button").click();
+        app.clickTool(Tools.BRUSH);
         mouse.moveRandomlyWithinCanvas();
         mouse.dragRandomlyWithinCanvas();
-        pw.toggleButton("Eraser Tool Button").click();
+
+        app.clickTool(Tools.ERASER);
         mouse.moveRandomlyWithinCanvas();
         mouse.dragRandomlyWithinCanvas();
 
@@ -1584,6 +1592,9 @@ public class MainGuiTest {
         dialog.close();
         dialog.requireNotVisible();
     }
+
+//</editor-fold>
+//<editor-fold desc="filters">
 
     void testFilters() {
         log(0, "filters");
@@ -1981,6 +1992,9 @@ public class MainGuiTest {
         dialog.button("ok").click();
     }
 
+    //</editor-fold>
+//<editor-fold desc="hand tool">
+
     private void testHandTool() {
         log(1, "hand tool");
 
@@ -1995,6 +2009,9 @@ public class MainGuiTest {
 
         checkConsistency();
     }
+
+//</editor-fold>
+//<editor-fold desc="shapes tool">
 
     private void testShapesTool() {
         log(1, "shapes tool");
@@ -2111,6 +2128,9 @@ public class MainGuiTest {
         dialog.requireNotVisible();
     }
 
+//</editor-fold>
+//<editor-fold desc="color picker tool">
+
     private void testColorPickerTool() {
         log(1, "color picker tool");
 
@@ -2124,6 +2144,9 @@ public class MainGuiTest {
 
         checkConsistency();
     }
+
+//</editor-fold>
+//<editor-fold desc="path tools">
 
     private void testPathTools() {
         testPenTool();
@@ -2253,6 +2276,9 @@ public class MainGuiTest {
             .click();
     }
 
+//</editor-fold>
+//<editor-fold desc="paint bucket tool">
+
     private void testPaintBucketTool() {
         log(1, "paint bucket tool");
 
@@ -2266,6 +2292,9 @@ public class MainGuiTest {
         keyboard.undoRedoUndo("Paint Bucket Tool");
         checkConsistency();
     }
+
+//</editor-fold>
+//<editor-fold desc="gradient tool">
 
     private void testGradientTool() {
         log(1, "gradient tool");
@@ -2329,6 +2358,9 @@ public class MainGuiTest {
         }
         checkConsistency();
     }
+
+//</editor-fold>
+//<editor-fold desc="brush tools">
 
     private void testEraserTool() {
         log(1, "eraser tool");
@@ -2448,6 +2480,174 @@ public class MainGuiTest {
         }
         keyboard.undoRedo("Clone Stamp Tool");
     }
+
+//</editor-fold>
+//<editor-fold desc="move tool">
+
+    private void testMoveTool() {
+        log(1, "move tool");
+
+        addSelection(); // so that the moving of the selection can be tested
+        app.clickTool(Tools.MOVE);
+
+        MoveMode[] moveModes = MoveMode.values();
+        for (MoveMode mode : moveModes) {
+            pw.comboBox("modeSelector").selectItem(mode.toString());
+
+            testMoveToolDrag(mode, false);
+            testMoveToolDrag(mode, true);
+            app.checkNumLayersIs(1);
+
+            keyboard.nudge();
+            keyboard.undoRedoUndo(mode.getEditName());
+            app.checkNumLayersIs(1);
+
+            // check that all move-related edits have been undone
+            EDT.assertEditToBeUndoneNameIs("Create Selection");
+
+            testMoveToolClick(mode, Modifiers.NONE);
+            testMoveToolClick(mode, Modifiers.CTRL);
+            testMoveToolClick(mode, Modifiers.SHIFT);
+            testMoveToolClick(mode, Modifiers.ALT);
+        }
+
+        maskMode.apply(this);
+        checkConsistency();
+    }
+
+    private void testMoveToolDrag(MoveMode mode, boolean altDrag) {
+        mouse.moveToCanvas(400, 400);
+
+        if (altDrag) {
+            app.setMaxUntestedEdits(2);
+
+            // adds 2 edits: "Duplicate Layer", "Move"
+            mouse.altDragToCanvas(300, 300);
+
+            keyboard.undo(mode.getEditName());
+            if (mode.movesLayer()) {
+                keyboard.undoRedo("Duplicate Layer");
+            }
+            keyboard.redo(mode.getEditName());
+
+            app.setMaxUntestedEdits(1);
+        } else {
+            View view = EDT.getActiveView();
+            Drawable dr = view.getComp().getActiveDrawableOrThrow();
+            assert dr.getTx() == 0 : "tx = " + dr.getTx();
+            assert dr.getTy() == 0 : "ty = " + dr.getTx();
+
+            mouse.dragToCanvas(200, 300);
+
+            if (mode.movesLayer()) {
+                // the translations will have these values only if we are at 100% zoom
+                assert view.getZoomLevel() == ZoomLevel.ACTUAL_SIZE : "zoom is " + view.getZoomLevel();
+                assert dr.getTx() == -200 : "tx = " + dr.getTx();
+                assert dr.getTy() == -100 : "ty = " + dr.getTy();
+            } else {
+                assert dr.getTx() == 0 : "tx = " + dr.getTx();
+                assert dr.getTy() == 0 : "ty = " + dr.getTy();
+            }
+        }
+
+        keyboard.undoRedoUndo(mode.getEditName());
+
+        if (altDrag && mode.movesLayer()) {
+            // The alt-dragged movement creates two history edits:
+            // a duplicate and a layer move. Now also undo the duplication.
+            keyboard.undo("Duplicate Layer");
+        }
+
+        // check that all move-related edits have been undone
+        EDT.assertEditToBeUndoneNameIs("Create Selection");
+    }
+
+    private void testMoveToolClick(MoveMode mode, Modifiers modifiers) {
+        app.checkNumLayersIs(1);
+        boolean duplicated = modifiers.alt().isDown() && mode.movesLayer();
+        if (duplicated) {
+            app.setMaxUntestedEdits(2);
+        }
+
+        mouse.click(modifiers);
+        keyboard.undoRedoUndo(mode.getEditName());
+
+        if (duplicated) {
+            app.checkNumLayersIs(2);
+            keyboard.undoRedoUndo("Duplicate Layer");
+            app.checkNumLayersIs(1);
+            app.setMaxUntestedEdits(1);
+        }
+    }
+
+//</editor-fold>
+//<editor-fold desc="crop tool">
+
+    private void testCropTool() {
+        log(1, "crop tool");
+
+        app.clickTool(Tools.CROP);
+
+        List<Boolean> checkBoxStates = List.of(Boolean.TRUE, Boolean.FALSE);
+        for (Boolean allowGrowing : checkBoxStates) {
+            for (Boolean deleteCropped : checkBoxStates) {
+                selectCheckBox("allowGrowingCB", allowGrowing);
+                selectCheckBox("deleteCroppedCB", deleteCropped);
+
+                cropFromCropTool();
+            }
+        }
+
+        checkConsistency();
+    }
+
+    private void cropFromCropTool() {
+        checkCropBoxDoesNotExist();
+
+        mouse.moveToCanvas(200, 200);
+        mouse.dragToCanvas(400, 400);
+        keyboard.undoRedo("Create Crop Box");
+        checkCropBoxExists();
+
+        mouse.dragToCanvas(450, 450);
+        keyboard.undoRedo("Modify Crop Box");
+
+        mouse.moveToCanvas(200, 200); // move to the top left corner
+        mouse.dragToCanvas(150, 150);
+        keyboard.undoRedo("Modify Crop Box");
+
+        keyboard.nudge();
+        keyboard.undoRedo("Nudge Crop Box");
+
+        mouse.randomAltClick(); // must be at the end, otherwise it tries to start a rectangle
+
+        findButtonByText(pw, "Crop")
+            .requireEnabled()
+            .click();
+        checkCropBoxDoesNotExist();
+
+        keyboard.undoRedoUndo("Crop");
+        // undoing the crop restores the crop box
+        checkCropBoxExists();
+
+        findButtonByText(pw, "Cancel")
+            .requireEnabled()
+            .click();
+        keyboard.undoRedo("Dismiss Crop Box");
+
+        checkCropBoxDoesNotExist();
+    }
+
+    private static void checkCropBoxExists() {
+        assert EDT.call(Tools.CROP::hasCropBox);
+    }
+
+    private static void checkCropBoxDoesNotExist() {
+        assert !EDT.call(Tools.CROP::hasCropBox);
+    }
+
+//</editor-fold>
+//<editor-fold desc="selections">
 
     private void testSelectionToolsAndMenus() {
         log(1, "selection tools and the selection menus");
@@ -2643,120 +2843,13 @@ public class MainGuiTest {
 
     private void testSelectionModifyMenu() {
         app.runModifySelection(EXPAND, 24);
-
-        keyboard.undoRedoUndo("Modify Selection");
+        keyboard.undo("Modify Selection");
     }
 
-    private void testCropTool() {
-        log(1, "crop tool");
+//</editor-fold>
+//<editor-fold desc="zooming">
 
-        app.clickTool(Tools.CROP);
-
-        List<Boolean> checkBoxStates = List.of(Boolean.TRUE, Boolean.FALSE);
-        for (Boolean allowGrowing : checkBoxStates) {
-            for (Boolean deleteCropped : checkBoxStates) {
-                selectCheckBox("allowGrowingCB", allowGrowing);
-                selectCheckBox("deleteCroppedCB", deleteCropped);
-
-                cropFromCropTool();
-            }
-        }
-
-        checkConsistency();
-    }
-
-    private void cropFromCropTool() {
-        mouse.moveToCanvas(200, 200);
-        mouse.dragToCanvas(400, 400);
-        mouse.dragToCanvas(450, 450);
-        mouse.moveToCanvas(200, 200); // move to the top left corner
-        mouse.dragToCanvas(150, 150);
-
-        keyboard.nudge();
-        // currently there is no undo after resizing or nudging the crop rectangle
-
-        mouse.randomAltClick(); // must be at the end, otherwise it tries to start a rectangle
-
-        findButtonByText(pw, "Crop")
-            .requireEnabled()
-            .click();
-        keyboard.undoRedoUndo("Crop");
-    }
-
-    private void testMoveTool() {
-        log(1, "move tool");
-
-        addSelection(); // so that the moving of the selection can be tested
-        app.clickTool(Tools.MOVE);
-
-        MoveMode[] moveModes = MoveMode.values();
-        for (MoveMode mode : moveModes) {
-            pw.comboBox("modeSelector").selectItem(mode.toString());
-
-            testMoveToolImpl(mode, false);
-            testMoveToolImpl(mode, true);
-            app.checkNumLayersIs(1);
-
-            keyboard.nudge();
-            keyboard.undoRedoUndo(mode.getEditName());
-            app.checkNumLayersIs(1);
-        }
-
-        // check that all move-related edits have been undone
-        EDT.assertEditToBeUndoneNameIs("Create Selection");
-
-        mouse.click();
-        mouse.ctrlClick();
-        app.checkNumLayersIs(1);
-
-        mouse.altClick(); // this duplicates the layer
-        app.checkNumLayersIs(2);
-        pw.button("deleteLayer")
-            .requireEnabled()
-            .click();
-        app.checkNumLayersIs(1);
-        maskMode.apply(this);
-
-        checkConsistency();
-    }
-
-    private void testMoveToolImpl(MoveMode mode, boolean altDrag) {
-        mouse.moveToCanvas(400, 400);
-
-        if (altDrag) {
-            mouse.altDragToCanvas(300, 300);
-        } else {
-            View view = EDT.getActiveView();
-            Drawable dr = view.getComp().getActiveDrawableOrThrow();
-            assert dr.getTx() == 0 : "tx = " + dr.getTx();
-            assert dr.getTy() == 0 : "ty = " + dr.getTx();
-
-            mouse.dragToCanvas(200, 300);
-
-            if (mode.movesLayer()) {
-                // the translations will have these values only if we are at 100% zoom
-                assert view.getZoomLevel() == ZoomLevel.ACTUAL_SIZE : "zoom is " + view.getZoomLevel();
-                assert dr.getTx() == -200 : "tx = " + dr.getTx();
-                assert dr.getTy() == -100 : "ty = " + dr.getTy();
-            } else {
-                assert dr.getTx() == 0 : "tx = " + dr.getTx();
-                assert dr.getTy() == 0 : "ty = " + dr.getTy();
-            }
-        }
-
-        keyboard.undoRedoUndo(mode.getEditName());
-
-        if (altDrag && mode != MoveMode.MOVE_SELECTION_ONLY) {
-            // The alt-dragged movement creates two history edits:
-            // a duplicate and a layer move. Now also undo the duplication.
-            keyboard.undo("Duplicate Layer");
-        }
-
-        // check that all move-related edits have been undone
-        EDT.assertEditToBeUndoneNameIs("Create Selection");
-    }
-
-    private void testZoomTool() {
+    private void testZooming() {
         log(1, "zoom tool");
 
         app.clickTool(Tools.ZOOM);
@@ -2904,6 +2997,8 @@ public class MainGuiTest {
 
         pw.releaseKey(VK_CONTROL);
     }
+//</editor-fold>
+//<editor-fold desc="color selector">
 
     private void testColorSelector() {
         log(1, "color selector");
@@ -2956,35 +3051,23 @@ public class MainGuiTest {
         clickPopupMenu(button.showPopupMenu(), dialogName + "...");
         testColorPaletteDialog(dialogName);
     }
-
-    private static void cleanOutputs() {
-        try {
-            String cleanerScriptPath = cleanerScript.getCanonicalPath();
-            System.out.println("MainGuiTest::cleanOutputs: running " + cleanerScript);
-            Process process = Runtime.getRuntime().exec(new String[]{cleanerScriptPath});
-            int exitValue = process.waitFor();
-            if (exitValue != 0) {
-                throw new IllegalStateException("Exit value for " + cleanerScriptPath + " was " + exitValue);
-            }
-
-            assertThat(Files.fileNamesIn(batchResizeOutputDir.getPath(), false)).isEmpty();
-            assertThat(Files.fileNamesIn(batchFilterOutputDir.getPath(), false)).isEmpty();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//</editor-fold>
 
     private void addSelection() {
-        pw.toggleButton("Rectangle Selection Tool Button").click();
+        app.clickTool(Tools.RECTANGLE_SELECTION);
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(600, 500);
+        keyboard.undoRedo("Create Selection");
     }
 
     private void addTranslation() {
-        pw.toggleButton("Move Tool Button").click();
+        app.clickTool(Tools.MOVE);
+        pw.comboBox("modeSelector").selectItem(MoveMode.MOVE_LAYER_ONLY.toString());
+
         mouse.moveToCanvas(400, 400);
-        mouse.click();
         mouse.dragToCanvas(200, 300);
+
+        keyboard.undoRedo(MoveMode.MOVE_LAYER_ONLY.getEditName());
     }
 
     private void runWithSelectionAndTranslation(boolean squashedImage, Runnable task) {
@@ -3036,7 +3119,7 @@ public class MainGuiTest {
             }
         } else {
             app.addLayerMask();
-            app.drawGradient(GradientType.RADIAL);
+            app.drawGradientFromCenter(GradientType.RADIAL);
         }
     }
 
@@ -3083,6 +3166,22 @@ public class MainGuiTest {
         if (!cleanerScript.exists()) {
             System.err.printf("Cleaner script %s not found.%n", cleanerScript.getName());
             System.exit(1);
+        }
+    }
+
+    private static void cleanOutputs() {
+        try {
+            String cleanerScriptPath = cleanerScript.getCanonicalPath();
+            Process process = Runtime.getRuntime().exec(new String[]{cleanerScriptPath});
+            int exitValue = process.waitFor();
+            if (exitValue != 0) {
+                throw new IllegalStateException("Exit value for " + cleanerScriptPath + " was " + exitValue);
+            }
+
+            assertThat(Files.fileNamesIn(batchResizeOutputDir.getPath(), false)).isEmpty();
+            assertThat(Files.fileNamesIn(batchFilterOutputDir.getPath(), false)).isEmpty();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -3154,5 +3253,26 @@ public class MainGuiTest {
 
     private DialogFixture findDialogByTitle(String title) {
         return app.findDialogByTitle(title);
+    }
+
+    public void testRotateFlip(boolean entireComp) {
+        String prefix = entireComp ? "comp" : "layer";
+        int indent = entireComp ? 2 : 1;
+        log(indent, prefix + " rotate and flip");
+
+        runMenuCommandByName(prefix + "_rot_90");
+        keyboard.undoRedoUndo("Rotate 90° CW");
+
+        runMenuCommandByName(prefix + "_rot_180");
+        keyboard.undoRedoUndo("Rotate 180°");
+
+        runMenuCommandByName(prefix + "_rot_270");
+        keyboard.undoRedoUndo("Rotate 90° CCW");
+
+        runMenuCommandByName(prefix + "_flip_hor");
+        keyboard.undoRedoUndo("Flip Horizontal");
+
+        runMenuCommandByName(prefix + "_flip_ver");
+        keyboard.undoRedoUndo("Flip Vertical");
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,7 @@
 package pixelitor.layers;
 
 /**
- * A listener for changes in layer mask state.
- * It doesn't observe a specific layer,
- * but rather the active layer of the active composition.
+ * A listener for the addition or removal of a mask on the active layer.
  */
 public interface ActiveMaskListener {
     void maskAdded(Layer layer);

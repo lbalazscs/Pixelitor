@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,13 +76,13 @@ public class Mouse {
 
         robot.pressMouse(LEFT_BUTTON);
 
-        // Move to intermediate point
+        // move to intermediate point
         Utils.sleep(50, MILLISECONDS);
         moveToScreen(
             (targetX + currentPos.x) / 2,
             (targetY + currentPos.y) / 2);
 
-        // Move to final position
+        // move to final position
         Utils.sleep(50, MILLISECONDS);
         moveToScreen(targetX, targetY);
 
@@ -115,22 +115,31 @@ public class Mouse {
         robot.releaseMouse(LEFT_BUTTON);
     }
 
-    void altDragToScreen(int screenX, int screenY) {
-        robot.pressKey(VK_ALT);
+    void dragToScreen(int screenX, int screenY, Modifiers modifiers) {
+        pressModifierKeys(modifiers);
         dragToScreen(screenX, screenY);
-        robot.releaseKey(VK_ALT);
+        releaseModifierKeys(modifiers);
         robot.waitForIdle();
     }
 
-    void altDragToCanvas(int canvasX, int canvasY) {
-        altDragToScreen(
+    void dragToCanvas(int canvasX, int canvasY, Modifiers modifiers) {
+        dragToScreen(
             canvasBounds.x + canvasX,
-            canvasBounds.y + canvasY);
+            canvasBounds.y + canvasY,
+            modifiers);
+    }
+
+    void altDragToScreen(int screenX, int screenY) {
+        dragToScreen(screenX, screenY, Modifiers.ALT);
+    }
+
+    void altDragToCanvas(int canvasX, int canvasY) {
+        dragToCanvas(canvasX, canvasY, Modifiers.ALT);
     }
 
     Point moveRandomlyWithinCanvas() {
-        int randomX = generateRandomScreenXWithinCanvas();
-        int randomY = generateRandomScreenYWithinCanvas();
+        int randomX = genRandomScreenXWithinCanvas();
+        int randomY = genRandomScreenYWithinCanvas();
 
         Point randomPoint = new Point(randomX, randomY);
         assert canvasBounds.contains(randomPoint);
@@ -140,8 +149,8 @@ public class Mouse {
     }
 
     Point dragRandomlyWithinCanvas() {
-        int randomX = generateRandomScreenXWithinCanvas();
-        int randomY = generateRandomScreenYWithinCanvas();
+        int randomX = genRandomScreenXWithinCanvas();
+        int randomY = genRandomScreenYWithinCanvas();
 
         Point randomPoint = new Point(randomX, randomY);
         assert canvasBounds.contains(randomPoint);
@@ -150,19 +159,19 @@ public class Mouse {
         return randomPoint;
     }
 
-    private int generateRandomScreenXWithinCanvas() {
+    private int genRandomScreenXWithinCanvas() {
         return canvasBounds.x + CANVAS_SAFETY_MARGIN
             + random.nextInt(canvasBounds.width - CANVAS_SAFETY_MARGIN * 2);
     }
 
-    private int generateRandomScreenYWithinCanvas() {
+    private int genRandomScreenYWithinCanvas() {
         return canvasBounds.y + CANVAS_SAFETY_MARGIN
             + random.nextInt(canvasBounds.height - CANVAS_SAFETY_MARGIN * 2);
     }
 
     void shiftMoveClickRandom() {
-        int randomX = generateRandomScreenXWithinCanvas();
-        int randomY = generateRandomScreenYWithinCanvas();
+        int randomX = genRandomScreenXWithinCanvas();
+        int randomY = genRandomScreenYWithinCanvas();
         pw.pressKey(VK_SHIFT);
         moveToScreen(randomX, randomY);
         click();
@@ -207,10 +216,22 @@ public class Mouse {
         click();
     }
 
+    void clickScreen(int screenX, int screenY, Modifiers modifiers) {
+        moveToScreen(screenX, screenY);
+        click(modifiers);
+    }
+
     void clickCanvas(int canvasX, int canvasY) {
         clickScreen(
             canvasBounds.x + canvasX,
             canvasBounds.y + canvasY);
+    }
+
+    void clickCanvas(int canvasX, int canvasY, Modifiers modifiers) {
+        clickScreen(
+            canvasBounds.x + canvasX,
+            canvasBounds.y + canvasY,
+            modifiers);
     }
 
     void randomClick() {
@@ -229,6 +250,18 @@ public class Mouse {
     }
 
     void click(Modifiers modifiers) {
+        pressModifierKeys(modifiers);
+
+        if (modifiers.button().isRight()) {
+            rightClick();
+        } else {
+            click();
+        }
+
+        releaseModifierKeys(modifiers);
+    }
+
+    private void pressModifierKeys(Modifiers modifiers) {
         if (modifiers.ctrl().isDown()) {
             robot.pressKey(VK_CONTROL);
         }
@@ -238,13 +271,9 @@ public class Mouse {
         if (modifiers.shift().isDown()) {
             robot.pressKey(VK_SHIFT);
         }
+    }
 
-        if (modifiers.button().isRight()) {
-            rightClick();
-        } else {
-            click();
-        }
-
+    private void releaseModifierKeys(Modifiers modifiers) {
         if (modifiers.shift().isDown()) {
             robot.releaseKey(VK_SHIFT);
         }
@@ -257,47 +286,35 @@ public class Mouse {
     }
 
     void altClick() {
-        robot.pressKey(VK_ALT);
-        click();
-        robot.releaseKey(VK_ALT);
+        click(Modifiers.ALT);
     }
 
     void ctrlClick() {
-        robot.pressKey(VK_CONTROL);
-        click();
-        robot.releaseKey(VK_CONTROL);
+        click(Modifiers.CTRL);
     }
 
     void shiftClick() {
-        robot.pressKey(VK_SHIFT);
-        click();
-        robot.releaseKey(VK_SHIFT);
+        click(Modifiers.SHIFT);
     }
 
     void ctrlClickScreen(int screenX, int screenY) {
-        moveToScreen(screenX, screenY);
-        ctrlClick();
+        clickScreen(screenX, screenY, Modifiers.CTRL);
     }
 
     void ctrlClickCanvas(int canvasX, int canvasY) {
-        ctrlClickScreen(
-            canvasBounds.x + canvasX,
-            canvasBounds.y + canvasY);
+        clickCanvas(canvasX, canvasY, Modifiers.CTRL);
     }
 
     void randomCtrlClick() {
-        moveRandomlyWithinCanvas();
-        ctrlClick();
+        randomClick(Modifiers.CTRL);
     }
 
     void randomAltClick() {
-        moveRandomlyWithinCanvas();
-        altClick();
+        randomClick(Modifiers.ALT);
     }
 
     void randomShiftClick() {
-        moveRandomlyWithinCanvas();
-        shiftClick();
+        randomClick(Modifiers.SHIFT);
     }
 
     void dragFromCanvasCenterToTheRight() {

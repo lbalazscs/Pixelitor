@@ -32,6 +32,7 @@ import pixelitor.guitest.AppRunner.ExpectConfirmation;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.guitest.AppRunner.ShowOriginal;
+import pixelitor.history.HistoryChecker;
 import pixelitor.layers.*;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tools;
@@ -88,6 +89,7 @@ public class WorkflowTest {
     private final Mouse mouse;
     private final FrameFixture pw;
     private final Keyboard keyboard;
+    private final HistoryChecker historyChecker;
 
     private static final int INITIAL_WIDTH = 700;
     private static final int INITIAL_HEIGHT = 500;
@@ -166,24 +168,13 @@ public class WorkflowTest {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println("WorkflowTest: started at " + AppRunner.getCurrentTimeHM());
-        Utils.ensureAssertionsEnabled();
-        FailOnThreadViolationRepaintManager.install();
-
-        assert args.length == 2;
-        referenceImagesDir = new File(args[0]);
-        assert referenceImagesDir.exists();
-
-        new WorkflowTest(args[1]);
-    }
-
     private WorkflowTest(String arg) {
         boolean experimentalWasEnabled = EDT.call(() -> Features.enableExperimental);
         // enable it before building the menus so that shortcuts work
         EDT.run(() -> Features.enableExperimental = true);
 
-        app = new AppRunner(null);
+        historyChecker = new HistoryChecker();
+        app = new AppRunner(historyChecker, null);
         mouse = app.getMouse();
         pw = app.getPW();
         keyboard = app.getKeyboard();
@@ -221,12 +212,14 @@ public class WorkflowTest {
     }
 
     private void wfTest1(GroupSetting groupSetting) {
+        System.out.println("WorkflowTest::wfTest1: CALLED, groupSetting = " + groupSetting);
+
         String compName = genCompName(1, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
 
-        addGuide();
+        addHorGuide();
         runFilterWithDialog("Wood");
         duplicateLayerThenUndo(ImageLayer.class);
 
@@ -239,10 +232,10 @@ public class WorkflowTest {
         rasterizeThenUndo(TextLayer.class);
         selectionFromText();
         deleteActiveLayer(TextLayer.class);
-        rotate90();
+        rotate90(true);
         invertSelection();
         deselect();
-        rotate270();
+        rotate270(true);
         drawTransparentZigzagRectangle();
         enlargeCanvas();
 
@@ -255,7 +248,7 @@ public class WorkflowTest {
         createEllipseSelection();
         expandSelection();
         eclipseSelectionToPath();
-        flipHorizontal();
+        flipHorizontal(true);
         tracePath(BrushType.WOBBLE);
         pathToSelection();
         copySelection();
@@ -265,11 +258,11 @@ public class WorkflowTest {
         eclipseSelectionToPath();
         app.swapColors();
         tracePath(BrushType.SHAPE);
-        flipHorizontal();
+        flipHorizontal(true);
         clearGuides();
         app.clickTool(Tools.BRUSH);
 
-        loadReferenceImage("wf1.png");
+        tearDown("wf1.png");
     }
 
     private static String genCompName(int testNr, GroupSetting groupSetting) {
@@ -281,6 +274,8 @@ public class WorkflowTest {
     }
 
     private void wfTest2(GroupSetting groupSetting) {
+        System.out.println("WorkflowTest::wfTest2: CALLED, groupSetting = " + groupSetting);
+
         String compName = genCompName(2, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
@@ -299,7 +294,7 @@ public class WorkflowTest {
             .enterText("WARPED TEXT"));
 
         app.addLayerMask();
-        app.drawGradient(RADIAL);
+        app.drawGradientFromCenter(RADIAL);
         app.closeCurrentView(ExpectConfirmation.NO); // smart object content
 
         runFilterWithDialog("Magnify",
@@ -310,6 +305,8 @@ public class WorkflowTest {
         runFilterWithDialog("Frosted Glass");
 
         app.runMenuCommand("Lower Layer");
+        keyboard.undoRedo("Move Frosted Glass Down");
+        
         app.runMenuCommand("Raise Layer");
         keyboard.undo("Move Frosted Glass Up");
         keyboard.undo("Move Frosted Glass Down");
@@ -340,13 +337,13 @@ public class WorkflowTest {
 
         // double the text
         app.clickLayerPopup("smart TEXT", "Edit Contents");
-        app.runMenuCommand("Duplicate Layer");
+        app.duplicateLayer(true);
         move(MOVE_LAYER_ONLY, 0, -25);
-        app.runMenuCommand("Lower Layer Selection");
+        app.selectLayerBelow();
         move(MOVE_LAYER_ONLY, 0, 50);
         app.closeCurrentView(ExpectConfirmation.NO); // smart object content
 
-        loadReferenceImage("wf2.png");
+        tearDown("wf2.png");
     }
 
     private void editSpiderWebImage(String compName) {
@@ -364,6 +361,7 @@ public class WorkflowTest {
         runFilterWithDialog("Fractal Tree",
             dialog -> dialog.slider("Age (Iterations)").slideTo(14));
         app.changeLayerBlendingMode(BlendingMode.HARD_LIGHT);
+        flipHorizontal(false);
         app.mergeDown();
 
         app.addGradientFillLayer(SPIRAL_CW);
@@ -393,6 +391,8 @@ public class WorkflowTest {
     }
 
     private void wfTest3(GroupSetting groupSetting) {
+        System.out.println("WorkflowTest::wfTest3: CALLED, groupSetting = " + groupSetting);
+
         String compName = genCompName(3, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
@@ -406,8 +406,8 @@ public class WorkflowTest {
         convertLayerToSmartObject();
         app.runMenuCommand("Edit Contents");
 
-        // In the contents add a plasma image layer
-        // below the existing text layer.
+        // in the contents add a plasma image layer
+        // below the existing text layer
         app.addEmptyImageLayer(false);
         app.runMenuCommand("Lower Layer");
         keyboard.undoRedo("Lower Layer");
@@ -421,6 +421,7 @@ public class WorkflowTest {
 
         app.addAdjustmentLayer(ColorBalance.NAME, dialog ->
             dialog.slider("Cyan-Red").slideTo(50));
+
         app.addLayerMask();
         runFilterWithDialog(Starburst.NAME, dialog ->
             dialog.slider("Spiral").slideTo(100));
@@ -432,7 +433,7 @@ public class WorkflowTest {
         app.closeCurrentView(ExpectConfirmation.NO); // smart object content
 
         // duplicate the whole smart object
-        app.runMenuCommand("Duplicate Layer");
+        app.duplicateLayer(true);
 
         // add a smart filter to the original smart object and copy it
         app.selectLayerBelow();
@@ -453,10 +454,12 @@ public class WorkflowTest {
         app.findLayerIconByLayerName("Colorize").click();
         deleteActiveLayer(SmartFilter.class);
 
-        loadReferenceImage("wf3.png");
+        tearDown("wf3.png");
     }
 
     private void wfTest4(GroupSetting groupSetting) {
+        System.out.println("WorkflowTest::wfTest4: CALLED, groupSetting = " + groupSetting);
+
         String compName = genCompName(4, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
@@ -471,7 +474,10 @@ public class WorkflowTest {
         app.addLayerMask();
         CanvasDrag kiwiSize = new CanvasDrag(150, 50, 400);
         app.drawShape(KIWI, FOREGROUND, NONE, kiwiSize, true);
+
+        // invert the layer mask so that it's white inside the kiwi
         app.runMenuCommand("Invert");
+        keyboard.undoRedo("Invert");
 
         // edit the checkers pattern inside a smart object's contents
         convertLayerToSmartObject();
@@ -494,7 +500,9 @@ public class WorkflowTest {
         // add a smart object below it
         app.addColorFillLayer(Color.BLUE);
         convertLayerToSmartObject();
+
         app.runMenuCommand("Lower Layer");
+        keyboard.undoRedo("Lower Layer");
 
         // add a smart filter to the smart object
         runFilterWithDialog("Caustics", dialog -> {
@@ -505,6 +513,7 @@ public class WorkflowTest {
         // add a layer mask with a vertical gradient to the smart filter
         var popup = app.findLayerIconByLayerName("Caustics").showPopupMenu();
         clickPopupMenu(popup, "Add Layer Mask");
+        keyboard.undoRedo("Add Layer Mask");
 
         app.drawGradient(LINEAR, FG_TO_BG, new CanvasDrag(100, 0, 100, INITIAL_HEIGHT), Color.BLACK, Color.WHITE);
 
@@ -524,25 +533,30 @@ public class WorkflowTest {
 
         app.resize(300);
         app.resize(5);
-        keyboard.undoRedoUndo("Resize");
-        keyboard.undoRedoUndo("Resize");
+        keyboard.undo("Resize");
+        keyboard.undo("Resize");
 
-        loadReferenceImage("wf4.png");
+        tearDown("wf4.png");
     }
 
     private void wfTest5(GroupSetting groupSetting) {
+        System.out.println("WorkflowTest::wfTest5: CALLED, groupSetting = " + groupSetting);
+
         String compName = genCompName(5, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
 
         runFilterWithDialog("Marble");
+        rotate90(false);
+        keyboard.undo("Rotate 90° CW");
+
         convertLayerToSmartObject();
 
         // first smart filter
         runFilterWithDialog("Crystallize");
         app.resize(50);
-        keyboard.undoRedoUndo("Resize");
+        keyboard.undo("Resize");
 
         // second smart filter
         runFilterWithDialog("Color Wheel", dialog -> {
@@ -562,7 +576,7 @@ public class WorkflowTest {
 
         app.addEmptyImageLayer(false);
 
-        loadReferenceImage("wf5.png");
+        tearDown("wf5.png");
     }
 
     private void addTextLayer(String text, String alignment) {
@@ -570,7 +584,7 @@ public class WorkflowTest {
             dialog.comboBox("alignmentCB").selectItem(alignment), "Pixelitor");
     }
 
-    private void addGuide() {
+    private void addHorGuide() {
         app.runMenuCommand("Add Horizontal Guide...");
         var dialog = app.findDialogByTitle("Add Horizontal Guide");
         dialog.slider("Percent").slideTo(60);
@@ -580,6 +594,8 @@ public class WorkflowTest {
             .usingComparatorForType(new DoubleComparator(0.001), Double.class)
             .containsExactly(0.6);
         assertThat(EDT.getGuides().getVerticals()).isEmpty();
+
+        keyboard.undoRedo("Create Guides");
     }
 
     private void runFilterWithDialog(String filterName) {
@@ -602,7 +618,7 @@ public class WorkflowTest {
         int numLayers = EDT.getNumLayersInActiveHolder();
         EDT.assertActiveLayerTypeIs(expectedLayerType);
 
-        app.runMenuCommand("Duplicate Layer");
+        app.duplicateLayer(false);
 
         EDT.assertNumLayersIs(numLayers + 1);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
@@ -682,9 +698,16 @@ public class WorkflowTest {
         assert EDT.call(holder::getNumLayers) == numLayers - 1;
     }
 
-    private void rotate90() {
-        app.runMenuCommand("Rotate 90° CW");
+    private void rotate90(boolean entireComp) {
+        String commandName = entireComp ? "comp_rot_90" : "layer_rot_90";
+        app.runMenuCommandByName(commandName);
         keyboard.undoRedo("Rotate 90° CW");
+    }
+
+    private void rotate270(boolean entireComp) {
+        String commandName = entireComp ? "comp_rot_270" : "layer_rot_270";
+        app.runMenuCommandByName(commandName);
+        keyboard.undoRedo("Rotate 90° CCW");
     }
 
     private void invertSelection() {
@@ -695,11 +718,6 @@ public class WorkflowTest {
     private void deselect() {
         app.runMenuCommand("Deselect");
         keyboard.undoRedo("Deselect");
-    }
-
-    private void rotate270() {
-        app.runMenuCommand("Rotate 90° CCW");
-        keyboard.undoRedo("Rotate 90° CCW");
     }
 
     private void drawTransparentZigzagRectangle() {
@@ -728,7 +746,10 @@ public class WorkflowTest {
         mouse.dragToCanvas(INITIAL_WIDTH - margin, INITIAL_HEIGHT - margin);
 
         keyboard.undoRedo("Create Shape");
+
         keyboard.pressEsc();
+        // presing esc rasterizes the shape
+        keyboard.undoRedo("Rasterize Shape");
     }
 
     private void enlargeCanvas() {
@@ -788,12 +809,13 @@ public class WorkflowTest {
         int margin = 100;
         mouse.moveToCanvas(margin, margin);
         mouse.dragToCanvas(canvasWidth - margin, canvasHeight - margin);
+
+        keyboard.undoRedo("Create Selection");
     }
 
     private void expandSelection() {
         app.runModifySelection(EXPAND, 75);
         app.runModifySelection(EXPAND, 75);
-        keyboard.undoRedo("Modify Selection");
     }
 
     private void eclipseSelectionToPath() {
@@ -838,21 +860,27 @@ public class WorkflowTest {
         int startY = INITIAL_HEIGHT / 2;
         mouse.moveToCanvas(startX, startY);
         mouse.dragToCanvas(startX + dx, startY + dy);
+
+        keyboard.undoRedo(moveMode.getEditName());
     }
 
     private void pasteSelection() {
         app.runMenuCommand("Paste Selection");
         var dialog = app.findDialogByTitle("Existing Selection");
         findButtonByText(dialog, "Intersect").click();
+
+        keyboard.undoRedo("Selection Change");
     }
 
-    private void flipHorizontal() {
-        app.runMenuCommand("Flip Horizontal");
+    private void flipHorizontal(boolean entireComp) {
+        String commandName = entireComp ? "comp_flip_hor" : "layer_flip_hor";
+        app.runMenuCommandByName(commandName);
         keyboard.undoRedo("Flip Horizontal");
     }
 
     private void clearGuides() {
         app.runMenuCommand("Clear Guides");
+        keyboard.undoRedo("Clear Guides");
     }
 
     private void convertLayerToSmartObject() {
@@ -861,11 +889,29 @@ public class WorkflowTest {
         duplicateLayerThenUndo(SmartObject.class);
     }
 
+    private void tearDown(String refImgFileName) {
+        historyChecker.verifyAndClear();
+
+        loadReferenceImage(refImgFileName);
+    }
+
     private void loadReferenceImage(String fileName) {
         if (loadedRefImages.contains(fileName)) {
             return;
         }
         app.openFileWithDialog("Open...", referenceImagesDir, fileName);
         loadedRefImages.add(fileName);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("WorkflowTest: started at " + AppRunner.getCurrentTimeHM());
+        Utils.ensureAssertionsEnabled();
+        FailOnThreadViolationRepaintManager.install();
+
+        assert args.length == 2;
+        referenceImagesDir = new File(args[0]);
+        assert referenceImagesDir.exists();
+
+        new WorkflowTest(args[1]);
     }
 }

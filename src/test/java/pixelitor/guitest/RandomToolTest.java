@@ -143,7 +143,7 @@ public class RandomToolTest {
         EDT.run(this::setupPauseKey);
         EDT.run(this::setupExitKey);
 
-        app = new AppRunner(inputDir, "b.jpg", "a.jpg");
+        app = new AppRunner(null, inputDir, "b.jpg", "a.jpg");
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
         ExceptionHandler.INSTANCE.addFirstHandler((t, e) -> {

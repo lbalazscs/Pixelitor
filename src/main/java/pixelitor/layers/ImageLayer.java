@@ -67,7 +67,7 @@ import static pixelitor.utils.ImageUtils.replaceSelectedRegion;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
- * A layer that renders a {@link BufferedImage}.
+ * A layer that holds and renders pixel data from a BufferedImage.
  */
 public class ImageLayer extends ContentLayer implements Drawable, Transformable {
     public enum State {
@@ -78,6 +78,10 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
     @Serial
     private static final long serialVersionUID = 2L;
+
+    // The result of a geometric transformation.
+    private record TransformResult(BufferedImage image, int tx, int ty) {
+    }
 
     //
     // all variables are transient
@@ -122,7 +126,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Creates a new layer with the given image and translation.
+     * Creates a new layer with the given image and initial translation.
      */
     public ImageLayer(Composition comp, BufferedImage image,
                       String name, int tx, int ty) {
@@ -136,7 +140,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Creates a new empty (transparent) layer.
+     * Creates a new, empty (fully transparent) image layer.
      */
     public static ImageLayer createEmpty(Composition comp, String name) {
         ImageLayer imageLayer = new ImageLayer(comp, name);
@@ -149,74 +153,53 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Creates an image layer from an external (pasted or drag-and-dropped)
-     * image, which can have a different size than the canvas. The new layer
-     * is sized and positioned to center the external image on the canvas.
+     * Creates a layer from an external (pasted or drag-and-dropped)
+     * image, centering and padding it to fit the canvas.
      */
     public static ImageLayer fromExternalImage(BufferedImage externalImg,
                                                Composition comp,
                                                String layerName) {
         ImageLayer layer = new ImageLayer(comp, layerName);
-        requireNonNull(externalImg);
 
-        BufferedImage newImage = layer.calcNewImageFromExternal(externalImg);
-        layer.setImage(newImage);
-
-        // set the translation to center the new layer image on the canvas
-        layer.centerExternalImage(externalImg);
-
-        return layer;
-    }
-
-    private BufferedImage calcNewImageFromExternal(BufferedImage img) {
         Canvas canvas = comp.getCanvas();
-
-        // if the external image is already large enough to
-        // cover the canvas, then it doesn't have to be enlarged
-        if (canvas.isFullyCoveredBy(img)) {
-            return ImageUtils.toSysCompatibleImage(img);
-        }
-
-        // the external image is smaller than the canvas in at least one
-        // dimension, so create a new image that is at least canvas-sized
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
-        int imgWidth = img.getWidth();
-        int imgHeight = img.getHeight();
+        int imgWidth = externalImg.getWidth();
+        int imgHeight = externalImg.getHeight();
 
-        int newWidth = Math.max(canvasWidth, imgWidth);
-        int newHeight = Math.max(canvasHeight, imgHeight);
-        BufferedImage newImage = createEmptyLayerImage(newWidth, newHeight);
+        BufferedImage finalImage;
+        int finalTx;
+        int finalTy;
 
-        // draw the external image centered within the new image buffer
-        Graphics2D g = newImage.createGraphics();
-        int drawX = Math.max((canvasWidth - imgWidth) / 2, 0);
-        int drawY = Math.max((canvasHeight - imgHeight) / 2, 0);
-        g.drawImage(img, drawX, drawY, null);
-        g.dispose();
+        boolean smallerThanCanvas = imgWidth < canvasWidth || imgHeight < canvasHeight;
+        if (smallerThanCanvas) {
+            // create a new image buffer, at least canvas-sized
+            int newWidth = Math.max(canvasWidth, imgWidth);
+            int newHeight = Math.max(canvasHeight, imgHeight);
+            finalImage = layer.createEmptyLayerImage(newWidth, newHeight);
 
-        return newImage;
-    }
+            // draw the external image centered within the new image
+            Graphics2D g = finalImage.createGraphics();
+            int drawX = (newWidth - imgWidth) / 2;
+            int drawY = (newHeight - imgHeight) / 2;
+            g.drawImage(externalImg, drawX, drawY, null);
+            g.dispose();
 
-    // if the external image is bigger than the canvas, then add a
-    // translation to it in order to make it centered on the canvas
-    private void centerExternalImage(BufferedImage img) {
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
-        int imgWidth = img.getWidth();
-        int imgHeight = img.getHeight();
-
-        int newTx = 0;
-        if (imgWidth > canvasWidth) {
-            newTx = -(imgWidth - canvasWidth) / 2;
+            // the layer itself is not translated relative to the canvas
+            finalTx = 0;
+            finalTy = 0;
+        } else {
+            // the external image is large enough, use it directly
+            finalImage = ImageUtils.toSysCompatibleImage(externalImg);
+            // add a negative translation to center it on the canvas
+            finalTx = (canvasWidth - imgWidth) / 2;
+            finalTy = (canvasHeight - imgHeight) / 2;
         }
 
-        int newTy = 0;
-        if (imgHeight > canvasHeight) {
-            newTy = -(imgHeight - canvasHeight) / 2;
-        }
+        layer.setImage(finalImage);
+        layer.setTranslation(finalTx, finalTy);
 
-        setTranslation(newTx, newTy);
+        return layer;
     }
 
     @Serial
@@ -257,9 +240,13 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         }
     }
 
+    /**
+     * Toggles between showing the filter preview and
+     * the original image during a filter dialog session.
+     */
     @Override
-    public void setShowOriginal(boolean b) {
-        State targetState = b ? SHOW_ORIGINAL : PREVIEW;
+    public void setShowOriginal(boolean showOriginal) {
+        State targetState = showOriginal ? SHOW_ORIGINAL : PREVIEW;
         if (state == targetState) {
             return;
         }
@@ -298,10 +285,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     public BufferedImage getSelectedSubImage(boolean copyIfNoSelection) {
         var selection = comp.getSelection();
         if (selection == null) { // no selection => return full image
-            if (copyIfNoSelection) {
-                return copyImage(image);
-            }
-            return image;
+            return copyIfNoSelection ? copyImage(image) : image;
         }
 
         // there is selection
@@ -347,8 +331,8 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Returns the image that should be shown by this layer,
-     * without considering the canvas or the translation.
+     * Returns the currently visible image, which may be the original
+     * or a filter preview, including the off-canvas parts.
      */
     public BufferedImage getVisibleImage() {
         BufferedImage visibleImage = switch (state) {
@@ -418,7 +402,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Replaces the image with history and icon update
+     * Replaces the layer's image and creates a corresponding history edit.
      */
     public void replaceImage(BufferedImage newImage, String editName) {
         BufferedImage prevImage = image;
@@ -442,6 +426,9 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         updateIconImage();
     }
 
+    /**
+     * Prepares the layer for a filter preview session.
+     */
     @Override
     public void startPreviewing() {
         assert state == NORMAL : "state was " + state;
@@ -460,6 +447,9 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         setState(PREVIEW);
     }
 
+    /**
+     * Ends a filter preview session and cleans up resources.
+     */
     @Override
     public void stopPreviewing() {
         assert state == PREVIEW || state == SHOW_ORIGINAL;
@@ -474,6 +464,9 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         holder.update();
     }
 
+    /**
+     * Commits the result of a filter preview and adds a history edit if needed.
+     */
     @Override
     public void onFilterDialogAccepted(String filterName) {
         assert state == PREVIEW || state == SHOW_ORIGINAL;
@@ -499,11 +492,17 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         }
     }
 
+    /**
+     * Cancels a filter preview, discarding any changes.
+     */
     @Override
     public void onFilterDialogCanceled() {
         stopPreviewing();
     }
 
+    /**
+     * Updates the image shown during a filter preview.
+     */
     @Override
     public void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context) {
         if (state == NORMAL) {
@@ -540,6 +539,9 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         }
     }
 
+    /**
+     * Applies the result of a non-interactive filter operation.
+     */
     @Override
     public void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName) {
         requireNonNull(filteredImage);
@@ -600,7 +602,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Returns the image bounds relative to the canvas
+     * Returns the layer's content bounds in image space.
      */
     @Override
     public Rectangle getContentBounds(boolean includeTransparent) {
@@ -666,11 +668,10 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
         g2.dispose();
 
-        setTranslation(newTx, newTy);
-
         if (layerTransform) {
-            replaceImage(dest, direction.getDisplayName());
+            replaceTranslatedImage(dest, direction.getDisplayName(), newTx, newTy);
         } else {
+            setTranslation(newTx, newTy);
             setImage(dest);
         }
     }
@@ -678,92 +679,76 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     @Override
     public void rotate(QuadrantAngle angle, boolean layerTransform) {
         if (layerTransform) {
-            // This is a layer-only transform. The canvas does not change.
-            // We must ensure the new image still covers the canvas.
-
-            // define the transformation around the canvas center.
-            Point2D canvasCenter = comp.getCanvas().getImCenter();
-            AffineTransform at = AffineTransform.getQuadrantRotateInstance(
-                angle.getAngleDegree() / 90, canvasCenter.getX(), canvasCenter.getY());
-            at.translate(getTx(), getTy());
-
-            // calculate the bounds of the transformed image
-            Rectangle initialImageLocalBounds = new Rectangle(0, 0, image.getWidth(), image.getHeight());
-            Rectangle2D transformedBounds = at.createTransformedShape(initialImageLocalBounds).getBounds2D();
-
-            // ensure the new image covers the canvas
-            Rectangle2D targetBounds = transformedBounds.createUnion(comp.getCanvasBounds());
-
-            int newWidth = (int) Math.ceil(targetBounds.getWidth());
-            int newHeight = (int) Math.ceil(targetBounds.getHeight());
-
-            if (newWidth <= 0 || newHeight <= 0) {
-                throw new IllegalStateException();
-            }
-
-            // create the new destination image
-            BufferedImage dest = createEmptyLayerImage(newWidth, newHeight);
-            Graphics2D g2 = dest.createGraphics();
-            g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-
-            // translates the full transform so that the top-left of our
-            // target bounds becomes the origin (0,0) of the new image
-            AffineTransform drawTransform = (AffineTransform) at.clone();
-            drawTransform.preConcatenate(AffineTransform.getTranslateInstance(
-                -targetBounds.getX(), -targetBounds.getY()));
-
-            g2.setTransform(drawTransform);
-            g2.drawImage(image, 0, 0, null);
-            g2.dispose();
-
-            int newTx = (int) Math.round(targetBounds.getX());
-            int newTy = (int) Math.round(targetBounds.getY());
-            replaceTranslatedImage(dest, angle.getDisplayName(), newTx, newTy);
+            rotateOnlyThisLayer(angle);
         } else {
-            // This is a full composition transform. The canvas will also be rotated.
-            int newTx;
-            int newTy;
-            switch (angle.getAngleDegree()) {
-                case 90 -> {
-                    newTx = comp.getCanvasHeight() - image.getHeight() - getTy();
-                    newTy = getTx();
-                }
-                case 270 -> {
-                    newTx = getTy();
-                    newTy = comp.getCanvasWidth() - image.getWidth() - getTx();
-                }
-                case 180 -> {
-                    newTx = comp.getCanvasWidth() - image.getWidth() - getTx();
-                    newTy = comp.getCanvasHeight() - image.getHeight() - getTy();
-                }
-                default -> throw new IllegalStateException("angleDegree = " + angle.getAngleDegree());
-            }
-
-            BufferedImage dest = angle.createDestImage(image);
-
-            Graphics2D g2 = dest.createGraphics();
-            // nearest neighbor should be ok for 90, 180, 270 degrees
-            g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-            g2.setTransform(angle.createImageTransform(image));
-            g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-            g2.dispose();
-
-            setTranslation(newTx, newTy);
-            setImage(dest);
+            rotateForFullComp(angle);
         }
+    }
+
+    // this is a layer-only transform, the canvas does not change
+    private void rotateOnlyThisLayer(QuadrantAngle angle) {
+        Point2D canvasCenter = comp.getCanvas().getImCenter();
+        AffineTransform at = AffineTransform.getQuadrantRotateInstance(
+            angle.getAngleDegree() / 90, canvasCenter.getX(), canvasCenter.getY());
+        // the transform must also include the layer's current translation
+        at.translate(getTx(), getTy());
+
+        TransformResult result = applyTransform(image, at, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        if (result == null) {
+            throw new IllegalStateException("transform resulted in an empty image");
+        }
+
+        replaceTranslatedImage(result.image, angle.getDisplayName(), result.tx, result.ty);
+    }
+
+    // this is a full composition transform, the canvas will also be rotated
+    private void rotateForFullComp(QuadrantAngle angle) {
+        int newTx;
+        int newTy;
+        switch (angle.getAngleDegree()) {
+            case 90 -> {
+                newTx = comp.getCanvasHeight() - image.getHeight() - getTy();
+                newTy = getTx();
+            }
+            case 270 -> {
+                newTx = getTy();
+                newTy = comp.getCanvasWidth() - image.getWidth() - getTx();
+            }
+            case 180 -> {
+                newTx = comp.getCanvasWidth() - image.getWidth() - getTx();
+                newTy = comp.getCanvasHeight() - image.getHeight() - getTy();
+            }
+            default -> throw new IllegalStateException("angleDegree = " + angle.getAngleDegree());
+        }
+
+        BufferedImage dest = angle.createDestImage(image);
+
+        Graphics2D g2 = dest.createGraphics();
+        // nearest neighbor should be ok for 90, 180, 270 degrees
+        g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g2.setTransform(angle.createImageTransform(image));
+        g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+        g2.dispose();
+
+        setTranslation(newTx, newTy);
+        setImage(dest);
     }
 
     @Override
     public void setTranslation(int x, int y) {
-        // don't allow positive translations for image layers
+        // don't allow positive translations for image layers,
+        // because the image must always fully cover the canvas
         if (x > 0 || y > 0) {
             throw new IllegalArgumentException("x = " + x + ", y = " + y + ", this = " + this);
         }
         super.setTranslation(x, y);
     }
 
+    /**
+     * Sets the layer's translation, temporarily allowing positive translation values.
+     */
     public void forceTranslation(int x, int y) {
-        // skips the range check on the overridden setTranslation
+        // skips the range check of the overridden setTranslation
         super.setTranslation(x, y);
     }
 
@@ -826,6 +811,9 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         setTranslation(0, 0);
     }
 
+    /**
+     * Crops the layer to the canvas size and records the action in history.
+     */
     public void toCanvasSizeWithHistory() {
         BufferedImage backupImage = getImage();
         // must be created before the change
@@ -861,28 +849,29 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Crops to the canvas size, without managing history.
-     * Returns true if something was changed.
+     * Crops the layer to the canvas size without creating a history edit.
      */
     public boolean toCanvasSize() {
-        if (isBigLayer()) {
-            BufferedImage newImage = ImageUtils.crop(image,
-                -getTx(), -getTy(), comp.getCanvasWidth(), comp.getCanvasHeight());
-
-            BufferedImage tmp = image;
-            setImage(newImage);
-            tmp.flush();
-
-            setTranslation(0, 0);
-            return true;
+        if (!isBigLayer()) {
+            return false; // nothing changed
         }
-        return false;
+
+        BufferedImage newImage = ImageUtils.crop(image,
+            -getTx(), -getTy(),
+            comp.getCanvasWidth(), comp.getCanvasHeight());
+
+        BufferedImage tmp = image;
+        setImage(newImage);
+        tmp.flush();
+        setTranslation(0, 0);
+
+        return true; // there was a change
     }
 
     @Override
     public void enlargeCanvas(Outsets out) {
         // all coordinates in this method are
-        // relative to the previous state of the canvas
+        // relative to the previous canvas state
         Rectangle imageBounds = getContentBounds();
         Rectangle canvasBounds = comp.getCanvasBounds();
 
@@ -961,7 +950,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             newTy = (int) (getTy() * verRatio);
 
             // correct rounding problems that can cause
-            // "image does dot cover canvas" errors
+            // "image does not cover canvas" errors
             if (imgTargetWidth + newTx < newSize.width) {
                 imgTargetWidth++;
             }
@@ -1000,19 +989,10 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
     @Override
     public void paint(Graphics2D g, boolean firstVisibleLayer) {
-        if (liveTransform != null) {
-            // This path is taken during a free-transform drag.
-            // It draws the original, untransformed image (transformRefImage)
-            // by applying the liveTransform directly to the Graphics2D context.
-            // This is extremely fast and avoids creating new BufferedImages.
-            // It also correctly respects the layer's opacity and blend mode,
-            // as those are already configured on the 'g' context.
+        if (liveTransform != null) { // we are in a free-transform session
             Graphics2D g2 = (Graphics2D) g.create();
             try {
-                // Apply the complete transformation for the preview.
                 g2.transform(liveTransform);
-                // Draw the original image at its local origin (0,0). The transform
-                // handles placing it correctly on the canvas.
                 g2.drawImage(image, 0, 0, null);
             } finally {
                 g2.dispose();
@@ -1224,60 +1204,68 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             return null;
         }
 
-        // --- perform the final render ---
-
-        // the initial bounds of the image in canvas coordinates
-        Rectangle initialBounds = new Rectangle(0, 0,
-            transformRefImage.getWidth(), transformRefImage.getHeight());
-
-        // the bounds of the transformed image in canvas coordinates
-        Rectangle2D transformedBounds = finalTransform.createTransformedShape(initialBounds).getBounds2D();
-
-        // the new image must be large enough to contain the transformed image
-        Rectangle2D targetBounds = transformedBounds.createUnion(comp.getCanvasBounds());
-
-        int width = (int) Math.ceil(targetBounds.getWidth());
-        int height = (int) Math.ceil(targetBounds.getHeight());
-
-        // ensure we have valid dimensions
-        if (width <= 0 || height <= 0) {
+        TransformResult result = applyTransform(transformRefImage, finalTransform, VALUE_INTERPOLATION_BILINEAR);
+        if (result == null) {
             cancelTransform();
             return null;
         }
 
-        BufferedImage newImage = createEmptyLayerImage(width, height);
-        Graphics2D g = newImage.createGraphics();
-        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-
-        // translate to the new buffer's coordinate system
-        AffineTransform drawTransform = (AffineTransform) finalTransform.clone();
-        drawTransform.preConcatenate(AffineTransform.getTranslateInstance(
-            -targetBounds.getX(), -targetBounds.getY()));
-
-        g.setTransform(drawTransform);
-        g.drawImage(transformRefImage, 0, 0, null);
-        g.dispose();
-
-        // the new translation is the top-left corner of the target bounds
-        int newTx = (int) Math.round(targetBounds.getX());
-        int newTy = (int) Math.round(targetBounds.getY());
-
         // commit changes, clean up, and create history edit
-        setImage(newImage);
-        setTranslation(newTx, newTy);
+        setImage(result.image);
+        setTranslation(result.tx, result.ty);
         this.liveTransform = null;
 
         comp.invalidateImageCache();
         updateIconImage();
 
-        // create history edit
         return createTranslatedImageEdit("Free Transform Layer", transformRefImage, origTx, origTy);
     }
 
-    private MultiEdit createTranslatedImageEdit(String editName, BufferedImage backupImage, int origTx, int origTy) {
+    private PixelitorEdit createTranslatedImageEdit(String editName, BufferedImage backupImage, int origTx, int origTy) {
         return new MultiEdit(editName, comp,
             new ImageEdit("", comp, this, backupImage, true),
             new TranslationEdit(comp, this, origTx, origTy, false));
+    }
+
+    /**
+     * Applies a geometric transform to a source image, returning a new image and translation.
+     * The returned image is guaranteed to cover the canvas bounds.
+     */
+    private TransformResult applyTransform(
+        BufferedImage sourceImage, AffineTransform transform, Object interpolationHint) {
+        // the initial bounds of the image in its own coordinate space
+        var sourceBounds = new Rectangle(0, 0, sourceImage.getWidth(), sourceImage.getHeight());
+
+        // the bounds of the transformed image in canvas coordinates
+        Rectangle2D transformedBounds = transform.createTransformedShape(sourceBounds).getBounds2D();
+
+        // the new image must be large enough to contain the transformed image and cover the canvas
+        Rectangle2D targetBounds = transformedBounds.createUnion(comp.getCanvasBounds());
+
+        int newWidth = (int) Math.ceil(targetBounds.getWidth());
+        int newHeight = (int) Math.ceil(targetBounds.getHeight());
+        if (newWidth <= 0 || newHeight <= 0) {
+            return null; // invalid transform resulted in empty image
+        }
+
+        BufferedImage newImage = createEmptyLayerImage(newWidth, newHeight);
+        Graphics2D g = newImage.createGraphics();
+        g.setRenderingHint(KEY_INTERPOLATION, interpolationHint);
+
+        // create a transform for drawing into the new buffer, which translates
+        // the main transform to the new buffer's origin
+        AffineTransform drawTransform = (AffineTransform) transform.clone();
+        drawTransform.preConcatenate(AffineTransform.getTranslateInstance(
+            -targetBounds.getX(), -targetBounds.getY()));
+
+        g.setTransform(drawTransform);
+        g.drawImage(sourceImage, 0, 0, null);
+        g.dispose();
+
+        int newTx = (int) Math.round(targetBounds.getX());
+        int newTy = (int) Math.round(targetBounds.getY());
+
+        return new TransformResult(newImage, newTx, newTy);
     }
 
     @Override

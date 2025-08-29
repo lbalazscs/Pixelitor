@@ -700,7 +700,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             deleteLayer(layerList.get(i), false);
         }
 
-        Layers.numLayersChanged(this, 1);
+        LayerEvents.fireLayerCountChanged(this, 1);
         History.add(new NotUndoableEdit("Flatten Image", this));
     }
 
@@ -802,7 +802,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         view.removeLayerUI(ui);
         if (isActive()) {
-            Layers.numLayersChanged(this, layerList.size());
+            LayerEvents.fireLayerCountChanged(this, layerList.size());
         }
         update();
     }
@@ -900,7 +900,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         if (isActive()) {
             Tools.editingTargetChanged(layer);
-            Layers.layerActivated(layer, true);
+            LayerEvents.fireLayerActivated(layer, true);
 
             if (prevActiveLayer != null) {
                 prevActiveLayer.updateUI();

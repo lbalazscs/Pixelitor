@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,13 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Static methods related to layer listeners
+ * Manages and notifies global listeners about events related to the active composition's layers.
  */
-public class Layers {
+public class LayerEvents {
     private static final List<ActiveHolderListener> holderListeners = new ArrayList<>();
     private static final List<ActiveMaskListener> maskListeners = new ArrayList<>();
 
-    private Layers() {
+    private LayerEvents() {
     }
 
     public static void addHolderListener(ActiveHolderListener listener) {
@@ -41,30 +41,29 @@ public class Layers {
         maskListeners.add(listener);
     }
 
-    public static void maskAdded(Layer layer) {
+    public static void fireMaskAdded(Layer layer) {
         for (var listener : maskListeners) {
             listener.maskAdded(layer);
         }
     }
 
-    public static void maskDeleted(Layer layer) {
+    public static void fireMaskDeleted(Layer layer) {
         for (var listener : maskListeners) {
             listener.maskDeleted(layer);
         }
     }
 
-    // used for GUI updates
-    public static void numLayersChanged(LayerHolder holder, int newLayerCount) {
+    public static void fireLayerCountChanged(LayerHolder holder, int newLayerCount) {
         for (var listener : holderListeners) {
-            listener.numLayersChanged(holder, newLayerCount);
+            listener.layerCountChanged(holder, newLayerCount);
         }
     }
 
-    public static void activeCompChanged(Composition newComp, boolean resetMaskViewMode) {
-        layerActivated(newComp.getActiveLayer(), resetMaskViewMode);
+    public static void fireActiveCompChanged(Composition newComp, boolean resetMaskViewMode) {
+        fireLayerActivated(newComp.getActiveLayer(), resetMaskViewMode);
     }
 
-    public static void layerActivated(Layer layer, boolean resetMaskViewMode) {
+    public static void fireLayerActivated(Layer layer, boolean resetMaskViewMode) {
         assert layer != null;
         assert layer.isActive();
         assert layer.getComp().isActive();
@@ -81,12 +80,6 @@ public class Layers {
         }
         if (resetMaskViewMode) {
             MaskViewMode.NORMAL.activate(view, layer);
-        }
-    }
-
-    public static void layersReordered(LayerHolder holder) {
-        for (var listener : holderListeners) {
-            listener.layersReordered(holder);
         }
     }
 }

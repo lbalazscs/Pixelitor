@@ -21,7 +21,7 @@ import java.awt.Shape;
 import java.awt.geom.Point2D;
 
 /**
- * Nonlinear shape distortion settings.
+ * The settings for a nonlinear shape distortion.
  */
 public record Distortion(NonlinTransform nonlinTransform,
                          Point2D pivotPoint, double amount,
