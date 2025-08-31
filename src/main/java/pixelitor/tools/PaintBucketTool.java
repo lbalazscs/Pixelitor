@@ -30,11 +30,12 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -159,7 +160,7 @@ public class PaintBucketTool extends Tool {
         int tolerance = colorTolerance.getValue();
         Rectangle modifiedArea = switch (getSelectedAction()) {
             case LOCAL -> scanlineFloodFill(workingImage,
-                x, y, tolerance, rgbAtMouse, fillRGB);
+                x, y, tolerance, fillRGB);
             case GLOBAL -> globalReplaceColor(workingImage,
                 tolerance, rgbAtMouse, fillRGB);
         };
@@ -197,118 +198,51 @@ public class PaintBucketTool extends Tool {
     }
 
     /**
-     * Uses the "Scanline fill" algorithm described at
-     * http://en.wikipedia.org/wiki/Flood_fill
+     * Fills an area using the generic scanline flood-fill utility.
+     *
+     * @return A Rectangle representing the bounding box of the modified area.
      */
     private static Rectangle scanlineFloodFill(BufferedImage img,
                                                int x, int y, int tolerance,
-                                               int rgbAtMouse, int newRGB) {
-        int minX = x;
-        int maxX = x;
-        int minY = y;
-        int maxY = y;
+                                               int newRGB) {
         int imgHeight = img.getHeight();
         int imgWidth = img.getWidth();
-
         int[] pixels = ImageUtils.getPixels(img);
 
-        boolean[] checkedPixels = new boolean[pixels.length];
+        // Initialize with the starting point.
+        Rectangle bounds = new Rectangle(x, y, 1, 1);
 
-        // the double-ended queue is used as a simple LIFO stack
-        Deque<Point> stack = new ArrayDeque<>();
-        stack.push(new Point(x, y));
+        ImageUtils.floodFill(pixels, imgWidth, imgHeight, x, y, tolerance,
+            // define the action: fill pixels and expand the bounding box
+            (segY, segX1, segX2) -> {
+                // expand the bounding box to include the new segment
+                bounds.add(segX1, segY);
+                bounds.add(segX2, segY);
 
-        while (!stack.isEmpty()) {
-            Point p = stack.pop();
-
-            x = p.x;
-            y = p.y;
-
-            // find the last replaceable point to the left
-            int scanlineMinX = x - 1;
-            int offset = y * imgWidth;
-            while (scanlineMinX >= 0
-                && ImageUtils.isSimilar(pixels[scanlineMinX + offset], rgbAtMouse, tolerance)) {
-                scanlineMinX--;
-            }
-            scanlineMinX++;
-
-            // find the last replaceable point to the right
-            int scanlineMaxX = x + 1;
-            while (scanlineMaxX < img.getWidth()
-                && ImageUtils.isSimilar(pixels[scanlineMaxX + offset], rgbAtMouse, tolerance)) {
-                scanlineMaxX++;
-            }
-            scanlineMaxX--;
-
-            // set the minX, maxX, minY, maxY variables
-            // that will be used to calculate the modified area
-            if (scanlineMinX < minX) {
-                minX = scanlineMinX;
-            }
-            if (scanlineMaxX > maxX) {
-                maxX = scanlineMaxX;
-            }
-            if (y > maxY) {
-                maxY = y;
-            } else if (y < minY) {
-                minY = y;
-            }
-
-            // draw a line between (scanlineMinX, y) and (scanlineMaxX, y)
-            for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
-                int index = i + offset;
-                pixels[index] = newRGB;
-                checkedPixels[index] = true;
-            }
-
-            // look upwards for new points to be inspected later
-            if (y > 0) {
-                // if there are multiple pixels to be replaced
-                // that are horizontal neighbours,
-                // only one of them has to be inspected later
-                boolean pointsInLine = false;
-
-                int upOffset = (y - 1) * imgWidth;
-
-                for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
-                    int upIndex = i + upOffset;
-                    boolean shouldBeReplaced = !checkedPixels[upIndex]
-                        && ImageUtils.isSimilar(pixels[upIndex], rgbAtMouse, tolerance);
-
-                    if (!pointsInLine && shouldBeReplaced) {
-                        Point inspectLater = new Point(i, y - 1);
-                        stack.push(inspectLater);
-                        pointsInLine = true;
-                    } else if (pointsInLine && !shouldBeReplaced) {
-                        pointsInLine = false;
-                    }
+                // fill the pixels in the segment with the new color
+                int offset = segY * imgWidth;
+                for (int i = segX1; i <= segX2; i++) {
+                    pixels[offset + i] = newRGB;
                 }
-            }
+            });
 
-            // look downwards for new points to be inspected later
-            if (y < imgHeight - 1) {
-                boolean pointsInLine = false;
-                int downOffset = (y + 1) * imgWidth;
-
-                for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
-                    int downIndex = i + downOffset;
-                    boolean shouldBeReplaced = !checkedPixels[downIndex]
-                        && ImageUtils.isSimilar(pixels[downIndex], rgbAtMouse, tolerance);
-
-                    if (!pointsInLine && shouldBeReplaced) {
-                        Point inspectLater = new Point(i, y + 1);
-                        stack.push(inspectLater);
-                        pointsInLine = true;
-                    } else if (pointsInLine && !shouldBeReplaced) {
-                        pointsInLine = false;
-                    }
-                }
+        // The flood fill utility needs the start color to work, but if the start pixel
+        // itself doesn't match (e.g., tolerance 0 and start color != start color),
+        // the fill won't happen. We check if the start pixel was changed.
+        if (pixels[y * imgWidth + x] != newRGB) {
+            // The starting pixel itself was not similar enough to be filled.
+            // This can happen if the start color is the same as the fill color.
+            // We check if the original color was similar to itself.
+            int originalColor = img.getRGB(x, y);
+            if (ImageUtils.isSimilar(originalColor, originalColor, tolerance)) {
+                pixels[y * imgWidth + x] = newRGB;
+            } else {
+                return null; // nothing was changed
             }
         }
 
-        // return the modified area
-        return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        bounds.grow(1, 1);
+        return bounds;
     }
 
     private static Rectangle globalReplaceColor(BufferedImage img,

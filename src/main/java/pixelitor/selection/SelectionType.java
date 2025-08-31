@@ -17,25 +17,14 @@
 
 package pixelitor.selection;
 
-import pixelitor.Composition;
-import pixelitor.gui.View;
-import pixelitor.layers.Drawable;
-import pixelitor.tools.Tools;
+import pixelitor.tools.selection.MagicWandSelectionTool;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
-import java.awt.Point;
 import java.awt.Shape;
-import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.util.Stack;
-
-import static pixelitor.utils.ImageUtils.isGrayscale;
 
 /**
  * The different ways a selection shape can be created or updated interactively.
@@ -112,168 +101,7 @@ public enum SelectionType {
 
         @Override
         public Shape createShapeFromEvent(PMouseEvent pm, Shape oldShape) {
-            // calculate the area selected by this specific click
-            Area newlySelectedArea = selectPixelsInColorRange(pm); // Existing private method
-            if (newlySelectedArea == null || newlySelectedArea.isEmpty()) {
-                // if nothing new selected, return the old shape or null
-                return oldShape;
-            }
-
-            if (oldShape instanceof Area area) {
-                // add the newly selected area to the existing area
-                area.add(newlySelectedArea);
-                return area;
-            } else {
-                // this is the first click, return the newly selected area
-                return newlySelectedArea;
-            }
-        }
-
-        /**
-         * Selects contiguous pixels within a color tolerance using a scanline fill algorithm.
-         */
-        private static Area selectPixelsInColorRange(PMouseEvent pm) {
-            Area selectedArea = new Area();
-
-            int imX = (int) pm.getImX();
-            int imY = (int) pm.getImY();
-
-            Composition comp = pm.getComp();
-            Drawable dr = comp.getActiveDrawableOrThrow();
-            BufferedImage image = dr.getImage();
-            int imgHeight = image.getHeight();
-            int imgWidth = image.getWidth();
-
-            // adjust click coordinates to be relative to the drawable's image
-            int x = imX - dr.getTx();
-            int y = imY - dr.getTy();
-
-            // check if the click is outside the drawable's bounds
-            if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight) {
-                return new Area();
-            }
-
-            int colorTolerance = Tools.MAGIC_WAND.getTolerance();
-
-            boolean hasSelection = comp.hasSelection();
-            boolean grayScale = isGrayscale(image);
-
-            // TODO optionally we should use the composite image
-            //   for color picking, as that's what the user sees
-            BufferedImage workingImage;
-            if (grayScale) {
-                workingImage = ImageUtils.toSysCompatibleImage(image);
-            } else if (hasSelection) {
-                workingImage = ImageUtils.copyImage(image);
-            } else {
-                workingImage = image;
-            }
-
-            // tracks pixels already processed or added to the selection
-            boolean [][] visited = new boolean[workingImage.getWidth()][workingImage.getHeight()];
-
-            int targetColor = getColorAtPoint(new Point(x, y), pm);
-
-            int finalX = x;
-            int finalY = y;
-
-            selectArea(workingImage, finalX, finalY, colorTolerance, targetColor, selectedArea, pm, visited, 1);
-            selectArea(workingImage, finalX, finalY, colorTolerance, targetColor, selectedArea, pm, visited, -1);
-
-            return selectedArea;
-        }
-
-        private static void selectArea(BufferedImage img, int x, int y, int tolerance,
-                                       int rgbAtMouse, Area selectedArea, PMouseEvent pm,
-                                       boolean[][] visited, int yOffset) {
-
-            Stack<Point> pixelsToProcess = new Stack<>();
-            pixelsToProcess.push(new Point(x, y));
-
-            while (!pixelsToProcess.isEmpty()) {
-                Point currentPixel = pixelsToProcess.pop();
-
-                int startX = currentPixel.x;
-                int startY = currentPixel.y;
-
-                if (canBeSelected(currentPixel, img, rgbAtMouse, tolerance, visited, pm)) {
-
-                    int leftX = walkDirection(currentPixel, img, rgbAtMouse, tolerance, visited, -1, pixelsToProcess, pm); // Walk left
-                    int lineEndX = walkDirection(currentPixel, img, rgbAtMouse, tolerance, visited, 1, pixelsToProcess, pm); // Walk right
-
-                    // Create an area based on the line segment
-                    int lineStartX = leftX + 1;
-                    int lineLength = lineEndX - lineStartX;
-
-                    if (lineLength > 0) {
-                        Area lineSegment = new Area(new Rectangle2D.Double(lineStartX, startY, lineLength, 1));
-                        selectedArea.add(lineSegment);
-                    }
-
-                    pixelsToProcess.push(new Point(startX, startY + yOffset));
-                }
-            }
-        }
-
-        private static int walkDirection(Point currentPixel, BufferedImage img, int rgbAtMouse, int tolerance, boolean[][] visited,
-                                         int xStep, Stack<Point> pixelsToProcess, PMouseEvent pm) {
-
-            int startX = currentPixel.x;
-            int startY = currentPixel.y;
-            int currentX = startX + xStep;
-
-            while (canBeSelected(new Point(currentX, startY), img, rgbAtMouse, tolerance, visited, pm)) {
-                visited[currentX][startY] = true;
-
-                Point pointAbove = new Point(currentX, startY - 1);
-                boolean canBeSelectedAbove = canBeSelected(pointAbove, img, rgbAtMouse, tolerance, visited, pm);
-
-                Point pointBelow = new Point(currentX, startY + 1);
-                boolean canBeSelectedBelow = canBeSelected(pointBelow, img, rgbAtMouse, tolerance, visited, pm);
-
-                selectPixelIfPossible(canBeSelectedAbove, pixelsToProcess, pointAbove);
-                selectPixelIfPossible(canBeSelectedBelow, pixelsToProcess, pointBelow);
-
-                currentX += xStep;
-            }
-            return currentX;
-        }
-
-        private static void selectPixelIfPossible(boolean canBeSelected, Stack<Point> pixelsToProcess, Point pointToSelect) {
-            if (canBeSelected) {
-                pixelsToProcess.push(pointToSelect);
-            }
-        }
-
-        private static boolean canBeSelected(Point currentPixel, BufferedImage img,
-                                             int rgbAtMouse, int tolerance, boolean[][] visited, PMouseEvent pm) {
-            int imgHeight = img.getHeight();
-            int imgWidth = img.getWidth();
-
-            int currentX = currentPixel.x;
-            int currentY = currentPixel.y;
-
-            int targetColor = getColorAtPoint(currentPixel, pm);
-
-            return currentX >= 0 && currentX < imgWidth && currentY >= 0 && currentY < imgHeight &&
-                ImageUtils.isSimilar(rgbAtMouse, targetColor, tolerance) &&
-                !visited[currentX][currentY];
-        }
-
-        private static int getColorAtPoint(Point p, PMouseEvent pm) {
-            int x = p.x;
-            int y = p.y;
-
-            View view = pm.getView();
-            BufferedImage img;
-            Composition comp = view.getComp();
-            img = comp.getCompositeImage();
-
-            if (x >= 0 && x < img.getWidth() && y >= 0 && y < img.getHeight()) {
-                return img.getRGB(x, y);
-            } else {
-                return Color.BLACK.getRGB();
-            }
+            return MagicWandSelectionTool.createSelectionPath(pm);
         }
     };
 
