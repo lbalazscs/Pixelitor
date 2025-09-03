@@ -31,16 +31,12 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_MITER;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
@@ -299,40 +295,6 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return g -> {
-            // the shape is based on paint_bucket_tool.svg
-            Path2D shape = new Path2D.Double();
-
-            // bucket
-            shape.moveTo(5.4289136, 12.759313);
-            shape.lineTo(14.020062, 25.454193);
-            shape.lineTo(26.406328, 18.948254);
-            shape.lineTo(20.734503, 4.768684);
-            shape.closePath();
-
-            g.setStroke(new BasicStroke(1.3f, CAP_BUTT, JOIN_MITER, 4));
-            g.draw(shape);
-
-            // handle
-            shape = new Path2D.Double();
-            shape.moveTo(14.87057, 12.192133);
-            shape.curveTo(14.87057, 12.192133, 11.7013235, 3.5592537, 13.550051, 2.5583534);
-            shape.curveTo(15.398779, 1.5574434, 16.939384, 6.8122234, 16.939384, 6.8122234);
-            shape.lineTo(16.939384, 6.8122234);
-
-            g.draw(shape);
-
-            // paint
-            shape = new Path2D.Double();
-            shape.moveTo(8.19497, 10.853959);
-            shape.curveTo(5.256423, 10.799759, 0.59281015, 13.51276, 0.6504288, 15.789537);
-            shape.curveTo(0.70804787, 18.066315, 1.8028003, 18.152325, 2.8399348, 18.206568);
-            shape.curveTo(3.9284532, 18.238678, 4.7648406, 17.252796, 4.862978, 16.437378);
-            shape.curveTo(4.978212, 15.298976, 5.03873, 14.855405, 5.635888, 13.452499);
-            shape.curveTo(5.828665, 12.999517, 8.19497, 10.853959, 8.19497, 10.853959);
-            shape.closePath();
-
-            g.fill(shape);
-        };
+        return ToolIcons::paintPaintBucketIcon;
     }
 }

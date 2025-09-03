@@ -22,12 +22,12 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.gui.View;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
+import pixelitor.tools.ToolIcons;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 import java.awt.Graphics2D;
-import java.awt.geom.Path2D;
 import java.util.function.Consumer;
 
 /**
@@ -107,38 +107,7 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return g -> {
-            // based on poly_tool.svg
-            Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-
-            path.moveTo(6.1484487, 15.462234);
-            path.curveTo(5.6141719, 17.426949, 6.5335977, 20.270432, 11.440085, 18.79228);
-            path.curveTo(11.165367, 19.575245, 9.138209, 20.355129, 8.4362545, 20.699641);
-            path.curveTo(6.9299497, 21.283743, 5.6160939, 21.932861, 5.36689, 23.697969);
-            path.curveTo(5.2350935, 24.631483, 5.7478461, 26.234294, 6.6964167, 25.593747);
-            path.curveTo(7.1059144, 24.837846, 6.4940809, 23.524083, 7.8683306, 22.662188);
-            path.curveTo(10.178744, 21.213153, 13.189381, 20.634149, 13.562594, 17.53758);
-            path.lineTo(21.104014, 15.10914);
-            path.lineTo(24.97093, 1.9650698);
-            path.lineTo(13.005194, 8.5186106);
-            path.lineTo(2.6531691, 3.8095857);
-            path.closePath();
-
-            path.moveTo(13.380613, 15.9582);
-            path.curveTo(11.925559, 13.25564, 10.007567, 13.111697, 7.381234, 14.201458);
-            path.lineTo(4.6956935, 6.0863419);
-            path.lineTo(13.012216, 9.9973027);
-            path.lineTo(23.185362, 4.218993);
-            path.lineTo(19.96356, 13.997892);
-            path.closePath();
-
-            path.moveTo(11.46885, 16.915383);
-            path.curveTo(10.047759, 19.071274, 6.3925118, 17.76767, 7.7550969, 15.923511);
-            path.curveTo(8.9939951, 14.471869, 12.469638, 15.019517, 11.46885, 16.915383);
-            path.closePath();
-
-            g.fill(path);
-        };
+        return ToolIcons::paintPolygonalSelectionIcon;
     }
 }
 

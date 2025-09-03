@@ -18,12 +18,12 @@
 package pixelitor.tools.selection;
 
 import pixelitor.selection.SelectionType;
+import pixelitor.tools.ToolIcons;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 import java.awt.Graphics2D;
-import java.awt.geom.Path2D;
 import java.util.function.Consumer;
 
 /**
@@ -77,37 +77,6 @@ public class LassoSelectionTool extends AbstractSelectionTool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return g -> {
-            // based on lasso_tool.svg
-            Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-
-            path.moveTo(14.975346, 2.4473651);
-            path.curveTo(10.833825, 2.4917351, 6.6417778, 3.5243885, 4.13823, 7.7701889);
-            path.curveTo(2.5103706, 10.530897, 3.5668295, 13.121411, 6.1484487, 15.462234);
-            path.curveTo(5.441171, 17.407727, 6.8027102, 20.385766, 11.455085, 18.79228);
-            path.curveTo(11.180367, 19.575245, 9.1532087, 20.355129, 8.4512542, 20.699642);
-            path.curveTo(6.9299497, 21.283743, 5.6160939, 21.932861, 5.36689, 23.697969);
-            path.curveTo(5.2350935, 24.631483, 5.7478461, 26.234294, 6.6964167, 25.593747);
-            path.curveTo(7.1059144, 24.837846, 6.4940809, 23.524083, 7.8683296, 22.662188);
-            path.curveTo(10.178743, 21.213153, 13.150935, 20.749483, 13.524148, 17.652914);
-            path.curveTo(17.185698, 17.003803, 21.162153, 16.08333, 23.731157, 13.248202);
-            path.curveTo(25.913043, 10.599099, 24.792459, 6.7877244, 22.12508, 4.8042194);
-            path.curveTo(20.14463, 3.3315254, 17.409278, 2.4212897, 14.975346, 2.4473651);
-
-            path.moveTo(15.112912, 3.9003906);
-            path.curveTo(21.110775, 4.1077395, 24.760267, 8.6954564, 23.006194, 11.527174);
-            path.curveTo(20.896045, 14.474877, 16.894225, 15.482169, 13.394205, 15.863054);
-            path.curveTo(12.035263, 13.160494, 9.931844, 13.17073, 7.4016223, 14.33738);
-            path.curveTo(4.054675, 11.216044, 4.1825418, 8.9120531, 7.6983987, 6.0466615);
-            path.curveTo(9.8134805, 4.3228889, 12.883084, 3.8233043, 15.112912, 3.9003906);
-
-            path.moveTo(11.46885, 16.915383);
-            path.curveTo(10.047759, 19.071274, 6.3925118, 17.76767, 7.7550969, 15.923511);
-            path.curveTo(8.9939951, 14.471869, 12.469638, 15.019517, 11.46885, 16.915383);
-
-            path.closePath();
-
-            g.fill(path);
-        };
+        return ToolIcons::paintLassoSelectionIcon;
     }
 }

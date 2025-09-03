@@ -32,17 +32,13 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_MITER;
 import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
@@ -263,44 +259,6 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        Color GLASS_COLOR = new Color(0x68_00_00_00, true);
-
-        return g -> {
-            // based on color_picker_tool.svg
-            Path2D glassPath = new Path2D.Double();
-            Color color = g.getColor();
-
-            glassPath.moveTo(15.487128, 10.694453);
-            glassPath.lineTo(1.8488811, 24.332703);
-            glassPath.curveTo(1.8488811, 24.332703, 0.9396646, 25.241873, 1.8488811, 26.151114);
-            glassPath.curveTo(2.7580976, 27.060343, 3.667314, 26.151114, 3.667314, 26.151114);
-            glassPath.lineTo(17.305561, 12.512863);
-            glassPath.closePath();
-
-            g.setColor(GLASS_COLOR);
-            g.fill(glassPath);
-
-            g.setColor(color);
-
-            g.setStroke(new BasicStroke(0.9106483f, CAP_BUTT, JOIN_MITER, 4));
-            g.draw(glassPath);
-
-            Path2D handlePath = new Path2D.Double();
-            handlePath.moveTo(13.668696, 7.966804);
-            handlePath.lineTo(16.396345, 5.239154);
-            handlePath.lineTo(18.214779, 7.057564);
-            handlePath.curveTo(18.214779, 7.057564, 21.90847, 1.6428838, 22.76086, 1.6022639);
-            handlePath.curveTo(23.694431, 1.642764, 26.438318, 4.549124, 26.397728, 5.239154);
-            handlePath.curveTo(26.397728, 6.132134, 20.942429, 9.785213, 20.942429, 9.785213);
-            handlePath.lineTo(22.76086, 11.603653);
-            handlePath.lineTo(20.03321, 14.331303);
-            handlePath.closePath();
-
-            g.setColor(color);
-
-            g.fill(handlePath);
-            g.setStroke(new BasicStroke(0.90921646f, CAP_BUTT, JOIN_MITER, 4));
-            g.draw(handlePath);
-        };
+        return ToolIcons::paintColorPickerIcon;
     }
 }

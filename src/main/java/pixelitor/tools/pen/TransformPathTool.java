@@ -20,24 +20,19 @@ package pixelitor.tools.pen;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
+import pixelitor.tools.ToolIcons;
 import pixelitor.tools.Tools;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.pen.PathActions.setActionsEnabled;
@@ -231,30 +226,6 @@ public class TransformPathTool extends PathTool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return g -> {
-            // based on transfrom_tool.svg
-            Path2D shape = new Path2D.Double();
-
-            // top left rectangle
-            shape.append(new Rectangle2D.Double(2.75, 2.75, 5.5, 5.5), false);
-            // bottom left rectangle
-            shape.append(new Rectangle2D.Double(2.75, 19.75, 5.5, 5.5), false);
-            // top right rectangle
-            shape.append(new Rectangle2D.Double(19.75, 2.75, 5.5, 5.5), false);
-            // bottom right rectangle
-            shape.append(new Rectangle2D.Double(19.75, 19.75, 5.5, 5.5), false);
-
-            // left line segment
-            shape.append(new Line2D.Double(5.5, 8.5, 5.5, 19.5), false);
-            // top line segment
-            shape.append(new Line2D.Double(8.5, 5.5, 19.5, 5.5), false);
-            // right line segment
-            shape.append(new Line2D.Double(22.5, 8.5, 22.5, 19.5), false);
-            // bottom line segment
-            shape.append(new Line2D.Double(8.5, 22.5, 19.5, 22.5), false);
-
-            g.setStroke(new BasicStroke(1.5f, CAP_BUTT, JOIN_MITER, 4));
-            g.draw(shape);
-        };
+        return ToolIcons::paintTransformPathIcon;
     }
 }

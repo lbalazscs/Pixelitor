@@ -23,13 +23,13 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.selection.SelectionType;
+import pixelitor.tools.ToolIcons;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Line2D;
@@ -275,36 +275,6 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return g -> {
-            // based on magic_wand_tool.svg
-            Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-
-            path.moveTo(21.034894, 11.558253);
-            path.lineTo(26.578, 11.905282);
-            path.moveTo(11.604685, 8.2918986);
-            path.lineTo(6.9357983, 5.2839172);
-            path.moveTo(15.408841, 6.0200348);
-            path.lineTo(14.797582, 0.49981555);
-            path.moveTo(19.095951, 15.196649);
-            path.lineTo(22.612622, 19.495426);
-            path.moveTo(19.568835, 7.5360495);
-            path.lineTo(23.463737, 3.5767324);
-            path.moveTo(16.236448, 14.396477);
-            path.lineTo(12.75574, 11.520686);
-            path.moveTo(16.978189, 9.131115);
-            path.lineTo(17.756734, 9.836974);
-            path.curveTo(18.497482, 10.508564, 18.553158, 11.645571, 17.881568, 12.386318);
-            path.lineTo(6.6333647, 24.792818);
-            path.curveTo(5.9617748, 25.533566, 4.8247674, 25.589242, 4.1531775, 24.917652);
-            path.lineTo(3.3054743, 24.211793);
-            path.curveTo(2.5647274, 23.540204, 2.5090517, 22.403196, 3.1806416, 21.662449);
-            path.lineTo(14.428845, 9.2559484);
-            path.curveTo(15.100435, 8.5152013, 16.237442, 8.4595257, 16.978189, 9.131115);
-            path.closePath();
-
-            g.setStroke(new BasicStroke(1.5f));
-
-            g.draw(path);
-        };
+        return ToolIcons::paintMagicWandSelectionIcon;
     }
 }

@@ -40,6 +40,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.ShapesLayer;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.DragToolState;
+import pixelitor.tools.ToolIcons;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.history.ConvertShapeToSelectionEdit;
 import pixelitor.tools.shapes.history.CreateBoxedShapeEdit;
@@ -51,13 +52,11 @@ import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -959,22 +958,7 @@ public class ShapesTool extends DragTool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return g -> {
-            // the shape is based on shapes_tool.svg
-            Path2D shape = new Path2D.Double();
-
-            shape.moveTo(14.0, 5.134844);
-            shape.curveTo(14, 5.134844, 15.964081, 1.4467101, 20.675045, 1.4467101);
-            shape.curveTo(24.443815, 1.4467101, 26.260193, 5.2239814, 26.286139, 9.187077);
-            shape.curveTo(26.328203, 15.612079, 16.0, 21.0, 14, 26.0);
-            shape.curveTo(12.0, 21.0, 1.8311971, 15.612079, 1.8311971, 9.001549);
-            shape.curveTo(1.8311971, 5.224129, 3.7155826, 1.44671, 7.484354, 1.44671);
-            shape.curveTo(12.195311, 1.44671, 14, 5.134844, 14, 5.134844);
-            shape.closePath();
-
-            g.setStroke(new BasicStroke(1.5f));
-            g.draw(shape);
-        };
+        return ToolIcons::paintShapesIcon;
     }
 }
 

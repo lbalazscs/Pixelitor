@@ -20,20 +20,18 @@ package pixelitor.tools.pen;
 import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.gui.View;
+import pixelitor.tools.ToolIcons;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
-import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
 import java.util.function.Consumer;
 
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
@@ -213,31 +211,6 @@ public class NodeTool extends PathTool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return g -> {
-            // based on path_edit_tool.svg
-
-            g.setStroke(new BasicStroke(1.5f, CAP_BUTT, JOIN_MITER, 4));
-
-            g.draw(new Rectangle2D.Double(2.75, 21.75, 3.5, 3.5)); // left
-            g.draw(new Rectangle2D.Double(21.75, 21.75, 3.5, 3.5)); // right
-            g.draw(new Rectangle2D.Double(12.25, 2.75, 3.5, 3.5)); // top
-
-            // Circles
-            g.draw(new Ellipse2D.Double(4.5 - 1.75, 4.5 - 1.75, 1.75 * 2, 1.75 * 2)); // left
-            g.draw(new Ellipse2D.Double(23.5 - 1.75, 4.5 - 1.75, 1.75 * 2, 1.75 * 2)); // right
-
-            g.draw(new Line2D.Double(6.5, 4.5, 12, 4.5)); // left
-            g.draw(new Line2D.Double(16, 4.5, 21.5, 4.5)); // right
-
-            Path2D.Double leftPath = new Path2D.Double();
-            leftPath.moveTo(4.5, 21.5);
-            leftPath.curveTo(4.5, 21.5, 4.5, 4.5, 12.0, 4.5);
-            g.draw(leftPath);
-
-            Path2D.Double rightPath = new Path2D.Double();
-            rightPath.moveTo(23.5, 21.5);
-            rightPath.curveTo(23.5, 21.5, 23.5, 4.5, 16.25, 4.500000);
-            g.draw(rightPath);
-        };
+        return ToolIcons::paintNodeIcon;
     }
 }

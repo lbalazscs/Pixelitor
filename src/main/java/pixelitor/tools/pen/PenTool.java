@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
+import pixelitor.tools.ToolIcons;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -30,18 +31,12 @@ import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
@@ -680,31 +675,6 @@ public class PenTool extends PathTool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return g -> {
-            // based on pen_tool.svg
-            g.setStroke(new BasicStroke(1.5f, CAP_BUTT, JOIN_MITER, 4));
-
-            Path2D.Double body = new Path2D.Double();
-            body.moveTo(20.182807, -0.58412839);
-            body.lineTo(15.885317, 4.1900467);
-            body.lineTo(24.480293, 13.738471);
-            body.lineTo(28.77778, 8.9642464);
-            g.draw(body);
-
-            Path2D.Double head = new Path2D.Double();
-            head.moveTo(18.504954, 7.3429552);
-            head.curveTo(18.504954, 7.3429552, 13.526367, 11.562249, 5.7244174, 11.725182);
-            head.lineTo(3.5014621, 24.583714);
-            head.lineTo(17, 22.5);
-            head.curveTo(17, 22.5, 17.107143, 15.553571, 21.218165, 10.083241);
-            head.closePath();
-            g.draw(head);
-
-            Line2D line = new Line2D.Double(3.95, 24.0, 10.09609, 18);
-            g.draw(line);
-
-            Ellipse2D circle = new Ellipse2D.Double(9, 14.375, 4.8, 4.8);
-            g.draw(circle);
-        };
+        return ToolIcons::paintPenIcon;
     }
 }
