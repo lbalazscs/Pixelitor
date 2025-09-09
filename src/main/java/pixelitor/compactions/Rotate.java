@@ -47,7 +47,7 @@ public class Rotate extends SimpleCompAction {
 
     @Override
     protected void transform(ContentLayer contentLayer) {
-        contentLayer.rotate(angle);
+        contentLayer.rotate(angle, false);
     }
 
     @Override

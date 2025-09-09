@@ -331,6 +331,15 @@ public class AppRunner {
         Utils.sleep(200, MILLISECONDS);
     }
 
+    void runMenuCommandByName(String name) {
+        assert calledOutsideEDT() : callInfo();
+
+        pw.menuItem(name)
+            .requireEnabled()
+            .click();
+        Utils.sleep(200, MILLISECONDS);
+    }
+
     public void selectLayerBelow() {
         runMenuCommand("Lower Layer Selection");
         keyboard.undoRedo("Lower Layer Selection");

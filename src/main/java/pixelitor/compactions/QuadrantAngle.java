@@ -18,10 +18,15 @@
 package pixelitor.compactions;
 
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Texts;
 
+import javax.swing.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
@@ -125,6 +130,19 @@ public enum QuadrantAngle {
      * Creates a new image with dimensions appropriate for this rotation.
      */
     public abstract BufferedImage createDestImage(BufferedImage img);
+
+    public Action createLayerTransformAction() {
+        return new AbstractViewEnabledAction(getDisplayName()) {
+            @Override
+            protected void onClick(Composition comp) {
+                if (comp.getActiveLayer() instanceof ImageLayer layer) {
+                    layer.rotate(QuadrantAngle.this, true);
+                } else {
+                    Messages.showNotImageLayerError(comp.getActiveLayer());
+                }
+            }
+        };
+    }
 
     public String asString() {
         return angleDegree + "°";

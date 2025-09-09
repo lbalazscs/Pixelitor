@@ -49,7 +49,7 @@ public class Flip extends SimpleCompAction {
 
     @Override
     protected void transform(ContentLayer contentLayer) {
-        contentLayer.flip(direction);
+        contentLayer.flip(direction, false);
     }
 
     @Override

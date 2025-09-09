@@ -374,12 +374,12 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void flip(FlipDirection direction) {
+    public void flip(FlipDirection direction, boolean layerTransform) {
         painter.flip(direction, comp.getCanvas());
     }
 
     @Override
-    public void rotate(QuadrantAngle angle) {
+    public void rotate(QuadrantAngle angle, boolean layerTransform) {
         painter.rotate(angle, comp.getCanvas());
     }
 

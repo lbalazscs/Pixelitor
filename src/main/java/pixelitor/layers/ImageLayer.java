@@ -40,6 +40,7 @@ import pixelitor.utils.test.Assertions;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -428,6 +429,19 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         updateIconImage();
     }
 
+    private void replaceTranslatedImage(BufferedImage newImage, String editName, int newTx, int newTy) {
+        int prevTx = getTx();
+        int prevTy = getTy();
+        setTranslation(newTx, newTy);
+
+        BufferedImage prevImage = image;
+        setImage(newImage);
+
+        History.add(createTranslatedImageEdit(editName, prevImage, prevTx, prevTy));
+        holder.update();
+        updateIconImage();
+    }
+
     @Override
     public void startPreviewing() {
         assert state == NORMAL : "state was " + state;
@@ -634,7 +648,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     @Override
-    public void flip(FlipDirection direction) {
+    public void flip(FlipDirection direction, boolean layerTransform) {
         int newTx;
         int newTy;
         if (direction == HORIZONTAL) {
@@ -654,40 +668,89 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
         setTranslation(newTx, newTy);
 
-        setImage(dest);
+        if (layerTransform) {
+            replaceImage(dest, direction.getDisplayName());
+        } else {
+            setImage(dest);
+        }
     }
 
     @Override
-    public void rotate(QuadrantAngle angle) {
-        int newTx;
-        int newTy;
-        switch (angle.getAngleDegree()) {
-            case 90 -> {
-                newTx = comp.getCanvasHeight() - image.getHeight() - getTy();
-                newTy = getTx();
+    public void rotate(QuadrantAngle angle, boolean layerTransform) {
+        if (layerTransform) {
+            // This is a layer-only transform. The canvas does not change.
+            // We must ensure the new image still covers the canvas.
+
+            // define the transformation around the canvas center.
+            Point2D canvasCenter = comp.getCanvas().getImCenter();
+            AffineTransform at = AffineTransform.getQuadrantRotateInstance(
+                angle.getAngleDegree() / 90, canvasCenter.getX(), canvasCenter.getY());
+            at.translate(getTx(), getTy());
+
+            // calculate the bounds of the transformed image
+            Rectangle initialImageLocalBounds = new Rectangle(0, 0, image.getWidth(), image.getHeight());
+            Rectangle2D transformedBounds = at.createTransformedShape(initialImageLocalBounds).getBounds2D();
+
+            // ensure the new image covers the canvas
+            Rectangle2D targetBounds = transformedBounds.createUnion(comp.getCanvasBounds());
+
+            int newWidth = (int) Math.ceil(targetBounds.getWidth());
+            int newHeight = (int) Math.ceil(targetBounds.getHeight());
+
+            if (newWidth <= 0 || newHeight <= 0) {
+                throw new IllegalStateException();
             }
-            case 270 -> {
-                newTx = getTy();
-                newTy = comp.getCanvasWidth() - image.getWidth() - getTx();
+
+            // create the new destination image
+            BufferedImage dest = createEmptyLayerImage(newWidth, newHeight);
+            Graphics2D g2 = dest.createGraphics();
+            g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+
+            // translates the full transform so that the top-left of our
+            // target bounds becomes the origin (0,0) of the new image
+            AffineTransform drawTransform = (AffineTransform) at.clone();
+            drawTransform.preConcatenate(AffineTransform.getTranslateInstance(
+                -targetBounds.getX(), -targetBounds.getY()));
+
+            g2.setTransform(drawTransform);
+            g2.drawImage(image, 0, 0, null);
+            g2.dispose();
+
+            int newTx = (int) Math.round(targetBounds.getX());
+            int newTy = (int) Math.round(targetBounds.getY());
+            replaceTranslatedImage(dest, angle.getDisplayName(), newTx, newTy);
+        } else {
+            // This is a full composition transform. The canvas will also be rotated.
+            int newTx;
+            int newTy;
+            switch (angle.getAngleDegree()) {
+                case 90 -> {
+                    newTx = comp.getCanvasHeight() - image.getHeight() - getTy();
+                    newTy = getTx();
+                }
+                case 270 -> {
+                    newTx = getTy();
+                    newTy = comp.getCanvasWidth() - image.getWidth() - getTx();
+                }
+                case 180 -> {
+                    newTx = comp.getCanvasWidth() - image.getWidth() - getTx();
+                    newTy = comp.getCanvasHeight() - image.getHeight() - getTy();
+                }
+                default -> throw new IllegalStateException("angleDegree = " + angle.getAngleDegree());
             }
-            case 180 -> {
-                newTx = comp.getCanvasWidth() - image.getWidth() - getTx();
-                newTy = comp.getCanvasHeight() - image.getHeight() - getTy();
-            }
-            default -> throw new IllegalStateException("angleDegree = " + angle.getAngleDegree());
+
+            BufferedImage dest = angle.createDestImage(image);
+
+            Graphics2D g2 = dest.createGraphics();
+            // nearest neighbor should be ok for 90, 180, 270 degrees
+            g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+            g2.setTransform(angle.createImageTransform(image));
+            g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+            g2.dispose();
+
+            setTranslation(newTx, newTy);
+            setImage(dest);
         }
-
-        BufferedImage dest = angle.createDestImage(image);
-
-        Graphics2D g2 = dest.createGraphics();
-        // nearest neighbor should be ok for 90, 180, 270 degrees
-        g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        g2.setTransform(angle.createImageTransform(image));
-        g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-        g2.dispose();
-
-        setTranslation(newTx, newTy);
-        setImage(dest);
     }
 
     @Override
@@ -1208,8 +1271,12 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         updateIconImage();
 
         // create history edit
-        return new MultiEdit("Free Transform Layer", comp,
-            new ImageEdit("", comp, this, transformRefImage, true),
+        return createTranslatedImageEdit("Free Transform Layer", transformRefImage, origTx, origTy);
+    }
+
+    private MultiEdit createTranslatedImageEdit(String editName, BufferedImage backupImage, int origTx, int origTy) {
+        return new MultiEdit(editName, comp,
+            new ImageEdit("", comp, this, backupImage, true),
             new TranslationEdit(comp, this, origTx, origTy, false));
     }
 

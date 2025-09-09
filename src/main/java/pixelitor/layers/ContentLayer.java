@@ -164,12 +164,12 @@ public abstract class ContentLayer extends Layer {
     /**
      * Flips the layer content horizontally or vertically.
      */
-    public abstract void flip(FlipDirection direction);
+    public abstract void flip(FlipDirection direction, boolean layerTransform);
 
     /**
      * Rotates the layer content by a multiple of 90 degrees.
      */
-    public abstract void rotate(QuadrantAngle angle);
+    public abstract void rotate(QuadrantAngle angle, boolean layerTransform);
 
     /**
      * Adjusts the layer content in response to canvas enlargement.

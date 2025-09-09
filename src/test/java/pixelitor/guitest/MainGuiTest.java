@@ -950,19 +950,20 @@ public class MainGuiTest {
 
     private void testRotateFlip() {
         log(2, "rotate and flip");
-        runMenuCommand("Rotate 90° CW");
+
+        runMenuCommandByName("comp_rot_90");
         keyboard.undoRedoUndo("Rotate 90° CW");
 
-        runMenuCommand("Rotate 180°");
+        runMenuCommandByName("comp_rot_180");
         keyboard.undoRedoUndo("Rotate 180°");
 
-        runMenuCommand("Rotate 90° CCW");
+        runMenuCommandByName("comp_rot_270");
         keyboard.undoRedoUndo("Rotate 90° CCW");
 
-        runMenuCommand("Flip Horizontal");
+        runMenuCommandByName("comp_flip_hor");
         keyboard.undoRedoUndo("Flip Horizontal");
 
-        runMenuCommand("Flip Vertical");
+        runMenuCommandByName("comp_flip_ver");
         keyboard.undoRedoUndo("Flip Vertical");
     }
 
@@ -3135,6 +3136,10 @@ public class MainGuiTest {
 
     private void runMenuCommand(String text) {
         app.runMenuCommand(text);
+    }
+
+    private void runMenuCommandByName(String name) {
+        app.runMenuCommandByName(name);
     }
 
     private void log(int indent, String msg) {

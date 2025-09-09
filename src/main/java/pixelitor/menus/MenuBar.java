@@ -330,6 +330,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(newFromVisible, CTRL_SHIFT_ALT_E);
 
         layersMenu.add(createLayerStackSubmenu(i18n));
+        layersMenu.add(createLayerTransformSubmenu());
         layersMenu.add(createLayerMaskSubmenu(i18n));
 
         if (Features.enableExperimental) {
@@ -384,6 +385,23 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new ViewEnabledAction(i18n.getString("isolate"),
             Composition::isolateActiveTopLevelLayer));
+
+        return sub;
+    }
+
+    private static JMenu createLayerTransformSubmenu() {
+        var sub = new PMenu("Transform");
+
+        // rotate
+        sub.add(ANGLE_90.createLayerTransformAction(), "layer_rot_90");
+        sub.add(ANGLE_180.createLayerTransformAction(), "layer_rot_180");
+        sub.add(ANGLE_270.createLayerTransformAction(), "layer_rot_270");
+
+        sub.addSeparator();
+
+        // flip
+        sub.add(HORIZONTAL.createLayerTransformAction(), "layer_flip_hor");
+        sub.add(VERTICAL.createLayerTransformAction(), "layer_flip_ver");
 
         return sub;
     }
@@ -716,15 +734,15 @@ public class MenuBar extends JMenuBar {
         imageMenu.addSeparator();
 
         // rotate
-        imageMenu.add(new Rotate(ANGLE_90));
-        imageMenu.add(new Rotate(ANGLE_180));
-        imageMenu.add(new Rotate(ANGLE_270));
+        imageMenu.add(new Rotate(ANGLE_90), "comp_rot_90");
+        imageMenu.add(new Rotate(ANGLE_180), "comp_rot_180");
+        imageMenu.add(new Rotate(ANGLE_270), "comp_rot_270");
 
         imageMenu.addSeparator();
 
         // flip
-        imageMenu.add(new Flip(HORIZONTAL));
-        imageMenu.add(new Flip(VERTICAL));
+        imageMenu.add(new Flip(HORIZONTAL), "comp_flip_hor");
+        imageMenu.add(new Flip(VERTICAL), "comp_flip_ver");
 
         return imageMenu;
     }

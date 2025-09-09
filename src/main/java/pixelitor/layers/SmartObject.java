@@ -743,7 +743,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void flip(FlipDirection direction) {
+    public void flip(FlipDirection direction, boolean layerTransform) {
         AffineTransform flipTransform = direction.createImageTransform(getVisibleImage());
         int targetWidth = comp.getCanvasWidth();
         int targetHeight = comp.getCanvasHeight();
@@ -757,13 +757,13 @@ public class SmartObject extends CompositeLayer {
 
         for (SmartFilter filter : filters) {
             if (filter.hasMask()) {
-                filter.getMask().flip(direction);
+                filter.getMask().flip(direction, false);
             }
         }
     }
 
     @Override
-    public void rotate(QuadrantAngle angle) {
+    public void rotate(QuadrantAngle angle, boolean layerTransform) {
         AffineTransform rotation = angle.createImageTransform(getVisibleImage());
         int targetWidth = comp.getCanvasWidth();
         int targetHeight = comp.getCanvasHeight();
@@ -778,7 +778,7 @@ public class SmartObject extends CompositeLayer {
 
         for (SmartFilter filter : filters) {
             if (filter.hasMask()) {
-                filter.getMask().rotate(angle);
+                filter.getMask().rotate(angle, false);
             }
         }
     }

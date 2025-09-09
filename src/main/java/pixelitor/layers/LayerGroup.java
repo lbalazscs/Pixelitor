@@ -255,12 +255,12 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void flip(FlipDirection direction) {
+    public void flip(FlipDirection direction, boolean layerTransform) {
         // do nothing for the group itself
     }
 
     @Override
-    public void rotate(QuadrantAngle angle) {
+    public void rotate(QuadrantAngle angle, boolean layerTransform) {
         // do nothing for the group itself
     }
 

@@ -514,14 +514,14 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     private JPopupMenu createContextMenu() {
         JPopupMenu menu = new JPopupMenu();
 
-        menu.add(createFlipAction(FlipDirection.HORIZONTAL));
-        menu.add(createFlipAction(FlipDirection.VERTICAL));
-
-        menu.addSeparator();
-
         menu.add(createRotateAction(QuadrantAngle.ANGLE_90));
         menu.add(createRotateAction(QuadrantAngle.ANGLE_180));
         menu.add(createRotateAction(QuadrantAngle.ANGLE_270));
+
+        menu.addSeparator();
+
+        menu.add(createFlipAction(FlipDirection.HORIZONTAL));
+        menu.add(createFlipAction(FlipDirection.VERTICAL));
 
         return menu;
     }

@@ -184,12 +184,12 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public void flip(FlipDirection direction) {
+    public void flip(FlipDirection direction, boolean layerTransform) {
         transform(direction.createCanvasTransform(comp.getCanvas()));
     }
 
     @Override
-    public void rotate(QuadrantAngle angle) {
+    public void rotate(QuadrantAngle angle, boolean layerTransform) {
         transform(angle.createCanvasTransform(comp.getCanvas()));
     }
 

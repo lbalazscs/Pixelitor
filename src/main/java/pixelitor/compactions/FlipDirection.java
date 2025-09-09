@@ -18,8 +18,13 @@
 package pixelitor.compactions;
 
 import pixelitor.Canvas;
+import pixelitor.Composition;
+import pixelitor.gui.utils.AbstractViewEnabledAction;
+import pixelitor.layers.ImageLayer;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Texts;
 
+import javax.swing.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
@@ -82,5 +87,18 @@ public enum FlipDirection {
      */
     public AffineTransform createImageTransform(BufferedImage image) {
         return createTransform(image.getWidth(), image.getHeight());
+    }
+
+    public Action createLayerTransformAction() {
+        return new AbstractViewEnabledAction(getDisplayName()) {
+            @Override
+            protected void onClick(Composition comp) {
+                if (comp.getActiveLayer() instanceof ImageLayer layer) {
+                    layer.flip(FlipDirection.this, true);
+                } else {
+                    Messages.showNotImageLayerError(comp.getActiveLayer());
+                }
+            }
+        };
     }
 }

@@ -43,6 +43,10 @@ public class PMenu extends JMenu {
         add(menuItem);
     }
 
+    public void add(Action action, String name) {
+        super.add(action).setName(name);
+    }
+
     public void addFilter(String name, Supplier<Filter> supplier) {
         add(new FilterAction(name, supplier));
     }
