@@ -27,6 +27,7 @@ import pixelitor.filters.painters.AreaEffects;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerGUI;
@@ -326,6 +327,22 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         activeLayer.update(false);
     }
 
+    @Override
+    public void prepareForTransform() {
+        // TODO implement the new Transformable methods
+    }
+
+    @Override
+    public PixelitorEdit finalizeTransform() {
+        // TODO implement the new Transformable methods
+        return null;
+    }
+
+    @Override
+    public void cancelTransform() {
+        // TODO implement the new Transformable methods
+    }
+
     private void updateShapeType(ShapesTool tool) {
         ShapeType newType = tool.getSelectedType();
         boolean typeChanged = this.shapeType != newType;
@@ -479,7 +496,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         TransformBox box = new TransformBox(horBoxImBounds, view, this);
 
         // rotate the horizontal box into place
-        box.saveImState(); // so that transform works
+        box.saveImRefPoints(); // so that transform works
         box.setAngle(angle);
 
         // this was coTransform before

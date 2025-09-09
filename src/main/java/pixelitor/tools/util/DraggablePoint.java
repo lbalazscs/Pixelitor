@@ -190,8 +190,14 @@ public class DraggablePoint extends Point2D.Double {
     /**
      * Translates the point by the given deltas.
      */
-    public void translate(double dx, double dy) {
-        setLocation(x + dx, y + dy);
+    public void translate(double coDx, double coDy) {
+        setLocation(x + coDx, y + coDy);
+    }
+
+    public void relTranslate(PPoint origPos, double coDx, double coDy) {
+        setLocation(
+            origPos.getCoX() + coDx,
+            origPos.getCoY() + coDy);
     }
 
     public final void translateOnlyThis(double dx, double dy) {

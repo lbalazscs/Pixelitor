@@ -86,7 +86,7 @@ public class History {
 
         // reset BEFORE posting, so that the fade menu item can become enabled
         numUndoneEdits = 0;
-        editSupport.postEdit(edit);
+        notifyMenus(edit);
 
         if (AppMode.isDevelopment()) {
             ConsistencyChecks.checkAll(edit.getComp());
@@ -143,6 +143,10 @@ public class History {
         editSupport.postEdit(edit);
     }
 
+    public static void notifyMenus() {
+        notifyMenus(null);
+    }
+
     public static String getUndoPresentationName() {
         return undoManager.getUndoPresentationName();
     }
@@ -188,6 +192,10 @@ public class History {
 
     public static PixelitorEdit getEditToBeUndone() {
         return undoManager.getEditToBeUndone();
+    }
+
+    public static int getNumEdits() {
+        return undoManager.getSize();
     }
 
     /**
@@ -236,7 +244,7 @@ public class History {
         numUndoneEdits = 0;
 
         undoManager.discardAllEdits();
-        editSupport.postEdit(null);
+        notifyMenus();
     }
 
     public static void showHistoryDialog() {

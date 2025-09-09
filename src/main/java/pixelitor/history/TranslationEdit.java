@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,8 +50,9 @@ public class TranslationEdit extends PixelitorEdit {
      * if the mask can be ignored
      */
     public TranslationEdit(Composition comp, ContentLayer layer, int oldTx, int oldTy, boolean considerMask) {
-        // needs no name, because this is never used alone
+        // needs no name, because this is always embedded into another edit
         super("", comp);
+        embedded = true;
 
         this.layer = layer;
         backupTx = oldTx;
@@ -61,9 +62,6 @@ public class TranslationEdit extends PixelitorEdit {
             LayerMask mask = layer.getMask();
             maskEdit = new TranslationEdit(comp, mask, mask.getTx(), mask.getTy(), false);
         }
-
-        // currently always embedded
-        embedded = true;
     }
 
     @Override

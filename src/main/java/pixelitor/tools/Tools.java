@@ -31,10 +31,7 @@ import pixelitor.tools.pen.NodeTool;
 import pixelitor.tools.pen.PathTool;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.TransformPathTool;
-import pixelitor.tools.selection.LassoSelectionTool;
-import pixelitor.tools.selection.MagicWandSelectionTool;
-import pixelitor.tools.selection.MarqueeSelectionTool;
-import pixelitor.tools.selection.PolygonalSelectionTool;
+import pixelitor.tools.selection.*;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.AppPreferences;
@@ -245,6 +242,12 @@ public class Tools {
             new Tool[]{LASSO_SELECTION, POLY_SELECTION}, // L
             new Tool[]{PEN, NODE, TRANSFORM_PATH} // P
         );
+    }
+
+    public static void notifySelectionChanged() {
+        if (activeTool instanceof SelectionChangeListener listener) {
+            listener.selectionChanged();
+        }
     }
 
     public static class EventDispatcher {

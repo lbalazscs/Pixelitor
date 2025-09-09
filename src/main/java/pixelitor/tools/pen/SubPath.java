@@ -22,6 +22,7 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.history.History;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.*;
 import pixelitor.tools.transform.TransformBox;
@@ -158,9 +159,9 @@ public class SubPath implements Serializable, Transformable {
         return anchorPoints.size();
     }
 
-    private Shape toComponentSpaceShape() {
+    private Shape toImageSpaceShape() {
         Path2D p = new Path2D.Double();
-        addToComponentSpaceShape(p);
+        addToImageSpaceShape(p);
         return p;
     }
 
@@ -669,17 +670,17 @@ public class SubPath implements Serializable, Transformable {
         }
         saveImTransformRefPoints();
 
-        Shape coShape = toComponentSpaceShape();
+        Shape imShape = toImageSpaceShape();
 
-        assert ShapeUtils.isValid(coShape) : "invalid shape for " + toDetailedString();
+        assert ShapeUtils.isValid(imShape) : "invalid shape for " + toDetailedString();
 
-        Rectangle2D coBoundingBox = coShape.getBounds2D();
-        if (coBoundingBox.isEmpty()) {
+        Rectangle2D imBoundingBox = imShape.getBounds2D();
+        if (imBoundingBox.isEmpty()) {
             // it can still be empty if all x or y coordinates are the same
             return null;
         }
 
-        return new TransformBox(coBoundingBox, comp.getView(), this, true);
+        return new TransformBox(imBoundingBox, comp.getView(), this);
     }
 
     public boolean isEmpty() {
@@ -699,6 +700,22 @@ public class SubPath implements Serializable, Transformable {
             "subpath comp = " + comp.getDebugName() +
                 ", view comp = " + view.getComp().getDebugName();
         comp.repaint();
+    }
+
+    @Override
+    public void prepareForTransform() {
+        // TODO implement the new Transformable methods
+    }
+
+    @Override
+    public PixelitorEdit finalizeTransform() {
+        // TODO implement the new Transformable methods
+        return null;
+    }
+
+    @Override
+    public void cancelTransform() {
+        // TODO implement the new Transformable methods
     }
 
     public void saveImTransformRefPoints() {

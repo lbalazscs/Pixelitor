@@ -19,40 +19,41 @@ package pixelitor.tools.transform.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.Tools;
+import pixelitor.tools.move.MoveTool;
 import pixelitor.tools.transform.TransformBox;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * Represents a change to a {@link TransformBox}.
- * This is the "legacy" edit for {@link TransformBox} changes.
+ * Represents the cancellation of a "Free Transform" session,
+ * which can be undone to restore the interactive {@link TransformBox}.
  */
-public class TransformBoxChangedEdit extends PixelitorEdit {
-    private final TransformBox box;
-    private final TransformBox.Memento before;
-    private final TransformBox.Memento after;
+public class CancelTransformEdit extends PixelitorEdit {
+    private final TransformUISnapshot uiSnapshot;
 
-    public TransformBoxChangedEdit(String editName, Composition comp, TransformBox box,
-                                   TransformBox.Memento before,
-                                   TransformBox.Memento after) {
-        super(editName, comp);
-        this.box = box;
-        this.before = before;
-        this.after = after;
+    public CancelTransformEdit(String name, Composition comp, TransformUISnapshot snapshot) {
+        super(name, comp);
+        this.uiSnapshot = snapshot;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
-
-        box.restoreFrom(before);
+        // restore the interactive transform session to its state just before it was canceled
+        MoveTool moveTool = Tools.MOVE;
+        moveTool.activate();
+        moveTool.restoreTransformSession(uiSnapshot);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
-
-        box.restoreFrom(after);
+        // re-execute the cancellation logic without creating a new history entry
+        MoveTool moveTool = Tools.MOVE;
+        if (moveTool.isFreeTransforming()) {
+            moveTool.cancelTransform(false);
+        }
     }
 }

@@ -34,11 +34,13 @@ import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.ShapeCombinator;
+import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
 import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
+import pixelitor.tools.selection.SelectionChangeListener;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
@@ -1176,7 +1178,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
         if (mode.movesSelection()) {
             if (selection != null) {
-                selection.prepareMovement();
+                selection.prepareForTransform();
             }
         }
     }
@@ -1211,7 +1213,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         PixelitorEdit selectionEdit = null;
         if (mode.movesSelection()) {
             if (selection != null) {
-                selectionEdit = selection.finalizeMovement(false);
+                selectionEdit = selection.finalizeTransform();
             }
         }
 
@@ -1325,8 +1327,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             History.add(edit);
         }
 
-        if (wasHidden && isActive()) {
-            SelectionActions.getShowHide().setHideText();
+        if (isActive()) {
+            if (wasHidden) {
+                SelectionActions.getShowHide().setHideText();
+            }
+            Tool activeTool = Tools.getActive();
+            if (activeTool instanceof SelectionChangeListener listener) {
+                listener.selectionDeleted();
+            }
         }
         return edit;
     }
@@ -1476,6 +1484,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             selection.setShape(invertedShape);
             History.add(new SelectionShapeChangeEdit(
                 "Invert Selection", this, origShape));
+            Tools.notifySelectionChanged();
         }
     }
 

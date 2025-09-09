@@ -19,40 +19,53 @@ package pixelitor.tools.transform.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.Tools;
 import pixelitor.tools.transform.TransformBox;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * Represents a change to a {@link TransformBox}.
- * This is the "legacy" edit for {@link TransformBox} changes.
+ * A lightweight edit representing a single incremental modification
+ * of a {@link TransformBox} during a free transform session.
  */
-public class TransformBoxChangedEdit extends PixelitorEdit {
-    private final TransformBox box;
-    private final TransformBox.Memento before;
-    private final TransformBox.Memento after;
+public class TransformStepEdit extends PixelitorEdit {
+    private TransformBox.Memento state;
 
-    public TransformBoxChangedEdit(String editName, Composition comp, TransformBox box,
-                                   TransformBox.Memento before,
-                                   TransformBox.Memento after) {
-        super(editName, comp);
-        this.box = box;
-        this.before = before;
-        this.after = after;
+    public TransformStepEdit(String name, Composition comp, TransformBox.Memento state) {
+        super(name, comp);
+        this.state = state;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
-
-        box.restoreFrom(before);
+        if (!swapTransformBoxState()) {
+            throw new CannotUndoException();
+        }
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
+        if (!swapTransformBoxState()) {
+            throw new CannotRedoException();
+        }
+    }
 
-        box.restoreFrom(after);
+    /**
+     * Returns true if successful.
+     */
+    private boolean swapTransformBoxState() {
+        TransformBox transformBox = Tools.MOVE.getTransformBox();
+        if (transformBox == null) {
+            // can happen if the session was terminated unexpectedly
+            return false;
+        }
+
+        TransformBox.Memento currentState = transformBox.createMemento();
+        transformBox.restoreFrom(state);
+        this.state = currentState;
+        return true; // success
     }
 }

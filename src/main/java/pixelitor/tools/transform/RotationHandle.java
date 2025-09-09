@@ -88,7 +88,6 @@ public class RotationHandle extends DraggablePoint {
         AffineTransform dragTransform = AffineTransform.getRotateInstance(
             newAngle - rotStartAngle, pivotX, pivotY);
         box.coTransform(dragTransform);
-        box.setRotated(true);
     }
 
     @Override

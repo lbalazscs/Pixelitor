@@ -20,6 +20,7 @@ package pixelitor.tools.transform;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.ColorFillLayer;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.input.Modifiers;
@@ -48,6 +49,22 @@ class TransformBoxTest {
 
         @Override
         public void updateUI(View view) {
+            // do nothing
+        }
+
+        @Override
+        public void prepareForTransform() {
+            // do nothing
+        }
+
+        @Override
+        public PixelitorEdit finalizeTransform() {
+            // do nothing
+            return null;
+        }
+
+        @Override
+        public void cancelTransform() {
             // do nothing
         }
 

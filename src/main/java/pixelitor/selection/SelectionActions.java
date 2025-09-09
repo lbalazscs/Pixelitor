@@ -32,6 +32,7 @@ import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.History;
 import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.menus.view.ShowHideSelectionAction;
+import pixelitor.tools.Tools;
 import pixelitor.utils.Threads;
 import pixelitor.utils.ViewActivationListener;
 
@@ -70,8 +71,10 @@ public final class SelectionActions {
     /**
      * @noinspection NonFinalStaticVariableUsedInClassInitialization
      */
-    private static final Action pasteSel = new TaskAction(i18n("paste_sel"), () ->
-        getActiveComp().changeSelection(copiedSelShape));
+    private static final Action pasteSel = new TaskAction(i18n("paste_sel"), () -> {
+        getActiveComp().changeSelection(copiedSelShape);
+        Tools.notifySelectionChanged();
+    });
 
     private static final Action modify = new TaskAction(i18n("modify_sel") + "...",
         SelectionActions::showModifySelectionDialog);
@@ -165,6 +168,7 @@ public final class SelectionActions {
                 var edit = new SelectionShapeChangeEdit(
                     "Modify Selection", comp, originalShape);
                 History.add(edit);
+                Tools.notifySelectionChanged();
                 view.repaint();
             }
             // else: shape is valid but same as original, do nothing

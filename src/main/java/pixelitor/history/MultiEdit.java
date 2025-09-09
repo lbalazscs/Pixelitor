@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,60 +23,71 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * A PixelitorEdit that represents multiple edits
+ * A {@link PixelitorEdit} that represents multiple edits
  * that need to be undone/redone together.
  * Similar in purpose to javax.swing.undo.CompoundEdit
  */
 public class MultiEdit extends PixelitorEdit {
-    private final List<PixelitorEdit> edits;
+    private final List<PixelitorEdit> children;
 
     public MultiEdit(String name, Composition comp, PixelitorEdit first, PixelitorEdit second) {
         super(name, comp);
-        edits = new ArrayList<>(2);
-        edits.add(first);
-        edits.add(second);
+        children = new ArrayList<>(2);
+        children.add(first);
+        children.add(second);
     }
 
     public MultiEdit(String name, Composition comp) {
         super(name, comp);
-        edits = new ArrayList<>(2);
+        children = new ArrayList<>(2);
+        // child edits will be added later via add
+    }
+
+    public MultiEdit(String name, Composition comp, PixelitorEdit[] array) {
+        super(name, comp);
+
+        children = new ArrayList<>(array.length);
+        Collections.addAll(children, array);
     }
 
     /**
-     * Combines two possibly null edits
+     * Combines two possibly null edits into a single edit.
      */
     public static PixelitorEdit combine(PixelitorEdit first,
                                         PixelitorEdit second,
                                         String name) {
-        PixelitorEdit combined = null;
-        if (first != null && second != null) {
-            assert first.getComp() == second.getComp();
-            combined = new MultiEdit(name, first.getComp(), first, second);
-        } else if (first != null) {
-            combined = first;
-        } else if (second != null) {
-            combined = second;
+        if (first == null && second == null) {
+            return null;
         }
-        return combined;
+        if (first == null) {
+            return second;
+        }
+        if (second == null) {
+            return first;
+        }
+
+        assert first.getComp() == second.getComp();
+        return new MultiEdit(name, first.getComp(), first, second);
     }
 
     public void add(PixelitorEdit edit) {
-        edits.add(edit);
+        children.add(edit);
     }
 
     public boolean isEmpty() {
-        return edits.isEmpty();
+        return children.isEmpty();
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        for (int i = edits.size() - 1; i >= 0; i--) { // undo in reverse order
-            PixelitorEdit edit = edits.get(i);
+        for (int i = children.size() - 1; i >= 0; i--) { // undo in reverse order
+            PixelitorEdit edit = children.get(i);
             edit.undo();
         }
     }
@@ -85,7 +96,7 @@ public class MultiEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        for (PixelitorEdit edit : edits) {
+        for (PixelitorEdit edit : children) {
             edit.redo();
         }
     }
@@ -94,16 +105,20 @@ public class MultiEdit extends PixelitorEdit {
     public void die() {
         super.die();
 
-        for (PixelitorEdit edit : edits) {
+        for (PixelitorEdit edit : children) {
             edit.die();
         }
+    }
+
+    public List<PixelitorEdit> getChildren() {
+        return children;
     }
 
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        for (PixelitorEdit edit : edits) {
+        for (PixelitorEdit edit : children) {
             node.add(edit.createDebugNode());
         }
 

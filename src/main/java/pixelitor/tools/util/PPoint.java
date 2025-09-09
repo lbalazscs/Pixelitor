@@ -26,6 +26,7 @@ import pixelitor.utils.debug.Debuggable;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.util.Objects;
 
 import static java.lang.String.format;
 
@@ -226,6 +227,24 @@ public class PPoint implements Debuggable {
         node.addDouble("imX", getImX());
         node.addDouble("imY", getImY());
         return node;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PPoint other = (PPoint) o;
+        return Double.compare(imX, other.imX) == 0 &&
+            Double.compare(imY, other.imY) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(imX, imY);
     }
 
     @Override

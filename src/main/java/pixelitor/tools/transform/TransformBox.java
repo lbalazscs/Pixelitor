@@ -18,10 +18,13 @@
 package pixelitor.tools.transform;
 
 import pixelitor.Composition;
+import pixelitor.compactions.FlipDirection;
+import pixelitor.compactions.QuadrantAngle;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DDimension;
 import pixelitor.history.History;
 import pixelitor.tools.ToolWidget;
+import pixelitor.tools.Tools;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.tools.transform.history.TransformBoxChangedEdit;
 import pixelitor.tools.util.ArrowKey;
@@ -30,18 +33,22 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Geometry;
+import pixelitor.utils.Lazy;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.debug.Debuggable;
 
+import javax.swing.*;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static pixelitor.tools.transform.Direction.*;
@@ -79,23 +86,20 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
 
     private transient View view;
 
-    // the starting positions of the box in component and image space,
+    // the starting bounds of the box in image space,
     // corresponding to the initial size of the transformed object
     private final Rectangle2D origImRect;
 
-    // the current width/height of the rotated rectangle in image space
+    // the current width/height of the box in image space, as if it were unrotated
+    // (the name is misleading, but it can be changed only after we stop serializing)
     private final DDimension rotatedImSize;
-
-    // a flag indicating if any rotation has been applied
-    // (used to disable pixel snapping when the box is rotated)
-    private boolean rotated;
 
     // the current rotation angle of the box relative to
     // its original, unrotated state
     private double angle = 0.0;
+    private int angleDegrees = 0;
     private double sin = 0.0;
     private double cos = 1.0;
-    private int angleDegrees = 0;
 
     // the angle-dependent cursor offset used to
     // determine the cursor for a given corner
@@ -110,20 +114,17 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
 
     private transient Memento beforeMovement;
 
-    public TransformBox(Rectangle2D origRect, View view, Transformable target) {
-        this(origRect, view, target, false);
-    }
+    // this is always false for the Move Tool, but other tools still use it
+    private transient boolean useLegacyHistory = true;
 
-    public TransformBox(Rectangle2D origRect, View view, Transformable target, boolean isCo) {
-        // it must be transformed to positive rectangle before calling this
-        assert !origRect.isEmpty();
+    private transient Lazy<JPopupMenu> contextMenu = Lazy.of(this::createContextMenu);
 
-        if (isCo) {
-            origImRect = view.componentToImageSpace(origRect);
-        } else {
-            origImRect = origRect;
-        }
+    public TransformBox(Rectangle2D origImRect, View view, Transformable target) {
+        // it must be a positive rectangle
+        assert !origImRect.isEmpty();
+        this.origImRect = origImRect;
         rotatedImSize = new DDimension(origImRect);
+
         this.view = view;
         this.target = target;
 
@@ -231,6 +232,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         wholeBoxDrag = false;
         wholeBoxDragStartCoX = 0;
         wholeBoxDragStartCoY = 0;
+        contextMenu = Lazy.of(this::createContextMenu);
 
         // these transient fields will be set when they are first needed
         target = null;
@@ -246,8 +248,8 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
      * Initialize transient variables after deserialization.
      */
     public void reInitialize(View view, Transformable target) {
-        // A box needs reinitialization if the view is null after deserialization
-        // or if it's the old view after the duplication of a composition.
+        // a box needs reinitialization if the view is null after deserialization
+        // or if it's the old view after the duplication of a composition
         if (this.view == view) {
             return;
         }
@@ -273,7 +275,6 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         Point2D pivot = getPivot();
         coTransform(AffineTransform.getRotateInstance(rad - angleBefore,
             pivot.getX(), pivot.getY()));
-        setRotated(true);
     }
 
     /**
@@ -287,18 +288,22 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
 
         AffineTransform at = new AffineTransform();
 
-        // uses the current North-West corner as a fixed reference point
+        // the transformation is built in reverse order, using the
+        // current top-left (NW) corner as a fixed reference point
         if (angle != 0) {
-            // rotate with origin at NW
+            // 4. rotate around the current NW corner
             at.rotate(angle, nw.imX, nw.imY);
         }
 
-        // scale with origin at NW
+        // 3. translate to the current top-left (NW) corner's position
         at.translate(nw.imX, nw.imY);
+
+        // 2. scale from the origin
         double scaleX = calcScaleX();
         double scaleY = calcScaleY();
         at.scale(scaleX, scaleY);
 
+        // 1. translate so the original top-left corner is at the origin
         at.translate(-origImRect.getX(), -origImRect.getY());
 
         return at;
@@ -312,13 +317,16 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         return rotatedImSize.getWidth() / origImRect.getWidth();
     }
 
-    private void updateRotatedDimensions() {
+    /**
+     * Recalculates the unrotated width and height from the corner positions.
+     */
+    private void updateUnrotatedDimensions() {
         double width, height;
+        // avoid dividing by a number close to zero to maintain precision
         if (Math.abs(cos) > Math.abs(sin)) {
             width = (ne.imX - nw.imX) / cos;
             height = (sw.imY - nw.imY) / cos;
         } else {
-            // the precision is better when divided by sin
             width = (ne.imY - nw.imY) / sin;
             height = (nw.imX - sw.imX) / sin;
         }
@@ -337,8 +345,8 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         updateEdgePositions();
 
         boolean wasInsideOut = rotatedImSize.isInsideOut();
-        updateRotatedDimensions();
-        updateRotLocation();
+        updateUnrotatedDimensions();
+        updateRotHandleLocation();
         updateBoxShape();
         applyTransform();
 
@@ -363,7 +371,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
      * Ensures that the rotation handle is attached correctly
      * above the (possibly rotated) top edge.
      */
-    private void updateRotLocation() {
+    private void updateRotHandleLocation() {
         Point2D northCenter = Geometry.midPoint(nw, ne);
 
         double rotDistX = ROT_HANDLE_DISTANCE * sin;
@@ -418,12 +426,18 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         double y = e.getOrigCoY();
         DraggablePoint hit = findHandleAt(x, y);
         if (hit != null) {
+            // a new handle drag action is starting
             mousePressedOn(hit, x, y);
             return true;
         } else {
             activePoint = null;
             if (contains(x, y)) {
-                prepareWholeBoxDrag(e.getCoX(), e.getCoY());
+                if (e.isPopupTrigger()) {
+                    showPopup(e);
+                } else {
+                    // a new whole-box drag is starting
+                    prepareWholeBoxDrag(e.getCoX(), e.getCoY());
+                }
                 return true;
             }
         }
@@ -435,7 +449,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
      * Handles a mouse press event specifically on one of the box's handles.
      */
     public void mousePressedOn(DraggablePoint handle, double x, double y) {
-        View.toolSnappingChanged(!rotated && handle.shouldSnap(), false);
+        View.toolSnappingChanged(cos == 1.0 && handle.shouldSnap(), false);
 
         handle.setActive(true);
         saveState();
@@ -448,7 +462,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         wholeBoxDragStartCoX = coX;
         wholeBoxDragStartCoY = coY;
         saveState();
-        View.toolSnappingChanged(!rotated, false);
+        View.toolSnappingChanged(cos == 1.0, false);
     }
 
     /**
@@ -480,16 +494,95 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             }
             target.updateUI(view);
             updateDirections(); // necessary if dragged through the opposite corner
-            addMovementToHistory(e.getComp(), "Change Transform Box");
+            addLegacyEditToHistory(e.getComp(), "Change Transform Box");
             return true;
+        } else if (e.isPopupTrigger()) {
+            showPopup(e);
         } else if (wholeBoxDrag) {
             dragBox(e.getCoX(), e.getCoY());
             wholeBoxDrag = false;
-            addMovementToHistory(e.getComp(), "Drag Transform Box");
+            addLegacyEditToHistory(e.getComp(), "Drag Transform Box");
             return true;
         }
-        // we shouldn't get here
         return false;
+    }
+
+    private void showPopup(PMouseEvent e) {
+        contextMenu.get().show(view, (int) e.getCoX(), (int) e.getCoY());
+    }
+
+    private JPopupMenu createContextMenu() {
+        JPopupMenu menu = new JPopupMenu();
+
+        menu.add(createFlipAction(FlipDirection.HORIZONTAL));
+        menu.add(createFlipAction(FlipDirection.VERTICAL));
+
+        menu.addSeparator();
+
+        menu.add(createRotateAction(QuadrantAngle.ANGLE_90));
+        menu.add(createRotateAction(QuadrantAngle.ANGLE_180));
+        menu.add(createRotateAction(QuadrantAngle.ANGLE_270));
+
+        return menu;
+    }
+
+    private AbstractAction createFlipAction(FlipDirection direction) {
+        return new AbstractAction(direction.getDisplayName()) {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                flip(direction);
+            }
+        };
+    }
+
+    private AbstractAction createRotateAction(QuadrantAngle angle) {
+        return new AbstractAction(angle.getDisplayName()) {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                rotate(angle);
+            }
+        };
+    }
+
+    private void flip(FlipDirection direction) {
+        saveState();
+
+        // get the original image-space locations of the corners
+        Point2D nwImLoc = nw.getImLocationCopy();
+        Point2D neImLoc = ne.getImLocationCopy();
+        Point2D swImLoc = sw.getImLocationCopy();
+        Point2D seImLoc = se.getImLocationCopy();
+
+        if (direction == FlipDirection.HORIZONTAL) {
+            // swap the east and west corners
+            nw.setImLocationOnlyForThis(neImLoc);
+            ne.setImLocationOnlyForThis(nwImLoc);
+            sw.setImLocationOnlyForThis(seImLoc);
+            se.setImLocationOnlyForThis(swImLoc);
+        } else {
+            // swap the north and south corners
+            nw.setImLocationOnlyForThis(swImLoc);
+            sw.setImLocationOnlyForThis(nwImLoc);
+            ne.setImLocationOnlyForThis(seImLoc);
+            se.setImLocationOnlyForThis(neImLoc);
+        }
+
+        // update the rest of the box's state and the UI
+        cornerHandlesMoved();
+        target.updateUI(view);
+        addLegacyEditToHistory(view.getComp(), direction.getDisplayName());
+    }
+
+    private void rotate(QuadrantAngle rotAngle) {
+        double delta = Math.toRadians(rotAngle.getAngleDegree());
+        double newAngle = angle + delta;
+        if (newAngle >= Math.PI * 2) {
+            newAngle -= Math.PI * 2;
+        }
+        rotateTo(newAngle, RADIANS);
+
+        target.updateUI(view);
+        addLegacyEditToHistory(view.getComp(), rotAngle.getDisplayName());
     }
 
     /**
@@ -560,18 +653,10 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     }
 
     private void moveWholeBox(double coDX, double coDY) {
-        nw.setLocation(
-            beforeMovement.nw.getCoX() + coDX,
-            beforeMovement.nw.getCoY() + coDY);
-        ne.setLocation(
-            beforeMovement.ne.getCoX() + coDX,
-            beforeMovement.ne.getCoY() + coDY);
-        se.setLocation(
-            beforeMovement.se.getCoX() + coDX,
-            beforeMovement.se.getCoY() + coDY);
-        sw.setLocation(
-            beforeMovement.sw.getCoX() + coDX,
-            beforeMovement.sw.getCoY() + coDY);
+        nw.relTranslate(beforeMovement.nw, coDX, coDY);
+        ne.relTranslate(beforeMovement.ne, coDX, coDY);
+        se.relTranslate(beforeMovement.se, coDX, coDY);
+        sw.relTranslate(beforeMovement.sw, coDX, coDY);
 
         cornerHandlesMoved();
 
@@ -592,7 +677,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             corner.restoreCoordsFromImSpace(view);
         }
         updateEdgePositions();
-        updateRotLocation();
+        updateRotHandleLocation();
         updateBoxShape();
     }
 
@@ -608,14 +693,10 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         recalcAngle();
 
         updateEdgePositions();
-        updateRotatedDimensions();
+        updateUnrotatedDimensions();
         updateBoxShape();
         applyTransform();
         updateDirections();
-    }
-
-    public void setRotated(boolean rotated) {
-        this.rotated = rotated;
     }
 
     /**
@@ -648,9 +729,12 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         String editName = key.isShiftDown()
             ? "Shift-nudge Transform Box"
             : "Nudge Transform Box";
-        addMovementToHistory(view.getComp(), editName);
+        addLegacyEditToHistory(view.getComp(), editName);
     }
 
+    /**
+     * Sets the rotation angle and updates derived trigonometric values.
+     */
     public void setAngle(double angle) {
         if (angle == this.angle) {
             return;
@@ -660,6 +744,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         cos = Math.cos(angle);
         sin = Math.sin(angle);
 
+        // update the cursor offset, which depends on the angle
         angleDegrees = (int) RADIANS.toIntuitiveDegrees(angle);
         cursorOffset = calcCursorOffset(angleDegrees);
     }
@@ -732,8 +817,8 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         node.add(sw.createDebugNode());
         node.add(rot.createDebugNode());
 
-        node.addDouble("rotated width", rotatedImSize.getWidth());
-        node.addDouble("rotated height", rotatedImSize.getHeight());
+        node.addDouble("unrotated width", rotatedImSize.getWidth());
+        node.addDouble("unrotated height", rotatedImSize.getHeight());
         node.addInt("angle (degrees)", getAngleDegrees());
         node.addDouble("scale X", calcScaleX());
         node.addDouble("scale Y", calcScaleY());
@@ -753,7 +838,11 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         beforeMovement = copyState();
     }
 
-    public void saveImState() {
+    public Memento getBeforeMovementMemento() {
+        return beforeMovement;
+    }
+
+    public void saveImRefPoints() {
         for (CornerHandle corner : corners) {
             corner.saveImTransformRefPoint();
         }
@@ -769,7 +858,6 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         se.setLocationOnlyForThis(m.se);
         sw.setLocationOnlyForThis(m.sw);
         setAngle(m.angle);
-        rotated = m.rotated;
 
         cornerHandlesMoved();
 
@@ -779,8 +867,18 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         target.updateUI(view);
     }
 
-    private void addMovementToHistory(Composition comp, String editName) {
-        History.add(createMovementEdit(comp, editName));
+    private void addLegacyEditToHistory(Composition comp, String editName) {
+        if (useLegacyHistory) {
+            if (Tools.MOVE.isActive()) {
+                // the move tool never uses the legacy history
+                throw new IllegalStateException();
+            }
+            History.add(createLegacyEdit(comp, editName));
+        }
+    }
+
+    public void setUseLegacyHistory(boolean useLegacyHistory) {
+        this.useLegacyHistory = useLegacyHistory;
     }
 
     public void prepareMovement() {
@@ -788,8 +886,8 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     }
 
     public void moveWhileDragging(double relImX, double relImY) {
-        // Since these are deltas, they can't use the normal
-        // image space => component space methods.
+        // since these are deltas, they can't use the normal
+        // image space to component space converting methods
         double scaling = view.getZoomScale();
         dragBox(scaling * relImX, scaling * relImY);
     }
@@ -800,7 +898,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         wholeBoxDrag = false;
     }
 
-    public TransformBoxChangedEdit createMovementEdit(Composition comp, String editName) {
+    public TransformBoxChangedEdit createLegacyEdit(Composition comp, String editName) {
         assert editName != null;
 
         if (target instanceof SubPath) {
@@ -810,6 +908,14 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         Memento afterMovement = copyState();
         return new TransformBoxChangedEdit(editName, comp,
             this, beforeMovement, afterMovement);
+    }
+
+    public Rectangle2D getOrigImRect() {
+        return origImRect;
+    }
+
+    public Memento createMemento() {
+        return new Memento(this);
     }
 
     /**
@@ -823,7 +929,6 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         private final PPoint sw;
 
         private final double angle;
-        private final boolean rotated;
 
         public Memento(TransformBox box) {
             this.nw = box.nw.getLocationCopy();
@@ -832,7 +937,27 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             this.sw = box.sw.getLocationCopy();
 
             this.angle = box.angle;
-            this.rotated = box.rotated;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Memento memento = (Memento) o;
+            return Double.compare(memento.angle, angle) == 0 &&
+                Objects.equals(nw, memento.nw) &&
+                Objects.equals(ne, memento.ne) &&
+                Objects.equals(se, memento.se) &&
+                Objects.equals(sw, memento.sw);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(nw, ne, se, sw, angle);
         }
     }
 }

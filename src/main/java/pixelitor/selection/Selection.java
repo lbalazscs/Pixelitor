@@ -54,8 +54,8 @@ public class Selection implements Transformable {
     // the shape of the selection, in image-space coordinates relative to the canvas
     private Shape shape;
 
-    // backup of the shape before a selection drag started
-    private Shape shapeBeforeDrag;
+    // backup of the shape before a drag/transform started
+    private Shape shapeBeforeTransform;
 
     // the view displaying this selection
     private View view;
@@ -90,7 +90,7 @@ public class Selection implements Transformable {
     public Selection(Selection orig) {
         // the shape can be shared because all changes create new instances
         this.shape = orig.shape;
-        this.shapeBeforeDrag = orig.shapeBeforeDrag;
+        this.shapeBeforeTransform = orig.shapeBeforeTransform;
 
         this.frozen = orig.frozen;
         this.hidden = orig.hidden;
@@ -321,11 +321,12 @@ public class Selection implements Transformable {
     /**
      * Prepares for a drag operation by backing up the current shape.
      */
-    public void prepareMovement() {
+    @Override
+    public void prepareForTransform() {
         assert shape != null;
         assert !disposed;
 
-        shapeBeforeDrag = shape;
+        shapeBeforeTransform = shape;
     }
 
     /**
@@ -333,9 +334,9 @@ public class Selection implements Transformable {
      */
     private void transformWhileDragging(AffineTransform at) {
         assert !disposed;
-        assert shapeBeforeDrag != null;
+        assert shapeBeforeTransform != null;
 
-        shape = at.createTransformedShape(shapeBeforeDrag);
+        shape = at.createTransformedShape(shapeBeforeTransform);
     }
 
     /**
@@ -343,15 +344,15 @@ public class Selection implements Transformable {
      */
     public void moveWhileDragging(double relImX, double relImY) {
         assert !disposed;
-        assert shapeBeforeDrag != null;
+        assert shapeBeforeTransform != null;
 
-        if (shapeBeforeDrag instanceof Rectangle2D startRect) {
+        if (shapeBeforeTransform instanceof Rectangle2D startRect) {
             // preserve the type information
             shape = new Rectangle2D.Double(
                 startRect.getX() + relImX, startRect.getY() + relImY,
                 startRect.getWidth(), startRect.getHeight());
         } else {
-            shape = Shapes.translate(shapeBeforeDrag, relImX, relImY);
+            shape = Shapes.translate(shapeBeforeTransform, relImX, relImY);
         }
     }
 
@@ -359,24 +360,36 @@ public class Selection implements Transformable {
      * Finalizes the movement of the selection shape after
      * a drag operation and returns an edit for undo/redo.
      */
-    public PixelitorEdit finalizeMovement(boolean keepOrigShape) {
+    @Override
+    public PixelitorEdit finalizeTransform() {
         assert !disposed;
-        assert shapeBeforeDrag != null;
+        assert shapeBeforeTransform != null;
 
         Composition comp = view.getComp();
         shape = comp.clipToCanvasBounds(shape);
         if (shape.getBounds().isEmpty()) { // moved off-canvas
             comp.deselect(false);
-            return new DeselectEdit(comp, shapeBeforeDrag);
+            return new DeselectEdit(comp, shapeBeforeTransform);
         }
 
         // the selection shape was changed successfully
         var edit = new SelectionShapeChangeEdit(
-            MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, shapeBeforeDrag);
-        if (!keepOrigShape) {
-            shapeBeforeDrag = null;
-        }
+            MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, shapeBeforeTransform);
+        shapeBeforeTransform = null;
         return edit;
+    }
+
+    @Override
+    public void cancelTransform() {
+        if (shapeBeforeTransform != null) {
+            shape = shapeBeforeTransform;
+            shapeBeforeTransform = null;
+
+            // the view can be null if we are canceling because a deselect happened
+            if (view != null) {
+                view.repaint();
+            }
+        }
     }
 
     @Override

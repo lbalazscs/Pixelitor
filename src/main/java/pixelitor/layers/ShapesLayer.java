@@ -294,7 +294,8 @@ public class ShapesLayer extends ContentLayer {
     @Override
     PixelitorEdit createMovementEdit(int prevTx, int prevTy) {
         if (hasShape() && transformBox != null) {
-            return transformBox.createMovementEdit(comp, "Move Layer");
+//            return transformBox.createMovementEdit(comp, "Move Layer");
+            return null; // TODO
         }
         return null;
     }

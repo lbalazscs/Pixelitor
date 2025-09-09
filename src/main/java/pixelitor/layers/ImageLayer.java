@@ -22,11 +22,13 @@ import pixelitor.*;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
 import pixelitor.compactions.QuadrantAngle;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
 import pixelitor.io.ORAImageInfo;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
+import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
@@ -37,6 +39,7 @@ import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.Assertions;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -46,6 +49,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -64,7 +68,7 @@ import static pixelitor.utils.Threads.onEDT;
 /**
  * A layer that renders a {@link BufferedImage}.
  */
-public class ImageLayer extends ContentLayer implements Drawable {
+public class ImageLayer extends ContentLayer implements Drawable, Transformable {
     public enum State {
         NORMAL, // no GUI filter is running on the layer
         PREVIEW, // a filter dialog is shown
@@ -103,6 +107,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Relevant only in {@link PREVIEW} state.
      */
     private transient boolean imageContentChanged = false;
+
+    // the current transform to be applied for live preview during a free transform session
+    private transient AffineTransform liveTransform;
+    private transient AffineTransform originalTransform;
 
     private ImageLayer(Composition comp, String name) {
         super(comp, name);
@@ -929,12 +937,32 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void paint(Graphics2D g, boolean firstVisibleLayer) {
-        BufferedImage visibleImage = getVisibleImage();
+        if (liveTransform != null) {
+            // This path is taken during a free-transform drag.
+            // It draws the original, untransformed image (transformRefImage)
+            // by applying the liveTransform directly to the Graphics2D context.
+            // This is extremely fast and avoids creating new BufferedImages.
+            // It also correctly respects the layer's opacity and blend mode,
+            // as those are already configured on the 'g' context.
+            Graphics2D g2 = (Graphics2D) g.create();
+            try {
+                // Apply the complete transformation for the preview.
+                g2.transform(liveTransform);
+                // Draw the original image at its local origin (0,0). The transform
+                // handles placing it correctly on the canvas.
+                g2.drawImage(image, 0, 0, null);
+            } finally {
+                g2.dispose();
+            }
+        } else {
+            // no active transform, so paint normally
+            BufferedImage visibleImage = getVisibleImage();
 
-        if (tmpLayer == null) {
-            paintWithoutTmpLayer(g, visibleImage, firstVisibleLayer);
-        } else { // we are in the middle of a brush draw
-            paintWithTmpLayer(g, visibleImage);
+            if (tmpLayer == null) {
+                paintWithoutTmpLayer(g, visibleImage, firstVisibleLayer);
+            } else { // we are in the middle of a brush draw
+                paintWithTmpLayer(g, visibleImage);
+            }
         }
     }
 
@@ -1087,5 +1115,113 @@ public class ImageLayer extends ContentLayer implements Drawable {
         node.add(DebugNodes.createBufferedImageNode("image", image));
 
         return node;
+    }
+
+    // --- Transformable implementation ---
+
+    @Override
+    public void prepareForTransform() {
+        this.liveTransform = null;
+
+        int tx = getTx();
+        int ty = getTy();
+        if (tx == 0 && ty == 0) {
+            this.originalTransform = null;
+        } else {
+            this.originalTransform = AffineTransform.getTranslateInstance(tx, ty);
+        }
+    }
+
+    @Override
+    public void imTransform(AffineTransform at) {
+        if (originalTransform == null) {
+            this.liveTransform = at;
+        } else {
+            // the given `at` transform is relative to the canvas origin
+            this.liveTransform = (AffineTransform) at.clone();
+            this.liveTransform.concatenate(this.originalTransform);
+        }
+
+        comp.invalidateImageCache();
+        // the repaint will be triggered by target.updateUI(view) in TransformBox
+    }
+
+    @Override
+    public PixelitorEdit finalizeTransform() {
+        BufferedImage transformRefImage = image;
+        int origTx = getTx();
+        int origTy = getTy();
+
+        // use the last known transform for the final render
+        AffineTransform finalTransform = this.liveTransform;
+
+        // if no transform was applied (e.g., user just clicked without dragging), do nothing
+        if (finalTransform == null || finalTransform.isIdentity()) {
+            cancelTransform(); // clean up state
+            return null;
+        }
+
+        // --- perform the final render ---
+
+        // the initial bounds of the image in canvas coordinates
+        Rectangle initialBounds = new Rectangle(0, 0,
+            transformRefImage.getWidth(), transformRefImage.getHeight());
+
+        // the bounds of the transformed image in canvas coordinates
+        Rectangle2D transformedBounds = finalTransform.createTransformedShape(initialBounds).getBounds2D();
+
+        // the new image must be large enough to contain the transformed image
+        Rectangle2D targetBounds = transformedBounds.createUnion(comp.getCanvasBounds());
+
+        int width = (int) Math.ceil(targetBounds.getWidth());
+        int height = (int) Math.ceil(targetBounds.getHeight());
+
+        // ensure we have valid dimensions
+        if (width <= 0 || height <= 0) {
+            cancelTransform();
+            return null;
+        }
+
+        BufferedImage newImage = createEmptyLayerImage(width, height);
+        Graphics2D g = newImage.createGraphics();
+        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+
+        // translate to the new buffer's coordinate system
+        AffineTransform drawTransform = (AffineTransform) finalTransform.clone();
+        drawTransform.preConcatenate(AffineTransform.getTranslateInstance(
+            -targetBounds.getX(), -targetBounds.getY()));
+
+        g.setTransform(drawTransform);
+        g.drawImage(transformRefImage, 0, 0, null);
+        g.dispose();
+
+        // the new translation is the top-left corner of the target bounds
+        int newTx = (int) Math.round(targetBounds.getX());
+        int newTy = (int) Math.round(targetBounds.getY());
+
+        // commit changes, clean up, and create history edit
+        setImage(newImage);
+        setTranslation(newTx, newTy);
+        this.liveTransform = null;
+
+        comp.invalidateImageCache();
+        updateIconImage();
+
+        // create history edit
+        return new MultiEdit("Free Transform Layer", comp,
+            new ImageEdit("", comp, this, transformRefImage, true),
+            new TranslationEdit(comp, this, origTx, origTy, false));
+    }
+
+    @Override
+    public void cancelTransform() {
+        this.liveTransform = null;
+        holder.update();
+        updateIconImage();
+    }
+
+    @Override
+    public void updateUI(View view) {
+        view.repaint();
     }
 }
