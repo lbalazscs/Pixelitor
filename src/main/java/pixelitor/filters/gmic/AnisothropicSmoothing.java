@@ -28,7 +28,7 @@ public class AnisothropicSmoothing extends GMICFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public static final String NAME = "Anisothropic Smoothing";
+    public static final String NAME = "Anisotropic Smoothing";
 
     private final RangeParam amplitude = new RangeParam("Amplitude", 0, 60, 1000);
     private final RangeParam sharpness = new RangeParam("Sharpness", 0, 70, 200);

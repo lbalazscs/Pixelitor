@@ -17,6 +17,7 @@
 
 package pixelitor.compactions;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -94,7 +95,7 @@ public class CompActionTest {
 
     @BeforeClass
     public static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
+        TestHelper.setUnitTestingMode(true);
 
         Tools.setActiveTool(Tools.CROP);
     }
@@ -121,6 +122,11 @@ public class CompActionTest {
         }
         History.clear();
         view = origComp.getView();
+    }
+
+    @After
+    public void afterEachTest() {
+        TestHelper.verifyAndClearHistory();
     }
 
     private void checkOriginalState() {

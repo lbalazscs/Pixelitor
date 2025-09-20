@@ -48,7 +48,7 @@ enum MaskMode {
         @Override
         public void configureActiveLayer(MainGuiTest tester) {
             if (EDT.activeLayerHasMask()) {
-                tester.deleteLayerMask();
+                tester.app().deleteLayerMask();
             }
         }
 

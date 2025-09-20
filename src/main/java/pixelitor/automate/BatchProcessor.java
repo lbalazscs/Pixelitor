@@ -23,6 +23,7 @@ import pixelitor.compactions.CompAction;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.history.History;
 import pixelitor.io.*;
 import pixelitor.utils.Messages;
 
@@ -48,7 +49,7 @@ public class BatchProcessor {
     private static final String OVERWRITE_CANCEL = "Cancel Processing";
 
     private boolean overwriteAll = false;
-    private boolean stopProcessing = false;
+    private volatile boolean stopProcessing = false;
 
     private final CompAction action;
     private final String dialogTitle;
@@ -78,33 +79,41 @@ public class BatchProcessor {
         }
 
         stopProcessing = false;
-        var progressMonitor = GUIUtils.createPercentageProgressMonitor(dialogTitle);
-        var worker = new SwingWorker<Void, Void>() {
+        History.setIgnoreEdits(true);
+
+        var worker = new SwingWorker<Void, Integer>() {
+            private final ProgressMonitor progressMonitor = GUIUtils.createPercentageProgressMonitor(dialogTitle);
+
             @Override
             public Void doInBackground() {
-                return processFilesSequentially(filesToProcess, progressMonitor);
-            } // end of doInBackground
-        };
-        worker.execute();
-    }
+                overwriteAll = false;
 
-    private Void processFilesSequentially(List<File> filesToProcess,
-                                          ProgressMonitor monitor) {
-        assert calledOutsideEDT() : "on EDT";
-
-        overwriteAll = false;
-
-        for (int i = 0, fileCount = filesToProcess.size(); i < fileCount; i++) {
-            if (monitor.isCanceled() || stopProcessing) {
-                break;
+                for (int i = 0, fileCount = filesToProcess.size(); i < fileCount; i++) {
+                    if (progressMonitor.isCanceled() || stopProcessing) {
+                        break;
+                    }
+                    processFile(filesToProcess.get(i));
+                    publish(i);
+                }
+                return null;
             }
 
-            updateProgress(monitor, i, fileCount);
-            processIndividualFile(filesToProcess.get(i));
-        }
+            @Override
+            protected void process(List<Integer> chunks) {
+                if (isCancelled()) {
+                    return;
+                }
+                Integer latestProgress = chunks.getLast();
+                updateProgress(progressMonitor, latestProgress, filesToProcess.size());
+            }
 
-        monitor.close();
-        return null;
+            @Override
+            protected void done() {
+                History.setIgnoreEdits(false);
+                progressMonitor.close();
+            }
+        };
+        worker.execute();
     }
 
     private static void updateProgress(ProgressMonitor monitor, int currentIndex, int total) {
@@ -112,7 +121,7 @@ public class BatchProcessor {
         monitor.setNote("Processing " + (currentIndex + 1) + " of " + total);
     }
 
-    private void processIndividualFile(File file) {
+    private void processFile(File file) {
         assert calledOutsideEDT() : "on EDT";
 
         FileIO.openFileAsync(file, false)

@@ -62,14 +62,9 @@ public class History {
      * Adds a new edit to the history.
      */
     public static void add(PixelitorEdit edit) {
-        if (checker != null) {
-            checker.registerAdd(edit.getName());
-        }
-
         assert edit != null;
         if (rejectEdits) {
-            // TODO we can get here if undoing something activates a view, and this in turn
-            //   creates another edit, such as an auto-rasterization in the shapes tool
+            // prevent accidentally adding edits during undo/redo
             if (AppMode.isDevelopment()) {
                 throw new IllegalStateException();
             } else {
@@ -78,6 +73,9 @@ public class History {
         }
         if (ignoreEdits) {
             return;
+        }
+        if (checker != null && edit.canUndo()) {
+            checker.registerAdd(edit.getName());
         }
 
         if (edit.makesDirty()) {
@@ -363,6 +361,11 @@ public class History {
         assertEditToBeRedoneNameIs(editName);
 
         redo();
+    }
+
+    public static void undoRedo(String editName) {
+        undo(editName);
+        redo(editName);
     }
 
     public static void setChecker(HistoryChecker checker) {

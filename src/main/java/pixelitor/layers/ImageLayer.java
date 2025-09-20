@@ -602,7 +602,8 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Returns the layer's content bounds in image space.
+     * Returns the image bounds in image space, optionally
+     * excluding the transparent pixels at the edges.
      */
     @Override
     public Rectangle getContentBounds(boolean includeTransparent) {

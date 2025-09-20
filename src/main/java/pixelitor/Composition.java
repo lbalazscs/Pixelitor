@@ -33,6 +33,7 @@ import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
+import pixelitor.selection.SelectionChangeResult;
 import pixelitor.selection.ShapeCombinator;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -53,7 +54,6 @@ import pixelitor.utils.debug.DebugNodes;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -1005,7 +1006,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // check if we should undo the last isolation of the same layer
             if (History.getEditToBeUndone() instanceof IsolateEdit isolateEdit) {
                 if (isolateEdit.getLayer() == layer) {
-                    History.undo();
+                    History.undo("Isolate");
                     return;
                 }
             }
@@ -1063,17 +1064,29 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Finds the topmost layer that is opaque at a given point on the canvas.
+     * Recursively searches for any layer that satisfies the given predicate.
      */
-    public Layer findLayerAtPoint(Point2D p) {
-        // In mask editing mode never auto-select another layer
+    public Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
+        for (Layer layer : layerList) {
+            Layer foundLayer = layer.findFirstLayerWhere(predicate, includeMasks);
+            if (foundLayer != null) {
+                return foundLayer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds the topmost layer that is opaque at a given image-space point.
+     */
+    public Layer findLayerAtPoint(Point p) {
+        // in mask editing mode never auto-select another layer
         if (getView().getMaskViewMode().showMask()) {
             return getActiveTopLevelLayer();
         }
 
-        Point pixelLoc = new Point((int) p.getX(), (int) p.getY());
-
-        return ImageUtils.findOpaqueLayerAtPoint(layerList, pixelLoc);
+        // iterate in reverse order to search layers from top to bottom
+        return ContentLayer.findOpaqueInList(layerList, p);
     }
 
     public Rectangle2D calcContentBounds(boolean includeTransparent) {
@@ -1369,33 +1382,43 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Changes the main selection based on a new shape, potentially combining
+     * Changes the selection based on a new shape, potentially combining
      * with the existing selection via user interaction (dialog).
-     * Returns the undo edit for the change, or null if cancelled or no change occurred.
      */
-    public PixelitorEdit changeSelection(Shape newShape) {
+    public SelectionChangeResult changeSelection(Shape newShape) {
         newShape = clipToCanvasBounds(newShape);
         if (newShape.getBounds().isEmpty()) {
-            // the new selection would be outside the canvas bounds
-            return null;
+            // the new shape is entirely outside the canvas
+            return SelectionChangeResult.outOfBounds();
         }
 
         if (selection == null) { // no existing selection
-            // create a new selection
+            // a new selection is created successfully.
             setSelection(new Selection(newShape, view));
-            return new NewSelectionEdit(this, selection.getShape());
+            return SelectionChangeResult.success(new NewSelectionEdit(this, selection.getShape()));
         }
 
         // modify existing selection
         ShapeCombinator combinator = showShapeCombinatorDialog(this);
         if (combinator == null) {
-            return null; // canceled
+            // the user cancelled the dialog
+            return SelectionChangeResult.cancelled();
         }
-        Shape origShape = selection.getShape();
-        selection.setShape(combinator.combine(origShape, newShape));
-        selection.setHidden(false);
 
-        return new SelectionShapeChangeEdit("Selection Change", this, origShape);
+        Shape origShape = selection.getShape();
+        Shape combinedShape = combinator.combine(origShape, newShape);
+
+        if (combinedShape.getBounds().isEmpty()) {
+            // the combination resulted in an empty shape => deselect
+            deselect(false);
+            return SelectionChangeResult.success(new DeselectEdit(this, origShape));
+        } else {
+            // the selection was successfully modified to a new, non-empty shape
+            selection.setShape(combinedShape);
+            selection.setHidden(false);
+            return SelectionChangeResult.success(new SelectionShapeChangeEdit(
+                combinator.getHistoryName(), this, origShape));
+        }
     }
 
     private static ShapeCombinator showShapeCombinatorDialog(Composition comp) {

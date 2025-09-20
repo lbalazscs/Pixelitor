@@ -22,10 +22,7 @@ import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.exception.ComponentLookupException;
-import org.assertj.swing.fixture.DialogFixture;
-import org.assertj.swing.fixture.FrameFixture;
-import org.assertj.swing.fixture.JButtonFixture;
-import org.assertj.swing.fixture.JSliderFixture;
+import org.assertj.swing.fixture.*;
 import org.fest.util.Files;
 import pixelitor.Canvas;
 import pixelitor.Composition;
@@ -48,7 +45,11 @@ import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.guitest.AppRunner.ShowOriginal;
 import pixelitor.history.History;
-import pixelitor.io.*;
+import pixelitor.history.HistoryChecker;
+import pixelitor.io.Dirs;
+import pixelitor.io.FileChoosers;
+import pixelitor.io.FileFormat;
+import pixelitor.io.FileUtils;
 import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
@@ -61,6 +62,7 @@ import pixelitor.tools.gradient.GradientColorType;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.move.MoveMode;
+import pixelitor.tools.pen.PathTool;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.tools.transform.TransformBox;
@@ -97,6 +99,8 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
 import static pixelitor.guitest.AppRunner.getCurrentTimeHM;
+import static pixelitor.guitest.GUITestUtils.change;
+import static pixelitor.guitest.GUITestUtils.checkRandomly;
 import static pixelitor.guitest.GUITestUtils.findButtonByText;
 import static pixelitor.guitest.MaskMode.NO_MASK;
 import static pixelitor.menus.view.ZoomLevel.zoomLevels;
@@ -111,10 +115,11 @@ import static pixelitor.tools.DragToolState.TRANSFORM;
  * This is not a unit test: the app as a whole is tested from the user
  * perspective, and depending on the configuration, it could run for hours.
  * <p>
- * Assertj-Swing requires using the following VM option:
+ * AssertJ-Swing requires using the following VM option:
  * --add-opens java.base/java.util=ALL-UNNAMED
  */
 public class MainGuiTest {
+    // in quick mode some tests are skipped
     private static boolean quick = false;
 
     private static File baseDir;
@@ -171,8 +176,7 @@ public class MainGuiTest {
     private MainGuiTest() {
         long startMillis = System.currentTimeMillis();
 
-//        app = new AppRunner(new HistoryChecker(), inputDir, "a.jpg");
-        app = new AppRunner(null, inputDir, "a.jpg");
+        app = new AppRunner(new HistoryChecker(), inputDir, "a.jpg");
 
         robot = app.getRobot();
         pw = app.getPW();
@@ -308,10 +312,10 @@ public class MainGuiTest {
         testColorPickerTool();
         testShapesTool();
 
-        runMenuCommand("Reload");
-        maskMode.apply(this);
+        app.reload();
 
-        checkConsistency();
+        maskMode.apply(this);
+        afterTestActions();
     }
 
     /**
@@ -344,7 +348,7 @@ public class MainGuiTest {
             testAdjLayers();
         }
 
-        checkConsistency();
+        afterTestActions();
     }
 
     /**
@@ -505,8 +509,7 @@ public class MainGuiTest {
 
         app.mergeDown();
 
-        runMenuCommand("Duplicate Layer");
-        keyboard.undoRedo("Duplicate Layer");
+        app.duplicateLayer(ImageLayer.class);
         maskMode.apply(this);
 
         runMenuCommand("New Layer");
@@ -530,7 +533,7 @@ public class MainGuiTest {
 
         testLayerMaskIconPopupMenus();
 
-        deleteLayerMask();
+        app.deleteLayerMask();
 
         maskMode.apply(this);
 
@@ -591,10 +594,10 @@ public class MainGuiTest {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
+        keyboard.undoRedo("Mask from Color Range");
 
         if (maskMode == NO_MASK) {
-            // delete the created layer mask
-            runMenuCommand("Delete");
+            app.deleteLayerMask();
         }
         maskMode.apply(this);
 
@@ -687,7 +690,7 @@ public class MainGuiTest {
         testCheckForUpdate();
         testAbout();
 
-        checkConsistency();
+        afterTestActions();
         helpMenuTested = true;
     }
 
@@ -723,7 +726,7 @@ public class MainGuiTest {
             // or "New Version Available"
             app.findJOptionPane(null).buttonWithText("Close").click();
         } catch (ComponentLookupException e) {
-            // if a close button was not found, then it must be the up to date dialog
+            // if a close button was not found, then it must be the up-to-date dialog
             app.findJOptionPane("Pixelitor Is Up to Date").okButton().click();
         }
     }
@@ -760,7 +763,7 @@ public class MainGuiTest {
 
         testColorPaletteMenu("Color Palette...", "Color Palette");
 
-        checkConsistency();
+        afterTestActions();
         colorsTested = true;
     }
 
@@ -786,17 +789,21 @@ public class MainGuiTest {
     void testEditMenu() {
         log(0, "edit menu");
 
-        keyboard.invert();
+        app.invert();
         runMenuCommand("Repeat Invert");
+        keyboard.undoRedo("Invert"); // needed by the history checker
+
+        // also test undo/redo via the menus
         runMenuCommand("Undo Invert");
         runMenuCommand("Redo Invert");
+
         testFade();
 
         testCopyPaste();
 
         testPreferences();
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testFade() {
@@ -822,6 +829,7 @@ public class MainGuiTest {
 
         runMenuCommand("Copy Layer/Mask");
         runMenuCommand("Paste as New Layer");
+        keyboard.undoRedo("New Pasted Layer");
 
         app.checkNumLayersIs(2);
 
@@ -837,6 +845,7 @@ public class MainGuiTest {
         app.checkNumLayersIs(2);
         assert DeleteActiveLayerAction.INSTANCE.isEnabled();
         runMenuCommand("Delete Layer");
+        keyboard.undoRedo("Delete Pasted Layer");
         app.checkNumLayersIs(1);
 
         maskMode.apply(this);
@@ -937,7 +946,7 @@ public class MainGuiTest {
 
         // crop is tested with the crop tool
 
-        runWithSelectionAndTranslation(() -> {
+        runWithSelectionTranslationCombinations(() -> {
             testResize();
             testEnlargeCanvas();
             testRotateFlip(true);
@@ -955,7 +964,8 @@ public class MainGuiTest {
 
         maskMode.apply(this);
         maskMode.check();
-        checkConsistency();
+
+        afterTestActions();
     }
 
     private void testCropSelection() {
@@ -964,14 +974,13 @@ public class MainGuiTest {
 
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(400, 400);
+        keyboard.undoRedo("Create Selection");
         EDT.assertThereIsSelection();
 
         testCropSelection(() -> runMenuCommand("Crop Selection"),
             false, 200.0, 200.0);
 
-        EDT.assertThereIsSelection();
-        keyboard.deselect();
-        EDT.assertThereIsNoSelection();
+        app.deselect();
     }
 
     private void testDuplicateImage() {
@@ -1034,6 +1043,7 @@ public class MainGuiTest {
         openFileWithDialog(inputDir, "a.jpg");
 
         fileMenuTested = true;
+        afterTestActions();
     }
 
     private void testNewImage() {
@@ -1053,7 +1063,7 @@ public class MainGuiTest {
 
         openFileWithDialog(inputDir, "b.jpg");
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testSave(String extension) {
@@ -1111,7 +1121,7 @@ public class MainGuiTest {
         app.closeCurrentView(ExpectConfirmation.UNKNOWN);
 
         maskMode.apply(this);
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testExportOptimizedJPEG() {
@@ -1125,7 +1135,7 @@ public class MainGuiTest {
         findDialogByTitle("Export Optimized JPEG").button("ok").click();
         app.saveWithOverwrite(baseDir, "saved.jpg");
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testMagick() {
@@ -1142,6 +1152,7 @@ public class MainGuiTest {
             .buttonWithText("Export").click();
 
         app.closeCurrentView(ExpectConfirmation.NO);
+        afterTestActions();
     }
 
     private void testExportLayerAnimation() {
@@ -1155,14 +1166,16 @@ public class MainGuiTest {
         app.findJOptionPane("Not Enough Layers")
             .okButton().click();
 
-        addNewLayer();
+        app.duplicateLayer(ImageLayer.class);
+        app.invert();
+
         // this time it should work
         runMenuCommand("Export Layer Animation...");
         findDialogByTitle("Export Animated GIF").button("ok").click();
 
         app.saveWithOverwrite(baseDir, "layeranim.gif");
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testExportTweeningAnimation() {
@@ -1206,7 +1219,7 @@ public class MainGuiTest {
 
         app.waitForProgressMonitorEnd();
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void closeOneOfTwoViews() {
@@ -1224,7 +1237,7 @@ public class MainGuiTest {
         EDT.assertNumOpenImagesIs(1);
 
         maskMode.apply(this);
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testCloseAll() {
@@ -1235,7 +1248,7 @@ public class MainGuiTest {
         app.closeAll();
         EDT.assertNumOpenImagesIs(0);
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testShowMetadata() {
@@ -1250,6 +1263,8 @@ public class MainGuiTest {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
+
+        afterTestActions();
     }
 
     private void testBatchResize() {
@@ -1271,14 +1286,9 @@ public class MainGuiTest {
         dialog.requireNotVisible();
 
         Utils.sleep(5, SECONDS);
-        checkConsistency();
 
-        for (File inputFile : FileUtils.listSupportedInputFiles(inputDir)) {
-            String fileName = inputFile.getName();
-
-            File outFile = new File(batchResizeOutputDir, fileName);
-            assertThat(outFile).exists().isFile();
-        }
+        checkOutputFilesWereCreated(batchResizeOutputDir);
+        afterTestActions();
     }
 
     private void testBatchFilter() {
@@ -1303,12 +1313,16 @@ public class MainGuiTest {
 
         app.waitForProgressMonitorEnd();
 
-        checkConsistency();
+        afterTestActions();
 
+        checkOutputFilesWereCreated(batchFilterOutputDir);
+    }
+
+    private static void checkOutputFilesWereCreated(File outputDir) {
         for (File inputFile : FileUtils.listSupportedInputFiles(inputDir)) {
             String fileName = inputFile.getName();
 
-            File outFile = new File(batchFilterOutputDir, fileName);
+            File outFile = new File(outputDir, fileName);
             assertThat(outFile).exists().isFile();
         }
     }
@@ -1317,25 +1331,29 @@ public class MainGuiTest {
         log(1, "testing export layer to png");
 
         Dirs.setLastSave(baseDir);
-        addNewLayer();
+
+        app.duplicateLayer(ImageLayer.class);
+        app.invert();
+        maskMode.apply(this);
+
         runMenuCommand("Export Layers to PNG...");
         findDialogByTitle("Select Output Folder").button("ok").click();
         Utils.sleep(2, SECONDS);
 
-        checkConsistency();
+        afterTestActions();
     }
 
     void testAutoPaint() {
         log(0, "testing AutoPaint");
 
-        runWithSelectionAndTranslation(this::testAutoPaintTask);
+        runWithSelectionTranslationCombinations(this::testAutoPaintTask);
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testAutoPaintTask() {
         for (Tool tool : AutoPaint.SUPPORTED_TOOLS) {
-            if (skipThis()) {
+            if (skip()) {
                 continue;
             }
             if (tool == Tools.BRUSH) {
@@ -1385,7 +1403,7 @@ public class MainGuiTest {
 
         EDT.activate(prevView);
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testScreenCapture(boolean hidePixelitor) {
@@ -1402,21 +1420,16 @@ public class MainGuiTest {
 
         maskMode.apply(this);
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testReload() {
         log(1, "testing reload");
 
-        runMenuCommand("Reload");
-
-        // reloading is asynchronous, wait a bit
-        IOTasks.waitForIdle();
-
-        keyboard.undoRedo("Reload");
+        app.reload();
         maskMode.apply(this);
 
-        checkConsistency();
+        afterTestActions();
     }
 //</editor-fold>
 //<editor-fold desc="view menu">
@@ -1431,8 +1444,40 @@ public class MainGuiTest {
         app.checkNumLayersIs(1);
 
         testZoomCommands();
-
         testHistory();
+        testHideShowUI();
+        testGuides();
+
+        if (ImageArea.isActiveMode(FRAMES)) {
+            runMenuCommand("Cascade");
+            runMenuCommand("Tile");
+        }
+
+        afterTestActions();
+        viewMenuTested = true;
+    }
+
+    private void testZoomCommands() {
+        log(1, "zoom commands");
+
+        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
+
+        runMenuCommand("Zoom In");
+        EDT.assertZoomOfActiveIs(startingZoom.zoomIn());
+
+        runMenuCommand("Zoom Out");
+        EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomOut());
+
+        runMenuCommand("Fit Space");
+        runMenuCommand("Fit Width");
+        runMenuCommand("Fit Height");
+
+        runMenuCommand("Actual Pixels");
+        EDT.assertZoomOfActiveIs(ZoomLevel.ACTUAL_SIZE);
+    }
+
+    private void testHideShowUI() {
+        log(1, "hide/show UI elements");
 
         runMenuCommand("Reset Workspace");
         assert EDT.call(StatusBar::isShown);
@@ -1487,42 +1532,18 @@ public class MainGuiTest {
         assert !EDT.call(HistogramsPanel::isShown);
         assert EDT.call(LayersContainer::areLayersShown);
         assert EDT.call(() -> PixelitorWindow.get().areToolsShown());
-
-        testGuides();
-
-        if (ImageArea.isActiveMode(FRAMES)) {
-            runMenuCommand("Cascade");
-            runMenuCommand("Tile");
-        }
-
-        checkConsistency();
-        viewMenuTested = true;
-    }
-
-    private void testZoomCommands() {
-        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
-
-        runMenuCommand("Zoom In");
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn());
-
-        runMenuCommand("Zoom Out");
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomOut());
-
-        runMenuCommand("Fit Space");
-        runMenuCommand("Fit Width");
-        runMenuCommand("Fit Height");
-
-        runMenuCommand("Actual Pixels");
-        EDT.assertZoomOfActiveIs(ZoomLevel.ACTUAL_SIZE);
     }
 
     private void testGuides() {
+        log(1, "guides");
+
         runMenuCommand("Add Horizontal Guide...");
         var dialog = findDialogByTitle("Add Horizontal Guide");
         dialog.button("ok").click();
         dialog.requireNotVisible();
         assertThat(EDT.getGuides().getHorizontals()).containsExactly(0.5);
         assertThat(EDT.getGuides().getVerticals()).isEmpty();
+        keyboard.undoRedo("Create Guides");
 
         runMenuCommand("Add Vertical Guide...");
         dialog = findDialogByTitle("Add Vertical Guide");
@@ -1530,6 +1551,7 @@ public class MainGuiTest {
         dialog.requireNotVisible();
         assertThat(EDT.getGuides().getHorizontals()).containsExactly(0.5);
         assertThat(EDT.getGuides().getVerticals()).containsExactly(0.5);
+        keyboard.undoRedo("Change Guides");
 
         runMenuCommand("Add Grid Guides...");
         dialog = findDialogByTitle("Add Grid Guides");
@@ -1537,23 +1559,29 @@ public class MainGuiTest {
         dialog.requireNotVisible();
         assertThat(EDT.getGuides().getHorizontals()).containsExactly(0.25, 0.5, 0.75);
         assertThat(EDT.getGuides().getVerticals()).containsExactly(0.25, 0.5, 0.75);
+        keyboard.undoRedo("Change Guides");
 
         runMenuCommand("Clear Guides");
+        keyboard.undoRedo("Clear Guides");
         assertThat(EDT.getGuides()).isNull();
     }
 
     private void testHistory() {
+        log(1, "history");
+
         // before testing make sure that we have something
         // in the history even if this is running alone
         app.clickTool(Tools.BRUSH);
         mouse.moveRandomlyWithinCanvas();
         mouse.dragRandomlyWithinCanvas();
+        keyboard.undoRedo("Brush Tool");
 
         app.clickTool(Tools.ERASER);
         mouse.moveRandomlyWithinCanvas();
         mouse.dragRandomlyWithinCanvas();
+        keyboard.undoRedo("Eraser Tool");
 
-        // now start testing the history
+        // now start testing the history window
         runMenuCommand("Show History...");
         var dialog = findDialogByTitle("History");
 
@@ -1603,6 +1631,9 @@ public class MainGuiTest {
         EDT.assertNumOpenImagesIs(1);
         app.checkNumLayersIs(1);
 
+        EDT.assertThereIsNoSelection();
+        EDT.assertThereIsNoTranslation();
+
         boolean squashImage = FILTER_TESTS_WITH_WIDTH_1 || FILTER_TESTS_WITH_HEIGHT_1;
         if (squashImage) {
             if (FILTER_TESTS_WITH_WIDTH_1 && FILTER_TESTS_WITH_HEIGHT_1) {
@@ -1627,7 +1658,7 @@ public class MainGuiTest {
         testRenderFilters();
         testTransitionsFilters();
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testColorFilters(boolean squashedImage) {
@@ -1808,7 +1839,7 @@ public class MainGuiTest {
         testFilterWithDialog("Voronoi", Randomize.YES, Reseed.YES, ShowOriginal.YES);
 
         // Blur/Sharpen
-        testFilterWithDialog("Anisothropic Smoothing", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Anisotropic Smoothing", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Bilateral Smoothing", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
         testFilterWithDialog("G'MIC Command", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1858,18 +1889,18 @@ public class MainGuiTest {
     }
 
     private void testColorBalance(boolean squashedImage) {
-        runWithSelectionAndTranslation(squashedImage, () ->
+        runWithSelectionTranslationCombinations(squashedImage, () ->
             testFilterWithDialog(ColorBalance.NAME,
                 Randomize.YES, Reseed.NO, ShowOriginal.YES));
     }
 
     private void testInvert(boolean squashedImage) {
-        runWithSelectionAndTranslation(squashedImage, () ->
+        runWithSelectionTranslationCombinations(squashedImage, () ->
             testNoDialogFilter(Invert.NAME));
     }
 
     private void testText() {
-        if (skipThis()) {
+        if (skip()) {
             return;
         }
         log(1, "filter Text");
@@ -1917,7 +1948,7 @@ public class MainGuiTest {
     }
 
     private void testNoDialogFilter(String name) {
-        if (skipThis()) {
+        if (skip()) {
             return;
         }
         log(1, "filter " + name);
@@ -1932,7 +1963,7 @@ public class MainGuiTest {
                                       Reseed reseed,
                                       ShowOriginal showOriginal,
                                       String... extraButtonsToClick) {
-        if (skipThis()) {
+        if (skip()) {
             return;
         }
         log(1, "filter " + name);
@@ -2007,7 +2038,7 @@ public class MainGuiTest {
 
         testAutoZoomButtons();
 
-        checkConsistency();
+        afterTestActions();
     }
 
 //</editor-fold>
@@ -2015,7 +2046,6 @@ public class MainGuiTest {
 
     private void testShapesTool() {
         log(1, "shapes tool");
-
         app.clickTool(Tools.SHAPES);
 
         keyboard.randomizeColors();
@@ -2032,18 +2062,25 @@ public class MainGuiTest {
         mouse.randomAltClick();
         mouse.randomShiftClick();
 
-        setupEffectsDialog();
         mouse.moveToCanvas(50, 50);
         mouse.dragToCanvas(150, 100);
         keyboard.undoRedo("Create Shape");
 
+        changeShapesToolEffects();
+        keyboard.undoRedo("Change Shape Effects");
+
         pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.FOREGROUND.toString());
         keyboard.undoRedo("Change Shape Stroke");
+
         setupStrokeSettingsDialog();
         keyboard.undoRedo("Change Shape Stroke Settings");
 
         mouse.moveToCanvas(200, 50);
+        app.setMaxUntestedEdits(2); // the drag will create two edits
         mouse.dragToCanvas(300, 100);
+        keyboard.undoRedo("Rasterize Shape", "Create Shape");
+        app.setMaxUntestedEdits(1); // reset
+
         pw.comboBox("shapeTypeCB").selectItem(ShapeType.CAT.toString());
         keyboard.undoRedo("Change Shape Type");
 
@@ -2054,7 +2091,7 @@ public class MainGuiTest {
 
         ShapeType[] shapeTypes = ShapeType.values();
         for (ShapeType shapeType : shapeTypes) {
-            if (shapeType == ShapeType.CAT || skipThis()) {
+            if (shapeType == ShapeType.CAT || skip()) {
                 continue;
             }
             pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());
@@ -2062,11 +2099,15 @@ public class MainGuiTest {
         }
 
         for (TwoPointPaintType paintType : TwoPointPaintType.values()) {
-            if (skipThis()) {
+            if (skip()) {
                 continue;
             }
-            pw.comboBox("fillPaintCB").selectItem(paintType.toString());
-            pw.comboBox("strokePaintCB").selectItem(paintType.toString());
+            if (change(pw.comboBox("fillPaintCB"), paintType.toString())) {
+                keyboard.undoRedo("Change Shape Fill");
+            }
+            if (change(pw.comboBox("strokePaintCB"), paintType.toString())) {
+                keyboard.undoRedo("Change Shape Stroke");
+            }
         }
 
         EDT.assertShapesToolStateIs(TRANSFORM);
@@ -2082,12 +2123,12 @@ public class MainGuiTest {
         // test convert to selection
         pw.button("convertToSelection").requireEnabled().click();
         keyboard.undoRedo("Convert Path to Selection");
-        keyboard.deselect();
+        app.deselect();
 
-        checkConsistency();
+        afterTestActions();
     }
 
-    private void setupEffectsDialog() {
+    private void changeShapesToolEffects() {
         findButtonByText(pw, "Effects...")
             .requireEnabled()
             .click();
@@ -2104,7 +2145,9 @@ public class MainGuiTest {
         tabbedPane.selectTab(EffectsPanel.DROP_SHADOW_TAB_NAME);
         tabbedPane.selectTab(EffectsPanel.GLOW_TAB_NAME);
 
-        dialog.checkBox("enabledCB").check();
+        JCheckBoxFixture enabledCB = dialog.checkBox("enabledCB");
+        boolean activeTabEnabled = enabledCB.target().isSelected();
+        enabledCB.check(!activeTabEnabled); // toggle in order to force a change
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -2116,6 +2159,7 @@ public class MainGuiTest {
             .click();
         var dialog = findDialogByTitle("Stroke Settings");
 
+        // force a change in the stroke width
         var strokeWidthSlider = dialog.slider();
         int value = strokeWidthSlider.target().getValue();
         if (value == 5) { // 5 is the default stroke width
@@ -2142,7 +2186,7 @@ public class MainGuiTest {
         pw.click();
         mouse.dragToCanvas(400, 400);
 
-        checkConsistency();
+        afterTestActions();
     }
 
 //</editor-fold>
@@ -2153,7 +2197,7 @@ public class MainGuiTest {
         testNodeTool();
         testTransformPathTool();
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testPenTool() {
@@ -2164,11 +2208,15 @@ public class MainGuiTest {
 
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(200, 400);
+        keyboard.undoRedo("Subpath Start");
+
         mouse.moveToCanvas(300, 400);
         mouse.dragToCanvas(300, 200);
+        keyboard.undoRedo("Add Anchor Point");
 
         mouse.moveToCanvas(200, 200);
         mouse.click();
+        keyboard.undoRedo("Close Subpath");
 
         assertThat(EDT.getActivePath())
             .isNotNull()
@@ -2179,8 +2227,7 @@ public class MainGuiTest {
         keyboard.undo("Add Anchor Point");
         keyboard.undo("Subpath Start");
 
-        assertThat(EDT.getActivePath())
-            .isNull();
+        assertThat(EDT.getActivePath()).isNull();
 
         keyboard.redo("Subpath Start");
         keyboard.redo("Add Anchor Point");
@@ -2189,15 +2236,26 @@ public class MainGuiTest {
         // add a second subpath, this one will be open and
         // consists of straight segments
         mouse.clickCanvas(600, 200);
+        keyboard.undoRedo("Subpath Start");
+
         mouse.clickCanvas(600, 300);
+        keyboard.undoRedo("Add Anchor Point");
+
         mouse.clickCanvas(700, 300);
+        keyboard.undoRedo("Add Anchor Point");
+
         mouse.clickCanvas(700, 200);
+        keyboard.undoRedo("Add Anchor Point");
+
         mouse.ctrlClickCanvas(700, 150);
+        keyboard.undoRedo("Finish Subpath");
 
         assertThat(EDT.getActivePath())
             .isNotNull()
             .numSubPathsIs(2)
             .numAnchorsIs(6);
+
+        testTraceButtons(Tools.PEN);
     }
 
     private void testNodeTool() {
@@ -2235,13 +2293,51 @@ public class MainGuiTest {
             .click();
         EDT.assertActiveToolIs(Tools.LASSO_SELECTION);
 
-        keyboard.invert();
+        keyboard.undo("Convert Path to Selection");
+        EDT.assertActiveToolIs(Tools.NODE);
+
+        keyboard.redo("Convert Path to Selection");
+        EDT.assertActiveToolIs(Tools.LASSO_SELECTION);
+
+        app.invert();
 
         pw.button("toPathButton")
             .requireEnabled()
             .click();
         EDT.assertActiveToolIs(Tools.NODE);
         assertThat(EDT.getActivePath()).isNotNull();
+
+        keyboard.undo("Convert Selection to Path");
+        EDT.assertActiveToolIs(Tools.LASSO_SELECTION);
+        assertThat(EDT.getActivePath()).isNull();
+
+        keyboard.redo("Convert Selection to Path");
+        EDT.assertActiveToolIs(Tools.NODE);
+        assertThat(EDT.getActivePath()).isNotNull();
+
+        testTraceButtons(Tools.NODE);
+    }
+
+    private void testTransformPathTool() {
+        log(1, "transform path tool");
+        app.clickTool(Tools.TRANSFORM_PATH);
+
+        Point nw = EDT.getTransformPathToolBoxPos(0, TransformBox::getNW);
+        mouse.moveToScreen(nw.x, nw.y);
+        mouse.dragToScreen(nw.x - 100, nw.y - 50);
+        keyboard.undoRedo("Change Transform Box");
+
+        Point rot = EDT.getTransformPathToolBoxPos(1, TransformBox::getRot);
+        mouse.moveToScreen(rot.x, rot.y);
+        mouse.dragToScreen(rot.x + 100, rot.y + 100);
+        keyboard.undoRedo("Change Transform Box");
+
+        testTraceButtons(Tools.TRANSFORM_PATH);
+    }
+
+    // tests the trace buttons in one of the path tools
+    private void testTraceButtons(PathTool tool) {
+        log(2, "test tracing in " + tool.getName());
 
         pw.button("traceWithSmudge")
             .requireEnabled()
@@ -2259,38 +2355,21 @@ public class MainGuiTest {
         keyboard.undoRedo("Brush Tool");
     }
 
-    private void testTransformPathTool() {
-        log(1, "transform path tool");
-        app.clickTool(Tools.TRANSFORM_PATH);
-
-        Point nw = EDT.getTransformPathToolBoxPos(0, TransformBox::getNW);
-        mouse.moveToScreen(nw.x, nw.y);
-        mouse.dragToScreen(nw.x - 100, nw.y - 50);
-
-        Point rot = EDT.getTransformPathToolBoxPos(1, TransformBox::getRot);
-        mouse.moveToScreen(rot.x, rot.y);
-        mouse.dragToScreen(rot.x + 100, rot.y + 100);
-
-        pw.button("traceWithBrush")
-            .requireEnabled()
-            .click();
-    }
-
 //</editor-fold>
 //<editor-fold desc="paint bucket tool">
 
     private void testPaintBucketTool() {
         log(1, "paint bucket tool");
-
         app.clickTool(Tools.PAINT_BUCKET);
 
         mouse.randomAltClick();
+        keyboard.undoRedoUndo("Paint Bucket Tool");
 
         mouse.moveToCanvas(300, 300);
         pw.click();
-
         keyboard.undoRedoUndo("Paint Bucket Tool");
-        checkConsistency();
+
+        afterTestActions();
     }
 
 //</editor-fold>
@@ -2306,21 +2385,33 @@ public class MainGuiTest {
             keyboard.fgBgDefaults();
         }
 
-        mouse.randomAltClick();
+        mouse.randomAltClick(); // TODO this adds a history entry
+        keyboard.undoRedo("Hide Gradient Handles");
+
         boolean gradientCreated = false;
 
         for (GradientType gradientType : GradientType.values()) {
-            pw.comboBox("typeCB").selectItem(gradientType.toString());
+            if (change(pw.comboBox("typeCB"), gradientType.toString()) && gradientCreated) {
+                keyboard.undoRedo("Change Gradient Type");
+            }
+
             for (String cycleMethod : GradientTool.CYCLE_METHODS) {
-                pw.comboBox("cycleMethodCB").selectItem(cycleMethod);
+                if (change(pw.comboBox("cycleMethodCB"), cycleMethod) && gradientCreated) {
+                    keyboard.undoRedo("Change Gradient Cycling");
+                }
+
                 GradientColorType[] gradientColorTypes = GradientColorType.values();
                 for (GradientColorType colorType : gradientColorTypes) {
-                    if (skipThis()) {
+                    if (skip()) {
                         continue;
                     }
-                    pw.comboBox("colorTypeCB").selectItem(colorType.toString());
+                    if (change(pw.comboBox("colorTypeCB"), colorType.toString()) && gradientCreated) {
+                        keyboard.undoRedo("Change Gradient Colors");
+                    }
 
-                    GUITestUtils.checkRandomly(pw.checkBox("reverseCB"));
+                    if (checkRandomly(pw.checkBox("reverseCB")) && gradientCreated) {
+                        keyboard.undoRedo("Reverse Gradient");
+                    }
 
                     // drag the gradient
                     Point start = mouse.moveRandomlyWithinCanvas();
@@ -2355,8 +2446,9 @@ public class MainGuiTest {
 
         if (gradientCreated) { // pretty likely
             keyboard.pressEsc(); // hide the gradient handles
+            keyboard.undoRedo("Hide Gradient Handles");
         }
-        checkConsistency();
+        afterTestActions();
     }
 
 //</editor-fold>
@@ -2369,7 +2461,7 @@ public class MainGuiTest {
 
         testBrushStrokes(Tools.ERASER);
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testBrushTool() {
@@ -2385,7 +2477,7 @@ public class MainGuiTest {
 //        enableLazyMouse(true);
 //        testBrushStrokes();
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void enableLazyMouse(boolean b) {
@@ -2409,24 +2501,20 @@ public class MainGuiTest {
     private void testBrushStrokes(Tool tool) {
         mouse.randomAltClick();
 
-        boolean tested = false;
         for (BrushType brushType : BrushType.values()) {
             pw.comboBox("typeCB").selectItem(brushType.toString());
             app.testBrushSettings(tool, brushType);
 
             for (Symmetry symmetry : Symmetry.values()) {
-                if (skipThis()) {
+                if (skip()) {
                     continue;
                 }
                 pw.comboBox("symmetrySelector").selectItem(symmetry.toString());
                 keyboard.randomizeColors();
                 mouse.moveRandomlyWithinCanvas();
                 mouse.dragRandomlyWithinCanvas();
-                tested = true;
+                keyboard.undoRedo(tool == Tools.BRUSH ? "Brush Tool" : "Eraser Tool");
             }
-        }
-        if (tested) {
-            keyboard.undoRedo(tool == Tools.BRUSH ? "Brush Tool" : "Eraser Tool");
         }
     }
 
@@ -2435,18 +2523,21 @@ public class MainGuiTest {
 
         app.clickTool(Tools.SMUDGE);
 
-        mouse.randomAltClick();
+        mouse.randomAltClick(); // adds no history entry
 
-        for (int i = 0; i < 3; i++) {
-            mouse.randomClick();
-            mouse.shiftMoveClickRandom();
-            mouse.moveRandomlyWithinCanvas();
-            mouse.dragRandomlyWithinCanvas();
-        }
-
+        mouse.randomClick(); // adds a history entry
         keyboard.undoRedo("Smudge Tool");
 
-        checkConsistency();
+        for (int i = 0; i < 3; i++) {
+            mouse.shiftMoveClickRandom();
+            keyboard.undoRedo("Smudge Tool");
+
+            mouse.moveRandomlyWithinCanvas();
+            mouse.dragRandomlyWithinCanvas();
+            keyboard.undoRedo("Smudge Tool");
+        }
+
+        afterTestActions();
     }
 
     private void testCloneTool() {
@@ -2459,13 +2550,13 @@ public class MainGuiTest {
         testClone(true, false, 300);
         testClone(true, true, 400);
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testClone(boolean aligned, boolean sampleAllLayers, int startX) {
-        selectCheckBox("alignedCB", aligned);
+        pw.checkBox("alignedCB").check(aligned);
 
-        selectCheckBox("sampleAllLayersCB", sampleAllLayers);
+        pw.checkBox("sampleAllLayersCB").check(sampleAllLayers);
 
         // set the source point
         mouse.moveToCanvas(300, 300);
@@ -2473,12 +2564,13 @@ public class MainGuiTest {
 
         // do some cloning
         mouse.moveToCanvas(startX, 300);
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 2; i++) {
             int x = startX + i * 10;
             mouse.dragToCanvas(x, 300);
+            keyboard.undoRedo("Clone Stamp Tool");
             mouse.dragToCanvas(x, 400);
+            keyboard.undoRedo("Clone Stamp Tool");
         }
-        keyboard.undoRedo("Clone Stamp Tool");
     }
 
 //</editor-fold>
@@ -2512,7 +2604,7 @@ public class MainGuiTest {
         }
 
         maskMode.apply(this);
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testMoveToolDrag(MoveMode mode, boolean altDrag) {
@@ -2591,14 +2683,14 @@ public class MainGuiTest {
         List<Boolean> checkBoxStates = List.of(Boolean.TRUE, Boolean.FALSE);
         for (Boolean allowGrowing : checkBoxStates) {
             for (Boolean deleteCropped : checkBoxStates) {
-                selectCheckBox("allowGrowingCB", allowGrowing);
-                selectCheckBox("deleteCroppedCB", deleteCropped);
+                pw.checkBox("allowGrowingCB").check(allowGrowing);
+                pw.checkBox("deleteCroppedCB").check(deleteCropped);
 
                 cropFromCropTool();
             }
         }
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void cropFromCropTool() {
@@ -2651,6 +2743,7 @@ public class MainGuiTest {
 
     private void testSelectionToolsAndMenus() {
         log(1, "selection tools and the selection menus");
+        boolean hadSelectionAtStart = EDT.getActiveSelection() != null;
 
         // make sure we are at 100%
         keyboard.actualPixels();
@@ -2659,13 +2752,19 @@ public class MainGuiTest {
         EDT.assertSelectionCombinatorIs(Tools.RECTANGLE_SELECTION, REPLACE);
 
         mouse.randomAltClick();
-        // the Alt should change the interaction only temporarily,
-        // while the mouse is down
+        if (hadSelectionAtStart) {
+            // if a previous test left a selection, then this click added a deselect edit
+            keyboard.undoRedo("Deselect");
+        }
+
+        // the Alt should change the interaction only temporarily, while the mouse is down
         EDT.assertSelectionCombinatorIs(Tools.RECTANGLE_SELECTION, REPLACE);
 
         // TODO test poly selection
         testWithSimpleSelection();
-        testWithTwoEclipseSelections();
+        testWithTwoEllipseSelections();
+
+        afterTestActions();
     }
 
     private void testWithSimpleSelection() {
@@ -2673,28 +2772,29 @@ public class MainGuiTest {
 
         mouse.moveToCanvas(200, 100);
         mouse.dragToCanvas(400, 300);
+
+        EDT.assertThereIsSelection();
+
+        keyboard.undo("Create Selection");
+        EDT.assertThereIsNoSelection();
+
+        keyboard.redo("Create Selection");
         EDT.assertThereIsSelection();
 
         keyboard.nudge();
         EDT.assertThereIsSelection();
 
-        keyboard.undo("Nudge Selection");
+        keyboard.undoRedoUndo("Nudge Selection");
         EDT.assertThereIsSelection();
 
-        keyboard.redo("Nudge Selection");
-        EDT.assertThereIsSelection();
-
-        keyboard.undo("Nudge Selection");
-        EDT.assertThereIsSelection();
-
-        keyboard.deselect();
+        app.deselect();
         EDT.assertThereIsNoSelection();
 
         keyboard.undo("Deselect");
         EDT.assertThereIsSelection();
     }
 
-    private void testWithTwoEclipseSelections() {
+    private void testWithTwoEllipseSelections() {
         app.clickTool(Tools.ELLIPSE_SELECTION);
         EDT.assertActiveToolIs(Tools.ELLIPSE_SELECTION);
 
@@ -2705,6 +2805,7 @@ public class MainGuiTest {
         int e1Height = 200;
         mouse.moveToCanvas(e1X, e1Y);
         mouse.dragToCanvas(e1X + e1Width, e1Y + e1Height);
+        keyboard.undoRedo("Replace Selection");
         EDT.assertThereIsSelection();
 
         // add second ellipse
@@ -2717,6 +2818,7 @@ public class MainGuiTest {
         int e2Height = 100;
         mouse.moveToCanvas(e2X, e2Y);
         mouse.dragToCanvas(e2X + e2Width, e2Y + e2Height);
+        keyboard.undoRedo("Add Selection");
 
         // test crop selection by clicking on the button
         testCropSelection(() -> findButtonByText(pw, "Crop Selection").requireEnabled().click(),
@@ -2732,13 +2834,20 @@ public class MainGuiTest {
         EDT.assertThereIsSelection();
 
         runMenuCommand("Invert Selection");
+        keyboard.undoRedo("Invert Selection");
         EDT.assertThereIsSelection();
 
         runMenuCommand("Deselect");
         EDT.assertThereIsNoSelection();
+
+        keyboard.undo("Deselect");
+        EDT.assertThereIsSelection();
+
+        keyboard.redo("Deselect");
+        EDT.assertThereIsNoSelection();
     }
 
-    private void testCropSelection(Runnable triggerTask,
+    private void testCropSelection(Runnable cropTask,
                                    boolean assumeNonRectangular,
                                    double expectedSelWidth,
                                    double expectedSelHeight) {
@@ -2760,7 +2869,7 @@ public class MainGuiTest {
         int origCanvasWidth = canvas.getWidth();
         int origCanvasHeight = canvas.getHeight();
 
-        triggerTask.run();
+        cropTask.run();
 
         if (rectangular) {
             undoRedoUndoSimpleSelectionCrop(origCanvasWidth, origCanvasHeight, selWidth, selHeight);
@@ -2772,12 +2881,12 @@ public class MainGuiTest {
             .buttonWithText("Only Crop").click();
         undoRedoUndoSimpleSelectionCrop(origCanvasWidth, origCanvasHeight, selWidth, selHeight);
 
-        if (skipThis(0.5)) {
+        if (skip(0.5)) {
             return;
         }
 
         // not rectangular: test choosing "Only Hide"
-        triggerTask.run();
+        cropTask.run();
         app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Only Hide").click();
 
@@ -2787,12 +2896,12 @@ public class MainGuiTest {
 
         keyboard.undoRedoUndo("Add Hiding Mask");
 
-        if (skipThis(0.5)) {
+        if (skip(0.5)) {
             return;
         }
 
         // not rectangular: test choosing "Crop and Hide"
-        triggerTask.run();
+        cropTask.run();
         app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Crop and Hide").click();
         checkAfterSelectionCrop(selWidth, selHeight);
@@ -2800,12 +2909,12 @@ public class MainGuiTest {
 
         keyboard.undoRedoUndo("Crop and Hide");
 
-        if (skipThis(0.5)) {
+        if (skip(0.5)) {
             return;
         }
 
         // not rectangular: test choosing "Cancel"
-        triggerTask.run();
+        cropTask.run();
         app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Cancel").click();
 
@@ -2873,7 +2982,7 @@ public class MainGuiTest {
         testNavigatorRightClickPopupMenu();
         testAutoZoomButtons();
 
-        checkConsistency();
+        afterTestActions();
     }
 
     private void testControlPlusMinusZooming() {
@@ -3019,6 +3128,8 @@ public class MainGuiTest {
             testColorSelectorPopup(fgButton, true);
             testColorSelectorPopup(bgButton, false);
         }
+
+        afterTestActions();
     }
 
     private void testColorSelectorDialog(String title) {
@@ -3070,41 +3181,44 @@ public class MainGuiTest {
         keyboard.undoRedo(MoveMode.MOVE_LAYER_ONLY.getEditName());
     }
 
-    private void runWithSelectionAndTranslation(boolean squashedImage, Runnable task) {
+    private void runWithSelectionTranslationCombinations(boolean squashedImage, Runnable task) {
         if (squashedImage) {
             task.run();
         } else {
-            runWithSelectionAndTranslation(task);
+            runWithSelectionTranslationCombinations(task);
         }
     }
 
-    private void runWithSelectionAndTranslation(Runnable task) {
-        log(1, "simple test");
-        keyboard.deselect();
+    private void runWithSelectionTranslationCombinations(Runnable task) {
+        log(1, "no selection, no translation");
+
+        EDT.assertThereIsNoSelection();
+        EDT.assertThereIsNoTranslation();
+
         task.run();
 
-        if (skipThis(0.5)) {
+        if (skip(0.5)) {
             return;
         }
 
-        log(1, "test with selection");
+        log(1, "existing selection, no translation");
         addSelection();
         task.run();
-        keyboard.deselect();
+        app.deselect();
 
-        if (skipThis(0.5)) {
+        if (skip(0.5)) {
             return;
         }
 
-        log(1, "test with translation");
+        log(1, "no selection, existing translation");
         addTranslation();
         task.run();
 
-        if (skipThis(0.5)) {
+        if (skip(0.5)) {
             return;
         }
 
-        log(1, "test with selection+translation");
+        log(1, "existing selection and translation");
         addSelection();
         task.run();
         keyboard.undo("Create Selection");
@@ -3121,10 +3235,6 @@ public class MainGuiTest {
             app.addLayerMask();
             app.drawGradientFromCenter(GradientType.RADIAL);
         }
-    }
-
-    void deleteLayerMask() {
-        runMenuCommand("Delete");
     }
 
     private void addAdjustmentLayer() {
@@ -3185,6 +3295,11 @@ public class MainGuiTest {
         }
     }
 
+    private void afterTestActions() {
+        app.verifyAndClearHistory();
+        checkConsistency();
+    }
+
     public void checkConsistency() {
         checkConsistency(0);
     }
@@ -3200,12 +3315,12 @@ public class MainGuiTest {
         maskMode.check();
     }
 
-    private boolean skipThis() {
-        // in quick mode only execute 10% of the repetitive tests
-        return skipThis(0.1);
+    // decide whether some test(s) should be skipped in quick mode
+    private boolean skip() {
+        return skip(0.1); // only execute 10% of the time
     }
 
-    private boolean skipThis(double threshold) {
+    private boolean skip(double threshold) {
         if (quick) {
             return random.nextDouble() > threshold;
         } else {
@@ -3217,20 +3332,8 @@ public class MainGuiTest {
         return keyboard;
     }
 
-    private void addNewLayer() {
-        int numLayers = EDT.active(Composition::getNumLayers);
-        runMenuCommand("Duplicate Layer");
-        app.checkNumLayersIs(numLayers + 1);
-        keyboard.invert();
-        maskMode.apply(this);
-    }
-
-    private void selectCheckBox(String name, boolean newSelected) {
-        if (newSelected) {
-            pw.checkBox(name).check();
-        } else {
-            pw.checkBox(name).uncheck();
-        }
+    public AppRunner app() {
+        return app;
     }
 
     private void runMenuCommand(String text) {

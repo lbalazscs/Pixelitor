@@ -248,7 +248,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Selects the layer above the current one.
      */
-    default void selectLayerAbove() {
+    default void raiseLayerSelection() {
         Composition comp = getComp();
         Layer activeLayer = comp.getActiveLayer();
         Layer newTarget;
@@ -279,7 +279,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Selects the layer below the current one.
      */
-    default void selectLayerBelow() {
+    default void lowerLayerSelection() {
         Composition comp = getComp();
         int oldIndex = indexOf(comp.getActiveLayer());
         int newIndex = oldIndex - 1;

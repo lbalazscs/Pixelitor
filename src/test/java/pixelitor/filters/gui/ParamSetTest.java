@@ -40,7 +40,7 @@ class ParamSetTest {
 
     @BeforeAll
     static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
+        TestHelper.setUnitTestingMode(true);
     }
 
     @BeforeEach
@@ -61,6 +61,11 @@ class ParamSetTest {
         Composition comp = TestHelper.createRealComp("ParamSetTest", ImageLayer.class);
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
         params.adaptToContext(layer, true);
+    }
+
+    @AfterEach
+    void afterEachTest() {
+        TestHelper.verifyAndClearHistory();
     }
 
     @Test

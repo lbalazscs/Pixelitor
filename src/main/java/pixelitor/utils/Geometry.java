@@ -20,6 +20,7 @@ package pixelitor.utils;
 import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
 
+import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
@@ -253,6 +254,10 @@ public class Geometry {
         pos.setLocation(
             FastMath.toRange(x1, x2, pos.getX()),
             FastMath.toRange(y1, y2, pos.getY()));
+    }
+
+    public static Point round(Point2D p) {
+        return new Point((int) p.getX(), (int) p.getY());
     }
 
     public static double calcSquaredDistance(double x1, double y1, double x2, double y2) {

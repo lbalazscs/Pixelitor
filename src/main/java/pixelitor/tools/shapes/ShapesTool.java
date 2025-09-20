@@ -30,14 +30,13 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.History;
-import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.layers.ShapesLayer;
+import pixelitor.selection.SelectionChangeResult;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.DragToolState;
 import pixelitor.tools.ToolIcons;
@@ -569,15 +568,14 @@ public class ShapesTool extends DragTool {
 
         Composition comp = Views.getActiveComp();
 
-        PixelitorEdit selectionEdit = comp.changeSelection(shape);
-        if (selectionEdit == null) {
-            Dialogs.showInfoDialog("No Selection",
-                "No selection was created because the shape is outside the canvas.");
+        SelectionChangeResult result = comp.changeSelection(shape);
+        if (!result.isSuccess()) {
+            result.showInfoDialog("shape");
             return;
         }
 
         History.add(new ConvertShapeToSelectionEdit(
-            comp, transformBox, styledShape, selectionEdit));
+            comp, transformBox, styledShape, result.getEdit()));
 
         reset();
         Tools.LASSO_SELECTION.activate();

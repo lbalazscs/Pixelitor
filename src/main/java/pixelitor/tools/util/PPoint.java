@@ -24,6 +24,7 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.Objects;
@@ -204,6 +205,10 @@ public class PPoint implements Debuggable {
      */
     public Point2D toImPoint2D() {
         return new Point2D.Double(getImX(), getImY());
+    }
+
+    public Point toImPoint() {
+        return new Point((int) getImX(), (int) getImY());
     }
 
     /**

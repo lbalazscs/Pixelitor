@@ -82,7 +82,7 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
 import static pixelitor.utils.Utils.toPercentage;
 
 /**
- * A utility class for running Pixelitor with assertj-swing based tests
+ * A utility class for running Pixelitor with AssertJ-Swing based tests.
  */
 public class AppRunner {
     public static final int DEFAULT_ROBOT_DELAY = 50; // millis
@@ -131,6 +131,10 @@ public class AppRunner {
         mouse = new Mouse(pw, robot);
         keyboard = new Keyboard(pw, robot, this, historyChecker);
         layersContainer = new LayersContainerFixture(robot);
+
+        if (!pw.target().isActive()) {
+            pw.target().requestFocus();
+        }
 
         if (Language.getActive() != Language.ENGLISH) {
             throw new IllegalStateException("language is " + Language.getActive());
@@ -209,11 +213,20 @@ public class AppRunner {
         } while (--remainingSeconds > 0);
     }
 
+    public void reload() {
+        runMenuCommand("Reload");
+
+        // reloading is asynchronous
+        IOTasks.waitForIdle();
+
+        keyboard.undoRedo("Reload");
+    }
+
     public void testBrushSettings(Tool tool, BrushType brushType) {
         var settingsButton = findButtonByText("Settings...");
         if (brushType.hasSettings()) {
             settingsButton.requireEnabled().click();
-            var dialog = findDialogByTitleStartingWith("Settings for the");
+            var dialog = findDialogByTitleStartingWith("Settings for the ");
             testBrushSettingsDialog(dialog, tool, brushType);
         } else {
             settingsButton.requireDisabled();
@@ -326,12 +339,21 @@ public class AppRunner {
         checkNumLayersIs(1);
     }
 
-    void duplicateLayer(boolean undoRedo) {
-        runMenuCommand("Duplicate Layer");
+    void duplicateLayer(Class<? extends Layer> expectedLayerType) {
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
+        int numLayersBefore = EDT.active(Composition::getNumLayers);
 
-        if (undoRedo) {
-            keyboard.undoRedo("Duplicate Layer");
-        }
+        runMenuCommand("Duplicate Layer");
+        checkNumLayersIs(numLayersBefore + 1);
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
+
+        keyboard.undo("Duplicate Layer");
+        checkNumLayersIs(numLayersBefore);
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
+
+        keyboard.redo("Duplicate Layer");
+        checkNumLayersIs(numLayersBefore + 1);
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
     }
 
     void runMenuCommand(String text) {
@@ -360,6 +382,29 @@ public class AppRunner {
     public void selectLayerAbove() {
         runMenuCommand("Raise Layer Selection");
         keyboard.undoRedo("Raise Layer Selection");
+    }
+
+    void deleteLayerMask() {
+        runMenuCommand("Delete");
+        keyboard.undoRedo("Delete Layer Mask");
+    }
+
+    public void deselect() {
+        EDT.assertThereIsSelection();
+
+        keyboard.deselect();
+        EDT.assertThereIsNoSelection();
+
+        keyboard.undo("Deselect");
+        EDT.assertThereIsSelection();
+
+        keyboard.redo("Deselect");
+        EDT.assertThereIsNoSelection();
+    }
+
+    public void invert() {
+        keyboard.invert();
+        keyboard.undoRedo("Invert");
     }
 
     void saveWithOverwrite(File baseTestingDir, String fileName) {
@@ -651,6 +696,8 @@ public class AppRunner {
     }
 
     public void clickMaskPopup(String layerName, String menuName) {
+        assert EDT.layerWithName(layerName, Layer::hasMask);
+
         // this shouldn't be necessary, mask edit mode should be set by default
         var popup = findMaskIconByLayerName(layerName).showPopupMenu();
         clickPopupMenu(popup, menuName, false);
@@ -675,7 +722,7 @@ public class AppRunner {
         });
     }
 
-    public void selectActiveLayer(String layerName) {
+    public void activateLayer(String layerName) {
         findLayerIconByLayerName(layerName).click();
     }
 
@@ -937,7 +984,7 @@ public class AppRunner {
         pw.checkBox("reverseCB").check();
 
         if (EDT.getZoomLevelOfActive() != ZoomLevel.ACTUAL_SIZE) {
-            // otherwise location on screen can lead to crazy results
+            // otherwise location on screen can lead to unexpected results
             runMenuCommand("Actual Pixels");
         }
 
@@ -1044,6 +1091,12 @@ public class AppRunner {
     public void setMaxUntestedEdits(int newLimit) {
         if (historyChecker != null) {
             historyChecker.setMaxUntestedEdits(newLimit);
+        }
+    }
+
+    public void verifyAndClearHistory() {
+        if (historyChecker != null) {
+            historyChecker.verifyAndClear();
         }
     }
 

@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,9 +65,6 @@ public class LayerTest {
 
     @Parameters(name = "{index}: {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
-        // this method runs before beforeAllTests
-        TestHelper.setUnitTestingMode();
-
         // define the combinations of layer types and mask presence to test
         return Arrays.asList(new Object[][]{
             {ImageLayer.class, WithMask.NO},
@@ -90,7 +88,7 @@ public class LayerTest {
 
     @BeforeClass
     public static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
+        TestHelper.setUnitTestingMode(true);
     }
 
     @Before
@@ -118,6 +116,11 @@ public class LayerTest {
             .invariantsAreOK();
 
         History.clear();
+    }
+
+    @After
+    public void afterEachTest() {
+        TestHelper.verifyAndClearHistory();
     }
 
     @Test

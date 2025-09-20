@@ -1602,33 +1602,6 @@ public class ImageUtils {
     }
 
     /**
-     * Finds the topmost content layer that is opaque at a given point.
-     */
-    public static ContentLayer findOpaqueLayerAtPoint(List<? extends Layer> layers, Point p) {
-        // iterate in reverse order to search layers from top to bottom
-        ListIterator<? extends Layer> li = layers.listIterator(layers.size());
-        while (li.hasPrevious()) {
-            Layer layer = li.previous();
-            if (!(layer instanceof ContentLayer contentLayer)) {
-                continue;
-            }
-            // a small opacity makes the layer effectively invisible for hit-testing
-            if (!layer.isVisible() || layer.getOpacity() < 0.05f) {
-                continue;
-            }
-
-            int pixel = contentLayer.getPixelAtPoint(p);
-
-            int pixelAlphaThreshold = 30;
-            if (((pixel >> 24) & 0xFF) > pixelAlphaThreshold) {
-                return contentLayer;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * An interface for processing a horizontal line segment of pixels.
      */
     @FunctionalInterface

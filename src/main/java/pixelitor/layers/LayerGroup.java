@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static pixelitor.Views.thumbSize;
@@ -284,8 +285,24 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public String getTypeString() {
-        return "Layer Group";
+    public Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
+        // search through all the child layers first to be consistent with forEachNestedLayer
+        for (Layer layer : layers) {
+            Layer foundLayer = layer.findFirstLayerWhere(predicate, includeMasks);
+            if (foundLayer != null) {
+                return foundLayer;
+            }
+        }
+
+        if (predicate.test(this)) {
+            return this;
+        }
+
+        if (includeMasks && hasMask() && predicate.test(getMask())) {
+            return getMask();
+        }
+
+        return null;
     }
 
     @Override
@@ -507,15 +524,27 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public int getPixelAtPoint(Point p) {
         if (isPassThrough()) {
-            // for a pass-through group, find the first opaque pixel from its layers
-            ContentLayer opaqueLayer = ImageUtils.findOpaqueLayerAtPoint(layers, p);
-            if (opaqueLayer == null) {
-                return 0;
-            }
-            return opaqueLayer.getPixelAtPoint(p);
+            // should be handled recursively
+            throw new IllegalStateException();
         } else {
             // for an isolated group, get the pixel from its cached composite image
             return ImageUtils.getPixelAt(this, getCachedImage(), p);
+        }
+    }
+
+    @Override
+    public ContentLayer findOpaqueLayerAtPoint(Point p) {
+        // a small opacity makes the layer effectively invisible for hit-testing.
+        if (!isVisible() || getOpacity() < 0.05f) {
+            return null;
+        }
+
+        if (isPassThrough()) {
+            // iterate in reverse order to search layers from top to bottom
+            return ContentLayer.findOpaqueInList(layers, p);
+        } else {
+            // for an isolated group, treat it as a single entity
+            return super.findOpaqueLayerAtPoint(p);
         }
     }
 
@@ -617,6 +646,11 @@ public class LayerGroup extends CompositeLayer {
         return "<stack composite-op=\"%s\" name=\"%s\" opacity=\"%f\" visibility=\"%s\" isolation=\"%s\">\n".formatted(
             blendingMode.toSVGName(), getName(), getOpacity(), getVisibilityAsORAString(),
             blendingMode == BlendingMode.PASS_THROUGH ? "auto" : "isolate");
+    }
+
+    @Override
+    public String getTypeString() {
+        return "Layer Group";
     }
 
     @Override

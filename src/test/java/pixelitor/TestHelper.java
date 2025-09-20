@@ -25,6 +25,7 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.View;
 import pixelitor.history.History;
+import pixelitor.history.HistoryChecker;
 import pixelitor.layers.*;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithTranslation;
@@ -70,6 +71,8 @@ public class TestHelper {
 
     private static Composition currentComp;
     private static Selection currentSel;
+
+    private static HistoryChecker historyChecker;
 
     private TestHelper() {
     }
@@ -152,6 +155,7 @@ public class TestHelper {
             comp.addLayerWithoutUI(layer);
             if (addMasks) {
                 layer.addMask(REVEAL_ALL);
+                History.undoRedo("Add Layer Mask");
             }
             if (i == numLayers - 1) {
                 NORMAL.activate(layer);
@@ -348,6 +352,8 @@ public class TestHelper {
         comp.prepareMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
         comp.moveActiveContent(MOVE_LAYER_ONLY, relX, relY);
         comp.finalizeMovement(MOVE_LAYER_ONLY);
+
+        History.undoRedo("Move Layer");
     }
 
     public static void setTranslation(Composition comp,
@@ -396,10 +402,38 @@ public class TestHelper {
         }
     }
 
+    private static void setupMockFgBgSelector() {
+        var fgBgColorSelector = mock(FgBgColorSelector.class);
+        when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
+        when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
+        FgBgColors.setUI(fgBgColorSelector);
+    }
+
+    public static BufferedImage create1x1Image(Color c) {
+        return create1x1Image(c.getAlpha(), c.getRed(), c.getGreen(), c.getBlue());
+    }
+
+    public static BufferedImage create1x1Image(int a, int r, int g, int b) {
+        BufferedImage img = ImageUtils.createSysCompatibleImage(1, 1);
+        img.setRGB(0, 0, toPackedARGB(a, r, g, b));
+        return img;
+    }
+
+    public static void setUnitTestingMode() {
+        setUnitTestingMode(false);
+    }
+
     /**
      * Configures the application for unit testing.
      */
-    public static void setUnitTestingMode() {
+    public static void setUnitTestingMode(boolean checkHistory) {
+        if (checkHistory) {
+            historyChecker = new HistoryChecker();
+        } else {
+            historyChecker = null; // clear previous checker
+        }
+        History.setChecker(historyChecker);
+
         if (AppMode.isUnitTesting()) {
             return; // already in unit testing mode
         }
@@ -426,20 +460,12 @@ public class TestHelper {
         setupMockFgBgSelector();
     }
 
-    private static void setupMockFgBgSelector() {
-        var fgBgColorSelector = mock(FgBgColorSelector.class);
-        when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
-        when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
-        FgBgColors.setUI(fgBgColorSelector);
+    public static void verifyAndClearHistory() {
+        historyChecker.verifyAndClear();
+        History.clear();
     }
 
-    public static BufferedImage create1x1Image(Color c) {
-        return create1x1Image(c.getAlpha(), c.getRed(), c.getGreen(), c.getBlue());
-    }
-
-    public static BufferedImage create1x1Image(int a, int r, int g, int b) {
-        BufferedImage img = ImageUtils.createSysCompatibleImage(1, 1);
-        img.setRGB(0, 0, toPackedARGB(a, r, g, b));
-        return img;
+    public static void setMaxUntestedEdits(int max) {
+        historyChecker.setMaxUntestedEdits(max);
     }
 }

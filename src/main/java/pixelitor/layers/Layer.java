@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
@@ -482,6 +483,10 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void addMask(LayerMaskAddType addType) {
+        addMask(addType, true);
+    }
+
+    public void addMask(LayerMaskAddType addType, boolean addHistory) {
         if (hasMask()) {
             RestrictedLayerAction.LayerRestriction.NO_LAYER_MASK.showErrorMessage(this);
             return;
@@ -500,7 +505,7 @@ public abstract class Layer implements Serializable, Debuggable {
         String editName = addType.needsSelection()
             ? "Layer Mask from Selection"
             : "Add Layer Mask";
-        addImageAsMask(bwMask, true, true,
+        addImageAsMask(bwMask, addHistory, addHistory,
             editName, addType.needsSelection());
     }
 
@@ -524,8 +529,8 @@ public abstract class Layer implements Serializable, Debuggable {
         }
 
         if (!createEdit) {
-            // history and UI update will be handled in an enclosing
-            // operation (such as a non-rectangular selection crop)
+            // either history and UI update will be handled by
+            // the caller or we are in a test setup
             return null;
         }
 
@@ -1148,6 +1153,20 @@ public abstract class Layer implements Serializable, Debuggable {
             action.accept(getMask());
         }
         // overridden by composite layers to iterate through children
+    }
+
+    /**
+     * Recursively searches for a layer that satisfies the predicate, starting with this layer.
+     */
+    public Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
+        if (predicate.test(this)) {
+            return this;
+        }
+        if (includeMasks && hasMask() && predicate.test(getMask())) {
+            return getMask();
+        }
+        // overridden by composite layers to search through children
+        return null;
     }
 
     public void update(boolean updateHistogram) {

@@ -76,12 +76,12 @@ import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.TRANSPARENT;
 
 /**
- * A workflow test is an Assertj-Swing regression test, where an
+ * A workflow test is an AssertJ-Swing regression test, where an
  * image is created from scratch using a longer workflow, and then
  * it is visually compared to a reference image saved earlier.
  * It's not a unit test.
  * <p>
- * Assertj-Swing requires using the following VM option:
+ * AssertJ-Swing requires using the following VM option:
  * --add-opens java.base/java.util=ALL-UNNAMED
  */
 public class WorkflowTest {
@@ -112,21 +112,21 @@ public class WorkflowTest {
             @Override
             public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
-                app.selectActiveLayer("layer 1");
+                app.activateLayer("layer 1");
             }
         }, ISOLATED("I") {
             @Override
             public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
-                app.selectActiveLayer("layer 1");
+                app.activateLayer("layer 1");
             }
         }, DOUBLE_PP("PP") { // two nested pass-through groups
             @Override
             public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
                 app.runMenuCommand("Convert Visible to Group");
-                app.selectActiveLayer("layer 1");
+                app.activateLayer("layer 1");
             }
         }, DOUBLE_II("II") { // two nested isolated groups
             @Override
@@ -135,7 +135,7 @@ public class WorkflowTest {
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
-                app.selectActiveLayer("layer 1");
+                app.activateLayer("layer 1");
             }
         }, DOUBLE_PI("PI") { // inner pass-through, outer isolated
             @Override
@@ -143,7 +143,7 @@ public class WorkflowTest {
                 app.runMenuCommand("Convert Visible to Group");
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
-                app.selectActiveLayer("layer 1");
+                app.activateLayer("layer 1");
             }
         }, DOUBLE_IP("IP") { // inner isolated, outer pass-through
             @Override
@@ -151,7 +151,7 @@ public class WorkflowTest {
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.runMenuCommand("Convert Visible to Group");
-                app.selectActiveLayer("layer 1");
+                app.activateLayer("layer 1");
             }
         };
 
@@ -212,9 +212,7 @@ public class WorkflowTest {
     }
 
     private void wfTest1(GroupSetting groupSetting) {
-        System.out.println("WorkflowTest::wfTest1: CALLED, groupSetting = " + groupSetting);
-
-        String compName = genCompName(1, groupSetting);
+        String compName = startTest(1, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -247,7 +245,7 @@ public class WorkflowTest {
         app.mergeDown();
         createEllipseSelection();
         expandSelection();
-        eclipseSelectionToPath();
+        ellipseSelectionToPath();
         flipHorizontal(true);
         tracePath(BrushType.WOBBLE);
         pathToSelection();
@@ -255,7 +253,7 @@ public class WorkflowTest {
         move(MOVE_SELECTION_ONLY, 0, -100);
         pasteSelection();
         move(MOVE_SELECTION_ONLY, 0, 50);
-        eclipseSelectionToPath();
+        ellipseSelectionToPath();
         app.swapColors();
         tracePath(BrushType.SHAPE);
         flipHorizontal(true);
@@ -265,8 +263,10 @@ public class WorkflowTest {
         tearDown("wf1.png");
     }
 
-    private static String genCompName(int testNr, GroupSetting groupSetting) {
-        return "wf " + testNr + groupSetting.getNameSuffix();
+    private static String startTest(int testNr, GroupSetting groupSetting) {
+        System.out.printf("starting workflow test %d, groupSetting = %s...%n", testNr, groupSetting);
+        String compName = "wf " + testNr + groupSetting.getNameSuffix();
+        return compName;
     }
 
     private void ungroup() {
@@ -274,9 +274,7 @@ public class WorkflowTest {
     }
 
     private void wfTest2(GroupSetting groupSetting) {
-        System.out.println("WorkflowTest::wfTest2: CALLED, groupSetting = " + groupSetting);
-
-        String compName = genCompName(2, groupSetting);
+        String compName = startTest(2, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -313,7 +311,7 @@ public class WorkflowTest {
         keyboard.redo("Move Frosted Glass Down");
         keyboard.redo("Move Frosted Glass Up");
 
-        app.selectActiveLayer("smart TEXT");
+        app.activateLayer("smart TEXT");
         duplicateLayerThenUndo(SmartObject.class);
         Utils.sleep(1, SECONDS);
         assert EDT.active(Composition::checkInvariants);
@@ -337,7 +335,7 @@ public class WorkflowTest {
 
         // double the text
         app.clickLayerPopup("smart TEXT", "Edit Contents");
-        app.duplicateLayer(true);
+        app.duplicateLayer(TextLayer.class);
         move(MOVE_LAYER_ONLY, 0, -25);
         app.selectLayerBelow();
         move(MOVE_LAYER_ONLY, 0, 50);
@@ -391,9 +389,7 @@ public class WorkflowTest {
     }
 
     private void wfTest3(GroupSetting groupSetting) {
-        System.out.println("WorkflowTest::wfTest3: CALLED, groupSetting = " + groupSetting);
-
-        String compName = genCompName(3, groupSetting);
+        String compName = startTest(3, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -433,7 +429,7 @@ public class WorkflowTest {
         app.closeCurrentView(ExpectConfirmation.NO); // smart object content
 
         // duplicate the whole smart object
-        app.duplicateLayer(true);
+        app.duplicateLayer(SmartObject.class);
 
         // add a smart filter to the original smart object and copy it
         app.selectLayerBelow();
@@ -458,9 +454,7 @@ public class WorkflowTest {
     }
 
     private void wfTest4(GroupSetting groupSetting) {
-        System.out.println("WorkflowTest::wfTest4: CALLED, groupSetting = " + groupSetting);
-
-        String compName = genCompName(4, groupSetting);
+        String compName = startTest(4, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -492,7 +486,7 @@ public class WorkflowTest {
         runFilterWithDialog("Color Balance", dialog ->
             dialog.slider("Yellow-Blue").slideTo(-45));
 
-        app.selectActiveLayer("smart layer 1");
+        app.activateLayer("smart layer 1");
 
         duplicateLayerThenUndo(SmartObject.class);
         cloneSmartObjectThenUndo();
@@ -540,9 +534,7 @@ public class WorkflowTest {
     }
 
     private void wfTest5(GroupSetting groupSetting) {
-        System.out.println("WorkflowTest::wfTest5: CALLED, groupSetting = " + groupSetting);
-
-        String compName = genCompName(5, groupSetting);
+        String compName = startTest(5, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
         groupSetting.configure(app);
@@ -616,15 +608,13 @@ public class WorkflowTest {
 
     private void duplicateLayerThenUndo(Class<? extends Layer> expectedLayerType) {
         int numLayers = EDT.getNumLayersInActiveHolder();
-        EDT.assertActiveLayerTypeIs(expectedLayerType);
 
-        app.duplicateLayer(false);
+        app.duplicateLayer(expectedLayerType);
 
         EDT.assertNumLayersIs(numLayers + 1);
-        EDT.assertActiveLayerTypeIs(expectedLayerType);
         assert EDT.active(Composition::checkInvariants);
 
-        keyboard.undoRedoUndo("Duplicate Layer");
+        keyboard.undo("Duplicate Layer");
 
         EDT.assertNumLayersIs(numLayers);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
@@ -682,8 +672,8 @@ public class WorkflowTest {
         String expectedEditName = "Delete " + EDT.active(comp -> comp.getActiveLayer().getName());
         EDT.assertActiveLayerTypeIs(expectedLayerType);
 
-        // Save a reference, because after the deleting the
-        // last child, it would stop being the active holder.
+        // save a reference, because after deleting the
+        // last child, it would stop being the active holder
         LayerHolder holder = EDT.active(Composition::getActiveHolder);
 
         int numLayers = EDT.call(holder::getNumLayers);
@@ -748,7 +738,7 @@ public class WorkflowTest {
         keyboard.undoRedo("Create Shape");
 
         keyboard.pressEsc();
-        // presing esc rasterizes the shape
+        // presing Esc rasterizes the shape
         keyboard.undoRedo("Rasterize Shape");
     }
 
@@ -818,7 +808,7 @@ public class WorkflowTest {
         app.runModifySelection(EXPAND, 75);
     }
 
-    private void eclipseSelectionToPath() {
+    private void ellipseSelectionToPath() {
         app.clickTool(Tools.ELLIPSE_SELECTION);
         pw.button("toPathButton")
             .requireEnabled()
@@ -869,7 +859,7 @@ public class WorkflowTest {
         var dialog = app.findDialogByTitle("Existing Selection");
         findButtonByText(dialog, "Intersect").click();
 
-        keyboard.undoRedo("Selection Change");
+        keyboard.undoRedo("Intersect Selection");
     }
 
     private void flipHorizontal(boolean entireComp) {

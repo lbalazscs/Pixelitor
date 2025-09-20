@@ -31,8 +31,12 @@ import pixelitor.filters.painters.TransformedTextPainter;
 import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.TaskAction;
-import pixelitor.history.*;
+import pixelitor.history.ContentLayerMoveEdit;
+import pixelitor.history.History;
+import pixelitor.history.NewLayerEdit;
+import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.io.ORAImageInfo;
+import pixelitor.selection.SelectionChangeResult;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -94,6 +98,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
+        // reconstruct the transient painter
         painter = new TransformedTextPainter();
         painter.setTranslation(getTx(), getTy());
         applySettings(settings);
@@ -175,11 +180,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
      * Commits the current settings after the edit dialog is accepted, updating history.
      */
     public void commitSettings(TextSettings prevSettings) {
+        // The settings object is replaced every time the user changes something
+        // in the dialog. If it is still the same, it means that nothing was changed.
         if (settings == prevSettings) {
-            // The settings object is replaced every time
-            // the user changes something in the dialog.
-            // If it is still the same, it means that
-            // nothing was changed.
             return;
         }
 
@@ -441,9 +444,12 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
      */
     public void createSelectionFromText() {
         Shape shape = getTextShape();
-        PixelitorEdit selectionEdit = comp.changeSelection(shape);
-        if (selectionEdit != null) {
-            History.add(selectionEdit);
+
+        SelectionChangeResult result = comp.changeSelection(shape);
+        if (result.isSuccess()) {
+            History.add(result.getEdit());
+        } else {
+            result.showInfoDialog("text");
         }
     }
 

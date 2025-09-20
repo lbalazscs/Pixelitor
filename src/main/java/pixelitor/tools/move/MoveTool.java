@@ -40,15 +40,16 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -106,8 +107,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
             }
         } else { // regular move mode
             if (activeMode.movesLayer() && isAutoSelecting()) {
-                Point2D cursorPos = e.toImPoint2D();
-                Layer targetLayer = e.getComp().findLayerAtPoint(cursorPos);
+                Layer targetLayer = e.getComp().findLayerAtPoint(e.toImPoint());
 
                 if (targetLayer == null) {
                     drag.cancel();
@@ -154,7 +154,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
 
     private void updateMoveCursor(View view, MouseEvent e) {
         if (isAutoSelecting()) {
-            Point2D p = view.componentToImageSpace(e.getPoint());
+            Point p = Geometry.round(view.componentToImageSpace(e.getPoint()));
             Layer movedLayer = view.getComp().findLayerAtPoint(p);
             if (movedLayer == null) {
                 view.setCursor(Cursors.DEFAULT);

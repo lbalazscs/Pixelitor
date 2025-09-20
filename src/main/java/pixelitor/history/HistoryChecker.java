@@ -29,7 +29,7 @@ import java.util.Objects;
 public final class HistoryChecker {
     // simulates the undo history stack
     private final Deque<EditState> undoStack = new ArrayDeque<>();
-    // simulates the editor's redo history stack
+    // simulates the redo history stack
     private final Deque<EditState> redoStack = new ArrayDeque<>();
 
     private int maxUntestedEdits = 1;
@@ -44,7 +44,7 @@ public final class HistoryChecker {
 
         if (untestedEdits.size() >= maxUntestedEdits) {
             throw new AssertionError(String.format(
-                "Cannot add '%s' because the limit of %d has been reached: %s",
+                "Cannot add \"%s\" because the limit of %d has been reached: %s",
                 editName, maxUntestedEdits, untestedEdits
             ));
         }
@@ -59,13 +59,13 @@ public final class HistoryChecker {
      */
     public synchronized void registerUndo(String editName) {
         if (undoStack.isEmpty()) {
-            throw new AssertionError(String.format("Undo called for '%s', but the undo stack is empty.", editName));
+            throw new AssertionError(String.format("Undo called for \"%s\", but the undo stack is empty.", editName));
         }
 
         EditState lastEdit = undoStack.peek();
         if (!Objects.equals(lastEdit.name, editName)) {
             throw new AssertionError(String.format(
-                "Undo called for '%s', but the last edit was '%s'.", editName, lastEdit.name
+                "Undo called for \"%s\", but the last edit was \"%s\".", editName, lastEdit.name
             ));
         }
 
@@ -79,13 +79,13 @@ public final class HistoryChecker {
      */
     public synchronized void registerRedo(String editName) {
         if (redoStack.isEmpty()) {
-            throw new AssertionError(String.format("Redo called for '%s', but the redo stack is empty.", editName));
+            throw new AssertionError(String.format("Redo called for \"%s\", but the redo stack is empty.", editName));
         }
 
         EditState lastUndoneEdit = redoStack.peek();
         if (!Objects.equals(lastUndoneEdit.name, editName)) {
             throw new AssertionError(String.format(
-                "Redo called for '%s', but the next available redo is '%s'.", editName, lastUndoneEdit.name
+                "Redo called for \"%s\", but the next available redo is \"%s\".", editName, lastUndoneEdit.name
             ));
         }
 
@@ -152,7 +152,7 @@ public final class HistoryChecker {
         public String toString() {
             String undoneStatus = hasBeenUndone ? "undone" : "not undone";
             String redoneStatus = hasBeenRedone ? "redone" : "not redone";
-            return String.format("'%s' (%s, %s)", name, undoneStatus, redoneStatus);
+            return String.format("\"%s\" (%s, %s)", name, undoneStatus, redoneStatus);
         }
     }
 }

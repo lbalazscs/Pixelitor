@@ -30,7 +30,6 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.History;
-import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.Tools;
@@ -73,12 +72,13 @@ public final class SelectionActions {
      * @noinspection NonFinalStaticVariableUsedInClassInitialization
      */
     private static final Action pasteSel = new TaskAction(i18n("paste_sel"), () -> {
-        PixelitorEdit edit = getActiveComp().changeSelection(copiedSelShape);
-        if (edit != null) {
-            History.add(edit);
+        SelectionChangeResult result = getActiveComp().changeSelection(copiedSelShape);
+        if (result.isSuccess()) {
+            History.add(result.getEdit());
+            Tools.notifySelectionChanged();
+        } else {
+            result.showInfoDialog("pasted selection");
         }
-
-        Tools.notifySelectionChanged();
     });
 
     private static final Action modify = new TaskAction(i18n("modify_sel") + "...",

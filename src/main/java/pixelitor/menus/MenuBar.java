@@ -372,12 +372,12 @@ public class MenuBar extends JMenuBar {
 
         // raise layer selection
         var raiseLayerSelection = new ViewEnabledAction(RAISE_LAYER_SELECTION,
-            comp -> comp.getActiveHolder().selectLayerAbove());
+            comp -> comp.getActiveHolder().raiseLayerSelection());
         raiseLayerSelection.setToolTip(i18n.getString("raise_layer_selection_tt"));
         sub.add(raiseLayerSelection, PAGE_UP);
 
         var lowerLayerSelection = new ViewEnabledAction(LOWER_LAYER_SELECTION,
-            comp -> comp.getActiveHolder().selectLayerBelow());
+            comp -> comp.getActiveHolder().lowerLayerSelection());
         lowerLayerSelection.setToolTip(i18n.getString("lower_layer_selection_tt"));
         sub.add(lowerLayerSelection, PAGE_DOWN);
 

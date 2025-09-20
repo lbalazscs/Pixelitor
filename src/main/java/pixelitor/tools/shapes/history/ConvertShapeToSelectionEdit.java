@@ -25,6 +25,7 @@ import pixelitor.tools.transform.TransformBox;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import java.util.Objects;
 
 public class ConvertShapeToSelectionEdit extends PixelitorEdit {
     private final TransformBox box;
@@ -34,12 +35,12 @@ public class ConvertShapeToSelectionEdit extends PixelitorEdit {
     public ConvertShapeToSelectionEdit(Composition comp,
                                        TransformBox box,
                                        StyledShape styledShape,
-                                       PixelitorEdit selectionEdit
-    ) {
+                                       PixelitorEdit selectionEdit) {
         super("Convert Path to Selection", comp);
-        this.box = box;
-        this.styledShape = styledShape;
-        this.selectionEdit = selectionEdit;
+
+        this.box = Objects.requireNonNull(box);
+        this.styledShape = Objects.requireNonNull(styledShape);
+        this.selectionEdit = Objects.requireNonNull(selectionEdit);
     }
 
     @Override

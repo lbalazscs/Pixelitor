@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -111,17 +111,25 @@ public class GUITestUtils {
         slider.slideTo(Rnd.intInRange(min, max));
     }
 
+    static boolean change(JComboBoxFixture combo, String newValue) {
+        String prevValue = combo.selectedItem();
+        if (!newValue.equals(prevValue)) {
+            combo.selectItem(newValue);
+            return true;
+        }
+        return false;
+    }
+
     static void chooseRandomly(JComboBoxFixture combo) {
         String newValue = Rnd.chooseFrom(combo.contents());
         combo.selectItem(newValue);
     }
 
-    static void checkRandomly(JCheckBoxFixture checkBox) {
-        if (Rnd.nextBoolean()) {
-            checkBox.uncheck();
-        } else {
-            checkBox.check();
-        }
+    static boolean checkRandomly(JCheckBoxFixture checkBox) {
+        boolean wasChecked = checkBox.target().isSelected();
+        boolean willBeChecked = Rnd.nextBoolean();
+        checkBox.check(willBeChecked);
+        return wasChecked != willBeChecked;
     }
 
     static void clickRandomly(double p, JButtonFixture button) {

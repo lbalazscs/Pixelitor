@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,13 +39,15 @@ import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 class ParamStateTest {
     @BeforeAll
     static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
+        TestHelper.setUnitTestingMode(true);
+    }
+
+    @AfterEach
+    void afterEachTest() {
+        TestHelper.verifyAndClearHistory();
     }
 
     static Stream<Arguments> instancesToTest() {
-        // this method runs before beforeAllTests
-        TestHelper.setUnitTestingMode();
-
         var angleParamStart = new AngleParam("AngleParam", 0);
         var angleParamEnd = new AngleParam("AngleParam", 180, INTUITIVE_DEGREES);
 

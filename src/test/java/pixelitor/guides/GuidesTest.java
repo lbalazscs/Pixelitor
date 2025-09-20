@@ -31,13 +31,18 @@ class GuidesTest {
 
     @BeforeAll
     static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
+        TestHelper.setUnitTestingMode(true);
     }
 
     @BeforeEach
     void beforeEachTest() {
         comp = TestHelper.createEmptyComp("GuidesTest");
         guides = new Guides();
+    }
+
+    @AfterEach
+    void afterEachTest() {
+        TestHelper.verifyAndClearHistory();
     }
 
     @Test

@@ -830,12 +830,12 @@ public class RandomGUITest {
 
     private void raiseLayerSelection(Composition comp) {
         log("layer selection change: raise selection");
-        comp.getActiveHolder().selectLayerAbove();
+        comp.getActiveHolder().raiseLayerSelection();
     }
 
     private void lowerLayerSelection(Composition comp) {
         log("layer selection change: lower selection");
-        comp.getActiveHolder().selectLayerBelow();
+        comp.getActiveHolder().lowerLayerSelection();
     }
 
     private void moveActiveLayerUp(Composition comp) {

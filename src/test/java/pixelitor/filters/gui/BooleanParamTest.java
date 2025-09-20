@@ -32,7 +32,12 @@ import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 class BooleanParamTest {
     @BeforeAll
     static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
+        TestHelper.setUnitTestingMode(true);
+    }
+
+    @AfterEach
+    void afterEachTest() {
+        TestHelper.verifyAndClearHistory();
     }
 
     @Test

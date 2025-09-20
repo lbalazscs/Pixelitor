@@ -49,6 +49,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static pixelitor.Views.thumbSize;
@@ -920,6 +921,28 @@ public class SmartObject extends CompositeLayer {
                 action.accept(filter.getMask());
             }
         }
+    }
+
+    @Override
+    public Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
+        if (predicate.test(this)) {
+            return this;
+        }
+
+        if (includeMasks && hasMask() && predicate.test(getMask())) {
+            return getMask();
+        }
+
+        for (SmartFilter filter : filters) {
+            if (predicate.test(filter)) {
+                return filter;
+            }
+            if (includeMasks && filter.hasMask() && predicate.test(filter.getMask())) {
+                return filter.getMask();
+            }
+        }
+
+        return null;
     }
 
     @Override

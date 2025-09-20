@@ -32,6 +32,8 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Base class for layers with content that can be manipulated
@@ -54,6 +56,24 @@ public abstract class ContentLayer extends Layer {
 
     protected ContentLayer(Composition comp, String name) {
         super(comp, name);
+    }
+
+    /**
+     * Finds the first opaque layer at the given image-space point,
+     * in the given list, searching from top to bottom.
+     */
+    public static ContentLayer findOpaqueInList(List<Layer> layers, Point p) {
+        ListIterator<Layer> li = layers.listIterator(layers.size());
+        while (li.hasPrevious()) {
+            Layer layer = li.previous();
+            if (layer instanceof ContentLayer contentLayer) {
+                ContentLayer found = contentLayer.findOpaqueLayerAtPoint(p);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 
     @Serial
@@ -91,10 +111,31 @@ public abstract class ContentLayer extends Layer {
     public abstract Rectangle getContentBounds(boolean includeTransparent);
 
     /**
-     * Returns the pixel value at the given point, or zero if
-     * the point is outside the content or transparent.
+     * Returns the pixel value at the given image-space point, or
+     * zero if the point is outside the content or transparent.
      */
     public abstract int getPixelAtPoint(Point p);
+
+    /**
+     * Finds the topmost opaque layer at a given image-space point.
+     * For simple content layers, this method checks the layer itself.
+     * For layer groups, this method can descend into child layers.
+     */
+    public ContentLayer findOpaqueLayerAtPoint(Point p) {
+        // a small opacity makes the layer effectively invisible for hit-testing
+        if (!isVisible() || getOpacity() < 0.05f) {
+            return null;
+        }
+
+        int pixel = getPixelAtPoint(p);
+
+        int pixelAlphaThreshold = 30;
+        if (((pixel >> 24) & 0xFF) > pixelAlphaThreshold) {
+            return this;
+        }
+
+        return null;
+    }
 
     @Override
     public void prepareMovement() {

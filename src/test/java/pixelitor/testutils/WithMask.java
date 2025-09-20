@@ -29,7 +29,7 @@ public enum WithMask {
         @Override
         public void configure(Layer layer) {
             if (!layer.hasMask()) {
-                layer.addMask(LayerMaskAddType.REVEAL_ALL);
+                layer.addMask(LayerMaskAddType.REVEAL_ALL, false);
             }
         }
     }, NO {

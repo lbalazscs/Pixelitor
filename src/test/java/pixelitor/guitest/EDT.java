@@ -27,6 +27,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
+import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
@@ -41,6 +42,7 @@ import pixelitor.tools.util.DraggablePoint;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
@@ -109,6 +111,16 @@ public class EDT {
         }
     }
 
+    public static void assertThereIsNoTranslation() {
+        Point translation = call(() -> {
+            ContentLayer activeLayer = (ContentLayer) Views.getActiveLayer();
+            return new Point(activeLayer.getTx(), activeLayer.getTy());
+        });
+        if (translation.x != 0 || translation.y != 0) {
+            throw new AssertionError("translation found: " + translation);
+        }
+    }
+
     public static void assertSelectionCombinatorIs(AbstractSelectionTool tool, ShapeCombinator expected) {
         ShapeCombinator actual = call(tool::getCombinator);
         if (expected != actual) {
@@ -157,6 +169,10 @@ public class EDT {
 
     public static void assertEditToBeRedoneNameIs(String expected) {
         run(() -> History.assertEditToBeRedoneNameIs(expected));
+    }
+
+    public static List<String> getEditNames() {
+        return call(History::getEditNames);
     }
 
     public static void zoomIn() {
@@ -210,6 +226,15 @@ public class EDT {
      */
     public static <T> T activeLayer(Function<Layer, T> fun) {
         return call(() -> fun.apply(Views.getActiveLayer()));
+    }
+
+    /**
+     * Returns the given property of the layer with the given name in the active composition.
+     */
+    public static <T> T layerWithName(String layerName, Function<Layer, T> fun) {
+        return call(() ->
+            fun.apply(Views.findFirstLayerWhere(layer ->
+                layer.getName().equals(layerName), false)));
     }
 
     public static <T> T activeView(Function<View, T> fun) {

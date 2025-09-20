@@ -93,7 +93,7 @@ import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
  * A standalone program which tests the tools with randomly
  * generated assertj-swing GUI actions. Not a unit test.
  * <p>
- * Assertj-Swing requires using the following VM option:
+ * AssertJ-Swing requires using the following VM option:
  * --add-opens java.base/java.util=ALL-UNNAMED
  */
 public class RandomToolTest {
@@ -476,7 +476,7 @@ public class RandomToolTest {
 
     private void reload() {
         log("reloading the image");
-        app.runMenuCommand("Reload");
+        app.reload();
     }
 
     private void randomizeColors() {
@@ -508,7 +508,7 @@ public class RandomToolTest {
     private void deselect() {
         log("deselecting");
         Utils.sleep(200, MILLISECONDS);
-        keyboard.deselect();
+        app.deselect();
     }
 
     private void actualPixels() {

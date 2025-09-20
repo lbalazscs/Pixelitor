@@ -128,6 +128,13 @@ public class Keyboard {
         undo(edit);
     }
 
+    void undoRedo(String firstEdit, String secondEdit) {
+        undo(secondEdit);
+        undo(firstEdit);
+        redo(firstEdit);
+        redo(secondEdit);
+    }
+
     void invert() {
         if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-I

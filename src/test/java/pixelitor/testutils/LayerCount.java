@@ -27,7 +27,7 @@ public enum LayerCount {
         @Override
         public void configure(Composition comp) {
             // delete a layer to ensure only one layer remains
-            comp.deleteLayer(comp.getActiveLayer(), true);
+            comp.deleteLayer(comp.getActiveLayer(), false);
         }
     }, TWO() {
         @Override

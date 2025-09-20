@@ -25,6 +25,7 @@ import pixelitor.tools.pen.PathTool;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import java.util.Objects;
 
 public class ConvertPathToSelectionEdit extends PixelitorEdit {
     private final Path path;
@@ -36,9 +37,10 @@ public class ConvertPathToSelectionEdit extends PixelitorEdit {
                                       PixelitorEdit selectionEdit,
                                       PathTool tool) {
         super("Convert Path to Selection", comp);
-        this.path = path;
-        this.selectionEdit = selectionEdit;
-        this.tool = tool;
+
+        this.path = Objects.requireNonNull(path);
+        this.selectionEdit = Objects.requireNonNull(selectionEdit);
+        this.tool = Objects.requireNonNull(tool);
     }
 
     @Override

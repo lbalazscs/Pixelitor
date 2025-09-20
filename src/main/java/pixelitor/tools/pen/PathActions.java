@@ -20,11 +20,10 @@ package pixelitor.tools.pen;
 import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.History;
-import pixelitor.history.PixelitorEdit;
 import pixelitor.io.FileIO;
+import pixelitor.selection.SelectionChangeResult;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.ConvertPathToSelectionEdit;
 import pixelitor.utils.Threads;
@@ -47,17 +46,16 @@ public class PathActions {
 
         Shape shape = oldPath.toImageSpaceShape();
 
-        PixelitorEdit selectionEdit = comp.changeSelection(shape);
-        if (selectionEdit == null) {
-            Dialogs.showInfoDialog(comp.getDialogParent(), "No Selection",
-                "No selection was created because the path is outside the canvas.");
+        SelectionChangeResult result = comp.changeSelection(shape);
+        if (!result.isSuccess()) {
+            result.showInfoDialog("path");
             return;
         }
 
         Tools.PEN.removePath();
         comp.pathChanged(true);
         History.add(new ConvertPathToSelectionEdit(
-            comp, oldPath, selectionEdit, (PathTool) Tools.getActive()));
+            comp, oldPath, result.getEdit(), (PathTool) Tools.getActive()));
 
         Tools.LASSO_SELECTION.activate();
     }

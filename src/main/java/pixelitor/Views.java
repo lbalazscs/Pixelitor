@@ -467,6 +467,14 @@ public class Views {
         return null;
     }
 
+    public static Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
+        if (activeView != null) {
+            return activeView.getComp().findFirstLayerWhere(predicate, includeMasks);
+        }
+
+        return null;
+    }
+
     public static void onActiveLayer(Consumer<Layer> action) {
         if (activeView != null) {
             action.accept(activeView.getComp().getActiveLayer());

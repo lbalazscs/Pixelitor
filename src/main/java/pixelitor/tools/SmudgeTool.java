@@ -120,7 +120,6 @@ public class SmudgeTool extends AbstractBrushTool {
         }
         // else: for shift-click line connect, reuse the existing source/strength
 
-        // proceed with the standard brush stroke handling
         super.mousePressed(e);
     }
 

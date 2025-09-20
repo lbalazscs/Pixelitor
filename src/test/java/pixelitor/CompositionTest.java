@@ -18,6 +18,8 @@
 package pixelitor;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import pixelitor.compactions.Crop;
 import pixelitor.history.History;
 import pixelitor.layers.Layer;
@@ -38,7 +40,7 @@ class CompositionTest {
 
     @BeforeAll
     static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
+        TestHelper.setUnitTestingMode(true);
     }
 
     @BeforeEach
@@ -58,6 +60,11 @@ class CompositionTest {
         History.clear();
     }
 
+    @AfterEach
+    void afterEachTest() {
+        TestHelper.verifyAndClearHistory();
+    }
+    
     @Test
     void addNewEmptyImageLayer() {
         assertThat(comp)
@@ -65,6 +72,7 @@ class CompositionTest {
             .numLayersIs(2)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
+        TestHelper.setMaxUntestedEdits(2);
 
         // add new layer below the active layer
         comp.addNewEmptyImageLayer("newLayer 1", true);
@@ -154,6 +162,8 @@ class CompositionTest {
 
     @Test
     void layerAdder() {
+        TestHelper.setMaxUntestedEdits(4);
+
         // add below active
         comp.adder()
             .withHistory("below active")
@@ -205,6 +215,7 @@ class CompositionTest {
         assertHistoryEditsAre(
             "below active", "above active", "position 0", "position 2");
 
+        // undo everything
         History.undo("position 2");
         assertThat(comp)
             .numLayersIs(5)
@@ -233,6 +244,7 @@ class CompositionTest {
             .secondLayerIsActive()
             .activeLayerNameIs("layer 2");
 
+        // redo everything
         History.redo("below active");
         assertThat(comp)
             .numLayersIs(3)
@@ -435,7 +447,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.getActiveHolder().selectLayerBelow(); // make the first layer active
+        comp.getActiveHolder().lowerLayerSelection(); // make the first layer active
         assertThat(comp)
             .isDirty()
             .layerNamesAre("layer 1", "layer 2")
@@ -451,7 +463,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .firstLayerIsActive();
 
-        comp.getActiveHolder().selectLayerAbove(); // make the second layer active
+        comp.getActiveHolder().raiseLayerSelection(); // make the second layer active
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -465,6 +477,24 @@ class CompositionTest {
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
+    }
+
+    @Test
+    void changeStackIndex() {
+        assertThat(comp).layerNamesAre("layer 1", "layer 2");
+
+        Layer layer = comp.getLayer(0);
+        comp.changeStackIndex(layer, 1);
+
+        assertThat(comp)
+            .layerNamesAre("layer 2", "layer 1")
+            .invariantsAreOK();
+
+        History.undo("Layer Reordering");
+        assertThat(comp).layerNamesAre("layer 1", "layer 2");
+
+        History.redo("Layer Reordering");
+        assertThat(comp).layerNamesAre("layer 2", "layer 1");
     }
 
     @Test
@@ -533,7 +563,7 @@ class CompositionTest {
 
         // now delete layer 1
         Layer layer1 = comp.getLayer(0);
-        comp.setActiveLayer(layer1, true, null);
+        comp.setActiveLayer(layer1, false, null);
         comp.deleteLayer(layer1, true);
 
         assertThat(comp)
@@ -576,7 +606,7 @@ class CompositionTest {
     }
 
     @Test
-    void isActive() {
+    void isActiveLayer() {
         Layer layer1 = comp.getLayer(0);
         Layer layer2 = comp.getLayer(1);
 
@@ -584,9 +614,21 @@ class CompositionTest {
         assertThat(comp.isActiveLayer(layer1)).isFalse();
         assertThat(comp.isActiveLayer(layer2)).isTrue();
 
-        comp.setActiveLayer(layer1);
+        comp.setActiveLayer(layer1, true, null);
 
         assertThat(comp).activeLayerIs(layer1).invariantsAreOK();
+        assertThat(comp.isActiveLayer(layer1)).isTrue();
+        assertThat(comp.isActiveLayer(layer2)).isFalse();
+
+        History.undo("Layer Selection Change");
+
+        assertThat(comp).activeLayerIs(layer2);
+        assertThat(comp.isActiveLayer(layer1)).isFalse();
+        assertThat(comp.isActiveLayer(layer2)).isTrue();
+
+        History.redo("Layer Selection Change");
+
+        assertThat(comp).activeLayerIs(layer1);
         assertThat(comp.isActiveLayer(layer1)).isTrue();
         assertThat(comp.isActiveLayer(layer2)).isFalse();
     }
@@ -622,62 +664,25 @@ class CompositionTest {
             .hasShapeBounds(comp.getCanvasBounds());
     }
 
-    @Test
-    void createSelectionFrom() {
-        assertThat(comp).doesNotHaveSelection();
-
-        Rectangle rect = new Rectangle(3, 3, 5, 5);
-        comp.createSelectionFrom(rect);
-
-        assertThat(comp)
-            .hasSelection()
-            .selectionShapeIs(rect)
-            .invariantsAreOK();
-    }
-
-    @Test
-    void changeStackIndex() {
-        assertThat(comp).layerNamesAre("layer 1", "layer 2");
-
-        Layer layer = comp.getLayer(0);
-        comp.changeStackIndex(layer, 1);
-
-        assertThat(comp)
-            .layerNamesAre("layer 2", "layer 1")
-            .invariantsAreOK();
-
-        History.undo("Layer Reordering");
-        assertThat(comp).layerNamesAre("layer 1", "layer 2");
-
-        History.redo("Layer Reordering");
-        assertThat(comp).layerNamesAre("layer 2", "layer 1");
-    }
-
-    @Test
-    void translationWODuplicating() {
-        testTranslation(false);
-    }
-
-    @Test
-    void translationWithDuplicating() {
-        testTranslation(true);
-    }
-
-    private void testTranslation(boolean makeDuplicateLayer) {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testTranslation(boolean duplicateLayer) {
         // delete one layer in order to simplify
-        comp.deleteLayer(comp.getActiveLayer(), true);
+        comp.deleteLayer(comp.getActiveLayer(), false);
+
+        TestHelper.setMaxUntestedEdits(duplicateLayer ? 10 : 5);
 
         assertThat(comp)
             .activeLayerTranslationIs(0, 0)
             .activeLayerAndMaskImageSizeIs(20, 10)
             .allLayerUIsAreOK();
-        History.assertNumEditsIs(1);
+        History.assertNumEditsIs(0);
 
         // 1. direction south-east
-        TestHelper.move(comp, 2, 2, makeDuplicateLayer);
+        TestHelper.move(comp, 2, 2, duplicateLayer);
 
         String[] expectedLayers = {"layer 1"};
-        if (makeDuplicateLayer) {
+        if (duplicateLayer) {
             expectedLayers = new String[]{"layer 1", "layer 1 copy"};
         }
 
@@ -687,48 +692,42 @@ class CompositionTest {
             // moved south-east, and enlarged
             .activeLayerTranslationIs(0, 0)
             .activeLayerAndMaskImageSizeIs(22, 12);
-        History.assertNumEditsIs(makeDuplicateLayer ? 3 : 2);
+        History.assertNumEditsIs(duplicateLayer ? 2 : 1);
         History.assertLastEditNameIs("Move Layer");
 
         // 2. direction north-west
-        TestHelper.move(comp, -2, -2, makeDuplicateLayer);
+        TestHelper.move(comp, -2, -2, duplicateLayer);
 
         assertThat(comp)
             // this time we have a non-zero translation
             .activeLayerTranslationIs(-2, -2)
             // no need to enlarge the image again
             .activeLayerAndMaskImageSizeIs(22, 12);
-        if (!makeDuplicateLayer) {
-            History.assertNumEditsIs(3);
-        }
+        History.assertNumEditsIs(duplicateLayer ? 4 : 2);
 
         // 3. direction north-west again
-        TestHelper.move(comp, -2, -2, makeDuplicateLayer);
+        TestHelper.move(comp, -2, -2, duplicateLayer);
 
         assertThat(comp)
             // the translation increases
             .activeLayerTranslationIs(-4, -4)
             // the image needs to be enlarged now
             .activeLayerAndMaskImageSizeIs(24, 14);
-        if (!makeDuplicateLayer) {
-            History.assertNumEditsIs(4);
-        }
+        History.assertNumEditsIs(duplicateLayer ? 6 : 3);
 
         // 4. direction north-east
-        TestHelper.move(comp, 2, -2, makeDuplicateLayer);
+        TestHelper.move(comp, 2, -2, duplicateLayer);
         assertThat(comp)
             // the translation increases
             .activeLayerTranslationIs(-2, -6)
             // the image needs to be enlarged vertically
             .activeLayerAndMaskImageSizeIs(24, 16);
-        if (!makeDuplicateLayer) {
-            History.assertNumEditsIs(5);
-        }
+        History.assertNumEditsIs(duplicateLayer ? 8 : 4);
 
         // 5. opposite movement: direction south-west
-        TestHelper.move(comp, -2, 2, makeDuplicateLayer);
+        TestHelper.move(comp, -2, 2, duplicateLayer);
 
-        if (makeDuplicateLayer) {
+        if (duplicateLayer) {
             expectedLayers = new String[]{"layer 1", "layer 1 copy",
                 "layer 1 copy 2", "layer 1 copy 3", "layer 1 copy 4", "layer 1 copy 5"};
         }
@@ -741,32 +740,34 @@ class CompositionTest {
 
 
         int numEdits;
-        if (makeDuplicateLayer) {
-            numEdits = 11; // 1 + 2*5
-            assertHistoryEditsAre("Delete layer 2",
+        if (duplicateLayer) {
+            numEdits = 10; // 2 * 5
+            assertHistoryEditsAre(
                 "Duplicate Layer", "Move Layer",
                 "Duplicate Layer", "Move Layer",
                 "Duplicate Layer", "Move Layer",
                 "Duplicate Layer", "Move Layer",
                 "Duplicate Layer", "Move Layer");
         } else {
-            numEdits = 6; // 1 initially + 5 movements
-            assertHistoryEditsAre("Delete layer 2",
+            numEdits = 5; // 5 movements
+            assertHistoryEditsAre(
                 "Move Layer", "Move Layer", "Move Layer", "Move Layer", "Move Layer");
         }
         History.assertNumEditsIs(numEdits);
 
-        // undo everything except the first "Delete Layer"
-        for (int i = 0; i < numEdits - 1; i++) {
-            History.undo();
+        // undo everything
+        for (int i = 0; i < numEdits; i++) {
+            boolean duplicating = duplicateLayer && i % 2 == 1;
+            History.undo(duplicating ? "Duplicate Layer" : "Move Layer");
         }
         assertThat(comp)
             .activeLayerTranslationIs(0, 0)
             .activeLayerAndMaskImageSizeIs(20, 10);
 
         // redo everything
-        for (int i = 0; i < numEdits - 1; i++) {
-            History.redo();
+        for (int i = 0; i < numEdits; i++) {
+            boolean duplicating = duplicateLayer && i % 2 == 0;
+            History.redo(duplicating ? "Duplicate Layer" : "Move Layer");
         }
         assertThat(comp)
             .activeLayerTranslationIs(-4, -4)

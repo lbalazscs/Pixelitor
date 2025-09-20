@@ -50,7 +50,7 @@ class LayerBlendingModesTest {
 
     @BeforeAll
     static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
+        TestHelper.setUnitTestingMode(false);
     }
 
     @BeforeEach
