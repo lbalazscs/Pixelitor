@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        java-version: [ 21, 24 ]
+        java-version: [ 21, 25 ]
 
     name: Build with Java ${{ matrix.java-version }}
 
@@ -54,4 +54,3 @@ jobs:
           DATE=$(date +"%b %-d, %Y")
           TAG_NAME=${GITHUB_REF#refs/tags/v}
           gh release create "v$TAG_NAME" --draft --title "$TAG_NAME - released on $DATE" target/*.jar
-            
