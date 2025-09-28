@@ -217,7 +217,10 @@ class FilterParamTest {
         assertThat(paramState).isNotNull();
 
         param.loadStateFrom(paramState, false);
-        assertThat(param).valueAsStringIs(origValue);
+
+        assertThat(param)
+            .as("restored " + param.getClass().getSimpleName())
+            .valueAsStringIs(origValue);
 
         verifyNoParamAdjustments();
     }

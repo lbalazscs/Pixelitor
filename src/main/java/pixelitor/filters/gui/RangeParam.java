@@ -485,7 +485,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public String getValueAsString() {
-        return String.valueOf(value);
+        return formatDecimal(value, decimalPlaces);
     }
 
     public boolean checkInvariants() {

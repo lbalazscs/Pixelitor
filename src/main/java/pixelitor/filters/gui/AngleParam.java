@@ -186,7 +186,11 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public String getValueAsString() {
-        return String.valueOf(angle);
+        double a = angle;
+        if (a < 0) {
+            a += 2 * Math.PI;
+        }
+        return format("%.2f", a);
     }
 
     @Override
