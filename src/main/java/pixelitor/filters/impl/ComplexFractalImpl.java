@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,11 +43,11 @@ public abstract class ComplexFractalImpl extends PointFilter {
     protected double xMultiplier;
     protected double yMultiplier;
 
-    private double zoomCenterX = 0.5f;
-    private double zoomCenterY = 0.5f;
+    private double zoomCenterX = 0.5;
+    private double zoomCenterY = 0.5;
 
     private int maxIterations = 570;
-    private double zoom = 1.0f;
+    private double zoom = 1.0;
 
     protected int[] colors;
 
@@ -61,48 +61,56 @@ public abstract class ComplexFractalImpl extends PointFilter {
         this.cyMin = cyMin;
         this.cyMax = cyMax;
 
-        cxRange = cxMax - cxMin;
-        cyRange = cyMax - cyMin;
+        this.cxRange = cxMax - cxMin;
+        this.cyRange = cyMax - cyMin;
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        double zoomedRangeCX = cxRange / zoom;
-        double zoomedRangeCY = cyRange / zoom;
+        // calculate the width and height of the view in the complex plane based on the zoom level
+        double zoomedRangeX = cxRange / zoom;
+        double zoomedRangeY = cyRange / zoom;
 
-        xMultiplier = zoomedRangeCX / src.getWidth();
-        yMultiplier = zoomedRangeCY / src.getHeight();
+        // calculate multipliers for converting image coordinates to complex plane coordinates
+        xMultiplier = zoomedRangeX / src.getWidth();
+        yMultiplier = zoomedRangeY / src.getHeight();
 
-        // the zoom center in the "C-space"
-        double zoomCenterCX = cxMin + zoomCenterX * cxRange;
-        double zoomCenterCY = cyMin + zoomCenterY * cyRange;
+        // find the zoom center point in the complex plane
+        double zoomCenterComplexX = cxMin + zoomCenterX * cxRange;
+        double zoomCenterComplexY = cyMin + zoomCenterY * cyRange;
 
-        double cxZoomedMin = zoomCenterCX - zoomedRangeCX / 2;
-        double cxZoomedMax = zoomCenterCX + zoomedRangeCX / 2;
-        double cyZoomedMin = zoomCenterCY - zoomedRangeCY / 2;
-        double cyZoomedMax = zoomCenterCY + zoomedRangeCY / 2;
+        // calculate the boundaries of the zoomed view
+        double zoomedMinX = zoomCenterComplexX - zoomedRangeX / 2.0;
+        double zoomedMaxX = zoomCenterComplexX + zoomedRangeX / 2.0;
+        double zoomedMinY = zoomCenterComplexY - zoomedRangeY / 2.0;
+        double zoomedMaxY = zoomCenterComplexY + zoomedRangeY / 2.0;
 
-        // if the zoomed range would go outside
-        // the default c range, then adjust it back
-        if (cxZoomedMax > cxMax) {
-            cxStart = cxZoomedMin - (cxZoomedMax - cxMax);
-        } else if (cxZoomedMin < cxMin) {
-            cxStart = cxMin;
-        } else {
-            cxStart = cxZoomedMin;
-        }
-
-        if (cyZoomedMax > cyMax) {
-            cyStart = cyZoomedMin - (cyZoomedMax - cyMax);
-        } else if (cyZoomedMin < cyMin) {
-            cyStart = cyMin;
-        } else {
-            cyStart = cyZoomedMin;
-        }
+        // adjust the view boundaries to ensure they stay within the original fractal limits
+        cxStart = adjustStart(zoomedMinX, zoomedMaxX, cxMin, cxMax);
+        cyStart = adjustStart(zoomedMinY, zoomedMaxY, cyMin, cyMax);
 
         return super.filter(src, dst);
     }
 
+    /**
+     * Adjusts the starting coordinate to keep the zoomed view within the original boundaries.
+     */
+    private static double adjustStart(double zoomedMin, double zoomedMax, double min, double max) {
+        if (zoomedMax > max) {
+            // if the zoomed view exceeds the maximum boundary, shift it back
+            return zoomedMin - (zoomedMax - max);
+        }
+        if (zoomedMin < min) {
+            // if the zoomed view is below the minimum boundary, clamp it to the minimum
+            return min;
+        }
+        // otherwise, the view is within bounds
+        return zoomedMin;
+    }
+
+    /**
+     * Calculates the color for a point based on its escape time.
+     */
     protected int calcIteratedColor(double zx, double zy, double cx, double cy) {
         int it = iterate(zx, zy, cx, cy, maxIterations);
         return colors[it];
@@ -124,8 +132,10 @@ public abstract class ComplexFractalImpl extends PointFilter {
         return it;
     }
 
-    // the unoptimized version of the "iterate" method, where the algorithm is more clear
-    private static int iterateUnOpt(double x, double y, double cx, double cy, int maxIt) {
+    // the unoptimized version of the "iterate" method, where
+    // the algorithm is clearer (not used, kept for reference)
+    @SuppressWarnings("unused")
+    private static int iterateReference(double x, double y, double cx, double cy, int maxIt) {
         int it = maxIt;
         while (x * x + y * y < 4 && it > 0) {
             it--;
@@ -141,19 +151,31 @@ public abstract class ComplexFractalImpl extends PointFilter {
         return it;
     }
 
+    /**
+     * Sets the zoom level for the fractal.
+     */
     public void setZoom(double zoom) {
         this.zoom = zoom;
     }
 
+    /**
+     * Sets the color palette used for rendering.
+     */
     public void setColors(int[] colors) {
         this.colors = colors;
     }
 
+    /**
+     * Sets the center point for zooming.
+     */
     public void setZoomCenter(double zoomCenterX, double zoomCenterY) {
         this.zoomCenterX = zoomCenterX;
         this.zoomCenterY = zoomCenterY;
     }
 
+    /**
+     * Sets the maximum number of iterations for the escape time algorithm.
+     */
     public void setMaxIterations(int maxIterations) {
         this.maxIterations = maxIterations;
     }

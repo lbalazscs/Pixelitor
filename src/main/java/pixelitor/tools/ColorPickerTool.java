@@ -127,7 +127,9 @@ public class ColorPickerTool extends Tool {
         if (!isWithinBounds(x, y, srcImg)) {
             return;
         } else {
-            int sampledRGB = sampleImage(srcImg, x, y, samplingRadius.getValue());
+            int sampledRGB = isGray
+                ? sampleGrayImage(srcImg, x, y, samplingRadius.getValue())
+                : sampleRGBImage(srcImg, x, y, samplingRadius.getValue());
 
             if (paintSamplingBounds) {
                 view.repaint();
@@ -143,7 +145,42 @@ public class ColorPickerTool extends Tool {
         }
     }
 
-    private int sampleImage(BufferedImage srcImg, int x, int y, int radius) {
+    private int sampleGrayImage(BufferedImage srcImg, int x, int y, int radius) {
+        int width = srcImg.getWidth();
+        int height = srcImg.getHeight();
+        byte[] pixels = ImageUtils.getGrayPixels(srcImg);
+
+        // if radius is 0, sample only the pixel under the mouse
+        if (radius == 0) {
+            paintSamplingBounds = false;
+            int grayValue = pixels[x + y * width] & 0xFF;
+            // convert grayscale to ARGB
+            return (0xFF << 24) | (grayValue << 16) | (grayValue << 8) | grayValue;
+        }
+        paintSamplingBounds = true;
+
+        // calculate the sampling bounds
+        startX = Math.max(0, x - radius);
+        endX = Math.min(width - 1, x + radius);
+        startY = Math.max(0, y - radius);
+        endY = Math.min(height - 1, y + radius);
+
+        // accumulate gray values
+        long graySum = 0;
+        int sampledPixels = 0;
+        for (int sy = startY; sy <= endY; sy++) {
+            for (int sx = startX; sx <= endX; sx++) {
+                graySum += pixels[sx + sy * width] & 0xFF;
+                sampledPixels++;
+            }
+        }
+
+        // return the average color
+        int avgGray = (int) (graySum / sampledPixels);
+        return (0xFF << 24) | (avgGray << 16) | (avgGray << 8) | avgGray;
+    }
+
+    private int sampleRGBImage(BufferedImage srcImg, int x, int y, int radius) {
         int width = srcImg.getWidth();
         int height = srcImg.getHeight();
         int[] pixels = ImageUtils.getPixels(srcImg);
@@ -162,7 +199,7 @@ public class ColorPickerTool extends Tool {
         endY = Math.min(height - 1, y + radius);
 
         // accumulate values for each channel
-        int a = 0, r = 0, g = 0, b = 0;
+        long a = 0, r = 0, g = 0, b = 0;
         int sampledPixels = 0;
         for (int sy = startY; sy <= endY; sy++) {
             for (int sx = startX; sx <= endX; sx++) {
@@ -180,7 +217,7 @@ public class ColorPickerTool extends Tool {
         r /= sampledPixels;
         g /= sampledPixels;
         b /= sampledPixels;
-        int avg = (a << 24) | (r << 16) | (g << 8) | b;
+        int avg = ((int) a << 24) | ((int) r << 16) | ((int) g << 8) | (int) b;
         return avg;
     }
 

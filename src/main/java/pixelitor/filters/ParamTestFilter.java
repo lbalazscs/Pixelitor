@@ -21,6 +21,7 @@ import pixelitor.AppMode;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.jhlabsproxies.JHWeave;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.test.RandomGUITest;
@@ -140,6 +141,7 @@ public class ParamTestFilter extends ParametrizedFilter {
             new BooleanParam("BooleanParam"),
             new TextParam("TextParam", "default value", true),
             new LogZoomParam("Zoom", 200, 200, 1000),
+            new GridParam("Grid", JHWeave.WEAVE_PRESETS, GridCellPainter.createForWeave()),
         };
     }
 }

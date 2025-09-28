@@ -35,7 +35,7 @@ import java.util.Locale;
 public class SelectionBuilder {
     private final SelectionType selectionType;
     private final ShapeCombinator combinator;
-    private final Composition comp;
+    private Composition comp;
 
     private Shape prevSelShape;
 
@@ -89,6 +89,11 @@ public class SelectionBuilder {
      * Updates the draft selection shape based on a mouse event.
      */
     public void updateDraftSelection(PMouseEvent mouseEvent) {
+        // update the composition reference, because in a polygonal lasso
+        // selection session an undo of a previous CompAction could change it
+        // (possibly it would be better to store the view in this class)
+        comp = mouseEvent.getComp();
+
         Selection draftSelection = comp.getDraftSelection();
 
         if (draftSelection == null) {

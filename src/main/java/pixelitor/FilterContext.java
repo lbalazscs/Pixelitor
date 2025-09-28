@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,8 @@ public enum FilterContext {
     }, REPEAT_LAST(true, false) {
     },
 
-    // Can't be named "PREVIEW", because it gets
-    // confused with the ImageLayer's PREVIEW state
-    // after static imports...
+    // can't be named "PREVIEW", because it would conflict
+    // with the ImageLayer's PREVIEW state after static imports
     PREVIEWING(false, true) {
 
     }, TWEEN_PREVIEW(false, true) {
@@ -52,4 +51,3 @@ public enum FilterContext {
         return preview;
     }
 }
-

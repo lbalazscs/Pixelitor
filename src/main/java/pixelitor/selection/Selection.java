@@ -191,8 +191,10 @@ public class Selection implements Transformable {
             return;
         }
         stopMarching();
-        view.repaint();
-        view = null;
+        if (view != null) {
+            view.repaint();
+            view = null;
+        }
         disposed = true;
     }
 

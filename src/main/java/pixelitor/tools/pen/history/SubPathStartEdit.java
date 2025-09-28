@@ -66,10 +66,10 @@ public class SubPathStartEdit extends PixelitorEdit {
 
         path.addSubPath(subPath);
         subPath.setFinished(false);
-        Tools.PEN.setBuildingInProgressState();
         if (wasFirstSP) {
             comp.setActivePath(path);
         }
+        Tools.PEN.setBuildingInProgressState();
         comp.repaint();
     }
 

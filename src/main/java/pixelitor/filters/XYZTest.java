@@ -23,7 +23,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ColorSpaces;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -98,9 +97,9 @@ public class XYZTest extends ParametrizedFilter {
             xyz[1] += yVal;
             xyz[2] += zVal;
 
-            xyz[0] = Utils.clampToUnitInterval(xyz[0]);
-            xyz[1] = Utils.clampToUnitInterval(xyz[1]);
-            xyz[2] = Utils.clampToUnitInterval(xyz[2]);
+            xyz[0] = Math.clamp(xyz[0], 0.0, 1.0);
+            xyz[1] = Math.clamp(xyz[1], 0.0, 1.0);
+            xyz[2] = Math.clamp(xyz[2], 0.0, 1.0);
 
 //            rgb = XYZ_CS.toRGB(xyz);
             xyz2rgb(xyz, rgb);

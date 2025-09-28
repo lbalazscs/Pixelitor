@@ -112,9 +112,9 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     private void showTransformDialog() {
-        if (transformDialog != null) {
-            // call this even if it's already visible to set its location
-            GUIUtils.showDialog(transformDialog, showTransformDialogButton);
+        if (transformDialog != null && transformDialog.isVisible()) {
+            // prevent multiple dialogs
+            GUIUtils.setDialogLocation(transformDialog, showTransformDialogButton);
             return;
         }
 

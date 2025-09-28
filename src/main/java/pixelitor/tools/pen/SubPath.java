@@ -354,6 +354,7 @@ public class SubPath implements Serializable, Transformable {
                 comparingWithFirst = true;
             } else {
                 // reached the last point, and it is not closed
+                mergedPoints.add(current);
                 break;
             }
 

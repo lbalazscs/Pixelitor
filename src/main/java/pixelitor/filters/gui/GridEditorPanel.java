@@ -29,8 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A reusable component for displaying and editing a 2D integer matrix.
- * This is the core view component for a {@link GridParam}.
+ * A component for displaying and editing the 2D integer matrix of a {@link GridParam}.
  */
 public class GridEditorPanel extends JPanel {
     private static final Dimension PREFERRED_PANEL_SIZE = new Dimension(120, 120);

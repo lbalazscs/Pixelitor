@@ -42,6 +42,7 @@ import pixelitor.utils.ViewActivationListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Tool-related static utility methods
@@ -177,6 +178,10 @@ public class Tools {
 
     public static Tool getRandomTool() {
         return Rnd.chooseFrom(allTools);
+    }
+
+    public static Tool getRandomTool(Predicate<Tool> condition) {
+        return Rnd.chooseFrom(condition, allTools);
     }
 
     public static void fgBgColorsChanged() {

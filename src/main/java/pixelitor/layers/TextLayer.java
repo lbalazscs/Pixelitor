@@ -392,8 +392,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         return CompletableFuture.completedFuture(null);
     }
 
-    private Shape getTextShape() {
-        return painter.getTextShape();
+    public Shape getTextShape() {
+        return painter.getTextShape(comp);
     }
 
     @Override

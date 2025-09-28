@@ -21,6 +21,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
 import org.jdesktop.swingx.util.GraphicsUtilities;
+import pixelitor.AppMode;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
@@ -593,14 +594,23 @@ public class TransformedTextPainter implements Debuggable {
         return startGlyphIndex;
     }
 
-    public Shape getTextShape() {
-        if (isOnPath()) {
-            return textShape;
-        }
-
+    public Shape getTextShape(Composition comp) {
         // This image is created just to get a Graphics2D somehow...
         BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = tmp.createGraphics();
+
+        if (invalidLayout) {
+            // normally we call this only for text layers that are already laid out
+            assert AppMode.isUnitTesting();
+
+            updateLayout(comp.getCanvasWidth(), comp.getCanvasHeight(), g2, comp);
+        }
+
+        if (isOnPath()) {
+            // for text on a path, updateLayout has already computed the final shape
+            return textShape;
+        }
+
         var imgOrigTransform = g2.getTransform();
 
         transformGraphics(g2);

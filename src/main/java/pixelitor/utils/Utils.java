@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -84,10 +85,6 @@ public final class Utils {
         Toolkit.getDefaultToolkit()
             .getSystemClipboard()
             .setContents(new StringSelection(text), null);
-    }
-
-    public static double clampToUnitInterval(double value) {
-        return Math.min(1.0, Math.max(0.0, value));
     }
 
     public static double parseLocalizedDouble(String s) throws ParseException {
@@ -149,10 +146,10 @@ public final class Utils {
     }
 
     public static String formatDuration(long millis) {
-        long seconds = millis / 1000;
-        long s = seconds % 60;
-        long m = (seconds / 60) % 60;
-        long h = (seconds / (60 * 60)) % 24;
+        Duration duration = Duration.ofMillis(millis);
+        long h = duration.toHours();
+        int m = duration.toMinutesPart();
+        int s = duration.toSecondsPart();
 
         return format("%d:%02d:%02d", h, m, s);
     }
@@ -241,8 +238,6 @@ public final class Utils {
         return () -> {
             try {
                 return callable.call();
-            } catch (RuntimeException e) {
-                throw e;
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             } catch (Exception e) {
@@ -306,6 +301,7 @@ public final class Utils {
     // adds an "a" or "an" before the given word
     public static String addArticle(String word) {
         String article = switch (word.charAt(0)) {
+            // this is a limited heuristic based on spelling, not pronunciation
             case 'a', 'e', 'i', 'o', 'u', 'h' -> "an ";
             default -> "a ";
         };
@@ -389,4 +385,3 @@ public final class Utils {
         return true;
     }
 }
-

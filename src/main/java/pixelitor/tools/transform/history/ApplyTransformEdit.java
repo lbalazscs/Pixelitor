@@ -37,8 +37,8 @@ public class ApplyTransformEdit extends MultiEdit {
     public ApplyTransformEdit(String name, Composition comp, PixelitorEdit contentEdit, TransformUISnapshot snapshot) {
         super(name, comp);
         if (contentEdit != null) {
-            // if the content edit is itself a MultiEdit (e.g., from transforming a layer
-            // and selection), unpack its children into this edit to avoid unnecessary nesting
+            // if the content edit is itself a MultiEdit, unpack
+            // its children into this edit to avoid unnecessary nesting
             if (contentEdit instanceof MultiEdit multi) {
                 multi.getChildren().forEach(this::add);
             } else {
@@ -71,4 +71,3 @@ public class ApplyTransformEdit extends MultiEdit {
         super.redo();
     }
 }
-

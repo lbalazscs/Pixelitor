@@ -81,14 +81,11 @@ public class ConnectBrushHistory {
     public static void drawConnectingLines(Graphics2D targetG,
                                            ConnectBrushSettings settings,
                                            PPoint currentPoint, double diamSq) {
-        // we don't expect history clearing between new stroke start and this
-        assert !history.isEmpty();
+        if (history.isEmpty()) {
+            nextAddIndex = 0;
+            return;
+        }
         assert currentStroke != null;
-
-//        if (history.isEmpty()) {
-//            nextAddIndex = 0;
-//            return;
-//        }
 
         // add the current point to the ongoing stroke
         Point2D last = currentPoint.toImPoint2D();

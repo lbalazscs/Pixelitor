@@ -152,22 +152,30 @@ public class PenTool extends PathTool {
     }
 
     public void setBuildState(BuildState newState) {
-        if (buildState == newState) {
-            return;
-        }
-
         prevBuildState = buildState;
         buildState = newState;
 
-        if (newState == MOVING_TO_NEXT_ANCHOR) {
+        // this must run even if the state was MOVING_TO_NEXT_ANCHOR
+        // before, to fix inconsistencies
+        if (buildState == MOVING_TO_NEXT_ANCHOR) {
             Path path = Views.getActivePath();
-            if (path != null && path.getActiveSubpath() != null && !path.getActiveSubpath().isFinished() && !path.getActiveSubpath().hasMovingPoint()) {
-                MovingPoint mp = createMovingPoint(path.getActiveSubpath());
-                path.getActiveSubpath().setMovingPoint(mp);
+            SubPath activeSubpath = (path != null) ? path.getActiveSubpath() : null;
+
+            if (activeSubpath != null && !activeSubpath.isFinished()) {
+                // this is a valid case for MOVING_TO_NEXT_ANCHOR =>
+                // ensure a moving point exists
+                if (!activeSubpath.hasMovingPoint()) {
+                    MovingPoint mp = createMovingPoint(activeSubpath);
+                    activeSubpath.setMovingPoint(mp);
+                }
+            } else {
+                // the new state is invalid because the subpath is
+                // finished, doesn't exist, or the path itself is null
+                buildState = IDLE;
             }
         }
 
-        if (newState == IDLE) {
+        if (buildState == IDLE) {
             prevBuildState = IDLE;
         }
     }
@@ -538,8 +546,17 @@ public class PenTool extends PathTool {
                 return;
             }
 
+            SubPath activeSubpath = path.getActiveSubpath();
+            if (activeSubpath != null && activeSubpath.isFinished()) {
+                setBuildState(IDLE);
+                return;
+            }
+
             setBuildState(MOVING_TO_NEXT_ANCHOR);
-            path.getMovingPoint().mouseDragged(x, y, e.isShiftDown());
+            MovingPoint movingPoint = path.getMovingPoint();
+            if (movingPoint != null) {
+                movingPoint.mouseDragged(x, y, e.isShiftDown());
+            }
 
             // highlight the first anchor if the mouse is over it to indicate closability
             AnchorPoint first = path.getFirstAnchor();

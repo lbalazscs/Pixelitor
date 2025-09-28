@@ -17,7 +17,6 @@
 
 package pixelitor.gui;
 
-import pixelitor.NewImage;
 import pixelitor.colors.FillType;
 import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.UserPreset;
@@ -27,9 +26,7 @@ import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.utils.ResizeUnit;
 
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
-import java.awt.Dimension;
+import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -51,23 +48,24 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner, Ke
 
     private final DimensionHelper dimensions;
 
-    public NewImagePanel() {
+    public record Settings(int width, int height, int dpi, ResizeUnit unit, FillType fillType, String title) {
+    }
+
+    public NewImagePanel(Settings settings) {
         super(new GridBagLayout());
         var gbh = new GridBagHelper(this);
 
         setBorder(createEmptyBorder(PANEL_PADDING, PANEL_PADDING, PANEL_PADDING, PANEL_PADDING));
 
-        nameTF = new JTextField(NewImage.generateTitle());
+        nameTF = new JTextField(settings.title());
         nameTF.setName("nameTF");
         gbh.addLabelAndLastControl("Name", nameTF);
 
         ResizeUnit[] units = {ResizeUnit.PIXELS, ResizeUnit.CENTIMETERS, ResizeUnit.INCHES};
-        Dimension lastSize = NewImage.getLastSize();
-        int lastDpi = NewImage.getLastDpi();
 
         // originalSize is 1, as it's only used by PERCENTAGE unit, which is not present here
         dimensions = new DimensionHelper(this, units,
-            lastSize.width, lastSize.height, lastDpi, 1, 1);
+            settings.width(), settings.height(), settings.dpi(), 1, 1);
 
         gbh.addVerticalSpace(PANEL_PADDING);
 
@@ -85,10 +83,10 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner, Ke
         gbh.addVerticalSpace(PANEL_PADDING);
 
         fillSelector = new JComboBox<>(FillType.values());
-        fillSelector.setSelectedIndex(NewImage.lastFillTypeIndex);
+        fillSelector.setSelectedItem(settings.fillType());
         gbh.addLabelAndLastControl("Fill:", fillSelector);
 
-        dimensions.getUnitSelectorModel().setSelectedItem(NewImage.getLastUnit());
+        dimensions.getUnitSelectorModel().setSelectedItem(settings.unit());
         dimensions.setInitialValues();
     }
 
@@ -170,21 +168,18 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner, Ke
         return ValidationResult.valid();
     }
 
-    public void dialogAccepted() {
-        FillType bg = getSelectedFill();
-
+    /**
+     * Returns the new image settings from the panel.
+     */
+    public Settings getSettings() {
         int width = dimensions.getTargetWidth();
         int height = dimensions.getTargetHeight();
         int dpi = dimensions.getDpi();
+        ResizeUnit unit = dimensions.getUnit();
+        FillType fillType = getSelectedFill();
+        String title = getTitle();
 
-        NewImage.addNewImage(bg, width, height, getTitle(), dpi);
-
-        NewImage.setLastSize(new Dimension(width, height));
-        NewImage.setLastUnit(dimensions.getUnit());
-        NewImage.setLastDpi(dpi);
-        NewImage.lastFillTypeIndex = fillSelector.getSelectedIndex();
-
-        NewImage.incrementUntitledCount();
+        return new Settings(width, height, dpi, unit, fillType, title);
     }
 
     private String getTitle() {

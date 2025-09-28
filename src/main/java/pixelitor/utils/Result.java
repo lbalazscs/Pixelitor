@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -28,6 +29,14 @@ import java.util.function.Supplier;
  */
 public sealed interface Result<S, E> permits Success, Error {
     boolean isSuccess();
+
+    default boolean isError() {
+        return !isSuccess();
+    }
+
+    void ifSuccess(Consumer<? super S> consumer);
+
+    void ifError(Consumer<? super E> consumer);
 
     /**
      * Returns the successful result value if present.
@@ -49,17 +58,17 @@ public sealed interface Result<S, E> permits Success, Error {
      */
     <T> Result<T, E> flatMap(Function<? super S, ? extends Result<? extends T, E>> mapper);
 
+    <F> Result<S, F> mapError(Function<? super E, ? extends F> mapper);
+
     /**
-     * Returns the success value if present,
-     * or the given default value if this is an error.
+     * Returns the success value if present, otherwise returns the given default value.
      */
     default S orElse(S defaultValue) {
         return isSuccess() ? get() : defaultValue;
     }
 
     /**
-     * Returns the success value if present, or throws the exception
-     * created by the supplier if this is an error.
+     * Returns the success value if present, otherwise throws the supplied exception.
      */
     default <T extends Throwable> S orElseThrow(Supplier<? extends T> exceptionSupplier) throws T {
         if (isSuccess()) {
@@ -93,5 +102,12 @@ public sealed interface Result<S, E> permits Success, Error {
             return success(value);
         }
     }
-}
 
+    static <V, E> Result<V, E> ofNullable(V value, Supplier<? extends E> errorSupplier) {
+        if (value == null) {
+            return error(errorSupplier.get());
+        } else {
+            return success(value);
+        }
+    }
+}

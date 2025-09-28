@@ -45,10 +45,12 @@ public class LayerAnimation {
     // delay in milliseconds between the frames of the animation
     private final int frameDurationMs;
 
+    private static final int DEFAULT_DELAY_MS = 200;
+
     // the list of images representing animation frames
     private final List<BufferedImage> frames = new ArrayList<>();
 
-    public LayerAnimation(Composition comp, int frameDurationMs, boolean isPingPong) {
+    private LayerAnimation(Composition comp, int frameDurationMs, boolean isPingPong) {
         this.frameDurationMs = frameDurationMs;
 
         generateFrames(comp, isPingPong);
@@ -57,12 +59,12 @@ public class LayerAnimation {
     private void generateFrames(Composition comp, boolean isPingPong) {
         int numLayers = comp.getNumLayers();
 
-        // Add frames in the forward direction.
+        // add frames in the forward direction
         for (int i = 0; i < numLayers; i++) {
             addFrameFromLayer(comp, i);
         }
 
-        // Add frames in reverse direction if ping-pong is enabled.
+        // add frames in reverse direction if ping-pong is enabled
         if (isPingPong && numLayers > 2) {
             for (int i = numLayers - 2; i > 0; i--) {
                 addFrameFromLayer(comp, i);
@@ -84,8 +86,8 @@ public class LayerAnimation {
     public static void showExportDialog(Composition comp) {
         if (comp.getNumLayers() < 2) {
             Messages.showInfo("Not Enough Layers",
-                "Animation frames are based on the layers of the image.\n" +
-                    comp.getName() + " has only one layer.");
+                "<html>Animation frames are based on the layers of the image." +
+                    "<br>The image <b>" + comp.getName() + "</b> has only one layer.");
             return;
         }
 
@@ -146,7 +148,7 @@ public class LayerAnimation {
             var settingsPanel = new JPanel();
             settingsPanel.setLayout(new FlowLayout(LEFT, 10, 10));
             settingsPanel.add(new JLabel("Delay Between Frames (Milliseconds):"));
-            delayTF = new JTextField("200", 4);
+            delayTF = new JTextField(String.valueOf(DEFAULT_DELAY_MS), 4);
             settingsPanel.add(TextFieldValidator.createPositiveIntLayer(
                 "Delay", delayTF));
 

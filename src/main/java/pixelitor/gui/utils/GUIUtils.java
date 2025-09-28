@@ -146,13 +146,17 @@ public final class GUIUtils {
     }
 
     public static void showDialog(JDialog dialog, JComponent parent) {
+        setDialogLocation(dialog, parent);
+        dialog.setVisible(true);
+    }
+
+    public static void setDialogLocation(JDialog dialog, JComponent parent) {
         Point lastLocation = dialogLocationsByTitle.get(dialog.getTitle());
         if (lastLocation != null) {
             dialog.setLocation(lastLocation);
         } else {
             dialog.setLocationRelativeTo(parent);
         }
-        dialog.setVisible(true);
     }
 
     public static void showDialog(JDialog d) {

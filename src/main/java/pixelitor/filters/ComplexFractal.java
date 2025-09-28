@@ -86,7 +86,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
         if (aa == AA_NONE) {
             return transformAA(src, dest);
         } else if (aa == AA_2x2) {
-            // transform an image with double size, then scale it down
+            // render an image with double size, then scale it down
             BufferedImage bigSrc = new BufferedImage(
                 src.getWidth() * 2, src.getHeight() * 2, src.getType());
             BufferedImage bigDest = transformAA(bigSrc, null);
@@ -107,37 +107,24 @@ public abstract class ComplexFractal extends ParametrizedFilter {
 
     protected int[] createColors(int maxIterations) {
         int[] colors = new int[maxIterations + 1];
-        if (colorsParam.getValue() == COLORS_CONTRASTING) {
-            double normalizer = Math.log(maxIterations + 1);
-            for (int it = 0; it <= maxIterations; it++) {
-                float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
-                colors[it] = Color.HSBtoRGB(
+        double normalizer = Math.log(maxIterations + 1);
+        int colorsStyle = colorsParam.getValue();
+        for (int it = 0; it <= maxIterations; it++) {
+            float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
+            colors[it] = switch (colorsStyle) {
+                case COLORS_CONTRASTING -> Color.HSBtoRGB(
                     maxIterations / (float) it,
-                    0.9f,
-                    it > 0 ? bri : 0);
-            }
-        } else if (colorsParam.getValue() == COLORS_CONTINUOUS) {
-            double normalizer = Math.log(maxIterations + 1);
-            for (int it = 0; it <= maxIterations; it++) {
-                float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
-                colors[it] = Color.HSBtoRGB(
+                    0.9f, it > 0 ? bri : 0);
+                case COLORS_CONTINUOUS -> Color.HSBtoRGB(
                     (float) it / maxIterations,
-                    0.9f,
-                    it > 0 ? bri : 0);
-            }
-        } else if (colorsParam.getValue() == COLORS_BLUES) {
-            double normalizer = Math.log(maxIterations + 1);
-            for (int it = 0; it <= maxIterations; it++) {
-                float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
-                colors[it] = Color.HSBtoRGB(
+                    0.9f, it > 0 ? bri : 0);
+                case COLORS_BLUES -> Color.HSBtoRGB(
                     0.5f + (float) it / (maxIterations * 10),
                     (float) it / maxIterations,
                     it > 0 ? bri : 0);
-            }
-        } else {
-            throw new IllegalStateException("value = " + colorsParam.getValue());
+                default -> throw new IllegalStateException("value = " + colorsStyle);
+            };
         }
         return colors;
     }
 }
-

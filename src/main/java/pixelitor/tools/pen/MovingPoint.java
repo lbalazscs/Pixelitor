@@ -26,8 +26,9 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
 /**
- * A point that follows the mouse cursor when the mouse
- * is moving (not dragging) as the path is being built.
+ * A temporary point that follows the mouse cursor when the mouse
+ * is moving (not dragging) as the path is being built, to provide
+ * a preview of the next path segment.
  * It has an inverse mouse cycle: it is dragged when the mouse is actually
  * moved; its mousePressed is called when the mouse is released, etc.
  * If the Shift key is pressed, the point is constrained

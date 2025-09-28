@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -26,6 +27,16 @@ public record Error<S, E>(E errorDetails) implements Result<S, E> {
     @Override
     public boolean isSuccess() {
         return false;
+    }
+
+    @Override
+    public void ifSuccess(Consumer<? super S> consumer) {
+        // do nothing
+    }
+
+    @Override
+    public void ifError(Consumer<? super E> consumer) {
+        consumer.accept(errorDetails);
     }
 
     @Override
@@ -41,5 +52,10 @@ public record Error<S, E>(E errorDetails) implements Result<S, E> {
     @Override
     public <T> Result<T, E> flatMap(Function<? super S, ? extends Result<? extends T, E>> mapper) {
         return new Error<>(errorDetails);
+    }
+
+    @Override
+    public <F> Result<S, F> mapError(Function<? super E, ? extends F> mapper) {
+        return new Error<>(mapper.apply(errorDetails));
     }
 }

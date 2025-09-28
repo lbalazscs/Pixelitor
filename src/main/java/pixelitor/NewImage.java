@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.Fill;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.NewImagePanel;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.DimensionHelper;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
@@ -33,10 +32,11 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.colors.FillType.TRANSPARENT;
+import static pixelitor.colors.FillType.WHITE;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Static methods for creating new images
+ * Static methods for creating new images.
  */
 public final class NewImage {
     private static final String NEW_IMAGE_STRING = i18n("new_image");
@@ -45,36 +45,63 @@ public final class NewImage {
     // last used settings for the "New Image" dialog
     private static Dimension lastSize = AppPreferences.loadNewImageSize();
 
+    // these last used settings are currently not restored after a restart
     private static ResizeUnit lastUnit = ResizeUnit.PIXELS;
     private static int lastDpi = Composition.DEFAULT_DPI;
-
-    public static int lastFillTypeIndex = 0; // currently not restored after a restart
+    private static FillType lastFillType = WHITE;
 
     private NewImage() {
     }
 
-    public static Composition addNewImage(FillType bg, int width, int height, String title, int dpi) {
-        var comp = createNewComposition(bg, width, height, title, dpi);
+    public static Composition addNewImage(FillType fillType, int width, int height, String title, int dpi) {
+        var comp = createNewComposition(fillType, width, height, title, dpi);
         Views.addNew(comp);
         return comp;
     }
 
-    public static Composition createNewComposition(FillType bg, int width, int height, String name, int dpi) {
+    public static Composition createNewComposition(FillType fillType, int width, int height, String name, int dpi) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width = " + width + ", height = " + height);
+        }
+
         BufferedImage newImage = ImageUtils.createSysCompatibleImage(width, height);
-        if (bg != TRANSPARENT) {
-            Fill.fillImage(newImage, bg.getColor());
+        if (fillType != TRANSPARENT) {
+            Fill.fillImage(newImage, fillType.getColor());
         }
 
         return Composition.fromImage(newImage, null, name, dpi);
     }
 
     private static void showInDialog() {
-        var panel = new NewImagePanel();
+        var initialSettings = new NewImagePanel.Settings(
+            lastSize.width,
+            lastSize.height,
+            lastDpi,
+            lastUnit,
+            lastFillType,
+            generateTitle()
+        );
+        var panel = new NewImagePanel(initialSettings);
+
+        Runnable okAction = () -> {
+            NewImagePanel.Settings settings = panel.getSettings();
+
+            addNewImage(settings.fillType(), settings.width(), settings.height(), settings.title(), settings.dpi());
+
+            lastSize = new Dimension(settings.width(), settings.height());
+            lastUnit = settings.unit();
+            lastDpi = settings.dpi();
+            lastFillType = settings.fillType();
+
+            // increment it only after a sucessfully added image
+            untitledCount++;
+        };
+
         new DialogBuilder()
             .title(NEW_IMAGE_STRING)
             .menuBar(new DialogMenuBar(panel))
             .validatedContent(panel)
-            .okAction(panel::dialogAccepted)
+            .okAction(okAction)
             .show();
     }
 
@@ -82,36 +109,23 @@ public final class NewImage {
         return lastSize;
     }
 
-    public static void setLastSize(Dimension d) {
-        lastSize = d;
-    }
-
     public static ResizeUnit getLastUnit() {
         return lastUnit;
-    }
-
-    public static void setLastUnit(ResizeUnit lastUnit) {
-        NewImage.lastUnit = lastUnit;
     }
 
     public static int getLastDpi() {
         return lastDpi;
     }
 
-    public static void setLastDpi(int lastDpi) {
-        NewImage.lastDpi = lastDpi;
+    public static FillType getLastFillType() {
+        return lastFillType;
     }
 
     public static Action getAction() {
         return new TaskAction(NEW_IMAGE_STRING + "...", NewImage::showInDialog);
     }
 
-    public static String generateTitle() {
+    private static String generateTitle() {
         return "Untitled " + untitledCount;
     }
-
-    public static void incrementUntitledCount() {
-        untitledCount++;
-    }
 }
-

@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Predicate;
 
 import static java.awt.font.TextAttribute.*;
 
@@ -45,17 +46,51 @@ public class Rnd {
         // do not instantiate
     }
 
+    /**
+     * Chooses a random element from the given array of integers.
+     */
     public static int chooseFrom(int[] items) {
         return items[rand.nextInt(items.length)];
     }
 
+    /**
+     * Chooses a random element from the given items.
+     */
     @SafeVarargs
     public static <T> T chooseFrom(T... items) {
         return items[rand.nextInt(items.length)];
     }
 
+    /**
+     * Chooses a random element from the given items that satisfies the condition.
+     */
+    @SafeVarargs
+    public static <T> T chooseFrom(Predicate<T> condition, T... items) {
+        T chosen;
+        // can result in an infinite loop if no item satisfies the condition
+        do {
+            chosen = chooseFrom(items);
+        } while (!condition.test(chosen));
+        return chosen;
+    }
+
+    /**
+     * Chooses a random element from the given List.
+     */
     public static <T> T chooseFrom(List<T> items) {
         return items.get(rand.nextInt(items.size()));
+    }
+
+    /**
+     * Chooses a random element from the given List that satisfies the condition.
+     */
+    public static <T> T chooseFrom(Predicate<T> condition, List<T> items) {
+        T chosen;
+        // can result in an infinite loop if no item satisfies the condition
+        do {
+            chosen = chooseFrom(items);
+        } while (!condition.test(chosen));
+        return chosen;
     }
 
     public static boolean nextBoolean() {

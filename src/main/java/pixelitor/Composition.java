@@ -336,6 +336,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (selection != null) {
                 selection.setView(view);
             }
+            if (draftSelection != null) {
+                draftSelection.setView(view);
+            }
             if (paths != null) {
                 paths.setView(view);
             }
@@ -345,6 +348,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         } else { // the new view can be null when closing or reloading
             if (selection != null) {
                 disposeSelection();
+            }
+            if (draftSelection != null) {
+                draftSelection.dispose();
+                draftSelection = null;
             }
             if (paths != null) {
                 paths.setView(null);

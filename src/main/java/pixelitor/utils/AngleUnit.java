@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ package pixelitor.utils;
  */
 public enum AngleUnit {
     /**
-     * Clockwise radians between -π and π, as returned from Math.atan2()
+     * Radians between -π and π, as returned from Math.atan2(dy, dx)
      */
     RADIANS {
         @Override
@@ -71,7 +71,7 @@ public enum AngleUnit {
         }
     },
     /**
-     * Clockwise degrees between -180 and 180
+     * Degrees between -180 and 180, as returned by Math.toDegrees(Math.atan2(dy, dx))
      */
     DEGREES {
         @Override
@@ -140,4 +140,3 @@ public enum AngleUnit {
 
     public abstract double toIntuitiveDegrees(double angle);
 }
-

@@ -47,7 +47,7 @@ public class UpdatesCheck {
 
     public static void checkForUpdates() {
         Result<Properties, String> result = fetchLatestVersionInfo();
-        if (!result.isSuccess()) {
+        if (result.isError()) {
             showUpdateCheckErrorDialog(result.errorDetails());
             return;
         }

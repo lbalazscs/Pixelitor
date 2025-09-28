@@ -544,7 +544,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         };
     }
 
-    private void flip(FlipDirection direction) {
+    void flip(FlipDirection direction) {
         saveState();
 
         // get the original image-space locations of the corners
@@ -573,7 +573,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         addLegacyEditToHistory(view.getComp(), direction.getDisplayName());
     }
 
-    private void rotate(QuadrantAngle rotAngle) {
+    void rotate(QuadrantAngle rotAngle) {
         double delta = Math.toRadians(rotAngle.getAngleDegree());
         double newAngle = angle + delta;
         if (newAngle >= Math.PI * 2) {

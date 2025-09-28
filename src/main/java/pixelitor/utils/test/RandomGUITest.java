@@ -91,7 +91,6 @@ public class RandomGUITest {
     public static final char PAUSE_KEY_CHAR = 'A';
 
     private static final boolean ENABLE_MEMORY_LOGGING = false;
-    private static final boolean NO_HIDE_SHOW = false;
     private static final boolean ENABLE_COPY_PASTE = false;
     private static final boolean TEST_ADJ_LAYERS = false;
 
@@ -876,9 +875,6 @@ public class RandomGUITest {
     }
 
     private void randomlyTogglePanelVisibility() {
-        if (NO_HIDE_SHOW) {
-            return;
-        }
         WorkSpace workSpace = PixelitorWindow.get().getWorkSpace();
         Action[] actions = {
             workSpace.getHistogramsAction(),
@@ -911,15 +907,16 @@ public class RandomGUITest {
         if (pastedImagesCount > 3) {
             return;
         }
-        int r = rand.nextInt(10);
-        if (r == 0) {
-            runAction(new PasteAction(PasteTarget.NEW_IMAGE));
-            pastedImagesCount++;
-        } else if (r == 1) {
-            runAction(new PasteAction(PasteTarget.NEW_LAYER));
+        PasteTarget target = switch (rand.nextInt(10)) {
+            case 0 -> PasteTarget.NEW_IMAGE;
+            case 1 -> PasteTarget.NEW_LAYER;
+            case 2 -> Views.getActiveLayer().hasMask() ? PasteTarget.MASK : null;
+            default -> null;
+        };
+        if (target != null) {
+            runAction(new PasteAction(target));
             pastedImagesCount++;
         }
-        // paste as mask?
     }
 
     private void randomChangeLayerOpacityOrBlending() {
@@ -1248,6 +1245,3 @@ public class RandomGUITest {
         actionCaller.registerAction(10, this::randomLayerMaskAction);
     }
 }
-
-
-

@@ -114,13 +114,11 @@ public class AnimatedGifEncoder {
      * for all subsequent frames.
      *
      * @param im BufferedImage containing frame to write.
-     * @return true if successful.
      */
-    public boolean addFrame(BufferedImage im) {
+    public void addFrame(BufferedImage im) {
         if ((im == null) || !started) {
-            return false;
+            throw new IllegalStateException();
         }
-        boolean ok = true;
         try {
             if (!sizeSet) {
                 // use first frame's size
@@ -145,10 +143,8 @@ public class AnimatedGifEncoder {
             writePixels(); // encode and write pixel data
             firstFrame = false;
         } catch (IOException e) {
-            ok = false;
+            throw new UncheckedIOException(e);
         }
-
-        return ok;
     }
 
     /**
@@ -270,19 +266,16 @@ public class AnimatedGifEncoder {
      * Initiates writing of a GIF file with the specified name.
      *
      * @param file String containing output file name.
-     * @return false if open or initial write failed.
      */
-    public boolean start(File file) {
+    public void start(File file) {
         this.file = file;
-        boolean ok = true;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
-            ok = start(out);
+            start(out);
             closeStream = true;
         } catch (IOException e) {
-            ok = false;
+            throw new UncheckedIOException(e);
         }
-        return started = ok;
     }
 
     /**
@@ -385,9 +378,9 @@ public class AnimatedGifEncoder {
 
         // packed fields
         out.write(0 | // 1:3 reserved
-                disp | // 4:6 disposal
-                0 | // 7 user input - 0 = none
-                transp); // 8 transparency flag
+            disp | // 4:6 disposal
+            0 | // 7 user input - 0 = none
+            transp); // 8 transparency flag
 
         writeShort(delay); // delay x 1/100 sec
         out.write(transIndex); // transparent color index
@@ -410,10 +403,10 @@ public class AnimatedGifEncoder {
         } else {
             // specify normal LCT
             out.write(0x80 | // 1 local color table 1=yes
-                    0 | // 2 interlace - 0=no
-                    0 | // 3 sorted - 0=no
-                    0 | // 4-5 reserved
-                    palSize); // 6-8 size of color table
+                0 | // 2 interlace - 0=no
+                0 | // 3 sorted - 0=no
+                0 | // 4-5 reserved
+                palSize); // 6-8 size of color table
         }
     }
 
@@ -426,9 +419,9 @@ public class AnimatedGifEncoder {
         writeShort(height);
         // packed fields
         out.write((0x80 | // 1 : global color table flag = 1 (gct used)
-                0x70 | // 2-4 : color resolution = 7
-                0x00 | // 5 : gct sort flag = 0
-                palSize)); // 6-8 : gct size
+            0x70 | // 2-4 : color resolution = 7
+            0x00 | // 5 : gct sort flag = 0
+            palSize)); // 6-8 : gct size
 
         out.write(0); // background color index
         out.write(0); // pixel aspect ratio - assume 1:1
@@ -1106,7 +1099,7 @@ class LZWEncoder {
     private int cur_bits = 0;
 
     private final int[] masks = {0x0000, 0x0001, 0x0003, 0x0007, 0x000F, 0x001F, 0x003F, 0x007F, 0x00FF, 0x01FF,
-            0x03FF, 0x07FF, 0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF};
+        0x03FF, 0x07FF, 0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF};
 
     // Number of characters so far in this 'packet'
     private int a_count;
