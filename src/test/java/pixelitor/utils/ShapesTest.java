@@ -28,6 +28,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.util.function.Consumer;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
@@ -50,41 +51,48 @@ class ShapesTest {
 
     @Test
     void convertRectangle() {
-        Shape s = new Rectangle2D.Double(2, 2, 10, 10);
-        checkRectangleShape(s);
-
-        Path path = Shapes.shapeToPath(s, view);
-        checkRectanglePath(path.getActiveSubpath());
-
-        s = path.toImageSpaceShape();
-        checkRectangleShape(s);
-
-        path = Shapes.shapeToPath(s, view);
-        checkRectanglePath(path.getActiveSubpath());
+        checkShapeToPathRoundtrip(
+            new Rectangle2D.Double(2, 2, 10, 10),
+            ShapesTest::checkRectangleShape,
+            ShapesTest::checkRectanglePath
+        );
     }
 
     @Test
     void convertEllipse() {
-        Shape s = new Ellipse2D.Double(2, 2, 10, 10);
-        checkEllipseShape(s);
+        checkShapeToPathRoundtrip(
+            new Ellipse2D.Double(2, 2, 10, 10),
+            ShapesTest::checkEllipseShape,
+            ShapesTest::checkEllipsePath
+        );
+    }
 
-        Path path = Shapes.shapeToPath(s, view);
-        checkEllipsePath(path.getActiveSubpath());
+    private void checkShapeToPathRoundtrip(Shape initialShape,
+                                           Consumer<Shape> shapeChecker,
+                                           Consumer<SubPath> pathChecker) {
+        // check the initial shape
+        shapeChecker.accept(initialShape);
 
-        s = path.toImageSpaceShape();
-        checkEllipseShape(s);
+        // convert to a path and check it
+        Path path = Shapes.shapeToPath(initialShape, view);
+        pathChecker.accept(path.getActiveSubpath());
 
-        path = Shapes.shapeToPath(s, view);
-        checkEllipsePath(path.getActiveSubpath());
+        // convert back to a shape and check it again
+        Shape finalShape = path.toImageSpaceShape();
+        shapeChecker.accept(finalShape);
+
+        // perform a second roundtrip to ensure stability
+        path = Shapes.shapeToPath(finalShape, view);
+        pathChecker.accept(path.getActiveSubpath());
     }
 
     private static void checkRectangleShape(Shape shape) {
-        SegmentCounter checker = new SegmentCounter(shape);
-        checker.assertMoveToCount(1);
-        checker.assertLineToCount(4);
-        checker.assertQuadToCount(0);
-        checker.assertCubicToCount(0);
-        checker.assertPathCloseCount(1);
+        new SegmentCounter(shape)
+            .assertMoveToCount(1)
+            .assertLineToCount(4)
+            .assertQuadToCount(0)
+            .assertCubicToCount(0)
+            .assertPathCloseCount(1);
     }
 
     private static void checkRectanglePath(SubPath subPath) {
@@ -110,12 +118,12 @@ class ShapesTest {
     }
 
     private static void checkEllipseShape(Shape shape) {
-        SegmentCounter checker = new SegmentCounter(shape);
-        checker.assertMoveToCount(1);
-        checker.assertLineToCount(0);
-        checker.assertQuadToCount(0);
-        checker.assertCubicToCount(4);
-        checker.assertPathCloseCount(1);
+        new SegmentCounter(shape)
+            .assertMoveToCount(1)
+            .assertLineToCount(0)
+            .assertQuadToCount(0)
+            .assertCubicToCount(4)
+            .assertPathCloseCount(1);
     }
 
     private static void checkEllipsePath(SubPath subPath) {

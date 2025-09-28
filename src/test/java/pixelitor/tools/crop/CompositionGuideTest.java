@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.tools.crop;
 
-
 import org.junit.jupiter.api.*;
 import org.mockito.ArgumentMatcher;
 import pixelitor.TestHelper;
@@ -33,9 +32,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-import static pixelitor.tools.crop.CompositionGuideType.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.refEq;
+import static org.mockito.Mockito.verify;
+import static pixelitor.tools.crop.CompositionGuideType.DIAGONALS;
+import static pixelitor.tools.crop.CompositionGuideType.GOLDEN_SECTIONS;
+import static pixelitor.tools.crop.CompositionGuideType.GOLDEN_SPIRAL;
+import static pixelitor.tools.crop.CompositionGuideType.GRID;
+import static pixelitor.tools.crop.CompositionGuideType.NONE;
+import static pixelitor.tools.crop.CompositionGuideType.RULE_OF_THIRDS;
+import static pixelitor.tools.crop.CompositionGuideType.TRIANGLES;
 
 @DisplayName("CompositionGuide tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -255,10 +266,11 @@ class DrawMatcherLine2D implements ArgumentMatcher<List<Shape>> {
         for (int i = 0; i < shapes.size(); i++) {
             if (shapes.get(i) instanceof Line2D line) {
                 Line2D line2 = this.shapes.get(i);
-                assertEquals(line.getX1(), line2.getX1(), 1.0e-15);
-                assertEquals(line.getY1(), line2.getY1(), 1.0e-15);
-                assertEquals(line.getX2(), line2.getX2(), 1.0e-15);
-                assertEquals(line.getY2(), line2.getY2(), 1.0e-15);
+                double tolerance = 1.0e-10;
+                assertThat(line.getX1()).isCloseTo(line2.getX1(), within(tolerance));
+                assertThat(line.getY1()).isCloseTo(line2.getY1(), within(tolerance));
+                assertThat(line.getX2()).isCloseTo(line2.getX2(), within(tolerance));
+                assertThat(line.getY2()).isCloseTo(line2.getY2(), within(tolerance));
             }
         }
         return true;

@@ -115,8 +115,8 @@ public class RandomToolTest {
     private final CountDownLatch mainLoopExitLatch = new CountDownLatch(1);
 
     private static final String[] simpleMultiLayerEdits = {
-        "Rotate 90° CW", "Rotate 180°", "Rotate 90° CCW",
-        "Flip Horizontal", "Flip Vertical"
+        "comp_rot_90", "comp_rot_180", "comp_rot_270",
+        "comp_flip_hor", "comp_flip_ver"
     };
 
     private static final String[] ADD_MASK_MENU_COMMANDS = {
@@ -233,16 +233,23 @@ public class RandomToolTest {
         Tool selectedTool;
         if (preferredTools.isEmpty()) {
             // there is no preferred tool, each tool gets equal chance
-            selectedTool = getRandomTool();
+            selectedTool = getRandomTool(RandomToolTest::canBeTested);
         } else {
             // with 80% probability force using a preferred tool
             if (Rnd.nextDouble() < 0.8) {
                 selectedTool = Rnd.chooseFrom(preferredTools);
             } else {
-                selectedTool = getRandomTool();
+                selectedTool = getRandomTool(RandomToolTest::canBeTested);
             }
         }
         return selectedTool;
+    }
+
+    private static boolean canBeTested(Tool tool) {
+        if (tool == Tools.NODE || tool == Tools.TRANSFORM_PATH) {
+            return EDT.getActivePath() != null;
+        }
+        return true;
     }
 
     private void testWithTimeout(Tool tool) {
@@ -337,7 +344,7 @@ public class RandomToolTest {
         String title = optionPane.title();
         switch (title) {
             case "Nothing Selected", "No Selection" -> optionPane.okButton().click();
-            case "Selection Crop Type" -> optionPane.buttonWithText("Crop and Hide").click();
+            case "Non-Rectangular Selection Crop" -> optionPane.buttonWithText("Crop and Hide").click();
             case "Existing Selection" -> optionPane.buttonWithText("Replace").click();
             default -> System.out.println("RandomToolTest::closeToolDialog: tool = "
                 + tool + ", title = " + title);
@@ -598,7 +605,7 @@ public class RandomToolTest {
     private void randomMultiLayerEdit() {
         String command = Rnd.chooseFrom(simpleMultiLayerEdits);
         log(command);
-        app.runMenuCommand(command);
+        app.runMenuCommandByName(command);
     }
 
     private void parseCLArguments(String[] args) {
@@ -718,17 +725,18 @@ public class RandomToolTest {
     }
 
     private void randomizeShapeTypeSettings() {
-        var button = app.findButton("shapeSettingsButton");
-        if (!button.isEnabled()) {
+        ShapeType shapeType = EDT.call(SHAPES::getSelectedType);
+        if (!shapeType.hasSettings()) {
             return;
         }
-
-        ShapeType shapeType = EDT.call(SHAPES::getSelectedType);
         log("randomizing the shape type setting for " + shapeType);
-        button.click();
-        Utils.sleep(200, MILLISECONDS);
-        var dialog = app.findDialogByTitleStartingWith("Settings for");
 
+        app.withToolDialog("shapeSettingsButton",
+            "Settings for " + shapeType.toString(),
+            dialog -> randomizeShapeSettingsDialog(dialog, shapeType));
+    }
+
+    private static void randomizeShapeSettingsDialog(DialogFixture dialog, ShapeType shapeType) {
         //noinspection EnumSwitchStatementWhichMissesCases
         switch (shapeType) {
             case RECTANGLE -> slideRandomly(dialog.slider("Rounding Radius (px)"));
@@ -740,24 +748,19 @@ public class RandomToolTest {
                 slideRandomly(dialog.slider("Number of Branches"));
                 slideRandomly(dialog.slider("Inner/Outer Radius Ratio (%)"));
             }
+            // other shape types should have no settings dialog
             default -> throw new IllegalStateException("shapeType is " + shapeType);
         }
-
-        dialog.button("ok").click();
     }
 
     private void randomizeShapeStrokeSettings() {
-        var button = app.findButton("strokeSettingsButton");
-        if (!button.isEnabled()) {
-            return;
-        }
-
         log("randomizing the shapes stroke setting");
-        button.click();
-        Utils.sleep(200, MILLISECONDS);
+        app.withToolDialog("strokeSettingsButton",
+            "Stroke Settings",
+            RandomToolTest::randomizeShapeStrokeDialog);
+    }
 
-        var dialog = app.findDialogByTitle("Stroke Settings");
-
+    private static void randomizeShapeStrokeDialog(DialogFixture dialog) {
         slideRandomly(dialog.slider("width"));
         chooseRandomly(dialog.comboBox("cap"));
         chooseRandomly(dialog.comboBox("join"));
@@ -772,14 +775,15 @@ public class RandomToolTest {
         if (dashed.isEnabled()) {
             checkRandomly(dashed);
         }
-
-        dialog.button("ok").click();
     }
 
     private void randomizeShapeEffects() {
         log("randomizing the shapes effects");
-        var dialog = startToolDialog("effectsButton", "Effects");
+        app.withToolDialog("effectsButton", "Effects",
+            RandomToolTest::randomizeEffectsDialog);
+    }
 
+    private static void randomizeEffectsDialog(DialogFixture dialog) {
         int selectedTabIndex = Rnd.nextInt(4);
         String[] tabNames = {
             EffectsPanel.GLOW_TAB_NAME,
@@ -795,8 +799,6 @@ public class RandomToolTest {
                 dialog.checkBox(tabName).uncheck();
             }
         }
-
-        dialog.button("ok").click();
     }
 
     private void clickConvertShapeToSelection() {
@@ -805,36 +807,24 @@ public class RandomToolTest {
 
     private void randomizeCloneTransform() {
         log("randomizing the clone transform setting");
-        var dialog = startToolDialog("transformButton", "Clone Transform");
-
-        slideRandomly(dialog.slider("scale"));
-        slideRandomly(dialog.slider("rotate"));
-        chooseRandomly(dialog.comboBox("mirror"));
-
-        dialog.button("ok").click();
+        app.withToolDialog("transformButton", "Clone Transform", dialog -> {
+            slideRandomly(dialog.slider("scale"));
+            slideRandomly(dialog.slider("rotate"));
+            chooseRandomly(dialog.comboBox("mirror"));
+        });
     }
 
     private void randomizeLazyMouse(Tool tool) {
         log("randomizing the lazy mouse on " + tool.getName());
+        app.withToolDialog("lazyMouseDialogButton", "Lazy Mouse Settings", dialog -> {
+            var enabledCB = dialog.checkBox();
+            enabledCB.click();
+            if (enabledCB.target().isSelected()) {
+                slideRandomly(dialog.slider("distSlider"));
+            }
 
-        var dialog = startToolDialog("lazyMouseDialogButton", "Lazy Mouse Settings");
-        var enabledCB = dialog.checkBox();
-        enabledCB.click();
-        if (enabledCB.target().isSelected()) {
-            slideRandomly(dialog.slider("distSlider"));
-        }
-
-        Utils.sleep(200, MILLISECONDS);
-
-        dialog.button("ok").click();
-    }
-
-    private DialogFixture startToolDialog(String buttonName, String dialogTitle) {
-        app.findButton(buttonName).click();
-        var dialog = app.findDialogByTitle(dialogTitle);
-
-        Utils.sleep(200, MILLISECONDS);
-        return dialog;
+            Utils.sleep(200, MILLISECONDS);
+        });
     }
 
     private void randomizeBrushSettings(Tool tool) {
@@ -921,13 +911,13 @@ public class RandomToolTest {
         }
     }
 
-    private void randomShowHide(String target, Callable<Boolean> checkVisibility) {
-        boolean shownBefore = EDT.call(checkVisibility);
+    private void randomShowHide(String target, Callable<Boolean> visibilityCheck) {
+        boolean shownBefore = EDT.call(visibilityCheck);
         String command = shownBefore ? "Hide " + target : "Show " + target;
         log(command);
         app.runMenuCommand(command);
 
-        boolean shownAfter = EDT.call(checkVisibility);
+        boolean shownAfter = EDT.call(visibilityCheck);
         assert shownAfter == !shownBefore;
     }
 

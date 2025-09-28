@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,10 +22,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("Result tests")
 class ResultTest {
@@ -34,24 +36,26 @@ class ResultTest {
     class MapTests {
         @Test
         @DisplayName("mapping a Success")
-        void map_OK() {
+        void map_onSuccess() {
             Result<String, Integer> result = new Success<>("a");
-            Result<String, Integer> mapped = result.map(String::toUpperCase);
+            Result<String, Integer> mapped = result.map(s -> s.toUpperCase(Locale.ENGLISH));
 
             // expect successful mapping
-            assertThat(mapped.isSuccess()).isTrue();
-            assertThat(mapped.get()).isEqualTo("A");
+            assertThat(mapped)
+                .isSuccess()
+                .hasValue("A");
         }
 
         @Test
         @DisplayName("mapping an Error")
-        void map_Error() {
+        void map_onError() {
             Result<String, Integer> result = new Error<>(2);
-            Result<String, Integer> mapped = result.map(String::toUpperCase);
+            Result<String, Integer> mapped = result.map(s -> s.toUpperCase(Locale.ENGLISH));
 
             // expect the original error
-            assertThat(mapped.isSuccess()).isFalse();
-            assertThat(mapped.errorDetails()).isEqualTo(2);
+            assertThat(mapped)
+                .isError()
+                .hasErrorDetails(2);
         }
 
         @Test
@@ -60,9 +64,9 @@ class ResultTest {
             Result<String, Integer> result = new Success<>("test");
             Result<String, Integer> mapped = result.map(s -> null);
 
-            // expect successful null
-            assertThat(mapped.isSuccess()).isTrue();
-            assertThat(mapped.get()).isNull();
+            assertThat(mapped)
+                .isSuccess()
+                .hasValue(null);
         }
     }
 
@@ -77,8 +81,9 @@ class ResultTest {
                 new Success<>(s.toUpperCase(Locale.ENGLISH)));
 
             // expect successful mapping
-            assertThat(mapped.isSuccess()).isTrue();
-            assertThat(mapped.get()).isEqualTo("A");
+            assertThat(mapped)
+                .isSuccess()
+                .hasValue("A");
         }
 
         @Test
@@ -88,8 +93,9 @@ class ResultTest {
             Result<String, Integer> mapped = result.flatMap(s -> new Error<>(10));
 
             // expect error
-            assertThat(mapped.isSuccess()).isFalse();
-            assertThat(mapped.errorDetails()).isEqualTo(10);
+            assertThat(mapped)
+                .isError()
+                .hasErrorDetails(10);
         }
 
         @Test
@@ -100,8 +106,9 @@ class ResultTest {
                 new Success<>(s.toUpperCase(Locale.ENGLISH)));
 
             // expect error ignoring the mapping
-            assertThat(mapped.isSuccess()).isFalse();
-            assertThat(mapped.errorDetails()).isEqualTo(2);
+            assertThat(mapped)
+                .isError()
+                .hasErrorDetails(2);
         }
 
         @Test
@@ -111,8 +118,49 @@ class ResultTest {
             Result<String, Integer> mapped = result.flatMap(s -> new Error<>(10));
 
             // expect error with the first error detail
-            assertThat(mapped.isSuccess()).isFalse();
-            assertThat(mapped.errorDetails()).isEqualTo(2);
+            assertThat(mapped)
+                .isError()
+                .hasErrorDetails(2);
+        }
+    }
+
+    @Nested
+    @DisplayName("mapError tests")
+    class MapErrorTests {
+        @Test
+        @DisplayName("mapError on a Success")
+        void mapError_onSuccess() {
+            Result<String, Integer> result = new Success<>("a");
+            Result<String, String> mapped = result.mapError(Object::toString);
+
+            // expect the original success
+            assertThat(mapped)
+                .isSuccess()
+                .hasValue("a");
+        }
+
+        @Test
+        @DisplayName("mapError on an Error")
+        void mapError_onError() {
+            Result<String, Integer> result = new Error<>(123);
+            Result<String, String> mapped = result.mapError(Object::toString);
+
+            // expect the mapped error
+            assertThat(mapped)
+                .isError()
+                .hasErrorDetails("123");
+        }
+
+        @Test
+        @DisplayName("mapError to null")
+        void mapError_toNull() {
+            Result<String, Integer> result = new Error<>(123);
+            Result<String, String> mapped = result.mapError(e -> null);
+
+            // expect an error with null details
+            assertThat(mapped)
+                .isError()
+                .hasErrorDetails(null);
         }
     }
 
@@ -172,10 +220,9 @@ class ResultTest {
         void successFactory() {
             Result<String, Integer> result = Result.success("test");
 
-            // expect a Success instance
-            assertThat(result).isInstanceOf(Success.class);
-            assertThat(result.isSuccess()).isTrue();
-            assertThat(result.get()).isEqualTo("test");
+            assertThat(result)
+                .isSuccess()
+                .hasValue("test");
         }
 
         @Test
@@ -183,10 +230,9 @@ class ResultTest {
         void errorFactory() {
             Result<String, Integer> result = Result.error(404);
 
-            // expect an Error instance
-            assertThat(result).isInstanceOf(Error.class);
-            assertThat(result.isSuccess()).isFalse();
-            assertThat(result.errorDetails()).isEqualTo(404);
+            assertThat(result)
+                .isError()
+                .hasErrorDetails(404);
         }
 
         @Test
@@ -195,8 +241,9 @@ class ResultTest {
             Result<String, Object> result = Result.ofNullable("test");
 
             // expect a Success with the original value
-            assertThat(result.isSuccess()).isTrue();
-            assertThat(result.get()).isEqualTo("test");
+            assertThat(result)
+                .isSuccess()
+                .hasValue("test");
         }
 
         @Test
@@ -204,9 +251,111 @@ class ResultTest {
         void ofNullableWithNull() {
             Result<String, Object> result = Result.ofNullable(null);
 
-            // expect an Error with null error details
+            assertThat(result)
+                .isError()
+                .hasErrorDetails(null);
+        }
+
+        @Test
+        @DisplayName("ofNullable() with supplier and non-null value")
+        void ofNullableWithSupplier_nonNull() {
+            Result<String, String> result = Result.ofNullable("test", () -> "error");
+
+            // expect a Success with the original value
+            assertThat(result)
+                .isSuccess()
+                .hasValue("test");
+        }
+
+        @Test
+        @DisplayName("ofNullable() with supplier and null value")
+        void ofNullableWithSupplier_null() {
+            Result<String, String> result = Result.ofNullable(null, () -> "error");
+
+            // expect an Error with the supplied error details
+            assertThat(result)
+                .isError()
+                .hasErrorDetails("error");
+        }
+    }
+
+    @Nested
+    @DisplayName("state tests")
+    class StateTests {
+        @Test
+        @DisplayName("isSuccess() on Success")
+        void isSuccess_onSuccess() {
+            Result<String, Integer> result = new Success<>("test");
+            assertThat(result.isSuccess()).isTrue();
+        }
+
+        @Test
+        @DisplayName("isSuccess() on Error")
+        void isSuccess_onError() {
+            Result<String, Integer> result = new Error<>(1);
             assertThat(result.isSuccess()).isFalse();
-            assertThat(result.errorDetails()).isNull();
+        }
+
+        @Test
+        @DisplayName("isError() on Success")
+        void isError_onSuccess() {
+            Result<String, Integer> result = new Success<>("test");
+            assertThat(result.isError()).isFalse();
+        }
+
+        @Test
+        @DisplayName("isError() on Error")
+        void isError_onError() {
+            Result<String, Integer> result = new Error<>(1);
+            assertThat(result.isError()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("conditional execution tests")
+    class ConditionalExecutionTests {
+        @Test
+        @DisplayName("ifSuccess() on Success")
+        void ifSuccess_onSuccess() {
+            Result<String, Integer> result = new Success<>("value");
+            var ref = new AtomicReference<String>();
+            result.ifSuccess(ref::set);
+
+            // expect the consumer to be called
+            assertThat(ref.get()).isEqualTo("value");
+        }
+
+        @Test
+        @DisplayName("ifSuccess() on Error")
+        void ifSuccess_onError() {
+            Result<String, Integer> result = new Error<>(1);
+            var ref = new AtomicReference<String>();
+            result.ifSuccess(ref::set);
+
+            // expect the consumer to not be called
+            assertThat(ref.get()).isNull();
+        }
+
+        @Test
+        @DisplayName("ifError() on Success")
+        void ifError_onSuccess() {
+            Result<String, Integer> result = new Success<>("value");
+            var ref = new AtomicReference<Integer>();
+            result.ifError(ref::set);
+
+            // expect the consumer to not be called
+            assertThat(ref.get()).isNull();
+        }
+
+        @Test
+        @DisplayName("ifError() on Error")
+        void ifError_onError() {
+            Result<String, Integer> result = new Error<>(42);
+            var ref = new AtomicReference<Integer>();
+            result.ifError(ref::set);
+
+            // expect the consumer to be called
+            assertThat(ref.get()).isEqualTo(42);
         }
     }
 

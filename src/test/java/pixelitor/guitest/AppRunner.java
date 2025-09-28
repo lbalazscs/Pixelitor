@@ -661,6 +661,23 @@ public class AppRunner {
         return GUITestUtils.findButtonByText(pw, text);
     }
 
+    /**
+     * Opens a tool dialog, performs the given actions, and then closes it.
+     */
+    public void withToolDialog(String buttonName, String dialogTitle, Consumer<DialogFixture> dialogActions) {
+        var button = findButton(buttonName).requireVisible();
+        if (!button.isEnabled()) {
+            return;
+        }
+        button.click();
+
+//        Utils.sleep(200, MILLISECONDS);
+
+        var dialog = findDialogByTitle(dialogTitle);
+        dialogActions.accept(dialog);
+        dialog.button("ok").click();
+    }
+
     public void setMaskViewModeViaRightClick(String layerName, MaskViewMode maskViewMode) {
         clickMaskPopup(layerName, maskViewMode.toString());
     }
@@ -754,8 +771,8 @@ public class AppRunner {
         }
 
         if (showOriginal == ShowOriginal.YES) {
-            dialog.checkBox("show original").click();
-            dialog.checkBox("show original").click();
+            // click twice to restore the unchecked state
+            dialog.checkBox("show original").click().click();
         }
 
         if (reseed == Reseed.YES) {
@@ -945,8 +962,8 @@ public class AppRunner {
         undoRedoNewLayer(numLayersBefore, "Add Gradient Fill Layer");
 
         EDT.assertActiveToolIs(Tools.GRADIENT);
-        CanvasDrag dragLocation = new CanvasDrag(100, 100, 100);
-        drawGradient(gradientType, GradientColorType.FG_TO_BG, dragLocation,
+        CanvasDrag drag = CanvasDrag.diagonal(100, 100, 100);
+        drawGradient(gradientType, GradientColorType.FG_TO_BG, drag,
             new Color(68, 152, 115),
             new Color(185, 56, 177));
 
@@ -955,7 +972,7 @@ public class AppRunner {
 
     public void drawGradient(GradientType gradientType,
                              GradientColorType colorType,
-                             CanvasDrag dragLocation,
+                             CanvasDrag drag,
                              Color fgColor, Color bgColor) {
         clickTool(Tools.GRADIENT);
 
@@ -964,7 +981,7 @@ public class AppRunner {
         pw.checkBox("reverseCB").uncheck();
 
         EDT.setFgBgColors(fgColor, bgColor);
-        mouse.drag(dragLocation);
+        mouse.drag(drag);
 
         if (EDT.isActiveLayerType(GradientFillLayer.class)) {
             keyboard.undoRedo("Gradient Fill Layer Change");
@@ -995,7 +1012,7 @@ public class AppRunner {
         keyboard.undoRedo("Hide Gradient Handles");
     }
 
-    public void addShapesLayer(ShapeType shapeType, CanvasDrag shapeLocation) {
+    public void addShapesLayer(ShapeType shapeType, CanvasDrag shapeBounds) {
         int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         keyboard.ctrlAltPress(VK_S);
@@ -1004,18 +1021,18 @@ public class AppRunner {
         EDT.assertActiveToolIs(Tools.SHAPES);
 
         EDT.setFgBgColors(new Color(248, 199, 25), new Color(39, 81, 39));
-        drawShape(shapeType, RADIAL_GRADIENT, NONE, shapeLocation, false);
+        drawShape(shapeType, RADIAL_GRADIENT, NONE, shapeBounds, false);
     }
 
     public void drawShape(ShapeType type,
                           TwoPointPaintType fillPaint,
                           TwoPointPaintType strokePaint,
-                          CanvasDrag shapeLocation, boolean rasterize) {
+                          CanvasDrag shapeBounds, boolean rasterize) {
         clickTool(Tools.SHAPES);
         pw.comboBox("shapeTypeCB").selectItem(type.toString());
         pw.comboBox("fillPaintCB").selectItem(fillPaint.toString());
         pw.comboBox("strokePaintCB").selectItem(strokePaint.toString());
-        mouse.drag(shapeLocation);
+        mouse.drag(shapeBounds);
         keyboard.undoRedo("Create Shape");
 
         if (rasterize) {

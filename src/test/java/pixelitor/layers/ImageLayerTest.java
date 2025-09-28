@@ -17,13 +17,10 @@
 
 package pixelitor.layers;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.*;
 import pixelitor.compactions.Outsets;
 import pixelitor.history.ContentLayerMoveEdit;
@@ -39,36 +36,37 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.assertions.PixelitorAssertions.assertThatThrownBy;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
 
-@RunWith(Parameterized.class)
-public class ImageLayerTest {
+@ParameterizedClass(name = "mask = {0}, translation = {1}, sel = {2}")
+@MethodSource("instancesToTest")
+@DisplayName("image layer tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class ImageLayerTest {
     private ImageLayer layer;
 
-    @Parameter
-    public WithMask withMask;
+    @Parameter(0)
+    private WithMask withMask;
 
-    @Parameter(value = 1)
-    public WithTranslation withTranslation;
+    @Parameter(1)
+    private WithTranslation withTranslation;
 
-    @Parameter(value = 2)
-    public WithSelection withSelection;
+    @Parameter(2)
+    private WithSelection withSelection;
 
     private Composition comp;
 
     private IconUpdateChecker iconChecker;
 
-    @Parameters(name = "{index}: mask = {0}, transl = {1}, sel = {2}")
-    public static Collection<Object[]> instancesToTest() {
+    static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
             {WithMask.NO, WithTranslation.NO, WithSelection.NO},
             {WithMask.YES, WithTranslation.NO, WithSelection.NO},
@@ -78,13 +76,13 @@ public class ImageLayerTest {
         });
     }
 
-    @BeforeClass
-    public static void beforeAllTests() {
+    @BeforeAll
+    static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
     }
 
-    @Before
-    public void beforeEachTest() {
+    @BeforeEach
+    void beforeEachTest() {
         comp = TestHelper.createMockComp("ImageLayerTest");
 
         layer = createEmptyImageLayer(comp, "layer 1");
@@ -102,7 +100,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void getSetImage() {
+    void getSetImage() {
         // setImage is called already in the ImageLayer constructor
         int expectedCacheInvalidations = 1;
         if (withMask.isTrue()) {
@@ -133,7 +131,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void startPreviewing() {
+    void startPreviewing() {
         BufferedImage imageBefore = layer.getImage();
 
         layer.startPreviewing();
@@ -150,7 +148,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void onDialogAccepted() {
+    void onDialogAccepted() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
         layer.onFilterDialogAccepted("filterName");
@@ -162,13 +160,13 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void onDialogCanceled_Fail() {
-        assertThrows(AssertionError.class, () ->
-            layer.onFilterDialogCanceled());
+    void onDialogCanceled_Fail() {
+        assertThatThrownBy(() -> layer.onFilterDialogCanceled())
+            .isInstanceOf(AssertionError.class);
     }
 
     @Test
-    public void onDialogCanceled_OK() {
+    void onDialogCanceled_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
         layer.onFilterDialogCanceled();
@@ -180,13 +178,13 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void changePreviewImage_Fail() {
-        assertThrows(IllegalStateException.class, () ->
-            layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING));
+    void changePreviewImage_Fail() {
+        assertThatThrownBy(() -> layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING))
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void changePreviewImage_OK() {
+    void changePreviewImage_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
         layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING);
@@ -198,7 +196,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void filterWithoutDialogFinished() {
+    void filterWithoutDialogFinished() {
         assert ConsistencyChecks.imageCoversCanvas(layer);
         BufferedImage dest = ImageUtils.copyImage(layer.getImage());
 
@@ -210,7 +208,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void changeImageForUndoRedo() {
+    void changeImageForUndoRedo() {
         TestHelper.setSelection(comp, new Rectangle(2, 2, 2, 2));
 
         layer.changeImageForUndoRedo(TestHelper.createImage(),
@@ -222,7 +220,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void getContentBounds() {
+    void getContentBounds() {
         Rectangle bounds = layer.getContentBounds();
 
         assertThat(bounds).isNotNull();
@@ -236,7 +234,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void getImageForFilterDialogs() {
+    void getImageForFilterDialogs() {
         BufferedImage image = layer.getImageForFilterDialogs();
 
         if (withSelection.isTrue()) {
@@ -256,7 +254,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void tmpDrawingLayer() {
+    void tmpDrawingLayer() {
         TmpLayer tmpLayer
             = layer.createTmpLayer(AlphaComposite.SrcOver, false);
         assertThat(tmpLayer).isNotNull();
@@ -269,7 +267,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void createCanvasSizedTmpImage() {
+    void createCanvasSizedTmpImage() {
         Canvas canvas = layer.getComp().getCanvas();
         BufferedImage image = canvas.createTmpImage();
 
@@ -280,7 +278,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void getCanvasSizedSubImage() {
+    void getCanvasSizedSubImage() {
         BufferedImage image = layer.getCanvasSizedSubImage();
 
         Canvas canvas = layer.getComp().getCanvas();
@@ -291,7 +289,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void getFilterSourceImage() {
+    void getFilterSourceImage() {
         var filterSourceImage = layer.getFilterSourceImage();
 
         assertThat(filterSourceImage).isNotNull();
@@ -307,7 +305,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void getSelectedSubImage() {
+    void getSelectedSubImage() {
         BufferedImage imageT = layer.getSelectedSubImage(true);
         assertThat(imageT).isNotNull();
         BufferedImage layerImage = layer.getImage();
@@ -340,7 +338,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void crop_deletePixels_noGrowing() {
+    void crop_deletePixels_noGrowing() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -359,7 +357,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void crop_deletePixels_withGrowing() {
+    void crop_deletePixels_withGrowing() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -376,7 +374,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void crop_keepPixels_noGrowing() {
+    void crop_keepPixels_noGrowing() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -395,7 +393,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void crop_keepPixels_withGrowingRightDown() {
+    void crop_keepPixels_withGrowingRightDown() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -412,7 +410,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void crop_keepPixels_withGrowingLeft() {
+    void crop_keepPixels_withGrowingLeft() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -429,7 +427,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void crop_keepPixels_withGrowingDown() {
+    void crop_keepPixels_withGrowingDown() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -459,7 +457,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void cropToCanvasSize() {
+    void cropToCanvasSize() {
         layer.toCanvasSize();
 
         Canvas canvas = layer.getComp().getCanvas();
@@ -470,14 +468,14 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void enlargeCanvas() {
+    void enlargeCanvas() {
         layer.enlargeCanvas(new Outsets(5, 5, 5, 10));
 
         iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
-    public void createMovementEdit() {
+    void createMovementEdit() {
         ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
 
         assertThat(edit).isNotNull();
@@ -485,7 +483,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void duplicate() {
+    void duplicate() {
         ImageLayer duplicate = (ImageLayer) layer.copy(CopyType.DUPLICATE_LAYER, true, comp);
 
         assertThat(duplicate)
@@ -495,7 +493,7 @@ public class ImageLayerTest {
 
         BufferedImage image = layer.getImage();
         BufferedImage duplicateImage = duplicate.getImage();
-        assertNotSame(duplicateImage, image);
+        assertThat(duplicateImage).isNotSameAs(image);
         assertThat(image)
             .isNotSameAs(duplicateImage)
             .hasSameSizeAs(duplicateImage);
@@ -504,7 +502,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void applyLayerMask() {
+    void applyLayerMask() {
         if (withMask.isTrue()) {
             History.clear();
             assertThat(layer).hasMask();

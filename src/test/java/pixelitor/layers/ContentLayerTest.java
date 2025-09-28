@@ -17,13 +17,11 @@
 
 package pixelitor.layers;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
@@ -31,47 +29,45 @@ import pixelitor.testutils.WithMask;
 import pixelitor.tools.move.MoveMode;
 
 import java.awt.Graphics2D;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
- * Tests the functionality common to all ContentLayer subclasses
+ * Tests the functionality common to all {@link ContentLayer} subclasses.
  */
-@RunWith(Parameterized.class)
-public class ContentLayerTest {
-    @Parameter
-    public Class<? extends Layer> layerClass;
+@ParameterizedClass(name = "class = {0}, with mask = {1}")
+@MethodSource("instancesToTest")
+@DisplayName("content layer tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class ContentLayerTest {
+    @Parameter(0)
+    private Class<? extends Layer> layerClass;
 
-    @Parameter(value = 1)
-    public WithMask withMask;
+    @Parameter(1)
+    private WithMask withMask;
 
     private ContentLayer layer;
     private Composition comp;
 
     private IconUpdateChecker iconChecker;
 
-    @Parameters(name = "{index}: layer = {0}, mask = {1}")
-    public static Collection<Object[]> instancesToTest() {
-        // this method runs before beforeAllTests
-        TestHelper.setUnitTestingMode();
-
-        return Arrays.asList(new Object[][]{
-            {ImageLayer.class, WithMask.NO},
-            {ImageLayer.class, WithMask.YES},
-            {TextLayer.class, WithMask.NO},
-            {TextLayer.class, WithMask.YES},
-        });
+    static Stream<Arguments> instancesToTest() {
+        return Stream.of(
+            Arguments.of(ImageLayer.class, WithMask.NO),
+            Arguments.of(ImageLayer.class, WithMask.YES),
+            Arguments.of(TextLayer.class, WithMask.NO),
+            Arguments.of(TextLayer.class, WithMask.YES)
+        );
     }
 
-    @BeforeClass
-    public static void beforeAllTests() {
+    @BeforeAll
+    static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
     }
 
-    @Before
-    public void beforeEachTest() {
+    @BeforeEach
+    void beforeEachTest() {
         comp = TestHelper.createEmptyComp("ContentLayerTest");
         layer = (ContentLayer) TestHelper.createLayer(layerClass, comp);
 
@@ -90,7 +86,7 @@ public class ContentLayerTest {
     }
 
     @Test
-    public void movingTheLayer() {
+    void movingTheLayer() {
         assertThat(layer).translationIs(0, 0);
 
         layer.prepareMovement();
@@ -157,7 +153,7 @@ public class ContentLayerTest {
     }
 
     @Test
-    public void render() {
+    void render() {
         var g2 = TestHelper.createGraphics();
         var image = TestHelper.createImage();
 
@@ -167,14 +163,14 @@ public class ContentLayerTest {
     }
 
     @Test
-    public void paintLayerOnGraphics() {
+    void paintLayerOnGraphics() {
         Graphics2D g2 = TestHelper.createGraphics();
         layer.paint(g2, false);
         iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
-    public void setupComposite() {
+    void setupComposite() {
         Graphics2D g = TestHelper.createGraphics();
         layer.setupComposite(g, true);
         layer.setupComposite(g, false);

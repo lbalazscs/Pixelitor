@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,17 +17,24 @@
 
 package pixelitor.tools.crop;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.TestHelper;
 
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("CropBox tests")
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @TestMethodOrder(MethodOrderer.Random.class)
 class CropBoxTest {
     @BeforeAll
@@ -35,253 +42,76 @@ class CropBoxTest {
         TestHelper.setUnitTestingMode();
     }
 
-    @Test
-    void aspectRatio() {
-        // width: 0
-        checkAspectRatio(new Rectangle(30, 40, 0, 20), 0);
-
-        // height: 0
-        checkAspectRatio(new Rectangle(30, 40, 20, 0), 0);
-
-        // width, height: 0
-        checkAspectRatio(new Rectangle(30, 40, 0, 0), 0);
-
-        // height > width
-        checkAspectRatio(new Rectangle(30, 40, 10, 20), 0.5);
-
-        // width > height
-        checkAspectRatio(new Rectangle(30, 40, 20, 10), 2.0);
-
-        // width == height
-        checkAspectRatio(new Rectangle(30, 40, 20, 20), 1.0);
+    @DisplayName("aspect ratio tests")
+    @ParameterizedTest(name = "aspect ratio for rect({0}x{1}) should be {2}")
+    @CsvSource({
+        // width, height, expected
+        " 0,     20,      0.0", // width is 0
+        "20,      0,      0.0", // height is 0
+        " 0,      0,      0.0", // width and height are 0
+        "10,     20,      0.5", // height > width
+        "20,     10,      2.0", // width > height
+        "20,     20,      1.0"  // width == height
+    })
+    void aspect_ratio(int width, int height, double expected) {
+        double actual = CropBox.calcAspectRatio(new Rectangle(30, 40, width, height));
+        assertThat(actual).isEqualTo(expected);
     }
 
-    private static void checkAspectRatio(Rectangle rect, double expected) {
-        double aspectRatio = CropBox.calcAspectRatio(rect);
-        assertThat(aspectRatio).isEqualTo(expected);
-    }
-
-    @Test
-    void resize_by_north_handle() {
-        // up by 20
+    @DisplayName("resize by handle")
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("resizeArguments")
+    void resize_by_handle(String displayName, int cursor, Point moveOffset, Rectangle expectedRect) {
         Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle expectedRect = new Rectangle(30, 20, 10, 40);
-        Point endPoint = new Point(35, -20); // x can be any value
-
-        CropBox.resize(rect, Cursor.N_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // down by 20
-        rect = new Rectangle(30, 40, 10, 20);
-        expectedRect = new Rectangle(30, 60, 10, 0);
-        endPoint = new Point(35, 20); // x can be any value
-
-        CropBox.resize(rect, Cursor.N_RESIZE_CURSOR, endPoint);
+        CropBox.resize(rect, cursor, moveOffset);
         assertThat(rect).isEqualTo(expectedRect);
     }
 
-    @Test
-    void resize_by_south_handle() {
-        // up by 20
-        Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle expectedRect = new Rectangle(30, 40, 10, 0);
-        Point endPoint = new Point(45, -20); // x can be any value
-
-        CropBox.resize(rect, Cursor.S_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // down by 20
-        rect = new Rectangle(30, 40, 10, 20);
-        expectedRect = new Rectangle(30, 40, 10, 40);
-        endPoint = new Point(45, 20); // x can be any value
-
-        CropBox.resize(rect, Cursor.S_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
+    private static Stream<Arguments> resizeArguments() {
+        return Stream.of(
+            // arguments: displayName, cursor, moveOffset, expectedRect
+            Arguments.of("North handle, move up", Cursor.N_RESIZE_CURSOR, new Point(0, -20), new Rectangle(30, 20, 10, 40)),
+            Arguments.of("North handle, move down", Cursor.N_RESIZE_CURSOR, new Point(0, 20), new Rectangle(30, 60, 10, 0)),
+            Arguments.of("South handle, move up", Cursor.S_RESIZE_CURSOR, new Point(0, -20), new Rectangle(30, 40, 10, 0)),
+            Arguments.of("South handle, move down", Cursor.S_RESIZE_CURSOR, new Point(0, 20), new Rectangle(30, 40, 10, 40)),
+            Arguments.of("West handle, move west", Cursor.W_RESIZE_CURSOR, new Point(-20, 0), new Rectangle(10, 40, 30, 20)),
+            Arguments.of("West handle, move east", Cursor.W_RESIZE_CURSOR, new Point(20, 0), new Rectangle(50, 40, -10, 20)),
+            Arguments.of("East handle, move west", Cursor.E_RESIZE_CURSOR, new Point(-20, 0), new Rectangle(30, 40, -10, 20)),
+            Arguments.of("East handle, move east", Cursor.E_RESIZE_CURSOR, new Point(20, 0), new Rectangle(30, 40, 30, 20)),
+            Arguments.of("North-East handle, move up-right", Cursor.NE_RESIZE_CURSOR, new Point(20, -20), new Rectangle(30, 20, 30, 40)),
+            Arguments.of("North-East handle, move down-left", Cursor.NE_RESIZE_CURSOR, new Point(-20, 20), new Rectangle(30, 60, -10, 0)),
+            Arguments.of("North-West handle, move up-left", Cursor.NW_RESIZE_CURSOR, new Point(-20, -20), new Rectangle(10, 20, 30, 40)),
+            Arguments.of("North-West handle, move down-right", Cursor.NW_RESIZE_CURSOR, new Point(20, 20), new Rectangle(50, 60, -10, 0)),
+            Arguments.of("South-East handle, move up-left", Cursor.SE_RESIZE_CURSOR, new Point(-20, -20), new Rectangle(30, 40, -10, 0)),
+            Arguments.of("South-East handle, move down-right", Cursor.SE_RESIZE_CURSOR, new Point(20, 20), new Rectangle(30, 40, 30, 40)),
+            Arguments.of("South-West handle, move up-right", Cursor.SW_RESIZE_CURSOR, new Point(20, -20), new Rectangle(50, 40, -10, 0)),
+            Arguments.of("South-West handle, move down-left", Cursor.SW_RESIZE_CURSOR, new Point(-20, 20), new Rectangle(10, 40, 30, 40))
+        );
     }
 
-    @Test
-    void resize_by_west_handle() {
-        // west by 20
-        Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle expectedRect = new Rectangle(10, 40, 30, 20);
-        Point endPoint = new Point(-20, 45); // y can be any value
-
-        CropBox.resize(rect, Cursor.W_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // east by 20
-        rect = new Rectangle(30, 40, 10, 20);
-        expectedRect = new Rectangle(50, 40, -10, 20);
-        endPoint = new Point(20, 45); // y can be any value
-
-        CropBox.resize(rect, Cursor.W_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void resize_by_east_handle() {
-        // west by 20
-        Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle expectedRect = new Rectangle(30, 40, -10, 20);
-        Point moveOffset = new Point(-20, 45); // y can be any value
-
-        CropBox.resize(rect, Cursor.E_RESIZE_CURSOR, moveOffset);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // east by 20
-        rect = new Rectangle(30, 40, 10, 20);
-        expectedRect = new Rectangle(30, 40, 30, 20);
-        moveOffset = new Point(20, 45); // y can be any value
-
-        CropBox.resize(rect, Cursor.E_RESIZE_CURSOR, moveOffset);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void resize_by_north_east_handle() {
-        // up xy by 20
-        Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle expectedRect = new Rectangle(30, 20, 30, 40);
-        Point moveOffset = new Point(20, -20);
-
-        CropBox.resize(rect, Cursor.NE_RESIZE_CURSOR, moveOffset);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // down xy by 20
-        rect = new Rectangle(30, 40, 10, 20);
-        expectedRect = new Rectangle(30, 60, -10, 0);
-        moveOffset = new Point(-20, 20);
-
-        CropBox.resize(rect, Cursor.NE_RESIZE_CURSOR, moveOffset);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void resize_by_north_west_handle() {
-        // up xy by 20
-        Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle expectedRect = new Rectangle(10, 20, 30, 40);
-        Point endPoint = new Point(-20, -20);
-
-        CropBox.resize(rect, Cursor.NW_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // down xy by 20
-        rect = new Rectangle(30, 40, 10, 20);
-        expectedRect = new Rectangle(50, 60, -10, 0);
-        endPoint = new Point(20, 20);
-
-        CropBox.resize(rect, Cursor.NW_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void resize_by_south_east_handle() {
-        // up xy by 20
-        Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle expectedRect = new Rectangle(30, 40, -10, 0);
-        Point moveOffset = new Point(-20, -20);
-
-        CropBox.resize(rect, Cursor.SE_RESIZE_CURSOR, moveOffset);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // down xy by 20
-        rect = new Rectangle(30, 40, 10, 20);
-        expectedRect = new Rectangle(30, 40, 30, 40);
-        moveOffset = new Point(20, 20);
-
-        CropBox.resize(rect, Cursor.SE_RESIZE_CURSOR, moveOffset);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void resize_by_south_west_handle() {
-        // up xy by 20
-        Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle expectedRect = new Rectangle(50, 40, -10, 0);
-        Point endPoint = new Point(20, -20);
-
-        CropBox.resize(rect, Cursor.SW_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // down xy by 20
-        rect = new Rectangle(30, 40, 10, 20);
-        expectedRect = new Rectangle(10, 40, 30, 40);
-        endPoint = new Point(-20, 20);
-
-        CropBox.resize(rect, Cursor.SW_RESIZE_CURSOR, endPoint);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void keepAspectRatio_by_north_or_south_handle() {
-        Rectangle rect, expectedRect;
-
-        // resize from 10x20 (aspectRatio: 0.5) to 10x40
-        rect = new Rectangle(30, 40, 10, 40);
-        expectedRect = new Rectangle(25, 40, 20, 40);
-
-        keepAspectRatio(rect, Cursor.N_RESIZE_CURSOR);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        keepAspectRatio(rect, Cursor.S_RESIZE_CURSOR);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void keepAspectRatio_by_west_or_east_handle() {
-        Rectangle rect, expectedRect;
-
-        // resize from 10x20 (aspectRatio: 0.5) to 20x20
-        rect = new Rectangle(30, 40, 20, 20);
-        expectedRect = new Rectangle(30, 30, 20, 40);
-
-        keepAspectRatio(rect, Cursor.E_RESIZE_CURSOR);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        keepAspectRatio(rect, Cursor.W_RESIZE_CURSOR);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void keepAspectRatio_by_north_east_handle() {
-        Rectangle rect, expectedRect;
-
-        // resize from 10x20 (aspectRatio: 0.5) to 20x20 (aspectRatio: 1.0) -> adjust height
-        rect = new Rectangle(30, 40, 20, 20);
-        expectedRect = new Rectangle(30, 20, 20, 40); // adjust: y, height
-
-        keepAspectRatio(rect, Cursor.NE_RESIZE_CURSOR);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // resize from 10x20 (aspectRatio: 0.5) to 10x40 (aspectRatio: 0.25) -> adjust width
-        rect = new Rectangle(30, 40, 10, 40);
-        expectedRect = new Rectangle(30, 40, 20, 40); // adjust x, width
-
-        keepAspectRatio(rect, Cursor.NE_RESIZE_CURSOR);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    @Test
-    void keepAspectRatio_by_north_west_handle() {
-        Rectangle rect, expectedRect;
-
-        // resize from 10x20 (aspectRatio: 0.5) to 20x20 (aspectRatio: 1.0) -> adjust height
-        rect = new Rectangle(30, 40, 20, 20);
-        expectedRect = new Rectangle(30, 20, 20, 40); // adjust: y, height
-
-        keepAspectRatio(rect, Cursor.NW_RESIZE_CURSOR);
-        assertThat(rect).isEqualTo(expectedRect);
-
-        // resize from 10x20 (aspectRatio: 0.5) to 5x40 (aspectRatio: 0.125) -> adjust width
-        rect = new Rectangle(30, 40, 5, 40);
-        expectedRect = new Rectangle(15, 40, 20, 40); // adjust: x, width
-
-        keepAspectRatio(rect, Cursor.NW_RESIZE_CURSOR);
-        assertThat(rect).isEqualTo(expectedRect);
-    }
-
-    private static void keepAspectRatio(Rectangle rect, int cursor) {
+    /**
+     * Tests that resizing maintains the correct aspect ratio.
+     */
+    @DisplayName("keep aspect ratio by handle")
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("keepAspectRatioArguments")
+    void keepAspectRatio_by_handle(String displayName, int cursor, Rectangle rect, Rectangle expectedRect) {
+        // the test uses a fixed aspect ratio of 0.5
         CropBox.keepAspectRatio(rect, cursor, 0.5, null);
+        assertThat(rect).isEqualTo(expectedRect);
+    }
+
+    private static Stream<Arguments> keepAspectRatioArguments() {
+        return Stream.of(
+            // arguments: displayName, cursor, initialRect, expectedRect
+            Arguments.of("North handle", Cursor.N_RESIZE_CURSOR, new Rectangle(30, 40, 10, 40), new Rectangle(25, 40, 20, 40)),
+            Arguments.of("South handle", Cursor.S_RESIZE_CURSOR, new Rectangle(30, 40, 10, 40), new Rectangle(25, 40, 20, 40)),
+            Arguments.of("East handle", Cursor.E_RESIZE_CURSOR, new Rectangle(30, 40, 20, 20), new Rectangle(30, 30, 20, 40)),
+            Arguments.of("West handle", Cursor.W_RESIZE_CURSOR, new Rectangle(30, 40, 20, 20), new Rectangle(30, 30, 20, 40)),
+            Arguments.of("North-East handle, adjust height", Cursor.NE_RESIZE_CURSOR, new Rectangle(30, 40, 20, 20), new Rectangle(30, 20, 20, 40)),
+            Arguments.of("North-East handle, adjust width", Cursor.NE_RESIZE_CURSOR, new Rectangle(30, 40, 10, 40), new Rectangle(30, 40, 20, 40)),
+            Arguments.of("North-West handle, adjust height", Cursor.NW_RESIZE_CURSOR, new Rectangle(30, 40, 20, 20), new Rectangle(30, 20, 20, 40)),
+            Arguments.of("North-West handle, adjust width", Cursor.NW_RESIZE_CURSOR, new Rectangle(30, 40, 5, 40), new Rectangle(15, 40, 20, 40))
+        );
     }
 }

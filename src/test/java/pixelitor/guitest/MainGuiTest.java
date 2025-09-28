@@ -939,7 +939,7 @@ public class MainGuiTest {
         if (addExtraLayers) {
             app.addGradientFillLayer(GradientType.ANGLE);
             app.addColorFillLayer(Color.BLUE);
-            app.addShapesLayer(ShapeType.BAT, new CanvasDrag(20, 380, 100));
+            app.addShapesLayer(ShapeType.BAT, CanvasDrag.diagonal(20, 380, 100));
         }
 
         testDuplicateImage();

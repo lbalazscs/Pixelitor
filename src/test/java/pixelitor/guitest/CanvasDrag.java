@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,39 +17,8 @@
 
 package pixelitor.guitest;
 
-public final class CanvasDrag {
-    private final int startX;
-    private final int startY;
-    private final int endX;
-    private final int endY;
-
-    public CanvasDrag(int startX, int startY, int size) {
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = startX + size;
-        this.endY = startY + size;
-    }
-
-    public CanvasDrag(int startX, int startY, int endX, int endY) {
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
-    }
-
-    public int getStartX() {
-        return startX;
-    }
-
-    public int getStartY() {
-        return startY;
-    }
-
-    public int getEndX() {
-        return endX;
-    }
-
-    public int getEndY() {
-        return endY;
+public record CanvasDrag(int startX, int startY, int endX, int endY) {
+    public static CanvasDrag diagonal(int startX, int startY, int size) {
+        return new CanvasDrag(startX, startY, startX + size, startY + size);
     }
 }

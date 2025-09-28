@@ -18,6 +18,8 @@
 package pixelitor.filters.gui;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.verification.VerificationMode;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -36,7 +38,7 @@ import static org.mockito.Mockito.verify;
 class ParamSetTest {
     private ParamSet params;
     private ParamAdjustmentListener mockAdjustmentListener;
-    private RangeParam extraParam;
+    private RangeParam testedParam;
 
     @BeforeAll
     static void beforeAllTests() {
@@ -54,9 +56,9 @@ class ParamSetTest {
         params.setAdjustmentListener(mockAdjustmentListener);
 
         // add an extra parameter that uses the adjustment listener defined here
-        extraParam = new RangeParam("Extra Param", 0, 0, 200);
-        extraParam.setAdjustmentListener(mockAdjustmentListener);
-        params.insertParam(extraParam, 3);
+        testedParam = new RangeParam("Tested Param", 0, 0, 200);
+        testedParam.setAdjustmentListener(mockAdjustmentListener);
+        params.insertParam(testedParam, 3);
 
         Composition comp = TestHelper.createRealComp("ParamSetTest", ImageLayer.class);
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
@@ -69,61 +71,84 @@ class ParamSetTest {
     }
 
     @Test
-    void resetShouldNotTriggerFilter() {
+    void resetShouldNotNotifyListener() {
         params.reset();
-        verifyFilterNotExecuted();
+        verifyListenerNotified(never());
     }
 
     @Test
-    void randomizeShouldNotTriggerFilter() {
+    void randomizeShouldNotNotifyListener() {
         params.randomize();
-        verifyFilterNotExecuted();
+        verifyListenerNotified(never());
     }
 
     @Test
-    void filterTriggering() {
-        extraParam.setValue(42, false);
-        verifyFilterNotExecuted();
+    void shouldNotifyListenerOnValueChangeAndRun() {
+        testedParam.setValue(42, false);
+        verifyListenerNotified(never());
 
-        extraParam.setValue(43, true);
-        verifyFilterExecuted(times(1));
+        testedParam.setValue(43, true);
+        verifyListenerNotified(times(1));
 
         params.runFilter();
-        verifyFilterExecuted(times(2));
+        verifyListenerNotified(times(2));
     }
 
-    @Test
-    @DisplayName("copyState()/setState()")
-    void copyState_setState() {
-        // Set initial test value
-        extraParam.setValue(75, false);
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldSaveAndRestoreFilterState(boolean forAnimation) {
+        // set initial test value
+        int originalValue = 36;
+        int differentValue = 72;
+        testedParam.setValue(originalValue, false);
 
-        // Copy state and modify current values
-        FilterState savedState = params.copyState(true);
-        extraParam.setValue(100, false);
+        // save a FilterState
+        FilterState savedState = params.copyState(forAnimation);
+        testedParam.setValue(differentValue, false);
+        verifyListenerNotified(never());
 
-        // Restore state and verify
-        params.setState(savedState, true);
-        assertThat(extraParam.getValue()).isEqualTo(75);
-        verifyFilterNotExecuted();
+        // restore state and verify
+        params.setState(savedState, forAnimation);
+        assertThat(testedParam.getValue()).isEqualTo(originalValue);
+        verifyListenerNotified(never());
+
+        // apply the state, which should restore the value and run the filter
+        testedParam.setValue(differentValue, false);
+        params.applyState(savedState, false);
+        verifyListenerNotified(times(1));
     }
 
     @Test
     void isAnimatable() {
         assertThat(params.isAnimatable()).isTrue();
+
+        ParamSet nonAnimatableParams = new ParamSet();
+        assertThat(nonAnimatableParams.isAnimatable()).isFalse();
     }
 
-    @Test
-    void setFinalAnimationMode() {
-        params.setAnimationEndStateMode(false);
-        params.setAnimationEndStateMode(true);
-
-        verifyFilterNotExecuted();
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void setFinalAnimationMode(boolean value) {
+        params.setAnimationEndStateMode(value);
+        verifyListenerNotified(never());
     }
 
     @Test
     void hasGradient() {
         assertThat(params.hasGradient()).isTrue();
+
+        ParamSet noGradientParams = new ParamSet();
+        assertThat(noGradientParams.hasGradient()).isFalse();
+    }
+
+    @Test
+    void setShouldUpdateCorrectParamValue() {
+        // set the value of "Tested Param" using its string name
+        params.set("Tested Param", "123");
+
+        assertThat(testedParam.getValue()).isEqualTo(123);
+        // verify that setting a value via this method does not trigger the listener
+        verifyListenerNotified(never());
     }
 
     @Test
@@ -135,11 +160,11 @@ class ParamSetTest {
 
     @Test
     void afterResetActionShouldBeExecuted() {
-        // Set up a mock after reset action
+        // set up a mock after reset action
         Runnable mockAfterResetAction = mock(Runnable.class);
         params.setAfterResetAllAction(mockAfterResetAction);
 
-        // Perform reset and verify action was executed
+        // perform reset and verify action was executed
         params.reset();
         verify(mockAfterResetAction, times(1)).run();
     }
@@ -147,37 +172,18 @@ class ParamSetTest {
     @Test
     void shouldSaveAndRestoreUserPreset() {
         UserPreset preset = new UserPreset("ParamSetTest");
-        extraParam.setValue(36, false);
+        testedParam.setValue(36, false);
 
         params.saveStateTo(preset);
-        extraParam.setValue(72, false);
-        verifyFilterNotExecuted();
+        testedParam.setValue(72, false);
+        verifyListenerNotified(never());
 
         params.loadUserPreset(preset);
-        assertThat(extraParam.getValue()).isEqualTo(36);
-        verifyFilterExecuted(times(1));
+        assertThat(testedParam.getValue()).isEqualTo(36);
+        verifyListenerNotified(times(1));
     }
 
-    @Test
-    void shouldSaveAndRestoreFilterState() {
-        extraParam.setValue(36, false);
-
-        // save an animation state so that it doesn't
-        // try to update the gui when restoring it
-        FilterState filterState = params.copyState(true);
-        extraParam.setValue(72, false);
-        verifyFilterNotExecuted();
-
-        params.setState(filterState, true);
-        assertThat(extraParam.getValue()).isEqualTo(36);
-        verifyFilterNotExecuted();
-    }
-
-    private void verifyFilterExecuted(VerificationMode times) {
+    private void verifyListenerNotified(VerificationMode times) {
         verify(mockAdjustmentListener, times).paramAdjusted();
-    }
-
-    private void verifyFilterNotExecuted() {
-        verifyFilterExecuted(never());
     }
 }

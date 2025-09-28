@@ -37,8 +37,28 @@ class IntChoiceParamTest {
     }
 
     @Test
-    @DisplayName("is IGNORE_RANDOMIZE working")
-    void isIgnoreRandomizeWorking() {
+    @DisplayName("test String array constructor")
+    void stringArrayConstructor() {
+        String[] choices = {"First", "Second", "Third"};
+        var param = new IntChoiceParam("Test", choices);
+
+        // assert that the parameter has the correct number of choices
+        assertThat(param.getSize()).isEqualTo(choices.length);
+
+        // assert that each Item has the expected name and value
+        for (int i = 0; i < choices.length; i++) {
+            Item item = param.getElementAt(i);
+            assertThat(item.name()).isEqualTo(choices[i]);
+            assertThat(item.value()).isEqualTo(i);
+        }
+
+        // assert that the initial selected value is 0
+        assertThat(param.getValue()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("randomize() with IGNORE_RANDOMIZE should not change value")
+    void randomize_whenModeIsIgnore_shouldNotChangeValue() {
         var param = new IntChoiceParam("Test", new Item[]{
             new Item("Name 1", 1),
             new Item("Name 2", 2),
@@ -49,6 +69,33 @@ class IntChoiceParamTest {
             param.randomize();
             assertThat(param).valueIs(1);
         }
+    }
+
+    @Test
+    @DisplayName("randomize() with ALLOW_RANDOMIZE should change value")
+    void randomize_whenModeIsAllow_shouldChangeValue() {
+        var param = new IntChoiceParam("Test", new Item[]{
+            new Item("Name 1", 1),
+            new Item("Name 2", 2),
+            new Item("Name 3", 3),
+            new Item("Name 4", 4),
+            new Item("Name 5", 5)
+        });
+
+        int initialValue = param.getValue();
+        boolean valueChanged = false;
+
+        // with enough attempts, the value should change: the probability
+        // of a false negative is (1/5)^100 = 1.26 * 10^-70
+        for (int i = 0; i < 100; i++) {
+            param.randomize();
+            if (param.getValue() != initialValue) {
+                valueChanged = true;
+                break;
+            }
+        }
+
+        assertThat(valueChanged).isTrue();
     }
 
     @Test

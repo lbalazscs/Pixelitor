@@ -320,14 +320,14 @@ public class WorkflowTest {
 
         int catMargin = 20;
         int catSize = 100;
-        CanvasDrag firstCatShapeLoc = new CanvasDrag(catMargin, INITIAL_HEIGHT - catMargin - catSize, catSize);
+        CanvasDrag firstCatBounds = CanvasDrag.diagonal(catMargin, INITIAL_HEIGHT - catMargin - catSize, catSize);
 
-        app.addShapesLayer(CAT, firstCatShapeLoc);
+        app.addShapesLayer(CAT, firstCatBounds);
         duplicateLayerThenUndo(ShapesLayer.class);
         rasterizeThenUndo(ShapesLayer.class);
 
-        CanvasDrag secondCatLoc = new CanvasDrag(INITIAL_WIDTH - catMargin, INITIAL_HEIGHT - catMargin - catSize, INITIAL_WIDTH - catMargin - catSize, INITIAL_HEIGHT - catMargin);
-        app.addShapesLayer(CAT, secondCatLoc);
+        CanvasDrag secondCatBounds = new CanvasDrag(INITIAL_WIDTH - catMargin, INITIAL_HEIGHT - catMargin - catSize, INITIAL_WIDTH - catMargin - catSize, INITIAL_HEIGHT - catMargin);
+        app.addShapesLayer(CAT, secondCatBounds);
 
         // ensure that the first layer is selected and the box is not shown
         app.selectLayerBelow();
@@ -466,8 +466,8 @@ public class WorkflowTest {
 
         // add a layer mask with a kiwi image
         app.addLayerMask();
-        CanvasDrag kiwiSize = new CanvasDrag(150, 50, 400);
-        app.drawShape(KIWI, FOREGROUND, NONE, kiwiSize, true);
+        CanvasDrag kiwiBounds = CanvasDrag.diagonal(150, 50, 400);
+        app.drawShape(KIWI, FOREGROUND, NONE, kiwiBounds, true);
 
         // invert the layer mask so that it's white inside the kiwi
         app.runMenuCommand("Invert");
@@ -776,8 +776,8 @@ public class WorkflowTest {
     private void addHeartShapedTransparency() {
         app.setDefaultColors();
         app.addLayerMask();
-        CanvasDrag heartLocation = new CanvasDrag(340, 100, 100);
-        app.drawShape(HEART, FOREGROUND, NONE, heartLocation, true);
+        CanvasDrag heartBounds = CanvasDrag.diagonal(340, 100, 100);
+        app.drawShape(HEART, FOREGROUND, NONE, heartBounds, true);
 
         app.runMenuCommand("Delete"); // in the Layer Mask submenu
         keyboard.undoRedoUndo("Delete Layer Mask");

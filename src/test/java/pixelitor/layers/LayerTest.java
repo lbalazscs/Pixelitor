@@ -17,14 +17,11 @@
 
 package pixelitor.layers;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.TestHelper;
@@ -37,10 +34,9 @@ import pixelitor.testutils.WithMask;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.BlendingMode.DIFFERENCE;
@@ -49,50 +45,52 @@ import static pixelitor.layers.BlendingMode.NORMAL;
 /**
  * Tests the functionality common to all Layer subclasses.
  */
-@RunWith(Parameterized.class)
-public class LayerTest {
+@ParameterizedClass(name = "class = {0}, with mask = {1}")
+@MethodSource("instancesToTest")
+@DisplayName("layer tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class LayerTest {
     private Composition comp;
     private Layer layer;  // the primary tested layer
     private ImageLayer layer2; // a secondary layer for context
 
-    @Parameter
-    public Class<? extends Layer> layerClass;
+    @Parameter(0)
+    private Class<? extends Layer> layerClass;
 
-    @Parameter(value = 1)
-    public WithMask withMask;
+    @Parameter(1)
+    private WithMask withMask;
 
     private IconUpdateChecker iconChecker;
 
-    @Parameters(name = "{index}: {0}, mask = {1}")
-    public static Collection<Object[]> instancesToTest() {
+    static Stream<Arguments> instancesToTest() {
         // define the combinations of layer types and mask presence to test
-        return Arrays.asList(new Object[][]{
-            {ImageLayer.class, WithMask.NO},
-            {ImageLayer.class, WithMask.YES},
-            {TextLayer.class, WithMask.NO},
-            {TextLayer.class, WithMask.YES},
-            {ShapesLayer.class, WithMask.NO},
-            {ShapesLayer.class, WithMask.YES},
-            {GradientFillLayer.class, WithMask.NO},
-            {GradientFillLayer.class, WithMask.YES},
-            {ColorFillLayer.class, WithMask.NO},
-            {ColorFillLayer.class, WithMask.YES},
-            {SmartObject.class, WithMask.NO},
-            {SmartObject.class, WithMask.YES},
-            {AdjustmentLayer.class, WithMask.NO},
-            {AdjustmentLayer.class, WithMask.YES},
-            {SmartFilter.class, WithMask.NO},
-            {SmartFilter.class, WithMask.YES},
-        });
+        return Stream.of(
+            Arguments.of(ImageLayer.class, WithMask.NO),
+            Arguments.of(ImageLayer.class, WithMask.YES),
+            Arguments.of(TextLayer.class, WithMask.NO),
+            Arguments.of(TextLayer.class, WithMask.YES),
+            Arguments.of(ShapesLayer.class, WithMask.NO),
+            Arguments.of(ShapesLayer.class, WithMask.YES),
+            Arguments.of(GradientFillLayer.class, WithMask.NO),
+            Arguments.of(GradientFillLayer.class, WithMask.YES),
+            Arguments.of(ColorFillLayer.class, WithMask.NO),
+            Arguments.of(ColorFillLayer.class, WithMask.YES),
+            Arguments.of(SmartObject.class, WithMask.NO),
+            Arguments.of(SmartObject.class, WithMask.YES),
+            Arguments.of(AdjustmentLayer.class, WithMask.NO),
+            Arguments.of(AdjustmentLayer.class, WithMask.YES),
+            Arguments.of(SmartFilter.class, WithMask.NO),
+            Arguments.of(SmartFilter.class, WithMask.YES)
+        );
     }
 
-    @BeforeClass
-    public static void beforeAllTests() {
+    @BeforeAll
+    static void beforeAllTests() {
         TestHelper.setUnitTestingMode(true);
     }
 
-    @Before
-    public void beforeEachTest() {
+    @BeforeEach
+    void beforeEachTest() {
         comp = TestHelper.createEmptyComp("LayerTest");
         layer = TestHelper.createLayer(layerClass, comp);
 
@@ -118,13 +116,13 @@ public class LayerTest {
         History.clear();
     }
 
-    @After
-    public void afterEachTest() {
+    @AfterEach
+    void afterEachTest() {
         TestHelper.verifyAndClearHistory();
     }
 
     @Test
-    public void hidingAndShowing() {
+    void hidingAndShowing() {
         checkShown(layer);
 
         // hide the layer
@@ -155,7 +153,7 @@ public class LayerTest {
     }
 
     @Test
-    public void isolating() {
+    void isolating() {
         checkShown(layer);
         checkShown(layer2);
 
@@ -189,7 +187,7 @@ public class LayerTest {
     }
 
     @Test
-    public void duplicating() {
+    void duplicating() {
         Layer copy = layer.copy(CopyType.DUPLICATE_LAYER, true, comp);
         checkCopy(copy, "layer 1 copy");
 
@@ -216,7 +214,7 @@ public class LayerTest {
     }
 
     @Test
-    public void opacity() {
+    void opacity() {
         float oldValue = 1.0f;
         float newValue = 0.7f;
         assertThat(layer).opacityIs(oldValue);
@@ -243,7 +241,7 @@ public class LayerTest {
     }
 
     @Test
-    public void blendingMode() {
+    void blendingMode() {
         assertThat(layer).blendingModeIs(NORMAL);
 
         layer.setBlendingMode(DIFFERENCE, true, true);
@@ -260,7 +258,7 @@ public class LayerTest {
     }
 
     @Test
-    public void renaming() {
+    void renaming() {
         String initialName = "layer 1";
         String newName = "newName";
         String editName = "Rename Layer to \"" + newName + "\"";
@@ -285,7 +283,7 @@ public class LayerTest {
     }
 
     @Test
-    public void activating() {
+    void activating() {
         assertThat(layer).isActive();
         assertThat(layer2).isNotActive();
 
@@ -311,7 +309,7 @@ public class LayerTest {
     }
 
     @Test
-    public void resizing() {
+    void resizing() {
         Dimension origSize = layer.getComp().getCanvas().getSize();
 
         // there is not much to assert, since normally
@@ -327,7 +325,7 @@ public class LayerTest {
     }
 
     @Test
-    public void changeStackIndex() {
+    void changeStackIndex() {
         Layer topLevelLayer = layer.getTopLevelLayer();
         assertThat(comp.indexOf(topLevelLayer)).isEqualTo(0);
 
@@ -344,7 +342,7 @@ public class LayerTest {
     }
 
     @Test
-    public void addMask() {
+    void addMask() {
         if (withMask.isTrue()) {
             return; // only test adding if no mask exists initially
         }
@@ -375,7 +373,7 @@ public class LayerTest {
     }
 
     @Test
-    public void deleteMask() {
+    void deleteMask() {
         if (withMask.isFalse()) {
             return;  // only test deleting if a mask exists
         }
@@ -396,7 +394,7 @@ public class LayerTest {
     }
 
     @Test
-    public void maskEnableToggle() {
+    void maskEnableToggle() {
         if (withMask.isFalse()) {
             return; // only test if a mask exists
         }
@@ -442,7 +440,7 @@ public class LayerTest {
     }
 
     @Test
-    public void maskLinking() {
+    void maskLinking() {
         if (withMask.isFalse()) {
             return; // only test if a mask exists
         }
@@ -484,7 +482,7 @@ public class LayerTest {
     }
 
     @Test
-    public void maskEditing() {
+    void maskEditing() {
         if (withMask.isFalse()) {
             return; // only test if a mask exists
         }

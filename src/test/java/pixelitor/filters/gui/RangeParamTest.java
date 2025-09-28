@@ -20,12 +20,12 @@ package pixelitor.filters.gui;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.assertions.PixelitorAssertions.assertThatThrownBy;
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
@@ -38,8 +38,8 @@ class RangeParamTest {
     }
 
     @Test
-    @DisplayName("is IGNORE_RANDOMIZE working")
-    void isIgnoreRandomizeWorking() {
+    @DisplayName("randomize() with IGNORE_RANDOMIZE should not change value")
+    void randomize_whenModeIsIgnore_shouldNotChangeValue() {
         var param = new RangeParam("Test", 0, 100, 1000,
             true, NONE, IGNORE_RANDOMIZE);
         for (int i = 0; i < 5; i++) {
@@ -76,28 +76,32 @@ class RangeParamTest {
     @Test
     @DisplayName("invalid arguments: min == max")
     void invalidArgsMinIsMax() {
-        assertThrows(AssertionError.class, () ->
-            new RangeParam("name", 10, 10, 10));
+        assertThatThrownBy(() -> new RangeParam("name", 10, 10, 10))
+            .isInstanceOf(AssertionError.class)
+            .hasMessage("name: maxValue (10) <= minValue (10)");
     }
 
     @Test
     @DisplayName("invalid arguments: min > max")
     void invalidArgsMinBiggerThanMax() {
-        assertThrows(AssertionError.class, () ->
-            new RangeParam("name", 11, 10, 10));
+        assertThatThrownBy(() -> new RangeParam("name", 11, 10, 10))
+            .isInstanceOf(AssertionError.class)
+            .hasMessage("name: maxValue (10) <= minValue (11)");
     }
 
     @Test
     @DisplayName("invalid arguments: default < min")
     void invalidArgsDefaultSmallerThanMin() {
-        assertThrows(AssertionError.class, () ->
-            new RangeParam("name", 5, 2, 10));
+        assertThatThrownBy(() -> new RangeParam("name", 5, 2, 10))
+            .isInstanceOf(AssertionError.class)
+            .hasMessage("name: value (2.00) < minValue (5)");
     }
 
     @Test
     @DisplayName("invalid arguments: default > max")
     void invalidArgsDefaultBiggerThanMax() {
-        assertThrows(AssertionError.class, () ->
-            new RangeParam("name", 5, 15, 10));
+        assertThatThrownBy(() -> new RangeParam("name", 5, 15, 10))
+            .isInstanceOf(AssertionError.class)
+            .hasMessage("name: value (15.00) > maxValue (10)");
     }
 }

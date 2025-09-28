@@ -99,8 +99,8 @@ public class Mouse {
     }
 
     public void drag(CanvasDrag drag) {
-        moveToCanvas(drag.getStartX(), drag.getStartY());
-        dragToCanvas(drag.getEndX(), drag.getEndY());
+        moveToCanvas(drag.startX(), drag.startY());
+        dragToCanvas(drag.endX(), drag.endY());
     }
 
     // move relative to the given dialog

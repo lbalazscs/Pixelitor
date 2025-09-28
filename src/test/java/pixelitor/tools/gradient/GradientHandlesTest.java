@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.tools.gradient;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.geom.AffineTransform;
@@ -94,6 +95,30 @@ class GradientHandlesTest {
     }
 
     @Test
+    @DisplayName("dragging the start handle moves the center handle")
+    void startMovesCenter() {
+        int dragStartX = START_X_INIT + 2;
+        int dragStartY = START_Y_INIT - 3;
+        int dx = -10;
+        int dy = 15;
+
+        start.mousePressed(dragStartX, dragStartY);
+        start.mouseDragged(dragStartX + dx / 3.0, dragStartY + dy / 3.0);
+        start.mouseDragged(dragStartX + dx / 1.5, dragStartY + dy / 1.5);
+        start.mouseReleased(dragStartX + dx, dragStartY + dy);
+
+        assertThat(start)
+            .isAt(START_X_INIT + dx, START_Y_INIT + dy)
+            .isAtIm(START_X_INIT + dx, START_Y_INIT + dy);
+        assertThat(end)
+            .isAt(END_X_INIT, END_Y_INIT)
+            .isAtIm(END_X_INIT, END_Y_INIT);
+        assertThat(middle)
+            .isAt(MIDDLE_X_INIT + dx / 2.0, MIDDLE_Y_INIT + dy / 2.0)
+            .isAtIm(MIDDLE_X_INIT + dx / 2.0, MIDDLE_Y_INIT + dy / 2.0);
+    }
+
+    @Test
     @DisplayName("dragging the end handle moves the center handle")
     void endMovesCenter() {
         int dragStartX = END_X_INIT + 1;
@@ -115,6 +140,70 @@ class GradientHandlesTest {
         assertThat(middle)
             .isAt(MIDDLE_X_INIT + dx / 2.0, MIDDLE_Y_INIT + dy / 2.0)
             .isAtIm(MIDDLE_X_INIT + dx / 2.0, MIDDLE_Y_INIT + dy / 2.0);
+    }
+
+    @Test
+    @DisplayName("dragging with Shift key snaps the angle")
+    void constrainedDragSnapsAngle() {
+        int dragStartX = END_X_INIT;
+        int dragStartY = END_Y_INIT;
+
+        // drag to a point where the angle from the start handle is closer to 0 than 45 degrees
+        // start is at (10, 70)
+        int finalX = 70; // dx = 60
+        int finalY = 55; // dy = -15
+        // angle is atan2(-15, 60) which is ~-14 degrees, so it should snap to horizontal (0 degrees)
+
+        end.mousePressed(dragStartX, dragStartY);
+        end.mouseReleased(finalX, finalY, true); // shift is down
+
+        // the new y should be the same as the start handle's y
+        int expectedX = finalX;
+        int expectedY = START_Y_INIT;
+
+        assertThat(end)
+            .isAt(expectedX, expectedY)
+            .isAtIm(expectedX, expectedY);
+        assertThat(start)
+            .isAt(START_X_INIT, START_Y_INIT)
+            .isAtIm(START_X_INIT, START_Y_INIT);
+        assertThat(middle)
+            .isAt((START_X_INIT + expectedX) / 2.0, (START_Y_INIT + expectedY) / 2.0)
+            .isAtIm((START_X_INIT + expectedX) / 2.0, (START_Y_INIT + expectedY) / 2.0);
+    }
+
+    @Test
+    @DisplayName("pressing arrow key moves the entire gradient")
+    void arrowKeyMovesGradient() {
+        handles.arrowKeyPressed(ArrowKey.RIGHT, view);
+
+        int dx = ArrowKey.RIGHT.getDeltaX();
+        int dy = ArrowKey.RIGHT.getDeltaY();
+
+        assertThat(start)
+            .isAt(START_X_INIT + dx, START_Y_INIT + dy)
+            .isAtIm(START_X_INIT + dx, START_Y_INIT + dy);
+        assertThat(end)
+            .isAt(END_X_INIT + dx, END_Y_INIT + dy)
+            .isAtIm(END_X_INIT + dx, END_Y_INIT + dy);
+        assertThat(middle)
+            .isAt(MIDDLE_X_INIT + dx, MIDDLE_Y_INIT + dy)
+            .isAtIm(MIDDLE_X_INIT + dx, MIDDLE_Y_INIT + dy);
+
+        handles.arrowKeyPressed(ArrowKey.SHIFT_UP, view);
+
+        int dx2 = ArrowKey.SHIFT_UP.getDeltaX();
+        int dy2 = ArrowKey.SHIFT_UP.getDeltaY();
+
+        assertThat(start)
+            .isAt(START_X_INIT + dx + dx2, START_Y_INIT + dy + dy2)
+            .isAtIm(START_X_INIT + dx + dx2, START_Y_INIT + dy + dy2);
+        assertThat(end)
+            .isAt(END_X_INIT + dx + dx2, END_Y_INIT + dy + dy2)
+            .isAtIm(END_X_INIT + dx + dx2, END_Y_INIT + dy + dy2);
+        assertThat(middle)
+            .isAt(MIDDLE_X_INIT + dx + dx2, MIDDLE_Y_INIT + dy + dy2)
+            .isAtIm(MIDDLE_X_INIT + dx + dx2, MIDDLE_Y_INIT + dy + dy2);
     }
 
     @Test

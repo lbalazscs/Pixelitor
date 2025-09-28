@@ -18,6 +18,8 @@
 package pixelitor.tools.pen;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -28,6 +30,8 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.util.stream.Stream;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
@@ -48,7 +52,7 @@ class PathTest {
     }
 
     @Test
-    void deletingSubPathPoints() {
+    void deletingAnchorPoints() {
         History.clear();
 
         var shape = new Rectangle(10, 10, 100, 100);
@@ -73,16 +77,21 @@ class PathTest {
         assertThat(path.getActiveSubpath()).numAnchorsIs(0);
     }
 
-    @Test
-    void conversionsForRectangle() {
-        testConversionsFor(
-            new Rectangle(20, 20, 40, 10));
+    static Stream<Shape> shapeProvider() {
+        return Stream.of(
+            new Rectangle(20, 20, 40, 10),
+            new Ellipse2D.Double(20, 20, 40, 10),
+            new Line2D.Double(20, 20, 40, 10)
+        );
     }
 
-    @Test
-    void conversionsForEllipse() {
-        testConversionsFor(
-            new Ellipse2D.Double(20, 20, 40, 10));
+    @ParameterizedTest(name = "path from {0} conversion")
+    @MethodSource("shapeProvider")
+    void pathFromShapeConversion(Shape shape) {
+        Path path = Shapes.shapeToPath(shape, view);
+        Path copy = path.deepCopy(view.getComp());
+        Shape convertedShape = copy.toImageSpaceShape();
+        assertThat(Shapes.pathsAreEqual(shape, convertedShape, 0.01)).isTrue();
     }
 
     @Test
@@ -101,12 +110,5 @@ class PathTest {
         at = AffineTransform.getTranslateInstance(10, 20);
         subpath.imTransform(at);
         assertThat(subpath).firstAnchorIsAt(20, 30);
-    }
-
-    private void testConversionsFor(Shape shape) {
-        Path path = Shapes.shapeToPath(shape, view);
-        Path copy = path.deepCopy(view.getComp());
-        Shape convertedShape = copy.toImageSpaceShape();
-        assertThat(Shapes.pathsAreEqual(shape, convertedShape, 0.01)).isTrue();
     }
 }

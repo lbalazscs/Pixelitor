@@ -17,14 +17,10 @@
 
 package pixelitor.tools;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import pixelitor.TestHelper;
 import pixelitor.Views;
@@ -50,18 +46,21 @@ import static pixelitor.tools.Tools.SMUDGE;
 /**
  * Tests functionality common to all {@link AbstractBrushTool} subclasses.
  */
-@RunWith(Parameterized.class)
-public class AbstractBrushToolTest {
+@ParameterizedClass(name = "{index}: {0} Tool")
+@MethodSource("instancesToTest")
+@DisplayName("AbstractBrushTool tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class AbstractBrushToolTest {
     // the tool being tested in each parameterized run
     @Parameter
-    public AbstractBrushTool tool;
+    private
+    AbstractBrushTool tool;
 
     private Brush spyBrush;
     private Brush origBrush;
     private Drawable dr;
 
-    @Parameters(name = "{index}: {0} Tool")
-    public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
+    static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
         // call it here, because this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
@@ -77,13 +76,13 @@ public class AbstractBrushToolTest {
             .toList();
     }
 
-    @BeforeClass
-    public static void beforeAllTests() {
+    @BeforeAll
+    static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
     }
 
-    @Before
-    public void beforeEachTest() {
+    @BeforeEach
+    void beforeEachTest() {
         var comp = TestHelper.createComp("AbstractBrushToolTest", 2, false);
 
         dr = comp.getActiveDrawableOrThrow();
@@ -95,8 +94,8 @@ public class AbstractBrushToolTest {
         tool.toolActivated(comp.getView());
     }
 
-    @After
-    public void afterEachTest() {
+    @AfterEach
+    void afterEachTest() {
         tool.toolDeactivated(Views.getActive());
 
         // restore it so that next time we don't spy on a spy...
@@ -104,7 +103,7 @@ public class AbstractBrushToolTest {
     }
 
     @Test
-    public void trace_invokesBrushMethodsInOrder() {
+    void trace_invokesBrushMethodsInOrder() {
         tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
         InOrder inOrder = inOrder(spyBrush);

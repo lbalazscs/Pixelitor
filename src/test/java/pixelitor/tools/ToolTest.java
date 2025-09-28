@@ -17,14 +17,10 @@
 
 package pixelitor.tools;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.Views;
@@ -41,34 +37,36 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Behavior that is common to all tools
+ * Tests behavior that is common to all tools.
  */
-@RunWith(Parameterized.class)
-public class ToolTest {
+@ParameterizedClass(name = "tool = {0} Tool, alt = {1}, ctrl = {2}, shift = {3}, mouseButton = {4}")
+@MethodSource("instancesToTest")
+@DisplayName("tool tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class ToolTest {
     private View view;
 
-    @Parameter
-    public Tool tool;
+    @Parameter(0)
+    private Tool tool;
 
-    @Parameter(value = 1)
-    public Alt alt;
+    @Parameter(1)
+    private Alt alt;
 
-    @Parameter(value = 2)
-    public Ctrl ctrl;
+    @Parameter(2)
+    private Ctrl ctrl;
 
-    @Parameter(value = 3)
-    public Shift shift;
+    @Parameter(3)
+    private Shift shift;
 
-    @Parameter(value = 4)
-    public MouseButton mouseButton;
+    @Parameter(4)
+    private MouseButton mouseButton;
 
-    @BeforeClass
-    public static void beforeAllTests() {
+    @BeforeAll
+    static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
     }
 
-    @Parameters(name = "{index}: tool = {0} Tool, alt = {1}, ctrl = {2}, shift = {3}, mouseButton = {4}")
-    public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
+    static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
         // this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
@@ -98,22 +96,22 @@ public class ToolTest {
         return instances;
     }
 
-    @Before
-    public void beforeEachTest() {
+    @BeforeEach
+    void beforeEachTest() {
         Composition comp = TestHelper.createComp("ToolTest", 2, true);
         view = comp.getView();
         Tools.setActiveTool(tool);
         tool.toolActivated(view);
     }
 
-    @After
-    public void afterEachTest() {
+    @AfterEach
+    void afterEachTest() {
         tool.toolDeactivated(view);
         Views.setActiveView(null, false);
     }
 
     @Test
-    public void presets() {
+    void presets() {
         if (tool.shouldHaveUserPresetsMenu()) {
             UserPreset preset = tool.createUserPreset("test");
             tool.loadUserPreset(preset);
@@ -121,7 +119,7 @@ public class ToolTest {
     }
 
     @Test
-    public void simpleStroke() {
+    void simpleStroke() {
         stroke(alt, ctrl, shift, mouseButton);
 
         // also test with space down

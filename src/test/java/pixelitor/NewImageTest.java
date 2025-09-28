@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,8 +32,8 @@ class NewImageTest {
         TestHelper.setUnitTestingMode();
     }
 
-    @DisplayName("create new comp")
-    @ParameterizedTest(name = "filled with {0}")
+    @DisplayName("create new composition")
+    @ParameterizedTest(name = "with a {0} fill")
     @EnumSource(FillType.class)
     void createNewComposition(FillType fillType) {
         var comp = NewImage.createNewComposition(fillType,
@@ -42,6 +42,8 @@ class NewImageTest {
         assertThat(comp)
             .numLayersIs(1)
             .canvasSizeIs(20, 20)
-            .hasName("NewImageTest");
+            .hasName("NewImageTest")
+            .hasDpi(Composition.DEFAULT_DPI)
+            .hasSolidColor(fillType.getColor());
     }
 }

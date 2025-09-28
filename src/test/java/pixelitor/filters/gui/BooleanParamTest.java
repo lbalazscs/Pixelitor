@@ -41,8 +41,8 @@ class BooleanParamTest {
     }
 
     @Test
-    @DisplayName("is IGNORE_RANDOMIZE working")
-    void isIgnoreRandomizeWorking() {
+    @DisplayName("randomize() with IGNORE_RANDOMIZE should not change value")
+    void randomize_whenModeIsIgnore_shouldNotChangeValue() {
         var param = new BooleanParam("Test", true, IGNORE_RANDOMIZE);
         for (int i = 0; i < 10; i++) {
             param.randomize();

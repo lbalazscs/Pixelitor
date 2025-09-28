@@ -28,8 +28,7 @@ import pixelitor.filters.util.ColorSpace;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,7 +36,6 @@ import static org.mockito.Mockito.verify;
 @DisplayName("Levels tests")
 @TestMethodOrder(MethodOrderer.Random.class)
 class LevelsTest {
-    private Levels levels;
     private LevelsModel model;
     private FilterGUI filterGUI;
     private ChannelLevelsModel rgbPage;
@@ -50,7 +48,6 @@ class LevelsTest {
 
     @BeforeEach
     void beforeEachTest() {
-        levels = new Levels();
         model = new LevelsModel();
         filterGUI = mock(FilterGUI.class);
         model.setFilterGUI(filterGUI);
@@ -169,12 +166,14 @@ class LevelsTest {
         okLPage.getInputDark().setValue(100);
 
         BufferedImageOp op = model.getFilterOp();
-        assertInstanceOf(OklabLevelsFilter.class, op, "FilterOp should be an OklabLevelsFilter");
+        assertThat(op)
+            .isNotNull()
+            .isInstanceOf(OklabLevelsFilter.class);
         OklabLevelsFilter oklabFilter = (OklabLevelsFilter) op;
 
         // black (L=0) should be unaffected by an input range adjustment that starts at 100
         int black = 0xFF000000;
-        Assertions.assertEquals(black, oklabFilter.processPixel(0, 0, black));
+        assertThat(oklabFilter.processPixel(0, 0, black)).isEqualTo(black);
 
         // White (L=1.0) should also be unaffected.
         // Due to floating point inaccuracies in color space conversion, the result might not be
@@ -184,13 +183,17 @@ class LevelsTest {
         int r = (whiteResult >> 16) & 0xFF;
         int g = (whiteResult >> 8) & 0xFF;
         int b = whiteResult & 0xFF;
-        Assertions.assertTrue(r > 250 && g > 250 && b > 250, "White should remain very close to white");
+        assertThat(r).as("Red component should be > 250").isGreaterThan(250);
+        assertThat(g).as("Green component should be > 250").isGreaterThan(250);
+        assertThat(b).as("Blue component should be > 250").isGreaterThan(250);
 
         // a mid-gray should become darker because its L value is stretched down
         int gray = 0xFF808080; // 128, 128, 128
         int result = oklabFilter.processPixel(0, 0, gray);
         int resultRed = (result >> 16) & 0xFF;
-        Assertions.assertTrue(resultRed < 128, "Gray should become darker");
+        assertThat(resultRed)
+            .as("Gray should become darker")
+            .isLessThan(128);
     }
 
     private RGBLookup getCalculatedSrgbLookup() {
@@ -200,8 +203,9 @@ class LevelsTest {
 
         // get the BufferedImageOp that the model configured
         BufferedImageOp op = model.getFilterOp();
-        assertNotNull(op, "FilterOp should have been set by the model");
-        assertInstanceOf(FastLookupOp.class, op, "FilterOp should be a FastLookupOp for sRGB tests");
+        assertThat(op)
+            .isNotNull()
+            .isInstanceOf(FastLookupOp.class);
 
         // extract the lookup table data and reconstruct an RGBLookup for assertions
         FastLookupOp fastOp = (FastLookupOp) op;
@@ -212,21 +216,21 @@ class LevelsTest {
     }
 
     private static void checkRedMapping(RGBLookup lookup, int input, int expected) {
-        Assertions.assertEquals(expected, lookup.mapRed(input));
+        assertThat(lookup.mapRed(input)).isEqualTo(expected);
     }
 
     private static void checkGreenMapping(RGBLookup lookup, int input, int expected) {
-        Assertions.assertEquals(expected, lookup.mapGreen(input));
+        assertThat(lookup.mapGreen(input)).isEqualTo(expected);
     }
 
     private static void checkBlueMapping(RGBLookup lookup, int input, int expected) {
-        Assertions.assertEquals(expected, lookup.mapBlue(input));
+        assertThat(lookup.mapBlue(input)).isEqualTo(expected);
     }
 
     private static void checkRGBMapping(RGBLookup lookup, int input,
                                         int expectedRed, int expectedGreen, int expectedBlue) {
-        Assertions.assertEquals(expectedRed, lookup.mapRed(input));
-        Assertions.assertEquals(expectedGreen, lookup.mapGreen(input));
-        Assertions.assertEquals(expectedBlue, lookup.mapBlue(input));
+        assertThat(lookup.mapRed(input)).isEqualTo(expectedRed);
+        assertThat(lookup.mapGreen(input)).isEqualTo(expectedGreen);
+        assertThat(lookup.mapBlue(input)).isEqualTo(expectedBlue);
     }
 }

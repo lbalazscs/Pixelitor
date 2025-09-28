@@ -18,6 +18,8 @@
 package pixelitor.tools.pen;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.Views;
@@ -28,15 +30,17 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.utils.input.Modifiers;
 
+import java.util.stream.Stream;
+
 import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.history.History.redo;
 import static pixelitor.history.History.undo;
 import static pixelitor.selection.ShapeCombinator.REPLACE;
 
-@DisplayName("Pen Tool tests")
+@DisplayName("Path Tools tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-class PathToolTest {
+class PathToolsTest {
     private View view;
     private Composition comp;
 
@@ -66,46 +70,24 @@ class PathToolTest {
         History.clear();
     }
 
-    @Test
-    @DisplayName("convert path to selection (build mode)")
-    void convertBuiltPathToSelection() {
-        createSimpleClosedPathInBuildMode();
+    private static Stream<PathTool> pathTools() {
+        return Stream.of(Tools.PEN, Tools.NODE, Tools.TRANSFORM_PATH);
+    }
+
+    @ParameterizedTest
+    @MethodSource("pathTools")
+    @DisplayName("convert path to selection")
+    void convertPathToSelection(PathTool tool) {
+        createSimpleClosedPathInPenTool();
+        tool.activate();
+        assertThat(tool).isActive();
 
         PathActions.convertToSelection();
         assertThat(Tools.LASSO_SELECTION).isActive();
         assertThat(comp).hasSelection();
 
         undo("Convert Path to Selection");
-        assertThat(Tools.PEN).isActive();
-        assertThat(comp)
-            .hasPath()
-            .doesNotHaveSelection();
-
-        redo("Convert Path to Selection");
-        assertThat(Tools.LASSO_SELECTION).isActive();
-        assertThat(comp)
-            .hasNoPath()
-            .hasSelection();
-    }
-
-    @Test
-    @DisplayName("convert path to selection (edit mode)")
-    void convertEditPathToSelection() {
-        createSimpleClosedPathInBuildMode();
-        Tools.NODE.activate();
-        assertThat(Tools.NODE).isActive();
-        assertThat(comp)
-            .hasPath()
-            .doesNotHaveSelection();
-
-        PathActions.convertToSelection();
-        assertThat(Tools.LASSO_SELECTION).isActive();
-        assertThat(comp)
-            .hasNoPath()
-            .hasSelection();
-
-        undo("Convert Path to Selection");
-        assertThat(Tools.NODE).isActive();
+        assertThat(tool).isActive();
         assertThat(comp)
             .hasPath()
             .doesNotHaveSelection();
@@ -148,9 +130,9 @@ class PathToolTest {
     }
 
     @Test
-    @DisplayName("undo an edit-mode change in build-mode")
-    void undoEditModeChangeInBuildMode() {
-        // create a 2-point path in build mode
+    @DisplayName("undo a node tool change in pen tool")
+    void undoNodeToolChangeInPenTool() {
+        // create a 2-point path in the pen tool
         Tools.PEN.activate();
         click(100, 100);
         click(200, 100);
@@ -161,7 +143,7 @@ class PathToolTest {
         AnchorPoint firstAnchor = subpath.getAnchor(0);
         assertThat(firstAnchor).isAt(100, 100);
 
-        // switch to edit mode
+        // switch to the node tool
         Tools.NODE.activate();
         assertThat(Tools.NODE).isActive();
         assertThat(comp).hasPath();
@@ -171,7 +153,7 @@ class PathToolTest {
         release(100, 200);
         assertThat(firstAnchor).isAt(100, 200);
 
-        // switch back to build mode
+        // switch back to the pen tool
         Tools.PEN.activate();
         assertThat(comp).hasPath();
 
@@ -186,11 +168,11 @@ class PathToolTest {
     }
 
     @Test
-    @DisplayName("undo a build-mode change in edit-mode")
-    void undoBuildModeChangeInEditMode() {
-        SubPath subPath = createSimpleClosedPathInBuildMode();
+    @DisplayName("undo a pen tool change in node tool")
+    void undoPenToolChangeInNodeTool() {
+        SubPath subPath = createSimpleClosedPathInPenTool();
 
-        // switch to edit mode
+        // switch to the node tool
         Tools.NODE.activate();
         assertThat(comp).hasPath();
 
@@ -236,8 +218,8 @@ class PathToolTest {
     }
 
     @Test
-    @DisplayName("delete subpath and path in edit mode")
-    void deleteSubPathAndPathInEditMode() {
+    @DisplayName("delete subpath and path in node tool")
+    void deleteSubPathAndPathInNodeTool() {
         // create a path with two subpaths
         Path path = new Path(comp, true);
 
@@ -301,7 +283,7 @@ class PathToolTest {
         assertThat(comp).hasNoPath();
     }
 
-    private SubPath createSimpleClosedPathInBuildMode() {
+    private SubPath createSimpleClosedPathInPenTool() {
         Tools.PEN.activate();
         assertThat(Tools.PEN)
             .isActive()

@@ -17,13 +17,10 @@
 
 package pixelitor.compactions;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
@@ -46,8 +43,11 @@ import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
 import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
 import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
 
-@RunWith(Parameterized.class)
-public class CompActionTest {
+@ParameterizedClass(name = "translation = {0}, sel = {1}, mask = {2}, #layers = {3}")
+@MethodSource("instancesToTest")
+@DisplayName("comp actions tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class CompActionTest {
     private static final int ORIG_CANVAS_WIDTH = 20;
     private static final int ORIG_CANVAS_HEIGHT = 10;
 
@@ -55,35 +55,25 @@ public class CompActionTest {
     private View view;
 
     private Rectangle origSelection;
-    private final int origTX;
-    private final int origTY;
-    private final int origImageWidth;
-    private final int origImageHeight;
+    private int origTX;
+    private int origTY;
+    private int origImageWidth;
+    private int origImageHeight;
 
     // the parameters
-    private final WithTranslation withTranslation;
-    private final WithSelection withSelection;
-    private final WithMask withMask;
-    private final LayerCount layerCount;
+    @Parameter(0)
+    private WithTranslation withTranslation;
 
-    public CompActionTest(WithTranslation withTranslation,
-                          WithSelection withSelection,
-                          WithMask withMask,
-                          LayerCount layerCount) {
-        this.withSelection = withSelection;
-        this.withTranslation = withTranslation;
-        this.withMask = withMask;
-        this.layerCount = layerCount;
+    @Parameter(1)
+    private WithSelection withSelection;
 
-        origTX = withTranslation.getExpectedTX();
-        origTY = withTranslation.getExpectedTY();
+    @Parameter(2)
+    private WithMask withMask;
 
-        origImageWidth = ORIG_CANVAS_WIDTH - origTX;
-        origImageHeight = ORIG_CANVAS_HEIGHT - origTY;
-    }
+    @Parameter(3)
+    private LayerCount layerCount;
 
-    @Parameters(name = "{index}: translation = {0}, selection = {1}, mask = {2}, layers = {3}")
-    public static Collection<Object[]> instancesToTest() {
+    static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
             {WithTranslation.NO, WithSelection.NO, WithMask.NO, LayerCount.ONE},
             {WithTranslation.YES, WithSelection.NO, WithMask.NO, LayerCount.ONE},
@@ -93,15 +83,20 @@ public class CompActionTest {
         });
     }
 
-    @BeforeClass
-    public static void beforeAllTests() {
+    @BeforeAll
+    static void beforeAllTests() {
         TestHelper.setUnitTestingMode(true);
 
         Tools.setActiveTool(Tools.CROP);
     }
 
-    @Before
-    public void beforeEachTest() {
+    @BeforeEach
+    void beforeEachTest() {
+        origTX = withTranslation.getExpectedTX();
+        origTY = withTranslation.getExpectedTY();
+        origImageWidth = ORIG_CANVAS_WIDTH - origTX;
+        origImageHeight = ORIG_CANVAS_HEIGHT - origTY;
+
         origComp = TestHelper.createComp("CompActionTest", 2, true);
         assertThat(origComp)
             .hasName("CompActionTest")
@@ -124,8 +119,8 @@ public class CompActionTest {
         view = origComp.getView();
     }
 
-    @After
-    public void afterEachTest() {
+    @AfterEach
+    void afterEachTest() {
         TestHelper.verifyAndClearHistory();
     }
 
@@ -146,7 +141,7 @@ public class CompActionTest {
     }
 
     @Test
-    public void enlargeCanvas() {
+    void enlargeCanvas() {
         checkOriginalState();
 
         int north = 3;
@@ -195,7 +190,7 @@ public class CompActionTest {
     }
 
     @Test
-    public void resize() {
+    void resize() {
         checkOriginalState();
 
         int targetWidth = ORIG_CANVAS_WIDTH / 2;
@@ -242,17 +237,17 @@ public class CompActionTest {
     }
 
     @Test
-    public void rotate90() {
+    void rotate90() {
         testRotate(ANGLE_90, "Rotate 90° CW");
     }
 
     @Test
-    public void rotate180() {
+    void rotate180() {
         testRotate(ANGLE_180, "Rotate 180°");
     }
 
     @Test
-    public void rotate270() {
+    void rotate270() {
         testRotate(ANGLE_270, "Rotate 90° CCW");
     }
 
@@ -330,12 +325,12 @@ public class CompActionTest {
     }
 
     @Test
-    public void flipHorizontal() {
+    void flipHorizontal() {
         testFlip(HORIZONTAL, "Flip Horizontal");
     }
 
     @Test
-    public void flipVertical() {
+    void flipVertical() {
         testFlip(VERTICAL, "Flip Vertical");
     }
 
@@ -398,7 +393,7 @@ public class CompActionTest {
     }
 
     @Test
-    public void crop() {
+    void crop() {
         boolean[] options = {false, true};
 
         // could be simple after this file is transitioned to JUnit 5

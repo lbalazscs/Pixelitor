@@ -60,7 +60,7 @@ class PathBuildingTest {
     void beforeEachTest() {
         // A real composition that can store paths.
         // The layer type doesn't matter.
-        comp = TestHelper.createRealComp("PathBuilderTest", ColorFillLayer.class);
+        comp = TestHelper.createRealComp("PathBuildingTest", ColorFillLayer.class);
 
         view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);
@@ -309,13 +309,13 @@ class PathBuildingTest {
     @Test
     @DisplayName("Alt-drag on a previous anchor")
     void altDragOnPreviousAnchor() {
-        testSpecialDragPrevious(CtrlOrAlt.ALT);
+        verifyModifierDragOnPreviousAnchor(CtrlOrAlt.ALT);
     }
 
     @Test
     @DisplayName("Ctrl-drag on a previous anchor")
     void movingPreviousAnchorsWithCtrl() {
-        testSpecialDragPrevious(CtrlOrAlt.CTRL);
+        verifyModifierDragOnPreviousAnchor(CtrlOrAlt.CTRL);
     }
 
     @Test
@@ -365,7 +365,7 @@ class PathBuildingTest {
             .bothControlsAreRetracted();
 
         // ctrl-click to finish
-        ctrlClick(314, 314, false);
+        ctrlClick(314, 314, IDLE);
         assertThat(subpath)
             .isFinished()
             .numAnchorsIs(2);
@@ -441,7 +441,7 @@ class PathBuildingTest {
             .firstAnchorIsAt(456, 654);
     }
 
-    private void testSpecialDragPrevious(CtrlOrAlt modifier) {
+    private void verifyModifierDragOnPreviousAnchor(CtrlOrAlt modifier) {
         // click to add the first anchor point
         click(100, 100);
         Path path = comp.getActivePath();
@@ -867,14 +867,9 @@ class PathBuildingTest {
         shiftRelease(x, y, MOVING_TO_NEXT_ANCHOR);
     }
 
-    private void ctrlClick(int x, int y, boolean isFirstInSubPath) {
-        if (isFirstInSubPath) {
-            ctrlPress(x, y, DRAGGING_LAST_CONTROL);
-            ctrlRelease(x, y, MOVING_TO_NEXT_ANCHOR);
-        } else {
-            ctrlPress(x, y, IDLE);
-            ctrlRelease(x, y, IDLE);
-        }
+    private void ctrlClick(int x, int y, BuildState state) {
+        ctrlPress(x, y, state);
+        ctrlRelease(x, y, state);
     }
 
     private void drag(int x, int y, BuildState state) {

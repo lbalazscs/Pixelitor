@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,8 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.geom.Point2D;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 class GeometryTest {
     @Test
@@ -29,12 +30,9 @@ class GeometryTest {
         var C = new Point2D.Float();
         var R = new Point2D.Float(2, 2);
         float distance = (float) Math.sqrt(2);
-
         var A = new Point2D.Float();
         var B = new Point2D.Float();
-
         Geometry.calcPerpendicularPoints(C, R, distance, A, B);
-
 //                   |
 //                   |
 //                   |       R
@@ -45,10 +43,10 @@ class GeometryTest {
 //                   |   B
 //                   |
 //                   |
-
-        assertEquals(-1.0f, A.x, 0.1);
-        assertEquals(1.0f, A.y, 0.1);
-        assertEquals(1.0f, B.x, 0.1);
-        assertEquals(-1.0f, B.y, 0.1);
+        float tolerance = 0.01f;
+        assertThat(A.x).isCloseTo(-1.0f, within(tolerance));
+        assertThat(A.y).isCloseTo(1.0f, within(tolerance));
+        assertThat(B.x).isCloseTo(1.0f, within(tolerance));
+        assertThat(B.y).isCloseTo(-1.0f, within(tolerance));
     }
 }

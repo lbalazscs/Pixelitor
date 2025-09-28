@@ -33,6 +33,7 @@ import pixelitor.tools.pen.SubPath;
 import pixelitor.tools.selection.AbstractSelectionTool;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.utils.Result;
 
 import java.awt.image.BufferedImage;
 
@@ -132,5 +133,9 @@ public class PixelitorAssertions extends Assertions {
 
     public static TransformBoxAssert assertThat(TransformBox actual) {
         return new TransformBoxAssert(actual);
+    }
+
+    public static <S, E> ResultAssert<S, E> assertThat(Result<S, E> actual) {
+        return new ResultAssert<>(actual);
     }
 }

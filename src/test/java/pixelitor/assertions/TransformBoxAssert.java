@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,10 +23,12 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 
 import java.awt.geom.Dimension2D;
+import java.awt.geom.Point2D;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
  * Custom AssertJ assertions for {@link TransformBox} objects.
@@ -38,6 +40,9 @@ public class TransformBoxAssert extends AbstractAssert<TransformBoxAssert, Trans
         super(actual, TransformBoxAssert.class);
     }
 
+    /**
+     * Asserts that the transform box's rotation angle is the given value in degrees.
+     */
     public TransformBoxAssert angleDegreesIs(int expected) {
         isNotNull();
 
@@ -46,6 +51,9 @@ public class TransformBoxAssert extends AbstractAssert<TransformBoxAssert, Trans
         return this;
     }
 
+    /**
+     * Asserts that the transform box's rotated image size matches the given width and height.
+     */
     public TransformBoxAssert rotSizeIs(double width, double height) {
         isNotNull();
 
@@ -60,6 +68,9 @@ public class TransformBoxAssert extends AbstractAssert<TransformBoxAssert, Trans
         return this;
     }
 
+    /**
+     * Asserts that a specific handle is at the given image-space coordinates.
+     */
     public TransformBoxAssert handleImPosIs(Function<TransformBox, DraggablePoint> getter,
                                             double x, double y) {
         isNotNull();
@@ -72,6 +83,30 @@ public class TransformBoxAssert extends AbstractAssert<TransformBoxAssert, Trans
             .as("im y")
             .isCloseTo(y, within(DOUBLE_TOLERANCE));
 
+        return this;
+    }
+
+    /**
+     * Asserts that the transform box's corners are at the given component-space coordinates.
+     */
+    public TransformBoxAssert hasCornersAt(Point2D nw, Point2D sw, Point2D ne, Point2D se) {
+        isNotNull();
+        assertThat(actual.getNW()).isAt(nw.getX(), nw.getY());
+        assertThat(actual.getSW()).isAt(sw.getX(), sw.getY());
+        assertThat(actual.getNE()).isAt(ne.getX(), ne.getY());
+        assertThat(actual.getSE()).isAt(se.getX(), se.getY());
+        return this;
+    }
+
+    /**
+     * Asserts that the transform box's corners are at the given image-space coordinates.
+     */
+    public TransformBoxAssert hasCornersAtIm(Point2D nw, Point2D sw, Point2D ne, Point2D se) {
+        isNotNull();
+        assertThat(actual.getNW()).isAtIm(nw.getX(), nw.getY());
+        assertThat(actual.getSW()).isAtIm(sw.getX(), sw.getY());
+        assertThat(actual.getNE()).isAtIm(ne.getX(), ne.getY());
+        assertThat(actual.getSE()).isAtIm(se.getX(), se.getY());
         return this;
     }
 }

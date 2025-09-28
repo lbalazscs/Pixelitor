@@ -25,8 +25,10 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerUI;
 import pixelitor.tools.pen.Path;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -389,6 +391,27 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
 
         assertThat(actual.getActiveLayer().getName()).isEqualTo(expected);
 
+        return this;
+    }
+
+    public CompositionAssert hasDpi(int expectedDpi) {
+        isNotNull();
+        int actualDpi = actual.getDpi();
+        if (actualDpi != expectedDpi) {
+            failWithMessage("Expected DPI <%d> but was <%d>",
+                expectedDpi, actualDpi);
+        }
+        return this;
+    }
+
+    public CompositionAssert hasSolidColor(Color expectedColor) {
+        isNotNull();
+        BufferedImage image = actual.getCompositeImage();
+        int actualRgb = image.getRGB(0, 0);
+        if (actualRgb != expectedColor.getRGB()) {
+            failWithMessage("Expected image to be filled with color <%s> but was <%s>",
+                expectedColor, new Color(actualRgb, true));
+        }
         return this;
     }
 }

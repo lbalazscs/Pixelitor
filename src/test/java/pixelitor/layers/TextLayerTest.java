@@ -17,13 +17,10 @@
 
 package pixelitor.layers;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.EnumSource;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.compactions.Outsets;
@@ -33,35 +30,29 @@ import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
 import pixelitor.utils.Rnd;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.awt.Shape;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
-@RunWith(Parameterized.class)
-public class TextLayerTest {
+@ParameterizedClass(name = "mask = {0}")
+@EnumSource(WithMask.class)
+@DisplayName("text layer tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class TextLayerTest {
     private TextLayer layer;
     private Composition comp;
     private IconUpdateChecker iconChecker;
 
     @Parameter
-    public WithMask withMask;
+    private WithMask withMask;
 
-    @Parameters(name = "{index}: mask = {0}")
-    public static Collection<Object[]> instancesToTest() {
-        return Arrays.asList(new Object[][]{
-            {WithMask.NO},
-            {WithMask.YES},
-        });
-    }
-
-    @BeforeClass
-    public static void beforeAllTests() {
+    @BeforeAll
+    static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
     }
 
-    @Before
-    public void beforeEachTest() {
+    @BeforeEach
+    void beforeEachTest() {
         comp = TestHelper.createEmptyComp("TextLayerTest");
         layer = TestHelper.createTextLayer(comp, "Text Layer");
         layer.updateLayerName();
@@ -80,7 +71,7 @@ public class TextLayerTest {
     }
 
     @Test
-    public void replaceWithRasterized() {
+    void replaceWithRasterized() {
         checkBeforeRasterizationState();
 
         layer.replaceWithRasterized();
@@ -125,25 +116,21 @@ public class TextLayerTest {
         }
     }
 
-//    @Test
-//    public void createSelectionFromText() {
-//        assertThat(comp).doesNotHaveSelection();
-//
-//        layer.createSelectionFromText();
-//
-//        assertThat(comp).hasSelection();
-//        iconUpdates.check(0, 0);
-//    }
+    @Test
+    void getTextShape() {
+        Shape textShape = layer.getTextShape();
+        assertThat(textShape).isNotNull();
+    }
 
     @Test
-    public void enlargeCanvas() {
+    void enlargeCanvas() {
         layer.enlargeCanvas(new Outsets(5, 5, 5, 10));
 
         iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
-    public void createMovementEdit() {
+    void createMovementEdit() {
         ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
 
         assertThat(edit).isNotNull();
@@ -151,7 +138,7 @@ public class TextLayerTest {
     }
 
     @Test
-    public void commitSettings() {
+    void commitSettings() {
         TextSettings oldSettings = layer.getSettings();
         String oldText = oldSettings.getText();
         String expectedOldName = TextLayer.nameFromText(oldText);

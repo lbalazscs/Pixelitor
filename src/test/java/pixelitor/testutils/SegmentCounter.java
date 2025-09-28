@@ -53,31 +53,36 @@ public class SegmentCounter {
         }
     }
 
+    public SegmentCounter assertMoveToCount(int expected) {
+        verifySegmentCount(moveToCount, expected, "moveTo");
+        return this;
+    }
+
+    public SegmentCounter assertLineToCount(int expected) {
+        verifySegmentCount(lineToCount, expected, "lineTo");
+        return this;
+    }
+
+    public SegmentCounter assertQuadToCount(int expected) {
+        verifySegmentCount(quadToCount, expected, "quadTo");
+        return this;
+    }
+
+    public SegmentCounter assertCubicToCount(int expected) {
+        verifySegmentCount(cubicToCount, expected, "cubicTo");
+        return this;
+    }
+
+    public SegmentCounter assertPathCloseCount(int expected) {
+        verifySegmentCount(pathCloseCount, expected, "close");
+        return this;
+    }
+
     private static void verifySegmentCount(int actual, int expected, String segmentType) {
         if (actual != expected) {
             throw new AssertionError(String.format(
                 "Expected %d %s segments but found %d",
                 expected, segmentType, actual));
         }
-    }
-
-    public void assertMoveToCount(int expected) {
-        verifySegmentCount(moveToCount, expected, "moveTo");
-    }
-
-    public void assertLineToCount(int expected) {
-        verifySegmentCount(lineToCount, expected, "lineTo");
-    }
-
-    public void assertQuadToCount(int expected) {
-        verifySegmentCount(quadToCount, expected, "quadTo");
-    }
-
-    public void assertCubicToCount(int expected) {
-        verifySegmentCount(cubicToCount, expected, "cubicTo");
-    }
-
-    public void assertPathCloseCount(int expected) {
-        verifySegmentCount(pathCloseCount, expected, "close");
     }
 }

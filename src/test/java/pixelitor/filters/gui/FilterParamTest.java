@@ -17,13 +17,10 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.TestHelper;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.jhlabsproxies.JHWeave;
@@ -52,26 +49,28 @@ import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
  * Checks whether different {@link FilterParam} implementations
  * implement the interface contract correctly.
  */
-@RunWith(Parameterized.class)
-public class FilterParamTest {
+@ParameterizedClass
+@MethodSource("instancesToTest")
+@DisplayName("filter param tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class FilterParamTest {
     @Parameter
-    public FilterParam param;
+    private FilterParam param;
 
     private ParamAdjustmentListener mockAdjustmentListener;
 
-    @BeforeClass
-    public static void beforeAllTests() {
+    @BeforeAll
+    static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
     }
 
-    @Before
-    public void beforeEachTest() {
+    @BeforeEach
+    void beforeEachTest() {
         mockAdjustmentListener = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(mockAdjustmentListener);
     }
 
-    @Parameters(name = "{index}: param = {0}")
-    public static Collection<Object[]> instancesToTest() {
+    static Collection<Object[]> instancesToTest() {
         // this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
@@ -109,7 +108,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void shouldCreateWorkingGUI() {
+    void shouldCreateWorkingGUI() {
         JComponent gui = param.createGUI();
         assertThat(gui)
             .isNotNull()
@@ -137,7 +136,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void shouldHaveValidLayoutColumnCount() {
+    void shouldHaveValidLayoutColumnCount() {
         int columnCount = ((ParamGUI) param.createGUI()).getNumLayoutColumns();
 
         assertThat(columnCount)
@@ -148,7 +147,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void shouldHandleRandomization() {
+    void shouldHandleRandomization() {
         // Test allowed randomization
         param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
         assertThat(param).shouldRandomize();
@@ -165,7 +164,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void shouldResetWithoutTriggering() {
+    void shouldResetWithoutTriggering() {
         param.reset(false);
 
         verifyNoParamAdjustments();
@@ -173,7 +172,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void shouldResetWithTriggering() {
+    void shouldResetWithTriggering() {
         // make sure that the value is set to the real default value,
         // otherwise (depending on the method execution order) the
         // copyState_setState test could change the value of the angle param
@@ -211,7 +210,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void shouldPreserveStateWhenCopiedAndRestored() {
+    void shouldPreserveStateWhenCopiedAndRestored() {
         String origValue = param.getValueAsString();
 
         ParamState<?> paramState = param.copyState();
@@ -224,7 +223,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void simpleMethodsShouldNotTriggerFilter() {
+    void simpleMethodsShouldNotTriggerFilter() {
         assertThat(param).hasName("Param Name");
 
         JComponent gui = param.createGUI();
