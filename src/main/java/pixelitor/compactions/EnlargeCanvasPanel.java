@@ -502,12 +502,12 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         private static final CheckerboardPainter checkerboard = ImageUtils.createCheckerboardPainter();
         private BufferedImage previewImg;
 
-        public CanvasPreviewPanel() {
+        CanvasPreviewPanel() {
             addComponentListener(new PreviewResizeListener());
             setBorder(createTitledBorder("Preview"));
         }
 
-        public void updatePreviewImage(Composition comp) {
+        void updatePreviewImage(Composition comp) {
             if (comp != null) {
                 BufferedImage actualImage = comp.getCompositeImage();
                 previewImg = ImageUtils.createThumbnail(actualImage, getWidth() / 2, null);

@@ -62,8 +62,8 @@ class GuidesRendererTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"SOLID", "DOTTED", "DASHED"})
-    void drawInSingleStrokeMode(GuideStrokeType strokeType) {
+    @EnumSource
+    void draw(GuideStrokeType strokeType) {
         var g2 = mock(Graphics2D.class);
         var lines = new ArrayList<Shape>();
         lines.add(new Line2D.Double(1, 2, 3, 4));
@@ -72,45 +72,19 @@ class GuidesRendererTest {
 
         guidesRenderer.draw(g2, lines);
 
-        verify(g2, times(1)).setColor(guideStyle.getColorA());
-        verify(g2, times(1)).setStroke(guideStyle.getStrokeA());
-        verify(g2, times(1)).draw(lines.getFirst());
-        verify(g2, times(1)).draw(lines.getLast());
-
-        // verify that properties are set before drawing
-        InOrder inOrder = inOrder(g2);
-        inOrder.verify(g2).setStroke(guideStyle.getStrokeA());
-        inOrder.verify(g2).setColor(guideStyle.getColorA());
-        inOrder.verify(g2).draw(lines.getFirst());
-    }
-
-    @ParameterizedTest
-    @EnumSource(names = {"DASHED_DOUBLE", "DASHED_BORDERED"})
-    void drawInDoubleStrokeMode(GuideStrokeType strokeType) {
-        var g2 = mock(Graphics2D.class);
-        var lines = new ArrayList<Shape>();
-        lines.add(new Line2D.Double(1, 2, 3, 4));
-        lines.add(new Line2D.Double(2, 3, 4, 5));
-        guideStyle.setStrokeType(strokeType);
-
-        guidesRenderer.draw(g2, lines);
-
-        verify(g2, times(1)).setColor(guideStyle.getColorA());
-        verify(g2, times(1)).setStroke(guideStyle.getStrokeA());
-        verify(g2, times(1)).setColor(guideStyle.getColorB());
-        verify(g2, times(1)).setStroke(guideStyle.getStrokeB());
-        verify(g2, times(2)).draw(lines.getFirst());
-        verify(g2, times(2)).draw(lines.getLast());
-
-        // verify that both drawing passes occur in the correct order
+        // verify that Graphics properties are set before drawing
         InOrder inOrder = inOrder(g2);
         inOrder.verify(g2).setStroke(guideStyle.getStrokeA());
         inOrder.verify(g2).setColor(guideStyle.getColorA());
         inOrder.verify(g2).draw(lines.getFirst());
         inOrder.verify(g2).draw(lines.getLast());
-        inOrder.verify(g2).setStroke(guideStyle.getStrokeB());
-        inOrder.verify(g2).setColor(guideStyle.getColorB());
-        inOrder.verify(g2).draw(lines.getFirst());
-        inOrder.verify(g2).draw(lines.getLast());
+
+        // verify second pass for double strokes
+        if (strokeType.hasDoubleStroke()) {
+            inOrder.verify(g2).setStroke(guideStyle.getStrokeB());
+            inOrder.verify(g2).setColor(guideStyle.getColorB());
+            inOrder.verify(g2).draw(lines.getFirst());
+            inOrder.verify(g2).draw(lines.getLast());
+        }
     }
 }

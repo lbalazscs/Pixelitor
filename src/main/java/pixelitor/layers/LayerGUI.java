@@ -731,8 +731,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         DebugNode node = new DebugNode(key, this);
         node.addInt("unique id", uniqueId);
 
-        node.addNullableProperty("dragReorderHandler", dragReorderHandler);
-        node.addNullableProperty("parentUI", parentUI);
+        node.addPresence("dragReorderHandler", dragReorderHandler);
+        node.addPresence("parentUI", parentUI);
 
         for (LayerGUI child : children) {
             node.add(child.createDebugNode("child " + child.getLayer().getName()));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,8 +52,7 @@ public class DialogBuilder {
     private boolean addCancelButton = true;
     private JComponent content;
     private boolean addScrollBars;
-    private JFrame ownerFrame;
-    private JDialog ownerDialog;
+    private Window owner;
     private String title;
     private boolean modal = true;
     private boolean disposeOnClose = true;
@@ -81,6 +80,8 @@ public class DialogBuilder {
     private JMenuBar menuBar;
     private Runnable onVisibleAction;
 
+    private boolean built = false;
+
     public DialogBuilder() {
     }
 
@@ -90,15 +91,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder owner(Window window) {
-        if (window instanceof JFrame) {
-            ownerFrame = (JFrame) window;
-        } else if (window instanceof JDialog) {
-            ownerDialog = (JDialog) window;
-        } else {
-            throw new IllegalStateException(window == null
-                ? "null window"
-                : window.getClass().getName());
-        }
+        this.owner = window;
         return this;
     }
 
@@ -250,6 +243,11 @@ public class DialogBuilder {
      * Builds the dialog without showing it.
      */
     public JDialog build() {
+        if (built) {
+            throw new IllegalStateException("can only be used once");
+        }
+        built = true;
+
         assert content != null : "no content";
 
         setupDefaults();
@@ -299,10 +297,8 @@ public class DialogBuilder {
     }
 
     private void createDialog() {
-        if (ownerFrame != null) {
-            dialog = new BuiltDialog(ownerFrame, modal);
-        } else if (ownerDialog != null) {
-            dialog = new BuiltDialog(ownerDialog, modal);
+        if (owner != null) {
+            dialog = new BuiltDialog(owner, modal);
         } else {
             var pw = PixelitorWindow.get();
             dialog = new BuiltDialog(pw, modal);
@@ -328,12 +324,17 @@ public class DialogBuilder {
     }
 
     private void addButtons(JDialog d) {
+        if (!addOKButton && !addCancelButton) {
+            return;
+        }
+
         if (addOKButton) {
             okButton = new JButton(okText);
             okButton.setName("ok");
             okButton.addActionListener(e -> okButtonPressed(d));
             d.getRootPane().setDefaultButton(okButton);
         }
+
         JButton cancelButton = null;
         if (addCancelButton) {
             cancelButton = new JButton(cancelText);
@@ -342,19 +343,15 @@ public class DialogBuilder {
             cancelButton.addActionListener(e -> dialogCanceled(d));
         }
 
-        JPanel southPanel = null;
-        if (addOKButton || addCancelButton) {
-            southPanel = new JPanel();
-            d.add(southPanel, SOUTH);
+        JPanel southPanel = new JPanel();
+        if (okButton != null && cancelButton != null) {
+            GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
+        } else if (okButton != null) {
+            southPanel.add(okButton);
+        } else {
+            southPanel.add(cancelButton);
         }
-
-        if (addOKButton) {
-            if (addCancelButton) { // add both
-                GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
-            } else { // only ok button
-                southPanel.add(okButton);
-            }
-        }
+        d.add(southPanel, SOUTH);
     }
 
     private void okButtonPressed(JDialog d) {
@@ -410,25 +407,16 @@ public class DialogBuilder {
     }
 
     private static class BuiltDialog extends JDialog {
-        private final boolean modal;
         private final boolean rootDialog; // true if the owner is the main window
 
-        public BuiltDialog(Frame owner, boolean modal) {
-            super(owner);
-            this.modal = modal;
-            rootDialog = true; // the main window is the only frame
-        }
-
-        public BuiltDialog(Window owner, boolean modal) {
-            super(owner);
-            this.modal = modal;
-            rootDialog = false;
+        BuiltDialog(Window owner, boolean modal) {
+            super(owner, modal ? ModalityType.APPLICATION_MODAL : ModalityType.MODELESS);
+            rootDialog = (owner instanceof Frame); // the main window is the only frame
         }
 
         @Override
         public void setVisible(boolean visible) {
-            assert modal == isModal();
-            if (modal) {
+            if (isModal()) {
                 if (visible) {
                     GlobalEvents.dialogOpened(getTitle());
                     assert !rootDialog || GlobalEvents.getModalDialogCount() == 1;

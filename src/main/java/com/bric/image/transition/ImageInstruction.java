@@ -111,11 +111,11 @@ public class ImageInstruction extends Transition2DInstruction {
             this.transform = new AffineTransform(transform);
         }
         if (clipping != null) {
-            if (clipping instanceof Rectangle) {
-                this.clipping = new Rectangle((Rectangle) clipping);
-            } else if (clipping instanceof Rectangle2D) {
+            if (clipping instanceof Rectangle rectangle) {
+                this.clipping = new Rectangle(rectangle);
+            } else if (clipping instanceof Rectangle2D rectangle2D) {
                 Rectangle2D r = new Rectangle2D.Float();
-                r.setFrame((Rectangle2D) clipping);
+                r.setFrame(rectangle2D);
                 this.clipping = r;
             } else {
                 this.clipping = new GeneralPath(clipping);

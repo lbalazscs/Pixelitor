@@ -265,7 +265,7 @@ public class PPoint implements Debuggable {
         private boolean xConverted = false;
         private boolean yConverted = false;
 
-        public LazyIm(View view, double imX, double imY) {
+        LazyIm(View view, double imX, double imY) {
             super(view);
             this.imX = imX;
             this.imY = imY;
@@ -297,4 +297,3 @@ public class PPoint implements Debuggable {
         }
     }
 }
-

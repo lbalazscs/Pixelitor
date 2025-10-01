@@ -58,7 +58,7 @@ public class RepeatLast extends DrawableAction {
         // if the active layer is a smart object, add the last filter as a new smart filter
         getLastFilter().ifPresent(lastFilter -> {
             if (lastFilter.canBeSmart()) {
-                so.tryAddingSmartFilter(lastFilter.copy());
+                so.addSmartFilterWithDialog(lastFilter.copy());
             } else {
                 Messages.showFilterCantBeSmartMessage(getName());
             }

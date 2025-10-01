@@ -42,8 +42,8 @@ public record JpegSettings(File file, FileFormat format, float quality, boolean 
      */
     public static JpegSettings from(SaveSettings settings) {
         assert settings.format() == FileFormat.JPG;
-        if (settings instanceof JpegSettings) {
-            return (JpegSettings) settings;
+        if (settings instanceof JpegSettings jpegSettings) {
+            return jpegSettings;
         }
         return new JpegSettings(DEFAULT_QUALITY, false, settings.file());
     }

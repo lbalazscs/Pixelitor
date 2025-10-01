@@ -251,7 +251,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     // used only for undo/redo
-    public void restoreFilter(Filter filter) {
+    public void setFilterFromHistory(Filter filter) {
         this.filter = filter;
 
         holder.update();

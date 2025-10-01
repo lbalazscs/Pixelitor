@@ -42,6 +42,7 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
@@ -99,12 +100,12 @@ public class SmartObject extends CompositeLayer {
     // the cached final image of this smart object
     private transient BufferedImage image = null;
 
-    private transient boolean imageNeedsRefresh = false;
+    private transient boolean invalidImageCache = false;
 
     // it's important to call updateIconImage() only when we are
     // sure that the smart object's image is up-to-date, because otherwise
     // the filters could be started concurrently on different threads
-    private transient boolean iconImageNeedsRefresh = false;
+    private transient boolean invalidIconImageCache = false;
 
     // constructor for converting a layer into a smart object
     public SmartObject(Layer layer) {
@@ -175,7 +176,7 @@ public class SmartObject extends CompositeLayer {
             smartFilterIsVisible = true;
         }
 
-        this.imageNeedsRefresh = false;
+        this.invalidImageCache = false;
         // further initialization happens in afterDeserialization()
     }
 
@@ -276,7 +277,7 @@ public class SmartObject extends CompositeLayer {
             FileIO.loadCompAsync(linkedContentFile)
                 .thenAcceptAsync(loadedComp -> {
                     setContent(loadedComp);
-                    iconImageNeedsRefresh = true;
+                    invalidateIconImageCache();
                     holder.update();
                 }, onEDT);
         } else {
@@ -311,12 +312,17 @@ public class SmartObject extends CompositeLayer {
         image = filters.isEmpty()
             ? baseSource.getImage()
             : filters.getLast().getImage();
-        imageNeedsRefresh = false;
+        invalidImageCache = false;
+
+        if (invalidIconImageCache) {
+            updateIconImage();
+            invalidIconImageCache = false;
+        }
     }
 
     @Override
     public void update(boolean updateHistogram) {
-        if (imageNeedsRefresh) {
+        if (invalidImageCache) {
             recalculateImage();
         }
         holder.update(updateHistogram);
@@ -324,7 +330,11 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void invalidateImageCache() {
-        imageNeedsRefresh = true;
+        invalidImageCache = true;
+    }
+
+    public void invalidateIconImageCache() {
+        invalidIconImageCache = true;
     }
 
     /**
@@ -347,7 +357,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     private void invalidateAllCaches(boolean invalidateTransformer) {
-        iconImageNeedsRefresh = true;
+        invalidateIconImageCache();
         invalidateImageCache();
         invalidateFilterCaches();
 
@@ -363,13 +373,8 @@ public class SmartObject extends CompositeLayer {
     }
 
     public BufferedImage getVisibleImage() {
-        if (imageNeedsRefresh) {
+        if (invalidImageCache) {
             recalculateImage();
-
-            if (iconImageNeedsRefresh) {
-                updateIconImage();
-                iconImageNeedsRefresh = false;
-            }
         }
         return image;
     }
@@ -445,7 +450,7 @@ public class SmartObject extends CompositeLayer {
 
     // adds a smart filter, and shows its configuration dialog,
     // but if the user cancels the dialog, the filter is removed
-    public void tryAddingSmartFilter(Filter filter) {
+    public void addSmartFilterWithDialog(Filter filter) {
         SmartFilter smartFilter = new SmartFilter(filter, baseSource, this);
         boolean hasDialog = filter instanceof FilterWithGUI;
         addSmartFilter(smartFilter, !hasDialog, true);
@@ -474,26 +479,24 @@ public class SmartObject extends CompositeLayer {
         insertSmartFilter((SmartFilter) layer, index, update, true);
     }
 
+    private void rewireFilterChain() {
+        ImageSource currentSource = baseSource;
+        for (int i = 0; i < filters.size(); i++) {
+            SmartFilter currentFilter = filters.get(i);
+            SmartFilter nextFilter = (i < filters.size() - 1) ? filters.get(i + 1) : null;
+
+            currentFilter.setImageSource(currentSource);
+            currentFilter.setNext(nextFilter);
+
+            currentSource = currentFilter;
+        }
+    }
+
     private void insertSmartFilter(SmartFilter newFilter, int index, boolean update, boolean activate) {
         assert newFilter.getHolder() == this;
 
-        SmartFilter previous = (index == 0) ? null : filters.get(index - 1);
-        SmartFilter next = (index == filters.size()) ? null : filters.get(index);
-
         filters.add(index, newFilter);
-
-        if (previous != null) {
-            previous.setNext(newFilter);
-            newFilter.setImageSource(previous);
-        } else {
-            newFilter.setImageSource(baseSource);
-        }
-
-        if (next != null) {
-            newFilter.setNext(next);
-            next.setImageSource(newFilter);
-            next.invalidateChain();
-        }
+        rewireFilterChain();
 
         if (update) {
             updateChildrenUI();
@@ -501,8 +504,11 @@ public class SmartObject extends CompositeLayer {
                 comp.setActiveLayer(newFilter); // activate after its UI has been created
             }
 
+            // the new filter itself keeps its cache, which is important for undo
+            newFilter.invalidateSubsequent();
+            
             invalidateImageCache();
-            iconImageNeedsRefresh = true;
+            invalidateIconImageCache();
             holder.update();
             layerCountChanged();
         } else if (activate) {
@@ -527,7 +533,7 @@ public class SmartObject extends CompositeLayer {
         }
 
         invalidateImageCache();
-        iconImageNeedsRefresh = true;
+        invalidateIconImageCache();
         if (update) {
             holder.update();
             updateChildrenUI();
@@ -539,19 +545,21 @@ public class SmartObject extends CompositeLayer {
         SmartFilter previous = (index > 0) ? filters.get(index - 1) : null;
         SmartFilter next = (index < filters.size() - 1) ? filters.get(index + 1) : null;
 
-        if (previous != null) {
-            previous.setNext(next);
-        }
         if (next != null) {
-            next.invalidateChain();
-            next.setImageSource(previous != null ? previous : baseSource);
             comp.setActiveLayer(next);
         } else if (previous != null) {
             comp.setActiveLayer(previous);
         } else {
             comp.setActiveLayer(this);
         }
+
         filters.remove(index);
+        rewireFilterChain();
+
+        // invalidate from the point of deletion onwards.
+        if (next != null) {
+            next.invalidateChain();
+        }
     }
 
     @Override
@@ -832,37 +840,10 @@ public class SmartObject extends CompositeLayer {
     }
 
     public void swapSmartFilters(int indexA, int indexB, String editName) {
-        assert indexB == indexA + 1;
+        assert Math.abs(indexA - indexB) == 1;
 
-        SmartFilter filterA = filters.get(indexA);
-        SmartFilter filterB = filters.get(indexB);
-        assert filterA.getNext() == filterB;
-        assert filterB.getImageSource() == filterA;
-
-        // identify the filters/source before and after the swapped pair
-        SmartFilter below = (indexA == 0) ? null : filters.get(indexA - 1);
-        SmartFilter above = filterB.getNext();
-        ImageSource origSourceOfA = filterA.getImageSource();
-
-        // swap the filters in the list
         Collections.swap(filters, indexA, indexB);
-
-        // re-wire the filter chain's linked list pointers
-        if (below != null) {
-            below.setNext(filterB);
-        }
-        filterB.setImageSource(origSourceOfA);
-
-        filterB.setNext(filterA);
-        filterA.setImageSource(filterB);
-
-        if (above != null) {
-            filterA.setNext(above);
-            above.setImageSource(filterA);
-        } else {
-            // it's the new last filter in the chain
-            filterA.setNext(null);
-        }
+        rewireFilterChain();
 
         assert checkInvariants();
 
@@ -870,12 +851,10 @@ public class SmartObject extends CompositeLayer {
             History.add(new SwapSmartFiltersEdit(editName, this, indexA, indexB));
         }
 
-        // update the GUI
         updateChildrenUI();
 
-        // update the image, starting from the first affected filter
-        SmartFilter lowestChanged = (below != null) ? below : filterB;
-        lowestChanged.invalidateChain();
+        // invalidate from the first of the swapped filters' new position
+        filters.get(Math.min(indexA, indexB)).invalidateChain();
         invalidateImageCache();
         holder.update();
     }
@@ -1072,7 +1051,7 @@ public class SmartObject extends CompositeLayer {
 
         // update() and setActiveLayer() will be called later, but this is necessary.
         invalidateImageCache();
-        iconImageNeedsRefresh = true;
+        invalidateIconImageCache();
     }
 
     @Override
@@ -1140,6 +1119,11 @@ public class SmartObject extends CompositeLayer {
             return ImageUtils.getPixelAt(this, image, p);
         }
         return 0;
+    }
+
+    @Override
+    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,8 +54,8 @@ public class ImageTransformer implements ImageSource, Serializable {
     public ImageTransformer copy(Composition newContent) {
         ImageTransformer copy = new ImageTransformer(newContent, new AffineTransform(transform), targetWidth, targetHeight);
 
-        // should be safe to share because the new content
-        // is either identical to the old one or a copy of it
+        // can be shared because the new content is
+        // either identical to the old one or a copy of it
         copy.cachedImage = cachedImage;
 
         return copy;

@@ -75,8 +75,7 @@ public class EffectsParam extends AbstractFilterParam {
             .content(effectsPanel)
             .withScrollbars()
             .okText(CLOSE_DIALOG)
-            .noCancelButton()
-            .build();
+            .noCancelButton();
     }
 
     /**

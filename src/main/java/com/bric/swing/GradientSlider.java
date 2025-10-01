@@ -286,8 +286,8 @@ public class GradientSlider extends MultiThumbSlider {
 
     private Frame getFrame() {
         Window w = SwingUtilities.getWindowAncestor(this);
-        if (w instanceof Frame) {
-            return ((Frame) w);
+        if (w instanceof Frame frame) {
+            return frame;
         }
         return null;
     }

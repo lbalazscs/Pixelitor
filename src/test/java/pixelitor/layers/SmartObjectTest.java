@@ -20,7 +20,12 @@ package pixelitor.layers;
 import org.junit.jupiter.api.*;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.colors.Colors;
 import pixelitor.history.History;
+import pixelitor.utils.ImageUtils;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
@@ -45,7 +50,7 @@ class SmartObjectTest {
     }
 
     @Test
-    void cloneSmartObject() {
+    void shallowDuplicate_shouldCreateCloneWithSharedContent() {
         Composition comp = smartObject.getComp();
         assertThat(comp)
             .numLayersIs(1)
@@ -59,12 +64,35 @@ class SmartObjectTest {
             .typeOfLayerNIs(1, SmartObject.class);
         Composition firstContent = ((SmartObject) comp.getLayer(0)).getContent();
         Composition secondContent = ((SmartObject) comp.getLayer(1)).getContent();
-        assert firstContent == secondContent;
+        assertThat(firstContent).isSameAs(secondContent);
 
         History.undo("Clone");
         assertThat(comp).numLayersIs(1);
 
         History.redo("Clone");
         assertThat(comp).numLayersIs(2);
+    }
+
+    @Test
+    void whenSmartObjectContentIsModified_thenParentLayerUpdates() {
+        // capture the initial state of the smart object's rendered image
+        BufferedImage beforeImage = ImageUtils.copyImage(smartObject.getVisibleImage());
+        int initialPixel = beforeImage.getRGB(0, 0);
+
+        // modify the content of the smart object
+        Composition content = smartObject.getContent();
+        ImageLayer contentLayer = (ImageLayer) content.getLayer(0);
+        Colors.fillWith(Color.RED, contentLayer.getImage());
+
+        // propagate the changes from the content to its smart object owner
+        smartObject.propagateContentChanges(content, true);
+
+        // capture the final state
+        BufferedImage afterImage = smartObject.getVisibleImage();
+        int finalPixel = afterImage.getRGB(0, 0);
+
+        // verify that the smart object's image has been updated
+        assertThat(finalPixel).isNotEqualTo(initialPixel);
+        assertThat(finalPixel).isEqualTo(Color.RED.getRGB());
     }
 }

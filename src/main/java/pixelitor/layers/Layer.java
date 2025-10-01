@@ -425,22 +425,16 @@ public abstract class Layer implements Serializable, Debuggable {
      * Returns the top-level layer containing this layer.
      */
     public Layer getTopLevelLayer() {
-        Layer top = this;
-        while (!top.isTopLevel()) {
-            if (!(top.holder instanceof Layer)) {
-                // non-top-level holders must be layers
-                throw new IllegalStateException("this = " + getName() + ", top.holder = " + top.holder.getName());
-            }
-
-            top = (Layer) top.holder;
+        Layer current = this;
+        while (!current.isTopLevel()) {
+            // non-top-level holders must be layers
+            current = (Layer) current.holder;
         }
 
-        if (top instanceof SmartFilter) {
-            // smart filters are never top-level
-            throw new IllegalStateException();
-        }
+        // smart filters should never be top-level
+        assert !(current instanceof SmartFilter);
 
-        return top;
+        return current;
     }
 
     /**

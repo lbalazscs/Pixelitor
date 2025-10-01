@@ -47,7 +47,7 @@ public class DebugNodes {
         var node = new DebugNode("system", device);
 
         node.addString("Java version", System.getProperty("java.version"));
-        node.addString("Java vendor", System.getProperty("java.vendor"));
+        node.addQuotedString("Java vendor", System.getProperty("java.vendor"));
         node.addQuotedString("OS name", System.getProperty("os.name"));
 
         var displayMode = device.getDisplayMode();
@@ -200,7 +200,7 @@ public class DebugNodes {
     public static DebugNode createFileNode(String name, File file) {
         DebugNode node = new DebugNode(name, file);
 
-        node.addQuotedString("path", file.getAbsolutePath());
+        node.addFilePath("path", file.getAbsolutePath());
         node.addBoolean("exists", file.exists());
 
         return node;

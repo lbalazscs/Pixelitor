@@ -135,8 +135,8 @@ public class CharcoalStroke implements FilteredStroke {
         GeneralPathWriter writer = new GeneralPathWriter(newShape);
 
         float maxDepth = Float.MAX_VALUE;
-        if (stroke instanceof BasicStroke) {
-            maxDepth = ((BasicStroke) stroke).getLineWidth() * 2;
+        if (stroke instanceof BasicStroke basicStroke) {
+            maxDepth = basicStroke.getLineWidth() * 2;
         }
 
         CharcoalEffect charcoal = new CharcoalEffect(writer, crackSize, angle, randomSeed, maxDepth);

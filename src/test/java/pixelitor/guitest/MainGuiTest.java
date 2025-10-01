@@ -3190,7 +3190,7 @@ public class MainGuiTest {
     }
 
     private void runWithSelectionTranslationCombinations(Runnable task) {
-        log(1, "no selection, no translation");
+        log(1, "without selection or translation");
 
         EDT.assertThereIsNoSelection();
         EDT.assertThereIsNoTranslation();
@@ -3201,7 +3201,7 @@ public class MainGuiTest {
             return;
         }
 
-        log(1, "existing selection, no translation");
+        log(1, "with selection, without translation");
         addSelection();
         task.run();
         app.deselect();
@@ -3210,7 +3210,7 @@ public class MainGuiTest {
             return;
         }
 
-        log(1, "no selection, existing translation");
+        log(1, "without selection, with translation");
         addTranslation();
         task.run();
 
@@ -3218,11 +3218,15 @@ public class MainGuiTest {
             return;
         }
 
-        log(1, "existing selection and translation");
+        log(1, "with selection and translation");
         addSelection();
         task.run();
+
         keyboard.undo("Create Selection");
+        EDT.assertThereIsNoSelection();
+
         keyboard.undo("Move Layer");
+        EDT.assertThereIsNoTranslation();
     }
 
     public void addLayerMask(boolean allowExistingMask) {

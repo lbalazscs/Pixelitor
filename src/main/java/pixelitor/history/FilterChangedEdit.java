@@ -38,9 +38,6 @@ public class FilterChangedEdit extends PixelitorEdit {
         this.layer = layer;
         this.prevFilter = prevFilter;
         this.prevName = prevName;
-
-        // a backup name is needed only if the new filter has a different type
-        assert (prevName != null) ^ (prevFilter.getClass().equals(layer.getFilter().getClass()));
     }
 
     @Override
@@ -59,7 +56,7 @@ public class FilterChangedEdit extends PixelitorEdit {
 
     private void swapState() {
         Filter currentFilter = layer.getFilter();
-        layer.restoreFilter(prevFilter);
+        layer.setFilterFromHistory(prevFilter);
         prevFilter = currentFilter;
 
         // if the layer name also changed (e.g., filter replacement), swap it too

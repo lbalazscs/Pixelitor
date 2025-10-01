@@ -201,12 +201,12 @@ public abstract class PathWriter {
         double cx1 = (bx2 - 3 * dx2 + 6 * cx0) / 3;
         double x1 = ax2 + dx2 - 3 * cx0 + 3 * cx1;
 
-        if (obj instanceof GeneralPath) {
-            ((GeneralPath) obj).curveTo((float) cx0, (float) cy0,
+        if (obj instanceof GeneralPath generalPath) {
+            generalPath.curveTo((float) cx0, (float) cy0,
                     (float) cx1, (float) cy1,
                     (float) x1, (float) y1);
-        } else if (obj instanceof PathWriter) {
-            ((PathWriter) obj).curveTo((float) cx0, (float) cy0,
+        } else if (obj instanceof PathWriter pathWriter) {
+            pathWriter.curveTo((float) cx0, (float) cy0,
                     (float) cx1, (float) cy1,
                     (float) x1, (float) y1);
         }
@@ -273,11 +273,11 @@ public abstract class PathWriter {
         double ctrlX = (2 * cx2 + bx2) / 2;
         double x1 = ax2 - cx2 + 2 * ctrlX;
 
-        if (obj instanceof GeneralPath) {
-            ((GeneralPath) obj).quadTo((float) ctrlX, (float) ctrlY,
+        if (obj instanceof GeneralPath generalPath) {
+            generalPath.quadTo((float) ctrlX, (float) ctrlY,
                     (float) x1, (float) y1);
-        } else if (obj instanceof PathWriter) {
-            ((PathWriter) obj).quadTo((float) ctrlX, (float) ctrlY,
+        } else if (obj instanceof PathWriter pathWriter) {
+            pathWriter.quadTo((float) ctrlX, (float) ctrlY,
                     (float) x1, (float) y1);
         }
     }

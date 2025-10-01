@@ -26,8 +26,11 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 
@@ -51,7 +54,7 @@ public class DebugNode extends DefaultMutableTreeNode {
             .cancelText(GUIText.CLOSE_DIALOG)
             .validator(d -> {
                 Utils.copyStringToClipboard(toJSON());
-                return false; // prevents the dialog from closing
+                return false; // prevents the dialog from closing on click
             })
             .show();
     }
@@ -62,68 +65,91 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     /**
-     * Returns a JSON-ish text representation of the tree.
+     * Returns a JSON text representation of the tree.
      */
     public String toJSON() {
+        // start recursion with indentation level 0
+        return toJSON(0);
+    }
+
+    private String toJSON(int indentLevel) {
         if (userObject == null) {
-            return "\"" + name + "\": null,";
+            return "  ".repeat(indentLevel) + "\"" + name + "\": null";
         }
+
+        String currentIndent = "  ".repeat(indentLevel);
 
         StringBuilder sb = new StringBuilder();
 
-        indent(sb, getLevel());
         if (isRoot()) {
-            sb.append("{");
+            sb.append("{\n");
         } else {
-            sb.append('"').append(name).append("\": {");
+            sb.append(currentIndent).append('"').append(name).append("\": {\n");
         }
 
+        List<String> childrenJsonParts = new ArrayList<>();
         Enumeration<TreeNode> childrenEnum = children();
         while (childrenEnum.hasMoreElements()) {
-            indent(sb, getLevel() + 1);
-
             TreeNode child = childrenEnum.nextElement();
-
-            String text;
+            String childJson;
             if (child instanceof DebugNode dn) {
-                text = dn.toJSON();
+                childJson = dn.toJSON(indentLevel + 1);
             } else if (child instanceof DefaultMutableTreeNode defaultNode) {
-                text = ((StringKeyValue) defaultNode.getUserObject()).toJSON();
+                StringKeyValue skv = (StringKeyValue) defaultNode.getUserObject();
+                childJson = "  ".repeat(indentLevel + 1) + skv.toJSON();
             } else {
-                throw new IllegalStateException();
+                throw new IllegalStateException("Unknown child type in DebugNode tree");
             }
-
-            sb.append(text);
+            childrenJsonParts.add(childJson);
         }
 
-        indent(sb, getLevel());
+        sb.append(String.join(",\n", childrenJsonParts));
+
+        if (!childrenJsonParts.isEmpty()) {
+            sb.append('\n');
+        }
 
         if (isRoot()) {
-            sb.append('}');
+            sb.append("}");
         } else {
-            sb.append("},");
+            sb.append(currentIndent).append("}");
         }
 
         return sb.toString();
     }
 
     public void addString(String name, String s) {
-        addNode(name, s);
+        addNode(name, s, DebugNode::quote);
     }
 
     /**
-     * A null-safe way of adding the toString() of an object
+     * Adds a file path, ensuring (Windows) backslashes are escaped for JSON.
+     */
+    public void addFilePath(String name, String path) {
+        if (path == null) {
+            addNullNode(name);
+        } else {
+            addNode(name, path, DebugNode::quoteAndEscapeBackslashes);
+        }
+    }
+
+    /**
+     * Adds the toString() representation of an object.
      */
     public void addAsString(String name, Object o) {
-        addString(name, o == null ? "null" : o.toString());
+        if (o == null) {
+            addNullNode(name);
+        } else {
+            addString(name, o.toString());
+        }
     }
 
     /**
-     * A null-safe version of adding the {@link DebugNode} created by an object
+     * A null-safe version of adding the {@link DebugNode} created by an object.
      */
     public void addNullableDebuggable(String name, Debuggable debuggable) {
         if (debuggable == null) {
-            addString(name, "null");
+            addNullNode(name);
         } else {
             add(debuggable.createDebugNode(name));
         }
@@ -135,71 +161,98 @@ public class DebugNode extends DefaultMutableTreeNode {
     public <T> void addNullableDebuggable(String name, T debugged,
                                           BiFunction<String, T, DebugNode> transformer) {
         if (debugged == null) {
-            addString(name, "null");
+            addNullNode(name);
         } else {
             add(transformer.apply(name, debugged));
         }
     }
 
-    public void addNullableProperty(String name, Object nullable) {
+    /**
+     * Reports the presence or absence (null vs. non-null) of an object.
+     */
+    public void addPresence(String name, Object nullable) {
         addString("has " + name, nullable == null ? "no" : "yes");
     }
 
     public void addQuotedString(String name, String s) {
-        addNode(name, "\"" + s + "\"");
+        addValidJsonNode(name, quote(s));
     }
 
     public void addAsQuotedString(String name, Object o) {
-        addQuotedString(name, o == null ? "null" : o.toString());
+        if (o == null) {
+            addNullNode(name);
+        } else {
+            addQuotedString(name, o.toString());
+        }
     }
 
     public void addInt(String name, int i) {
-        addNode(name, String.valueOf(i));
+        addValidJsonNode(name, String.valueOf(i));
     }
 
     public void addFloat(String name, float f) {
-        addNode(name, format("%.2f", f));
+        addValidJsonNode(name, format("%.2f", f));
     }
 
     public void addDouble(String name, double f) {
-        addNode(name, format("%.2f", f));
+        addValidJsonNode(name, format("%.2f", f));
     }
 
     public void addBoolean(String name, boolean b) {
-        addNode(name, String.valueOf(b));
+        addValidJsonNode(name, String.valueOf(b));
     }
 
     public void addColor(String name, Color c) {
-        addNode(name, Colors.toHTMLHex(c, true));
+        addNode(name, Colors.toHTMLHex(c, true), DebugNode::quote);
     }
 
     public void addClass() {
-        addNode("class", userObject.getClass().getSimpleName());
+        addNode("class", userObject.getClass().getSimpleName(), DebugNode::quote);
     }
 
     public void addAsClass(String name, Object o) {
-        addString(name, o == null ? "null" : o.getClass().getName());
+        if (o == null) {
+            addNullNode(name);
+        } else {
+            addString(name, o.getClass().getName());
+        }
     }
 
-    private void addNode(String key, String value) {
-        add(new DefaultMutableTreeNode(new StringKeyValue(key, value)));
+    private void addNullNode(String name) {
+        addValidJsonNode(name, "null");
     }
 
-    private static void indent(StringBuilder sb, int indentLevel) {
-        sb.append('\n');
-        sb.append("  ".repeat(indentLevel));
+    // adds a value which is already a valid JSON literal
+    private void addValidJsonNode(String key, String value) {
+        addNode(key, value, Function.identity());
+    }
+
+    private void addNode(String key, String value, Function<String, String> jsonValueConverter) {
+        add(new DefaultMutableTreeNode(new StringKeyValue(key, value, jsonValueConverter)));
+    }
+
+    private static String quote(String s) {
+        return "\"" + s + "\"";
+    }
+
+    private static String quoteAndEscapeBackslashes(String s) {
+        // in JSON, a backslash must be escaped with another backslash
+        String escaped = s.replace("\\", "\\\\");
+        return quote(escaped);
     }
 
     /**
      * Allow a leaf node to have two string representations: a GUI text and a JSON.
      */
-    private record StringKeyValue(String key, String value) {
-        public String toJSON() {
-            return "\"" + key + "\": " + value + ",";
+    private record StringKeyValue(String key, String value, Function<String, String> jsonValueConverter) {
+        String toJSON() {
+            String jsonValue = jsonValueConverter.apply(value);
+            return "\"" + key + "\": " + jsonValue;
         }
 
         @Override
         public String toString() {
+            // the value is stored exactly as it should appear in the GUI
             return key + " = " + value;
         }
     }

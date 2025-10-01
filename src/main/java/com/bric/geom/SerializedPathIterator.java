@@ -85,35 +85,29 @@ class SerializedPathIterator implements PathIterator {
         int terms;
         char k = c[ctr];
 
-        switch (k) {
-            case 'm':
-            case 'M':
+        terms = switch (k) {
+            case 'm', 'M' -> {
                 currentSegment = SEG_MOVETO;
-                terms = 2;
-                break;
-            case 'l':
-            case 'L':
+                yield 2;
+            }
+            case 'l', 'L' -> {
                 currentSegment = SEG_LINETO;
-                terms = 2;
-                break;
-            case 'q':
-            case 'Q':
+                yield 2;
+            }
+            case 'q', 'Q' -> {
                 currentSegment = SEG_QUADTO;
-                terms = 4;
-                break;
-            case 'c':
-            case 'C':
+                yield 4;
+            }
+            case 'c', 'C' -> {
                 currentSegment = SEG_CUBICTO;
-                terms = 6;
-                break;
-            case 'z':
-            case 'Z':
+                yield 6;
+            }
+            case 'z', 'Z' -> {
                 currentSegment = SEG_CLOSE;
-                terms = 0;
-                break;
-            default:
-                throw new ParserException("Unrecognized character in shape data: '" + c[ctr] + "'", ctr, 1);
-        }
+                yield 0;
+            }
+            default -> throw new ParserException("Unrecognized character in shape data: '" + c[ctr] + "'", ctr, 1);
+        };
         ctr++;
         if (terms > 0) {
             parseTerms(terms);

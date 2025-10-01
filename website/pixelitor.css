@@ -4,9 +4,54 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-color: #ebf0f5;
+  --text-color: black;
+  --heading-color: #000066;
+  --bold-text-color: #142233;
+  --card-bg-color: #f2f7fc;
+  --card-shadow: 0.1rem 0.1rem 0.6rem rgba(0, 0, 0, 0.35);
+  --link-color: #003366;
+  --link-visited-color: #003040;
+  --toc-bg-color: #e2e8f0;
+  --toc-border-color: #64748b;
+  --kbd-bg-color: rgb(247, 247, 247);
+  --kbd-border-color: rgb(204, 204, 204);
+  --kbd-text-color: #333;
+  --kbd-shadow: 0px 1px 0px rgba(0,0,0,0.4), inset 0 0 0 0.1em #ffffff;  
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #22272e;
+    --text-color: #cdd9e5;
+    --heading-color: #f0f6fc;
+    --bold-text-color: #ebf0f5;
+    --card-bg-color: #2c2c2c;
+    --card-shadow: 0.1rem 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
+    --link-color: #58a6ff;
+    --link-visited-color: #8f72cf;
+    --toc-bg-color: #2d333b;
+    --toc-border-color: #545d68;
+    --kbd-bg-color: #3e444d;
+    --kbd-border-color: #6a737d;
+    --kbd-text-color: var(--text-color); 
+    --kbd-shadow: 0px 1px 0px rgba(0,0,0,0.6), inset 0 0 0 0.1em #5a6068;
+  }
+  
+  .icon-svg {
+    filter: invert(1);
+  }  
+}
+
+html {
+  color-scheme: light dark;
+}
+
 body {
   font-family: Verdana, Geneva, Arial, sans-serif;
-  background-color: #ebf0f5;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   margin: 0;
   line-height: 1.4em;
 }
@@ -18,20 +63,20 @@ body {
 }
 
 h1 {
-  color: #000066;
+  color: var(--heading-color);
   font-size: 200%;
 }
 
 b {
-  color: #142233;
+  color: var(--bold-text-color);
 }
 
 a:link {
-  color: #003366;
+  color: var(--link-color);
 }
 
 a:visited {
-  color: #003040;
+  color: var(--link-visited-color);
 }
 
 .navbar {
@@ -39,10 +84,11 @@ a:visited {
 }
 
 ul.navbar-nav {
+  display: flex;
+  justify-content: flex-start;
   list-style-type: none;
   margin: 0;
   padding: 0;
-  overflow: hidden;
 }
 
 #hamburger-cb {
@@ -103,10 +149,6 @@ ul.navbar-nav {
   }
 }
 
-li.nav-item {
-  float: left;
-}
-
 a.nav-link {
   display: block;
   color: white;
@@ -124,19 +166,11 @@ li.active {
   background-color: #3e5780;
 }
 
-.release {
-  padding: 0.1em 0.5em 0.5em;
-  margin-top: 0.8em;
-  background: #f2f7fc;
-  box-shadow: 0.1rem 0.1rem 0.6rem rgba(0, 0, 0, 0.35);
-  border-radius: 0.5em;
-}
-
 .card {
   padding: 0.1em 0.5em 0.5em;
   margin-top: 0.8em;
-  background: #f2f7fc;
-  box-shadow: 0.1rem 0.1rem 0.6rem rgba(0, 0, 0, 0.35);
+  background: var(--card-bg-color);
+  box-shadow: var(--card-shadow);
   border-radius: 0.5em;
 }
 
@@ -160,18 +194,19 @@ li.active {
 }
 
 kbd {
+  color: var(--kbd-text-color);
   margin: 0 0.1em;
   padding: 0.1em 0.6em;
   border-radius: 0.3em;
-  border: 1px solid rgb(204, 204, 204);
+  border: 1px solid var(--kbd-border-color);
   line-height: 1.4;
   font-family: Arial,Helvetica,sans-serif;
   font-size: 0.7em;
   display: inline-block;
-  text-shadow: 0 1px 0 #fff;
-  box-shadow: 0px 1px 0px rgba(0,0,0,0.4), inset 0 0 0 0.1em #ffffff;
+  text-shadow: none;
+  box-shadow: var(--kbd-shadow);
   white-space: nowrap;
-  background-color: rgb(247, 247, 247);
+  background-color: var(--kbd-bg-color);
 }
 
 .screenshot {
@@ -182,9 +217,9 @@ kbd {
 
 .toc {
   padding: 0.5rem 2.0rem 0.5rem 0.1rem;
-  background-color: #e2e8f0;
+  background-color: var(--toc-bg-color);
   display: table;
-  border: 1px solid #64748b;
+  border: 1px solid var(--toc-border-color);
 }
 
 .toctitle {

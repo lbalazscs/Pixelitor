@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.SmartFilter;
 import pixelitor.layers.SmartObject;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -40,12 +42,10 @@ public class SmartObjectAssert extends ContentLayerAssert<SmartObjectAssert, Sma
     public SmartObjectAssert smartFilterNamesAre(String... expected) {
         isNotNull();
 
-        int numFilters = actual.getNumSmartFilters();
-        assertThat(numFilters).isEqualTo(expected.length);
-        for (int i = 0; i < numFilters; i++) {
-            SmartFilter smartFilter = actual.getSmartFilter(i);
-            assertThat(smartFilter.getName()).isEqualTo(expected[i]);
-        }
+        List<String> actualNames = actual.directChildrenStream()
+            .map(SmartFilter::getName)
+            .toList();
+        assertThat(actualNames).containsExactly(expected);
 
         return myself;
     }
@@ -59,6 +59,14 @@ public class SmartObjectAssert extends ContentLayerAssert<SmartObjectAssert, Sma
             SmartFilter smartFilter = actual.getSmartFilter(i);
             assertThat(smartFilter.isVisible()).isEqualTo(expected[i]);
         }
+
+        return myself;
+    }
+
+    public SmartObjectAssert activeLayerNameIs(String expected) {
+        isNotNull();
+
+        assertThat(actual.getComp().getActiveLayer().getName()).isEqualTo(expected);
 
         return myself;
     }

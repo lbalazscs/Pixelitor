@@ -199,7 +199,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         // the serialized state of the filter in preset format
         private String filterState;
 
-        public SerializationProxy(Filter filter) {
+        SerializationProxy(Filter filter) {
             filterClass = filter.getClass();
             filterName = filter.getName();
 

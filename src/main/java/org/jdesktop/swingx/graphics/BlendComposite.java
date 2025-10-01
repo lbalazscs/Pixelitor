@@ -317,9 +317,9 @@ public final class BlendComposite implements Composite {
         throw new RasterFormatException("Incompatible color models");
     }
 
-    private static abstract class BlendingContext implements CompositeContext {
-        protected final Blender blender;
-        protected final BlendComposite composite;
+    private abstract static class BlendingContext implements CompositeContext {
+        final Blender blender;
+        final BlendComposite composite;
 
         private BlendingContext(BlendComposite composite) {
             this.composite = composite;
@@ -429,10 +429,10 @@ public final class BlendComposite implements Composite {
         }
     }
 
-    private static abstract class Blender {
-        public abstract void blend(int[] src, int[] dst, int[] result);
+    private abstract static class Blender {
+        abstract void blend(int[] src, int[] dst, int[] result);
 
-        public static Blender getBlenderFor(BlendComposite composite) {
+        static Blender getBlenderFor(BlendComposite composite) {
             switch (composite.getMode()) {
                 case CROSS_FADE:
                     return new Blender() {

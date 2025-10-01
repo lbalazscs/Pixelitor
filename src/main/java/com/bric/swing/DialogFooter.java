@@ -247,8 +247,8 @@ public class DialogFooter extends JPanel {
         public void ancestorAdded(AncestorEvent event) {
             JButton button = (JButton) event.getComponent();
             Window w = SwingUtilities.getWindowAncestor(button);
-            if (w instanceof RootPaneContainer) {
-                setRootPaneContainer(button, (RootPaneContainer) w);
+            if (w instanceof RootPaneContainer container) {
+                setRootPaneContainer(button, container);
             } else {
                 setRootPaneContainer(button, null);
             }

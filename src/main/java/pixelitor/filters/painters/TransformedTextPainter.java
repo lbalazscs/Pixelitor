@@ -922,7 +922,7 @@ public class TransformedTextPainter implements Debuggable {
 
         node.addNullableDebuggable("boundingBox", boundingBox, DebugNodes::createRectangleNode);
         node.addNullableDebuggable("transformedRect", transformedRect);
-        node.addNullableProperty("transformedShape", textShape);
+        node.addPresence("transformedShape", textShape);
 
         return node;
     }

@@ -17,16 +17,14 @@
 
 package pixelitor.utils;
 
-import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.layers.Filterable;
+import pixelitor.filters.Filter;
 
 import java.awt.image.BufferedImage;
 
 /**
  * A mock filter that counts filter executions.
  */
-public class MockFilter extends FilterWithGUI {
+public class MockFilter extends Filter {
     private int numTransformCalls;
 
     public MockFilter(String name) {
@@ -41,16 +39,6 @@ public class MockFilter extends FilterWithGUI {
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
         numTransformCalls++;
         return src;
-    }
-
-    @Override
-    public FilterGUI createGUI(Filterable layer, boolean reset) {
-        return null;
-    }
-
-    @Override
-    public void randomize() {
-
     }
 
     public void resetNumTransformCalls() {

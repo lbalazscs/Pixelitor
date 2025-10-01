@@ -124,8 +124,8 @@ public class ColorPicker extends JPanel {
         ColorPickerDialog d;
         if (owner instanceof Frame || owner == null) {
             d = new ColorPickerDialog((Frame) owner, originalColor, includeOpacity, adjustmentListener);
-        } else if (owner instanceof Dialog) {
-            d = new ColorPickerDialog((Dialog) owner, originalColor, includeOpacity, adjustmentListener);
+        } else if (owner instanceof Dialog dialog) {
+            d = new ColorPickerDialog(dialog, originalColor, includeOpacity, adjustmentListener);
         } else {
             throw new IllegalArgumentException("the owner (" + owner.getClass()
                     .getName() + ") must be a java.awt.Frame or a java.awt.Dialog");

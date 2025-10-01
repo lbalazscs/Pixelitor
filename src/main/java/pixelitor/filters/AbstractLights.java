@@ -283,17 +283,17 @@ public class AbstractLights extends ParametrizedFilter {
     }
 
     private static class Particle {
-        protected double x, y; // position
-        protected final double speed;
-        protected double vx, vy; // velocity vector
+        double x, y; // position
+        final double speed;
+        double vx, vy; // velocity vector
         private final Color color;
 
         // each particle is connected to a sibling, and lines are drawn between them
-        public Particle sibling;
+        Particle sibling;
 
         private final boolean bounce;
 
-        public Particle(int x, int y, double speed, double angle, Color color, boolean bounce) {
+        Particle(int x, int y, double speed, double angle, Color color, boolean bounce) {
             this.x = x;
             this.y = y;
             this.speed = speed;

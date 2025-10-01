@@ -35,6 +35,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
@@ -302,6 +303,12 @@ public class Colors {
                 colorSetter.accept(color);
             }
         });
+    }
+
+    public static void fillWith(Color color, BufferedImage img) {
+        Graphics2D g = img.createGraphics();
+        fillWith(color, g, img.getWidth(), img.getHeight());
+        g.dispose();
     }
 
     public static void fillWith(Color color, Graphics2D g2, int width, int height) {

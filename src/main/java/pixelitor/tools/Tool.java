@@ -392,7 +392,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
 
-        node.addString("name", getName());
+        node.addQuotedString("name", getName());
         node.addBoolean("altDown", altDown);
         node.addBoolean("pixelSnapping", pixelSnapping);
 

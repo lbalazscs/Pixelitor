@@ -151,7 +151,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         return outputCache;
     }
 
-    public void evaluateNow() {
+    public void forceRendering() {
         if (outputCache == null) {
             createOutputCache(imageSource.getImage());
         }
@@ -215,9 +215,15 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
      * Invalidates the cache for this filter and all subsequent filters in the chain.
      */
     public void invalidateChain() {
-        invalidateCache();
+        SmartFilter current = this;
+        while (current != null) {
+            current.invalidateCache();
+            current = current.next;
+        }
+    }
+
+    public void invalidateSubsequent() {
         if (next != null) {
-            //noinspection TailRecursion
             next.invalidateChain();
         }
     }
@@ -233,7 +239,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
-    public void restoreFilter(Filter filter) {
+    public void setFilterFromHistory(Filter filter) {
         this.filter = filter;
 
         invalidateAll();
@@ -246,6 +252,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public void invalidateAll() {
         invalidateChain();
         smartObject.invalidateImageCache();
+        smartObject.invalidateIconImageCache();
     }
 
     /**
@@ -353,10 +360,16 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (action == null) {
             return; // dialog canceled
         }
+
+        replaceFilterWith(action.createNewFilterInstance());
+    }
+
+    // the non-ui, unit testable part of replacing
+    public void replaceFilterWith(Filter newFilter) {
         Filter origFilter = filter;
         String origName = getName();
+        filter = newFilter;
 
-        filter = action.createNewFilterInstance();
         setName(filter.getName(), false);
 
         History.add(new FilterChangedEdit("Replace Filter", this, origFilter, origName));

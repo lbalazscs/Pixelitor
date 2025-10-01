@@ -141,7 +141,7 @@ public class SplashImageCreator {
 
         SmartFilter lightsSF = new SmartFilter(lights, so.getContent(), so);
         so.addSmartFilter(lightsSF, true, true);
-        lightsSF.evaluateNow();
+        lightsSF.forceRendering();
 
         addTextLayers(comp);
 

@@ -133,7 +133,7 @@ public class FilterAction extends AbstractViewEnabledAction {
         // a new filter instance is created for each smart filter
         // to ensure that its parameters are independent
         Filter newFilterInstance = createNewFilterInstance();
-        so.tryAddingSmartFilter(newFilterInstance);
+        so.addSmartFilterWithDialog(newFilterInstance);
     }
 
     /**

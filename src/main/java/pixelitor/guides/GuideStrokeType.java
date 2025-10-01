@@ -66,6 +66,10 @@ public enum GuideStrokeType {
         return strokeB;
     }
 
+    public boolean hasDoubleStroke() {
+        return strokeB != null;
+    }
+
     @Override
     public String toString() {
         return displayName;

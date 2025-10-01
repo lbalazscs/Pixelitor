@@ -339,10 +339,6 @@ public class TestHelper {
         return view;
     }
 
-    public static MockFilter createMockFilter(String name) {
-        return new MockFilter(name);
-    }
-
     public static void setSelection(Composition comp, Shape shape) {
         if (mockingDetails(comp).isMock()) {
             comp.setSelection(new Selection(shape, comp.getView()));

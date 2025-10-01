@@ -44,16 +44,12 @@ public class ResetButton extends JButton {
     }
 
     public void updateState() {
-        boolean isDefault = resettable.isAtDefault();
-        setArrowIcon(isDefault);
-        setEnabled(!isDefault);
-    }
-
-    private void setArrowIcon(boolean isDefault) {
-        if (isDefault) {
+        if (resettable.isAtDefault()) {
             setIcon(null);
+            setEnabled(false);
         } else {
             setIcon(Icons.getResetIcon());
+            setEnabled(true);
         }
     }
 

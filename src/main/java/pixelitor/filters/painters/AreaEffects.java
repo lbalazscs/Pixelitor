@@ -292,10 +292,10 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
-        node.addNullableProperty("glow", glowEffect);
-        node.addNullableProperty("inner glow", innerGlowEffect);
-        node.addNullableProperty("neon border", neonBorderEffect);
-        node.addNullableProperty("drop shadow", dropShadowEffect);
+        node.addPresence("glow", glowEffect);
+        node.addPresence("inner glow", innerGlowEffect);
+        node.addPresence("neon border", neonBorderEffect);
+        node.addPresence("drop shadow", dropShadowEffect);
         return node;
     }
 
