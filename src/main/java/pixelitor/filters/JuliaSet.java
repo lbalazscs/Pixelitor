@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Renders a Julia Set, see https://en.wikipedia.org/wiki/Julia_set
+ * Renders a Julia-type set, where z is varied across pixels and the constant c is fixed.
  */
 public class JuliaSet extends ComplexFractal {
     public static final String NAME = "Julia Set";
@@ -51,20 +51,22 @@ public class JuliaSet extends ComplexFractal {
     }
 
     @Override
-    public BufferedImage transformAA(BufferedImage src, BufferedImage dest) {
+    public BufferedImage renderFractal(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new JuliaSetImpl();
         }
 
+        filter.setIterator(createIterator());
         filter.setZoom(zoomParam.getZoomRatio());
         filter.setZoomCenter(zoomCenter.getRelativeX(), zoomCenter.getRelativeY());
 
         int iterations = iterationsParam.getValue();
-        filter.setColors(createColors(iterations));
+        filter.setColors(getColors(colorsParam.getValue(), iterations));
         filter.setMaxIterations(iterations);
 
         filter.setCx(cParam.getPercentage(0));
         filter.setCy(cParam.getPercentage(1));
+        filter.setInsideOut(insideOutParam.isChecked());
 
         return filter.filter(src, dest);
     }
@@ -73,6 +75,7 @@ public class JuliaSet extends ComplexFractal {
 class JuliaSetImpl extends ComplexFractalImpl {
     private double cx;
     private double cy;
+    private boolean insideOut;
 
     protected JuliaSetImpl() {
         super(JuliaSet.NAME, -2.0f, 2.0f, -1.2f, 1.2f);
@@ -80,9 +83,23 @@ class JuliaSetImpl extends ComplexFractalImpl {
 
     @Override
     public int processPixel(int x, int y, int rgb) {
+        // for Julia-type sets, the initial z is mapped from the pixel's image coordinates
         double zx = cxStart + x * xMultiplier;
         double zy = cyStart + y * yMultiplier;
 
+        if (insideOut) {
+            // invert the initial z value using f(z) = 1/z
+            double d = zx * zx + zy * zy;
+            if (d == 0) {
+                // z0 is at the origin, so 1/z0 is at infinity => escape immediately
+                return colors[colors.length - 1];
+            }
+            // use the inverted z0' az z0
+            zx = zx / d;
+            zy = -zy / d;
+        }
+
+        // the complex constant c is fixed for the entire image
         return calcIteratedColor(zx, zy, cx, cy);
     }
 
@@ -93,6 +110,8 @@ class JuliaSetImpl extends ComplexFractalImpl {
     public void setCy(double cy) {
         this.cy = cy;
     }
+
+    public void setInsideOut(boolean insideOut) {
+        this.insideOut = insideOut;
+    }
 }
-
-

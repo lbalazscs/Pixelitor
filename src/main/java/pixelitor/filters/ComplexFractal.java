@@ -17,11 +17,8 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.LogZoomParam;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
@@ -32,9 +29,16 @@ import java.io.Serial;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
+import static pixelitor.filters.impl.ComplexFractalImpl.BurningShipStrategy;
+import static pixelitor.filters.impl.ComplexFractalImpl.IterationStrategy;
+import static pixelitor.filters.impl.ComplexFractalImpl.MandelbrotStrategy;
+import static pixelitor.filters.impl.ComplexFractalImpl.MultibrotStrategy3;
+import static pixelitor.filters.impl.ComplexFractalImpl.MultibrotStrategy4;
+import static pixelitor.filters.impl.ComplexFractalImpl.MultibrotStrategy5;
+import static pixelitor.filters.impl.ComplexFractalImpl.TricornStrategy;
 
 /**
- * Common superclass for the Julia and Mandelbrot sets
+ * Common superclass for the Julia and Mandelbrot sets.
  */
 public abstract class ComplexFractal extends ParametrizedFilter {
     @Serial
@@ -47,10 +51,31 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     private static final int AA_NONE = 1;
     private static final int AA_2x2 = 2;
 
+    private static final int ITERATION_MANDELBROT = 0;
+    private static final int ITERATION_BURNING_SHIP = 1;
+    private static final int ITERATION_TRICORN = 2;
+    private static final int ITERATION_MULTIBROT_3 = 3;
+    private static final int ITERATION_MULTIBROT_4 = 4;
+    private static final int ITERATION_MULTIBROT_5 = 5;
+
+    // color cache fields
+    private static int[] cachedColors = null;
+    private static int cachedColorsStyle = -1;
+    private static int cachedMaxIterations = -1;
+
+    private final IntChoiceParam iterationTypeParam = new IntChoiceParam("Iteration Type", new Item[]{
+        new Item("Mandelbrot", ITERATION_MANDELBROT),
+        new Item("Burning Ship", ITERATION_BURNING_SHIP),
+        new Item("Tricorn", ITERATION_TRICORN),
+        new Item("Multibrot d=3", ITERATION_MULTIBROT_3),
+        new Item("Multibrot d=4", ITERATION_MULTIBROT_4),
+        new Item("Multibrot d=5", ITERATION_MULTIBROT_5),
+    });
+    protected final BooleanParam insideOutParam = new BooleanParam("Inside Out", false);
     protected final LogZoomParam zoomParam = new LogZoomParam(GUIText.ZOOM, 200, 200, 1000);
     protected final ImagePositionParam zoomCenter;
     protected final RangeParam iterationsParam;
-    private final IntChoiceParam colorsParam = new IntChoiceParam("Colors", new Item[]{
+    protected final IntChoiceParam colorsParam = new IntChoiceParam("Colors", new Item[]{
         new Item("Contrasting", COLORS_CONTRASTING),
         new Item("Continuous", COLORS_CONTINUOUS),
         new Item("Blues", COLORS_BLUES),
@@ -73,7 +98,10 @@ public abstract class ComplexFractal extends ParametrizedFilter {
         zoomParam.setPresetKey("Zoom");
 
         zoomCenter = new ImagePositionParam("Zoom Center", zoomX, 0.5f);
-        initParams(zoomParam,
+        initParams(
+            iterationTypeParam,
+            insideOutParam,
+            zoomParam,
             zoomCenter.withDecimalPlaces(2),
             iterationsParam,
             colorsParam,
@@ -82,49 +110,81 @@ public abstract class ComplexFractal extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int aa = aaParam.getValue();
-        if (aa == AA_NONE) {
-            return transformAA(src, dest);
-        } else if (aa == AA_2x2) {
-            // render an image with double size, then scale it down
-            BufferedImage bigSrc = new BufferedImage(
-                src.getWidth() * 2, src.getHeight() * 2, src.getType());
-            BufferedImage bigDest = transformAA(bigSrc, null);
-            bigSrc.flush();
-            Graphics2D g2 = dest.createGraphics();
-            g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-            g2.scale(0.5, 0.5);
-            g2.drawImage(bigDest, 0, 0, null);
-            g2.dispose();
-            bigDest.flush();
-            return dest;
-        } else {
-            throw new IllegalStateException("aa = " + aa);
-        }
+        return switch (aaParam.getValue()) {
+            case AA_NONE -> renderFractal(src, dest);
+            case AA_2x2 -> {
+                // render at double resolution, then scale down for 2x2 supersampling
+                BufferedImage bigSrc = new BufferedImage(
+                    src.getWidth() * 2, src.getHeight() * 2, src.getType());
+                BufferedImage bigDest = renderFractal(bigSrc, null);
+                bigSrc.flush();
+                Graphics2D g2 = dest.createGraphics();
+                g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+                g2.scale(0.5, 0.5);
+                g2.drawImage(bigDest, 0, 0, null);
+                g2.dispose();
+                bigDest.flush();
+                yield dest;
+            }
+            default -> throw new IllegalStateException("aa = " + aaParam.getValue());
+        };
     }
 
-    protected abstract BufferedImage transformAA(BufferedImage src, BufferedImage dest);
+    protected abstract BufferedImage renderFractal(BufferedImage src, BufferedImage dest);
 
-    protected int[] createColors(int maxIterations) {
+    protected static int[] getColors(int colorsStyle, int maxIterations) {
+        // check if we can use the cached colors
+        if (cachedColors != null &&
+            cachedColorsStyle == colorsStyle &&
+            cachedMaxIterations == maxIterations) {
+            return cachedColors;
+        }
+
+        int[] colors = generateColors(colorsStyle, maxIterations);
+
+        // cache the generated colors
+        cachedColors = colors;
+        cachedColorsStyle = colorsStyle;
+        cachedMaxIterations = maxIterations;
+
+        return colors;
+    }
+
+    private static int[] generateColors(int colorsStyle, int maxIterations) {
         int[] colors = new int[maxIterations + 1];
         double normalizer = Math.log(maxIterations + 1);
-        int colorsStyle = colorsParam.getValue();
         for (int it = 0; it <= maxIterations; it++) {
             float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
             colors[it] = switch (colorsStyle) {
                 case COLORS_CONTRASTING -> Color.HSBtoRGB(
                     maxIterations / (float) it,
-                    0.9f, it > 0 ? bri : 0);
+                    0.9f, it > 0 ? bri : 0); // black for points in the set
                 case COLORS_CONTINUOUS -> Color.HSBtoRGB(
                     (float) it / maxIterations,
-                    0.9f, it > 0 ? bri : 0);
+                    0.9f, it > 0 ? bri : 0); // black for points in the set
                 case COLORS_BLUES -> Color.HSBtoRGB(
                     0.5f + (float) it / (maxIterations * 10),
                     (float) it / maxIterations,
-                    it > 0 ? bri : 0);
+                    it > 0 ? bri : 0); // black for points in the set
                 default -> throw new IllegalStateException("value = " + colorsStyle);
             };
         }
         return colors;
+    }
+
+    /**
+     * Creates an iteration strategy based on the user's selection.
+     */
+    protected IterationStrategy createIterator() {
+        int type = iterationTypeParam.getValue();
+        return switch (type) {
+            case ITERATION_MANDELBROT -> new MandelbrotStrategy();
+            case ITERATION_BURNING_SHIP -> new BurningShipStrategy();
+            case ITERATION_TRICORN -> new TricornStrategy();
+            case ITERATION_MULTIBROT_3 -> new MultibrotStrategy3();
+            case ITERATION_MULTIBROT_4 -> new MultibrotStrategy4();
+            case ITERATION_MULTIBROT_5 -> new MultibrotStrategy5();
+            default -> throw new IllegalStateException("Unknown iteration type: " + type);
+        };
     }
 }

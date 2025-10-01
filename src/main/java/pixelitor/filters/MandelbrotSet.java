@@ -19,20 +19,20 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.Help;
 import pixelitor.filters.impl.ComplexFractalImpl;
+import pixelitor.filters.impl.ComplexFractalImpl.IterationStrategy;
 
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Renders a Mandelbrot Set, see https://en.wikipedia.org/wiki/Mandelbrot_set
+ * Renders a Mandelbrot-type set, where the constant c is varied across pixels and z starts at 0.
  */
 public class MandelbrotSet extends ComplexFractal {
     public static final String NAME = "Mandelbrot Set";
 
     @Serial
     private static final long serialVersionUID = 6726131928523590000L;
-
-    private MandelbrotSetImpl filter;
 
     public MandelbrotSet() {
         super(100, 0.2028f);
@@ -41,16 +41,17 @@ public class MandelbrotSet extends ComplexFractal {
     }
 
     @Override
-    public BufferedImage transformAA(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new MandelbrotSetImpl();
-        }
+    public BufferedImage renderFractal(BufferedImage src, BufferedImage dest) {
+        IterationStrategy iterator = createIterator();
+        Rectangle2D view = iterator.getComplexView();
+        MandelbrotSetImpl filter = new MandelbrotSetImpl(view, insideOutParam.isChecked());
 
+        filter.setIterator(iterator);
         filter.setZoom(zoomParam.getZoomRatio());
         filter.setZoomCenter(zoomCenter.getRelativeX(), zoomCenter.getRelativeY());
 
         int iterations = iterationsParam.getValue();
-        filter.setColors(createColors(iterations));
+        filter.setColors(getColors(colorsParam.getValue(), iterations));
         filter.setMaxIterations(iterations);
 
         return filter.filter(src, dest);
@@ -58,42 +59,41 @@ public class MandelbrotSet extends ComplexFractal {
 }
 
 class MandelbrotSetImpl extends ComplexFractalImpl {
-    protected MandelbrotSetImpl() {
-        super(MandelbrotSet.NAME, -2.2f, 0.7f, -1.2f, 1.2f);
+    private final boolean insideOut;
+
+    protected MandelbrotSetImpl(Rectangle2D view, boolean insideOut) {
+        super(MandelbrotSet.NAME,
+            view.getX(), view.getX() + view.getWidth(),
+            view.getY(), view.getY() + view.getHeight());
+        this.insideOut = insideOut;
     }
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        // start with the complex number (0, 0)
+        // for Mandelbrot-type sets, z starts at 0
         double zx = 0;
         double zy = 0;
 
-        // the complex constant c, mapped from image coordinates
+        // the complex constant c is mapped from the pixel's image coordinates
         double cx = cxStart + x * xMultiplier;
         double cy = cyStart + y * yMultiplier;
 
-        // before going into the escape time algorithm,
-        // first two possible shortcuts:
-
-        // 1. check if the point is in the period-2 bulb
-        if (cx < -0.75 && cx > -1.25 && cy < 0.28 && cy > -0.28) { // approx. check
-            if ((cx + 1) * (cx + 1) + cy * cy < 1 / 16.0) { // exact check
-                return colors[0];
+        if (insideOut) {
+            // invert c using f(c) = 1/c
+            double d = cx * cx + cy * cy;
+            if (d == 0) {
+                // c is at the origin, so 1/c is at infinity => escape immediately
+                return colors[colors.length - 1];
             }
+            // use the inverted c' as c
+            cx = cx / d;
+            cy = -cy / d;
         }
 
-        // 2. check if the point is inside the main cardioid
-        if (cx > -0.75 && cx < 0.37 && cy < 0.65 && cy > -0.65) { // approx. check
-            double cm = cx - 1 / 4.0;
-            double cy2 = cy * cy;
-            double q = cm * cm + cy2;
-            if (q * (q + cm) < cy2 / 4.0) { // exact check
-                return colors[0];
-            }
+        // check for known regions of the set for a quick exit
+        if (iterator.checkShortcuts(cx, cy)) {
+            return 0xFF_00_00_00; // black, indicating the point is in the set
         }
-
         return calcIteratedColor(zx, zy, cx, cy);
     }
 }
-
-
