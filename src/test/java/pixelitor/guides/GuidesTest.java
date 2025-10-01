@@ -15,11 +15,15 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 package pixelitor.guides;
 
 import org.junit.jupiter.api.*;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.compactions.FlipDirection;
+import pixelitor.compactions.QuadrantAngle;
+import pixelitor.gui.View;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GuidesTest {
     private Guides guides;
     private Composition comp;
+    private View view;
 
     @BeforeAll
     static void beforeAllTests() {
@@ -38,6 +43,7 @@ class GuidesTest {
     void beforeEachTest() {
         comp = TestHelper.createEmptyComp("GuidesTest");
         guides = new Guides();
+        view = comp.getView();
     }
 
     @AfterEach
@@ -79,5 +85,71 @@ class GuidesTest {
         guides.addRelativeGrid(4, 4);
         assertThat(guides.getHorizontals()).containsOnly(0.25, 0.5, 0.75);
         assertThat(guides.getVerticals()).containsOnly(0.25, 0.5, 0.75);
+    }
+
+    @Test
+    @DisplayName("flip horizontally")
+    void copyFlippedHorizontally() {
+        guides.addVerRelative(0.25);
+        guides.addHorRelative(0.4);
+
+        Guides flippedGuides = guides.copyFlipped(FlipDirection.HORIZONTAL, view);
+
+        assertThat(flippedGuides.getVerticals()).containsOnly(0.75);
+        assertThat(flippedGuides.getHorizontals()).containsOnly(0.4);
+    }
+
+    @Test
+    @DisplayName("flip vertically")
+    void copyFlippedVertically() {
+        guides.addVerRelative(0.25);
+        guides.addHorRelative(0.4);
+
+        Guides flippedGuides = guides.copyFlipped(FlipDirection.VERTICAL, view);
+
+        assertThat(flippedGuides.getVerticals()).containsOnly(0.25);
+        assertThat(flippedGuides.getHorizontals()).containsOnly(0.6);
+    }
+
+    @Test
+    @DisplayName("rotate 90 degrees")
+    void copyRotated90() {
+        guides.addHorRelative(0.2);
+        guides.addVerRelative(0.4);
+
+        Guides rotatedGuides = guides.copyRotated(QuadrantAngle.ANGLE_90, view);
+
+        // horizontal at y becomes vertical at 1 - y
+        // vertical at x becomes horizontal at x
+        assertThat(rotatedGuides.getVerticals()).containsOnly(1.0 - 0.2);
+        assertThat(rotatedGuides.getHorizontals()).containsOnly(0.4);
+    }
+
+    @Test
+    @DisplayName("rotate 180 degrees")
+    void copyRotated180() {
+        guides.addHorRelative(0.2);
+        guides.addVerRelative(0.4);
+
+        Guides rotatedGuides = guides.copyRotated(QuadrantAngle.ANGLE_180, view);
+
+        // horizontal at y becomes horizontal at 1 - y
+        // vertical at x becomes vertical at 1 - x
+        assertThat(rotatedGuides.getHorizontals()).containsOnly(1.0 - 0.2);
+        assertThat(rotatedGuides.getVerticals()).containsOnly(1.0 - 0.4);
+    }
+
+    @Test
+    @DisplayName("rotate 270 degrees")
+    void copyRotated270() {
+        guides.addHorRelative(0.2);
+        guides.addVerRelative(0.4);
+
+        Guides rotatedGuides = guides.copyRotated(QuadrantAngle.ANGLE_270, view);
+
+        // horizontal at y becomes vertical at y
+        // vertical at x becomes horizontal at 1 - x
+        assertThat(rotatedGuides.getVerticals()).containsOnly(0.2);
+        assertThat(rotatedGuides.getHorizontals()).containsOnly(1.0 - 0.4);
     }
 }

@@ -32,6 +32,7 @@ public class GridTester extends JFrame {
     private static final int MIN_GRID_SIZE = 10;
     private static final int MAX_GRID_SIZE = 100;
     private static final int INITIAL_GRID_SIZE = 30;
+    private static final int STROKE_WIDTH = 2;
 
     private final TestPanel testPanel;
     private final JComboBox<GridType> gridTypeComboBox;
@@ -41,7 +42,7 @@ public class GridTester extends JFrame {
         SQUARE("Square") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                ImageUtils.renderGrid(g, 1, size, canvasWidth, canvasHeight);
+                ImageUtils.renderGrid(g, STROKE_WIDTH, size, canvasWidth, canvasHeight);
             }
         }, BRICK("Brick") {
             @Override
@@ -99,7 +100,7 @@ public class GridTester extends JFrame {
             g2.translate(PADDING, PADDING);
 
             g2.setColor(Color.BLUE);
-            g2.setStroke(new BasicStroke(2));
+            g2.setStroke(new BasicStroke(STROKE_WIDTH));
             currentGridType.renderGrid(g2, currentGridSize, canvasWidth, canvasHeight);
 
             g2.translate(-PADDING, -PADDING);

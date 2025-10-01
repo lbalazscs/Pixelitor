@@ -59,14 +59,9 @@ class TextLayerTest {
         comp.add(layer);
 
         withMask.configure(layer);
-        LayerMask mask = null;
-        if (withMask.isTrue()) {
-            mask = layer.getMask();
-        }
+        iconChecker = new IconUpdateChecker(layer);
 
-        iconChecker = new IconUpdateChecker(layer, mask);
-
-        assert layer.getComp().checkInvariants();
+        assert comp.checkInvariants();
         History.clear();
     }
 
@@ -93,27 +88,27 @@ class TextLayerTest {
         assertThat(comp)
             .numLayersIs(1)
             .typeOfLayerNIs(0, TextLayer.class);
-        assertThat(layer).hasUI();
-        if (withMask.isTrue()) {
-            assertThat(layer).hasMask();
-            assertThat(layer.getMask()).hasUI();
-        }
+        assertThat(layer)
+            .hasUI()
+            .hasMask(withMask.isTrue())
+            .hasMaskUI(withMask.isTrue());
     }
 
     private void checkAfterRasterizationState() {
         assertThat(comp)
             .numLayersIs(1)
             .typeOfLayerNIs(0, ImageLayer.class);
+
+        // the original layer was discarded, and its mask transferred
         assertThat(layer)
             .hasNoUI()
             .hasNoMask();
-        if (withMask.isTrue()) {
-            ImageLayer raster = (ImageLayer) comp.getActiveLayer();
-            assertThat(raster)
-                .hasMask()
-                .hasUI();
-            assertThat(raster.getMask()).hasUI();
-        }
+
+        // the rasterized layer has a mask if the original had one
+        assertThat((ImageLayer) comp.getActiveLayer())
+            .hasUI()
+            .hasMask(withMask.isTrue())
+            .hasMaskUI(withMask.isTrue());
     }
 
     @Test

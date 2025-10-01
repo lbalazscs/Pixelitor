@@ -50,7 +50,7 @@ class StyledShapeTest {
     }
 
     @ParameterizedTest
-    @EnumSource(ShapeType.class)
+    @EnumSource
     void testTransformBoxCreation(ShapeType shapeType) {
         Tools.SHAPES.setSelectedType(shapeType);
         StyledShape styledShape = new StyledShape(Tools.SHAPES);

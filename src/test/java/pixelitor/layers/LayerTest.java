@@ -102,9 +102,7 @@ class LayerTest {
         comp.addLayerWithoutUI(layer2);
 
         withMask.configure(layer);
-        LayerMask mask = layer.getMask();
-
-        iconChecker = new IconUpdateChecker(layer, mask);
+        iconChecker = new IconUpdateChecker(layer);
 
         comp.setActiveLayer(layer, false, null);
 

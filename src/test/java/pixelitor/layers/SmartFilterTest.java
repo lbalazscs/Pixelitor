@@ -80,7 +80,7 @@ class SmartFilterTest {
             .invariantsAreOK();
 
         smartObject.createUI();
-        soIconChecker = new IconUpdateChecker(smartObject, null);
+        soIconChecker = new IconUpdateChecker(smartObject);
 
         firstFilter.resetNumTransformCalls();
         middleFilter.resetNumTransformCalls();

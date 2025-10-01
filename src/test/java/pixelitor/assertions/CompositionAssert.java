@@ -26,6 +26,7 @@ import pixelitor.layers.LayerUI;
 import pixelitor.tools.pen.Path;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -242,6 +243,10 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         }
 
         return this;
+    }
+
+    public CompositionAssert activeLayerTranslationIs(Point p) {
+        return activeLayerTranslationIs(p.x, p.y);
     }
 
     public CompositionAssert activeLayerTranslationIs(int tx, int ty) {

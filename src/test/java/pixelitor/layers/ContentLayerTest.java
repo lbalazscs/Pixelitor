@@ -70,27 +70,23 @@ class ContentLayerTest {
     void beforeEachTest() {
         comp = TestHelper.createEmptyComp("ContentLayerTest");
         layer = (ContentLayer) TestHelper.createLayer(layerClass, comp);
-
         comp.addLayerWithoutUI(layer);
 
         withMask.configure(layer);
-        LayerMask mask = null;
-        if (withMask.isTrue()) {
-            mask = layer.getMask();
-        }
+        iconChecker = new IconUpdateChecker(layer);
 
-        iconChecker = new IconUpdateChecker(layer, mask);
-
-        assert comp.getNumLayers() == 1 : "found " + comp.getNumLayers() + " layers";
+        assertThat(comp)
+            .numLayersIs(1)
+            .invariantsAreOK();
         History.clear();
     }
 
     @Test
     void movingTheLayer() {
-        assertThat(layer).translationIs(0, 0);
+        assertThat(layer).hasNoTranslation();
 
         layer.prepareMovement();
-        assertThat(layer).translationIs(0, 0);
+        assertThat(layer).hasNoTranslation();
 
         layer.moveWhileDragging(2, 2);
         assertThat(layer).translationIs(2, 2);
@@ -126,7 +122,7 @@ class ContentLayerTest {
         checkTranslationAfterPositiveDrag();
 
         History.undo("Move Layer");
-        assertThat(layer).translationIs(0, 0);
+        assertThat(layer).hasNoTranslation();
 
         History.redo("Move Layer");
         History.redo("Move Layer");
@@ -134,8 +130,8 @@ class ContentLayerTest {
 
     private void checkTranslationAfterPositiveDrag() {
         if (layer instanceof ImageLayer) {
-            // the layer was enlarged in finalizeMovement, and the translation reset to 0, 0
-            assertThat(layer).translationIs(0, 0);
+            // the layer was enlarged in finalizeMovement, and the translation was reset to 0, 0
+            assertThat(layer).hasNoTranslation();
         } else if (layer instanceof TextLayer) {
             // text layers can have positive translations
             assertThat(layer).translationIs(3, 3);

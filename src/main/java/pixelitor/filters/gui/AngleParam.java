@@ -49,7 +49,7 @@ public class AngleParam extends AbstractFilterParam {
 
     public AngleParam(String name, double def) {
         super(name, ALLOW_RANDOMIZE);
-        this.defaultAngle = def;
+        this.defaultAngle = normalize(def);
         setValue(this.defaultAngle, false);
     }
 
@@ -103,7 +103,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public boolean isAtDefault() {
-        return angle == defaultAngle;
+        return normalize(angle) == defaultAngle;
     }
 
     private void fireStateChanged() {
@@ -154,8 +154,8 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     public RangeParam asRangeParam() {
-        // At this point, the actual value can already differ from the
-        // default one => ensure the returned param has the same default.
+        // at this point, the actual value can already differ from the
+        // default one => ensure the returned param has the same default
         double defaultInDegrees = Geometry.toIntuitiveDegrees(defaultAngle);
         RangeParam rangeParam = new RangeParam(getName(),
             0, defaultInDegrees, getMaxAngleInDegrees());
@@ -186,11 +186,11 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public String getValueAsString() {
-        double a = angle;
-        if (a < 0) {
-            a += 2 * Math.PI;
-        }
-        return format("%.2f", a);
+        return format("%.2f", normalize(angle));
+    }
+
+    private static double normalize(double angle) {
+        return angle < 0 ? angle + 2 * Math.PI : angle;
     }
 
     @Override

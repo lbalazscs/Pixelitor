@@ -29,12 +29,12 @@ public class IconUpdateChecker {
     private final int initialLayerIconUpdates;
     private final int initialMaskIconUpdates;
 
-    public IconUpdateChecker(Layer layer, LayerMask mask) {
+    public IconUpdateChecker(Layer layer) {
         if (!(layer.getUI() instanceof TestLayerUI layerUI)) {
             throw new IllegalArgumentException();
         }
         this.ui = layerUI;
-        this.mask = mask;
+        this.mask = layer.getMask();
 
         initialLayerIconUpdates = ui.getLayerIconUpdateCount();
         initialMaskIconUpdates = mask == null ? 0 : ui.getMaskIconUpdateCount();

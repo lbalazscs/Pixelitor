@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class TwoLimitsUndoManagerTest {
-
     private TwoLimitsUndoManager undoManager;
 
     @BeforeAll
@@ -111,9 +110,9 @@ class TwoLimitsUndoManagerTest {
         }
     }
 
-    static int counter = 1;
-    static int counterH = 1;
-    static int counterL = 1;
+    private static int counter = 1;
+    private static int counterH = 1;
+    private static int counterL = 1;
 
     private static PixelitorEdit createMockEdit(boolean isHeavy) {
         PixelitorEdit edit = mock(PixelitorEdit.class);
@@ -129,5 +128,4 @@ class TwoLimitsUndoManagerTest {
 
         return edit;
     }
-
 }

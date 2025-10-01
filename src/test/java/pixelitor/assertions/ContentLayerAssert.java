@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.assertions;
 
 import pixelitor.layers.ContentLayer;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ContentLayerAssert<S extends ContentLayerAssert<S, T>, T extends ContentLayer> extends LayerAssert<S, T> {
     public ContentLayerAssert(T actual, Class<S> selfType) {
         super(actual, selfType);
+    }
+
+    public S hasNoTranslation() {
+        return translationIs(0, 0);
+    }
+
+    public S translationIs(Point p) {
+        return translationIs(p.x, p.y);
     }
 
     public S translationIs(int tx, int ty) {

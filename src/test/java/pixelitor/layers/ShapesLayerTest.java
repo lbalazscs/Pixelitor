@@ -62,42 +62,45 @@ class ShapesLayerTest {
 
         TransformBox box = styledShape.createBox(view);
         layer.setTransformBox(box);
-        checkOrigBoxPosition(box);
     }
 
     @Test
     void duplicate() {
+        assertBoxIsAtOrigPosition(layer.getTransformBox());
+
         ShapesLayer duplicate = (ShapesLayer) layer.copy(CopyType.DUPLICATE_LAYER, true, comp);
-//        TransformBox duplicateBox = duplicate.getTransformBox();
-//        checkOrigBoxPosition(duplicateBox);
+
+        assertBoxIsAtOrigPosition(duplicate.getTransformBox());
     }
 
     @Test
     void resize() {
+        assertBoxIsAtOrigPosition(layer.getTransformBox());
         comp.addLayerWithoutUI(layer.copy(CopyType.DUPLICATE_LAYER, false, comp));
 
         Composition smallComp = TestHelper.resize(comp, 10, 5);
+
         ShapesLayer smallLayer1 = (ShapesLayer) smallComp.getLayer(0);
         ShapesLayer smallLayer2 = (ShapesLayer) smallComp.getLayer(1);
-//        checkHalfSizeBoxPosition(smallLayer1.getTransformBox());
-//        checkHalfSizeBoxPosition(smallLayer2.getTransformBox());
+        assertBoxIsAtHalfSizePosition(smallLayer1.getTransformBox());
+        assertBoxIsAtHalfSizePosition(smallLayer2.getTransformBox());
 
         // resize back to the original size
         Composition bigComp = TestHelper.resize(smallComp, TestHelper.TEST_WIDTH, TestHelper.TEST_HEIGHT);
         ShapesLayer bigLayer1 = (ShapesLayer) bigComp.getLayer(0);
         ShapesLayer bigLayer2 = (ShapesLayer) bigComp.getLayer(1);
-//        checkOrigBoxPosition(bigLayer1.getTransformBox());
-//        checkOrigBoxPosition(bigLayer2.getTransformBox());
+        assertBoxIsAtOrigPosition(bigLayer1.getTransformBox());
+        assertBoxIsAtOrigPosition(bigLayer2.getTransformBox());
     }
 
-    private static void checkOrigBoxPosition(TransformBox box) {
+    private static void assertBoxIsAtOrigPosition(TransformBox box) {
         assertThat(box).handleImPosIs(TransformBox::getNW, 0, 0);
         assertThat(box).handleImPosIs(TransformBox::getNE, 10, 0);
         assertThat(box).handleImPosIs(TransformBox::getSW, 0, 10);
         assertThat(box).handleImPosIs(TransformBox::getSE, 10, 10);
     }
 
-    private static void checkHalfSizeBoxPosition(TransformBox box) {
+    private static void assertBoxIsAtHalfSizePosition(TransformBox box) {
         assertThat(box).handleImPosIs(TransformBox::getNW, 0, 0);
         assertThat(box).handleImPosIs(TransformBox::getNE, 5, 0);
         assertThat(box).handleImPosIs(TransformBox::getSW, 0, 5);

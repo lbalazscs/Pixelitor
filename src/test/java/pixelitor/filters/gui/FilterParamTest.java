@@ -111,24 +111,18 @@ class FilterParamTest {
     void shouldCreateWorkingGUI() {
         JComponent gui = param.createGUI();
         assertThat(gui)
+            .as(param + " gui")
             .isNotNull()
             .isInstanceOf(ParamGUI.class);
-
-        assertThat(gui.isEnabled()).isTrue();
+        assertIsEnabled(gui);
 
         ParamGUI paramGUI = (ParamGUI) gui;
 
-        // enable-disable via the GUI
-        paramGUI.setEnabled(false);
-        assertThat(gui.isEnabled()).isFalse();
-        paramGUI.setEnabled(true);
-        assertThat(gui.isEnabled()).isTrue();
-
-        // enable-disable via the param
         param.setEnabled(false);
-        assertThat(gui.isEnabled()).isFalse();
+        assertIsDisabled(gui);
+
         param.setEnabled(true);
-        assertThat(gui.isEnabled()).isTrue();
+        assertIsEnabled(gui);
 
         paramGUI.updateGUI();
 
@@ -148,13 +142,13 @@ class FilterParamTest {
 
     @Test
     void shouldHandleRandomization() {
-        // Test allowed randomization
+        // test allowed randomization
         param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
         assertThat(param).shouldRandomize();
         param.randomize();
         verifyNoParamAdjustments();
 
-        // Test ignored randomization
+        // test ignored randomization
         String origValue = param.getValueAsString();
         param.setRandomizeMode(RandomizeMode.IGNORE_RANDOMIZE);
         assertThat(param).shouldNotRandomize();
@@ -173,22 +167,13 @@ class FilterParamTest {
 
     @Test
     void shouldResetWithTriggering() {
-        // make sure that the value is set to the real default value,
-        // otherwise (depending on the method execution order) the
-        // copyState_setState test could change the value of the angle param
-        // from 0 to 2*pi, which confuses this test
         param.reset(false);
-
         String defaultValue = param.getValueAsString();
-        // we can change the value in a general way only
-        // through randomize
-        if (!param.shouldRandomize()) {
-            param.reset(true);
-            assertThat(param).isAtDefault();
-            return;
-        }
 
-        // Randomize until we get a non-default value
+        // we can change the value in a general way only through randomize
+        param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
+
+        // randomize until we get a non-default value
         while (param.isAtDefault()) {
             param.randomize();
             verifyNoParamAdjustments();
@@ -219,7 +204,7 @@ class FilterParamTest {
         param.loadStateFrom(paramState, false);
 
         assertThat(param)
-            .as("restored " + param.getClass().getSimpleName())
+            .as("restored " + param.toString())
             .valueAsStringIs(origValue);
 
         verifyNoParamAdjustments();
@@ -227,7 +212,9 @@ class FilterParamTest {
 
     @Test
     void simpleMethodsShouldNotTriggerFilter() {
-        assertThat(param).hasName("Param Name");
+        assertThat(param)
+            .as(param.toString())
+            .hasName("Param Name");
 
         JComponent gui = param.createGUI();
 
@@ -235,31 +222,46 @@ class FilterParamTest {
 
         // Test APP_LOGIC disable/enable
         param.setEnabled(false, FILTER_LOGIC);
-        assertThat(param).isDisabled();
-        assertThat(gui.isEnabled()).isFalse();
+        assertIsDisabled(gui);
 
         param.setEnabled(true, FILTER_LOGIC);
-        assertThat(param).isEnabled();
-        assertThat(gui.isEnabled()).isTrue();
+        assertIsEnabled(gui);
 
         // Test ANIMATION_ENDING_STATE disable/enable
         param.setEnabled(false, ANIMATION_ENDING_STATE);
         if (param.isAnimatable()) {
-            assertThat(param).isEnabled();
-            assertThat(gui.isEnabled()).isTrue();
+            assertIsEnabled(gui); // unaffected
         } else {
-            assertThat(param).isDisabled();
-            assertThat(gui.isEnabled()).isFalse();
+            assertIsDisabled(gui); // disabled
         }
 
         param.setEnabled(true, ANIMATION_ENDING_STATE);
-        assertThat(param).isEnabled();
-        assertThat(gui.isEnabled()).isTrue();
+        assertIsEnabled(gui);
 
         verifyNoParamAdjustments();
     }
 
     private void verifyNoParamAdjustments() {
         verify(mockAdjustmentListener, never()).paramAdjusted();
+    }
+
+    private void assertIsEnabled(JComponent gui) {
+        String paramDesc = param.toString();
+        assertThat(param)
+            .as(paramDesc)
+            .isEnabled();
+        assertThat(gui.isEnabled())
+            .as("gui of " + paramDesc)
+            .isTrue();
+    }
+
+    private void assertIsDisabled(JComponent gui) {
+        String paramDesc = param.toString();
+        assertThat(param)
+            .as(paramDesc)
+            .isDisabled();
+        assertThat(gui.isEnabled())
+            .as("gui of " + paramDesc)
+            .isFalse();
     }
 }

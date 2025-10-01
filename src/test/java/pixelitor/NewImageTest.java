@@ -34,16 +34,16 @@ class NewImageTest {
 
     @DisplayName("create new composition")
     @ParameterizedTest(name = "with a {0} fill")
-    @EnumSource(FillType.class)
+    @EnumSource
     void createNewComposition(FillType fillType) {
         var comp = NewImage.createNewComposition(fillType,
             20, 20, "NewImageTest", Composition.DEFAULT_DPI);
-        assert comp.checkInvariants();
         assertThat(comp)
             .numLayersIs(1)
             .canvasSizeIs(20, 20)
             .hasName("NewImageTest")
             .hasDpi(Composition.DEFAULT_DPI)
-            .hasSolidColor(fillType.getColor());
+            .hasSolidColor(fillType.getColor())
+            .invariantsAreOK();
     }
 }

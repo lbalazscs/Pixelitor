@@ -139,6 +139,24 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         return expected ? hasMask() : hasNoMask();
     }
 
+    public S hasMaskUI() {
+        isNotNull();
+        assertThat(actual.getMask().hasUI()).isTrue();
+        return myself;
+    }
+
+    public S hasNoMaskUI() {
+        isNotNull();
+        if (actual.hasMask()) {
+            assertThat(actual.getMask().hasUI()).isFalse();
+        }
+        return myself;
+    }
+
+    public S hasMaskUI(boolean expected) {
+        return expected ? hasMaskUI() : hasNoMaskUI();
+    }
+
     public S maskIsEnabled() {
         isNotNull();
         assertThat(actual.isMaskEnabled()).isTrue();

@@ -88,15 +88,10 @@ class ImageLayerTest {
         layer = createEmptyImageLayer(comp, "layer 1");
 
         withMask.configure(layer);
-        LayerMask mask = null;
-        if (withMask.isTrue()) {
-            mask = layer.getMask();
-        }
-
         withTranslation.configure(layer);
         withSelection.configure(comp);
 
-        iconChecker = new IconUpdateChecker(layer, mask);
+        iconChecker = new IconUpdateChecker(layer);
     }
 
     @Test

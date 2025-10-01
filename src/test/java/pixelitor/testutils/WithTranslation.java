@@ -21,6 +21,8 @@ import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.layers.ContentLayer;
 
+import java.awt.Point;
+
 /**
  * Whether and how translatios should be applied to content layers during tests.
  */
@@ -81,6 +83,10 @@ public enum WithTranslation {
 
     public int getExpectedTY() {
         return expectedTY;
+    }
+
+    public Point getExpectedValue() {
+        return new Point(expectedTX, expectedTY);
     }
 
     public boolean isTrue() {

@@ -143,7 +143,9 @@ public class TestHelper {
 
     public static Composition createComp(String name, int numLayers, boolean addMasks) {
         Composition comp = createComp(name, numLayers, addMasks, true);
-        assert comp.checkInvariants();
+        assertThat(comp)
+            .isNotDirty()
+            .invariantsAreOK();
         return comp;
     }
 
@@ -163,8 +165,10 @@ public class TestHelper {
             }
             assert layer == comp.getLayer(i);
         }
-        assert comp.getNumLayers() == numLayers;
-        assert comp.checkInvariants();
+
+        assertThat(comp)
+            .numLayersIs(numLayers)
+            .invariantsAreOK();
 
         comp.setDirty(false);
 
@@ -369,13 +373,11 @@ public class TestHelper {
         }
 
         // should be used on layers without translation
-        assertThat(layer).translationIs(0, 0);
+        assertThat(layer).hasNoTranslation();
 
         translation.move(comp);
 
-        int expectedTX = translation.getExpectedTX();
-        int expectedTY = translation.getExpectedTY();
-        assertThat(layer).translationIs(expectedTX, expectedTY);
+        assertThat(layer).translationIs(translation.getExpectedValue());
 
         if (activeLayerChanged) {
             comp.setActiveLayer(activeLayerBefore);
