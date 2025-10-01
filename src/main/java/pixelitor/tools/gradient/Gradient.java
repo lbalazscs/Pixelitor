@@ -35,6 +35,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -266,6 +267,31 @@ public class Gradient implements Serializable, Debuggable {
         node.addFloat("opacity", opacity);
 
         return node;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Gradient that = (Gradient) o;
+        return reversed == that.reversed &&
+            Float.compare(that.opacity, opacity) == 0 &&
+            Objects.equals(drag, that.drag) &&
+            type == that.type &&
+            cycleMethod == that.cycleMethod &&
+            colorType == that.colorType &&
+            blendingMode == that.blendingMode &&
+            Objects.equals(fgColor, that.fgColor) &&
+            Objects.equals(bgColor, that.bgColor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(drag, type, cycleMethod, colorType, reversed, blendingMode, opacity, fgColor, bgColor);
     }
 
     @Override

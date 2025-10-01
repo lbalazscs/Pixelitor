@@ -111,46 +111,46 @@ public class WorkflowTest {
         }, PASS_THROUGH("P") {
             @Override
             public void configure(AppRunner app) {
-                app.runMenuCommand("Convert Visible to Group");
+                app.convertVisibleToGroup();
                 app.activateLayer("layer 1");
             }
         }, ISOLATED("I") {
             @Override
             public void configure(AppRunner app) {
-                app.runMenuCommand("Convert Visible to Group");
+                app.convertVisibleToGroup();
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.activateLayer("layer 1");
             }
         }, DOUBLE_PP("PP") { // two nested pass-through groups
             @Override
             public void configure(AppRunner app) {
-                app.runMenuCommand("Convert Visible to Group");
-                app.runMenuCommand("Convert Visible to Group");
+                app.convertVisibleToGroup();
+                app.convertVisibleToGroup();
                 app.activateLayer("layer 1");
             }
         }, DOUBLE_II("II") { // two nested isolated groups
             @Override
             public void configure(AppRunner app) {
-                app.runMenuCommand("Convert Visible to Group");
+                app.convertVisibleToGroup();
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
-                app.runMenuCommand("Convert Visible to Group");
+                app.convertVisibleToGroup();
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.activateLayer("layer 1");
             }
         }, DOUBLE_PI("PI") { // inner pass-through, outer isolated
             @Override
             public void configure(AppRunner app) {
-                app.runMenuCommand("Convert Visible to Group");
-                app.runMenuCommand("Convert Visible to Group");
+                app.convertVisibleToGroup();
+                app.convertVisibleToGroup();
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.activateLayer("layer 1");
             }
         }, DOUBLE_IP("IP") { // inner isolated, outer pass-through
             @Override
             public void configure(AppRunner app) {
-                app.runMenuCommand("Convert Visible to Group");
+                app.convertVisibleToGroup();
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
-                app.runMenuCommand("Convert Visible to Group");
+                app.convertVisibleToGroup();
                 app.activateLayer("layer 1");
             }
         };

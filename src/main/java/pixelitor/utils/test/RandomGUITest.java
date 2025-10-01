@@ -49,6 +49,7 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.PathActions;
+import pixelitor.tools.pen.PathTool;
 import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.input.Alt;
@@ -847,19 +848,19 @@ public class RandomGUITest {
         comp.getActiveHolder().reorderActiveLayer(false);
     }
 
-    private void randomLayerMerge() {
+    private void randomMergeDown() {
         var comp = Views.getActiveComp();
-
-        if (rand.nextBoolean()) {
-            Layer layer = comp.getActiveLayer();
-            if (layer.getHolder().canMergeDown(layer)) {
-                log("merge down " + layer.getName() + " in " + comp.getName());
-                comp.mergeActiveLayerDown();
-            }
-        } else {
-            log("flatten image " + comp.getName());
-            comp.flattenImage();
+        Layer layer = comp.getActiveLayer();
+        if (layer.getHolder().canMergeDown(layer)) {
+            log("merge down " + layer.getName() + " in " + comp.getName());
+            comp.mergeActiveLayerDown();
         }
+    }
+
+    private void randomFlattenImage() {
+        var comp = Views.getActiveComp();
+        log("flatten image " + comp.getName());
+        comp.flattenImage();
     }
 
     private void randomLayerAddOrDelete() {
@@ -1158,19 +1159,14 @@ public class RandomGUITest {
         }
     }
 
-    /**
-     * Clears paths on inactive views to prevent them from growing too large.
-     */
-    private void clearPaths() {
-        log("clear paths");
-        Views.forEach(view -> {
-            // don't touch the active, as its path might be edited just now
-            if (!view.isActive()) {
-                view.getComp().setActivePath(null);
-            }
-        });
-        // history is in an inconsistent state now
-        History.clear();
+    private void deletePath() {
+        if (!Tools.activeIsPathTool()) {
+            return;
+        }
+        if (PathActions.deletePathAction.isEnabled()) {
+            log("delete path");
+            PathActions.deletePathAction.actionPerformed(null);
+        }
     }
 
     /**
@@ -1215,7 +1211,8 @@ public class RandomGUITest {
         actionCaller.registerAction(1, this::randomRotateFlip);
         actionCaller.registerAction(5, this::activateRandomView);
         actionCaller.registerAction(1, this::randomLayerOrderChange);
-        actionCaller.registerAction(5, this::randomLayerMerge);
+        actionCaller.registerAction(5, this::randomMergeDown);
+        actionCaller.registerAction(5, this::randomFlattenImage);
         actionCaller.registerAction(3, this::randomLayerAddOrDelete);
         actionCaller.registerAction(1, this::randomlyTogglePanelVisibility);
         if (ENABLE_COPY_PASTE) {
@@ -1235,7 +1232,7 @@ public class RandomGUITest {
         actionCaller.registerAction(1, this::convertToSmartObject);
         actionCaller.registerAction(5, this::randomRasterizeLayer);
         actionCaller.registerAction(4, this::randomGuides);
-        actionCaller.registerAction(4, this::clearPaths);
+        actionCaller.registerAction(4, this::deletePath);
 
         if (TEST_ADJ_LAYERS) {
             actionCaller.registerAction(2, this::randomNewAdjustmentLayer);

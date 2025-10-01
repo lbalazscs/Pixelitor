@@ -151,7 +151,12 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         // TODO it's not elegant to detach all child GUIs and
         //   then reattach those that weren't changed.
         for (LayerGUI child : children) {
-            child.detach();
+            // Detach the child UI only if this component is still its parent.
+            // This prevents detaching a UI that has been re-parented by another
+            // component during an operation like undo/redo of grouping.
+            if (child.getParentUI() == this) {
+                child.detach();
+            }
         }
         children.clear();
 
@@ -698,19 +703,20 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     public boolean checkInvariants() {
         if (parentUI != null) {
             if (!parentUI.containsChild(this)) {
-                throw new AssertionError(parentUI.getLayerName() + " UI doesn't contain " + this.getLayerName() + " UI");
+                throw new AssertionError("parent UI ('%s') doesn't contain this UI ('%s')"
+                    .formatted(parentUI.getLayerName(), this.getLayerName()));
             }
         }
         if (!layer.isTopLevel()) {
             if (parentUI == null) {
-                throw new AssertionError("null parentUI in " + getLayerName()
-                    + " UI, holder class = " + layer.getHolder().getClass().getSimpleName());
+                throw new AssertionError("null parentUI in '%s' UI, holder class = '%s'"
+                    .formatted(getLayerName(), layer.getHolder().getClass().getSimpleName()));
             }
 
             LayerUI holderUI = ((CompositeLayer) layer.getHolder()).getUI();
             if (holderUI != parentUI) {
-                throw new AssertionError("mismatched UIs: holderUI = " + holderUI.getLayerName()
-                    + ", parentUI = " + parentUI.getLayerName());
+                throw new AssertionError("mismatched UIs: holderUI = '%s', parentUI = '%s'"
+                    .formatted(holderUI.getLayerName(), parentUI.getLayerName()));
             }
         }
         return true;

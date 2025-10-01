@@ -341,7 +341,7 @@ public class AppRunner {
 
     void duplicateLayer(Class<? extends Layer> expectedLayerType) {
         EDT.assertActiveLayerTypeIs(expectedLayerType);
-        int numLayersBefore = EDT.active(Composition::getNumLayers);
+        int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         runMenuCommand("Duplicate Layer");
         checkNumLayersIs(numLayersBefore + 1);
@@ -372,6 +372,11 @@ public class AppRunner {
             .requireEnabled()
             .click();
         Utils.sleep(200, MILLISECONDS);
+    }
+
+    public void convertVisibleToGroup() {
+        runMenuCommand("Convert Visible to Group");
+        keyboard.undoRedo("Grouping");
     }
 
     public void selectLayerBelow() {

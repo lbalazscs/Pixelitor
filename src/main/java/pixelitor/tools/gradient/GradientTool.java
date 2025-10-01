@@ -163,11 +163,19 @@ public class GradientTool extends DragTool {
             return; // no change if handles are coincident
         }
 
+        // create the potential new gradient based on current settings
+        Gradient newGradient = createGradient(renderedDrag);
+
+        // if the new gradient is identical to the last one, do nothing
+        if (lastGradient != null && lastGradient.equals(newGradient)) {
+            return;
+        }
+
         if (isEditingGradientLayer()) {
-            gradientLayer.setGradient(createGradient(renderedDrag), true);
+            gradientLayer.setGradient(newGradient, true);
         } else {
             DrawableAction.run(editName,
-                dr -> drawGradient(dr, renderedDrag, true, editName));
+                dr -> drawGradient(dr, newGradient, true, editName));
         }
     }
 
@@ -253,7 +261,8 @@ public class GradientTool extends DragTool {
         } else {
             Drawable dr = comp.getActiveDrawable();
             if (dr != null) {
-                drawGradient(dr, renderedDrag, true, editName);
+                Gradient newGradient = createGradient(renderedDrag);
+                drawGradient(dr, newGradient, true, editName);
             } else {
                 throw new IllegalStateException();
             }
@@ -406,10 +415,8 @@ public class GradientTool extends DragTool {
         return reverseCB.isSelected();
     }
 
-    private void drawGradient(Drawable dr, Drag drag,
+    private void drawGradient(Drawable dr, Gradient gradient,
                               boolean addToHistory, String editName) {
-        Gradient gradient = createGradient(drag);
-
         if (addToHistory) {
             // check if is the first gradient application since handles were created/shown
             boolean isFirst = lastGradient == null;
@@ -537,7 +544,7 @@ public class GradientTool extends DragTool {
         loadSettingsFromGradient(gradient, view);
         if (regenerate) {
             Drag dragFromHandles = handles.toDrag(view);
-            drawGradient(dr, dragFromHandles, false, null);
+            drawGradient(dr, createGradient(dragFromHandles), false, null);
         }
 
         lastGradient = gradient;

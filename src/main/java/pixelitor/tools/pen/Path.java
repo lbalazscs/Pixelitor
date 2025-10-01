@@ -305,6 +305,10 @@ public class Path implements Serializable, Debuggable {
         return activeSubPath;
     }
 
+    public boolean hasActiveSubpath() {
+        return activeSubPath != null;
+    }
+
     public Composition getComp() {
         return comp;
     }

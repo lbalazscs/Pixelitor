@@ -112,7 +112,7 @@ public class PenTool extends PathTool {
 
         Path path = view.getComp().getActivePath();
         if (path != null) {
-            if (path.getActiveSubpath() != null && path.getActiveSubpath().isFinished()) {
+            if (path.hasActiveSubpath() && path.getActiveSubpath().isFinished()) {
                 buildState = IDLE;
                 prevBuildState = IDLE;
             }
@@ -134,17 +134,17 @@ public class PenTool extends PathTool {
         Path path = view.getComp().getActivePath();
         if (path != null) {
             assert path.checkInvariants();
-            if (!path.getActiveSubpath().isFinished()) {
-                path.finishActiveSubpath(false);
-            } else {
-                assert buildState == IDLE;
-            }
-
             lastActive = null;
             Views.repaintActive(); // visually hide the path
         }
-        buildState = IDLE;
-        prevBuildState = IDLE;
+
+        // Reset the build state only if there is no active path or if the
+        // current path-building process is complete. If a path is in progress,
+        // its state is preserved for when the tool is reactivated.
+        if (path == null || (path.hasActiveSubpath() && path.getActiveSubpath().isFinished())) {
+            buildState = IDLE;
+            prevBuildState = IDLE;
+        }
     }
 
     public BuildState getBuildState() {

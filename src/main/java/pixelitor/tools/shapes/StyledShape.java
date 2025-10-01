@@ -49,6 +49,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.List;
+import java.util.Objects;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -603,6 +604,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             default -> throw new IllegalStateException("Unexpected edit: " + editName);
         }
 
+        if (this.equals(backup)) {
+            // there was no actual change in state
+            return;
+        }
+
         Composition comp = Views.getActiveComp();
         History.add(new StyledShapeEdit(editName, comp, backup));
         comp.getActiveLayer().update();
@@ -697,6 +703,31 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        StyledShape that = (StyledShape) o;
+
+        return shapeType == that.shapeType &&
+            Objects.equals(typeSettings, that.typeSettings) &&
+            fillPaint == that.fillPaint &&
+            strokePaint == that.strokePaint &&
+            Objects.equals(effects, that.effects) &&
+            Objects.equals(strokeSettings, that.strokeSettings) &&
+            Objects.equals(fgColor, that.fgColor) &&
+            Objects.equals(bgColor, that.bgColor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(shapeType, typeSettings, fillPaint, strokePaint, effects, strokeSettings, fgColor, bgColor);
     }
 
     @Override

@@ -40,6 +40,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 import static java.lang.String.format;
+import static java.util.Objects.*;
 
 /**
  * Represents a mouse drag performed by the user while using
@@ -768,6 +769,26 @@ public class Drag implements Serializable, Debuggable {
         node.addDouble("im end y", imEndY);
 
         return node;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Drag that = (Drag) o;
+        return Double.compare(that.imStartX, imStartX) == 0 &&
+            Double.compare(that.imStartY, imStartY) == 0 &&
+            Double.compare(that.imEndX, imEndX) == 0 &&
+            Double.compare(that.imEndY, imEndY) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash(imStartX, imStartY, imEndX, imEndY);
     }
 
     @Override
