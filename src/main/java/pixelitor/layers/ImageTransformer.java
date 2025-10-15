@@ -81,8 +81,8 @@ public class ImageTransformer implements ImageSource, Serializable {
         return cachedImage;
     }
 
-    public void concatenate(AffineTransform newScaling, int targetWidth, int targetHeight) {
-        transform.concatenate(newScaling);
+    public void chainTransform(AffineTransform newTransform, int targetWidth, int targetHeight) {
+        transform.preConcatenate(newTransform);
         setTargetSize(targetWidth, targetHeight);
         invalidateCache();
     }

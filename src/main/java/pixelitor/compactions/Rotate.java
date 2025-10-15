@@ -36,6 +36,11 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
+    public boolean disableForSmartObjects() {
+        return true;
+    }
+
+    @Override
     protected void updateCanvasSize(Canvas newCanvas, View view) {
         angle.resizeNewCanvas(newCanvas, view);
     }

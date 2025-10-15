@@ -729,7 +729,7 @@ public class SmartObject extends CompositeLayer {
             imageTransformer = new ImageTransformer(content, newScaling, newSize.width, newSize.height);
             setBaseImageSource(imageTransformer);
         } else {
-            imageTransformer.concatenate(newScaling, newSize.width, newSize.height);
+            imageTransformer.chainTransform(newScaling, newSize.width, newSize.height);
             assert baseSource == imageTransformer;
         }
         invalidateAllCaches(false);
@@ -760,7 +760,7 @@ public class SmartObject extends CompositeLayer {
             imageTransformer = new ImageTransformer(content, flipTransform, targetWidth, targetHeight);
             setBaseImageSource(imageTransformer);
         } else {
-            imageTransformer.concatenate(flipTransform, targetWidth, targetHeight);
+            imageTransformer.chainTransform(flipTransform, targetWidth, targetHeight);
         }
         invalidateAllCaches(false);
 
@@ -781,7 +781,7 @@ public class SmartObject extends CompositeLayer {
             imageTransformer = new ImageTransformer(content, rotation, targetWidth, targetHeight);
             setBaseImageSource(imageTransformer);
         } else {
-            imageTransformer.concatenate(rotation, targetWidth, targetHeight);
+            imageTransformer.chainTransform(rotation, targetWidth, targetHeight);
         }
         invalidateAllCaches(false);
 

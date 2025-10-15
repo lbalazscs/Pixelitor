@@ -37,6 +37,11 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
+    public boolean disableForSmartObjects() {
+        return false;
+    }
+
+    @Override
     protected void updateCanvasSize(Canvas newCanvas, View view) {
         // a flip doesn't change the canvas size
         throw new IllegalStateException("should not be called");
