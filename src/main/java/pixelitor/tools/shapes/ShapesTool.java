@@ -301,21 +301,11 @@ public class ShapesTool extends DragTool {
     @Override
     protected void dragStarted(PMouseEvent e) {
         if (state == TRANSFORM) {
-            assert hasBox();
-            assert hasStyledShape();
-            if (transformBox.processMousePressed(e)) {
-                return; // drag started on a handle, the box will manage it
-            }
-
-            // if the mouse was pressed outside the transform box:
-            if (isEditingShapesLayer()) {
-                return; // do nothing
-            } else {
-                rasterizeShape(e.getComp());
+            if (handleMousePressInTransformState(e)) {
+                return; // the event is fully handled and we should stop
             }
         }
 
-        // if we are here, we are starting a new shape
         startNewShape();
         if (isEditingShapesLayer()) {
             // if we are on an empty shapes layer, the new shape belongs to it
@@ -323,6 +313,30 @@ public class ShapesTool extends DragTool {
         }
 
         assert state != IDLE : "state = " + state;
+    }
+
+    /**
+     * Handles a mouse press when the tool is in the TRANSFORM state.
+     * Returns true if the event was fully consumed, false if processing should continue.
+     */
+    private boolean handleMousePressInTransformState(PMouseEvent e) {
+        assert hasBox();
+        assert hasStyledShape();
+
+        if (transformBox.processMousePressed(e)) {
+            return true; // the box consumed the event
+        }
+
+        // if the mouse was pressed outside the transform box:
+        if (isEditingShapesLayer()) {
+            // on a shapes layer, clicking outside the box does nothing
+            return true;
+        } else {
+            // on a raster layer, rasterize the shape
+            rasterize(e.getComp());
+            // return false to allow the caller to continue and start a new shape
+            return false;
+        }
     }
 
     private void startNewShape() {
@@ -392,7 +406,7 @@ public class ShapesTool extends DragTool {
 
         e.getView().repaint();
         setState(TRANSFORM);
-        History.add(new CreateBoxedShapeEdit(e.getComp(), styledShape, transformBox));
+        History.add(new CreateBoxedShapeEdit(e.getComp(), styledShape, transformBox, shapesLayer));
 
         if (isEditingShapesLayer()) {
             shapesLayer.setTransformBox(transformBox);
@@ -445,7 +459,7 @@ public class ShapesTool extends DragTool {
         // or to clicking outside the transform box:
         // the handles disappear, but the effect remains
         if (state == TRANSFORM && !isEditingShapesLayer()) {
-            Views.onActiveComp(this::rasterizeShape);
+            Views.onActiveComp(this::rasterize);
         }
     }
 
@@ -482,7 +496,7 @@ public class ShapesTool extends DragTool {
      * After this method the shape becomes part of the {@link Drawable}'s
      * pixels (before it was only drawn above it).
      */
-    private void rasterizeShape(Composition comp) {
+    private void rasterize(Composition comp) {
         assert hasBox();
         assert hasStyledShape();
         assert !isEditingShapesLayer();
@@ -680,6 +694,14 @@ public class ShapesTool extends DragTool {
             setState(TRANSFORM);
         }
 
+        if (isEditingShapesLayer()) {
+            shapesLayer.setStyledShape(this.styledShape);
+            if (box != null) {
+                shapesLayer.setTransformBox(this.transformBox);
+            }
+            shapesLayer.updateIconImage();
+        }
+
         FgBgColors.setFGColor(styledShape.getFgColor(), false);
         FgBgColors.setBGColor(styledShape.getBgColor(), false);
 
@@ -689,7 +711,7 @@ public class ShapesTool extends DragTool {
     @Override
     public void viewActivated(View oldView, View newView) {
         if (oldView != null) {
-            rasterizeBox(oldView.getComp());
+            rasterizeShape(oldView.getComp());
         }
 
         super.viewActivated(oldView, newView);
@@ -697,18 +719,18 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void forceFinish() {
-        rasterizeBox();
+        rasterizeShape();
     }
 
-    private void rasterizeBox() {
-        rasterizeBox(Views.getActiveComp());
+    private void rasterizeShape() {
+        rasterizeShape(Views.getActiveComp());
     }
 
-    private void rasterizeBox(Composition comp) {
+    private void rasterizeShape(Composition comp) {
         if (transformBox != null && !isEditingShapesLayer()) {
             assert hasStyledShape();
             assert state == TRANSFORM : "state = " + state;
-            rasterizeShape(comp);
+            rasterize(comp);
         }
     }
 
@@ -821,24 +843,23 @@ public class ShapesTool extends DragTool {
     protected void toolDeactivated(View view) {
         super.toolDeactivated(view);
 
-        rasterizeBox();
+        rasterizeShape();
 
         reset();
     }
 
     private void layerActivated(Layer layer) {
-        if (layer.isMaskEditing()) {
-            switchToRasterEditing(layer);
-        } else {
-            if (layer instanceof ShapesLayer newShapesLayer) {
-                if (newShapesLayer == shapesLayer) {
-                    return; // already editing this layer
-                }
-                shapesLayer = newShapesLayer;
-                switchToShapesLayerEditing();
-            } else {
-                switchToRasterEditing(layer);
+        // check if we should enter the dedicated shapes layer editing mode
+        if (layer instanceof ShapesLayer newShapesLayer && !layer.isMaskEditing()) {
+            if (newShapesLayer == shapesLayer) {
+                return; // already editing this layer
             }
+            shapesLayer = newShapesLayer;
+            switchToShapesLayerEditing();
+        } else {
+            // for masks and all other layer types (even for
+            // non-drawable layers) enter the default mode
+            switchToNormalEditing(layer);
         }
     }
 
@@ -866,13 +887,13 @@ public class ShapesTool extends DragTool {
         shapesLayer.getComp().repaint();
     }
 
-    private void switchToRasterEditing(Layer layer) {
+    private void switchToNormalEditing(Layer newLayer) {
         boolean wasShapesLayer = isEditingShapesLayer();
         shapesLayer = null;
         if (wasShapesLayer) {
             // hide the shape and box
             setIdleState();
-            layer.getComp().repaint();
+            newLayer.getComp().repaint();
         }
     }
 
@@ -959,4 +980,3 @@ public class ShapesTool extends DragTool {
         return ToolIcons::paintShapesIcon;
     }
 }
-

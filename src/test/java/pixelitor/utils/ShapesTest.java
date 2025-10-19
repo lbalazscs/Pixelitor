@@ -18,6 +18,9 @@
 package pixelitor.utils;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.testutils.SegmentCounter;
@@ -29,13 +32,21 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
+/**
+ * Unit tests for the {@link Shapes} utility class.
+ */
 @DisplayName("Shapes tests")
 @TestMethodOrder(MethodOrderer.Random.class)
 class ShapesTest {
+    // constant for approximating a circle with cubic Bézier curves
+    private static final double KAPPA = 0.55228474983;
+
     private View view;
 
     @BeforeAll
@@ -131,61 +142,93 @@ class ShapesTest {
             .numAnchorsIs(4)
             .isClosed();
 
-        var p1 = subPath.getAnchor(0);
-        assertThat(p1)
-            .isAt(12, 7)
-            .typeIs(SYMMETRIC);
-        assertThat(p1.ctrlOut).isAt(12, 9.76);
-        assertThat(p1.ctrlIn).isAt(12, 4.24);
+        double x = 2.0, y = 2.0, w = 10.0, h = 10.0;
+        double radiusX = w / 2.0;
+        double radiusY = h / 2.0;
+        double centerX = x + radiusX;
+        double centerY = y + radiusY;
+        double ctrlOffsetX = radiusX * KAPPA;
+        double ctrlOffsetY = radiusY * KAPPA;
 
-        var p2 = subPath.getAnchor(1);
-        assertThat(p2).isAt(7, 12);
-        assertThat(p2.ctrlOut).isAt(4.24, 12.00);
-        assertThat(p2.ctrlIn).isAt(9.76, 12);
+        assertThat(subPath.getAnchor(0)) // right
+            .isAt(centerX + radiusX, centerY)
+            .typeIs(SYMMETRIC)
+            .hasCtrlOutAt(centerX + radiusX, centerY + ctrlOffsetY)
+            .hasCtrlInAt(centerX + radiusX, centerY - ctrlOffsetY);
 
-        var p3 = subPath.getAnchor(2);
-        assertThat(p3).isAt(2, 7);
-        assertThat(p3.ctrlOut).isAt(2, 4.24);
-        assertThat(p3.ctrlIn).isAt(2, 9.76);
+        assertThat(subPath.getAnchor(1)) // bottom
+            .isAt(centerX, centerY + radiusY)
+            .hasCtrlOutAt(centerX - ctrlOffsetX, centerY + radiusY)
+            .hasCtrlInAt(centerX + ctrlOffsetX, centerY + radiusY);
 
-        var p4 = subPath.getAnchor(3);
-        assertThat(p4).isAt(7, 2);
-        assertThat(p4.ctrlOut).isAt(9.76, 2);
-        assertThat(p4.ctrlIn).isAt(4.24, 2);
+        assertThat(subPath.getAnchor(2)) // left
+            .isAt(centerX - radiusX, centerY)
+            .hasCtrlOutAt(centerX - radiusX, centerY - ctrlOffsetY)
+            .hasCtrlInAt(centerX - radiusX, centerY + ctrlOffsetY);
+
+        assertThat(subPath.getAnchor(3)) // top
+            .isAt(centerX, centerY - radiusY)
+            .hasCtrlOutAt(centerX + ctrlOffsetX, centerY - radiusY)
+            .hasCtrlInAt(centerX - ctrlOffsetX, centerY - radiusY);
+    }
+
+    @ParameterizedTest(name = "toPositiveRect: {0}")
+    @MethodSource("provideRectanglesForNormalization")
+    void toPositiveRect_normalizesRectangles(String caseName,
+                                             int inX, int inY, int inW, int inH,
+                                             int expX, int expY, int expW, int expH) {
+        // test rectangle
+        Rectangle inputRect = new Rectangle(inX, inY, inW, inH);
+        Rectangle expectedRect = new Rectangle(expX, expY, expW, expH);
+
+        // test the overload that takes a Rectangle
+        assertThat(Shapes.toPositiveRect(inputRect)).isEqualTo(expectedRect);
+
+        // test the overload that takes coordinates
+        assertThat(Shapes.toPositiveRect(inX, inX + inW, inY, inY + inH)).isEqualTo(expectedRect);
+
+        // test the overload that takes a Rectangle2D
+        Rectangle2D inputRect2D = new Rectangle2D.Double(inX, inY, inW, inH);
+        Rectangle2D expectedRect2D = new Rectangle2D.Double(expX, expY, expW, expH);
+
+        assertThat(Shapes.toPositiveRect(inputRect2D)).isEqualTo(expectedRect2D);
+    }
+
+    private static Stream<Arguments> provideRectanglesForNormalization() {
+        return Stream.of(
+            arguments("positive w/h", 30, 40, 10, 20, 30, 40, 10, 20),
+            arguments("negative width", 30, 40, -10, 20, 20, 40, 10, 20),
+            arguments("negative height", 30, 40, 10, -20, 30, 20, 10, 20),
+            arguments("negative w/h", 30, 40, -10, -20, 20, 20, 10, 20)
+        );
     }
 
     @Test
-    void toPositiveRect_fromRectangle_whenWidthHeightPositive() {
-        Rectangle input = new Rectangle(30, 40, 10, 20);
-        Rectangle output = Shapes.toPositiveRect(input);
+    void toSvgPath_convertsRectangleCorrectly() {
+        Shape rect = new Rectangle2D.Double(10, 20, 30, 40);
+        String svgPath = Shapes.toSvgPath(rect);
+        String expected = """
+            M 10.000 20.000
+            L 40.000 20.000
+            L 40.000 60.000
+            L 10.000 60.000
+            L 10.000 20.000
+            Z
+            """;
 
-        assertThat(output).isEqualTo(input);
+        assertThat(svgPath).isEqualTo(expected);
     }
 
     @Test
-    void toPositiveRect_fromRectangle_whenWidthNegative() {
-        Rectangle input = new Rectangle(30, 40, -10, 20);
-        Rectangle expectedOutput = new Rectangle(20, 40, 10, 20);
+    void pathsAreEqual() {
+        Shape r1 = new Rectangle2D.Double(10, 10, 20, 20);
+        Shape r2 = new Rectangle2D.Double(10, 10, 20, 20);
+        Shape r3 = new Rectangle2D.Double(10, 10, 20, 21);
+        Shape r4 = new Rectangle2D.Double(10.001, 10.001, 19.998, 19.998);
 
-        Rectangle output = Shapes.toPositiveRect(input);
-        assertThat(output).isEqualTo(expectedOutput);
-    }
-
-    @Test
-    void toPositiveRect_fromRectangle_whenHeightNegative() {
-        Rectangle input = new Rectangle(30, 40, 10, -20);
-        Rectangle expectedOutput = new Rectangle(30, 20, 10, 20);
-
-        Rectangle output = Shapes.toPositiveRect(input);
-        assertThat(output).isEqualTo(expectedOutput);
-    }
-
-    @Test
-    void toPositiveRect_fromRectangle_whenWidthHeightNegative() {
-        Rectangle input = new Rectangle(30, 40, -10, -20);
-        Rectangle expectedOutput = new Rectangle(20, 20, 10, 20);
-
-        Rectangle output = Shapes.toPositiveRect(input);
-        assertThat(output).isEqualTo(expectedOutput);
+        assertThat(Shapes.pathsAreEqual(r1, r2, 0.0)).isTrue();
+        assertThat(Shapes.pathsAreEqual(r1, r3, 0.0)).isFalse();
+        assertThat(Shapes.pathsAreEqual(r1, r4, 0.0)).isFalse();
+        assertThat(Shapes.pathsAreEqual(r1, r4, 0.01)).isTrue();
     }
 }

@@ -20,7 +20,7 @@ package pixelitor.tools.selection;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
+import pixelitor.Invariants;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
@@ -133,7 +133,7 @@ public abstract class AbstractSelectionTool extends DragTool {
         altMeansSubtract = false;
 
         if (AppMode.isDevelopment()) {
-            ConsistencyChecks.selectionActionsEnabledCheck(comp);
+            Invariants.selectionActionsEnabledCheck(comp);
         }
     }
 
@@ -205,8 +205,8 @@ public abstract class AbstractSelectionTool extends DragTool {
         // reset state for the next operation
         altMeansSubtract = false;
 
-        assert ConsistencyChecks.selectionShapeIsNotEmpty(comp) : "selection is empty";
-        assert ConsistencyChecks.selectionIsInsideCanvas(comp) : "selection is outside";
+        assert Invariants.selectionShapeIsNotEmpty(comp.getSelection()) : "selection is empty";
+        assert Invariants.selectionIsInsideCanvas(comp) : "selection is outside";
     }
 
     @Override

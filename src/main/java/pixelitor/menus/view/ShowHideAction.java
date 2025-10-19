@@ -37,7 +37,7 @@ public abstract class ShowHideAction extends NamedAction.Checked {
         this.workSpace = workSpace;
 
         //noinspection AbstractMethodCallInConstructor
-        updateText(getStartupVisibility());
+        updateText(isVisible());
     }
 
     public void setHideText() {
@@ -50,7 +50,7 @@ public abstract class ShowHideAction extends NamedAction.Checked {
 
     @Override
     protected void onClick() {
-        boolean currentVisibility = getCurrentVisibility();
+        boolean currentVisibility = isVisible();
         setVisibility(!currentVisibility);
         updateText(!currentVisibility);
     }
@@ -68,9 +68,7 @@ public abstract class ShowHideAction extends NamedAction.Checked {
         }
     }
 
-    public abstract boolean getStartupVisibility();
-
-    public abstract boolean getCurrentVisibility();
+    public abstract boolean isVisible();
 
     /**
      * Hides or shows the controlled GUI area

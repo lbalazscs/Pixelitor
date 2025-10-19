@@ -20,6 +20,7 @@ package pixelitor.tools.util;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
+import pixelitor.utils.CustomShapes;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
@@ -40,7 +41,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 import static java.lang.String.format;
-import static java.util.Objects.*;
+import static java.util.Objects.hash;
 
 /**
  * Represents a mouse drag performed by the user while using
@@ -327,7 +328,7 @@ public class Drag implements Serializable, Debuggable {
      */
     public void drawCoDirectionArrow(Graphics2D g) {
         assert hasCoCoords;
-        Shapes.drawDirectionArrow(g, coStartX, coStartY, coEndX, coEndY);
+        CustomShapes.drawDirectionArrow(g, coStartX, coStartY, coEndX, coEndY);
     }
 
     /**
@@ -336,7 +337,7 @@ public class Drag implements Serializable, Debuggable {
      * However, this is good enough for debugging.
      */
     public void drawImDirectionArrow(Graphics2D g) {
-        Shapes.drawDirectionArrow(g, imStartX, imStartY, imEndX, imEndY);
+        CustomShapes.drawDirectionArrow(g, imStartX, imStartY, imEndX, imEndY);
     }
 
     public void saveEndValues() {
@@ -754,7 +755,7 @@ public class Drag implements Serializable, Debuggable {
 
     public void debug(Graphics2D g, Color c) {
         Line2D line = new Line2D.Double(imStartX, imStartY, imEndX, imEndY);
-        Shape circle = Shapes.createCircle(imStartX, imStartY, 10);
+        Shape circle = CustomShapes.createCircle(imStartX, imStartY, 10);
         Shapes.debug(g, c, line);
         Shapes.debug(g, c, circle);
     }

@@ -73,13 +73,22 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
      * The state of a {@link StyledShape}.
      */
     enum State {
-        CREATED, // after the constructor - no actual shape yet
+        EMPTY, // has no actual shape yet
         DESERIALIZED, // after being deserialized
-        SHAPE_SET, // when it has a shape after the first drag event
-        BOX_CREATED // final state after transform box is created
+        INITIAL_DRAG, // when it has a shape after the first drag event
+        TRANSFORMABLE; // final state after transform box is created
+
+        boolean canChangeTo(State next) {
+            return switch (this) {
+                case EMPTY -> next == INITIAL_DRAG;
+                case DESERIALIZED -> next == TRANSFORMABLE;
+                case INITIAL_DRAG -> next == INITIAL_DRAG || next == TRANSFORMABLE;
+                case TRANSFORMABLE -> false;
+            };
+        }
     }
 
-    private transient State state;
+    private transient State state = State.EMPTY;
 
     private ShapeType shapeType;
     private List<ParamState<?>> typeSettings;
@@ -109,7 +118,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     private Color fgColor;
     private Color bgColor;
 
-    // TODO this is a hack to enable a shapes layer to invalidate the image cache
+    // TODO this enables a shapes layer to invalidate the image cache
     //  when the styled shape changes. Instead of this, either the need for an
     //  image cache should be eliminated or the image should be cached in this class.
     private transient Runnable changeListener;
@@ -121,15 +130,13 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         updateStroke(tool);
         updateEffects(tool);
         updateColors();
-
-        state = State.CREATED;
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        if (strokePaint != NONE) {
+        if (hasStroke()) {
             // a stroke might be needed before this object
             // has a chance to load it from the tool
             StrokeParam p = new StrokeParam("");
@@ -174,11 +181,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             g.setComposite(origComposite);
         }
 
-        if (fillPaint != NONE) {
+        if (hasFill()) {
             paintFill(g);
         }
 
-        if (strokePaint != NONE) {
+        if (hasStroke()) {
             paintStroke(g);
         }
 
@@ -206,52 +213,35 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private void paintEffects(Graphics2D g) {
-        if (strokePaint != NONE) {
-            if (fillPaint != NONE) {
-                paintEffectsForFilledStrokedShape(g);
-            } else {
-                paintStrokeOutlineEffects(g);
-            }
-        } else {
-            paintEffectsNoStroke(g);
-        }
+        effects.apply(g, getShapeForEffects());
     }
 
-    private void paintEffectsForFilledStrokedShape(Graphics2D g) {
-        // Add the outline area of the stroke to the shape area
-        // to get the shape for the effects, but these Area operations
-        // could be too slow for the WobbleStroke.
+    private Shape getShapeForEffects() {
+        if (!hasStroke()) {
+            return shape; // simplest case
+        }
+
+        // using Area operations could be too slow for the WobbleStroke
         // TODO Also some shapes (Line, Cat, Bat + sometimes rounded rectangle) trigger
         //  https://bugs.openjdk.java.net/browse/JDK-6357341
         //  with Tapering stroke + neon border
         var strokeClass = stroke.getClass();
         if (strokeClass == WobbleStroke.class || (strokeClass == TaperingStroke.class && shapeType.hasAreaProblem())) {
-            // give up, draw the effect directly on the original shape,
-            // ignoring the stroke's width
-            effects.apply(g, shape);
-        } else {
-            // do the correct thing
-            Shape strokeOutline = stroke.createStrokedShape(shape);
-            Area strokeOutlineArea = new Area(strokeOutline);
+            // give up, use the original shape, ignoring the stroke's width
+            return shape;
+        }
+
+        Shape strokeOutline = stroke.createStrokedShape(shape);
+
+        if (hasFill()) {
+            // combine the fill area and the stroke outline area
             Area combined = new Area(shape);
-            combined.add(strokeOutlineArea);
-            effects.apply(g, combined);
-        }
-    }
-
-    private void paintStrokeOutlineEffects(Graphics2D g) {
-        if (stroke instanceof WobbleStroke) {
-            // consistent with the behavior above
-            effects.apply(g, shape);
+            combined.add(new Area(strokeOutline));
+            return combined;
         } else {
-            // apply the effects on the stroke outline
-            Shape outline = stroke.createStrokedShape(shape);
-            effects.apply(g, outline);
+            // just use the stroke outline
+            return strokeOutline;
         }
-    }
-
-    private void paintEffectsNoStroke(Graphics2D g) {
-        effects.apply(g, shape); // simplest case
     }
 
     /**
@@ -306,7 +296,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         this.transformedDrag = drag;
         shape = origShape;
 
-        state = State.SHAPE_SET;
+        setState(State.INITIAL_DRAG);
         assert checkInvariants();
     }
 
@@ -446,10 +436,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             assert !origImRect.isEmpty() : "drag = " + origDrag;
             box = new TransformBox(origImRect, view, this);
         }
-        state = State.BOX_CREATED;
+        setState(State.TRANSFORMABLE);
         return box;
     }
 
+    // creates a transform box for directional shapes
     private TransformBox createRotatedBox(View view, double angle) {
         ShapeTypeSettings settings = null;
         if (shapeType.hasSettings()) {
@@ -462,7 +453,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         // The rotated box is created in 3 steps:
         // 1) Rotate the original shape backwards.
         // 2) Create a horizontal box for it.
-        // 3) Rotate the box (an implicitly the shape) forwards.
+        // 3) Rotate the box (and implicitly the shape) forwards.
 
         double dragLength = transformedDrag.calcImLength();
         double dragStartX = transformedDrag.getOriginX();
@@ -480,10 +471,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         // Set the original shape to the horizontal shape.
         // It could also be rotated backwards with an AffineTransform.
         origShape = shapeType.createShape(transformedDrag, settings);
-        assert origShape != null;
         // rotate back
         origShape = Shapes.rotate(origShape, -angle, rotCenterImX, rotCenterImY);
-        assert origShape != null;
 
         // Set the original drag to the diagonal of the back-rotated transform box,
         // so that after a shape-type change the new shape is created correctly
@@ -632,6 +621,14 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return strokePaint;
     }
 
+    private boolean hasFill() {
+        return fillPaint != NONE;
+    }
+
+    private boolean hasStroke() {
+        return strokePaint != NONE;
+    }
+
     public StrokeSettings getStrokeSettings() {
         return strokeSettings;
     }
@@ -655,7 +652,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     // this object is created when the mouse is pressed, but
     // it has a shape only after the first drag events arrive
     public boolean hasShape() {
-        boolean hasShape = state != State.CREATED;
+        boolean hasShape = state != State.EMPTY;
 
         assert hasShape == (shape != null);
         assert hasShape == (origDrag != null);
@@ -688,10 +685,15 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return shape.contains(p);
     }
 
+    private void setState(State next) {
+        assert state.canChangeTo(next) : state + " => " + next;
+        state = next;
+    }
+
     public boolean checkInvariants() {
         // TODO CREATED, but not initialized styled shapes
         //  shouldn't be put in shape layers
-        if (state == State.CREATED) {
+        if (state == State.EMPTY) {
             return true;
         }
 

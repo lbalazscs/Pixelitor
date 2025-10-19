@@ -754,7 +754,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     @Override
-    public void crop(Rectangle2D cropRect,
+    public void crop(Rectangle cropRect,
                      boolean deleteCropped,
                      boolean allowGrowing) {
         assert !cropRect.isEmpty() : "empty crop rectangle";
@@ -766,22 +766,19 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             return;
         }
 
-        int cropWidth = (int) cropRect.getWidth();
-        int cropHeight = (int) cropRect.getHeight();
-        assert cropWidth > 0 : "cropRect = " + cropRect;
-        assert cropHeight > 0 : "cropRect = " + cropRect;
+        assert cropRect.width > 0 && cropRect.height > 0 : "cropRect = " + cropRect;
 
         // the cropRect is in image space, but relative to the canvas,
         // so it's translated to get the correct image coordinates
-        int cropX = (int) (cropRect.getX() - getTx());
-        int cropY = (int) (cropRect.getY() - getTy());
+        int cropX = cropRect.x - getTx();
+        int cropY = cropRect.y - getTy();
 
         if (!deleteCropped) {
             assert allowGrowing;
 
             boolean imageCoversNewCanvas = cropX >= 0 && cropY >= 0
-                && cropX + cropWidth <= image.getWidth()
-                && cropY + cropHeight <= image.getHeight();
+                && cropX + cropRect.width <= image.getWidth()
+                && cropY + cropRect.height <= image.getHeight();
             if (imageCoversNewCanvas) {
                 // no need to change the image, just set the translation
                 super.crop(cropRect, false, allowGrowing);
@@ -789,10 +786,10 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
                 // the image still has to be enlarged, but the translation will not be zero
                 int westEnlargement = Math.max(0, -cropX);
                 int newWidth = westEnlargement + Math.max(
-                    image.getWidth(), cropX + cropWidth);
+                    image.getWidth(), cropX + cropRect.width);
                 int northEnlargement = Math.max(0, -cropY);
                 int newHeight = northEnlargement + Math.max(
-                    image.getHeight(), cropY + cropHeight);
+                    image.getHeight(), cropY + cropRect.height);
 
                 BufferedImage newImage = ImageUtils.crop(image,
                     -westEnlargement, -northEnlargement, newWidth, newHeight);
@@ -807,7 +804,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         // and the translation must be 0, 0
 
         // this method call can also grow the image
-        BufferedImage newImage = ImageUtils.crop(image, cropX, cropY, cropWidth, cropHeight);
+        BufferedImage newImage = ImageUtils.crop(image, cropX, cropY, cropRect.width, cropRect.height);
         setImage(newImage);
         setTranslation(0, 0);
     }

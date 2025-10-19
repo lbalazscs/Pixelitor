@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.impl;
 
 import net.jafama.FastMath;
 import pixelitor.filters.CircleToSquare;
-import pixelitor.utils.Shapes;
+import pixelitor.utils.CustomShapes;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
@@ -51,7 +51,7 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
 
     public Shape[] getAffectedAreaShapes() {
         Shape rect = new Rectangle2D.Double(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
-        Shape ellipse = Shapes.createEllipse(cx, cy, radiusX, radiusY);
+        Shape ellipse = CustomShapes.createEllipse(cx, cy, radiusX, radiusY);
         return new Shape[]{rect, ellipse};
     }
 

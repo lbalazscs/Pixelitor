@@ -173,14 +173,14 @@ public class PoissonDiskSampling {
 
     public void renderPoints(Graphics2D g2, double radius) {
         for (Point2D sample : samples) {
-            g2.fill(Shapes.createCircle(sample, radius));
+            g2.fill(CustomShapes.createCircle(sample, radius));
         }
     }
 
     public void renderPoints(Graphics2D g2, double radius, Color[] colors) {
         for (int i = 0; i < samples.size(); i++) {
             g2.setColor(colors[i % colors.length]);
-            g2.fill(Shapes.createCircle(samples.get(i), radius));
+            g2.fill(CustomShapes.createCircle(samples.get(i), radius));
         }
     }
 

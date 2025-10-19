@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
+import pixelitor.Invariants;
 import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.Debuggable;
@@ -273,7 +273,7 @@ public interface LayerHolder extends Debuggable {
         comp.setActiveLayer(newTarget, true,
             LayerMoveAction.RAISE_LAYER_SELECTION);
 
-        assert ConsistencyChecks.fadeWouldWorkOn(comp);
+        assert Invariants.fadeWouldWorkOn(comp);
     }
 
     /**
@@ -290,7 +290,7 @@ public interface LayerHolder extends Debuggable {
         comp.setActiveLayer(getLayer(newIndex), true,
             LayerMoveAction.LOWER_LAYER_SELECTION);
 
-        assert ConsistencyChecks.fadeWouldWorkOn(comp);
+        assert Invariants.fadeWouldWorkOn(comp);
     }
 
     /**

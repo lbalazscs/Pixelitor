@@ -32,18 +32,12 @@ public class ShowHideSelectionAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getCurrentVisibility() {
-        var selection = Views.getActiveSelection();
-        if (selection != null) {
-            return !selection.isHidden();
-        }
+    public boolean isVisible() {
+        Selection selection = Views.getActiveSelection();
 
-        return true;
-    }
-
-    @Override
-    public boolean getStartupVisibility() {
-        return true;
+        // if there is no selection, then the menu text
+        // is "Hide Selection", but the menu is disabled
+        return selection == null ? true : !selection.isHidden();
     }
 
     @Override

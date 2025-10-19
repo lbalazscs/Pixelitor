@@ -31,7 +31,7 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -86,7 +86,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+    public void crop(Rectangle cropRect, boolean deleteCropped, boolean allowGrowing) {
         // do nothing, as an adjustment layer has no content of its own
     }
 

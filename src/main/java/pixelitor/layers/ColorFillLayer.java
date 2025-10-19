@@ -33,7 +33,7 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
@@ -154,7 +154,7 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+    public void crop(Rectangle cropRect, boolean deleteCropped, boolean allowGrowing) {
         // do nothing
     }
 

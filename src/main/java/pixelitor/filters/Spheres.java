@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.Shapes;
+import pixelitor.utils.CustomShapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.*;
@@ -179,7 +179,7 @@ public class Spheres extends ParametrizedFilter {
             }
 
             // render the spheres
-            g.fill(Shapes.createCircle(x, y, r));
+            g.fill(CustomShapes.createCircle(x, y, r));
 
             pt.unitDone();
         }

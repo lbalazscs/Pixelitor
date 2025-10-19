@@ -31,7 +31,6 @@ import pixelitor.utils.debug.Debuggable;
 import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
@@ -219,8 +218,8 @@ public class Gradient implements Serializable, Debuggable {
         return new GradientHandles(drag.getStart(view), drag.getEnd(view), view);
     }
 
-    public void crop(Rectangle2D cropRect) {
-        drag = drag.imTranslatedCopy(-cropRect.getX(), -cropRect.getY());
+    public void crop(Rectangle cropRect) {
+        drag = drag.imTranslatedCopy(-cropRect.x, -cropRect.y);
     }
 
     public void enlargeCanvas(Outsets enlargement) {

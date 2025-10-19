@@ -105,7 +105,7 @@ public class AppRunner {
     private static File initialOpenDir;
     private static File initialSaveDir;
 
-    private final HistoryChecker historyChecker;
+    private HistoryChecker historyChecker;
 
     public AppRunner(HistoryChecker historyChecker, File inputDir, String... fileNames) {
         this.historyChecker = historyChecker;
@@ -1120,6 +1120,11 @@ public class AppRunner {
         if (historyChecker != null) {
             historyChecker.verifyAndClear();
         }
+    }
+
+    public void removeHistoryChecker() {
+        historyChecker = null;
+        History.setChecker(null);
     }
 
     public Robot getRobot() {

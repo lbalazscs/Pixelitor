@@ -918,6 +918,13 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         return new Memento(this);
     }
 
+    public static TransformBox fromMemento(Memento memento, View view, Transformable target) {
+        TransformBox box = new TransformBox(memento.origImRect, view, target);
+        box.restoreFrom(memento);
+
+        return box;
+    }
+
     /**
      * Captures the internal state of a {@link TransformBox}
      * so that it can be returned to this state later.
@@ -928,15 +935,23 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         private final PPoint se;
         private final PPoint sw;
 
+        private final Rectangle2D origImRect;
         private final double angle;
 
         public Memento(TransformBox box) {
+            this.origImRect = new Rectangle2D.Double();
+            this.origImRect.setRect(box.origImRect); // copy the original rect
+
             this.nw = box.nw.getLocationCopy();
             this.ne = box.ne.getLocationCopy();
             this.se = box.se.getLocationCopy();
             this.sw = box.sw.getLocationCopy();
 
             this.angle = box.angle;
+        }
+
+        public Rectangle2D getOrigImRect() {
+            return origImRect;
         }
 
         @Override

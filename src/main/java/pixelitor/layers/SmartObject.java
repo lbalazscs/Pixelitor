@@ -42,7 +42,6 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
@@ -1122,7 +1121,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+    public void crop(Rectangle cropRect, boolean deleteCropped, boolean allowGrowing) {
         throw new UnsupportedOperationException();
     }
 

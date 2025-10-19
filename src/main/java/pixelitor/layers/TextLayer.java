@@ -45,7 +45,6 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -397,15 +396,15 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+    public void crop(Rectangle cropRect, boolean deleteCropped, boolean allowGrowing) {
         // the text will not be cropped, but the translations have to be adjusted
 
         // as the cropping is the exact opposite of "enlarge canvas",
         // calculate the corresponding margins...
-        int northMargin = (int) cropRect.getY();
-        int westMargin = (int) cropRect.getX();
-        int southMargin = (int) (comp.getCanvasHeight() - cropRect.getHeight() - cropRect.getY());
-        int eastMargin = (int) (comp.getCanvasWidth() - cropRect.getWidth() - cropRect.getX());
+        int northMargin = cropRect.y;
+        int westMargin = cropRect.x;
+        int southMargin = comp.getCanvasHeight() - cropRect.height - cropRect.y;
+        int eastMargin = comp.getCanvasWidth() - cropRect.width - cropRect.x;
 
         // ...and do a negative enlargement
         enlargeCanvas(new Outsets(

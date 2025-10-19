@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
+import pixelitor.Invariants;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.gui.utils.ThemedImageIcon;
@@ -77,6 +77,6 @@ public class DeleteActiveLayerAction extends AbstractViewEnabledAction
     public void setEnabled(boolean newValue) {
         super.setEnabled(newValue);
 
-        assert ConsistencyChecks.layerDeleteActionEnabled();
+        assert Invariants.layerDeleteActionEnabled();
     }
 }

@@ -33,7 +33,6 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
@@ -152,7 +151,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+    public void crop(Rectangle cropRect, boolean deleteCropped, boolean allowGrowing) {
         if (gradient != null) {
             gradient.crop(cropRect);
             invalidateGradientCache();

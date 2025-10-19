@@ -21,6 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.CustomShapes;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.Shapes;
 
@@ -115,8 +116,8 @@ public class CircleWeave extends CurveFilter {
     private static void addInterpolatedCircle(Path2D path, Point2D point, Point2D imageCenter, double t, double radius, boolean distorted) {
         Point2D c = Geometry.interpolate(point, imageCenter, t);
         Shape circle = distorted
-            ? Shapes.createCircle(c.getX(), c.getY(), radius, 24)
-            : Shapes.createCircle(c.getX(), c.getY(), radius);
+            ? CustomShapes.createCircle(c.getX(), c.getY(), radius, 24)
+            : CustomShapes.createCircle(c.getX(), c.getY(), radius);
         path.append(circle, false);
     }
 

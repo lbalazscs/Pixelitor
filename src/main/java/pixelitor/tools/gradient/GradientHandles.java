@@ -25,7 +25,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.Shapes;
+import pixelitor.utils.CustomShapes;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -71,7 +71,7 @@ public class GradientHandles implements ToolWidget, Debuggable {
 
     @Override
     public void paint(Graphics2D g) {
-        Shapes.drawDirectionArrow(g, start.x, start.y, end.x, end.y);
+        CustomShapes.drawDirectionArrow(g, start.x, start.y, end.x, end.y);
 
         start.paintHandle(g);
         end.paintHandle(g);

@@ -38,7 +38,6 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
@@ -56,8 +55,11 @@ public class ShapesLayer extends ContentLayer {
 
     private StyledShape styledShape;
 
-    // TODO The box is also stored here because recreating
-    //   it from the styled shape is currently not possible.
+    // TODO instead of storing the box here, only a simpler TransformBox.Memento
+    //   should be stored and serialized. When a ShapesTool edits a ShapesLayer,
+    //   it would be responsible for creating the live box from the memento.
+    //   TransformBox would no longer be serializable, and its reInitialize()
+    //   method would not be needed.
     private TransformBox transformBox;
 
     private transient BufferedImage cachedImage;
@@ -179,7 +181,7 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+    public void crop(Rectangle cropRect, boolean deleteCropped, boolean allowGrowing) {
         transform(Crop.createCropTransform(cropRect));
     }
 
@@ -240,12 +242,15 @@ public class ShapesLayer extends ContentLayer {
     }
 
     public void setStyledShape(StyledShape styledShape) {
-        assert styledShape != null;
         this.styledShape = styledShape;
 
         // register a listener to invalidate the layer's
         // image cache when the styled shape changes
-        styledShape.setChangeListener(() -> cachedImage = null);
+        if (styledShape != null) {
+            styledShape.setChangeListener(() -> cachedImage = null);
+        } else {
+            cachedImage = null; // clear the cache if the shape is removed
+        }
     }
 
     @Override

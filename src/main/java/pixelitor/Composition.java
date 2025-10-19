@@ -1735,10 +1735,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                 throw new AssertionError("bad holder in layer '%s' (that holder='%s', this='%s')".formatted(
                     layer.getName(), layer.getHolder().getName(), getDebugName()));
             }
-            assert layer.checkInvariants();
         }
 
         forEachNestedLayerAndMask(layer -> {
+            assert layer.checkInvariants();
             if (layer.getComp() != this) {
                 throw new AssertionError("bad comp in '%s' (that comp='%s', this='%s')".formatted(
                     layer.getName(), layer.getComp().getDebugName(), getDebugName()));

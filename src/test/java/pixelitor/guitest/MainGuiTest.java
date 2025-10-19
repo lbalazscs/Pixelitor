@@ -3215,6 +3215,8 @@ public class MainGuiTest {
         task.run();
 
         if (skip(0.5)) {
+            keyboard.undo("Move Layer");
+            EDT.assertThereIsNoTranslation();
             return;
         }
 

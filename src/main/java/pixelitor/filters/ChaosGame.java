@@ -21,8 +21,8 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam.RangeParamState;
 import pixelitor.utils.BoundingBox;
+import pixelitor.utils.CustomShapes;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.BasicStroke;
@@ -353,7 +353,7 @@ public class ChaosGame extends ParametrizedFilter {
         if (color) {
             for (Vertex p : vertices) {
                 g.setColor(new Color(p.color));
-                Shape circle = Shapes.createCircle(p.x, p.y, MARGIN);
+                Shape circle = CustomShapes.createCircle(p.x, p.y, MARGIN);
                 g.fill(circle);
                 g.setColor(Color.BLACK);
                 g.draw(circle);

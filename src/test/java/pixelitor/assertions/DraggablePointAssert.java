@@ -97,6 +97,28 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         return this;
     }
 
+    /**
+     * Asserts that the point is an {@link AnchorPoint} and its "in" control point is at the given component-space location.
+     */
+    public DraggablePointAssert hasCtrlInAt(double x, double y) {
+        isNotNull();
+        isInstanceOf(AnchorPoint.class);
+        AnchorPoint ap = (AnchorPoint) actual;
+        assertThat(ap.ctrlIn).isAt(x, y);
+        return this;
+    }
+
+    /**
+     * Asserts that the point is an {@link AnchorPoint} and its "out" control point is at the given component-space location.
+     */
+    public DraggablePointAssert hasCtrlOutAt(double x, double y) {
+        isNotNull();
+        isInstanceOf(AnchorPoint.class);
+        AnchorPoint ap = (AnchorPoint) actual;
+        assertThat(ap.ctrlOut).isAt(x, y);
+        return this;
+    }
+
     public DraggablePointAssert isActive() {
         isNotNull();
         assertThat(actual.isActive()).as("isActive").isTrue();

@@ -19,6 +19,7 @@ package pixelitor.tools.shapes.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.layers.ShapesLayer;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.StyledShape;
 import pixelitor.tools.transform.TransformBox;
@@ -33,18 +34,28 @@ import javax.swing.undo.CannotUndoException;
 public class CreateBoxedShapeEdit extends PixelitorEdit {
     private final StyledShape shape;
     private final TransformBox box;
+    private final ShapesLayer targetLayer;
 
     public CreateBoxedShapeEdit(Composition comp,
                                 StyledShape shape,
-                                TransformBox box) {
+                                TransformBox box,
+                                ShapesLayer targetLayer) {
         super("Create Shape", comp);
         this.shape = shape.clone();
         this.box = box;
+        this.targetLayer = targetLayer;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
+
+        // if the shape was on a ShapesLayer, remove it from the layer
+        if (targetLayer != null) {
+            targetLayer.setStyledShape(null);
+            targetLayer.setTransformBox(null);
+            targetLayer.updateIconImage();
+        }
 
         Tools.SHAPES.reset();
     }
@@ -56,6 +67,13 @@ public class CreateBoxedShapeEdit extends PixelitorEdit {
         // they were not connected, because of the
         // cloning in the constructor
         box.setTarget(shape);
+
+        // if re-creating on a ShapesLayer, restore the shape to the layer
+        if (targetLayer != null) {
+            targetLayer.setStyledShape(shape);
+            targetLayer.setTransformBox(box);
+            targetLayer.updateIconImage();
+        }
 
         Tools.SHAPES.restoreBox(shape, box);
     }

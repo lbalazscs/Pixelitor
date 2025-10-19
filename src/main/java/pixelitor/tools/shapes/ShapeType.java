@@ -21,8 +21,8 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.OverlayType;
+import pixelitor.utils.CustomShapes;
 import pixelitor.utils.Geometry;
-import pixelitor.utils.Shapes;
 
 import java.awt.BasicStroke;
 import java.awt.Shape;
@@ -57,34 +57,17 @@ public enum ShapeType {
         public RectangleSettings createSettings() {
             return new RectangleSettings();
         }
-    }, ELLIPSE("Ellipse", false, false, false) {
+    }, ELLIPSE("Ellipse", false, false, false, Ellipse2D.Double::new) {
         @Override
-        public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createPositiveImRect();
-            return new Ellipse2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return new Ellipse2D.Double(x, y, width, height);
+        protected Rectangle2D getShapeBounds(Drag drag) {
+            return drag.createPositiveImRect();
         }
 
         @Override
         public OverlayType getOverlayType() {
             return OverlayType.WIDTH_HEIGHT;
         }
-    }, DIAMOND("Diamond", false, false, false) {
-        @Override
-        public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createSignedImRect();
-            return Shapes.createDiamond(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return Shapes.createDiamond(x, y, width, height);
-        }
-
+    }, DIAMOND("Diamond", false, false, false, CustomShapes::createDiamond) {
         @Override
         public OverlayType getOverlayType() {
             return OverlayType.WIDTH_HEIGHT;
@@ -113,18 +96,8 @@ public enum ShapeType {
         public LineSettings createSettings() {
             return new LineSettings();
         }
-    }, HEART("Heart", false, false, false) {
-        @Override
-        public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createSignedImRect();
-            return Shapes.createHeart(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return Shapes.createHeart(x, y, width, height);
-        }
-    }, STAR("Star", false, true, false) {
+    }, HEART("Heart", false, false, false, CustomShapes::createHeart),
+    STAR("Star", false, true, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             StarSettings starSettings = (StarSettings) settings;
@@ -139,13 +112,13 @@ public enum ShapeType {
             }
 
             Rectangle2D r = drag.createPositiveImRect();
-            return Shapes.createStar(numBranches, r.getX(), r.getY(),
+            return CustomShapes.createStar(numBranches, r.getX(), r.getY(),
                 r.getWidth(), r.getHeight(), radiusRatio);
         }
 
         @Override
         public Shape createShape(double x, double y, double width, double height) {
-            return Shapes.createStar(StarSettings.DEFAULT_NUM_BRANCHES,
+            return CustomShapes.createStar(StarSettings.DEFAULT_NUM_BRANCHES,
                 x, y, width, height, StarSettings.DEFAULT_RADIUS_RATIO);
         }
 
@@ -190,7 +163,7 @@ public enum ShapeType {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             if (unitArrow == null) {
-                unitArrow = Shapes.createUnitArrow();
+                unitArrow = CustomShapes.createUnitArrow();
             }
 
             Rectangle2D r = drag.createSignedImRect();
@@ -222,51 +195,10 @@ public enum ShapeType {
         public OverlayType getOverlayType() {
             return OverlayType.ANGLE_DIST;
         }
-    }, CAT("Cat", false, false, true) {
-        @Override
-        public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createSignedImRect();
-            return Shapes.createCat(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return Shapes.createCat(x, y, width, height);
-        }
-    }, KIWI("Kiwi", false, false, false) {
-        @Override
-        public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createSignedImRect();
-            return Shapes.createKiwi(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return Shapes.createKiwi(x, y, width, height);
-        }
-    }, BAT("Bat", false, false, true) {
-        @Override
-        public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createSignedImRect();
-            return Shapes.createBat(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return Shapes.createBat(x, y, width, height);
-        }
-    }, RABBIT("Rabbit", false, false, false) {
-        @Override
-        public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            Rectangle2D r = drag.createSignedImRect();
-            return Shapes.createRabbit(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return Shapes.createRabbit(x, y, width, height);
-        }
-    };
+    }, CAT("Cat", false, false, true, CustomShapes::createCat),
+    KIWI("Kiwi", false, false, false, CustomShapes::createKiwi),
+    BAT("Bat", false, false, true, CustomShapes::createBat),
+    RABBIT("Rabbit", false, false, false, CustomShapes::createRabbit);
 
     // the key can't be simpy "Shape", because
     // that key is used by the stroke settings
@@ -282,23 +214,61 @@ public enum ShapeType {
     // is initialized at the angle of the shape
     private final boolean directional;
 
+    // factory for simple shapes that can be created from a rectangle
+    private final ShapeFactory shapeFactory;
+
+    /**
+     * Functional interface for shape creation from a rectangle's components
+     */
+    @FunctionalInterface
+    private interface ShapeFactory {
+        Shape create(double x, double y, double width, double height);
+    }
+
+    // Constructor for shapes without a factory (complex shapes)
     ShapeType(String displayName, boolean directional, boolean hasSettings, boolean hasAreaBug) {
+        this(displayName, directional, hasSettings, hasAreaBug, null);
+    }
+
+    // Constructor for simple shapes with a factory
+    ShapeType(String displayName, boolean directional, boolean hasSettings, boolean hasAreaBug,
+              ShapeFactory factory) {
         this.displayName = displayName;
         this.directional = directional;
         this.hasSettings = hasSettings;
         this.hasAreaBug = hasAreaBug;
+        this.shapeFactory = factory;
     }
 
     /**
      * The returned shapes must always be closed, so that they can be filled.
      */
-    public abstract Shape createShape(Drag drag, ShapeTypeSettings settings);
+    public Shape createShape(Drag drag, ShapeTypeSettings settings) {
+        if (shapeFactory == null) {
+            throw new UnsupportedOperationException("Shape " + this + " must override createShape(Drag, ShapeTypeSettings)");
+        }
+        Rectangle2D r = getShapeBounds(drag);
+        return shapeFactory.create(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+    }
+
+    /**
+     * Override this to use a different rectangle type (positive vs signed).
+     * Most simple shapes use signed rect for symmetry during drag.
+     */
+    protected Rectangle2D getShapeBounds(Drag drag) {
+        return drag.createSignedImRect();
+    }
 
     public final Shape createShape(double x, double y, double size) {
         return createShape(x, y, size, size);
     }
 
-    public abstract Shape createShape(double x, double y, double width, double height);
+    public Shape createShape(double x, double y, double width, double height) {
+        if (shapeFactory == null) {
+            throw new UnsupportedOperationException("Shape " + this + " must override createShape(double, double, double, double)");
+        }
+        return shapeFactory.create(x, y, width, height);
+    }
 
     public OverlayType getOverlayType() {
         // overridden if necessary

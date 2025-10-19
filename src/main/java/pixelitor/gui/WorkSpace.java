@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.menus.view.*;
 import static pixelitor.utils.AppPreferences.mainPrefs;
 
 /**
- * Manages the visibility of various UI panels.
+ * The single source of truth for the visibility of UI panels.
  */
 public class WorkSpace {
     // preference keys for storing visibility states
@@ -51,6 +51,8 @@ public class WorkSpace {
     private final ShowHideStatusBarAction statusBarAction;
     private final ShowHideAllAction allAction;
 
+    private boolean frameInitialized = false;
+
     public WorkSpace() {
         // load visibility preferences
         histogramsVisible = mainPrefs.getBoolean(KEY_HISTOGRAMS_SHOWN, DEFAULT_HISTOGRAMS_VISIBLE);
@@ -72,6 +74,7 @@ public class WorkSpace {
         resetLayersVisibility();
         resetStatusBarVisibility();
 
+        // revalidate only once at the end
         pw.getContentPane().revalidate();
     }
 
@@ -104,18 +107,22 @@ public class WorkSpace {
     }
 
     public boolean areHistogramsVisible() {
+        assert !frameInitialized || histogramsVisible == HistogramsPanel.isShown();
         return histogramsVisible;
     }
 
     public boolean areLayersVisible() {
+        assert !frameInitialized || layersVisible == LayersContainer.areLayersShown();
         return layersVisible;
     }
 
     public boolean isStatusBarVisible() {
+        assert !frameInitialized || statusBarVisible == StatusBar.isShown();
         return statusBarVisible;
     }
 
     public boolean areToolsVisible() {
+        assert !frameInitialized || toolsVisible == PixelitorWindow.get().areToolsShown();
         return toolsVisible;
     }
 
@@ -164,5 +171,9 @@ public class WorkSpace {
 
     public ShowHideAllAction getAllAction() {
         return allAction;
+    }
+
+    public void setFrameInitialized(boolean frameInitialized) {
+        this.frameInitialized = frameInitialized;
     }
 }

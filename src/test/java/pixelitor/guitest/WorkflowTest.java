@@ -204,9 +204,13 @@ public class WorkflowTest {
             tests.forEach(test ->
                 test.accept(groupSetting)));
 
+        // restore initial state if necessary
         if (!experimentalWasEnabled) {
             EDT.run(() -> Features.enableExperimental = false);
         }
+
+        // ensure that manual testing can continue without undoing/redoing
+        app.removeHistoryChecker();
 
         System.out.println("WorkflowTest: finished at " + AppRunner.getCurrentTimeHM());
     }

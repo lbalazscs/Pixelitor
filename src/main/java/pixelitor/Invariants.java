@@ -20,6 +20,7 @@ package pixelitor;
 import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.layers.*;
+import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Threads;
 import pixelitor.utils.debug.Debug;
@@ -32,27 +33,23 @@ import static java.lang.String.format;
 /**
  * Runtime assertions checked only in developer mode.
  */
-public final class ConsistencyChecks {
-    private ConsistencyChecks() { // do not instantiate
+public final class Invariants {
+    private Invariants() { // do not instantiate
     }
 
     public static void checkAll(Composition comp) {
         assert comp != null;
 
+        assert comp.checkInvariants();
+
         selectionActionsEnabledCheck(comp);
 
-        assert selectionShapeIsNotEmpty(comp) : "empty selection shape in " + comp.getName();
+        assert selectionShapeIsNotEmpty(comp.getSelection()) : "empty selection shape in " + comp.getName();
         assert selectionIsInsideCanvas(comp) : "selection outside the canvas in " + comp.getName();
         assert fadeWouldWorkOn(comp);
         assert imageCoversCanvas(comp);
         assert layerDeleteActionEnabled();
         assert addMaskActionEnabled();
-        assert shapeLayersAreOK(comp);
-    }
-
-    public static boolean shapeLayersAreOK(Composition comp) {
-        comp.forEachNestedLayerOfType(ShapesLayer.class, ShapesLayer::checkInvariants);
-        return true;
     }
 
     public static boolean fadeWouldWorkOn(Composition comp) {
@@ -132,8 +129,7 @@ public final class ConsistencyChecks {
         throw new IllegalStateException(msg + " on " + Threads.threadName());
     }
 
-    public static boolean selectionShapeIsNotEmpty(Composition comp) {
-        var selection = comp.getSelection();
+    public static boolean selectionShapeIsNotEmpty(Selection selection) {
         if (selection == null) {
             return true;
         }
@@ -185,13 +181,11 @@ public final class ConsistencyChecks {
 
         var image = dr.getImage();
 
-        int txAbs = -dr.getTx();
-        if (image.getWidth() < txAbs + canvas.getWidth()) {
+        if (image.getWidth() < -dr.getTx() + canvas.getWidth()) {
             return imageDoesNotCoverCanvas(dr);
         }
 
-        int tyAbs = -dr.getTy();
-        if (image.getHeight() < tyAbs + canvas.getHeight()) {
+        if (image.getHeight() < -dr.getTy() + canvas.getHeight()) {
             return imageDoesNotCoverCanvas(dr);
         }
 

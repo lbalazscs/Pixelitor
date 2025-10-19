@@ -38,11 +38,7 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.*;
-import java.awt.AlphaComposite;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.geom.Rectangle2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -801,8 +797,13 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Crops the layer content to the given rectangle, which is
      * in image space, relative to the canvas.
+     * <p>
+     * The given rectangle uses integer precision to ensure all layers
+     * in a composition are cropped at consistent boundaries, preventing
+     * relative shifts between layers that could occur if pixel-based
+     * layers used rounding while other layer types didn't.
      */
-    public abstract void crop(Rectangle2D cropRect,
+    public abstract void crop(Rectangle cropRect,
                               boolean deleteCropped,
                               boolean allowGrowing);
 

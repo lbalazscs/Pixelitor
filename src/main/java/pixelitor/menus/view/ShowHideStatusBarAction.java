@@ -17,7 +17,6 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.StatusBar;
 import pixelitor.gui.WorkSpace;
 
 import javax.swing.*;
@@ -31,12 +30,7 @@ public class ShowHideStatusBarAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getCurrentVisibility() {
-        return StatusBar.isShown();
-    }
-
-    @Override
-    public boolean getStartupVisibility() {
+    public boolean isVisible() {
         return workSpace.isStatusBarVisible();
     }
 

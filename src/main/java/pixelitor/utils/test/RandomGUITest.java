@@ -20,7 +20,7 @@ package pixelitor.utils.test;
 import com.bric.util.JVM;
 import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
+import pixelitor.Invariants;
 import pixelitor.Views;
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
@@ -49,7 +49,6 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.PathActions;
-import pixelitor.tools.pen.PathTool;
 import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.input.Alt;
@@ -259,7 +258,7 @@ public class RandomGUITest {
             GUIUtils.invokeAndWait(() -> {
                 try {
                     actionCaller.executeRandomAction();
-                    ConsistencyChecks.checkAll(Views.getActiveComp());
+                    Invariants.checkAll(Views.getActiveComp());
                 } catch (Throwable e) {
                     Messages.showException(e);
                 }

@@ -25,10 +25,10 @@ import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.utils.CustomShapes;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ResizeUnit;
-import pixelitor.utils.Shapes;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -601,7 +601,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         private static void drawArrowIfLargeEnough(Graphics2D g, float enlargement,
                                                    float fromX, float fromY, float toX, float toY) {
             if (enlargement > ENLARGEMENT_THRESHOLD_PIXELS) {
-                g.fill(Shapes.createFixedWidthArrow(fromX, fromY, toX, toY));
+                g.fill(CustomShapes.createFixedWidthArrow(fromX, fromY, toX, toY));
             }
         }
 

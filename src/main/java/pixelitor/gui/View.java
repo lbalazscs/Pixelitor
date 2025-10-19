@@ -581,7 +581,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * Called when the canvas component-space size changed (zoom, resize, crop, etc.)
      */
     public void canvasCoSizeChanged() {
-        assert ConsistencyChecks.imageCoversCanvas(comp);
+        assert Invariants.imageCoversCanvas(comp);
 
         updateContainerSize();
         updateCanvasLocation();

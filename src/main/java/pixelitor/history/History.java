@@ -19,7 +19,7 @@ package pixelitor.history;
 
 import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
+import pixelitor.Invariants;
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.AppPreferences;
@@ -93,7 +93,7 @@ public class History {
         notifyMenus(edit);
 
         if (AppMode.isDevelopment()) {
-            ConsistencyChecks.checkAll(edit.getComp());
+            Invariants.checkAll(edit.getComp());
         }
     }
 

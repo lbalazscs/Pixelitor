@@ -24,6 +24,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
+import pixelitor.utils.CustomShapes;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Shapes;
@@ -71,12 +72,12 @@ public class ConcentricShapes extends ParametrizedFilter {
         CIRCLES("Circles", false, false, 1.0, 1.0) {
             @Override
             Shape createShape(double cx, double cy, double r, int n, double tuning) {
-                return Shapes.createCircle(cx, cy, r);
+                return CustomShapes.createCircle(cx, cy, r);
             }
         }, POLYGONS("Polygons", true, true, 1.0, 1.0) {
             @Override
             Shape createShape(double cx, double cy, double r, int n, double tuning) {
-                return Shapes.createCircumscribedPolygon(n, cx, cy, r, tuning);
+                return CustomShapes.createCircumscribedPolygon(n, cx, cy, r, tuning);
             }
         }, STARS("Stars", true, true, 2.0, 2.0) {
             @Override
@@ -87,17 +88,17 @@ public class ConcentricShapes extends ParametrizedFilter {
         }, BATS("Bats", false, false, 2.0, 2.0) {
             @Override
             Shape createShape(double cx, double cy, double r, int n, double tuning) {
-                return Shapes.createBat(cx - r, cy - r, 2 * r, 2 * r);
+                return CustomShapes.createBat(cx - r, cy - r, 2 * r, 2 * r);
             }
         }, HEARTS("Hearts", false, false, 1.0, 1.5) {
             @Override
             Shape createShape(double cx, double cy, double r, int n, double tuning) {
-                return Shapes.createHeart(cx - r, cy - r, 2 * r, 2 * r);
+                return CustomShapes.createHeart(cx - r, cy - r, 2 * r, 2 * r);
             }
         }, FLOWERS("Flowers", true, true, 1.0, 1.0) {
             @Override
             Shape createShape(double cx, double cy, double r, int n, double tuning) {
-                return Shapes.createFlower(n, cx, cy, r, tuning);
+                return CustomShapes.createFlower(n, cx, cy, r, tuning);
             }
         };
 

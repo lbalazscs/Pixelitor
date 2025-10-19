@@ -63,7 +63,6 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.awt.image.BufferedImage.TRANSLUCENT;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
@@ -1397,21 +1396,6 @@ public class ImageUtils {
             unpremultiply(dest);
         }
         return dest;
-    }
-
-    public static BufferedImage applyTransform(BufferedImage src, AffineTransform at, int targetWidth, int targetHeight) {
-        assert targetWidth > 0 && targetHeight > 0 : "target = " + targetWidth + "x" + targetHeight;
-        BufferedImage newImage = new BufferedImage(targetWidth, targetHeight, TYPE_INT_ARGB);
-        Graphics2D g = newImage.createGraphics();
-        g.setTransform(at);
-        if (targetWidth > src.getWidth() || targetHeight > src.getHeight()) {
-            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-        } else {
-            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
-        }
-        g.drawImage(src, 0, 0, null);
-        g.dispose();
-        return newImage;
     }
 
     /**

@@ -18,7 +18,7 @@
 package pixelitor.tools.selection;
 
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
+import pixelitor.Invariants;
 import pixelitor.gui.View;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
@@ -82,8 +82,8 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
             }
         }
 
-        assert ConsistencyChecks.selectionShapeIsNotEmpty(comp) : "selection is empty";
-        assert ConsistencyChecks.selectionIsInsideCanvas(comp) : "selection is outside";
+        assert Invariants.selectionShapeIsNotEmpty(comp.getSelection()) : "selection is empty";
+        assert Invariants.selectionIsInsideCanvas(comp) : "selection is outside";
     }
 
     @Override
@@ -110,4 +110,3 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
         return ToolIcons::paintPolygonalSelectionIcon;
     }
 }
-

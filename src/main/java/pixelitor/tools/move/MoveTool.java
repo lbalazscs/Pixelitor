@@ -399,7 +399,6 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
         // create a snapshot of the UI state before finalizing, for undo support
         TransformUISnapshot snapshot = new TransformUISnapshot(
             transformBox.createMemento(),
-            transformBox.getOrigImRect(),
             activeMode
         );
 
@@ -431,7 +430,6 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
         // create a snapshot of the UI state before canceling, for undo support
         TransformUISnapshot snapshot = new TransformUISnapshot(
             transformBox.createMemento(),
-            transformBox.getOrigImRect(),
             activeMode
         );
 
@@ -492,8 +490,8 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
         transformTarget = target;
         transformTarget.prepareForTransform();
 
-        // create the box using the original image-space rectangle from the snapshot
-        transformBox = new TransformBox(snapshot.origImRect(), view, transformTarget);
+        // create the box using the original image-space rectangle from the memento in the snapshot
+        transformBox = new TransformBox(snapshot.memento().getOrigImRect(), view, transformTarget);
         transformBox.setUseLegacyHistory(false);
         initialTransformMemento = transformBox.createMemento();
 

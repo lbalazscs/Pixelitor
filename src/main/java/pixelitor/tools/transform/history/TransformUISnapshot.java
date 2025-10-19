@@ -20,21 +20,17 @@ package pixelitor.tools.transform.history;
 import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.transform.TransformBox;
 
-import java.awt.geom.Rectangle2D;
-
 /**
  * A snapshot of the UI state of a free-transform session.
  * This is stored in a history edit to allow the interactive TransformBox
  * to be restored when an action is undone.
  *
- * @param memento    The state of the TransformBox handles, angle, etc.
- * @param origImRect The initial image-space bounds of the transformation, which serves
- *                   as the frame of reference for the transform calculation.
+ * @param memento    The state of the TransformBox, including its original bounds,
+ *                   handle positions, and angle.
  * @param moveMode   The MoveMode that was active during the transformation.
  */
 public record TransformUISnapshot(
     TransformBox.Memento memento,
-    Rectangle2D origImRect,
     MoveMode moveMode
 ) {
 }

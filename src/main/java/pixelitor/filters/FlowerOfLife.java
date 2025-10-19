@@ -22,7 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.Shapes;
+import pixelitor.utils.CustomShapes;
 
 import java.awt.Shape;
 import java.awt.geom.Path2D;
@@ -137,9 +137,9 @@ public class FlowerOfLife extends CurveFilter {
 
         Shape toShape(boolean manyPoints) {
             if (manyPoints) {
-                return Shapes.createCircle(cx, cy, r, 24);
+                return CustomShapes.createCircle(cx, cy, r, 24);
             } else {
-                return Shapes.createCircle(cx, cy, r);
+                return CustomShapes.createCircle(cx, cy, r);
             }
         }
 

@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.filters.jhlabsproxies.JHWeave;
+
 import javax.swing.*;
 import java.io.Serial;
 import java.util.ArrayList;
@@ -167,6 +169,14 @@ public class GridParam extends AbstractFilterParam {
                 paramGUI.updateGUI();
             }
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            // recovery for legacy (4.3.0) Weave saved values
+            for (Preset preset : JHWeave.WEAVE_PRESETS) {
+                if (preset.name().equals(savedValue)) {
+                    internalSetData(preset.data(), true);
+                    paramGUI.updateGUI();
+                    return;
+                }
+            }
             throw new IllegalArgumentException("Could not parse: \"" + savedValue + "\"", e);
         }
     }

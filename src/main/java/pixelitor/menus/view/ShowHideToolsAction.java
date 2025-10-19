@@ -16,7 +16,6 @@
  */
 package pixelitor.menus.view;
 
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.WorkSpace;
 
 import javax.swing.*;
@@ -30,12 +29,7 @@ public class ShowHideToolsAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getCurrentVisibility() {
-        return PixelitorWindow.get().areToolsShown();
-    }
-
-    @Override
-    public boolean getStartupVisibility() {
+    public boolean isVisible() {
         return workSpace.areToolsVisible();
     }
 

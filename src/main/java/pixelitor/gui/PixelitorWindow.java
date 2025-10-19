@@ -92,6 +92,7 @@ public class PixelitorWindow extends JFrame {
             setupFirstUnMaximization();
         }
         configureWindowEvents();
+        workSpace.setFrameInitialized(true);
         setVisible(true);
     }
 
@@ -404,4 +405,3 @@ public class PixelitorWindow extends JFrame {
         return workSpace;
     }
 }
-

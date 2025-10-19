@@ -17,11 +17,8 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.StatusBar;
 import pixelitor.gui.WorkSpace;
-import pixelitor.layers.LayersContainer;
 
 import javax.swing.*;
 
@@ -43,59 +40,50 @@ public class ShowHideAllAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getStartupVisibility() {
-        return !allHidden;
-    }
-
-    @Override
-    public boolean getCurrentVisibility() {
+    public boolean isVisible() {
         return !allHidden;
     }
 
     @Override
     public void setVisibility(boolean show) {
         var pw = PixelitorWindow.get();
-        boolean histogramsAreShown = HistogramsPanel.isShown();
-        boolean layersAreShown = LayersContainer.areLayersShown();
-        boolean statusBarIsShown = StatusBar.isShown();
-        boolean toolsAreShown = pw.areToolsShown();
 
-        // remember the current visibility, but only when hiding
+        // when hiding, remember the current visibility
         if (!show) {
-            histogramsWereShown = histogramsAreShown;
-            layersWereShown = layersAreShown;
-            statusBarWasShown = statusBarIsShown;
-            toolsWereShown = toolsAreShown;
+            histogramsWereShown = workSpace.areHistogramsVisible();
+            layersWereShown = workSpace.areLayersVisible();
+            statusBarWasShown = workSpace.isStatusBarVisible();
+            toolsWereShown = workSpace.areToolsVisible();
         }
 
-        // If "Hide All" is running (show=false), then nothing should be shown.
-        // If "Restore Workspace" is running (show=true), then show something
-        // either because it was hidden by this action or because it is already shown.
-        boolean showHistograms = show && (histogramsWereShown || histogramsAreShown);
-        boolean showLayers = show && (layersWereShown || layersAreShown);
-        boolean showStatusBar = show && (statusBarWasShown || statusBarIsShown);
-        boolean showTools = show && (toolsWereShown || toolsAreShown);
+        // determine the target visibility for each panel
+        boolean showHistograms = show ? histogramsWereShown : false;
+        boolean showLayers = show ? layersWereShown : false;
+        boolean showStatusBar = show ? statusBarWasShown : false;
+        boolean showTools = show ? toolsWereShown : false;
 
-        if (histogramsAreShown != showHistograms) {
-            workSpace.getHistogramsAction().updateText(show);
-            pw.setHistogramsVisible(showHistograms, false);
+        // apply changes only where needed
+        if (workSpace.areHistogramsVisible() != showHistograms) {
+            workSpace.getHistogramsAction().updateText(showHistograms);
+            workSpace.setHistogramsVisible(showHistograms, false);
         }
 
-        if (layersAreShown != showLayers) {
-            workSpace.getLayersAction().updateText(show);
-            pw.setLayersVisible(showLayers, false);
+        if (workSpace.areLayersVisible() != showLayers) {
+            workSpace.getLayersAction().updateText(showLayers);
+            workSpace.setLayersVisible(showLayers, false);
         }
 
-        if (statusBarIsShown != showStatusBar) {
-            workSpace.getStatusBarAction().updateText(show);
-            pw.setStatusBarVisible(showStatusBar, false);
+        if (workSpace.isStatusBarVisible() != showStatusBar) {
+            workSpace.getStatusBarAction().updateText(showStatusBar);
+            workSpace.setStatusBarVisible(showStatusBar, false);
         }
 
-        if (toolsAreShown != showTools) {
-            workSpace.getToolsAction().updateText(show);
-            pw.setToolsVisible(showTools, false);
+        if (workSpace.areToolsVisible() != showTools) {
+            workSpace.getToolsAction().updateText(showTools);
+            workSpace.setToolsVisible(showTools, false);
         }
 
+        // revalidate only once at the end
         pw.getContentPane().revalidate();
 
         allHidden = !show;

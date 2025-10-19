@@ -316,9 +316,7 @@ public class Crop implements CompAction {
      * Creates an AffineTransform that describes how
      * image space coordinates change after a crop.
      */
-    public static AffineTransform createCropTransform(Rectangle2D imCropRect) {
-        double tx = -imCropRect.getX();
-        double ty = -imCropRect.getY();
-        return AffineTransform.getTranslateInstance(tx, ty);
+    public static AffineTransform createCropTransform(Rectangle cropRect) {
+        return AffineTransform.getTranslateInstance(-cropRect.x, -cropRect.y);
     }
 }

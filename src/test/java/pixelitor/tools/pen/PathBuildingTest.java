@@ -188,17 +188,19 @@ class PathBuildingTest {
         // drag the "out" handle in the opposite direction of the desired "in" control
         drag(p1x + 25, p1y + 25, DRAGGING_LAST_CONTROL);
         drag(p1x + 50, p1y + 50, DRAGGING_LAST_CONTROL);
-        assertThat(firstAnchor.ctrlOut).isAt(p1x + 50, p1y + 50);
-        assertThat(firstAnchor.ctrlIn).isAt(p1x - 50, p1y - 50);
+        assertThat(firstAnchor)
+            .hasCtrlOutAt(p1x + 50, p1y + 50)
+            .hasCtrlInAt(p1x - 50, p1y - 50);
 
         // alt-drag the "out" handle to its place
         altDrag(p1x + 50, p1y, DRAGGING_LAST_CONTROL);
         assertThat(firstAnchor).typeIs(CUSP);
         altDrag(p1x + 50, p1y - 50, DRAGGING_LAST_CONTROL);
         release(p1x + 50, p1y - 50, MOVING_TO_NEXT_ANCHOR);
-        assertThat(firstAnchor.ctrlOut).isAt(p1x + 50, p1y - 50);
-        // since alt breaks the handles, the "in" handle is not supposed to move
-        assertThat(firstAnchor.ctrlIn).isAt(p1x - 50, p1y - 50);
+        assertThat(firstAnchor)
+            .hasCtrlOutAt(p1x + 50, p1y - 50)
+            // since alt breaks the handles, the "in" handle is not supposed to move
+            .hasCtrlInAt(p1x - 50, p1y - 50);
 
         // move the mouse to the second anchor point
         int p2x = 100;
@@ -215,17 +217,19 @@ class PathBuildingTest {
         // drag in the opposite direction of the desired "in" control
         drag(p2x - 25, p2y + 25, DRAGGING_LAST_CONTROL);
         drag(p2x - 50, p2y + 50, DRAGGING_LAST_CONTROL);
-        assertThat(secondAnchor.ctrlOut).isAt(p2x - 50, p2y + 50);
-        assertThat(secondAnchor.ctrlIn).isAt(p2x + 50, p2y - 50);
+        assertThat(secondAnchor)
+            .hasCtrlOutAt(p2x - 50, p2y + 50)
+            .hasCtrlInAt(p2x + 50, p2y - 50);
 
         // alt-drag the "out" handle to its place
         altDrag(p2x - 50, p2y - 25, DRAGGING_LAST_CONTROL);
         assertThat(secondAnchor).typeIs(CUSP);
         altDrag(p2x - 50, p2y - 50, DRAGGING_LAST_CONTROL);
         release(p2x - 50, p2y - 50, MOVING_TO_NEXT_ANCHOR);
-        assertThat(secondAnchor.ctrlOut).isAt(p2x - 50, p2y - 50);
-        // since alt breaks the handles, the "in" handle is not supposed to move
-        assertThat(secondAnchor.ctrlIn).isAt(p2x + 50, p2y - 50);
+        assertThat(secondAnchor)
+            .hasCtrlOutAt(p2x - 50, p2y - 50)
+            // since alt breaks the handles, the "in" handle is not supposed to move
+            .hasCtrlInAt(p2x + 50, p2y - 50);
 
         // move back to the first anchor point
         move(p1x, p1y, MOVING_TO_NEXT_ANCHOR);
@@ -267,8 +271,9 @@ class PathBuildingTest {
         drag(120, 100, DRAGGING_LAST_CONTROL);
         drag(140, 100, DRAGGING_LAST_CONTROL);
         release(150, 100, MOVING_TO_NEXT_ANCHOR);
-        assertThat(firstAnchor.ctrlOut).isAt(150, 100);
-        assertThat(firstAnchor.ctrlIn).isAt(50, 100);
+        assertThat(firstAnchor)
+            .hasCtrlOutAt(150, 100)
+            .hasCtrlInAt(50, 100);
 
         // create a second point by clicking
         move(175, 100, MOVING_TO_NEXT_ANCHOR);
@@ -408,8 +413,9 @@ class PathBuildingTest {
             .isNotFinished()
             .numAnchorsIs(1);
         AnchorPoint firstAnchor = subpath.getAnchor(0);
-        assertThat(firstAnchor).isAt(314, 314);
-        assertThat(firstAnchor.ctrlOut).isAt(350, 314); // constrained horizontally
+        assertThat(firstAnchor)
+            .isAt(314, 314)
+            .hasCtrlOutAt(350, 314); // constrained horizontally
 
         // shift-move the moving point and check that it is constrained
         // relative to the first anchor point (and not relative to its
@@ -507,9 +513,10 @@ class PathBuildingTest {
             case ALT -> {
                 assertThat(secondAnchor.ctrlOut).isAt(200, 200).isActive();
                 // check that the in handle was moved up symmetrically...
-                assertThat(secondAnchor.ctrlIn).isAt(200, 0);
                 // ...and that the anchor didn't move at all
-                assertThat(secondAnchor).isAt(200, 100);
+                assertThat(secondAnchor)
+                    .isAt(200, 100)
+                    .hasCtrlInAt(200, 0);
             }
         }
         // move away, the point should deactivate

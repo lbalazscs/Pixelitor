@@ -28,7 +28,6 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
@@ -187,18 +186,13 @@ public abstract class ContentLayer extends Layer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+    public void crop(Rectangle cropRect, boolean deleteCropped, boolean allowGrowing) {
         if (!deleteCropped) {
-            // the new (0,0) point of the canvas
-            // within the old canvas's coordinate system
-            int cropOriginX = (int) cropRect.getX();
-            int cropOriginY = (int) cropRect.getY();
-
             // only adjusts the layer translation (subclasses can
             // do more or something completely different)
             setTranslation(
-                translationX - cropOriginX,
-                translationY - cropOriginY);
+                translationX - cropRect.x,
+                translationY - cropRect.y);
         }
     }
 

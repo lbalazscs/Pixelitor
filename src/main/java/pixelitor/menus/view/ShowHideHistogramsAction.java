@@ -16,7 +16,6 @@
  */
 package pixelitor.menus.view;
 
-import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.WorkSpace;
 
 import javax.swing.*;
@@ -30,12 +29,7 @@ public class ShowHideHistogramsAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getCurrentVisibility() {
-        return HistogramsPanel.isShown();
-    }
-
-    @Override
-    public boolean getStartupVisibility() {
+    public boolean isVisible() {
         return workSpace.areHistogramsVisible();
     }
 

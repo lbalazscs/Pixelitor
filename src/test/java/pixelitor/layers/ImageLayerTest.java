@@ -192,7 +192,7 @@ class ImageLayerTest {
 
     @Test
     void filterWithoutDialogFinished() {
-        assert ConsistencyChecks.imageCoversCanvas(layer);
+        assert Invariants.imageCoversCanvas(layer);
         BufferedImage dest = ImageUtils.copyImage(layer.getImage());
 
         layer.filterWithoutDialogFinished(dest,
@@ -448,7 +448,7 @@ class ImageLayerTest {
         comp.getCanvas().resize(
             (int) expectedNewCanvas.getWidth(),
             (int) expectedNewCanvas.getHeight(), comp.getView(), true);
-        ConsistencyChecks.imageCoversCanvas(layer);
+        Invariants.imageCoversCanvas(layer);
     }
 
     @Test

@@ -17,7 +17,6 @@
 package pixelitor.menus.view;
 
 import pixelitor.gui.WorkSpace;
-import pixelitor.layers.LayersContainer;
 
 import javax.swing.*;
 
@@ -30,12 +29,7 @@ public class ShowHideLayersAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getCurrentVisibility() {
-        return LayersContainer.areLayersShown();
-    }
-
-    @Override
-    public boolean getStartupVisibility() {
+    public boolean isVisible() {
         return workSpace.areLayersVisible();
     }
 

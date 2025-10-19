@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,11 +27,14 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Similar in spirit to {@link PPoint}, this represents
- * a rectangle both in component and image space.
+ * The rectangular equivalent of {@link PPoint}, representing
+ * a rectangular area in both component space and image space.
  */
 public class PRectangle {
+    // the rectangle in component-space, with integer coordinates
     private Rectangle coRect;
+
+    // the rectangle in in image space, with sub-pixel precision
     private Rectangle2D imRect;
 
     private PRectangle(Rectangle coRect, Rectangle2D imRect) {
@@ -40,7 +43,7 @@ public class PRectangle {
     }
 
     /**
-     * Creates a {@link PRectangle} from a component-space input
+     * Creates a {@link PRectangle} from component-space coordinates.
      */
     public static PRectangle fromCo(Rectangle coRect, View view) {
         Rectangle2D imRect = view.componentToImageSpace(coRect);
@@ -48,7 +51,7 @@ public class PRectangle {
     }
 
     /**
-     * Creates a positive {@link PRectangle} from a component-space input
+     * Creates a positive {@link PRectangle} from component-space coordinates.
      */
     public static PRectangle positiveFromCo(Rectangle coRect, View view) {
         coRect = Shapes.toPositiveRect(coRect);
@@ -56,7 +59,7 @@ public class PRectangle {
     }
 
     /**
-     * Creates a {@link PRectangle} from an image-space input
+     * Creates a {@link PRectangle} from image-space coordinates.
      */
     public static PRectangle fromIm(Rectangle2D imRect, View view) {
         Rectangle coRect = view.imageToComponentSpace(imRect);
@@ -64,7 +67,7 @@ public class PRectangle {
     }
 
     /**
-     * Creates a {@link PRectangle} from image-space input
+     * Creates a {@link PRectangle} from image-space coordinates.
      */
     public static PRectangle fromIm(double x, double y, double w, double h, View view) {
         Rectangle2D rect = new Rectangle2D.Double(x, y, w, h);
@@ -72,7 +75,7 @@ public class PRectangle {
     }
 
     /**
-     * Creates a positive {@link PRectangle} from an image-space input
+     * Creates a positive {@link PRectangle} from image-space coordinates.
      */
     public static PRectangle positiveFromIm(Rectangle2D imRect, View view) {
         imRect = Shapes.toPositiveRect(imRect);

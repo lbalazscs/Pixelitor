@@ -26,10 +26,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.io.FileIO;
-import pixelitor.utils.Distortion;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Shapes;
-import pixelitor.utils.Transform;
+import pixelitor.utils.*;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -178,7 +175,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
             List<Point2D> points = Shapes.getAnchorPoints(shape);
             g2.setColor(Color.RED);
             for (Point2D point : points) {
-                g2.fill(Shapes.createCircle(point.getX(), point.getY(), 4));
+                g2.fill(CustomShapes.createCircle(point.getX(), point.getY(), 4));
             }
         }
 

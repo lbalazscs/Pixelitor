@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.ConsistencyChecks;
+import pixelitor.Invariants;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
@@ -103,6 +103,6 @@ public class AddLayerMaskAction extends NamedAction
     public void setEnabled(boolean newValue) {
         super.setEnabled(newValue);
 
-        assert ConsistencyChecks.addMaskActionEnabled();
+        assert Invariants.addMaskActionEnabled();
     }
 }

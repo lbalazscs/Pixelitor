@@ -18,14 +18,19 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
+
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
  * An object that can apply an affine transformation to the output image
@@ -71,20 +76,46 @@ public class ImageTransformer implements ImageSource, Serializable {
         this.targetHeight = targetHeight;
     }
 
+    /**
+     * Chains a new transformation, applying it to the output of the existing transform.
+     *
+     * @param newTransform The new transformation to apply. It is defined in the coordinate
+     *                     space of the output of the current transform.
+     * @param targetWidth  The final width of the image after the new transformation is applied.
+     * @param targetHeight The final height of the image after the new transformation is applied.
+     * @see AffineTransform#preConcatenate(AffineTransform)
+     */
+    public void chainTransform(AffineTransform newTransform, int targetWidth, int targetHeight) {
+        // maintain the correct logical order by preconcatenating
+        transform.preConcatenate(newTransform);
+
+        setTargetSize(targetWidth, targetHeight);
+        invalidateCache();
+    }
+
     @Override
     public BufferedImage getImage() {
         if (cachedImage != null) {
             return cachedImage;
         }
-        cachedImage = ImageUtils.applyTransform(content.getCompositeImage(),
+        cachedImage = applyTransform(content.getCompositeImage(),
             transform, targetWidth, targetHeight);
         return cachedImage;
     }
 
-    public void chainTransform(AffineTransform newTransform, int targetWidth, int targetHeight) {
-        transform.preConcatenate(newTransform);
-        setTargetSize(targetWidth, targetHeight);
-        invalidateCache();
+    private static BufferedImage applyTransform(BufferedImage src, AffineTransform at, int targetWidth, int targetHeight) {
+        assert targetWidth > 0 && targetHeight > 0 : "target = " + targetWidth + "x" + targetHeight;
+        BufferedImage newImage = new BufferedImage(targetWidth, targetHeight, TYPE_INT_ARGB);
+        Graphics2D g = newImage.createGraphics();
+        g.setTransform(at);
+        if (targetWidth > src.getWidth() || targetHeight > src.getHeight()) {
+            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+        } else {
+            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
+        }
+        g.drawImage(src, 0, 0, null);
+        g.dispose();
+        return newImage;
     }
 
     public BufferedImage getCachedImage() {
