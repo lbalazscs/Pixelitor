@@ -42,18 +42,19 @@ import static pixelitor.menus.view.ZoomLevel.HALF_SIZE;
 import static pixelitor.menus.view.ZoomLevel.QUARTER_SIZE;
 
 /**
- * The navigator component that allows the user to pan a zoomed-in image
- * or to zoom to a specific area by ctrl-dragging.
+ * A component that displays a thumbnail of the active composition, and
+ * allows the user to pan a zoomed-in image by dragging the "view box",
+ * or to zoom to a specific area by Ctrl-dragging to create a new view box.
  */
 public class Navigator extends JComponent
     implements MouseListener, MouseMotionListener, ViewActivationListener {
 
     private static final int DEFAULT_SIZE = 300;
     private static final BasicStroke VIEW_BOX_STROKE = new BasicStroke(3);
-    private static final CheckerboardPainter checkerBoardPainter
+    private static final CheckerboardPainter checkerboardPainter
         = ImageUtils.createCheckerboardPainter();
 
-    // The navigated active view.
+    // The currently active View being navigated.
     // Null if all images are closed.
     private View view;
 
@@ -61,11 +62,16 @@ public class Navigator extends JComponent
     private int viewHeight;
     private JScrollPane scrollPane;
 
-    private Point dragStartPoint;
-    private Point origRectLoc; // the view box rectangle location before starting the drag
+    // the view box represents the view's viewport, in the navigator's component space
     private Rectangle viewBoxRect;
     private static Color viewBoxColor = Color.RED;
+
+    // the new area to zoom into, created by Ctrl-dragging
     private Rectangle targetBoxRect;
+
+    private Point dragStartPoint;
+    private Point dragStartBoxLoc; // the location of the view box when the drag started
+
     private boolean dragging = false;
     private boolean areaZooming = false;
 
@@ -80,8 +86,8 @@ public class Navigator extends JComponent
     private static JDialog dialog;
     private JPopupMenu contextMenu;
 
-    // if not null, the scaling factor is calculated based on this
-    // explicitly given zoom level instead of the navigator size
+    // if not null, the scaling is determined by this, rather
+    // than being calculated to fit the navigator's current size
     private ZoomLevel fixedZoom = null;
 
     private static Navigator instance;
@@ -107,7 +113,7 @@ public class Navigator extends JComponent
         ZoomLevel[] levels = {ACTUAL_SIZE, HALF_SIZE, QUARTER_SIZE, EIGHTH_SIZE};
         for (ZoomLevel level : levels) {
             contextMenu.add(new TaskAction("Navigator Zoom: " + level, () ->
-                setNavigatorSizeFromZoom(level)));
+                resizeDialogForZoom(level)));
         }
         contextMenu.addSeparator();
         contextMenu.add(new TaskAction("View Box Color...", () ->
@@ -121,9 +127,11 @@ public class Navigator extends JComponent
         repaint();
     }
 
-    private void setNavigatorSizeFromZoom(ZoomLevel zoom) {
+    // changes the size of the containing dialog to match
+    // the given zoom level for the thumbnail
+    private void resizeDialogForZoom(ZoomLevel zoom) {
         Canvas canvas = view.getCanvas();
-        double scale = zoom.getViewScale();
+        double scale = zoom.getScale();
         preferredWidth = (int) (scale * canvas.getWidth());
         preferredHeight = (int) (scale * canvas.getHeight());
 
@@ -197,10 +205,6 @@ public class Navigator extends JComponent
                                 boolean canvasSizeChanged,
                                 boolean navigatorResized) {
         assert newView || canvasSizeChanged || navigatorResized : "why did you call me?";
-
-        if (newView) {
-            attachToView(sourceView);
-        }
 
         if (newView) {
             attachToView(sourceView);
@@ -283,6 +287,8 @@ public class Navigator extends JComponent
         repaint();
     }
 
+    // calculates the rectangle in the view's coordinate space
+    // that corresponds to the navigator's view box
     private Rectangle getScaledViewRect() {
         double scaleX = (double) viewWidth / thumbWidth;
         double scaleY = (double) viewHeight / thumbHeight;
@@ -295,12 +301,12 @@ public class Navigator extends JComponent
         return new Rectangle(x, y, width, height);
     }
 
-    // scrolls the main composition view based on the view box position and thumb size
+    // scrolls the view to match the current position of the view box
     private void scrollView() {
         view.scrollRectToVisible(getScaledViewRect());
     }
 
-    // zooms and scrolls the main composition view based on the target rect
+    // zooms the main view to the region defined by the target box rectangle
     private void areaZoom() {
         view.zoomToRegion(PRectangle.fromCo(getScaledViewRect(), view));
     }
@@ -315,7 +321,7 @@ public class Navigator extends JComponent
         var origTransform = g2.getTransform();
 
         // draw the thumbnail scaled down
-        checkerBoardPainter.paint(g2, null, thumbWidth, thumbHeight);
+        checkerboardPainter.paint(g2, null, thumbWidth, thumbHeight);
         g2.scale(thumbnailScale, thumbnailScale);
         g2.drawImage(view.getComp().getCompositeImage(), 0, 0, null);
 
@@ -350,7 +356,7 @@ public class Navigator extends JComponent
 
             if (dragging) {
                 dragStartPoint = point;
-                origRectLoc = viewBoxRect.getLocation();
+                dragStartBoxLoc = viewBoxRect.getLocation();
             }
         }
     }
@@ -364,22 +370,13 @@ public class Navigator extends JComponent
             int dx = mouseNow.x - dragStartPoint.x;
             int dy = mouseNow.y - dragStartPoint.y;
 
-            int newBoxX = origRectLoc.x + dx;
-            int newBoxY = origRectLoc.y + dy;
+            int newBoxX = dragStartBoxLoc.x + dx;
+            int newBoxY = dragStartBoxLoc.y + dy;
 
             if (areaZooming) {
-                if (mouseNow.x < 0) {
-                    mouseNow.x = 0;
-                }
-                if (mouseNow.y < 0) {
-                    mouseNow.y = 0;
-                }
-                if (mouseNow.x > thumbWidth) {
-                    mouseNow.x = thumbWidth;
-                }
-                if (mouseNow.y > thumbHeight) {
-                    mouseNow.y = thumbHeight;
-                }
+                // ensure the zoom area remains within the image
+                mouseNow.x = Math.clamp(mouseNow.x, 0, thumbWidth);
+                mouseNow.y = Math.clamp(mouseNow.y, 0, thumbHeight);
 
                 int x = Math.min(dragStartPoint.x, mouseNow.x);
                 int y = Math.min(dragStartPoint.y, mouseNow.y);
@@ -388,7 +385,7 @@ public class Navigator extends JComponent
 
                 updateTargetBox(x, y, w, h);
             } else {
-                // make sure that the view box doesn't leave the thumb
+                // prevent the view box from being dragged outside the thumbnail
                 if (newBoxX < 0) {
                     newBoxX = 0;
                 }
@@ -446,7 +443,7 @@ public class Navigator extends JComponent
         int canvasHeight = canvas.getHeight();
 
         if (fixedZoom != null) {
-            thumbnailScale = fixedZoom.getViewScale();
+            thumbnailScale = fixedZoom.getScale();
 
             fixedZoom = null; // was set only temporarily
         } else {

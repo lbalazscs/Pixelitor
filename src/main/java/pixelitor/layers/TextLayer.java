@@ -444,7 +444,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public void createSelectionFromText() {
         Shape shape = getTextShape();
 
-        SelectionChangeResult result = comp.changeSelection(shape);
+        SelectionChangeResult result = comp.updateSelectionInteractively(shape);
         if (result.isSuccess()) {
             History.add(result.getEdit());
         } else {

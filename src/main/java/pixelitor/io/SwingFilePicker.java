@@ -41,6 +41,9 @@ import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 
+/**
+ * An implementation of {@link FilePicker} that uses Swing's JFileChooser.
+ */
 public class SwingFilePicker implements FilePicker {
     private JFileChooser openChooser;
     private SaveFileChooser saveChooser;
@@ -57,11 +60,11 @@ public class SwingFilePicker implements FilePicker {
     }
 
     @Override
-    public File getSupportedOpenFile() {
+    public File selectSupportedOpenFile() {
         initOpenChooser();
-        GlobalEvents.dialogOpened("Open");
+        GlobalEvents.modalDialogOpened();
         int userChoice = openChooser.showOpenDialog(PixelitorWindow.get());
-        GlobalEvents.dialogClosed("Open");
+        GlobalEvents.modalDialogClosed();
 
         if (userChoice == JFileChooser.APPROVE_OPTION) {
             File selectedFile = openChooser.getSelectedFile();
@@ -79,11 +82,11 @@ public class SwingFilePicker implements FilePicker {
         var selectableFormats = config.formats();
         if (selectableFormats == ANY) {
             saveChooser.setAcceptAllFileFilterUsed(true);
-            setSingleSaveExtension(saveChooser.getAcceptAllFileFilter()); // remove all custom file filters
+            useSingleSaveFilter(saveChooser.getAcceptAllFileFilter()); // remove all custom file filters
         } else {
             FileFilter fileFilter = config.defaultFileFilter();
             if (selectableFormats == SINGLE) {
-                setSingleSaveExtension(fileFilter);
+                useSingleSaveFilter(fileFilter);
             } else {
                 // If the file is saved normally, don't suggest an extension,
                 // because the chooser should add it based on the selected file filter.
@@ -98,15 +101,15 @@ public class SwingFilePicker implements FilePicker {
 
         int userChoice;
         try {
-            GlobalEvents.dialogOpened("Save");
+            GlobalEvents.modalDialogOpened();
             userChoice = saveChooser.showSaveDialog(PixelitorWindow.get());
-            GlobalEvents.dialogClosed("Save");
+            GlobalEvents.modalDialogClosed();
         } catch (Exception e) {
             Messages.showException(e);
             return null;
         } finally {
             if (selectableFormats == ANY || selectableFormats == SINGLE) {
-                setDefaultSaveExtensions();
+                addDefaultSaveFileFilters();
             }
         }
 
@@ -150,7 +153,7 @@ public class SwingFilePicker implements FilePicker {
             }
         };
         openChooser.setName("open");
-        setDefaultOpenExtensions();
+        addDefaultOpenFileFilters();
 
         var accessoryPanel = new JPanel(new BorderLayout());
         var progressPanel = new ProgressPanel();
@@ -169,41 +172,33 @@ public class SwingFilePicker implements FilePicker {
             saveChooser = new SaveFileChooser(Dirs.getLastSave());
             saveChooser.setName("save");
             saveChooser.setDialogTitle(i18n("save_as"));
-            setDefaultSaveExtensions();
+            addDefaultSaveFileFilters();
         }
     }
 
-    private void setDefaultOpenExtensions() {
+    private void addDefaultOpenFileFilters() {
         for (FileFilter filter : OPEN_FILTERS) {
             openChooser.addChoosableFileFilter(filter);
         }
     }
 
-    private void setDefaultSaveExtensions() {
+    private void addDefaultSaveFileFilters() {
         for (FileFilter filter : SAVE_FILTERS) {
             saveChooser.addChoosableFileFilter(filter);
         }
     }
 
-    private void setSingleSaveExtension(FileFilter filter) {
-        configureSingleFileFilter(saveChooser, filter);
+    private void useSingleSaveFilter(FileFilter filter) {
+        useSingleFileFilter(saveChooser, filter, SAVE_FILTERS);
     }
 
-    private void setSingleOpenExtension(FileFilter filter) {
-        configureSingleFileFilter(openChooser, filter);
+    private void useSingleOpenFilter(FileFilter filter) {
+        useSingleFileFilter(openChooser, filter, OPEN_FILTERS);
     }
 
-    private void configureSingleFileFilter(JFileChooser chooser,
-                                           FileFilter chosenFilter) {
-        FileFilter[] allFilters;
-        if (chooser == openChooser) {
-            allFilters = OPEN_FILTERS;
-        } else if (chooser == saveChooser) {
-            allFilters = SAVE_FILTERS;
-        } else {
-            throw new IllegalArgumentException("chooser = " + chooser.getClass().getName());
-        }
-
+    private static void useSingleFileFilter(JFileChooser chooser,
+                                            FileFilter chosenFilter,
+                                            FileFilter[] allFilters) {
         for (FileFilter filter : allFilters) {
             if (filter != chosenFilter) {
                 chooser.removeChoosableFileFilter(filter);
@@ -214,22 +209,17 @@ public class SwingFilePicker implements FilePicker {
     }
 
     @Override
-    public String getSelectedSaveExtension(File selectedFile) {
-        return saveChooser.getExtension();
-    }
-
-    @Override
-    public File getAnyOpenFile() {
+    public File selectAnyOpenFile() {
         try {
             initOpenChooser();
             openChooser.setAcceptAllFileFilterUsed(true);
-            setSingleOpenExtension(openChooser.getAcceptAllFileFilter()); // remove all custom file filters
-            return getSupportedOpenFile();
+            useSingleOpenFilter(openChooser.getAcceptAllFileFilter()); // remove all custom file filters
+            return selectSupportedOpenFile();
         } catch (Exception e) {
             Messages.showException(e);
             return null;
         } finally {
-            setDefaultOpenExtensions();
+            addDefaultOpenFileFilters();
         }
     }
 }

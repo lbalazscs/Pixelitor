@@ -52,9 +52,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static pixelitor.Views.thumbSize;
-import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
  * A layer that embeds a {@link Composition},
@@ -267,7 +266,7 @@ public class SmartObject extends CompositeLayer {
 
         File newFile = null;
         if (search) {
-            newFile = FileChoosers.getSupportedOpenFile();
+            newFile = FileChoosers.selectSupportedOpenFile();
         }
         if (newFile != null) { // user selected a new file
             linkedContentFile = newFile;
@@ -1149,7 +1148,7 @@ public class SmartObject extends CompositeLayer {
     @Override
     public BufferedImage createIconThumbnail() {
         // TODO: The thumbnail isn't created from the canvas-visible region of the image.
-        return createThumbnail(getVisibleImage(), thumbSize, thumbCheckerBoardPainter);
+        return createThumbnail(getVisibleImage(), thumbCheckerBoardPainter);
     }
 
     @Override

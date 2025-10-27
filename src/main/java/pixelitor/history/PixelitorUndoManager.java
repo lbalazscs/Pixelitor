@@ -293,14 +293,6 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
         return node;
     }
 
-    public void dump() {
-        int numEdits = getSize();
-        for (int i = 0; i < numEdits; i++) {
-            PixelitorEdit edit = getElementAt(i);
-            System.out.println(edit);
-        }
-    }
-
     public List<String> getEditNames() {
         return edits.stream()
             .map(UndoableEdit::getPresentationName)

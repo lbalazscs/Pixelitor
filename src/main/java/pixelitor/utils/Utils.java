@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import com.bric.util.JVM;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 
@@ -30,7 +29,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.NumberFormat;
@@ -337,24 +335,6 @@ public final class Utils {
      */
     public static int toPercentage(float float01) {
         return (int) (float01 * 100);
-    }
-
-    /**
-     * Checks if an executable file with the given name exists and
-     * can be executed in the given directory.
-     */
-    public static File findExecutable(String dirPath, String executableName) {
-        if (dirPath.isEmpty()) {
-            return null;
-        }
-        if (JVM.isWindows) {
-            executableName += ".exe";
-        }
-        File executableFile = new File(dirPath, executableName);
-        if (executableFile.exists() && executableFile.canExecute()) {
-            return executableFile;
-        }
-        return null;
     }
 
     public static String encodeNewlines(String input) {

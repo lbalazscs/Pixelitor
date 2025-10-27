@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ public record FileChooserConfig(String suggestedFileName,
         if (suggestedFileName == null) {
             throw new IllegalArgumentException();
         }
-        if (!formats.allows(defaultFileFilter)) {
+        if (!formats.isValidFilter(defaultFileFilter)) {
             throw new IllegalArgumentException();
         }
     }
@@ -59,7 +59,7 @@ public record FileChooserConfig(String suggestedFileName,
          */
         SINGLE {
             @Override
-            public boolean allows(FileFilter defaultFileFilter) {
+            public boolean isValidFilter(FileFilter defaultFileFilter) {
                 return defaultFileFilter != null;
             }
         },
@@ -68,7 +68,7 @@ public record FileChooserConfig(String suggestedFileName,
          */
         SUPPORTED {
             @Override
-            public boolean allows(FileFilter defaultFileFilter) {
+            public boolean isValidFilter(FileFilter defaultFileFilter) {
                 return true;
             }
         },
@@ -77,12 +77,12 @@ public record FileChooserConfig(String suggestedFileName,
          */
         ANY {
             @Override
-            public boolean allows(FileFilter defaultFileFilter) {
-                // No default file filter should be set for this mode
+            public boolean isValidFilter(FileFilter defaultFileFilter) {
+                // no default file filter should be set for this mode
                 return defaultFileFilter == null;
             }
         };
 
-        public abstract boolean allows(FileFilter defaultFileFilter);
+        public abstract boolean isValidFilter(FileFilter defaultFileFilter);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,8 @@ package pixelitor.gui;
 import javax.swing.*;
 
 /**
- * A component that contains a {@link View} inside a JScrollPane.
+ * A container that displays a {@link View} inside a JScrollPane.
  * It can be either a JInternalFrame or a tab in a JTabbedPane.
- * Some methods make sense only for internal frames, not for tabs.
  */
 public interface ViewContainer {
     JScrollPane getScrollPane();
@@ -32,9 +31,4 @@ public interface ViewContainer {
     void select();
 
     void updateTitle(View view);
-
-    /**
-     * Important only for the cropping with internal frames.
-     */
-    void ensurePositiveLocation();
 }

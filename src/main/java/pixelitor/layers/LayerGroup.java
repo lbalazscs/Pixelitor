@@ -27,6 +27,7 @@ import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Thumbnails;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
@@ -43,8 +44,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static pixelitor.Views.thumbSize;
-import static pixelitor.utils.ImageUtils.createThumbnail;
+import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
  * A layer group that organizes multiple layers as a single entity in the layer stack.
@@ -458,9 +458,9 @@ public class LayerGroup extends CompositeLayer {
         }
 
         if (isPassThrough()) {
-            thumb = ImageUtils.createCircleThumb(new Color(0, 138, 0));
+            thumb = Thumbnails.createCircleThumb(new Color(0, 138, 0));
         } else if (cachedImage != null) {
-            thumb = createThumbnail(cachedImage, thumbSize, thumbCheckerBoardPainter);
+            thumb = createThumbnail(cachedImage, thumbCheckerBoardPainter);
         } else {
             // isolated groups should always have a cached image
             throw new IllegalStateException();

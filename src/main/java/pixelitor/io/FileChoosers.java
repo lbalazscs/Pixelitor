@@ -25,7 +25,6 @@ import pixelitor.utils.Messages;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
-import java.util.Optional;
 
 public class FileChoosers {
     private static boolean useNativeDialogs;
@@ -76,16 +75,16 @@ public class FileChoosers {
     private FileChoosers() {
     }
 
-    public static File getAnyOpenFile() {
-        return picker.getAnyOpenFile();
+    public static File selectAnyOpenFile() {
+        return picker.selectAnyOpenFile();
     }
 
-    public static File getSupportedOpenFile() {
-        return picker.getSupportedOpenFile();
+    public static File selectSupportedOpenFile() {
+        return picker.selectSupportedOpenFile();
     }
 
     public static void openAsync() {
-        File selectedFile = picker.getSupportedOpenFile();
+        File selectedFile = picker.selectSupportedOpenFile();
         if (selectedFile != null) {
             String fileName = selectedFile.getName();
             if (FileUtils.hasSupportedInputExt(fileName)) {
@@ -99,11 +98,11 @@ public class FileChoosers {
     private static void showUnsupportedExtensionError(String fileName) {
         String msg = "<html>Could not open <b>" + fileName + "</b>, because ";
 
-        Optional<String> extension = FileUtils.findExtension(fileName);
-        if (extension.isEmpty()) {
+        String extension = FileUtils.getExtension(fileName);
+        if (extension == null) {
             msg += "it has no extension.";
         } else {
-            msg += "files of type <b>" + extension.get() + "</b> are not supported.";
+            msg += "files of type <b>" + extension + "</b> are not supported.";
         }
         Messages.showError("Error", msg);
     }
@@ -114,19 +113,22 @@ public class FileChoosers {
     }
 
     /**
-     * Returns true if the file was saved, false if the user cancels the saving
+     * Returns true if the given {@link Composition} was saved, false if the user cancels the saving.
      */
-    public static boolean saveWithChooser(Composition comp) {
+    public static boolean promptAndSaveComp(Composition comp) {
         File file = picker.showSaveDialog(FileChooserConfig.forSavingComp(comp));
         if (file == null) {
             return false;
         }
 
-        String extension = picker.getSelectedSaveExtension(file);
+        // defensive re-validating, as the file picker is responsible for ensuring a valid extension
+        String extension = FileUtils.getExtension(file.getName());
         if (extension == null) {
-            extension = FileFormat.getLastSaved().toString();
-            file = new File(file.getAbsolutePath() + "." + extension);
+            Messages.showError("No Extension",
+                "<html> The file <b>" + file.getName() + "</b> has no extension.");
+            return false;
         }
+
         if (!FileUtils.isSupportedOutputExt(extension)) {
             Messages.showError("Unsupported Extension",
                 "<html> The extension <b>" + extension + "</b> isn't supported.");
@@ -148,13 +150,16 @@ public class FileChoosers {
     }
 
     public static void setUseNativeDialogs(boolean useNativeDialogs) {
-        if (FileChoosers.useNativeDialogs != useNativeDialogs || picker == null) {
-            FileChoosers.useNativeDialogs = useNativeDialogs;
-            if (useNativeDialogs) {
-                picker = new AWTFilePicker();
-            } else {
-                picker = new SwingFilePicker();
-            }
+        // re-initialize only if the setting changes, or if it's the first time
+        if (FileChoosers.useNativeDialogs == useNativeDialogs && picker != null) {
+            return;
+        }
+
+        FileChoosers.useNativeDialogs = useNativeDialogs;
+        if (useNativeDialogs) {
+            picker = new AWTFilePicker();
+        } else {
+            picker = new SwingFilePicker();
         }
     }
 }

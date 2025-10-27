@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.Views;
 import pixelitor.gui.utils.Themes;
 
 import javax.swing.*;
@@ -35,7 +36,7 @@ import static javax.swing.BorderFactory.createEtchedBorder;
  */
 class CloseTabButton extends JButton {
     // shared mouse listener to handle hover effects for all instances
-    private static final MouseListener hoverMouseListener = new MouseAdapter() {
+    private static final MouseListener HOVER_MOUSE_LISTENER = new MouseAdapter() {
         @Override
         public void mouseEntered(MouseEvent e) {
             ((CloseTabButton) e.getComponent()).setBorderPainted(true);
@@ -58,9 +59,9 @@ class CloseTabButton extends JButton {
         setFocusable(false);
         setBorder(createEtchedBorder());
         setBorderPainted(false);
-        addMouseListener(hoverMouseListener);
+        addMouseListener(HOVER_MOUSE_LISTENER);
         setRolloverEnabled(true);
-        addActionListener(e -> TabsUI.warnAndCloseTab(tab));
+        addActionListener(e -> Views.warnAndClose(tab.getView()));
     }
 
     @Override

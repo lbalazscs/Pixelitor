@@ -23,6 +23,7 @@ import pixelitor.utils.Distortion;
 import pixelitor.utils.Shapes;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.List;
@@ -31,10 +32,16 @@ import java.util.List;
  * Associates a {@link Shape} with a {@link Color}.
  */
 public record ShapeWithColor(Shape shape, Color color) {
+    public void fill(Graphics2D g) {
+        g.setColor(color());
+        g.fill(shape());
+    }
+
     public ShapeWithColor transform(AffineTransform at) {
         return new ShapeWithColor(at.createTransformedShape(shape), color);
     }
 
+    // creates SVG content with no stroke
     public static String createSvgContent(List<ShapeWithColor> shapes, Canvas canvas, Color bgColor) {
         return createSvgContent(shapes, canvas, bgColor, 0, null);
     }
@@ -48,32 +55,32 @@ public record ShapeWithColor(Shape shape, Color color) {
             content.append(String.format("<rect width=\"100%%\" height=\"100%%\" fill=\"#%s\"/>\n",
                 Colors.toHTMLHex(bgColor, true)));
         }
-        appendSvgPaths(shapes, content, strokeWidth, strokeColor);
+        appendSvgPaths(content, shapes, strokeWidth, strokeColor);
         content.append("</svg>");
         return content.toString();
     }
 
-    private static void appendSvgPaths(List<ShapeWithColor> shapes, StringBuilder sb,
+    private static void appendSvgPaths(StringBuilder sb, List<ShapeWithColor> shapes,
                                        int strokeWidth, Color strokeColor) {
         for (ShapeWithColor shape : shapes) {
             String pathData = Shapes.toSvgPath(shape.shape());
-            String svgFillRule = Shapes.getSvgFillRule(shape.shape());
-            String colorHex = Colors.toHTMLHex(shape.color(), false);
+            sb.append("<path d=\"").append(pathData).append("\" ");
 
-            StringBuilder pathAttrs = new StringBuilder();
-            pathAttrs.append(String.format("d=\"%s\" ", pathData));
-            pathAttrs.append(String.format("fill=\"#%s\" ", colorHex));
-            pathAttrs.append(String.format("fill-rule=\"%s\"", svgFillRule));
+            String colorHex = Colors.toHTMLHex(shape.color(), false);
+            sb.append("fill=\"#").append(colorHex).append("\" ");
+
+            String svgFillRule = Shapes.getSvgFillRule(shape.shape());
+            sb.append("fill-rule=\"").append(svgFillRule).append("\"");
 
             if (strokeWidth > 0 && strokeColor != null) {
-                pathAttrs.append(String.format(" stroke=\"#%s\"",
-                    Colors.toHTMLHex(strokeColor, false)));
-                pathAttrs.append(String.format(" stroke-width=\"%d\"", strokeWidth));
-                pathAttrs.append(" stroke-linecap=\"butt\"");
-                pathAttrs.append(" stroke-linejoin=\"bevel\"");
+                String strokeColorHex = Colors.toHTMLHex(strokeColor, false);
+                sb.append(" stroke=\"#").append(strokeColorHex).append("\"");
+                sb.append(" stroke-width=\"").append(strokeWidth).append("\"");
+                sb.append(" stroke-linecap=\"butt\"");
+                sb.append(" stroke-linejoin=\"bevel\"");
             }
 
-            sb.append(String.format("<path %s/>\n", pathAttrs));
+            sb.append("/>\n");
         }
     }
 

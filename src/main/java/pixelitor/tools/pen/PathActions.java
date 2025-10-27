@@ -46,7 +46,7 @@ public class PathActions {
 
         Shape shape = oldPath.toImageSpaceShape();
 
-        SelectionChangeResult result = comp.changeSelection(shape);
+        SelectionChangeResult result = comp.updateSelectionInteractively(shape);
         if (!result.isSuccess()) {
             result.showInfoDialog("path");
             return;

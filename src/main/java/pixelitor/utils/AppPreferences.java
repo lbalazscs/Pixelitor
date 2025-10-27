@@ -341,7 +341,7 @@ public final class AppPreferences {
     }
 
     private static void saveThumbSize() {
-        mainPrefs.putInt(THUMB_SIZE_KEY, LayerGUILayout.getThumbSize());
+        mainPrefs.putInt(THUMB_SIZE_KEY, Thumbnails.getMaxSize());
     }
 
     public static synchronized GuideStyle getGuideStyle() {

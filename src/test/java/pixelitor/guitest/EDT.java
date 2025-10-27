@@ -19,7 +19,6 @@ package pixelitor.guitest;
 
 import org.assertj.swing.edt.GuiActionRunnable;
 import org.assertj.swing.edt.GuiActionRunner;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.FgBgColors;
@@ -29,6 +28,7 @@ import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.selection.ShapeCombinator;
@@ -45,21 +45,28 @@ import java.awt.Point;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
  * Utility methods to execute queries, actions and assertions
- * on the Event Dispatch Thread.
+ * on the Event Dispatch Thread (EDT).
  */
 public class EDT {
     private EDT() {
     }
 
+    /**
+     * Executes the given callable on the EDT and returns its result.
+     */
     public static <T> T call(Callable<T> callable) {
         return GuiActionRunner.execute(callable);
     }
 
+    /**
+     * Executes the given runnable on the EDT.
+     */
     public static void run(GuiActionRunnable runnable) {
         GuiActionRunner.execute(runnable);
     }
@@ -68,27 +75,41 @@ public class EDT {
         return call(Views::getActive);
     }
 
-    public static Composition getComp() {
+    public static Composition getActiveComp() {
         return call(Views::getActiveComp);
     }
 
-    public static Canvas getCanvas() {
-        return call(() -> Views.getActiveComp().getCanvas());
+    private static <U, T> T query(Supplier<U> supplier, Function<U, ? extends T> fun) {
+        return call(() -> fun.apply(supplier.get()));
     }
 
     /**
-     * Returns the given property of the active composition
+     * Returns the given property of the active composition.
      */
-    public static <T> T active(Function<Composition, ? extends T> fun) {
-        return call(() -> fun.apply(Views.getActiveComp()));
+    public static <T> T queryActiveComp(Function<Composition, ? extends T> fun) {
+        return query(Views::getActiveComp, fun);
+    }
+
+    /**
+     * Returns the given property of the active layer.
+     */
+    public static <T> T queryActiveLayer(Function<Layer, T> fun) {
+        return query(Views::getActiveLayer, fun);
+    }
+
+    /**
+     * Returns the given property of the active view.
+     */
+    public static <T> T queryActiveView(Function<View, T> fun) {
+        return query(Views::getActive, fun);
     }
 
     public static Selection getActiveSelection() {
         return call(Views::getActiveSelection);
     }
 
-    public static Guides getGuides() {
-        return active(Composition::getGuides);
+    public static Guides getActiveGuides() {
+        return queryActiveComp(Composition::getGuides);
     }
 
     public static Layer getActiveLayer() {
@@ -99,46 +120,67 @@ public class EDT {
         return call(() -> Views.getActiveLayer().getClass().equals(type));
     }
 
-    public static void assertThereIsSelection() {
-        if (getActiveSelection() == null) {
-            throw new AssertionError("no selection found");
-        }
+    /**
+     * Asserts that the active composition has a selection.
+     */
+    public static void requireSelection() {
+        assertThat(getActiveSelection()).withFailMessage("no selection found").isNotNull();
     }
 
-    public static void assertThereIsNoSelection() {
-        if (getActiveSelection() != null) {
-            throw new AssertionError("selection found");
-        }
+    /**
+     * Asserts that the active composition has no selection.
+     */
+    public static void requireNoSelection() {
+        assertThat(getActiveSelection()).withFailMessage("selection found").isNull();
     }
 
-    public static void assertThereIsNoTranslation() {
-        Point translation = call(() -> {
-            ContentLayer activeLayer = (ContentLayer) Views.getActiveLayer();
-            return new Point(activeLayer.getTx(), activeLayer.getTy());
+    /**
+     * Asserts that the active content layer has zero translation offset.
+     */
+    public static void assertNoTranslation() {
+        Point translation = queryActiveLayer(layer -> {
+            assertThat(layer).isInstanceOf(ContentLayer.class);
+            ContentLayer contentLayer = (ContentLayer) layer;
+            return new Point(contentLayer.getTx(), contentLayer.getTy());
         });
-        if (translation.x != 0 || translation.y != 0) {
-            throw new AssertionError("translation found: " + translation);
-        }
+        assertThat(translation).isEqualTo(new Point(0, 0));
     }
 
+    /**
+     * Asserts that the given selection tool is using the expected shape combinator.
+     */
     public static void assertSelectionCombinatorIs(AbstractSelectionTool tool, ShapeCombinator expected) {
         ShapeCombinator actual = call(tool::getCombinator);
-        if (expected != actual) {
-            throw new AssertionError("expected " + expected + ", found " + actual);
-        }
+        assertThat(actual).isSameAs(expected);
     }
 
     public static void assertActiveToolIs(Tool expected) {
         Tool actual = call(Tools::getActive);
-        if (actual != expected) {
-            throw new AssertionError("Expected " + expected + ", found " + actual + ".");
-        }
+        assertThat(actual).isSameAs(expected);
     }
 
+    /**
+     * Asserts that the names of all open compositions match the given names in order.
+     */
+    public static void assertOpenCompNamesAre(String... expectedNames) {
+        List<String> actual = call(Views::getOpenCompNames);
+        assertThat(actual).containsExactly(expectedNames);
+    }
+
+    public static String getActiveCompName() {
+        return queryActiveComp(Composition::getName);
+    }
+
+    /**
+     * Returns the active path from the active composition.
+     */
     public static Path getActivePath() {
-        return active(Composition::getActivePath);
+        return queryActiveComp(Composition::getActivePath);
     }
 
+    /**
+     * Returns the screen coordinates of a specific handle on a transform box of the Transform Path tool.
+     */
     public static Point getTransformPathToolBoxPos(int boxIndex,
                                                    Function<TransformBox, DraggablePoint> handleSelector) {
         return call(() -> {
@@ -183,38 +225,38 @@ public class EDT {
         run(() -> Views.getActive().zoomOut());
     }
 
-    public static ZoomLevel getZoomLevelOfActive() {
+    /**
+     * Returns the current zoom level of the active view.
+     */
+    public static ZoomLevel getActiveZoomLevel() {
         return call(() -> Views.getActive().getZoomLevel());
     }
 
-    public static void assertZoomOfActiveIs(ZoomLevel expected) {
-        run(() -> Views.assertZoomOfActiveIs(expected));
+    public static void assertActiveZoomIs(ZoomLevel expected) {
+        assertThat(getActiveZoomLevel()).isSameAs(expected);
     }
 
-    public static void assertNumOpenImagesIs(int expected) {
-        run(() -> Views.assertNumViewsIs(expected));
+    public static int getNumViews() {
+        return call(Views::getNumViews);
     }
 
-    public static void assertNumOpenImagesIsAtLeast(int expected) {
-        run(() -> Views.assertNumViewsIsAtLeast(expected));
+    public static void assertNumViewsIs(int expected) {
+        int actual = call(Views::getNumViews);
+        assertThat(actual).isEqualTo(expected);
     }
 
     public static int getNumLayersInActiveHolder() {
         return call(Views::getNumLayersInActiveHolder);
     }
 
-    public static void assertNumLayersIs(int expected) {
+    public static void assertNumLayersInActiveHolderIs(int expected) {
         Integer found = call(Views::getNumLayersInActiveHolder);
-        if (found != expected) {
-            throw new AssertionError("expected " + expected + ", found = " + found);
-        }
+        assertThat(found).isEqualTo(expected);
     }
 
     public static void assertShapesToolStateIs(DragToolState expected) {
         DragToolState actual = call(Tools.SHAPES::getState);
-        if (actual != expected) {
-            throw new AssertionError("expected " + expected + ", found " + actual);
-        }
+        assertThat(actual).isEqualTo(expected);
     }
 
     public static void activate(View view) {
@@ -222,61 +264,77 @@ public class EDT {
     }
 
     /**
-     * Returns the given property of the active layer.
-     */
-    public static <T> T activeLayer(Function<Layer, T> fun) {
-        return call(() -> fun.apply(Views.getActiveLayer()));
-    }
-
-    /**
      * Returns the given property of the layer with the given name in the active composition.
      */
-    public static <T> T layerWithName(String layerName, Function<Layer, T> fun) {
+    public static <T> T queryLayerWithName(String layerName, Function<Layer, T> fun) {
         return call(() ->
             fun.apply(Views.findFirstLayerWhere(layer ->
                 layer.getName().equals(layerName), false)));
     }
 
-    public static <T> T activeView(Function<View, T> fun) {
-        return call(() -> fun.apply(Views.getActive()));
-    }
-
     public static void assertActiveLayerTypeIs(Class<? extends Layer> expected) {
-        Class<? extends Layer> actual = activeLayer((Function<Layer, Class<? extends Layer>>) Layer::getClass);
-        if (expected != actual) {
-            throw new AssertionError("expected " + expected.getSimpleName()
-                + ", found " + actual.getSimpleName());
-        }
-    }
-
-    public static String activeLayerName() {
-        return activeLayer(Layer::getName);
-    }
-
-    public static boolean activeLayerIsMaskEditing() {
-        return activeLayer(Layer::isMaskEditing);
+        Class<? extends Layer> actual = queryActiveLayer(Layer::getClass);
+        assertThat(actual).isEqualTo(expected);
     }
 
     public static boolean activeLayerHasMask() {
-        return activeLayer(Layer::hasMask);
+        return queryActiveLayer(Layer::hasMask);
     }
 
+    public static void assertActiveLayerHasMask(boolean expected) {
+        boolean actual = activeLayerHasMask();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    public static void assertActiveLayerHasMask() {
+        assertActiveLayerHasMask(true);
+    }
+
+    public static void assertActiveLayerHasNoMask() {
+        assertActiveLayerHasMask(false);
+    }
+
+    public static boolean activeLayerIsMaskEditing() {
+        return queryActiveLayer(Layer::isMaskEditing);
+    }
+
+    public static void assertActiveLayerIsMaskEditing(boolean expected) {
+        boolean actual = activeLayerIsMaskEditing();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    public static void assertActiveLayerIsMaskEditing() {
+        assertActiveLayerIsMaskEditing(true);
+    }
+
+    public static void assertActiveLayerIsNotMaskEditing() {
+        assertActiveLayerIsMaskEditing(false);
+    }
+
+    public static void assertMaskViewModeIs(MaskViewMode expected) {
+        MaskViewMode actual = queryActiveView(View::getMaskViewMode);
+        assertThat(actual).isSameAs(expected);
+    }
+
+    /**
+     * Asserts that the canvas of the active composition has the given width and height.
+     */
     public static void assertCanvasSizeIs(int expectedWidth, int expectedHeight) {
-        assertThat(active(Composition::getCanvas))
+        assertThat(queryActiveComp(Composition::getCanvas))
             .hasSize(expectedWidth, expectedHeight);
     }
 
-    public static int getModalDialogCount() {
-        return call(GlobalEvents::getModalDialogCount);
+    public static int getModalDialogNesting() {
+        return call(GlobalEvents::getModalDialogNesting);
     }
 
-    public static void assertModalDialogCountIs(int expected) {
-        int actual = getModalDialogCount();
-        if (actual != expected) {
-            throw new AssertionError("expected " + expected + ", found " + actual);
-        }
+    public static void assertNoModalDialogs() {
+        assertThat(getModalDialogNesting()).isEqualTo(0);
     }
 
+    /**
+     * Sets the global foreground and background colors.
+     */
     public static void setFgBgColors(Color fgColor, Color bgColor) {
         run(() -> {
             FgBgColors.setFGColor(fgColor);

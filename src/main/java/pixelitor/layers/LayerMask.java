@@ -38,9 +38,8 @@ import java.io.Serial;
 
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-import static pixelitor.Views.thumbSize;
-import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.ImageUtils.isGrayscale;
+import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
  * A layer mask that applies a transparency mask to an associated layer, controlling its visibility.
@@ -295,7 +294,7 @@ public class LayerMask extends ImageLayer {
     public BufferedImage createIconThumbnail() {
         // same as for the image layer, but without checkerboard painter
         BufferedImage bigImg = getCanvasSizedSubImage();
-        return createThumbnail(bigImg, thumbSize, null);
+        return createThumbnail(bigImg, null);
     }
 
     @Override

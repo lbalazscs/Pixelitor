@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,12 +92,12 @@ public class CloneBrush extends CopyBrush {
         type.beforeDrawImage(g);
 
         // the current sampling coordinates relative to the source image
-        double currSrcX = offsetX - p.getImX();
-        double currSrcY = offsetY - p.getImY();
+        double currSrcX = p.getImX() - offsetX;
+        double currSrcY = p.getImY() - offsetY;
 
         // create the transformation from the source image to the brush image
         var transform = AffineTransform.getTranslateInstance(
-            currSrcX + radius, currSrcY + radius);
+            -currSrcX + radius, -currSrcY + radius);
         if (scaleX != 1.0 || scaleY != 1.0 || rotationAngle != 0.0) {
             g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
             // apply scaling and rotation around the original source point

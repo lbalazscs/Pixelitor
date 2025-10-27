@@ -28,18 +28,17 @@ import pixelitor.utils.Shapes;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.geom.AffineTransform;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 import static pixelitor.tools.DragToolState.IDLE;
 import static pixelitor.tools.DragToolState.INITIAL_DRAG;
-import static pixelitor.tools.DragToolState.TRANSFORM;
 
+/**
+ * The Zoom Tool.
+ */
 public class ZoomTool extends DragTool {
-    private PRectangle box;
-
-    public ZoomTool() { // Do I need this false in super call?
+    public ZoomTool() {
         super("Zoom", 'Z',
             "<b>click</b> to zoom in, " +
                 "<b>right-click</b> (or <b>Alt-click</b>) to zoom out. " +
@@ -76,52 +75,30 @@ public class ZoomTool extends DragTool {
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
+        // triggers painting a drag rectangle over the canvas
         e.repaint();
     }
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        if (state == IDLE) {
-            return;
-        }
-
         if (state == INITIAL_DRAG) {
-            if (box != null) {
-                throw new IllegalStateException();
-            }
-
+            // zoom the view to the dragged zoom rectangle
             View view = e.getView();
-            box = PRectangle.positiveFromCo(drag.toCoRect(), view);
-            setState(TRANSFORM);
+            PRectangle zoomRect = drag.toPosPRect(view);
+            view.zoomToRegion(zoomRect);
 
-            view.zoomToRegion(getZoomRect(view));
+            // we are done
             reset();
-
             e.consume();
         }
     }
 
     @Override
     public void paintOverCanvas(Graphics2D g2, Composition comp) {
-        if (state == IDLE) {
-            return;
-        }
-        PRectangle zoomRect = getZoomRect(comp.getView());
-        if (zoomRect == null) {
-            return;
-        }
-
-        Shapes.drawVisibly(g2, zoomRect.getCo());
-    }
-
-    private PRectangle getZoomRect(View view) {
         if (state == INITIAL_DRAG) {
-            return drag.toPosPRect(view);
-        } else if (state == TRANSFORM) {
-            return box;
+            PRectangle zoomRect = drag.toPosPRect(comp.getView());
+            Shapes.drawVisibly(g2, zoomRect.getCo());
         }
-        // initial state
-        return null;
     }
 
     @Override
@@ -132,11 +109,8 @@ public class ZoomTool extends DragTool {
 
     @Override
     public void reset() {
-        box = null;
         setState(IDLE);
-
         Views.repaintActive();
-        Views.setCursorForAll(Cursors.HAND);
     }
 
     private void setState(DragToolState newState) {
@@ -147,20 +121,6 @@ public class ZoomTool extends DragTool {
     public void compReplaced(Composition newComp, boolean reloaded) {
         if (reloaded) {
             reset();
-        }
-    }
-
-    @Override
-    public void coCoordsChanged(View view) {
-        if (box != null && state == TRANSFORM) {
-            box.coCoordsChanged(view);
-        }
-    }
-
-    @Override
-    public void imCoordsChanged(AffineTransform at, View view) {
-        if (box != null && state == TRANSFORM) {
-            box.imCoordsChanged(at, view);
         }
     }
 

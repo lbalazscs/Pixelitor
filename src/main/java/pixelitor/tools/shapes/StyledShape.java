@@ -40,6 +40,7 @@ import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.Drag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.TaperingStroke;
+import pixelitor.utils.Thumbnails;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.*;
@@ -247,7 +248,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     /**
      * Paints a thumbnail icon of the shape.
      */
-    public void paintIconThumbnail(Graphics2D g2, int thumbSize) {
+    public void paintIconThumbnail(Graphics2D g2) {
+        int thumbSize = Thumbnails.getMaxSize();
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         Drag drag;
         if (shapeType.isDirectional()) {

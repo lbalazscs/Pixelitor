@@ -29,9 +29,7 @@ import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.TabsUI;
 import pixelitor.guitest.AppRunner.ExpectConfirmation;
-import pixelitor.guitest.AppRunner.Randomize;
-import pixelitor.guitest.AppRunner.Reseed;
-import pixelitor.guitest.AppRunner.ShowOriginal;
+import pixelitor.guitest.AppRunner.FilterOptions;
 import pixelitor.history.HistoryChecker;
 import pixelitor.layers.*;
 import pixelitor.tools.BrushType;
@@ -174,7 +172,7 @@ public class WorkflowTest {
         EDT.run(() -> Features.enableExperimental = true);
 
         historyChecker = new HistoryChecker();
-        app = new AppRunner(historyChecker, null);
+        app = new AppRunner(historyChecker, null, null);
         mouse = app.getMouse();
         pw = app.getPW();
         keyboard = app.getKeyboard();
@@ -318,7 +316,7 @@ public class WorkflowTest {
         app.activateLayer("smart TEXT");
         duplicateLayerThenUndo(SmartObject.class);
         Utils.sleep(1, SECONDS);
-        assert EDT.active(Composition::checkInvariants);
+        assert EDT.queryActiveComp(Composition::checkInvariants);
 
         rasterizeThenUndo(SmartObject.class);
 
@@ -586,10 +584,10 @@ public class WorkflowTest {
         dialog.slider("Percent").slideTo(60);
         dialog.button("ok").click();
         dialog.requireNotVisible();
-        assertThat(EDT.getGuides().getHorizontals())
+        assertThat(EDT.getActiveGuides().getHorizontals())
             .usingComparatorForType(new DoubleComparator(0.001), Double.class)
             .containsExactly(0.6);
-        assertThat(EDT.getGuides().getVerticals()).isEmpty();
+        assertThat(EDT.getActiveGuides().getVerticals()).isEmpty();
 
         keyboard.undoRedo("Create Guides");
     }
@@ -599,9 +597,9 @@ public class WorkflowTest {
     }
 
     private void runFilterWithDialog(String filterName, Consumer<DialogFixture> customizer) {
-        app.runFilterWithDialog(filterName, Randomize.NO, Reseed.NO, ShowOriginal.NO, false, customizer);
+        app.runFilterWithDialog(filterName, FilterOptions.NONE, false, customizer);
 
-        boolean activeIsSmart = EDT.activeLayer(layer ->
+        boolean activeIsSmart = EDT.queryActiveLayer(layer ->
             (layer instanceof SmartObject) || (layer instanceof SmartFilter));
         boolean maskEditing = EDT.activeLayerIsMaskEditing();
         boolean smartFilter = activeIsSmart && !maskEditing;
@@ -615,14 +613,14 @@ public class WorkflowTest {
 
         app.duplicateLayer(expectedLayerType);
 
-        EDT.assertNumLayersIs(numLayers + 1);
-        assert EDT.active(Composition::checkInvariants);
+        EDT.assertNumLayersInActiveHolderIs(numLayers + 1);
+        assert EDT.queryActiveComp(Composition::checkInvariants);
 
         keyboard.undo("Duplicate Layer");
 
-        EDT.assertNumLayersIs(numLayers);
+        EDT.assertNumLayersInActiveHolderIs(numLayers);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
-        assert EDT.active(Composition::checkInvariants);
+        assert EDT.queryActiveComp(Composition::checkInvariants);
     }
 
     private void cloneSmartObjectThenUndo() {
@@ -631,12 +629,12 @@ public class WorkflowTest {
 
         app.runMenuCommand("Clone");
 
-        EDT.assertNumLayersIs(numLayers + 1);
+        EDT.assertNumLayersInActiveHolderIs(numLayers + 1);
         EDT.assertActiveLayerTypeIs(SmartObject.class);
 
         keyboard.undoRedoUndo("Clone");
 
-        EDT.assertNumLayersIs(numLayers);
+        EDT.assertNumLayersInActiveHolderIs(numLayers);
         EDT.assertActiveLayerTypeIs(SmartObject.class);
     }
 
@@ -648,37 +646,37 @@ public class WorkflowTest {
         app.runMenuCommand("Rasterize " + layer.getTypeString());
         Utils.sleep(1, SECONDS);
 
-        EDT.assertNumLayersIs(numLayers);
+        EDT.assertNumLayersInActiveHolderIs(numLayers);
         EDT.assertActiveLayerTypeIs(ImageLayer.class);
-        assert EDT.active(Composition::checkInvariants);
+        assert EDT.queryActiveComp(Composition::checkInvariants);
 
         keyboard.undoRedoUndo("Rasterize " + layer.getTypeString());
 
         EDT.assertActiveLayerTypeIs(expectedLayerType);
-        EDT.assertNumLayersIs(numLayers);
-        assert EDT.active(Composition::checkInvariants);
+        EDT.assertNumLayersInActiveHolderIs(numLayers);
+        assert EDT.queryActiveComp(Composition::checkInvariants);
     }
 
     private void selectionFromText() {
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
 
         app.runMenuCommand("Selection from Text");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         keyboard.undo("Create Selection");
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
 
         keyboard.redo("Create Selection");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
     }
 
     private void deleteActiveLayer(Class<? extends Layer> expectedLayerType) {
-        String expectedEditName = "Delete " + EDT.active(comp -> comp.getActiveLayer().getName());
+        String expectedEditName = "Delete " + EDT.queryActiveComp(comp -> comp.getActiveLayer().getName());
         EDT.assertActiveLayerTypeIs(expectedLayerType);
 
         // save a reference, because after deleting the
         // last child, it would stop being the active holder
-        LayerHolder holder = EDT.active(Composition::getActiveHolder);
+        LayerHolder holder = EDT.queryActiveComp(Composition::getActiveHolder);
 
         int numLayers = EDT.call(holder::getNumLayers);
 
@@ -796,8 +794,8 @@ public class WorkflowTest {
 
         int canvasWidth = INITIAL_WIDTH + 2 * EXTRA_WIDTH;
         int canvasHeight = INITIAL_HEIGHT + 2 * EXTRA_HEIGHT;
-        assertThat(EDT.active(Composition::getCanvasWidth)).isEqualTo(canvasWidth);
-        assertThat(EDT.active(Composition::getCanvasHeight)).isEqualTo(canvasHeight);
+        assertThat(EDT.queryActiveComp(Composition::getCanvasWidth)).isEqualTo(canvasWidth);
+        assertThat(EDT.queryActiveComp(Composition::getCanvasHeight)).isEqualTo(canvasHeight);
 
         mouse.updateCanvasBounds();
         int margin = 100;

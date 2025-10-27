@@ -207,6 +207,12 @@ public class Geometry {
             (p1.getY() + p2.getY()) / 2.0);
     }
 
+    public static Point midPoint(Point p1, Point p2) {
+        return new Point(
+            (p1.x + p2.x) / 2,
+            (p1.y + p2.y) / 2);
+    }
+
     public static Point2D interpolate(Point2D p1, Point2D p2, double t) {
         return new Point2D.Double(
             ImageMath.lerp(t, p1.getX(), p2.getX()),

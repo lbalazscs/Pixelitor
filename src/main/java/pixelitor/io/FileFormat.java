@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,11 +30,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
 
 /**
- * The supported input and output file formats.
+ * The supported input and output file formats in the Open/Save menus.
+ * This enum is used only for reading/writing compositions,
+ * and not for other exports/imports (like SVG, ImageMagick).
  */
 public enum FileFormat {
     BMP(false, ImageUtils::convertToRGB, FileChoosers.bmpFilter) {
@@ -99,6 +100,9 @@ public enum FileFormat {
         this.fileFilter = fileFilter;
     }
 
+    /**
+     * Creates a Runnable task for saving the given composition with the given settings.
+     */
     public Runnable createSaveTask(Composition comp, SaveSettings settings) {
         assert !multiLayered; // overridden for multi-layered formats
         return () -> saveSingleLayered(comp, settings);
@@ -106,22 +110,12 @@ public enum FileFormat {
 
     public Composition readSync(File file) {
         assert !multiLayered; // overridden for multi-layered formats
-        return readSingleLayeredSync(file);
-    }
-
-    private static Composition readSingleLayeredSync(File file) {
-        BufferedImage img = TrackedIO.uncheckedRead(file);
-        return Composition.fromImage(img, file, null);
+        return TrackedIO.readSingleLayeredSync(file);
     }
 
     public CompletableFuture<Composition> readAsync(File file) {
         assert !multiLayered; // overridden for multi-layered formats
-        return readSingleLayeredAsync(file);
-    }
-
-    private static CompletableFuture<Composition> readSingleLayeredAsync(File file) {
-        return CompletableFuture.supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
-            .thenApplyAsync(img -> Composition.fromImage(img, file, null), onEDT);
+        return TrackedIO.readSingleLayeredAsync(file);
     }
 
     private void saveSingleLayered(Composition comp, SaveSettings settings) {
@@ -145,12 +139,12 @@ public enum FileFormat {
     }
 
     public static Optional<FileFormat> fromFile(File file) {
-        String extension = FileUtils.findExtension(file.getName()).orElse("");
+        String extension = FileUtils.getExtension(file.getName());
         return fromExtension(extension);
     }
 
     public static Optional<FileFormat> fromExtension(String extension) {
-        return switch (extension.toLowerCase(Locale.ROOT)) {
+        return switch (extension) {
             case "bmp" -> Optional.of(BMP);
             case "gif" -> Optional.of(GIF);
             case "jpg", "jpeg" -> Optional.of(JPG);
@@ -165,13 +159,13 @@ public enum FileFormat {
         };
     }
 
-    private static volatile FileFormat lastOutputFormat = AppPreferences.loadLastSaveFormat();
+    private static volatile FileFormat lastSaveFormat = AppPreferences.loadLastSaveFormat();
 
     public static FileFormat getLastSaved() {
-        return lastOutputFormat;
+        return lastSaveFormat;
     }
 
     public static void setLastSaved(FileFormat format) {
-        lastOutputFormat = format;
+        lastSaveFormat = format;
     }
 }

@@ -345,7 +345,7 @@ public class OpenRaster {
         // "It must be a non-interlaced PNG with 8 bits per channel
         // of at most 256x256 pixels. It should be as big as possible
         // without upscaling or changing the aspect ratio."
-        Dimension thumbSize = ImageUtils.calcThumbDimensions(
+        Dimension thumbSize = Thumbnails.calcThumbDimensions(
             src.getWidth(), src.getHeight(), THUMBNAIL_MAX_DIMENSION, false);
         return ImageUtils.resize(src, thumbSize.width, thumbSize.height);
     }

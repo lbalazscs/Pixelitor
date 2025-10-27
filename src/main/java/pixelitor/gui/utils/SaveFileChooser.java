@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,15 +22,11 @@ import pixelitor.io.FileUtils;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
-import java.util.Optional;
 
 /**
- * The file chooser used for saving files. It tries to
- * handle file extensions intelligently.
+ * A save JFileChooser that automatically adds a file extension based on the selected filter.
  */
-public class SaveFileChooser extends ConfirmSaveFileChooser {
-    private String extension;
-
+public class SaveFileChooser extends ValidatingSaveFileChooser {
     public SaveFileChooser(File currentDirPath) {
         super(currentDirPath);
         setAcceptAllFileFilterUsed(false);
@@ -43,17 +39,15 @@ public class SaveFileChooser extends ConfirmSaveFileChooser {
             return null;
         }
 
-        Optional<String> foundExt = FileUtils.findExtension(f.getName());
-        if (foundExt.isEmpty()) {
+        String ext = FileUtils.getExtension(f.getName());
+        if (ext == null) {
             // the user has entered no extension
             // determine it from the active FileFilter
             f = addExtension(f);
         } else {
-            boolean supported = FileUtils.hasSupportedOutputExt(f.getName());
+            boolean supported = FileUtils.isSupportedOutputExt(ext);
             if (!supported) {
                 f = addExtension(f);
-            } else {
-                extension = foundExt.get();
             }
         }
 
@@ -61,15 +55,11 @@ public class SaveFileChooser extends ConfirmSaveFileChooser {
     }
 
     private File addExtension(File f) {
-        extension = getExtensionFromFileFilter();
+        String extension = getExtensionFromFileFilter();
         if (extension != null) {
             f = new File(f.getAbsolutePath() + '.' + extension);
         }
         return f;
-    }
-
-    public String getExtension() {
-        return extension;
     }
 
     private String getExtensionFromFileFilter() {

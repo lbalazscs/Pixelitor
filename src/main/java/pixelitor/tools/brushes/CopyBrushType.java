@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,10 @@ public enum CopyBrushType {
 
         @Override
         public void setSize(double size) {
-            super.setSize(size);
+            if (this.size == size) {
+                return; // can happen, for example when loading brush presets
+            }
+            this.size = size;
             transparencyImage = ImageUtils.createSoftTransparencyImage((int) size);
         }
 
@@ -54,7 +57,10 @@ public enum CopyBrushType {
 
         @Override
         public void setSize(double size) {
-            super.setSize(size);
+            if (this.size == size) {
+                return;
+            }
+            this.size = size;
             circleClip = new Ellipse2D.Double(0, 0, size, size);
         }
 
@@ -80,18 +86,16 @@ public enum CopyBrushType {
     }
 
     /**
-     * Called before g.drawImage with the source image
+     * Prepares the graphics context before the source image is drawn.
      */
     public abstract void beforeDrawImage(Graphics2D g);
 
     /**
-     * Called after g.drawImage with the source image
+     * Applies final effects to the graphics context after the source image is drawn.
      */
     public abstract void afterDrawImage(Graphics2D g);
 
-    public void setSize(double size) {
-        this.size = size;
-    }
+    public abstract void setSize(double size);
 
     @Override
     public String toString() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.tools.HandToolSupport;
+import pixelitor.tools.ViewportPanner;
 import pixelitor.utils.*;
 
 import javax.imageio.ImageIO;
@@ -39,6 +39,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -52,7 +53,7 @@ import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onPool;
 
 /**
- * The panel shown in the "Export Optimized JPEG..." dialog
+ * The panel shown in the "Export Optimized JPEG..." dialog.
  */
 public class OptimizedJpegExportPanel extends JPanel {
     private static final int GRID_GAP = 10;
@@ -102,9 +103,9 @@ public class OptimizedJpegExportPanel extends JPanel {
         GUIUtils.synchronizeScrollPanes(originalSP, optimizedSP);
     }
 
-    private static JScrollPane createScrollPane(ImagePanel original, String borderTitle) {
-        JScrollPane scrollPane = new JScrollPane(original);
-        HandToolSupport.addBehavior(scrollPane);
+    private static JScrollPane createScrollPane(ImagePanel imagePanel, String borderTitle) {
+        JScrollPane scrollPane = new JScrollPane(imagePanel);
+        ViewportPanner.enablePanning(scrollPane);
         scrollPane.setBorder(createTitledBorder(borderTitle));
 
         return scrollPane;
@@ -155,9 +156,13 @@ public class OptimizedJpegExportPanel extends JPanel {
     }
 
     private PreviewInfo generatePreview(float quality, boolean progressive) {
-        return writeJPGtoPreviewImage(sourceImage,
-            JpegSettings.createJpegCustomizer(quality, progressive),
-            new JProgressBarTracker(progressPanel));
+        try {
+            return writeJPGtoPreviewImage(sourceImage,
+                JpegSettings.createJpegCustomizer(quality, progressive),
+                new JProgressBarTracker(progressPanel));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private void updatePreview(PreviewInfo previewInfo) {
@@ -190,30 +195,28 @@ public class OptimizedJpegExportPanel extends JPanel {
 
     private static PreviewInfo writeJPGtoPreviewImage(BufferedImage image,
                                                       Consumer<ImageWriteParam> customizer,
-                                                      ProgressTracker pt) {
+                                                      ProgressTracker pt) throws IOException {
+        assert Threads.calledOutsideEDT() : Threads.callInfo();
+
         var bos = new ByteArrayOutputStream(32768);
-        BufferedImage previewImage = null;
-        byte[] bytes = null;
-        try {
-            // Step 1: write JPEG with the given settings to memory.
-            // Approximately 70% of the total time is spent here.
-            ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
-            var pt1 = new SubtaskProgressTracker(0.7, pt);
-            TrackedIO.writeToIOS(image, ios, "jpg", pt1, customizer);
+        // Step 1: write JPEG with the given settings to memory.
+        // Approximately 70% of the total time is spent here.
+        ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
+        var pt1 = new SubtaskProgressTracker(0.7, pt);
+        TrackedIO.writeToIOS(image, ios, "jpg", pt1, customizer);
 
-            // Step 2: Read it back into the preview image.
-            // Approximately 30% of the total time is spent here.
-            bytes = bos.toByteArray();
-            var in = new ByteArrayInputStream(bytes);
-            var pt2 = new SubtaskProgressTracker(0.3, pt);
-            try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
-                previewImage = TrackedIO.readFromIIS(iis, pt2);
-            }
+        // Step 2: Read it back into the preview image.
+        // Approximately 30% of the total time is spent here.
+        byte[] bytes = bos.toByteArray();
+        var in = new ByteArrayInputStream(bytes);
+        var pt2 = new SubtaskProgressTracker(0.3, pt);
 
-            pt.finished();
-        } catch (IOException e) {
-            Messages.showException(e);
+        BufferedImage previewImage;
+        try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
+            previewImage = TrackedIO.readFromIIS(iis, pt2);
         }
+
+        pt.finished();
 
         return new PreviewInfo(previewImage, bytes.length);
     }
@@ -224,4 +227,3 @@ public class OptimizedJpegExportPanel extends JPanel {
     private record PreviewInfo(BufferedImage image, int sizeInBytes) {
     }
 }
-

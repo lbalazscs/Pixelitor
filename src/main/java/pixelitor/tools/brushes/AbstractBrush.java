@@ -91,7 +91,7 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public void startAt(PPoint p) {
+    public void startStrokeAt(PPoint p) {
         // when starting a new stroke, the previous
         // variables should not be set to (0, 0)
         // because it causes unnecessary repainting
@@ -116,7 +116,7 @@ public abstract class AbstractBrush implements Brush {
         if (previous == null) {
             // can happen if the first click (in the tool of after a
             // symmetry activation) is a shift-click
-            startAt(p);
+            startStrokeAt(p);
         } else {
             initDrawing(p);
 

@@ -17,7 +17,6 @@
 
 package pixelitor.guitest;
 
-import pixelitor.Views;
 import pixelitor.layers.MaskViewMode;
 
 import java.util.Arrays;
@@ -40,9 +39,7 @@ enum MaskMode {
     NO_MASK(null) {
         @Override
         public void check() {
-            if (EDT.activeLayerHasMask()) {
-                throw new AssertionError("Mask found in " + EDT.activeLayerName());
-            }
+            EDT.assertActiveLayerHasNoMask();
         }
 
         @Override
@@ -68,13 +65,8 @@ enum MaskMode {
     WITH_MASK(NORMAL) {
         @Override
         public void check() {
-            if (EDT.activeLayerHasMask()) {
-                if (EDT.activeLayerIsMaskEditing()) {
-                    throw new AssertionError("Mask editing in " + EDT.activeLayerName());
-                }
-            } else {
-                throw new AssertionError("No mask found in " + EDT.activeLayerName());
-            }
+            EDT.assertActiveLayerHasMask();
+            EDT.assertActiveLayerIsNotMaskEditing();
         }
 
         @Override
@@ -95,15 +87,7 @@ enum MaskMode {
     ON_MASK_VIEW_LAYER(EDIT_MASK) {
         @Override
         public void check() {
-            if (EDT.activeLayerHasMask()) {
-                if (EDT.activeLayerIsMaskEditing()) {
-                    assertMaskViewModeIs(EDIT_MASK);
-                } else {
-                    throw new AssertionError("Not mask editing in '%s'".formatted(EDT.activeLayerName()));
-                }
-            } else {
-                throw new AssertionError("No mask found in '%s'".formatted(EDT.activeLayerName()));
-            }
+            checkMaskEditingInMode(EDIT_MASK);
         }
 
         @Override
@@ -122,15 +106,7 @@ enum MaskMode {
     ON_MASK_VIEW_MASK(VIEW_MASK) {
         @Override
         public void check() {
-            if (EDT.activeLayerHasMask()) {
-                if (EDT.activeLayerIsMaskEditing()) {
-                    assertMaskViewModeIs(VIEW_MASK);
-                } else {
-                    throw new AssertionError("Not mask editing in " + EDT.activeLayerName());
-                }
-            } else {
-                throw new AssertionError("No mask found in " + EDT.activeLayerName());
-            }
+            checkMaskEditingInMode(VIEW_MASK);
         }
 
         @Override
@@ -149,15 +125,7 @@ enum MaskMode {
     RUBY(RUBYLITH) {
         @Override
         public void check() {
-            if (EDT.activeLayerHasMask()) {
-                if (EDT.activeLayerIsMaskEditing()) {
-                    assertMaskViewModeIs(RUBYLITH);
-                } else {
-                    throw new AssertionError("Not mask editing in " + EDT.activeLayerName());
-                }
-            } else {
-                throw new AssertionError("No mask found in " + EDT.activeLayerName());
-            }
+            checkMaskEditingInMode(RUBYLITH);
         }
 
         @Override
@@ -171,6 +139,12 @@ enum MaskMode {
         }
     };
 
+    private static void checkMaskEditingInMode(MaskViewMode expectedMode) {
+        EDT.assertActiveLayerHasMask();
+        EDT.assertActiveLayerIsMaskEditing();
+        EDT.assertMaskViewModeIs(expectedMode);
+    }
+
     private final MaskViewMode viewMode;
 
     MaskMode(MaskViewMode viewMode) {
@@ -179,14 +153,6 @@ enum MaskMode {
 
     public boolean isMaskEditing() {
         return viewMode.editMask();
-    }
-
-    private static void assertMaskViewModeIs(MaskViewMode expected) {
-        MaskViewMode actual = Views.getActive().getMaskViewMode();
-        if (actual != expected) {
-            throw new AssertionError("expected mask view mode " + expected
-                + ", found " + actual);
-        }
     }
 
     /**

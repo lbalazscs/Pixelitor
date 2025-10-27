@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,17 +22,21 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.Random;
 
+import static pixelitor.utils.input.Modifiers.ROBOT_DELAY_MS;
+
 /**
  * Represents which mouse button is being simulated in a {@link MouseEvent}.
  */
 public enum MouseButton implements EventMaskModifier {
-    LEFT(InputEvent.BUTTON1_DOWN_MASK),
-    RIGHT(InputEvent.BUTTON3_DOWN_MASK);
+    LEFT(InputEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1),
+    RIGHT(InputEvent.BUTTON3_DOWN_MASK, MouseEvent.BUTTON3);
 
     private final int buttonMask;
+    private final int awtButton;
 
-    MouseButton(int buttonMask) {
+    MouseButton(int buttonMask, int awtButton) {
         this.buttonMask = buttonMask;
+        this.awtButton = awtButton;
     }
 
     @Override
@@ -44,16 +48,20 @@ public enum MouseButton implements EventMaskModifier {
         return this == RIGHT;
     }
 
+    public int getAwtButton() {
+        return awtButton;
+    }
+
     public MouseButton press(Robot robot) {
         robot.mousePress(buttonMask);
-        robot.delay(50);
+        robot.delay(ROBOT_DELAY_MS);
 
         return this;
     }
 
     public void release(Robot robot) {
         robot.mouseRelease(buttonMask);
-        robot.delay(50);
+        robot.delay(ROBOT_DELAY_MS);
     }
 
     public static MouseButton randomly(Random rand) {

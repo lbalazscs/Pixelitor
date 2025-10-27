@@ -40,10 +40,6 @@ import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.*;
 import pixelitor.guides.GuideStrokeType;
-import pixelitor.guitest.AppRunner.ExpectConfirmation;
-import pixelitor.guitest.AppRunner.Randomize;
-import pixelitor.guitest.AppRunner.Reseed;
-import pixelitor.guitest.AppRunner.ShowOriginal;
 import pixelitor.history.History;
 import pixelitor.history.HistoryChecker;
 import pixelitor.io.Dirs;
@@ -97,6 +93,8 @@ import static org.assertj.swing.core.matcher.JButtonMatcher.withText;
 import static org.junit.Assert.assertFalse;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.guitest.AppRunner.ExpectConfirmation;
+import static pixelitor.guitest.AppRunner.FilterOptions;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
 import static pixelitor.guitest.AppRunner.getCurrentTimeHM;
 import static pixelitor.guitest.GUITestUtils.change;
@@ -128,10 +126,12 @@ public class MainGuiTest {
     private static File inputDir;
     private static File batchResizeOutputDir;
     private static File batchFilterOutputDir;
+    private static File svgOutputDir;
 
-    private final AppRunner app;
     private final Robot robot;
     private final FrameFixture pw;
+
+    private final AppRunner app;
     private final Keyboard keyboard;
     private final Mouse mouse;
 
@@ -176,7 +176,7 @@ public class MainGuiTest {
     private MainGuiTest() {
         long startMillis = System.currentTimeMillis();
 
-        app = new AppRunner(new HistoryChecker(), inputDir, "a.jpg");
+        app = new AppRunner(new HistoryChecker(), inputDir, svgOutputDir, "a.jpg");
 
         robot = app.getRobot();
         pw = app.getPW();
@@ -189,13 +189,13 @@ public class MainGuiTest {
             System.exit(0);
         }
 
-        boolean testOneMethodSlowly = false;
-        if (testOneMethodSlowly) {
+        boolean testOneThingSlowly = false;
+        if (testOneThingSlowly) {
             app.runSlowly();
 
-            testMagick();
+            testFilterWithDialog("Rose", FilterOptions.SHAPES);
         } else {
-            runMenuCommand("Reset Workspace");
+            app.runMenuCommand("Reset Workspace");
 
             MaskMode[] maskModes = MaskMode.load();
             TestSuite testSuite = TestSuite.load();
@@ -357,7 +357,7 @@ public class MainGuiTest {
     private void testAddLayer() {
         log(1, "add layer");
 
-        app.checkNumLayersIs(1);
+        app.checkLayerNamesAre("layer 1");
         var layer1Button = findLayerButton("layer 1");
         layer1Button.requireSelected();
 
@@ -366,16 +366,16 @@ public class MainGuiTest {
         // add layer
         addEmptyLayerButton.click();
 
-        app.checkNumLayersIs(2);
+        app.checkLayerNamesAre("layer 1", "layer 2");
         var layer2Button = findLayerButton("layer 2");
         layer2Button.requireSelected();
 
         keyboard.undo("New Empty Layer");
-        app.checkNumLayersIs(1);
+        app.checkLayerNamesAre("layer 1");
         layer1Button.requireSelected();
 
         keyboard.redo("New Empty Layer");
-        app.checkNumLayersIs(2);
+        app.checkLayerNamesAre("layer 1", "layer 2");
         layer2Button.requireSelected();
         maskMode.apply(this);
 
@@ -398,26 +398,25 @@ public class MainGuiTest {
         var layer1Button = findLayerButton("layer 1");
         var layer2Button = findLayerButton("layer 2");
 
-        app.checkNumLayersIs(2);
+        app.checkLayerNamesAre("layer 1", "layer 2");
         layer2Button.requireSelected();
 
         // delete layer 2
         pw.button("deleteLayer")
             .requireEnabled()
             .click();
-        app.checkNumLayersIs(1);
+        app.checkLayerNamesAre("layer 1");
         layer1Button.requireSelected();
 
         // undo delete
         keyboard.undo("Delete layer 2");
-
-        app.checkNumLayersIs(2);
+        app.checkLayerNamesAre("layer 1", "layer 2");
         layer2Button = findLayerButton("layer 2");
         layer2Button.requireSelected();
 
         // redo delete
         keyboard.redo("Delete layer 2");
-        app.checkNumLayersIs(1);
+        app.checkLayerNamesAre("layer 1");
         layer1Button.requireSelected();
 
         maskMode.apply(this);
@@ -426,19 +425,18 @@ public class MainGuiTest {
     private void testDuplicateLayer() {
         log(1, "duplicate layer");
 
-        app.checkNumLayersIs(1);
+        app.checkLayerNamesAre("layer 1");
         pw.button("duplicateLayer").click();
 
         findLayerButton("layer 1 copy").requireSelected();
-        app.checkNumLayersIs(2);
         app.checkLayerNamesAre("layer 1", "layer 1 copy");
 
         keyboard.undo("Duplicate Layer");
-        app.checkNumLayersIs(1);
+        app.checkLayerNamesAre("layer 1");
         findLayerButton("layer 1").requireSelected();
 
         keyboard.redo("Duplicate Layer");
-        app.checkNumLayersIs(2);
+        app.checkLayerNamesAre("layer 1", "layer 1 copy");
         findLayerButton("layer 1 copy").requireSelected();
 
         maskMode.apply(this);
@@ -466,26 +464,26 @@ public class MainGuiTest {
     private void testLayerOrderChangeFromMenu() {
         log(1, "layer order change from menu");
 
-        runMenuCommand("Lower Layer");
+        app.runMenuCommand("Lower Layer");
         keyboard.undoRedo("Lower Layer");
 
-        runMenuCommand("Raise Layer");
+        app.runMenuCommand("Raise Layer");
         keyboard.undoRedo("Raise Layer");
 
-        runMenuCommand("Layer to Bottom");
+        app.runMenuCommand("Layer to Bottom");
         keyboard.undoRedo("Layer to Bottom");
 
-        runMenuCommand("Layer to Top");
+        app.runMenuCommand("Layer to Top");
         keyboard.undoRedo("Layer to Top");
     }
 
     private void testActiveLayerChangeFromMenu() {
         log(1, "active layer change from menu");
 
-        runMenuCommand("Lower Layer Selection");
+        app.runMenuCommand("Lower Layer Selection");
         keyboard.undoRedo("Lower Layer Selection");
 
-        runMenuCommand("Raise Layer Selection");
+        app.runMenuCommand("Raise Layer Selection");
         keyboard.undoRedo("Raise Layer Selection");
     }
 
@@ -496,14 +494,14 @@ public class MainGuiTest {
         // otherwise "layer to canvas size" has no effect
         addTranslation();
 
-        runMenuCommand("Layer to Canvas Size");
+        app.runMenuCommand("Layer to Canvas Size");
         keyboard.undoRedo("Layer to Canvas Size");
     }
 
     private void testLayerMenusChangingNumLayers() {
         log(1, "layer menus changing the number of layers");
 
-        runMenuCommand("New from Visible");
+        app.runMenuCommand("New from Visible");
         keyboard.undoRedo("New Layer from Visible");
         maskMode.apply(this);
 
@@ -512,15 +510,15 @@ public class MainGuiTest {
         app.duplicateLayer(ImageLayer.class);
         maskMode.apply(this);
 
-        runMenuCommand("New Layer");
+        app.runMenuCommand("New Layer");
         keyboard.undoRedo("New Empty Layer");
         maskMode.apply(this);
 
-        runMenuCommand("Delete Layer");
+        app.runMenuCommand("Delete Layer");
         keyboard.undoRedo("Delete layer 3");
         maskMode.apply(this);
 
-        runMenuCommand("Flatten Image");
+        app.runMenuCommand("Flatten Image");
         assertFalse(History.canUndo());
         maskMode.apply(this);
     }
@@ -580,9 +578,9 @@ public class MainGuiTest {
         }
         log(1, "mask from color range");
 
-        runMenuCommand("Mask from Color Range...");
+        app.runMenuCommand("Mask from Color Range...");
 
-        var dialog = findDialogByTitle("Mask from Color Range");
+        var dialog = app.findDialogByTitle("Mask from Color Range");
 
         mouse.moveTo(dialog, 100, 100);
         mouse.click();
@@ -617,7 +615,7 @@ public class MainGuiTest {
 
         checkConsistency();
 
-        runMenuCommand("Rasterize Text Layer");
+        app.runMenuCommand("Rasterize Text Layer");
         keyboard.undoRedoUndo("Rasterize Text Layer");
 
         checkConsistency();
@@ -640,7 +638,7 @@ public class MainGuiTest {
 
         findButtonByText(dialog, "Advanced...").click();
 
-        var advDialog = findDialogByTitle("Advanced Text Settings");
+        var advDialog = app.findDialogByTitle("Advanced Text Settings");
         advDialog.checkBox("underlineCB").check().uncheck();
         advDialog.checkBox("strikeThroughCB").check().uncheck();
         advDialog.checkBox("kerningCB").check().uncheck();
@@ -677,74 +675,6 @@ public class MainGuiTest {
             }));
     }
 
-//<editor-fold desc="help menu">
-
-    void testHelpMenu() {
-        if (helpMenuTested && Rnd.nextDouble() > 0.05) {
-            return;
-        }
-        log(0, "help menu");
-
-        testTipOfTheDay();
-        testInternalState();
-        testCheckForUpdate();
-        testAbout();
-
-        afterTestActions();
-        helpMenuTested = true;
-    }
-
-    private void testTipOfTheDay() {
-        var laf = EDT.call(UIManager::getLookAndFeel);
-
-        runMenuCommand("Tip of the Day");
-        var dialog = findDialogByTitle("Tip of the Day");
-        if (laf instanceof NimbusLookAndFeel) {
-            findButtonByText(dialog, "Next >").click();
-            findButtonByText(dialog, "Next >").click();
-            findButtonByText(dialog, "< Back").click();
-        } else {
-            findButtonByText(dialog, "Next Tip").click();
-            findButtonByText(dialog, "Next Tip").click();
-        }
-        findButtonByText(dialog, "Close").click();
-        dialog.requireNotVisible();
-    }
-
-    private void testInternalState() {
-        runMenuCommand("Internal State...");
-        var dialog = findDialogByTitle("Internal State");
-        findButtonByText(dialog, "Copy as JSON").click();
-        findButtonByText(dialog, "Close").click();
-        dialog.requireNotVisible();
-    }
-
-    private void testCheckForUpdate() {
-        runMenuCommand("Check for Updates...");
-        try {
-            // the title is either "Pixelitor Is Up to Date"
-            // or "New Version Available"
-            app.findJOptionPane(null).buttonWithText("Close").click();
-        } catch (ComponentLookupException e) {
-            // if a close button was not found, then it must be the up-to-date dialog
-            app.findJOptionPane("Pixelitor Is Up to Date").okButton().click();
-        }
-    }
-
-    private void testAbout() {
-        runMenuCommand("About Pixelitor");
-        var dialog = findDialogByTitle("About Pixelitor");
-
-        var tabbedPane = dialog.tabbedPane();
-        tabbedPane.requireTabTitles("About", "Credits", "System Info");
-        tabbedPane.selectTab("Credits");
-        tabbedPane.selectTab("System Info");
-        tabbedPane.selectTab("About");
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-    }
-//</editor-fold>
 //<editor-fold desc="colors">
 
     void testColors() {
@@ -768,12 +698,12 @@ public class MainGuiTest {
     }
 
     private void testColorPaletteMenu(String menuName, String dialogTitle) {
-        runMenuCommand(menuName);
+        app.runMenuCommand(menuName);
         testColorPaletteDialog(dialogTitle);
     }
 
     private void testColorPaletteDialog(String dialogTitle) {
-        var dialog = findDialogByTitle(dialogTitle);
+        var dialog = app.findDialogByTitle(dialogTitle);
         if (dialogTitle.contains("Foreground")) {
             dialog.resizeTo(new Dimension(500, 500));
         } else {
@@ -784,37 +714,433 @@ public class MainGuiTest {
     }
 
 //</editor-fold>
+//<editor-fold desc="file menu">
+
+    void testFileMenu() {
+        if (fileMenuTested && Rnd.nextDouble() > 0.05) {
+            return;
+        }
+        log(0, "file menu");
+
+        cleanOutputs();
+
+        testNewImage();
+        testSave("png");
+        testSave("pxc");
+        closeOneOfTwoViews();
+        testFileOpen();
+        closeOneOfTwoViews();
+        testExportOptimizedJPEG();
+        testMagick();
+        testExportLayerAnimation();
+        testExportTweeningAnimation();
+        testReload();
+        testShowMetadata();
+        testBatchResize();
+        testBatchFilter();
+        testExportLayerToPNG();
+        testScreenCapture();
+        testCloseAll();
+
+        // open an image for the next test
+        openFileWithDialog(inputDir, "a.jpg");
+
+        fileMenuTested = true;
+        afterTestActions();
+    }
+
+    private void testNewImage() {
+        log(1, "new image");
+
+        app.createNewImage(611, 411, null);
+
+        app.closeCurrentView(ExpectConfirmation.NO);
+    }
+
+    private void testFileOpen() {
+        log(1, "file open");
+
+        app.runMenuCommand("Open...");
+        var openDialog = app.findOpenFileChooser();
+        openDialog.cancel();
+
+        openFileWithDialog(inputDir, "b.jpg");
+
+        afterTestActions();
+    }
+
+    private void testSave(String extension) {
+        log(1, "save, ext = " + extension);
+
+        // create a new image to be saved
+        app.createNewImage(400, 400, null);
+        maskMode.apply(this);
+
+        // the new image is unsaved => has no file
+        assertThat(EDT.queryActiveComp(Composition::getFile)).isNull();
+
+        String fileName = "saved." + extension;
+        app.runMenuCommand("Save");
+        // new unsaved image, will be saved with a file chooser
+        app.acceptSaveDialog(baseDir, fileName);
+
+        // now that the file is saved, save again:
+        // no file chooser should appear
+        app.runMenuCommand("Save");
+        Utils.sleep(500, MILLISECONDS);
+
+        // test "Save As"
+        app.runMenuCommand("Save As...");
+        // there is always a dialog for "Save As"
+        app.acceptSaveDialog(baseDir, fileName);
+
+        app.closeCurrentView(ExpectConfirmation.NO);
+
+        openFileWithDialog(baseDir, fileName);
+        maskMode.apply(this);
+
+        // can be dirty if a masked mask mode is set
+        app.closeCurrentView(ExpectConfirmation.UNKNOWN);
+
+        maskMode.apply(this);
+        afterTestActions();
+    }
+
+    private void testExportOptimizedJPEG() {
+        log(1, "testing export optimized jpeg");
+
+        app.runMenuCommand("Export Optimized JPEG...");
+
+        // wait for the preview to be calculated
+        Utils.sleep(2, SECONDS);
+
+        app.findDialogByTitle("Export Optimized JPEG").button("ok").click();
+        app.acceptSaveDialog(baseDir, "saved.jpg");
+
+        afterTestActions();
+    }
+
+    private void testMagick() {
+        log(1, "testing ImageMagick export-import");
+
+        // test importing
+        app.openFileWithDialog("Import...", baseDir, "webp_image.webp");
+
+        // test exporting
+        app.runMenuCommand("Export...");
+        String exportFileName = "saved_image.webp";
+        app.acceptSaveDialog(baseDir, exportFileName);
+        app.findJOptionPane("WebP Export Options for " + exportFileName)
+            .buttonWithText("Export").click();
+
+        app.closeCurrentView(ExpectConfirmation.NO);
+        afterTestActions();
+    }
+
+    private void testExportLayerAnimation() {
+        log(1, "testing exporting layer animation");
+
+        // precondition: the active image has only 1 layer
+        app.checkNumLayersIs(1);
+
+        app.runMenuCommand("Export Layer Animation...");
+        // error dialog, because there is only one layer
+        app.findJOptionPane("Not Enough Layers")
+            .okButton().click();
+
+        app.duplicateLayer(ImageLayer.class);
+        app.invert();
+
+        // this time it should work
+        app.runMenuCommand("Export Layer Animation...");
+        app.findDialogByTitle("Export Animated GIF").button("ok").click();
+
+        app.acceptSaveDialog(baseDir, "layeranim.gif");
+
+        afterTestActions();
+    }
+
+    private void testExportTweeningAnimation() {
+        log(1, "testing export tweening animation");
+
+        assertThat(EDT.getNumViews()).isGreaterThan(0);
+
+        app.runMenuCommand("Export Tweening Animation...");
+        var dialog = app.findDialogByTitle("Export Tweening Animation");
+        String[] searchTexts = {"wav", "kalei"};
+        dialog.textBox("searchTF").enterText(Rnd.chooseFrom(searchTexts));
+        dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
+            .pressKey(VK_DOWN).releaseKey(VK_DOWN);
+        dialog.button("ok").click(); // next
+        dialog.requireVisible();
+
+        dialog.button(withText("Randomize Settings")).click();
+        dialog.button("ok").click(); // next
+        dialog.requireVisible();
+
+        findButtonByText(dialog, "Randomize Settings").click();
+        dialog.button("ok").click(); // next
+        dialog.requireVisible();
+
+        if (quick) {
+            dialog.textBox("numSecondsTF").deleteText().enterText("1");
+            dialog.textBox("fpsTF").deleteText().enterText("4");
+            dialog.label("numFramesLabel").requireText("4");
+        } else {
+            dialog.textBox("numSecondsTF").deleteText().enterText("3");
+            dialog.textBox("fpsTF").deleteText().enterText("5");
+            dialog.label("numFramesLabel").requireText("15");
+        }
+
+        dialog.button("ok").click(); // render button
+        dialog.requireVisible(); // still visible because of the validation error
+
+        app.findJOptionPane("Folder Not Empty")
+            .yesButton().click();
+        dialog.requireNotVisible();
+
+        app.waitForProgressMonitorEnd();
+
+        afterTestActions();
+    }
+
+    private void closeOneOfTwoViews() {
+        log(1, "testing close one of two views");
+
+        int numOpenImages = EDT.call(Views::getNumViews);
+        if (numOpenImages == 1) {
+            app.createNewImage(400, 400, null);
+        }
+
+        EDT.assertNumViewsIs(2);
+
+        app.closeCurrentView(ExpectConfirmation.UNKNOWN);
+
+        EDT.assertNumViewsIs(1);
+
+        maskMode.apply(this);
+        afterTestActions();
+    }
+
+    private void testCloseAll() {
+        log(1, "testing close all");
+
+        assertThat(EDT.getNumViews()).isGreaterThan(0);
+
+        app.closeAll();
+        EDT.assertNumViewsIs(0);
+
+        afterTestActions();
+    }
+
+    private void testShowMetadata() {
+        log(1, "testing show metadata");
+
+        app.runMenuCommand("Show Metadata...");
+        String title = "Metadata for "
+            + EDT.queryActiveComp(Composition::getName);
+        var dialog = app.findDialogByTitle(title);
+
+        dialog.button("expandAllButton").click();
+        dialog.button("collapseAllButton").click();
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+
+        afterTestActions();
+    }
+
+    private void testBatchResize() {
+        log(1, "testing batch resize");
+        maskMode.apply(this);
+
+        EDT.run(() -> {
+            Dirs.setLastOpen(inputDir);
+            Dirs.setLastSave(batchResizeOutputDir);
+            FileFormat.setLastSaved(FileFormat.JPG);
+        });
+
+        app.runMenuCommand("Batch Resize...");
+        var dialog = app.findDialogByTitle("Batch Resize");
+
+        dialog.textBox("widthTF").setText("200");
+        dialog.textBox("heightTF").setText("200");
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+
+        Utils.sleep(5, SECONDS);
+
+        checkOutputFilesWereCreated(batchResizeOutputDir);
+        afterTestActions();
+    }
+
+    private void testBatchFilter() {
+        log(1, "testing batch filter");
+
+        Dirs.setLastOpen(inputDir);
+        Dirs.setLastSave(batchFilterOutputDir);
+
+        assertThat(EDT.getNumViews()).isGreaterThan(0);
+        maskMode.apply(this);
+
+        app.runMenuCommand("Batch Filter...");
+        var dialog = app.findDialogByTitle("Batch Filter");
+        dialog.textBox("searchTF").enterText("wav");
+        dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
+            .pressKey(VK_DOWN).releaseKey(VK_DOWN);
+        dialog.button("ok").click(); // next
+
+        findButtonByText(dialog, "Randomize Settings").click();
+        dialog.button("ok").click(); // start processing
+        dialog.requireNotVisible();
+
+        app.waitForProgressMonitorEnd();
+
+        afterTestActions();
+
+        checkOutputFilesWereCreated(batchFilterOutputDir);
+    }
+
+    private static void checkOutputFilesWereCreated(File outputDir) {
+        for (File inputFile : FileUtils.listSupportedInputFiles(inputDir)) {
+            String fileName = inputFile.getName();
+
+            File outFile = new File(outputDir, fileName);
+            assertThat(outFile).exists().isFile();
+        }
+    }
+
+    private void testExportLayerToPNG() {
+        log(1, "testing export layer to png");
+
+        Dirs.setLastSave(baseDir);
+
+        app.duplicateLayer(ImageLayer.class);
+        app.invert();
+        maskMode.apply(this);
+
+        app.runMenuCommand("Export Layers to PNG...");
+        app.findDialogByTitle("Select Output Folder").button("ok").click();
+        Utils.sleep(2, SECONDS);
+
+        afterTestActions();
+    }
+
+    void testAutoPaint() {
+        log(0, "testing AutoPaint");
+
+        runWithSelectionTranslationCombinations(this::testAutoPaintTask);
+
+        afterTestActions();
+    }
+
+    private void testAutoPaintTask() {
+        for (Tool tool : AutoPaint.SUPPORTED_TOOLS) {
+            if (skip()) {
+                continue;
+            }
+            if (tool == Tools.BRUSH) {
+                for (String colorMode : AutoPaintPanel.COLOR_MODES) {
+                    testAutoPaintWithTool(tool, colorMode);
+                }
+            } else {
+                testAutoPaintWithTool(tool, null);
+            }
+        }
+    }
+
+    private void testAutoPaintWithTool(Tool tool, String colorMode) {
+        app.runMenuCommand("Auto Paint...");
+        var dialog = app.findDialogByTitle("Auto Paint");
+
+        var toolSelector = dialog.comboBox("toolSelector");
+        toolSelector.selectItem(tool.toString());
+
+        var strokeCountTF = dialog.textBox("strokeCountTF");
+        String testNumStrokes = "111";
+        if (!strokeCountTF.text().equals(testNumStrokes)) {
+            strokeCountTF.deleteText();
+            strokeCountTF.enterText(testNumStrokes);
+        }
+
+        var colorsCB = dialog.comboBox("colorsCB");
+        if (colorMode != null) {
+            colorsCB.requireEnabled();
+            colorsCB.selectItem(colorMode);
+        } else {
+            colorsCB.requireDisabled();
+        }
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+
+        keyboard.undoRedoUndo("Auto Paint");
+    }
+
+    private void testScreenCapture() {
+        log(1, "testing screen capture");
+
+        View prevView = EDT.getActiveView();
+        testScreenCapture(true);
+        testScreenCapture(false);
+
+        EDT.activate(prevView);
+
+        afterTestActions();
+    }
+
+    private void testScreenCapture(boolean hidePixelitor) {
+        app.runMenuCommand("Screen Capture...");
+        var dialog = app.findDialogByTitle("Screen Capture");
+        var cb = dialog.checkBox();
+        if (hidePixelitor) {
+            cb.check();
+        } else {
+            cb.uncheck();
+        }
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+
+        maskMode.apply(this);
+
+        afterTestActions();
+    }
+
+    private void testReload() {
+        log(1, "testing reload");
+
+        app.reload();
+        maskMode.apply(this);
+
+        afterTestActions();
+    }
+//</editor-fold>
 //<editor-fold desc="edit menu">
 
     void testEditMenu() {
         log(0, "edit menu");
 
-        app.invert();
-        runMenuCommand("Repeat Invert");
-        keyboard.undoRedo("Invert"); // needed by the history checker
-
-        // also test undo/redo via the menus
-        runMenuCommand("Undo Invert");
-        runMenuCommand("Redo Invert");
-
+        testMenuUndoRedo();
         testFade();
-
         testCopyPaste();
-
         testPreferences();
 
         afterTestActions();
     }
 
+    private void testMenuUndoRedo() {
+        app.invert();
+        app.runMenuCommand("Undo Invert");
+        app.runMenuCommand("Redo Invert");
+    }
+
     private void testFade() {
-        // test with own method so that a meaningful opacity can be set
-        runMenuCommand("Fade Invert...");
+        app.runMenuCommand("Fade Invert...");
         var dialog = app.findFilterDialog();
 
-        dialog.slider().slideTo(75);
+        dialog.slider().slideTo(75); // set opacity to 75%
 
-        dialog.checkBox("show original").click();
-        dialog.checkBox("show original").click();
+        dialog.checkBox("show original").check().uncheck();
 
         dialog.button("ok").click();
 
@@ -824,29 +1150,43 @@ public class MainGuiTest {
     private void testCopyPaste() {
         log(1, "copy-paste");
 
-        EDT.assertNumOpenImagesIs(1);
-        app.checkNumLayersIs(1);
+        EDT.assertNumViewsIs(1);
+        String existingLayerName = "layer 1";
+        String activeCompAtStartName = EDT.queryActiveComp(Composition::getName);
+        app.checkLayerNamesAre(existingLayerName);
 
-        runMenuCommand("Copy Layer/Mask");
-        runMenuCommand("Paste as New Layer");
-        keyboard.undoRedo("New Pasted Layer");
+        app.runMenuCommand("Copy Layer/Mask");
 
-        app.checkNumLayersIs(2);
+        app.runMenuCommand("Paste as New Layer");
+        app.checkLayerNamesAre(existingLayerName, "pasted layer");
 
-        runMenuCommand("Copy Composite");
-        runMenuCommand("Paste as New Image");
-        EDT.assertNumOpenImagesIs(2);
+        keyboard.undo("New Pasted Layer");
+        app.checkLayerNamesAre(existingLayerName);
+
+        keyboard.redo("New Pasted Layer");
+        app.checkLayerNamesAre(existingLayerName, "pasted layer");
+
+        app.checkLayerNamesAre(existingLayerName, "pasted layer");
+
+        app.runMenuCommand("Copy Composite");
+        app.runMenuCommand("Paste as New Image");
+        assertThat(EDT.getActiveCompName()).startsWith("Pasted Image ");
 
         // close the pasted image
         app.closeCurrentView(ExpectConfirmation.NO);
-        EDT.assertNumOpenImagesIs(1);
+        EDT.assertOpenCompNamesAre(activeCompAtStartName);
 
         // delete the pasted layer
-        app.checkNumLayersIs(2);
+        app.checkLayerNamesAre(existingLayerName, "pasted layer");
         assert DeleteActiveLayerAction.INSTANCE.isEnabled();
-        runMenuCommand("Delete Layer");
-        keyboard.undoRedo("Delete Pasted Layer");
-        app.checkNumLayersIs(1);
+        app.runMenuCommand("Delete Layer");
+        app.checkLayerNamesAre(existingLayerName);
+
+        keyboard.undo("Delete pasted layer");
+        app.checkLayerNamesAre(existingLayerName, "pasted layer");
+
+        keyboard.redo("Delete pasted layer");
+        app.checkLayerNamesAre(existingLayerName);
 
         maskMode.apply(this);
     }
@@ -857,8 +1197,8 @@ public class MainGuiTest {
         }
         log(1, "preferences dialog");
 
-        runMenuCommand("Preferences...");
-        var dialog = findDialogByTitle("Preferences");
+        app.runMenuCommand("Preferences...");
+        var dialog = app.findDialogByTitle("Preferences");
         if (preferencesTested) {
             dialog.tabbedPane().selectTab("UI");
         }
@@ -927,14 +1267,14 @@ public class MainGuiTest {
         log(0, "image menu");
 
         // image from the previous tests
-        EDT.assertNumOpenImagesIs(1);
+        EDT.assertNumViewsIs(1);
         app.checkNumLayersIs(1);
 
         testCropSelection();
 
         // add more layer types
         // TODO set to false, because currently not all layer types
-        // create undo edits when used with the move tool
+        //   create undo edits when used with the move tool
         boolean addExtraLayers = false;
         if (addExtraLayers) {
             app.addGradientFillLayer(GradientType.ANGLE);
@@ -975,9 +1315,9 @@ public class MainGuiTest {
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(400, 400);
         keyboard.undoRedo("Create Selection");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
-        testCropSelection(() -> runMenuCommand("Crop Selection"),
+        testCropSelection(() -> app.runMenuCommand("Crop Selection"),
             false, 200.0, 200.0);
 
         app.deselect();
@@ -987,14 +1327,14 @@ public class MainGuiTest {
         int numLayers = EDT.getNumLayersInActiveHolder();
         log(1, "image duplication, num layers = " + numLayers);
 
-        EDT.assertNumOpenImagesIs(1);
+        EDT.assertNumViewsIs(1);
 
-        runMenuCommand("Duplicate");
-        EDT.assertNumOpenImagesIs(2);
-        EDT.assertNumLayersIs(numLayers);
+        app.runMenuCommand("Duplicate");
+        EDT.assertNumViewsIs(2);
+        EDT.assertNumLayersInActiveHolderIs(numLayers);
 
         closeOneOfTwoViews();
-        EDT.assertNumOpenImagesIs(1);
+        EDT.assertNumViewsIs(1);
     }
 
     private void testResize() {
@@ -1011,427 +1351,6 @@ public class MainGuiTest {
     }
 
 //</editor-fold>
-//<editor-fold desc="file menu">
-
-    void testFileMenu() {
-        if (fileMenuTested && Rnd.nextDouble() > 0.05) {
-            return;
-        }
-        log(0, "file menu");
-
-        cleanOutputs();
-
-        testNewImage();
-        testSave("png");
-        testSave("pxc");
-        closeOneOfTwoViews();
-        testFileOpen();
-        closeOneOfTwoViews();
-        testExportOptimizedJPEG();
-        testMagick();
-        testExportLayerAnimation();
-        testExportTweeningAnimation();
-        testReload();
-        testShowMetadata();
-        testBatchResize();
-        testBatchFilter();
-        testExportLayerToPNG();
-        testScreenCapture();
-        testCloseAll();
-
-        // open an image for the next test
-        openFileWithDialog(inputDir, "a.jpg");
-
-        fileMenuTested = true;
-        afterTestActions();
-    }
-
-    private void testNewImage() {
-        log(1, "new image");
-
-        app.createNewImage(611, 411, null);
-
-        app.closeCurrentView(ExpectConfirmation.NO);
-    }
-
-    private void testFileOpen() {
-        log(1, "file open");
-
-        runMenuCommand("Open...");
-        var openDialog = app.findOpenFileChooser();
-        openDialog.cancel();
-
-        openFileWithDialog(inputDir, "b.jpg");
-
-        afterTestActions();
-    }
-
-    private void testSave(String extension) {
-        log(1, "save, ext = " + extension);
-
-        // create a new image to be saved
-        app.createNewImage(400, 400, null);
-        maskMode.apply(this);
-
-        // the new image is unsaved => has no file
-        assertThat(EDT.active(Composition::getFile)).isNull();
-
-        // new unsaved image, will be saved with a file chooser
-        runMenuCommand("Save");
-        var saveDialog = app.findSaveFileChooser();
-
-        String fileName = "saved." + extension;
-        File file = new File(baseDir, fileName);
-
-        boolean fileExistsAlready = file.exists();
-
-        String compName = EDT.active(Composition::getName);
-
-        saveDialog.setCurrentDirectory(baseDir);
-        saveDialog.fileNameTextBox()
-            .requireText(compName)
-            .deleteText()
-            .enterText(fileName);
-        saveDialog.approve();
-
-        if (fileExistsAlready) {
-            // say OK to the overwrite question
-            app.findJOptionPane("Confirmation").yesButton().click();
-        }
-        Utils.sleep(500, MILLISECONDS);
-        assertThat(file).exists().isFile();
-
-        // now that the file is saved, save again:
-        // no file chooser should appear
-        runMenuCommand("Save");
-        Utils.sleep(500, MILLISECONDS);
-
-        // test "Save As"
-        runMenuCommand("Save As...");
-
-        // there is always a dialog for "Save As"
-        app.saveWithOverwrite(baseDir, fileName);
-
-        app.closeCurrentView(ExpectConfirmation.NO);
-
-        openFileWithDialog(baseDir, fileName);
-        maskMode.apply(this);
-
-        // can be dirty if a masked mask mode is set
-        app.closeCurrentView(ExpectConfirmation.UNKNOWN);
-
-        maskMode.apply(this);
-        afterTestActions();
-    }
-
-    private void testExportOptimizedJPEG() {
-        log(1, "testing export optimized jpeg");
-
-        runMenuCommand("Export Optimized JPEG...");
-
-        // wait for the preview to be calculated
-        Utils.sleep(2, SECONDS);
-
-        findDialogByTitle("Export Optimized JPEG").button("ok").click();
-        app.saveWithOverwrite(baseDir, "saved.jpg");
-
-        afterTestActions();
-    }
-
-    private void testMagick() {
-        log(1, "testing ImageMagick export-import");
-
-        // test importing
-        app.openFileWithDialog("Import...", baseDir, "webp_image.webp");
-
-        // test exporting
-        app.runMenuCommand("Export...");
-        String exportFileName = "saved_image.webp";
-        app.saveWithOverwrite(baseDir, exportFileName);
-        app.findJOptionPane("WebP Export Options for " + exportFileName)
-            .buttonWithText("Export").click();
-
-        app.closeCurrentView(ExpectConfirmation.NO);
-        afterTestActions();
-    }
-
-    private void testExportLayerAnimation() {
-        log(1, "testing exporting layer animation");
-
-        // precondition: the active image has only 1 layer
-        app.checkNumLayersIs(1);
-
-        runMenuCommand("Export Layer Animation...");
-        // error dialog, because there is only one layer
-        app.findJOptionPane("Not Enough Layers")
-            .okButton().click();
-
-        app.duplicateLayer(ImageLayer.class);
-        app.invert();
-
-        // this time it should work
-        runMenuCommand("Export Layer Animation...");
-        findDialogByTitle("Export Animated GIF").button("ok").click();
-
-        app.saveWithOverwrite(baseDir, "layeranim.gif");
-
-        afterTestActions();
-    }
-
-    private void testExportTweeningAnimation() {
-        log(1, "testing export tweening animation");
-
-        EDT.assertNumOpenImagesIsAtLeast(1);
-
-        runMenuCommand("Export Tweening Animation...");
-        var dialog = findDialogByTitle("Export Tweening Animation");
-        String[] searchTexts = {"wav", "kalei"};
-        dialog.textBox("searchTF").enterText(Rnd.chooseFrom(searchTexts));
-        dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
-            .pressKey(VK_DOWN).releaseKey(VK_DOWN);
-        dialog.button("ok").click(); // next
-        dialog.requireVisible();
-
-        dialog.button(withText("Randomize Settings")).click();
-        dialog.button("ok").click(); // next
-        dialog.requireVisible();
-
-        findButtonByText(dialog, "Randomize Settings").click();
-        dialog.button("ok").click(); // next
-        dialog.requireVisible();
-
-        if (quick) {
-            dialog.textBox("numSecondsTF").deleteText().enterText("1");
-            dialog.textBox("fpsTF").deleteText().enterText("4");
-            dialog.label("numFramesLabel").requireText("4");
-        } else {
-            dialog.textBox("numSecondsTF").deleteText().enterText("3");
-            dialog.textBox("fpsTF").deleteText().enterText("5");
-            dialog.label("numFramesLabel").requireText("15");
-        }
-
-        dialog.button("ok").click(); // render button
-        dialog.requireVisible(); // still visible because of the validation error
-
-        app.findJOptionPane("Folder Not Empty")
-            .yesButton().click();
-        dialog.requireNotVisible();
-
-        app.waitForProgressMonitorEnd();
-
-        afterTestActions();
-    }
-
-    private void closeOneOfTwoViews() {
-        log(1, "testing close one of two views");
-
-        int numOpenImages = EDT.call(Views::getNumViews);
-        if (numOpenImages == 1) {
-            app.createNewImage(400, 400, null);
-        }
-
-        EDT.assertNumOpenImagesIs(2);
-
-        app.closeCurrentView(ExpectConfirmation.UNKNOWN);
-
-        EDT.assertNumOpenImagesIs(1);
-
-        maskMode.apply(this);
-        afterTestActions();
-    }
-
-    private void testCloseAll() {
-        log(1, "testing close all");
-
-        EDT.assertNumOpenImagesIsAtLeast(1);
-
-        app.closeAll();
-        EDT.assertNumOpenImagesIs(0);
-
-        afterTestActions();
-    }
-
-    private void testShowMetadata() {
-        log(1, "testing show metadata");
-
-        runMenuCommand("Show Metadata...");
-        var dialog = findDialogByTitle("Metadata for "
-            + EDT.active(Composition::getName));
-
-        dialog.button("expandAllButton").click();
-        dialog.button("collapseAllButton").click();
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-
-        afterTestActions();
-    }
-
-    private void testBatchResize() {
-        log(1, "testing batch resize");
-        maskMode.apply(this);
-
-        EDT.run(() -> {
-            Dirs.setLastOpen(inputDir);
-            Dirs.setLastSave(batchResizeOutputDir);
-            FileFormat.setLastSaved(FileFormat.JPG);
-        });
-
-        runMenuCommand("Batch Resize...");
-        var dialog = findDialogByTitle("Batch Resize");
-
-        dialog.textBox("widthTF").setText("200");
-        dialog.textBox("heightTF").setText("200");
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-
-        Utils.sleep(5, SECONDS);
-
-        checkOutputFilesWereCreated(batchResizeOutputDir);
-        afterTestActions();
-    }
-
-    private void testBatchFilter() {
-        log(1, "testing batch filter");
-
-        Dirs.setLastOpen(inputDir);
-        Dirs.setLastSave(batchFilterOutputDir);
-
-        EDT.assertNumOpenImagesIsAtLeast(1);
-        maskMode.apply(this);
-
-        runMenuCommand("Batch Filter...");
-        var dialog = findDialogByTitle("Batch Filter");
-        dialog.textBox("searchTF").enterText("wav");
-        dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
-            .pressKey(VK_DOWN).releaseKey(VK_DOWN);
-        dialog.button("ok").click(); // next
-
-        findButtonByText(dialog, "Randomize Settings").click();
-        dialog.button("ok").click(); // start processing
-        dialog.requireNotVisible();
-
-        app.waitForProgressMonitorEnd();
-
-        afterTestActions();
-
-        checkOutputFilesWereCreated(batchFilterOutputDir);
-    }
-
-    private static void checkOutputFilesWereCreated(File outputDir) {
-        for (File inputFile : FileUtils.listSupportedInputFiles(inputDir)) {
-            String fileName = inputFile.getName();
-
-            File outFile = new File(outputDir, fileName);
-            assertThat(outFile).exists().isFile();
-        }
-    }
-
-    private void testExportLayerToPNG() {
-        log(1, "testing export layer to png");
-
-        Dirs.setLastSave(baseDir);
-
-        app.duplicateLayer(ImageLayer.class);
-        app.invert();
-        maskMode.apply(this);
-
-        runMenuCommand("Export Layers to PNG...");
-        findDialogByTitle("Select Output Folder").button("ok").click();
-        Utils.sleep(2, SECONDS);
-
-        afterTestActions();
-    }
-
-    void testAutoPaint() {
-        log(0, "testing AutoPaint");
-
-        runWithSelectionTranslationCombinations(this::testAutoPaintTask);
-
-        afterTestActions();
-    }
-
-    private void testAutoPaintTask() {
-        for (Tool tool : AutoPaint.SUPPORTED_TOOLS) {
-            if (skip()) {
-                continue;
-            }
-            if (tool == Tools.BRUSH) {
-                for (String colorMode : AutoPaintPanel.COLOR_MODES) {
-                    testAutoPaintWithTool(tool, colorMode);
-                }
-            } else {
-                testAutoPaintWithTool(tool, null);
-            }
-        }
-    }
-
-    private void testAutoPaintWithTool(Tool tool, String colorMode) {
-        runMenuCommand("Auto Paint...");
-        var dialog = findDialogByTitle("Auto Paint");
-
-        var toolSelector = dialog.comboBox("toolSelector");
-        toolSelector.selectItem(tool.toString());
-
-        var strokeCountTF = dialog.textBox("strokeCountTF");
-        String testNumStrokes = "111";
-        if (!strokeCountTF.text().equals(testNumStrokes)) {
-            strokeCountTF.deleteText();
-            strokeCountTF.enterText(testNumStrokes);
-        }
-
-        var colorsCB = dialog.comboBox("colorsCB");
-        if (colorMode != null) {
-            colorsCB.requireEnabled();
-            colorsCB.selectItem(colorMode);
-        } else {
-            colorsCB.requireDisabled();
-        }
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-
-        keyboard.undoRedoUndo("Auto Paint");
-    }
-
-    private void testScreenCapture() {
-        log(1, "testing screen capture");
-
-        View prevView = EDT.getActiveView();
-        testScreenCapture(true);
-        testScreenCapture(false);
-
-        EDT.activate(prevView);
-
-        afterTestActions();
-    }
-
-    private void testScreenCapture(boolean hidePixelitor) {
-        runMenuCommand("Screen Capture...");
-        var dialog = findDialogByTitle("Screen Capture");
-        var cb = dialog.checkBox();
-        if (hidePixelitor) {
-            cb.check();
-        } else {
-            cb.uncheck();
-        }
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-
-        maskMode.apply(this);
-
-        afterTestActions();
-    }
-
-    private void testReload() {
-        log(1, "testing reload");
-
-        app.reload();
-        maskMode.apply(this);
-
-        afterTestActions();
-    }
-//</editor-fold>
 //<editor-fold desc="view menu">
 
     void testViewMenu() {
@@ -1440,7 +1359,7 @@ public class MainGuiTest {
         }
         log(0, "view menu");
 
-        EDT.assertNumOpenImagesIs(1);
+        EDT.assertNumViewsIs(1);
         app.checkNumLayersIs(1);
 
         testZoomCommands();
@@ -1449,8 +1368,8 @@ public class MainGuiTest {
         testGuides();
 
         if (ImageArea.isActiveMode(FRAMES)) {
-            runMenuCommand("Cascade");
-            runMenuCommand("Tile");
+            app.runMenuCommand("Cascade");
+            app.runMenuCommand("Tile");
         }
 
         afterTestActions();
@@ -1460,41 +1379,41 @@ public class MainGuiTest {
     private void testZoomCommands() {
         log(1, "zoom commands");
 
-        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
+        ZoomLevel startingZoom = EDT.getActiveZoomLevel();
 
-        runMenuCommand("Zoom In");
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn());
+        app.runMenuCommand("Zoom In");
+        EDT.assertActiveZoomIs(startingZoom.zoomIn());
 
-        runMenuCommand("Zoom Out");
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomOut());
+        app.runMenuCommand("Zoom Out");
+        EDT.assertActiveZoomIs(startingZoom.zoomIn().zoomOut());
 
-        runMenuCommand("Fit Space");
-        runMenuCommand("Fit Width");
-        runMenuCommand("Fit Height");
+        app.runMenuCommand("Fit Space");
+        app.runMenuCommand("Fit Width");
+        app.runMenuCommand("Fit Height");
 
-        runMenuCommand("Actual Pixels");
-        EDT.assertZoomOfActiveIs(ZoomLevel.ACTUAL_SIZE);
+        app.runMenuCommand("Actual Pixels");
+        EDT.assertActiveZoomIs(ZoomLevel.ACTUAL_SIZE);
     }
 
     private void testHideShowUI() {
         log(1, "hide/show UI elements");
 
-        runMenuCommand("Reset Workspace");
+        app.runMenuCommand("Reset Workspace");
         assert EDT.call(StatusBar::isShown);
         assert !EDT.call(HistogramsPanel::isShown);
         assert EDT.call(LayersContainer::areLayersShown);
         assert EDT.call(() -> PixelitorWindow.get().areToolsShown());
 
-        runMenuCommand("Hide Status Bar");
+        app.runMenuCommand("Hide Status Bar");
         assert !EDT.call(StatusBar::isShown);
 
-        runMenuCommand("Show Status Bar");
+        app.runMenuCommand("Show Status Bar");
         assert EDT.call(StatusBar::isShown);
 
-        runMenuCommand("Show Histograms");
+        app.runMenuCommand("Show Histograms");
         assert EDT.call(HistogramsPanel::isShown);
 
-        runMenuCommand("Hide Histograms");
+        app.runMenuCommand("Hide Histograms");
         assert !EDT.call(HistogramsPanel::isShown);
 
         keyboard.press(VK_F6);
@@ -1503,10 +1422,10 @@ public class MainGuiTest {
         keyboard.press(VK_F6);
         assert !EDT.call(HistogramsPanel::isShown);
 
-        runMenuCommand("Hide Layers");
+        app.runMenuCommand("Hide Layers");
         assert !EDT.call(LayersContainer::areLayersShown);
 
-        runMenuCommand("Show Layers");
+        app.runMenuCommand("Show Layers");
         assert EDT.call(LayersContainer::areLayersShown);
 
         keyboard.press(VK_F7);
@@ -1515,19 +1434,19 @@ public class MainGuiTest {
         keyboard.press(VK_F7);
         assert EDT.call(LayersContainer::areLayersShown);
 
-        runMenuCommand("Hide Tools");
+        app.runMenuCommand("Hide Tools");
         assert !EDT.call(() -> PixelitorWindow.get().areToolsShown());
 
-        runMenuCommand("Show Tools");
+        app.runMenuCommand("Show Tools");
         assert EDT.call(() -> PixelitorWindow.get().areToolsShown());
 
-        runMenuCommand("Hide All");
+        app.runMenuCommand("Hide All");
         assert !EDT.call(StatusBar::isShown);
         assert !EDT.call(HistogramsPanel::isShown);
         assert !EDT.call(LayersContainer::areLayersShown);
         assert !EDT.call(() -> PixelitorWindow.get().areToolsShown());
 
-        runMenuCommand("Restore Workspace");
+        app.runMenuCommand("Restore Workspace");
         assert EDT.call(StatusBar::isShown);
         assert !EDT.call(HistogramsPanel::isShown);
         assert EDT.call(LayersContainer::areLayersShown);
@@ -1537,33 +1456,33 @@ public class MainGuiTest {
     private void testGuides() {
         log(1, "guides");
 
-        runMenuCommand("Add Horizontal Guide...");
-        var dialog = findDialogByTitle("Add Horizontal Guide");
+        app.runMenuCommand("Add Horizontal Guide...");
+        var dialog = app.findDialogByTitle("Add Horizontal Guide");
         dialog.button("ok").click();
         dialog.requireNotVisible();
-        assertThat(EDT.getGuides().getHorizontals()).containsExactly(0.5);
-        assertThat(EDT.getGuides().getVerticals()).isEmpty();
+        assertThat(EDT.getActiveGuides().getHorizontals()).containsExactly(0.5);
+        assertThat(EDT.getActiveGuides().getVerticals()).isEmpty();
         keyboard.undoRedo("Create Guides");
 
-        runMenuCommand("Add Vertical Guide...");
-        dialog = findDialogByTitle("Add Vertical Guide");
+        app.runMenuCommand("Add Vertical Guide...");
+        dialog = app.findDialogByTitle("Add Vertical Guide");
         dialog.button("ok").click();
         dialog.requireNotVisible();
-        assertThat(EDT.getGuides().getHorizontals()).containsExactly(0.5);
-        assertThat(EDT.getGuides().getVerticals()).containsExactly(0.5);
+        assertThat(EDT.getActiveGuides().getHorizontals()).containsExactly(0.5);
+        assertThat(EDT.getActiveGuides().getVerticals()).containsExactly(0.5);
         keyboard.undoRedo("Change Guides");
 
-        runMenuCommand("Add Grid Guides...");
-        dialog = findDialogByTitle("Add Grid Guides");
+        app.runMenuCommand("Add Grid Guides...");
+        dialog = app.findDialogByTitle("Add Grid Guides");
         dialog.button("ok").click();
         dialog.requireNotVisible();
-        assertThat(EDT.getGuides().getHorizontals()).containsExactly(0.25, 0.5, 0.75);
-        assertThat(EDT.getGuides().getVerticals()).containsExactly(0.25, 0.5, 0.75);
+        assertThat(EDT.getActiveGuides().getHorizontals()).containsExactly(0.25, 0.5, 0.75);
+        assertThat(EDT.getActiveGuides().getVerticals()).containsExactly(0.25, 0.5, 0.75);
         keyboard.undoRedo("Change Guides");
 
-        runMenuCommand("Clear Guides");
+        app.runMenuCommand("Clear Guides");
         keyboard.undoRedo("Clear Guides");
-        assertThat(EDT.getGuides()).isNull();
+        assertThat(EDT.getActiveGuides()).isNull();
     }
 
     private void testHistory() {
@@ -1582,8 +1501,8 @@ public class MainGuiTest {
         keyboard.undoRedo("Eraser Tool");
 
         // now start testing the history window
-        runMenuCommand("Show History...");
-        var dialog = findDialogByTitle("History");
+        app.runMenuCommand("Show History...");
+        var dialog = app.findDialogByTitle("History");
 
         var undoButton = dialog.button("undo");
         var redoButton = dialog.button("redo");
@@ -1628,11 +1547,11 @@ public class MainGuiTest {
         log(0, "filters");
 //        app.setIndexedMode();
 
-        EDT.assertNumOpenImagesIs(1);
+        EDT.assertNumViewsIs(1);
         app.checkNumLayersIs(1);
 
-        EDT.assertThereIsNoSelection();
-        EDT.assertThereIsNoTranslation();
+        EDT.requireNoSelection();
+        EDT.assertNoTranslation();
 
         boolean squashImage = FILTER_TESTS_WITH_WIDTH_1 || FILTER_TESTS_WITH_HEIGHT_1;
         if (squashImage) {
@@ -1645,6 +1564,7 @@ public class MainGuiTest {
             }
         }
 
+        testRepeatLast();
         testColorFilters(squashImage);
         testArtisticFilters();
         testBlurSharpenFilters();
@@ -1661,167 +1581,172 @@ public class MainGuiTest {
         afterTestActions();
     }
 
+    private void testRepeatLast() {
+        app.invert();
+        app.runMenuCommand("Repeat Invert");
+        keyboard.undoRedo("Invert"); // needed by the history checker
+    }
+
     private void testColorFilters(boolean squashedImage) {
         testColorBalance(squashedImage);
-        testFilterWithDialog(HueSat.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(Colorize.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(Levels.NAME, Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(BrightnessContrast.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(Solarize.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(Sepia.NAME, Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(HueSat.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog(Colorize.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog(Levels.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog(BrightnessContrast.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog(Solarize.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog(Sepia.NAME, FilterOptions.TRIVIAL);
         testInvert(squashedImage);
-        testFilterWithDialog("Channel Invert", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(ChannelMixer.NAME, Randomize.YES,
-            Reseed.NO, ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
+        testFilterWithDialog("Channel Invert", FilterOptions.TRIVIAL);
+        testFilterWithDialog(ChannelMixer.NAME, FilterOptions.STANDARD, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
             "R -> G -> B -> R", "R -> B -> G -> R",
             "Average BW", "Luminosity BW", "Sepia");
-        testFilterWithDialog("Equalize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Extract Channel", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Equalize", FilterOptions.STANDARD);
+        testFilterWithDialog("Extract Channel", FilterOptions.STANDARD);
         testNoDialogFilter("Luminosity");
         testNoDialogFilter("Value = max(R,G,B)");
         testNoDialogFilter(ExtractChannelFilter.DESATURATE_NAME);
         testNoDialogFilter(GUIText.HUE);
         testNoDialogFilter("Hue (with colors)");
         testNoDialogFilter(ExtractChannelFilter.SATURATION_NAME);
-        testFilterWithDialog("Quantize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(Posterize.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(Threshold.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Color Threshold", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Tritone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Gradient Map", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Quantize", FilterOptions.STANDARD);
+        testFilterWithDialog(Posterize.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog(Threshold.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog("Color Threshold", FilterOptions.STANDARD);
+        testFilterWithDialog("Tritone", FilterOptions.STANDARD);
+        testFilterWithDialog("Gradient Map", FilterOptions.TRIVIAL);
         testNoDialogFilter(GUIText.FG_COLOR);
         testNoDialogFilter(GUIText.BG_COLOR);
         testNoDialogFilter("Transparent");
-        testFilterWithDialog("Color Wheel", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Four Color Gradient", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Color Wheel", FilterOptions.RENDERING);
+        testFilterWithDialog("Four Color Gradient", FilterOptions.RENDERING);
     }
 
     private void testBlurSharpenFilters() {
-        testFilterWithDialog("Box Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Focus", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Gaussian Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Lens Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Motion Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Smart Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Spin and Zoom Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Unsharp Mask", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Box Blur", FilterOptions.STANDARD);
+        testFilterWithDialog("Focus", FilterOptions.STANDARD);
+        testFilterWithDialog("Gaussian Blur", FilterOptions.STANDARD);
+        testFilterWithDialog("Lens Blur", FilterOptions.STANDARD);
+        testFilterWithDialog("Motion Blur", FilterOptions.STANDARD);
+        testFilterWithDialog("Smart Blur", FilterOptions.STANDARD);
+        testFilterWithDialog("Spin and Zoom Blur", FilterOptions.STANDARD);
+        testFilterWithDialog("Unsharp Mask", FilterOptions.STANDARD);
     }
 
     private void testDistortFilters() {
-        testFilterWithDialog("Swirl, Pinch, Bulge", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Circle to Square", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Perspective", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Lens Over Image", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Magnify", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Turbulent Distortion", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Underwater", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Water Ripple", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Waves", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Angular Waves", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Radial Waves", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Glass Tiles", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Polar Glass Tiles", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Frosted Glass", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog(LittlePlanet.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(JHPolarCoordinates.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Wrap Around Arc", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Swirl, Pinch, Bulge", FilterOptions.STANDARD);
+        testFilterWithDialog("Circle to Square", FilterOptions.STANDARD);
+        testFilterWithDialog("Perspective", FilterOptions.STANDARD);
+        testFilterWithDialog("Lens Over Image", FilterOptions.STANDARD);
+        testFilterWithDialog("Magnify", FilterOptions.STANDARD);
+        testFilterWithDialog("Turbulent Distortion", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Underwater", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Water Ripple", FilterOptions.STANDARD);
+        testFilterWithDialog("Waves", FilterOptions.STANDARD);
+        testFilterWithDialog("Angular Waves", FilterOptions.STANDARD);
+        testFilterWithDialog("Radial Waves", FilterOptions.STANDARD);
+        testFilterWithDialog("Glass Tiles", FilterOptions.STANDARD);
+        testFilterWithDialog("Polar Glass Tiles", FilterOptions.STANDARD);
+        testFilterWithDialog("Frosted Glass", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog(LittlePlanet.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog(JHPolarCoordinates.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog("Wrap Around Arc", FilterOptions.STANDARD);
     }
 
     private void testDisplaceFilters() {
-        testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Grid Kaleidoscope", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(JHKaleidoscope.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(Mirror.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Offset", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Slice", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Tile Seamless", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Video Feedback", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Displacement Map", FilterOptions.STANDARD);
+        testFilterWithDialog("Drunk Vision", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Grid Kaleidoscope", FilterOptions.STANDARD);
+        testFilterWithDialog(JHKaleidoscope.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog(Mirror.NAME, FilterOptions.STANDARD);
+        testFilterWithDialog("Offset", FilterOptions.TRIVIAL);
+        testFilterWithDialog("Slice", FilterOptions.STANDARD);
+        testFilterWithDialog("Tile Seamless", FilterOptions.STANDARD);
+        testFilterWithDialog("Video Feedback", FilterOptions.STANDARD);
     }
 
     private void testLightFilters() {
-        testFilterWithDialog("Bump Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Flashlight", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Glint", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Glow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Rays", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Sparkle", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Bump Map", FilterOptions.STANDARD);
+        testFilterWithDialog("Flashlight", FilterOptions.STANDARD);
+        testFilterWithDialog("Glint", FilterOptions.STANDARD);
+        testFilterWithDialog("Glow", FilterOptions.STANDARD);
+        testFilterWithDialog("Rays", FilterOptions.STANDARD);
+        testFilterWithDialog("Sparkle", FilterOptions.STANDARD_RESEED);
     }
 
     private void testNoiseFilters() {
-        testFilterWithDialog("Kuwahara", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Kuwahara", FilterOptions.STANDARD);
         testNoDialogFilter("Reduce Single Pixel Noise");
         testNoDialogFilter("3x3 Median Filter");
-        testFilterWithDialog("Add Noise", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Pixelate", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Add Noise", FilterOptions.STANDARD);
+        testFilterWithDialog("Pixelate", FilterOptions.STANDARD);
     }
 
     private void testRenderFilters() {
-        testFilterWithDialog("Clouds", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Plasma", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Value Noise", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Clouds", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Plasma", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Value Noise", FilterOptions.RENDERING_RESEED);
 
-        testFilterWithDialog("Abstract Lights", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Brushed Metal", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Caustics", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Cells", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Flow Field", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Marble", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Voronoi Diagram", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Wood", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Abstract Lights", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Brushed Metal", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Caustics", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Cells", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Flow Field", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Marble", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Voronoi Diagram", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Wood", FilterOptions.RENDERING_RESEED);
 
         // Curves
-        testFilterWithDialog("Circle Weave", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Flower of Life", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("L-Systems", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Lissajous Curve", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Spider Web", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Spiral", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Spirograph", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Circle Weave", FilterOptions.SHAPES);
+        testFilterWithDialog("Flower of Life", FilterOptions.SHAPES);
+        testFilterWithDialog("L-Systems", FilterOptions.SHAPES);
+        testFilterWithDialog("Grid", FilterOptions.SHAPES);
+        testFilterWithDialog("Lissajous Curve", FilterOptions.SHAPES);
+        testFilterWithDialog("Spider Web", FilterOptions.SHAPES);
+        testFilterWithDialog("Spiral", FilterOptions.SHAPES);
+        testFilterWithDialog("Spirograph", FilterOptions.SHAPES);
 
         // Fractals
-        testFilterWithDialog("Chaos Game", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Fractal Tree", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Julia Set", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Mandelbrot Set", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Chaos Game", FilterOptions.RENDERING);
+        testFilterWithDialog("Fractal Tree", FilterOptions.RENDERING_RESEED);
+        testFilterWithDialog("Julia Set", FilterOptions.RENDERING);
+        testFilterWithDialog("Mandelbrot Set", FilterOptions.RENDERING);
 
         // Geometry
-        testFilterWithDialog("Border Mask", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Concentric Shapes", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Checker Pattern", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Cubes Pattern", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Penrose Tiling", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Starburst", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Stripes", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Truchet Tiles", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Border Mask", FilterOptions.RENDERING);
+        testFilterWithDialog("Concentric Shapes", FilterOptions.SHAPES);
+        testFilterWithDialog("Checker Pattern", FilterOptions.RENDERING);
+        testFilterWithDialog("Cubes Pattern", FilterOptions.SHAPES);
+        testFilterWithDialog("Penrose Tiling", FilterOptions.RENDERING);
+        testFilterWithDialog("Rose", FilterOptions.SHAPES);
+        testFilterWithDialog("Starburst", FilterOptions.SHAPES);
+        testFilterWithDialog("Stripes", FilterOptions.SHAPES);
+        testFilterWithDialog("Truchet Tiles", FilterOptions.RENDERING);
     }
 
     private void testArtisticFilters() {
-        testFilterWithDialog("Comic Book", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Crystallize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Pointillize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Stamp", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Oil Painting", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Spheres", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Smear", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Emboss", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Orton Effect", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Photo Collage", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Weave", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Comic Book", FilterOptions.STANDARD);
+        testFilterWithDialog("Crystallize", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Pointillize", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Stamp", FilterOptions.STANDARD);
+        testFilterWithDialog("Oil Painting", FilterOptions.STANDARD);
+        testFilterWithDialog("Spheres", FilterOptions.STANDARD);
+        testFilterWithDialog("Smear", FilterOptions.STANDARD);
+        testFilterWithDialog("Emboss", FilterOptions.STANDARD);
+        testFilterWithDialog("Orton Effect", FilterOptions.STANDARD);
+        testFilterWithDialog("Photo Collage", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Weave", FilterOptions.STANDARD);
 
-        testFilterWithDialog("Dots Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Striped Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Concentric Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Color Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Ordered Dithering", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Dots Halftone", FilterOptions.STANDARD);
+        testFilterWithDialog("Striped Halftone", FilterOptions.STANDARD);
+        testFilterWithDialog("Concentric Halftone", FilterOptions.STANDARD);
+        testFilterWithDialog("Color Halftone", FilterOptions.STANDARD);
+        testFilterWithDialog("Ordered Dithering", FilterOptions.STANDARD);
     }
 
     private void testFindEdgesFilters() {
-        testFilterWithDialog("Canny", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Convolution Edge Detection", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Difference of Gaussians", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Canny", FilterOptions.STANDARD);
+        testFilterWithDialog("Convolution Edge Detection", FilterOptions.STANDARD);
+        testFilterWithDialog("Difference of Gaussians", FilterOptions.STANDARD);
         testNoDialogFilter("Laplacian");
     }
 
@@ -1829,24 +1754,24 @@ public class MainGuiTest {
         app.resize(200);
 
         // Artistic
-        testFilterWithDialog("Bokeh", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Box Fitting", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Brushify", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Cubism", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Huffman Glitches", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Random 3D Objects", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Rodilius", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Voronoi", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Bokeh", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Box Fitting", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Brushify", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Cubism", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Huffman Glitches", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Random 3D Objects", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Rodilius", FilterOptions.STANDARD);
+        testFilterWithDialog("Voronoi", FilterOptions.STANDARD_RESEED);
 
         // Blur/Sharpen
-        testFilterWithDialog("Anisotropic Smoothing", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Bilateral Smoothing", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Anisotropic Smoothing", FilterOptions.STANDARD);
+        testFilterWithDialog("Bilateral Smoothing", FilterOptions.STANDARD);
 
-        testFilterWithDialog("G'MIC Command", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Light Glow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Local Normalization", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Stroke", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Vibrance", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("G'MIC Command", FilterOptions.STANDARD);
+        testFilterWithDialog("Light Glow", FilterOptions.STANDARD);
+        testFilterWithDialog("Local Normalization", FilterOptions.STANDARD);
+        testFilterWithDialog("Stroke", FilterOptions.STANDARD);
+        testFilterWithDialog("Vibrance", FilterOptions.STANDARD);
 
         // the image was reduced in size at the start of the GMIC filter tests
         app.closeCurrentView(ExpectConfirmation.YES);
@@ -1855,43 +1780,41 @@ public class MainGuiTest {
     }
 
     private void testOtherFilters() {
-        testFilterWithDialog("Drop Shadow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Morphology", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Drop Shadow", FilterOptions.STANDARD);
+        testFilterWithDialog("Morphology", FilterOptions.STANDARD);
 //        testRandomFilter();
         testText();
-        testFilterWithDialog("Transform Layer", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Transform Layer", FilterOptions.STANDARD);
 
         testConvolution();
 
-        testFilterWithDialog("Channel to Transparency", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Channel to Transparency", FilterOptions.STANDARD);
         testNoDialogFilter("Invert Transparency");
     }
 
     private void testConvolution() {
-        testFilterWithDialog("Custom 3x3 Convolution", Randomize.NO,
-            Reseed.NO, ShowOriginal.NO, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
+        testFilterWithDialog("Custom 3x3 Convolution", FilterOptions.NONE, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
             "Edge Detection", "Edge Detection 2", "Horizontal Edge Detection",
             "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
             "Reset", "Randomize");
-        testFilterWithDialog("Custom 5x5 Convolution", Randomize.NO,
-            Reseed.NO, ShowOriginal.NO, "Diamond Blur", "Motion Blur",
+        testFilterWithDialog("Custom 5x5 Convolution", FilterOptions.NONE, "Diamond Blur", "Motion Blur",
             "Find Horizontal Edges", "Find Vertical Edges",
             "Find / Edges", "Find \\ Edges", "Sharpen",
             "Reset", "Randomize");
     }
 
     private void testTransitionsFilters() {
-        testFilterWithDialog("2D Transitions", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Blinds Transition", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Checkerboard Transition", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Goo Transition", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Shapes Grid Transition", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("2D Transitions", FilterOptions.STANDARD);
+        testFilterWithDialog("Blinds Transition", FilterOptions.STANDARD);
+        testFilterWithDialog("Checkerboard Transition", FilterOptions.STANDARD);
+        testFilterWithDialog("Goo Transition", FilterOptions.STANDARD);
+        testFilterWithDialog("Shapes Grid Transition", FilterOptions.STANDARD);
     }
 
     private void testColorBalance(boolean squashedImage) {
         runWithSelectionTranslationCombinations(squashedImage, () ->
             testFilterWithDialog(ColorBalance.NAME,
-                Randomize.YES, Reseed.NO, ShowOriginal.YES));
+                FilterOptions.STANDARD));
     }
 
     private void testInvert(boolean squashedImage) {
@@ -1905,7 +1828,7 @@ public class MainGuiTest {
         }
         log(1, "filter Text");
 
-        runMenuCommand("Text...");
+        app.runMenuCommand("Text...");
         var dialog = app.findFilterDialog();
 
         testTextDialog(dialog, textFilterTested ?
@@ -1920,7 +1843,7 @@ public class MainGuiTest {
     private void testRandomFilter() {
         log(1, "random filter");
 
-        runMenuCommand("Random Filter...");
+        app.runMenuCommand("Random Filter...");
         var dialog = app.findFilterDialog();
         var nextRandomButton = findButtonByText(dialog, "Next Random Filter");
         var backButton = findButtonByText(dialog, "Back");
@@ -1953,15 +1876,13 @@ public class MainGuiTest {
         }
         log(1, "filter " + name);
 
-        runMenuCommand(name);
+        app.runMenuCommand(name);
 
         afterFilterRunActions(name);
     }
 
     private void testFilterWithDialog(String name,
-                                      Randomize randomize,
-                                      Reseed reseed,
-                                      ShowOriginal showOriginal,
+                                      FilterOptions options,
                                       String... extraButtonsToClick) {
         if (skip()) {
             return;
@@ -1979,7 +1900,7 @@ public class MainGuiTest {
             }
         };
 
-        app.runFilterWithDialog(name, randomize, reseed, showOriginal, testPresets, extraButtonClicker);
+        app.runFilterWithDialog(name, options, testPresets, extraButtonClicker);
 
         afterFilterRunActions(name);
     }
@@ -1994,26 +1915,26 @@ public class MainGuiTest {
         checkConsistency();
     }
 
-    private void stressTestFilterWithDialog(String name, Randomize randomize, Reseed reseed, boolean resizeToSmall) {
+    private void stressTestFilterWithDialog(String name, FilterOptions options, boolean resizeToSmall) {
         if (resizeToSmall) {
             app.resize(200);
-            runMenuCommand("Zoom In");
-            runMenuCommand("Zoom In");
+            app.runMenuCommand("Zoom In");
+            app.runMenuCommand("Zoom In");
         }
 
         String nameWithoutDots = name.substring(0, name.length() - 3);
         log(1, "filter " + nameWithoutDots);
 
-        runMenuCommand(name);
+        app.runMenuCommand(name);
         var dialog = app.findFilterDialog();
 
         int max = 1000;
         for (int i = 0; i < max; i++) {
             System.out.println("MainGuiTest stress testing " + nameWithoutDots + ": " + (i + 1) + " of " + max);
-            if (randomize == Randomize.YES) {
+            if (options.randomize()) {
                 findButtonByText(dialog, "Randomize Settings").click();
             }
-            if (reseed == Reseed.YES) {
+            if (options.reseed()) {
                 findButtonByText(dialog, "Reseed").click();
                 findButtonByText(dialog, "Reseed").click();
                 findButtonByText(dialog, "Reseed").click();
@@ -2024,6 +1945,74 @@ public class MainGuiTest {
     }
 
     //</editor-fold>
+//<editor-fold desc="help menu">
+
+    void testHelpMenu() {
+        if (helpMenuTested && Rnd.nextDouble() > 0.05) {
+            return;
+        }
+        log(0, "help menu");
+
+        testTipOfTheDay();
+        testInternalState();
+        testCheckForUpdate();
+        testAbout();
+
+        afterTestActions();
+        helpMenuTested = true;
+    }
+
+    private void testTipOfTheDay() {
+        var laf = EDT.call(UIManager::getLookAndFeel);
+
+        app.runMenuCommand("Tip of the Day");
+        var dialog = app.findDialogByTitle("Tip of the Day");
+        if (laf instanceof NimbusLookAndFeel) {
+            findButtonByText(dialog, "Next >").click();
+            findButtonByText(dialog, "Next >").click();
+            findButtonByText(dialog, "< Back").click();
+        } else {
+            findButtonByText(dialog, "Next Tip").click();
+            findButtonByText(dialog, "Next Tip").click();
+        }
+        findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
+    }
+
+    private void testInternalState() {
+        app.runMenuCommand("Internal State...");
+        var dialog = app.findDialogByTitle("Internal State");
+        findButtonByText(dialog, "Copy as JSON").click();
+        findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
+    }
+
+    private void testCheckForUpdate() {
+        app.runMenuCommand("Check for Updates...");
+        try {
+            // the title is either "Pixelitor Is Up to Date"
+            // or "New Version Available"
+            app.findJOptionPane(null).buttonWithText("Close").click();
+        } catch (ComponentLookupException e) {
+            // if a close button was not found, then it must be the up-to-date dialog
+            app.findJOptionPane("Pixelitor Is Up to Date").okButton().click();
+        }
+    }
+
+    private void testAbout() {
+        app.runMenuCommand("About Pixelitor");
+        var dialog = app.findDialogByTitle("About Pixelitor");
+
+        var tabbedPane = dialog.tabbedPane();
+        tabbedPane.requireTabTitles("About", "Credits", "System Info");
+        tabbedPane.selectTab("Credits");
+        tabbedPane.selectTab("System Info");
+        tabbedPane.selectTab("About");
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+    }
+//</editor-fold>
 //<editor-fold desc="hand tool">
 
     private void testHandTool() {
@@ -2133,7 +2122,7 @@ public class MainGuiTest {
             .requireEnabled()
             .click();
 
-        var dialog = findDialogByTitle("Effects");
+        var dialog = app.findDialogByTitle("Effects");
         var tabbedPane = dialog.tabbedPane();
         tabbedPane.requireTabTitles(
             EffectsPanel.GLOW_TAB_NAME,
@@ -2157,7 +2146,7 @@ public class MainGuiTest {
         findButtonByText(pw, "Stroke Settings...")
             .requireEnabled()
             .click();
-        var dialog = findDialogByTitle("Stroke Settings");
+        var dialog = app.findDialogByTitle("Stroke Settings");
 
         // force a change in the stroke width
         var strokeWidthSlider = dialog.slider();
@@ -2484,7 +2473,7 @@ public class MainGuiTest {
         pw.button("lazyMouseDialogButton")
             .requireEnabled()
             .click();
-        var dialog = findDialogByTitle("Lazy Mouse Settings");
+        var dialog = app.findDialogByTitle("Lazy Mouse Settings");
         if (b) {
             dialog.checkBox().check();
             dialog.slider("distSlider")
@@ -2560,7 +2549,7 @@ public class MainGuiTest {
 
         // set the source point
         mouse.moveToCanvas(300, 300);
-        mouse.altClick();
+        mouse.click(Modifiers.ALT);
 
         // do some cloning
         mouse.moveToCanvas(startX, 300);
@@ -2768,35 +2757,38 @@ public class MainGuiTest {
     }
 
     private void testWithSimpleSelection() {
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
 
         mouse.moveToCanvas(200, 100);
         mouse.dragToCanvas(400, 300);
 
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         keyboard.undo("Create Selection");
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
 
         keyboard.redo("Create Selection");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         keyboard.nudge();
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         keyboard.undoRedoUndo("Nudge Selection");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         app.deselect();
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
 
         keyboard.undo("Deselect");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
     }
 
     private void testWithTwoEllipseSelections() {
         app.clickTool(Tools.ELLIPSE_SELECTION);
         EDT.assertActiveToolIs(Tools.ELLIPSE_SELECTION);
+
+        pw.comboBox("combinatorCB").selectItem("Replace");
+        EDT.assertSelectionCombinatorIs(Tools.ELLIPSE_SELECTION, REPLACE);
 
         // replace current selection with the first ellipse
         int e1X = 200;
@@ -2806,7 +2798,7 @@ public class MainGuiTest {
         mouse.moveToCanvas(e1X, e1Y);
         mouse.dragToCanvas(e1X + e1Width, e1Y + e1Height);
         keyboard.undoRedo("Replace Selection");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         // add second ellipse
         pw.comboBox("combinatorCB").selectItem("Add");
@@ -2826,32 +2818,32 @@ public class MainGuiTest {
 
         if (!quick) {
             // test crop selection by using the menu
-            testCropSelection(() -> runMenuCommand("Crop Selection"),
+            testCropSelection(() -> app.runMenuCommand("Crop Selection"),
                 true, 300.0, 200.0);
         }
 
         testSelectionModifyMenu();
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
-        runMenuCommand("Invert Selection");
+        app.runMenuCommand("Invert Selection");
         keyboard.undoRedo("Invert Selection");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
-        runMenuCommand("Deselect");
-        EDT.assertThereIsNoSelection();
+        app.runMenuCommand("Deselect");
+        EDT.requireNoSelection();
 
         keyboard.undo("Deselect");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         keyboard.redo("Deselect");
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
     }
 
     private void testCropSelection(Runnable cropTask,
                                    boolean assumeNonRectangular,
                                    double expectedSelWidth,
                                    double expectedSelHeight) {
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         Selection selection = EDT.getActiveSelection();
         boolean rectangular = selection.getShape() instanceof Rectangle2D;
@@ -2865,7 +2857,7 @@ public class MainGuiTest {
         assertThat(selWidth).isCloseTo(expectedSelWidth, within(2.0));
         assertThat(selHeight).isCloseTo(expectedSelHeight, within(2.0));
 
-        Canvas canvas = EDT.active(Composition::getCanvas);
+        Canvas canvas = EDT.queryActiveComp(Composition::getCanvas);
         int origCanvasWidth = canvas.getWidth();
         int origCanvasHeight = canvas.getHeight();
 
@@ -2890,9 +2882,9 @@ public class MainGuiTest {
         app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Only Hide").click();
 
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);
-        assert EDT.activeLayerHasMask();
+        EDT.assertActiveLayerHasMask();
 
         keyboard.undoRedoUndo("Add Hiding Mask");
 
@@ -2905,7 +2897,7 @@ public class MainGuiTest {
         app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Crop and Hide").click();
         checkAfterSelectionCrop(selWidth, selHeight);
-        assert EDT.activeLayerHasMask();
+        EDT.assertActiveLayerHasMask();
 
         keyboard.undoRedoUndo("Crop and Hide");
 
@@ -2918,7 +2910,7 @@ public class MainGuiTest {
         app.findJOptionPane("Non-Rectangular Selection Crop")
             .buttonWithText("Cancel").click();
 
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);
     }
 
@@ -2939,7 +2931,7 @@ public class MainGuiTest {
 
     private static void checkAfterSelectionCrop(double selWidth, double selHeight) {
         EDT.assertCanvasSizeIs((int) (selWidth + 0.5), (int) (selHeight + 0.5));
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
     }
 
     private static void checkAfterSelectionCropUndone(int origCanvasWidth, int origCanvasHeight) {
@@ -2963,18 +2955,18 @@ public class MainGuiTest {
 
         app.clickTool(Tools.ZOOM);
 
-        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
+        ZoomLevel startingZoom = EDT.getActiveZoomLevel();
 
         mouse.moveToActiveCanvasCenter();
 
         mouse.click();
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn());
+        EDT.assertActiveZoomIs(startingZoom.zoomIn());
         mouse.click();
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn());
-        mouse.altClick();
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn().zoomOut());
-        mouse.altClick();
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
+        EDT.assertActiveZoomIs(startingZoom.zoomIn().zoomIn());
+        mouse.click(Modifiers.ALT);
+        EDT.assertActiveZoomIs(startingZoom.zoomIn().zoomIn().zoomOut());
+        mouse.click(Modifiers.ALT);
+        EDT.assertActiveZoomIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
 
         testMouseWheelZooming();
         testControlPlusMinusZooming();
@@ -2986,42 +2978,42 @@ public class MainGuiTest {
     }
 
     private void testControlPlusMinusZooming() {
-        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
+        ZoomLevel startingZoom = EDT.getActiveZoomLevel();
 
         Keyboard.pressCtrlPlus(pw, 2);
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn());
+        EDT.assertActiveZoomIs(startingZoom.zoomIn().zoomIn());
 
         Keyboard.pressCtrlMinus(pw, 2);
-        EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
+        EDT.assertActiveZoomIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
     }
 
     private void testZoomControlAndNavigatorZooming() {
         var slider = findZoomControlSlider();
 
         slider.slideToMinimum();
-        EDT.assertZoomOfActiveIs(zoomLevels[0]);
+        EDT.assertActiveZoomIs(zoomLevels[0]);
 
         findButtonByText(pw, "100%").click();
-        EDT.assertZoomOfActiveIs(ZoomLevel.ACTUAL_SIZE);
+        EDT.assertActiveZoomIs(ZoomLevel.ACTUAL_SIZE);
 
         slider.slideToMaximum();
-        EDT.assertZoomOfActiveIs(zoomLevels[zoomLevels.length - 1]);
+        EDT.assertActiveZoomIs(zoomLevels[zoomLevels.length - 1]);
 
         findButtonByText(pw, "Fit").click();
 
-        runMenuCommand("Show Navigator...");
-        var navigator = findDialogByTitle("Navigator");
+        app.runMenuCommand("Show Navigator...");
+        var navigator = app.findDialogByTitle("Navigator");
         navigator.resizeTo(new Dimension(500, 400));
 
-        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
+        ZoomLevel startingZoom = EDT.getActiveZoomLevel();
 
         Keyboard.pressCtrlPlus(navigator, 4);
         ZoomLevel expectedZoomIn = startingZoom.zoomIn().zoomIn().zoomIn().zoomIn();
-        EDT.assertZoomOfActiveIs(expectedZoomIn);
+        EDT.assertActiveZoomIs(expectedZoomIn);
 
         Keyboard.pressCtrlMinus(navigator, 2);
         ZoomLevel expectedZoomOut = expectedZoomIn.zoomOut().zoomOut();
-        EDT.assertZoomOfActiveIs(expectedZoomOut);
+        EDT.assertActiveZoomIs(expectedZoomOut);
         findButtonByText(pw, "Fit").click();
 
         // navigate
@@ -3051,8 +3043,8 @@ public class MainGuiTest {
     }
 
     private void testNavigatorRightClickPopupMenu() {
-        runMenuCommand("Show Navigator...");
-        var navigator = findDialogByTitle("Navigator");
+        app.runMenuCommand("Show Navigator...");
+        var navigator = app.findDialogByTitle("Navigator");
         navigator.resizeTo(new Dimension(500, 400));
 
         var popupMenu = navigator.showPopupMenu();
@@ -3086,22 +3078,22 @@ public class MainGuiTest {
 
     private void testMouseWheelZooming() {
         pw.pressKey(VK_CONTROL);
-        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
+        ZoomLevel startingZoom = EDT.getActiveZoomLevel();
         View view = EDT.getActiveView();
 
         robot.rotateMouseWheel(view, 2);
         if (JVM.isLinux) {
-            EDT.assertZoomOfActiveIs(startingZoom.zoomOut().zoomOut());
+            EDT.assertActiveZoomIs(startingZoom.zoomOut().zoomOut());
         } else {
-            EDT.assertZoomOfActiveIs(startingZoom.zoomOut());
+            EDT.assertActiveZoomIs(startingZoom.zoomOut());
         }
 
         robot.rotateMouseWheel(view, -2);
 
         if (JVM.isLinux) {
-            EDT.assertZoomOfActiveIs(startingZoom.zoomOut().zoomOut().zoomIn().zoomIn());
+            EDT.assertActiveZoomIs(startingZoom.zoomOut().zoomOut().zoomIn().zoomIn());
         } else {
-            EDT.assertZoomOfActiveIs(startingZoom.zoomOut().zoomIn());
+            EDT.assertActiveZoomIs(startingZoom.zoomOut().zoomIn());
         }
 
         pw.releaseKey(VK_CONTROL);
@@ -3133,7 +3125,7 @@ public class MainGuiTest {
     }
 
     private void testColorSelectorDialog(String title) {
-        var colorSelector = findDialogByTitle(title);
+        var colorSelector = app.findDialogByTitle(title);
         mouse.moveTo(colorSelector, 100, 150);
         mouse.dragTo(colorSelector, Rnd.intInRange(110, 200), Rnd.intInRange(160, 300));
         findButtonByText(colorSelector, "OK").click();
@@ -3192,8 +3184,8 @@ public class MainGuiTest {
     private void runWithSelectionTranslationCombinations(Runnable task) {
         log(1, "without selection or translation");
 
-        EDT.assertThereIsNoSelection();
-        EDT.assertThereIsNoTranslation();
+        EDT.requireNoSelection();
+        EDT.assertNoTranslation();
 
         task.run();
 
@@ -3216,7 +3208,7 @@ public class MainGuiTest {
 
         if (skip(0.5)) {
             keyboard.undo("Move Layer");
-            EDT.assertThereIsNoTranslation();
+            EDT.assertNoTranslation();
             return;
         }
 
@@ -3225,10 +3217,10 @@ public class MainGuiTest {
         task.run();
 
         keyboard.undo("Create Selection");
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
 
         keyboard.undo("Move Layer");
-        EDT.assertThereIsNoTranslation();
+        EDT.assertNoTranslation();
     }
 
     public void addLayerMask(boolean allowExistingMask) {
@@ -3269,6 +3261,9 @@ public class MainGuiTest {
 
         batchFilterOutputDir = new File(baseDir, "batch_filter_output");
         assertThat(batchFilterOutputDir).exists().isDirectory();
+
+        svgOutputDir = new File(baseDir, "svg_output");
+        assertThat(svgOutputDir).exists().isDirectory();
 
         String cleanerScriptExt;
         if (JVM.isWindows) {
@@ -3342,14 +3337,6 @@ public class MainGuiTest {
         return app;
     }
 
-    private void runMenuCommand(String text) {
-        app.runMenuCommand(text);
-    }
-
-    private void runMenuCommandByName(String name) {
-        app.runMenuCommandByName(name);
-    }
-
     private void log(int indent, String msg) {
         for (int i = 0; i < indent; i++) {
             System.out.print("    ");
@@ -3360,28 +3347,24 @@ public class MainGuiTest {
         EDT.run(() -> PixelitorWindow.get().setTitle(fullMsg));
     }
 
-    private DialogFixture findDialogByTitle(String title) {
-        return app.findDialogByTitle(title);
-    }
-
-    public void testRotateFlip(boolean entireComp) {
+    private void testRotateFlip(boolean entireComp) {
         String prefix = entireComp ? "comp" : "layer";
         int indent = entireComp ? 2 : 1;
         log(indent, prefix + " rotate and flip");
 
-        runMenuCommandByName(prefix + "_rot_90");
+        app.runMenuCommandByName(prefix + "_rot_90");
         keyboard.undoRedoUndo("Rotate 90° CW");
 
-        runMenuCommandByName(prefix + "_rot_180");
+        app.runMenuCommandByName(prefix + "_rot_180");
         keyboard.undoRedoUndo("Rotate 180°");
 
-        runMenuCommandByName(prefix + "_rot_270");
+        app.runMenuCommandByName(prefix + "_rot_270");
         keyboard.undoRedoUndo("Rotate 90° CCW");
 
-        runMenuCommandByName(prefix + "_flip_hor");
+        app.runMenuCommandByName(prefix + "_flip_hor");
         keyboard.undoRedoUndo("Flip Horizontal");
 
-        runMenuCommandByName(prefix + "_flip_ver");
+        app.runMenuCommandByName(prefix + "_flip_ver");
         keyboard.undoRedoUndo("Flip Vertical");
     }
 }

@@ -72,7 +72,7 @@ public final class SelectionActions {
      * @noinspection NonFinalStaticVariableUsedInClassInitialization
      */
     private static final Action pasteSel = new TaskAction(i18n("paste_sel"), () -> {
-        SelectionChangeResult result = getActiveComp().changeSelection(copiedSelShape);
+        SelectionChangeResult result = getActiveComp().updateSelectionInteractively(copiedSelShape);
         if (result.isSuccess()) {
             History.add(result.getEdit());
             Tools.notifySelectionChanged();

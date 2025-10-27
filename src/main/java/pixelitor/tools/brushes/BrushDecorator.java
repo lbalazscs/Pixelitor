@@ -35,8 +35,8 @@ public abstract class BrushDecorator implements Brush {
     }
 
     @Override
-    public void startAt(PPoint p) {
-        delegate.startAt(p);
+    public void startStrokeAt(PPoint p) {
+        delegate.startStrokeAt(p);
     }
 
     @Override

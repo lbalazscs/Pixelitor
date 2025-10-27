@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.automate.DirectoryChooser;
+import pixelitor.filters.Filter;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
@@ -78,18 +79,28 @@ public class FileIO {
      * Asynchronously loads a {@link Composition} from a file.
      */
     public static CompletableFuture<Composition> loadCompAsync(File file) {
-        // if the file format isn't recognized, this will still try to
-        // read it in a single-layered format, which doesn't have to be JPG
-        FileFormat format = FileFormat.fromFile(file).orElse(FileFormat.JPG);
-        return format.readAsync(file);
+        Optional<FileFormat> fileFormat = FileFormat.fromFile(file);
+        if (fileFormat.isPresent()) {
+            return fileFormat.get().readAsync(file);
+        } else {
+            // if the file format isn't recognized from the extension,
+            // try to read it as a generic single-layered format
+            return TrackedIO.readSingleLayeredAsync(file);
+        }
     }
 
     /**
      * Synchronously loads a Composition from a file.
      */
     public static Composition loadCompSync(File file) {
-        FileFormat format = FileFormat.fromFile(file).orElse(FileFormat.JPG);
-        return format.readSync(file);
+        Optional<FileFormat> fileFormat = FileFormat.fromFile(file);
+        if (fileFormat.isPresent()) {
+            return fileFormat.get().readSync(file);
+        } else {
+            // if the file format isn't recognized from the extension,
+            // try to read it as a generic single-layered format
+            return TrackedIO.readSingleLayeredSync(file);
+        }
     }
 
     /**
@@ -131,7 +142,7 @@ public class FileIO {
 
     private static void showDecodingError(DecodingException de) {
         String msg = de.getMessage();
-        if (de.wasMagick()) {
+        if (de.isFromImageMagick()) {
             Messages.showError("Error", msg);
         } else {
             promptImageMagickRetry(de, msg);
@@ -155,7 +166,7 @@ public class FileIO {
     public static boolean save(Composition comp, boolean forceChooser) {
         boolean useFileChooser = forceChooser || comp.getFile() == null;
         if (useFileChooser) {
-            return FileChoosers.saveWithChooser(comp);
+            return FileChoosers.promptAndSaveComp(comp);
         }
 
         File targetFile = comp.getFile();
@@ -173,7 +184,7 @@ public class FileIO {
         } else {
             // the file was read from a file with an unsupported
             // extension, save it with a file chooser
-            return FileChoosers.saveWithChooser(comp);
+            return FileChoosers.promptAndSaveComp(comp);
         }
     }
 
@@ -309,11 +320,17 @@ public class FileIO {
                                                   boolean progressive) {
         File selectedFile = FileChoosers.selectSaveFileForFormat(
             comp.suggestFileName("jpg"), FileChoosers.jpegFilter);
-        comp.saveAsync(new JpegSettings(quality, progressive, selectedFile), true);
+        if (selectedFile != null) {
+            comp.saveAsync(new JpegSettings(quality, progressive, selectedFile), true);
+        }
     }
 
     public static void saveSVG(Shape shape, StrokeParam strokeParam, String suggestedFileName) {
         saveSVG(createSVGContent(shape, strokeParam), suggestedFileName);
+    }
+
+    public static void saveSVG(String content, Filter filter) {
+        saveSVG(content, filter.getName() + ".svg");
     }
 
     public static void saveSVG(String content, String suggestedFileName) {

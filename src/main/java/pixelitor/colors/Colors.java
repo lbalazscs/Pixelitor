@@ -65,7 +65,9 @@ public class Colors {
     private Colors() {
     }
 
-    // linear interpolation in the RGB space
+    /**
+     * Linearly interpolates between two colors in the RGB color space.
+     */
     public static Color interpolateRGB(Color startColor, Color endColor, double progress) {
         int interpolatedRGB = ImageMath.mixColors((float) progress,
             startColor.getRGB(), endColor.getRGB());
@@ -108,7 +110,7 @@ public class Colors {
         return mix;
     }
 
-    public static String packedIntToString(int rgb) {
+    public static String argbToString(int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
@@ -130,7 +132,7 @@ public class Colors {
         return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
     }
 
-    public static int HSBAtoARGB(float[] hsb, int alpha) {
+    public static int hsbToARGB(float[] hsb, int alpha) {
         int col = Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
         return setAlpha(col, alpha);
     }
@@ -179,10 +181,10 @@ public class Colors {
         }
 
         Color prevColor = selectedColor;
-        GlobalEvents.dialogOpened(title);
+        GlobalEvents.modalDialogOpened();
         Color color = ColorPicker.showDialog(owner, title, selectedColor,
             allowTransparency, colorChangeListener);
-        GlobalEvents.dialogClosed(title);
+        GlobalEvents.modalDialogClosed();
 
         if (color == null) {  // Cancel was pressed, reset the old color
             colorChangeListener.accept(prevColor);
@@ -233,6 +235,14 @@ public class Colors {
         return null;
     }
 
+    /**
+     * Attaches a right-click popup menu to a color swatch.
+     *
+     * @param parent      the parent component, used to determine the owner window for dialogs
+     * @param swatch      the color swatch to attach the menu to
+     * @param colorSource a supplier for the current color (used for 'Copy Color')
+     * @param colorSetter a consumer for the newly selected color
+     */
     public static void setupFilterColorsPopupMenu(JComponent parent, ColorSwatch swatch,
                                                   Supplier<Color> colorSource,
                                                   Consumer<Color> colorSetter) {
@@ -332,10 +342,10 @@ public class Colors {
     }
 
     /**
-     * Sets the alpha channel of the given ARGB packed int to the
-     * minimum of its current alpha and the given new alpha value.
+     * Sets the alpha channel of a packed ARGB int, ensuring the
+     * new alpha does not exceed the original alpha value.
      */
-    public static int setMinAlpha(int rgb, int newAlpha) {
+    public static int capAlpha(int rgb, int newAlpha) {
         int origAlpha = (rgb >>> 24) & 0xFF;
         return setAlpha(rgb, Math.min(origAlpha, newAlpha));
     }

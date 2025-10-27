@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static pixelitor.utils.Keys.CTRL_TAB;
  */
 public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     private final Lazy<JMenu> cachedPlacementMenu = Lazy.of(this::createTabPlacementMenu);
-    private boolean userInitiatedChange = true;
+    private boolean suppressChangeEvent = false;
 
     public TabsUI() {
         setTabPlacement(ImageArea.getTabPlacement());
@@ -44,7 +44,7 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     private void tabsChanged() {
-        if (!userInitiatedChange) {
+        if (suppressChangeEvent) {
             return;
         }
 
@@ -69,20 +69,17 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
         int newTabIndex = getTabCount();
 
         try {
-            userInitiatedChange = false;
+            suppressChangeEvent = true;
             addTab(view.getName(), newTab);
         } finally {
-            userInitiatedChange = true;
+            suppressChangeEvent = false;
         }
 
-        setTabComponentAt(newTabIndex, new TabTitleRenderer(view.getName(), newTab));
+        TabTitleRenderer renderer = new TabTitleRenderer(view.getName(), newTab);
+        newTab.setTitleRenderer(renderer);
+        setTabComponentAt(newTabIndex, renderer);
         setSelectedIndex(newTabIndex);
         newTab.activated();
-    }
-
-    public static void warnAndCloseTab(TabViewContainer tab) {
-        // this will call closeTab
-        Views.warnAndClose(tab.getView());
     }
 
     public void closeTab(TabViewContainer tab) {
@@ -126,10 +123,10 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
         return menu;
     }
 
-    private JRadioButtonMenuItem createTabPlacementMenuItem(String name, int pos) {
+    private JRadioButtonMenuItem createTabPlacementMenuItem(String name, int placement) {
         return new JRadioButtonMenuItem(new TaskAction(name, () -> {
-            setTabPlacement(pos); // update the GUI
-            ImageArea.setTabPlacement(pos); // store it for the saved preferences
+            setTabPlacement(placement); // update the GUI
+            ImageArea.setTabPlacement(placement); // store it for the saved preferences
         }));
     }
 

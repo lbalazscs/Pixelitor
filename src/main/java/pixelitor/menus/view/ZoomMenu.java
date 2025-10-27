@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,9 @@ package pixelitor.menus.view;
 
 import pixelitor.gui.utils.ViewEnabledAction;
 import pixelitor.menus.PMenu;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 
-import static java.lang.String.format;
 import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_HEIGHT_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
@@ -40,21 +38,13 @@ import static pixelitor.utils.Keys.FIT_SPACE_KEY;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * The zoom menu
+ * The Zoom submenu inside the View menu.
  */
 public class ZoomMenu extends PMenu {
-    public static final String ACTUAL_PIXELS_TOOLTIP = format(
-        "Set the zoom level to 100%% (%s)",
-        Utils.keystrokeToText(ACTUAL_PIXELS_KEY));
-
-    public static final String FIT_SPACE_TOOLTIP = format(
-        "Display the image at the largest zoom that can fit in the available space (%s)",
-        Utils.keystrokeToText(FIT_SPACE_KEY));
-
-    private static final String ACTION_MAP_KEY_INCREASE = "increase";
-    private static final String ACTION_MAP_KEY_DECREASE = "decrease";
-    private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
-    private static final String ACTION_MAP_KEY_FIT_SPACE = "fit space";
+    private static final String ZOOM_IN_ACTION_KEY = "zoom_in";
+    private static final String ZOOM_OUT_ACTION_KEY = "zoom_out";
+    private static final String ACTUAL_PIXELS_ACTION_KEY = "actual_pixels";
+    private static final String FIT_SPACE_ACTION_KEY = "fit_space";
 
     private static final Action ZOOM_IN_ACTION = new ViewEnabledAction(
         i18n("zoom_in"),
@@ -84,18 +74,18 @@ public class ZoomMenu extends PMenu {
     public static void setupZoomKeys(JComponent c) {
         InputMap inputMap = c.getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = c.getActionMap();
-        inputMap.put(CTRL_SHIFT_EQUALS, ACTION_MAP_KEY_INCREASE);  // + key in English keyboards
-        inputMap.put(CTRL_NUMPAD_PLUS, ACTION_MAP_KEY_INCREASE);  // + key on the numpad
-        inputMap.put(CTRL_NUMPAD_MINUS, ACTION_MAP_KEY_DECREASE); // - key on the numpad
-        actionMap.put(ACTION_MAP_KEY_INCREASE, ZOOM_IN_ACTION);
-        actionMap.put(ACTION_MAP_KEY_DECREASE, ZOOM_OUT_ACTION);
+        inputMap.put(CTRL_SHIFT_EQUALS, ZOOM_IN_ACTION_KEY);  // + key in English keyboards
+        inputMap.put(CTRL_NUMPAD_PLUS, ZOOM_IN_ACTION_KEY);  // + key on the numpad
+        inputMap.put(CTRL_NUMPAD_MINUS, ZOOM_OUT_ACTION_KEY); // - key on the numpad
+        actionMap.put(ZOOM_IN_ACTION_KEY, ZOOM_IN_ACTION);
+        actionMap.put(ZOOM_OUT_ACTION_KEY, ZOOM_OUT_ACTION);
 
         // ctrl + numpad 0 = actual pixels
-        inputMap.put(CTRL_NUMPAD_0, ACTION_MAP_KEY_ACTUAL_PIXELS);
-        actionMap.put(ACTION_MAP_KEY_ACTUAL_PIXELS, ACTUAL_PIXELS_ACTION);
+        inputMap.put(CTRL_NUMPAD_0, ACTUAL_PIXELS_ACTION_KEY);
+        actionMap.put(ACTUAL_PIXELS_ACTION_KEY, ACTUAL_PIXELS_ACTION);
 
         // ctrl + alt + numpad 0 = fit screen
-        inputMap.put(CTRL_ALT_NUMPAD_0, ACTION_MAP_KEY_FIT_SPACE);
-        actionMap.put(ACTION_MAP_KEY_FIT_SPACE, FIT_SPACE_ACTION);
+        inputMap.put(CTRL_ALT_NUMPAD_0, FIT_SPACE_ACTION_KEY);
+        actionMap.put(FIT_SPACE_ACTION_KEY, FIT_SPACE_ACTION);
     }
 }

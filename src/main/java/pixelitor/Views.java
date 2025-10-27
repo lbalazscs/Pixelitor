@@ -25,12 +25,10 @@ import pixelitor.history.History;
 import pixelitor.io.FileIO;
 import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
-import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.ViewActivationListener;
@@ -48,8 +46,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.swing.JOptionPane.CANCEL_OPTION;
 import static javax.swing.JOptionPane.CLOSED_OPTION;
@@ -64,7 +60,6 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class Views {
     private static final List<View> views = new ArrayList<>();
-    public static int thumbSize;
     private static int pastedCount = 1;
     private static View activeView;
     private static final List<ViewActivationListener> activationListeners
@@ -76,14 +71,8 @@ public class Views {
     public static final Action CLOSE_ACTIVE_ACTION = new ViewEnabledAction(
         i18n("close"), comp -> warnAndClose(comp.getView()));
 
-    public static final Action CLOSE_UNMODIFIED_ACTION = new ViewEnabledAction(
+    public static final Action CLOSE_ALL_UNMODIFIED_ACTION = new ViewEnabledAction(
         "Close Unmodified", comp -> warnAndCloseUnmodified());
-
-    static {
-        // this call must be somewhere in the GUI code,
-        // when the AppPreferences is already initialized
-        updateThumbSize(AppPreferences.loadThumbSize());
-    }
 
     private Views() {
     }
@@ -215,6 +204,9 @@ public class Views {
         }
     }
 
+    /**
+     * Repaints all currently visible views.
+     */
     public static void repaintVisible() {
         if (ImageArea.isActiveMode(FRAMES)) {
             repaintAll();
@@ -253,42 +245,10 @@ public class Views {
         return null;
     }
 
-    public static void assertNumViewsIs(int expected) {
-        int numViews = getNumViews();
-        if (numViews == expected) {
-            return;
-        }
-
-        throw new AssertionError(format(
-            "Expected %d views, found %d (%s)",
-            expected, numViews, getOpenCompNamesAsString()));
-    }
-
-    public static void assertNumViewsIsAtLeast(int minimum) {
-        int numViews = getNumViews();
-        if (numViews >= minimum) {
-            return;
-        }
-        throw new AssertionError(format(
-            "Expected at least %d views, found %d (%s)",
-            minimum, numViews, getOpenCompNamesAsString()));
-    }
-
-    private static String getOpenCompNamesAsString() {
+    public static List<String> getOpenCompNames() {
         return views.stream()
             .map(View::getName)
-            .collect(joining(", ", "[", "]"));
-    }
-
-    public static void assertZoomOfActiveIs(ZoomLevel expected) {
-        if (activeView == null) {
-            throw new AssertionError("no active view");
-        }
-        ZoomLevel actual = activeView.getZoomLevel();
-        if (actual != expected) {
-            throw new AssertionError("expected = " + expected +
-                ", found = " + actual);
-        }
+            .toList();
     }
 
     /**
@@ -362,14 +322,6 @@ public class Views {
         return false;
     }
 
-    public static boolean activeCompIs(Composition comp) {
-        if (activeView != null) {
-            return activeView.getComp() == comp;
-        }
-        // there is no open view
-        return comp == null;
-    }
-
     public static Composition getActiveComp() {
         if (activeView != null) {
             return activeView.getComp();
@@ -433,19 +385,26 @@ public class Views {
     public static void addNew(Composition comp) {
         try {
             assert comp.getView() == null : "already has a view";
-
-            View view = new View(comp);
-            comp.addLayersToUI();
-            view.setCursor(Tools.getActive().getStartingCursor());
-            views.add(view);
-            MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
-            ImageArea.addView(view);
-            setActiveView(view, false);
+            registerView(new View(comp));
         } catch (Exception e) {
             Messages.showException(e);
         }
     }
 
+    // registers a new view with various app components
+    private static void registerView(View view) {
+        Composition comp = view.getComp();
+        comp.addLayersToUI();
+        view.setCursor(Tools.getActive().getStartingCursor());
+        views.add(view);
+        MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
+        ImageArea.addView(view);
+        setActiveView(view, false);
+    }
+
+    /**
+     * Returns the number of layers in the active layer holder.
+     */
     public static int getNumLayersInActiveHolder() {
         Composition comp = getActiveComp();
         if (comp == null) {
@@ -459,6 +418,9 @@ public class Views {
         return getActiveLayer().getHolderForNewLayers().getNumLayers();
     }
 
+    /**
+     * Returns the active layer of the active composition.
+     */
     public static Layer getActiveLayer() {
         if (activeView != null) {
             return activeView.getComp().getActiveLayer();
@@ -505,6 +467,9 @@ public class Views {
         throw new IllegalStateException("no active view");
     }
 
+    /**
+     * Returns the selection of the active composition.
+     */
     public static Selection getActiveSelection() {
         if (activeView != null) {
             return activeView.getComp().getSelection();
@@ -567,19 +532,6 @@ public class Views {
             // make sure that the next reload is not started
             // before the previous one is finished
             chainedChecks = chainedChecks.thenCompose(comp -> view.checkForExternalModifications());
-        }
-    }
-
-    public static void updateThumbSize(int newThumbSize) {
-        if (thumbSize == newThumbSize) {
-            return;
-        }
-        thumbSize = newThumbSize;
-
-        // since the layer GUIs are cached, all views have
-        // to be notified to update their buttons
-        for (View view : views) {
-            view.updateThumbSize(newThumbSize);
         }
     }
 

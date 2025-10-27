@@ -22,7 +22,7 @@ import pixelitor.tools.brushes.*;
 import java.util.IdentityHashMap;
 import java.util.function.Supplier;
 
-import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLED;
+import static pixelitor.tools.brushes.RotationSettings.NOT_DIRECTIONAL;
 
 /**
  * The brush types in the brush and eraser tools.
@@ -37,7 +37,7 @@ public enum BrushType {
         @Override
         public Brush createBrush(AbstractBrushTool tool, double radius) {
             return new ImageDabsBrush(radius,
-                ImageBrushType.SOFT, 0.25, NOT_ANGLED);
+                ImageBrushType.SOFT, 0.25, NOT_DIRECTIONAL);
         }
     }, WOBBLE("Wobble", null) {
         @Override
@@ -53,13 +53,13 @@ public enum BrushType {
         @Override
         public Brush createBrush(AbstractBrushTool tool, double radius) {
             return new ImageDabsBrush(radius,
-                ImageBrushType.REAL, 0.05, NOT_ANGLED);
+                ImageBrushType.REAL, 0.05, NOT_DIRECTIONAL);
         }
     }, HAIR("Hair", null) {
         @Override
         public Brush createBrush(AbstractBrushTool tool, double radius) {
             return new ImageDabsBrush(radius,
-                ImageBrushType.HAIR, 0.02, NOT_ANGLED);
+                ImageBrushType.HAIR, 0.02, NOT_DIRECTIONAL);
         }
     }, SHAPE("Shapes", ShapeDabsBrushSettings::new) {
         @Override
@@ -102,7 +102,7 @@ public enum BrushType {
     private final boolean hasSettings;
     private final Supplier<BrushSettings> settingsFactory;
 
-    // The settings are shared between the symmetry-brushes of a
+    // the settings are shared between the symmetry-brushes of a
     // tool, but they are different between the different tools
     private IdentityHashMap<AbstractBrushTool, BrushSettings> settingsByTool;
 
@@ -133,17 +133,14 @@ public enum BrushType {
     public BrushSettings getSettings(AbstractBrushTool tool) {
         assert hasSettings;
 
-        BrushSettings settings = null;
         if (settingsByTool == null) {
             settingsByTool = new IdentityHashMap<>();
-        } else {
-            settings = settingsByTool.get(tool);
         }
-        if (settings == null) {
-            settings = settingsFactory.get();
-            settings.setTool(tool);
-            settingsByTool.put(tool, settings);
-        }
-        return settings;
+
+        return settingsByTool.computeIfAbsent(tool, t -> {
+            BrushSettings settings = settingsFactory.get();
+            settings.setTool(t);
+            return settings;
+        });
     }
 }

@@ -582,7 +582,7 @@ public class ShapesTool extends DragTool {
 
         Composition comp = Views.getActiveComp();
 
-        SelectionChangeResult result = comp.changeSelection(shape);
+        SelectionChangeResult result = comp.updateSelectionInteractively(shape);
         if (!result.isSuccess()) {
             result.showInfoDialog("shape");
             return;

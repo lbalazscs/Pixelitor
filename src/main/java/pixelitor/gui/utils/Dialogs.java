@@ -20,11 +20,13 @@ package pixelitor.gui.utils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 import pixelitor.AppMode;
+import pixelitor.Composition;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
+import pixelitor.selection.ShapeCombinator;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -87,9 +89,9 @@ public class Dialogs {
             parent = getMainWindow();
         }
 
-        GlobalEvents.dialogOpened(title);
+        GlobalEvents.modalDialogOpened();
         JOptionPane.showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
-        GlobalEvents.dialogClosed(title);
+        GlobalEvents.modalDialogClosed();
     }
 
     public static boolean showYesNoQuestionDialog(String title, String msg) {
@@ -110,11 +112,11 @@ public class Dialogs {
                                             String question, Object[] options,
                                             int messageType) {
         assert !(parent instanceof View);
-        GlobalEvents.dialogOpened(title);
+        GlobalEvents.modalDialogOpened();
         int answer = JOptionPane.showOptionDialog(parent, new JLabel(question),
             title, YES_NO_CANCEL_OPTION,
             messageType, null, options, options[0]);
-        GlobalEvents.dialogClosed(title);
+        GlobalEvents.modalDialogClosed();
         return answer;
     }
 
@@ -131,9 +133,9 @@ public class Dialogs {
                                           String msg, int messageType) {
         assert !(parent instanceof View);
 
-        GlobalEvents.dialogOpened(title);
+        GlobalEvents.modalDialogOpened();
         int reply = JOptionPane.showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType);
-        GlobalEvents.dialogClosed(title);
+        GlobalEvents.modalDialogClosed();
 
         return reply == YES_OPTION;
     }
@@ -159,11 +161,11 @@ public class Dialogs {
                                              int messageType) {
         assert !(parent instanceof View);
 
-        GlobalEvents.dialogOpened(title);
+        GlobalEvents.modalDialogOpened();
         int userAnswer = JOptionPane.showOptionDialog(parent, msg, title,
             OK_CANCEL_OPTION, messageType, null,
             options, options[initialOptionIndex]);
-        GlobalEvents.dialogClosed(title);
+        GlobalEvents.modalDialogClosed();
 
         return userAnswer == OK_OPTION;
     }
@@ -187,17 +189,17 @@ public class Dialogs {
             parent = getMainWindow();
         }
 
-        GlobalEvents.dialogOpened(title);
+        GlobalEvents.modalDialogOpened();
         JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
-        GlobalEvents.dialogClosed(title);
+        GlobalEvents.modalDialogClosed();
     }
 
     public static String showInputDialog(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
-        GlobalEvents.dialogOpened(title);
+        GlobalEvents.modalDialogOpened();
         String userInput = JOptionPane.showInputDialog(parent, msg, title, QUESTION_MESSAGE);
-        GlobalEvents.dialogClosed(title);
+        GlobalEvents.modalDialogClosed();
 
         return userInput;
     }
@@ -225,9 +227,9 @@ public class Dialogs {
     public static void showWarningDialog(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
-        GlobalEvents.dialogOpened(title);
+        GlobalEvents.modalDialogOpened();
         JOptionPane.showMessageDialog(parent, msg, title, WARNING_MESSAGE);
-        GlobalEvents.dialogClosed(title);
+        GlobalEvents.modalDialogClosed();
     }
 
     public static void showExceptionDialog(Throwable e) {
@@ -399,5 +401,27 @@ public class Dialogs {
         boolean rasterize = showOKCancelWarningDialog(msg,
             layer.getTypeString(), options, 1);
         return rasterize;
+    }
+
+    public static ShapeCombinator showShapeCombinatorDialog(Composition comp) {
+        String[] options = {"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL};
+        String msg = "<html>There is already a selection on " + comp.getName() +
+            ".<br>How do you want to combine new selection with the existing one?";
+
+        int userChoice = showManyOptionsDialog(
+            comp.getDialogParent(),
+            "Existing Selection",
+            msg,
+            options,
+            QUESTION_MESSAGE);
+
+        return switch (userChoice) {
+            case 0 -> ShapeCombinator.REPLACE;
+            case 1 -> ShapeCombinator.ADD;
+            case 2 -> ShapeCombinator.SUBTRACT;
+            case 3 -> ShapeCombinator.INTERSECT;
+            case JOptionPane.CLOSED_OPTION, 4 -> null; // canceled
+            default -> throw new IllegalStateException("userChoice = " + userChoice);
+        };
     }
 }

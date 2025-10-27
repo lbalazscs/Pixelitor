@@ -59,8 +59,8 @@ public class ConnectBrush extends AbstractBrush {
     }
 
     @Override
-    public void startAt(PPoint p) {
-        super.startAt(p);
+    public void startStrokeAt(PPoint p) {
+        super.startStrokeAt(p);
 
         if (settings.shouldClearHistoryPerStroke()) {
             clearHistory();

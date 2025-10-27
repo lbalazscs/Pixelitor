@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Views;
+import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -34,8 +35,11 @@ import java.beans.PropertyVetoException;
 public class ImageFrame extends JInternalFrame
     implements ViewContainer, InternalFrameListener {
 
-    private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
-    private static final int NIMBUS_VERTICAL_ADJUSTMENT = 37;
+    // extra space reserved for potential scrollbars
+    private static final int SCROLLBAR_SAFETY_HOR = 20;
+    private static final int SCROLLBAR_SAFETY_VER = 10;
+
+    private final int frameDecorationHeight;
 
     private final View view;
     private final JScrollPane scrollPane;
@@ -43,6 +47,8 @@ public class ImageFrame extends JInternalFrame
     public ImageFrame(View view, int locX, int locY) {
         super(view.createTitleWithZoom(),
             true, true, true, true);
+        frameDecorationHeight = Themes.getActive().getFrameDecorationHeight();
+
         addInternalFrameListener(this);
         setFrameIcon(null);
         this.view = view;
@@ -62,9 +68,8 @@ public class ImageFrame extends JInternalFrame
 
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
-        // Called as the result of a user click or as part
-        // of a programmatic activation, but it shouldn't matter as all
-        // activation takes place in the following method
+        // this event is fired both by user clicks and programmatic activation,
+        // but it shouldn't matter as the following method handles both cases
         Views.viewActivated(view);
     }
 
@@ -111,32 +116,25 @@ public class ImageFrame extends JInternalFrame
     }
 
     @Override
-    public void setSize(int width, int height) {
+    public void setSize(int contentWidth, int contentHeight) {
+        // the required size for the frame to hold the content
+        int requiredWidth = contentWidth + SCROLLBAR_SAFETY_HOR;
+        int requiredHeight = contentHeight + frameDecorationHeight + SCROLLBAR_SAFETY_VER;
+
         Point loc = getLocation();
         Dimension desktopSize = ImageArea.getSize();
 
-        int maxWidth = Math.max(0, desktopSize.width - 20 - loc.x);
-        int maxHeight = Math.max(0, desktopSize.height - 40 - loc.y);
+        // the maximum allowed size at the current location
+        int maxWidth = Math.max(0, desktopSize.width - loc.x);
+        int maxHeight = Math.max(0, desktopSize.height - loc.y);
 
-        if (width > maxWidth) {
-            width = maxWidth;
+        // constrain the required size to the available space
+        int finalWidth = Math.min(requiredWidth, maxWidth);
+        int finalHeight = Math.min(requiredHeight, maxHeight);
 
-            height += 15; // correction for the horizontal scrollbar
-        }
-        if (height > maxHeight) {
-            height = maxHeight;
-
-            width += 15; // correction for the vertical scrollbar
-            if (width > maxWidth) { // check again
-                width = maxWidth;
-            }
-        }
-
-        super.setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT,
-            height + NIMBUS_VERTICAL_ADJUSTMENT);
+        super.setSize(finalWidth, finalHeight);
     }
 
-    @Override
     public void ensurePositiveLocation() {
         Rectangle bounds = getBounds();
         if (bounds.x < 0 || bounds.y < 0) {

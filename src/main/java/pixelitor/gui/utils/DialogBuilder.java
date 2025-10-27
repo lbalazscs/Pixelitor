@@ -418,11 +418,11 @@ public class DialogBuilder {
         public void setVisible(boolean visible) {
             if (isModal()) {
                 if (visible) {
-                    GlobalEvents.dialogOpened(getTitle());
-                    assert !rootDialog || GlobalEvents.getModalDialogCount() == 1;
+                    GlobalEvents.modalDialogOpened();
+                    assert !rootDialog || GlobalEvents.getModalDialogNesting() == 1;
                 } else {
-                    GlobalEvents.dialogClosed(getTitle());
-                    assert !rootDialog || GlobalEvents.getModalDialogCount() == 0;
+                    GlobalEvents.modalDialogClosed();
+                    assert !rootDialog || GlobalEvents.getModalDialogNesting() == 0;
                 }
             }
             super.setVisible(visible);

@@ -85,8 +85,8 @@ public class LazyMouseBrush extends BrushDecorator {
     }
 
     @Override
-    public void startAt(PPoint p) {
-        delegate.startAt(p);
+    public void startStrokeAt(PPoint p) {
+        delegate.startStrokeAt(p);
 
         mouseX = p.getImX();
         mouseY = p.getImY();

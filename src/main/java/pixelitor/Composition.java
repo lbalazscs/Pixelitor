@@ -19,7 +19,10 @@ package pixelitor;
 
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Outsets;
-import pixelitor.gui.*;
+import pixelitor.gui.HistogramsPanel;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.TabViewContainer;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.guides.Guides;
@@ -136,6 +139,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     // the View that shows this composition, if any
     private transient View view;
 
+    // the current, finalized selection
     private transient Selection selection;
 
     // a temporary selection that is currently being created
@@ -287,7 +291,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         // if it's an undo, then the active layer names must match
         assert copyType != CopyType.UNDO || compCopy.activeLayer.getName().equals(activeLayer.getName())
-            : "copyType = " + copyType + ", compCopy.activeLayer.getName() = " + compCopy.activeLayer.getName() + ", activeLayer.getName() = " + activeLayer.getName();
+            : "copyType = " + copyType
+            + ", compCopy.activeLayer.getName() = " + compCopy.activeLayer.getName()
+            + ", activeLayer.getName() = " + activeLayer.getName();
 
         return compCopy;
     }
@@ -734,7 +740,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private void addLayerToGUI(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
-        view.addLayerToGUI(layer, layerIndex);
+        view.addLayerUI(layer, layerIndex);
     }
 
     private void removeAllLayerUIs() {
@@ -1111,7 +1117,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return activeLayer instanceof Drawable || activeLayer.isMaskEditing();
     }
 
-    private Layer getActiveTarget() {
+    private Layer getActiveMoveTarget() {
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
@@ -1194,7 +1200,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                 duplicateActiveLayer();
             }
 
-            getActiveTarget().prepareMovement();
+            getActiveMoveTarget().prepareMovement();
         }
         if (mode.movesSelection()) {
             if (selection != null) {
@@ -1204,11 +1210,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Updates the position of content/selection selection during a drag operation.
+     * Updates the position of a content layer/selection selection during a drag operation (Move Tool).
      */
     public void moveActiveContent(MoveMode mode, double imDx, double imDy) {
         if (mode.movesLayer()) {
-            Layer target = getActiveTarget();
+            Layer target = getActiveMoveTarget();
             target.moveWhileDragging(imDx, imDy);
             target.getHolder().invalidateImageCache();
         }
@@ -1224,7 +1230,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void finalizeMovement(MoveMode mode) {
         PixelitorEdit layerEdit = null;
         if (mode.movesLayer()) {
-            Layer target = getActiveTarget();
+            Layer target = getActiveMoveTarget();
 
             // will be null if a non-content layer without mask was moved
             layerEdit = target.finalizeMovement();
@@ -1250,7 +1256,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public void drawMovementContours(Graphics2D g, MoveMode mode) {
         if (mode.movesLayer()) {
-            Layer target = getActiveTarget();
+            Layer target = getActiveMoveTarget();
             if (target instanceof ContentLayer contentLayer) {
                 Rectangle imBounds = contentLayer.getContentBounds();
                 if (imBounds != null) {
@@ -1319,9 +1325,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Removes the current selection, optionally adding an undo/redo edit to the
-     * history. The edit is always returned, allowing callers to embed it into
-     * a composite edit. If there was no selection, then null is returned.
+     * Removes the current selection and cancels any draft selection,
+     * optionally adding an undo/redo edit to the history.
+     * The edit is always returned, allowing callers to embed it into a
+     * composite edit. If there was no selection, then null is returned.
      */
     public DeselectEdit deselect(boolean addToHistory) {
         if (draftSelection != null) {
@@ -1392,7 +1399,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Changes the selection based on a new shape, potentially combining
      * with the existing selection via user interaction (dialog).
      */
-    public SelectionChangeResult changeSelection(Shape newShape) {
+    public SelectionChangeResult updateSelectionInteractively(Shape newShape) {
         newShape = clipToCanvasBounds(newShape);
         if (newShape.getBounds().isEmpty()) {
             // the new shape is entirely outside the canvas
@@ -1402,11 +1409,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (selection == null) { // no existing selection
             // a new selection is created successfully.
             setSelection(new Selection(newShape, view));
-            return SelectionChangeResult.success(new NewSelectionEdit(this, selection.getShape()));
+            return SelectionChangeResult.success(
+                new NewSelectionEdit(this, selection.getShape()));
         }
 
         // modify existing selection
-        ShapeCombinator combinator = showShapeCombinatorDialog(this);
+        ShapeCombinator combinator = Dialogs.showShapeCombinatorDialog(this);
         if (combinator == null) {
             // the user cancelled the dialog
             return SelectionChangeResult.cancelled();
@@ -1426,28 +1434,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             return SelectionChangeResult.success(new SelectionShapeChangeEdit(
                 combinator.getHistoryName(), this, origShape));
         }
-    }
-
-    private static ShapeCombinator showShapeCombinatorDialog(Composition comp) {
-        String[] options = {"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL};
-        String msg = "<html>There is already a selection on " + comp.getName() +
-            ".<br>How do you want to combine new selection with the existing one?";
-
-        int userChoice = Dialogs.showManyOptionsDialog(
-            comp.getDialogParent(),
-            "Existing Selection",
-            msg,
-            options,
-            JOptionPane.QUESTION_MESSAGE);
-
-        return switch (userChoice) {
-            case 0 -> ShapeCombinator.REPLACE;
-            case 1 -> ShapeCombinator.ADD;
-            case 2 -> ShapeCombinator.SUBTRACT;
-            case 3 -> ShapeCombinator.INTERSECT;
-            case JOptionPane.CLOSED_OPTION, 4 -> null; // canceled
-            default -> throw new IllegalStateException("userChoice = " + userChoice);
-        };
     }
 
     /**
@@ -1624,7 +1610,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public boolean isActive() {
-        return Views.activeCompIs(this);
+        return Views.getActiveComp() == this;
     }
 
     /**
@@ -1713,11 +1699,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             throw new AssertionError("no active layer in " + getName());
         }
         if (activeTopLevelLayer.getComp() != this) {
-            throw new AssertionError("bad comp in active top-level layer '%s' (that comp='%s', this='%s')".formatted(
+            throw new AssertionError(
+                "bad comp in active top-level layer '%s' (that comp='%s', this='%s')".formatted(
                 activeTopLevelLayer.getName(), activeTopLevelLayer.getComp().getDebugName(), getDebugName()));
         }
         if (activeLayer.getComp() != this) {
-            throw new AssertionError("bad comp in active layer '%s' (that comp='%s', this='%s')".formatted(
+            throw new AssertionError(
+                "bad comp in active layer '%s' (that comp='%s', this='%s')".formatted(
                 activeLayer.getName(), activeLayer.getComp().getDebugName(), getDebugName()));
         }
         if (!layerList.contains(activeTopLevelLayer)) {
@@ -1732,7 +1720,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
         for (Layer layer : layerList) {
             if (layer.getHolder() != this) {
-                throw new AssertionError("bad holder in layer '%s' (that holder='%s', this='%s')".formatted(
+                throw new AssertionError(
+                    "bad holder in layer '%s' (that holder='%s', this='%s')".formatted(
                     layer.getName(), layer.getHolder().getName(), getDebugName()));
             }
         }
@@ -1740,7 +1729,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         forEachNestedLayerAndMask(layer -> {
             assert layer.checkInvariants();
             if (layer.getComp() != this) {
-                throw new AssertionError("bad comp in '%s' (that comp='%s', this='%s')".formatted(
+                throw new AssertionError(
+                    "bad comp in '%s' (that comp='%s', this='%s')".formatted(
                     layer.getName(), layer.getComp().getDebugName(), getDebugName()));
             }
         });
@@ -1760,7 +1750,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (owners != null) {
             for (SmartObject owner : owners) {
                 if (owner.getContent() != this) {
-                    throw new AssertionError("bad owner reference for " + getDebugName());
+                    throw new AssertionError(
+                        "bad owner reference for " + getDebugName());
                 }
             }
         }
@@ -1788,7 +1779,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         String filePath = targetFile.getAbsolutePath();
         if (IOTasks.isPathProcessing(filePath)) {
             Messages.showInfo("Save Busy",
-                "The file " + targetFile.getName() + " is currently being processed.");
+                "The file " + targetFile.getName()
+                    + " is currently being processed.");
             return CompletableFuture.completedFuture(null);
         }
         IOTasks.markPathForWriting(filePath);

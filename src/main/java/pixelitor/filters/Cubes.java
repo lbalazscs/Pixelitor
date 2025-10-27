@@ -126,8 +126,7 @@ public class Cubes extends ParametrizedFilter {
         List<ShapeWithColor> shapes = createDistortedShapes(width, height);
 
         for (ShapeWithColor shapeWithColor : shapes) {
-            g.setColor(shapeWithColor.color());
-            g.fill(shapeWithColor.shape());
+            shapeWithColor.fill(g);
 
             if (edgeWidth > 0) {
                 g.setColor(edgeColorParam.getColor());
@@ -441,7 +440,7 @@ public class Cubes extends ParametrizedFilter {
         }
         String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, null,
             edgeWidthParam.getValue(), edgeColorParam.getColor());
-        FileIO.saveSVG(svgContent, "cubes.svg");
+        FileIO.saveSVG(svgContent, this);
     }
 
     @Override

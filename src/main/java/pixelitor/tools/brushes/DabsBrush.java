@@ -29,14 +29,14 @@ public abstract class DabsBrush extends AbstractBrush {
     private final DabsStrategy dabsStrategy;
 
     protected DabsBrush(double radius, Spacing spacing,
-                        AngleSettings angleSettings,
+                        RotationSettings rotationSettings,
                         boolean refreshBrushForEachDab) {
         super(radius);
         this.spacing = spacing;
-        settings = new DabsBrushSettings(angleSettings, spacing);
+        settings = new DabsBrushSettings(rotationSettings, spacing);
         dabsStrategy = new LinearDabsStrategy(this,
             spacing,
-            angleSettings,
+            rotationSettings,
             refreshBrushForEachDab);
         settings.registerBrush(this);
     }
@@ -64,8 +64,8 @@ public abstract class DabsBrush extends AbstractBrush {
     public abstract void putDab(PPoint currentPoint, double angle);
 
     @Override
-    public void startAt(PPoint p) {
-        super.startAt(p);
+    public void startStrokeAt(PPoint p) {
+        super.startStrokeAt(p);
         dabsStrategy.onStrokeStart(p);
         repaintComp(p);
     }
@@ -112,7 +112,7 @@ public abstract class DabsBrush extends AbstractBrush {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addBoolean("angled", settings.isAngled());
+        node.addBoolean("directional", settings.isDirectional());
         node.addBoolean("jittered",
             settings.getAngleSettings().isJitterEnabled());
         node.addDouble("spacing", getPreferredSpacing());

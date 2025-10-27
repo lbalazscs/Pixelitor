@@ -27,11 +27,11 @@ import java.util.function.Consumer;
  * The settings of a {@link DabsBrush}.
  */
 public class DabsBrushSettings extends BrushSettings {
-    private AngleSettings angleSettings;
+    private RotationSettings rotationSettings;
     private Spacing spacing;
 
-    public DabsBrushSettings(AngleSettings angleSettings, Spacing spacing) {
-        this.angleSettings = angleSettings;
+    public DabsBrushSettings(RotationSettings rotationSettings, Spacing spacing) {
+        this.rotationSettings = rotationSettings;
         this.spacing = spacing;
     }
 
@@ -40,20 +40,20 @@ public class DabsBrushSettings extends BrushSettings {
         notifyBrushes();
     }
 
-    public void setAngleSettings(AngleSettings angleSettings) {
-        this.angleSettings = angleSettings;
+    public void setAngleSettings(RotationSettings rotationSettings) {
+        this.rotationSettings = rotationSettings;
         notifyBrushes();
     }
 
     /**
      * Returns true if the brush angle should follow the stroke direction.
      */
-    public boolean isAngled() {
-        return angleSettings.isAngled();
+    public boolean isDirectional() {
+        return rotationSettings.isDirectional();
     }
 
-    public AngleSettings getAngleSettings() {
-        return angleSettings;
+    public RotationSettings getAngleSettings() {
+        return rotationSettings;
     }
 
     public Spacing getSpacingStrategy() {
@@ -75,13 +75,13 @@ public class DabsBrushSettings extends BrushSettings {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        angleSettings.saveStateTo(preset);
+        rotationSettings.saveStateTo(preset);
         spacing.saveStateTo(preset);
     }
 
     @Override
     public void loadStateFrom(UserPreset preset) {
-        angleSettings.loadStateFrom(preset);
+        rotationSettings = RotationSettings.fromPreset(preset);
         spacing.loadStateFrom(preset);
     }
 }

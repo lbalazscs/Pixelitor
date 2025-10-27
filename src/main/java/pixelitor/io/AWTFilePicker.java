@@ -21,6 +21,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.FileDialog;
 import java.io.File;
 
@@ -28,16 +29,19 @@ import static pixelitor.io.FileChooserConfig.SelectableFormats.SINGLE;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 
+/**
+ * An implementation of {@link FilePicker} that uses AWT's FileDialog to show native file choosers.
+ */
 public class AWTFilePicker implements FilePicker {
     private FileDialog openDialog;
     private FileDialog saveDialog;
 
     @Override
-    public File getSupportedOpenFile() {
+    public File selectSupportedOpenFile() {
         initOpenPicker();
-        GlobalEvents.dialogOpened("Open");
+        GlobalEvents.modalDialogOpened();
         openDialog.setVisible(true);
-        GlobalEvents.dialogClosed("Open");
+        GlobalEvents.modalDialogClosed();
         String file = openDialog.getFile();
         if (file != null) {
             String directory = openDialog.getDirectory();
@@ -60,9 +64,9 @@ public class AWTFilePicker implements FilePicker {
             saveDialog.setFile(suggestedFileName);
         }
 
-        GlobalEvents.dialogOpened("Save");
+        GlobalEvents.modalDialogOpened();
         saveDialog.setVisible(true);
-        GlobalEvents.dialogClosed("Save");
+        GlobalEvents.modalDialogClosed();
 
         String selectedFileName = saveDialog.getFile();
         if (selectedFileName == null) {
@@ -70,17 +74,11 @@ public class AWTFilePicker implements FilePicker {
         }
 
         if (!FileUtils.hasExtension(selectedFileName)) {
-            boolean extAdded = false;
-            if (suggestedFileName != null) {
-                // if there was a suggested file name, then try using its extension
-                String extension = FileUtils.getExtension(suggestedFileName);
-                if (extension != null) {
-                    selectedFileName += ("." + extension);
-                    extAdded = true;
-                }
-            }
-            if (!extAdded) {
-                // give up
+            if (config.defaultFileFilter() instanceof FileNameExtensionFilter filter) {
+                String extension = filter.getExtensions()[0];
+                selectedFileName += "." + extension;
+            } else {
+                // this shouldn't happen with the current configuration options
                 Dialogs.showNoExtensionDialog(null);
                 return null;
             }
@@ -106,12 +104,9 @@ public class AWTFilePicker implements FilePicker {
     }
 
     @Override
-    public String getSelectedSaveExtension(File selectedFile) {
-        return FileUtils.getExtension(selectedFile.getName());
-    }
-
-    @Override
-    public File getAnyOpenFile() {
-        return getSupportedOpenFile();
+    public File selectAnyOpenFile() {
+        // the AWT chooser isn't configured with an extension
+        // picker, so these two methods are identical in this class
+        return selectSupportedOpenFile();
     }
 }

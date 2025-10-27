@@ -26,10 +26,10 @@ import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 /**
- * The hand tool.
+ * A tool for panning the view by dragging the mouse.
  */
 public class HandTool extends Tool {
-    private final HandToolSupport handToolSupport = new HandToolSupport();
+    private final ViewportPanner viewportPanner = new ViewportPanner();
 
     HandTool() {
         super("Hand", 'H',
@@ -44,12 +44,12 @@ public class HandTool extends Tool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        handToolSupport.mousePressed(e.getOrigEvent(), e.getViewport());
+        viewportPanner.mousePressed(e.getOrigEvent(), e.getViewport());
     }
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        handToolSupport.mouseDragged(e.getOrigEvent(), e.getViewport());
+        viewportPanner.mouseDragged(e.getOrigEvent(), e.getViewport());
     }
 
     @Override

@@ -109,7 +109,7 @@ class AbstractBrushToolTest {
         InOrder inOrder = inOrder(spyBrush);
 
         inOrder.verify(spyBrush).setTarget(any(), any());
-        inOrder.verify(spyBrush).startAt(any());
+        inOrder.verify(spyBrush).startStrokeAt(any());
         inOrder.verify(spyBrush, atLeastOnce()).continueTo(any());
     }
 }

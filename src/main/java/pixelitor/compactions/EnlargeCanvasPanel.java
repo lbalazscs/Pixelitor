@@ -25,10 +25,7 @@ import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.utils.CustomShapes;
-import pixelitor.utils.Icons;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ResizeUnit;
+import pixelitor.utils.*;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -510,7 +507,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         void updatePreviewImage(Composition comp) {
             if (comp != null) {
                 BufferedImage actualImage = comp.getCompositeImage();
-                previewImg = ImageUtils.createThumbnail(actualImage, getWidth() / 2, null);
+                previewImg = Thumbnails.createThumbnail(actualImage, getWidth() / 2, null);
             }
         }
 

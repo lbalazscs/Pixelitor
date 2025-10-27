@@ -81,7 +81,12 @@ public class Messages {
     }
 
     public static void showException(Throwable exception, Thread srcThread) {
-        msgHandler.showException(exception, srcThread);
+        if (msgHandler != null) {
+            msgHandler.showException(exception, srcThread);
+        } else {
+            //noinspection CallToPrintStackTrace
+            exception.printStackTrace();
+        }
     }
 
     public static boolean showYesNoQuestion(String title, String msg) {

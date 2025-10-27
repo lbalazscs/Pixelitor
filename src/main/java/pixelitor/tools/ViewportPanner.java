@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,14 +28,13 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 /**
- * Provides a "hand tool"-like behavior (the contents of a scroll pane can be
- * moved with a mouse drag) to the hand tool and other components
+ * Implements hand-tool-style mouse-drag panning for the content of a JViewport.
  */
-public class HandToolSupport {
+public class ViewportPanner {
     private int startX;
     private int startY;
-    private int maxScrollPositionX;
-    private int maxScrollPositionY;
+    private int maxScrollPosX;
+    private int maxScrollPosY;
 
     public void mousePressed(MouseEvent e, JViewport viewport) {
         startX = e.getX();
@@ -44,54 +43,43 @@ public class HandToolSupport {
         Dimension viewSize = viewport.getViewSize();
         Dimension extentSize = viewport.getExtentSize(); // the size of the visible part of the view in view coordinates
 
-        maxScrollPositionX = viewSize.width - extentSize.width;
-        maxScrollPositionY = viewSize.height - extentSize.height;
+        maxScrollPosX = viewSize.width - extentSize.width;
+        maxScrollPosY = viewSize.height - extentSize.height;
     }
 
     public void mouseDragged(MouseEvent e, JViewport viewport) {
-        int dx = e.getX() - startX;
-        int dy = e.getY() - startY;
         Point scrollPos = viewport.getViewPosition();
-        scrollPos.x -= dx;
-        scrollPos.y -= dy;
-        if (scrollPos.x < 0) {
-            scrollPos.x = 0;
-        }
-        if (scrollPos.y < 0) {
-            scrollPos.y = 0;
-        }
-        if (scrollPos.x > maxScrollPositionX) {
-            scrollPos.x = maxScrollPositionX;
-        }
-        if (scrollPos.y > maxScrollPositionY) {
-            scrollPos.y = maxScrollPositionY;
-        }
+        scrollPos.translate(
+            startX - e.getX(),
+            startY - e.getY());
+
+        scrollPos.x = Math.clamp(scrollPos.x, 0, maxScrollPosX);
+        scrollPos.y = Math.clamp(scrollPos.y, 0, maxScrollPosY);
 
         viewport.setViewPosition(scrollPos);
     }
 
     /**
-     * Adds the "hand tool"-like behavior to the given scroll pane
+     * Adds the "hand tool"-like panning behavior to the given scroll pane.
      */
-    public static void addBehavior(JScrollPane scrollPane) {
+    public static void enablePanning(JScrollPane scrollPane) {
         scrollPane.setCursor(Cursors.HAND);
-        HandToolSupport support = new HandToolSupport();
+        ViewportPanner panner = new ViewportPanner();
         JViewport viewport = scrollPane.getViewport();
         Component panel = viewport.getView();
 
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                support.mousePressed(e, viewport);
+                panner.mousePressed(e, viewport);
             }
         });
 
         panel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                support.mouseDragged(e, viewport);
+                panner.mouseDragged(e, viewport);
             }
         });
-
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,9 +23,10 @@ import java.awt.event.MouseEvent;
 import java.util.Random;
 
 import static java.awt.event.KeyEvent.VK_CONTROL;
+import static pixelitor.utils.input.Modifiers.ROBOT_DELAY_MS;
 
 /**
- * Represents the state of the Ctrl key during a {@link KeyEvent}.
+ * Represents the pressed or released state of the Ctrl key.
  */
 public enum Ctrl implements EventMaskModifier {
     PRESSED {
@@ -55,7 +56,7 @@ public enum Ctrl implements EventMaskModifier {
     public Ctrl press(Robot robot) {
         if (this == PRESSED) {
             robot.keyPress(VK_CONTROL);
-            robot.delay(50);
+            robot.delay(ROBOT_DELAY_MS);
         }
         return this;
     }
@@ -63,7 +64,7 @@ public enum Ctrl implements EventMaskModifier {
     public void release(Robot robot) {
         if (this == PRESSED) {
             robot.keyRelease(VK_CONTROL);
-            robot.delay(50);
+            robot.delay(ROBOT_DELAY_MS);
         }
     }
 }

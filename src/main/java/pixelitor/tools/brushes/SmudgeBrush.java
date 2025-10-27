@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,16 +31,12 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * The brush used by the Smudge Tool.
  */
 public class SmudgeBrush extends CopyBrush {
-    /**
-     * The last point where the brush was used.
-     * Used for sampling the source image.
-     */
+    // the location of the previous dab, used to sample pixels
+    // from the source image for the current dab
     private PPoint lastPoint;
 
-    /**
-     * The opacity of the brush (strength in the GUI).
-     */
-    private float opacity;
+    // the brush's strength, applied as opacity for each dab
+    private float strength;
 
     private boolean firstDabInStroke = true;
 
@@ -54,14 +50,14 @@ public class SmudgeBrush extends CopyBrush {
         super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
-    public void initFirstPoint(BufferedImage sourceImage, PPoint startPoint, float opacity) {
+    public void initStroke(BufferedImage sourceImage, PPoint startPoint, float strength) {
         this.sourceImage = sourceImage;
         lastPoint = startPoint;
-        this.opacity = opacity;
+        this.strength = strength;
         firstDabInStroke = true;
     }
 
-    public boolean isFirstPointInitialized() {
+    public boolean isStrokeInitialized() {
         return lastPoint != null;
     }
 
@@ -100,7 +96,7 @@ public class SmudgeBrush extends CopyBrush {
         // SrcOver allows to smudge into transparent areas, but transparency
         // can't be smudged into non-transparent areas.
         // DstOver allows only smudging into transparent.
-        targetG.setComposite(AlphaComposite.SrcOver.derive(opacity));
+        targetG.setComposite(AlphaComposite.SrcOver.derive(strength));
 
         targetG.drawImage(brushImage, transform, null);
         lastPoint = currentPoint;
@@ -116,8 +112,8 @@ public class SmudgeBrush extends CopyBrush {
         DebugNode node = super.createDebugNode(key);
 
         node.addNullableDebuggable("last", lastPoint);
-        node.addFloat("opacity", opacity);
-        node.addBoolean("first usage in stroke", firstDabInStroke);
+        node.addFloat("strength", strength);
+        node.addBoolean("first dab in stroke", firstDabInStroke);
 
         return node;
     }

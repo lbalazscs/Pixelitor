@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,11 +28,11 @@ import static java.nio.file.Files.isWritable;
  * A save file chooser that confirms before overwriting a file,
  * and also does some other validations (valid file name, writable file).
  */
-public class ConfirmSaveFileChooser extends JFileChooser {
+public class ValidatingSaveFileChooser extends JFileChooser {
     private static final char[] INVALID_CHARACTERS =
         {'`', '?', '*', '\\', '<', '>', '|', '\"', ':'};
 
-    public ConfirmSaveFileChooser(File currentDir) {
+    public ValidatingSaveFileChooser(File currentDir) {
         super(currentDir);
     }
 
@@ -41,7 +41,7 @@ public class ConfirmSaveFileChooser extends JFileChooser {
         File f = getSelectedFile();
         String fileName = f.getName();
 
-        if (invalidFileName(fileName)) {
+        if (checkAndReportInvalidFileName(fileName)) {
             return;
         }
 
@@ -56,8 +56,8 @@ public class ConfirmSaveFileChooser extends JFileChooser {
         if (f.exists()) {
             String msg = "<html><b>" + fileName + "</b> already exists." +
                 "<br>Do you want to replace it?";
-            boolean overWrite = Dialogs.showYesNoQuestionDialog(this, "Confirmation", msg);
-            if (!overWrite) {
+            boolean overwrite = Dialogs.showYesNoQuestionDialog(this, "Confirmation", msg);
+            if (!overwrite) {
                 return;
             }
             if (!isWritable(f.toPath())) {
@@ -70,7 +70,7 @@ public class ConfirmSaveFileChooser extends JFileChooser {
     }
 
     // an incomplete check, but it should cover the most common cases
-    private boolean invalidFileName(String fileName) {
+    private boolean checkAndReportInvalidFileName(String fileName) {
         for (char ch : INVALID_CHARACTERS) {
             if (fileName.indexOf(ch) != -1) {
                 // no HTML in the message, because then the display

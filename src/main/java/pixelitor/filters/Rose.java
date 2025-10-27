@@ -76,6 +76,7 @@ public class Rose extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
+        // copy the source because transparency is enabled in the colors
         dest = ImageUtils.copyImage(src);
 
         int width = dest.getWidth();
@@ -157,7 +158,7 @@ public class Rose extends ParametrizedFilter {
             fgColor.getColor()
         ));
         String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, bgColor.getColor());
-        FileIO.saveSVG(svgContent, "rose.svg");
+        FileIO.saveSVG(svgContent, this);
     }
 
     @Override

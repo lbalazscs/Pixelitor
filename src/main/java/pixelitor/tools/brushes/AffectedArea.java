@@ -25,7 +25,7 @@ import pixelitor.utils.debug.Debuggable;
 import java.awt.Rectangle;
 
 /**
- * Represents the area affected by a brush. Used for the undo.
+ * Represents the rectangular region affected by a single brush stroke.
  */
 public class AffectedArea implements Debuggable {
     private final BoundingBox boundingBox = new BoundingBox();
@@ -39,7 +39,7 @@ public class AffectedArea implements Debuggable {
      * There is only one {@link AffectedArea} object for each brush tool,
      * and it gets reinitialized for each independent brush stroke.
      */
-    public void initAt(PPoint p) {
+    public void startStrokeAt(PPoint p) {
         boundingBox.reset();
         boundingBox.add(p.getImX(), p.getImY());
     }
@@ -47,7 +47,7 @@ public class AffectedArea implements Debuggable {
     /**
      * Update the area with a brush position
      */
-    public void updateWith(PPoint p) {
+    public void extendStrokeTo(PPoint p) {
         boundingBox.add(p.getImX(), p.getImY());
     }
 

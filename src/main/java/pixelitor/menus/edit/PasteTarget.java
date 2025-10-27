@@ -40,7 +40,7 @@ public enum PasteTarget {
         @Override
         void paste(BufferedImage pastedImage) {
             Views.getActiveComp().addExternalImageAsNewLayer(pastedImage,
-                "Pasted Layer", "New Pasted Layer");
+                "pasted layer", "New Pasted Layer");
         }
     },
     /**
@@ -69,9 +69,6 @@ public enum PasteTarget {
             int canvasWidth = canvas.getWidth();
             int canvasHeight = canvas.getHeight();
 
-            int imgWidth = pastedImage.getWidth();
-            int imgHeight = pastedImage.getHeight();
-
             // the mask image will be canvas-sized, even
             // if the pasted image has a different size
             BufferedImage bwImage = new BufferedImage(
@@ -84,8 +81,8 @@ public enum PasteTarget {
             }
 
             // center the pasted image
-            int x = (canvasWidth - imgWidth) / 2;
-            int y = (canvasHeight - imgHeight) / 2;
+            int x = (canvasWidth - pastedImage.getWidth()) / 2;
+            int y = (canvasHeight - pastedImage.getHeight()) / 2;
             g.drawImage(pastedImage, x, y, null);
 
             g.dispose();

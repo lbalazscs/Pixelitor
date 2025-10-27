@@ -75,7 +75,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     private MaskViewMode maskViewMode;
 
-    private static final CheckerboardPainter checkerBoardPainter
+    private static final CheckerboardPainter checkerboardPainter
         = ImageUtils.createCheckerboardPainter();
 
     // Coordinates of the canvas origin within the view (for centering).
@@ -312,7 +312,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     public void setViewContainer(ViewContainer container) {
         viewContainer = container;
-        updateContainerSize();
+        fitFrameToCanvas();
     }
 
     public ViewContainer getViewContainer() {
@@ -397,7 +397,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // paint zoom-independent checkerboard pattern
         boolean showMask = maskViewMode.showMask();
         if (!showMask) {
-            checkerBoardPainter.paint(g2, this,
+            checkerboardPainter.paint(g2, this,
                 canvas.getCoWidth(), canvas.getCoHeight());
         }
 
@@ -555,8 +555,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public void ensurePositiveLocation() {
-        if (viewContainer != null) {
-            viewContainer.ensurePositiveLocation();
+        if (viewContainer instanceof ImageFrame frame) {
+            frame.ensurePositiveLocation();
         }
     }
 
@@ -565,8 +565,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public boolean setMaskViewModeInternal(MaskViewMode maskViewMode) {
-        // it is important not to call this directly,
-        // it should be a part of a mask activation
+        // should only be called from MaskViewMode.activate,
+        // as it sets the mode without triggering related UI updates
         assert Assertions.callingClassIs("MaskViewMode");
 
         boolean changed = this.maskViewMode != maskViewMode;
@@ -583,11 +583,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void canvasCoSizeChanged() {
         assert Invariants.imageCoversCanvas(comp);
 
-        updateContainerSize();
+        fitFrameToCanvas();
         updateCanvasLocation();
     }
 
-    private void updateContainerSize() {
+    private void fitFrameToCanvas() {
         if (viewContainer instanceof ImageFrame frame) {
             frame.setToCanvasSize();
         }
@@ -637,7 +637,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         ZoomLevel prevZoom = zoomLevel;
         this.zoomLevel = newZoom;
-        zoomScale = newZoom.getViewScale();
+        zoomScale = newZoom.getScale();
         canvas.recalcCoSize(this, true);
 
         if (ImageArea.isActiveMode(ImageArea.Mode.FRAMES)) {
@@ -651,7 +651,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
 
         if (isActive()) {
-            ZoomControl.get().updateZoom(zoomLevel);
+            ZoomControl.get().syncFromExternalZoom(zoomLevel);
         }
     }
 
@@ -816,7 +816,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     private Point2D fromComponentToImageSpace(Point co, ZoomLevel zoom) {
-        double zoomViewScale = zoom.getViewScale();
+        double zoomViewScale = zoom.getScale();
         return new Point2D.Double(
             (co.x - canvasStartX) / zoomViewScale,
             (co.y - canvasStartY) / zoomViewScale
@@ -824,7 +824,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     private Point fromImageToComponentSpace(Point2D im, ZoomLevel zoom) {
-        double zoomViewScale = zoom.getViewScale();
+        double zoomViewScale = zoom.getScale();
         return new Point(
             (int) (canvasStartX + im.getX() * zoomViewScale),
             (int) (canvasStartY + im.getY() * zoomViewScale)
@@ -854,7 +854,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         );
     }
 
-    public Rectangle2D imageToComponentSpace2(Rectangle2D im) {
+    public Rectangle2D imageToComponentSpacePrecise(Rectangle2D im) {
         return new Rectangle2D.Double(
             imageXToComponentSpace(im.getX()),
             imageYToComponentSpace(im.getY()),
@@ -887,14 +887,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     /**
-     * Returns (in component space) how much of this {@link View} is currently
-     * visible considering that the JScrollPane might show only a part of it.
+     * Returns the currently visible portion of this {@link View} in component-space
+     * coordinates, considering that the JScrollPane might only show a part of it.
      */
     public Rectangle getVisibleRegion() {
         return viewContainer.getScrollPane().getViewport().getViewRect();
     }
 
-    public void addLayerToGUI(Layer layer, int index) {
+    public void addLayerUI(Layer layer, int index) {
         assert calledOnEDT() : callInfo();
 
         // can be cast outside unit tests

@@ -18,21 +18,26 @@
 package pixelitor.gui.utils;
 
 import com.formdev.flatlaf.FlatLaf;
-import pixelitor.colors.FgBgColors;
-import pixelitor.layers.LayerGUILayout;
-import pixelitor.layers.SelectionState;
 import pixelitor.tools.gui.ToolButton;
 
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 import java.awt.Color;
 import java.awt.Window;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
+/**
+ * A static utility class for managing the application's Look and Feel (theme).
+ */
 public class Themes {
     private Themes() {
         // do not instantiate
     }
+
+    private static final List<Consumer<Theme>> themeChangeListeners = new ArrayList<>();
 
     public static final Color LIGHT_ICON_COLOR = new ColorUIResource(187, 187, 187);
 
@@ -44,16 +49,22 @@ public class Themes {
     public static final AccentColor DEFAULT_ACCENT_COLOR = AccentColor.BLUE;
     private static AccentColor activeAccentColor = DEFAULT_ACCENT_COLOR;
 
-    public static void apply(Theme theme, boolean updateGUI, boolean force) {
+    public static void addThemeChangeListener(Consumer<Theme> listener) {
+        themeChangeListeners.add(listener);
+    }
+
+    public static void apply(Theme theme, boolean notifyComponents, boolean force) {
         if (theme != activeTheme || force) {
             applyLookAndFeel(theme);
             activeTheme = theme;
 
-            if (updateGUI) {
-                LayerGUILayout.themeChanged(theme);
-                SelectionState.setupBorders(theme.isDark());
-                FgBgColors.getGUI().themeChanged();
-                updateAllComponents();
+            if (notifyComponents) {
+                // notify all registered listeners
+                for (Consumer<Theme> listener : themeChangeListeners) {
+                    listener.accept(theme);
+                }
+
+                refreshComponentUIs();
             }
         }
     }
@@ -78,7 +89,7 @@ public class Themes {
     /**
      * Updates all UI components to reflect theme changes.
      */
-    public static void updateAllComponents() {
+    public static void refreshComponentUIs() {
         for (Window window : Window.getWindows()) {
             SwingUtilities.updateComponentTreeUI(window);
         }

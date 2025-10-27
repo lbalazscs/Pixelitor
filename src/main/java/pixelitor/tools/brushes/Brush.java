@@ -32,7 +32,7 @@ public interface Brush extends Debuggable {
     /**
      * Starts a new brush stroke at the given point.
      */
-    void startAt(PPoint p);
+    void startStrokeAt(PPoint p);
 
     /**
      * Continues the current brush stroke to the given point.

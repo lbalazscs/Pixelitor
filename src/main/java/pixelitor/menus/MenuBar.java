@@ -57,10 +57,7 @@ import pixelitor.guides.AddSingleGuidePanel;
 import pixelitor.history.History;
 import pixelitor.history.RedoAction;
 import pixelitor.history.UndoAction;
-import pixelitor.io.FileChoosers;
-import pixelitor.io.FileIO;
-import pixelitor.io.LayerAnimation;
-import pixelitor.io.OptimizedJpegExportPanel;
+import pixelitor.io.*;
 import pixelitor.io.magick.ExportSettings;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.*;
@@ -592,7 +589,7 @@ public class MenuBar extends JMenuBar {
         }, CTRL_SHIFT_E);
 
         sub.add(new ViewEnabledAction("Add Linked...", comp -> {
-            File file = FileChoosers.getSupportedOpenFile();
+            File file = FileChoosers.selectSupportedOpenFile();
             if (file == null) {
                 return; // the user canceled the dialog
             }
@@ -866,7 +863,7 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createDistortSubmenu(i18n));
         filterMenu.add(createFindEdgesSubmenu(i18n));
 
-        File gmicExe = Utils.findExecutable(AppPreferences.gmicDirName, "gmic");
+        File gmicExe = FileUtils.findExecutable(AppPreferences.gmicDirName, "gmic");
         if (gmicExe != null) {
             GMICFilter.GMIC_PATH = gmicExe;
             filterMenu.add(createGMICSubmenu());
@@ -1397,9 +1394,6 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(PorterDuff.NAME, PorterDuff::new);
 
-        sub.add(new TaskAction("Debug All Comp Names",
-            Debug::debugAllDebugNames));
-
         return sub;
     }
 
@@ -1430,7 +1424,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new TaskAction("revalidate() the main window", () ->
             pw.getContentPane().revalidate()));
 
-        sub.add(new TaskAction("Themes.updateAllComponents()", Themes::updateAllComponents));
+        sub.add(new TaskAction("Themes.refreshComponentUIs()", Themes::refreshComponentUIs));
 
         sub.add(new ViewEnabledAction("update() on the active image",
             Composition::update));

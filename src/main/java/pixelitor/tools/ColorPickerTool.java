@@ -268,7 +268,7 @@ public class ColorPickerTool extends Tool {
                 startX, startY,
                 endX - startX + 1, endY - startY + 1);
         }
-        Rectangle2D coSamplingRect = comp.getView().imageToComponentSpace2(imSamplingRect);
+        Rectangle2D coSamplingRect = comp.getView().imageToComponentSpacePrecise(imSamplingRect);
         Shapes.drawVisibly(g2, coSamplingRect);
     }
 

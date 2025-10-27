@@ -101,7 +101,7 @@ public final class FilterButtonModel implements FilterSetting {
     public static FilterButtonModel createExportSvg(Runnable exportAction) {
         return new FilterButtonModel("Export SVG...", exportAction,
             null, "Export the current image to an SVG file",
-            null, false);
+            "exportSvg", false);
     }
 
     @Override

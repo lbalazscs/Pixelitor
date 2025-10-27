@@ -398,6 +398,7 @@ public final class GUIUtils {
         JButton button = new JButton("Randomize", Icons.getRandomizeIcon());
         button.setToolTipText(ParamSet.RANDOMIZE_BUTTON_TOOLTIP);
         button.addActionListener(action);
+        button.setName("randomize");
         return button;
     }
 
@@ -405,6 +406,7 @@ public final class GUIUtils {
         JButton button = new JButton("Reset All", Icons.getResetIcon());
         button.setToolTipText(Resettable.RESET_ALL_TOOLTIP);
         button.addActionListener(action);
+        button.setName("resetAll");
         return button;
     }
 

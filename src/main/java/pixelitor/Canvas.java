@@ -22,6 +22,7 @@ import pixelitor.tools.Symmetry;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.Thumbnails;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -289,8 +290,8 @@ public class Canvas implements Serializable, Debuggable {
 
     public Dimension getThumbSize() {
         if (thumbDimension == null) {
-            thumbDimension = ImageUtils.calcThumbDimensions(
-                width, height, Views.thumbSize, true);
+            thumbDimension = Thumbnails.calcThumbDimensions(
+                width, height, Thumbnails.getMaxSize(), true);
         }
         return thumbDimension;
     }

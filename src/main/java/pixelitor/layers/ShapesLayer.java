@@ -34,6 +34,7 @@ import pixelitor.tools.shapes.StyledShape;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Thumbnails;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.*;
@@ -41,8 +42,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
-
-import static pixelitor.Views.thumbSize;
 
 /**
  * A layer that renders a vector-based shape (or in the future: multiple shapes).
@@ -161,13 +160,13 @@ public class ShapesLayer extends ContentLayer {
 
     @Override
     public BufferedImage createIconThumbnail() {
-        BufferedImage img = ImageUtils.createSysCompatibleImage(thumbSize, thumbSize);
+        BufferedImage img = Thumbnails.createEmpty();
         Graphics2D g2 = img.createGraphics();
 
         if (styledShape == null) {
-            thumbCheckerBoardPainter.paint(g2, null, thumbSize, thumbSize);
+            Thumbnails.paintBackground(g2, thumbCheckerBoardPainter);
         } else {
-            styledShape.paintIconThumbnail(g2, thumbSize);
+            styledShape.paintIconThumbnail(g2);
         }
 
         g2.dispose();

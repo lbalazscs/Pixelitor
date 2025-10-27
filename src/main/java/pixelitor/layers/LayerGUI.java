@@ -24,7 +24,7 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Icons;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Thumbnails;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
@@ -84,11 +84,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private JLabel maskIconLabel;
 
     private DragReorderHandler dragReorderHandler;
-
-    // most often false, but when opening serialized pxc files,
-    // the mask/smart filter label might be added before the drag handler,
-    // and in unit tests the drag handler isn't added at all
-    private boolean delayedDragHandler;
 
     /**
      * The Y coordinate in the parent when it is not dragged.
@@ -374,10 +369,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         handler.attachTo(nameEditor);
         handler.attachTo(layerIconLabel);
 
-        if (delayedDragHandler) {
-            if (maskIconLabel != null) {
-                handler.attachTo(maskIconLabel);
-            }
+        // if the mask icon already exists, attach the handler to it now
+        if (maskIconLabel != null) {
+            handler.attachTo(maskIconLabel);
         }
 
         for (LayerGUI child : children) {
@@ -479,7 +473,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             }
             boolean disabledMask = !mask.getOwner().isMaskEnabled();
             if (disabledMask) {
-                ImageUtils.paintRedXOn(thumb);
+                Thumbnails.paintRedX(thumb);
             }
             maskIconLabel.setIcon(new ImageIcon(thumb));
         } else {
@@ -512,11 +506,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             }
         });
 
+        // if the drag handler already exists, attach it to the new mask icon
         if (dragReorderHandler != null) {
             dragReorderHandler.attachTo(maskIconLabel);
-            delayedDragHandler = false;
-        } else {
-            delayedDragHandler = true;
         }
 
         // don't call layer.getMask().updateIconImage(); because
@@ -579,8 +571,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         revalidate();
         repaint();
         maskIconLabel = null;
-
-        delayedDragHandler = false;
     }
 
     @Override
@@ -738,7 +728,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             node.add(child.createDebugNode("child " + child.getLayer().getName()));
         }
 
-        node.addBoolean("lateDragHandler", delayedDragHandler);
         node.addAsString("selectionState", selectionState);
         node.addString("layer name", layer.getName());
 

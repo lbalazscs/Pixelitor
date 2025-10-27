@@ -143,10 +143,10 @@ public class RandomToolTest {
         EDT.run(this::setupPauseKey);
         EDT.run(this::setupExitKey);
 
-        app = new AppRunner(null, inputDir, "b.jpg", "a.jpg");
+        app = new AppRunner(null, inputDir, null, "b.jpg", "a.jpg");
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
-        ExceptionHandler.INSTANCE.addFirstHandler((t, e) -> {
+        ExceptionHandler.INSTANCE.prependHandler((t, e) -> {
             e.printStackTrace();
             keyboard.releaseModifierKeysFromAnyThread();
         });
@@ -265,7 +265,7 @@ public class RandomToolTest {
             System.err.printf("%s: task unexpectedly timed out, exiting.%n" +
                     "Active comp is: %s%n",
                 AppRunner.getCurrentTimeHMS(),
-                EDT.active(Composition::toString));
+                EDT.queryActiveComp(Composition::toString));
             exitInNewThread();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
@@ -304,9 +304,9 @@ public class RandomToolTest {
         Utils.sleep(200, MILLISECONDS);
         activate(tool);
 
-        EDT.assertModalDialogCountIs(0);
+        EDT.assertNoModalDialogs();
         randomizeToolSettings(tool);
-        EDT.assertModalDialogCountIs(0);
+        EDT.assertNoModalDialogs();
 
         // set the source point for the clone tool
         if (tool == CLONE) {
@@ -322,7 +322,7 @@ public class RandomToolTest {
         randomActions(tool);
 
         cleanupAfterTool();
-        EDT.assertModalDialogCountIs(0);
+        EDT.assertNoModalDialogs();
 
         Utils.sleep(200, MILLISECONDS);
         checkControlVariables();
@@ -330,7 +330,7 @@ public class RandomToolTest {
 
     // close a possible randomly shown dialog
     private void closeToolDialog(Tool tool) {
-        if (EDT.getModalDialogCount() == 0) {
+        if (EDT.getModalDialogNesting() == 0) {
             return;
         }
         waitForIdleEDT();
@@ -350,7 +350,7 @@ public class RandomToolTest {
                 + tool + ", title = " + title);
         }
         Utils.sleep(200, MILLISECONDS);
-        EDT.assertModalDialogCountIs(0);
+        EDT.assertNoModalDialogs();
     }
 
     private void activate(Tool tool) {
@@ -493,7 +493,7 @@ public class RandomToolTest {
 
     // might be necessary because of the croppings
     private void setStandardSize() {
-        var canvas = EDT.active(Composition::getCanvas);
+        var canvas = EDT.queryActiveComp(Composition::getCanvas);
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
@@ -525,7 +525,7 @@ public class RandomToolTest {
     }
 
     private void dragRandomly(Tool tool) {
-        EDT.assertModalDialogCountIs(0);
+        EDT.assertNoModalDialogs();
 
         int numDrags = Rnd.intInRange(1, 5);
         for (int i = 0; i < numDrags; i++) {
@@ -592,14 +592,14 @@ public class RandomToolTest {
         String editName = EDT.call(History::getEditToBeUndoneName);
         log("random undo " + Ansi.yellow(editName));
 
-        keyboard.undo();
+        keyboard.undo(editName);
     }
 
     private void redo() {
         String editName = EDT.call(History::getEditToBeRedoneName);
         log("random redo " + Ansi.yellow(editName));
 
-        keyboard.redo();
+        keyboard.redo(editName);
     }
 
     private void randomMultiLayerEdit() {
@@ -628,7 +628,7 @@ public class RandomToolTest {
         if (EDT.getActiveSelection() != null) {
             printed += Ansi.red(" SEL");
         }
-        if (EDT.active(Composition::getDraftSelection) != null) {
+        if (EDT.queryActiveComp(Composition::getDraftSelection) != null) {
             printed += Ansi.red(" IP SEL");
         }
         System.out.println(printed);
@@ -645,7 +645,7 @@ public class RandomToolTest {
 
     private void cutBigLayersIfNecessary() {
         Rectangle imgSize = EDT.call(() -> calcMaxImageSize(Views.getActiveComp()));
-        Dimension canvasSize = EDT.active(comp -> comp.getCanvas().getSize());
+        Dimension canvasSize = EDT.queryActiveComp(comp -> comp.getCanvas().getSize());
 
         if (imgSize.width > 3 * canvasSize.width || imgSize.height > 3 * canvasSize.height) {
             // needs to be cut, otherwise there is a risk that
@@ -678,7 +678,7 @@ public class RandomToolTest {
     }
 
     private void flattenImage() {
-        if (EDT.active(Composition::getNumLayers) == 1) {
+        if (EDT.queryActiveComp(Composition::getNumLayers) == 1) {
             return;
         }
         log("flatten image");
@@ -845,11 +845,11 @@ public class RandomToolTest {
     }
 
     private void clickPenToolButton() {
-        Path path = EDT.active(Composition::getActivePath);
+        Path path = EDT.queryActiveComp(Composition::getActivePath);
         if (path == null) {
             return;
         }
-        var canvas = EDT.getCanvas();
+        var canvas = EDT.queryActiveComp(Composition::getCanvas);
         if (!canvas.getBounds().contains(path.getImBounds())) {
             // if the path is outside, then it can potentially take a very long time
             return;

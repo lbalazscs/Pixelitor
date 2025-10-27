@@ -25,38 +25,43 @@ import pixelitor.utils.test.RandomGUITest;
  * straight line segments connecting the input points of a brush stroke.
  */
 public class LinearDabsStrategy implements DabsStrategy {
+    // Determines how soon the first dab is placed on the first segment
+    // for directional brushes. A value of 0.8 means the first dab will
+    // be placed after the user moves 20% of the required spacing distance.
+    private static final double FIRST_DAB_DELAY_FACTOR = 0.8;
+
     private final DabsBrush brush;
 
     // distance accumulated since the last dab was placed
-    private double distFromLastDab = 0;
+    private double accumulatedDist = 0;
 
     private Spacing spacing;
-    private AngleSettings angleSettings;
+    private RotationSettings rotationSettings;
     private final boolean refreshBrushForEachDab;
     private PPoint prev; // the last processed input point
 
     public LinearDabsStrategy(DabsBrush brush,
                               Spacing spacing,
-                              AngleSettings angleSettings,
+                              RotationSettings rotationSettings,
                               boolean refreshBrushForEachDab) {
         this.brush = brush;
         this.spacing = spacing;
-        this.angleSettings = angleSettings;
+        this.rotationSettings = rotationSettings;
         this.refreshBrushForEachDab = refreshBrushForEachDab;
     }
 
     @Override
     public void onStrokeStart(PPoint startPoint) {
         // reset accumulated distance for the new stroke
-        distFromLastDab = 0;
+        accumulatedDist = 0;
         prev = startPoint;
 
-        if (angleSettings.isAngled()) {
-            // Angled brushes need a direction, so don't place the first dab immediately.
+        if (rotationSettings.isDirectional()) {
+            // Don't place the first dab immediately, as we have no direction info yet.
             // Distance is artificially set to ensure a dab is placed soon.
-            distFromLastDab = spacing.getSpacing(brush.getRadius()) * 0.8;
+            accumulatedDist = spacing.getSpacing(brush.getRadius()) * FIRST_DAB_DELAY_FACTOR;
         } else {
-            // non-angled brushes can place the first dab right away
+            // non-directional brushes can place the first dab right away
             brush.putDab(startPoint, 0);
         }
     }
@@ -69,13 +74,17 @@ public class LinearDabsStrategy implements DabsStrategy {
         double prevY = prev.getImY();
 
         double lineDist = newPoint.imDist(prev);
+        if (lineDist < 1.0e-6) {
+            return;
+        }
+
         double spacingDist = spacing.getSpacing(brush.getRadius());
-        double initialRelativeSpacingDist = (spacingDist - distFromLastDab) / lineDist;
+        double tForFirstDab = (spacingDist - accumulatedDist) / lineDist;
 
         double dx = newX - prevX;
         double dy = newY - prevY;
         // the angle of the current line segment
-        double angle = angleSettings.isAngled() ? Math.atan2(dy, dx) : 0;
+        double baseAngle = rotationSettings.isDirectional() ? Math.atan2(dy, dx) : 0;
 
         // track the position of the last placed dab on this segment
         double lastDabX = prevX;
@@ -84,8 +93,8 @@ public class LinearDabsStrategy implements DabsStrategy {
 
         int steps = 0;
 
-        double relativeSpacingDist = spacingDist / lineDist;
-        for (double t = initialRelativeSpacingDist; t < 1.0; t += relativeSpacingDist) {
+        double tStep = spacingDist / lineDist;
+        for (double t = tForFirstDab; t < 1.0; t += tStep) {
             if (steps++ > 1_000 && RandomGUITest.isRunning()) {
                 // crazy big shapes can appear during
                 // random GUI testing, don't wait forever
@@ -95,19 +104,16 @@ public class LinearDabsStrategy implements DabsStrategy {
             // calculate coordinates for the current dab
             double dabX = prevX + t * dx;
             double dabY = prevY + t * dy;
-            PPoint dabPoint = PPoint.fromIm(dabX, dabY, newPoint.getView());
+            PPoint dabPoint = PPoint.lazyFromIm(dabX, dabY, newPoint.getView());
 
             if (refreshBrushForEachDab) {
                 // allow brush stamp to update based on the specific dab location
                 brush.initBrushStamp(dabPoint);
             }
 
-            if (angleSettings.isJitterEnabled()) {
-                // apply random jitter to the angle if enabled
-                angle = angleSettings.calcJitteredAngle(angle);
-            }
+            double dabAngle = rotationSettings.jitterAngle(baseAngle);
+            brush.putDab(dabPoint, dabAngle);
 
-            brush.putDab(dabPoint, angle);
             lastDabX = dabX;
             lastDabY = dabY;
             dabPlacedOnSegment = true;
@@ -117,10 +123,10 @@ public class LinearDabsStrategy implements DabsStrategy {
         if (dabPlacedOnSegment) {
             double remainingDx = newX - lastDabX;
             double remainingDy = newY - lastDabY;
-            distFromLastDab = Math.sqrt(remainingDx * remainingDx
+            accumulatedDist = Math.sqrt(remainingDx * remainingDx
                 + remainingDy * remainingDy);
         } else {
-            distFromLastDab += lineDist;
+            accumulatedDist += lineDist;
         }
 
         prev = newPoint;
@@ -130,7 +136,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     public void settingsChanged() {
         // refresh local references to settings from the brush
         DabsBrushSettings settings = brush.getSettings();
-        angleSettings = settings.getAngleSettings();
+        rotationSettings = settings.getAngleSettings();
         spacing = settings.getSpacingStrategy();
     }
 

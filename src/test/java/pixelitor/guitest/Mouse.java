@@ -23,6 +23,7 @@ import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JPopupMenuFixture;
 import pixelitor.Views;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.Utils;
 import pixelitor.utils.input.Modifiers;
 
@@ -36,7 +37,6 @@ import static java.awt.event.KeyEvent.VK_ALT;
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.swing.core.MouseButton.LEFT_BUTTON;
 
 /**
@@ -54,6 +54,10 @@ public class Mouse {
         this.pw = pw;
     }
 
+    private Point toScreenCoords(int canvasX, int canvasY) {
+        return new Point(canvasBounds.x + canvasX, canvasBounds.y + canvasY);
+    }
+
     /**
      * Moves the mouse to absolute screen coordinates.
      */
@@ -61,30 +65,34 @@ public class Mouse {
         robot.moveMouse(screenX, screenY);
     }
 
+    void moveToScreen(Point screenPos) {
+        robot.moveMouse(screenPos);
+    }
+
     /**
      * Moves the mouse to coordinates relative to the canvas.
      */
     void moveToCanvas(int canvasX, int canvasY) {
-        moveToScreen(
-            canvasBounds.x + canvasX,
-            canvasBounds.y + canvasY);
+        moveToScreen(toScreenCoords(canvasX, canvasY));
     }
 
     // drag relative to the screen
     void dragToScreen(int targetX, int targetY) {
+        dragToScreen(new Point(targetX, targetY));
+    }
+
+    void dragToScreen(Point target) {
         Point currentPos = MouseInfo.getPointerInfo().getLocation();
 
         robot.pressMouse(LEFT_BUTTON);
 
         // move to intermediate point
         Utils.sleep(50, MILLISECONDS);
-        moveToScreen(
-            (targetX + currentPos.x) / 2,
-            (targetY + currentPos.y) / 2);
+        moveToScreen(Geometry.midPoint(currentPos, target));
 
         // move to final position
         Utils.sleep(50, MILLISECONDS);
-        moveToScreen(targetX, targetY);
+        moveToScreen(target);
 
         Utils.sleep(50, MILLISECONDS);
         robot.releaseMouse(LEFT_BUTTON);
@@ -93,9 +101,7 @@ public class Mouse {
 
     // drag relative to the canvas
     void dragToCanvas(int canvasX, int canvasY) {
-        dragToScreen(
-            canvasBounds.x + canvasX,
-            canvasBounds.y + canvasY);
+        dragToScreen(toScreenCoords(canvasX, canvasY));
     }
 
     public void drag(CanvasDrag drag) {
@@ -115,67 +121,57 @@ public class Mouse {
         robot.releaseMouse(LEFT_BUTTON);
     }
 
-    void dragToScreen(int screenX, int screenY, Modifiers modifiers) {
-        pressModifierKeys(modifiers);
-        dragToScreen(screenX, screenY);
-        releaseModifierKeys(modifiers);
-        robot.waitForIdle();
+    void dragToScreen(Point screenPos, Modifiers modifiers) {
+        withModifiers(modifiers, () -> dragToScreen(screenPos));
     }
 
-    void dragToCanvas(int canvasX, int canvasY, Modifiers modifiers) {
-        dragToScreen(
-            canvasBounds.x + canvasX,
-            canvasBounds.y + canvasY,
-            modifiers);
-    }
-
-    void altDragToScreen(int screenX, int screenY) {
-        dragToScreen(screenX, screenY, Modifiers.ALT);
+    void altDragToScreen(Point screenPos) {
+        dragToScreen(screenPos, Modifiers.ALT);
     }
 
     void altDragToCanvas(int canvasX, int canvasY) {
-        dragToCanvas(canvasX, canvasY, Modifiers.ALT);
+        dragToScreen(
+            toScreenCoords(canvasX, canvasY),
+            Modifiers.ALT);
     }
 
     Point moveRandomlyWithinCanvas() {
-        int randomX = genRandomScreenXWithinCanvas();
-        int randomY = genRandomScreenYWithinCanvas();
-
-        Point randomPoint = new Point(randomX, randomY);
-        assert canvasBounds.contains(randomPoint);
-        moveToScreen(randomX, randomY);
+        Point randomPoint = genRandomScreenPointInCanvas();
+        moveToScreen(randomPoint);
 
         return randomPoint;
     }
 
     Point dragRandomlyWithinCanvas() {
-        int randomX = genRandomScreenXWithinCanvas();
-        int randomY = genRandomScreenYWithinCanvas();
-
-        Point randomPoint = new Point(randomX, randomY);
-        assert canvasBounds.contains(randomPoint);
-        dragToScreen(randomX, randomY);
-
+        Point randomPoint = genRandomScreenPointInCanvas();
+        dragToScreen(randomPoint);
         return randomPoint;
     }
 
-    private int genRandomScreenXWithinCanvas() {
-        return canvasBounds.x + CANVAS_SAFETY_MARGIN
+    private Point genRandomScreenPointInCanvas() {
+        int randomX = canvasBounds.x + CANVAS_SAFETY_MARGIN
             + random.nextInt(canvasBounds.width - CANVAS_SAFETY_MARGIN * 2);
-    }
-
-    private int genRandomScreenYWithinCanvas() {
-        return canvasBounds.y + CANVAS_SAFETY_MARGIN
+        int randomY = canvasBounds.y + CANVAS_SAFETY_MARGIN
             + random.nextInt(canvasBounds.height - CANVAS_SAFETY_MARGIN * 2);
+
+        Point randomPoint = new Point(randomX, randomY);
+        assert canvasBounds.contains(randomPoint);
+        return randomPoint;
     }
 
+    void randomShiftClick() {
+        randomClick(Modifiers.SHIFT);
+    }
+
+    // TODO is this different from randomShiftClick()?
     void shiftMoveClickRandom() {
-        int randomX = genRandomScreenXWithinCanvas();
-        int randomY = genRandomScreenYWithinCanvas();
         pw.pressKey(VK_SHIFT);
-        moveToScreen(randomX, randomY);
-        click();
-        pw.releaseKey(VK_SHIFT);
+        try {
+            moveToScreen(genRandomScreenPointInCanvas());
+            click();
+        } finally {
+            pw.releaseKey(VK_SHIFT);
+        }
     }
 
     void moveToActiveCanvasCenter() {
@@ -190,10 +186,8 @@ public class Mouse {
     }
 
     void doubleClick() {
-        robot.pressMouse(LEFT_BUTTON);
-        robot.releaseMouse(LEFT_BUTTON);
-        robot.pressMouse(LEFT_BUTTON);
-        robot.releaseMouse(LEFT_BUTTON);
+        click();
+        click();
     }
 
     void rightClick() {
@@ -211,27 +205,22 @@ public class Mouse {
         return new JPopupMenuFixture(robot, popup);
     }
 
-    void clickScreen(int screenX, int screenY) {
-        moveToScreen(screenX, screenY);
+    void clickScreen(Point screenPos) {
+        moveToScreen(screenPos);
         click();
     }
 
-    void clickScreen(int screenX, int screenY, Modifiers modifiers) {
-        moveToScreen(screenX, screenY);
+    void clickScreen(Point screenPos, Modifiers modifiers) {
+        moveToScreen(screenPos);
         click(modifiers);
     }
 
     void clickCanvas(int canvasX, int canvasY) {
-        clickScreen(
-            canvasBounds.x + canvasX,
-            canvasBounds.y + canvasY);
+        clickScreen(toScreenCoords(canvasX, canvasY));
     }
 
     void clickCanvas(int canvasX, int canvasY, Modifiers modifiers) {
-        clickScreen(
-            canvasBounds.x + canvasX,
-            canvasBounds.y + canvasY,
-            modifiers);
+        clickScreen(toScreenCoords(canvasX, canvasY), modifiers);
     }
 
     void randomClick() {
@@ -250,15 +239,13 @@ public class Mouse {
     }
 
     void click(Modifiers modifiers) {
-        pressModifierKeys(modifiers);
-
-        if (modifiers.button().isRight()) {
-            rightClick();
-        } else {
-            click();
-        }
-
-        releaseModifierKeys(modifiers);
+        withModifiers(modifiers, () -> {
+            if (modifiers.button().isRight()) {
+                rightClick();
+            } else {
+                click();
+            }
+        });
     }
 
     private void pressModifierKeys(Modifiers modifiers) {
@@ -285,22 +272,6 @@ public class Mouse {
         }
     }
 
-    void altClick() {
-        click(Modifiers.ALT);
-    }
-
-    void ctrlClick() {
-        click(Modifiers.CTRL);
-    }
-
-    void shiftClick() {
-        click(Modifiers.SHIFT);
-    }
-
-    void ctrlClickScreen(int screenX, int screenY) {
-        clickScreen(screenX, screenY, Modifiers.CTRL);
-    }
-
     void ctrlClickCanvas(int canvasX, int canvasY) {
         clickCanvas(canvasX, canvasY, Modifiers.CTRL);
     }
@@ -311,10 +282,6 @@ public class Mouse {
 
     void randomAltClick() {
         randomClick(Modifiers.ALT);
-    }
-
-    void randomShiftClick() {
-        randomClick(Modifiers.SHIFT);
     }
 
     void dragFromCanvasCenterToTheRight() {
@@ -331,11 +298,12 @@ public class Mouse {
             Views.getActive().getVisibleCanvasBoundsOnScreen());
     }
 
-    private void debugCanvasBounds() {
-        JFrame frame = new JFrame("debug bounds");
-        frame.setBounds(canvasBounds);
-        frame.setVisible(true);
-        Utils.sleep(3, SECONDS);
-        frame.setVisible(false);
+    private void withModifiers(Modifiers modifiers, Runnable action) {
+        pressModifierKeys(modifiers);
+        try {
+            action.run();
+        } finally {
+            releaseModifierKeys(modifiers);
+        }
     }
 }

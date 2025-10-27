@@ -222,12 +222,12 @@ public class Tools {
         }
     }
 
-    public static void firstModalDialogShown() {
-        activeTool.firstModalDialogShown();
+    public static void modalDialogShown() {
+        activeTool.modalDialogShown();
     }
 
-    public static void firstModalDialogHidden() {
-        activeTool.firstModalDialogHidden();
+    public static void modalDialogHidden() {
+        activeTool.modalDialogHidden();
     }
 
     public static void forceFinish() {

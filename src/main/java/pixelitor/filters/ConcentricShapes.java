@@ -192,8 +192,7 @@ public class ConcentricShapes extends ParametrizedFilter {
             tuning.getPercentage(), arrangementParam.getSelected());
 
         for (ShapeWithColor shape : shapes) {
-            g.setColor(shape.color());
-            g.fill(shape.shape());
+            shape.fill(g);
         }
 
         g.dispose();
@@ -319,7 +318,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight(),
             paramSet.getLastSeedRandom(), tuning.getPercentage(), arrangementParam.getSelected());
         String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, null);
-        FileIO.saveSVG(svgContent, "concentric.svg");
+        FileIO.saveSVG(svgContent, this);
     }
 
     private static double calcMaxDistance(double cx, double cy, double width, double height) {

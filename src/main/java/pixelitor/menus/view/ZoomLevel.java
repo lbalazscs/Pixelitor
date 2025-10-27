@@ -20,13 +20,15 @@ package pixelitor.menus.view;
 import pixelitor.Canvas;
 import pixelitor.gui.AutoZoom;
 import pixelitor.gui.ImageArea;
+import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Rnd;
 
 import java.awt.Dimension;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 
 /**
- * The available zoom levels, organized as a bidirectional chain of zoom steps.
+ * A discrete zoom level in a predefined sequence of steps.
  */
 public class ZoomLevel {
     private static final double[] ZOOM_PERCENTAGES = {
@@ -82,19 +84,13 @@ public class ZoomLevel {
 
         // link zoom levels in the chain
         for (int i = 0; i < zoomLevels.length; i++) {
-            if (i == 0) {
-                // lowest zoom level: can't zoom out further
-                zoomLevels[i].setNextOut(zoomLevels[0]);
-                zoomLevels[i].setNextIn(zoomLevels[i + 1]);
-            } else if (i == zoomLevels.length - 1) {
-                // highest zoom level: can't zoom in further
-                zoomLevels[i].setNextOut(zoomLevels[i - 1]);
-                zoomLevels[i].setNextIn(zoomLevels[i]);
-            } else {
-                // middle levels: normal bidirectional linking
-                zoomLevels[i].setNextOut(zoomLevels[i - 1]);
-                zoomLevels[i].setNextIn(zoomLevels[i + 1]);
-            }
+            // the lowest level's 'nextOut' points to itself: can't zoom out further
+            int prevIndex = Math.max(0, i - 1);
+            zoomLevels[i].setNextOut(zoomLevels[prevIndex]);
+
+            // the highest level's 'nextIn' points to itself: can't zoom in further
+            int nextIndex = Math.min(zoomLevels.length - 1, i + 1);
+            zoomLevels[i].setNextIn(zoomLevels[nextIndex]);
         }
     }
 
@@ -145,7 +141,7 @@ public class ZoomLevel {
         return Rnd.chooseFrom(zoomLevels);
     }
 
-    public double getViewScale() {
+    public double getScale() {
         return scale;
     }
 
@@ -166,45 +162,41 @@ public class ZoomLevel {
     }
 
     /**
-     * Calculates the optimal zoom level for the given canvas,
+     * Calculates the best-fitting zoom level for the given canvas,
      * and possibly for a given auto zoom.
      */
     public static ZoomLevel calcBestFitZoom(Canvas canvas, AutoZoom autoZoom,
-                                            boolean zoomInToFitSpace) {
+                                            boolean allowUpscalingToFit) {
         if (autoZoom == AutoZoom.ACTUAL_PIXELS) {
             return ACTUAL_SIZE;
         }
         if (autoZoom == null) {
-            // If this isn't an auto zoom, then the
-            // algorithm is the same as for "Fit Space".
+            // if this isn't an auto zoom, then the
+            // algorithm is the same as for "Fit Space"
             autoZoom = AutoZoom.FIT_SPACE;
         }
 
         double targetZoomPercent = 100.0 / calcSizeRatio(canvas, autoZoom);
 
-        ZoomLevel maximallyZoomedOut = zoomLevels[0];
-
-        // Can't avoid scrollbars if the canvas is too large for the viewport
-        if (maximallyZoomedOut.getPercent() > targetZoomPercent) {
-            return maximallyZoomedOut;
+        // if not allowed to zoom in to fit, cap the zoom at 100%
+        if (!allowUpscalingToFit) {
+            targetZoomPercent = Math.min(targetZoomPercent, 100.0);
         }
 
-        ZoomLevel lastOK = maximallyZoomedOut;
-        // iterate through all zoom levels from zoomed-out to zoomed-in
-        for (ZoomLevel level : zoomLevels) {
-            if (level.getPercent() > targetZoomPercent) {
-                // found one that is too much zoomed in
-                return lastOK;
-            }
-            if (!zoomInToFitSpace && lastOK == ACTUAL_SIZE) {
-                return ACTUAL_SIZE;
-            }
-            lastOK = level;
+        // find the largest zoom percentage that is less than or equal to the target
+        int index = Arrays.binarySearch(ZOOM_PERCENTAGES, targetZoomPercent);
+
+        int bestFitIndex;
+        if (index >= 0) {
+            // an exact match was found
+            bestFitIndex = index;
+        } else {
+            // we want the element right before the insertion point
+            int insertionPoint = -index - 1;
+            bestFitIndex = Math.max(0, insertionPoint - 1);
         }
-        // If we reach this point, it means that the image is small
-        // enough to fit within the available space even at maximum
-        // zoom. Therefore, set the zoom level to the maximum.
-        return lastOK;
+
+        return zoomLevels[bestFitIndex];
     }
 
     private static double calcSizeRatio(Canvas canvas, AutoZoom autoZoom) {
@@ -212,10 +204,9 @@ public class ZoomLevel {
         double availableWidth = availableArea.getWidth();
         double availableHeight = availableArea.getHeight();
 
-        // Adjust for frame decoration height if in frames mode
+        // adjust for frame decoration height if in frames mode
         if (ImageArea.isActiveMode(ImageArea.Mode.FRAMES)) {
-            int frameDecorationHeight = 35; // Nimbus
-            availableHeight -= frameDecorationHeight;
+            availableHeight -= Themes.getActive().getFrameDecorationHeight();
         }
 
         double horRatio = canvas.getWidth() / availableWidth;

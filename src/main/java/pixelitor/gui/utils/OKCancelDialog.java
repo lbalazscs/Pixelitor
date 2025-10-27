@@ -60,7 +60,7 @@ public abstract class OKCancelDialog extends JDialog {
         okButton = new JButton(okButtonText);
         JButton cancelButton = new JButton(GUIText.CANCEL);
 
-        GlobalEvents.dialogOpened(getTitle());
+        GlobalEvents.modalDialogOpened();
 
         GUIUtils.addOKCancelButtons(footerPanel, okButton, cancelButton);
         add(footerPanel, SOUTH);
@@ -116,7 +116,7 @@ public abstract class OKCancelDialog extends JDialog {
 
     public void close() {
         setVisible(false);
-        GlobalEvents.dialogClosed(getTitle());
+        GlobalEvents.modalDialogClosed();
         dispose();
     }
 

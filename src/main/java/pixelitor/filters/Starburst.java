@@ -88,8 +88,7 @@ public class Starburst extends ParametrizedFilter {
 
         List<ShapeWithColor> shapes = createShapes(width, height);
         for (ShapeWithColor shapeWithColor : shapes) {
-            g.setColor(shapeWithColor.color());
-            g.fill(shapeWithColor.shape());
+            shapeWithColor.fill(g);
         }
 
         g.dispose();
@@ -182,7 +181,7 @@ public class Starburst extends ParametrizedFilter {
         Canvas canvas = Views.getActiveComp().getCanvas();
         List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight());
         String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, bgColor.getColor());
-        FileIO.saveSVG(svgContent, "starburst.svg");
+        FileIO.saveSVG(svgContent, this);
     }
 
     @Override

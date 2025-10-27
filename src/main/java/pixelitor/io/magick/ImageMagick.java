@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.utils.AppPreferences.magickDirName;
@@ -103,7 +102,7 @@ public class ImageMagick {
         if (ext == null) {
             return ExportSettings.DEFAULTS;
         }
-        return switch (ext.toLowerCase(Locale.ROOT)) {
+        return switch (ext) {
             case "png" -> PNGExportSettings.INSTANCE;
             case "webp" -> WebPExportSettings.INSTANCE;
             default -> ExportSettings.DEFAULTS;
@@ -118,7 +117,7 @@ public class ImageMagick {
             showNotInstalledDialog();
             return;
         }
-        File file = FileChoosers.getAnyOpenFile();
+        File file = FileChoosers.selectAnyOpenFile();
         if (file != null) {
             importComposition(file, true);
         }

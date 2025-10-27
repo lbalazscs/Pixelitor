@@ -63,7 +63,6 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.awt.image.BufferedImage.TRANSLUCENT;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -71,7 +70,6 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
-import static pixelitor.Views.thumbSize;
 import static pixelitor.utils.Threads.onPool;
 
 /**
@@ -555,104 +553,6 @@ public class ImageUtils {
         return new BufferedImage(icm2, raster, image.isAlphaPremultiplied(), null);
     }
 
-    /**
-     * Shrinks the "src" image to match its width to "size" and returns the new image.
-     */
-    public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
-        assert src != null;
-
-        Dimension thumbDim = calcThumbDimensions(src.getWidth(), src.getHeight(), size, true);
-
-        return downSizeFast(src, thumbDim.width, thumbDim.height, painter);
-    }
-
-    /**
-     * Calculates the target dimensions if an image needs to be resized
-     * to fit into a box of a given size without distorting the aspect ratio.
-     */
-    public static Dimension calcThumbDimensions(int srcWidth, int srcHeight, int boxSize, boolean upscale) {
-        int thumbWidth;
-        int thumbHeight;
-        if (srcWidth > srcHeight) { // landscape
-            if (upscale || srcWidth > boxSize) {
-                thumbWidth = boxSize;
-                double ratio = (double) srcWidth / srcHeight;
-                thumbHeight = (int) (boxSize / ratio);
-            } else {
-                // the image already fits in the box and no up-scaling is needed
-                thumbWidth = srcWidth;
-                thumbHeight = srcHeight;
-            }
-        } else { // portrait
-            if (upscale || srcHeight > boxSize) {
-                thumbHeight = boxSize;
-                double ratio = (double) srcHeight / srcWidth;
-                thumbWidth = (int) (boxSize / ratio);
-            } else {
-                // the image already fits in the box and no up-scaling is needed
-                thumbWidth = srcWidth;
-                thumbHeight = srcHeight;
-            }
-        }
-
-        if (thumbWidth == 0) {
-            thumbWidth = 1;
-        }
-        if (thumbHeight == 0) {
-            thumbHeight = 1;
-        }
-
-        return new Dimension(thumbWidth, thumbHeight);
-    }
-
-    public static BufferedImage createThumbnail(BufferedImage src,
-                                                int maxWidth, int maxHeight,
-                                                CheckerboardPainter painter) {
-        assert src != null;
-
-        int imgWidth = src.getWidth();
-        int imgHeight = src.getHeight();
-
-        double xScaling = maxWidth / (double) imgWidth;
-        double yScaling = maxHeight / (double) imgHeight;
-        double scaling = Math.min(xScaling, yScaling);
-        int thumbWidth = (int) (imgWidth * scaling);
-        int thumbHeight = (int) (imgHeight * scaling);
-
-        return downSizeFast(src, thumbWidth, thumbHeight, painter);
-    }
-
-    private static BufferedImage downSizeFast(BufferedImage src,
-                                              int thumbWidth, int thumbHeight,
-                                              CheckerboardPainter painter) {
-        BufferedImage thumb = createSysCompatibleImage(thumbWidth, thumbHeight);
-        Graphics2D g = thumb.createGraphics();
-
-        if (painter != null) {
-            painter.paint(g, null, thumbWidth, thumbHeight);
-        }
-
-        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        g.drawImage(src, 0, 0, thumbWidth, thumbHeight, null);
-        g.dispose();
-
-        return thumb;
-    }
-
-    public static void paintRedXOn(BufferedImage thumb) {
-        int thumbWidth = thumb.getWidth();
-        int thumbHeight = thumb.getHeight();
-
-        Graphics2D g = thumb.createGraphics();
-
-        g.setColor(new Color(200, 0, 0));
-        g.setStroke(new BasicStroke(2.5f));
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g.drawLine(0, 0, thumbWidth, thumbHeight);
-        g.drawLine(thumbWidth - 1, 0, 0, thumbHeight - 1);
-        g.dispose();
-    }
-
     public static void main(String[] args) {
         BufferedImage img = createSysCompatibleImage(100, 100);
         copyImage(img);
@@ -823,32 +723,35 @@ public class ImageUtils {
         return highPass;
     }
 
-    public static BufferedImage createRandomPointsTemplateBrush(int diameter, float density) {
-        if (density < 0.0 && density > 1.0) {
+    public static BufferedImage createGrayRandomPointsBrushImage(int diameter, float density) {
+        if (density < 0.0f || density > 1.0f) {
             throw new IllegalArgumentException("density is " + density);
         }
 
-        BufferedImage brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
+        BufferedImage brushImage = new BufferedImage(diameter, diameter, TYPE_BYTE_GRAY);
 
         int radius = diameter / 2;
         int radius2 = radius * radius;
         Random random = new Random();
 
-        int[] pixels = getPixels(brushImage);
+        byte[] pixels = getGrayPixels(brushImage);
         for (int x = 0; x < diameter; x++) {
             for (int y = 0; y < diameter; y++) {
                 int dx = x - radius;
                 int dy = y - radius;
                 int centerDistance2 = dx * dx + dy * dy;
+                int index = x + y * diameter;
                 if (centerDistance2 < radius2) {
                     float rn = random.nextFloat();
                     if (density > rn) {
-                        pixels[x + y * diameter] = random.nextInt();
+                        pixels[index] = (byte) random.nextInt(256);
                     } else {
-                        pixels[x + y * diameter] = 0xFF_FF_FF_FF;  // white
+                        // (byte) 255 is -1 in signed representation, but the ComponentColorModel
+                        // for grayscale treats it as unsigned, ensuring that it is interpreted as white
+                        pixels[index] = (byte) 255;  // white
                     }
                 } else {
-                    pixels[x + y * diameter] = 0xFF_FF_FF_FF; // white
+                    pixels[index] = (byte) 255; // white
                 }
             }
         }
@@ -856,8 +759,8 @@ public class ImageUtils {
         return brushImage;
     }
 
-    public static BufferedImage createSoftBWBrush(int size) {
-        BufferedImage brushImage = new BufferedImage(size, size, TYPE_INT_ARGB);
+    public static BufferedImage createSoftGrayBrushImage(int size) {
+        BufferedImage brushImage = new BufferedImage(size, size, TYPE_BYTE_GRAY);
         Graphics2D g = brushImage.createGraphics();
 
         // fill a black circle over the white background
@@ -876,14 +779,30 @@ public class ImageUtils {
     }
 
     public static BufferedImage createSoftTransparencyImage(int size) {
-        BufferedImage image = createSoftBWBrush(size);
-        int[] pixels = getPixels(image);
-        for (int i = 0, pixelsLength = pixels.length; i < pixelsLength; i++) {
-            int pixelValue = pixels[i] & 0xFF; // take the blue channel: they are all the same
-            int alpha = 255 - pixelValue;
-            pixels[i] = alpha << 24;
+        BufferedImage mask = createSoftGrayBrushImage(size);
+
+        // the color doesn't matter, as only the alpha channel will be used
+        return maskToTransparency(mask, 0);
+    }
+
+    /**
+     * Converts a grayscale mask image into an ARGB image with the
+     * corresponding alpha channel. The color argument must have 0 alpha.
+     */
+    public static BufferedImage maskToTransparency(BufferedImage mask, int colorNoAlpha) {
+        BufferedImage dest = new BufferedImage(mask.getWidth(), mask.getHeight(), TYPE_INT_ARGB);
+        byte[] srcPixels = getGrayPixels(mask);
+        int[] destPixels = getPixels(dest);
+
+        for (int i = 0; i < destPixels.length; i++) {
+            int srcGray = srcPixels[i] & 0xFF; // convert signed byte to unsigned int
+
+            // the color comes from the given color, the alpha from the
+            // mask's gray value (white => transparent, black => opaque)
+            int alpha = 0xFF - srcGray;
+            destPixels[i] = alpha << 24 | colorNoAlpha;
         }
-        return image;
+        return dest;
     }
 
     public static void renderGrid(Graphics2D g,
@@ -1435,16 +1354,6 @@ public class ImageUtils {
 
         g.dispose();
         return compositeImg;
-    }
-
-    public static BufferedImage createCircleThumb(Color color) {
-        BufferedImage img = createSysCompatibleImage(thumbSize, thumbSize);
-        Graphics2D g2 = img.createGraphics();
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g2.setColor(color);
-        g2.fillOval(0, 0, thumbSize, thumbSize);
-        g2.dispose();
-        return img;
     }
 
     /**

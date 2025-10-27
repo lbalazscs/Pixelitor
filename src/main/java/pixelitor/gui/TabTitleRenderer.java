@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,10 +48,10 @@ class TabTitleRenderer extends JPanel {
         gbc.weightx = 0;
         add(new CloseTabButton(tab), gbc);
 
-        addRightClickTabPopup(tab);
+        forwardMouseEventsToTab(tab);
     }
 
-    private void addRightClickTabPopup(TabViewContainer tab) {
+    private void forwardMouseEventsToTab(TabViewContainer tab) {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {

@@ -18,6 +18,7 @@
 package pixelitor.io;
 
 import pd.GifDecoder;
+import pixelitor.Composition;
 import pixelitor.gui.utils.ThumbInfo;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -30,11 +31,14 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOutsideEDT;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.onIOThread;
+import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
  * Utility class for image input/output with progress tracking.
@@ -267,7 +271,7 @@ public class TrackedIO {
             // when the image is shrunk by 2x or greater
             BufferedImage image = reader.read(0);
             BufferedImage thumb = createThumbnail(image,
-                Math.min(maxThumbWidth, maxThumbHeight), null);
+                maxThumbWidth, maxThumbHeight, null);
             return ThumbInfo.success(thumb, imgWidth, imgHeight);
         }
 
@@ -299,5 +303,15 @@ public class TrackedIO {
         int rows = (int) Math.ceil(imgHeight / (double) thumbMaxHeight);
 
         return Math.max(cols, rows);
+    }
+
+    public static Composition readSingleLayeredSync(File file) {
+        BufferedImage img = uncheckedRead(file);
+        return Composition.fromImage(img, file, null);
+    }
+
+    static CompletableFuture<Composition> readSingleLayeredAsync(File file) {
+        return CompletableFuture.supplyAsync(() -> uncheckedRead(file), onIOThread)
+            .thenApplyAsync(img -> Composition.fromImage(img, file, null), onEDT);
     }
 }

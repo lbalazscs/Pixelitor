@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,10 +38,10 @@ public class CalligraphyBrush extends StrokeBrush {
     }
 
     @Override
-    public void startAt(PPoint p) {
+    public void startStrokeAt(PPoint p) {
         currentStroke = createStroke((float) (2 * radius));
 
-        super.startAt(p);
+        super.startStrokeAt(p);
     }
 
     @Override

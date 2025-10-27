@@ -61,7 +61,7 @@ public class DecodingException extends RuntimeException {
     /**
      * Whether this error occured during an ImageMagick import.
      */
-    public boolean wasMagick() {
+    public boolean isFromImageMagick() {
         return magick;
     }
 }

@@ -21,6 +21,7 @@ import pixelitor.AppMode;
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Thumbnails;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -76,7 +77,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
             thumb = ImageUtils.createSysCompatibleImage(thumbnailSize, thumbnailSize);
         } else {
             BufferedImage sourceImage = dr.getImageForFilterDialogs();
-            thumb = ImageUtils.createThumbnail(sourceImage, thumbnailSize, null);
+            thumb = Thumbnails.createThumbnail(sourceImage, null);
         }
     }
 

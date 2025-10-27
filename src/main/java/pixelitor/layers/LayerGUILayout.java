@@ -17,10 +17,10 @@
 
 package pixelitor.layers;
 
-import pixelitor.Views;
 import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Threads;
+import pixelitor.utils.Thumbnails;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -62,11 +62,15 @@ public class LayerGUILayout implements LayoutManager {
 
     private int height;
 
+    static {
+        Themes.addThemeChangeListener(LayerGUILayout::themeChanged);
+    }
+
     public LayerGUILayout(Layer layer) {
         assert Threads.calledOnEDT();
 
         layerIconShowsThumbnail = layer.hasRasterIcon();
-        updateHeight(Views.thumbSize);
+        updateHeight(Thumbnails.getMaxSize());
     }
 
     public void updateHeight(int newThumbSize) {
@@ -179,11 +183,6 @@ public class LayerGUILayout implements LayoutManager {
             int sfHeight = sfSize.height;
             childrenPanel.setBounds(sfX, sfY, sfWidth, sfHeight);
         }
-    }
-
-    public static int getThumbSize() {
-        assert Threads.calledOnEDT();
-        return Views.thumbSize;
     }
 
     public static void themeChanged(Theme theme) {

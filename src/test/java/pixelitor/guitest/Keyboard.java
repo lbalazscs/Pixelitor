@@ -71,8 +71,7 @@ public class Keyboard {
         EDT.assertEditToBeUndoneNameIs(editName);
 
         if (USE_OS_LEVEL_EVENTS) {
-            // press Ctrl-Z
-            pressKeys(VK_CONTROL, VK_Z);
+            pressKeys(VK_CONTROL, VK_Z); // press Ctrl-Z
         } else {
             Utils.sleep(DEFAULT_ROBOT_DELAY, MILLISECONDS);
             EDT.undo(editName);
@@ -81,40 +80,19 @@ public class Keyboard {
         robot.waitForIdle();
     }
 
-    // undo without edit name verification for random tests
-    void undo() {
-        if (USE_OS_LEVEL_EVENTS) {
-            // press Ctrl-Z
-            pressKeys(VK_CONTROL, VK_Z);
-        } else {
-            EDT.undo();
-        }
-    }
-
     void redo(String editName) {
         if (historyChecker != null) {
             historyChecker.registerRedo(editName);
         }
         EDT.assertEditToBeRedoneNameIs(editName);
         if (USE_OS_LEVEL_EVENTS) {
-            // press Ctrl-Shift-Z
-            pressKeys(VK_CONTROL, VK_SHIFT, VK_Z);
+            pressKeys(VK_CONTROL, VK_SHIFT, VK_Z); // press Ctrl-Shift-Z
         } else {
             Utils.sleep(DEFAULT_ROBOT_DELAY, MILLISECONDS);
             EDT.redo(editName);
         }
 
         robot.waitForIdle();
-    }
-
-    // redo without edit name verification for random tests
-    void redo() {
-        if (USE_OS_LEVEL_EVENTS) {
-            // press Ctrl-Shift-Z
-            pressKeys(VK_CONTROL, VK_SHIFT, VK_Z);
-        } else {
-            EDT.redo();
-        }
     }
 
     void undoRedo(String edit) {
@@ -175,7 +153,7 @@ public class Keyboard {
     void actualPixels() {
         if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-0
-            pw.pressKey(VK_CONTROL).pressKey(VK_0).releaseKey(VK_0).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, VK_0);
         } else {
             app.runMenuCommand("Actual Pixels");
         }
@@ -191,10 +169,9 @@ public class Keyboard {
         if (USE_OS_LEVEL_EVENTS) {
             if (key.isShiftDown()) {
                 // TODO for some reason the shift is not detected
-                pw.pressKey(VK_SHIFT).pressKey(keyCode)
-                    .releaseKey(keyCode).releaseKey(VK_SHIFT);
+                pressKeys(VK_SHIFT, keyCode);
             } else {
-                pw.pressKey(keyCode).releaseKey(keyCode);
+                pressKeys(keyCode);
             }
         } else {
             if (key.isShiftDown()) {
@@ -205,6 +182,7 @@ public class Keyboard {
         }
     }
 
+    // can be sent to a dialog or to the main frame
     static <S, C extends Window, D extends WindowDriver>
     void pressCtrlPlus(AbstractWindowFixture<S, C, D> window, int times) {
         for (int i = 0; i < times; i++) {
@@ -219,6 +197,7 @@ public class Keyboard {
         }
     }
 
+    // can be sent to a dialog or to the main frame
     static <S, C extends Window, D extends WindowDriver>
     void pressCtrlMinus(AbstractWindowFixture<S, C, D> window, int times) {
         for (int i = 0; i < times; i++) {
@@ -257,8 +236,7 @@ public class Keyboard {
 
     void ctrlPress(int keyCode) {
         if (USE_OS_LEVEL_EVENTS) {
-            pw.pressKey(VK_CONTROL).pressKey(keyCode)
-                .releaseKey(keyCode).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, keyCode);
         } else {
             postKeyToEventQueue(CTRL_DOWN_MASK, keyCode);
         }
@@ -267,8 +245,7 @@ public class Keyboard {
 
     void ctrlAltPress(int keyCode) {
         if (USE_OS_LEVEL_EVENTS) {
-            pw.pressKey(VK_CONTROL).pressKey(VK_ALT).pressKey(keyCode)
-                .releaseKey(keyCode).releaseKey(VK_ALT).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, VK_ALT, keyCode);
         } else {
             postKeyToEventQueue(CTRL_DOWN_MASK | ALT_DOWN_MASK, keyCode);
         }

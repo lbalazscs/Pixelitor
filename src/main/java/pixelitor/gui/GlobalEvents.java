@@ -18,7 +18,6 @@
 package pixelitor.gui;
 
 import pixelitor.gui.utils.TaskAction;
-import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Keys;
@@ -50,6 +49,7 @@ import static java.awt.event.KeyEvent.VK_LEFT;
 import static java.awt.event.KeyEvent.VK_RIGHT;
 import static java.awt.event.KeyEvent.VK_SPACE;
 import static java.awt.event.KeyEvent.VK_UP;
+import static pixelitor.tools.Tools.activeTool;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 
@@ -59,10 +59,8 @@ import static pixelitor.utils.Threads.calledOnEDT;
 public class GlobalEvents {
     private static boolean spaceDown = false;
 
-    // Dialogs can be inside dialogs, and this keeps track of the nesting
-    private static int modalDialogCount = 0;
-
-    private static Tool activeTool;
+    // dialogs can be inside dialogs, and this keeps track of the nesting
+    private static int modalDialogNesting = 0;
 
     private static final Action INCREASE_BRUSH_SIZE_ACTION =
         new TaskAction(Tools::increaseBrushSize);
@@ -71,35 +69,8 @@ public class GlobalEvents {
 
     private static final Map<KeyStroke, Action> hotKeyMap = new HashMap<>();
 
-    static {
-        initGlobalKeyListener();
-    }
-
-    private static void initGlobalKeyListener() {
-        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
-            KeyEvent keyEvent = (KeyEvent) event;
-            if (keyEvent.getID() != KEY_PRESSED) {
-                // we are only interested in key pressed events
-                return;
-            }
-            if (keyEvent.getSource() instanceof JTextField) {
-                // hotkeys should be inactive while editing text
-                return;
-            }
-            if (modalDialogCount > 0) {
-                return;
-            }
-
-            KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(keyEvent);
-            Action action = hotKeyMap.get(keyStroke);
-            if (action != null) {
-                action.actionPerformed(null);
-            }
-        }, AWTEvent.KEY_EVENT_MASK);
-    }
-
     private GlobalEvents() {
-        // Private constructor to prevent instantiation of utility class
+        // prevents instantiation of this utility class
     }
 
     public static void registerHotkey(char key, Action action) {
@@ -123,20 +94,33 @@ public class GlobalEvents {
     }
 
     private static KeyboardFocusManager configureKeyboardManager() {
-        KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        keyboardFocusManager.addKeyEventDispatcher(e -> {
-            if (modalDialogCount > 0) {
-                return false;
-            }
-            int id = e.getID();
-            if (id == KEY_PRESSED) {
-                keyPressed(e);
-            } else if (id == KEY_RELEASED) {
-                keyReleased(e);
-            }
+        KeyboardFocusManager focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        focusManager.addKeyEventDispatcher(GlobalEvents::dispatchGlobalKeyEvent);
+        return focusManager;
+    }
+
+    private static boolean dispatchGlobalKeyEvent(KeyEvent e) {
+        if (modalDialogNesting > 0) {
             return false;
-        });
-        return keyboardFocusManager;
+        }
+        int id = e.getID();
+        if (id == KEY_PRESSED) {
+            // hotkeys should be inactive while editing text
+            if (!(e.getSource() instanceof JTextField)) {
+                KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(e);
+                Action action = hotKeyMap.get(keyStroke);
+                if (action != null) {
+                    action.actionPerformed(null);
+                    // hotkey was handled, so consume the event by returning true
+                    return true;
+                }
+            }
+            keyPressed(e);
+        } else if (id == KEY_RELEASED) {
+            keyReleased(e);
+        }
+        // let the event be processed by other dispatchers and the focused component
+        return false;
     }
 
     private static void configureFocusTraversal(KeyboardFocusManager keyboardFocusManager) {
@@ -168,8 +152,8 @@ public class GlobalEvents {
             case VK_LEFT, VK_KP_LEFT -> arrowKeyPressed(e, ArrowKey.left(e.isShiftDown()));
             case VK_UP, VK_KP_UP -> arrowKeyPressed(e, ArrowKey.up(e.isShiftDown()));
             case VK_DOWN, VK_KP_DOWN -> arrowKeyPressed(e, ArrowKey.down(e.isShiftDown()));
-            case VK_ESCAPE -> escPressed();
-            case VK_ALT -> altPressed();
+            case VK_ESCAPE -> activeTool.escPressed();
+            case VK_ALT -> activeTool.altPressed();
             default -> activeTool.otherKeyPressed(e);
         }
     }
@@ -180,7 +164,7 @@ public class GlobalEvents {
         // event, but not the space released-event, and the app gets
         // stuck in Hand mode. This looks like a freeze when there
         // are no scrollbars. See issue #29.
-        if (modalDialogCount == 0 && !e.isAltDown()) {
+        if (modalDialogNesting == 0 && !e.isAltDown()) {
             activeTool.spacePressed();
             spaceDown = true;
             e.consume();
@@ -188,27 +172,15 @@ public class GlobalEvents {
     }
 
     private static void arrowKeyPressed(KeyEvent e, ArrowKey key) {
-        if (modalDialogCount == 0 && activeTool.arrowKeyPressed(key)) {
+        if (activeTool.arrowKeyPressed(key)) {
             e.consume();
-        }
-    }
-
-    private static void escPressed() {
-        if (modalDialogCount == 0) {
-            activeTool.escPressed();
-        }
-    }
-
-    private static void altPressed() {
-        if (modalDialogCount == 0) {
-            activeTool.altPressed();
         }
     }
 
     private static void keyReleased(KeyEvent e) {
         switch (e.getKeyCode()) {
             case VK_SPACE -> spaceReleased();
-            case VK_ALT -> altReleased();
+            case VK_ALT -> activeTool.altReleased();
         }
     }
 
@@ -217,50 +189,48 @@ public class GlobalEvents {
         spaceDown = false;
     }
 
-    private static void altReleased() {
-        if (modalDialogCount == 0) {
-            activeTool.altReleased();
-        }
-    }
-
     public static boolean isSpaceDown() {
         return spaceDown;
     }
 
+    // used only by unit tests
     public static void setSpaceDown(boolean spaceDown) {
         GlobalEvents.spaceDown = spaceDown;
     }
 
-    // keeps track of dialog nesting
-    public static void dialogOpened(String dialogTitle) {
+    // keeps track of modal dialog nesting
+    public static void modalDialogOpened() {
         assert calledOnEDT() : callInfo();
 
-        modalDialogCount++;
-        if (modalDialogCount == 1) {
-            Tools.firstModalDialogShown();
+        modalDialogNesting++;
+        if (modalDialogNesting == 1) {
+            Tools.modalDialogShown();
         }
     }
 
-    // keeps track of dialog nesting
-    public static void dialogClosed(String dialogTitle) {
+    // keeps track of modal dialog nesting
+    public static void modalDialogClosed() {
         assert calledOnEDT() : callInfo();
 
-        modalDialogCount--;
-        assert modalDialogCount >= 0;
-        if (modalDialogCount == 0) {
-            Tools.firstModalDialogHidden();
+        modalDialogNesting--;
+        assert modalDialogNesting >= 0;
+        if (modalDialogNesting == 0) {
+            Tools.modalDialogHidden();
         }
     }
 
     public static void assertDialogNestingIs(int expectedCount) {
-        if (modalDialogCount != expectedCount) {
-            throw new AssertionError("numNestedDialogs = " + modalDialogCount
+        if (modalDialogNesting != expectedCount) {
+            throw new AssertionError("numNestedDialogs = " + modalDialogNesting
                 + ", expectedCount = " + expectedCount);
         }
     }
 
-    public static int getModalDialogCount() {
-        return modalDialogCount;
+    /**
+     * Returns the number of currently open modal dialogs.
+     */
+    public static int getModalDialogNesting() {
+        return modalDialogNesting;
     }
 
     public static void enableMouseEventDebugging(boolean postEvents) {
@@ -271,10 +241,6 @@ public class GlobalEvents {
         }, AWTEvent.MOUSE_EVENT_MASK
             | AWTEvent.MOUSE_MOTION_EVENT_MASK
             | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
-    }
-
-    public static void setActiveTool(Tool activeTool) {
-        GlobalEvents.activeTool = activeTool;
     }
 
     /**

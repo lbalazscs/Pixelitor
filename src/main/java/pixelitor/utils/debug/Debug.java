@@ -50,7 +50,6 @@ import java.awt.image.*;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.io.*;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.awt.BorderLayout.CENTER;
@@ -226,12 +225,6 @@ public class Debug {
         if (previousView != null) {
             Views.activate(previousView);
         }
-    }
-
-    // Color's toString doesn't include the alpha
-    public static String debugColor(Color c) {
-        return String.format("r=%d,g=%d,b=%d,a=%d",
-            c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
     }
 
     private static void replaceImageInDebugComp(Composition comp, BufferedImage newImg) {
@@ -413,27 +406,6 @@ public class Debug {
         }
     }
 
-    public static String debugJComponent(JComponent c) {
-        return String.format("""
-                size = %s
-                preferredSize = %s
-                minimumSize = %s
-                maximumSize = %s
-                insets = %s
-                border = %s
-                border insets = %s
-                doubleBuffered = %s
-                """,
-            dimensionAsString(c.getSize()),
-            dimensionAsString(c.getPreferredSize()),
-            dimensionAsString(c.getMinimumSize()),
-            dimensionAsString(c.getMaximumSize()),
-            c.getInsets().toString(),
-            c.getBorder().toString(),
-            c.getBorder().getBorderInsets(c).toString(),
-            c.isDoubleBuffered());
-    }
-
     private static String dimensionAsString(Dimension d) {
         return d.width + "x" + d.height;
     }
@@ -479,15 +451,6 @@ public class Debug {
     private static File createFileForSerializedFilter(Filter filter) {
         String fileName = FileUtils.sanitizeToFileName(filter.getName()) + ".ser";
         return new File("ser", fileName);
-    }
-
-    public static void debugAllDebugNames() {
-        // make a copy, because this could add new views in the future
-        List<View> origViews = List.copyOf(Views.getAll());
-        for (View view : origViews) {
-            String debugName = view.getComp().getDebugName();
-            System.out.println("Debug::debugAllImages: debugName = " + debugName);
-        }
     }
 
     public static void addAllSmartFilters(Composition comp) {

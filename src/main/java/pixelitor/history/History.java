@@ -280,6 +280,9 @@ public class History {
         }
     }
 
+    /**
+     * Asserts that the name of the next edit to be undone is the given string.
+     */
     public static void assertEditToBeUndoneNameIs(String expected) {
         String name = getEditToBeUndoneName();
         if (!name.equals(expected)) {
@@ -337,10 +340,9 @@ public class History {
         return node;
     }
 
-    public static void dump() {
-        undoManager.dump();
-    }
-
+    /**
+     * Returns the names of all edits in the current history.
+     */
     public static List<String> getEditNames() {
         return undoManager.getEditNames();
     }

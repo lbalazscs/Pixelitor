@@ -44,6 +44,10 @@ public interface DabsStrategy {
 
     /**
      * Informs the strategy about the previous point.
+     * TODO clarify whether we need to violate encapsulation
+     *   because of the mirrored brushes, or the strategy
+     *   should be responsible for managing its own internal state,
+     *   including the last point it processed.
      */
     void setPrevious(PPoint previous);
 }

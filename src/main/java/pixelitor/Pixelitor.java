@@ -28,10 +28,7 @@ import pixelitor.gui.utils.Themes;
 import pixelitor.io.FileIO;
 import pixelitor.io.IOTasks;
 import pixelitor.tools.util.MeasurementOverlay;
-import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Language;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -131,6 +128,7 @@ public class Pixelitor {
         assert calledOnEDT() : callInfo();
 
         Messages.setHandler(new GUIMessageHandler());
+        Thumbnails.updateThumbSize(AppPreferences.loadThumbSize());
 
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
@@ -219,14 +217,15 @@ public class Pixelitor {
     public static void exitApp(PixelitorWindow mainWindow) {
         assert calledOnEDT() : callInfo();
 
-        if (isExitBlockedByOngoingWrites(mainWindow)) {
+        if (handleOngoingWrites(mainWindow)) {
             return;
         }
 
         checkUnsavedChangesAndExit(mainWindow);
     }
 
-    private static boolean isExitBlockedByOngoingWrites(PixelitorWindow mainWindow) {
+    // returns true if we can't exit yet
+    private static boolean handleOngoingWrites(PixelitorWindow mainWindow) {
         Set<String> writePaths = IOTasks.getActiveWritePaths();
         if (writePaths.isEmpty()) {
             return false;

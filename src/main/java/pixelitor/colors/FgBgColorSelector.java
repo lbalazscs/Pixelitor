@@ -98,6 +98,7 @@ public class FgBgColorSelector extends JLayeredPane {
         setBgColor(initialBg, false);
 
         setupKeyboardShortcuts();
+        Themes.addThemeChangeListener(theme -> themeChanged());
     }
 
     private void initFgButton() {

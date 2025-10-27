@@ -45,13 +45,13 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.layers.LayerMask.RUBYLITH_COLOR_MODEL;
 import static pixelitor.layers.LayerMask.RUBYLITH_COMPOSITE;
 import static pixelitor.layers.LayerMask.TRANSPARENCY_COLOR_MODEL;
-import static pixelitor.utils.ImageUtils.calcThumbDimensions;
 import static pixelitor.utils.ImageUtils.convertToGrayscaleImage;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.copySubImage;
 import static pixelitor.utils.ImageUtils.createSysCompatibleImage;
-import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.ImageUtils.isSubImage;
+import static pixelitor.utils.Thumbnails.calcThumbDimensions;
+import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
  * GUI panel for creating layer masks based on color similarity.

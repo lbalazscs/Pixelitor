@@ -153,9 +153,9 @@ public class Crop implements CompAction {
             addMaskDerivedFromShape(croppedComp, hidingShape, false);
         }
 
-        // If before the crop the internal frame started
+        // if before the crop the internal frame started
         // at large negative coordinates, it might become
-        // unreachable after the crop, so move it.
+        // unreachable after the crop, so move it
         view.ensurePositiveLocation();
 
         String editName = addMaskForHiding ? "Crop and Hide" : "Crop";

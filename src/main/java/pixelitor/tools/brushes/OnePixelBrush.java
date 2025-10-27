@@ -35,8 +35,8 @@ public class OnePixelBrush extends AbstractBrush {
     }
 
     @Override
-    public void startAt(PPoint p) {
-        super.startAt(p);
+    public void startStrokeAt(PPoint p) {
+        super.startStrokeAt(p);
         repaintComp(p);
         setPrevious(p);
 

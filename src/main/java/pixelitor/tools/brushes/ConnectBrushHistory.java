@@ -171,7 +171,7 @@ public class ConnectBrushHistory {
     }
 
     /**
-     * Integrates this history with the application's history.
+     * Integrates {@link ConnectBrushHistory} with the application's history.
      */
     public static class Edit extends PixelitorEdit {
         public Edit(Composition comp) {

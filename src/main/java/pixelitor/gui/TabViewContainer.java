@@ -43,7 +43,8 @@ public class TabViewContainer extends JComponent implements ViewContainer {
     private final View view;
     private final JScrollPane scrollPane;
     private final TabsUI tabsUI;
-
+    private TabTitleRenderer titleRenderer;
+    
     public TabViewContainer(View view, TabsUI tabsUI) {
         this.view = view;
         this.tabsUI = tabsUI;
@@ -67,18 +68,15 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         tabsUI.selectTab(this);
     }
 
-    @Override
-    public void updateTitle(View view) {
-        int myIndex = tabsUI.indexOfComponent(this);
-        if (myIndex != -1) {
-            var tabComponent = (TabTitleRenderer) tabsUI.getTabComponentAt(myIndex);
-            tabComponent.setTitle(view.getName());
-        }
+    public void setTitleRenderer(TabTitleRenderer titleRenderer) {
+        this.titleRenderer = titleRenderer;
     }
 
     @Override
-    public void ensurePositiveLocation() {
-        // nothing to do
+    public void updateTitle(View view) {
+        if (titleRenderer != null) {
+            titleRenderer.setTitle(view.getName());
+        }
     }
 
     public void activated() {
@@ -109,43 +107,49 @@ public class TabViewContainer extends JComponent implements ViewContainer {
     private void showPopup(MouseEvent e) {
         JPopupMenu popup = new JPopupMenu();
 
+        addRenameAction(popup);
+        popup.addSeparator();
+        addCloseActions(popup);
+        if (Desktop.isDesktopSupported()) {
+            addFileActions(e, popup);
+        }
+        popup.addSeparator();
+        popup.add(tabsUI.getTabPlacementMenu());
+        if (AppMode.isDevelopment()) {
+            addDebugAction(popup);
+        }
+
+        popup.show(e.getComponent(), e.getX(), e.getY());
+    }
+
+    private void addRenameAction(JPopupMenu popup) {
         popup.add(new TaskAction("Rename...", () ->
             view.getComp().renameInteractively(this)));
+    }
 
-        popup.addSeparator();
-
+    private void addCloseActions(JPopupMenu popup) {
         // close the clicked one, even if it isn't the active!
         popup.add(new TaskAction(i18n("close"), () ->
             Views.warnAndClose(view)));
 
         popup.add(new TaskAction("Close Others", () ->
             Views.warnAndCloseAllBut(view)));
-        popup.add(Views.CLOSE_UNMODIFIED_ACTION);
+        popup.add(Views.CLOSE_ALL_UNMODIFIED_ACTION);
         popup.add(Views.CLOSE_ALL_ACTION);
+    }
 
-        if (Desktop.isDesktopSupported()) {
-            Composition comp = view.getComp();
-            File file = comp.getFile();
-            if (file != null && file.exists()) {
-                popup.addSeparator();
-                popup.add(GUIUtils.createShowInFolderAction(file));
+    private void addFileActions(MouseEvent e, JPopupMenu popup) {
+        Composition comp = view.getComp();
+        File file = comp.getFile();
+        if (file != null && file.exists()) {
+            popup.addSeparator();
+            popup.add(GUIUtils.createShowInFolderAction(file));
 
-                if (canBePrintedByOS(file)) {
-                    popup.add(GUIUtils.createPrintFileAction(
-                        comp, file, e.getComponent()));
-                }
+            if (canBePrintedByOS(file)) {
+                popup.add(GUIUtils.createPrintFileAction(
+                    comp, file, e.getComponent()));
             }
         }
-
-        popup.addSeparator();
-        popup.add(tabsUI.getTabPlacementMenu());
-
-        if (AppMode.isDevelopment()) {
-            popup.add(new TaskAction("Debug View...", () ->
-                Debug.showTree(view, "View " + view.getName())));
-        }
-
-        popup.show(e.getComponent(), e.getX(), e.getY());
     }
 
     private static boolean canBePrintedByOS(File file) {
@@ -159,5 +163,10 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         }
 
         return true;
+    }
+
+    private void addDebugAction(JPopupMenu popup) {
+        popup.add(new TaskAction("Debug View...", () ->
+            Debug.showTree(view, "View " + view.getName())));
     }
 }

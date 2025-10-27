@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,14 +37,14 @@ public class GoldenRatio {
     }
 
     public Color next() {
-        Color randomColor = new Color(Colors.HSBAtoARGB(hsbColors, root.getAlpha()), true);
+        Color randomColor = new Color(Colors.hsbToARGB(hsbColors, root.getAlpha()), true);
         randomColor = Colors.interpolateRGB(root, randomColor, colorRandomness);
         hsbColors[0] = (hsbColors[0] + GOLDEN_RATIO_CONJUGATE) % 1;
         return randomColor;
     }
 
     public Color next(Color root) {
-        Color randomColor = new Color(Colors.HSBAtoARGB(hsbColors, root.getAlpha()), true);
+        Color randomColor = new Color(Colors.hsbToARGB(hsbColors, root.getAlpha()), true);
         randomColor = Colors.interpolateRGB(root, randomColor, colorRandomness);
         hsbColors[0] = (hsbColors[0] + GOLDEN_RATIO_CONJUGATE) % 1;
         return randomColor;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,26 +38,23 @@ public class DragReorderHandler extends MouseInputAdapter {
     // the y coordinate within a LayerGUI where the drag started
     private int dragStartY;
 
-    // timestamp of the last press on a LayerNameEditor
-    private long lastNameEditorPressTime;
-
     public DragReorderHandler(LayersPanel layersPanel) {
         this.layersPanel = layersPanel;
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
-        // a manual double-click watch - necessary on Mac?
-        Component c = e.getComponent();
-        if (c instanceof LayerNameEditor editor) {
-            long eventTime = e.getWhen();
-            long diffMillis = eventTime - lastNameEditorPressTime;
-            if (diffMillis < 250) {
+    public void mouseClicked(MouseEvent e) {
+        // double-click enables editing on a LayerNameEditor
+        if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+            Component c = e.getComponent();
+            if (c instanceof LayerNameEditor editor) {
                 editor.enableEditing();
             }
-            lastNameEditorPressTime = eventTime;
         }
+    }
 
+    @Override
+    public void mousePressed(MouseEvent e) {
         translateMouseEvent(e);
         dragStartY = e.getY();
     }

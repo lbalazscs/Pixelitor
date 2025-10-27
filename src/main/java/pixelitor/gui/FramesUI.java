@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
+import java.awt.Point;
 import java.beans.PropertyVetoException;
 import java.util.List;
 
@@ -48,15 +49,9 @@ public final class FramesUI extends JDesktopPane implements ImageAreaUI {
     @Override
     public void addView(View view) {
         // calculate the location of the next frame
-        int locX = CASCADE_OFFSET_X * cascadeCount;
-        int locY = CASCADE_OFFSET_Y * cascadeCount;
-        int availableWidth = getWidth() - CASCADE_OFFSET_X;
-        int availableHeight = getHeight() - CASCADE_OFFSET_Y;
-        // wrap coordinates to keep frames within visible area
-        locX %= availableWidth;
-        locY %= availableHeight;
+        Point loc = getCascadeLocation(cascadeCount);
 
-        ImageFrame frame = new ImageFrame(view, locX, locY);
+        ImageFrame frame = new ImageFrame(view, loc.x, loc.y);
         view.setViewContainer(frame);
         add(frame);
         activateFrame(frame);
@@ -79,29 +74,33 @@ public final class FramesUI extends JDesktopPane implements ImageAreaUI {
             return;
         }
         List<View> views = Views.getAll();
-        int locX = 0;
-        int locY = 0;
 
-        for (View view : views) {
+        for (int i = 0; i < views.size(); i++) {
+            View view = views.get(i);
             ImageFrame frame = (ImageFrame) view.getViewContainer();
-            frame.setLocation(locX, locY);
+            Point loc = getCascadeLocation(i);
+            frame.setLocation(loc.x, loc.y);
             frame.setToCanvasSize();
             ensureNormalDisplay(frame);
-
-            locX += CASCADE_OFFSET_X;
-            locY += CASCADE_OFFSET_Y;
-
-            // wrap
-            int maxWidth = getWidth() - CASCADE_OFFSET_X;
-            int maxHeight = getHeight() - CASCADE_OFFSET_Y;
-
-            if (locX > maxWidth) {
-                locX = 0;
-            }
-            if (locY > maxHeight) {
-                locY = 0;
-            }
         }
+    }
+
+    private Point getCascadeLocation(int index) {
+        int locX = CASCADE_OFFSET_X * index;
+        int locY = CASCADE_OFFSET_Y * index;
+
+        // wrap coordinates to keep frames within visible area
+        int availableWidth = getWidth() - CASCADE_OFFSET_X;
+        if (availableWidth > 0) {
+            locX %= availableWidth;
+        }
+
+        int availableHeight = getHeight() - CASCADE_OFFSET_Y;
+        if (availableHeight > 0) {
+            locY %= availableHeight;
+        }
+
+        return new Point(locX, locY);
     }
 
     public void tileWindows() {

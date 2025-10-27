@@ -21,7 +21,6 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.PresetOwner;
-import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -92,7 +91,6 @@ public abstract class Tool implements PresetOwner, Debuggable {
      * A hook for actions to be performed when the tool is activated.
      */
     protected void toolActivated(View view) {
-        GlobalEvents.setActiveTool(this);
         Views.setCursorForAll(cursor);
         View.toolSnappingChanged(pixelSnapping, this == Tools.CROP);
     }
@@ -249,11 +247,11 @@ public abstract class Tool implements PresetOwner, Debuggable {
     /**
      * Called before a modal dialog, such as a filter or the color selector, is shown.
      */
-    public void firstModalDialogShown() {
+    public void modalDialogShown() {
         // empty by default
     }
 
-    public void firstModalDialogHidden() {
+    public void modalDialogHidden() {
         // empty by default
     }
 

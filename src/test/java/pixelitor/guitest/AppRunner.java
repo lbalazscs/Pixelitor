@@ -26,6 +26,9 @@ import org.assertj.swing.finder.JOptionPaneFinder;
 import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.*;
 import org.assertj.swing.launcher.ApplicationLauncher;
+import org.assertj.swing.timing.Condition;
+import org.assertj.swing.timing.Pause;
+import org.assertj.swing.timing.Timeout;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.FgBgColorSelector;
@@ -59,6 +62,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.awt.event.KeyEvent.VK_CONTROL;
@@ -106,14 +110,17 @@ public class AppRunner {
     private static File initialSaveDir;
 
     private HistoryChecker historyChecker;
+    private final File svgOutputDir;
 
-    public AppRunner(HistoryChecker historyChecker, File inputDir, String... fileNames) {
+    public AppRunner(HistoryChecker historyChecker,
+                     File inputDir, File svgOutputDir, String... fileNames) {
         this.historyChecker = historyChecker;
+        this.svgOutputDir = svgOutputDir;
         robot = BasicRobot.robotWithNewAwtHierarchy();
 
         History.setChecker(historyChecker);
 
-        // Converts filenames to full paths
+        // convert filenames to full paths
         String[] filePaths = Stream.of(fileNames)
             .map(fileName -> new File(inputDir, fileName).getPath())
             .toArray(String[]::new);
@@ -156,13 +163,12 @@ public class AppRunner {
     }
 
     private static void waitForImageLoading(int numImages) {
-        // wait even after the frame is shown to
-        // make sure that the image is also loaded
-        int numOpenImages = EDT.call(Views::getNumViews);
-        while (numOpenImages < numImages) {
-            Utils.sleep(1, SECONDS);
-            numOpenImages = EDT.call(Views::getNumViews);
-        }
+        Pause.pause(new Condition(numImages + " images are opened") {
+            @Override
+            public boolean test() {
+                return EDT.call(Views::getNumViews) == numImages;
+            }
+        }, Timeout.timeout(5, SECONDS));
     }
 
     public void runTests(Runnable tests) {
@@ -226,7 +232,7 @@ public class AppRunner {
         var settingsButton = findButtonByText("Settings...");
         if (brushType.hasSettings()) {
             settingsButton.requireEnabled().click();
-            var dialog = findDialogByTitleStartingWith("Settings for the ");
+            var dialog = findDialogByTitle(s -> s.startsWith("Settings for the "));
             testBrushSettingsDialog(dialog, tool, brushType);
         } else {
             settingsButton.requireDisabled();
@@ -253,7 +259,7 @@ public class AppRunner {
         chooseRandomly(dialog.comboBox("shape"));
         slideRandomly(dialog.slider("spacing"));
         slideRandomly(dialog.slider("angleJitter"));
-        checkRandomly(dialog.checkBox("angled"));
+        checkRandomly(dialog.checkBox("directional"));
     }
 
     private static void testSprayBrushSettings(DialogFixture dialog, boolean isEraser) {
@@ -274,10 +280,6 @@ public class AppRunner {
         slideRandomly(dialog.slider("width"));
         checkRandomly(dialog.checkBox("resetForEach"));
         clickRandomly(0.1, dialog.button("resetHistNow"));
-    }
-
-    void setIndexedMode() {
-        runMenuCommand("Indexed");
     }
 
     void clickTool(Tool tool) {
@@ -327,13 +329,13 @@ public class AppRunner {
         // this time the dialog should close
         dialog.requireNotVisible();
 
-        String activeCompName = EDT.active(Composition::getName);
+        String activeCompName = EDT.queryActiveComp(Composition::getName);
         if (name != null) {
             assertThat(activeCompName).isEqualTo(name);
         } else {
             assertThat(activeCompName).startsWith("Untitled");
         }
-        assert !EDT.active(Composition::isDirty);
+        assert !EDT.queryActiveComp(Composition::isDirty);
 
         mouse.updateCanvasBounds();
         checkNumLayersIs(1);
@@ -344,15 +346,15 @@ public class AppRunner {
         int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         runMenuCommand("Duplicate Layer");
-        checkNumLayersIs(numLayersBefore + 1);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore + 1);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
 
         keyboard.undo("Duplicate Layer");
-        checkNumLayersIs(numLayersBefore);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
 
         keyboard.redo("Duplicate Layer");
-        checkNumLayersIs(numLayersBefore + 1);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore + 1);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
     }
 
@@ -395,16 +397,16 @@ public class AppRunner {
     }
 
     public void deselect() {
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         keyboard.deselect();
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
 
         keyboard.undo("Deselect");
-        EDT.assertThereIsSelection();
+        EDT.requireSelection();
 
         keyboard.redo("Deselect");
-        EDT.assertThereIsNoSelection();
+        EDT.requireNoSelection();
     }
 
     public void invert() {
@@ -412,12 +414,24 @@ public class AppRunner {
         keyboard.undoRedo("Invert");
     }
 
-    void saveWithOverwrite(File baseTestingDir, String fileName) {
+    void acceptSaveDialog(File dir, String fileName) {
         var saveDialog = findSaveFileChooser();
-        saveDialog.selectFile(new File(baseTestingDir, fileName));
+        if (fileName == null) {
+            // use the file name that was pre-selected in the dialog
+            fileName = saveDialog.target().getSelectedFile().getName();
+        }
+        File file = new File(dir, fileName);
+        saveDialog.selectFile(file);
+        boolean fileExistsAlready = file.exists();
         saveDialog.approve();
-        var optionPane = findJOptionPane("Confirmation"); // overwrite question
-        optionPane.yesButton().click();
+        if (fileExistsAlready) {
+            // say OK to the overwrite question
+            var optionPane = findJOptionPane("Confirmation");
+            optionPane.yesButton().click();
+        }
+
+        Utils.sleep(500, MILLISECONDS);
+        assertThat(file).exists().isFile();
     }
 
     void openFileWithDialog(String command, File dir, String fileName) {
@@ -437,8 +451,8 @@ public class AppRunner {
         IOTasks.waitForIdle();
         mouse.updateCanvasBounds();
 
-        if (EDT.active(Composition::isDirty)) {
-            String compName = EDT.active(Composition::getName);
+        if (EDT.queryActiveComp(Composition::isDirty)) {
+            String compName = EDT.queryActiveComp(Composition::getName);
             throw new AssertionError(
                 format("New comp '%s', loaded from %s is dirty",
                     compName, fileName));
@@ -448,29 +462,30 @@ public class AppRunner {
     void waitForProgressMonitorEnd() {
         Utils.sleep(2, SECONDS); // wait until progress monitor comes up
 
-        boolean dialogRunning = true;
-        while (dialogRunning) {
+        boolean dialogVisible = true;
+        while (dialogVisible) {
             Utils.sleep(1, SECONDS);
             try {
                 findDialogByTitle("Progress...");
             } catch (Exception e) {
-                dialogRunning = false;
+                dialogVisible = false;
             }
         }
 
-        // even if the dialog is not visible, the
+        // even when the dialog is no longer visible, the
         // async saving of the last file might be still running
-        boolean stillWriting = EDT.call(IOTasks::hasActiveWrites);
-        while (stillWriting) {
-            System.out.println("waiting 1s for the IO thread...");
-            Utils.sleep(1, SECONDS);
-            stillWriting = EDT.call(IOTasks::hasActiveWrites);
-        }
+        Pause.pause(new Condition("finished writing") {
+            @Override
+            public boolean test() {
+                return !EDT.call(IOTasks::hasActiveWrites);
+            }
+        }, Timeout.timeout(5, SECONDS));
     }
 
     void closeCurrentView(ExpectConfirmation expectConfirmation) {
-        boolean unsaved = EDT.active(Composition::hasUnsavedChanges);
+        boolean unsaved = EDT.queryActiveComp(Composition::hasUnsavedChanges);
 
+        // verify that the expectation of a confirmation dialog matches the actual unsaved state
         if (unsaved && expectConfirmation == ExpectConfirmation.NO
             || !unsaved && expectConfirmation == ExpectConfirmation.YES) {
             throw new IllegalStateException("unsaved = " + unsaved + ", expectConfirmation = " + expectConfirmation);
@@ -504,7 +519,7 @@ public class AppRunner {
             }
         }
 
-        EDT.assertNumOpenImagesIs(0);
+        EDT.assertNumViewsIs(0);
     }
 
     void resize(int targetWidth) {
@@ -533,7 +548,13 @@ public class AppRunner {
         dialog.button("ok").click();
         dialog.requireNotVisible();
 
-        Utils.sleep(5, SECONDS);
+        Pause.pause(new Condition("comp was resized") {
+            @Override
+            public boolean test() {
+                Composition comp = EDT.getActiveComp();
+                return comp.getCanvasWidth() == targetWidth;
+            }
+        }, Timeout.timeout(5, SECONDS));
 
         keyboard.undoRedo("Resize");
     }
@@ -588,7 +609,7 @@ public class AppRunner {
         return TIME_FORMAT_HMS.format(LocalTime.now());
     }
 
-    JMenuItemFixture findMenuItemByText(String guiName) {
+    private JMenuItemFixture findMenuItemByText(String guiName) {
         return new JMenuItemFixture(robot, robot.finder().find(new GenericTypeMatcher<>(JMenuItem.class) {
             @Override
             protected boolean isMatching(JMenuItem menuItem) {
@@ -609,33 +630,21 @@ public class AppRunner {
     }
 
     DialogFixture findDialogByTitle(String title) {
-        return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<>(JDialog.class) {
-            @Override
-            protected boolean isMatching(JDialog dialog) {
-                // the visible condition is necessary because otherwise it finds
-                // dialogs that were not disposed, but hidden
-                return dialog.getTitle().equals(title) && dialog.isVisible();
-            }
-
-            @Override
-            public String toString() {
-                return "Matcher for JDialogs with title = " + title;
-            }
-        }));
+        return findDialogByTitle(s -> s.equals(title));
     }
 
-    DialogFixture findDialogByTitleStartingWith(String start) {
+    DialogFixture findDialogByTitle(Predicate<String> condition) {
         return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<>(JDialog.class) {
             @Override
             protected boolean isMatching(JDialog dialog) {
-                // the visible condition is necessary because otherwise it finds
-                // dialogs that were not disposed, but hidden
-                return dialog.getTitle().startsWith(start) && dialog.isVisible();
+                // the visible condition is necessary because otherwise it
+                // finds dialogs that were not disposed, but only hidden
+                return condition.test(dialog.getTitle()) && dialog.isVisible();
             }
 
             @Override
             public String toString() {
-                return "Matcher for JDialogs with title starting with " + start;
+                return "Matcher for JDialogs";
             }
         }));
     }
@@ -658,10 +667,6 @@ public class AppRunner {
         return JFileChooserFinder.findFileChooser("save").using(robot);
     }
 
-    public JButtonFixture findButton(String name) {
-        return pw.button(name);
-    }
-
     public JButtonFixture findButtonByText(String text) {
         return GUITestUtils.findButtonByText(pw, text);
     }
@@ -670,13 +675,11 @@ public class AppRunner {
      * Opens a tool dialog, performs the given actions, and then closes it.
      */
     public void withToolDialog(String buttonName, String dialogTitle, Consumer<DialogFixture> dialogActions) {
-        var button = findButton(buttonName).requireVisible();
+        var button = pw.button(buttonName).requireVisible();
         if (!button.isEnabled()) {
             return;
         }
         button.click();
-
-//        Utils.sleep(200, MILLISECONDS);
 
         var dialog = findDialogByTitle(dialogTitle);
         dialogActions.accept(dialog);
@@ -718,7 +721,7 @@ public class AppRunner {
     }
 
     public void clickMaskPopup(String layerName, String menuName) {
-        assert EDT.layerWithName(layerName, Layer::hasMask);
+        assert EDT.queryLayerWithName(layerName, Layer::hasMask);
 
         // this shouldn't be necessary, mask edit mode should be set by default
         var popup = findMaskIconByLayerName(layerName).showPopupMenu();
@@ -748,8 +751,7 @@ public class AppRunner {
         findLayerIconByLayerName(layerName).click();
     }
 
-    public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed,
-                                    ShowOriginal showOriginal, boolean testPresets,
+    public void runFilterWithDialog(String name, FilterOptions options, boolean testPresets,
                                     Consumer<DialogFixture> customizer) {
         runMenuCommand(name + "...");
         var dialog = findFilterDialog();
@@ -757,7 +759,7 @@ public class AppRunner {
             customizer.accept(dialog);
         }
 
-        if (randomize == Randomize.YES) {
+        if (options.randomize()) {
             dialog.button("randomize").click();
             dialog.button("resetAll").click();
             dialog.button("randomize").click();
@@ -775,13 +777,18 @@ public class AppRunner {
             }
         }
 
-        if (showOriginal == ShowOriginal.YES) {
+        if (options.showOriginal()) {
             // click twice to restore the unchecked state
             dialog.checkBox("show original").click().click();
         }
 
-        if (reseed == Reseed.YES) {
+        if (options.reseed()) {
             dialog.button("reseed").click();
+        }
+
+        if (options.exportSvg()) {
+            dialog.button("exportSvg").click();
+            acceptSaveDialog(svgOutputDir, null);
         }
 
         dialog.button("ok").click();
@@ -831,14 +838,11 @@ public class AppRunner {
     }
 
     void checkNumLayersIs(int expected) {
-        EDT.assertNumLayersIs(expected);
-
-        // the above line checks the layers in the active holder
-//        layersContainer.requireNumLayerButtons(expected);
+        EDT.assertNumLayersInActiveHolderIs(expected);
     }
 
     public void checkLayerNamesAre(String... expectedNames) {
-        assertThat(EDT.getComp()).layerNamesAre(expectedNames);
+        assertThat(EDT.getActiveComp()).layerNamesAre(expectedNames);
         layersContainer.requireLayerNames(expectedNames);
     }
 
@@ -857,32 +861,32 @@ public class AppRunner {
             .requireEnabled()
             .click()
             .requireDisabled();
-        assert EDT.activeLayerHasMask();
+        EDT.assertActiveLayerHasMask();
 
         keyboard.undoRedo("Add Layer Mask");
     }
 
     private void undoRedoNewLayer(int numLayersBefore, String editName) {
-        checkNumLayersIs(numLayersBefore + 1);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore + 1);
 
         keyboard.undo(editName);
-        checkNumLayersIs(numLayersBefore);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore);
 
         keyboard.redo(editName);
-        checkNumLayersIs(numLayersBefore + 1);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore + 1);
     }
 
     public void mergeDown() {
         int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         runMenuCommand("Merge Down");
-        checkNumLayersIs(numLayersBefore - 1);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore - 1);
 
         keyboard.undo("Merge Down");
-        checkNumLayersIs(numLayersBefore);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore);
 
         keyboard.redo("Merge Down");
-        checkNumLayersIs(numLayersBefore - 1);
+        EDT.assertNumLayersInActiveHolderIs(numLayersBefore - 1);
     }
 
     public void addEmptyImageLayer(boolean below) {
@@ -1005,7 +1009,7 @@ public class AppRunner {
         pw.comboBox("typeCB").selectItem(gradientType.toString());
         pw.checkBox("reverseCB").check();
 
-        if (EDT.getZoomLevelOfActive() != ZoomLevel.ACTUAL_SIZE) {
+        if (EDT.getActiveZoomLevel() != ZoomLevel.ACTUAL_SIZE) {
             // otherwise location on screen can lead to unexpected results
             runMenuCommand("Actual Pixels");
         }
@@ -1143,14 +1147,23 @@ public class AppRunner {
         return pw;
     }
 
-    // Whether a "randomize settings" button should be tested for a filter.
-    public enum Randomize {YES, NO}
-
-    // Whether a "reseed" button should be tested for a filter.
-    public enum Reseed {YES, NO}
-
-    // Whether a "show original" checkbox should be tested for a filter.
-    public enum ShowOriginal {YES, NO}
+    // what GUI widgets should be tested on for a filter
+    public record FilterOptions(boolean randomize, boolean reseed, boolean showOriginal, boolean exportSvg) {
+        // nothing
+        static final FilterOptions NONE = new FilterOptions(false, false, false, false);
+        // show original
+        static final FilterOptions TRIVIAL = new FilterOptions(false, false, true, false);
+        // randomize + show original
+        static final FilterOptions STANDARD = new FilterOptions(true, false, true, false);
+        // randomize + show original + resed
+        static final FilterOptions STANDARD_RESEED = new FilterOptions(true, true, true, false);
+        // randomize
+        static final FilterOptions RENDERING = new FilterOptions(true, false, false, false);
+        // randomize + reseed
+        static final FilterOptions RENDERING_RESEED = new FilterOptions(true, true, false, false);
+        // randomize + svg export
+        static final FilterOptions SHAPES = new FilterOptions(true, false, false, true);
+    }
 
     // Whether we expect a save modified image confirmation dialog
     public enum ExpectConfirmation {

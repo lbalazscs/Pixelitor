@@ -17,13 +17,14 @@
 package pixelitor.io;
 
 import com.bric.util.JVM;
-import pixelitor.utils.Utils;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -31,33 +32,33 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * Utility class with static methods related to files.
  */
 public class FileUtils {
-    // Supported file extensions for the open file dialog.
+    // supported file extensions for the open file dialog
     private static final Set<String> SUPPORTED_OPEN_EXTENSIONS =
         extensionSet(FileChoosers.OPEN_FILTERS);
 
-    // Supported file extensions for the save file dialog.
+    // supported file extensions for the save file dialog
     private static final Set<String> SUPPORTED_SAVE_EXTENSIONS =
         extensionSet(FileChoosers.SAVE_FILTERS);
 
-    // Export-only formats that aren't offered when using save.
+    // export-only formats that aren't offered when using save
     private static final Set<String> SUPPORTED_EXPORT_EXTENSIONS =
         Set.of("svg");
 
     private static Pattern specialCharsPattern = null;
 
-    // Private constructor to prevent instantiation.
+    // private constructor to prevent instantiation
     private FileUtils() {
     }
 
     /**
-     * Returns the file extension or null if none is found.
+     * Returns the file extension in lower case or null if none is found.
      */
     public static String getExtension(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
         if (lastIndex == -1) {
             return null;
         }
-        return fileName.substring(lastIndex + 1);
+        return fileName.substring(lastIndex + 1).toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -71,16 +72,15 @@ public class FileUtils {
      * Checks if the given file name has an extension.
      */
     public static boolean hasExtension(String fileName) {
-        return findExtension(fileName).isPresent();
+        return fileName.indexOf('.') != -1;
     }
 
     /**
      * Checks if the given file name has the given extension.
      */
     private static boolean hasSpecificExtension(String fileName, String ext) {
-        return findExtension(fileName)
-            .filter(s -> s.equalsIgnoreCase(ext))
-            .isPresent();
+        String foundExt = getExtension(fileName);
+        return foundExt != null && foundExt.equals(ext);
     }
 
     public static boolean hasPNGExtension(String fileName) {
@@ -92,11 +92,10 @@ public class FileUtils {
     }
 
     public static boolean hasMultiLayerExtension(File file) {
-        Optional<String> extOpt = findExtension(file.getName());
-        if (extOpt.isEmpty()) {
+        String ext = getExtension(file.getName());
+        if (ext == null) {
             return false;
         }
-        String ext = extOpt.get().toLowerCase(Locale.ROOT);
         return ext.equals("pxc") || ext.equals("ora");
     }
 
@@ -113,17 +112,13 @@ public class FileUtils {
     }
 
     public static boolean hasSupportedInputExt(String fileName) {
-        return findExtension(fileName)
-            .map(s -> s.toLowerCase(Locale.ROOT))
-            .filter(SUPPORTED_OPEN_EXTENSIONS::contains)
-            .isPresent();
+        String extension = getExtension(fileName);
+        return extension != null && SUPPORTED_OPEN_EXTENSIONS.contains(extension);
     }
 
     public static boolean hasSupportedOutputExt(String fileName) {
-        return findExtension(fileName)
-            .map(s -> s.toLowerCase(Locale.ROOT))
-            .filter(FileUtils::isSupportedOutputExt)
-            .isPresent();
+        String extension = getExtension(fileName);
+        return extension != null && isSupportedOutputExt(extension);
     }
 
     public static boolean isSupportedOutputExt(String extension) {
@@ -140,16 +135,11 @@ public class FileUtils {
      * that have supported input extensions.
      */
     public static List<File> listSupportedInputFiles(File dir) {
-        FileFilter imageFilter = FileUtils::hasSupportedInputExt;
-        File[] files = dir.listFiles(imageFilter);
+        File[] files = dir.listFiles(file -> file.isFile() && hasSupportedInputExt(file));
         if (files == null) {
             return Collections.emptyList();
         }
-
-        // filter out crazily named directories with image file extensions
-        return Stream.of(files)
-            .filter(File::isFile)
-            .toList();
+        return Arrays.asList(files);
     }
 
     private static Set<String> extensionSet(FileNameExtensionFilter[] filters) {
@@ -161,7 +151,7 @@ public class FileUtils {
     }
 
     /**
-     * Replaces all special characters in the given string with an underscore
+     * Trims the given string and replaces all special characters with an underscore.
      */
     public static String sanitizeToFileName(String s) {
         if (specialCharsPattern == null) {
@@ -177,7 +167,7 @@ public class FileUtils {
      */
     public static File locateExecutable(String configuredDir, String executableName) {
         // first, check the directory configured in Preferences
-        File executable = Utils.findExecutable(configuredDir, executableName);
+        File executable = findExecutable(configuredDir, executableName);
         if (executable != null) {
             return executable;
         }
@@ -203,5 +193,23 @@ public class FileUtils {
             // command failed (e.g., 'which' not found) or was interrupted
             return null;
         }
+    }
+
+    /**
+     * Checks if an executable file with the given name exists and
+     * can be executed in the given directory.
+     */
+    public static File findExecutable(String dirPath, String executableName) {
+        if (dirPath.isEmpty()) {
+            return null;
+        }
+        if (JVM.isWindows) {
+            executableName += ".exe";
+        }
+        File executableFile = new File(dirPath, executableName);
+        if (executableFile.exists() && executableFile.canExecute()) {
+            return executableFile;
+        }
+        return null;
     }
 }

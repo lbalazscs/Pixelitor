@@ -56,15 +56,14 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
-import static pixelitor.Views.thumbSize;
 import static pixelitor.compactions.FlipDirection.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
 import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 import static pixelitor.utils.ImageUtils.copyImage;
-import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.ImageUtils.replaceSelectedRegion;
 import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
  * A layer that holds and renders pixel data from a BufferedImage.
@@ -1096,7 +1095,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     @Override
     public BufferedImage createIconThumbnail() {
         BufferedImage bigImg = getCanvasSizedSubImage();
-        return createThumbnail(bigImg, thumbSize, thumbCheckerBoardPainter);
+        return createThumbnail(bigImg, thumbCheckerBoardPainter);
     }
 
     /**

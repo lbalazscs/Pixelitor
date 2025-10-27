@@ -23,22 +23,22 @@ import javax.swing.*;
  * The available Swing Look and Feels.
  */
 public enum Theme {
-    NIMBUS("Nimbus", false, false) {
+    NIMBUS("Nimbus", false, false, 35) {
         @Override
         String getLAFClassName() {
             return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
         }
-    }, FLAT_DARK("Flat Dark", true, true) {
+    }, FLAT_DARK("Flat Dark", true, true, 30) {
         @Override
         String getLAFClassName() {
             return "com.formdev.flatlaf.FlatDarculaLaf";
         }
-    }, FLAT_LIGHT("Flat Light", false, true) {
+    }, FLAT_LIGHT("Flat Light", false, true, 30) {
         @Override
         String getLAFClassName() {
             return "com.formdev.flatlaf.FlatIntelliJLaf";
         }
-    }, SYSTEM("System", false, false) {
+    }, SYSTEM("System", false, false, 30) {
         @Override
         String getLAFClassName() {
             return UIManager.getSystemLookAndFeelClassName();
@@ -48,11 +48,13 @@ public enum Theme {
     private final String displayName;
     private final boolean dark;
     private final boolean flat;
+    private final int frameDecorationHeight;
 
-    Theme(String displayName, boolean dark, boolean flat) {
+    Theme(String displayName, boolean dark, boolean flat, int frameDecorationHeight) {
         this.displayName = displayName;
         this.dark = dark;
         this.flat = flat;
+        this.frameDecorationHeight = frameDecorationHeight;
     }
 
     /**
@@ -74,6 +76,10 @@ public enum Theme {
 
     public String getPrefsCode() {
         return displayName;
+    }
+
+    public int getFrameDecorationHeight() {
+        return frameDecorationHeight;
     }
 
     @Override

@@ -126,7 +126,7 @@ public class SymmetryBrush implements Brush {
     // action to the correct internal brushes with transformed coordinates.
 
     @Override
-    public void startAt(PPoint p) {
+    public void startStrokeAt(PPoint p) {
         symmetry.startAt(this, p);
     }
 
@@ -204,20 +204,20 @@ public class SymmetryBrush implements Brush {
     public void startAt(int brushNo, PPoint p) {
         // the tracking of the shared affected area is done at this level
         if (brushNo == 0) {
-            affectedArea.initAt(p);
+            affectedArea.startStrokeAt(p);
         } else {
-            affectedArea.updateWith(p);
+            affectedArea.extendStrokeTo(p);
         }
 
         // do the actual drawing
-        brushes[brushNo].startAt(p);
+        brushes[brushNo].startStrokeAt(p);
     }
 
     /**
      * Continues a brush stroke for a specific internal brush.
      */
     public void continueTo(int brushNo, PPoint p) {
-        affectedArea.updateWith(p);
+        affectedArea.extendStrokeTo(p);
         brushes[brushNo].continueTo(p);
     }
 
@@ -225,7 +225,7 @@ public class SymmetryBrush implements Brush {
      * Connects the last point with a line for a specific internal brush.
      */
     public void lineConnectTo(int brushNo, PPoint p) {
-        affectedArea.updateWith(p);
+        affectedArea.extendStrokeTo(p);
         brushes[brushNo].lineConnectTo(p);
     }
 

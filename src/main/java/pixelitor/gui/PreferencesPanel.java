@@ -20,7 +20,6 @@ package pixelitor.gui;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Features;
-import pixelitor.Views;
 import pixelitor.colors.ColorPickerHelper;
 import pixelitor.filters.gui.ChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -31,7 +30,6 @@ import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
-import pixelitor.layers.LayerGUILayout;
 import pixelitor.utils.Error;
 import pixelitor.utils.*;
 
@@ -198,7 +196,7 @@ public class PreferencesPanel extends JTabbedPane {
         }
 
         EventQueue.invokeLater(() -> {
-            Themes.updateAllComponents();
+            Themes.refreshComponentUIs();
             SwingUtilities.getWindowAncestor(this).pack();
             setCursor(Cursors.DEFAULT);
         });
@@ -224,8 +222,13 @@ public class PreferencesPanel extends JTabbedPane {
         });
         thumbSizeCB.setName("thumbSizeCB");
 
-        int currentSize = LayerGUILayout.getThumbSize();
-        thumbSizeCB.setSelectedIndex(currentSize / 24 - 1);
+        int currentSize = Thumbnails.getMaxSize();
+        for (int i = 0; i < thumbSizeCB.getItemCount(); i++) {
+            if (thumbSizeCB.getItemAt(i).valueIs(currentSize)) {
+                thumbSizeCB.setSelectedIndex(i);
+                break;
+            }
+        }
 
         gbh.addLabelAndControlNoStretch("Layer/Mask Thumb Sizes: ", thumbSizeCB);
         thumbSizeCB.addActionListener(e -> updateThumbSize());
@@ -261,22 +264,25 @@ public class PreferencesPanel extends JTabbedPane {
     private static JPanel createGuidesPanel() {
         var guidesPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(guidesPanel);
-        configureGuidesSettings(gbh);
-        configureCropGuidesSettings(gbh);
+        configureGuideStyle(AppPreferences.getGuideStyle(),
+            "Guide", "guideStyleCB", gbh);
+        configureGuideStyle(AppPreferences.getCropGuideStyle(),
+            "Cropping Guide", "cropGuideStyleCB", gbh);
         guidesPanel.setBorder(PANEL_PADDING);
         return guidesPanel;
     }
 
-    private static void configureGuidesSettings(GridBagHelper gbh) {
-        GuideStyle guideStyle = AppPreferences.getGuideStyle();
-
+    /**
+     * Configures either regular guides or composition guides in the crop tool.
+     */
+    private static void configureGuideStyle(GuideStyle guideStyle, String labelPrefix, String comboName, GridBagHelper gbh) {
         var guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
         var guideStyleCB = new JComboBox<>(GuideStrokeType.values());
-        guideStyleCB.setName("guideStyleCB");
+        guideStyleCB.setName(comboName);
         guideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
-        gbh.addLabelAndControlNoStretch("Guide Color: ", guideColorSwatch);
-        gbh.addLabelAndControlNoStretch("Guide Style: ", guideStyleCB);
+        gbh.addLabelAndControlNoStretch(labelPrefix + " Color: ", guideColorSwatch);
+        gbh.addLabelAndControlNoStretch(labelPrefix + " Style: ", guideStyleCB);
 
         new ColorPickerHelper(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
@@ -285,28 +291,6 @@ public class PreferencesPanel extends JTabbedPane {
 
         guideStyleCB.addActionListener(e -> {
             guideStyle.setStrokeType((GuideStrokeType) guideStyleCB.getSelectedItem());
-            ImageArea.getUI().repaint();
-        });
-    }
-
-    private static void configureCropGuidesSettings(GridBagHelper gbh) {
-        GuideStyle guideStyle = AppPreferences.getCropGuideStyle();
-
-        var guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
-        var cropGuideStyleCB = new JComboBox<>(GuideStrokeType.values());
-        cropGuideStyleCB.setName("cropGuideStyleCB");
-        cropGuideStyleCB.setSelectedItem(guideStyle.getStrokeType());
-
-        gbh.addLabelAndControlNoStretch("Cropping Guide Color: ", guideColorSwatch);
-        gbh.addLabelAndControlNoStretch("Cropping Guide Style: ", cropGuideStyleCB);
-
-        new ColorPickerHelper(guideColorSwatch, e -> {
-            guideStyle.setColorA(guideColorSwatch.getForeground());
-            ImageArea.getUI().repaint();
-        });
-
-        cropGuideStyleCB.addActionListener(e -> {
-            guideStyle.setStrokeType((GuideStrokeType) cropGuideStyleCB.getSelectedItem());
             ImageArea.getUI().repaint();
         });
     }
@@ -357,7 +341,8 @@ public class PreferencesPanel extends JTabbedPane {
         gbh.addLabelAndControl("Enable Experimental Features:", experimentalCB);
     }
 
-    private boolean validate(JDialog d) {
+    // validates and applies settings that are not handled by immediate action listeners
+    private boolean validateAndApply(JDialog d) {
         // we don't want to continuously set the undo levels
         // as the user edits the text field, because low levels
         // erase the history, therefore it is set here
@@ -428,7 +413,7 @@ public class PreferencesPanel extends JTabbedPane {
 
     private void updateThumbSize() {
         int newSize = ((Item) thumbSizeCB.getSelectedItem()).value();
-        Views.updateThumbSize(newSize);
+        Thumbnails.updateThumbSize(newSize);
     }
 
     private void setupRememberingTabSelection() {
@@ -447,7 +432,7 @@ public class PreferencesPanel extends JTabbedPane {
             .noCancelButton()
             .title(i18n("preferences"))
             .okText(CLOSE_DIALOG)
-            .validator(prefPanel::validate)
+            .validator(prefPanel::validateAndApply)
             .validateOnCancel()
             .show();
     }

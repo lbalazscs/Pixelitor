@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,8 @@ public record Modifiers(Ctrl ctrl, Alt alt, Shift shift, MouseButton button) imp
     public static final Modifiers ALT = new Modifiers(Ctrl.RELEASED, Alt.PRESSED, Shift.RELEASED, MouseButton.LEFT);
     public static final Modifiers SHIFT = new Modifiers(Ctrl.RELEASED, Alt.RELEASED, Shift.PRESSED, MouseButton.LEFT);
 
+    public static final int ROBOT_DELAY_MS = 50;
+
     @Override
     public int modify(int currentMask) {
         currentMask = ctrl.modify(currentMask);
@@ -52,7 +54,7 @@ public record Modifiers(Ctrl ctrl, Alt alt, Shift shift, MouseButton button) imp
     private MouseEvent createEvent(int x, int y, int id, Component source) {
         //noinspection MagicConstant
         return new MouseEvent(source, id, System.currentTimeMillis(),
-            modify(0), x, y, 1, button == MouseButton.RIGHT);
+            modify(0), x, y, 1, button.isRight(), button.getAwtButton());
     }
 
     public PMouseEvent createPEvent(int x, int y, int id, View view) {

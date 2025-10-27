@@ -140,7 +140,7 @@ public class Flashlight extends ParametrizedFilter {
             if (outside == 1.0) {
                 // outside the blurred shape set the background color
                 // while preserving the transparency of the source
-                return Colors.setMinAlpha(bgRGBA, srcAlpha);
+                return Colors.capAlpha(bgRGBA, srcAlpha);
             } else if (outside == 0.0) {
                 return rgb;
             } else {
@@ -148,10 +148,10 @@ public class Flashlight extends ParametrizedFilter {
                     // Don't mix, because it would darken the image.
                     // Take the smaller alpha in order to preserve existing transparency.
                     int calcAlpha = (int) (255.0 * (1.0 - outside));
-                    return Colors.setMinAlpha(rgb, calcAlpha);
+                    return Colors.capAlpha(rgb, calcAlpha);
                 } else {
                     int mixed = ImageMath.mixColors((float) outside, rgb, bgRGBA);
-                    return Colors.setMinAlpha(mixed, srcAlpha);
+                    return Colors.capAlpha(mixed, srcAlpha);
                 }
             }
         }

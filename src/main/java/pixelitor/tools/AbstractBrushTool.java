@@ -263,23 +263,23 @@ public abstract class AbstractBrushTool extends Tool {
     public void mousePressed(PMouseEvent e) {
         // start a new brush stroke or continue with line connect (Shift)
         boolean lineConnect = e.isShiftDown() && brush.hasPrevious();
-        newMousePoint(e, lineConnect);
+        processStrokePoint(e, lineConnect);
 
         // if it can have symmetry, then the symmetry brush does
         // the tracking of the affected area
         if (!supportsSymmetry) {
             if (lineConnect) {
                 assert brush.hasPrevious();
-                affectedArea.updateWith(e);
+                affectedArea.extendStrokeTo(e);
             } else {
-                affectedArea.initAt(e);
+                affectedArea.startStrokeAt(e);
             }
         }
     }
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        newMousePoint(e, false); // continue the stroke
+        processStrokePoint(e, false); // continue the stroke
 
         if (lazyMouse) {
             PPoint drawLoc = lazyMouseBrush.getDrawLocation();
@@ -298,7 +298,7 @@ public abstract class AbstractBrushTool extends Tool {
             return;
         }
 
-        // Whether or not it is a lazy mouse, reset
+        // whether or not it is a lazy mouse, reset
         // the outline back to the mouse coordinates
         outlineCoX = (int) e.getCoX();
         outlineCoY = (int) e.getCoY();
@@ -399,9 +399,9 @@ public abstract class AbstractBrushTool extends Tool {
         assert !affectedRect.isEmpty() : "brush radius = " + maxBrushRadius
             + ", affected area = " + affectedArea;
 
-        var imageEdit = PartialImageEdit.create(
+        PartialImageEdit imageEdit = PartialImageEdit.create(
             affectedRect, originalImage, dr, false, getName());
-        if (imageEdit != null) {
+        if (imageEdit != null) { // there was a change
             if (hasBrushType() && getBrushType() == BrushType.CONNECT) {
                 Composition comp = dr.getComp();
                 History.add(new MultiEdit(imageEdit.getName(), comp,
@@ -436,7 +436,7 @@ public abstract class AbstractBrushTool extends Tool {
     /**
      * Processes a new mouse point during a drawing operation (press or drag).
      */
-    private void newMousePoint(PMouseEvent p, boolean lineConnect) {
+    private void processStrokePoint(PMouseEvent p, boolean lineConnect) {
         Drawable dr = p.getComp().getActiveDrawableOrThrow();
         if (brushContext == null) { // start of a new stroke
             createBrushStroke(dr);
@@ -444,7 +444,7 @@ public abstract class AbstractBrushTool extends Tool {
             if (lineConnect) {
                 brush.lineConnectTo(p);
             } else {
-                brush.startAt(p);
+                brush.startStrokeAt(p);
             }
         } else if (brush.hasPrevious()) { // continuation of an existing stroke
             brush.continueTo(p);
@@ -452,7 +452,7 @@ public abstract class AbstractBrushTool extends Tool {
             // there is a brush stroke, but the brush has no previous
             // TODO why does this happen sometimes in random tests?
             //   Perhaps after programmatic changes?
-            brush.startAt(p);
+            brush.startStrokeAt(p);
         }
     }
 
@@ -523,7 +523,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void firstModalDialogShown() {
+    public void modalDialogShown() {
         // the outline has to be hidden, because there is no mouseExited event
         View view = Views.getActive();
         if (view != null) {
@@ -532,7 +532,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void firstModalDialogHidden() {
+    public void modalDialogHidden() {
         // the outline has to be shown again, because there is no mouseEntered event
         View view = Views.getActive();
         if (view != null) {
@@ -578,10 +578,10 @@ public abstract class AbstractBrushTool extends Tool {
             PPoint pathPoint = PPoint.lazyFromIm(coords[0], coords[1], view);
 
             if (isFirstPoint) {
-                affectedArea.initAt(pathPoint);
+                affectedArea.startStrokeAt(pathPoint);
                 isFirstPoint = false;
             } else {
-                affectedArea.updateWith(pathPoint);
+                affectedArea.extendStrokeTo(pathPoint);
             }
 
             switch (segmentType) {
@@ -599,7 +599,7 @@ public abstract class AbstractBrushTool extends Tool {
                         // finish the previous brush stroke before starting a new subpath
                         brush.finishBrushStroke();
                     }
-                    brush.startAt(pathPoint);
+                    brush.startStrokeAt(pathPoint);
                 }
                 case SEG_LINETO -> brush.continueTo(pathPoint);
                 case SEG_CLOSE -> brush.continueTo(subPathStart);

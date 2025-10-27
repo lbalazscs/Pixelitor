@@ -321,7 +321,7 @@ public class CropBox implements ToolWidget, Debuggable {
     public void arrowKeyPressed(ArrowKey key, View view) {
         // move by 1 image pixel if zoom is >= 100%, otherwise
         // scale move distance so that the user always sees a change
-        double viewScale = view.getZoomLevel().getViewScale();
+        double viewScale = view.getZoomLevel().getScale();
         int moveScale = viewScale >= 1 ? 1 : (int) Math.ceil(1 / viewScale);
 
         Rectangle2D im = cropRect.getIm();
@@ -464,4 +464,3 @@ public class CropBox implements ToolWidget, Debuggable {
         return node;
     }
 }
-

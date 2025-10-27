@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,18 +28,18 @@ import java.awt.image.BufferedImage;
 public enum ImageBrushType {
     REAL {
         @Override
-        public BufferedImage createBWBrushImage() {
-            return ImageUtils.createRandomPointsTemplateBrush(SIZE, 0.2f);
+        public BufferedImage createTemplateImage() {
+            return ImageUtils.createGrayRandomPointsBrushImage(SIZE, 0.2f);
         }
     }, HAIR {
         @Override
-        public BufferedImage createBWBrushImage() {
-            return ImageUtils.createRandomPointsTemplateBrush(SIZE, 0.03f);
+        public BufferedImage createTemplateImage() {
+            return ImageUtils.createGrayRandomPointsBrushImage(SIZE, 0.03f);
         }
     }, SOFT {
         @Override
-        public BufferedImage createBWBrushImage() {
-            return ImageUtils.createSoftBWBrush(SIZE);
+        public BufferedImage createTemplateImage() {
+            return ImageUtils.createSoftGrayBrushImage(SIZE);
         }
     };
 
@@ -49,5 +49,5 @@ public enum ImageBrushType {
      * Creates a brush template that is not colorized yet. Areas that should be transparent in the final
      * brush image are white, and semi-transparent images are gray
      */
-    public abstract BufferedImage createBWBrushImage();
+    public abstract BufferedImage createTemplateImage();
 }

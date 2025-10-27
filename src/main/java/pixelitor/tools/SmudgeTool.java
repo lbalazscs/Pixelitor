@@ -113,7 +113,7 @@ public class SmudgeTool extends AbstractBrushTool {
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
         // initialize the smudge brush state before starting the stroke
-        boolean lineConnect = e.isShiftDown() && smudgeBrush.isFirstPointInitialized();
+        boolean lineConnect = e.isShiftDown() && smudgeBrush.isStrokeInitialized();
         if (!lineConnect) {
             // initialize source image, start point, and strength for a new stroke segment
             initStroke(sourceImage, e);
@@ -124,7 +124,7 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     private void initStroke(BufferedImage sourceImage, PPoint startPoint) {
-        smudgeBrush.initFirstPoint(sourceImage, startPoint, (float) strengthParam.getPercentage());
+        smudgeBrush.initStroke(sourceImage, startPoint, (float) strengthParam.getPercentage());
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,21 +20,23 @@ package pixelitor.tools.brushes;
 import pixelitor.filters.gui.UserPreset;
 
 /**
- * Angle-related settings for the brushes.
+ * Encapsulates the configuration for the orientation of brush dabs.
  */
-public final class AngleSettings {
+public final class RotationSettings {
     // global shared immutable instances for the most common cases
-    public static final AngleSettings NOT_ANGLED = new AngleSettings(false, 0);
-    public static final AngleSettings ANGLED_NO_JITTER = new AngleSettings(true, 0);
+    public static final RotationSettings NOT_DIRECTIONAL = new RotationSettings(false, 0);
+    public static final RotationSettings DIRECTIONAL_NO_JITTER = new RotationSettings(true, 0);
 
-    private static final String ANGLED_KEY = "Angled";
+    private static final String DIRECTIONAL_KEY = "Angled";
     private static final String MAX_JITTER_KEY = "Max Angle Jitter";
 
-    private boolean angled;
-    private double maxAngleJitter;
+    // whether the dabs are rotated to follow the stroke direction
+    private final boolean directional;
 
-    public AngleSettings(boolean angled, double maxAngleJitter) {
-        this.angled = angled;
+    private final double maxAngleJitter;
+
+    public RotationSettings(boolean directional, double maxAngleJitter) {
+        this.directional = directional;
         this.maxAngleJitter = maxAngleJitter;
     }
 
@@ -42,29 +44,36 @@ public final class AngleSettings {
         return maxAngleJitter > 0;
     }
 
-    public double calcJitteredAngle(double baseAngle) {
+    /**
+     * Applies random angular jitter to the given base angle.
+     */
+    public double jitterAngle(double baseAngle) {
+        if (maxAngleJitter == 0) {
+            return baseAngle;
+        }
         double jitter = (2 * Math.random() - 1) * maxAngleJitter;
         return baseAngle + jitter;
     }
 
-    public boolean isAngled() {
-        return angled;
+    public boolean isDirectional() {
+        return directional;
     }
 
     public void saveStateTo(UserPreset preset) {
-        preset.putBoolean(ANGLED_KEY, angled);
+        preset.putBoolean(DIRECTIONAL_KEY, directional);
         preset.putDouble(MAX_JITTER_KEY, maxAngleJitter);
     }
 
-    public void loadStateFrom(UserPreset preset) {
-        angled = preset.getBoolean(ANGLED_KEY);
-        maxAngleJitter = preset.getDouble(MAX_JITTER_KEY);
+    public static RotationSettings fromPreset(UserPreset preset) {
+        return new RotationSettings(
+            preset.getBoolean(DIRECTIONAL_KEY),
+            preset.getDouble(MAX_JITTER_KEY));
     }
 
     @Override
     public String toString() {
-        return "AngleSettings[" +
-            "angled=" + angled + ", " +
+        return getClass().getSimpleName() + "[" +
+            "follows stroke dir=" + directional + ", " +
             "maxAngleJitter=" + maxAngleJitter + ']';
     }
 }

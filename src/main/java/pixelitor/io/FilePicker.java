@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,19 +27,17 @@ public interface FilePicker {
      * Shows an "open" file picker that allows the selection of supported input files.
      * Returns the selected file or null if the dialog was canceled.
      */
-    File getSupportedOpenFile();
+    File selectSupportedOpenFile();
 
     /**
      * Shows an "open" file picker that allows the selection of any file.
      * Returns the selected file or null if the dialog was canceled.
      */
-    File getAnyOpenFile();
+    File selectAnyOpenFile();
 
     /**
      * Shows a save file dialog and returns the selected file
      * or null if the dialog was canceled.
      */
     File showSaveDialog(FileChooserConfig config);
-
-    String getSelectedSaveExtension(File selectedFile);
 }

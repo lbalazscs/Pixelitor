@@ -37,19 +37,27 @@ public class ImageDabsBrush extends DabsBrush {
     private static final Map<ImageBrushType, BufferedImage> templateImages
         = new EnumMap<>(ImageBrushType.class);
 
-    private final BufferedImage templateImg; // not colorized, unchanging
+    // a black-and-white, unchanging image, which defines the brush's texture
+    private final BufferedImage templateImg;
+
+    // a colorized version of the template, using the current color for
+    // the pixels and the template's grayscale values for the transparency
     private BufferedImage coloredBrushImg;
+
+    // the colorized image, scaled to match the current
+    // brush diameter, and used as the stamp/dab of the brush
     private BufferedImage finalScaledImg;
+
     private Color lastColor;
 
     public ImageDabsBrush(double radius, ImageBrushType imageBrushType,
-                          double spacingRatio, AngleSettings angleSettings) {
+                          double spacingRatio, RotationSettings rotationSettings) {
         super(radius, new RadiusRatioSpacing(spacingRatio),
-            angleSettings, false);
+            rotationSettings, false);
 
         // share template images between instances of the same brush type
         templateImg = templateImages.computeIfAbsent(imageBrushType,
-            ImageBrushType::createBWBrushImage);
+            ImageBrushType::createTemplateImage);
     }
 
     @Override
@@ -69,20 +77,20 @@ public class ImageDabsBrush extends DabsBrush {
         assert diameter > 0 : "zero diameter in " + getClass().getName();
         Color currentColor = targetG.getColor();
 
-        if (!currentColor.equals(lastColor)) {
+        boolean colorChanged = !currentColor.equals(lastColor);
+        if (colorChanged) {
             recreateColoredBrushImage(currentColor);
             lastColor = currentColor;
-            recreateBrushImage(diameter, true);
-        } else {
-            // color unchanged, but size may have changed
-            recreateBrushImage(diameter, false);
         }
+
+        // always check size, as it might have changed even if color hasn't
+        recreateFinalScaledImage(diameter, colorChanged);
     }
 
     /**
      * Recreates the final scaled image from the colorized image.
      */
-    private void recreateBrushImage(double diameter, boolean colorChanged) {
+    private void recreateFinalScaledImage(double diameter, boolean colorChanged) {
         int newSize = (int) diameter;
         assert newSize > 0 : "newSize = " + newSize;
         if (!colorChanged && isBrushImageSize(newSize)) {
@@ -107,27 +115,8 @@ public class ImageDabsBrush extends DabsBrush {
      * using the given color.
      */
     private void recreateColoredBrushImage(Color color) {
-        coloredBrushImg = new BufferedImage(
-            templateImg.getWidth(), templateImg.getHeight(), TYPE_INT_ARGB);
-        int[] srcPixels = ImageUtils.getPixels(templateImg);
-        int[] destPixels = ImageUtils.getPixels(coloredBrushImg);
-
         int colorNoAlpha = color.getRGB() & 0x00_FF_FF_FF;
-
-        for (int i = 0; i < destPixels.length; i++) {
-            int srcRGB = srcPixels[i];
-
-            int srcR = (srcRGB >>> 16) & 0xFF;
-            int srcG = (srcRGB >>> 8) & 0xFF;
-            int srcB = srcRGB & 0xFF;
-            // averaging is not actually necessary since all channels
-            // should be the same in the grayscale image, but doesn't hurt
-            int srcAverage = (srcR + srcG + srcB) / 3;
-
-            // the color comes from the given color,
-            // the alpha depends on the template image
-            destPixels[i] = (0xFF - srcAverage) << 24 | colorNoAlpha;
-        }
+        coloredBrushImg = ImageUtils.maskToTransparency(templateImg, colorNoAlpha);
     }
 
     @Override
@@ -139,7 +128,7 @@ public class ImageDabsBrush extends DabsBrush {
         int drawStartX = (int) (x - radius);
         int drawStartY = (int) (y - radius);
 
-        if (!settings.isAngled() || angle == 0) {
+        if (!settings.isDirectional() || angle == 0) {
             targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
         } else {
             // draw rotated image
@@ -152,4 +141,17 @@ public class ImageDabsBrush extends DabsBrush {
 
         repaintComp(currentPoint);
     }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (coloredBrushImg != null) {
+            coloredBrushImg.flush();
+            coloredBrushImg = null;
+        }
+        if (finalScaledImg != null) {
+            finalScaledImg.flush();
+            finalScaledImg = null;
+        }
+    }    
 }
