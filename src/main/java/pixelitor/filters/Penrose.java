@@ -17,7 +17,11 @@
 
 package pixelitor.filters;
 
+import pixelitor.Canvas;
+import pixelitor.Views;
 import pixelitor.filters.gui.*;
+import pixelitor.filters.util.ShapeWithColor;
+import pixelitor.io.FileIO;
 import pixelitor.utils.Geometry;
 
 import java.awt.BasicStroke;
@@ -105,12 +109,10 @@ public class Penrose extends ParametrizedFilter {
         @Override
         public boolean equals(Object o) {
             Tile that = (Tile) o;
-            boolean equals = type == that.type
+            return type == that.type
                 && abs(x - that.x) < DIST_EPSILON
                 && abs(y - that.y) < DIST_EPSILON
                 && abs(angle - that.angle) < ANGLE_EPSILON;
-
-            return equals;
         }
 
         @Override
@@ -132,7 +134,7 @@ public class Penrose extends ParametrizedFilter {
         }
     }
 
-    // The two types of tiles in a Penrose P2 pattern
+    // the two types of tiles in a Penrose P2 pattern
     enum Type {
         Kite, Dart
     }
@@ -151,31 +153,78 @@ public class Penrose extends ParametrizedFilter {
             colors,
             edgeWidth,
             zoom
-        );
+        ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
     }
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Graphics2D g = dest.createGraphics();
 
-        g.setColor(Color.WHITE);
-        g.drawRect(0, 0, src.getWidth(), src.getHeight());
+//        g.setColor(Color.WHITE);
+//        g.fillRect(0, 0, src.getWidth(), src.getHeight());
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         // this can be used to check that duplicate tiles are removed
         // g.setComposite(AlphaComposite.SrcOver.derive(0.5f));
 
-        double scale = zoom.getPercentage();
+        List<ShapeWithColor> shapes = createShapes(src.getWidth(), src.getHeight());
+        for (ShapeWithColor shapeWithColor : shapes) {
+            shapeWithColor.fill(g);
+        }
 
-        List<Tile> tiles = createPrototiles(src.getWidth(), src.getHeight(), scale);
-
-        tiles = deflateTiles(tiles, iterations.getValue());
-
-        drawTiles(tiles, g, edgeWidth.getValue() * scale,
-            colors.getColor(0), colors.getColor(1), colors.getColor(2));
+        double currentEdgeWidth = edgeWidth.getValue();
+        if (currentEdgeWidth > 0) {
+            double scale = zoom.getPercentage();
+            g.setStroke(new BasicStroke((float) (currentEdgeWidth * scale)));
+            g.setColor(colors.getColor(2)); // edgeColor
+            for (ShapeWithColor shapeWithColor : shapes) {
+                g.draw(shapeWithColor.shape());
+            }
+        }
 
         g.dispose();
         return dest;
+    }
+
+    /**
+     * Creates a list of shapes with their associated colors.
+     * Used both for drawing and SVG export.
+     */
+    private List<ShapeWithColor> createShapes(int width, int height) {
+        double scale = zoom.getPercentage();
+
+        List<Tile> tiles = createPrototiles(width, height, scale);
+        tiles = deflateTiles(tiles, iterations.getValue());
+
+        Color kiteColor = colors.getColor(0);
+        Color dartColor = colors.getColor(1);
+
+        List<ShapeWithColor> shapes = new ArrayList<>();
+
+        // distance ratios for vertices of kite and dart shapes
+        double[][] dist = {{G, G, G}, {-G, -1, -G}};
+
+        for (Tile tile : tiles) {
+            double angle = tile.angle - T;
+            Path2D tileShape = new Path2D.Double();
+            tileShape.moveTo(tile.x, tile.y);
+
+            int ord = tile.type.ordinal();
+            for (int i = 0; i < 3; i++) {
+                double x = tile.x + dist[ord][i] * tile.size * cos(angle);
+                double y = tile.y - dist[ord][i] * tile.size * sin(angle);
+                tileShape.lineTo(x, y);
+                angle += T;
+            }
+            tileShape.closePath();
+
+            // the tile types are swapped for some reason,
+            // so as a workaround, swap again for correct rendering
+            Color color = (tile.type == Type.Kite) ? dartColor : kiteColor;
+            shapes.add(new ShapeWithColor(tileShape, color));
+        }
+
+        return shapes;
     }
 
     private List<Tile> createPrototiles(int width, int height, double scale) {
@@ -311,7 +360,7 @@ public class Penrose extends ParametrizedFilter {
 
         // process each tile according to deflation rules
         for (Tile tile : tiles) {
-            double x = tile.x, y = tile.y, a = tile.angle, nx, ny;
+            double x = tile.x, y = tile.y, a = tile.angle;
             // new tiles are smaller by golden ratio
             double size = tile.size / G;
 
@@ -320,8 +369,8 @@ public class Penrose extends ParametrizedFilter {
                 next.add(new Tile(Type.Kite, x, y, a + 5 * T, size));
 
                 for (int i = 0, sign = 1; i < 2; i++, sign *= -1) {
-                    nx = x + cos(a - 4 * T * sign) * G * tile.size;
-                    ny = y - sin(a - 4 * T * sign) * G * tile.size;
+                    double nx = x + cos(a - 4 * T * sign) * G * tile.size;
+                    double ny = y - sin(a - 4 * T * sign) * G * tile.size;
                     next.add(new Tile(Type.Dart, nx, ny, a - 4 * T * sign, size));
                 }
             } else {
@@ -329,8 +378,8 @@ public class Penrose extends ParametrizedFilter {
                 for (int i = 0, sign = 1; i < 2; i++, sign *= -1) {
                     next.add(new Tile(Type.Dart, x, y, a - 4 * T * sign, size));
 
-                    nx = x + cos(a - T * sign) * G * tile.size;
-                    ny = y - sin(a - T * sign) * G * tile.size;
+                    double nx = x + cos(a - T * sign) * G * tile.size;
+                    double ny = y - sin(a - T * sign) * G * tile.size;
                     next.add(new Tile(Type.Kite, nx, ny, a + 3 * T * sign, size));
                 }
             }
@@ -338,36 +387,17 @@ public class Penrose extends ParametrizedFilter {
 
         // remove duplicate tiles and continue deflation
         tiles = next.stream().distinct().collect(toList());
+        //noinspection TailRecursion
         return deflateTiles(tiles, generation - 1);
     }
 
-    private static void drawTiles(List<Tile> tiles, Graphics2D g, double edgeWidth,
-                                  Color kiteColor, Color dartColor, Color edgeColor) {
-        // distance ratios for vertices of kite and dart shapes
-        double[][] dist = {{G, G, G}, {-G, -1, -G}};
+    private void exportSVG() {
+        Canvas canvas = Views.getActiveComp().getCanvas();
+        List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight());
+        double strokeWidth = edgeWidth.getValue() * zoom.getPercentage();
+        Color strokeColor = colors.getColor(2); // edge color
 
-        for (Tile tile : tiles) {
-            double angle = tile.angle - T;
-            Path2D tileShape = new Path2D.Double();
-            tileShape.moveTo(tile.x, tile.y);
-
-            int ord = tile.type.ordinal();
-            for (int i = 0; i < 3; i++) {
-                double x = tile.x + dist[ord][i] * tile.size * cos(angle);
-                double y = tile.y - dist[ord][i] * tile.size * sin(angle);
-                tileShape.lineTo(x, y);
-                angle += T;
-            }
-            tileShape.closePath();
-
-            g.setColor(ord != 0 ? kiteColor : dartColor);
-            g.fill(tileShape);
-
-            if (edgeWidth > 0) {
-                g.setStroke(new BasicStroke((float) edgeWidth));
-                g.setColor(edgeColor);
-                g.draw(tileShape);
-            }
-        }
+        String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, null, strokeWidth, strokeColor);
+        FileIO.saveSVG(svgContent, this);
     }
 }

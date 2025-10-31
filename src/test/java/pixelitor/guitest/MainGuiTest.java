@@ -1716,7 +1716,7 @@ public class MainGuiTest {
         testFilterWithDialog("Concentric Shapes", FilterOptions.SHAPES);
         testFilterWithDialog("Checker Pattern", FilterOptions.RENDERING);
         testFilterWithDialog("Cubes Pattern", FilterOptions.SHAPES);
-        testFilterWithDialog("Penrose Tiling", FilterOptions.RENDERING);
+        testFilterWithDialog("Penrose Tiling", FilterOptions.SHAPES);
         testFilterWithDialog("Rose", FilterOptions.SHAPES);
         testFilterWithDialog("Starburst", FilterOptions.SHAPES);
         testFilterWithDialog("Stripes", FilterOptions.SHAPES);

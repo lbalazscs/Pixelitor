@@ -43,11 +43,11 @@ public record ShapeWithColor(Shape shape, Color color) {
 
     // creates SVG content with no stroke
     public static String createSvgContent(List<ShapeWithColor> shapes, Canvas canvas, Color bgColor) {
-        return createSvgContent(shapes, canvas, bgColor, 0, null);
+        return createSvgContent(shapes, canvas, bgColor, 0.0, null);
     }
 
     public static String createSvgContent(List<ShapeWithColor> shapes, Canvas canvas, Color bgColor,
-                                          int strokeWidth, Color strokeColor) {
+                                          double strokeWidth, Color strokeColor) {
         StringBuilder content = new StringBuilder()
             .append(canvas.createSVGElement())
             .append("\n");
@@ -61,7 +61,7 @@ public record ShapeWithColor(Shape shape, Color color) {
     }
 
     private static void appendSvgPaths(StringBuilder sb, List<ShapeWithColor> shapes,
-                                       int strokeWidth, Color strokeColor) {
+                                       double strokeWidth, Color strokeColor) {
         for (ShapeWithColor shape : shapes) {
             String pathData = Shapes.toSvgPath(shape.shape());
             sb.append("<path d=\"").append(pathData).append("\" ");
