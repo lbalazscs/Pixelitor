@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,10 +77,21 @@ public class ImagePanel extends JPanel {
     }
 
     private void renderImage(Graphics g) {
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
+
+        // the position to center the image
+        int imgX = (getWidth() - imageWidth) / 2;
+        int imgY = (getHeight() - imageHeight) / 2;
+
         if (checkerboardEnabled) {
             Graphics2D g2 = (Graphics2D) g;
-            checkerboardPainter.paint(g2, null, image.getWidth(), image.getHeight());
+            // translate the checkerboard to the image position
+            g2.translate(imgX, imgY);
+            checkerboardPainter.paint(g2, null, imageWidth, imageHeight);
+            g2.translate(-imgX, -imgY);
         }
-        g.drawImage(image, 0, 0, null);
+
+        g.drawImage(image, imgX, imgY, null);
     }
 }

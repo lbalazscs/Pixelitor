@@ -77,7 +77,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
             thumb = ImageUtils.createSysCompatibleImage(thumbnailSize, thumbnailSize);
         } else {
             BufferedImage sourceImage = dr.getImageForFilterDialogs();
-            thumb = Thumbnails.createThumbnail(sourceImage, null);
+            thumb = Thumbnails.createThumbnail(sourceImage, thumbnailSize, null);
         }
     }
 
