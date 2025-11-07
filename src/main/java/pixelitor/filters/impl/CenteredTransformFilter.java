@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.awt.geom.Point2D;
  * Abstract superclass for transform filters with a center
  */
 public abstract class CenteredTransformFilter extends TransformFilter {
-    // actual center coordinates in pixels
+    // center coordinates in pixels
     protected double cx;
     protected double cy;
 
@@ -34,8 +34,8 @@ public abstract class CenteredTransformFilter extends TransformFilter {
     }
 
     public void setCenter(Point2D c) {
-        // needs absolute values, because some filters use these
-        // values in other setters, before the filtering begins
+        // sets absolute values (pixel coordinates), because some filters
+        // use these values in other setters, before the filtering begins
         cx = c.getX();
         cy = c.getY();
     }

@@ -20,15 +20,14 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
-import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
 
 import java.awt.event.ActionEvent;
 
-import static java.awt.event.ActionEvent.CTRL_MASK;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -46,19 +45,11 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        boolean ctrlPressed = false;
-        if (e != null) { // could be null in tests
-            ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
-        }
-
-        try {
-            Composition comp = Views.getActiveComp();
-            String layerName = comp.generateNewLayerName();
-            comp.addNewEmptyImageLayer(layerName, ctrlPressed);
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
+    public void onClick(ActionEvent e) {
+        Composition comp = Views.getActiveComp();
+        String layerName = comp.generateNewLayerName();
+        boolean belowActive = GUIUtils.isCtrlPressed(e);
+        comp.addNewEmptyImageLayer(layerName, belowActive);
     }
 
     @Override

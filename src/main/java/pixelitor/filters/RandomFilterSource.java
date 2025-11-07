@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,17 +28,11 @@ import java.util.List;
  */
 public class RandomFilterSource {
     // the history of the random filters generated so far
-    private List<Filter> history = new ArrayList<>();
+    private final List<Filter> history = new ArrayList<>();
 
-    // the index of the previous filter in history,
-    // or -1 if there isn't one
-    private int previousIndex = -1;
-
-    // the index of the next filter in history,
-    // or the size of the history if there isn't one
-    private int nextIndex = 0;
-
-    private Filter lastFilter;
+    // points to the filter currently being displayed
+    // -1 means empty state
+    private int currentIndex = -1;
 
     /**
      * Returns the next filter from the history
@@ -47,13 +41,8 @@ public class RandomFilterSource {
         // makes sense only if we already went back in history
         assert hasNext();
 
-        Filter filter = history.get(nextIndex);
-        assert filter != null;
-
-        previousIndex++;
-        nextIndex++;
-
-        return filter;
+        currentIndex++;
+        return history.get(currentIndex);
     }
 
     /**
@@ -62,61 +51,55 @@ public class RandomFilterSource {
     public Filter getPrevious() {
         // makes sense only if we already picked
         // a second random filter
-        assert previousIndex >= 0;
-        assert previousIndex < history.size();
         assert hasPrevious();
 
-        Filter filter = history.get(previousIndex);
-        assert filter != null;
-
-        lastFilter = filter;
-
-        previousIndex--;
-        nextIndex--;
-        return filter;
+        currentIndex--;
+        return history.get(currentIndex);
     }
 
-    public Filter choose() {
+    public Filter selectNewFilter() {
+        // ensure we don't pick the same filter twice in a row
+        Filter currentFilter = getCurrentFilter();
+
         Filter randomFilter = Filters.getRandomFilter(filter ->
-            filter != lastFilter
+            filter != currentFilter
                 && !(filter instanceof RandomFilter));
 
-        if (lastFilter != null) { // not the first call
-            previousIndex++;
+        if (currentIndex < history.size() - 1) { // the user went back
+            // truncate forward history, because a new path was taken
+            history.subList(currentIndex + 1, history.size()).clear();
         }
 
-        if (hasNext()) {
-            // we went back in history and then started to generate again,
-            // so we need to throw away the history after the current point
-            history = new ArrayList<>(history.subList(0, nextIndex));
-        }
-
-        nextIndex++;
         history.add(randomFilter);
+        currentIndex++;
 
-        lastFilter = randomFilter;
         return randomFilter;
     }
 
     public boolean hasPrevious() {
-        return previousIndex >= 0 && !history.isEmpty();
+        return currentIndex > 0;
     }
 
     public boolean hasNext() {
-        return nextIndex < history.size();
+        return currentIndex < history.size() - 1;
     }
 
-    public Filter getLastFilter() {
-        return lastFilter;
+    /**
+     * Returns the filter currently pointed to by currentIndex,
+     * or null if the history is empty.
+     */
+    public Filter getCurrentFilter() {
+        if (currentIndex >= 0 && currentIndex < history.size()) {
+            return history.get(currentIndex);
+        }
+        return null;
     }
 
     @Override
     public String toString() {
         return '{' +
             "history=" + history +
-            ", previousIndex=" + previousIndex +
-            ", nextIndex=" + nextIndex +
-            ", lastFilter=" + lastFilter +
+            ", currentIndex=" + currentIndex +
             '}';
     }
 }

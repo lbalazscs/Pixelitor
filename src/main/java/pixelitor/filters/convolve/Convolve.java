@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImagingOpException;
 import java.awt.image.Kernel;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * A customizable convolution filter.
@@ -37,16 +37,19 @@ public class Convolve extends FilterWithGUI {
     private final String filterName;
 
     private float[] kernelMatrix; // the matrix as a flat array
-    private final int matrixOrder;
+    private final int kernelSize;
 
-    private Convolve(int matrixOrder, String filterName) {
-        this.matrixOrder = matrixOrder;
+    private Convolve(int kernelSize, String filterName) {
+        if (kernelSize % 2 == 0) {
+            throw new IllegalArgumentException("kernel size should be odd, but was " + kernelSize);
+        }
+        this.kernelSize = kernelSize;
         this.filterName = filterName;
     }
 
     public void setKernelMatrix(float[] kernelMatrix) {
-        if (kernelMatrix.length != matrixOrder * matrixOrder) {
-            throw new IllegalArgumentException("array length = " + kernelMatrix.length + ", matrix order = " + matrixOrder);
+        if (kernelMatrix.length != kernelSize * kernelSize) {
+            throw new IllegalArgumentException("array length = " + kernelMatrix.length + ", kernel size = " + kernelSize);
         }
         this.kernelMatrix = kernelMatrix;
     }
@@ -57,7 +60,7 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        Kernel kernel = new Kernel(matrixOrder, matrixOrder, kernelMatrix);
+        Kernel kernel = new Kernel(kernelSize, kernelSize, kernelMatrix);
         BufferedImageOp convolveOp = createConvolveOp(kernel);
 
         try {
@@ -76,7 +79,7 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public void randomize() {
-        kernelMatrix = createRandomKernel(matrixOrder);
+        kernelMatrix = createRandomKernel(kernelSize);
     }
 
     private BufferedImageOp createConvolveOp(Kernel kernel) {
@@ -90,7 +93,7 @@ public class Convolve extends FilterWithGUI {
      * Returns a randomized array that is on average close to being normalized
      */
     public static float[] createRandomKernel(int size) {
-        Random rand = new Random();
+        ThreadLocalRandom rand = ThreadLocalRandom.current();
         float[] kernelValues = new float[size * size];
         for (int i = 0; i < kernelValues.length; i++) {
             int randomInt = rand.nextInt(10000);
@@ -100,17 +103,13 @@ public class Convolve extends FilterWithGUI {
         return kernelValues;
     }
 
-    public int getMatrixOrder() {
-        return matrixOrder;
+    public int getKernelSize() {
+        return kernelSize;
     }
 
     public static FilterAction createFilterAction(int size) {
-        String name = generateFilterName(size, size);
+        String name = "Custom " + size + 'x' + size + " Convolution";
         return new FilterAction(name, () -> new Convolve(size, name));
-    }
-
-    private static String generateFilterName(int width, int height) {
-        return "Custom " + width + 'x' + height + " Convolution";
     }
 
     @Override

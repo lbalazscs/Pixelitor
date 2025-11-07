@@ -17,13 +17,13 @@
 
 package pixelitor.filters.convolve;
 
-import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.FilterGUI;
+import pixelitor.gui.GUIText;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.text.NumberFormat;
@@ -37,32 +37,30 @@ import static javax.swing.BoxLayout.X_AXIS;
  * An adjustment panel for customizable convolution filters.
  */
 public class ConvolveGUI extends FilterGUI {
-    private static final int PREFERRED_TEXTFIELD_WIDTH = 70;
+    private static final float EPSILON = 0.003f;
 
     private JTextField[] kernelTextFields;
     private JPanel kernelPanel;
     private JButton normalizeButton;
     private Box presetsBox;
-    private final int matrixOrder;
-
-    private Object lastEventSource;
+    private final int kernelSize;
 
     public ConvolveGUI(Convolve filter, Filterable layer, boolean reset) {
         super(filter, layer);
         setLayout(new BoxLayout(this, X_AXIS));
 
-        matrixOrder = filter.getMatrixOrder();
+        kernelSize = filter.getKernelSize();
 
         initLeftPanel();
         initPresetPanel();
 
         if (reset) {
-            resetKernel(matrixOrder);
+            resetKernel(kernelSize);
         } else {
             // use the last values
             float[] matrix = filter.getKernelMatrix();
             if (matrix == null) {
-                resetKernel(matrixOrder);
+                resetKernel(kernelSize);
             } else {
                 loadKernel(matrix);
             }
@@ -107,28 +105,21 @@ public class ConvolveGUI extends FilterGUI {
     }
 
     private void setupKernelPanel(Box parentBox) {
-        kernelPanel = new JPanel(new GridLayout(matrixOrder, matrixOrder));
-        kernelTextFields = new JTextField[matrixOrder * matrixOrder];
+        kernelPanel = new JPanel(new GridLayout(kernelSize, kernelSize));
+
+        kernelTextFields = new JTextField[kernelSize * kernelSize];
         for (int i = 0; i < kernelTextFields.length; i++) {
-            kernelTextFields[i] = new JTextField();
+            kernelTextFields[i] = createKernelTextField();
         }
-        for (var textField : kernelTextFields) {
-            setupKernelTextField(textField);
-        }
+
         kernelPanel.setBorder(createTitledBorder("Kernel"));
         kernelPanel.setAlignmentX(LEFT_ALIGNMENT);
         parentBox.add(kernelPanel);
-
-        // this must come after adding the textFields to the box
-        var minimumSize = kernelPanel.getMinimumSize();
-        kernelPanel.setPreferredSize(new Dimension(
-            matrixOrder * PREFERRED_TEXTFIELD_WIDTH,
-            minimumSize.height));
     }
 
     private void addNormalizeButton(Box parentBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
-        normalizeButton.addActionListener(this::onUserAction);
+        normalizeButton.addActionListener(this::normalizeKernel);
         normalizeButton.setAlignmentX(LEFT_ALIGNMENT);
         parentBox.add(normalizeButton);
     }
@@ -142,28 +133,24 @@ public class ConvolveGUI extends FilterGUI {
 
     private void initPresetPanel() {
         presetsBox = Box.createVerticalBox();
-        presetsBox.setBorder(createTitledBorder(DialogMenuBar.PRESETS));
+        presetsBox.setBorder(createTitledBorder(GUIText.PRESETS));
 
-        if (matrixOrder == 3) {
-            init3x3Presets();
-        } else if (matrixOrder == 5) {
-            init5x5Presets();
-        } else {
-            throw new IllegalStateException("matrixOrder = " + matrixOrder);
+        switch (kernelSize) {
+            case 3 -> init3x3Presets();
+            case 5 -> init5x5Presets();
+            default -> throw new IllegalStateException("kernelSize = " + kernelSize);
         }
 
         presetsBox.add(Box.createVerticalStrut(20));
 
-        JButton randomizeButton = new JButton("Randomize");
-        randomizeButton.addActionListener(e -> {
-            loadKernel(Convolve.createRandomKernel(matrixOrder));
+        JButton randomizeButton = GUIUtils.createRandomizeSettingsButton(e -> {
+            loadKernel(Convolve.createRandomKernel(kernelSize));
             onUserAction(e);
         });
         presetsBox.add(randomizeButton);
 
-        JButton resetButton = new JButton("Reset");
-        resetButton.addActionListener(e -> {
-            resetKernel(matrixOrder);
+        JButton resetButton = GUIUtils.createResetAllButton(e -> {
+            resetKernel(kernelSize);
             onUserAction(e);
         });
         presetsBox.add(resetButton);
@@ -309,39 +296,62 @@ public class ConvolveGUI extends FilterGUI {
         loadKernel(defaultValues);
     }
 
-    private void setupKernelTextField(JTextField textField) {
+    private JTextField createKernelTextField() {
+        JTextField textField = new JTextField();
+        textField.setColumns(5);
+        textField.setHorizontalAlignment(JTextField.RIGHT);
         kernelPanel.add(textField);
         textField.addActionListener(this::onUserAction);
+        return textField;
     }
 
     private void collectKernelValues() {
-        float sum = 0;
-        float[] values = new float[matrixOrder * matrixOrder];
+        float[] values = getCurrentKernelValues();
+        if (values == null) {
+            return; // an error occurred during parsing
+        }
+        ((Convolve) this.filter).setKernelMatrix(values);
+    }
+
+    private float[] getCurrentKernelValues() {
+        float[] values = new float[kernelSize * kernelSize];
+        float sum = 0.0f;
         for (int i = 0; i < values.length; i++) {
             String s = kernelTextFields[i].getText();
             try {
                 values[i] = parseUserInput(s);
             } catch (NumberFormatException ex) {
                 Messages.showError("Invalid Input", ex.getMessage(), this);
-                return;
+                return null;
             }
             sum += values[i];
         }
         toggleNormalizeButton(sum);
+        return values;
+    }
 
-        if (lastEventSource == normalizeButton && sum != 0.0f) {
+    private void onUserAction(ActionEvent event) {
+        startPreview(false);
+    }
+
+    private void normalizeKernel(ActionEvent event) {
+        float[] values = getCurrentKernelValues();
+        if (values == null) {
+            return; // an error occurred during parsing
+        }
+
+        float sum = 0.0f;
+        for (float value : values) {
+            sum += value;
+        }
+
+        if (sum != 0.0f) {
             for (int i = 0; i < values.length; i++) {
                 values[i] /= sum;
             }
             loadKernel(values);
+            startPreview(false);
         }
-
-        ((Convolve) this.filter).setKernelMatrix(values);
-    }
-
-    private void onUserAction(ActionEvent event) {
-        lastEventSource = event.getSource();
-        startPreview(false);
     }
 
     @Override
@@ -351,7 +361,7 @@ public class ConvolveGUI extends FilterGUI {
     }
 
     private void loadKernel(float[] values) {
-        assert values.length == matrixOrder * matrixOrder;
+        assert values.length == kernelSize * kernelSize;
 
         float sum = 0;
         for (int i = 0; i < kernelTextFields.length; i++) {
@@ -371,8 +381,8 @@ public class ConvolveGUI extends FilterGUI {
      * Enables or disables the normalize button based on the kernel sum.
      */
     private void toggleNormalizeButton(float sum) {
-        boolean notZero = sum < -0.003f || sum > 0.003f;
-        boolean notOne = sum < 0.997f || sum > 1.003f;
+        boolean notZero = Math.abs(sum) > EPSILON;
+        boolean notOne = Math.abs(sum - 1.0f) > EPSILON;
 
         normalizeButton.setEnabled(notZero && notOne);
     }

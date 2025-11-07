@@ -32,13 +32,10 @@ public class DrawableCheckHandler extends ToolHandler {
     private final Tool activeTool;
 
     public DrawableCheckHandler(Tool activeTool) {
-        drawableAction = new DrawableAction(activeTool.getName()) {
-            @Override
-            protected void process(Drawable dr) {
-                // The action itself does nothing - it's only used for
-                // showing the rasterization dialogs
-            }
-        };
+        drawableAction = new DrawableAction(activeTool.getName(), dr -> {
+            // the action itself does nothing - it's only used
+            // for showing the rasterization dialogs
+        });
         this.activeTool = activeTool;
     }
 

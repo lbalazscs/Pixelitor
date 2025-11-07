@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,20 +25,6 @@ import java.awt.image.BufferedImage;
  */
 public class Assertions {
     private Assertions() {
-    }
-
-    public static boolean callingClassIs(String name) {
-        StackTraceElement[] stackTrace = new Exception().getStackTrace();
-        // checks the caller of the caller
-        String callerClassName = stackTrace.length > 2
-            ? stackTrace[2].getClassName()
-            : "";
-
-        if (!callerClassName.contains(name)) {
-            throw new IllegalCallerException("Unexpected caller: " + callerClassName);
-        }
-
-        return true;
     }
 
     @SuppressWarnings("SameReturnValue")

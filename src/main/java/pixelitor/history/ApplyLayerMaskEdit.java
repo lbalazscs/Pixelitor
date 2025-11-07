@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,17 +34,17 @@ import java.awt.image.BufferedImage;
  */
 public class ApplyLayerMaskEdit extends PixelitorEdit {
     private final LayerMask mask;
-    private BufferedImage previousLayerImage;
+    private BufferedImage prevLayerImage;
     private final ImageLayer layer;
-    private final MaskViewMode previousMaskViewMode;
+    private final MaskViewMode prevMaskViewMode;
 
     public ApplyLayerMaskEdit(ImageLayer layer, LayerMask mask,
-                              BufferedImage previousLayerImage,
-                              MaskViewMode previousMaskViewMode) {
+                              BufferedImage prevLayerImage,
+                              MaskViewMode prevMaskViewMode) {
         super("Apply Layer Mask", layer.getComp());
 
-        this.previousMaskViewMode = previousMaskViewMode;
-        this.previousLayerImage = previousLayerImage;
+        this.prevMaskViewMode = prevMaskViewMode;
+        this.prevLayerImage = prevLayerImage;
         this.layer = layer;
         this.mask = mask;
     }
@@ -53,10 +53,10 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.setImage(previousLayerImage);
+        layer.setImage(prevLayerImage);
         layer.addConfiguredMask(mask);
         if (layer.isActive()) {
-            previousMaskViewMode.activate(comp, layer);
+            comp.setMaskViewMode(prevMaskViewMode, layer);
         }
         layer.updateIconImage();
     }
@@ -66,15 +66,15 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         super.redo();
 
         // the mask view mode is automatically set to normal
-        previousLayerImage = layer.applyLayerMask(false);
+        prevLayerImage = layer.applyLayerMask(false);
     }
 
     @Override
     public void die() {
         super.die();
 
-        if (previousLayerImage != null) {
-            previousLayerImage.flush();
+        if (prevLayerImage != null) {
+            prevLayerImage.flush();
         }
     }
 
@@ -84,8 +84,8 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
 
         node.add(layer.createDebugNode());
         node.add(mask.createDebugNode("mask"));
-        node.add(DebugNodes.createBufferedImageNode("previous layer image", previousLayerImage));
-        node.addAsString("previous mask view mode", previousMaskViewMode);
+        node.add(DebugNodes.createBufferedImageNode("previous layer image", prevLayerImage));
+        node.addAsString("previous mask view mode", prevMaskViewMode);
 
         return node;
     }

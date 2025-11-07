@@ -88,7 +88,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     /**
      * The Y coordinate in the parent when it is not dragged.
      */
-    private int staticY;
+    private int layoutY;
 
     public LayerGUI(Layer layer) {
         assert calledOnEDT() : callInfo();
@@ -228,7 +228,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         int clickCount = e.getClickCount();
         if (clickCount == 1) {
-            MaskViewMode.NORMAL.activate(layer);
+            MaskViewMode.NORMAL.activateOn(layer);
         } else {
             layer.edit();
         }
@@ -405,12 +405,12 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         return maskIconLabel != null;
     }
 
-    public int getStaticY() {
-        return staticY;
+    public int getLayoutY() {
+        return layoutY;
     }
 
-    public void setStaticY(int staticY) {
-        this.staticY = staticY;
+    public void setLayoutY(int layoutY) {
+        this.layoutY = layoutY;
     }
 
     public void dragFinished(int newLayerIndex) {
@@ -528,25 +528,25 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             // shift-alt-click switches to RUBYLITH
             // except when it already is in RUBYLITH
             if (view.getMaskViewMode() == MaskViewMode.RUBYLITH) {
-                MaskViewMode.EDIT_MASK.activate(view, layer);
+                view.setMaskViewMode(MaskViewMode.EDIT_MASK, layer);
             } else {
-                MaskViewMode.RUBYLITH.activate(view, layer);
+                view.setMaskViewMode(MaskViewMode.RUBYLITH, layer);
             }
         } else if (altClick) {
             // alt-click switches to VIEW_MASK
             // except when it already is in VIEW_MASK
             if (view.getMaskViewMode() == MaskViewMode.VIEW_MASK) {
-                MaskViewMode.EDIT_MASK.activate(view, layer);
+                view.setMaskViewMode(MaskViewMode.EDIT_MASK, layer);
             } else {
-                MaskViewMode.VIEW_MASK.activate(view, layer);
+                view.setMaskViewMode(MaskViewMode.VIEW_MASK, layer);
             }
         } else if (shiftClick) {
             // shift-click toggles the enabled-disabled state
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
         } else { // plain click, without key modifiers
             // don't change SHOW_MASK or RUBYLITH into EDIT_MASK
-            if (!view.getMaskViewMode().editMask()) {
-                MaskViewMode.EDIT_MASK.activate(layer);
+            if (!view.getMaskViewMode().isEditingMask()) {
+                MaskViewMode.EDIT_MASK.activateOn(layer);
             }
             // ...but make sure that the layer is notified even if
             // the view already was in mask editing mode

@@ -29,9 +29,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -40,7 +38,6 @@ import static java.lang.Math.abs;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.toRadians;
-import static java.util.stream.Collectors.toList;
 
 public class Penrose extends ParametrizedFilter {
     public static final String NAME = "Penrose Tiling";
@@ -66,6 +63,9 @@ public class Penrose extends ParametrizedFilter {
 
     private final RangeParam iterations = new RangeParam("Iterations", 0, 0, 7);
 
+    private static final int KITE_COLOR_INDEX = 0;
+    private static final int DART_COLOR_INDEX = 1;
+    private static final int EDGE_COLOR_INDEX = 2;
     private final GroupedColorsParam colors = new GroupedColorsParam("Colors",
         new String[]{"Kite", "Dart", "Edge"},
         new Color[]{
@@ -93,6 +93,13 @@ public class Penrose extends ParametrizedFilter {
             this.y = y;
             this.angle = normalizeAngle(angle); // so that equals works
             this.size = size;
+        }
+
+        /**
+         * Generates the geometric path for this tile.
+         */
+        public Path2D createPath() {
+            return type.createPath(x, y, angle, size);
         }
 
         // Normalizes an angle to the range [0, 2 * PI)
@@ -136,11 +143,37 @@ public class Penrose extends ParametrizedFilter {
 
     // the two types of tiles in a Penrose P2 pattern
     enum Type {
-        Kite, Dart
+        Kite(G, G, G),
+        Dart(-G, -1, -G);
+
+        private final double[] dist;
+
+        Type(double... dist) {
+            this.dist = dist;
+        }
+
+        /**
+         * Generates the geometric path for this tile type.
+         */
+        public Path2D createPath(double x, double y, double angle, double size) {
+            Path2D path = new Path2D.Double();
+            path.moveTo(x, y);
+
+            double currentAngle = angle - T;
+
+            for (double d : dist) {
+                double px = x + d * size * cos(currentAngle);
+                double py = y - d * size * sin(currentAngle);
+                path.lineTo(px, py);
+                currentAngle += T;
+            }
+            path.closePath();
+            return path;
+        }
     }
 
     private static final double G = Geometry.GOLDEN_RATIO;
-    private static final double T = toRadians(36); // theta
+    private static final double T = toRadians(36); // theta = 36°
 
     public Penrose() {
         super(false);
@@ -176,7 +209,7 @@ public class Penrose extends ParametrizedFilter {
         if (currentEdgeWidth > 0) {
             double scale = zoom.getPercentage();
             g.setStroke(new BasicStroke((float) (currentEdgeWidth * scale)));
-            g.setColor(colors.getColor(2)); // edgeColor
+            g.setColor(colors.getColor(EDGE_COLOR_INDEX));
             for (ShapeWithColor shapeWithColor : shapes) {
                 g.draw(shapeWithColor.shape());
             }
@@ -193,34 +226,18 @@ public class Penrose extends ParametrizedFilter {
     private List<ShapeWithColor> createShapes(int width, int height) {
         double scale = zoom.getPercentage();
 
-        List<Tile> tiles = createPrototiles(width, height, scale);
+        Set<Tile> tiles = new HashSet<>(createPrototiles(width, height, scale));
         tiles = deflateTiles(tiles, iterations.getValue());
 
-        Color kiteColor = colors.getColor(0);
-        Color dartColor = colors.getColor(1);
+        Color kiteColor = colors.getColor(KITE_COLOR_INDEX);
+        Color dartColor = colors.getColor(DART_COLOR_INDEX);
 
         List<ShapeWithColor> shapes = new ArrayList<>();
 
-        // distance ratios for vertices of kite and dart shapes
-        double[][] dist = {{G, G, G}, {-G, -1, -G}};
-
         for (Tile tile : tiles) {
-            double angle = tile.angle - T;
-            Path2D tileShape = new Path2D.Double();
-            tileShape.moveTo(tile.x, tile.y);
+            Path2D tileShape = tile.createPath();
 
-            int ord = tile.type.ordinal();
-            for (int i = 0; i < 3; i++) {
-                double x = tile.x + dist[ord][i] * tile.size * cos(angle);
-                double y = tile.y - dist[ord][i] * tile.size * sin(angle);
-                tileShape.lineTo(x, y);
-                angle += T;
-            }
-            tileShape.closePath();
-
-            // the tile types are swapped for some reason,
-            // so as a workaround, swap again for correct rendering
-            Color color = (tile.type == Type.Kite) ? dartColor : kiteColor;
+            Color color = (tile.type == Type.Dart) ? dartColor : kiteColor;
             shapes.add(new ShapeWithColor(tileShape, color));
         }
 
@@ -349,14 +366,16 @@ public class Penrose extends ParametrizedFilter {
         return proto;
     }
 
-    // recursively subdivides tiles using Penrose deflation rules
-    private static List<Tile> deflateTiles(List<Tile> tiles, int generation) {
+    /**
+     * Recursively subdivides tiles using Penrose deflation rules.
+     */
+    private static Set<Tile> deflateTiles(Set<Tile> tiles, int generation) {
         // base case: return tiles when generation count reaches 0
         if (generation <= 0) {
             return tiles;
         }
 
-        List<Tile> next = new ArrayList<>();
+        Set<Tile> next = new HashSet<>();
 
         // process each tile according to deflation rules
         for (Tile tile : tiles) {
@@ -385,17 +404,16 @@ public class Penrose extends ParametrizedFilter {
             }
         }
 
-        // remove duplicate tiles and continue deflation
-        tiles = next.stream().distinct().collect(toList());
+        // continue deflation with the new set of tiles
         //noinspection TailRecursion
-        return deflateTiles(tiles, generation - 1);
+        return deflateTiles(next, generation - 1);
     }
 
     private void exportSVG() {
         Canvas canvas = Views.getActiveComp().getCanvas();
         List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight());
         double strokeWidth = edgeWidth.getValue() * zoom.getPercentage();
-        Color strokeColor = colors.getColor(2); // edge color
+        Color strokeColor = colors.getColor(EDGE_COLOR_INDEX);
 
         String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, null, strokeWidth, strokeColor);
         FileIO.saveSVG(svgContent, this);

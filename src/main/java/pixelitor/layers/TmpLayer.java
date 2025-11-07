@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,7 +63,7 @@ public class TmpLayer {
                 Rectangle bounds = selShape.getBounds();
                 selStartX = bounds.x;
                 selStartY = bounds.y;
-                image = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
+                image = ImageUtils.createSysCompatibleImage(bounds);
                 g = ImageUtils.createSoftSelectionMask(image, selShape, selStartX, selStartY);
                 smallImage = true;
             }

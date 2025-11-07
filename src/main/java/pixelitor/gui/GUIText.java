@@ -45,6 +45,9 @@ public class GUIText {
     public static final String FG_COLOR = i18n("fg_color");
     public static final String BG_COLOR = i18n("bg_color");
 
+    public static final String PRESETS = i18n("presets");
+    public static final String BUILT_IN_PRESETS = i18n("builtin_presets");
+
     public static final String HELP = i18n("help");
     public static final String COPY_AS_JSON = "Copy as JSON";
 

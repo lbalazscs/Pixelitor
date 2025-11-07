@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 
@@ -36,9 +37,8 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * The {@link Action} for creating a screen capture.
  */
-public class ScreenCaptureAction extends NamedAction.Checked {
+public class ScreenCaptureAction extends NamedAction {
     private static final String SCREEN_CAPTURE_STRING = i18n("screen_capture");
-    private JCheckBox hidePixelitorCB;
     private static int captureCount = 1;
 
     public ScreenCaptureAction() {
@@ -46,35 +46,35 @@ public class ScreenCaptureAction extends NamedAction.Checked {
     }
 
     @Override
-    protected void onClick() {
+    protected void onClick(ActionEvent e) {
+        JCheckBox hidePixelitorCB = new JCheckBox();
+
         new DialogBuilder()
-            .content(createSettingsPanel())
+            .content(createSettingsPanel(hidePixelitorCB))
             .title(SCREEN_CAPTURE_STRING)
-            .okAction(this::capture)
+            .okAction(() -> capture(hidePixelitorCB.isSelected()))
             .show();
     }
 
-    private JPanel createSettingsPanel() {
+    private static JPanel createSettingsPanel(JCheckBox hidePixelitorCB) {
         var p = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(p);
 
-        hidePixelitorCB = new JCheckBox();
         hidePixelitorCB.setSelected(true);
         gbh.addLabelAndControl("Hide Pixelitor", hidePixelitorCB);
 
         return p;
     }
 
-    private void capture() {
+    private static void capture(boolean hide) {
         try {
-            tryCapture();
+            tryCapture(hide);
         } catch (Exception ex) {
             Messages.showException(ex);
         }
     }
 
-    private void tryCapture() throws AWTException {
-        boolean hide = hidePixelitorCB.isSelected();
+    private static void tryCapture(boolean hide) throws AWTException {
         if (hide) {
             hideApp();
         }

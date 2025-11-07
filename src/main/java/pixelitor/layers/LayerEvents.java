@@ -79,8 +79,7 @@ public class LayerEvents {
             return;
         }
         if (resetMaskViewMode) {
-            MaskViewMode.NORMAL.activate(view, layer);
+            view.setMaskViewMode(MaskViewMode.NORMAL, layer);
         }
     }
 }
-

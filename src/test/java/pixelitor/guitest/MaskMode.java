@@ -152,7 +152,7 @@ enum MaskMode {
     }
 
     public boolean isMaskEditing() {
-        return viewMode.editMask();
+        return viewMode.isEditingMask();
     }
 
     /**

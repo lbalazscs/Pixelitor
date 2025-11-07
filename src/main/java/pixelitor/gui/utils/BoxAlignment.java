@@ -55,6 +55,10 @@ public enum BoxAlignment {
         return verticalAlignment;
     }
 
+    public boolean isPath() {
+        return this == PATH;
+    }
+
     @Override
     public String toString() {
         return displayName;

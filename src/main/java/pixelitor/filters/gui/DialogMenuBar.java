@@ -17,8 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -31,9 +31,6 @@ import static pixelitor.filters.gui.UserPreset.detectPresetNames;
  * Can be used by any component that implements {@link DialogMenuOwner}.
  */
 public class DialogMenuBar extends JMenuBar {
-    public static final String PRESETS = Texts.i18n("presets");
-    public static final String BUILT_IN_PRESETS = Texts.i18n("builtin_presets");
-
     private final DialogMenuOwner owner;
     private JMenu presetsMenu;
     private int userPresetCount = 0;
@@ -50,12 +47,12 @@ public class DialogMenuBar extends JMenuBar {
         }
 
         if (owner.hasHelp()) {
-            add(this.owner.getHelp().createMenu());
+            add(owner.getHelp().createMenu());
         }
     }
 
     private void addPresetsMenu() {
-        presetsMenu = new JMenu(PRESETS);
+        presetsMenu = new JMenu(GUIText.PRESETS);
 
         if (owner.hasBuiltinPresets()) {
             addBuiltInPresets();
@@ -91,14 +88,15 @@ public class DialogMenuBar extends JMenuBar {
     }
 
     private void addSavePresetMenuItem() {
-        Action savePresetAction = owner.createSavePresetAction(presetsMenu,
+        Action savePresetAction = PresetActions.createSaveAction(
+            owner, presetsMenu,
             this::addNewUserPreset,
             this::removeUserPreset);
         addPresetMenuItem(savePresetAction, "savePreset");
     }
 
     private void addBuiltInPresets() {
-        JMenu builtinPresets = new JMenu(BUILT_IN_PRESETS);
+        JMenu builtinPresets = new JMenu(GUIText.BUILT_IN_PRESETS);
         Preset[] presets = owner.getBuiltinPresets();
 
         for (Preset preset : presets) {
@@ -111,11 +109,11 @@ public class DialogMenuBar extends JMenuBar {
         if (!GUIUtils.CAN_USE_FILE_MANAGER) {
             return;
         }
-        presetsMenu.add(owner.createManagePresetsAction());
+        presetsMenu.add(PresetActions.createManageAction(owner));
     }
 
     private void addNewUserPreset(UserPreset preset) {
-        // if this is the first user preset, also adds the
+        // if this is the first user preset, also add the
         // "Manage Presets" menu item and a separator
         if (userPresetCount == 0) {
             addManagePresetsMenu();
@@ -148,5 +146,4 @@ public class DialogMenuBar extends JMenuBar {
             }
         }
     }
-
 }

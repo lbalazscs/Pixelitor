@@ -202,8 +202,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Creates a composition with a single, transparent image layer.
      */
-    public static Composition createTransparent(int width, int height) {
-        BufferedImage img = ImageUtils.createSysCompatibleImage(width, height);
+    public static Composition createTransparent(Canvas canvas) {
+        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas);
         return fromImage(img, null, "transparent");
     }
 
@@ -728,7 +728,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         // this shouldn't change the active layer here,
         // but sets the last button to selected
-        forEachTopLevelLayer(this::addLayerToGUI);
+        view.addAllLayerUIs(layerList);
+        layerUICountChanged();
+
         assert activeTopLevelLayer == origActiveTopLevelLayer;
 
         // correct the selection
@@ -738,9 +740,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
-    private void addLayerToGUI(Layer layer) {
-        int layerIndex = layerList.indexOf(layer);
-        view.addLayerUI(layer, layerIndex);
+    public void layerUICountChanged() {
+        if (view.isActive() && isHolderOfActiveLayer()) {
+            LayerEvents.fireLayerCountChanged(this, getNumLayers());
+        }
     }
 
     private void removeAllLayerUIs() {
@@ -1094,7 +1097,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public Layer findLayerAtPoint(Point p) {
         // in mask editing mode never auto-select another layer
-        if (getView().getMaskViewMode().showMask()) {
+        if (getView().getMaskViewMode().isShowingMask()) {
             return getActiveTopLevelLayer();
         }
 
@@ -1104,6 +1107,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public Rectangle2D calcContentBounds(boolean includeTransparent) {
         return Utils.calcCombinedBounds(layerList, includeTransparent);
+    }
+
+    public void setMaskViewMode(MaskViewMode maskViewMode, Layer activeLayer) {
+        view.setMaskViewMode(maskViewMode, activeLayer);
     }
 
     public void updateAllIconImages() {

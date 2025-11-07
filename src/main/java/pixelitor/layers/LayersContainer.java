@@ -58,8 +58,8 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         scrollPane = new JScrollPane();
         add(scrollPane, CENTER);
 
-        JPanel southPanel = createSouthPanel();
-        add(southPanel, SOUTH);
+        JPanel actionsPanel = createActionsPanel();
+        add(actionsPanel, SOUTH);
 
         setBorder(createTitledBorder(i18n("layers")));
 
@@ -68,23 +68,27 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         new DropTarget(this, new DropListener(ADD_AS_NEW_LAYERS));
     }
 
-    private static JPanel createSouthPanel() {
-        JPanel southPanel = new JPanel(new FlowLayout(LEFT, 2, 0));
+    private static JPanel createActionsPanel() {
+        JPanel panel = new JPanel(new FlowLayout(LEFT, 2, 0));
 
-        southPanel.add(new LayerActionButton(AddNewLayerAction.INSTANCE, "addLayer"));
-        southPanel.add(new LayerActionButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
-        southPanel.add(new LayerActionButton(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
-        southPanel.add(new LayerActionButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
-        southPanel.add(new LayerActionButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
+        addActionButton(panel, AddNewLayerAction.INSTANCE, "addLayer");
+        addActionButton(panel, DeleteActiveLayerAction.INSTANCE, "deleteLayer");
+        addActionButton(panel, DuplicateLayerAction.INSTANCE, "duplicateLayer");
+        addActionButton(panel, AddLayerMaskAction.INSTANCE, "addLayerMask");
+        addActionButton(panel, AddTextLayerAction.INSTANCE, "addTextLayer");
 
         if (Features.enableExperimental) {
-            southPanel.add(new LayerActionButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
+            addActionButton(panel, AddAdjLayerAction.INSTANCE, "addAdjLayer");
         }
 
-        return southPanel;
+        return panel;
     }
 
-    private void changeLayersPanel(LayersPanel newLayersPanel) {
+    private static void addActionButton(JPanel panel, Action action, String name) {
+        panel.add(new LayerActionButton(action, name));
+    }
+
+    private void replaceLayersPanel(LayersPanel newLayersPanel) {
         if (layersPanel == newLayersPanel) {
             return;
         }
@@ -112,7 +116,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     }
 
     public static void showLayersFor(View view) {
-        INSTANCE.changeLayersPanel(view.getLayersPanel());
+        INSTANCE.replaceLayersPanel(view.getLayersPanel());
     }
 
     public int getNumLayerGUIs() {
@@ -151,4 +155,3 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         }
     }
 }
-

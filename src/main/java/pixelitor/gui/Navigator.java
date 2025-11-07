@@ -22,7 +22,6 @@ import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
@@ -135,8 +134,8 @@ public class Navigator extends JComponent
         preferredWidth = (int) (scale * canvas.getWidth());
         preferredHeight = (int) (scale * canvas.getHeight());
 
-        JDialog ancestor = GUIUtils.getDialogAncestor(this);
-        ancestor.setTitle("Navigator - " + zoom);
+        assert dialog == SwingUtilities.getWindowAncestor(this);
+        dialog.setTitle("Navigator - " + zoom);
 
         fixedZoom = zoom; // set the exact zoom only temporarily
 
@@ -144,7 +143,7 @@ public class Navigator extends JComponent
         // size instead of some cached value
         invalidate();
 
-        ancestor.pack();
+        dialog.pack();
     }
 
     private void showPopup(MouseEvent e) {
@@ -211,9 +210,8 @@ public class Navigator extends JComponent
         }
 
         if (fixedZoom == null) {
-            JDialog ancestor = GUIUtils.getDialogAncestor(this);
-            if (ancestor != null) { // is null during the initial construction
-                ancestor.setTitle("Navigator");
+            if (dialog != null) { // is null during the initial construction
+                dialog.setTitle("Navigator");
             }
         }
 

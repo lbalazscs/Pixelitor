@@ -147,12 +147,17 @@ public class CropTool extends DragTool {
     }
 
     private void addGuidesSelector() {
-        guidesCB = GUIUtils.createComboBox(CompositionGuideType.values());
+        guidesCB = GUIUtils.createComboBox(CompositionGuideType.values(),
+            e -> guidesChanged());
         guidesCB.setToolTipText("<html>Composition guides." +
             "<br><br>Press <b>O</b> to select the next guide." +
             "<br>Press <b>Shift-O</b> to change the orientation.");
-        guidesCB.addActionListener(e -> Views.repaintActive());
         settingsPanel.addComboBox("Guides:", guidesCB, "guidesCB");
+    }
+
+    private void guidesChanged() {
+        compositionGuide.setType((CompositionGuideType) guidesCB.getSelectedItem());
+        Views.repaintActive();
     }
 
     private void addCropSizeControls() {
@@ -455,7 +460,6 @@ public class CropTool extends DragTool {
     }
 
     private void paintBoxAndGuides(Graphics2D g2, PRectangle cropRect) {
-        compositionGuide.setType((CompositionGuideType) guidesCB.getSelectedItem());
         compositionGuide.draw(cropRect.getCo(), g2);
 
         cropBox.paint(g2);

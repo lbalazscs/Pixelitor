@@ -75,9 +75,9 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
             suppressChangeEvent = false;
         }
 
-        TabTitleRenderer renderer = new TabTitleRenderer(view.getName(), newTab);
-        newTab.setTitleRenderer(renderer);
-        setTabComponentAt(newTabIndex, renderer);
+        TabHeader header = new TabHeader(view.getName(), newTab);
+        newTab.setHeader(header);
+        setTabComponentAt(newTabIndex, header);
         setSelectedIndex(newTabIndex);
         newTab.activated();
     }

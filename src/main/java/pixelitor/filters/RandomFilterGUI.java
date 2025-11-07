@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import pixelitor.layers.Filterable;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
+import java.util.function.Supplier;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
@@ -36,38 +36,43 @@ import static pixelitor.FilterContext.PREVIEWING;
  * The GUI for the Random Filter
  */
 public class RandomFilterGUI extends FilterGUI {
-    private final JPanel realSettingsPanel;
     private final Filterable layer;
-    private JPanel lastFilterPanel;
     private final RandomFilterSource filterSource;
+
+    private final JPanel settingsContainer; // holds the specific GUI of the selected filter
+    private JPanel currentFilterPanel;
+
     private final JPanel northPanel;
     private final JButton backButton;
     private final JButton forwardButton;
 
     protected RandomFilterGUI(Filterable layer) {
-        super(null, layer); // the actual filter will be determined below
+        super(null, layer); // the actual filter will be determined later
         this.layer = layer;
         filterSource = new RandomFilterSource();
 
         setLayout(new BorderLayout());
         northPanel = new JPanel(new FlowLayout(LEFT));
 
-        backButton = createButton("Back", e -> showFilter(filterSource.getPrevious()));
-        forwardButton = createButton("Forward", e -> showFilter(filterSource.getNext()));
-        createButton("Next Random Filter", e -> showFilter(filterSource.choose()));
+        backButton = addButton("Back", filterSource::getPrevious);
+        forwardButton = addButton("Forward", filterSource::getNext);
+        addButton("Next Random Filter", filterSource::selectNewFilter);
 
         add(northPanel, NORTH);
-        realSettingsPanel = new JPanel();
-        add(realSettingsPanel, CENTER);
+        settingsContainer = new JPanel();
+        add(settingsContainer, CENTER);
 
-        showFilter(filterSource.choose());
+        // Pass false to avoid double preview calculation on startup.
+        // The initial preview is triggered when the dialog becomes visible.
+        showFilter(filterSource.selectNewFilter(), false);
         updateEnabled();
     }
 
-    private JButton createButton(String text, ActionListener listener) {
+    private JButton addButton(String text, Supplier<Filter> filterSupplier) {
         JButton button = new JButton(text);
         button.addActionListener(e -> {
-            listener.actionPerformed(e);
+            // trigger the preview when navigating
+            showFilter(filterSupplier.get(), true);
             updateEnabled();
         });
         northPanel.add(button);
@@ -79,28 +84,39 @@ public class RandomFilterGUI extends FilterGUI {
         forwardButton.setEnabled(filterSource.hasNext());
     }
 
-    private void showFilter(Filter newFilter) {
-        if (lastFilterPanel != null) {
-            realSettingsPanel.remove(lastFilterPanel);
+    private void showFilter(Filter newFilter, boolean triggerPreview) {
+        if (currentFilterPanel != null) {
+            settingsContainer.remove(currentFilterPanel);
         }
 
         filter = newFilter;
         String filterName = newFilter.getName();
-        realSettingsPanel.setBorder(createTitledBorder(filterName));
+        settingsContainer.setBorder(createTitledBorder(filterName));
+
         if (newFilter instanceof FilterWithGUI newFilterWithGUI) {
-            if (filterSource.getLastFilter() != null) { // there was a filter before
+            if (filterSource.getCurrentFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                layer.stopPreviewing(); // stop the last one
+                layer.stopPreviewing(); // stop the current one
                 layer.startPreviewing(); // start the new one
             }
             FilterGUI filterGUI = newFilterWithGUI.createGUI(layer, true);
-            realSettingsPanel.add(filterGUI);
-            filterGUI.revalidate();
-            lastFilterPanel = filterGUI;
+            settingsContainer.add(filterGUI);
+            currentFilterPanel = filterGUI;
+
+            // trigger the preview if requested (i.e., on button clicks)
+            if (triggerPreview) {
+                filterGUI.startPreview(true);
+            }
         } else {
-            lastFilterPanel = null;
-            layer.startFilter(filter, PREVIEWING);
+            currentFilterPanel = null;
+            // only run if requested (avoids double run on startup)
+            if (triggerPreview) {
+                layer.startFilter(filter, PREVIEWING);
+            }
         }
+
+        settingsContainer.revalidate();
+        settingsContainer.repaint();
     }
 }

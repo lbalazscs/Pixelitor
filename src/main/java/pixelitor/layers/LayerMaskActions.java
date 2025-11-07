@@ -19,9 +19,9 @@ package pixelitor.layers;
 
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.gui.utils.TaskAction;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -48,11 +48,16 @@ public class LayerMaskActions {
 
             menu.addSeparator();
 
-            menu.add(new JMenuItem(new DeleteMaskAction(layer)));
+            // delete mask action
+            menu.add(new JMenuItem(new TaskAction("Delete", () -> layer.deleteMask(true))));
 
             // masks can be applied only to image layers
             if (layer instanceof ImageLayer) {
-                menu.add(new JMenuItem(new ApplyMaskAction(layer)));
+                // apply mask action
+                menu.add(new JMenuItem(new TaskAction("Apply", () -> {
+                    ((ImageLayer) layer).applyLayerMask(true);
+                    layer.update();
+                })));
             }
 
             menu.add(new JMenuItem(new EnableDisableMaskAction(layer)));
@@ -84,30 +89,7 @@ public class LayerMaskActions {
         }
     }
 
-    private static class DeleteMaskAction extends TaskAction {
-        protected DeleteMaskAction(Layer layer) {
-            super("Delete", () -> layer.deleteMask(true));
-        }
-    }
-
-    private static class ApplyMaskAction extends TaskAction {
-        protected ApplyMaskAction(Layer layer) {
-            super("Apply", () -> {
-                if (!(layer instanceof ImageLayer)) {
-                    // actually we should never get here because the popup menu
-                    // is enabled only for image layers
-                    Messages.showNotImageLayerError(layer);
-                    return;
-                }
-
-                ((ImageLayer) layer).applyLayerMask(true);
-
-                layer.update();
-            });
-        }
-    }
-
-    static class EnableDisableMaskAction extends NamedAction.Checked implements LayerListener {
+    static class EnableDisableMaskAction extends NamedAction implements LayerListener {
         private final Layer layer;
 
         public EnableDisableMaskAction(Layer layer) {
@@ -117,7 +99,7 @@ public class LayerMaskActions {
         }
 
         @Override
-        protected void onClick() {
+        protected void onClick(ActionEvent e) {
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
             refreshText();
         }
@@ -137,7 +119,7 @@ public class LayerMaskActions {
         }
     }
 
-    static class LinkUnlinkMaskAction extends NamedAction.Checked implements LayerListener {
+    static class LinkUnlinkMaskAction extends NamedAction implements LayerListener {
         private final Layer layer;
 
         public LinkUnlinkMaskAction(Layer layer) {
@@ -147,7 +129,7 @@ public class LayerMaskActions {
         }
 
         @Override
-        protected void onClick() {
+        protected void onClick(ActionEvent e) {
             LayerMask mask = layer.getMask();
             mask.setLinked(!mask.isLinked(), true);
             refreshText();

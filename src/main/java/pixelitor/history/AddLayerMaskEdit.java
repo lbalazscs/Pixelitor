@@ -64,7 +64,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         layer.addConfiguredMask(layerMask);
 
         assert newMode != null;
-        newMode.activate(comp, layer);
+        comp.setMaskViewMode(newMode, layer);
     }
 
     private String genNotActiveLayerErrorMsg() {

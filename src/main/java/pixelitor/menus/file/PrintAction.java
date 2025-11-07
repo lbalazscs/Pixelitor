@@ -41,7 +41,7 @@ import static pixelitor.utils.Threads.onIOThread;
 public class PrintAction extends AbstractViewEnabledAction implements Printable {
     // this is not the image's DPI or the printer's DPI,
     // it's just the resolution of the Java2D "user space"
-    private static final float DPI = 72.0f;
+    private static final float JAVA_2D_DPI = 72.0f;
 
     private static final float DEFAULT_PAGE_MARGIN_INCHES = 0.25f;
     private final ResourceBundle resourceBundle;
@@ -100,7 +100,15 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         JPanel previewContainer = new JPanel(new BorderLayout());
         PrintPreviewPanel previewPanel = new PrintPreviewPanel(pageFormat, this);
 
-        // main panel for all options at the top
+        JPanel northPanel = createOptionsPanel(job, comp, previewPanel);
+
+        previewContainer.add(northPanel, BorderLayout.NORTH);
+        previewContainer.add(previewPanel, BorderLayout.CENTER);
+        return previewContainer;
+    }
+
+    // creates the panel for all options at the top
+    private JPanel createOptionsPanel(PrinterJob job, Composition comp, PrintPreviewPanel previewPanel) {
         JPanel northPanel = new JPanel(new GridBagLayout());
         northPanel.setBorder(BorderFactory.createTitledBorder("Print Options"));
 
@@ -183,10 +191,7 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         gbc.gridheight = 3; // spanning 3 rows
         gbc.anchor = GridBagConstraints.CENTER;
         northPanel.add(alignmentSelector, gbc);
-
-        previewContainer.add(northPanel, BorderLayout.NORTH);
-        previewContainer.add(previewPanel, BorderLayout.CENTER);
-        return previewContainer;
+        return northPanel;
     }
 
     /**
@@ -209,7 +214,7 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
             PageFormat.LANDSCAPE : PageFormat.PORTRAIT);
         Paper paper = format.getPaper();
 
-        float marginInDots = DEFAULT_PAGE_MARGIN_INCHES * DPI;
+        float marginInDots = DEFAULT_PAGE_MARGIN_INCHES * JAVA_2D_DPI;
         paper.setImageableArea(
             marginInDots,
             marginInDots,
@@ -264,15 +269,15 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
 
         Paper paper = page.getPaper();
         attributes.add(new MediaPrintableArea(
-            (float) paper.getImageableX() / DPI,
-            (float) paper.getImageableY() / DPI,
-            (float) paper.getImageableWidth() / DPI,
-            (float) paper.getImageableHeight() / DPI,
+            (float) paper.getImageableX() / JAVA_2D_DPI,
+            (float) paper.getImageableY() / JAVA_2D_DPI,
+            (float) paper.getImageableWidth() / JAVA_2D_DPI,
+            (float) paper.getImageableHeight() / JAVA_2D_DPI,
             MediaPrintableArea.INCH));
 
         attributes.add(MediaSize.findMedia(
-            (float) paper.getWidth() / DPI,
-            (float) paper.getHeight() / DPI,
+            (float) paper.getWidth() / JAVA_2D_DPI,
+            (float) paper.getHeight() / JAVA_2D_DPI,
             Size2DSyntax.INCH));
 
         return attributes;
@@ -315,8 +320,8 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         switch (scalingMode) {
             case ACTUAL_SIZE:
                 // convert image pixels to points (1/72 inch) based on image DPI
-                scaledWidth = imageWidth * (DPI / imageDpi);
-                scaledHeight = imageHeight * (DPI / imageDpi);
+                scaledWidth = imageWidth * (JAVA_2D_DPI / imageDpi);
+                scaledHeight = imageHeight * (JAVA_2D_DPI / imageDpi);
                 break;
             case FIT_TO_PAGE:
             default:

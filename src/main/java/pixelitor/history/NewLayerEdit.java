@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,21 +30,21 @@ import javax.swing.undo.CannotUndoException;
  */
 public class NewLayerEdit extends PixelitorEdit {
     private final LayerHolder holder;
-    private final Layer previousActiveLayer;
+    private final Layer prevActiveLayer;
     private final Layer layer;
     private final int layerIndex;
-    private final MaskViewMode previousMaskViewMode;
+    private final MaskViewMode prevMaskViewMode;
 
     public NewLayerEdit(String editName,
-                        Layer layer, Layer previousActiveLayer,
-                        MaskViewMode previousMaskViewMode) {
+                        Layer layer, Layer prevActiveLayer,
+                        MaskViewMode prevMaskViewMode) {
         super(editName, layer.getComp());
 
-        assert previousActiveLayer != layer;
+        assert prevActiveLayer != layer;
 
         this.holder = layer.getHolder();
-        this.previousActiveLayer = previousActiveLayer;
-        this.previousMaskViewMode = previousMaskViewMode;
+        this.prevActiveLayer = prevActiveLayer;
+        this.prevMaskViewMode = prevMaskViewMode;
         this.layer = layer;
         layerIndex = this.holder.indexOf(layer);
     }
@@ -54,8 +54,8 @@ public class NewLayerEdit extends PixelitorEdit {
         super.undo();
 
         holder.deleteLayer(layer, false);
-        comp.setActiveLayer(previousActiveLayer);
-        previousMaskViewMode.activate(comp, previousActiveLayer);
+        comp.setActiveLayer(prevActiveLayer);
+        comp.setMaskViewMode(prevMaskViewMode, prevActiveLayer);
     }
 
     @Override
@@ -72,10 +72,10 @@ public class NewLayerEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode(key);
 
         node.add(holder.createDebugNode("holder"));
-        node.add(previousActiveLayer.createDebugNode("previous active layer"));
+        node.add(prevActiveLayer.createDebugNode("previous active layer"));
         node.add(layer.createDebugNode("layer"));
         node.addInt("layer index", layerIndex);
-        node.addAsString("previous mask view mode", previousMaskViewMode);
+        node.addAsString("previous mask view mode", prevMaskViewMode);
 
         return node;
     }

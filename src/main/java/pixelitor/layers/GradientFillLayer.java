@@ -125,8 +125,7 @@ public class GradientFillLayer extends ContentLayer {
     public BufferedImage createIconThumbnail() {
         Dimension thumbDim = comp.getCanvas().getThumbSize();
 
-        BufferedImage img = ImageUtils.createSysCompatibleImage(
-            thumbDim.width, thumbDim.height);
+        BufferedImage img = ImageUtils.createSysCompatibleImage(thumbDim);
         Graphics2D g2 = img.createGraphics();
 
         if (gradient == null || gradient.hasTransparency()) {

@@ -55,7 +55,7 @@ import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.colors.Colors.toPackedARGB;
-import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
+import static pixelitor.layers.MaskInitMethod.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
 
@@ -160,7 +160,7 @@ public class TestHelper {
                 History.undoRedo("Add Layer Mask");
             }
             if (i == numLayers - 1) {
-                NORMAL.activate(layer);
+                NORMAL.activateOn(layer);
                 assert layer == comp.getActiveLayer();
             }
             assert layer == comp.getLayer(i);

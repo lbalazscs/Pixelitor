@@ -190,16 +190,16 @@ class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // a white mask for the upper layer should change nothing
-        upperLayer.addMask(LayerMaskAddType.REVEAL_ALL);
+        upperLayer.addMask(MaskInitMethod.REVEAL_ALL);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // a white mask for the lower layer should change nothing
-        lowerLayer.addMask(LayerMaskAddType.REVEAL_ALL);
+        lowerLayer.addMask(MaskInitMethod.REVEAL_ALL);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // upper layer with a black mask: expect lower color
         upperLayer.deleteMask(true);
-        upperLayer.addMask(LayerMaskAddType.HIDE_ALL);
+        upperLayer.addMask(MaskInitMethod.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
         upperLayer.deleteMask(true);
 
@@ -210,12 +210,12 @@ class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(inverted);
 
         // adding a white mask to the adjustment should change nothing
-        invertAdjustment.addMask(LayerMaskAddType.REVEAL_ALL);
+        invertAdjustment.addMask(MaskInitMethod.REVEAL_ALL);
         assertThat(getResultingColor()).isEqualTo(inverted);
 
         // with a black mask, the adjustment should have no effect
         invertAdjustment.deleteMask(true);
-        invertAdjustment.addMask(LayerMaskAddType.HIDE_ALL);
+        invertAdjustment.addMask(MaskInitMethod.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the invert adjustment with black mask should have no effect
@@ -241,12 +241,12 @@ class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adjustment layer with white mask
-        alwaysUpperColorAdjustment.addMask(LayerMaskAddType.REVEAL_ALL);
+        alwaysUpperColorAdjustment.addMask(MaskInitMethod.REVEAL_ALL);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adjustment layer with black mask, expect lower color
         alwaysUpperColorAdjustment.deleteMask(true);
-        alwaysUpperColorAdjustment.addMask(LayerMaskAddType.HIDE_ALL);
+        alwaysUpperColorAdjustment.addMask(MaskInitMethod.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
 
         // merging down the adjustment with black mask should have no effect
@@ -260,12 +260,12 @@ class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // text layer with white mask
-        upperColorTextLayer.addMask(LayerMaskAddType.REVEAL_ALL);
+        upperColorTextLayer.addMask(MaskInitMethod.REVEAL_ALL);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // text layer with black mask, expect lower color
         upperColorTextLayer.deleteMask(true);
-        upperColorTextLayer.addMask(LayerMaskAddType.HIDE_ALL);
+        upperColorTextLayer.addMask(MaskInitMethod.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
 
         // merging down the text layer with black mask should have no effect

@@ -20,16 +20,14 @@ package pixelitor.layers;
 import pixelitor.Invariants;
 import pixelitor.Views;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
-import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-
-import static java.awt.event.ActionEvent.CTRL_MASK;
 
 /**
  * An {@link Action} that adds a new layer mask
@@ -51,24 +49,11 @@ public class AddLayerMaskAction extends NamedAction
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        boolean ctrlPressed = false;
-        if (e != null) { // could be null in tests
-            ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
-        }
-
-        try {
-            onClick(ctrlPressed);
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
-    }
-
-    private static void onClick(boolean ctrlPressed) {
+    public void onClick(ActionEvent e) {
         var layer = Views.getActiveComp().getActiveLayer();
         assert !layer.hasMask();
 
-        layer.addMask(ctrlPressed);
+        layer.addMask(GUIUtils.isCtrlPressed(e));
     }
 
     @Override

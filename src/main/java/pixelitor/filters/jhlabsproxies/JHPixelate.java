@@ -27,6 +27,7 @@ import pixelitor.filters.impl.BrickBlockFilter;
 import pixelitor.filters.impl.HexagonBlockFilter;
 import pixelitor.filters.impl.TriangleBlockFilter;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.GridUtils;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.BasicStroke;
@@ -157,10 +158,10 @@ public class JHPixelate extends ParametrizedFilter {
         g.setColor(GRAY);
 
         switch (type) {
-            case TYPE_SQUARE -> ImageUtils.renderGrid(g, gapWidth, cellSize, width, height);
-            case TYPE_BRICK -> ImageUtils.renderBrickGrid(g, cellSize, width, height);
-            case TYPE_TRIANGLE -> ImageUtils.renderTriangleGrid(g, cellSize, width, height);
-            case TYPE_HEXAGON -> ImageUtils.renderHexagonGrid(g, cellSize, width, height);
+            case TYPE_SQUARE -> GridUtils.renderGrid(g, gapWidth, cellSize, width, height);
+            case TYPE_BRICK -> GridUtils.renderBrickGrid(g, cellSize, width, height);
+            case TYPE_TRIANGLE -> GridUtils.renderTriangleGrid(g, cellSize, width, height);
+            case TYPE_HEXAGON -> GridUtils.renderHexagonGrid(g, cellSize, width, height);
             default -> throw new IllegalStateException("Unexpected value: " + type);
         }
 

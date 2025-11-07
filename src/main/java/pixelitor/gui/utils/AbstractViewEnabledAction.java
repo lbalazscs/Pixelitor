@@ -20,7 +20,6 @@ package pixelitor.gui.utils;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
@@ -58,12 +57,8 @@ public abstract class AbstractViewEnabledAction extends NamedAction implements V
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            onClick(Views.getActiveComp());
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
+    public void onClick(ActionEvent e) {
+        onClick(Views.getActiveComp());
     }
 
     /**

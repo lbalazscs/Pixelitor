@@ -43,7 +43,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
     private final View view;
     private final JScrollPane scrollPane;
     private final TabsUI tabsUI;
-    private TabTitleRenderer titleRenderer;
+    private TabHeader header;
     
     public TabViewContainer(View view, TabsUI tabsUI) {
         this.view = view;
@@ -68,14 +68,14 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         tabsUI.selectTab(this);
     }
 
-    public void setTitleRenderer(TabTitleRenderer titleRenderer) {
-        this.titleRenderer = titleRenderer;
+    public void setHeader(TabHeader header) {
+        this.header = header;
     }
 
     @Override
     public void updateTitle(View view) {
-        if (titleRenderer != null) {
-            titleRenderer.setTitle(view.getName());
+        if (header != null) {
+            header.setTitle(view.getName());
         }
     }
 

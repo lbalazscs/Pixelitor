@@ -347,7 +347,7 @@ class LayerTest {
 
         // set up a dummy selection for mask types that require it
         TestHelper.setSelection(comp, new Rectangle(1, 1, 2, 2));
-        for (LayerMaskAddType addType : LayerMaskAddType.values()) {
+        for (MaskInitMethod addType : MaskInitMethod.values()) {
             assertThat(layer).hasNoMask();
 
             layer.addMask(addType);

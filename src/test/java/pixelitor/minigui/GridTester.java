@@ -17,7 +17,7 @@
 
 package pixelitor.minigui;
 
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.GridUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,22 +42,22 @@ public class GridTester extends JFrame {
         SQUARE("Square") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                ImageUtils.renderGrid(g, STROKE_WIDTH, size, canvasWidth, canvasHeight);
+                GridUtils.renderGrid(g, STROKE_WIDTH, size, canvasWidth, canvasHeight);
             }
         }, BRICK("Brick") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                ImageUtils.renderBrickGrid(g, size, canvasWidth, canvasHeight);
+                GridUtils.renderBrickGrid(g, size, canvasWidth, canvasHeight);
             }
         }, TRIANGLE("Triangle") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                ImageUtils.renderTriangleGrid(g, size, canvasWidth, canvasHeight);
+                GridUtils.renderTriangleGrid(g, size, canvasWidth, canvasHeight);
             }
         }, HEXAGON("Hexagon") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                ImageUtils.renderHexagonGrid(g, size, canvasWidth, canvasHeight);
+                GridUtils.renderHexagonGrid(g, size, canvasWidth, canvasHeight);
             }
         };
 

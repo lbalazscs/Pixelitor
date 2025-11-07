@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,27 +50,14 @@ public abstract class NamedAction extends AbstractAction {
         putValue(Action.SHORT_DESCRIPTION, toolTip);
     }
 
-    public abstract static class Checked extends NamedAction {
-        protected Checked() {
+    @Override
+    public final void actionPerformed(ActionEvent e) {
+        try {
+            onClick(e);
+        } catch (Exception ex) {
+            Messages.showException(ex);
         }
-
-        protected Checked(String name) {
-            super(name);
-        }
-
-        protected Checked(String name, Icon icon) {
-            super(name, icon);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                onClick();
-            } catch (Exception ex) {
-                Messages.showException(ex);
-            }
-        }
-
-        protected abstract void onClick();
     }
+
+    protected abstract void onClick(ActionEvent e);
 }

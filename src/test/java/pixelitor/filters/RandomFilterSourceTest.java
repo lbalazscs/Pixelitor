@@ -36,10 +36,10 @@ class RandomFilterSourceTest {
     static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
 
-        // generate mock filters with the names "A", "B" ... "Z"
-        for (int i = 'A'; i < 'Z' + 1; i++) {
-            char[] charsInFilterName = {(char) i};
-            String filterName = new String(charsInFilterName);
+        // generate mock filters with the names "A", "B", ... "Z"
+        //noinspection CharacterComparison
+        for (char c = 'A'; c <= 'Z'; c++) {
+            String filterName = String.valueOf(c);
             Filter filter = mock(Filter.class);
             FilterAction filterAction = mock(FilterAction.class);
 
@@ -62,28 +62,28 @@ class RandomFilterSourceTest {
         assertThat(source)
             .doesNotHavePrevious()
             .doesNotHaveNext()
-            .lastFilterIsNull();
+            .currentFilterIsNull();
     }
 
     @Test
     @Timeout(value = 1, unit = SECONDS)
-        // make sure there is no infinite loop
+        // ensure there is no infinite loop
     void afterOne() {
-        Filter one = source.choose();
+        Filter one = source.selectNewFilter();
 
         assertThat(source)
             .doesNotHavePrevious()
             .doesNotHaveNext()
-            .lastFilterIsNotNull()
-            .lastFilterIs(one);
+            .currentFilterIsNotNull()
+            .currentFilterIs(one);
     }
 
     @Test
     @Timeout(value = 1, unit = SECONDS)
-        // make sure there is no infinite loop
+        // ensure there is no infinite loop
     void afterTwo() {
-        Filter one = source.choose();
-        Filter two = source.choose();
+        Filter one = source.selectNewFilter();
+        Filter two = source.selectNewFilter();
 
         assertThat(source)
             .hasPrevious()
@@ -95,7 +95,7 @@ class RandomFilterSourceTest {
             .hasPrevious()
             .doesNotHaveNext();
 
-        source.choose(); // three
+        source.selectNewFilter(); // three
         assertThat(source)
             .hasPrevious()
             .doesNotHaveNext()
@@ -106,10 +106,10 @@ class RandomFilterSourceTest {
 
     @Test
     @Timeout(value = 1, unit = SECONDS)
-        // make sure there is no infinite loop
+        // ensure there is no infinite loop
     void multipleBackForward() {
-        Filter one = source.choose();
-        Filter two = source.choose();
+        Filter one = source.selectNewFilter();
+        Filter two = source.selectNewFilter();
 
         for (int i = 0; i < 3; i++) {
             assertThat(source)
@@ -124,24 +124,24 @@ class RandomFilterSourceTest {
 
     @Test
     @Timeout(value = 1, unit = SECONDS)
-        // make sure there is no infinite loop
+        // ensure there is no infinite loop
     void generateWhenBackInHistory() {
-        Filter one = source.choose();
-        Filter two = source.choose();
-        Filter three = source.choose();
-        source.choose(); // four
+        Filter one = source.selectNewFilter();
+        Filter two = source.selectNewFilter();
+        Filter three = source.selectNewFilter();
+        source.selectNewFilter(); // four
 
         assertThat(source)
             .previousFilterIs(three)
             .previousFilterIs(two);
 
         // after going back a while start generating new filters
-        Filter five = source.choose();
+        Filter five = source.selectNewFilter();
         assertThat(source)
             .hasPrevious()
             .doesNotHaveNext();
 
-        source.choose(); // six
+        source.selectNewFilter(); // six
         assertThat(source)
             .hasPrevious()
             .doesNotHaveNext();

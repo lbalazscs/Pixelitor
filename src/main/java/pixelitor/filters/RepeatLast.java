@@ -45,7 +45,9 @@ public class RepeatLast extends DrawableAction {
 
     private RepeatLast(boolean showDialog) {
         super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME,
-            showDialog, true);
+            showDialog, true,
+            dr -> applyToDrawable(dr, showDialog),
+            so -> applyToSmartObject(so, showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME));
         this.showDialog = showDialog;
         setEnabled(false);
     }
@@ -53,14 +55,13 @@ public class RepeatLast extends DrawableAction {
     /**
      * Adds the last used filter as a smart filter to the smart object.
      */
-    @Override
-    protected void applyToSmartObject(SmartObject so) {
+    private static void applyToSmartObject(SmartObject so, String actionName) {
         // if the active layer is a smart object, add the last filter as a new smart filter
         getLastFilter().ifPresent(lastFilter -> {
             if (lastFilter.canBeSmart()) {
                 so.addSmartFilterWithDialog(lastFilter.copy());
             } else {
-                Messages.showFilterCantBeSmartMessage(getName());
+                Messages.showFilterCantBeSmartMessage(actionName);
             }
         });
     }
@@ -68,8 +69,7 @@ public class RepeatLast extends DrawableAction {
     /**
      * Applies the last used filter to the drawable.
      */
-    @Override
-    protected void process(Drawable dr) {
+    private static void applyToDrawable(Drawable dr, boolean showDialog) {
         getLastFilter().ifPresent(filter -> {
             if (showDialog) {
                 // shows the filter's configuration dialog before applying

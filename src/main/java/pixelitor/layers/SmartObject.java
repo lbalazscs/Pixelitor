@@ -52,6 +52,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static pixelitor.layers.LayerMoveDirection.DOWN;
+import static pixelitor.layers.LayerMoveDirection.UP;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Thumbnails.createThumbnail;
 
@@ -202,8 +204,7 @@ public class SmartObject extends CompositeLayer {
             } else { // linked file not found
                 // Set a transparent image as content to avoid all sorts of errors.
                 // It will be replaced if the content is found later.
-                setContent(Composition.createTransparent(
-                    comp.getCanvasWidth(), comp.getCanvasHeight()));
+                setContent(Composition.createTransparent(comp.getCanvas()));
 
                 EventQueue.invokeLater(this::handleMissingContent);
             }
@@ -810,28 +811,28 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void reorderActiveLayer(boolean up) {
+    public void reorderActiveLayer(LayerMoveDirection direction) {
         SmartFilter smartFilter = getSelectedSmartFilter();
         if (smartFilter != null) {
-            move(smartFilter, up);
+            move(smartFilter, direction);
         }
     }
 
     public void moveUp(SmartFilter smartFilter) {
-        move(smartFilter, true);
+        move(smartFilter, UP);
     }
 
     public void moveDown(SmartFilter smartFilter) {
-        move(smartFilter, false);
+        move(smartFilter, DOWN);
     }
 
-    public void move(SmartFilter smartFilter, boolean up) {
+    public void move(SmartFilter smartFilter, LayerMoveDirection direction) {
         int index = filters.indexOf(smartFilter);
-        if ((up && index == filters.size() - 1) || (!up && index == 0)) {
+        if (direction.isAtEdge(index, filters.size())) {
             return; // already at the top or bottom of the filter stack
         }
-        String editName = "Move " + smartFilter.getName() + (up ? " Up" : " Down");
-        int indexA = up ? index : index - 1;
+        String editName = "Move " + smartFilter.getName() + (direction == UP ? " Up" : " Down");
+        int indexA = direction == UP ? index : index - 1;
         int indexB = indexA + 1;
         swapSmartFilters(indexA, indexB, editName);
         comp.setActiveLayer(smartFilter);

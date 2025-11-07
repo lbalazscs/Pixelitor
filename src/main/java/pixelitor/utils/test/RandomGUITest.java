@@ -839,12 +839,12 @@ public class RandomGUITest {
 
     private void moveActiveLayerUp(Composition comp) {
         log("layer order change: active up");
-        comp.getActiveHolder().reorderActiveLayer(true);
+        comp.getActiveHolder().reorderActiveLayer(LayerMoveDirection.UP);
     }
 
     private void moveActiveLayerDown(Composition comp) {
         log("layer order change: active down");
-        comp.getActiveHolder().reorderActiveLayer(false);
+        comp.getActiveHolder().reorderActiveLayer(LayerMoveDirection.DOWN);
     }
 
     private void randomMergeDown() {

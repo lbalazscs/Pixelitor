@@ -18,7 +18,6 @@
 package pixelitor.filters.gui;
 
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -52,7 +51,7 @@ public class DialogLauncherGUI extends JPanel implements ParamGUI {
 
     private void createAndShowDialog(Consumer<DialogBuilder> dialogConfigurator) {
         DialogBuilder builder = new DialogBuilder()
-            .owner(GUIUtils.getDialogAncestor(configureButton))
+            .owner(SwingUtilities.getWindowAncestor(configureButton))
             .parentComponent(configureButton);
         dialogConfigurator.accept(builder);
         builder.show();

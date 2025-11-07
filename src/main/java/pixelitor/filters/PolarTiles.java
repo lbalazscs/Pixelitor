@@ -41,12 +41,12 @@ public class PolarTiles extends ParametrizedFilter {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam numAngDivisions = new RangeParam("Angular Divisions", 0, 7, 100);
     private final RangeParam numRadDivisions = new RangeParam("Radial Divisions", 0, 7, 50);
-    private final RangeParam rotateEffect = new RangeParam("Rotate Effect", 0, 0, 100);
+    private final RangeParam effectRotation = new RangeParam("Rotate Effect", 0, 0, 100);
     private final RangeParam randomness = new RangeParam("Randomness", 0, 0, 100);
     private final RangeParam curvature = new RangeParam("Curvature", 0, 7, 20);
 
     private final RangeParam zoom = new RangeParam("Zoom Image (%)", 1, 100, 500);
-    private final AngleParam rotateImage = new AngleParam("Rotate Image", 0);
+    private final AngleParam imageRotation = new AngleParam("Rotate Image", 0);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
@@ -64,9 +64,9 @@ public class PolarTiles extends ParametrizedFilter {
             numAngDivisions,
             numRadDivisions,
             curvature.withAdjustedRange(0.02),
-            rotateEffect,
+            effectRotation,
             randomness.withSideButton(reseedRandomness),
-            new CompositeParam("Background", zoom, rotateImage),
+            new CompositeParam("Background", zoom, imageRotation),
             edgeAction,
             interpolation
         );
@@ -82,9 +82,9 @@ public class PolarTiles extends ParametrizedFilter {
         filter.setCenter(center.getAbsolutePoint(src));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-        filter.setRotateResult((float) rotateImage.getValueInIntuitiveRadians());
+        filter.setImageRotation((float) imageRotation.getValueInIntuitiveRadians());
         filter.setZoom(zoom.getPercentage());
-        filter.setRotateEffect(rotateEffect.getPercentage());
+        filter.setEffectRotation(effectRotation.getPercentage());
         filter.setNumADivisions(numAngDivisions.getValue());
         filter.setNumRDivisions(numRadDivisions.getValue());
         filter.setCurvature(curvature.getValueAsDouble());

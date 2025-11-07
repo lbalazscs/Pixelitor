@@ -17,16 +17,11 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition;
-import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction;
 import pixelitor.gui.utils.TaskAction;
-import pixelitor.history.History;
 import pixelitor.menus.PMenu;
-import pixelitor.menus.edit.FadeAction;
-import pixelitor.tools.Tools;
 import pixelitor.utils.Texts;
 
 import javax.swing.*;
@@ -37,19 +32,24 @@ import static pixelitor.utils.Keys.CTRL_3;
 import static pixelitor.utils.Keys.CTRL_4;
 
 /**
- * Whether the layer or its mask is visible/edited,
- * and whether the mask editing is done in "rubylith" mode.
+ * Defines the visibility and editing state of a layer and its mask.
  */
 public enum MaskViewMode {
+    // Standard view where the layer content is visible and the mask applies transparency
     NORMAL("lm_edit_layer", false, false, false,
-        LayerRestriction.ALLOW_ALL, CTRL_1) {
-    }, VIEW_MASK("lm_view_mask", true, true, false,
-        LayerRestriction.HAS_LAYER_MASK, CTRL_2) {
-    }, EDIT_MASK("lm_edit_mask", false, true, false,
-        LayerRestriction.HAS_LAYER_MASK, CTRL_3) {
-    }, RUBYLITH("lm_ruby", false, true, true,
-        LayerRestriction.HAS_LAYER_MASK, CTRL_4) {
-    };
+        LayerRestriction.ALLOW_ALL, CTRL_1),
+
+    // Displays the grayscale mask image instead of the layer content
+    VIEW_MASK("lm_view_mask", true, true, false,
+        LayerRestriction.HAS_LAYER_MASK, CTRL_2),
+
+    // Displays the layer content with the mask applied, but editing actions affect the mask
+    EDIT_MASK("lm_edit_mask", false, true, false,
+        LayerRestriction.HAS_LAYER_MASK, CTRL_3),
+
+    // Displays the layer content with the mask overlaid as a red "rubylith" tint
+    RUBYLITH("lm_ruby", false, true, true,
+        LayerRestriction.HAS_LAYER_MASK, CTRL_4);
 
     private final String displayName;
     private final boolean showRuby;
@@ -69,79 +69,41 @@ public enum MaskViewMode {
     }
 
     /**
-     * Adds a menu item that acts on the active layer of the active image
+     * Adds a menu item that acts on the active layer of the active composition.
      */
-    public void addToMenuBar(PMenu sub) {
-        var action = new RestrictedLayerAction(displayName, layerRestriction) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                activate(layer);
-            }
-        };
-        sub.add(action, keyStroke);
+    public void addToMainMenu(PMenu sub) {
+        sub.add(new RestrictedLayerAction(displayName,
+            layerRestriction, this::activateOn), keyStroke);
     }
 
     /**
-     * Adds a menu item that acts on the given layer and its image
+     * Adds a menu item that acts on the given layer.
      */
     public void addToPopupMenu(JMenu menu, Layer layer) {
         var menuItem = new JMenuItem(new TaskAction(displayName, () ->
-            activate(layer)));
+            activateOn(layer)));
         menuItem.setAccelerator(keyStroke);
         menu.add(menuItem);
     }
 
-    public void activate(Layer activeLayer) {
+    public void activateOn(Layer activeLayer) {
         View view = activeLayer.getComp().getView();
-        activate(view, activeLayer);
+        view.setMaskViewMode(this, activeLayer);
     }
 
-    public void activate(Composition comp, Layer activeLayer) {
-        activate(comp.getView(), activeLayer);
-    }
-
-    public void activate(View view, Layer layer) {
-        assert view != null;
-        assert layer.isActive();
-
-        assert canBeAssignedTo(layer);
-
-        boolean changed = view.setMaskViewModeInternal(this);
-        layer.setMaskEditing(editMask);
-        if (changed) {
-            FgBgColors.maskEditingChanged(editMask);
-
-            if (!view.isMock()) {
-                Tools.maskEditingChanged(editMask);
-            }
-
-            boolean canFade;
-            if (editMask) {
-                canFade = History.canFade(layer.getMask());
-            } else {
-                if (layer instanceof ImageLayer imageLayer) {
-                    canFade = History.canFade(imageLayer);
-                } else {
-                    canFade = false;
-                }
-            }
-            FadeAction.INSTANCE.updateGUI(canFade);
-        }
-    }
-
-    public boolean editMask() {
+    public boolean isEditingMask() {
         return editMask;
     }
 
-    public boolean showMask() {
+    public boolean isShowingMask() {
         return showMask;
     }
 
-    public boolean showRubylith() {
+    public boolean isShowingRubylith() {
         return showRuby;
     }
 
-    private boolean canBeAssignedTo(Layer layer) {
+    public boolean isApplicableTo(Layer layer) {
         if (editMask || showMask) {
             boolean hasMask = layer.hasMask();
             if (!hasMask) {

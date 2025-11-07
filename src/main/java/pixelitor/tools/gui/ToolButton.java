@@ -18,6 +18,7 @@
 package pixelitor.tools.gui;
 
 import pixelitor.AppMode;
+import pixelitor.filters.gui.PresetActions;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TaskAction;
@@ -28,6 +29,8 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
@@ -44,6 +47,7 @@ public class ToolButton extends JToggleButton {
 
     private int numPresets;
     private JPopupMenu presetsMenu;
+    private boolean popupMenuPopulated = false;
 
     public ToolButton(Tool tool) {
         this.tool = tool;
@@ -97,10 +101,36 @@ public class ToolButton extends JToggleButton {
      * and manage configuration presets for the tool represented by this button.
      */
     private void initPresetsPopup(Tool tool) {
+        presetsMenu = new JPopupMenu();
+
+        // the popup menu is populated only when it is about to become visible
+        presetsMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent event) {
+                if (!popupMenuPopulated) {
+                    populatePresetsMenu(tool);
+                    popupMenuPopulated = true;
+                }
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent event) {
+            }
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent event) {
+            }
+        });
+
+        setComponentPopupMenu(presetsMenu);
+    }
+
+    /**
+     * Loads presets from disk and populates the menu items.
+     */
+    private void populatePresetsMenu(Tool tool) {
         List<UserPreset> startupPresets = UserPreset.detectPresetNames(tool.getPresetDirName());
         numPresets = startupPresets.size();
-
-        presetsMenu = new JPopupMenu();
 
         if (AppMode.isDevelopment()) {
             presetsMenu.add(new TaskAction("Internal State...", () ->
@@ -108,21 +138,19 @@ public class ToolButton extends JToggleButton {
             presetsMenu.addSeparator();
         }
 
-        presetsMenu.add(tool.createSavePresetAction(this,
+        presetsMenu.add(PresetActions.createSaveAction(tool, this,
             this::addPresetMenuItem, this::removePresetMenuItem));
 
         // if any existing presets were detected, add them to the menu
         if (!startupPresets.isEmpty()) {
             if (GUIUtils.CAN_USE_FILE_MANAGER) {
-                presetsMenu.add(tool.createManagePresetsAction());
+                presetsMenu.add(PresetActions.createManageAction(tool));
             }
             presetsMenu.addSeparator();
             for (UserPreset preset : startupPresets) {
                 presetsMenu.add(preset.createAction(tool));
             }
         }
-
-        setComponentPopupMenu(presetsMenu);
     }
 
     /**
@@ -134,7 +162,7 @@ public class ToolButton extends JToggleButton {
             // if this is the very first preset being added, then this
             // was not added during initialization, so add it now
             if (GUIUtils.CAN_USE_FILE_MANAGER) {
-                presetsMenu.add(tool.createManagePresetsAction());
+                presetsMenu.add(PresetActions.createManageAction(tool));
             }
             presetsMenu.addSeparator();
         }

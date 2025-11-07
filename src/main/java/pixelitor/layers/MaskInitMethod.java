@@ -22,7 +22,9 @@ import pixelitor.Canvas;
 import pixelitor.colors.Colors;
 import pixelitor.utils.ProgressTracker;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -30,89 +32,78 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
- * Ways to create a new layer mask
+ * Defines how a new layer mask is initialized when created.
  */
-public enum LayerMaskAddType {
+public enum MaskInitMethod {
     REVEAL_ALL("Reveal All", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Shape selShape) {
-            // a fully white image
-            return createFilledImage(layer, Color.WHITE, null, null);
+        BufferedImage createMaskImage(Layer layer, Shape selShape) {
+            // a fully white mask reveals the entire layer
+            return createSolidMask(layer, Color.WHITE);
         }
     }, HIDE_ALL("Hide All", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Shape selShape) {
-            // a fully black image
-            return createFilledImage(layer, Color.BLACK, null, null);
+        BufferedImage createMaskImage(Layer layer, Shape selShape) {
+            // a fully black mask hides the entire layer
+            return createSolidMask(layer, Color.BLACK);
         }
     }, REVEAL_SELECTION("Reveal Selection", true) {
         @Override
-        BufferedImage createBWImage(Layer layer, Shape selShape) {
-            // back image, but the selection is white
-            return createFilledImage(layer, Color.BLACK, Color.WHITE, selShape);
+        BufferedImage createMaskImage(Layer layer, Shape selShape) {
+            // black hiding mask, but the selection is shown
+            return createSelectionMask(layer, Color.BLACK, Color.WHITE, selShape);
         }
     }, HIDE_SELECTION("Hide Selection", true) {
         @Override
-        BufferedImage createBWImage(Layer layer, Shape selShape) {
-            // white image, but the selection is black
-            return createFilledImage(layer, Color.WHITE, Color.BLACK, selShape);
+        BufferedImage createMaskImage(Layer layer, Shape selShape) {
+            // white revealing mask, but the selection is hidden
+            return createSelectionMask(layer, Color.WHITE, Color.BLACK, selShape);
         }
     }, FROM_TRANSPARENCY("From Transparency", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Shape selShape) {
+        BufferedImage createMaskImage(Layer layer, Shape selShape) {
             return createMaskFromLayer(layer, true);
         }
     }, FROM_LAYER("From Layer", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Shape selShape) {
+        BufferedImage createMaskImage(Layer layer, Shape selShape) {
             return createMaskFromLayer(layer, false);
-        }
-    }, PATTERN("Pattern", false) { // only for debugging
-
-        @Override
-        BufferedImage createBWImage(Layer layer, Shape selShape) {
-            Canvas canvas = layer.getComp().getCanvas();
-            BufferedImage bi = createFilledImage(layer, Color.WHITE, null, null);
-            Graphics2D g = bi.createGraphics();
-            int width = canvas.getWidth();
-            int height = canvas.getHeight();
-            float cx = width / 2.0f;
-            float cy = height / 2.0f;
-            float radius = Math.min(cx, cy);
-            float[] fractions = {0.5f, 1.0f};
-            Paint gradient = new RadialGradientPaint(cx, cy, radius, fractions,
-                new Color[]{Color.WHITE, Color.BLACK});
-            g.setPaint(gradient);
-            g.fillRect(0, 0, width, height);
-            g.dispose();
-            return bi;
         }
     };
 
-    // Returns a canvas-sized image filled with the background color.
-    // If a foreground color is given, then fills the shape with it.
-    private static BufferedImage createFilledImage(Layer layer, Color bg, Color fg, Shape selShape) {
+    // Returns a canvas-sized image filled with the given color.
+    private static BufferedImage createSolidMask(Layer layer, Color color) {
         Canvas canvas = layer.getComp().getCanvas();
         int width = canvas.getWidth();
         int height = canvas.getHeight();
-        BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
-        Graphics2D g = bwImage.createGraphics();
+        BufferedImage grayImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
+        Graphics2D g = grayImage.createGraphics();
+
+        Colors.fillWith(color, g, width, height);
+
+        g.dispose();
+        return grayImage;
+    }
+
+    // Returns a canvas-sized image filled with the background color,
+    // and fills the given shape with the foreground color.
+    private static BufferedImage createSelectionMask(Layer layer, Color bg, Color fg, Shape shape) {
+        Canvas canvas = layer.getComp().getCanvas();
+        int width = canvas.getWidth();
+        int height = canvas.getHeight();
+        BufferedImage grayImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
+        Graphics2D g = grayImage.createGraphics();
 
         // fill background
         Colors.fillWith(bg, g, width, height);
 
-        // fill foreground
-        if (fg != null) {
-            g.setColor(fg);
-            if (selShape != null) {
-                g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-                g.fill(selShape);
-            } else {
-                throw new IllegalArgumentException("fg fill is given, but no shape");
-            }
-        }
+        // fill shape
+        g.setColor(fg);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.fill(shape);
+
         g.dispose();
-        return bwImage;
+        return grayImage;
     }
 
     // Returns a canvas-size grayscale image representing
@@ -123,48 +114,49 @@ public enum LayerMaskAddType {
         if (image != null) {
             return createMaskFromImage(image, onlyTransparency);
         } else {
-            // adjustment layer or smart filter, there is nothing better
+            // no pixel data to convert => fallback to a white mask
             assert layer instanceof AdjustmentLayer;
-            return REVEAL_ALL.createBWImage(layer, null);
+            return REVEAL_ALL.createMaskImage(layer, null);
         }
     }
 
     // creates a grayscale version of the given image
     private static BufferedImage createMaskFromImage(BufferedImage image,
                                                      boolean onlyTransparency) {
-        BufferedImage bwImage = new BufferedImage(
+        BufferedImage grayImage = new BufferedImage(
             image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
-        Graphics2D g = bwImage.createGraphics();
+        Graphics2D g = grayImage.createGraphics();
 
         if (onlyTransparency) {
-            PointFilter transparencyToBWFilter = new PointFilter("") {
+            var transparencyToGrayFilter = new PointFilter("") {
                 @Override
                 public int processPixel(int x, int y, int rgb) {
+                    // map alpha (0-255) to RGB grayscale (R=a, G=a, B=a)
                     int a = (rgb >>> 24) & 0xFF;
                     return 0xFF_00_00_00 | a << 16 | a << 8 | a;
                 }
             };
-            transparencyToBWFilter.setProgressTracker(ProgressTracker.NULL_TRACKER);
-            BufferedImage argbBWImage = transparencyToBWFilter.filter(image, null);
-            g.drawImage(argbBWImage, 0, 0, null);
+            transparencyToGrayFilter.setProgressTracker(ProgressTracker.NULL_TRACKER);
+            BufferedImage argbMaskImage = transparencyToGrayFilter.filter(image, null);
+            g.drawImage(argbMaskImage, 0, 0, null);
         } else {
             // fill the background with white so that transparent parts become white
             Colors.fillWith(Color.WHITE, g, image.getWidth(), image.getHeight());
             g.drawImage(image, 0, 0, null);
         }
         g.dispose();
-        return bwImage;
+        return grayImage;
     }
 
     private final String displayName;
     private final boolean needsSelection;
 
-    LayerMaskAddType(String guiName, boolean needsSelection) {
-        this.displayName = guiName;
+    MaskInitMethod(String displayName, boolean needsSelection) {
+        this.displayName = displayName;
         this.needsSelection = needsSelection;
     }
 
-    abstract BufferedImage createBWImage(Layer layer, Shape selShape);
+    abstract BufferedImage createMaskImage(Layer layer, Shape selShape);
 
     @Override
     public String toString() {

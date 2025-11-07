@@ -22,11 +22,12 @@ import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Texts;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
 
 /**
  * An abstract {@link Action} that toggles the visibility of something.
  */
-public abstract class ShowHideAction extends NamedAction.Checked {
+public abstract class ShowHideAction extends NamedAction {
     private final String showText;
     private final String hideText;
     protected final WorkSpace workSpace;
@@ -49,7 +50,7 @@ public abstract class ShowHideAction extends NamedAction.Checked {
     }
 
     @Override
-    protected void onClick() {
+    protected void onClick(ActionEvent e) {
         boolean currentVisibility = isVisible();
         setVisibility(!currentVisibility);
         updateText(!currentVisibility);

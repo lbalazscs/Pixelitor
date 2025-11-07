@@ -18,35 +18,24 @@
 package pixelitor.gui;
 
 import javax.swing.*;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static javax.swing.BorderFactory.createEmptyBorder;
-
 /**
- * A custom tab title renderer used in {@link TabsUI},
- * with a {@link CloseTabButton}
+ * A custom tab header component used in {@link TabsUI},
+ * with a {@link CloseTabButton}.
  */
-class TabTitleRenderer extends JPanel {
+public class TabHeader extends JPanel {
     private final JLabel titleLabel;
 
-    TabTitleRenderer(String title, TabViewContainer tab) {
-        super(new GridBagLayout());
+    TabHeader(String title, TabViewContainer tab) {
+        super(new BorderLayout(5, 0));
         setOpaque(false);
         titleLabel = new JLabel(title);
-        titleLabel.setBorder(createEmptyBorder(0, 0, 0, 5));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1;
-        add(titleLabel, gbc);
-
-        gbc.gridx++;
-        gbc.weightx = 0;
-        add(new CloseTabButton(tab), gbc);
+        add(titleLabel, BorderLayout.CENTER);
+        add(new CloseTabButton(tab), BorderLayout.EAST);
 
         forwardMouseEventsToTab(tab);
     }

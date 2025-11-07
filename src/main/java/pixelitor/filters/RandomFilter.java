@@ -23,7 +23,7 @@ import pixelitor.layers.Filterable;
 import java.awt.image.BufferedImage;
 
 /**
- * A filter that delegates the filtering to a randomly chosen filter
+ * A filter that delegates the filtering to a randomly chosen filter.
  */
 public class RandomFilter extends FilterWithGUI {
     public static final String NAME = "Random Filter";
@@ -35,13 +35,14 @@ public class RandomFilter extends FilterWithGUI {
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        // The real work is done by other filters
-        throw new UnsupportedOperationException("this should not be called");
+        // should be delegated to the randomly chosen filter
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void randomize() {
-        throw new UnsupportedOperationException("this should not be called");
+        // should be delegated to the randomly chosen filter
+        throw new UnsupportedOperationException();
     }
 
     @Override

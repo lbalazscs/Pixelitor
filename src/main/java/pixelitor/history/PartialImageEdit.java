@@ -180,17 +180,17 @@ public class PartialImageEdit extends FadeableEdit {
         // because Fade expects to fade images of equal size
         // TODO this is not the optimal solution  - Fade should fade only the changed area
         BufferedImage fullImage = dr.getImage();
-        BufferedImage previousImage = ImageUtils.copyImage(fullImage);
-        previousImage.setData(backupRaster);
+        BufferedImage prevImage = ImageUtils.copyImage(fullImage);
+        prevImage.setData(backupRaster);
 
         var selection = dr.getComp().getSelection();
         if (selection != null) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
-            previousImage = ImageUtils.extractSelectedRegion(
-                previousImage, selection, dr.getTx(), dr.getTy());
+            prevImage = ImageUtils.extractSelectedRegion(
+                prevImage, selection, dr.getTx(), dr.getTy());
         }
 
-        return previousImage;
+        return prevImage;
     }
 
     @Override

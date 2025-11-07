@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,33 +29,29 @@ import javax.swing.undo.CannotUndoException;
  */
 public class LayerBlendingEdit extends PixelitorEdit {
     private final Layer layer;
-    private BlendingMode backupBlendingMode;
+    private final BlendingMode oldMode;
+    private final BlendingMode newMode;
 
-    public LayerBlendingEdit(Layer layer, BlendingMode backupBlendingMode) {
+    public LayerBlendingEdit(Layer layer, BlendingMode oldMode) {
         super("Blending Mode Change", layer.getComp());
 
         this.layer = layer;
-        this.backupBlendingMode = backupBlendingMode;
+        this.oldMode = oldMode;
+        this.newMode = layer.getBlendingMode();
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        swapBlendingModes();
+        layer.setBlendingMode(oldMode, false, true);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        swapBlendingModes();
-    }
-
-    private void swapBlendingModes() {
-        BlendingMode tmp = layer.getBlendingMode();
-        layer.setBlendingMode(backupBlendingMode, false, true);
-        backupBlendingMode = tmp;
+        layer.setBlendingMode(newMode, false, true);
     }
 
     @Override
@@ -63,8 +59,8 @@ public class LayerBlendingEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode(key);
 
         node.add(layer.createDebugNode());
-        node.addAsString("current", layer.getBlendingMode());
-        node.addAsString("backup", backupBlendingMode);
+        node.addAsString("oldMode", oldMode);
+        node.addAsString("newMode", newMode);
 
         return node;
     }

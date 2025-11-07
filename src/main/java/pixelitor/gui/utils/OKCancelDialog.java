@@ -68,7 +68,7 @@ public abstract class OKCancelDialog extends JDialog {
         initCancelButton(cancelButton);
 
         pack();
-        Screens.positionWindow(this, SCREEN_CENTER, null);
+        Screens.positionWindow(this, SCREEN_CENTER);
     }
 
     private void initOKButton() {

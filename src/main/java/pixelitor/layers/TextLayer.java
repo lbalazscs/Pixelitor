@@ -354,7 +354,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public void enlargeCanvas(Outsets out) {
         BoxAlignment alignment = settings.getAlignment();
-        if (alignment == BoxAlignment.PATH) {
+        if (alignment.isPath()) {
             // the path will handle the canvas enlargement
             // and the text is glued to it => nothing to do
             return;

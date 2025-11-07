@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,14 +46,12 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
 
     @Override
     public void undo() throws CannotUndoException {
-        // perhaps the MaskViewMode should be saved here,
-        // like in the AddLayerMaskEdit
         assert layer.isActive() || AppMode.isUnitTesting();
 
         super.undo();
 
         layer.addConfiguredMask(prevMask);
-        prevMode.activate(comp, layer);
+        comp.setMaskViewMode(prevMode, layer);
     }
 
     @Override

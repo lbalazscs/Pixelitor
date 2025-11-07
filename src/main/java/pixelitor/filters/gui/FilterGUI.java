@@ -18,7 +18,6 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
 import javax.swing.*;
@@ -45,7 +44,7 @@ public abstract class FilterGUI extends JPanel {
     public void startPreview(boolean initialPreview) {
         // for the initial preview, show the busy cursor on the top-level container
         Component busyCursorTarget = initialPreview
-            ? GUIUtils.getTopmostContainer(this)
+            ? SwingUtilities.getWindowAncestor(this)
             : this;
         layer.startPreview(filter, initialPreview, busyCursorTarget);
     }

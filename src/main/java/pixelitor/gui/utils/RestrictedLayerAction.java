@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,14 @@ import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
+import java.util.function.Consumer;
+
 import static java.lang.String.format;
 
 /**
  * An action that can run only when the active layer has a specific type.
  */
-public abstract class RestrictedLayerAction extends AbstractViewEnabledAction {
+public final class RestrictedLayerAction extends AbstractViewEnabledAction {
     /**
      * On which layer types is a {@link RestrictedLayerAction} allowed to run
      */
@@ -50,12 +52,12 @@ public abstract class RestrictedLayerAction extends AbstractViewEnabledAction {
 
             @Override
             public String getErrorMessage(Layer layer) {
-                return null;
+                throw new IllegalStateException(); // should not be called
             }
 
             @Override
             public String getErrorTitle() {
-                return null;
+                throw new IllegalStateException(); // should not be called
             }
         };
 
@@ -113,21 +115,21 @@ public abstract class RestrictedLayerAction extends AbstractViewEnabledAction {
     }
 
     private final LayerRestriction restriction;
+    private final Consumer<Layer> action;
 
-    protected RestrictedLayerAction(String name, LayerRestriction restriction) {
+    public RestrictedLayerAction(String name, LayerRestriction restriction, Consumer<Layer> action) {
         super(name);
         this.restriction = restriction;
+        this.action = action;
     }
 
     @Override
     protected void onClick(Composition comp) {
         Layer activeLayer = comp.getActiveLayer();
         if (restriction.allows(activeLayer)) {
-            onActiveLayer(activeLayer);
+            action.accept(activeLayer);
         } else {
             restriction.showErrorMessage(activeLayer);
         }
     }
-
-    protected abstract void onActiveLayer(Layer layer);
 }

@@ -114,9 +114,7 @@ public class ShapesLayer extends ContentLayer {
             && styledShape.hasBlendingIssue();
         if (useCachedImage) {
             if (cachedImage == null) {
-                int width = comp.getCanvasWidth();
-                int height = comp.getCanvasHeight();
-                cachedImage = ImageUtils.createSysCompatibleImage(width, height);
+                cachedImage = ImageUtils.createSysCompatibleImage(comp.getCanvas());
                 Graphics2D imgG = cachedImage.createGraphics();
                 styledShape.paint(imgG);
                 imgG.dispose();
@@ -146,7 +144,7 @@ public class ShapesLayer extends ContentLayer {
         }
 
         // create a tightly cropped image for the shape
-        BufferedImage tightImage = ImageUtils.createSysCompatibleImage(shapeBounds.width, shapeBounds.height);
+        BufferedImage tightImage = ImageUtils.createSysCompatibleImage(shapeBounds);
         Graphics2D tightG = tightImage.createGraphics();
         try {
             // translate graphics to paint the shape relative to the tight image's origin

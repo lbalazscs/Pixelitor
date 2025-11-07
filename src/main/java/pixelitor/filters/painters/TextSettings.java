@@ -290,7 +290,7 @@ public class TextSettings implements Serializable, Debuggable {
             verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
         } else {
             BoxAlignment alignment = BoxAlignment.values()[alignIndex];
-            if (alignment == BoxAlignment.PATH && !Views.getActiveComp().hasActivePath()) {
+            if (alignment.isPath() && !Views.getActiveComp().hasActivePath()) {
                 alignment = BoxAlignment.CENTER_CENTER;
             }
             horizontalAlignment = alignment.getHorizontal();

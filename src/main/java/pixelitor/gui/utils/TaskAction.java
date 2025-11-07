@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,6 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.utils.Messages;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
@@ -29,12 +27,11 @@ public class TaskAction extends NamedAction {
     private final Runnable task;
 
     public TaskAction(Runnable task) {
-        this.task = task;
+        this(null, null, task);
     }
 
     public TaskAction(String name, Runnable task) {
-        super(name);
-        this.task = task;
+        this(name, null, task);
     }
 
     public TaskAction(String name, Icon icon, Runnable task) {
@@ -43,11 +40,7 @@ public class TaskAction extends NamedAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            task.run();
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
+    public void onClick(ActionEvent e) {
+        task.run();
     }
 }

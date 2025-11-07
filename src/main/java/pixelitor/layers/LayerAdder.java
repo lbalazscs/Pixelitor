@@ -139,6 +139,7 @@ public class LayerAdder {
         if (addToUI) {
             if (holder == comp) {
                 comp.getView().addLayerUI(layer, insertionIndex);
+                comp.layerUICountChanged();
             } else {
                 ((CompositeLayer) holder).updateChildrenUI();
             }

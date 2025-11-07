@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,34 +38,34 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         super(actual, RandomFilterSourceAssert.class);
     }
 
-    public RandomFilterSourceAssert lastFilterIsNull() {
+    public RandomFilterSourceAssert currentFilterIsNull() {
         isNotNull();
 
-        if (actual.getLastFilter() != null) {
-            failWithMessage("The last filter is not null");
+        if (actual.getCurrentFilter() != null) {
+            failWithMessage("The current filter is not null");
         }
 
         return this;
     }
 
-    public RandomFilterSourceAssert lastFilterIsNotNull() {
+    public RandomFilterSourceAssert currentFilterIsNotNull() {
         isNotNull();
 
-        if (actual.getLastFilter() == null) {
-            failWithMessage("The last filter is null");
+        if (actual.getCurrentFilter() == null) {
+            failWithMessage("The current filter is null");
         }
 
         return this;
     }
 
-    public RandomFilterSourceAssert lastFilterIs(Filter expected) {
+    public RandomFilterSourceAssert currentFilterIs(Filter expected) {
         isNotNull();
 
-        Filter lastFilter = actual.getLastFilter();
-        if (lastFilter != expected) {
+        Filter currentFilter = actual.getCurrentFilter();
+        if (currentFilter != expected) {
             failWithMessage(format("""
-                Expecting that the last filter is equal to the expected, but it is not.
-                Expected: %s, actual last filer: %s""", expected.getName(), lastFilter.getName()));
+                Expecting that the current filter is equal to the expected, but it is not.
+                Expected: %s, actual current filer: %s""", expected.getName(), currentFilter.getName()));
         }
 
         return this;

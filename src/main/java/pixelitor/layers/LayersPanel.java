@@ -32,37 +32,70 @@ import static java.util.stream.Collectors.toList;
  * Each {@link View} has its own {@link LayersPanel} instance.
  */
 public class LayersPanel extends JLayeredPane {
-    private final List<LayerGUI> layerGUIs = new ArrayList<>();
+    private final List<LayerGUI> layerButtons = new ArrayList<>();
     private final ButtonGroup buttonGroup = new ButtonGroup();
     private final DragReorderHandler dragReorderHandler;
-    private LayerGUI draggedGUI;
+    private LayerGUI draggedButton;
 
     public LayersPanel() {
         dragReorderHandler = new DragReorderHandler(this);
     }
 
+    /**
+     * Adds a single layer button at the given index.
+     */
     public void addLayerGUI(LayerGUI gui, int index) {
-        assert gui != null;
+        addLayerGUIImpl(gui, index);
 
-        buttonGroup.add(gui);
-        layerGUIs.add(index, gui);
-
-        add(gui, JLayeredPane.DEFAULT_LAYER);
-
-        // the new layer always becomes the selected layer
-        gui.setReactToItemEvents(false); // this selection should not go into history
-        gui.setSelected(true);
+        // finalize the single layer
+        gui.updateSelectionState();
         gui.setReactToItemEvents(true);
+        
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Batch addition method for all layers of a composition
+     * that revalidates only once at the end.
+     */
+    public void addLayerGUIs(List<LayerGUI> guis) {
+        assert layerButtons.isEmpty();
+
+        for (int i = 0; i < guis.size(); i++) {
+            addLayerGUIImpl(guis.get(i), i);
+        }
+
+        // finalize all layers after the batch addition
+        for (LayerGUI gui : guis) {
+            gui.updateSelectionState();
+            gui.setReactToItemEvents(true);
+        }
 
         revalidate();
         repaint();
+    }
+
+    private void addLayerGUIImpl(LayerGUI gui, int index) {
+        assert gui != null;
+
+        gui.setReactToItemEvents(false);
+
+        buttonGroup.add(gui);
+        layerButtons.add(index, gui);
+
+        add(gui, JLayeredPane.DEFAULT_LAYER);
+
+        // the new layer becomes selected in the button group, but
+        // item listeners won't fire yet because events are disabled
+        gui.setSelected(true);
 
         gui.attachDragHandler(dragReorderHandler);
     }
 
     public void removeLayerGUI(LayerGUI gui) {
         buttonGroup.remove(gui);
-        layerGUIs.remove(gui);
+        layerButtons.remove(gui);
         remove(gui);
         revalidate();
         repaint();
@@ -71,8 +104,8 @@ public class LayersPanel extends JLayeredPane {
     }
 
     public void reorderLayer(int oldIndex, int newIndex) {
-        LayerGUI layerGUI = layerGUIs.remove(oldIndex);
-        layerGUIs.add(newIndex, layerGUI);
+        LayerGUI layerGUI = layerButtons.remove(oldIndex);
+        layerButtons.add(newIndex, layerGUI);
 
         revalidate();
     }
@@ -86,7 +119,7 @@ public class LayersPanel extends JLayeredPane {
         if (firstUpdate) {
             // put it into the drag layer so that it is always visible
             setLayer(newDraggedGUI, JLayeredPane.DRAG_LAYER);
-            draggedGUI = newDraggedGUI;
+            draggedButton = newDraggedGUI;
         }
         swapIfNecessary(dragY);
     }
@@ -97,16 +130,16 @@ public class LayersPanel extends JLayeredPane {
      */
     @Override
     public void doLayout() {
-        int parentHeight = getHeight();
-        int y = parentHeight;
-        for (LayerGUI layerGUI : layerGUIs) {
-            int guiHeight = layerGUI.getPreferredHeight();
-            y -= guiHeight;
-            if (layerGUI != draggedGUI) {
-                layerGUI.setSize(getWidth(), guiHeight);
-                layerGUI.setLocation(0, y);
+        // layout components from bottom to top
+        int y = getHeight();
+        for (LayerGUI layerButton : layerButtons) {
+            int buttonHeight = layerButton.getPreferredHeight();
+            y -= buttonHeight;
+            if (layerButton != draggedButton) {
+                layerButton.setSize(getWidth(), buttonHeight);
+                layerButton.setLocation(0, y);
             }
-            layerGUI.setStaticY(y);
+            layerButton.setLayoutY(y);
         }
     }
 
@@ -114,29 +147,28 @@ public class LayersPanel extends JLayeredPane {
      * Change the order of layer GUIs while dragging
      */
     private void swapIfNecessary(int dragY) {
-        int staticY = draggedGUI.getStaticY();
-        int deltaY = dragY - staticY;
-        int draggedIndex = layerGUIs.indexOf(draggedGUI);
+        int deltaY = dragY - draggedButton.getLayoutY();
+        int draggedIndex = layerButtons.indexOf(draggedButton);
         if (deltaY > 0) {  // dragging downwards
             int indexBelow = draggedIndex - 1;
             if (indexBelow < 0) {
                 return;
             }
-            int swapDistance = layerGUIs.get(indexBelow).getPreferredHeight() / 2;
+            int swapDistance = layerButtons.get(indexBelow).getPreferredHeight() / 2;
             if (deltaY >= swapDistance) {
                 if (draggedIndex > 0) {
-                    Collections.swap(layerGUIs, indexBelow, draggedIndex);
+                    Collections.swap(layerButtons, indexBelow, draggedIndex);
                 }
             }
         } else { // dragging upwards
             int indexAbove = draggedIndex + 1;
-            if (indexAbove >= layerGUIs.size()) {
+            if (indexAbove >= layerButtons.size()) {
                 return;
             }
-            int swapDistance = layerGUIs.get(indexAbove).getPreferredHeight() / 2;
+            int swapDistance = layerButtons.get(indexAbove).getPreferredHeight() / 2;
             if (deltaY <= -swapDistance) {
-                if (draggedIndex < layerGUIs.size() - 1) {
-                    Collections.swap(layerGUIs, indexAbove, draggedIndex);
+                if (draggedIndex < layerButtons.size() - 1) {
+                    Collections.swap(layerButtons, indexAbove, draggedIndex);
                 }
             }
         }
@@ -144,41 +176,41 @@ public class LayersPanel extends JLayeredPane {
 
     // drag finished, put the last dragged back to the default JLayeredPane layer
     public void dragFinished() {
-        if (draggedGUI != null) {
-            setLayer(draggedGUI, JLayeredPane.DEFAULT_LAYER);
-            draggedGUI.dragFinished(layerGUIs.indexOf(draggedGUI)); // notify the composition
+        if (draggedButton != null) {
+            setLayer(draggedButton, JLayeredPane.DEFAULT_LAYER);
+            draggedButton.dragFinished(layerButtons.indexOf(draggedButton)); // notify the composition
         } else {
             throw new IllegalStateException();
         }
-        draggedGUI = null;
+        draggedButton = null;
         doLayout();
     }
 
     @Override
     public Dimension getPreferredSize() {
         int totalHeight = 0;
-        for (LayerGUI gui : layerGUIs) {
+        for (LayerGUI gui : layerButtons) {
             totalHeight += gui.getPreferredHeight();
         }
         return new Dimension(10, totalHeight);
     }
 
     public int getNumLayerGUIs() {
-        return layerGUIs.size();
+        return layerButtons.size();
     }
 
     public List<String> getLayerNames() {
-        return layerGUIs.stream()
+        return layerButtons.stream()
             .map(LayerGUI::getLayerName)
             .collect(toList());
     }
 
     public boolean containsGUI(LayerGUI gui) {
-        return layerGUIs.contains(gui);
+        return layerButtons.contains(gui);
     }
 
     public void updateThumbSize(int newThumbSize) {
-        for (LayerGUI gui : layerGUIs) {
+        for (LayerGUI gui : layerButtons) {
             gui.updateThumbSize(newThumbSize);
         }
     }

@@ -101,17 +101,17 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.HAS_LAYER_MASK;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.LayerClassRestriction;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.NO_LAYER_MASK;
-import static pixelitor.layers.LayerMaskAddType.FROM_LAYER;
-import static pixelitor.layers.LayerMaskAddType.FROM_TRANSPARENCY;
-import static pixelitor.layers.LayerMaskAddType.HIDE_ALL;
-import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
-import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
 import static pixelitor.layers.LayerMoveAction.LAYER_TO_BOTTOM;
 import static pixelitor.layers.LayerMoveAction.LAYER_TO_TOP;
 import static pixelitor.layers.LayerMoveAction.LOWER_LAYER_SELECTION;
 import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_DOWN;
 import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_UP;
 import static pixelitor.layers.LayerMoveAction.RAISE_LAYER_SELECTION;
+import static pixelitor.layers.MaskInitMethod.FROM_LAYER;
+import static pixelitor.layers.MaskInitMethod.FROM_TRANSPARENCY;
+import static pixelitor.layers.MaskInitMethod.HIDE_ALL;
+import static pixelitor.layers.MaskInitMethod.REVEAL_ALL;
+import static pixelitor.layers.MaskInitMethod.REVEAL_SELECTION;
 import static pixelitor.utils.Keys.*;
 
 /**
@@ -172,12 +172,8 @@ public class MenuBar extends JMenuBar {
             i18n.getString("export_layer_animation") + "...",
             LayerAnimation::showExportDialog));
 
-        fileMenu.add(new DrawableAction(i18n.getString("export_tweening_animation")) {
-            @Override
-            protected void process(Drawable dr) {
-                new TweenWizard(dr).start(pw);
-            }
-        });
+        fileMenu.add(new DrawableAction(i18n.getString("export_tweening_animation"),
+            dr -> new TweenWizard(dr).start(pw)));
 
         fileMenu.addSeparator();
 
@@ -231,20 +227,12 @@ public class MenuBar extends JMenuBar {
     private static JMenu createAutomateSubmenu(PixelitorWindow pw, ResourceBundle i18n) {
         PMenu automateMenu = new PMenu(i18n.getString("automate"));
 
-        automateMenu.add(new DrawableAction(i18n.getString("auto_paint")) {
-            @Override
-            protected void process(Drawable dr) {
-                AutoPaint.showDialog(dr);
-            }
-        });
+        automateMenu.add(new DrawableAction(i18n.getString("auto_paint"),
+            AutoPaint::showDialog));
 
         String batchFilterText = i18n.getString("batch_filter");
-        automateMenu.add(new DrawableAction(batchFilterText) {
-            @Override
-            protected void process(Drawable dr) {
-                new BatchFilterWizard(dr, batchFilterText).start(pw);
-            }
-        });
+        automateMenu.add(new DrawableAction(batchFilterText,
+            dr -> new BatchFilterWizard(dr, batchFilterText).start(pw)));
 
         String batchResizeText = i18n.getString("batch_resize");
         automateMenu.add(new TaskAction(
@@ -407,44 +395,24 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu(i18n.getString("layer_mask"));
 
         // add all-white layer mask (reveal all)
-        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_white"), NO_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.addMask(REVEAL_ALL);
-            }
-        });
+        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_white"), NO_LAYER_MASK,
+            layer -> layer.addMask(REVEAL_ALL)));
 
         // add all-black layer mask (hide all)
-        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_black"), NO_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.addMask(HIDE_ALL);
-            }
-        });
+        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_black"), NO_LAYER_MASK,
+            layer -> layer.addMask(HIDE_ALL)));
 
         // add mask based on the selection
-        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_from_sel"), NO_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.addMask(REVEAL_SELECTION);
-            }
-        });
+        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_from_sel"), NO_LAYER_MASK,
+            layer -> layer.addMask(REVEAL_SELECTION)));
 
         // add mask based on the alpha channel
-        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_from_transp"), NO_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.addMask(FROM_TRANSPARENCY);
-            }
-        });
+        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_from_transp"), NO_LAYER_MASK,
+            layer -> layer.addMask(FROM_TRANSPARENCY)));
 
         // add mask from grayscale version of layer
-        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_from_layer"), NO_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.addMask(FROM_LAYER);
-            }
-        });
+        sub.add(new RestrictedLayerAction(i18n.getString("lm_add_from_layer"), NO_LAYER_MASK,
+            layer -> layer.addMask(FROM_LAYER)));
 
         // add mask from color range
         sub.add(new ViewEnabledAction(
@@ -454,36 +422,29 @@ public class MenuBar extends JMenuBar {
         sub.addSeparator();
 
         // delete layer mask
-        sub.add(new RestrictedLayerAction(i18n.getString("lm_delete"), HAS_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.deleteMask(true);
-            }
-        });
+        sub.add(new RestrictedLayerAction(i18n.getString("lm_delete"), HAS_LAYER_MASK,
+            layer -> layer.deleteMask(true)));
 
         // apply layer mask
-        sub.add(new RestrictedLayerAction(i18n.getString("lm_apply"), HAS_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                if (!(layer instanceof ImageLayer)) {
-                    Messages.showNotImageLayerError(layer);
-                    return;
-                }
-
-                ((ImageLayer) layer).applyLayerMask(true);
-
-                // not necessary, as the result looks the same, but still
-                // useful because bugs would be spotted early
-                layer.update();
+        sub.add(new RestrictedLayerAction(i18n.getString("lm_apply"), HAS_LAYER_MASK, layer -> {
+            if (!(layer instanceof ImageLayer)) {
+                Messages.showNotImageLayerError(layer);
+                return;
             }
-        });
+
+            ((ImageLayer) layer).applyLayerMask(true);
+
+            // not necessary, as the result looks the same, but still
+            // useful because bugs would be spotted early
+            layer.update();
+        }));
 
         sub.addSeparator();
 
-        MaskViewMode.NORMAL.addToMenuBar(sub);
-        MaskViewMode.VIEW_MASK.addToMenuBar(sub);
-        MaskViewMode.EDIT_MASK.addToMenuBar(sub);
-        MaskViewMode.RUBYLITH.addToMenuBar(sub);
+        MaskViewMode.NORMAL.addToMainMenu(sub);
+        MaskViewMode.VIEW_MASK.addToMainMenu(sub);
+        MaskViewMode.EDIT_MASK.addToMainMenu(sub);
+        MaskViewMode.RUBYLITH.addToMainMenu(sub);
 
         return sub;
     }
@@ -498,28 +459,16 @@ public class MenuBar extends JMenuBar {
         var isTextLayer = new LayerClassRestriction(TextLayer.class, "text layer");
 
         // edit the active text layer
-        sub.add(new RestrictedLayerAction(i18n.getString("tl_edit") + "...", isTextLayer) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.edit();
-            }
-        }, CTRL_T);
+        sub.add(new RestrictedLayerAction(i18n.getString("tl_edit") + "...", isTextLayer,
+            Layer::edit), CTRL_T);
 
         // rasterize the active text layer
-        sub.add(new RestrictedLayerAction(i18n.getString("tl_rasterize"), isTextLayer) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.replaceWithRasterized();
-            }
-        });
+        sub.add(new RestrictedLayerAction(i18n.getString("tl_rasterize"), isTextLayer,
+            Layer::replaceWithRasterized));
 
         // create a selection from the text of a text layer
-        sub.add(new RestrictedLayerAction(i18n.getString("tl_sel"), isTextLayer) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                ((TextLayer) layer).createSelectionFromText();
-            }
-        });
+        sub.add(new RestrictedLayerAction(i18n.getString("tl_sel"), isTextLayer,
+            layer -> ((TextLayer) layer).createSelectionFromText()));
 
         return sub;
     }
@@ -542,7 +491,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createAdjustmentLayersSubmenu() {
         PMenu sub = new PMenu("Adjustment Layer");
 
-        for (Action action : AddAdjLayerAction.actions) {
+        for (Action action : AddAdjLayerAction.getActions()) {
             sub.add(action);
         }
 
@@ -564,29 +513,17 @@ public class MenuBar extends JMenuBar {
 
         var isSmartObject = new LayerClassRestriction(SmartObject.class, "smart object");
 
-        sub.add(new RestrictedLayerAction("Rasterize Smart Object", isSmartObject) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.replaceWithRasterized();
-            }
-        });
+        sub.add(new RestrictedLayerAction("Rasterize Smart Object", isSmartObject,
+            Layer::replaceWithRasterized));
 
-        sub.add(new RestrictedLayerAction("Edit Contents", isSmartObject) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.edit();
-            }
-        });
+        sub.add(new RestrictedLayerAction("Edit Contents", isSmartObject,
+            Layer::edit));
 
         sub.add(new ViewEnabledAction("Edit All Nested Contents",
             comp -> comp.forEachNestedSmartObject(SmartObject::edit)), CTRL_ALT_O);
 
-        sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                ((SmartObject) layer).editSelectedSmartFilter();
-            }
-        }, CTRL_SHIFT_E);
+        sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject,
+            layer -> ((SmartObject) layer).editSelectedSmartFilter()), CTRL_SHIFT_E);
 
         sub.add(new ViewEnabledAction("Add Linked...", comp -> {
             File file = FileChoosers.selectSupportedOpenFile();
@@ -600,12 +537,8 @@ public class MenuBar extends JMenuBar {
                 .exceptionally(Messages::showExceptionOnEDT);
         }));
 
-        sub.add(new RestrictedLayerAction("Clone", isSmartObject) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.getComp().shallowDuplicate((SmartObject) layer);
-            }
-        });
+        sub.add(new RestrictedLayerAction("Clone", isSmartObject,
+            layer -> layer.getComp().shallowDuplicate((SmartObject) layer)));
 
         return sub;
     }
@@ -618,19 +551,11 @@ public class MenuBar extends JMenuBar {
 
         var isColorFillLayer = new LayerClassRestriction(ColorFillLayer.class, "color fill layer");
 
-        sub.add(new RestrictedLayerAction("Edit Color Fill Layer...", isColorFillLayer) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.edit();
-            }
-        });
+        sub.add(new RestrictedLayerAction("Edit Color Fill Layer...", isColorFillLayer,
+            Layer::edit));
 
-        sub.add(new RestrictedLayerAction("Rasterize Color Fill Layer", isColorFillLayer) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.replaceWithRasterized();
-            }
-        });
+        sub.add(new RestrictedLayerAction("Rasterize Color Fill Layer", isColorFillLayer,
+            Layer::replaceWithRasterized));
 
         return sub;
     }
@@ -643,12 +568,8 @@ public class MenuBar extends JMenuBar {
 
         var isGradientFillLayer = new LayerClassRestriction(GradientFillLayer.class, "gradient fill layer");
 
-        sub.add(new RestrictedLayerAction("Rasterize Gradient Fill Layer", isGradientFillLayer) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.replaceWithRasterized();
-            }
-        });
+        sub.add(new RestrictedLayerAction("Rasterize Gradient Fill Layer", isGradientFillLayer,
+            Layer::replaceWithRasterized));
 
         return sub;
     }
@@ -659,14 +580,9 @@ public class MenuBar extends JMenuBar {
         sub.add(new ViewEnabledAction("New Shape Layer...",
             ShapesLayer::createNew), CTRL_ALT_S);
 
-        var isShapeLayer = new LayerClassRestriction(ShapesLayer.class, "shape layer");
-
-        sub.add(new RestrictedLayerAction("Rasterize Shape Layer", isShapeLayer) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.replaceWithRasterized();
-            }
-        });
+        sub.add(new RestrictedLayerAction("Rasterize Shape Layer",
+            new LayerClassRestriction(ShapesLayer.class, "shape layer"),
+            Layer::replaceWithRasterized));
 
         return sub;
     }
@@ -1308,38 +1224,16 @@ public class MenuBar extends JMenuBar {
         developMenu.add(createTestSubmenu());
 
         var isSmartObject = new LayerClassRestriction(SmartObject.class, "smart object");
-        abstract class ActiveSmartObjectAction extends RestrictedLayerAction {
-            protected ActiveSmartObjectAction(String name) {
-                super(name, isSmartObject);
-            }
 
-            @Override
-            protected void onActiveLayer(Layer layer) {
-                onActiveSO((SmartObject) layer);
-            }
+        developMenu.add(new RestrictedLayerAction("Edit 0", isSmartObject,
+            layer -> ((SmartObject) layer).getSmartFilter(0).edit()));
 
-            protected abstract void onActiveSO(SmartObject so);
-        }
+        developMenu.add(new RestrictedLayerAction("Edit 1", isSmartObject,
+            layer -> ((SmartObject) layer).getSmartFilter(1).edit()));
 
-        developMenu.add(new ActiveSmartObjectAction("Edit 0") {
-            @Override
-            protected void onActiveSO(SmartObject so) {
-                so.getSmartFilter(0).edit();
-            }
-        });
-        developMenu.add(new ActiveSmartObjectAction("Edit 1") {
-            @Override
-            protected void onActiveSO(SmartObject so) {
-                so.getSmartFilter(1).edit();
-            }
-        });
-        developMenu.add(new ActiveSmartObjectAction("Edit 2") {
-            @Override
-            protected void onActiveSO(SmartObject so) {
-                so.getSmartFilter(2).edit();
-            }
-        });
-
+        developMenu.add(new RestrictedLayerAction("Edit 2", isSmartObject,
+            layer -> ((SmartObject) layer).getSmartFilter(2).edit()));
+        
         return developMenu;
     }
 
@@ -1355,40 +1249,29 @@ public class MenuBar extends JMenuBar {
         sub.add(new ViewEnabledAction("Debug Active Composite Image",
             comp -> Debug.debugImage(comp.getCompositeImage(), "Composite of " + comp.getDebugName())));
 
-        sub.add(new DrawableAction("Debug ImageLayer Images") {
-            @Override
-            protected void process(Drawable dr) {
-                dr.debugImages();
-            }
-        });
+        sub.add(new DrawableAction("Debug ImageLayer Images",
+            Drawable::debugImages));
 
         sub.add(new ViewEnabledAction("Enable Mouse Debugging",
             comp -> GlobalEvents.enableMouseEventDebugging(false)));
 
-        sub.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                Debug.debugImage(imageLayer.getImage(), "layer image");
+        sub.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK, layer -> {
+            ImageLayer imageLayer = (ImageLayer) layer;
+            Debug.debugImage(imageLayer.getImage(), "layer image");
 
-                if (imageLayer.hasMask()) {
-                    LayerMask layerMask = imageLayer.getMask();
-                    BufferedImage maskImage = layerMask.getImage();
-                    Debug.debugImage(maskImage, "mask image");
+            if (imageLayer.hasMask()) {
+                LayerMask layerMask = imageLayer.getMask();
+                BufferedImage maskImage = layerMask.getImage();
+                Debug.debugImage(maskImage, "mask image");
 
-                    BufferedImage transparencyImage = layerMask.getTransparencyImage();
-                    Debug.debugImage(transparencyImage, "transparency image");
-                }
+                BufferedImage transparencyImage = layerMask.getTransparencyImage();
+                Debug.debugImage(transparencyImage, "transparency image");
             }
-        });
-
-        sub.add(new DrawableAction("Debug getCanvasSizedSubImage()") {
-            @Override
-            protected void process(Drawable dr) {
-                Debug.debugImage(dr.getCanvasSizedSubImage());
-            }
-        });
-
+        }));
+        
+        sub.add(new DrawableAction("Debug getCanvasSizedSubImage()",
+            dr -> Debug.debugImage(dr.getCanvasSizedSubImage())));
+        
         sub.add(new TaskAction("Debug Copy Brush",
             () -> CopyBrush.setDebugBrushImage(true)));
 

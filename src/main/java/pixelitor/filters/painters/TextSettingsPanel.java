@@ -32,6 +32,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
@@ -155,19 +156,7 @@ public class TextSettingsPanel extends FilterGUI
         lastBoxAlignment = alignment;
         boxAlignmentCB.setSelectedItem(alignment);
 
-        boxAlignmentCB.addActionListener(e -> {
-            BoxAlignment selectedAlignment = getSelectedBoxAlignment();
-            if (selectedAlignment == BoxAlignment.PATH && !comp.hasActivePath()) {
-                String msg = "<html>There's no path in <b>\"" + comp.getName() + "\"</b>.<br>You can have text along a path after creating a path with the Pen Tool.";
-                Messages.showError("No Path", msg, this);
-                boxAlignmentCB.setSelectedItem(lastBoxAlignment);
-                return;
-            }
-
-            lastBoxAlignment = selectedAlignment;
-            updateMLPAlignEnabled();
-            actionPerformed(e);
-        });
+        boxAlignmentCB.addActionListener(e -> boxAlignmentChanged(comp, e));
         gbh.addLabel("Box Alignment:", 0, 2);
 
         JPanel alignPanel = new JPanel(new FlowLayout(LEFT));
@@ -181,6 +170,20 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addControl(alignPanel);
 
         return textPanel;
+    }
+
+    private void boxAlignmentChanged(Composition comp, ActionEvent e) {
+        BoxAlignment selectedAlignment = getBoxAlignment();
+        if (selectedAlignment.isPath() && !comp.hasActivePath()) {
+            String msg = "<html>There's no path in <b>\"" + comp.getName() + "\"</b>.<br>You can have text along a path after creating a path with the Pen Tool.";
+            Messages.showError("No Path", msg, this);
+            boxAlignmentCB.setSelectedItem(lastBoxAlignment);
+            return;
+        }
+
+        lastBoxAlignment = selectedAlignment;
+        updateMLPAlignEnabled();
+        actionPerformed(e);
     }
 
     private void createTextArea(TextSettings settings) {
@@ -211,7 +214,7 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private void updateMLPAlignEnabled() {
-        boolean hasMLPAlignNow = getSelectedBoxAlignment() == BoxAlignment.PATH || textArea.getText().contains("\n");
+        boolean hasMLPAlignNow = getBoxAlignment().isPath() || textArea.getText().contains("\n");
         if (hasMLPAlignNow != hasMLPAlign) {
             hasMLPAlign = hasMLPAlignNow;
             mlpLabel.setEnabled(hasMLPAlign);
@@ -277,7 +280,7 @@ public class TextSettingsPanel extends FilterGUI
         if (advancedSettingsDialog == null) {
             advancedSettingsPanel = new AdvancedTextSettingsPanel(
                 this, fontInfo, relLineHeight, scaleX, scaleY, shearX, shearY);
-            JDialog owner = GUIUtils.getDialogAncestor(this);
+            Window owner = SwingUtilities.getWindowAncestor(this);
             advancedSettingsDialog = new DialogBuilder()
                 .owner(owner)
                 .content(advancedSettingsPanel)
@@ -383,7 +386,7 @@ public class TextSettingsPanel extends FilterGUI
             effects = effectsPanel.getEffects();
         }
 
-        BoxAlignment alignment = getSelectedBoxAlignment();
+        BoxAlignment alignment = getBoxAlignment();
 
         return new TextSettings(
             textArea.getText(),
@@ -400,7 +403,7 @@ public class TextSettingsPanel extends FilterGUI
             getShearX(), getShearY(), this);
     }
 
-    private BoxAlignment getSelectedBoxAlignment() {
+    private BoxAlignment getBoxAlignment() {
         return (BoxAlignment) boxAlignmentCB.getSelectedItem();
     }
 

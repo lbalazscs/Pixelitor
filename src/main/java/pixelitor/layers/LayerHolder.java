@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static pixelitor.layers.LayerMoveDirection.UP;
+
 /**
  * Interface representing any layer container that can hold multiple
  * child layers, such as compositions, layer groups, or smart objects.
@@ -116,32 +118,35 @@ public interface LayerHolder extends Debuggable {
      * Moves the currently active layer up or down in the layer stack.
      * Handles moving layers into or out of adjacent {@link LayerGroup}s automatically.
      */
-    default void reorderActiveLayer(boolean up) {
+    default void reorderActiveLayer(LayerMoveDirection direction) {
         assert isHolderOfActiveLayer();
         Layer activeLayer = getComp().getActiveLayer();
-        String editName = up ? LayerMoveAction.RAISE_LAYER : LayerMoveAction.LOWER_LAYER;
+        String editName = direction.getName();
 
         int index = indexOf(activeLayer);
         // if the layer is already at the edge of its current holder,
         // and the holder is a group, then move it out of the group
-        if ((up && index == getNumLayers() - 1) || (!up && index == 0)) {
-            if (this instanceof LayerGroup group) {
-                LayerHolder groupHolder = group.getHolder();
-                int groupIndex = groupHolder.indexOf(group);
-                int targetIndex = up ? groupIndex + 1 : groupIndex;
-                transferLayerToHolder(activeLayer, groupHolder, targetIndex, editName);
-                return;
-            }
+        boolean atEdge = direction.isAtEdge(index, getNumLayers());
+        if (atEdge && this instanceof LayerGroup group) {
+            LayerHolder groupHolder = group.getHolder();
+            int groupIndex = groupHolder.indexOf(group);
+
+            // logic for moving out of group:
+            // if moving UP, we target after the group (groupIndex + 1)
+            // if moving DOWN, we target the group's index (groupIndex)
+            int targetIndex = direction == UP ? groupIndex + 1 : groupIndex;
+            transferLayerToHolder(activeLayer, groupHolder, targetIndex, editName);
+            return;
         }
 
-        int newIndex = up ? index + 1 : index - 1;
+        int newIndex = direction == UP ? index + 1 : index - 1;
         if (newIndex < 0 || newIndex > getNumLayers() - 1) {
             return;
         }
         if (getLayer(newIndex) instanceof LayerGroup group) {
             // special case: move the layer into the group
 
-            int groupIndex = up ? 0 : group.getNumLayers();
+            int groupIndex = direction == UP ? 0 : group.getNumLayers();
             transferLayerToHolder(activeLayer, group, groupIndex, editName);
         } else {
             reorderLayer(index, newIndex, true, editName);

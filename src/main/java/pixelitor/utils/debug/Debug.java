@@ -17,10 +17,11 @@
 
 package pixelitor.utils.debug;
 
+import pixelitor.AppMode;
 import pixelitor.Canvas;
-import pixelitor.*;
+import pixelitor.Composition;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
-import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.util.Filters;
@@ -333,12 +334,7 @@ public class Debug {
         AddLayerMaskAction.INSTANCE.actionPerformed(null);
         View view = Views.getActive();
         Layer layer = view.getComp().getActiveLayer();
-        MaskViewMode.VIEW_MASK.activate(view, layer);
-    }
-
-    public static void addNewImageWithMask() {
-        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test", Composition.DEFAULT_DPI);
-        Views.getActiveLayer().addMask(LayerMaskAddType.PATTERN);
+        view.setMaskViewMode(MaskViewMode.VIEW_MASK, layer);
     }
 
     public static void copyInternalState() {

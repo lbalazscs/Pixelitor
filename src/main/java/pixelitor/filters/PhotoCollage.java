@@ -141,7 +141,8 @@ public class PhotoCollage extends ParametrizedFilter {
             0, 0, src.getWidth(), src.getHeight()));
 
         for (int i = 0; i < numPhotos; i++) {
-            var imageTransform = calcImageTransform(dest, photoWidth, photoHeight, rand);
+            var imageTransform = calcImageTransform(
+                dest.getWidth(), dest.getHeight(), photoWidth, photoHeight, rand);
             var shadowTransform = calcShadowTransform(imageTransform, shadowPadding, shadowOffset);
 
             // draw the shadow behind the photo
@@ -192,24 +193,18 @@ public class PhotoCollage extends ParametrizedFilter {
     }
 
     // calculate the transform of the image
-    private AffineTransform calcImageTransform(BufferedImage dest, int photoWidth, int photoHeight, Random rand) {
+    private AffineTransform calcImageTransform(int areaWidth, int areaHeight, int photoWidth, int photoHeight, Random rand) {
         // step 2: translate
         double tx, ty;
         if (allowOutside.isChecked()) {
-            tx = rand.nextInt(dest.getWidth()) - photoWidth / 2.0;
-            ty = rand.nextInt(dest.getHeight()) - photoHeight / 2.0;
+            tx = rand.nextInt(areaWidth) - photoWidth / 2.0;
+            ty = rand.nextInt(areaHeight) - photoHeight / 2.0;
         } else {
             // a small part could be still outside because of the
             // rotation, which is ignored here, but it's not a big deal.
-            int maxTranslateX = dest.getWidth() - photoWidth;
-            int maxTranslateY = dest.getHeight() - photoHeight;
-            if (maxTranslateX <= 0) {
-                maxTranslateX = 1;
-            }
-            if (maxTranslateY <= 0) {
-                maxTranslateY = 1;
-            }
+            int maxTranslateX = Math.max(1, areaWidth - photoWidth);
             tx = maxTranslateX * rand.nextDouble();
+            int maxTranslateY = Math.max(1, areaHeight - photoHeight);
             ty = maxTranslateY * rand.nextDouble();
         }
         var imageTransform = AffineTransform.getTranslateInstance(tx, ty);

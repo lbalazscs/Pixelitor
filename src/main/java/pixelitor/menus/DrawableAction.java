@@ -31,18 +31,30 @@ import java.util.function.Consumer;
  * An action that operates on a {@link Drawable}, and can optionally
  * rasterize other layer types or apply to smart objects.
  */
-public abstract class DrawableAction extends AbstractViewEnabledAction {
+public class DrawableAction extends AbstractViewEnabledAction {
     protected final String name;
     private final boolean allowSmartObjects;
 
-    protected DrawableAction(String name) {
-        this(name, true, false);
+    /**
+     * Defines the core task for this action, which operates on a {@link Drawable}
+     * that is either the original active layer or a newly rasterized one.
+     */
+    private final Consumer<Drawable> action;
+
+    private final Consumer<SmartObject> smartObjectAction;
+
+    public DrawableAction(String name, Consumer<Drawable> action) {
+        this(name, true, false, action, null);
     }
 
-    protected DrawableAction(String name, boolean hasDialog, boolean allowSmartObjects) {
+    public DrawableAction(String name, boolean hasDialog, boolean allowSmartObjects,
+                          Consumer<Drawable> action, Consumer<SmartObject> smartObjectAction) {
         super(name);
         this.allowSmartObjects = allowSmartObjects;
+        this.action = action;
+        this.smartObjectAction = smartObjectAction;
         assert name != null;
+        assert action != null;
 
         this.name = name;
         String menuName = hasDialog ? name + "..." : name;
@@ -53,24 +65,13 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
      * Runs the given task on the active layer if it is a {@link Drawable}.
      */
     public static void run(String taskName, Consumer<Drawable> task) {
-        var action = new DrawableAction(taskName) {
-            @Override
-            protected void process(Drawable dr) {
-                task.accept(dr);
-            }
-        };
+        var drawableAction = new DrawableAction(taskName, task);
         // Invoke later, because this is typically called from a GUI listener
         // and showing a dialog right now can cause weird things (the combo box
         // remains opened, the dialog button has to be pressed twice).
         // Also, it is good practice to ensure that the effects of original GUI change are complete.
-        EventQueue.invokeLater(() -> action.actionPerformed(null));
+        EventQueue.invokeLater(() -> drawableAction.actionPerformed(null));
     }
-
-    /**
-     * Defines the core task for this action, which operates on a {@link Drawable}
-     * that is either the original active layer or a newly rasterized one.
-     */
-    protected abstract void process(Drawable dr);
 
     @Override
     protected void onClick(Composition comp) {
@@ -80,13 +81,13 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
     private void startOnLayer(Layer layer) {
         // if we are editing a mask, the action applies to the mask
         if (layer.isMaskEditing()) {
-            process(layer.getMask());
+            action.accept(layer.getMask());
             return;
         }
 
         // if the layer itself is a drawable, process it directly
         if (layer instanceof Drawable dr) {
-            process(dr);
+            action.accept(dr);
             return;
         }
 
@@ -117,7 +118,7 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
         boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
         if (rasterize) {
             ImageLayer rasterizedLayer = layer.replaceWithRasterized();
-            process(rasterizedLayer);
+            action.accept(rasterizedLayer);
         }
     }
 
@@ -137,18 +138,16 @@ public abstract class DrawableAction extends AbstractViewEnabledAction {
 
     private void handleSmartObject(SmartObject so) {
         if (allowSmartObjects) {
-            applyToSmartObject(so);
+            if (smartObjectAction != null) {
+                smartObjectAction.accept(so);
+            }
             return;
         }
         boolean rasterize = Dialogs.showRasterizeDialog(so, name);
         if (rasterize) {
             ImageLayer rasterizedLayer = so.replaceWithRasterized();
-            process(rasterizedLayer);
+            action.accept(rasterizedLayer);
         }
-    }
-
-    protected void applyToSmartObject(SmartObject so) {
-        // do nothing by default
     }
 
     public String getName() {

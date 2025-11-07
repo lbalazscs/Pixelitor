@@ -48,6 +48,7 @@ import java.util.function.Supplier;
 import static java.awt.FlowLayout.CENTER;
 import static java.awt.FlowLayout.RIGHT;
 import static java.awt.Taskbar.Feature.PROGRESS_VALUE_WINDOW;
+import static java.awt.event.ActionEvent.CTRL_MASK;
 import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
@@ -102,9 +103,7 @@ public final class GUIUtils {
     }
 
     public static JPanel createVerticalPanel(ParamSet paramSet) {
-        JPanel panel = new JPanel(new GridBagLayout());
-        new GridBagHelper(panel).arrangeVertically(paramSet.getParams());
-        return panel;
+        return createVerticalPanel(paramSet.getParams());
     }
 
     public static JPanel createVerticalPanel(Iterable<? extends FilterSetting> settings) {
@@ -128,23 +127,6 @@ public final class GUIUtils {
         new GridBagHelper(panel).arrangeVertically(settings);
     }
 
-    public static Container getTopmostContainer(Container component) {
-        Container parent = component.getParent();
-        while (parent != null) {
-            if (parent instanceof Dialog) {
-                // don't jump from dialogs to their parents
-                return parent;
-            }
-            component = parent;
-            parent = component.getParent();
-        }
-        return component;
-    }
-
-    public static JDialog getDialogAncestor(Component c) {
-        return (JDialog) SwingUtilities.getWindowAncestor(c);
-    }
-
     public static void showDialog(JDialog dialog, JComponent parent) {
         setDialogLocation(dialog, parent);
         dialog.setVisible(true);
@@ -166,9 +148,9 @@ public final class GUIUtils {
     public static void showDialog(JDialog dialog, Screens.Align align) {
         Point lastLocation = dialogLocationsByTitle.get(dialog.getTitle());
         if (lastLocation != null) {
-            Screens.positionWindow(dialog, null, lastLocation);
+            Screens.positionWindow(dialog, lastLocation);
         } else {
-            Screens.positionWindow(dialog, align, null);
+            Screens.positionWindow(dialog, align);
         }
 
         dialog.setVisible(true);
@@ -427,8 +409,10 @@ public final class GUIUtils {
         return cb;
     }
 
-    public static <E> JComboBox<E> createComboBox(E[] values) {
+    public static <E> JComboBox<E> createComboBox(E[] values,
+                                                  ActionListener al) {
         JComboBox<E> cb = new JComboBox<>(values);
+        cb.addActionListener(al);
 
         // make sure all values are visible without a scrollbar
         cb.setMaximumRowCount(values.length);
@@ -454,5 +438,10 @@ public final class GUIUtils {
         linkedCB.setToolTipText(linkable.createLinkedToolTip());
         linkedCB.addActionListener(e -> linkable.setLinked(linkedCB.isSelected()));
         return linkedCB;
+    }
+
+    public static boolean isCtrlPressed(ActionEvent e) {
+        return e != null // could be null in unit tests
+            && ((e.getModifiers() & CTRL_MASK) == CTRL_MASK);
     }
 }

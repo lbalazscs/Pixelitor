@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,37 +28,27 @@ import javax.swing.undo.CannotUndoException;
  */
 public class LayerOpacityEdit extends PixelitorEdit {
     private final Layer layer;
-    private float backupOpacity;
+    private final float oldOpacity;
+    private final float newOpacity;
 
-    public LayerOpacityEdit(Layer layer, float backupOpacity) {
+    public LayerOpacityEdit(Layer layer, float oldOpacity) {
         super("Layer Opacity Change", layer.getComp());
 
         this.layer = layer;
-        this.backupOpacity = backupOpacity;
+        this.oldOpacity = oldOpacity;
+        this.newOpacity = layer.getOpacity();
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
-
-        swapOpacity();
+        layer.setOpacity(oldOpacity, false, true);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
-
-        swapOpacity();
-    }
-
-    private void swapOpacity() {
-        float tmp = layer.getOpacity();
-
-        layer.setOpacity(backupOpacity, false, true);
-        assert layer.getOpacity() == backupOpacity
-            : "backupOpacity = " + backupOpacity + ", current = " + layer.getOpacity();
-
-        backupOpacity = tmp;
+        layer.setOpacity(newOpacity, false, true);
     }
 
     public Layer getLayer() {
@@ -70,8 +60,8 @@ public class LayerOpacityEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode(key);
 
         node.add(layer.createDebugNode());
-        node.addFloat("current", layer.getOpacity());
-        node.addFloat("backup", backupOpacity);
+        node.addFloat("oldOpacity", oldOpacity);
+        node.addFloat("newOpacity", newOpacity);
 
         return node;
     }

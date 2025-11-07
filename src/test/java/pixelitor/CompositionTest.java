@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import pixelitor.compactions.Crop;
 import pixelitor.history.History;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMoveDirection;
 
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
@@ -353,7 +354,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.getActiveHolder().reorderActiveLayer(true);
+        comp.getActiveHolder().reorderActiveLayer(LayerMoveDirection.UP);
         // nothing changes as the active layer is already at the top
         assertThat(comp)
             .isNotDirty()
@@ -361,7 +362,7 @@ class CompositionTest {
             .secondLayerIsActive();
         History.assertNumEditsIs(0);
 
-        comp.getActiveHolder().reorderActiveLayer(false);
+        comp.getActiveHolder().reorderActiveLayer(LayerMoveDirection.DOWN);
         assertThat(comp)
             .isDirty()
             .layerNamesAre("layer 2", "layer 1")
@@ -377,7 +378,7 @@ class CompositionTest {
             .layerNamesAre("layer 2", "layer 1")
             .firstLayerIsActive();
 
-        comp.getActiveHolder().reorderActiveLayer(true);
+        comp.getActiveHolder().reorderActiveLayer(LayerMoveDirection.UP);
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();

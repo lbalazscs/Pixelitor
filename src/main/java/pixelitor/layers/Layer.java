@@ -25,7 +25,7 @@ import pixelitor.Features;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.RestrictedLayerAction;
+import pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
 import pixelitor.io.ORAImageInfo;
@@ -56,10 +56,10 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
-import static pixelitor.layers.LayerMaskAddType.HIDE_ALL;
-import static pixelitor.layers.LayerMaskAddType.HIDE_SELECTION;
-import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
-import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
+import static pixelitor.layers.MaskInitMethod.HIDE_ALL;
+import static pixelitor.layers.MaskInitMethod.HIDE_SELECTION;
+import static pixelitor.layers.MaskInitMethod.REVEAL_ALL;
+import static pixelitor.layers.MaskInitMethod.REVEAL_SELECTION;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
@@ -463,40 +463,40 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void addMask(boolean ctrlPressed) {
-        LayerMaskAddType type;
+        MaskInitMethod initMethod;
         if (comp.hasSelection()) {
-            type = ctrlPressed ? HIDE_SELECTION : REVEAL_SELECTION;
+            initMethod = ctrlPressed ? HIDE_SELECTION : REVEAL_SELECTION;
         } else {
-            type = ctrlPressed ? HIDE_ALL : REVEAL_ALL;
+            initMethod = ctrlPressed ? HIDE_ALL : REVEAL_ALL;
         }
-        addMask(type);
+        addMask(initMethod);
     }
 
-    public void addMask(LayerMaskAddType addType) {
-        addMask(addType, true);
+    public void addMask(MaskInitMethod initMethod) {
+        addMask(initMethod, true);
     }
 
-    public void addMask(LayerMaskAddType addType, boolean addHistory) {
+    public void addMask(MaskInitMethod initMethod, boolean addHistory) {
         if (hasMask()) {
-            RestrictedLayerAction.LayerRestriction.NO_LAYER_MASK.showErrorMessage(this);
+            LayerRestriction.NO_LAYER_MASK.showErrorMessage(this);
             return;
         }
-        if (addType.needsSelection() && !comp.hasSelection()) {
+        if (initMethod.needsSelection() && !comp.hasSelection()) {
             String msg = format("The composition \"%s\" has no selection to create a mask from.", comp.getName());
             Messages.showInfo("No Selection", msg, comp.getDialogParent());
             return;
         }
 
         Shape selShape = comp.getSelectionShape();
-        BufferedImage bwMask = addType.createBWImage(this, selShape);
+        BufferedImage bwMask = initMethod.createMaskImage(this, selShape);
         assert bwMask.getWidth() == comp.getCanvasWidth();
         assert bwMask.getHeight() == comp.getCanvasHeight();
 
-        String editName = addType.needsSelection()
+        String editName = initMethod.needsSelection()
             ? "Layer Mask from Selection"
             : "Add Layer Mask";
         addImageAsMask(bwMask, addHistory, addHistory,
-            editName, addType.needsSelection());
+            editName, initMethod.needsSelection());
     }
 
     /**
@@ -540,7 +540,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
         if (isActive()) {
             // switch to mask editing mode if the layer is active
-            MaskViewMode.EDIT_MASK.activate(comp, this);
+            comp.setMaskViewMode(MaskViewMode.EDIT_MASK, this);
         }
 
         if (addEdit) {
@@ -619,7 +619,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
         if (isActive()) {
             // switch back to normal layer editing
-            MaskViewMode.NORMAL.activate(view, this);
+            view.setMaskViewMode(MaskViewMode.NORMAL, this);
         }
         maskChanged();
         holder.update();
@@ -657,7 +657,7 @@ public abstract class Layer implements Serializable, Debuggable {
             return mask.modifyToHide(shape, createEdit);
         } else {
             // create a new mask that reveals only the shape area
-            var maskImage = REVEAL_SELECTION.createBWImage(this, shape);
+            var maskImage = REVEAL_SELECTION.createMaskImage(this, shape);
             return addImageAsMask(maskImage, createEdit, false,
                 "Add Layer Mask", false);
         }

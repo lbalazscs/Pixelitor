@@ -67,10 +67,9 @@ public class DeleteActiveLayerAction extends AbstractViewEnabledAction
     }
 
     private void enableDisable(LayerHolder holder, int layerCount) {
-        boolean shouldBeEnabled = holder.canBeEmpty()
-            ? layerCount > 0
-            : layerCount > 1;
-        setEnabled(shouldBeEnabled);
+        // minimum layers required to remain after deletion
+        int minLayers = holder.canBeEmpty() ? 0 : 1;
+        setEnabled(layerCount > minLayers);
     }
 
     @Override

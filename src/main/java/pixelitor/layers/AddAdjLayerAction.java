@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,10 @@ import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.gui.utils.AbstractViewEnabledAction;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -39,22 +39,17 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static java.awt.event.ActionEvent.CTRL_MASK;
-
 /**
  * An Action that adds a new adjustment layer to the active composition.
  */
 public class AddAdjLayerAction extends AbstractViewEnabledAction {
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
-    public static final List<Action> actions = List.of(
-        createAction(ColorBalance::new, ColorBalance.NAME),
-        createAction(Colorize::new, Colorize.NAME),
-        createAction(ToneCurvesFilter::new, ToneCurvesFilter.NAME),
-        createAction(GradientMap::new, GradientMap.NAME),
-        createAction(HueSat::new, HueSat.NAME)
-//        createAction(Levels::new, Levels.NAME)
-    );
+    private JPopupMenu popup;
+
+    // adjustment layer adding actions, used  
+    // both in the main menu and in the popup menu
+    private static final List<Action> actions = createActions();
 
     private AddAdjLayerAction() {
         super("Add Adjustment Layer",
@@ -63,24 +58,28 @@ public class AddAdjLayerAction extends AbstractViewEnabledAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            boolean ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
-            if (ctrlPressed) {
-                FilterAction action = FilterSearchPanel.showInDialog("Find Adjustment Layer");
-                if (action != null) {
-                    Filter filter = action.createNewFilterInstance();
-                    addAdjustmentLayer(filter, filter.getName());
-                }
-                return;
-            }
-
-            JPopupMenu popup = createActionsPopup();
-            Dimension size = popup.getPreferredSize();
-            popup.show((JButton) e.getSource(), 0, -size.height);
-        } catch (Exception ex) {
-            Messages.showException(ex);
+    public void onClick(ActionEvent e) {
+        if (GUIUtils.isCtrlPressed(e)) {
+            addFromFilterSearchDialog();
+        } else {
+            addFromPopupMenu(e);
         }
+    }
+
+    private static void addFromFilterSearchDialog() {
+        FilterAction action = FilterSearchPanel.showInDialog("Find Adjustment Layer");
+        if (action != null) {
+            Filter filter = action.createNewFilterInstance();
+            addAdjustmentLayer(filter, filter.getName());
+        }
+    }
+
+    private void addFromPopupMenu(ActionEvent e) {
+        if (popup == null) {
+            popup = createActionsPopup();
+        }
+        Dimension size = popup.getPreferredSize();
+        popup.show((JButton) e.getSource(), 0, -size.height);
     }
 
     @Override
@@ -96,6 +95,17 @@ public class AddAdjLayerAction extends AbstractViewEnabledAction {
         }
         popup.pack();
         return popup;
+    }
+
+    private static List<Action> createActions() {
+        return List.of(
+            createAction(ColorBalance::new, ColorBalance.NAME),
+            createAction(Colorize::new, Colorize.NAME),
+            createAction(ToneCurvesFilter::new, ToneCurvesFilter.NAME),
+            createAction(GradientMap::new, GradientMap.NAME),
+            createAction(HueSat::new, HueSat.NAME)
+//        createAction(Levels::new, Levels.NAME)
+        );
     }
 
     private static Action createAction(Supplier<Filter> factory, String name) {
@@ -117,5 +127,9 @@ public class AddAdjLayerAction extends AbstractViewEnabledAction {
             .addWithHistory(layer, "New Adjustment Layer");
 
         layer.edit();
+    }
+
+    public static List<Action> getActions() {
+        return actions;
     }
 }

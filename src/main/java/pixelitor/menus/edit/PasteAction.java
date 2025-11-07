@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Optional;
@@ -36,7 +37,7 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * Action for pasting an image from the system clipboard to a given target.
  */
-public class PasteAction extends NamedAction.Checked implements ViewActivationListener {
+public class PasteAction extends NamedAction implements ViewActivationListener {
     private final PasteTarget pasteTarget;
 
     public PasteAction(PasteTarget pasteTarget) {
@@ -51,7 +52,7 @@ public class PasteAction extends NamedAction.Checked implements ViewActivationLi
     }
 
     @Override
-    protected void onClick() {
+    protected void onClick(ActionEvent e) {
         retrieveClipboardImage().ifPresent(pasteTarget::paste);
     }
 

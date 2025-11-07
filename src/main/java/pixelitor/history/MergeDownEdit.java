@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,7 +67,7 @@ public class MergeDownEdit extends PixelitorEdit {
 
         // restore the original mask view mode of the merged layer
         if (layer.hasMask()) {
-            maskViewMode.activate(layer);
+            maskViewMode.activateOn(layer);
         }
     }
 

@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.ChannelMixer;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
@@ -66,7 +67,7 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     private static JPanel createPresetsPanel(Action[] presets) {
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, Y_AXIS));
-        rightPanel.setBorder(createTitledBorder(DialogMenuBar.BUILT_IN_PRESETS));
+        rightPanel.setBorder(createTitledBorder(GUIText.BUILT_IN_PRESETS));
         for (Action preset : presets) {
             JButton b = new JButton(preset);
             b.setAlignmentX(LEFT_ALIGNMENT);

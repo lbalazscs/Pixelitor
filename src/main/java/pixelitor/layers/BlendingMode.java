@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -139,8 +139,8 @@ public enum BlendingMode {
     private final String displayName;
     private final String svgName; // used by the OpenRaster import-export
 
-    BlendingMode(String guiName, String svgName) {
-        this.displayName = guiName;
+    BlendingMode(String displayName, String svgName) {
+        this.displayName = displayName;
         this.svgName = svgName;
     }
 

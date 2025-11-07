@@ -182,7 +182,7 @@ public class Views {
         // assume that the new view has a proper mask view mode set up
         LayerEvents.fireActiveCompChanged(comp, false);
 
-        boolean maskEditing = view.getMaskViewMode().editMask();
+        boolean maskEditing = view.getMaskViewMode().isEditingMask();
         Tools.maskEditingChanged(maskEditing);
         FgBgColors.maskEditingChanged(maskEditing);
 
@@ -266,8 +266,8 @@ public class Views {
 
                 switch (answer) {
                     case YES_OPTION:  // "Save"
-                        boolean fileSaved = FileIO.save(comp, false);
-                        if (fileSaved) {
+                        boolean saved = FileIO.save(comp, false);
+                        if (saved) {
                             view.close();
                         }
                         break;
@@ -277,7 +277,7 @@ public class Views {
                     case CANCEL_OPTION:
                     case CLOSED_OPTION:  // dialog closed by pressing X
                         // do nothing
-                        break;
+                        return;
                     default:
                         throw new IllegalStateException("answer = " + answer);
                 }
@@ -397,7 +397,7 @@ public class Views {
         comp.addLayersToUI();
         view.setCursor(Tools.getActive().getStartingCursor());
         views.add(view);
-        MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
+        view.setMaskViewMode(MaskViewMode.NORMAL, comp.getActiveLayer());
         ImageArea.addView(view);
         setActiveView(view, false);
     }

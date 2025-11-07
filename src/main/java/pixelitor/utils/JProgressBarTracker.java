@@ -17,8 +17,7 @@
 
 package pixelitor.utils;
 
-import pixelitor.gui.utils.GUIUtils;
-
+import javax.swing.*;
 import java.awt.Container;
 import java.awt.Cursor;
 
@@ -46,10 +45,9 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
         progressPanel.setProgress(0);
 
         // Find the top-level container for cursor management.
-        // It can be a window, but if progressPanel is not
-        // added yet to a window, the broadest available
-        // GUI area will do.
-        topContainer = GUIUtils.getTopmostContainer(progressPanel);
+        // It can be a window, but if progressPanel is not added
+        // yet to a window, the broadest available GUI area will do.
+        topContainer = SwingUtilities.getWindowAncestor(progressPanel);
     }
 
     @Override

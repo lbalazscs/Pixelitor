@@ -94,8 +94,7 @@ public enum CopySource {
         Rectangle selBounds = selectionShape.getBounds();
 
         // fill the new image first with a mask generated from the selection shape
-        BufferedImage selectedRegion = ImageUtils.createSysCompatibleImage(
-            selBounds.width, selBounds.height);
+        BufferedImage selectedRegion = ImageUtils.createSysCompatibleImage(selBounds);
         Graphics2D g2 = ImageUtils.createSoftSelectionMask(
             selectedRegion, selection.getShape(), selBounds.x, selBounds.y);
 

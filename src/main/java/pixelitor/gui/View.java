@@ -20,12 +20,14 @@ package pixelitor.gui;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
 import pixelitor.*;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
 import pixelitor.io.FileIO;
 import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
+import pixelitor.menus.edit.FadeAction;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionActions;
@@ -39,7 +41,6 @@ import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
-import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,6 +52,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.BLACK;
@@ -133,8 +136,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * Initiates an asynchronous reload of the composition from its associated file.
      */
     public CompletableFuture<Composition> reloadCompAsync() {
-        assert isActive();
-
         File file = comp.getFile();
         if (file == null) {
             Messages.showError("Cannot Reload", String.format(
@@ -176,14 +177,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         assert newComp != comp;
         assert !newComp.hasSelection();
 
-        if (comp.isSmartObjectContent()) {
-            // If the old composition was smart object content, re-link the
-            // owners to the new one. Owner is a transient field in Composition,
-            // so this must be done even when reloading from a PXC file.
-            for (SmartObject owner : comp.getOwners()) {
-                owner.setContent(newComp);
-            }
-        }
+        updateSmartObjectOwners(newComp);
         comp.closeAllNestedComps();
 
         // do this before actually replacing so that the old comp is
@@ -203,6 +197,17 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             newComp.getName(), newComp.getFile().getAbsolutePath()));
 
         return newComp;
+    }
+
+    private void updateSmartObjectOwners(Composition newComp) {
+        if (comp.isSmartObjectContent()) {
+            // If the old composition was smart object content, re-link the
+            // owners to the new one. Owner is a transient field in Composition,
+            // so this must be done even when reloading from a PXC file.
+            for (SmartObject owner : comp.getOwners()) {
+                owner.setContent(newComp);
+            }
+        }
     }
 
     // the simple form of replacing, used by multi-layer edits
@@ -253,7 +258,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         LayerEvents.fireActiveCompChanged(newComp, reloaded);
 
         // is this needed?
-        newMaskViewMode.activate(this, newComp.getActiveLayer());
+        setMaskViewMode(newMaskViewMode, newComp.getActiveLayer());
 
         repaintNavigator(true);
         HistogramsPanel.updateFrom(newComp);
@@ -395,7 +400,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         g2.translate(canvasStartX, canvasStartY);
 
         // paint zoom-independent checkerboard pattern
-        boolean showMask = maskViewMode.showMask();
+        boolean showMask = maskViewMode.isShowingMask();
         if (!showMask) {
             checkerboardPainter.paint(g2, this,
                 canvas.getCoWidth(), canvas.getCoHeight());
@@ -404,16 +409,18 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // apply canvas zoom
         g2.scale(zoomScale, zoomScale);
 
-        // after the translation and scaling, we are in image space
-
+        // paint the content in image space
         if (showMask) {
+            // paint the mask
             LayerMask mask = comp.getActiveLayer().getMask();
             assert mask != null : "no mask in " + maskViewMode;
             mask.paint(g2, true);
         } else {
+            // paint the composite image if the composition
             g2.drawImage(comp.getCompositeImage(), 0, 0, null);
 
-            if (maskViewMode.showRubylith()) {
+            if (maskViewMode.isShowingRubylith()) {
+                // paint the mask as a red "rubylith" overlay over the composite image
                 LayerMask mask = comp.getActiveLayer().getMask();
                 assert mask != null : "no mask in " + maskViewMode;
                 mask.paintAsRubylith(g2);
@@ -422,14 +429,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         comp.paintSelection(g2);
 
+        // get back into "component space"
         g2.setTransform(componentTransform);
-        // now we are back in "component space"
 
         paintOverlays(g2);
     }
 
     /**
-     * Paints overlays that appear on top of the image content.
+     * Paints overlays that appear on top of the image content (grid, guides, tools).
      */
     private void paintOverlays(Graphics2D g2) {
         if (pixelGridVisible && allowPixelGrid()) {
@@ -456,6 +463,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         Rectangle visibleRect = getVisibleRegion();
 
+        // calculate bounds in component space
         double startX = canvasStartX;
         if (visibleRect.x > 0) {
             startX += Math.floor(visibleRect.x / pixelSize) * pixelSize;
@@ -518,33 +526,21 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         double endX = end.getCoX();
         double endY = end.getCoY();
 
-        // make sure that the start coordinates are smaller
-        if (endX < startX) {
-            double tmp = startX;
-            startX = endX;
-            endX = tmp;
-        }
-        if (endY < startY) {
-            double tmp = startY;
-            startY = endY;
-            endY = tmp;
-        }
+        // determine bounds
+        double minX = Math.min(startX, endX);
+        double maxX = Math.max(startX, endX);
+        double minY = Math.min(startY, endY);
+        double maxY = Math.max(startY, endY);
 
-        // the thickness is derived from the brush radius, therefore
-        // it still needs to be converted into component space
-        thickness = zoomScale * thickness;
+        // adjust for thickness (zoom dependent)
+        double coThickness = zoomScale * thickness;
 
-        startX = startX - thickness;
-        endX = endX + thickness;
-        startY = startY - thickness;
-        endY = endY + thickness;
+        int x = (int) (minX - coThickness);
+        int y = (int) (minY - coThickness);
+        int w = (int) (maxX - minX + 2 * coThickness) + 1;
+        int h = (int) (maxY - minY + 2 * coThickness) + 1;
 
-        // add 1 to the width and height because
-        // casting to int will round them downwards
-        double repWidth = endX - startX + 1;
-        double repHeight = endY - startY + 1;
-
-        repaint((int) startX, (int) startY, (int) repWidth, (int) repHeight);
+        repaint(x, y, w, h);
     }
 
     /**
@@ -564,17 +560,37 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return maskViewMode;
     }
 
-    public boolean setMaskViewModeInternal(MaskViewMode maskViewMode) {
-        // should only be called from MaskViewMode.activate,
-        // as it sets the mode without triggering related UI updates
-        assert Assertions.callingClassIs("MaskViewMode");
+    /**
+     * Activates this mask view mode on the given layer.
+     */
+    public void setMaskViewMode(MaskViewMode maskViewMode, Layer layer) {
+        assert layer.getComp() == comp;
+        assert layer.isActive();
+        assert maskViewMode.isApplicableTo(layer);
 
         boolean changed = this.maskViewMode != maskViewMode;
         if (changed) {
             this.maskViewMode = maskViewMode;
             repaint();
         }
-        return changed;
+        boolean maskEditing = maskViewMode.isEditingMask();
+        layer.setMaskEditing(maskEditing);
+        if (changed) {
+            notifyMaskEditingChanged(maskEditing, layer);
+        }
+    }
+
+    private void notifyMaskEditingChanged(boolean maskEditing, Layer layer) {
+        FgBgColors.maskEditingChanged(maskEditing);
+
+        if (!isMock()) {
+            Tools.maskEditingChanged(maskEditing);
+        }
+
+        boolean canFade = maskEditing
+            ? History.canFade(layer.getMask())
+            : (layer instanceof ImageLayer imageLayer && History.canFade(imageLayer));
+        FadeAction.INSTANCE.updateGUI(canFade);
     }
 
     /**
@@ -584,7 +600,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         assert Invariants.imageCoversCanvas(comp);
 
         fitFrameToCanvas();
-        updateCanvasLocation();
+        updateLayout();
     }
 
     private void fitFrameToCanvas() {
@@ -722,12 +738,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void setSize(int width, int height) {
         super.setSize(width, height);
 
-        updateCanvasLocation();
+        updateLayout();
         repaint();
     }
 
     // recalculates coordinates when the view's layout changes
-    private void updateCanvasLocation() {
+    private void updateLayout() {
         int viewWidth = getWidth();
         int viewHeight = getHeight();
         int canvasCoWidth = canvas.getCoWidth();
@@ -899,19 +915,25 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         // can be cast outside unit tests
         LayerGUI layerGUI = (LayerGUI) layer.createUI();
+        layersPanel.addLayerGUI(layerGUI, index);
+    }
 
-        try {
-            // otherwise loading multi-layer files makes the comp dirty
-            layerGUI.setReactToItemEvents(false);
-            layersPanel.addLayerGUI(layerGUI, index);
-            layerGUI.updateSelectionState();
-        } finally {
-            layerGUI.setReactToItemEvents(true);
+    /**
+     * Batch addition method for all layers of a composition.
+     */
+    public void addAllLayerUIs(List<Layer> layers) {
+        assert calledOnEDT() : callInfo();
+
+        // create all layer buttons
+        List<LayerGUI> guis = new ArrayList<>(layers.size());
+        for (Layer layer : layers) {
+            // can be cast outside unit tests
+            LayerGUI layerGUI = (LayerGUI) layer.createUI();
+            guis.add(layerGUI);
         }
 
-        if (isActive() && comp.isHolderOfActiveLayer()) {
-            LayerEvents.fireLayerCountChanged(comp, comp.getNumLayers());
-        }
+        // batch add to panel (revalidates only once)
+        layersPanel.addLayerGUIs(guis);
     }
 
     /**

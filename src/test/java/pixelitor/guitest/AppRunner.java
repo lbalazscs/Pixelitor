@@ -32,7 +32,7 @@ import org.assertj.swing.timing.Timeout;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.FgBgColorSelector;
-import pixelitor.filters.gui.DialogMenuBar;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
@@ -830,7 +830,7 @@ public class AppRunner {
         JMenuBar menuBar = realDialog.getJMenuBar();
         if (menuBar != null) {
             JMenu firstMenu = menuBar.getMenu(0);
-            if (DialogMenuBar.PRESETS.equals(firstMenu.getText())) {
+            if (GUIText.PRESETS.equals(firstMenu.getText())) {
                 return firstMenu;
             }
         }

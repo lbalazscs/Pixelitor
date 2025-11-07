@@ -17,20 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.TaskAction;
-import pixelitor.io.FileUtils;
-import pixelitor.utils.Messages;
-
-import javax.swing.*;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
-import java.util.function.Consumer;
-
-import static pixelitor.filters.gui.UserPreset.PRESETS_DIR;
-
 /**
  * Represents a component (such as a filter or tool) that can
  * load and save its current state as {@link Preset} objects.
@@ -87,64 +73,5 @@ public interface PresetOwner {
     default void loadFilterState(FilterState filterState, boolean reset) {
         // used only for parametrized filters
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Creates an action that opens the {@link UserPreset} directory
-     * in the system's file manager.
-     */
-    default TaskAction createManagePresetsAction() {
-        return new TaskAction("Manage Presets...", () -> {
-            try {
-                String dirPath = PRESETS_DIR + File.separator + getPresetDirName();
-                Desktop.getDesktop().open(new File(dirPath));
-            } catch (IOException ex) {
-                Messages.showException(ex);
-            }
-        });
-    }
-
-    /**
-     * Creates an {@link Action} that prompts the user to save
-     * the current state as a new {@link UserPreset}.
-     */
-    default Action createSavePresetAction(Component parent,
-                                          Consumer<UserPreset> menuAdder,
-                                          Consumer<UserPreset> menuRemover) {
-        return new TaskAction("Save Preset...", () ->
-            savePreset(parent, menuAdder, menuRemover));
-    }
-
-    private void savePreset(Component parent,
-                            Consumer<UserPreset> menuAdder,
-                            Consumer<UserPreset> menuRemover) {
-        String presetName = Dialogs.showInputDialog(
-            parent, "Preset Name", "Preset Name:");
-        if (presetName == null || presetName.isBlank()) {
-            return;
-        }
-
-        presetName = FileUtils.sanitizeToFileName(presetName);
-        UserPreset preset = createUserPreset(presetName);
-
-        if (preset.fileExists()) {
-            boolean overwrite = confirmOverwrite(parent, preset.getName());
-            if (!overwrite) {
-                return;
-            }
-            // if the user overwrites an existing preset,
-            // remove the old menu item before adding the new one
-            menuRemover.accept(preset);
-        }
-        preset.save();
-        menuAdder.accept(preset); // add the new preset to the menu
-    }
-
-    private static boolean confirmOverwrite(Component parent, String presetName) {
-        String title = "Preset Exists";
-        String msg = String.format("The preset \"%s\" already exists. Overwrite?",
-            presetName);
-        int msgType = JOptionPane.WARNING_MESSAGE;
-        return Dialogs.showYesNoDialog(parent, title, msg, msgType);
     }
 }

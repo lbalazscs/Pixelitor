@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,9 @@ import pixelitor.filters.PolarTiles;
  */
 public class PolarTilesFilter extends CenteredTransformFilter {
     private double zoom;
-    private double rotateResult;
+    private double imageRotation;
     private float curvature;
-    private double rotateEffect;
+    private double effectRotation;
     private int numADivisions;
     private int numRDivisions;
     private float randomness;
@@ -55,7 +55,7 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         double r = Math.sqrt(dx * dx + dy * dy);
         double rr = r;
         if (mode != MODE_CONCENTRIC) {
-            double spiralCorr = srcWidth * (Math.PI + angle + rotateEffect) / (4 * Math.PI);
+            double spiralCorr = srcWidth * (Math.PI + angle + effectRotation) / (4 * Math.PI);
             if (mode == MODE_SPIRAL) {
                 spiralCorr /= numRDivisions;
             }
@@ -63,7 +63,7 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         }
 
         if (numADivisions > 0) {
-            double tan = FastMath.tan(randomShift + rotateEffect + angle * numADivisions / 2);
+            double tan = FastMath.tan(randomShift + effectRotation + angle * numADivisions / 2);
             double angleShift = tan * curvature * (numADivisions / 4.0) / r;
             angle += angleShift;
         }
@@ -74,7 +74,7 @@ public class PolarTilesFilter extends CenteredTransformFilter {
             r += rShift;
         }
 
-        angle += rotateResult;
+        angle += imageRotation;
 
         double zoomedR = r / zoom;
         double u = zoomedR * FastMath.cos(angle);
@@ -88,12 +88,12 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         this.zoom = zoom;
     }
 
-    public void setRotateResult(double rotateResult) {
-        this.rotateResult = rotateResult;
+    public void setImageRotation(double imageRotation) {
+        this.imageRotation = imageRotation;
     }
 
-    public void setRotateEffect(double rotateEffect) {
-        this.rotateEffect = Math.PI * rotateEffect;
+    public void setEffectRotation(double effectRotation) {
+        this.effectRotation = Math.PI * effectRotation;
     }
 
     public void setNumADivisions(int numADivisions) {

@@ -25,11 +25,12 @@ import pixelitor.tools.AbstractBrushTool;
 import pixelitor.utils.Messages;
 
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 
 /**
  * Strokes a shape with an {@link AbstractBrushTool}
  */
-public class TraceAction extends NamedAction.Checked {
+public class TraceAction extends NamedAction {
     private final AbstractBrushTool brushTool;
 
     public TraceAction(String name, AbstractBrushTool brushTool) {
@@ -38,7 +39,7 @@ public class TraceAction extends NamedAction.Checked {
     }
 
     @Override
-    protected void onClick() {
+    protected void onClick(ActionEvent e) {
         Views.onActiveComp(this::trace);
     }
 

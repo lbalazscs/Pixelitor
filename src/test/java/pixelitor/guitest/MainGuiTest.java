@@ -1621,6 +1621,26 @@ public class MainGuiTest {
         testFilterWithDialog("Four Color Gradient", FilterOptions.RENDERING);
     }
 
+    private void testArtisticFilters() {
+        testFilterWithDialog("Comic Book", FilterOptions.STANDARD);
+        testFilterWithDialog("Crystallize", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Emboss", FilterOptions.STANDARD);
+        testFilterWithDialog("Oil Painting", FilterOptions.STANDARD);
+        testFilterWithDialog("Orton Effect", FilterOptions.STANDARD);
+        testFilterWithDialog("Photo Collage", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Pointillize", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Smear", FilterOptions.STANDARD);
+        testFilterWithDialog("Spheres", FilterOptions.STANDARD);
+        testFilterWithDialog("Stamp", FilterOptions.STANDARD);
+        testFilterWithDialog("Weave", FilterOptions.STANDARD);
+
+        testFilterWithDialog("Dots Halftone", FilterOptions.STANDARD);
+        testFilterWithDialog("Striped Halftone", FilterOptions.STANDARD);
+        testFilterWithDialog("Concentric Halftone", FilterOptions.STANDARD);
+        testFilterWithDialog("Color Halftone", FilterOptions.STANDARD);
+        testFilterWithDialog("Ordered Dithering", FilterOptions.STANDARD);
+    }
+
     private void testBlurSharpenFilters() {
         testFilterWithDialog("Box Blur", FilterOptions.STANDARD);
         testFilterWithDialog("Focus", FilterOptions.STANDARD);
@@ -1723,26 +1743,6 @@ public class MainGuiTest {
         testFilterWithDialog("Truchet Tiles", FilterOptions.RENDERING);
     }
 
-    private void testArtisticFilters() {
-        testFilterWithDialog("Comic Book", FilterOptions.STANDARD);
-        testFilterWithDialog("Crystallize", FilterOptions.STANDARD_RESEED);
-        testFilterWithDialog("Pointillize", FilterOptions.STANDARD_RESEED);
-        testFilterWithDialog("Stamp", FilterOptions.STANDARD);
-        testFilterWithDialog("Oil Painting", FilterOptions.STANDARD);
-        testFilterWithDialog("Spheres", FilterOptions.STANDARD);
-        testFilterWithDialog("Smear", FilterOptions.STANDARD);
-        testFilterWithDialog("Emboss", FilterOptions.STANDARD);
-        testFilterWithDialog("Orton Effect", FilterOptions.STANDARD);
-        testFilterWithDialog("Photo Collage", FilterOptions.STANDARD_RESEED);
-        testFilterWithDialog("Weave", FilterOptions.STANDARD);
-
-        testFilterWithDialog("Dots Halftone", FilterOptions.STANDARD);
-        testFilterWithDialog("Striped Halftone", FilterOptions.STANDARD);
-        testFilterWithDialog("Concentric Halftone", FilterOptions.STANDARD);
-        testFilterWithDialog("Color Halftone", FilterOptions.STANDARD);
-        testFilterWithDialog("Ordered Dithering", FilterOptions.STANDARD);
-    }
-
     private void testFindEdgesFilters() {
         testFilterWithDialog("Canny", FilterOptions.STANDARD);
         testFilterWithDialog("Convolution Edge Detection", FilterOptions.STANDARD);
@@ -1796,11 +1796,11 @@ public class MainGuiTest {
         testFilterWithDialog("Custom 3x3 Convolution", FilterOptions.NONE, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
             "Edge Detection", "Edge Detection 2", "Horizontal Edge Detection",
             "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
-            "Reset", "Randomize");
+            "Reset All", "Randomize");
         testFilterWithDialog("Custom 5x5 Convolution", FilterOptions.NONE, "Diamond Blur", "Motion Blur",
             "Find Horizontal Edges", "Find Vertical Edges",
             "Find / Edges", "Find \\ Edges", "Sharpen",
-            "Reset", "Randomize");
+            "Reset All", "Randomize");
     }
 
     private void testTransitionsFilters() {

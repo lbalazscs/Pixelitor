@@ -19,7 +19,7 @@ package pixelitor.testutils;
 
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMaskAddType;
+import pixelitor.layers.MaskInitMethod;
 
 /**
  * Whether a layer mask is added to a layer during tests.
@@ -29,7 +29,7 @@ public enum WithMask {
         @Override
         public void configure(Layer layer) {
             if (!layer.hasMask()) {
-                layer.addMask(LayerMaskAddType.REVEAL_ALL, false);
+                layer.addMask(MaskInitMethod.REVEAL_ALL, false);
             }
         }
     }, NO {
