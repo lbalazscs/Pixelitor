@@ -38,20 +38,12 @@ class ColorPickerDialog extends JDialog {
     @Serial
     private static final long serialVersionUID = 2L;
 
-    private ColorPicker cp;
+    private final ColorPicker cp;
     private Color returnValue = null;
 
-    public ColorPickerDialog(Frame owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
+    public ColorPickerDialog(Window owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
         super(owner);
-        initialize(owner, color, includeOpacity, adjustmentListener);
-    }
 
-    public ColorPickerDialog(Dialog owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
-        super(owner);
-        initialize(owner, color, includeOpacity, adjustmentListener);
-    }
-
-    private void initialize(Component owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
         cp = new ColorPicker(true, includeOpacity);
         setModal(true);
         setResizable(false);
@@ -93,4 +85,3 @@ class ColorPickerDialog extends JDialog {
         return returnValue;
     }
 }
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -99,16 +99,13 @@ public final class SelectionChangeResult {
 
     public void showInfoDialog(String source) {
         switch (status) {
-            case SUCCESS -> {
-                throw new IllegalStateException(); // should not be called for success
-            }
+            // should not be called for success
+            case SUCCESS -> throw new IllegalStateException();
             case CANCELLED -> {
                 // do nothing, as the user intentionally cancelled
             }
-            case OUT_OF_BOUNDS -> {
-                Dialogs.showInfoDialog("No Selection",
-                    String.format("No selection was created because the %s is outside the canvas.", source));
-            }
+            case OUT_OF_BOUNDS -> Dialogs.showInfoDialog("No Selection",
+                String.format("No selection was created because the %s is outside the canvas.", source));
         }
     }
 }

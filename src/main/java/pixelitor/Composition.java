@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,7 @@ import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.*;
-import pixelitor.io.FileFormat;
-import pixelitor.io.FileUtils;
-import pixelitor.io.IOTasks;
-import pixelitor.io.SaveSettings;
+import pixelitor.io.*;
 import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
@@ -409,6 +406,18 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // if a content file is opened independently of its parent,
         // then this will return false, even for PXC files
         return owners != null;
+    }
+
+    public void addLinkedSmartObject() {
+        File linkedContentFile = FileChoosers.selectSupportedOpenFile();
+        if (linkedContentFile == null) {
+            return;
+        }
+
+        FileIO.loadCompAsync(linkedContentFile)
+            .thenAcceptAsync(content ->
+                add(new SmartObject(linkedContentFile, this, content)), onEDT)
+            .exceptionally(Messages::showExceptionOnEDT);
     }
 
     public int getDpi() {

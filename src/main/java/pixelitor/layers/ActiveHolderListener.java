@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 
 /**
- * A listener for changes in layer count, selection, and order within
+ * A listener for changes in layer count and selection within
  * the active {@link LayerHolder} of the active {@link Composition}.
  * It doesn't observe a specific {@link LayerHolder}, but rather the active one.
  */

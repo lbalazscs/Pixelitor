@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,8 @@ import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * The "Abstract Lights" filter.
+ * It renders abstract "light painting" patterns by simulating
+ * a system of moving particles connected by semi-transparent lines.
  * The algorithm is based on <a href="https://codepen.io/tsuhre/pen/BYbjyg">this codepen by Ben Matthews</a>.
  */
 public class AbstractLights extends ParametrizedFilter {
@@ -72,6 +74,10 @@ public class AbstractLights extends ParametrizedFilter {
             this.displayName = displayName;
         }
 
+        /**
+         * Performance optimization to avoid unnecessary edge
+         * collision checks for simulation types that never bounce.
+         */
         public boolean canBounce() {
             return this == CHAOS || this == STAR;
         }
@@ -146,8 +152,9 @@ public class AbstractLights extends ParametrizedFilter {
         g2.fillRect(0, 0, width, height);
 
         float darkening = 1.0f;
+        double brightness = brightnessParam.getValueAsDouble();
         // the sqrt is an attempt to use linear light calculations
-        float alpha = (float) (brightnessParam.getValueAsDouble() / (200.0 * Math.sqrt(lineWidth)));
+        float alpha = (float) (brightness / (200.0 * Math.sqrt(lineWidth)));
         if (alpha < MIN_VISIBLE_ALPHA) {
             // if a smaller alpha is used, nothing is drawn, therefore
             // use this alpha and compensate by darkening the color.
@@ -181,14 +188,17 @@ public class AbstractLights extends ParametrizedFilter {
         return dest;
     }
 
+    /**
+     * Creates the particles with their initial settings.
+     */
     private List<Particle> createParticles(int width, int height, Random random, float bri) {
         int numParticles = complexityParam.getValue() + 1;
         int baseHue = hueParam.getValueInNonIntuitiveDegrees();
         int hueRandomness = (int) (hueRandomnessParam.getValue() * 3.6);
 
-        boolean bounce = bounceParam.isChecked();
-        double speed = speedParam.getValueAsDouble();
         Type type = typeParam.getSelected();
+        boolean bounce = type.canBounce() && bounceParam.isChecked();
+        double speed = speedParam.getValueAsDouble();
 
         List<Particle> particles = new ArrayList<>();
         for (int i = 0; i < numParticles; i++) {
@@ -282,13 +292,15 @@ public class AbstractLights extends ParametrizedFilter {
         return color;
     }
 
+    /**
+     * A single moving point that draws a line to its connected sibling during every iteration.
+     */
     private static class Particle {
         double x, y; // position
         final double speed;
         double vx, vy; // velocity vector
         private final Color color;
 
-        // each particle is connected to a sibling, and lines are drawn between them
         Particle sibling;
 
         private final boolean bounce;

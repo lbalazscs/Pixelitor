@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import org.junit.jupiter.params.provider.Arguments;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.compactions.Resize;
@@ -28,6 +29,7 @@ import pixelitor.history.History;
 import pixelitor.history.HistoryChecker;
 import pixelitor.layers.*;
 import pixelitor.selection.Selection;
+import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -44,6 +46,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Mockito.any;
@@ -465,5 +468,16 @@ public class TestHelper {
 
     public static void setMaxUntestedEdits(int max) {
         historyChecker.setMaxUntestedEdits(max);
+    }
+
+    // create the Cartesian product of layer types and mask presence to test
+    public static Stream<Arguments> cartesianProduct(List<Class<? extends Layer>> layerTypes,
+                                                     WithMask[] maskPresence) {
+        return layerTypes.stream()
+            .mapMulti((layerClass, consumer) -> {
+                for (WithMask mask : maskPresence) {
+                    consumer.accept(Arguments.of(layerClass, mask));
+                }
+            });
     }
 }

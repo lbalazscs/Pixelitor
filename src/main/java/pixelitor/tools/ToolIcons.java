@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import java.awt.geom.Rectangle2D;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.JOIN_BEVEL;
 import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.BasicStroke.JOIN_ROUND;
 
@@ -138,8 +139,7 @@ public class ToolIcons {
 
     public static void paintEllipseSelectionIcon(Graphics2D g) {
         // draws a dashed ellipse
-        g.setStroke(new BasicStroke(2,
-            BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
+        g.setStroke(new BasicStroke(2, CAP_BUTT, JOIN_BEVEL,
             0, new float[]{4.1888f, 4.1888f}, 0));
         g.drawOval(2, 2, 24, 24);
     }

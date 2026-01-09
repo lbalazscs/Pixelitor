@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,6 +58,12 @@ public class AddAdjLayerAction extends AbstractViewEnabledAction {
     }
 
     @Override
+    protected void onClick(Composition comp) {
+        // never called, because this class overrides the other onClick method
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void onClick(ActionEvent e) {
         if (GUIUtils.isCtrlPressed(e)) {
             addFromFilterSearchDialog();
@@ -80,12 +86,6 @@ public class AddAdjLayerAction extends AbstractViewEnabledAction {
         }
         Dimension size = popup.getPreferredSize();
         popup.show((JButton) e.getSource(), 0, -size.height);
-    }
-
-    @Override
-    protected void onClick(Composition comp) {
-        // never called, because this class overrides actionPerformed
-        throw new UnsupportedOperationException();
     }
 
     private static JPopupMenu createActionsPopup() {

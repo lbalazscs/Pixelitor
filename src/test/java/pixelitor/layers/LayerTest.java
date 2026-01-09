@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,7 @@ import pixelitor.testutils.WithMask;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -63,25 +64,16 @@ class LayerTest {
     private IconUpdateChecker iconChecker;
 
     static Stream<Arguments> instancesToTest() {
-        // define the combinations of layer types and mask presence to test
-        return Stream.of(
-            Arguments.of(ImageLayer.class, WithMask.NO),
-            Arguments.of(ImageLayer.class, WithMask.YES),
-            Arguments.of(TextLayer.class, WithMask.NO),
-            Arguments.of(TextLayer.class, WithMask.YES),
-            Arguments.of(ShapesLayer.class, WithMask.NO),
-            Arguments.of(ShapesLayer.class, WithMask.YES),
-            Arguments.of(GradientFillLayer.class, WithMask.NO),
-            Arguments.of(GradientFillLayer.class, WithMask.YES),
-            Arguments.of(ColorFillLayer.class, WithMask.NO),
-            Arguments.of(ColorFillLayer.class, WithMask.YES),
-            Arguments.of(SmartObject.class, WithMask.NO),
-            Arguments.of(SmartObject.class, WithMask.YES),
-            Arguments.of(AdjustmentLayer.class, WithMask.NO),
-            Arguments.of(AdjustmentLayer.class, WithMask.YES),
-            Arguments.of(SmartFilter.class, WithMask.NO),
-            Arguments.of(SmartFilter.class, WithMask.YES)
-        );
+        return TestHelper.cartesianProduct(List.of(
+            ImageLayer.class,
+            TextLayer.class,
+            ShapesLayer.class,
+            GradientFillLayer.class,
+            ColorFillLayer.class,
+            SmartObject.class,
+            AdjustmentLayer.class,
+            SmartFilter.class
+        ), WithMask.values());
     }
 
     @BeforeAll
@@ -116,6 +108,7 @@ class LayerTest {
 
     @AfterEach
     void afterEachTest() {
+        assertThat(comp).invariantsAreOK();
         TestHelper.verifyAndClearHistory();
     }
 
@@ -186,29 +179,27 @@ class LayerTest {
 
     @Test
     void duplicating() {
-        Layer copy = layer.copy(CopyType.DUPLICATE_LAYER, true, comp);
-        checkCopy(copy, "layer 1 copy");
-
-        Layer copy2 = copy.copy(CopyType.DUPLICATE_LAYER, true, comp);
-        checkCopy(copy2, "layer 1 copy 2");
-
-        Layer copy3 = copy2.copy(CopyType.DUPLICATE_LAYER, true, comp);
-        checkCopy(copy3, "layer 1 copy 3");
+        Layer copy1 = verifyCopy(layer, CopyType.DUPLICATE_LAYER, "layer 1 copy");
+        Layer copy2 = verifyCopy(copy1, CopyType.DUPLICATE_LAYER, "layer 1 copy 2");
+        Layer copy3 = verifyCopy(copy2, CopyType.DUPLICATE_LAYER, "layer 1 copy 3");
 
         // in this case the name shouldn't change
-        Layer exactCopy = layer.copy(CopyType.UNDO, true, comp);
-        checkCopy(exactCopy, "layer 1");
+        Layer exactCopy = verifyCopy(layer, CopyType.UNDO, "layer 1");
 
         iconChecker.verifyUpdateCounts(0, 0);
     }
 
-    private void checkCopy(Layer copy, String expectedName) {
+    private Layer verifyCopy(Layer source, CopyType copyType, String expectedName) {
+        Layer copy = source.copy(copyType, true, comp);
+
         copy.createUI();
         assertThat(copy)
             .nameIs(expectedName)
             .isInstanceOf(layer.getClass())
             .uiIsVisible()
             .hasMask(withMask.isTrue());
+
+        return copy;
     }
 
     @Test
@@ -281,7 +272,7 @@ class LayerTest {
     }
 
     @Test
-    void activating() {
+    void activatingProgrammatically() {
         assertThat(layer).isActive();
         assertThat(layer2).isNotActive();
 
@@ -290,8 +281,14 @@ class LayerTest {
         layer.activate();
         assertThat(layer).isActive();
         History.assertNumEditsIs(0);
+        iconChecker.verifyUpdateCounts(0, 0);
+    }
 
-        // now with history
+    @Test
+    void activatingWithHistory() {
+        assertThat(layer).isActive();
+        assertThat(layer2).isNotActive();
+
         comp.setActiveLayer(layer2, true, "Layer Selection Change");
         assertThat(layer2).isActive();
         History.assertNumEditsIs(1);
@@ -319,6 +316,7 @@ class LayerTest {
         layer.resize(new Dimension(1, 10)).join();
         layer.resize(origSize).join();
 
+        History.assertNumEditsIs(0);
         iconChecker.verifyUpdateCounts(0, 0);
     }
 
@@ -347,14 +345,14 @@ class LayerTest {
 
         // set up a dummy selection for mask types that require it
         TestHelper.setSelection(comp, new Rectangle(1, 1, 2, 2));
-        for (MaskInitMethod addType : MaskInitMethod.values()) {
+        for (MaskInitMethod initMethod : MaskInitMethod.values()) {
             assertThat(layer).hasNoMask();
 
-            layer.addMask(addType);
+            layer.addMask(initMethod);
             assertThat(layer).hasMask();
             History.assertNumEditsIs(1);
 
-            String expectedEditName = addType.needsSelection() ?
+            String expectedEditName = initMethod.needsSelection() ?
                 "Layer Mask from Selection" : "Add Layer Mask";
             History.undo(expectedEditName);
             assertThat(layer).hasNoMask();

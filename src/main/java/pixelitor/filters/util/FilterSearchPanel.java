@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,15 +21,10 @@ import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.JXTextField;
 import org.jdesktop.swingx.prompt.BuddySupport;
 import org.jdesktop.swingx.prompt.PromptSupport;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.Themes;
-import pixelitor.gui.utils.VectorIcon;
+import pixelitor.gui.utils.*;
 import pixelitor.layers.LayerGUI;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -90,41 +85,29 @@ public class FilterSearchPanel extends JPanel {
                 navigateFilterList(e);
             }
         });
-        searchTF.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                searchTermChanged();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                searchTermChanged();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                searchTermChanged();
-            }
-        });
+        searchTF.getDocument().addDocumentListener(
+            new SimpleDocumentListener(e -> searchTermChanged()));
     }
 
     private void navigateFilterList(KeyEvent e) {
         int keyCode = e.getKeyCode();
-        if (keyCode == VK_DOWN || keyCode == VK_UP) {
-            int numFilters = getMatchingFilterCount();
-            if (numFilters > 0) {
-                if (filterList.isSelectionEmpty()) {
-                    if (keyCode == VK_DOWN) {
-                        selectFilter(0);
-                    } else if (keyCode == VK_UP) {
-                        selectFilter(numFilters - 1);
-                    }
-                } else {
-                    forwardEventTo(filterList, e);
-                }
-                filterList.requestFocusInWindow();
-            }
+        if (keyCode != VK_DOWN && keyCode != VK_UP) {
+            return;
         }
+        int numFilters = getMatchingFilterCount();
+        if (numFilters == 0) {
+            return;
+        }
+        if (filterList.isSelectionEmpty()) {
+            if (keyCode == VK_DOWN) {
+                selectFilter(0);
+            } else if (keyCode == VK_UP) {
+                selectFilter(numFilters - 1);
+            }
+        } else {
+            forwardEventTo(filterList, e);
+        }
+        filterList.requestFocusInWindow();
     }
 
     private void initFiltersList(FilterAction[] filters) {
@@ -184,8 +167,13 @@ public class FilterSearchPanel extends JPanel {
 
     private void searchTermChanged() {
         String searchTextLC = searchTF.getText().trim().toLowerCase(Locale.getDefault());
+        updateListFilter(searchTextLC);
+        ensureSelectionVisible();
+        highlighter.updateSearchText(searchTextLC);
+    }
 
-        // dynamically filter the list based on the search text
+    // dynamically filter the list based on the search text
+    private void updateListFilter(String searchTextLC) {
         filterList.setRowFilter(new RowFilter<ListModel<FilterAction>, Integer>() {
             @Override
             public boolean include(Entry<? extends ListModel<FilterAction>, ? extends Integer> entry) {
@@ -195,14 +183,14 @@ public class FilterSearchPanel extends JPanel {
                 return searchTextLC.isEmpty() || filterNameLC.contains(searchTextLC);
             }
         });
+    }
 
+    private void ensureSelectionVisible() {
         // if there are matching filters and none are selected,
         // select the first matching filter by default
         if (getMatchingFilterCount() > 0 && filterList.isSelectionEmpty()) {
             selectFilter(0);
         }
-
-        highlighter.updateSearchText(searchTextLC);
 
         // ensure the currently selected filter (if any) is visible in the list
         filterList.ensureIndexIsVisible(filterList.getSelectedIndex());
@@ -217,7 +205,7 @@ public class FilterSearchPanel extends JPanel {
             return selected;
         }
         if (getMatchingFilterCount() == 1) {
-            // nothing is selected, but there is only one remaining filter
+            // nothing is selected, but there is only one matching result remaining
             return (FilterAction) filterList.getElementAt(0);
         }
         return null;
@@ -229,6 +217,13 @@ public class FilterSearchPanel extends JPanel {
 
     public void addSelectionListener(ListSelectionListener listener) {
         filterList.getSelectionModel().addListSelectionListener(listener);
+    }
+
+    public static void startWithDialog(String title) {
+        FilterAction action = showInDialog(title);
+        if (action != null) {
+            action.actionPerformed(null);
+        }
     }
 
     public static FilterAction showInDialog(String title) {
@@ -250,8 +245,8 @@ public class FilterSearchPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     if (panel.hasSelection()) {
-                        // Double-clicking on a selected filter will
-                        // start it after the modal dialog is closed.
+                        // double-clicking on a selected filter will
+                        // start it after the modal dialog is closed
                         GUIUtils.closeDialog(dialog, true);
                     }
                 }

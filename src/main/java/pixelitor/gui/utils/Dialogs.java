@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -260,14 +260,15 @@ public class Dialogs {
 
         showMoreDevelopmentInfo(e);
 
-        if (e instanceof CompletionException) {
-            e = e.getCause();
-        }
-        if (e instanceof UncheckedIOException) {
-            e = e.getCause();
-        }
-        if (e instanceof InvocationTargetException) {
-            e = e.getCause();
+        // unwrap exceptions
+        while (e instanceof CompletionException ||
+            e instanceof UncheckedIOException ||
+            e instanceof InvocationTargetException) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                break;
+            }
+            e = cause;
         }
 
         Frame parent = getMainWindow();
@@ -313,12 +314,13 @@ public class Dialogs {
     }
 
     private static void playWarningSound() {
-        try {
-            int maxVolume = 90;
-            int sound = 65;
-            Synthesizer synthesizer = MidiSystem.getSynthesizer();
+        int maxVolume = 90;
+        int sound = 65;
+
+        try (Synthesizer synthesizer = MidiSystem.getSynthesizer()) {
             synthesizer.open();
-            MidiChannel channel = synthesizer.getChannels()[9];  // drums channel.
+            MidiChannel channel = synthesizer.getChannels()[9]; // drums channel
+
             for (int i = 0; i < 10; i++) {
                 Thread.sleep(100);
                 channel.noteOn(sound + i, maxVolume);

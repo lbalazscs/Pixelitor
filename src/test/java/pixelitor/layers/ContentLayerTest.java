@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import pixelitor.testutils.WithMask;
 import pixelitor.tools.move.MoveMode;
 
 import java.awt.Graphics2D;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
@@ -53,12 +54,10 @@ class ContentLayerTest {
     private IconUpdateChecker iconChecker;
 
     static Stream<Arguments> instancesToTest() {
-        return Stream.of(
-            Arguments.of(ImageLayer.class, WithMask.NO),
-            Arguments.of(ImageLayer.class, WithMask.YES),
-            Arguments.of(TextLayer.class, WithMask.NO),
-            Arguments.of(TextLayer.class, WithMask.YES)
-        );
+        return TestHelper.cartesianProduct(List.of(
+            ImageLayer.class,
+            TextLayer.class
+        ), WithMask.values());
     }
 
     @BeforeAll

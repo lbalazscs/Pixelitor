@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters.gmic;
 
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -33,13 +32,13 @@ import java.util.regex.Pattern;
 
 public class GMICFilterCreator {
     private static final String NAME_REGEX = "([a-zA-Z0-9\\s-]+) = ";
-    private static final Lazy<Pattern> INT_PATTERN = Lazy.of(() -> Pattern.compile(NAME_REGEX + "int\\((-?\\d+),(-?\\d+),(-?\\d+)\\)"));
-    private static final Lazy<Pattern> FLOAT_PATTERN = Lazy.of(() -> Pattern.compile(NAME_REGEX + "float\\(([-+]?\\d*\\.?\\d+),([-+]?\\d*\\.?\\d+),([-+]?\\d*\\.?\\d+)\\)"));
-    private static final Lazy<Pattern> COLOR_PATTERN = Lazy.of(() -> Pattern.compile(NAME_REGEX + "color\\((\\d+),(\\d+),(\\d+),(\\d+)\\)"));
-    private static final Lazy<Pattern> CHOICE_PATTERN = Lazy.of(() -> Pattern.compile(NAME_REGEX + "choice\\((.+?)\\)"));
-    private static final Lazy<Pattern> BOOL_PATTERN = Lazy.of(() -> Pattern.compile(NAME_REGEX + "bool\\((\\d)\\)"));
-    private static final Lazy<Pattern> PERCENT_PATTERN = Lazy.of(() -> Pattern.compile(" \\(%\\)"));
-    private static final Lazy<Pattern> WORD_SEPARATOR_PATTERN = Lazy.of(() -> Pattern.compile("[\\s-]+"));
+    private static final Pattern INT_PATTERN = Pattern.compile(NAME_REGEX + "int\\((-?\\d+),(-?\\d+),(-?\\d+)\\)");
+    private static final Pattern FLOAT_PATTERN = Pattern.compile(NAME_REGEX + "float\\(([-+]?\\d*\\.?\\d+),([-+]?\\d*\\.?\\d+),([-+]?\\d*\\.?\\d+)\\)");
+    private static final Pattern COLOR_PATTERN = Pattern.compile(NAME_REGEX + "color\\((\\d+),(\\d+),(\\d+),(\\d+)\\)");
+    private static final Pattern CHOICE_PATTERN = Pattern.compile(NAME_REGEX + "choice\\((.+?)\\)");
+    private static final Pattern BOOL_PATTERN = Pattern.compile(NAME_REGEX + "bool\\((\\d)\\)");
+    private static final Pattern PERCENT_PATTERN = Pattern.compile(" \\(%\\)");
+    private static final Pattern WORD_SEPARATOR_PATTERN = Pattern.compile("[\\s-]+");
 
     public static final String TITLE = "G'MIC Filter Creator";
     private static final String COULD_NOT_PARSE_MSG = "Could not parse the following:\n";
@@ -245,7 +244,7 @@ public class GMICFilterCreator {
         input = parts[1];
 
         // remove " (%)" from the string
-        input = PERCENT_PATTERN.get().matcher(input).replaceAll("");
+        input = PERCENT_PATTERN.matcher(input).replaceAll("");
 
         ParamInfo output;
         if (input.contains(" = int(")) {
@@ -265,7 +264,7 @@ public class GMICFilterCreator {
     }
 
     private static ParamInfo transformIntRange(String input) {
-        Matcher matcher = INT_PATTERN.get().matcher(input);
+        Matcher matcher = INT_PATTERN.matcher(input);
 
         if (matcher.matches()) {
             String paramString = matcher.group(1);
@@ -307,7 +306,7 @@ public class GMICFilterCreator {
     }
 
     private static ParamInfo transformFloatRange(String input) {
-        Matcher matcher = FLOAT_PATTERN.get().matcher(input);
+        Matcher matcher = FLOAT_PATTERN.matcher(input);
 
         if (matcher.matches()) {
             String paramString = matcher.group(1);
@@ -349,7 +348,7 @@ public class GMICFilterCreator {
     }
 
     private static ParamInfo transformColor(String input) {
-        Matcher matcher = COLOR_PATTERN.get().matcher(input);
+        Matcher matcher = COLOR_PATTERN.matcher(input);
 
         if (matcher.matches()) {
             String paramString = matcher.group(1);
@@ -371,7 +370,7 @@ public class GMICFilterCreator {
     }
 
     private static ParamInfo transformChoice(String input) {
-        Matcher matcher = CHOICE_PATTERN.get().matcher(input);
+        Matcher matcher = CHOICE_PATTERN.matcher(input);
 
         if (matcher.matches()) {
             String paramString = matcher.group(1);
@@ -407,7 +406,7 @@ public class GMICFilterCreator {
     }
 
     private static ParamInfo transformBool(String input) {
-        Matcher matcher = BOOL_PATTERN.get().matcher(input);
+        Matcher matcher = BOOL_PATTERN.matcher(input);
 
         if (matcher.matches()) {
             String paramString = matcher.group(1);
@@ -432,13 +431,13 @@ public class GMICFilterCreator {
     private static String toCamelCase(String input) {
         // it's important to treat hyphens as word separators
         // because they can't be in variable names
-        String[] words = WORD_SEPARATOR_PATTERN.get().split(input);
+        String[] words = WORD_SEPARATOR_PATTERN.split(input);
 
         if (words.length > 0) {
-            // Convert the first word to lowercase
+            // convert the first word to lowercase
             StringBuilder camelCase = new StringBuilder(words[0].toLowerCase(Locale.ENGLISH));
 
-            // Convert the subsequent words, capitalizing the first letter of each
+            // convert the subsequent words, capitalizing the first letter of each
             for (int i = 1; i < words.length; i++) {
                 camelCase.append(words[i].substring(0, 1).toUpperCase(Locale.ENGLISH))
                     .append(words[i].substring(1).toLowerCase(Locale.ENGLISH));

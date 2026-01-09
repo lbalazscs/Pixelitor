@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,22 +18,35 @@
 package pixelitor.menus;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.util.FilterAction;
+import pixelitor.gui.utils.ViewEnabledAction;
 
 import javax.swing.*;
+import java.util.ResourceBundle;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
  * A JMenu with some utility methods
  */
 public class PMenu extends JMenu {
-    public PMenu(String s) {
-        super(s);
+    public PMenu(String text) {
+        super(text);
     }
 
-    public PMenu(String s, char mnemonic) {
-        super(s);
+    public PMenu(ResourceBundle i18n, String key) {
+        super(i18n.getString(key));
+    }
+
+    public PMenu(String text, char mnemonic) {
+        super(text);
+        setMnemonic(mnemonic);
+    }
+
+    public PMenu(ResourceBundle i18n, String key, char mnemonic) {
+        super(i18n.getString(key));
         setMnemonic(mnemonic);
     }
 
@@ -45,6 +58,42 @@ public class PMenu extends JMenu {
 
     public void add(Action action, String name) {
         super.add(action).setName(name);
+    }
+
+    public void addViewEnabled(String name, Consumer<Composition> task) {
+        add(new ViewEnabledAction(name, task));
+    }
+
+    public void addViewEnabled(String name, String toolTip, Consumer<Composition> task) {
+        ViewEnabledAction action = new ViewEnabledAction(name, task);
+        action.setToolTip(toolTip);
+        add(action);
+    }
+
+    public void addViewEnabled(String name, String toolTip, Consumer<Composition> task, KeyStroke keyStroke) {
+        ViewEnabledAction action = new ViewEnabledAction(name, task);
+        action.setToolTip(toolTip);
+        add(action, keyStroke);
+    }
+
+    public void addViewEnabled(ResourceBundle i18n, String key, Consumer<Composition> task) {
+        add(new ViewEnabledAction(i18n.getString(key), task));
+    }
+
+    public void addViewEnabledDialog(ResourceBundle i18n, String key, Consumer<Composition> task) {
+        addViewEnabled(i18n.getString(key) + "...", task);
+    }
+
+    public void addViewEnabled(String name, Consumer<Composition> task, KeyStroke keyStroke) {
+        add(new ViewEnabledAction(name, task), keyStroke);
+    }
+
+    public void addViewEnabled(ResourceBundle i18n, String key, Consumer<Composition> task, KeyStroke keyStroke) {
+        add(new ViewEnabledAction(i18n.getString(key), task), keyStroke);
+    }
+
+    public void addViewEnabledDialog(ResourceBundle i18n, String key, Consumer<Composition> task, KeyStroke keyStroke) {
+        add(new ViewEnabledAction(i18n.getString(key) + "...", task), keyStroke);
     }
 
     public void addFilter(String name, Supplier<Filter> supplier) {

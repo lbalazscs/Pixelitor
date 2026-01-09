@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class PoissonDiskSampling {
         this.height = height;
         this.r = minDist;
 
-        // Calculate grid cell size to ensure each cell
+        // calculate grid cell size to ensure each cell
         // can contain at most one point
         double cellSize = minDist / SQRT_2;
         numHorCells = (int) Math.ceil(width / cellSize);
@@ -68,7 +68,7 @@ public class PoissonDiskSampling {
         cellWidth = width / (double) numHorCells;
         cellHeight = height / (double) numVerCells;
 
-        // Initialize acceleration grid with -1 (empty cells)
+        // initialize acceleration grid with -1 (empty cells)
         grid = new int[numHorCells][numVerCells];
         for (int x = 0; x < numHorCells; x++) {
             for (int y = 0; y < numVerCells; y++) {
@@ -76,7 +76,7 @@ public class PoissonDiskSampling {
             }
         }
 
-        // Start with center point
+        // start with the center point
         Point2D initialSample = new Point2D.Double(width / 2.0, height / 2.0);
         addSamplePoint(initialSample, 0);
 
@@ -137,7 +137,7 @@ public class PoissonDiskSampling {
         int gridX = (int) (candidate.x / cellWidth);
         int gridY = (int) (candidate.y / cellHeight);
 
-        // Check neighboring cells for nearby points
+        // check neighboring cells for nearby points
         for (int gx = gridX - 1; gx <= gridX + 1; gx++) {
             if (gx < 0 || gx >= numHorCells) {
                 continue;
@@ -159,14 +159,10 @@ public class PoissonDiskSampling {
     }
 
     public void renderGrid(Graphics2D g2) {
-        double yy = 0;
-        while (yy < height) {
-            yy += cellHeight;
+        for (double yy = cellHeight; yy < height; yy += cellHeight) {
             g2.draw(new Line2D.Double(0, yy, width, yy));
         }
-        double xx = 0;
-        while (xx < width) {
-            xx += cellWidth;
+        for (double xx = cellWidth; xx < width; xx += cellWidth) {
             g2.draw(new Line2D.Double(xx, 0, xx, height));
         }
     }
@@ -185,11 +181,13 @@ public class PoissonDiskSampling {
     }
 
     /**
-     * Returns the index of the closest sample
+     * Returns the index of the closest sample.
      */
     public int findClosestPointIndex(double x, double y,
                                      DistanceFunction distanceFunction) {
-        int searchDist = 1;
+        // check the immediate cell containing the point first,
+        // then expand outwards in rings
+        int searchDist = 0;
         while (true) {
             int index = searchNeighborhood(x, y, searchDist, distanceFunction);
             if (index != -1) {
@@ -205,6 +203,7 @@ public class PoissonDiskSampling {
         int gridY = (int) (y / cellHeight);
         double minDistSoFar = Double.POSITIVE_INFINITY;
         int indexOfClosest = -1;
+
         for (int gx = gridX - searchDist; gx <= gridX + searchDist; gx++) {
             if (gx < 0 || gx >= numHorCells) {
                 continue;
@@ -213,6 +212,19 @@ public class PoissonDiskSampling {
                 if (gy < 0 || gy >= numVerCells) {
                     continue;
                 }
+
+                if (searchDist > 0) {
+                    int dx = Math.abs(gx - gridX);
+                    int dy = Math.abs(gy - gridY);
+
+                    // skips the inner area that was already checked in
+                    // the previous iteration (where searchDist was smaller),
+                    // only processing the outer "ring" of the current square
+                    if (dx < searchDist && dy < searchDist) {
+                        continue;
+                    }
+                }
+
                 int index = grid[gx][gy];
                 if (index != -1) {
                     Point2D point = samples.get(index);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,6 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagLayout;
@@ -190,22 +188,8 @@ public class TextSettingsPanel extends FilterGUI
         textArea = new JTextArea(settings.getText(), DEFAULT_TEXT_AREA_ROWS, DEFAULT_TEXT_AREA_COLS);
         textArea.setName("textArea");
 
-        textArea.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                textChanged();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                textChanged();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                textChanged();
-            }
-        });
+        textArea.getDocument().addDocumentListener(
+            new SimpleDocumentListener(e -> textChanged()));
     }
 
     private void textChanged() {

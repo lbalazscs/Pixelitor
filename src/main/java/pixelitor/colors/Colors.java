@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -166,27 +166,28 @@ public class Colors {
     }
 
     public static void selectColorWithDialog(JComponent component, String title,
-                                             Color selectedColor, boolean allowTransparency,
+                                             Color defaultColor, boolean allowTransparency,
                                              Consumer<Color> colorChangeListener) {
         Window owner = SwingUtilities.getWindowAncestor(component);
-        selectColorWithDialog(owner, title, selectedColor, allowTransparency, colorChangeListener);
+        selectColorWithDialog(owner, title, defaultColor, allowTransparency, colorChangeListener);
     }
 
     // returns true if the dialog was accepted
     public static boolean selectColorWithDialog(Window owner, String title,
-                                                Color selectedColor, boolean allowTransparency,
+                                                Color defaultColor, boolean allowTransparency,
                                                 Consumer<Color> colorChangeListener) {
         if (RandomGUITest.isRunning()) {
             return false;
         }
 
-        Color prevColor = selectedColor;
+        Color prevColor = defaultColor;
         GlobalEvents.modalDialogOpened();
-        Color color = ColorPicker.showDialog(owner, title, selectedColor,
+        Color color = ColorPicker.showDialog(owner, title, defaultColor,
             allowTransparency, colorChangeListener);
         GlobalEvents.modalDialogClosed();
 
-        if (color == null) {  // Cancel was pressed, reset the old color
+        if (color == null) {
+            // cancel was pressed, reset the previous color
             colorChangeListener.accept(prevColor);
             return false;
         } else {
@@ -194,11 +195,11 @@ public class Colors {
         }
     }
 
-    public static void copyColorToClipboard(Color c) {
+    private static void copyColorToClipboard(Color c) {
         Utils.copyStringToClipboard(toHTMLHex(c, false));
     }
 
-    public static Color getColorFromClipboard() {
+    private static Color getColorFromClipboard() {
         String text;
         try {
             var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

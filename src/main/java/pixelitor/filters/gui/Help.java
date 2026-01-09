@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,9 @@ import pixelitor.utils.OpenInBrowserAction;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+/**
+ * The configuration of a filter's help menu.
+ */
 public class Help {
     private final String content;
     private final boolean isWikipediaURL;

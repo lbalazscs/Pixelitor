@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,17 +59,18 @@ public class ColorFillLayer extends Layer {
         ColorFillLayer layer = new ColorFillLayer(comp, generateName(), null);
         var activeLayerBefore = comp.getActiveLayer();
         var prevViewMode = comp.getView().getMaskViewMode();
-        // don't add it yet to history, only after the user presses OK (and not Cancel!)
+
+        // don't add it yet to history, only after the user accepts the dialog
         LayerHolder holder = comp.getHolderForNewLayers();
         holder.add(layer);
 
-        String title = "Add Color Fill Layer";
+        String dialogTitle = "Add Color Fill Layer";
         Color defaultColor = FgBgColors.getFGColor();
         layer.changeColor(defaultColor, false);
-        if (Colors.selectColorWithDialog(PixelitorWindow.get(), title,
+        if (Colors.selectColorWithDialog(PixelitorWindow.get(), dialogTitle,
             defaultColor, true, c -> layer.changeColor(c, false))) {
             // dialog accepted, now it is safe to add it to the history
-            History.add(new NewLayerEdit(title,
+            History.add(new NewLayerEdit(dialogTitle,
                 layer, activeLayerBefore, prevViewMode));
         } else {
             // dialog canceled
@@ -83,9 +84,9 @@ public class ColorFillLayer extends Layer {
 
     @Override
     public boolean edit() {
-        String title = "Edit Color Fill Layer";
+        String dialogTitle = "Edit Color Fill Layer";
         Color prevColor = color;
-        if (Colors.selectColorWithDialog(PixelitorWindow.get(), title,
+        if (Colors.selectColorWithDialog(PixelitorWindow.get(), dialogTitle,
             color, true, c -> changeColor(c, false))) {
             // adds an edit to the history only after the dialog is accepted
             History.add(new ColorFillLayerChangeEdit(this, prevColor, color));
@@ -131,9 +132,9 @@ public class ColorFillLayer extends Layer {
 
     @Override
     protected ColorFillLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        Color colorCopy = new Color(this.color.getRGB(), true);
         String copyName = copyType.createLayerCopyName(name);
-        return new ColorFillLayer(comp, copyName, colorCopy);
+        // java.awt.Color is immutable => it can be shared
+        return new ColorFillLayer(comp, copyName, color);
     }
 
     @Override

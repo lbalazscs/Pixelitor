@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class PXCFormat {
     private static final int CURRENT_PXC_VERSION_NUMBER = 0x04;
 
     // the first version supporting a thumbnail
-    private static final int THUMBNAIL_FORMAT_VERSION = 0x04;
+    private static final int THUMBNAIL_SUPPORTING_VERSION = 0x04;
 
     // tracks the writing of the whole file
     private static ProgressTracker mainPT;
@@ -84,11 +84,10 @@ public class PXCFormat {
                     + " has unknown version byte " + versionByte);
             }
 
-            // Skip thumbnail data
-            if (versionByte >= THUMBNAIL_FORMAT_VERSION) {
-                // Read thumbnail length (4 bytes)
+            if (versionByte >= THUMBNAIL_SUPPORTING_VERSION) { // this version has thumbs
+                // the thumbnail length is 4 bytes
                 int thumbnailLength = readInt(is);
-                // Skip the thumbnail data
+                // skip the thumbnail data
                 is.skip(thumbnailLength);
             }
 
@@ -167,7 +166,7 @@ public class PXCFormat {
             }
 
             int versionByte = is.read();
-            if (versionByte != THUMBNAIL_FORMAT_VERSION) {
+            if (versionByte != THUMBNAIL_SUPPORTING_VERSION) {
                 return null; // old version, no thumbnail
             }
 

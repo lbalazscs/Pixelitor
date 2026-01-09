@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -841,7 +841,7 @@ public class MainGuiTest {
         log(1, "testing exporting layer animation");
 
         // precondition: the active image has only 1 layer
-        app.checkNumLayersIs(1);
+        EDT.assertNumLayersInActiveHolderIs(1);
 
         app.runMenuCommand("Export Layer Animation...");
         // error dialog, because there is only one layer
@@ -1268,7 +1268,7 @@ public class MainGuiTest {
 
         // image from the previous tests
         EDT.assertNumViewsIs(1);
-        app.checkNumLayersIs(1);
+        EDT.assertNumLayersInActiveHolderIs(1);
 
         testCropSelection();
 
@@ -1299,7 +1299,7 @@ public class MainGuiTest {
                 .click()
                 .click()
                 .click();
-            app.checkNumLayersIs(1);
+            EDT.assertNumLayersInActiveHolderIs(1);
         }
 
         maskMode.apply(this);
@@ -1360,7 +1360,7 @@ public class MainGuiTest {
         log(0, "view menu");
 
         EDT.assertNumViewsIs(1);
-        app.checkNumLayersIs(1);
+        EDT.assertNumLayersInActiveHolderIs(1);
 
         testZoomCommands();
         testHistory();
@@ -1548,7 +1548,7 @@ public class MainGuiTest {
 //        app.setIndexedMode();
 
         EDT.assertNumViewsIs(1);
-        app.checkNumLayersIs(1);
+        EDT.assertNumLayersInActiveHolderIs(1);
 
         EDT.requireNoSelection();
         EDT.assertNoTranslation();
@@ -2577,11 +2577,11 @@ public class MainGuiTest {
 
             testMoveToolDrag(mode, false);
             testMoveToolDrag(mode, true);
-            app.checkNumLayersIs(1);
+            EDT.assertNumLayersInActiveHolderIs(1);
 
             keyboard.nudge();
             keyboard.undoRedoUndo(mode.getEditName());
-            app.checkNumLayersIs(1);
+            EDT.assertNumLayersInActiveHolderIs(1);
 
             // check that all move-related edits have been undone
             EDT.assertEditToBeUndoneNameIs("Create Selection");
@@ -2644,7 +2644,7 @@ public class MainGuiTest {
     }
 
     private void testMoveToolClick(MoveMode mode, Modifiers modifiers) {
-        app.checkNumLayersIs(1);
+        EDT.assertNumLayersInActiveHolderIs(1);
         boolean duplicated = modifiers.alt().isDown() && mode.movesLayer();
         if (duplicated) {
             app.setMaxUntestedEdits(2);
@@ -2654,9 +2654,9 @@ public class MainGuiTest {
         keyboard.undoRedoUndo(mode.getEditName());
 
         if (duplicated) {
-            app.checkNumLayersIs(2);
+            EDT.assertNumLayersInActiveHolderIs(2);
             keyboard.undoRedoUndo("Duplicate Layer");
-            app.checkNumLayersIs(1);
+            EDT.assertNumLayersInActiveHolderIs(1);
             app.setMaxUntestedEdits(1);
         }
     }

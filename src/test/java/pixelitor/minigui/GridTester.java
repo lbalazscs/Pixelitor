@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.minigui;
 
-import pixelitor.utils.GridUtils;
+import pixelitor.filters.jhlabsproxies.JHPixelate;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,22 +42,22 @@ public class GridTester extends JFrame {
         SQUARE("Square") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                GridUtils.renderGrid(g, STROKE_WIDTH, size, canvasWidth, canvasHeight);
+                JHPixelate.renderGrid(g, STROKE_WIDTH, size, canvasWidth, canvasHeight);
             }
         }, BRICK("Brick") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                GridUtils.renderBrickGrid(g, size, canvasWidth, canvasHeight);
+                JHPixelate.renderBrickGrid(g, size, canvasWidth, canvasHeight);
             }
         }, TRIANGLE("Triangle") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                GridUtils.renderTriangleGrid(g, size, canvasWidth, canvasHeight);
+                JHPixelate.renderTriangleGrid(g, size, canvasWidth, canvasHeight);
             }
         }, HEXAGON("Hexagon") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                GridUtils.renderHexagonGrid(g, size, canvasWidth, canvasHeight);
+                JHPixelate.renderHexagonGrid(g, size, canvasWidth, canvasHeight);
             }
         };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,11 +40,10 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  */
 public class VoronoiFilter extends PointFilter {
     private double distanceBetweenPoints;
-    private Metric metric;
     private boolean useImageColors;
 
     private int aaRes = 2;
-    private int aaRes2 = aaRes * aaRes;
+    private int numSamples = aaRes * aaRes;
 
     private PoissonDiskSampling sampling;
     private int[] colors;
@@ -66,7 +65,6 @@ public class VoronoiFilter extends PointFilter {
     }
 
     public void setMetric(Metric metric, int cx, int cy) {
-        this.metric = metric;
         intPrecisionDistance = metric.asIntPrecisionDistance(cx, cy);
         doublePrecisionDistance = metric.asDoublePrecisionDistance(cx, cy);
     }
@@ -77,7 +75,7 @@ public class VoronoiFilter extends PointFilter {
 
     public void setAaRes(int aaRes) {
         this.aaRes = aaRes;
-        aaRes2 = aaRes * aaRes;
+        numSamples = aaRes * aaRes;
     }
 
     @Override
@@ -90,6 +88,13 @@ public class VoronoiFilter extends PointFilter {
         List<Point2D> points = sampling.getSamples();
 
         // assign colors to the points
+        genColors(src, points);
+
+        // process each pixel
+        return super.filter(src, dst);
+    }
+
+    private void genColors(BufferedImage src, List<Point2D> points) {
         int numPoints = points.size();
         colors = new int[numPoints];
         for (int i = 0; i < numPoints; i++) {
@@ -98,13 +103,11 @@ public class VoronoiFilter extends PointFilter {
                 Point2D point = points.get(i);
                 color = src.getRGB((int) point.getX(), (int) point.getY());
             } else {
-                color = 0xFF_00_00_00 | rand.nextInt(0xFF_FF_FF);
+                // generate full range of RGB colors: 0x1_00_00_00 = 0xFF_FF_FF + 1
+                color = 0xFF_00_00_00 | rand.nextInt(0x1_00_00_00);
             }
             colors[i] = color;
         }
-
-        // process each pixel
-        return super.filter(src, dst);
     }
 
     @Override
@@ -127,21 +130,19 @@ public class VoronoiFilter extends PointFilter {
     /**
      * Checks whether the pixel is different from its neighbors.
      */
-    private static boolean isEdge(int index, int[] allPixels, int width, int height) {
-        int row = index / width;
-        int col = index % width;
-        int color = allPixels[index];
+    private static boolean isEdge(int x, int y, int index, int[] pixels, int width, int height) {
+        int color = pixels[index];
 
-        if (col > 0 && allPixels[index - 1] != color) { // left
+        if (x > 0 && pixels[index - 1] != color) { // left
             return true;
         }
-        if (col < width - 1 && allPixels[index + 1] != color) { // right
+        if (x < width - 1 && pixels[index + 1] != color) { // right
             return true;
         }
-        if (row > 0 && allPixels[index - width] != color) { // up
+        if (y > 0 && pixels[index - width] != color) { // up
             return true;
         }
-        if (row < height - 1 && allPixels[index + width] != color) { // down
+        if (y < height - 1 && pixels[index + width] != color) { // down
             return true;
         }
 
@@ -151,18 +152,18 @@ public class VoronoiFilter extends PointFilter {
     /**
      * Calculates the average color for a pixel using sub-pixel sampling.
      */
-    private int calcSuperSampledColor(int pixelIndex, int width) {
-        int x = pixelIndex % width;
-        int y = pixelIndex / width;
-
+    private int calcSuperSampledColor(int x, int y) {
         int r = 0;
         int g = 0;
         int b = 0;
 
+        double step = 1.0 / aaRes;
+
         for (int i = 0; i < aaRes; i++) {
-            double sy = y + 1.0 / aaRes * i - 0.5;
+            double sy = y + step * i - 0.5;
             for (int j = 0; j < aaRes; j++) {
-                double sx = x + 1.0 / aaRes * j - 0.5;
+                double sx = x + step * j - 0.5;
+
                 // sx and sy are the supersampling coordinates
                 int closestIndex = sampling.findClosestPointIndex(sx, sy, doublePrecisionDistance);
                 int color = colors[closestIndex];
@@ -171,9 +172,11 @@ public class VoronoiFilter extends PointFilter {
                 b += color & 0xFF;
             }
         }
-        r /= aaRes2;
-        g /= aaRes2;
-        b /= aaRes2;
+
+        int halfSamples = numSamples / 2;
+        r = (r + halfSamples) / numSamples;
+        g = (g + halfSamples) / numSamples;
+        b = (b + halfSamples) / numSamples;
 
         return 0xFF_00_00_00 | r << 16 | g << 8 | b;
     }
@@ -187,15 +190,18 @@ public class VoronoiFilter extends PointFilter {
 
         // since this code runs outside the superclass-powered
         // parallelization, use parallel streams
-        int[] aaPixels = IntStream.range(0, pixels.length).parallel()
-            .map(i -> {
+        int[] aaPixels = new int[pixels.length];
+        IntStream.range(0, height).parallel().forEach(y -> {
+            for (int x = 0; x < width; x++) {
+                int i = y * width + x;
                 // only pixels at the edges are supersampled
-                if (isEdge(i, pixels, width, height)) {
-                    return calcSuperSampledColor(i, width);
+                if (isEdge(x, y, i, pixels, width, height)) {
+                    aaPixels[i] = calcSuperSampledColor(x, y);
                 } else {
-                    return pixels[i];
+                    aaPixels[i] = pixels[i];
                 }
-            }).toArray();
+            }
+        });
         System.arraycopy(aaPixels, 0, pixels, 0, pixels.length);
     }
 

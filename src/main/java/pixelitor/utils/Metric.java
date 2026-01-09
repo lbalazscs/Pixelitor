@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -121,18 +121,14 @@ public enum Metric {
             // polar coordinates
             double theta1 = Math.atan2(y1, x1);
             double theta2 = Math.atan2(y2, x2);
-            double r1 = Math.sqrt(x1 * x1 + y1 * y1);
-            double r2 = Math.sqrt(x2 * x2 + y2 * y2);
+            double r1Sq = x1 * x1 + y1 * y1;
+            double r2Sq = x2 * x2 + y2 * y2;
 
-            // angular difference considering periodicity
-            double dTheta = Math.abs(theta1 - theta2);
-            if (dTheta > Math.PI) {
-                dTheta = 2 * Math.PI - dTheta;
-            }
+            double dTheta = angularDiff(theta1, theta2);
 
-            double dr = r1 - r2;
-            double dt = r1 * r2 * dTheta;
-            return Math.sqrt(dr * dr + dt * dt);
+            double dr = r1Sq - r2Sq;
+            double dt = r1Sq * r2Sq * dTheta;
+            return dr * dr + dt * dt;
         }
     }, POLAR_CON("Polar Concentric", true) {
         @Override
@@ -145,19 +141,21 @@ public enum Metric {
             // polar coordinates
             double theta1 = Math.atan2(y1, x1);
             double theta2 = Math.atan2(y2, x2);
-            double r1 = Math.sqrt(x1 * x1 + y1 * y1);
-            double r2 = Math.sqrt(x2 * x2 + y2 * y2);
+            double r1Sq = x1 * x1 + y1 * y1;
+            double r2Sq = x2 * x2 + y2 * y2;
 
-            // angular difference considering periodicity
-            double dTheta = Math.abs(theta1 - theta2);
-            if (dTheta > Math.PI) {
-                dTheta = 2 * Math.PI - dTheta;
-            }
+            double dTheta = angularDiff(theta1, theta2);
 
-            double dr = r1 - r2;
-            return Math.sqrt(dr * dr + dTheta * dTheta);
+            double dr = r1Sq - r2Sq;
+            return dr * dr + dTheta * dTheta;
         }
     };
+
+    // angular difference considering periodicity
+    private static double angularDiff(double theta1, double theta2) {
+        double diff = Math.abs(theta1 - theta2);
+        return (diff > Math.PI) ? 2 * Math.PI - diff : diff;
+    }
 
     private final String displayName;
     private final boolean centered;
