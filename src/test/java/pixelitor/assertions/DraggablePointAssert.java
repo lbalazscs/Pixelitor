@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
+import pixelitor.gui.View;
 import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.AnchorPointType;
 import pixelitor.tools.pen.ControlPoint;
@@ -31,6 +32,9 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
  * Custom AssertJ assertions for {@link DraggablePoint} objects.
  */
 public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, DraggablePoint> {
+    private static final double IMAGE_SPACE_TOLERANCE = 2.0;
+    private static final double COMPONENT_SPACE_TOLERANCE = 0.1;
+
     public DraggablePointAssert(DraggablePoint actual) {
         super(actual, DraggablePointAssert.class);
     }
@@ -40,8 +44,8 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
      */
     public DraggablePointAssert isAt(double x, double y) {
         isNotNull();
-        assertThat(actual.getX()).as("x").isCloseTo(x, within(0.1));
-        assertThat(actual.getY()).as("y").isCloseTo(y, within(0.1));
+        assertThat(actual.getX()).as("x").isCloseTo(x, within(COMPONENT_SPACE_TOLERANCE));
+        assertThat(actual.getY()).as("y").isCloseTo(y, within(COMPONENT_SPACE_TOLERANCE));
         return this;
     }
 
@@ -50,8 +54,21 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
      */
     public DraggablePointAssert isAtIm(double x, double y) {
         isNotNull();
-        assertThat(actual.imX).as("imX").isCloseTo(x, within(2.0));
-        assertThat(actual.imY).as("imY").isCloseTo(y, within(2.0));
+        assertThat(actual.imX).as("imX").isCloseTo(x, within(IMAGE_SPACE_TOLERANCE));
+        assertThat(actual.imY).as("imY").isCloseTo(y, within(IMAGE_SPACE_TOLERANCE));
+        return this;
+    }
+
+    /**
+     * Asserts that component and image coordinates are consistent according to the view.
+     */
+    public DraggablePointAssert isSyncedWithView(View view) {
+        isNotNull();
+        double expectedCoX = view.imageXToComponentSpace(actual.imX);
+        double expectedCoY = view.imageYToComponentSpace(actual.imY);
+
+        assertThat(actual.getX()).as("synced X").isCloseTo(expectedCoX, within(COMPONENT_SPACE_TOLERANCE));
+        assertThat(actual.getY()).as("synced Y").isCloseTo(expectedCoY, within(COMPONENT_SPACE_TOLERANCE));
         return this;
     }
 

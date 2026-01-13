@@ -42,6 +42,7 @@ import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.BlendingMode.DIFFERENCE;
 import static pixelitor.layers.BlendingMode.NORMAL;
+import static pixelitor.layers.BlendingMode.PASS_THROUGH;
 
 /**
  * Tests the functionality common to all Layer subclasses.
@@ -64,7 +65,7 @@ class LayerTest {
     private IconUpdateChecker iconChecker;
 
     static Stream<Arguments> instancesToTest() {
-        return TestHelper.cartesianProduct(List.of(
+        return TestHelper.combinations(List.of(
             ImageLayer.class,
             TextLayer.class,
             ShapesLayer.class,
@@ -72,8 +73,9 @@ class LayerTest {
             ColorFillLayer.class,
             SmartObject.class,
             AdjustmentLayer.class,
-            SmartFilter.class
-        ), WithMask.values());
+            SmartFilter.class,
+            LayerGroup.class
+        ), List.of(WithMask.NO, WithMask.YES));
     }
 
     @BeforeAll
@@ -231,19 +233,24 @@ class LayerTest {
 
     @Test
     void blendingMode() {
-        assertThat(layer).blendingModeIs(NORMAL);
+        BlendingMode initialMode = layerClass == LayerGroup.class
+            ? PASS_THROUGH : NORMAL;
+
+        assertThat(layer).blendingModeIs(initialMode);
 
         layer.setBlendingMode(DIFFERENCE, true, true);
         assertThat(layer).blendingModeIs(DIFFERENCE);
 
         History.undo("Blending Mode Change");
-        assertThat(layer).blendingModeIs(NORMAL);
+        assertThat(layer).blendingModeIs(initialMode);
 
         History.redo("Blending Mode Change");
         assertThat(layer).blendingModeIs(DIFFERENCE);
 
         History.assertNumEditsIs(1);
-        iconChecker.verifyUpdateCounts(0, 0);
+        int expectedLayerIconUpdates = layerClass == LayerGroup.class
+            ? 3 : 0;
+        iconChecker.verifyUpdateCounts(expectedLayerIconUpdates, 0);
     }
 
     @Test

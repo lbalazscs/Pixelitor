@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,12 +63,12 @@ public enum WithTranslation {
         }
     };
 
-    private final int expectedTX;
-    private final int expectedTY;
+    private final int expectedTx;
+    private final int expectedTy;
 
-    WithTranslation(int expectedTX, int expectedTY) {
-        this.expectedTX = expectedTX;
-        this.expectedTY = expectedTY;
+    WithTranslation(int expectedTx, int expectedTy) {
+        this.expectedTx = expectedTx;
+        this.expectedTy = expectedTy;
     }
 
     public abstract void configure(Composition comp);
@@ -77,19 +77,19 @@ public enum WithTranslation {
 
     public abstract void move(Composition comp);
 
-    public int getExpectedTX() {
-        return expectedTX;
+    public int getExpectedTx() {
+        return expectedTx;
     }
 
-    public int getExpectedTY() {
-        return expectedTY;
+    public int getExpectedTy() {
+        return expectedTy;
     }
 
     public Point getExpectedValue() {
-        return new Point(expectedTX, expectedTY);
+        return new Point(expectedTx, expectedTy);
     }
 
     public boolean isTrue() {
-        return expectedTX != 0 || expectedTY != 0;
+        return expectedTx != 0 || expectedTy != 0;
     }
 }

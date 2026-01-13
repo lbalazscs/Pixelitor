@@ -63,7 +63,7 @@ class LayerGroupTest {
 
         assertThat(group)
             .nameIs(groupName)
-            .opacityIs(1.0f)
+            .isOpaque()
             .isVisible()
             .blendingModeIs(BlendingMode.PASS_THROUGH)
             .isPassThrough()

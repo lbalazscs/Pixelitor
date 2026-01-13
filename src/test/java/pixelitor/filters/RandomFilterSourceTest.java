@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -66,8 +66,7 @@ class RandomFilterSourceTest {
     }
 
     @Test
-    @Timeout(value = 1, unit = SECONDS)
-        // ensure there is no infinite loop
+    @Timeout(value = 1, unit = SECONDS) // ensure there is no infinite loop
     void afterOne() {
         Filter one = source.selectNewFilter();
 
@@ -79,8 +78,7 @@ class RandomFilterSourceTest {
     }
 
     @Test
-    @Timeout(value = 1, unit = SECONDS)
-        // ensure there is no infinite loop
+    @Timeout(value = 1, unit = SECONDS) // ensure there is no infinite loop
     void afterTwo() {
         Filter one = source.selectNewFilter();
         Filter two = source.selectNewFilter();
@@ -105,8 +103,7 @@ class RandomFilterSourceTest {
     }
 
     @Test
-    @Timeout(value = 1, unit = SECONDS)
-        // ensure there is no infinite loop
+    @Timeout(value = 1, unit = SECONDS) // ensure there is no infinite loop
     void multipleBackForward() {
         Filter one = source.selectNewFilter();
         Filter two = source.selectNewFilter();
@@ -123,19 +120,19 @@ class RandomFilterSourceTest {
     }
 
     @Test
-    @Timeout(value = 1, unit = SECONDS)
-        // ensure there is no infinite loop
+    @Timeout(value = 1, unit = SECONDS) // ensure there is no infinite loop
     void generateWhenBackInHistory() {
         Filter one = source.selectNewFilter();
         Filter two = source.selectNewFilter();
         Filter three = source.selectNewFilter();
         source.selectNewFilter(); // four
 
+        // each call goes back in history
         assertThat(source)
             .previousFilterIs(three)
             .previousFilterIs(two);
 
-        // after going back a while start generating new filters
+        // start generating new filters
         Filter five = source.selectNewFilter();
         assertThat(source)
             .hasPrevious()
@@ -146,7 +143,7 @@ class RandomFilterSourceTest {
             .hasPrevious()
             .doesNotHaveNext();
 
-        // and now go back to verify the history
+        // go back to verify the history
         assertThat(source)
             .previousFilterIs(five)
             .previousFilterIs(two)

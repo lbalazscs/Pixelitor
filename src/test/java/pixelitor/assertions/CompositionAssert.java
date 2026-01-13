@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -108,20 +108,9 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert layerNamesAre(String... expected) {
         isNotNull();
 
-        int expectedLayerCount = expected.length;
-        if (expectedLayerCount != actual.getNumLayers()) {
-            failWithMessage(String.format(
-                "\nFound %d layers instead of the expected %d.",
-                actual.getNumLayers(), expectedLayerCount));
-        }
-        for (int i = 0; i < expectedLayerCount; i++) {
-            String layerName = actual.getLayer(i).getName();
-            if (!layerName.equals(expected[i])) {
-                failWithMessage(String.format(
-                    "\nIn layer nr. %d the layer name was '%s', while expecting '%s'.",
-                    i, layerName, expected[i]));
-            }
-        }
+        assertThat(actual.directChildrenStream())
+            .extracting(Layer::getName)
+            .containsExactly(expected);
 
         return this;
     }
@@ -157,7 +146,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return layerNHasMask(1);
     }
 
-    public CompositionAssert activeLayerIndexIs(int expected) {
+    public CompositionAssert activeLayerIsAtIndex(int expected) {
         isNotNull();
 
         int actualIndex = actual.indexOf(actual.getActiveTopLevelLayer());
@@ -176,15 +165,15 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     }
 
     public CompositionAssert firstLayerIsActive() {
-        return activeLayerIndexIs(0);
+        return activeLayerIsAtIndex(0);
     }
 
     public CompositionAssert secondLayerIsActive() {
-        return activeLayerIndexIs(1);
+        return activeLayerIsAtIndex(1);
     }
 
     public CompositionAssert thirdLayerIsActive() {
-        return activeLayerIndexIs(2);
+        return activeLayerIsAtIndex(2);
     }
 
     public CompositionAssert canvasSizeIs(int w, int h) {
@@ -223,6 +212,10 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         }
 
         return this;
+    }
+
+    public CompositionAssert hasSelection(boolean b) {
+        return b ? hasSelection() : doesNotHaveSelection();
     }
 
     public CompositionAssert hasSelection() {
@@ -396,6 +389,14 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
 
         assertThat(actual.getActiveLayer().getName()).isEqualTo(expected);
 
+        return this;
+    }
+
+    public CompositionAssert activeTopLevelLayerIs(Layer expected) {
+        isNotNull();
+        assertThat(actual.getActiveTopLevelLayer())
+            .as("Active top-level layer")
+            .isSameAs(expected);
         return this;
     }
 

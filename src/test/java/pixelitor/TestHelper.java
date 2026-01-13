@@ -29,7 +29,6 @@ import pixelitor.history.History;
 import pixelitor.history.HistoryChecker;
 import pixelitor.layers.*;
 import pixelitor.selection.Selection;
-import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -188,6 +187,7 @@ public class TestHelper {
             case "ShapesLayer" -> createShapesLayer(comp, DEFAULT_LAYER_NAME);
             case "SmartObject" -> createSmartObject(comp, DEFAULT_LAYER_NAME);
             case "SmartFilter" -> createSmartFilter(comp, DEFAULT_LAYER_NAME);
+            case "LayerGroup" -> createLayerGroup(comp, DEFAULT_LAYER_NAME);
             default -> throw new IllegalStateException("unexpected class " + layerClass.getSimpleName());
         };
 
@@ -247,6 +247,10 @@ public class TestHelper {
 
     private static GradientFillLayer createGradientFillLayer(Composition comp, String name) {
         return new GradientFillLayer(comp, name);
+    }
+
+    private static LayerGroup createLayerGroup(Composition comp, String name) {
+        return new LayerGroup(comp, name);
     }
 
     private static SmartFilter createSmartFilter(Composition comp, String name) {
@@ -470,13 +474,45 @@ public class TestHelper {
         historyChecker.setMaxUntestedEdits(max);
     }
 
-    // create the Cartesian product of layer types and mask presence to test
-    public static Stream<Arguments> cartesianProduct(List<Class<? extends Layer>> layerTypes,
-                                                     WithMask[] maskPresence) {
-        return layerTypes.stream()
-            .mapMulti((layerClass, consumer) -> {
-                for (WithMask mask : maskPresence) {
-                    consumer.accept(Arguments.of(layerClass, mask));
+    /**
+     * Generates a stream of Arguments for every possible
+     * combination of elements from the given lists.
+     */
+    public static <A, B> Stream<Arguments> combinations(List<A> listA,
+                                                        List<B> listB) {
+        return listA.stream()
+            .mapMulti((a, downstream) -> {
+                for (B b : listB) {
+                    downstream.accept(Arguments.of(a, b));
+                }
+            });
+    }
+
+    public static <A, B, C> Stream<Arguments> combinations(List<A> listA,
+                                                           List<B> listB,
+                                                           List<C> listC) {
+        return listA.stream()
+            .mapMulti((a, downstream) -> {
+                for (B b : listB) {
+                    for (C c : listC) {
+                        downstream.accept(Arguments.of(a, b, c));
+                    }
+                }
+            });
+    }
+
+    public static <A, B, C, D> Stream<Arguments> combinations(List<A> listA,
+                                                              List<B> listB,
+                                                              List<C> listC,
+                                                              List<D> listD) {
+        return listA.stream()
+            .mapMulti((a, downstream) -> {
+                for (B b : listB) {
+                    for (C c : listC) {
+                        for (D d : listD) {
+                            downstream.accept(Arguments.of(a, b, c, d));
+                        }
+                    }
                 }
             });
     }

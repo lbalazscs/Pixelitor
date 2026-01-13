@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,12 @@
 package pixelitor.tools.gradient;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.geom.AffineTransform;
@@ -30,18 +33,18 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 @DisplayName("GradientHandles tests")
 @TestMethodOrder(MethodOrderer.Random.class)
 class GradientHandlesTest {
-    // the initial positions for the start, end and middle handles
-    private static final int START_X_INIT = 10;
-    private static final int START_Y_INIT = 70;
-    private static final int END_X_INIT = 30;
-    private static final int END_Y_INIT = 50;
-    private static final int MIDDLE_X_INIT = (START_X_INIT + END_X_INIT) / 2;
-    private static final int MIDDLE_Y_INIT = (START_Y_INIT + END_Y_INIT) / 2;
+    // the initial positions for the start, end and center handles
+    private static final double START_X_INIT = 10.0;
+    private static final double START_Y_INIT = 70.0;
+    private static final double END_X_INIT = 30.0;
+    private static final double END_Y_INIT = 50.0;
+    private static final double CENTER_X_INIT = (START_X_INIT + END_X_INIT) / 2;
+    private static final double CENTER_Y_INIT = (START_Y_INIT + END_Y_INIT) / 2;
 
+    private GradientHandles handles;
     private GradientDefiningPoint start;
     private GradientDefiningPoint end;
-    private GradientCenterPoint middle;
-    private GradientHandles handles;
+    private GradientCenterPoint center;
     private View view;
 
     @BeforeAll
@@ -57,153 +60,104 @@ class GradientHandlesTest {
         handles = new GradientHandles(startPos, endPos, view);
         start = handles.getStart();
         end = handles.getEnd();
-        middle = handles.getMiddle();
+        center = handles.getCenter();
 
-        assertThat(start)
-            .isAt(START_X_INIT, START_Y_INIT)
-            .isAtIm(START_X_INIT, START_Y_INIT);
-        assertThat(end)
-            .isAt(END_X_INIT, END_Y_INIT)
-            .isAtIm(END_X_INIT, END_Y_INIT);
-        assertThat(middle)
-            .isAt(MIDDLE_X_INIT, MIDDLE_Y_INIT)
-            .isAtIm(MIDDLE_X_INIT, MIDDLE_Y_INIT);
+        assertGradientPosition(START_X_INIT, START_Y_INIT, END_X_INIT, END_Y_INIT);
     }
 
     @Test
     @DisplayName("dragging the center handle moves the start and end handles")
     void centerMovesStartEnd() {
-        int dragStartX = MIDDLE_X_INIT - 1;
-        int dragStartY = MIDDLE_Y_INIT + 1;
         int dx = -5;
         int dy = 10;
 
-        middle.mousePressed(dragStartX, dragStartY);
-        middle.mouseDragged(dragStartX + dx / 4.0, dragStartY + dy / 4.0);
-        middle.mouseDragged(dragStartX + dx / 2.0, dragStartY + dy / 2.0);
-        middle.mouseReleased(dragStartX + dx, dragStartY + dy);
+        simulateDrag(center, dx, dy);
 
-        assertThat(start)
-            .isAt(START_X_INIT + dx, START_Y_INIT + dy)
-            .isAtIm(START_X_INIT + dx, START_Y_INIT + dy);
-        assertThat(end)
-            .isAt(END_X_INIT + dx, END_Y_INIT + dy)
-            .isAtIm(END_X_INIT + dx, END_Y_INIT + dy);
-        assertThat(middle)
-            .isAt(MIDDLE_X_INIT + dx, MIDDLE_Y_INIT + dy)
-            .isAtIm(MIDDLE_X_INIT + dx, MIDDLE_Y_INIT + dy);
+        assertGradientPosition(
+            START_X_INIT + dx, START_Y_INIT + dy,
+            END_X_INIT + dx, END_Y_INIT + dy);
     }
 
     @Test
     @DisplayName("dragging the start handle moves the center handle")
     void startMovesCenter() {
-        int dragStartX = START_X_INIT + 2;
-        int dragStartY = START_Y_INIT - 3;
         int dx = -10;
         int dy = 15;
 
-        start.mousePressed(dragStartX, dragStartY);
-        start.mouseDragged(dragStartX + dx / 3.0, dragStartY + dy / 3.0);
-        start.mouseDragged(dragStartX + dx / 1.5, dragStartY + dy / 1.5);
-        start.mouseReleased(dragStartX + dx, dragStartY + dy);
+        simulateDrag(start, dx, dy);
 
-        assertThat(start)
-            .isAt(START_X_INIT + dx, START_Y_INIT + dy)
-            .isAtIm(START_X_INIT + dx, START_Y_INIT + dy);
-        assertThat(end)
-            .isAt(END_X_INIT, END_Y_INIT)
-            .isAtIm(END_X_INIT, END_Y_INIT);
-        assertThat(middle)
-            .isAt(MIDDLE_X_INIT + dx / 2.0, MIDDLE_Y_INIT + dy / 2.0)
-            .isAtIm(MIDDLE_X_INIT + dx / 2.0, MIDDLE_Y_INIT + dy / 2.0);
+        assertGradientPosition(
+            START_X_INIT + dx, START_Y_INIT + dy,
+            END_X_INIT, END_Y_INIT); // end handle acts as anchor
     }
 
     @Test
     @DisplayName("dragging the end handle moves the center handle")
     void endMovesCenter() {
-        int dragStartX = END_X_INIT + 1;
-        int dragStartY = END_Y_INIT + 2;
         int dx = 20;
         int dy = 10;
 
-        end.mousePressed(dragStartX, dragStartY);
-        end.mouseDragged(dragStartX + dx / 4.0, dragStartY + dy / 4.0);
-        end.mouseDragged(dragStartX + dx / 2.0, dragStartY + dy / 2.0);
-        end.mouseReleased(dragStartX + dx, dragStartY + dy);
+        simulateDrag(end, dx, dy);
 
-        assertThat(end)
-            .isAt(END_X_INIT + dx, END_Y_INIT + dy)
-            .isAtIm(END_X_INIT + dx, END_Y_INIT + dy);
-        assertThat(start)
-            .isAt(START_X_INIT, START_Y_INIT)
-            .isAtIm(START_X_INIT, START_Y_INIT);
-        assertThat(middle)
-            .isAt(MIDDLE_X_INIT + dx / 2.0, MIDDLE_Y_INIT + dy / 2.0)
-            .isAtIm(MIDDLE_X_INIT + dx / 2.0, MIDDLE_Y_INIT + dy / 2.0);
+        assertGradientPosition(
+            START_X_INIT, START_Y_INIT, // start handle acts as anchor
+            END_X_INIT + dx, END_Y_INIT + dy);
     }
 
     @Test
-    @DisplayName("dragging with Shift key snaps the angle")
-    void constrainedDragSnapsAngle() {
-        int dragStartX = END_X_INIT;
-        int dragStartY = END_Y_INIT;
+    @DisplayName("dragging start handle with Shift key snaps the angle")
+    void constrainedDragStartSnapsAngle() {
+        // move start handle to be almost horizontal to the end handle
+        double dragDist = 50;
+        double slightOffset = -15;
 
-        // drag to a point where the angle from the start handle is closer to 0 than 45 degrees
-        // start is at (10, 70)
-        int finalX = 70; // dx = 60
-        int finalY = 55; // dy = -15
-        // angle is atan2(-15, 60) which is ~-14 degrees, so it should snap to horizontal (0 degrees)
+        simulateDrag(start, dragDist, slightOffset, true);
 
-        end.mousePressed(dragStartX, dragStartY);
-        end.mouseReleased(finalX, finalY, true); // shift is down
-
-        // the new y should be the same as the start handle's y
-        int expectedX = finalX;
-        int expectedY = START_Y_INIT;
-
-        assertThat(end)
-            .isAt(expectedX, expectedY)
-            .isAtIm(expectedX, expectedY);
-        assertThat(start)
-            .isAt(START_X_INIT, START_Y_INIT)
-            .isAtIm(START_X_INIT, START_Y_INIT);
-        assertThat(middle)
-            .isAt((START_X_INIT + expectedX) / 2.0, (START_Y_INIT + expectedY) / 2.0)
-            .isAtIm((START_X_INIT + expectedX) / 2.0, (START_Y_INIT + expectedY) / 2.0);
+        // start should snap to same Y as end
+        assertGradientPosition(
+            START_X_INIT + dragDist, END_Y_INIT,
+            END_X_INIT, END_Y_INIT);
     }
 
     @Test
+    @DisplayName("dragging end handle with Shift key snaps the angle")
+    void constrainedDragEndSnapsAngle() {
+        // drag end handle to a position slightly off the horizontal axis relative to start
+        double dragDist = 60;
+        double slightOffset = -15;
+
+        simulateDrag(end, dragDist, slightOffset, true);
+
+        // end should snap to same Y as start
+        assertGradientPosition(
+            START_X_INIT, START_Y_INIT,
+            END_X_INIT + dragDist, START_Y_INIT);
+    }
+
+    @Test
+    @DisplayName("gradient handles can overlap")
+    void handlesCanOverlap() {
+        // drag start to exactly match end
+        double dx = END_X_INIT - START_X_INIT;
+        double dy = END_Y_INIT - START_Y_INIT;
+
+        simulateDrag(start, dx, dy);
+
+        assertGradientPosition(END_X_INIT, END_Y_INIT, END_X_INIT, END_Y_INIT);
+    }
+
+    @ParameterizedTest
+    @EnumSource(ArrowKey.class)
     @DisplayName("pressing arrow key moves the entire gradient")
-    void arrowKeyMovesGradient() {
-        handles.arrowKeyPressed(ArrowKey.RIGHT, view);
+    void arrowKeyMovesGradient(ArrowKey key) {
+        handles.arrowKeyPressed(key, view);
 
-        int dx = ArrowKey.RIGHT.getDeltaX();
-        int dy = ArrowKey.RIGHT.getDeltaY();
+        int dx = key.getDeltaX();
+        int dy = key.getDeltaY();
 
-        assertThat(start)
-            .isAt(START_X_INIT + dx, START_Y_INIT + dy)
-            .isAtIm(START_X_INIT + dx, START_Y_INIT + dy);
-        assertThat(end)
-            .isAt(END_X_INIT + dx, END_Y_INIT + dy)
-            .isAtIm(END_X_INIT + dx, END_Y_INIT + dy);
-        assertThat(middle)
-            .isAt(MIDDLE_X_INIT + dx, MIDDLE_Y_INIT + dy)
-            .isAtIm(MIDDLE_X_INIT + dx, MIDDLE_Y_INIT + dy);
-
-        handles.arrowKeyPressed(ArrowKey.SHIFT_UP, view);
-
-        int dx2 = ArrowKey.SHIFT_UP.getDeltaX();
-        int dy2 = ArrowKey.SHIFT_UP.getDeltaY();
-
-        assertThat(start)
-            .isAt(START_X_INIT + dx + dx2, START_Y_INIT + dy + dy2)
-            .isAtIm(START_X_INIT + dx + dx2, START_Y_INIT + dy + dy2);
-        assertThat(end)
-            .isAt(END_X_INIT + dx + dx2, END_Y_INIT + dy + dy2)
-            .isAtIm(END_X_INIT + dx + dx2, END_Y_INIT + dy + dy2);
-        assertThat(middle)
-            .isAt(MIDDLE_X_INIT + dx + dx2, MIDDLE_Y_INIT + dy + dy2)
-            .isAtIm(MIDDLE_X_INIT + dx + dx2, MIDDLE_Y_INIT + dy + dy2);
+        assertGradientPosition(
+            START_X_INIT + dx, START_Y_INIT + dy,
+            END_X_INIT + dx, END_Y_INIT + dy);
     }
 
     @Test
@@ -214,15 +168,9 @@ class GradientHandlesTest {
         var at = AffineTransform.getTranslateInstance(dx, dy);
         handles.imCoordsChanged(at, view);
 
-        assertThat(start)
-            .isAt(START_X_INIT + dx, START_Y_INIT + dy)
-            .isAtIm(START_X_INIT + dx, START_Y_INIT + dy);
-        assertThat(middle)
-            .isAt(MIDDLE_X_INIT + dx, MIDDLE_Y_INIT + dy)
-            .isAtIm(MIDDLE_X_INIT + dx, MIDDLE_Y_INIT + dy);
-        assertThat(end)
-            .isAt(END_X_INIT + dx, END_Y_INIT + dy)
-            .isAtIm(END_X_INIT + dx, END_Y_INIT + dy);
+        assertGradientPosition(
+            START_X_INIT + dx, START_Y_INIT + dy,
+            END_X_INIT + dx, END_Y_INIT + dy);
     }
 
     @Test
@@ -231,14 +179,60 @@ class GradientHandlesTest {
         var at = AffineTransform.getScaleInstance(0.5, 0.5);
         handles.imCoordsChanged(at, view);
 
+        assertGradientPosition(
+            START_X_INIT * 0.5, START_Y_INIT * 0.5,
+            END_X_INIT * 0.5, END_Y_INIT * 0.5);
+    }
+
+    @Test
+    @DisplayName("findHandleAt returns the correct handle near coordinates")
+    void testFindHandleAt() {
+        // check exact positions
+        assertThat(handles.findHandleAt(START_X_INIT, START_Y_INIT)).isSameAs(start);
+        assertThat(handles.findHandleAt(END_X_INIT, END_Y_INIT)).isSameAs(end);
+        assertThat(handles.findHandleAt(CENTER_X_INIT, CENTER_Y_INIT)).isSameAs(center);
+
+        // check near positions (within handle radius)
+        double offset = DraggablePoint.HANDLE_RADIUS - 1.0;
+        assertThat(handles.findHandleAt(START_X_INIT + offset, START_Y_INIT)).isSameAs(start);
+
+        // check empty space
+        assertThat(handles.findHandleAt(0, 0)).isNull();
+    }
+
+    /**
+     * Simulates a mouse drag sequence on a specific handle.
+     */
+    private static void simulateDrag(DraggablePoint handle, double dx, double dy) {
+        simulateDrag(handle, dx, dy, false);
+    }
+
+    /**
+     * Simulates a mouse drag sequence on a specific handle with optional constraint.
+     */
+    private static void simulateDrag(DraggablePoint handle, double dx, double dy, boolean constrained) {
+        double startX = handle.getX();
+        double startY = handle.getY();
+
+        handle.mousePressed(startX, startY);
+        // simulate an intermediate drag event
+        handle.mouseDragged(startX + dx / 2.0, startY + dy / 2.0, constrained);
+        handle.mouseReleased(startX + dx, startY + dy, constrained);
+    }
+
+    private void assertGradientPosition(double startX, double startY,
+                                        double endX, double endY) {
+        double centerX = (startX + endX) / 2.0;
+        double centerY = (startY + endY) / 2.0;
+
         assertThat(start)
-            .isAt(START_X_INIT * 0.5, START_Y_INIT * 0.5)
-            .isAtIm(START_X_INIT * 0.5, START_Y_INIT * 0.5);
-        assertThat(middle)
-            .isAt(MIDDLE_X_INIT * 0.5, MIDDLE_Y_INIT * 0.5)
-            .isAtIm(MIDDLE_X_INIT * 0.5, MIDDLE_Y_INIT * 0.5);
+            .isAt(startX, startY)
+            .isSyncedWithView(view);
+        assertThat(center)
+            .isAt(centerX, centerY)
+            .isSyncedWithView(view);
         assertThat(end)
-            .isAt(END_X_INIT * 0.5, END_Y_INIT * 0.5)
-            .isAtIm(END_X_INIT * 0.5, END_Y_INIT * 0.5);
+            .isAt(endX, endY)
+            .isSyncedWithView(view);
     }
 }

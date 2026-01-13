@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ public class GradientFillLayerChangeEdit extends PixelitorEdit {
     private final Gradient before;
     private final Gradient after;
 
-    public GradientFillLayerChangeEdit(GradientFillLayer layer, Gradient before, Gradient after) {
-        super("Gradient Fill Layer Change", layer.getComp());
+    public GradientFillLayerChangeEdit(String name, GradientFillLayer layer, Gradient before, Gradient after) {
+        super(name, layer.getComp());
 
         this.layer = layer;
         this.before = before;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,12 @@ package pixelitor;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import pixelitor.compactions.Crop;
 import pixelitor.history.History;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMoveDirection;
 
@@ -31,8 +34,7 @@ import java.awt.geom.Rectangle2D;
 import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
+import static pixelitor.layers.LayerAdder.Position;
 
 @DisplayName("Composition tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -65,7 +67,7 @@ class CompositionTest {
     void afterEachTest() {
         TestHelper.verifyAndClearHistory();
     }
-    
+
     @Test
     void addNewEmptyImageLayer() {
         assertThat(comp)
@@ -161,118 +163,84 @@ class CompositionTest {
             .thirdLayerIsActive();
     }
 
-    @Test
-    void layerAdder() {
-        TestHelper.setMaxUntestedEdits(4);
+    @ParameterizedTest
+    @EnumSource(Position.class)
+    void addLayerRelative(Position position) {
+        String historyName = "add relative " + position;
 
-        // add below active
         comp.adder()
-            .withHistory("below active")
-            .atPosition(BELOW_ACTIVE)
-            .add(createEmptyImageLayer(comp, "layer A"));
+            .withHistory(historyName)
+            .atPosition(position)
+            .add(createEmptyImageLayer(comp, "new layer"));
+
+        // initial state: ["layer 1", "layer 2"], active is "layer 2"
+        String[] expectedLayerNames = switch (position) {
+            case BELOW_ACTIVE -> new String[]{"layer 1", "new layer", "layer 2"};
+            case ABOVE_ACTIVE -> new String[]{"layer 1", "layer 2", "new layer"};
+        };
 
         assertThat(comp)
             .isDirty()
             .numLayersIs(3)
-            .layerNamesAre("layer 1", "layer A", "layer 2")
-            .secondLayerIsActive()
-            .activeLayerNameIs("layer A");
+            .layerNamesAre(expectedLayerNames)
+            .activeLayerNameIs("new layer");
 
-        // add above active
-        comp.adder()
-            .withHistory("above active")
-            .atPosition(ABOVE_ACTIVE)
-            .add(createEmptyImageLayer(comp, "layer B"));
-
-        assertThat(comp)
-            .numLayersIs(4)
-            .layerNamesAre("layer 1", "layer A", "layer B", "layer 2")
-            .thirdLayerIsActive()
-            .activeLayerNameIs("layer B");
-
-        // add to position 0
-        comp.adder()
-            .withHistory("position 0")
-            .atIndex(0)
-            .add(createEmptyImageLayer(comp, "layer C"));
-
-        assertThat(comp)
-            .numLayersIs(5)
-            .layerNamesAre("layer C", "layer 1", "layer A", "layer B", "layer 2")
-            .firstLayerIsActive()
-            .activeLayerNameIs("layer C");
-
-        // add to position 2
-        comp.adder()
-            .withHistory("position 2")
-            .atIndex(2)
-            .add(createEmptyImageLayer(comp, "layer D"));
-
-        assertThat(comp)
-            .numLayersIs(6)
-            .layerNamesAre("layer C", "layer 1", "layer D", "layer A", "layer B", "layer 2")
-            .thirdLayerIsActive()
-            .activeLayerNameIs("layer D");
-        assertHistoryEditsAre(
-            "below active", "above active", "position 0", "position 2");
-
-        // undo everything
-        History.undo("position 2");
-        assertThat(comp)
-            .numLayersIs(5)
-            .layerNamesAre("layer C", "layer 1", "layer A", "layer B", "layer 2")
-            .firstLayerIsActive()
-            .activeLayerNameIs("layer C");
-
-        History.undo("position 0");
-        assertThat(comp)
-            .numLayersIs(4)
-            .layerNamesAre("layer 1", "layer A", "layer B", "layer 2")
-            .thirdLayerIsActive()
-            .activeLayerNameIs("layer B");
-
-        History.undo("above active");
-        assertThat(comp)
-            .numLayersIs(3)
-            .layerNamesAre("layer 1", "layer A", "layer 2")
-            .secondLayerIsActive()
-            .activeLayerNameIs("layer A");
-
-        History.undo("below active");
+        History.undo(historyName);
         assertThat(comp)
             .numLayersIs(2)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive()
             .activeLayerNameIs("layer 2");
 
-        // redo everything
-        History.redo("below active");
+        History.redo(historyName);
         assertThat(comp)
             .numLayersIs(3)
-            .layerNamesAre("layer 1", "layer A", "layer 2")
+            .layerNamesAre(expectedLayerNames)
+            .activeLayerNameIs("new layer");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "bottom, 0",
+        "middle, 1",
+        "top, 2"
+    })
+    void addLayerAtIndex(String positionName, int index) {
+        String historyName = "add at index " + positionName;
+
+        comp.adder()
+            .withHistory(historyName)
+            .atIndex(index)
+            .add(createEmptyImageLayer(comp, "new layer"));
+
+        // initial state: ["layer 1", "layer 2"]
+        String[] expectedLayerNames = switch (positionName) {
+            case "bottom" -> new String[]{"new layer", "layer 1", "layer 2"};
+            case "middle" -> new String[]{"layer 1", "new layer", "layer 2"};
+            case "top" -> new String[]{"layer 1", "layer 2", "new layer"};
+            default -> throw new IllegalArgumentException("Unexpected position: " + positionName);
+        };
+
+        assertThat(comp)
+            .isDirty()
+            .numLayersIs(3)
+            .layerNamesAre(expectedLayerNames)
+            .activeLayerIsAtIndex(index)
+            .activeLayerNameIs("new layer");
+
+        History.undo(historyName);
+        assertThat(comp)
+            .numLayersIs(2)
+            .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive()
-            .activeLayerNameIs("layer A");
+            .activeLayerNameIs("layer 2");
 
-        History.redo("above active");
+        History.redo(historyName);
         assertThat(comp)
-            .numLayersIs(4)
-            .layerNamesAre("layer 1", "layer A", "layer B", "layer 2")
-            .thirdLayerIsActive()
-            .activeLayerNameIs("layer B");
-
-        History.redo("position 0");
-        assertThat(comp)
-            .numLayersIs(5)
-            .layerNamesAre("layer C", "layer 1", "layer A", "layer B", "layer 2")
-            .firstLayerIsActive()
-            .activeLayerNameIs("layer C");
-
-        History.redo("position 2");
-        assertThat(comp)
-            .numLayersIs(6)
-            .layerNamesAre("layer C", "layer 1", "layer D", "layer A", "layer B", "layer 2")
-            .thirdLayerIsActive()
-            .activeLayerNameIs("layer D");
+            .numLayersIs(3)
+            .layerNamesAre(expectedLayerNames)
+            .activeLayerIsAtIndex(index)
+            .activeLayerNameIs("new layer");
     }
 
     @Test
@@ -307,14 +275,11 @@ class CompositionTest {
 
     @Test
     void flattenImage() {
-        assertThat(comp)
-            .isNotDirty()
-            .layerNamesAre("layer 1", "layer 2");
-
         comp.flattenImage();
 
         assertThat(comp)
             .isDirty()
+            .numLayersIs(1)
             .layerNamesAre("flattened");
 
         // there is no undo for flatten image
@@ -345,98 +310,94 @@ class CompositionTest {
             .layerNamesAre("layer 1");
     }
 
-    @Test
-    @DisplayName("move the active layer")
-    void moveActiveLayer() {
-        // check initial state
-        assertThat(comp)
-            .isNotDirty()
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
+    @ParameterizedTest
+    @EnumSource(LayerMoveDirection.class)
+    @DisplayName("move active layer relative")
+    void moveActiveLayerRelative(LayerMoveDirection direction) {
+        // add a 3rd layer to allow movement in both directions from the middle
+        addThirdLayer();
+        // state: layer 1, layer 2, layer 3. Active: layer 3.
 
-        comp.getActiveHolder().reorderActiveLayer(LayerMoveDirection.UP);
-        // nothing changes as the active layer is already at the top
-        assertThat(comp)
-            .isNotDirty()
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
-        History.assertNumEditsIs(0);
+        // activate the middle layer
+        comp.setActiveLayer(comp.getLayer(1));
 
-        comp.getActiveHolder().reorderActiveLayer(LayerMoveDirection.DOWN);
+        String historyName = direction.getName();
+        comp.getActiveHolder().reorderActiveLayer(direction);
+
+        String[] expectedLayerNames = switch (direction) {
+            case UP -> new String[]{"layer 1", "layer 3", "layer 2"};
+            case DOWN -> new String[]{"layer 2", "layer 1", "layer 3"};
+        };
+
         assertThat(comp)
             .isDirty()
-            .layerNamesAre("layer 2", "layer 1")
-            .firstLayerIsActive();
+            .layerNamesAre(expectedLayerNames)
+            .activeLayerNameIs("layer 2");
 
-        History.undo("Lower Layer");
-        assertThat(comp)
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
+        History.undo(historyName);
+        assertThat(comp).layerNamesAre("layer 1", "layer 2", "layer 3");
 
-        History.redo("Lower Layer");
-        assertThat(comp)
-            .layerNamesAre("layer 2", "layer 1")
-            .firstLayerIsActive();
+        History.redo(historyName);
+        assertThat(comp).layerNamesAre(expectedLayerNames);
+    }
 
-        comp.getActiveHolder().reorderActiveLayer(LayerMoveDirection.UP);
-        assertThat(comp)
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
+    @ParameterizedTest
+    @ValueSource(strings = {"TOP", "BOTTOM"})
+    @DisplayName("move active layer to extreme")
+    void moveActiveLayerToExtreme(String dest) {
+        addThirdLayer();
+        // state: layer 1, layer 2, layer 3. Active: layer 3.
+        comp.setActiveLayer(comp.getLayer(1)); // activate middle
 
-        History.undo("Raise Layer");
-        assertThat(comp)
-            .layerNamesAre("layer 2", "layer 1")
-            .firstLayerIsActive();
+        String historyName;
+        String[] expectedLayers;
 
-        History.redo("Raise Layer");
-        assertThat(comp)
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
+        if ("TOP".equals(dest)) {
+            comp.getActiveHolder().moveActiveLayerToTop();
+            historyName = "Layer to Top";
+            expectedLayers = new String[]{"layer 1", "layer 3", "layer 2"};
+        } else {
+            comp.getActiveHolder().moveActiveLayerToBottom();
+            historyName = "Layer to Bottom";
+            expectedLayers = new String[]{"layer 2", "layer 1", "layer 3"};
+        }
 
-        comp.getActiveHolder().moveActiveLayerToBottom();
         assertThat(comp)
-            .layerNamesAre("layer 2", "layer 1")
-            .firstLayerIsActive();
+            .isDirty()
+            .layerNamesAre(expectedLayers)
+            .activeLayerNameIs("layer 2");
 
-        History.undo("Layer to Bottom");
-        assertThat(comp)
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
+        History.undo(historyName);
+        assertThat(comp).layerNamesAre("layer 1", "layer 2", "layer 3");
 
-        History.redo("Layer to Bottom");
-        assertThat(comp)
-            .layerNamesAre("layer 2", "layer 1")
-            .firstLayerIsActive();
+        History.redo(historyName);
+        assertThat(comp).layerNamesAre(expectedLayers);
+    }
 
-        comp.getActiveHolder().moveActiveLayerToTop();
-        assertThat(comp)
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
+    @ParameterizedTest
+    @CsvSource({
+        "0, 2, 'layer 2, layer 3, layer 1'", // move bottom (L1) to top
+        "2, 0, 'layer 3, layer 1, layer 2'", // move top (L3) to bottom
+        "1, 0, 'layer 2, layer 1, layer 3'", // move middle (L2) to bottom
+        "1, 2, 'layer 1, layer 3, layer 2'"  // move middle (L2) to top
+    })
+    @DisplayName("reorder layer by index")
+    void reorderLayerByIndex(int fromIndex, int toIndex, String expectedNamesStr) {
+        addThirdLayer();
+        // state: layer 1, layer 2, layer 3
 
-        History.undo("Layer to Top");
-        assertThat(comp)
-            .layerNamesAre("layer 2", "layer 1")
-            .firstLayerIsActive();
+        comp.reorderLayer(fromIndex, toIndex, true, null);
 
-        History.redo("Layer to Top");
+        String[] expectedNames = expectedNamesStr.split(", ");
         assertThat(comp)
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
-
-        comp.reorderLayer(0, 1, true, null);
-        assertThat(comp)
-            .layerNamesAre("layer 2", "layer 1")
-            .firstLayerIsActive();
+            .isDirty()
+            .layerNamesAre(expectedNames);
 
         History.undo("Layer Order Change");
-        assertThat(comp)
-            .layerNamesAre("layer 1", "layer 2")
-            .secondLayerIsActive();
+        assertThat(comp).layerNamesAre("layer 1", "layer 2", "layer 3");
 
         History.redo("Layer Order Change");
-        assertThat(comp)
-            .layerNamesAre("layer 2", "layer 1")
-            .firstLayerIsActive();
+        assertThat(comp).layerNamesAre(expectedNames);
     }
 
     @Test
@@ -838,7 +799,7 @@ class CompositionTest {
             .hasSelection()
             .selectionBoundsIs(new Rectangle(2, 2, 2, 2));
 
-        // There is no undo at this level
+        // the history isn't managed in this method
         History.assertNumEditsIs(0);
     }
 
@@ -852,5 +813,87 @@ class CompositionTest {
 
         History.redo("Rename Image");
         assertThat(comp).hasName("CompositionTest New Name");
+    }
+
+    @Test
+    void copyComposition() {
+        Composition copy = comp.copy(CopyType.DUPLICATE_COMP, true);
+
+        assertThat(copy)
+            .isNotSameAs(comp)
+            .numLayersIs(2)
+            .layerNamesAre("layer 1", "layer 2")
+            .activeLayerNameIs("layer 2");
+
+        // verify deep copy of layers
+        assertThat(copy.getLayer(0)).isNotSameAs(comp.getLayer(0));
+    }
+
+    @Test
+    void dispose() {
+        assertThat(comp).isOpen();
+
+        comp.dispose();
+
+        assertThat(comp)
+            .isNotOpen()
+            .doesNotHaveSelection();
+    }
+
+    @Test
+    void mergeDown() {
+        Layer bottomLayer = comp.getLayer(0);
+        Layer topLayer = comp.getLayer(1);
+
+        // in the standard setup, only the top layer can be merged down
+        assertThat(comp.canMergeDown(topLayer)).isTrue();
+        assertThat(comp.canMergeDown(bottomLayer)).isFalse();
+
+        // a hidden layer can't be merged down
+        topLayer.setVisible(false);
+        assertThat(comp.canMergeDown(topLayer)).isFalse();
+        topLayer.setVisible(true);
+
+        // the bottom layer must also be visible
+        bottomLayer.setVisible(false);
+        assertThat(comp.canMergeDown(topLayer)).isFalse();
+        bottomLayer.setVisible(true);
+
+        // insert a non-image layer between the two image layers
+        Layer textLayer = TestHelper.createTextLayer(comp, "Text Layer");
+        comp.adder()
+            .atIndex(1)
+            .add(textLayer);
+        assertThat(comp)
+            .numLayersIs(3)
+            .layerNamesAre("layer 1", "Text Layer", "layer 2");
+
+        // can't merge down onto the text layer
+        assertThat(comp.canMergeDown(topLayer)).isFalse();
+        // the text layer can be merged down onto the bottom image layer
+        assertThat(comp.canMergeDown(textLayer)).isTrue();
+
+        // actually merge down
+        comp.mergeDown(textLayer);
+        assertThat(comp)
+            .isDirty()
+            .numLayersIs(2)
+            .layerNamesAre("layer 1", "layer 2");
+        History.assertNumEditsIs(1);
+
+        History.undo("Merge Down");
+        assertThat(comp)
+            .numLayersIs(3)
+            .layerNamesAre("layer 1", "Text Layer", "layer 2");
+
+        History.redo("Merge Down");
+        assertThat(comp)
+            .numLayersIs(2)
+            .layerNamesAre("layer 1", "layer 2");
+    }
+
+    private void addThirdLayer() {
+        var layer3 = ImageLayer.createEmpty(comp, "layer 3");
+        comp.addLayerWithoutUI(layer3); // adds it without history
     }
 }

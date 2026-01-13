@@ -43,7 +43,7 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 @TestMethodOrder(MethodOrderer.Random.class)
 class ContentLayerTest {
     @Parameter(0)
-    private Class<? extends Layer> layerClass;
+    private Class<? extends ContentLayer> layerClass;
 
     @Parameter(1)
     private WithMask withMask;
@@ -54,10 +54,11 @@ class ContentLayerTest {
     private IconUpdateChecker iconChecker;
 
     static Stream<Arguments> instancesToTest() {
-        return TestHelper.cartesianProduct(List.of(
+        return TestHelper.combinations(List.of(
             ImageLayer.class,
-            TextLayer.class
-        ), WithMask.values());
+            TextLayer.class,
+            GradientFillLayer.class
+        ), List.of(WithMask.NO, WithMask.YES));
     }
 
     @BeforeAll
@@ -93,8 +94,7 @@ class ContentLayerTest {
         layer.moveWhileDragging(3, 3);
         assertThat(layer).translationIs(3, 3);
 
-        // finalizeMovement is called on the composition
-        // so that we have history
+        // call finalizeMovement on the composition to create history
         comp.finalizeMovement(MoveMode.MOVE_LAYER_ONLY);
 
         checkTranslationAfterPositiveDrag();
@@ -104,10 +104,9 @@ class ContentLayerTest {
         // start another drag to the negative direction
         layer.prepareMovement();
         layer.moveWhileDragging(-1, -2);
+        comp.finalizeMovement(MoveMode.MOVE_LAYER_ONLY);
 
         checkTranslationAfterNegativeDrag();
-
-        comp.finalizeMovement(MoveMode.MOVE_LAYER_ONLY);
 
         // No change:
         // ImageLayer: this time the layer was not enlarged
@@ -124,25 +123,31 @@ class ContentLayerTest {
         assertThat(layer).hasNoTranslation();
 
         History.redo("Move Layer");
+        checkTranslationAfterPositiveDrag();
+
         History.redo("Move Layer");
+        checkTranslationAfterNegativeDrag();
     }
 
     private void checkTranslationAfterPositiveDrag() {
         if (layer instanceof ImageLayer) {
-            // the layer was enlarged in finalizeMovement, and the translation was reset to 0, 0
+            // the layer was enlarged in finalizeMovement, and the translation was reset to 0, 0.
             assertThat(layer).hasNoTranslation();
-        } else if (layer instanceof TextLayer) {
-            // text layers can have positive translations
-            assertThat(layer).translationIs(3, 3);
+        } else if (layer instanceof GradientFillLayer) {
+            // gradient fill layers have no translation at the end
+            assertThat(layer).hasNoTranslation();
         } else {
-            throw new IllegalStateException("unexpected layer " + layer.getClass().getName());
+            // other layers can have positive translations
+            assertThat(layer).translationIs(3, 3);
         }
     }
 
     private void checkTranslationAfterNegativeDrag() {
         if (layer instanceof ImageLayer) {
             assertThat(layer).translationIs(-1, -2);
-        } else if (layer instanceof TextLayer) {
+        } else if (layer instanceof GradientFillLayer) {
+            assertThat(layer).hasNoTranslation();
+        } else {
             assertThat(layer).translationIs(2, 1);
         }
     }

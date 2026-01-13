@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -279,7 +279,7 @@ public class GradientTool extends DragTool {
 
         DraggablePoint handle = handles.findHandleAt(e.getX(), e.getY());
         if (handle != null) {
-            // if one of the handles  (start, end, or middle
+            // if one of the handles (start, end, or center
             // point of the gradient) is currently under the
             // mouse cursor, then activate it...
             handle.setActive(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,12 +30,14 @@ import pixelitor.tools.pen.SubPath;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
 /**
@@ -172,6 +174,32 @@ class ShapesTest {
             .hasCtrlInAt(centerX - ctrlOffsetX, centerY - radiusY);
     }
 
+    @Test
+    void convertQuadCurve() {
+        // create a shape with a quadratic curve
+        Path2D input = new Path2D.Double();
+        input.moveTo(0, 0);
+        input.quadTo(10, 0, 10, 10);
+        new SegmentCounter(input)
+            .assertMoveToCount(1)
+            .assertQuadToCount(1)
+            .assertCubicToCount(0);
+
+        Path path = Shapes.shapeToPath(input, view);
+        SubPath subPath = path.getActiveSubpath();
+
+        assertThat(subPath).numAnchorsIs(2);
+        assertThat(subPath.getAnchor(0)).typeIs(CUSP);
+        assertThat(subPath.getAnchor(1)).typeIs(CUSP);
+
+        // the resulting shape is now cubic, not quadratic
+        Shape finalShape = path.toImageSpaceShape();
+        new SegmentCounter(finalShape)
+            .assertMoveToCount(1)
+            .assertQuadToCount(0)
+            .assertCubicToCount(1);
+    }
+
     @ParameterizedTest(name = "toPositiveRect: {0}")
     @MethodSource("provideRectanglesForNormalization")
     void toPositiveRect_normalizesRectangles(String caseName,
@@ -230,5 +258,21 @@ class ShapesTest {
         assertThat(Shapes.pathsAreEqual(r1, r3, 0.0)).isFalse();
         assertThat(Shapes.pathsAreEqual(r1, r4, 0.0)).isFalse();
         assertThat(Shapes.pathsAreEqual(r1, r4, 0.01)).isTrue();
+    }
+
+    @Test
+    void resizeToFit() {
+        // 10x10 square
+        Rectangle2D input = new Rectangle2D.Double(0, 0, 10, 10);
+
+        // fit into 100x50 area with 0 margin
+        Shape result = Shapes.resizeToFit(input, 100, 50, 0, 0, 0);
+        Rectangle2D bounds = result.getBounds2D();
+
+        // should be 50x50 (limited by height) and centered horizontally
+        assertThat(bounds.getWidth()).isEqualTo(50.0);
+        assertThat(bounds.getHeight()).isEqualTo(50.0);
+        assertThat(bounds.getX()).isEqualTo(25.0); // (100 - 50) / 2
+        assertThat(bounds.getY()).isEqualTo(0.0);
     }
 }

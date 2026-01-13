@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ import java.awt.geom.AffineTransform;
 public class GradientHandles implements ToolWidget, Debuggable {
     private final GradientDefiningPoint start;
     private final GradientDefiningPoint end;
-    private final GradientCenterPoint middle;
+    private final GradientCenterPoint center;
     private final View view;
 
     public GradientHandles(PPoint startPos, PPoint endPos, View view) {
@@ -47,24 +47,25 @@ public class GradientHandles implements ToolWidget, Debuggable {
 
         start = new GradientDefiningPoint("start", startPos, view, this);
         end = new GradientDefiningPoint("end", endPos, view, this);
-        middle = new GradientCenterPoint(start, end, view);
+        center = new GradientCenterPoint(start, end, view);
 
         end.setOther(start);
-        end.setCenter(middle);
+        end.setCenter(center);
         start.setOther(end);
-        start.setCenter(middle);
+        start.setCenter(center);
     }
 
     @Override
     public DraggablePoint findHandleAt(double coX, double coY) {
+        // if the handles overlap, we want to grab the end point
         if (end.contains(coX, coY)) {
             return end;
         }
         if (start.contains(coX, coY)) {
             return start;
         }
-        if (middle.contains(coX, coY)) {
-            return middle;
+        if (center.contains(coX, coY)) {
+            return center;
         }
         return null;
     }
@@ -75,7 +76,7 @@ public class GradientHandles implements ToolWidget, Debuggable {
 
         start.paintHandle(g);
         end.paintHandle(g);
-        middle.paintHandle(g);
+        center.paintHandle(g);
     }
 
     public Drag toDrag(View view) {
@@ -118,7 +119,7 @@ public class GradientHandles implements ToolWidget, Debuggable {
         if (view == this.view) {
             start.restoreCoordsFromImSpace(view);
             end.restoreCoordsFromImSpace(view);
-            middle.restoreCoordsFromImSpace(view);
+            center.restoreCoordsFromImSpace(view);
         } else {
             if (AppMode.isDevelopment()) {
                 throw new IllegalStateException("different views, ui = " + ImageArea.getMode());
@@ -132,7 +133,7 @@ public class GradientHandles implements ToolWidget, Debuggable {
 
         start.imTransformOnlyThis(at, false);
         end.imTransformOnlyThis(at, false);
-        middle.imTransformOnlyThis(at, false);
+        center.imTransformOnlyThis(at, false);
     }
 
     @Override
@@ -140,7 +141,7 @@ public class GradientHandles implements ToolWidget, Debuggable {
         assert view == this.view;
 
         // arrow keys move the entire gradient by nudging the center point
-        middle.arrowKeyPressed(key);
+        center.arrowKeyPressed(key);
     }
 
     public GradientDefiningPoint getStart() {
@@ -151,15 +152,15 @@ public class GradientHandles implements ToolWidget, Debuggable {
         return end;
     }
 
-    public GradientCenterPoint getMiddle() {
-        return middle;
+    public GradientCenterPoint getCenter() {
+        return center;
     }
 
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
         node.add(start.createDebugNode());
-        node.add(middle.createDebugNode());
+        node.add(center.createDebugNode());
         node.add(end.createDebugNode());
         return node;
     }

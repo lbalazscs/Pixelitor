@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,13 +40,17 @@ public class ContentLayerAssert<S extends ContentLayerAssert<S, T>, T extends Co
         return translationIs(p.x, p.y);
     }
 
-    public S translationIs(int tx, int ty) {
+    public S translationIs(int expectedTx, int expectedTy) {
         isNotNull();
-
-        assertThat(actual.getTx()).isEqualTo(tx);
-        assertThat(actual.getTy()).isEqualTo(ty);
-
+        assertThat(actual)
+            .extracting(ContentLayer::getTx, ContentLayer::getTy)
+            .as("layer translation (x, y)")
+            .containsExactly(expectedTx, expectedTy);
         return myself;
+    }
+
+    public S contentBoundsIs(int x, int y, int width, int height) {
+        return contentBoundsIsEqualTo(new Rectangle(x, y, width, height));
     }
 
     public S contentBoundsIsEqualTo(Rectangle bounds) {

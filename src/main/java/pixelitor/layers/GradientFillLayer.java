@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -201,7 +201,8 @@ public class GradientFillLayer extends ContentLayer {
         updateIconImage();
 
         if (addHistory) {
-            History.add(new GradientFillLayerChangeEdit(this, prevGradient, newGradient));
+            History.add(new GradientFillLayerChangeEdit(
+                "Gradient Fill Layer Change", this, prevGradient, newGradient));
         } else { // called from the undo/redo
             if (Tools.GRADIENT.isActive()) {
                 // the handles have to be updated by the tool
@@ -247,14 +248,19 @@ public class GradientFillLayer extends ContentLayer {
         if (gradient != null) {
             updateIconImage();
         }
+
+        // the movement is captured in the gradient state
+        setTranslation(0, 0);
+
         return edit;
     }
 
     @Override
     PixelitorEdit createMovementEdit(int prevTx, int prevTy) {
-        // prevTx and prevTy are for the ContentLayer's translation, not directly
-        // used here as gradient movement is handled via gradient state
-        return new GradientFillLayerChangeEdit(this, backupGradient, gradient);
+        // prevTx and prevTy are not used here
+        // as gradient movement is handled via gradient state
+        return new GradientFillLayerChangeEdit("Move Layer",
+            this, backupGradient, gradient);
     }
 
     @Override

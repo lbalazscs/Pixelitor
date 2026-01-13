@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.layers;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.*;
 import pixelitor.compactions.Outsets;
@@ -33,8 +34,8 @@ import pixelitor.utils.ImageUtils;
 import java.awt.AlphaComposite;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -66,14 +67,12 @@ class ImageLayerTest {
 
     private IconUpdateChecker iconChecker;
 
-    static Collection<Object[]> instancesToTest() {
-        return Arrays.asList(new Object[][]{
-            {WithMask.NO, WithTranslation.NO, WithSelection.NO},
-            {WithMask.YES, WithTranslation.NO, WithSelection.NO},
-            {WithMask.NO, WithTranslation.YES, WithSelection.NO},
-            {WithMask.YES, WithTranslation.YES, WithSelection.NO},
-            {WithMask.NO, WithTranslation.NO, WithSelection.YES},
-        });
+    static Stream<Arguments> instancesToTest() {
+        return TestHelper.combinations(
+            List.of(WithMask.NO, WithMask.YES),
+            List.of(WithTranslation.NO, WithTranslation.YES),
+            List.of(WithSelection.NO, WithSelection.YES)
+        );
     }
 
     @BeforeAll
@@ -441,8 +440,8 @@ class ImageLayerTest {
     private void checkLayerAfterCrop(int expectedTx, int expectedTy,
                                      int expectedImWidth, int expectedImHeight,
                                      Rectangle expectedNewCanvas) {
-        assertThat(layer).contentBoundsIsEqualTo(new Rectangle(
-            expectedTx, expectedTy, expectedImWidth, expectedImHeight));
+        assertThat(layer).contentBoundsIs(
+            expectedTx, expectedTy, expectedImWidth, expectedImHeight);
         iconChecker.verifyUpdateCounts(0, 0);
 
         comp.getCanvas().resize(

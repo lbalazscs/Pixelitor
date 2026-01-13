@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class SegmentCounter {
 
     public SegmentCounter(Shape shape) {
         var pathIterator = shape.getPathIterator(null);
-        float[] coords = new float[6];
+        double[] coords = new double[6];
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
             switch (type) {
@@ -78,11 +78,17 @@ public class SegmentCounter {
         return this;
     }
 
-    private static void verifySegmentCount(int actual, int expected, String segmentType) {
+    private void verifySegmentCount(int actual, int expected, String segmentType) {
         if (actual != expected) {
             throw new AssertionError(String.format(
-                "Expected %d %s segments but found %d",
-                expected, segmentType, actual));
+                "Expected %d %s segments but found %d. Full counts: %s",
+                expected, segmentType, actual, this));
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("M:%d L:%d Q:%d C:%d Z:%d",
+            moveToCount, lineToCount, quadToCount, cubicToCount, pathCloseCount);
     }
 }
