@@ -193,7 +193,7 @@ public class ColorPicker extends JPanel {
     private int currentGreen = 0;
     private int currentBlue = 0;
 
-    final ChangeListener changeListener = new ChangeListener() {
+    private final ChangeListener changeListener = new ChangeListener() {
         @Override
         public void stateChanged(ChangeEvent e) {
             Object src = e.getSource();
@@ -259,7 +259,7 @@ public class ColorPicker extends JPanel {
         }
     };
 
-    final ActionListener actionListener = new ActionListener() {
+    private final ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             Object src = e.getSource();
@@ -294,7 +294,7 @@ public class ColorPicker extends JPanel {
         };
     }
 
-    final HexDocumentListener hexDocListener = new HexDocumentListener();
+    private final HexDocumentListener hexDocListener = new HexDocumentListener();
 
     class SetRGBRunnable implements Runnable {
         final int red, green, blue;
@@ -1094,7 +1094,10 @@ public class ColorPicker extends JPanel {
 
         public Option(String text, int max) {
             spinner = new JSpinner(new SpinnerNumberModel(0, 0, max, 5));
-            spinner.addChangeListener(changeListener);
+
+            // Add the app notification listener FIRST.
+            // Since JSpinner notifies listeners in reverse order of addition,
+            // this listener will execute LAST, after the internal state has been updated.
             spinner.addChangeListener(e -> {
                 if (adjustmentListener != null
                         && adjustingSpinners == 0
@@ -1103,6 +1106,10 @@ public class ColorPicker extends JPanel {
                     adjustmentListener.accept(getColor());
                 }
             });
+
+            // Add the internal state change listener SECOND.
+            // This listener will execute FIRST.
+            spinner.addChangeListener(changeListener);
 
             /*this tries out Tim Boudreaux's new slider UI.
              * It's a good UI, but I think for the ColorPicker
