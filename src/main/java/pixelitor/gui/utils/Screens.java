@@ -29,10 +29,6 @@ public class Screens {
     private static final GraphicsDevice[] SCREEN_DEVICES = GRAPHICS_ENV.getScreenDevices();
     private static final boolean IS_MULTI_MONITOR = SCREEN_DEVICES.length > 1;
 
-    private static final Rectangle SCREEN_BOUNDS = IS_MULTI_MONITOR
-        ? PixelitorWindow.get().getGraphicsConfiguration().getBounds()
-        : GRAPHICS_ENV.getMaximumWindowBounds(); // takes the taskbar into account
-
     /**
      * Alignment strategies for positioning windows.
      */
@@ -49,12 +45,14 @@ public class Screens {
      * Positions a window on the screen based on the given alignment.
      */
     public static void positionWindow(Window window, Align align) {
-        restrictWindowSize(window);
+        Rectangle screenBounds = getScreenBounds();
+
+        restrictWindowSize(window, screenBounds);
 
         // calculate window position based on alignment
         switch (align) {
-            case SCREEN_CENTER -> centerWindowOnScreen(window);
-            case FRAME_RIGHT -> alignWindowToFrameRight(window);
+            case SCREEN_CENTER -> centerWindowOnScreen(window, screenBounds);
+            case FRAME_RIGHT -> alignWindowToFrameRight(window, screenBounds);
             default -> throw new IllegalStateException();
         }
     }
@@ -63,33 +61,40 @@ public class Screens {
      * Positions a window on the screen based on the given custom location.
      */
     public static void positionWindow(Window window, Point location) {
-        restrictWindowSize(window);
+        restrictWindowSize(window, getScreenBounds());
         window.setLocation(Objects.requireNonNull(location));
     }
 
-    private static void restrictWindowSize(Window window) {
+    private static Rectangle getScreenBounds() {
+        // takes the taskbar into account
+        return IS_MULTI_MONITOR
+            ? PixelitorWindow.get().getGraphicsConfiguration().getBounds()
+            : GRAPHICS_ENV.getMaximumWindowBounds();
+    }
+
+    private static void restrictWindowSize(Window window, Rectangle screenBounds) {
         Rectangle windowBounds = window.getBounds();
 
         // adjust window size if larger than the screen
-        windowBounds.height = Math.min(windowBounds.height, SCREEN_BOUNDS.height);
-        windowBounds.width = Math.min(windowBounds.width, SCREEN_BOUNDS.width);
+        windowBounds.height = Math.min(windowBounds.height, screenBounds.height);
+        windowBounds.width = Math.min(windowBounds.width, screenBounds.width);
         window.setSize(windowBounds.width, windowBounds.height);
     }
 
     /**
      * Centers the window on the screen.
      */
-    private static void centerWindowOnScreen(Window window) {
+    private static void centerWindowOnScreen(Window window, Rectangle screenBounds) {
         Dimension windowSize = window.getSize();
-        int locX = SCREEN_BOUNDS.x + (SCREEN_BOUNDS.width - windowSize.width) / 2;
-        int locY = SCREEN_BOUNDS.y + (SCREEN_BOUNDS.height - windowSize.height) / 2;
+        int locX = screenBounds.x + (screenBounds.width - windowSize.width) / 2;
+        int locY = screenBounds.y + (screenBounds.height - windowSize.height) / 2;
         window.setLocation(locX, locY);
     }
 
     /**
      * Aligns the window to the right side of the main application frame.
      */
-    private static void alignWindowToFrameRight(Window window) {
+    private static void alignWindowToFrameRight(Window window, Rectangle screenBounds) {
         PixelitorWindow mainWindow = PixelitorWindow.get();
         Point pwLoc = mainWindow.getLocationOnScreen();
         Dimension windowSize = window.getSize();
@@ -105,7 +110,7 @@ public class Screens {
             locY = pwLoc.y + (mainWindow.getHeight() - windowSize.height) / 2;
         } else {
             // center on screen
-            locY = SCREEN_BOUNDS.y + (SCREEN_BOUNDS.height - windowSize.height) / 2;
+            locY = screenBounds.y + (screenBounds.height - windowSize.height) / 2;
         }
 
         // if there is a horizontal gap between the canvas and
