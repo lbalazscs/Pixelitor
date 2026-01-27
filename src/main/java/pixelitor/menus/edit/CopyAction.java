@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,25 +57,28 @@ public class CopyAction extends ViewEnabledAction {
         BufferedImage imageCopy = ImageUtils.copySubImage(img);
 
         ProgressHandler progressHandler = Messages.startProgress("Copying to clipboard", -1);
-        CompletableFuture.runAsync(() -> transferToClipboard(imageCopy))
-            .thenRunAsync(() -> postCopyEDTActions(progressHandler), onEDT)
+
+        CompletableFuture.supplyAsync(() -> transferToClipboard(imageCopy))
+            .thenAcceptAsync(success -> postCopyEDTActions(progressHandler, success), onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private static void transferToClipboard(BufferedImage image) {
+    private static boolean transferToClipboard(BufferedImage image) {
         Transferable imageTransferable = new ImageTransferable(image);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
         try {
             clipboard.setContents(imageTransferable, null);
-        } catch (IllegalStateException e) {
-            // ignore, see issue #181
+            return true; // success
+        } catch (IllegalStateException e) { // can happen, see issue #181
+            return false; // the clipboard was busy
         }
     }
 
-    private static void postCopyEDTActions(ProgressHandler handler) {
+    private static void postCopyEDTActions(ProgressHandler handler, boolean success) {
         handler.stopProgress();
-        Messages.showStatusMessage("Image copied to the clipboard.");
+        Messages.showStatusMessage(success
+            ? "Image copied to the clipboard."
+            : "Copy failed: System clipboard is busy.");
     }
 }
-

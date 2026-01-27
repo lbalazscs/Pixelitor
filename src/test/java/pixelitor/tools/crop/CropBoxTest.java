@@ -23,7 +23,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.TestHelper;
 
@@ -47,22 +46,6 @@ class CropBoxTest {
     @BeforeAll
     static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
-    }
-
-    @DisplayName("aspect ratio tests")
-    @ParameterizedTest(name = "aspect ratio for rect({0}x{1}) should be {2}")
-    @CsvSource({
-        // width, height, expected
-        " 0,     20,      0.0", // width is 0
-        "20,      0,      0.0", // height is 0
-        " 0,      0,      0.0", // width and height are 0
-        "10,     20,      0.5", // height > width
-        "20,     10,      2.0", // width > height
-        "20,     20,      1.0"  // width == height
-    })
-    void aspect_ratio(int width, int height, double expected) {
-        double actual = CropBox.calcAspectRatio(new Rectangle(30, 40, width, height));
-        assertThat(actual).isEqualTo(expected);
     }
 
     @DisplayName("resize by handle")

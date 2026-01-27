@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,11 +92,9 @@ public final class GUIUtils {
                                                      String title) {
         new DialogBuilder()
             .okText(GUIText.COPY_AS_JSON)
+            .okAction(() -> Utils.copyStringToClipboard(textSupplier.get()))
+            .keepOpenAfterOk()
             .cancelText(CLOSE_DIALOG)
-            .validator(d -> {
-                Utils.copyStringToClipboard(textSupplier.get()); // OK action
-                return false; // prevents the dialog from closing
-            })
             .title(title)
             .content(content)
             .show();
@@ -262,7 +260,7 @@ public final class GUIUtils {
 
         try {
             // if after BUSY_CURSOR_DELAY_MS the original task is
-            // still running, set the cursor to the delay cursor
+            // still running, set the cursor to the busy cursor
             timer.schedule(startBusyCursorTask, delay);
             task.run(); // on this thread!
         } finally {

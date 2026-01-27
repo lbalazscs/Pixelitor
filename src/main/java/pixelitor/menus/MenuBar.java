@@ -166,7 +166,7 @@ public class MenuBar extends JMenuBar {
             exportOptimizedText + "...",
             comp -> OptimizedJpegExportPanel.showInDialog(comp, exportOptimizedText));
 
-        fileMenu.add(createImageMagickSubmenu(i18n));
+        fileMenu.add(createImageMagickSubmenu());
 
         fileMenu.addSeparator();
 
@@ -211,7 +211,7 @@ public class MenuBar extends JMenuBar {
         return fileMenu;
     }
 
-    private static JMenu createImageMagickSubmenu(ResourceBundle i18n) {
+    private JMenu createImageMagickSubmenu() {
         PMenu imMenu = new PMenu("ImageMagick");
 
         imMenu.addViewEnabledDialog(i18n, "im_export", ImageMagick::export);
@@ -478,9 +478,6 @@ public class MenuBar extends JMenuBar {
 
         sub.addViewEnabled("Convert Layer to Smart Object",
             comp -> comp.getActiveLayer().replaceWithSmartObject());
-
-        sub.addViewEnabled("Convert All to Smart Object",
-            Composition::replaceWithSmartObject);
 
         sub.addViewEnabled("Convert Visible to Smart Object",
             Composition::convertVisibleLayersToSmartObject, CTRL_SHIFT_L);

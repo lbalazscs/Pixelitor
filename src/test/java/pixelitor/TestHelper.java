@@ -242,7 +242,11 @@ public class TestHelper {
     }
 
     private static ColorFillLayer createColorFillLayer(Composition comp, String name) {
-        return new ColorFillLayer(comp, name, Color.WHITE);
+        return createColorFillLayer(comp, Color.WHITE, name);
+    }
+
+    public static ColorFillLayer createColorFillLayer(Composition comp, Color color, String name) {
+        return new ColorFillLayer(comp, name, color);
     }
 
     private static GradientFillLayer createGradientFillLayer(Composition comp, String name) {

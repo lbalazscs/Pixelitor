@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,6 +88,12 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
          * The enabled state is determined by the app's animation mode
          * (disabling non-animatable parameters when configuting an animation's end frame).
          */
-        ANIMATION_ENDING_STATE
+        ANIMATION_ENDING_STATE,
+
+        /**
+         * The enabled state is determined by the parent parameter
+         * (an entire composite filter parameter is enabled/disabled).
+         */
+        PARENT_PARAM
     }
 }

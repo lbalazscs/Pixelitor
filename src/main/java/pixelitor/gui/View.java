@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -440,7 +440,16 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      */
     private void paintOverlays(Graphics2D g2) {
         if (pixelGridVisible && allowPixelGrid()) {
-            drawPixelGrid(g2);
+            // use XOR mode for visibility on any background
+            g2.setColor(WHITE);
+            g2.setXORMode(BLACK);
+
+            try {
+                drawPixelGrid(g2);
+            } finally {
+                // stop the XOR mode
+                g2.setPaintMode();
+            }
         }
 
         comp.drawGuides(g2);
@@ -454,10 +463,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * Draws the pixel grid lines in component space.
      */
     private void drawPixelGrid(Graphics2D g2) {
-        // use XOR mode for visibility on any background
-        g2.setColor(WHITE);
-        g2.setXORMode(BLACK);
-
         double pixelSize = zoomScale;
         assert pixelSize > 1;
 
@@ -489,9 +494,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         for (double y = startY + pixelSize; y < endY; y += pixelSize) {
             g2.draw(new Line2D.Double(startX, y, endX, y));
         }
-
-        // stop the XOR mode
-        g2.setPaintMode();
     }
 
     /**

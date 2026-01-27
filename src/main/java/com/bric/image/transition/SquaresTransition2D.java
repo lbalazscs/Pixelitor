@@ -21,7 +21,7 @@ package com.bric.image.transition;
 
 import com.bric.geom.RectangularTransform;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Random;
@@ -172,11 +172,11 @@ public class SquaresTransition2D extends Transition2D {
                 instr[1 + ctr++] = new ImageInstruction(true, transform.createAffineTransform(), clip);
             }
         }
-        Arrays.sort(instr, this::compareInstructions);
+        Arrays.sort(instr, SquaresTransition2D::compareInstructions);
         return instr;
     }
 
-    private int compareInstructions(ImageInstruction i1, ImageInstruction i2) {
+    private static int compareInstructions(ImageInstruction i1, ImageInstruction i2) {
         if (i1.isFirstFrame && !i2.isFirstFrame) {
             return 1;
         }

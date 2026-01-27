@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.history.History;
 import pixelitor.tools.pen.history.AnchorPointChangeEdit;
 import pixelitor.tools.pen.history.SubPathEdit;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
@@ -265,7 +266,7 @@ public class AnchorPoint extends DraggablePoint {
         return CUSP;
     }
 
-    public void showPopup(int x, int y) {
+    public void showPopup(PMouseEvent e) {
         var popup = new JPopupMenu();
 
         for (var anchorPointType : AnchorPointType.values()) {
@@ -304,8 +305,8 @@ public class AnchorPoint extends DraggablePoint {
         popup.add(new TaskAction("Delete Path", subPath::deletePath));
 
         try {
-            popup.show(view, x, y);
-        } catch (IllegalComponentStateException e) {
+            popup.show(view, (int) e.getCoX(), (int) e.getCoY());
+        } catch (IllegalComponentStateException ex) {
             // ignore: happens in RandomGUITest, but works OK otherwise
             // ("component must be showing on the screen to determine its location")
             // probably related to the always-on-top state of RandomGUITest,

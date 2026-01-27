@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,6 @@ import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
-import pixelitor.utils.Error;
 import pixelitor.utils.*;
 
 import javax.swing.*;
@@ -41,7 +40,6 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagLayout;
-import java.io.File;
 
 import static java.lang.Integer.parseInt;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
@@ -343,72 +341,35 @@ public class PreferencesPanel extends JTabbedPane {
 
     // validates and applies settings that are not handled by immediate action listeners
     private boolean validateAndApply(JDialog d) {
-        // we don't want to continuously set the undo levels
+        // validate all fields first
+        ValidationResult result = TextFieldValidator.hasNonNegativeInt(undoLevelsTF, UNDO_LEVELS_LABEL)
+            .checkOptionalDir(magickDirTF.getText(), IMAGEMAGICK_FOLDER_LABEL)
+            .checkOptionalDir(gmicDirTF.getText(), GMIC_FOLDER_LABEL);
+
+        // if there are errors, show them all at once and stop
+        if (!result.isValid()) {
+            result.showErrorDialog(d);
+            return false; // keep dialog open
+        }
+
+        // apply undo levels (parsing is safe now because validation passed)
+        // (we don't want to continuously set the undo levels
         // as the user edits the text field, because low levels
-        // erase the history, therefore it is set here
-        switch (getUndoLevels()) {
-            case Success<Integer, ?>(Integer undoLevels) -> History.setUndoLevels(undoLevels);
-            case Error<?, String>(String errorMsg) -> {
-                Messages.showError("Error", errorMsg, d);
-                return false;
-            }
-        }
+        // erase the history, therefore it is set here)
+        int undoLevels = parseInt(undoLevelsTF.getText().trim());
+        History.setUndoLevels(undoLevels);
 
-        switch (checkDirectory(magickDirTF, IMAGEMAGICK_FOLDER_LABEL)) {
-            case Success<String, ?>(String magickDir) -> AppPreferences.magickDirName = magickDir;
-            case Error<?, String>(String errorMsg) -> {
-                Messages.showError("Error", errorMsg, d);
-                return false;
-            }
-        }
-
-        switch (checkDirectory(gmicDirTF, GMIC_FOLDER_LABEL)) {
-            case Success<String, ?>(String gmicDir) -> AppPreferences.gmicDirName = gmicDir;
-            case Error<?, String>(String errorMsg) -> {
-                Messages.showError("Error", errorMsg, d);
-                return false;
-            }
-        }
-
-        // these can't be set interactively => set it here
+        // apply remaining settings
+        // (these can't be set interactively => set them here)
+        AppPreferences.magickDirName = magickDirTF.getText().trim();
+        AppPreferences.gmicDirName = gmicDirTF.getText().trim();
         MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
         View.snappingSettingChanged(snapCB.isSelected());
         FileChoosers.setUseNativeDialogs(nativeChoosersCB.isSelected());
         Features.enableExperimental(experimentalCB.isSelected());
 
-        return true;
-    }
-
-    private static Result<String, String> checkDirectory(JTextField textField, String label) {
-        String dirName = textField.getText().trim();
-        if (!dirName.isEmpty()) {
-            File dir = new File(dirName);
-            if (!dir.exists()) {
-                return Result.error(String.format("<html>The %s <b>\"%s\"</b> doesn't exist.",
-                    label, dirName));
-            }
-            if (!dir.isDirectory()) {
-                return Result.error(String.format("<html>The %s <b>\"%s\"</b> isn't a directory.",
-                    label, dirName));
-            }
-        }
-        return Result.success(dirName);
-    }
-
-    private Result<Integer, String> getUndoLevels() {
-        int undoLevels = 0;
-
-        try {
-            undoLevels = parseInt(undoLevelsTF.getText().trim());
-            if (undoLevels < 0) {
-                return Result.error("<html><b>" + UNDO_LEVELS_LABEL + "</b> must be positive.");
-            }
-        } catch (NumberFormatException ex) {
-            return Result.error("<html><b>" + UNDO_LEVELS_LABEL + "</b> must be an integer.");
-        }
-
-        return Result.success(undoLevels);
+        return true; // valid, dialog can be closed
     }
 
     private void updateThumbSize() {
@@ -427,6 +388,8 @@ public class PreferencesPanel extends JTabbedPane {
     public static void showInDialog() {
         var prefPanel = new PreferencesPanel();
 
+        // there's no Cancel button, and changes are applied
+        // even if the dialog is canceled with Esc/X
         new DialogBuilder()
             .content(prefPanel)
             .noCancelButton()

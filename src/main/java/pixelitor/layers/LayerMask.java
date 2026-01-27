@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -298,11 +298,11 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    public void update(boolean updateHistogram) {
+    public void update() {
         if (owner instanceof SmartFilter sf) {
             sf.layerLevelPropertyChanged(false);
         }
-        holder.update(updateHistogram);
+        super.update();
     }
 
     @Override
@@ -310,6 +310,7 @@ public class LayerMask extends ImageLayer {
         if (owner instanceof SmartFilter sf) {
             sf.layerLevelPropertyChanged(false);
         }
+        invalidateMaskedImageCache();
         comp.repaintRegion(start, end, thickness);
     }
 
@@ -318,7 +319,16 @@ public class LayerMask extends ImageLayer {
         if (owner instanceof SmartFilter sf) {
             sf.layerLevelPropertyChanged(false);
         }
+        invalidateMaskedImageCache();
         comp.repaintRegion(area);
+    }
+
+    @Override
+    public void invalidateMaskedImageCache() {
+        // a mask can't have its own mask, so calling super is not necessary
+        if (owner != null) {
+            owner.invalidateMaskedImageCache();
+        }
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     protected ParamAdjustmentListener adjustmentListener;
     private boolean enabledByAnimation = true;
     private boolean enabledByFilterLogic = true;
+    private boolean enabledByParent = true;
     protected ParamGUI paramGUI;
     private RandomizeMode randomizeMode;
     private String toolTip;
@@ -69,6 +70,13 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     public FilterParam withSideButton(FilterButtonModel action) {
         this.sideButtonModel = action;
+
+        if (adjustmentListener != null) {
+            sideButtonModel.setAdjustmentListener(adjustmentListener);
+        }
+
+        sideButtonModel.setEnabled(isEnabled(), EnabledReason.PARENT_PARAM);
+
         return this;
     }
 
@@ -107,10 +115,14 @@ public abstract class AbstractFilterParam implements FilterParam {
                 }
                 enabledByAnimation = enabled;
             }
+            case PARENT_PARAM -> enabledByParent = enabled;
         }
 
         if (paramGUI != null) {
             updateGUIEnabledState();
+        }
+        if (sideButtonModel != null) {
+            sideButtonModel.setEnabled(isEnabled(), reason);
         }
     }
 
@@ -120,7 +132,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public boolean isEnabled() {
-        return enabledByFilterLogic && enabledByAnimation;
+        return enabledByFilterLogic && enabledByAnimation && enabledByParent;
     }
 
     @Override
@@ -164,6 +176,10 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public boolean isComplex() {
         return false;
+    }
+
+    public FilterButtonModel getSideButtonModel() {
+        return sideButtonModel;
     }
 
     @Override

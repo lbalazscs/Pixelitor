@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,13 +33,15 @@ import static java.awt.FlowLayout.LEFT;
 public class ColorParamGUI extends JPanel implements ParamGUI {
     public static final int BUTTON_SIZE = 30;
     private final ColorParam model;
+    private final FilterButtonModel extraAction;
     private final ColorSwatch colorSwatch;
     private ResetButton resetButton;
 
-    public ColorParamGUI(ColorParam model, FilterButtonModel action, boolean addResetButton) {
+    public ColorParamGUI(ColorParam model, FilterButtonModel extraAction, boolean addResetButton) {
         super(new FlowLayout(LEFT));
 
         this.model = model;
+        this.extraAction = extraAction;
 
         Color color = model.getColor();
         colorSwatch = new ColorSwatch(color, BUTTON_SIZE);
@@ -50,8 +52,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         Colors.setupFilterColorsPopupMenu(this, colorSwatch,
             model::getColor, this::applySelectedColor);
 
-        if (action != null) {
-            add(action.createGUI());
+        if (extraAction != null) {
+            add(extraAction.createGUI());
         }
 
         if (addResetButton) {
@@ -90,6 +92,12 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled); // so that isEnabled() works
         colorSwatch.setEnabled(enabled);
+        if (extraAction != null) {
+            extraAction.setEnabled(enabled);
+        }
+        if (resetButton != null) {
+            resetButton.setEnabled(enabled);
+        }
     }
 
     @Override

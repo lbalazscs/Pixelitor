@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -110,41 +110,40 @@ public class NodeTool extends PathTool {
             return;
         }
 
-        double x = e.getCoX();
-        double y = e.getCoY();
-
-        DraggablePoint handle = path.findHandleAt(x, y, e.isAltDown());
+        DraggablePoint handle = path.findHandleAt(e);
         if (handle != null) {
-            if (e.isPopupTrigger() && handle instanceof AnchorPoint ap) {
-                ap.showPopup((int) x, (int) y);
+            if (e.isPopupTrigger()) {
+                if (handle instanceof AnchorPoint ap) {
+                    ap.showPopup(e);
+                }
             } else if (e.isAltDown()) {
-                altMousePressedOn(handle, x, y);
+                altMousePressedOn(handle, e);
             } else {
                 handle.setActive(true);
-                handle.mousePressed(x, y);
+                handle.mousePressed(e);
             }
         }
     }
 
-    private static void altMousePressedOn(DraggablePoint handle, double x, double y) {
+    private static void altMousePressedOn(DraggablePoint handle, PMouseEvent e) {
         if (handle instanceof ControlPoint cp) {
-            altMousePressedOnControl(cp, x, y);
+            altMousePressedOnControl(cp, e);
         } else if (handle instanceof AnchorPoint ap) {
-            altMousePressedOnAnchor(ap, x, y);
+            altMousePressedOnAnchor(ap, e);
         }
     }
 
-    private static void altMousePressedOnControl(ControlPoint cp, double x, double y) {
+    private static void altMousePressedOnControl(ControlPoint cp, PMouseEvent e) {
         cp.breakOrDragOut();
         cp.setActive(true);
-        cp.mousePressed(x, y);
+        cp.mousePressed(e);
     }
 
-    private static void altMousePressedOnAnchor(AnchorPoint ap, double x, double y) {
+    private static void altMousePressedOnAnchor(AnchorPoint ap, PMouseEvent e) {
         ap.retractHandles();
         ap.setType(SYMMETRIC);
         ap.ctrlOut.setActive(true);
-        ap.ctrlOut.mousePressed(x, y);
+        ap.ctrlOut.mousePressed(e);
     }
 
     @Override
@@ -161,13 +160,12 @@ public class NodeTool extends PathTool {
             return;
         }
 
-        double x = e.getCoX();
-        double y = e.getCoY();
-
-        if (e.isPopupTrigger() && activePoint instanceof AnchorPoint ap) {
-            ap.showPopup((int) x, (int) y);
+        if (e.isPopupTrigger()) {
+            if (activePoint instanceof AnchorPoint ap) {
+                ap.showPopup(e);
+            }
         } else {
-            activePoint.mouseReleased(x, y, e.isShiftDown());
+            activePoint.mouseReleased(e);
             Composition comp = e.getComp();
             Path path = comp.getActivePath();
             activePoint.createMovedEdit(comp).ifPresent(path::handleMoved);
@@ -184,7 +182,7 @@ public class NodeTool extends PathTool {
             return;
         }
 
-        DraggablePoint handle = path.findHandleAt(e.getX(), e.getY(), e.isAltDown());
+        DraggablePoint handle = path.findHandleAt(e);
         if (handle != activePoint) {
             if (activePoint != null) {
                 activePoint.setActive(false);

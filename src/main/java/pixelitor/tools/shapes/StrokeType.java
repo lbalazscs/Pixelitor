@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,12 +38,12 @@ import java.awt.Stroke;
  * Different stroke types available for drawing shapes.
  */
 public enum StrokeType {
-    BASIC("Basic", false) {
+    BASIC("Basic", false, true) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new BasicStroke(width, cap, join, 1.5f, dashPattern, 0.0f);
         }
-    }, ZIGZAG("Zigzag", false) {
+    }, ZIGZAG("Zigzag", false, true) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             Stroke tmp = BASIC.createStroke(width, cap, join, dashPattern);
@@ -54,7 +54,7 @@ public enum StrokeType {
         public double getExtraThickness(double defaultWidth) {
             return defaultWidth / 2;
         }
-    }, WOBBLE("Wobble", true) {
+    }, WOBBLE("Wobble", true, false) {
         private static final float SIZE_DIVIDING_FACTOR = 4.0f;
         private float lastWidth = 0.0f;
         private WobbleStroke wobbleStroke;
@@ -75,17 +75,17 @@ public enum StrokeType {
         public double getExtraThickness(double defaultWidth) {
             return defaultWidth * 1.5;
         }
-    }, CHARCOAL("Charcoal (can be slow!)", true) {
+    }, CHARCOAL("Charcoal (can be slow!)", true, false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new CharcoalStroke(width, 0.5f);
         }
-    }, BRISTLE("Bristle (can be slow!)", true) {
+    }, BRISTLE("Bristle (can be slow!)", true, false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new BristleStroke(width, 0.5f);
         }
-    }, OUTLINE("Outline", false) {
+    }, OUTLINE("Outline", false, false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new CompositeStroke(
@@ -97,12 +97,12 @@ public enum StrokeType {
         public Stroke getInnerStroke() {
             return innerOutlineStroke;
         }
-    }, CALLIGRAPHY("Calligraphy", false) {
+    }, CALLIGRAPHY("Calligraphy", false, false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new CalligraphyStroke(width);
         }
-    }, SHAPE("Shape", false) {
+    }, SHAPE("Shape", false, true) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             // needs a full StrokeParam
@@ -120,17 +120,17 @@ public enum StrokeType {
             Shape shape = shapeType.createShape(new Drag(0, 0, width, width), null);
             return new ShapeStroke(shape, advance);
         }
-    }, TAPERING("Tapering", false) {
+    }, TAPERING("Tapering", false, false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new TaperingStroke(width);
         }
-    }, TAPERING_REV("Reversed Tapering", false) {
+    }, TAPERING_REV("Reversed Tapering", false, false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new TaperingStroke(width, true);
         }
-    }, RAILWAY("Railway Tracks", false) {
+    }, RAILWAY("Railway Tracks", false, false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new RailwayTrackStroke(width);
@@ -143,10 +143,12 @@ public enum StrokeType {
 
     private final String displayName;
     private final boolean slow;
+    private final boolean supportsDashes;
 
-    StrokeType(String displayName, boolean slow) {
+    StrokeType(String displayName, boolean slow, boolean supportsDashes) {
         this.displayName = displayName;
         this.slow = slow;
+        this.supportsDashes = supportsDashes;
     }
 
     public Stroke getInnerStroke() {
@@ -162,6 +164,10 @@ public enum StrokeType {
 
     public boolean isSlow() {
         return slow;
+    }
+
+    public boolean supportsDashes() {
+        return supportsDashes;
     }
 
     /**
@@ -181,4 +187,3 @@ public enum StrokeType {
         return displayName;
     }
 }
-

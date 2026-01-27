@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,6 +46,7 @@ public enum CopySource {
                 src = src.getMask();
             }
 
+            // a canvas-sized image, even if the source content is smaller or larger
             BufferedImage layerImage = src.toImage(true, false);
             if (layerImage == null) {
                 return Result.error("this layer can't be copied");

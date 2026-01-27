@@ -399,7 +399,7 @@ public class ShapeUtils {
      */
     public static boolean equals(Shape shape, Shape shape2) {
         PathIterator iter1 = shape.getPathIterator(null);
-        PathIterator iter2 = shape.getPathIterator(null);
+        PathIterator iter2 = shape2.getPathIterator(null);
         double[] coords1 = new double[6];
         double[] coords2 = new double[6];
         while (!iter1.isDone() && !iter2.isDone()) {

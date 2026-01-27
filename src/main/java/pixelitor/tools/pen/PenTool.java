@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,7 +57,7 @@ public class PenTool extends PathTool {
     private final JCheckBox rubberBandCB = new JCheckBox("", true);
     private boolean showRubberBand = true;
 
-    // State of the path building process
+    // state of the path building process
     private BuildState buildState = IDLE;
     private BuildState prevBuildState = IDLE;
 
@@ -135,6 +135,12 @@ public class PenTool extends PathTool {
         if (path != null) {
             assert path.checkInvariants();
             lastActive = null;
+
+            SubPath activeSubpath = path.getActiveSubpath();
+            if (activeSubpath != null) {
+                activeSubpath.setClosingPreview(false);
+            }
+
             Views.repaintActive(); // visually hide the path
         }
 
@@ -238,12 +244,12 @@ public class PenTool extends PathTool {
         // if Ctrl or Alt is held down, the user wants to edit an existing path
         if (e.isControlDown()) {
             // if over an existing point, start moving it
-            if (handleCtrlPressBeforeSubpath(e.isAltDown(), x, y, path)) {
+            if (handleCtrlPressBeforeSubpath(e, path)) {
                 return;
             }
         } else if (e.isAltDown()) {
             // if only alt is down, break the control points
-            if (handleAltPressBeforeSubpath(x, y, path)) {
+            if (handleAltPressBeforeSubpath(e, path)) {
                 return;
             }
         }
@@ -276,19 +282,19 @@ public class PenTool extends PathTool {
 
         if (e.isControlDown()) {
             // edit an existing point or finish the path
-            handleCtrlPressWhileMoving(e, e.isAltDown(), x, y, path);
+            handleCtrlPressWhileMoving(e, path);
             return;
         }
 
         boolean altDownHitNothing = false;
         if (e.isAltDown()) { // break handles on an existing point
-            DraggablePoint handle = path.findHandleAt(x, y, true);
+            DraggablePoint handle = path.findHandleAt(e);
             if (handle != null) {
                 if (handle instanceof ControlPoint cp) {
-                    breakAndStartMoving(cp, x, y, path);
+                    breakAndStartMoving(cp, e);
                     return;
                 } else if (handle instanceof AnchorPoint ap) {
-                    startDraggingOutNewHandles(ap, x, y, path);
+                    startDraggingOutNewHandles(ap, e);
                     return;
                 }
             } else {
@@ -297,13 +303,13 @@ public class PenTool extends PathTool {
         }
 
         // check if the click occurred on the first anchor point of the subpath
-        if (path.tryClosing(x, y)) {
+        if (path.tryClosing(e)) {
             // the path is closed, nothing to do
             return;
         }
 
         // if none of the above apply, it means a new anchor point is being placed
-        finalizeMovingPoint(x, y, altDownHitNothing, e.isShiftDown(), path);
+        finalizeMovingPoint(path, e, altDownHitNothing);
 
         // allow the user to drag out the handles for this newly created point
         setBuildState(DRAGGING_LAST_CONTROL);
@@ -312,24 +318,23 @@ public class PenTool extends PathTool {
     }
 
     // converts the temporary MovingPoint (which follows the mouse) into a new, permanent AnchorPoint
-    private static void finalizeMovingPoint(double x, double y, boolean altDownHitNothing, boolean shiftDown, Path path) {
-        path.getMovingPoint().mouseReleased(x, y, shiftDown);
+    private static void finalizeMovingPoint(Path path, PMouseEvent e, boolean altDownHitNothing) {
+        path.getMovingPoint().mouseReleased(e);
         AnchorPoint anchor = path.convertMovingPointToAnchor();
         if (altDownHitNothing) {
             // the user held Alt while clicking but didn't
             // hit a handle, so make it a sharp corner
             anchor.setType(CUSP);
         }
-        anchor.ctrlOut.mousePressed(x, y);
+        anchor.ctrlOut.mousePressed(e);
     }
 
     // handles a Ctrl-click when the tool is IDLE
-    private boolean handleCtrlPressBeforeSubpath(boolean altDown,
-                                                 double x, double y, Path path) {
+    private boolean handleCtrlPressBeforeSubpath(PMouseEvent e, Path path) {
         // if we are over an existing point, initiate a move on it
-        DraggablePoint handle = path.findHandleAt(x, y, altDown);
+        DraggablePoint handle = path.findHandleAt(e);
         if (handle != null) {
-            startMovingPrevious(handle, x, y, path); // begin the drag-edit
+            startMovingPrevious(handle, e); // begin the drag-edit
             return true; // no further action is needed
         }
         return false;
@@ -337,16 +342,16 @@ public class PenTool extends PathTool {
 
     // handles an Alt-click when the tool is IDLE:
     // break or drag out existing handles
-    private boolean handleAltPressBeforeSubpath(double x, double y, Path path) {
-        DraggablePoint handle = path.findHandleAt(x, y, true);
+    private boolean handleAltPressBeforeSubpath(PMouseEvent e, Path path) {
+        DraggablePoint handle = path.findHandleAt(e);
         if (handle != null) {
             if (handle instanceof ControlPoint cp) {
                 // convert the anchor to a CUSP type and start dragging the handle
-                breakAndStartMoving(cp, x, y, path);
+                breakAndStartMoving(cp, e);
                 return true;
             } else if (handle instanceof AnchorPoint ap) {
                 // pull out a new pair of symmetric handles
-                startDraggingOutNewHandles(ap, x, y, path);
+                startDraggingOutNewHandles(ap, e);
                 return true;
             }
         }
@@ -354,12 +359,11 @@ public class PenTool extends PathTool {
     }
 
     // handles a Ctrl-click while adding points to a path
-    private void handleCtrlPressWhileMoving(PMouseEvent e, boolean altDown,
-                                            double x, double y, Path path) {
-        DraggablePoint handle = path.findHandleAt(x, y, altDown);
+    private void handleCtrlPressWhileMoving(PMouseEvent e, Path path) {
+        DraggablePoint handle = path.findHandleAt(e);
         if (handle != null) {
             // let the user edit the point under the mouse
-            startMovingPrevious(handle, x, y, path);
+            startMovingPrevious(handle, e);
         } else {
             // control is down, but the mouse is not over any handle,
             // so finish the current subpath without closing it
@@ -368,24 +372,24 @@ public class PenTool extends PathTool {
     }
 
     // implements the logic for Alt-dragging from a corner point to create smooth handles
-    private void startDraggingOutNewHandles(AnchorPoint ap, double x, double y, Path path) {
+    private void startDraggingOutNewHandles(AnchorPoint ap, PMouseEvent e) {
         ap.retractHandles();
         // drag the retracted handles out
         ap.setType(SYMMETRIC);
-        startMovingPrevious(ap.ctrlOut, x, y, path);
+        startMovingPrevious(ap.ctrlOut, e);
     }
 
     // implements the logic for Alt-dragging a control handle to break its symmetry
-    private void breakAndStartMoving(ControlPoint cp, double x, double y, Path path) {
+    private void breakAndStartMoving(ControlPoint cp, PMouseEvent e) {
         cp.breakOrDragOut();
         // after breaking symmetry, move the handle as usual
-        startMovingPrevious(cp, x, y, path);
+        startMovingPrevious(cp, e);
     }
 
     // begins a drag-edit operation on an existing point
-    private void startMovingPrevious(DraggablePoint point, double x, double y, Path path) {
+    private void startMovingPrevious(DraggablePoint point, PMouseEvent e) {
         point.setActive(true);
-        point.mousePressed(x, y);
+        point.mousePressed(e);
         setBuildState(DRAG_EDITING_PREVIOUS);
     }
 
@@ -466,10 +470,7 @@ public class PenTool extends PathTool {
 
     // finalizes a Ctrl-drag or Alt-drag editing operation
     private void handleMouseReleaseEditingPrevious(PMouseEvent e, Path path) {
-        double x = e.getCoX();
-        double y = e.getCoY();
-
-        activePoint.mouseReleased(x, y, e.isShiftDown());
+        activePoint.mouseReleased(e);
         activePoint.createMovedEdit(e.getComp()).ifPresent(path::handleMoved);
 
         // transitions the BuildState back to a sensible state
@@ -494,7 +495,7 @@ public class PenTool extends PathTool {
 
         AnchorPoint last = path.getLastAnchor();
         ControlPoint ctrlOut = last.ctrlOut;
-        ctrlOut.mouseReleased(x, y, e.isShiftDown()); // set the final position
+        ctrlOut.mouseReleased(e); // set the final position
         if (!ctrlOut.isRetracted()) {
             last.changeTypeFromSymToSmooth();
         }
@@ -515,12 +516,11 @@ public class PenTool extends PathTool {
 
     @Override
     public void mouseMoved(MouseEvent e, View view) {
-        Composition comp = view.getComp();
-        Path path = comp.getActivePath();
-
+        Path path = view.getComp().getActivePath();
         if (path == null) {
             return;
         }
+
         if (buildState == DRAGGING_LAST_CONTROL) {
             buildState = recoverFromUnexpectedDrag("mouseMoved", view, path);
         }
@@ -535,7 +535,7 @@ public class PenTool extends PathTool {
                 setBuildState(MOVE_EDITING_PREVIOUS);
             }
 
-            DraggablePoint handle = path.findHandleAt(x, y, e.isAltDown());
+            DraggablePoint handle = path.findHandleAt(e);
             if (handle != null) {
                 handle.setActive(true);
             } else {
@@ -559,8 +559,14 @@ public class PenTool extends PathTool {
             }
 
             // highlight the first anchor if the mouse is over it to indicate closability
-            AnchorPoint first = path.getFirstAnchor();
-            if (first.contains(x, y)) {
+            AnchorPoint first = activeSubpath.getFirstAnchor();
+            boolean isOverFirst = first.contains(x, y);
+
+            if (activeSubpath != null) {
+                activeSubpath.setClosingPreview(isOverFirst);
+            }
+
+            if (isOverFirst) {
                 first.setActive(true);
             } else {
                 activePoint = null;
@@ -614,6 +620,8 @@ public class PenTool extends PathTool {
         if (path != null) {
             path.coCoordsChanged(view);
         }
+        // lastX and lastY belong to the view/mouse (not
+        // to the composition), so they are not updated here
     }
 
     @Override

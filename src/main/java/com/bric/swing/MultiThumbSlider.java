@@ -144,7 +144,7 @@ public abstract class MultiThumbSlider extends JComponent {
     /**
      * ChangeListeners registered with this slider.
      */
-    List<ChangeListener> changeListeners;
+    private List<ChangeListener> changeListeners;
 
     /**
      * The orientation constant for a horizontal slider.

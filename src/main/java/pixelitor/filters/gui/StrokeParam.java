@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,16 +24,13 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Stroke;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
-import static pixelitor.tools.shapes.StrokeType.BASIC;
 import static pixelitor.tools.shapes.StrokeType.SHAPE;
-import static pixelitor.tools.shapes.StrokeType.ZIGZAG;
 
 /**
  * A {@link FilterParam} that configures stroke settings through a dialog-based GUI.
@@ -66,9 +63,7 @@ public class StrokeParam extends AbstractFilterParam {
 
         // disable dashed option for stroke types that don't support it
         strokeTypeParam.setupDisableOtherIf(dashedParam,
-            strokeType -> strokeType != BASIC
-                && strokeType != ZIGZAG
-                && strokeType != SHAPE);
+            strokeType -> !strokeType.supportsDashes());
     }
 
     @Override
@@ -81,14 +76,14 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        // this listener updates the reset button and preview,
-        // then delegates to the original listener
+        // use a wrapper to ensure that the reset button and the
+        // stroke preview are updated whenever any sub-param changes
         ParamAdjustmentListener decoratedListener = () -> {
             updateResetButtonState();
             if (previewer != null) {
                 previewer.repaint();
             }
-            listener.paramAdjusted();
+            listener.paramAdjusted(); // notify the app
         };
 
         super.setAdjustmentListener(decoratedListener);
@@ -132,10 +127,13 @@ public class StrokeParam extends AbstractFilterParam {
         strokeCapParam.doRandomize();
         strokeJoinParam.doRandomize();
 
-        // avoid slow stroke types during randomization
+        // biases the randomization toward fast-rendering strokes
+        // while still allowing slow ones to be selected manually
+        int attempts = 0; // avoid infinite loops
         do {
             strokeTypeParam.doRandomize();
-        } while (strokeTypeParam.getSelected().isSlow());
+            attempts++;
+        } while (strokeTypeParam.getSelected().isSlow() && attempts < 20);
 
         shapeTypeParam.doRandomize();
         dashedParam.doRandomize();
@@ -163,7 +161,7 @@ public class StrokeParam extends AbstractFilterParam {
         strokeJoinParam.setSelectedItem(setting.join(), false);
         strokeTypeParam.setSelectedItem(setting.type(), false);
         shapeTypeParam.setSelectedItem(setting.shapeType(), false);
-        dashedParam.setValue(setting.dashed(), true, false);
+        dashedParam.setValue(setting.dashed(), updateGUI, false);
     }
 
     @Override
@@ -185,7 +183,7 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public void saveStateTo(UserPreset preset) {
         for (FilterParam param : allParams) {
-            preset.put(param.getName(), param.copyState().toSaveString());
+            preset.put(param.getPresetKey(), param.copyState().toSaveString());
         }
     }
 
@@ -195,14 +193,18 @@ public class StrokeParam extends AbstractFilterParam {
         super.setEnabled(enabled, reason);
 
         for (FilterParam param : allParams) {
-            param.setEnabled(enabled, reason);
+            param.setEnabled(enabled, EnabledReason.PARENT_PARAM);
         }
     }
 
     @Override
     public boolean isAtDefault() {
-        return Arrays.stream(allParams)
-            .allMatch(Resettable::isAtDefault);
+        for (FilterParam param : allParams) {
+            if (!param.isAtDefault()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -230,14 +232,14 @@ public class StrokeParam extends AbstractFilterParam {
     public void configureSettingsDialog(DialogBuilder builder) {
         builder
             .title("Stroke Settings")
-            .notModal()
+            .modeless()
             .content(new StrokeSettingsPanel(this))
             .withScrollbars()
             .noCancelButton()
             .okText(CLOSE_DIALOG);
     }
 
-    public FilterParam withStrokeWidth(int newWidth) {
+    public FilterParam withDefaultStrokeWidth(int newWidth) {
         strokeWidthParam.setDefaultValue(newWidth);
         return this;
     }

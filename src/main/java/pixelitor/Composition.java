@@ -90,6 +90,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private String name;
 
+    // the top-level layers of the composition
     private final List<Layer> layerList = new ArrayList<>();
 
     // the currently selected layer, potentially nested within groups or smart objects
@@ -223,7 +224,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             dpi = DEFAULT_DPI;
         }
 
-        activeTopLevelLayer = activeLayer.getTopLevelLayer();
+        if (activeLayer == null) {
+            // recover from corrupted pxc file
+            activeLayer = layerList.getFirst();
+            activeTopLevelLayer = activeLayer;
+        } else {
+            activeTopLevelLayer = activeLayer.getTopLevelLayer();
+        }
 
         // perform actions that need a full canvas and also
         // (re)load the contents of linked smart objects
@@ -245,7 +252,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         // copy layers recursively
         for (Layer layer : layerList) {
-            // Layer.copy handles recursion
+            // Layer.copy handles recursion, and also sets the
+            // active layer of the copied composition
             var layerCopy = layer.copy(copyType, true, compCopy);
 
             // fully setup only the top-level stuff here
@@ -425,7 +433,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void setDpi(int dpi) {
+        if (this.dpi == dpi) {
+            return;
+        }
         this.dpi = dpi;
+
+        // set explicitly, since there is no undo edit for changing the DPI
+        dirty = true;
     }
 
     public Canvas getCanvas() {
@@ -465,12 +479,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             return false;
         }
 
-        // If this is the content of a smart object, the dirty flag
-        // is relevant only if the content is linked (not embedded).
-        // Otherwise, the parent composition should save it.
+        // if this is the content of a smart object, the dirty flag
+        // is relevant only if the content is linked (not embedded)
         if (isSmartObjectContent()) {
             for (SmartObject owner : owners) {
                 if (owner.isContentEmbedded()) {
+                    // if embedded anywhere, the parent saves it
                     return false;
                 }
             }
@@ -807,7 +821,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         layerList.remove(layer);
 
-        if (layer == activeLayer) {
+        if (layer.contains(activeLayer)) {
             // the active layer was deleted, a new one must be selected
             Layer newActiveLayer = deletedIndex > 0
                 ? layerList.get(deletedIndex - 1)
@@ -1019,6 +1033,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return "<stack>\n";
     }
 
+    // this is the only GUI entry point for isolation =>
+    // only the isolation of top-level layers is supported
     public void isolateActiveTopLevelLayer() {
         isolateLayer(activeTopLevelLayer, true);
     }
@@ -1046,6 +1062,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             Messages.showStatusMessage("Layer <b>" + layer.getName() + "</b> was isolated.");
         }
 
+        // assumes that the isolated layer is top-level
         for (Layer other : layerList) {
             other.setVisible(other == layer);
         }
@@ -1196,7 +1213,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         // if this composition is itself content for other
-        // smart objects, propagate the change upwards.
+        // smart objects, propagate the change upwards
+        // (the GUI must ensure that the composition graph is acyclic)
         if (isSmartObjectContent()) {
             for (SmartObject owner : owners) {
                 owner.invalidateImageCache();
@@ -1478,9 +1496,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Promotes a draft selection into a final one.
      */
     public void promoteSelection() {
-        assert selection == null || !selection.isUsable() : "selection = " + selection;
         assert draftSelection != null;
         assert draftSelection.isUsable();
+
+        if (selection != null) {
+            selection.dispose();
+        }
 
         setSelection(draftSelection);
         setDraftSelection(null);
@@ -1601,12 +1622,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     @Override
     public void update() {
-        update(true);
-    }
-
-    @Override
-    public void update(boolean updateHistogram) {
-        update(updateHistogram, false);
+        update(false, false);
     }
 
     /**
@@ -1620,9 +1636,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             view.repaintNavigator(canvasSizeChanged);
         }
 
-        if (updateHistogram) {
-            HistogramsPanel.updateFrom(this);
-        }
+        HistogramsPanel.updateFrom(this);
     }
 
     public boolean isActive() {
@@ -1645,12 +1659,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Resizes the active image layer to match canvas dimensions.
      */
     public void activeLayerToCanvasSize() {
-        if (!(activeTopLevelLayer instanceof ImageLayer)) {
-            Messages.showNotImageLayerError(activeTopLevelLayer);
+        if (!(activeLayer instanceof ImageLayer)) {
+            Messages.showNotImageLayerError(activeLayer);
             return;
         }
 
-        ((ImageLayer) activeTopLevelLayer).toCanvasSizeWithHistory();
+        ((ImageLayer) activeLayer).toCanvasSizeWithHistory();
     }
 
     /**
@@ -1815,6 +1829,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             .handleAsync((v, e) -> {
                 if (e != null) {
                     Messages.showException(e);
+                    // TODO this does not restore the dirty flags of
+                    //   nested smart objects which were also cleared
                     setDirty(wasDirty);
                 } else {
                     handleSuccessfulSave(targetFile, addToRecentFiles);
@@ -1893,9 +1909,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Creates a new path from a shape, makes it active, and optionally activates the Node tool.
+     * Creates a new path from an image-space shape, makes it active, and optionally activates the Node tool.
      */
-    public void createPathFromShape(Shape shape, boolean addToHistory, boolean activateNodeTool) {
+    public void createPathFromImShape(Shape shape, boolean addToHistory, boolean activateNodeTool) {
         Path origActivePath = getActivePath();
         Path newPath = Shapes.shapeToPath(shape, getView());
         setActivePath(newPath);
@@ -2000,35 +2016,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Replaces this composition in its view with a new composition
-     * containing a smart object that has this composition as its content.
-     */
-    public void replaceWithSmartObject() {
-        // create the new outer composition
-        Composition newOuterComp = new Composition(canvas.copy(), mode, dpi);
-        if (file != null) {
-            newOuterComp.setFile(file);
-            setFile(null);
-        } else {
-            newOuterComp.setName(name);
-        }
-        newOuterComp.createDebugName();
-
-        // create the smart object referencing this composition
-        SmartObject so = new SmartObject(newOuterComp, this);
-
-        // add the smart object to the new outer composition
-        newOuterComp.addLayerWithoutUI(so);
-
-        // replace the composition in the view
-        History.add(new CompositionReplacedEdit("Convert All to Smart Object",
-            view, this, newOuterComp, null, false));
-        view.replaceComp(newOuterComp);
-
-        setName("Contents of " + name);
-    }
-
-    /**
      * Converts the visible top-level layers into a new smart object.
      */
     public void convertVisibleLayersToSmartObject() {
@@ -2037,11 +2024,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             .count();
         if (visibleCount == 0) {
             Messages.showNoVisibleLayersError(this);
-            return;
-        }
-        if (visibleCount == layerList.size()) {
-            // all layers are visible, equivalent to converting the whole composition
-            replaceWithSmartObject();
             return;
         }
 
@@ -2057,7 +2039,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             .filter(Layer::isVisible)
             .toList();
         for (Layer layer : visibleLayers) {
-            newMainComp.deleteLayer(layer, false, false);
+            newMainComp.deleteInternal(layer);
             layer.setComp(content);
             content.addLayerWithoutUI(layer);
         }

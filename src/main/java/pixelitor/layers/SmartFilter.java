@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -177,6 +177,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     @Override
     protected void maskChanged() {
+        super.maskChanged();
         layerLevelPropertyChanged(false);
     }
 
@@ -281,7 +282,18 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     @Override
     public void onFilterDialogAccepted(String filterName) {
+        // capture the filter reference currently in use
+        Filter preAcceptFilter = this.filter;
+
+        // if "Show Original" was checked, this method
+        // swaps 'this.filter' back to the backup
         super.onFilterDialogAccepted(filterName);
+
+        // if the filter reference changed, the current cache is now stale
+        if (this.filter != preAcceptFilter) {
+            invalidateAll();
+        }
+
         smartObject.updateIconImage();
     }
 
@@ -376,7 +388,14 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
         invalidateAll();
         holder.update();
-        edit();
+
+        // edit the settings of the new filter
+        boolean dialogAccepted = edit();
+        if (!dialogAccepted) {
+            // canceling the configuration dialog for the new filter
+            // means canceling the replacement operation entirely
+            History.undo();
+        }
     }
 
     public ImageSource getImageSource() {

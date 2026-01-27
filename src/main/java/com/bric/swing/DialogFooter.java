@@ -254,7 +254,7 @@ public class DialogFooter extends JPanel {
             }
         }
 
-        private void setRootPaneContainer(JButton button, RootPaneContainer c) {
+        private static void setRootPaneContainer(JButton button, RootPaneContainer c) {
             RootPaneContainer lastContainer = (RootPaneContainer) button.getClientProperty("bric.footer.rpc");
             if (lastContainer == c) {
                 return;

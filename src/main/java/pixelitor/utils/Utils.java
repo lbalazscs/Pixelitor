@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -230,7 +230,7 @@ public final class Utils {
 
     /**
      * Transforms a Callable into a Supplier by wrapping
-     * the checked exceptions in runtime exceptions
+     * the checked exceptions in runtime exceptions.
      */
     public static <T> Supplier<T> uncheck(Callable<T> callable) {
         return () -> {
@@ -250,7 +250,7 @@ public final class Utils {
             .getLocalGraphicsEnvironment()
             .getAvailableFontFamilyNames();
 
-        // It's almost sorted already, but not completely.
+        // it's almost sorted already, but not completely
         Arrays.sort(fontNames);
 
         fontLoadingLatch.countDown();
@@ -279,7 +279,7 @@ public final class Utils {
 
     /**
      * Returns a new CompletableFuture that is completed when all the
-     * CompletableFutures in the given list complete
+     * CompletableFutures in the given list complete.
      */
     public static CompletableFuture<Void> allOf(List<? extends CompletableFuture<?>> list) {
         if (list.isEmpty()) {
@@ -342,7 +342,7 @@ public final class Utils {
     }
 
     public static String decodeNewlines(String input) {
-        return input.replaceAll(ENCODED_NEWLINE, "\n");
+        return input.replace(ENCODED_NEWLINE, "\n");
     }
 
     public static String shorten(String input, int maxLength) {

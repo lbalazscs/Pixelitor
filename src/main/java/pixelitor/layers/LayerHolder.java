@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -332,6 +332,7 @@ public interface LayerHolder extends Debuggable {
         g.dispose();
 
         belowLayer.updateIconImage();
+        belowLayer.invalidateMaskedImageCache();
 
         deleteLayer(layer, false);
 
@@ -342,11 +343,6 @@ public interface LayerHolder extends Debuggable {
     /**
      * Signals a change in the holder's content, requiring a visual update.
      * Implementations must invalidate cached images and trigger a re-rendering of the main composition.
-     */
-    void update(boolean updateHistogram);
-
-    /**
-     * A convenience method that always updates the histogram as well.
      */
     void update();
 

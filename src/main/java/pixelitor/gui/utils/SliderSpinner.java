@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.filters.gui.ParamGUI;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.RangeWithColorsParam;
-import pixelitor.filters.gui.ResetButton;
+import pixelitor.filters.gui.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -154,13 +151,17 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         controlPanel = new JPanel(new FlowLayout(LEFT));
         controlPanel.add(spinner);
 
+        FilterButtonModel action = model.getSideButtonModel();
+        if (action != null) {
+            controlPanel.add(action.createGUI());
+        }
+
         if (addResetButton) {
             createResetButton(model);
             controlPanel.add(resetButton);
         }
-        add(controlPanel, orientation == HORIZONTAL
-            ? EAST
-            : SOUTH);
+
+        add(controlPanel, orientation == HORIZONTAL ? EAST : SOUTH);
 
 //        showTicksAsFloat();
     }
@@ -232,6 +233,8 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     public void addExplicitResetButton(ResetButton resetButton) {
+        assert this.resetButton == null;
+        
         this.resetButton = resetButton;
         controlPanel.add(resetButton);
     }
@@ -329,13 +332,8 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             }
             // synchronize the slider with the spinner value
             isSpinnerAdjusting = true;
-            if (model.getDecimalPlaces() > 0) {
-                // the spinner returns a Double
-                model.setValue((Double) spinner.getValue(), true);
-            } else {
-                // the spinner returns an Integer
-                model.setValue((Integer) spinner.getValue());
-            }
+            // (the spinner returns a Double or an Integer)
+            model.setValue(((Number) spinner.getValue()).doubleValue(), true);
             isSpinnerAdjusting = false;
         }
 
@@ -364,10 +362,10 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     public void forceSpinnerValueOnly(int value) {
-        boolean oldSliderMoved = isSliderAdjusting;
+        boolean wasSliderAdjusting = isSliderAdjusting;
         isSliderAdjusting = true;
         spinner.setValue(value);
-        isSliderAdjusting = oldSliderMoved;
+        isSliderAdjusting = wasSliderAdjusting;
     }
 
     @Override
@@ -453,6 +451,33 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         slider.addChangeListener(listener);
     }
 
+    /**
+     * Updates the range (min/max) of the components based on the model.
+     * Called when the model's range changes.
+     */
+    public void updateRange() {
+        // update spinner limits
+        SpinnerNumberModel spinnerModel = (SpinnerNumberModel) spinner.getModel();
+        spinnerModel.setMinimum(model.getMinimum());
+        spinnerModel.setMaximum(model.getMaximum());
+
+        // update ticks (recalculates spacing based on new range)
+        if (labelPosition.shouldShowTicks()) {
+            setupTicks();
+        }
+
+        // update the value in the spinner to ensure it is within
+        // the new range and reflects any changes in the model
+        if (model.getDecimalPlaces() > 0) {
+            spinner.setValue(model.getValueAsDouble());
+        } else {
+            spinner.setValue(model.getValue());
+        }
+
+        revalidate();
+        repaint();
+    }
+
     // overridden so that AssertJSwing tests find the components easily
     @Override
     public void setName(String name) {
@@ -463,9 +488,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
     @Override
     public int getNumLayoutColumns() {
-        if (labelPosition == LabelPosition.NONE) {
-            return 2;
-        }
-        return 1;
+        return labelPosition == LabelPosition.NONE ? 2 : 1;
     }
 }

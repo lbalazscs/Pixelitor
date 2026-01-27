@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import pixelitor.tools.pen.history.*;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
@@ -36,6 +37,8 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
@@ -77,6 +80,10 @@ public class SubPath implements Serializable, Transformable {
     // true if path construction is complete (no more points can be added)
     private boolean finished = false;
 
+    // true when the mouse is hovering over the first anchor
+    // (indicating a potential "close subpath" action)
+    private transient boolean closingPreview = false;
+
     public SubPath(Path path, Composition comp) {
         assert path != null;
         this.path = path;
@@ -96,6 +103,15 @@ public class SubPath implements Serializable, Transformable {
         // we can have a moving point here, but it's not copied
 
         return copy;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        // defaults for transient fields
+        moving = null;
+        closingPreview = false;
     }
 
     public void addStartingAnchor(AnchorPoint p, boolean addToHistory) {
@@ -213,13 +229,31 @@ public class SubPath implements Serializable, Transformable {
 
         // handle the "rubber band "preview of the next point during path construction
         if (moving != null && Tools.PEN.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
-            double movingX = toX.applyAsDouble(moving);
-            double movingY = toY.applyAsDouble(moving);
+            double movingX;
+            double movingY;
+            double ctrlInX;
+            double ctrlInY;
+
+            if (closingPreview && getNumAnchors() >= 2) {
+                // snap the preview to the first anchor and use its incoming control handle
+                movingX = toX.applyAsDouble(first);
+                movingY = toY.applyAsDouble(first);
+                ctrlInX = toX.applyAsDouble(first.ctrlIn);
+                ctrlInY = toY.applyAsDouble(first.ctrlIn);
+            } else {
+                // standard behavior: follow the mouse (MovingPoint)
+                movingX = toX.applyAsDouble(moving);
+                movingY = toY.applyAsDouble(moving);
+                // the "ctrl in" of the moving point is effectively "retracted" to the point itself
+                ctrlInX = movingX;
+                ctrlInY = movingY;
+            }
+
             p.curveTo(
                 toX.applyAsDouble(last.ctrlOut),
                 toY.applyAsDouble(last.ctrlOut),
-                movingX, // the "ctrl in" of the moving is "retracted"
-                movingY, // the "ctrl in" of the moving is "retracted"
+                ctrlInX,
+                ctrlInY,
                 movingX,
                 movingY);
         }
@@ -241,8 +275,8 @@ public class SubPath implements Serializable, Transformable {
                     toX.applyAsDouble(first),
                     toY.applyAsDouble(first));
             }
-            // We reached the first point again,
-            // however call this to add a clean SEG_CLOSE.
+            // we reached the first point again,
+            // however call this to add a clean SEG_CLOSE
             p.closePath();
         }
     }
@@ -564,6 +598,10 @@ public class SubPath implements Serializable, Transformable {
         History.add(new PathEdit(editName, comp, backup, path, null));
     }
 
+    public void setClosingPreview(boolean closingPreview) {
+        this.closingPreview = closingPreview;
+    }
+
     public Composition getComp() {
         return comp;
     }
@@ -572,13 +610,13 @@ public class SubPath implements Serializable, Transformable {
         return path;
     }
 
-    private boolean shouldBeClosed(double x, double y) {
-        return getFirstAnchor().contains(x, y) && getNumAnchors() >= 2;
+    private boolean shouldBeClosed(PMouseEvent e) {
+        return getNumAnchors() >= 2 && getFirstAnchor().isHitBy(e);
     }
 
     // return true if it could be closed
-    boolean tryClosing(double x, double y) {
-        if (shouldBeClosed(x, y)) {
+    boolean tryClosing(PMouseEvent e) {
+        if (shouldBeClosed(e)) {
             getFirstAnchor().setActive(false);
             close(true);
             return true;

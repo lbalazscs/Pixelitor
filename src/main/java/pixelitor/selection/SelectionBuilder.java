@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -164,17 +164,15 @@ public class SelectionBuilder {
         Shape combinedShape = combinator.combine(origShape, newShape);
 
         if (combinedShape.getBounds().isEmpty()) { // nothing after combine
-            handleEmptyCombinedShape(origSelection, draftSelection, origShape);
+            handleEmptyCombinedShape(draftSelection, origShape);
         } else {
-            finalizeShapeCombination(origSelection, draftSelection, combinedShape, origShape);
+            finalizeShapeCombination(draftSelection, combinedShape, origShape);
         }
     }
 
-    private void handleEmptyCombinedShape(Selection origSelection,
-                                          Selection draftSelection,
+    private void handleEmptyCombinedShape(Selection draftSelection,
                                           Shape origShape) {
         draftSelection.setShape(origShape); // for the correct deselect undo
-        origSelection.dispose();
         comp.promoteSelection();
         comp.deselect(true);
 
@@ -185,12 +183,10 @@ public class SelectionBuilder {
             comp.getDialogParent());
     }
 
-    private void finalizeShapeCombination(Selection origSelection,
-                                          Selection draftSelection,
+    private void finalizeShapeCombination(Selection draftSelection,
                                           Shape combinedShape,
                                           Shape origShape) {
         draftSelection.setShape(combinedShape);
-        origSelection.dispose();
         comp.promoteSelection();
 
         History.add(new SelectionShapeChangeEdit(

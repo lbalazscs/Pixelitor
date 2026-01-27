@@ -283,8 +283,7 @@ public class ColorPicker extends JPanel {
      * @return the currently selected <code>Option</code>
      */
     private Option getSelectedOption() {
-        int mode = getMode();
-        return switch (mode) {
+        return switch (getMode()) {
             case HUE -> hue;
             case SAT -> sat;
             case BRI -> bri;
@@ -293,8 +292,6 @@ public class ColorPicker extends JPanel {
             default -> blue;
         };
     }
-
-    private final HexDocumentListener hexDocListener = new HexDocumentListener();
 
     class SetRGBRunnable implements Runnable {
         final int red, green, blue;
@@ -395,7 +392,7 @@ public class ColorPicker extends JPanel {
          * @return an uppercase version of <code>s</code> that only includes hexadecimal
          * characters and is not longer than <code>charLimit</code>.
          */
-        private String stripToHex(String s, int charLimit) {
+        private static String stripToHex(String s, int charLimit) {
             s = s.toUpperCase(Locale.ENGLISH);
             StringBuilder returnValue = new StringBuilder(6);
             for (int a = 0; a < s.length() && returnValue.length() < charLimit; a++) {
@@ -507,6 +504,7 @@ public class ColorPicker extends JPanel {
         GridBagConstraints c = new GridBagConstraints();
 
         Insets normalInsets = new Insets(3, 3, 3, 3);
+        Insets tallInsets = new Insets(normalInsets.top + 10, normalInsets.left, normalInsets.bottom, normalInsets.right);
 
         JPanel options = new JPanel(new GridBagLayout());
         c.gridx = 0;
@@ -516,14 +514,14 @@ public class ColorPicker extends JPanel {
         c.insets = normalInsets;
         ButtonGroup bg = new ButtonGroup();
 
-        //put them in order
+        // put them in order
         Option[] optionsArray = {
                 hue, sat, bri, red, green, blue
         };
 
         for (int a = 0; a < optionsArray.length; a++) {
             if (a == 3 || a == 6) {
-                c.insets = new Insets(normalInsets.top + 10, normalInsets.left, normalInsets.bottom, normalInsets.right);
+                c.insets = tallInsets;
             } else {
                 c.insets = normalInsets;
             }
@@ -533,11 +531,7 @@ public class ColorPicker extends JPanel {
             c.gridx++;
             c.anchor = GridBagConstraints.WEST;
             c.fill = GridBagConstraints.HORIZONTAL;
-            if (optionsArray[a].spinner != null) {
-                options.add(optionsArray[a].spinner, c);
-            } else {
-                options.add(optionsArray[a].slider, c);
-            }
+            options.add(optionsArray[a].spinner, c);
             c.gridx++;
             c.fill = GridBagConstraints.NONE;
             options.add(optionsArray[a].radioButton, c);
@@ -545,7 +539,7 @@ public class ColorPicker extends JPanel {
             c.gridx = 0;
             bg.add(optionsArray[a].radioButton);
         }
-        c.insets = new Insets(normalInsets.top + 10, normalInsets.left, normalInsets.bottom, normalInsets.right);
+        c.insets = tallInsets;
         c.anchor = GridBagConstraints.EAST;
         c.fill = GridBagConstraints.NONE;
         options.add(hexLabel, c);
@@ -573,7 +567,6 @@ public class ColorPicker extends JPanel {
         c.gridwidth = 2;
         add(colorPanel, c);
 
-        c.gridwidth = 1;
         c.insets = normalInsets;
         c.gridx += 2;
         c.weighty = 1;
@@ -620,13 +613,13 @@ public class ColorPicker extends JPanel {
         expertControls.add(options, c);
 
         preview.setOpaque(true);
-        colorPanel.setPreferredSize(new Dimension(expertControls.getPreferredSize().height,
-                expertControls.getPreferredSize().height));
+        int colorPanelSize = expertControls.getPreferredSize().height;
+        colorPanel.setPreferredSize(new Dimension(colorPanelSize, colorPanelSize));
 
         slider.addChangeListener(changeListener);
         colorPanel.addChangeListener(changeListener);
         slider.setUI(new ColorPickerSliderUI(slider, this));
-        hexField.getDocument().addDocumentListener(hexDocListener);
+        hexField.getDocument().addDocumentListener(new HexDocumentListener());
         setMode(BRI);
 
         setExpertControlsVisible(showExpertControls);
@@ -668,7 +661,7 @@ public class ColorPicker extends JPanel {
             return;
         }
 
-        jc.setOpaque(false);
+        jc.setOpaque(opaque);
         if (jc instanceof JSpinner) {
             return;
         }
@@ -1086,18 +1079,20 @@ public class ColorPicker extends JPanel {
         }
     }
 
+    /**
+     * The UI controls for a single color channel.
+     */
     class Option {
         final JRadioButton radioButton = new JRadioButton();
         final JSpinner spinner;
-        JSlider slider;
         final JLabel label;
 
         public Option(String text, int max) {
             spinner = new JSpinner(new SpinnerNumberModel(0, 0, max, 5));
 
-            // Add the app notification listener FIRST.
-            // Since JSpinner notifies listeners in reverse order of addition,
-            // this listener will execute LAST, after the internal state has been updated.
+            // since the listeners are notified in reverse order
+            // of addition, this app notification listener will execute
+            // last, after the internal state has been updated
             spinner.addChangeListener(e -> {
                 if (adjustmentListener != null
                         && adjustingSpinners == 0
@@ -1107,47 +1102,23 @@ public class ColorPicker extends JPanel {
                 }
             });
 
-            // Add the internal state change listener SECOND.
-            // This listener will execute FIRST.
+            // this internal state change listener will execute first
             spinner.addChangeListener(changeListener);
-
-            /*this tries out Tim Boudreaux's new slider UI.
-             * It's a good UI, but I think for the ColorPicker
-             * the numeric controls are more useful.
-             * That is: users who want click-and-drag control to choose
-             * their colors don't need any of these Option objects
-             * at all; only power users who may have specific RGB
-             * values in mind will use these controls: and when they do
-             * limiting them to a slider is unnecessary.
-             * That's my current position... of course it may
-             * not be true in the real world... :)
-             */
-            //slider = new JSlider(0,max);
-            //slider.addChangeListener(changeListener);
-            //slider.setUI(new org.netbeans.paint.api.components.PopupSliderUI());
 
             label = new JLabel(text);
             radioButton.addActionListener(actionListener);
         }
 
         public void setValue(int i) {
-            if (slider != null) {
-                slider.setValue(i);
-            }
-            if (spinner != null) {
-                spinner.setValue(i);
-            }
+            spinner.setValue(i);
         }
 
         public int getMaximum() {
-            if (slider != null) {
-                return slider.getMaximum();
-            }
             return ((Number) ((SpinnerNumberModel) spinner.getModel()).getMaximum()).intValue();
         }
 
         public boolean contains(Object src) {
-            return (src == slider || src == spinner || src == radioButton || src == label);
+            return (src == spinner || src == radioButton || src == label);
         }
 
         public float getFloatValue() {
@@ -1155,9 +1126,6 @@ public class ColorPicker extends JPanel {
         }
 
         public int getIntValue() {
-            if (slider != null) {
-                return slider.getValue();
-            }
             return ((Number) spinner.getValue()).intValue();
         }
 
@@ -1173,12 +1141,7 @@ public class ColorPicker extends JPanel {
             }
 
             radioButton.setVisible(b && radioButtonsAllowed);
-            if (slider != null) {
-                slider.setVisible(b);
-            }
-            if (spinner != null) {
-                spinner.setVisible(b);
-            }
+            spinner.setVisible(b);
             label.setVisible(b);
         }
     }

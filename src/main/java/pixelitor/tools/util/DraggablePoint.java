@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -295,6 +295,10 @@ public class DraggablePoint extends Point2D.Double {
             : DEFAULT_HANDLE_COLOR);
     }
 
+    public boolean isHitBy(PMouseEvent e) {
+        return contains(e.getCoX(), e.getCoY());
+    }
+
     /**
      * Checks if the given component-space coordinates are within the handle's bounds.
      */
@@ -303,6 +307,10 @@ public class DraggablePoint extends Point2D.Double {
             && coX < this.x + HANDLE_RADIUS
             && coY > this.y - HANDLE_RADIUS
             && coY < this.y + HANDLE_RADIUS;
+    }
+
+    public void mousePressed(PMouseEvent e) {
+        mousePressed(e.getCoX(), e.getCoY());
     }
 
     public void mousePressed(double x, double y) {
@@ -343,6 +351,10 @@ public class DraggablePoint extends Point2D.Double {
     public void mouseReleased(double x, double y, boolean constrained) {
         mouseDragged(x, y, constrained);
         afterMouseReleasedActions();
+    }
+
+    public void mouseReleased(PMouseEvent e) {
+        mouseReleased(e.getCoX(), e.getCoY(), e.isShiftDown());
     }
 
     protected void afterMouseReleasedActions() {
@@ -528,4 +540,3 @@ public class DraggablePoint extends Point2D.Double {
         return node;
     }
 }
-

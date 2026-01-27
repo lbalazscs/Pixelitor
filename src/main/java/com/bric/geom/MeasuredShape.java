@@ -29,7 +29,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.awt.geom.PathIterator.*;
+import static java.awt.geom.PathIterator.SEG_CLOSE;
+import static java.awt.geom.PathIterator.SEG_CUBICTO;
+import static java.awt.geom.PathIterator.SEG_LINETO;
+import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.SEG_QUADTO;
 
 /**
  * This represents a single closed path.
@@ -94,7 +98,6 @@ public class MeasuredShape implements Serializable {
             if (k == SEG_MOVETO) {
                 if (path != null) {
                     v.add(new MeasuredShape(path, spacing));
-                    path = null;
                 }
                 path = new GeneralPath();
                 path.moveTo(coords[0], coords[1]);
@@ -111,7 +114,6 @@ public class MeasuredShape implements Serializable {
         }
         if (path != null) {
             v.add(new MeasuredShape(path, spacing));
-            path = null;
         }
         return v.toArray(new MeasuredShape[v.size()]);
     }
@@ -326,11 +328,11 @@ public class MeasuredShape implements Serializable {
      * meaning quadratic and cubic curves are converted to linear segments
      * connecting at t = 0, t = .05, t = .1, ... t = .95, t = 1.
      */
-    public static final float DEFAULT_SPACING = 0.05f;
+    private static final float DEFAULT_SPACING = 0.05f;
 
-    Segment[] segments;
-    float closedDistance = 0;
-    float originalDistance;
+    private final Segment[] segments;
+    private float closedDistance = 0;
+    private final float originalDistance;
 
     /**
      * Construct a <code>MeasuredShape</code> from a <code>Shape</code>,

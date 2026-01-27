@@ -197,7 +197,7 @@ public class GradientFillLayer extends ContentLayer {
 
         this.gradient = newGradient;
         invalidateGradientCache();
-        holder.update();
+        update();
         updateIconImage();
 
         if (addHistory) {

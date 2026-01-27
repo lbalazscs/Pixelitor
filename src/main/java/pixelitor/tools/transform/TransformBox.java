@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -488,7 +488,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             double x = e.getCoX();
             double y = e.getCoY();
             activePoint.mouseReleased(x, y);
-            if (!activePoint.contains(x, y)) {
+            if (!activePoint.isHitBy(e)) {
                 // can happen if the handle has a constrained position
                 activePoint = null;
             }
@@ -602,11 +602,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
                 view.repaint();
             }
 
-            if (contains(x, y)) {
-                view.setCursor(MOVE);
-            } else {
-                view.setCursor(DEFAULT);
-            }
+            view.setCursor(contains(x, y) ? MOVE : DEFAULT);
         }
     }
 

@@ -96,9 +96,8 @@ public class BristleStroke implements Stroke {
     }
 
     private static float getGrain(float width, float thickness) {
-        double k = width;
         if (width > 1) {
-            k = Math.pow(width, 0.5f);
+            double k = Math.pow(width, 0.5f);
             if (k > 4) {
                 k = 4;
             }

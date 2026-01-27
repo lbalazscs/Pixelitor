@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -252,7 +252,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
         setState(targetState);
         imageRefChanged();
-        holder.update(false);
+        update();
     }
 
     @Override
@@ -374,7 +374,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
         setState(PREVIEW);
         imageRefChanged();
-        holder.update();
+        update();
     }
 
     private void setImageWithSelection(BufferedImage newImage, boolean isUndoRedo) {
@@ -382,6 +382,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         imageRefChanged();
 
         comp.invalidateImageCache();
+        invalidateMaskedImageCache();
     }
 
     @Override
@@ -394,6 +395,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         assert Assertions.rasterStartsAtOrigin(newImage);
 
         comp.invalidateImageCache();
+        invalidateMaskedImageCache();
 
         if (prevRef != null && prevRef != image) {
             prevRef.flush();
@@ -408,7 +410,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         setImage(newImage);
 
         History.add(new ImageEdit(editName, comp, this, prevImage, true));
-        holder.update();
+        update();
         updateIconImage();
     }
 
@@ -421,7 +423,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         setImage(newImage);
 
         History.add(createTranslatedImageEdit(editName, prevImage, prevTx, prevTy));
-        holder.update();
+        update();
         updateIconImage();
     }
 
@@ -460,7 +462,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         // from the real image after the previews
         imageRefChanged();
 
-        holder.update();
+        update();
     }
 
     /**
@@ -487,7 +489,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         setState(NORMAL);
 
         if (wasShowOriginal) {
-            holder.update();
+            update();
         }
     }
 
@@ -529,7 +531,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
             if (shouldRefresh) {
                 imageRefChanged();
-                holder.update();
+                update();
             }
         } else {
             imageContentChanged = true; // history will be necessary
@@ -583,7 +585,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         // otherwise the next filter run will take the old image source,
         // not the actual one
         filterSourceImage = null;
-        holder.update();
+        update();
         updateIconImage();
     }
 
@@ -742,6 +744,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             throw new IllegalArgumentException("x = " + x + ", y = " + y + ", this = " + this);
         }
         super.setTranslation(x, y);
+        invalidateMaskedImageCache();
     }
 
     /**
@@ -750,6 +753,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     public void forceTranslation(int x, int y) {
         // skips the range check of the overridden setTranslation
         super.setTranslation(x, y);
+        invalidateMaskedImageCache();
     }
 
     @Override
@@ -1139,11 +1143,13 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
     @Override
     public void repaintRegion(PPoint start, PPoint end, double thickness) {
+        invalidateMaskedImageCache();
         comp.repaintRegion(start, end, thickness);
     }
 
     @Override
     public void repaintRegion(PRectangle area) {
+        invalidateMaskedImageCache();
         comp.repaintRegion(area);
     }
 
@@ -1183,6 +1189,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         }
 
         comp.invalidateImageCache();
+        invalidateMaskedImageCache();
         // the repaint will be triggered by target.updateUI(view) in TransformBox
     }
 
@@ -1268,7 +1275,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     @Override
     public void cancelTransform() {
         this.liveTransform = null;
-        holder.update();
+        update();
         updateIconImage();
     }
 

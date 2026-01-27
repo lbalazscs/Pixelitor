@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
@@ -170,7 +171,7 @@ public class CropBox implements ToolWidget, Debuggable {
         coDragStartPos = new Point((int) e.getCoX(), (int) e.getCoY()); // snapped
         coDragStartRect = new Rectangle(cropRect.getCo());
         dragStartCursor = view.getCursor().getType();
-        aspectRatio = calcAspectRatio(cropRect.getCo());
+        aspectRatio = Geometry.calcAspectRatio(cropRect.getIm());
 
         if (isResizeCursor(dragStartCursor)) {
             // if the user clicked on the handle, allow resizing
@@ -337,21 +338,15 @@ public class CropBox implements ToolWidget, Debuggable {
         view.repaint();
     }
 
-    public static double calcAspectRatio(Rectangle rect) {
-        // return 0 if height is zero to avoid division
-        // by zero and represent undefined aspect ratio
-        return (rect.height > 0) ? (double) rect.width / rect.height : 0;
-    }
-
     /**
      * Checks if the given cursor type corresponds to a resize handle.
      */
     private static boolean isResizeCursor(int cursor) {
         return switch (cursor) {
             case NW_RESIZE_CURSOR, SE_RESIZE_CURSOR,
-                    SW_RESIZE_CURSOR, NE_RESIZE_CURSOR,
-                    N_RESIZE_CURSOR, S_RESIZE_CURSOR,
-                    E_RESIZE_CURSOR, W_RESIZE_CURSOR -> true;
+                SW_RESIZE_CURSOR, NE_RESIZE_CURSOR,
+                N_RESIZE_CURSOR, S_RESIZE_CURSOR,
+                E_RESIZE_CURSOR, W_RESIZE_CURSOR -> true;
             default -> false;
         };
     }
@@ -407,10 +402,10 @@ public class CropBox implements ToolWidget, Debuggable {
 
         switch (cursor) {
             case NW_RESIZE_CURSOR, NE_RESIZE_CURSOR,
-                    SE_RESIZE_CURSOR, SW_RESIZE_CURSOR -> {
+                SE_RESIZE_CURSOR, SW_RESIZE_CURSOR -> {
                 // corner handles: adjust the dimension that
                 // deviates more from the target ratio
-                double currentAspectRatio = calcAspectRatio(rect);
+                double currentAspectRatio = Geometry.calcAspectRatio(rect);
                 if (currentAspectRatio > targetAspectRatio) {
                     // rectangle is too wide, adjust height based on width
                     int adjustedHeight = (int) (rect.width / targetAspectRatio);

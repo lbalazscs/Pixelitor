@@ -321,11 +321,11 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void update(boolean updateHistogram) {
+    public void update() {
         if (invalidImageCache) {
             recalculateImage();
         }
-        holder.update(updateHistogram);
+        super.update();
     }
 
     @Override
@@ -1116,6 +1116,8 @@ public class SmartObject extends CompositeLayer {
     @Override
     public int getPixelAtPoint(Point p) {
         if (image != null) {
+            // this could be stale data, however this method is
+            // called by the Move Tool, which doesn't modify the pixels
             return ImageUtils.getPixelAt(this, image, p);
         }
         return 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,12 @@
 
 package pixelitor.utils;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,5 +52,21 @@ class GeometryTest {
         assertThat(A.y).isCloseTo(1.0f, within(tolerance));
         assertThat(B.x).isCloseTo(1.0f, within(tolerance));
         assertThat(B.y).isCloseTo(-1.0f, within(tolerance));
+    }
+
+    @DisplayName("aspect ratio tests")
+    @ParameterizedTest(name = "aspect ratio for rect({0}x{1}) should be {2}")
+    @CsvSource({
+        // width, height, expected
+        " 0,     20,      0.0", // width is 0
+        "20,      0,      0.0", // height is 0
+        " 0,      0,      0.0", // width and height are 0
+        "10,     20,      0.5", // height > width
+        "20,     10,      2.0", // width > height
+        "20,     20,      1.0"  // width == height
+    })
+    void aspect_ratio(int width, int height, double expected) {
+        double actual = Geometry.calcAspectRatio(new Rectangle(30, 40, width, height));
+        assertThat(actual).isEqualTo(expected);
     }
 }

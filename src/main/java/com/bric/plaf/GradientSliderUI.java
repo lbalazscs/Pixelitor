@@ -23,15 +23,7 @@ import com.bric.swing.GradientSlider;
 import com.bric.swing.MultiThumbSlider;
 
 import javax.swing.*;
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.TexturePaint;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
@@ -257,7 +249,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
         calculateImage();
     }
 
-    static TexturePaint checkerPaint;
+    private static TexturePaint checkerPaint;
 
     private static void createCheckerPaint() {
         int k = 4;
@@ -444,8 +436,8 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 
     }
 
-    static GeneralPath hTriangle = null;
-    static GeneralPath vTriangle = null;
+    private static GeneralPath hTriangle = null;
+    private static GeneralPath vTriangle = null;
 
     @Override
     protected void paintThumbs(Graphics2D g) {

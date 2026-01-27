@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,6 +48,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private int decimalPlaces = 0;
 
     // stored as double to support animation interpolation
+    // (in interactive mode the slider snaps this value to an integer,
+    // however the spinner allows fractional values if decimalPlaces > 0)
     private double value;
 
     private boolean adjusting;
@@ -90,9 +92,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         paramGUI = sliderSpinner;
         syncWithGui();
 
-        return sideButtonModel == null
-            ? sliderSpinner
-            : new ParamGUIWithAction(sliderSpinner, sideButtonModel);
+        return sliderSpinner;
     }
 
     /**
@@ -168,6 +168,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     public void setDecimalPlaces(int dp) {
         assert dp >= 0 && dp <= 2 : "dp = " + dp;
+
+        // can't be changed after the GUI is created, because the
+        // SliderSpinner configures its SpinnerNumberModel (int vs. double)
+        // and DecimalFormat only in the constructor based on model.getDecimalPlaces()
+        assert paramGUI == null;
+
         decimalPlaces = dp;
     }
 
@@ -210,10 +216,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     protected void doRandomize() {
-        int range = maxValue - minValue;
-        int newValue = minValue + Rnd.nextInt(range);
-
-        setValueNoTrigger(newValue);
+        int randomValue = Rnd.intInRange(minValue, maxValue);
+        setValueNoTrigger(randomValue);
     }
 
     public void increaseValue() {
@@ -282,14 +286,18 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     // accepts an int so that the class can implement BoundedRangeModel
     @Override
     public void setValue(int n) {
-        setValue(n, true);
+        setValue(n, true, true);
     }
 
     public void setValueNoTrigger(double n) {
-        setValue(n, false);
+        setValue(n, true, false);
     }
 
     public void setValue(double v, boolean trigger) {
+        setValue(v, true, trigger);
+    }
+
+    public void setValue(double v, boolean updateGUI, boolean trigger) {
         if (paramGUI != null || trigger) {
             // While loading a smart filter, it can happen that
             // the value is out of range (if the range is adjusted
@@ -306,10 +314,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
         if (Math.abs(v - value) > 0.001) { // there are max 2 decimal places in the GUI
             value = v;
-            fireStateChanged(); // update the GUI, because this is the model of the slider
-            if (paramGUI != null) {
-                // make sure fractional values are also updated in the spinner
-                paramGUI.updateGUI();
+
+            if (updateGUI) {
+                fireStateChanged(); // updates the GUI, as this is the model of the slider
+                if (paramGUI != null) {
+                    // ensures fractional values are also updated in
+                    // the spinner (since the slider is integer-based)
+                    paramGUI.updateGUI();
+                }
             }
 
             if (!adjusting && trigger && adjustmentListener != null) {
@@ -319,10 +331,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     /**
-     * This is only used programmatically while tweening, therefore
-     * it never triggers the filter or the GUI
+     * This is only used while tweening, therefore
+     * it never has to notify the filter or the GUI.
      */
-    public void setValueNoGUI(double d) {
+    public void setValueProgrammatically(double d) {
         value = d;
     }
 
@@ -398,23 +410,35 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         if (!adjustRangeToCanvasSize) {
             return;
         }
+
         Dimension size = layer.getComp().getCanvas().getSize();
         double defaultToMaxRatio = defaultValue / maxValue;
 
-        // The maximum value is calculated proportionally to the
+        // the maximum value is calculated proportionally to the
         // largest dimension of the canvas while preserving
-        // the ratio between default and maximum values.
+        // the ratio between default and maximum values
         maxValue = (int) (maxToCanvasSizeRatio * Math.max(size.width, size.height));
         if (maxValue <= minValue) { // can happen with very small images
             maxValue = minValue + 1;
         }
 
-        // make sure that the tic/label for max value is painted, see issue #91
-        maxValue += (4 - (maxValue - minValue) % 4);
+        // make sure that the tic/label for max value is painted
+        // (the range is divisible by 4), see issue #91
+        int remainder = (maxValue - minValue) % 4;
+        if (remainder != 0) {
+            maxValue += (4 - remainder);
+        }
 
         setDefaultValue((int) (defaultToMaxRatio * maxValue));
         if (applyNewDefault) {
             value = defaultValue;
+        }
+
+        if (paramGUI != null) {
+            ((SliderSpinner) paramGUI).updateRange();
+            if (applyNewDefault) {
+                fireStateChanged();
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -179,7 +179,7 @@ public class Navigator extends JComponent
         dialog = new DialogBuilder()
             .title("Navigator")
             .content(instance)
-            .notModal()
+            .modeless()
             .noOKButton()
             .noCancelButton()
             .cancelAction(instance::dispose) // when it's closed with X
@@ -203,7 +203,7 @@ public class Navigator extends JComponent
                                 boolean newView,
                                 boolean canvasSizeChanged,
                                 boolean navigatorResized) {
-        assert newView || canvasSizeChanged || navigatorResized : "why did you call me?";
+        assert newView || canvasSizeChanged || navigatorResized : "no change flags";
 
         if (newView) {
             attachToView(sourceView);
@@ -344,10 +344,12 @@ public class Navigator extends JComponent
         Point point = e.getPoint();
         if (view != null) {
             if (e.isControlDown()) {
+                // initialize the area zooming (Ctrl + drag) interaction mode
                 areaZooming = true;
                 dragging = true;
                 targetBoxRect = new Rectangle(viewBoxRect);
             } else if (viewBoxRect.contains(point)) {
+                // initialize the panning interaction mode
                 areaZooming = false;
                 dragging = true;
             }
@@ -361,9 +363,7 @@ public class Navigator extends JComponent
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (dragStartPoint != null) {
-            assert dragging;
-
+        if (dragging) {
             Point mouseNow = e.getPoint();
             int dx = mouseNow.x - dragStartPoint.x;
             int dy = mouseNow.y - dragStartPoint.y;
@@ -496,6 +496,10 @@ public class Navigator extends JComponent
 
     private void dispose() {
         Views.removeActivationListener(this);
+
+        if (view != null) {
+            detachFromView();
+        }
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,20 +65,22 @@ public class Screens {
         window.setLocation(Objects.requireNonNull(location));
     }
 
+    // the result must not be stored in a static field at startup,
+    // because this class is initialized before the constructor of
+    // the main window completes (would fail for multi-monitor setups)
     private static Rectangle getScreenBounds() {
-        // takes the taskbar into account
         return IS_MULTI_MONITOR
             ? PixelitorWindow.get().getGraphicsConfiguration().getBounds()
-            : GRAPHICS_ENV.getMaximumWindowBounds();
+            : GRAPHICS_ENV.getMaximumWindowBounds(); // takes the taskbar into account
     }
 
     private static void restrictWindowSize(Window window, Rectangle screenBounds) {
         Rectangle windowBounds = window.getBounds();
 
         // adjust window size if larger than the screen
-        windowBounds.height = Math.min(windowBounds.height, screenBounds.height);
-        windowBounds.width = Math.min(windowBounds.width, screenBounds.width);
-        window.setSize(windowBounds.width, windowBounds.height);
+        int width = Math.min(windowBounds.width, screenBounds.width);
+        int height = Math.min(windowBounds.height, screenBounds.height);
+        window.setSize(width, height);
     }
 
     /**

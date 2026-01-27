@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -444,15 +444,29 @@ public class CropTool extends DragTool {
 
         // all calculations are in component space
         Rectangle coCanvasBounds = comp.getCanvas().getCoBounds(view);
-
-        // create an area covering the whole canvas
-        Area darkAreaShape = new Area(coCanvasBounds);
-        // subtract the crop rectangle area to create the mask shape
-        darkAreaShape.subtract(new Area(cropRect.getCo()));
+        Rectangle coCropRect = cropRect.getCo();
 
         g2.setColor(BLACK);
         g2.setComposite(maskComposite);
-        g2.fill(darkAreaShape);
+
+        // avoids using slow Area objects and Area.subtract, and
+        // constructs the dark mask shape (rectangle with a hole) manually
+        Rectangle hole = coCanvasBounds.intersection(coCropRect);
+        if (hole.isEmpty()) {
+            // if the crop rectangle is entirely outside the canvas,
+            // the whole canvas should be dark
+            g2.fill(coCanvasBounds);
+        } else if (hole.equals(coCanvasBounds)) {
+            // if the crop rect completely covers the canvas
+            // (or is larger), nothing should be darkened (do nothing)
+        } else {
+            // standard crop: WIND_EVEN_ODD ensures that
+            // the inner rectangle is treated as a hole
+            Path2D darkAreaShape = new Path2D.Double(Path2D.WIND_EVEN_ODD);
+            darkAreaShape.append(coCanvasBounds, false);
+            darkAreaShape.append(hole, false);
+            g2.fill(darkAreaShape);
+        }
 
         // restore original graphics settings
         g2.setColor(origColor);

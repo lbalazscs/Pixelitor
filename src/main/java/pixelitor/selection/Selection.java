@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -234,14 +234,26 @@ public class Selection implements Transformable {
     }
 
     public void nudge(ArrowKey key) {
-        transformAndAddHistory(key.toTransform());
+        transformAndAddHistory("Nudge Selection", key.toTransform());
     }
 
-    private void transformAndAddHistory(AffineTransform at) {
+    private void transformAndAddHistory(String editName, AffineTransform at) {
         assert !disposed;
-        Shape backupShape = transform(at);
-        History.add(new SelectionShapeChangeEdit(
-            "Nudge Selection", view.getComp(), backupShape));
+
+        Composition comp = view.getComp();
+        Shape backupShape = shape;
+
+        Shape newShape = at.createTransformedShape(shape);
+        newShape = comp.clipToCanvasBounds(newShape);
+
+        if (newShape.getBounds().isEmpty()) {
+            // the selection moved entirely off the canvas
+            comp.deselect(true);
+        } else {
+            shape = newShape;
+            History.add(new SelectionShapeChangeEdit(
+                editName, comp, backupShape));
+        }
     }
 
     /**

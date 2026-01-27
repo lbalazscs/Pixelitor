@@ -98,7 +98,7 @@ public class ColorFillLayer extends Layer {
     public void changeColor(Color color, boolean addHistory) {
         Color prevColor = this.color;
         this.color = color;
-        holder.update();
+        update();
         updateIconImage();
         if (addHistory) {
             History.add(new ColorFillLayerChangeEdit(this, prevColor, color));

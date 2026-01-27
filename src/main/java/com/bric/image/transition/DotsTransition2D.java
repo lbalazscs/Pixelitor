@@ -134,10 +134,8 @@ public class DotsTransition2D extends AbstractClippedTransition2D {
                 r = r * p;
 
                 random.setSeed(10L * a);
-                float dx = (1 - p) * (2 * random.nextFloat() - 1);
-                float dy = (1 - p) * (2 * random.nextFloat() - 1);
-                dx = (1 - p) * (float) (r * cos(random.nextFloat() * 10 + 8 * (1 - p)));
-                dy = (1 - p) * (float) (r * sin(random.nextFloat() * 10 + 8 * (1 - p)));
+                float dx = (1 - p) * (float) (r * cos(random.nextFloat() * 10 + 8 * (1 - p)));
+                float dy = (1 - p) * (float) (r * sin(random.nextFloat() * 10 + 8 * (1 - p)));
 
                 v.add(new Ellipse2D.Double(
                         bubbles[a].getCenterX() * size.width - r + dx,

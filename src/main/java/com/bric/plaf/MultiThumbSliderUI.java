@@ -23,22 +23,8 @@ import com.bric.swing.MultiThumbSlider;
 
 import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -209,9 +195,9 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
         }
     }
 
-    Thread animatingThread = null;
+    private Thread animatingThread = null;
 
-    final Runnable animatingRunnable = new Runnable() {
+    private final Runnable animatingRunnable = new Runnable() {
         @Override
         public void run() {
             boolean finished = false;
@@ -632,7 +618,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
         return true;
     }
 
-    final FocusListener focusListener = new FocusListener() {
+    private final FocusListener focusListener = new FocusListener() {
         @Override
         public void focusLost(FocusEvent e) {
             Component c = (Component) e.getSource();
@@ -702,7 +688,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
         return true;
     }
 
-    final KeyListener keyListener = new KeyListener() {
+    private final KeyListener keyListener = new KeyListener() {
         @Override
         public void keyPressed(KeyEvent e) {
             if (!slider.isEnabled()) {
@@ -798,7 +784,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
         }
     };
 
-    final PropertyChangeListener propertyListener = new PropertyChangeListener() {
+    private final PropertyChangeListener propertyListener = new PropertyChangeListener() {
 
         @Override
         public void propertyChange(PropertyChangeEvent e) {
@@ -823,7 +809,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 
     };
 
-    final ComponentListener compListener = new ComponentListener() {
+    private final ComponentListener compListener = new ComponentListener() {
 
         @Override
         public void componentHidden(ComponentEvent e) {

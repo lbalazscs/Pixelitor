@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.Invert;
 import pixelitor.filters.NoOpFilter;
-import pixelitor.filters.OneColorFilter;
 import pixelitor.filters.painters.TextSettings;
 
 import java.awt.Color;
@@ -39,13 +38,13 @@ class LayerBlendingModesTest {
     private Composition comp;
 
     private ImageLayer lowerLayer;
-    private Layer upperLayer;
+    private ImageLayer upperLayer;
 
     private static final Color lowerColor = new Color(211, 141, 86);
     private static final Color upperColor = new Color(119, 86, 132);
 
     private AdjustmentLayer invertAdjustment;
-    private AdjustmentLayer alwaysUpperColorAdjustment;
+    private ColorFillLayer upperColorFillLayer;
     private TextLayer upperColorTextLayer;
 
     @BeforeAll
@@ -71,8 +70,7 @@ class LayerBlendingModesTest {
 
         invertAdjustment = TestHelper.createAdjustmentLayer(
             comp, "Invert", new Invert());
-        alwaysUpperColorAdjustment = TestHelper.createAdjustmentLayer(
-            comp, "One Color", new OneColorFilter(upperColor));
+        upperColorFillLayer = createColorFillLayer(upperColor);
         upperColorTextLayer = createTestTextLayerWithColor(upperColor);
     }
 
@@ -185,102 +183,106 @@ class LayerBlendingModesTest {
     }
 
     private void testBlendingMode(BlendingMode blendingMode, Color expectedColor) {
+        // start with 2 image layers
+
         // check that the blending mode is working as expected
         upperLayer.setBlendingMode(blendingMode, true, true);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
 
         // a white mask for the upper layer should change nothing
         upperLayer.addMask(MaskInitMethod.REVEAL_ALL);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
 
         // a white mask for the lower layer should change nothing
         lowerLayer.addMask(MaskInitMethod.REVEAL_ALL);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
 
         // upper layer with a black mask: expect lower color
         upperLayer.deleteMask(true);
         upperLayer.addMask(MaskInitMethod.HIDE_ALL);
-        assertThat(getResultingColor()).isEqualTo(lowerColor);
+        assertCompositeColorIs(lowerColor);
         upperLayer.deleteMask(true);
 
         // adding an invert adjustment should deliver the inverted color
         Color inverted = invert(expectedColor);
         comp.addLayerWithoutUI(invertAdjustment);
         assertThat(comp).numLayersIs(3);
-        assertThat(getResultingColor()).isEqualTo(inverted);
+        assertCompositeColorIs(inverted);
 
         // adding a white mask to the adjustment should change nothing
         invertAdjustment.addMask(MaskInitMethod.REVEAL_ALL);
-        assertThat(getResultingColor()).isEqualTo(inverted);
+        assertCompositeColorIs(inverted);
 
         // with a black mask, the adjustment should have no effect
         invertAdjustment.deleteMask(true);
         invertAdjustment.addMask(MaskInitMethod.HIDE_ALL);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
 
         // merging down the invert adjustment with black mask should have no effect
         comp.mergeActiveLayerDown();
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
 
         // adding a no-op adjustment layer should change nothing
         var noOpAdjustment = new AdjustmentLayer(comp, "No-op", new NoOpFilter());
         comp.addLayerWithoutUI(noOpAdjustment);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
 
         // merging down the no-op adjustment with black mask should have no effect
         comp.mergeActiveLayerDown();
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
 
         // delete the upper layer
         comp.deleteLayer(upperLayer, true);
         assertThat(comp).numLayersIs(1);
 
-        // test the blending mode with an OneColorFilter that outputs the upper color
-        comp.addLayerWithoutUI(alwaysUpperColorAdjustment);
-        alwaysUpperColorAdjustment.setBlendingMode(blendingMode, true, true);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        // test the blending mode with a color fill layer of the upper color
+        addLayerWithBM(upperColorFillLayer, blendingMode);
+        assertCompositeColorIs(expectedColor);
 
         // adjustment layer with white mask
-        alwaysUpperColorAdjustment.addMask(MaskInitMethod.REVEAL_ALL);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        upperColorFillLayer.addMask(MaskInitMethod.REVEAL_ALL);
+        assertCompositeColorIs(expectedColor);
 
         // adjustment layer with black mask, expect lower color
-        alwaysUpperColorAdjustment.deleteMask(true);
-        alwaysUpperColorAdjustment.addMask(MaskInitMethod.HIDE_ALL);
-        assertThat(getResultingColor()).isEqualTo(lowerColor);
+        upperColorFillLayer.deleteMask(true);
+        upperColorFillLayer.addMask(MaskInitMethod.HIDE_ALL);
+        assertCompositeColorIs(lowerColor);
 
         // merging down the adjustment with black mask should have no effect
         comp.mergeActiveLayerDown();
-        assertThat(getResultingColor()).isEqualTo(lowerColor);
+        assertCompositeColorIs(lowerColor);
         assertThat(comp).numLayersIs(1);
 
         // test with text layer
-        comp.addLayerWithoutUI(upperColorTextLayer);
-        upperColorTextLayer.setBlendingMode(blendingMode, true, true);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        addLayerWithBM(upperColorTextLayer, blendingMode);
+        assertCompositeColorIs(expectedColor);
 
         // text layer with white mask
         upperColorTextLayer.addMask(MaskInitMethod.REVEAL_ALL);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
 
         // text layer with black mask, expect lower color
         upperColorTextLayer.deleteMask(true);
         upperColorTextLayer.addMask(MaskInitMethod.HIDE_ALL);
-        assertThat(getResultingColor()).isEqualTo(lowerColor);
+        assertCompositeColorIs(lowerColor);
 
         // merging down the text layer with black mask should have no effect
         comp.mergeActiveLayerDown();
-        assertThat(getResultingColor()).isEqualTo(lowerColor);
         assertThat(comp).numLayersIs(1);
+        assertCompositeColorIs(lowerColor);
 
         // merging down the upper layer should result in the expected color
-        comp.addLayerWithoutUI(upperLayer);
+        addLayerWithBM(upperLayer, blendingMode);
         assertThat(comp).numLayersIs(2);
-        upperLayer.setBlendingMode(blendingMode, true, true);
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertCompositeColorIs(expectedColor);
         comp.mergeActiveLayerDown();
-        assertThat(getResultingColor()).isEqualTo(expectedColor);
         assertThat(comp).numLayersIs(1);
+        assertCompositeColorIs(expectedColor);
+    }
+
+    private void addLayerWithBM(Layer layer, BlendingMode blendingMode) {
+        comp.addLayerWithoutUI(layer);
+        layer.setBlendingMode(blendingMode, true, true);
     }
 
     private TextLayer createTestTextLayerWithColor(Color color) {
@@ -294,9 +296,18 @@ class LayerBlendingModesTest {
         return layer;
     }
 
-    private Color getResultingColor() {
+    private ColorFillLayer createColorFillLayer(Color color) {
+        ColorFillLayer layer = TestHelper.createColorFillLayer(
+            comp, color, "Color Fill");
+        layer.createUI();
+        return layer;
+    }
+
+    private void assertCompositeColorIs(Color expected) {
         comp.invalidateImageCache();
-        return new Color(comp.getCompositeImage().getRGB(0, 0));
+        Color compositeColor = new Color(comp.getCompositeImage().getRGB(0, 0));
+
+        assertThat(compositeColor).isEqualTo(expected);
     }
 
     private static Color invert(Color in) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.menus.edit;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
-import pixelitor.utils.Messages;
-import pixelitor.utils.ViewActivationListener;
+import pixelitor.utils.*;
+import pixelitor.utils.Error;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -53,29 +53,30 @@ public class PasteAction extends NamedAction implements ViewActivationListener {
 
     @Override
     protected void onClick(ActionEvent e) {
-        retrieveClipboardImage().ifPresent(pasteTarget::paste);
+        switch (retrieveClipboardImage()) {
+            case Success<BufferedImage, ?>(BufferedImage img) -> pasteTarget.paste(img);
+            case Error<?, String>(String errorMsg) -> Messages.showInfo("Paste Error", errorMsg);
+        }
     }
 
-    private static Optional<BufferedImage> retrieveClipboardImage() {
+    private static Result<BufferedImage, String> retrieveClipboardImage() {
         Transferable clipboardContents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
 
         if (clipboardContents == null) {
-            Messages.showInfo("Paste", "The clipboard is empty. Nothing to paste.");
-            return Optional.empty();
+            return Result.error("The clipboard is empty. Nothing to paste.");
         }
 
         if (!clipboardContents.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-            Messages.showInfo("Paste", "The clipboard content isn't an image.");
-            return Optional.empty();
+            return Result.error("The clipboard content isn't an image.");
         }
 
         try {
             BufferedImage pastedImage = (BufferedImage)
                 clipboardContents.getTransferData(DataFlavor.imageFlavor);
-            return Optional.of(pastedImage);
+            return Result.success(pastedImage);
         } catch (UnsupportedFlavorException | IOException ex) {
             Messages.showException(ex);
-            return Optional.empty();
+            return Result.error(ex.getMessage());
         }
     }
 

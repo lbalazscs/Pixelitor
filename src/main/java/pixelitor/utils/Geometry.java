@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import net.jafama.FastMath;
 import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Static utility methods for 2D geometry calculations.
@@ -50,17 +51,17 @@ public class Geometry {
                                                double distance,
                                                Point2D leftOut,
                                                Point2D rightOut) {
-        // Calculate direction vector from center to reference
+        // calculate direction vector from center to reference
         Point2D direction = new Point2D.Double();
         subtract(reference, center, direction);
         normalize(direction);
         scale(direction, distance);
 
-        // Calculate perpendicular points
+        // calculate perpendicular points
         // leftOut, rightOut = direction rotated 90 degrees either way
         calculatePerpendicularVectors(direction, leftOut, rightOut);
 
-        // Translate points to center position
+        // translate points to center position
         add(leftOut, center, leftOut);
         add(rightOut, center, rightOut);
     }
@@ -72,16 +73,16 @@ public class Geometry {
                                                Point2D reference,
                                                Point2D leftOut,
                                                Point2D rightOut) {
-        // Calculate direction vector from center to reference
+        // calculate direction vector from center to reference
         Point2D direction = new Point2D.Double();
         subtract(reference, center, direction);
         normalize(direction);
 
-        // Calculate perpendicular points
+        // calculate perpendicular points
         // leftOut, rightOut = direction rotated 90 degrees either way
         calculatePerpendicularVectors(direction, leftOut, rightOut);
 
-        // Translate points to center position
+        // translate points to center position
         add(leftOut, center, leftOut);
         add(rightOut, center, rightOut);
     }
@@ -306,5 +307,11 @@ public class Geometry {
         return degrees <= 0
             ? -degrees
             : 360.0 - degrees;
+    }
+
+    public static double calcAspectRatio(Rectangle2D rect) {
+        // return 0 if height is zero to avoid division
+        // by zero and represent undefined aspect ratio
+        return (rect.getHeight() > 0) ? rect.getWidth() / rect.getHeight() : 0;
     }
 }

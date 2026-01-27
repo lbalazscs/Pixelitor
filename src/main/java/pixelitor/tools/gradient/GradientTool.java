@@ -194,7 +194,7 @@ public class GradientTool extends DragTool {
         DraggablePoint hit = handles.findHandleAt(x, y);
         if (hit != null) {
             hit.setActive(true);
-            hit.mousePressed(x, y);
+            hit.mousePressed(e);
         }
         e.repaint();
     }
@@ -229,10 +229,8 @@ public class GradientTool extends DragTool {
         if (activePoint != null) { // a handle was dragged
             assert handles != null;
 
-            double x = e.getCoX();
-            double y = e.getCoY();
-            activePoint.mouseReleased(x, y, e.isShiftDown());
-            if (!activePoint.contains(x, y)) {
+            activePoint.mouseReleased(e);
+            if (!activePoint.isHitBy(e)) {
                 // we can get here if the handle has a
                 // constrained position
                 activePoint = null;

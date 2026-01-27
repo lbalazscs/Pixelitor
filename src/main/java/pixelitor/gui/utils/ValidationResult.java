@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -159,6 +159,17 @@ public class ValidationResult {
         } catch (NumberFormatException e) {
             return this.addError(format("<b>%s</b> must be an integer.", fieldName));
         }
+    }
+
+    /**
+     * Validates a directory path that is allowed to be empty.
+     * If the path is not empty, it must point to an existing directory.
+     */
+    public ValidationResult checkOptionalDir(String path, String description) {
+        if (path == null || path.trim().isEmpty()) {
+            return this;
+        }
+        return requireExistingDir(new File(path.trim()), description);
     }
 
     /**

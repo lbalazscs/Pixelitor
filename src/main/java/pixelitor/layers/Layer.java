@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -103,6 +103,9 @@ public abstract class Layer implements Serializable, Debuggable {
 
     private transient List<LayerListener> listeners;
 
+    // cache for the masked image to avoid reallocation and repainting
+    private transient BufferedImage cachedMaskedImage;
+
     // unit tests use a different LayerUI implementation
     // by assigning a different UI factory
     public static Function<Layer, LayerUI> uiFactory = LayerGUI::new;
@@ -130,6 +133,7 @@ public abstract class Layer implements Serializable, Debuggable {
         // defaults for transient fields
         maskEditing = false;
         ui = null;
+        cachedMaskedImage = null;
 
         in.defaultReadObject();
         listeners = new ArrayList<>();
@@ -626,7 +630,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     protected void maskChanged() {
-        // empty by default
+        invalidateMaskedImageCache();
     }
 
     public boolean isMaskEditing() {
@@ -743,19 +747,30 @@ public abstract class Layer implements Serializable, Debuggable {
 
     // paints the layer content applying its mask
     private void paintWithMask(Graphics2D g, boolean firstVisibleLayer) {
-        // 1. create the masked image
-        // TODO the masked image should be cached
-        var maskedImage = new BufferedImage(
-            comp.getCanvasWidth(), comp.getCanvasHeight(), TYPE_INT_ARGB);
-        Graphics2D mig = maskedImage.createGraphics();
-        paint(mig, firstVisibleLayer);
-        mig.setComposite(DstIn);
-        mig.drawImage(mask.getTransparencyImage(),
-            mask.getTx(), mask.getTy(), null);
-        mig.dispose();
+        int w = comp.getCanvasWidth();
+        int h = comp.getCanvasHeight();
+
+        // 1. create the masked image if not cached or size changed
+        if (cachedMaskedImage == null || cachedMaskedImage.getWidth() != w || cachedMaskedImage.getHeight() != h) {
+            invalidateMaskedImageCache();
+            cachedMaskedImage = new BufferedImage(w, h, TYPE_INT_ARGB);
+            Graphics2D mig = cachedMaskedImage.createGraphics();
+            paint(mig, firstVisibleLayer);
+            mig.setComposite(DstIn);
+            mig.drawImage(mask.getTransparencyImage(),
+                mask.getTx(), mask.getTy(), null);
+            mig.dispose();
+        }
 
         // 2. paint the masked image onto the graphics
-        g.drawImage(maskedImage, 0, 0, null);
+        g.drawImage(cachedMaskedImage, 0, 0, null);
+    }
+
+    public void invalidateMaskedImageCache() {
+        if (cachedMaskedImage != null) {
+            cachedMaskedImage.flush();
+            cachedMaskedImage = null;
+        }
     }
 
     /**
@@ -1164,12 +1179,11 @@ public abstract class Layer implements Serializable, Debuggable {
         return null;
     }
 
-    public void update(boolean updateHistogram) {
-        holder.update(updateHistogram);
-    }
-
+    // every subclass must signal its update request via
+    // this method, and this forwards it to the holder hierarchy
     public void update() {
-        update(true);
+        invalidateMaskedImageCache();
+        holder.update();
     }
 
     public boolean checkInvariants() {

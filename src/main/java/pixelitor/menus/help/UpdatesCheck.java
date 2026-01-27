@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,13 +46,14 @@ public class UpdatesCheck {
     }
 
     public static void checkForUpdates() {
-        Result<Properties, String> result = fetchLatestVersionInfo();
-        if (result.isError()) {
-            showUpdateCheckErrorDialog(result.errorDetails());
+        Properties versionInfo;
+        try {
+            versionInfo = downloadVersionInfo();
+        } catch (IOException | URISyntaxException e) {
+            showUpdateCheckErrorDialog(e.getClass().getSimpleName() + ": " + e.getMessage());
             return;
         }
 
-        Properties versionInfo = result.get();
         String latestVersion = versionInfo.getProperty("last_version");
         if (latestVersion == null) {
             showUpdateCheckErrorDialog("missing last_version");
@@ -98,16 +99,6 @@ public class UpdatesCheck {
         }
         int currentJavaVersion = getJavaMainVersion();
         return parseInt(requiredJavaVersion) > currentJavaVersion;
-    }
-
-    private static Result<Properties, String> fetchLatestVersionInfo() {
-        Properties versionInfo;
-        try {
-            versionInfo = downloadVersionInfo();
-        } catch (IOException | URISyntaxException e) {
-            return Result.error(e.getClass().getSimpleName() + ": " + e.getMessage());
-        }
-        return Result.ofNullable(versionInfo);
     }
 
     private static Properties downloadVersionInfo() throws IOException, URISyntaxException {

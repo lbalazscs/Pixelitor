@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.PathEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
@@ -33,6 +34,7 @@ import pixelitor.utils.debug.Debuggable;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
@@ -121,6 +123,14 @@ public class Path implements Serializable, Debuggable {
      */
     public void paintForTransforming(Graphics2D g) {
         Shapes.drawVisibly(g, toComponentSpaceShape());
+    }
+
+    public DraggablePoint findHandleAt(PMouseEvent e) {
+        return findHandleAt(e.getCoX(), e.getCoY(), e.isAltDown());
+    }
+
+    public DraggablePoint findHandleAt(MouseEvent e) {
+        return findHandleAt(e.getX(), e.getY(), e.isAltDown());
     }
 
     public DraggablePoint findHandleAt(double x, double y, boolean altDown) {
@@ -283,8 +293,8 @@ public class Path implements Serializable, Debuggable {
     }
 
     // return true if it could be closed
-    boolean tryClosing(double x, double y) {
-        return activeSubPath.tryClosing(x, y);
+    boolean tryClosing(PMouseEvent e) {
+        return activeSubPath.tryClosing(e);
     }
 
     public String getId() {
@@ -311,10 +321,6 @@ public class Path implements Serializable, Debuggable {
 
     public Composition getComp() {
         return comp;
-    }
-
-    public AnchorPoint getFirstAnchor() {
-        return activeSubPath.getFirstAnchor();
     }
 
     public AnchorPoint getLastAnchor() {

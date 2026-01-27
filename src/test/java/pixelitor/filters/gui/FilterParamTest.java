@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,8 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.jhlabsproxies.JHWeave;
 
 import javax.swing.*;
+import java.awt.Component;
+import java.awt.Container;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -55,7 +57,7 @@ import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 @TestMethodOrder(MethodOrderer.Random.class)
 class FilterParamTest {
     @Parameter
-    private FilterParam param;
+    private AbstractFilterParam param;
 
     private ParamAdjustmentListener mockAdjustmentListener;
 
@@ -87,18 +89,17 @@ class FilterParamTest {
             {new ColorParam("Param Name", BLUE, OPAQUE_ONLY)},
             {new ColorListParam("Param Name", 1, 1, BLACK, BLUE)},
             {new GroupedColorsParam("Param Name", "Name 1", BLUE, "Name 2", BLUE, ALPHA_ENABLED, true, true)},
-            {new BooleanParam("Param Name", true)},
+            {new BooleanParam("Param Name", true, RandomizeMode.ALLOW_RANDOMIZE, true)},
             {new AngleParam("Param Name", 0)},
             {new ElevationAngleParam("Param Name", 0)},
             {new IntChoiceParam("Param Name", new Item[]{
                 new Item("Better", 0),
                 new Item("Faster", 1),
-            })
-            },
+            })},
             {new StrokeParam("Param Name")},
             {new EffectsParam("Param Name")},
             {new CompositeParam("Param Name",
-                new RangeParam("Child", 0, 50, 100),
+                new RangeParam("Child 1", 0, 50, 100),
                 new AngleParam("Child 2", 0),
                 new BooleanParam("Child 3", true))
             },
@@ -167,6 +168,9 @@ class FilterParamTest {
 
     @Test
     void shouldResetWithTriggering() {
+        // check that another test didn't leave the param disabled
+        assertThat(param).isEnabled();
+
         param.reset(false);
         String defaultValue = param.getValueAsString();
 
@@ -174,9 +178,11 @@ class FilterParamTest {
         param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
 
         // randomize until we get a non-default value
-        while (param.isAtDefault()) {
+        int attempts = 0;
+        while (param.isAtDefault() && attempts < 100) {
             param.randomize();
             verifyNoParamAdjustments();
+            attempts++;
         }
 
         assertThat(param.getValueAsString())
@@ -239,6 +245,93 @@ class FilterParamTest {
         assertIsEnabled(gui);
 
         verifyNoParamAdjustments();
+    }
+
+    @Test
+    void shouldDisableAuxiliaryButtonsWhenParamIsDisabled() {
+        // inject a side button with a known lookup name so we can find it in the GUI
+        String sideButtonName = "testSideButton";
+        FilterButtonModel sideButtonModel = new FilterButtonModel(
+            "Side", () -> {}, null, "Tooltip", sideButtonName
+        );
+        param.withSideButton(sideButtonModel);
+        JComponent gui = param.createGUI();
+
+        // randomize until we are NOT at default => the reset button should be enabled
+        param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
+        int attempts = 0;
+        while (param.isAtDefault() && attempts < 100) {
+            param.randomize();
+            attempts++;
+        }
+
+        // find the specific components in the GUI hierarchy
+        ResetButton resetButton = findChildComponent(gui, ResetButton.class);
+        JButton sideButton = findChildComponentByName(gui, JButton.class, sideButtonName);
+
+        // disable the parameter and verify buttons are disabled
+        param.setEnabled(false);
+        if (resetButton != null) {
+            assertThat(resetButton.isEnabled())
+                .as("ResetButton should be disabled when param is disabled")
+                .isFalse();
+        }
+        if (sideButton != null) {
+            assertThat(sideButton.isEnabled())
+                .as("Side button should be disabled when param is disabled")
+                .isFalse();
+        }
+
+        // re-enable the parameter and verify buttons
+        param.setEnabled(true);
+        if (resetButton != null) {
+            // the reset button should only be enabled if the value is still not default
+            boolean expectedState = !param.isAtDefault();
+            assertThat(resetButton.isEnabled())
+                .as("ResetButton enabled state should match !isAtDefault() when param is enabled")
+                .isEqualTo(expectedState);
+        }
+        if (sideButton != null) {
+            assertThat(sideButton.isEnabled())
+                .as("Side button should be enabled when param is enabled")
+                .isTrue();
+        }
+    }
+
+    /**
+     * Helper to find a component of a specific type in a Container hierarchy.
+     */
+    private static <T extends Component> T findChildComponent(Container container, Class<T> type) {
+        for (Component c : container.getComponents()) {
+            if (type.isInstance(c)) {
+                return type.cast(c);
+            }
+            if (c instanceof Container) {
+                T found = findChildComponent((Container) c, type);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Helper to find a component by its name in a Container hierarchy.
+     */
+    private static <T extends Component> T findChildComponentByName(Container container, Class<T> type, String name) {
+        for (Component c : container.getComponents()) {
+            if (type.isInstance(c) && name.equals(c.getName())) {
+                return type.cast(c);
+            }
+            if (c instanceof Container) {
+                T found = findChildComponentByName((Container) c, type, name);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 
     private void verifyNoParamAdjustments() {
