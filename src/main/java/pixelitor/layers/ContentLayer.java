@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -165,7 +165,7 @@ public abstract class ContentLayer extends Layer {
         // possibly null if there is no linked mask
         PixelitorEdit linkedEdit = createLinkedMovementEdit();
 
-        // can be null for empty shape layers
+        // can be null for empty shape or gradient fill layers
         PixelitorEdit ownEdit = createMovementEdit(prevTx, prevTy);
 
         return MultiEdit.combine(ownEdit, linkedEdit, ContentLayerMoveEdit.NAME);

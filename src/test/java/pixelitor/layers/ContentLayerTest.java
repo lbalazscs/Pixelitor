@@ -98,7 +98,7 @@ class ContentLayerTest {
         comp.finalizeMovement(MoveMode.MOVE_LAYER_ONLY);
 
         checkTranslationAfterPositiveDrag();
-        int expectedLayerIconUpdates = layerClass == ImageLayer.class ? 1 : 0;
+        int expectedLayerIconUpdates = layer.hasRasterIcon() ? 1 : 0;
         iconChecker.verifyUpdateCounts(expectedLayerIconUpdates, 1);
 
         // start another drag to the negative direction
@@ -112,7 +112,8 @@ class ContentLayerTest {
         // ImageLayer: this time the layer was not enlarged
         // TextLayer: finalizeMovement does not change the tmpTranslation + translation sum
         checkTranslationAfterNegativeDrag();
-        expectedLayerIconUpdates = layerClass == ImageLayer.class ? 2 : 0;
+
+        expectedLayerIconUpdates = layer.hasRasterIcon() ? 2 : 0;
         iconChecker.verifyUpdateCounts(expectedLayerIconUpdates, 2);
         History.assertNumEditsIs(2);
 

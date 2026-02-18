@@ -257,6 +257,10 @@ public class GradientFillLayer extends ContentLayer {
 
     @Override
     PixelitorEdit createMovementEdit(int prevTx, int prevTy) {
+        if (gradient == null) {
+            return null; // no edit for empty layer
+        }
+
         // prevTx and prevTy are not used here
         // as gradient movement is handled via gradient state
         return new GradientFillLayerChangeEdit("Move Layer",

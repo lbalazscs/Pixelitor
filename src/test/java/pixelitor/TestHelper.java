@@ -32,8 +32,12 @@ import pixelitor.selection.Selection;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gradient.Gradient;
+import pixelitor.tools.gradient.GradientColorType;
+import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
+import pixelitor.tools.util.Drag;
 import pixelitor.utils.*;
 
 import javax.swing.*;
@@ -250,7 +254,13 @@ public class TestHelper {
     }
 
     private static GradientFillLayer createGradientFillLayer(Composition comp, String name) {
-        return new GradientFillLayer(comp, name);
+        GradientFillLayer layer = new GradientFillLayer(comp, name);
+        layer.setGradient(createGradient(), false);
+        return layer;
+    }
+
+    private static Gradient createGradient() {
+        return new Gradient(new Drag(0, 0, 1, 1), GradientType.LINEAR, MultipleGradientPaint.CycleMethod.NO_CYCLE, GradientColorType.FG_TO_BG, false, BlendingMode.NORMAL, 1.0f);
     }
 
     private static LayerGroup createLayerGroup(Composition comp, String name) {

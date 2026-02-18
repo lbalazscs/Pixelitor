@@ -29,12 +29,15 @@ public class GradientFillLayerChangeEdit extends PixelitorEdit {
     private final Gradient before;
     private final Gradient after;
 
-    public GradientFillLayerChangeEdit(String name, GradientFillLayer layer, Gradient before, Gradient after) {
+    public GradientFillLayerChangeEdit(String name, GradientFillLayer layer, Gradient before, Gradient current) {
         super(name, layer.getComp());
 
         this.layer = layer;
         this.before = before;
-        this.after = after;
+
+        // make a copy for the stored snapshot, because
+        // the Gradient.drag field can be mutated
+        this.after = current.copy();
     }
 
     @Override
