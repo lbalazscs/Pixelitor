@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class ThemedImageIcon extends ImageIcon {
     public static final int GREEN = 0x00428F4C;
     public static final int RED = 0x00CC555D;
     public static final int BLUE = 0x004488AD;
-    public static final int BLACK = 0x00000000;
+//    public static final int BLACK = 0x00000000;
 
     // if the dark-themed image has to be generated,
     // based on the alpha of the original, this

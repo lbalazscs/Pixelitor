@@ -21,6 +21,8 @@ import net.jafama.FastMath;
 import java.awt.image.BufferedImage;
 import java.util.random.RandomGenerator;
 
+import static com.jhlabs.image.PixelUtils.clamp;
+
 /**
  * A filter which produces an image simulating brushed metal.
  */
@@ -120,16 +122,6 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
             x = 0xff;
         }
         return x;
-    }
-
-    private static int clamp(int c) {
-        if (c < 0) {
-            return 0;
-        }
-        if (c > 255) {
-            return 255;
-        }
-        return c;
     }
 
     /**

@@ -543,8 +543,6 @@ class NeuQuant {
 
     private static final int gammashift = 10; /* gamma = 1024 */
 
-    protected static final int gamma = (1 << gammashift);
-
     private static final int betashift = 10;
 
     private static final int beta = (intbias >> betashift); /* beta = 1/1024 */

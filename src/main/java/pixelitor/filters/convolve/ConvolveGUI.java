@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
@@ -119,7 +118,7 @@ public class ConvolveGUI extends FilterGUI {
 
     private void addNormalizeButton(Box parentBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
-        normalizeButton.addActionListener(this::normalizeKernel);
+        normalizeButton.addActionListener(e -> normalizeKernel());
         normalizeButton.setAlignmentX(LEFT_ALIGNMENT);
         parentBox.add(normalizeButton);
     }
@@ -127,7 +126,7 @@ public class ConvolveGUI extends FilterGUI {
     private void addExecuteButton(Box parentBox) {
         JButton runButton = new JButton("Apply Filter");
         runButton.setToolTipText("Applies the filter with the current kernel values.");
-        runButton.addActionListener(this::onUserAction);
+        runButton.addActionListener(e -> onUserAction());
         parentBox.add(runButton);
     }
 
@@ -145,13 +144,13 @@ public class ConvolveGUI extends FilterGUI {
 
         JButton randomizeButton = GUIUtils.createRandomizeSettingsButton(e -> {
             loadKernel(Convolve.createRandomKernel(kernelSize));
-            onUserAction(e);
+            onUserAction();
         });
         presetsBox.add(randomizeButton);
 
         JButton resetButton = GUIUtils.createResetAllButton(e -> {
             resetKernel(kernelSize);
-            onUserAction(e);
+            onUserAction();
         });
         presetsBox.add(resetButton);
 
@@ -164,7 +163,7 @@ public class ConvolveGUI extends FilterGUI {
         JButton button = new JButton(name);
         button.addActionListener(e -> {
             loadKernel(kernel);
-            onUserAction(e);
+            onUserAction();
         });
         presetsBox.add(button);
     }
@@ -301,7 +300,7 @@ public class ConvolveGUI extends FilterGUI {
         textField.setColumns(5);
         textField.setHorizontalAlignment(JTextField.RIGHT);
         kernelPanel.add(textField);
-        textField.addActionListener(this::onUserAction);
+        textField.addActionListener(e -> onUserAction());
         return textField;
     }
 
@@ -330,11 +329,11 @@ public class ConvolveGUI extends FilterGUI {
         return values;
     }
 
-    private void onUserAction(ActionEvent event) {
+    private void onUserAction() {
         startPreview(false);
     }
 
-    private void normalizeKernel(ActionEvent event) {
+    private void normalizeKernel() {
         float[] values = getCurrentKernelValues();
         if (values == null) {
             return; // an error occurred during parsing

@@ -747,7 +747,6 @@ public class FastNoiseLite {
             case Perlin -> SinglePerlin(seed, x, y);
             case ValueCubic -> SingleValueCubic(seed, x, y);
             case Value -> SingleValue(seed, x, y);
-            default -> 0;
         };
     }
 
@@ -759,7 +758,6 @@ public class FastNoiseLite {
             case Perlin -> SinglePerlin(seed, x, y, z);
             case ValueCubic -> SingleValueCubic(seed, x, y, z);
             case Value -> SingleValue(seed, x, y, z);
-            default -> 0;
         };
     }
 
@@ -1469,7 +1467,6 @@ public class FastNoiseLite {
             case Distance2Sub -> distance1 - distance0 - 1;
             case Distance2Mul -> distance1 * distance0 * 0.5f - 1;
             case Distance2Div -> distance0 / distance1 - 1;
-            default -> 0;
         };
     }
 
@@ -1597,7 +1594,6 @@ public class FastNoiseLite {
             case Distance2Sub -> distance1 - distance0 - 1;
             case Distance2Mul -> distance1 * distance0 * 0.5f - 1;
             case Distance2Div -> distance0 / distance1 - 1;
-            default -> 0;
         };
     }
 
@@ -1838,7 +1834,7 @@ public class FastNoiseLite {
         switch (mDomainWarpType) {
             case OpenSimplex2:
             case OpenSimplex2Reduced:
-                final double SQRT3 = (double) 1.7320508075688772935274463415059;
+                final double SQRT3 = 1.7320508075688772935274463415059;
                 final double F2 = 0.5f * (SQRT3 - 1);
                 /*FNLfloat*/
                 double t = (xs + ys) * F2;
@@ -1880,13 +1876,13 @@ public class FastNoiseLite {
                 double xz = xs + zs;
                 /*FNLfloat*/
                 double s2 = xz * -(double) 0.211324865405187;
-                ys *= (double) 0.577350269189626;
+                ys *= 0.577350269189626;
                 xs += s2 - ys;
                 zs += s2 - ys;
-                ys += xz * (double) 0.577350269189626;
+                ys += xz * 0.577350269189626;
                 break;
             case DefaultOpenSimplex2:
-                final double R3 = (double) (2.0 / 3.0);
+                final double R3 = 2.0 / 3.0;
                 /*FNLfloat*/
                 double r = (xs + ys + zs) * R3; // Rotation, not skew
                 xs = r - xs;
@@ -1916,7 +1912,7 @@ public class FastNoiseLite {
             switch (mDomainWarpType) {
                 case OpenSimplex2:
                 case OpenSimplex2Reduced:
-                    final double SQRT3 = (double) 1.7320508075688772935274463415059;
+                    final double SQRT3 = 1.7320508075688772935274463415059;
                     final double F2 = 0.5f * (SQRT3 - 1);
                     /*FNLfloat*/
                     double t = (xs + ys) * F2;

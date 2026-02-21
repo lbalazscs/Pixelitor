@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,6 @@ import static pixelitor.utils.Threads.calledOnEDT;
  * For creating dialogs, consider using {@link DialogBuilder} for more flexibility.
  */
 public abstract class OKCancelDialog extends JDialog {
-    private JComponent content;
     private JLabel headerMsgLabel;
     private JScrollPane scrollPane;
     private final JButton okButton;
@@ -50,8 +49,6 @@ public abstract class OKCancelDialog extends JDialog {
                              String title, String okButtonText) {
         super(owner, title, true);
         assert calledOnEDT() : callInfo();
-
-        this.content = content;
 
         setLayout(new BorderLayout());
         addContent(content);
@@ -151,7 +148,6 @@ public abstract class OKCancelDialog extends JDialog {
     public void updateContent(JComponent newContent) {
         remove(scrollPane);
 
-        this.content = newContent;
         addContent(newContent);
 
         revalidate();

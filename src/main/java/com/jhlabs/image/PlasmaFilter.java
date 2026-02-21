@@ -29,7 +29,6 @@ public class PlasmaFilter extends WholeImageFilter {
     private int iterationCount = 0;
 
     public float turbulence = 1.0f;
-    private float scaling = 0.0f;
     private Colormap colormap = new LinearColormap();
     private SplittableRandom random;
     private boolean useColormap = false;
@@ -57,10 +56,6 @@ public class PlasmaFilter extends WholeImageFilter {
      */
     public void setTurbulence(float turbulence) {
         this.turbulence = turbulence;
-    }
-
-    public void setScaling(float scaling) {
-        this.scaling = scaling;
     }
 
     /**

@@ -47,57 +47,12 @@ public class ColorSwatch extends JPanel {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    JPopupMenu menu;
-    JMenuItem copyItem;
-
-// Laszlo: Commented out - would only confuse Pixelitor users
-//	MouseListener mouseListener = new MouseAdapter() {
-//		@Override
-//		public void mousePressed(MouseEvent e) {
-//			checkPopup(e);
-//		}
-//
-//		public void checkPopup(MouseEvent e) {
-//			if(e.isPopupTrigger()) {
-//				if(menu==null) {
-//					menu = new JPopupMenu();
-//					copyItem = new JMenuItem(ColorPicker.strings.getObject("Copy").toString());
-//					menu.add(copyItem);
-//					copyItem.addActionListener(actionListener);
-//				}
-//				menu.show(ColorSwatch.this,e.getX(),e.getY());
-//			}
-//		}
-//
-//		@Override
-//	 	public void mouseReleased(MouseEvent e) {
-//			checkPopup(e);
-//		}
-//	};
-
-//	ActionListener actionListener = new ActionListener() {
-//		public void actionPerformed(ActionEvent e) {
-//			Object src = e.getSource();
-//			if(src==copyItem) {
-//				BufferedImage image = new BufferedImage(100,100,BufferedImage.TYPE_INT_RGB);
-//				Graphics2D g = image.createGraphics();
-//				g.setColor(getBackground());
-//				g.fillRect(0, 0, image.getWidth(), image.getHeight());
-//				g.dispose();
-//				Transferable contents = new ImageTransferable(image);
-//				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(contents, null);
-//			}
-//		}
-//	};
-
-
     private final int w;
 
     public ColorSwatch(int width) {
         w = width;
         setPreferredSize(new Dimension(width, width));
         setMinimumSize(new Dimension(width, width));
-//		addMouseListener(mouseListener);
     }
 
     public ColorSwatch(Color color, int width) {
@@ -151,4 +106,3 @@ public class ColorSwatch extends JPanel {
         PlafPaintUtils.drawBevel(g, r);
     }
 }
-

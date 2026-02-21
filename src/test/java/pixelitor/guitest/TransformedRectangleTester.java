@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,10 +69,9 @@ class TransformedRectangleTester extends JPanel {
         var syParam = new RangeParam("Sy", -200, 100, 200, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
         var shxParam = new RangeParam("Shx", -100, 0, 100, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
         var shyParam = new RangeParam("Shy", -100, 0, 100, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
-        var growParam = new RangeParam("Grow", 0, 0, 100, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
         ParamAdjustmentListener adjustmentListener = () ->
             testPanel.updateTransfrom(
-                angleParam.getValueInRadians(), growParam.getValueAsDouble(),
+                angleParam.getValueInRadians(),
                 sxParam.getPercentage(), syParam.getPercentage(),
                 shxParam.getPercentage(), shyParam.getPercentage());
 
@@ -81,7 +80,6 @@ class TransformedRectangleTester extends JPanel {
         syParam.setAdjustmentListener(adjustmentListener);
         shxParam.setAdjustmentListener(adjustmentListener);
         shyParam.setAdjustmentListener(adjustmentListener);
-        growParam.setAdjustmentListener(adjustmentListener);
 
         JPanel controlsPanel = new JPanel(new GridBagLayout());
         GridBagHelper gbh = new GridBagHelper(controlsPanel);
@@ -90,7 +88,6 @@ class TransformedRectangleTester extends JPanel {
         gbh.addParam(syParam);
         gbh.addParam(shxParam);
         gbh.addParam(shyParam);
-        gbh.addParam(growParam);
         p.add(controlsPanel, SOUTH);
         f.add(p);
 
@@ -125,7 +122,7 @@ class TransformedRectangleTester extends JPanel {
         transformedRect.paintCorners(g2);
     }
 
-    private void updateTransfrom(double rotation, double growth,
+    private void updateTransfrom(double rotation,
                                  double sx, double sy,
                                  double shx, double shy) {
         this.rotation = rotation;

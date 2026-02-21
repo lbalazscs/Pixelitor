@@ -104,7 +104,6 @@ public class RippleFilter extends RotatingEffectFilter {
         double fx, fy;
         switch (waveType) {
             case WaveType.SINE:
-            default:
                 fx = (float) FastMath.sin(nx - phaseY);
                 fy = (float) FastMath.sin(ny - phaseX);
                 break;
@@ -120,6 +119,8 @@ public class RippleFilter extends RotatingEffectFilter {
                 fx = Noise.sinLikeNoise1((float) (nx - phaseY));
                 fy = Noise.sinLikeNoise1((float) (ny - phaseX));
                 break;
+            default:
+                throw new IllegalStateException("waveType = " + waveType);
         }
         out[0] = x + xAmplitude * fx;
         out[1] = y + yAmplitude * fy;

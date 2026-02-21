@@ -24,7 +24,6 @@ import com.jhlabs.math.Noise;
 public class SwimFilter extends TransformFilter {
     private float scale = 32;
     private float stretch = 1.0f;
-    private float angle = 0.0f;
     private float amount = 1.0f;
     //	private float turbulence = 1.0f; // Laszlo: commented out, because it did not seem to be useful
     private float time = 0.0f;
@@ -77,7 +76,6 @@ public class SwimFilter extends TransformFilter {
      * @angle
      */
     public void setAngle(float angle) {
-        this.angle = angle;
         float cos = (float) Math.cos(angle);
         float sin = (float) Math.sin(angle);
         m00 = cos;

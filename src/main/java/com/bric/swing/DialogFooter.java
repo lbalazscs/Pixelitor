@@ -732,8 +732,6 @@ public class DialogFooter extends JPanel {
             }
 
             window.setFocusTraversalPolicy(new DelegateFocusTraversalPolicy(window.getFocusTraversalPolicy()) {
-                private static final long serialVersionUID = 1L;
-
                 @Override
                 public Component getDefaultComponent(Container focusCycleRoot) {
                     /* If the default component would naturally be in the footer *anyway*:

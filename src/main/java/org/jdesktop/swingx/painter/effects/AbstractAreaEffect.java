@@ -219,7 +219,7 @@ public class AbstractAreaEffect implements AreaEffect {
         if (isShouldFillShape()) {
             // set the inside/outside mode
             if (inside) {
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1f));
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1.0f));
                 Area a1 = new Area(new Rectangle(
                     (int) -offset.getX() - 20,
                     (int) -offset.getY() - 20,
@@ -228,7 +228,7 @@ public class AbstractAreaEffect implements AreaEffect {
                 a1.subtract(a2);
                 g2.fill(a1);
             } else {
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, 1f));
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, 1.0f));
                 g2.fill(clipShape);
             }
         }
@@ -244,7 +244,7 @@ public class AbstractAreaEffect implements AreaEffect {
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, brushAlpha));
 
         // draw the effect
-        for (float i = 0; i < steps; i = i + 1f) {
+        for (float i = 0; i < steps; i = i + 1.0f) {
             float brushWidth = (float) (i * effectWidthDouble / steps);
             g2.setStroke(new BasicStroke(brushWidth,
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));

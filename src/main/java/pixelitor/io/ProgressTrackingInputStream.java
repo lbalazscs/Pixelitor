@@ -20,7 +20,6 @@ package pixelitor.io;
 import pixelitor.utils.ProgressTracker;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 
@@ -33,7 +32,7 @@ public class ProgressTrackingInputStream extends FilterInputStream {
     private final ProgressTracker progressTracker;
     private boolean closed = false;
 
-    public ProgressTrackingInputStream(FileInputStream inputStream, ProgressTracker tracker) throws FileNotFoundException {
+    public ProgressTrackingInputStream(FileInputStream inputStream, ProgressTracker tracker) {
         super(inputStream);
 
         this.progressTracker = tracker;

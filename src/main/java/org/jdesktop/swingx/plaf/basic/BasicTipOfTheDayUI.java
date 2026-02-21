@@ -49,7 +49,7 @@ public class BasicTipOfTheDayUI extends TipOfTheDayUI {
     return new BasicTipOfTheDayUI((JXTipOfTheDay)c);
   }
 
-  protected JXTipOfTheDay tipPane;
+  protected final JXTipOfTheDay tipPane;
   protected JPanel tipArea;
   protected Component currentTipComponent;
 

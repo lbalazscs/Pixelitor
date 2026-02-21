@@ -40,10 +40,9 @@ public class CellularFilter extends WholeImageFilter {
 
     protected float scale = 32;
     protected float stretch = 1.0f;
-    protected float angle = 0.0f;
     public float amount = 1.0f;
     public float turbulence = 1.0f;
-    protected Colormap colormap = new Gradient();
+    protected Colormap colormap;
     private final float[] coefficients = {1, 0, 0, 0};
 
     protected float m00 = 1.0f;
@@ -129,7 +128,6 @@ public class CellularFilter extends WholeImageFilter {
      * @angle
      */
     public void setAngle(float angle) {
-        this.angle = angle;
         float cos = (float) Math.cos(angle);
         float sin = (float) Math.sin(angle);
         m00 = cos;

@@ -51,16 +51,12 @@ public abstract class TransferFilter extends PointFilter {
         rTable = gTable = bTable = makeTable();
     }
 
-    protected int[] makeTable() {
+    private static int[] makeTable() {
         int[] table = new int[256];
         for (int i = 0; i < 256; i++) {
-            table[i] = PixelUtils.clamp((int) (255 * transferFunction(i / 255.0f)));
+            table[i] = 0;
         }
         return table;
-    }
-
-    protected float transferFunction(float v) {
-        return 0;
     }
 
     public int[] getLUT() {
@@ -74,4 +70,3 @@ public abstract class TransferFilter extends PointFilter {
         return lut;
     }
 }
-

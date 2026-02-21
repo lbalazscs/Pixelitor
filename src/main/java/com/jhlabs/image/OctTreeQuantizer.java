@@ -40,8 +40,6 @@ public class OctTreeQuantizer implements Quantizer {
      */
     static class OctTreeNode {
         int numChildren;
-        int level;
-        OctTreeNode parent;
         final OctTreeNode[] children = new OctTreeNode[8];
         boolean isLeaf;
         int numAssignedPixels;
@@ -202,7 +200,6 @@ public class OctTreeQuantizer implements Quantizer {
                 node.numChildren++;
 
                 child = new OctTreeNode();
-                child.parent = node;
                 node.children[index] = child;
                 node.isLeaf = false;
 //                nodes++;
@@ -214,7 +211,6 @@ public class OctTreeQuantizer implements Quantizer {
                     child.totalRed = red;
                     child.totalGreen = green;
                     child.totalBlue = blue;
-                    child.level = level;
                     colors++;
                     return;
                 }
@@ -327,4 +323,3 @@ public class OctTreeQuantizer implements Quantizer {
         return index;
     }
 }
-

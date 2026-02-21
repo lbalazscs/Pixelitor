@@ -1622,13 +1622,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     @Override
     public void update() {
-        update(false, false);
+        update(false);
     }
 
     /**
      * Signals that the contents of this composition have been changed.
      */
-    public void update(boolean updateHistogram, boolean canvasSizeChanged) {
+    public void update(boolean canvasSizeChanged) {
         invalidateImageCache();
 
         if (isOpen()) {

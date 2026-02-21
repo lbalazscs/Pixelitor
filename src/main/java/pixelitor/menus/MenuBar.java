@@ -1198,7 +1198,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new DrawableAction("Debug ImageLayer Images",
             Drawable::debugImages));
 
-        sub.addViewEnabled("Enable Mouse Debugging", comp -> GlobalEvents.enableMouseEventDebugging(false));
+        sub.addViewEnabled("Enable Mouse Debugging", comp -> GlobalEvents.enableMouseEventDebugging());
 
         sub.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK, layer -> {
             ImageLayer imageLayer = (ImageLayer) layer;

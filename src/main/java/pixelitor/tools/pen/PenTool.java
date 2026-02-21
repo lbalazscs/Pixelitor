@@ -218,7 +218,7 @@ public class PenTool extends PathTool {
         }
 
         if (buildState == DRAGGING_LAST_CONTROL) {
-            buildState = recoverFromUnexpectedDrag("mousePressed", e.getView(), path);
+            buildState = recoverFromUnexpectedDrag("mousePressed", e.getView());
         }
 
         lastX = e.getCoX();
@@ -276,9 +276,6 @@ public class PenTool extends PathTool {
             // and is now clicking to place the next one
             assert path.hasMovingPoint();
         }
-
-        double x = e.getCoX();
-        double y = e.getCoY();
 
         if (e.isControlDown()) {
             // edit an existing point or finish the path
@@ -406,7 +403,7 @@ public class PenTool extends PathTool {
         }
 
         if (buildState.isMoving()) {
-            buildState = recoverFromUnexpectedMove("mouseDragged", e.getView(), buildState, path);
+            buildState = recoverFromUnexpectedMove("mouseDragged", e.getView(), buildState);
             if (buildState == IDLE) {
                 return;
             }
@@ -448,7 +445,7 @@ public class PenTool extends PathTool {
         }
 
         if (buildState.isMoving()) {
-            buildState = recoverFromUnexpectedMove("mouseReleased", e.getView(), buildState, path);
+            buildState = recoverFromUnexpectedMove("mouseReleased", e.getView(), buildState);
             if (buildState == IDLE) {
                 return;
             }
@@ -522,7 +519,7 @@ public class PenTool extends PathTool {
         }
 
         if (buildState == DRAGGING_LAST_CONTROL) {
-            buildState = recoverFromUnexpectedDrag("mouseMoved", view, path);
+            buildState = recoverFromUnexpectedDrag("mouseMoved", view);
         }
 
         int x = e.getX();
@@ -577,7 +574,7 @@ public class PenTool extends PathTool {
     }
 
     // recovers from an inconsistent state where a drag is detected unexpectedly
-    private BuildState recoverFromUnexpectedDrag(String where, View view, Path path) {
+    private BuildState recoverFromUnexpectedDrag(String where, View view) {
         if (AppMode.isDevelopment()) {
             System.out.printf("PenTool::recoverFromUnexpectedDrag: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
@@ -590,7 +587,7 @@ public class PenTool extends PathTool {
     }
 
     // recovers from an inconsistent state where a move is detected unexpectedly
-    private BuildState recoverFromUnexpectedMove(String where, View view, BuildState state, Path path) {
+    private BuildState recoverFromUnexpectedMove(String where, View view, BuildState state) {
         if (AppMode.isDevelopment()) {
             System.out.printf("PenTool::recoverFromUnexpectedMove: " +
                 "where = '%s, active = %s'%n", where, view.isActive());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,7 +61,6 @@ public final class Invariants {
         return fadeWouldWorkOn(dr);
     }
 
-    @SuppressWarnings("SameReturnValue")
     private static boolean fadeWouldWorkOn(Drawable dr) {
         assert dr != null;
         if (!History.canFade(dr)) {
@@ -77,8 +76,7 @@ public final class Invariants {
             }
 
             if (isSizeDifferent(currentImg, previousImg)) {
-                var comp = dr.getComp();
-                differentSizeForFade(currentImg, previousImg, comp);
+                differentSizeForFade(currentImg, previousImg);
                 return false;
             }
 
@@ -90,7 +88,7 @@ public final class Invariants {
         return a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight();
     }
 
-    private static void differentSizeForFade(BufferedImage currentImg, BufferedImage previousImg, Composition comp) {
+    private static void differentSizeForFade(BufferedImage currentImg, BufferedImage previousImg) {
         Debug.debugImage(currentImg, "current");
         Debug.debugImage(previousImg, "previous");
 

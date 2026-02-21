@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -281,7 +281,7 @@ public class ColorBalance extends ParametrizedFilter {
             oklab[2] += bAdj * affectFactor;
 
             // clamp lightness to its valid [0, 1] range
-            oklab[0] = ImageMath.clamp(oklab[0], 0.0f, 1.0f);
+            oklab[0] = ImageMath.clamp01(oklab[0]);
 
             return ColorSpaces.oklabToSrgb(oklab);
         }

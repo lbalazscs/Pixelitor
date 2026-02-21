@@ -19,14 +19,15 @@
  */
 package com.bric.geom;
 
-import com.bric.math.MathG;
-
-import java.awt.*;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
-import static java.awt.geom.PathIterator.*;
+import static java.awt.geom.PathIterator.SEG_CLOSE;
+import static java.awt.geom.PathIterator.SEG_LINETO;
+import static java.awt.geom.PathIterator.SEG_MOVETO;
 
 /**
  * This can identify if a shape is a Rectangle, Rectangle2D or other.
@@ -298,16 +299,16 @@ public class RectangleReader {
             h = -h;
         }
 
-        int iw = MathG.roundInt(w);
-        int ih = MathG.roundInt(h);
+        int iw = roundInt(w);
+        int ih = roundInt(h);
         if (Math.abs(iw - w) > TOL) {
             return null;
         }
         if (Math.abs(ih - h) > TOL) {
             return null;
         }
-        int ix = MathG.roundInt(x);
-        int iy = MathG.roundInt(y);
+        int ix = roundInt(x);
+        int iy = roundInt(y);
         if (Math.abs(ix - x) > TOL) {
             return null;
         }
@@ -316,5 +317,22 @@ public class RectangleReader {
         }
 
         return new Rectangle(ix, iy, iw, ih);
+    }
+
+    /**
+     * Rounds a double to the nearest integer value.
+     * <BR>Warning: do not use an argument greater than 1e10, or less than 1e-10.
+     *
+     * @param d the value to round.
+     * @return the closest integer that is less than the argument.
+     */
+    public static int roundInt(double d) {
+        int i;
+        if (d >= 0) {
+            i = (int) (d + 0.5);
+        } else {
+            i = (int) (d - 0.5);
+        }
+        return i;
     }
 }

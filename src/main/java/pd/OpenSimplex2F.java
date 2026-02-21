@@ -1,3 +1,20 @@
+/*
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pd;
 
 /**
@@ -17,10 +34,10 @@ public class OpenSimplex2F {
     private static final int PSIZE = 2048;
     private static final int PMASK = 2047;
 
-    private short[] perm;
-    private Grad2[] permGrad2;
-    private Grad3[] permGrad3;
-    private Grad4[] permGrad4;
+    private final short[] perm;
+    private final Grad2[] permGrad2;
+    private final Grad3[] permGrad3;
+    private final Grad4[] permGrad4;
 
     public OpenSimplex2F(long seed) {
         perm = new short[PSIZE];
@@ -456,8 +473,10 @@ public class OpenSimplex2F {
     }
 
     private static class LatticePoint2D {
-        int xsv, ysv;
-        double dx, dy;
+        final int xsv;
+        final int ysv;
+        final double dx;
+        final double dy;
         public LatticePoint2D(int xsv, int ysv) {
             this.xsv = xsv; this.ysv = ysv;
             double ssv = (xsv + ysv) * -0.211324865405187;
@@ -467,8 +486,12 @@ public class OpenSimplex2F {
     }
 
     private static class LatticePoint3D {
-        public double dxr, dyr, dzr;
-        public int xrv, yrv, zrv;
+        public final double dxr;
+        public final double dyr;
+        public final double dzr;
+        public final int xrv;
+        public final int yrv;
+        public final int zrv;
         LatticePoint3D nextOnFailure, nextOnSuccess;
         public LatticePoint3D(int xrv, int yrv, int zrv, int lattice) {
             this.dxr = -xrv + lattice * 0.5; this.dyr = -yrv + lattice * 0.5; this.dzr = -zrv + lattice * 0.5;
@@ -477,10 +500,19 @@ public class OpenSimplex2F {
     }
 
     private static class LatticePoint4D {
-        int xsv, ysv, zsv, wsv;
-        double dx, dy, dz, dw;
-        double xsi, ysi, zsi, wsi;
-        double ssiDelta;
+        final int xsv;
+        final int ysv;
+        final int zsv;
+        final int wsv;
+        final double dx;
+        final double dy;
+        final double dz;
+        final double dw;
+        final double xsi;
+        final double ysi;
+        final double zsi;
+        final double wsi;
+        final double ssiDelta;
         public LatticePoint4D(int xsv, int ysv, int zsv, int wsv) {
             this.xsv = xsv + 409; this.ysv = ysv + 409; this.zsv = zsv + 409; this.wsv = wsv + 409;
             double ssv = (xsv + ysv + zsv + wsv) * 0.309016994374947;
