@@ -19,7 +19,7 @@
  */
 package com.bric.image.transition;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -91,5 +91,4 @@ public class KaleidoscopeTransition2D extends Transition2D {
     public String toString() {
         return "Kaleidoscope";
     }
-
 }

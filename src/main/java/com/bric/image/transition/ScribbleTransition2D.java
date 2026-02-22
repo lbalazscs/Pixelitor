@@ -45,21 +45,6 @@ import java.awt.geom.Rectangle2D;
  * </tr></table>
  */
 public class ScribbleTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new ScribbleTransition2D(false),
-                new ScribbleTransition2D(true)
-        };
-    }
-
     private final Shape scribble;
     private final Rectangle2D shapeBounds;
 

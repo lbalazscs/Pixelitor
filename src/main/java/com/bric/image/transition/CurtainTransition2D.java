@@ -70,5 +70,4 @@ public class CurtainTransition2D extends Transition2D {
     public String toString() {
         return "Curtain";
     }
-
 }

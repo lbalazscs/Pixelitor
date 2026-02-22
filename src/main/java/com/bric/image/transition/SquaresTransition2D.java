@@ -46,22 +46,6 @@ import java.util.Random;
  * </tr></table>
  */
 public class SquaresTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new SquaresTransition2D(10, 10),
-                new SquaresTransition2D(30, 30),
-                new SquaresTransition2D(20, 20),
-        };
-    }
-
     private final float[][] accels;
     private final float[][] delays;
     private float progressMax = 1;

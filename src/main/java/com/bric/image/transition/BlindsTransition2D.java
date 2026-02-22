@@ -56,34 +56,8 @@ import java.util.List;
  * </tr></table>
  */
 public class BlindsTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new BlindsTransition2D(LEFT, 4),
-                new BlindsTransition2D(LEFT, 10),
-                new BlindsTransition2D(LEFT, 20),
-                new BlindsTransition2D(RIGHT),
-                new BlindsTransition2D(UP),
-                new BlindsTransition2D(DOWN)
-        };
-    }
-
     private final int type;
     private final int blinds;
-
-    /**
-     * Creates a BlindsTransition2D that moves to the right with 10 blinds.
-     */
-    public BlindsTransition2D() {
-        this(RIGHT);
-    }
 
     /**
      * Creates a new BlindsTransition2D with 10 blinds.

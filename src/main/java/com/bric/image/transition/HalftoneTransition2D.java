@@ -19,7 +19,8 @@
  */
 package com.bric.image.transition;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.RectangularShape;
@@ -45,28 +46,7 @@ import java.util.List;
  * </tr></table>
  */
 public class HalftoneTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new HalftoneTransition2D(IN),
-                new HalftoneTransition2D(OUT)
-        };
-    }
-
-    private int type = OUT;
-
-    /**
-     * Creates a new halftone transition that moves out
-     */
-    public HalftoneTransition2D() {
-    }
+    private final int type;
 
     /**
      * Creates a new halftone transition.
@@ -146,5 +126,4 @@ public class HalftoneTransition2D extends Transition2D {
             return "Halftone Out";
         }
     }
-
 }

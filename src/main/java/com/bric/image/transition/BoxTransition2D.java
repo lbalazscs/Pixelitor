@@ -37,28 +37,6 @@ import java.awt.geom.Rectangle2D;
  */
 public class BoxTransition2D extends AbstractShapeTransition2D {
     /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new BoxTransition2D(IN),
-                new BoxTransition2D(OUT)
-        };
-    }
-
-    /**
-     * Creates a new BoxTransition2D that zooms out
-     */
-    public BoxTransition2D() {
-        super(false);
-    }
-
-    /**
      * Creates a new BoxTransition2D
      *
      * @param type must be IN or OUT
@@ -76,5 +54,4 @@ public class BoxTransition2D extends AbstractShapeTransition2D {
     public String getShapeName() {
         return "Box";
     }
-
 }

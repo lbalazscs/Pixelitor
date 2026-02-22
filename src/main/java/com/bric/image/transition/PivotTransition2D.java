@@ -63,36 +63,8 @@ import static java.lang.Math.PI;
  * </tr></table>
  */
 public class PivotTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new PivotTransition2D(TOP_LEFT, false),
-                new PivotTransition2D(TOP_LEFT, true),
-                new PivotTransition2D(TOP_RIGHT, false),
-                new PivotTransition2D(TOP_RIGHT, true),
-                new PivotTransition2D(BOTTOM_LEFT, false),
-                new PivotTransition2D(BOTTOM_LEFT, true),
-                new PivotTransition2D(BOTTOM_RIGHT, false),
-                new PivotTransition2D(BOTTOM_RIGHT, true)
-        };
-    }
-
     private final boolean in;
     private final int type;
-
-    /**
-     * Creates a new PivotTransition2D that pivots in from the top-left corner.
-     */
-    public PivotTransition2D() {
-        this(TOP_LEFT, true);
-    }
 
     /**
      * Creates a new PivotTransition2D.
@@ -114,19 +86,16 @@ public class PivotTransition2D extends Transition2D {
                                                      Dimension size) {
         AffineTransform transform;
         if (in) {
-            if (type == TOP_LEFT) {
-                transform = AffineTransform.getRotateInstance(
-                        (float) (-(1 - progress) * PI / 2.0f), 0, 0);
-            } else if (type == TOP_RIGHT) {
-                transform = AffineTransform.getRotateInstance(
-                        (float) ((1 - progress) * PI / 2.0f), size.width, 0);
-            } else if (type == BOTTOM_LEFT) {
-                transform = AffineTransform.getRotateInstance(
-                        (float) ((1 - progress) * PI / 2.0f), 0, size.height);
-            } else {
-                transform = AffineTransform.getRotateInstance(
-                        (float) ((1 - progress) * PI / 2.0f), size.width, size.height);
-            }
+            transform = switch (type) {
+                case TOP_LEFT -> AffineTransform.getRotateInstance(
+                    (float) (-(1 - progress) * PI / 2.0f), 0, 0);
+                case TOP_RIGHT -> AffineTransform.getRotateInstance(
+                    (float) ((1 - progress) * PI / 2.0f), size.width, 0);
+                case BOTTOM_LEFT -> AffineTransform.getRotateInstance(
+                    (float) ((1 - progress) * PI / 2.0f), 0, size.height);
+                default -> AffineTransform.getRotateInstance(
+                    (float) ((1 - progress) * PI / 2.0f), size.width, size.height);
+            };
             return new Transition2DInstruction[]{
                     new ImageInstruction(true),
                     new ImageInstruction(false, transform, null)
@@ -134,19 +103,16 @@ public class PivotTransition2D extends Transition2D {
         }
 
         //pivot out:
-        if (type == TOP_LEFT) {
-            transform = AffineTransform.getRotateInstance(
-                    (float) (progress * PI / 2.0f), 0, 0);
-        } else if (type == TOP_RIGHT) {
-            transform = AffineTransform.getRotateInstance(
-                    (float) (-progress * PI / 2.0f), size.width, 0);
-        } else if (type == BOTTOM_LEFT) {
-            transform = AffineTransform.getRotateInstance(
-                    (float) (-progress * PI / 2.0f), 0, size.height);
-        } else {
-            transform = AffineTransform.getRotateInstance(
-                    (float) (-progress * PI / 2.0f), size.width, size.height);
-        }
+        transform = switch (type) {
+            case TOP_LEFT -> AffineTransform.getRotateInstance(
+                (float) (progress * PI / 2.0f), 0, 0);
+            case TOP_RIGHT -> AffineTransform.getRotateInstance(
+                (float) (-progress * PI / 2.0f), size.width, 0);
+            case BOTTOM_LEFT -> AffineTransform.getRotateInstance(
+                (float) (-progress * PI / 2.0f), 0, size.height);
+            default -> AffineTransform.getRotateInstance(
+                (float) (-progress * PI / 2.0f), size.width, size.height);
+        };
         return new Transition2DInstruction[]{
                 new ImageInstruction(false),
                 new ImageInstruction(true, transform, null)

@@ -19,7 +19,8 @@
  */
 package com.bric.image.transition;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -38,30 +39,7 @@ import java.awt.geom.Rectangle2D;
  * </tr></table>
  */
 public class RadialWipeTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new RadialWipeTransition2D(CLOCKWISE),
-                new RadialWipeTransition2D(COUNTER_CLOCKWISE)
-        };
-    }
-
-
     private final int type;
-
-    /**
-     * Creates a new RadialTransition2D
-     */
-    public RadialWipeTransition2D() {
-        this(CLOCKWISE);
-    }
 
     /**
      * Creates a new RadialTransition2D.

@@ -40,13 +40,6 @@ public class DiamondsTransition2D extends Transition2D {
     private final double angle;
 
     /**
-     * Creates a new DiamondsTransition2D with a diamond size of 50.
-     */
-    public DiamondsTransition2D() {
-        this(50, TYPE_DIAMOND, 0);
-    }
-
-    /**
      * Creates a new DiamondsTransition2D.
      *
      * @param size the width of the diamonds.

@@ -49,29 +49,7 @@ import java.util.Random;
  * </tr></table>
  */
 public class FlurryTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new FlurryTransition2D(IN),
-                new FlurryTransition2D(OUT)
-        };
-    }
-
-    private int type = OUT;
-
-    /**
-     * Creates a new flurry transition that moves out.
-     */
-    public FlurryTransition2D() {
-        this(OUT);
-    }
+    private final int type;
 
     /**
      * Creates a new flurry transition
@@ -199,5 +177,4 @@ public class FlurryTransition2D extends Transition2D {
             return "Flurry In";
         }
     }
-
 }

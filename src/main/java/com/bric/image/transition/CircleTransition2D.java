@@ -37,28 +37,6 @@ import java.awt.geom.Ellipse2D;
  */
 public class CircleTransition2D extends AbstractShapeTransition2D {
     /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition2D[] getDemoTransitions() {
-        return new Transition2D[]{
-                new CircleTransition2D(IN),
-                new CircleTransition2D(OUT)
-        };
-    }
-
-    /**
-     * Creates a new CircleTransition2D that zooms out
-     */
-    public CircleTransition2D() {
-        super(true);
-    }
-
-    /**
      * Creates a new CircleTransition2D
      *
      * @param type must be IN or OUT

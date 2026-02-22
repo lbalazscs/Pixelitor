@@ -40,29 +40,7 @@ import java.awt.geom.Rectangle2D;
  * </tr></table>
  */
 public class ScaleTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new ScaleTransition2D(IN),
-                new ScaleTransition2D(OUT)
-        };
-    }
-
     private final int type;
-
-    /**
-     * Creates a new ScaleTransition2D that scales out
-     */
-    public ScaleTransition2D() {
-        this(OUT);
-    }
 
     /**
      * Creates a new ScaleTransition2D

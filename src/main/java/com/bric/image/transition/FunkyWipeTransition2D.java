@@ -53,21 +53,6 @@ import static net.jafama.FastMath.sin;
  * </tr></table>
  */
 public class FunkyWipeTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new FunkyWipeTransition2D(true),
-                new FunkyWipeTransition2D(false)
-        };
-    }
-
     private static final GeneralPath pathCyclic = createPathCyclic();
     private static final MeasuredShape measuredPathCyclic = new MeasuredShape(pathCyclic);
     private static final GeneralPath pathAcross = createPathAcross();
@@ -142,5 +127,4 @@ public class FunkyWipeTransition2D extends Transition2D {
         String s = (circular ? " Circular" : " Across");
         return "Funky Wipe " + s;
     }
-
 }

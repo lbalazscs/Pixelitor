@@ -88,6 +88,4 @@ public class MicroscopeTransition2D extends Transition2D {
     public String toString() {
         return "Microscope";
     }
-
-
 }

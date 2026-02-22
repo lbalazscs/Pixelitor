@@ -88,10 +88,6 @@ public class BristleStroke implements Stroke {
         this.grain = getGrain(width, thickness);
         this.spacing = 0.5f + 0.5f * thickness;
         this.randomSeed = randomSeed;
-//        int l = (int) ((1 + 2 * thickness) * width) + 10;
-//        if (l > 20) {
-//            l = 20;
-//        }
         this.layers = 20;
     }
 

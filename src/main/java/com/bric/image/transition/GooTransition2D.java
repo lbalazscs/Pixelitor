@@ -117,5 +117,4 @@ public class GooTransition2D extends AbstractClippedTransition2D {
     public String toString() {
         return "Goo (" + offset.length + ")";
     }
-
 }

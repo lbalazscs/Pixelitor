@@ -74,5 +74,4 @@ public class CollapseTransition2D extends Transition2D {
     public String toString() {
         return "Collapse";
     }
-
 }

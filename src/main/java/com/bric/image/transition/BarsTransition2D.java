@@ -49,23 +49,6 @@ import java.util.Random;
  */
 public class BarsTransition2D extends Transition2D {
     /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new BarsTransition2D(HORIZONTAL, true),
-                new BarsTransition2D(HORIZONTAL, false),
-                new BarsTransition2D(VERTICAL, true),
-                new BarsTransition2D(VERTICAL, false)
-        };
-    }
-
-    /**
      * Keep a truly random seed; constantly creating a new
      * Random object with the current time as its seed created
      * several non-random frames generated in the same millisecond
@@ -74,13 +57,6 @@ public class BarsTransition2D extends Transition2D {
 
     private final int type;
     private final boolean isRandom;
-
-    /**
-     * Creates a randomized horizontal BarsTransition2D
-     */
-    public BarsTransition2D() {
-        this(HORIZONTAL, true);
-    }
 
     /**
      * Creates a BarsTransition2D.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,14 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static com.bric.image.transition.Transition.*;
+import static com.bric.image.transition.Transition.BOTTOM_LEFT;
+import static com.bric.image.transition.Transition.CLOCKWISE;
+import static com.bric.image.transition.Transition.HORIZONTAL;
+import static com.bric.image.transition.Transition.IN;
+import static com.bric.image.transition.Transition.LEFT;
+import static com.bric.image.transition.Transition.OUT;
+import static com.bric.image.transition.Transition.RIGHT;
+import static com.bric.image.transition.Transition.VERTICAL;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -92,7 +99,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
             case BARS_HORIZONTAL -> new BarsTransition2D(HORIZONTAL, false);
             case BARS_VERTICAL -> new BarsTransition2D(VERTICAL, false);
             case FADE -> new BlendTransition2D();
-            case BLINDS -> new BlindsTransition2D();
+            case BLINDS -> new BlindsTransition2D(RIGHT);
             case BOX_IN -> new BoxTransition2D(IN);
             case BOX_OUT -> new BoxTransition2D(OUT);
             case KALEIDOSCOPE -> new KaleidoscopeTransition2D();
@@ -106,12 +113,12 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
             case FLURRY -> new FlurryTransition2D(OUT);
             case FUNKY_WIPE -> new FunkyWipeTransition2D(true);
             case GOO -> createGooTransition();
-            case HALFTONE -> new HalftoneTransition2D();
+            case HALFTONE -> new HalftoneTransition2D(OUT);
             case LEVITATE -> new LevitateTransition2D();
             case MICROSCOPE -> new MicroscopeTransition2D();
             case PIVOT -> new PivotTransition2D(BOTTOM_LEFT, false);
-            case RADIAL_WIPE -> new RadialWipeTransition2D();
-            case REVEAL -> new RevealTransition2D();
+            case RADIAL_WIPE -> new RadialWipeTransition2D(CLOCKWISE);
+            case REVEAL -> new RevealTransition2D(LEFT);
             case ROTATE -> new RotateTransition2D(OUT);
             case SCALE -> new ScaleTransition2D(OUT);
             case SCRIBBLE -> new ScribbleTransition2D(false);

@@ -46,23 +46,8 @@ import static java.lang.Math.PI;
  * </tr></table>
  */
 public class SpiralTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new SpiralTransition2D(false),
-                new SpiralTransition2D(true)
-        };
-    }
-
     private final Shape spiral;
-    private boolean sprawl = true;
+    private final boolean sprawl;
     private final Rectangle2D shapeBounds;
 
     /**

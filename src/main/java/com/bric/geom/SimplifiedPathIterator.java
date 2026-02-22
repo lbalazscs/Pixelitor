@@ -79,16 +79,14 @@ public class SimplifiedPathIterator implements PathIterator {
      * argument if nothing was modified.
      */
     public static int simplify(int type, float lastX, float lastY, float[] data) {
-        synchronized (doubleArray) {
-            for (int a = 0; a < data.length; a++) {
-                doubleArray[a] = data[a];
-            }
-            int returnValue = simplify(type, lastX, lastY, doubleArray);
-            for (int a = 0; a < data.length; a++) {
-                data[a] = (float) doubleArray[a];
-            }
-            return returnValue;
+        for (int a = 0; a < data.length; a++) {
+            doubleArray[a] = data[a];
         }
+        int returnValue = simplify(type, lastX, lastY, doubleArray);
+        for (int a = 0; a < data.length; a++) {
+            data[a] = (float) doubleArray[a];
+        }
+        return returnValue;
     }
 
     /**

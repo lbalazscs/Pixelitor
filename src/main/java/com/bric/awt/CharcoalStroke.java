@@ -38,7 +38,7 @@ import static java.lang.Math.PI;
  * of another <code>CharcoalStroke</code>, because they are very
  * complex.
  */
-public class CharcoalStroke implements FilteredStroke {
+public class CharcoalStroke implements Stroke {
     private final Stroke stroke;
     private final float crackSize;
     private final float angle;
@@ -118,8 +118,7 @@ public class CharcoalStroke implements FilteredStroke {
      *                  of another <code>CharcoalStroke</code>, because they are very
      *                  complex.
      */
-    @Override
-    public FilteredStroke deriveStroke(Stroke newStroke) {
+    public CharcoalStroke deriveStroke(Stroke newStroke) {
         return new CharcoalStroke(newStroke, crackSize, angle, randomSeed);
     }
 
@@ -150,7 +149,6 @@ public class CharcoalStroke implements FilteredStroke {
      * Returns the underlying stroke this <code>CharcoalStroke</code> is layered
      * on top of.
      */
-    @Override
     public Stroke getStroke() {
         return stroke;
     }

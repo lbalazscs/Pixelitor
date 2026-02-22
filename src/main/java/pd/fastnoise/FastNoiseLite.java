@@ -393,10 +393,10 @@ public class FastNoiseLite {
         }
 
         return switch (mFractalType) {
-            default -> GenNoiseSingle(mSeed, x, y);
             case FBm -> GenFractalFBm(x, y);
             case Ridged -> GenFractalRidged(x, y);
             case PingPong -> GenFractalPingPong(x, y);
+            default -> GenNoiseSingle(mSeed, x, y);
         };
     }
 
@@ -443,10 +443,10 @@ public class FastNoiseLite {
         }
 
         return switch (mFractalType) {
-            default -> GenNoiseSingle(mSeed, x, y, z);
             case FBm -> GenFractalFBm(x, y, z);
             case Ridged -> GenFractalRidged(x, y, z);
             case PingPong -> GenFractalPingPong(x, y, z);
+            default -> GenNoiseSingle(mSeed, x, y, z);
         };
     }
 
@@ -483,14 +483,14 @@ public class FastNoiseLite {
     /// </example>
     public void DomainWarp(Vector3 coord) {
         switch (mDomainWarpFractalType) {
-            default:
-                DomainWarpSingle(coord);
-                break;
             case Progressive:
                 DomainWarpFractalProgressive(coord);
                 break;
             case Independent:
                 DomainWarpFractalIndependent(coord);
+                break;
+            default:
+                DomainWarpSingle(coord);
                 break;
         }
     }

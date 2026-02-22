@@ -81,5 +81,4 @@ public class LevitateTransition2D extends Transition2D {
     public String toString() {
         return "Levitate";
     }
-
 }

@@ -21,7 +21,8 @@ package com.bric.image.transition;
 
 import com.bric.geom.*;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -49,21 +50,6 @@ import static net.jafama.FastMath.sin;
  * </tr></table>
  */
 public class StarsTransition2D extends AbstractClippedTransition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new StarsTransition2D(LEFT),
-                new StarsTransition2D(RIGHT)
-        };
-    }
-
     private static final GeneralPath[] star = {
             createStar(1.5f),
             createStar(1.6f),

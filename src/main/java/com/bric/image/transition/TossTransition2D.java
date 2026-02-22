@@ -21,7 +21,7 @@ package com.bric.image.transition;
 
 import com.bric.geom.TransformUtils;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
@@ -42,22 +42,7 @@ import static java.lang.Math.PI;
  * </tr></table>
  */
 public class TossTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new TossTransition2D(LEFT),
-                new TossTransition2D(RIGHT)
-        };
-    }
-
-    private int type = RIGHT;
+    private final int type;
 
     /**
      * Creates a new toss transition that throws to the right

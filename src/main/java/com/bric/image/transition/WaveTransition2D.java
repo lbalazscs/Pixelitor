@@ -50,30 +50,7 @@ import static net.jafama.FastMath.sin;
  * </tr></table>
  */
 public class WaveTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new WaveTransition2D(LEFT),
-                new WaveTransition2D(RIGHT),
-                new WaveTransition2D(UP),
-                new WaveTransition2D(DOWN)
-        };
-    }
-
-    private int type = RIGHT;
-
-    /**
-     * Creates a new wave transition that moves to the right
-     */
-    public WaveTransition2D() {
-    }
+    private final int type;
 
     /**
      * Creates a new wave transition.

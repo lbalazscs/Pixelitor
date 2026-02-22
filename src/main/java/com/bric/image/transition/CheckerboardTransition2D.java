@@ -30,7 +30,6 @@ import java.awt.geom.GeneralPath;
  */
 public class CheckerboardTransition2D extends Transition2D {
     private final int type;
-
     private final int rowCount;
     private final int columnCount;
 
@@ -149,5 +148,4 @@ public class CheckerboardTransition2D extends Transition2D {
             default -> "Checkerboard Down";
         };
     }
-
 }

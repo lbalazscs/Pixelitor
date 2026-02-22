@@ -50,22 +50,6 @@ import java.util.Random;
  * </tr></table>
  */
 public class SquareRainTransition2D extends AbstractClippedTransition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new SquareRainTransition2D(6, false),
-                new SquareRainTransition2D(12, false),
-                new SquareRainTransition2D(24, false)
-        };
-    }
-
     private final float[] offset;
     private final float[] accel;
 

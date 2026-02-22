@@ -159,7 +159,7 @@ public class CalligraphyPathWriter extends PathWriter {
     }
 
     @Override
-    public synchronized void moveTo(float x, float y) {
+    public void moveTo(float x, float y) {
         checkArgument(x, "x is invalid");
         checkArgument(y, "y is invalid");
         flush(x, y);
@@ -168,7 +168,7 @@ public class CalligraphyPathWriter extends PathWriter {
     }
 
     @Override
-    public synchronized void lineTo(float x, float y) {
+    public void lineTo(float x, float y) {
         checkArgument(x, "x is invalid");
         checkArgument(y, "y is invalid");
         if (tail == null) {
@@ -184,7 +184,7 @@ public class CalligraphyPathWriter extends PathWriter {
     }
 
     @Override
-    public synchronized void quadTo(float cx, float cy, float x, float y) {
+    public void quadTo(float cx, float cy, float x, float y) {
         checkArgument(cx, "cx is invalid");
         checkArgument(cy, "cy is invalid");
         checkArgument(x, "x is invalid");
@@ -229,7 +229,7 @@ public class CalligraphyPathWriter extends PathWriter {
     }
 
     @Override
-    public synchronized void curveTo(float cx1, float cy1,
+    public void curveTo(float cx1, float cy1,
                                      float cx2, float cy2,
                                      float x, float y) {
         checkArgument(cx1, "cx1 is invalid");
@@ -364,7 +364,7 @@ public class CalligraphyPathWriter extends PathWriter {
     }
 
     @Override
-    public synchronized void closePath() {
+    public void closePath() {
         if (tail == null) {
             throw new NullPointerException("missing moveTo segment");
         }
@@ -389,7 +389,7 @@ public class CalligraphyPathWriter extends PathWriter {
     }
 
     @Override
-    public synchronized void flush() {
+    public void flush() {
         try {
             // This occurs if there hasn't been a moveTo
             if (tail == null) {
