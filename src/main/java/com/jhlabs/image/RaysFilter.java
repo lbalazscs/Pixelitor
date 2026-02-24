@@ -26,10 +26,8 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
  * A filter which produces the effect of light rays shining out of an image.
  */
 public class RaysFilter extends MotionBlurOp {
-    //    private float opacity = 1.0f;
     private float threshold = 0.0f;
     private float strength = 0.5f;
-    //    private boolean raysOnly = false;
     private Colormap colormap;
 
     public RaysFilter(String filterName) {
@@ -54,15 +52,6 @@ public class RaysFilter extends MotionBlurOp {
         this.strength = strength;
     }
 
-//    /**
-//     * Set whether to render only the rays.
-//     *
-//     * @param raysOnly true to render rays only.
-//     */
-//    public void setRaysOnly(boolean raysOnly) {
-//        this.raysOnly = raysOnly;
-//    }
-
     /**
      * Set the colormap to be used for the filter.
      *
@@ -77,7 +66,6 @@ public class RaysFilter extends MotionBlurOp {
         int width = src.getWidth();
         int height = src.getHeight();
         int[] pixels = new int[width];
-        int[] srcPixels = new int[width];
 
         pt = createProgressTracker(3);
         BufferedImage rays = new BufferedImage(width, height, TYPE_INT_ARGB);
@@ -113,7 +101,7 @@ public class RaysFilter extends MotionBlurOp {
 
         for (int y = 0; y < height; y++) {
             getRGB(rays, 0, y, width, 1, pixels);
-            getRGB(src, 0, y, width, 1, srcPixels);
+
             for (int x = 0; x < width; x++) {
                 int rgb = pixels[x];
                 int a = rgb & 0xff000000;
@@ -121,15 +109,23 @@ public class RaysFilter extends MotionBlurOp {
                 int g = (rgb >> 8) & 0xff;
                 int b = rgb & 0xff;
 
-                if (colormap != null) {
-                    int l = r + g + b;
-                    rgb = colormap.getColor(l * strength * (1 / 3.0f));
-                } else {
-                    r = PixelUtils.max255((int) (r * strength));
-                    g = PixelUtils.max255((int) (g * strength));
-                    b = PixelUtils.max255((int) (b * strength));
-                    rgb = a | (r << 16) | (g << 8) | b;
-                }
+                int l = r + g + b;
+                // scale from 0-765 to 0.0-1.0
+                float v = (l * strength) / 765.0f;
+
+                // get the mapped color
+                int color = colormap.getColor(v);
+                int cr = (color >> 16) & 0xff;
+                int cg = (color >> 8) & 0xff;
+                int cb = color & 0xff;
+
+                // multiply the colormap's color by the ray's intensity (v)
+                r = PixelUtils.max255((int) (cr * v));
+                g = PixelUtils.max255((int) (cg * v));
+                b = PixelUtils.max255((int) (cb * v));
+
+                // preserve the original alpha of the blurred image
+                rgb = a | (r << 16) | (g << 8) | b;
 
                 pixels[x] = rgb;
             }

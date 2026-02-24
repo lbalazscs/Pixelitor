@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,8 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.RangeParam;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-
-import static java.awt.Color.WHITE;
 
 /**
  * Glint filter based on the JHLabs GlintFilter
@@ -45,9 +42,7 @@ public class JHGlint extends ParametrizedFilter {
     private final RangeParam blur = new RangeParam("Blur", 0, 1, 20);
 //    private BooleanParam glintOnly = new BooleanParam("Glint Only", false);
 
-    private final GradientParam colors = new GradientParam("Colors",
-        new float[]{0.0f, 0.5f, 1.0f},
-        new Color[]{WHITE, WHITE, WHITE});
+    private final GradientParam colors = GradientParam.createUniformWhite();
 
     private GlintFilter filter;
 
