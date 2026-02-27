@@ -72,7 +72,7 @@ public final class Utils {
 
     public static void sleep(long duration, TimeUnit unit) {
         try {
-            Thread.sleep(unit.toMillis(duration));
+            unit.sleep(duration);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("interrupted!");
@@ -130,19 +130,6 @@ public final class Utils {
         return sb.toString();
     }
 
-    public static String keyEventToText(KeyEvent e) {
-        String keyText = KeyEvent.getKeyText(e.getKeyCode());
-        int modifiers = e.getModifiersEx();
-        if (modifiers != 0) {
-            String modifiersText = InputEvent.getModifiersExText(modifiers);
-            if (keyText.equals(modifiersText)) { // the key itself is the modifier
-                return modifiersText;
-            }
-            return modifiersText + "+" + keyText;
-        }
-        return keyText;
-    }
-
     public static String formatDuration(long millis) {
         Duration duration = Duration.ofMillis(millis);
         long h = duration.toHours();
@@ -188,7 +175,7 @@ public final class Utils {
     }
 
     public static int getJavaMainVersion() {
-        return Runtime.Version.parse(System.getProperty("java.version")).feature();
+        return Runtime.version().feature();
     }
 
     public static Point2D constrainToNearestAngle(double relX, double relY, double mouseX, double mouseY) {
@@ -238,6 +225,8 @@ public final class Utils {
                 return callable.call();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
+            } catch (RuntimeException e) { // avoid double-wrapping
+                throw e;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -246,14 +235,16 @@ public final class Utils {
 
     public static void preloadFontNames() {
         assert fontLoadingLatch.getCount() == 1;
-        fontNames = GraphicsEnvironment
-            .getLocalGraphicsEnvironment()
-            .getAvailableFontFamilyNames();
+        try {
+            fontNames = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getAvailableFontFamilyNames();
 
-        // it's almost sorted already, but not completely
-        Arrays.sort(fontNames);
-
-        fontLoadingLatch.countDown();
+            // it's almost sorted already, but not completely
+            Arrays.sort(fontNames);
+        } finally {
+            fontLoadingLatch.countDown();
+        }
     }
 
     public static void preloadUnitTestFontNames() {
@@ -296,7 +287,7 @@ public final class Utils {
         return s;
     }
 
-    // adds an "a" or "an" before the given word
+    // adds an "a" or "an" before the given lower-case word
     public static String addArticle(String word) {
         String article = switch (word.charAt(0)) {
             // this is a limited heuristic based on spelling, not pronunciation
@@ -334,7 +325,7 @@ public final class Utils {
      * Converts a float value in the range 0..1 to an int value in the range 0..100.
      */
     public static int toPercentage(float float01) {
-        return (int) (float01 * 100);
+        return Math.round(float01 * 100);
     }
 
     public static String encodeNewlines(String input) {
@@ -345,9 +336,22 @@ public final class Utils {
         return input.replace(ENCODED_NEWLINE, "\n");
     }
 
+    /**
+     * Truncates the input string to the given maximum length by appending "..." in an emoji-safe manner.
+     */
     public static String shorten(String input, int maxLength) {
-        if (input.length() > maxLength) {
-            input = input.substring(0, maxLength - 3) + "...";
+        if (input == null) {
+            return null;
+        }
+        if (maxLength < 4) {
+            throw new IllegalArgumentException("maxLength = " + maxLength);
+        }
+
+        // check code points instead of char length to accurately measure visual characters
+        int codePointCount = input.codePointCount(0, input.length());
+        if (codePointCount > maxLength) {
+            int safeIndex = input.offsetByCodePoints(0, maxLength - 3);
+            return input.substring(0, safeIndex) + "...";
         }
         return input;
     }

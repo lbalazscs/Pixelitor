@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,6 +38,7 @@ import static java.awt.BorderLayout.SOUTH;
 public class ToneCurvesGUI extends FilterGUI {
     private final ToneCurvesPanel curvesPanel;
     private final ToneCurves curves;
+    private final ChannelSelectorPanel channelSelectorPanel;
 
     public ToneCurvesGUI(ToneCurvesFilter filter, Filterable layer) {
         super(filter, layer);
@@ -47,7 +48,7 @@ public class ToneCurvesGUI extends FilterGUI {
         curvesPanel = new ToneCurvesPanel(curves);
         curvesPanel.addActionListener(e -> startPreview(false));
 
-        var channelSelectorPanel = new ChannelSelectorPanel(curvesPanel::setActiveCurve);
+        channelSelectorPanel = new ChannelSelectorPanel(curvesPanel::setActiveCurve);
         channelSelectorPanel.addResetButton(e -> curvesPanel.resetActiveCurve());
         channelSelectorPanel.addColorSpaceChangedListener(colorSpace -> {
             curves.setColorSpace(colorSpace);
@@ -79,6 +80,11 @@ public class ToneCurvesGUI extends FilterGUI {
     }
 
     public void stateChanged() {
+        // synchronize the UI dropdown to reflect the filter's
+        // backend data model (necessary when loading a preset)
+        channelSelectorPanel.setColorSpaceUI(curves.getColorSpace());
+
+        // paint the updated tone curves and dispatch standard events
         curvesPanel.stateChanged();
     }
 

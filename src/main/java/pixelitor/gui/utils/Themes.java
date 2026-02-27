@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.tools.gui.ToolButton;
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +49,8 @@ public class Themes {
 
     public static final AccentColor DEFAULT_ACCENT_COLOR = AccentColor.BLUE;
     private static AccentColor activeAccentColor = DEFAULT_ACCENT_COLOR;
+
+    private static Font originalDefaultFont;
 
     public static void addThemeChangeListener(Consumer<Theme> listener) {
         themeChangeListeners.add(listener);
@@ -101,6 +104,15 @@ public class Themes {
             UIManager.put("Component.focusWidth", 1);
 
             UIManager.setLookAndFeel(theme.getLAFClassName());
+
+            // capture the unpolluted LAF-specific default font
+            UIDefaults lafDefaults = UIManager.getLookAndFeelDefaults();
+            originalDefaultFont = lafDefaults != null ? lafDefaults.getFont("defaultFont") : null;
+
+            // fallback in case the LAF defaults map doesn't declare it directly
+            if (originalDefaultFont == null) {
+                originalDefaultFont = UIManager.getFont("defaultFont");
+            }
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
         }
@@ -112,5 +124,9 @@ public class Themes {
 
     public static AccentColor getActiveAccentColor() {
         return activeAccentColor;
+    }
+
+    public static Font getOriginalDefaultFont() {
+        return originalDefaultFont;
     }
 }

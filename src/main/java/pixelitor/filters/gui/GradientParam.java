@@ -194,7 +194,7 @@ public class GradientParam extends AbstractFilterParam {
         Color[] newColors = new Color[colorStrings.length];
         for (int i = 0; i < thumbStrings.length; i++) {
             newThumbPositions[i] = Float.parseFloat(thumbStrings[i]);
-            newColors[i] = Colors.fromHTMLHex(colorStrings[i]);
+            newColors[i] = Colors.fromHtmlHexRgba(colorStrings[i]);
         }
 
         setValues(newThumbPositions, newColors, false);

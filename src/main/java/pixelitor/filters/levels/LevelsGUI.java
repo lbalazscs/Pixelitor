@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.ChannelSelectorPanel;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.util.Channel;
+import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
@@ -38,11 +39,12 @@ import static java.awt.BorderLayout.SOUTH;
  */
 public class LevelsGUI extends FilterGUI {
     private final JPanel cardPanel;
+    private final ChannelSelectorPanel channelSelectorPanel;
     private JCheckBox showOriginalCB;
 
     public LevelsGUI(Filter filter, Filterable layer, LevelsModel model) {
         super(filter, layer);
-        model.setFilterGUI(this);
+        model.setLevelsGUI(this);
 
         setLayout(new BorderLayout());
 
@@ -51,7 +53,7 @@ public class LevelsGUI extends FilterGUI {
         cardPanel = createCenterPanel(model);
         add(cardPanel, CENTER);
 
-        ChannelSelectorPanel channelSelectorPanel = new ChannelSelectorPanel(this::showChannelPanel);
+        channelSelectorPanel = new ChannelSelectorPanel(this::showChannelPanel);
         channelSelectorPanel.addResetButton(e ->
             model.resetChannelToDefault(channelSelectorPanel.getSelectedChannel()));
         channelSelectorPanel.addColorSpaceChangedListener(colorSpace ->
@@ -96,5 +98,9 @@ public class LevelsGUI extends FilterGUI {
             model.resetAllAndRun()));
 
         return southPanel;
+    }
+
+    public void setColorSpaceUI(ColorSpace colorSpace) {
+        channelSelectorPanel.setColorSpaceUI(colorSpace);
     }
 }

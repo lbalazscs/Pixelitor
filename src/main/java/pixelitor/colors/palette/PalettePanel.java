@@ -141,7 +141,7 @@ public class PalettePanel extends JPanel implements Scrollable {
 
     // adds a new button
     private void addButton(int col, int row, Color c) {
-        ColorSwatchButton button = new ColorSwatchButton(c, clickHandler, col, row);
+        ColorSwatchButton button = new ColorSwatchButton(c, clickHandler);
 
         // ensure column list exists
         while (grid.size() <= col) {

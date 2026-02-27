@@ -51,8 +51,11 @@ public class ColorHistory {
      * Adds a color to the history, respecting capacity and avoiding duplicates.
      */
     private void add(Color newColor) {
+        colors.remove(newColor); // remove duplicates
         boolean added = colors.add(newColor);
-        if (added && colors.size() > MAX_HISTORY_CAPACITY) {
+        assert added;
+
+        if (colors.size() > MAX_HISTORY_CAPACITY) {
             colors.removeFirst();
         }
     }
@@ -94,7 +97,7 @@ public class ColorHistory {
         JPanel swatchPanel = new JPanel(new GridLayout(numRows, SWATCHES_PER_ROW, 2, 2));
         swatchPanel.setBorder(createEmptyBorder(2, 2, 2, 2));
         for (Color color : colors) {
-            swatchPanel.add(new ColorSwatchButton(color, clickHandler, 0, 0));
+            swatchPanel.add(new ColorSwatchButton(color, clickHandler));
         }
         return swatchPanel;
     }

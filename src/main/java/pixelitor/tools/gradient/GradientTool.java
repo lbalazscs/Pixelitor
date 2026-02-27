@@ -590,9 +590,9 @@ public class GradientTool extends DragTool {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.put("Type", getType().toString());
+        preset.put(GradientType.PRESET_KEY, getType().name());
         preset.put("Cycling", (String) cycleMethodCB.getSelectedItem());
-        preset.put("Color", getGradientColorType().toString());
+        preset.put(GradientColorType.PRESET_KEY, getGradientColorType().name());
         preset.putBoolean("Reverse", isReversed());
         blendingModePanel.saveStateTo(preset);
         FgBgColors.saveStateTo(preset);
@@ -602,9 +602,9 @@ public class GradientTool extends DragTool {
     public void loadUserPreset(UserPreset preset) {
         ignoreRegenerate = true;
 
-        typeCB.setSelectedItem(preset.getEnum("Type", GradientType.class));
+        typeCB.setSelectedItem(preset.getEnum(GradientType.PRESET_KEY, GradientType.class));
         cycleMethodCB.setSelectedItem(preset.get("Cycling"));
-        colorTypeCB.setSelectedItem(preset.getEnum("Color", GradientColorType.class));
+        colorTypeCB.setSelectedItem(preset.getEnum(GradientColorType.PRESET_KEY, GradientColorType.class));
         reverseCB.setSelected(preset.getBoolean("Reverse"));
         blendingModePanel.loadStateFrom(preset);
         FgBgColors.loadStateFrom(preset);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,7 @@ import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
 public class DimensionHelper {
     private static final int INPUT_FIELD_COLUMNS = 5;
     public static final Integer[] DPI_VALUES = {150, DEFAULT_DPI, 600};
+    private static final String DPI_PRESET_KEY = "DPI";
 
     private final JTextField widthTF;
     private final JTextField heightTF;
@@ -251,13 +252,13 @@ public class DimensionHelper {
         preset.put("Width", widthTF.getText().trim());
         preset.put("Height", heightTF.getText().trim());
 
-        preset.put("Unit", getUnit().toString());
-        preset.putInt("DPI", getDpi());
+        preset.put(ResizeUnit.PRESET_KEY, getUnit().name());
+        preset.putInt(DPI_PRESET_KEY, getDpi());
     }
 
     public void loadUserPreset(UserPreset preset, boolean keepProportions) {
-        unitSelectorModel.setSelectedItem(preset.getEnum("Unit", ResizeUnit.class));
-        dpiChooser.setSelectedItem(preset.getInt("DPI", DEFAULT_DPI));
+        unitSelectorModel.setSelectedItem(preset.getEnum(ResizeUnit.PRESET_KEY, ResizeUnit.class));
+        dpiChooser.setSelectedItem(preset.getInt(DPI_PRESET_KEY, DEFAULT_DPI));
 
         // set text fields first, then update the model from them
         widthTF.setText(preset.get("Width"));

@@ -282,7 +282,7 @@ public class CloneTool extends BlendingModeBrushTool {
     public void saveStateTo(UserPreset preset) {
         super.saveStateTo(preset);
 
-        preset.put("Brush Type", brushModel.getSelectedItem().toString());
+        preset.put(CopyBrushType.PRESET_KEY, brushModel.getSelectedItem().name());
         preset.putBoolean(ALIGNED_TEXT, alignedCB.isSelected());
         preset.putBoolean(SAMPLE_ALL_LAYERS_TEXT, sampleAllCB.isSelected());
         scaleParam.saveStateTo(preset);
@@ -294,7 +294,7 @@ public class CloneTool extends BlendingModeBrushTool {
     public void loadUserPreset(UserPreset preset) {
         super.loadUserPreset(preset);
 
-        brushModel.setSelectedItem(preset.getEnum("Brush Type", CopyBrushType.class));
+        brushModel.setSelectedItem(preset.getEnum(CopyBrushType.PRESET_KEY, CopyBrushType.class));
         alignedCB.setSelected(preset.getBoolean(ALIGNED_TEXT));
         sampleAllCB.setSelected(preset.getBoolean(SAMPLE_ALL_LAYERS_TEXT));
         scaleParam.loadStateFrom(preset);

@@ -679,7 +679,7 @@ public abstract class AbstractBrushTool extends Tool {
     public void saveStateTo(UserPreset preset) {
         if (hasBrushType()) {
             BrushType brushType = getBrushType();
-            preset.put("Brush Type", brushType.toString());
+            preset.put(BrushType.PRESET_KEY, brushType.name());
             if (brushType.hasRadius()) {
                 brushRadiusParam.saveStateTo(preset);
             }
@@ -693,7 +693,7 @@ public abstract class AbstractBrushTool extends Tool {
         }
 
         if (supportsSymmetry) {
-            preset.put("Mirror", symmetryModel.getSelectedItem().toString());
+            preset.put(Symmetry.PRESET_KEY, symmetryModel.getSelectedItem().name());
         }
 
         lazyMouseEnabled.saveStateTo(preset);
@@ -703,7 +703,7 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void loadUserPreset(UserPreset preset) {
         if (hasBrushType()) {
-            BrushType type = preset.getEnum("Brush Type", BrushType.class);
+            BrushType type = preset.getEnum(BrushType.PRESET_KEY, BrushType.class);
             typeCB.setSelectedItem(type);
             if (type.hasSettings()) {
                 BrushSettings settings = type.getSettings(this);
@@ -719,7 +719,7 @@ public abstract class AbstractBrushTool extends Tool {
         }
 
         if (supportsSymmetry) {
-            symmetryModel.setSelectedItem(preset.getEnum("Mirror", Symmetry.class));
+            symmetryModel.setSelectedItem(preset.getEnum(Symmetry.PRESET_KEY, Symmetry.class));
         }
 
         lazyMouseEnabled.loadStateFrom(preset);

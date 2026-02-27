@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters.levels;
 
-import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.lookup.GrayScaleLookup;
 import pixelitor.filters.lookup.RGBLookup;
@@ -42,7 +41,7 @@ import static pixelitor.filters.util.Channel.RGB;
 public class LevelsModel {
     private final Map<Channel, ChannelLevelsModel> channelModels;
 
-    private FilterGUI filterGUI;
+    private LevelsGUI levelsGUI;
     private BufferedImageOp filterOp;
 
     private ColorSpace colorSpace = ColorSpace.SRGB;
@@ -55,8 +54,8 @@ public class LevelsModel {
         }
     }
 
-    public void setFilterGUI(FilterGUI filterGUI) {
-        this.filterGUI = filterGUI;
+    public void setLevelsGUI(LevelsGUI levelsGUI) {
+        this.levelsGUI = levelsGUI;
     }
 
     /**
@@ -88,10 +87,10 @@ public class LevelsModel {
     public void settingsChanged() {
         updateFilterLookup();
 
-        if (filterGUI == null) {
+        if (levelsGUI == null) {
             return; // it's null when loading a smart filter or running non-interactively
         }
-        filterGUI.startPreview(false);
+        levelsGUI.startPreview(false);
     }
 
     /**
@@ -150,7 +149,7 @@ public class LevelsModel {
     }
 
     public void saveToUserPreset(UserPreset preset) {
-        preset.put(ColorSpace.PRESET_KEY, colorSpace.toString());
+        preset.put(ColorSpace.PRESET_KEY, colorSpace.name());
         for (var entry : channelModels.entrySet()) {
             Channel channel = entry.getKey();
             if (channel.getColorSpace() == colorSpace) {
@@ -197,6 +196,13 @@ public class LevelsModel {
             return;
         }
         this.colorSpace = colorSpace;
+
+        if (levelsGUI != null) {
+            // synchronize the UI dropdown to reflect the 
+            // data model (necessary when loading a preset)
+            levelsGUI.setColorSpaceUI(colorSpace);
+        }
+
         if (triggerFilter) {
             settingsChanged();
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,6 +36,7 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class BlendingModePanel extends JPanel {
     private static final String OPACITY_LABEL_TEXT = i18n("opacity") + ":";
+    private static final String OPACITY_PRESET_KEY = "Opacity";
 
     // threshold above which opacity is considered fully opaque
     public static final float FULLY_OPAQUE_THRESHOLD = 0.999f;
@@ -123,12 +124,12 @@ public class BlendingModePanel extends JPanel {
     }
 
     public void saveStateTo(UserPreset preset) {
-        preset.putFloat("Opacity", getOpacity());
-        preset.put("Blending Mode", getBlendingMode().toString());
+        preset.putFloat(OPACITY_PRESET_KEY, getOpacity());
+        preset.put(BlendingMode.PRESET_KEY, getBlendingMode().name());
     }
 
     public void loadStateFrom(UserPreset preset) {
-        setOpacity(preset.getFloat("Opacity", 1.0f));
-        setBlendingMode(preset.getEnum("Blending Mode", BlendingMode.class), null);
+        setOpacity(preset.getFloat(OPACITY_PRESET_KEY, 1.0f));
+        setBlendingMode(preset.getEnum(BlendingMode.PRESET_KEY, BlendingMode.class), null);
     }
 }

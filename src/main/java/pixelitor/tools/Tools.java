@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -181,7 +181,7 @@ public class Tools {
     }
 
     public static Tool getRandomTool(Predicate<Tool> condition) {
-        return Rnd.chooseFrom(condition, allTools);
+        return Rnd.chooseFrom(allTools, condition);
     }
 
     public static void fgBgColorsChanged() {

@@ -61,6 +61,11 @@ public class Colors {
     public static final Color CW_VIOLET = new Color(145, 37, 144);
     public static final Color CW_YELLOW = new Color(251, 240, 2);
 
+    // Oklab gradient colors
+    public static final Color OK_GREEN = new Color(0, 157, 113);
+    public static final Color OK_RED = new Color(213, 63, 63);
+    public static final Color OK_BLUE = new Color(66, 0, 254);
+    public static final Color OK_YELLOW = new Color(254, 157, 0);
 
     private Colors() {
     }
@@ -125,7 +130,7 @@ public class Colors {
     public static Color toGray(Color c) {
         int gray = (2 * c.getRed() + 3 * c.getGreen() + c.getBlue()) / 6;
 
-        return new Color(0xFF_00_00_00 | gray << 16 | gray << 8 | gray);
+        return new Color(gray << 16 | gray << 8 | gray);
     }
 
     public static float[] toHSB(Color c) {
@@ -147,21 +152,32 @@ public class Colors {
         }
     }
 
-    public static Color fromHTMLHex(String text) {
-        int length = text.length();
-        if (length == 6) {
-            return new Color(
-                parseInt(text.substring(0, 2), 16),
-                parseInt(text.substring(2, 4), 16),
-                parseInt(text.substring(4, 6), 16));
-        } else if (length == 8) {
+    public static Color fromHtmlHexRgba(String text) {
+        if (text.length() != 8) {
+            throw new IllegalArgumentException("text = " + text);
+        }
+        try {
             return new Color(
                 parseInt(text.substring(0, 2), 16),
                 parseInt(text.substring(2, 4), 16),
                 parseInt(text.substring(4, 6), 16),
                 parseInt(text.substring(6, 8), 16));
-        } else {
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    public static Color fromHtmlHexRgb(String text) {
+        if (text.length() != 6) {
             throw new IllegalArgumentException("text = " + text);
+        }
+        try {
+            return new Color(
+                parseInt(text.substring(0, 2), 16),
+                parseInt(text.substring(2, 4), 16),
+                parseInt(text.substring(4, 6), 16));
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
@@ -179,6 +195,7 @@ public class Colors {
         if (RandomGUITest.isRunning()) {
             return false;
         }
+        assert colorChangeListener != null;
 
         Color prevColor = defaultColor;
         GlobalEvents.modalDialogOpened();
@@ -214,8 +231,10 @@ public class Colors {
         }
 
         // try HTML hex format (RRGGBB or RRGGBBAA)
-        if (text.length() == 6 || text.length() == 8) {
-            return fromHTMLHex(text);
+        if (text.length() == 6) {
+            return fromHtmlHexRgb(text);
+        } else if (text.length() == 8) {
+            return fromHtmlHexRgba(text);
         }
 
         // try rgb(163, 69, 151) format
@@ -323,6 +342,9 @@ public class Colors {
     }
 
     public static void fillWith(Color color, Graphics2D g2, int width, int height) {
+        // ensure that transparent colors override the original content
+//        g2.setComposite(AlphaComposite.Src);
+
         g2.setColor(color);
         g2.fillRect(0, 0, width, height);
     }

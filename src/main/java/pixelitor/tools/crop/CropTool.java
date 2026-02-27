@@ -156,8 +156,12 @@ public class CropTool extends DragTool {
     }
 
     private void guidesChanged() {
-        compositionGuide.setType((CompositionGuideType) guidesCB.getSelectedItem());
+        compositionGuide.setType(getSelectedGuides());
         Views.repaintActive();
+    }
+
+    private CompositionGuideType getSelectedGuides() {
+        return (CompositionGuideType) guidesCB.getSelectedItem();
     }
 
     private void addCropSizeControls() {
@@ -821,7 +825,7 @@ public class CropTool extends DragTool {
     @Override
     public void saveStateTo(UserPreset preset) {
         maskOpacity.saveStateTo(preset);
-        preset.put("Guides", guidesCB.getSelectedItem().toString());
+        preset.put(CompositionGuideType.PRESET_KEY, getSelectedGuides().name());
 
         preset.putBoolean(DELETE_CROPPED_TEXT, deleteCroppedCB.isSelected());
         preset.putBoolean(ALLOW_GROWING_TEXT, allowGrowingCB.isSelected());
@@ -830,10 +834,8 @@ public class CropTool extends DragTool {
     @Override
     public void loadUserPreset(UserPreset preset) {
         maskOpacity.loadStateFrom(preset);
-
-        CompositionGuideType guideType = preset.getEnum("Guides", CompositionGuideType.class);
-        guidesCB.setSelectedItem(guideType);
-
+        guidesCB.setSelectedItem(preset.getEnum(
+            CompositionGuideType.PRESET_KEY, CompositionGuideType.class));
         deleteCroppedCB.setSelected(preset.getBoolean(DELETE_CROPPED_TEXT));
         allowGrowingCB.setSelected(preset.getBoolean(ALLOW_GROWING_TEXT));
     }
@@ -845,7 +847,7 @@ public class CropTool extends DragTool {
         node.addDouble("mask opacity", maskOpacity.getPercentage());
         node.addBoolean("delete cropped", deleteCroppedCB.isSelected());
         node.addBoolean("allow growing", allowGrowingCB.isSelected());
-        node.addAsString("guide type", guidesCB.getSelectedItem());
+        node.addAsString("guide type", getSelectedGuides());
         node.addNullableDebuggable("cropBox", cropBox);
 
         return node;

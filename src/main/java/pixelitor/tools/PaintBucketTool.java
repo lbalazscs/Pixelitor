@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,6 +50,7 @@ public class PaintBucketTool extends Tool {
         LOCAL("Local"),   // flood fill around clicked pixel
         GLOBAL("Global"); // replace throughout image
 
+        private static final String PRESET_KEY = "Action";
         private final String displayName;
 
         Action(String displayName) {
@@ -68,6 +69,7 @@ public class PaintBucketTool extends Tool {
         TRANSPARENT("Transparent"),
         CLICKED("Clicked Pixel Color");
 
+        private static final String PRESET_KEY = "Fill";
         private final String displayName;
 
         Fill(String displayName) {
@@ -271,15 +273,15 @@ public class PaintBucketTool extends Tool {
     @Override
     public void saveStateTo(UserPreset preset) {
         colorTolerance.saveStateTo(preset);
-        preset.put("Fill", getSelectedFill().toString());
-        preset.put("Action", getSelectedAction().toString());
+        preset.put(Fill.PRESET_KEY, getSelectedFill().name());
+        preset.put(Action.PRESET_KEY, getSelectedAction().name());
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
         colorTolerance.loadStateFrom(preset);
-        fillCB.setSelectedItem(preset.getEnum("Fill", Fill.class));
-        actionCB.setSelectedItem(preset.getEnum("Action", Action.class));
+        fillCB.setSelectedItem(preset.getEnum(Fill.PRESET_KEY, Fill.class));
+        actionCB.setSelectedItem(preset.getEnum(Action.PRESET_KEY, Action.class));
     }
 
     @Override

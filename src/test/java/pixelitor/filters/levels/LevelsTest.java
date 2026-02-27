@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters.levels;
 
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
-import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.filters.util.Channel;
@@ -37,7 +36,7 @@ import static org.mockito.Mockito.verify;
 @TestMethodOrder(MethodOrderer.Random.class)
 class LevelsTest {
     private LevelsModel model;
-    private FilterGUI filterGUI;
+    private LevelsGUI filterGUI;
     private ChannelLevelsModel rgbPage;
     private ChannelLevelsModel rPage;
 
@@ -49,8 +48,8 @@ class LevelsTest {
     @BeforeEach
     void beforeEachTest() {
         model = new LevelsModel();
-        filterGUI = mock(FilterGUI.class);
-        model.setFilterGUI(filterGUI);
+        filterGUI = mock(LevelsGUI.class);
+        model.setLevelsGUI(filterGUI);
 
         rgbPage = model.getModelForChannel(Channel.RGB);
         rPage = model.getModelForChannel(Channel.RED);

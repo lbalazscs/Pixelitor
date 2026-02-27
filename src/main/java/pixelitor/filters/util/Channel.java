@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,10 @@ import java.awt.Color;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static pixelitor.colors.Colors.OK_BLUE;
+import static pixelitor.colors.Colors.OK_GREEN;
+import static pixelitor.colors.Colors.OK_RED;
+import static pixelitor.colors.Colors.OK_YELLOW;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -115,7 +119,16 @@ public enum Channel {
         public double getIntensity(int r, int g, int b) {
             throw new UnsupportedOperationException();
         }
-    }, OK_A(GUIText.RED_GREEN_A, "a", BLACK, ColorSpace.OKLAB) {
+
+        @Override
+        public Color getDrawColor(boolean active, boolean darkTheme) {
+            if (darkTheme) {
+                return active ? WHITE : FADED_WHITE;
+            } else {
+                return super.getDrawColor(active, darkTheme);
+            }
+        }
+    }, OK_A(GUIText.RED_GREEN_A, "a", OK_GREEN, ColorSpace.OKLAB) {
         @Override
         public Color getDarkColor() {
             return OK_GREEN;
@@ -130,7 +143,7 @@ public enum Channel {
         public double getIntensity(int r, int g, int b) {
             throw new UnsupportedOperationException();
         }
-    }, OK_B(GUIText.BLUE_YELLOW_B, "b", BLACK, ColorSpace.OKLAB) {
+    }, OK_B(GUIText.BLUE_YELLOW_B, "b", OK_BLUE, ColorSpace.OKLAB) {
         @Override
         public Color getDarkColor() {
             return OK_BLUE;
@@ -159,12 +172,6 @@ public enum Channel {
     private static final Color DARK_CYAN = new Color(0, 128, 128);
     private static final Color DARK_PURPLE = new Color(128, 0, 128);
     private static final Color DARK_YELLOW_GREEN = new Color(128, 128, 0);
-
-    // Oklab gradient colors
-    private static final Color OK_GREEN = new Color(0, 157, 113);
-    private static final Color OK_RED = new Color(213, 63, 63);
-    private static final Color OK_BLUE = new Color(66, 0, 254);
-    private static final Color OK_YELLOW = new Color(254, 157, 0);
 
     private final String name;
     private final String presetKey;

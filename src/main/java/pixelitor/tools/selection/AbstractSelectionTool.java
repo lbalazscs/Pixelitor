@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -211,7 +211,7 @@ public abstract class AbstractSelectionTool extends DragTool {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.put(NEW_SELECTION_TEXT, getCombinator().toString());
+        preset.put(NEW_SELECTION_TEXT, getCombinator().name());
     }
 
     @Override

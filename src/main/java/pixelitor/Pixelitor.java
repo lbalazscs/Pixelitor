@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -106,11 +106,10 @@ public class Pixelitor {
             // doesn't seem to pick up good defaults
             System.setProperty("awt.useSystemAAFontSettings", "lcd");
             System.setProperty("swing.aatext", "true");
-
-            if (GraphicsEnvironment.isHeadless()) {
-                System.err.println("Pixelitor can't be used in headless mode");
-                System.exit(1);
-            }
+        }
+        if (GraphicsEnvironment.isHeadless()) {
+            System.err.println("Pixelitor can't be used in headless mode");
+            System.exit(1);
         }
     }
 
@@ -168,7 +167,7 @@ public class Pixelitor {
         int uiFontSize = AppPreferences.loadUIFontSize();
         String uiFontType = AppPreferences.loadUIFontType();
 
-        if (uiFontSize == 0 || uiFontType.isEmpty()) {
+        if (uiFontSize == 0) {
             // no saved settings found, use default font settings
             return;
         }
@@ -224,31 +223,44 @@ public class Pixelitor {
         checkUnsavedChangesAndExit(mainWindow);
     }
 
-    // returns true if we can't exit yet
+    // returns true if we can't exit yet (i.e., we are either waiting or the user canceled)
     private static boolean handleOngoingWrites(PixelitorWindow mainWindow) {
         Set<String> writePaths = IOTasks.getActiveWritePaths();
         if (writePaths.isEmpty()) {
             return false;
         }
 
-        boolean waitRequested = showOngoingWriteWarning(writePaths);
-        if (waitRequested && IOTasks.hasActiveWrites()) {
-            scheduleExitRetry(mainWindow);
-            return true;
+        int choice = showOngoingWriteWarning(writePaths);
+
+        if (choice == 0) { // "Wait 10 seconds"
+            if (IOTasks.hasActiveWrites()) {
+                scheduleExitRetry(mainWindow);
+                return true;
+            }
+            return false; // IO finished while dialog was open, proceed to exit
+        } else if (choice == 1) { // "Exit now"
+            return false; // proceed to exit despite active IO
         }
 
-        return false;
+        // choice == 2 ("Cancel") or JOptionPane.CLOSED_OPTION (-1)
+        return true; // abort exit
     }
 
-    private static boolean showOngoingWriteWarning(Set<String> writePaths) {
+    private static int showOngoingWriteWarning(Set<String> writePaths) {
         var msg = new StringBuilder(
             "<html>The following files are still being written. Exit anyway?<br><ul>");
         for (String path : writePaths) {
             msg.append("<li>").append(path);
         }
 
-        String[] options = {"Wait 10 seconds", "Exit now"};
-        return Dialogs.showOKCancelWarningDialog(msg.toString(), "Warning", options, 0);
+        String[] options = {"Wait 10 seconds", "Exit now", GUIText.CANCEL};
+
+        return Dialogs.showManyOptionsDialog(
+            "Warning",
+            msg.toString(),
+            options,
+            JOptionPane.WARNING_MESSAGE
+        );
     }
 
     private static void scheduleExitRetry(PixelitorWindow mainWindow) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,8 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.font.TextAttribute;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 import static java.awt.font.TextAttribute.*;
@@ -40,8 +38,6 @@ import static java.awt.font.TextAttribute.*;
  * Static utility methods related to random numbers and objects.
  */
 public class Rnd {
-    private static final Random rand = new Random();
-
     private Rnd() {
         // do not instantiate
     }
@@ -50,7 +46,7 @@ public class Rnd {
      * Chooses a random element from the given array of integers.
      */
     public static int chooseFrom(int[] items) {
-        return items[rand.nextInt(items.length)];
+        return items[nextInt(items.length)];
     }
 
     /**
@@ -58,55 +54,38 @@ public class Rnd {
      */
     @SafeVarargs
     public static <T> T chooseFrom(T... items) {
-        return items[rand.nextInt(items.length)];
+        return items[nextInt(items.length)];
     }
 
     /**
-     * Chooses a random element from the given items that satisfies the condition.
+     * Chooses a random element from the given array that satisfies the condition.
      */
-    @SafeVarargs
-    public static <T> T chooseFrom(Predicate<T> condition, T... items) {
-        T chosen;
-        // can result in an infinite loop if no item satisfies the condition
-        do {
-            chosen = chooseFrom(items);
-        } while (!condition.test(chosen));
-        return chosen;
+    public static <T> T chooseFrom(T[] items, Predicate<T> condition) {
+        List<T> matching = Arrays.stream(items).filter(condition).toList();
+        return chooseFrom(matching);
     }
 
     /**
      * Chooses a random element from the given List.
      */
     public static <T> T chooseFrom(List<T> items) {
-        return items.get(rand.nextInt(items.size()));
+        return items.get(nextInt(items.size()));
     }
 
     /**
      * Chooses a random element from the given List that satisfies the condition.
      */
-    public static <T> T chooseFrom(Predicate<T> condition, List<T> items) {
-        T chosen;
-        // can result in an infinite loop if no item satisfies the condition
-        do {
-            chosen = chooseFrom(items);
-        } while (!condition.test(chosen));
-        return chosen;
-    }
-
-    public static boolean nextBoolean() {
-        return rand.nextBoolean();
-    }
-
-    public static int nextInt(int bound) {
-        return rand.nextInt(bound);
+    public static <T> T chooseFrom(List<T> items, Predicate<T> condition) {
+        List<T> matching = items.stream().filter(condition).toList();
+        return chooseFrom(matching);
     }
 
     public static Point pointInRect(Rectangle bounds) {
         if (bounds.width <= 0 || bounds.height <= 0) {
             throw new IllegalArgumentException("width = " + bounds.width + ", height = " + bounds.height);
         }
-        int x = intInRange(bounds.x, bounds.x + bounds.width);
-        int y = intInRange(bounds.y, bounds.y + bounds.height);
+        int x = intInRange(bounds.x, bounds.x + bounds.width - 1);
+        int y = intInRange(bounds.y, bounds.y + bounds.height - 1);
         return new Point(x, y);
     }
 
@@ -119,31 +98,39 @@ public class Rnd {
      */
     public static int intInRange(int min, int max) {
         assert max - min + 1 > 0 : "max = " + max + ", min = " + min;
-        return min + rand.nextInt(max - min + 1);
+        return min + nextInt(max - min + 1);
     }
 
     public static float floatInRange(float min, float max) {
-        return min + rand.nextFloat() * (max - min);
+        return min + nextFloat() * (max - min);
     }
 
     public static double doubleInRange(double min, double max) {
-        return min + rand.nextDouble() * (max - min);
+        return min + nextDouble() * (max - min);
+    }
+
+    public static int nextInt(int bound) {
+        return ThreadLocalRandom.current().nextInt(bound);
+    }
+
+    public static boolean nextBoolean() {
+        return ThreadLocalRandom.current().nextBoolean();
     }
 
     public static long nextLong() {
-        return rand.nextLong();
+        return ThreadLocalRandom.current().nextLong();
     }
 
     public static double nextGaussian() {
-        return rand.nextGaussian();
+        return ThreadLocalRandom.current().nextGaussian();
     }
 
     public static double nextDouble() {
-        return rand.nextDouble();
+        return ThreadLocalRandom.current().nextDouble();
     }
 
     public static float nextFloat() {
-        return rand.nextFloat();
+        return ThreadLocalRandom.current().nextFloat();
     }
 
     public static Color createRandomColor() {
@@ -151,7 +138,7 @@ public class Rnd {
     }
 
     public static Color createRandomColor(boolean randomAlpha) {
-        return createRandomColor(rand, randomAlpha);
+        return createRandomColor(ThreadLocalRandom.current(), randomAlpha);
     }
 
     public static Color createRandomColor(Random rnd, boolean randomAlpha) {
@@ -168,7 +155,7 @@ public class Rnd {
         char[] chars = "abcdefghijklmnopqrstuvwxyz -/\\~!@#$%^&*()".toCharArray();
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
-            char c = chars[rand.nextInt(chars.length)];
+            char c = chars[nextInt(chars.length)];
             sb.append(c);
         }
         return sb.toString();
@@ -176,7 +163,9 @@ public class Rnd {
 
     public static AreaEffects createRandomEffects() {
         AreaEffects effects = new AreaEffects();
-        float p = rand.nextFloat();
+
+        // set exactly one effect
+        float p = nextFloat();
         if (p < 0.25f) {
             effects.setNeonBorder(new NeonBorderEffect());
         } else if (p < 0.5f) {
@@ -220,7 +209,7 @@ public class Rnd {
 
     public static boolean runWithProbability(Runnable task, double p) {
         assert p >= 0 && p <= 1;
-        if (p > rand.nextDouble()) {
+        if (p > nextDouble()) {
             task.run();
             return true;
         }

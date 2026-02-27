@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.gui.utils;
 
 import pixelitor.colors.Colors;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * The accent color used in flat LAFs.
@@ -46,7 +46,7 @@ public enum AccentColor {
 
     public Color asColor() {
         if (color == null) {
-            color = Colors.fromHTMLHex(hexCode.substring(1));
+            color = Colors.fromHtmlHexRgb(hexCode.substring(1));
         }
         return color;
     }

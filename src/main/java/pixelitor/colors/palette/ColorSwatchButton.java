@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,19 +36,13 @@ public class ColorSwatchButton extends JComponent {
     // tracks the last-clicked swatch across all instances
     public static ColorSwatchButton lastClickedSwatch = null;
 
-    // the coordinates of this swatch in its grid
-    private final int gridX;
-    private final int gridY;
-
     private Color color;
     private boolean raised = true;
     private boolean marked = false;
 
-    public ColorSwatchButton(Color color, ColorSwatchClickHandler clickHandler, int gridX, int gridY) {
+    public ColorSwatchButton(Color color, ColorSwatchClickHandler clickHandler) {
         assert clickHandler != null;
 
-        this.gridX = gridX;
-        this.gridY = gridY;
         setColor(color);
 
         setPreferredSize(SIZE_DIM);
@@ -117,13 +111,5 @@ public class ColorSwatchButton extends JComponent {
         g.fillRect(1, 1, 7, 7);
         g.setColor(LayerGUI.UNSELECTED_COLOR);
         g.fillRect(3, 3, 3, 3);
-    }
-
-    public int getGridX() {
-        return gridX;
-    }
-
-    public int getGridY() {
-        return gridY;
     }
 }

@@ -48,10 +48,10 @@ public abstract class ContentLayer extends Layer {
     private int translationX = 0;
     private int translationY = 0;
 
-    // Store the relative movement of the layer content while
-    // the user is actively dragging it with the Move Tool.
-    private transient int tmpTx = 0;
-    private transient int tmpTy = 0;
+    // the relative movement of the layer content while
+    // the user is actively dragging it with the Move Tool
+    private transient int dragOffsetX = 0;
+    private transient int dragOffsetY = 0;
 
     protected ContentLayer(Composition comp, String name) {
         super(comp, name);
@@ -80,8 +80,8 @@ public abstract class ContentLayer extends Layer {
         in.defaultReadObject();
 
         // defaults for transient fields
-        tmpTx = 0;
-        tmpTy = 0;
+        dragOffsetX = 0;
+        dragOffsetY = 0;
     }
 
     /**
@@ -90,14 +90,14 @@ public abstract class ContentLayer extends Layer {
      * the canvas and it's always zero or negative because the image must cover the canvas.
      */
     public int getTx() {
-        return translationX + tmpTx;
+        return translationX + dragOffsetX;
     }
 
     /**
      * Similar to {@link  #getTx()}, but for the Y translation.
      */
     public int getTy() {
-        return translationY + tmpTy;
+        return translationY + dragOffsetY;
     }
 
     /**
@@ -138,15 +138,15 @@ public abstract class ContentLayer extends Layer {
 
     @Override
     public void prepareMovement() {
-        tmpTx = 0;
-        tmpTy = 0;
+        dragOffsetX = 0;
+        dragOffsetY = 0;
         super.prepareMovement();
     }
 
     @Override
     public void moveWhileDragging(double imDx, double imDy) {
-        tmpTx = (int) imDx;
-        tmpTy = (int) imDy;
+        dragOffsetX = (int) imDx;
+        dragOffsetY = (int) imDy;
         super.moveWhileDragging(imDx, imDy);
     }
 
@@ -155,12 +155,12 @@ public abstract class ContentLayer extends Layer {
         int prevTx = translationX;
         int prevTy = translationY;
 
-        // while dragging only the temporary values were updated,
+        // while dragging only the drag offsets were updated,
         // and now they can be committed to the final value
-        translationX += tmpTx;
-        translationY += tmpTy;
-        tmpTx = 0;
-        tmpTy = 0;
+        translationX += dragOffsetX;
+        translationY += dragOffsetY;
+        dragOffsetX = 0;
+        dragOffsetY = 0;
 
         // possibly null if there is no linked mask
         PixelitorEdit linkedEdit = createLinkedMovementEdit();

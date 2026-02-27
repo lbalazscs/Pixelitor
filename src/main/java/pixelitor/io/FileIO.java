@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -210,21 +210,8 @@ public class FileIO {
                 TrackedIO.write(image, format.toString(), targetFile, null);
             }
         } catch (IOException e) {
-            if (e.getMessage().contains("another process")) {
-                // handle here, because we have the file information
-                showFileInUseError(targetFile);
-            } else {
-                throw new UncheckedIOException(e);
-            }
+            throw new UncheckedIOException(e);
         }
-    }
-
-    private static void showFileInUseError(File file) {
-        String msg = format(
-            "Can't save to%n%s%nbecause this file is being used by another program.",
-            file.getAbsolutePath());
-
-        EventQueue.invokeLater(() -> Messages.showError("Save Error", msg));
     }
 
     public static void openAllSupportedImagesInDir(File dir) {
@@ -341,10 +328,10 @@ public class FileIO {
 
         try (PrintWriter out = new PrintWriter(file, UTF_8)) {
             out.println(content);
+            Messages.showFileSavedMessage(file);
         } catch (IOException e) {
             Messages.showException(e);
         }
-        Messages.showFileSavedMessage(file);
     }
 
     private static String createSVGContent(Shape shape, StrokeParam strokeParam) {
@@ -391,6 +378,9 @@ public class FileIO {
         };
     }
 
+    /**
+     * Executes an external command that understands PNG on stdin and writes PNG to stdout.
+     */
     public static Result<BufferedImage, String> runCommandLineFilter(BufferedImage src, List<String> command) {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new))
             .redirectInput(ProcessBuilder.Redirect.PIPE)
@@ -407,13 +397,19 @@ public class FileIO {
             String errorMsg = null;
             if (out == null) { // there was an error
                 // try to get the error message
+                // TODO this could deadlock if the command completely fills
+                //   the OS pipe buffer before finishing writing to stdout
                 try (InputStream processError = process.getErrorStream()) {
                     errorMsg = new String(processError.readAllBytes(), UTF_8);
                 }
             }
-            process.waitFor();
-            if (errorMsg != null) {
-                return Result.error(errorMsg);
+            int exit = process.waitFor();
+            if (exit != 0 || errorMsg != null) {
+                if (errorMsg != null) {
+                    return Result.error(errorMsg);
+                } else {
+                    return Result.error("Process failed (exit=" + exit + ")");
+                }
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);

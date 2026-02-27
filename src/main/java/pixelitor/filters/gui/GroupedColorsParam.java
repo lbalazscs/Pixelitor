@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -172,7 +172,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
         Color[] newColors = new Color[colors.length];
         for (int i = 0; i < newColors.length; i++) {
-            newColors[i] = Colors.fromHTMLHex(st.nextToken());
+            newColors[i] = Colors.fromHtmlHexRgba(st.nextToken());
         }
         setColors(newColors, false);
     }

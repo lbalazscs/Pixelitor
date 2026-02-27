@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,8 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
  * The smudge tool.
  */
 public class SmudgeTool extends AbstractBrushTool {
+    private static final String FINGER_PAINTING_PRESET_KEY = "Finger Painting";
+
     private EnumComboBoxModel<CopyBrushType> brushModel;
 
     private final RangeParam strengthParam = new RangeParam("Strength", 1, 60, 100);
@@ -144,9 +146,9 @@ public class SmudgeTool extends AbstractBrushTool {
     public void saveStateTo(UserPreset preset) {
         super.saveStateTo(preset);
 
-        preset.put("Brush Type", brushModel.getSelectedItem().toString());
+        preset.put(CopyBrushType.PRESET_KEY, brushModel.getSelectedItem().toString());
         strengthParam.saveStateTo(preset);
-        preset.putBoolean("Finger Painting", fingerPaintingCB.isSelected());
+        preset.putBoolean(FINGER_PAINTING_PRESET_KEY, fingerPaintingCB.isSelected());
         FgBgColors.saveStateTo(preset);
     }
 
@@ -154,9 +156,9 @@ public class SmudgeTool extends AbstractBrushTool {
     public void loadUserPreset(UserPreset preset) {
         super.loadUserPreset(preset);
 
-        brushModel.setSelectedItem(preset.getEnum("Brush Type", CopyBrushType.class));
+        brushModel.setSelectedItem(preset.getEnumByToString(CopyBrushType.PRESET_KEY, CopyBrushType.class));
         strengthParam.loadStateFrom(preset);
-        fingerPaintingCB.setSelected(preset.getBoolean("Finger Painting"));
+        fingerPaintingCB.setSelected(preset.getBoolean(FINGER_PAINTING_PRESET_KEY));
         FgBgColors.loadStateFrom(preset);
     }
 

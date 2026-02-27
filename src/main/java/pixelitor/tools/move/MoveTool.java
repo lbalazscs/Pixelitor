@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,7 +59,7 @@ import java.util.function.Consumer;
  */
 public class MoveTool extends DragTool implements SelectionChangeListener {
     private final JComboBox<MoveMode> modeSelector = new JComboBox<>(MoveMode.values());
-    private MoveMode activeMode = (MoveMode) modeSelector.getSelectedItem();
+    private MoveMode activeMode = getActiveMode();
 
     private final JCheckBox autoSelectCheckBox = new JCheckBox();
     private final JCheckBox freeTransformCheckBox = new JCheckBox();
@@ -94,7 +94,11 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
 
     private void modeChanged() {
         cancelTransform(true);
-        activeMode = (MoveMode) modeSelector.getSelectedItem();
+        activeMode = getActiveMode();
+    }
+
+    private MoveMode getActiveMode() {
+        return (MoveMode) modeSelector.getSelectedItem();
     }
 
     @Override
@@ -522,14 +526,14 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.put("Mode", modeSelector.getSelectedItem().toString());
+        preset.put(MoveMode.PRESET_KEY, getActiveMode().name());
         preset.putBoolean("AutoSelect", isAutoSelecting());
         preset.putBoolean("FreeTransform", isFreeTransforming());
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        MoveMode mode = preset.getEnum("Mode", MoveMode.class);
+        MoveMode mode = preset.getEnum(MoveMode.PRESET_KEY, MoveMode.class);
         modeSelector.setSelectedItem(mode);
 
         autoSelectCheckBox.setSelected(preset.getBoolean("AutoSelect"));

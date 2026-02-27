@@ -75,20 +75,6 @@ public class ColorPicker extends JPanel {
 
     /**
      * This creates a modal dialog prompting the user to select a color.
-     * <P>This uses a generic dialog title: "Choose a Color", and does not include opacity.
-     *
-     * @param owner         the dialog this new dialog belongs to.  This must be a Frame or a Dialog.
-     *                      Java 1.6 supports Windows here, but this package is designed/compiled to work in Java 1.4,
-     *                      so an <code>IllegalArgumentException</code> will be thrown if this component is a <code>Window</code>.
-     * @param originalColor the color the <code>ColorPicker</code> initially points to.
-     * @return the <code>Color</code> the user chooses, or <code>null</code> if the user cancels the dialog.
-     */
-    public static Color showDialog(Window owner, Color originalColor) {
-        return showDialog(owner, null, originalColor, false);
-    }
-
-    /**
-     * This creates a modal dialog prompting the user to select a color.
      * <P>This uses a generic dialog title: "Choose a Color".
      *
      * @param owner          the dialog this new dialog belongs to.  This must be a Frame or a Dialog.
@@ -106,26 +92,21 @@ public class ColorPicker extends JPanel {
     /**
      * This creates a modal dialog prompting the user to select a color.
      *
-     * @param owner          the dialog this new dialog belongs to.  This must be a Frame or a Dialog.
-     *                       Java 1.6 supports Windows here, but this package is designed/compiled to work in Java 1.4,
-     *                       so an <code>IllegalArgumentException</code> will be thrown if this component is a <code>Window</code>.
-     * @param title          the title for the dialog.
-     * @param originalColor  the color the <code>ColorPicker</code> initially points to.
-     * @param includeOpacity whether to add a control for the opacity of the color.
+     * @param owner              the dialog this new dialog belongs to
+     * @param title              the title for the dialog.
+     * @param originalColor      the color the <code>ColorPicker</code> initially points to.
+     * @param includeOpacity     whether to add a control for the opacity of the color.
+     * @param adjustmentListener a callback notified of real-time color adjustments
      * @return the <code>Color</code> the user chooses, or <code>null</code> if the user cancels the dialog.
      */
-    public static Color showDialog(Window owner, String title, Color originalColor, boolean includeOpacity) {
-        return showDialog(owner, title, originalColor, includeOpacity, null);
-    }
-
     public static Color showDialog(Window owner, String title,
                                    Color originalColor, boolean includeOpacity,
                                    Consumer<Color> adjustmentListener) {
         var d = new ColorPickerDialog(owner, originalColor, includeOpacity, adjustmentListener);
 
         d.setTitle(title == null ?
-                strings.getString("ColorPickerDialogTitle") :
-                title);
+            strings.getString("ColorPickerDialogTitle") :
+            title);
         d.pack();
         d.setVisible(true);
         return d.getColor();
@@ -204,16 +185,16 @@ public class ColorPicker extends JPanel {
                 }
 
                 setHSB(hue.getFloatValue() / 360.0f,
-                        sat.getFloatValue() / 100.0f,
-                        bri.getFloatValue() / 100.0f);
+                    sat.getFloatValue() / 100.0f,
+                    bri.getFloatValue() / 100.0f);
             } else if (red.contains(src) || green.contains(src) || blue.contains(src)) {
                 if (adjustingSpinners > 0) {
                     return;
                 }
 
                 setRGB(red.getIntValue(),
-                        green.getIntValue(),
-                        blue.getIntValue());
+                    green.getIntValue(),
+                    blue.getIntValue());
             } else if (src == colorPanel) {
                 if (adjustingColorPanel > 0) {
                     return;
@@ -516,7 +497,7 @@ public class ColorPicker extends JPanel {
 
         // put them in order
         Option[] optionsArray = {
-                hue, sat, bri, red, green, blue
+            hue, sat, bri, red, green, blue
         };
 
         for (int a = 0; a < optionsArray.length; a++) {
@@ -636,24 +617,22 @@ public class ColorPicker extends JPanel {
 
     public void setupAdjListener(Consumer<Color> adjustmentListener) {
         this.adjustmentListener = adjustmentListener;
-        if (adjustmentListener != null) {
-            // notify the listener, but only if the value is not adjusting
-            opacitySlider.addChangeListener(e -> {
-                if (adjustingOpacity == 0 && !opacitySlider.getValueIsAdjusting()) {
-                    adjustmentListener.accept(getColor());
-                }
-            });
-            slider.addChangeListener(e -> {
-                if (adjustingSlider == 0 && !slider.getValueIsAdjusting()) {
-                    adjustmentListener.accept(getColor());
-                }
-            });
-            colorPanel.addChangeListener(e -> {
-                if (adjustingColorPanel == 0 && !colorPanel.isAdjusting()) {
-                    adjustmentListener.accept(getColor());
-                }
-            });
-        }
+        // notify the listener, but only if the value is not adjusting
+        opacitySlider.addChangeListener(e -> {
+            if (adjustingOpacity == 0 && !opacitySlider.getValueIsAdjusting()) {
+                adjustmentListener.accept(getColor());
+            }
+        });
+        slider.addChangeListener(e -> {
+            if (adjustingSlider == 0 && !slider.getValueIsAdjusting()) {
+                adjustmentListener.accept(getColor());
+            }
+        });
+        colorPanel.addChangeListener(e -> {
+            if (adjustingColorPanel == 0 && !colorPanel.isAdjusting()) {
+                adjustmentListener.accept(getColor());
+            }
+        });
     }
 
     private static void setOpaque(JComponent jc, boolean opaque) {
@@ -709,9 +688,9 @@ public class ColorPicker extends JPanel {
      */
     public float[] getHSB() {
         return new float[]{
-                hue.getFloatValue() / 360.0f,
-                sat.getFloatValue() / 100.0f,
-                bri.getFloatValue() / 100.0f
+            hue.getFloatValue() / 360.0f,
+            sat.getFloatValue() / 100.0f,
+            bri.getFloatValue() / 100.0f
         };
     }
 
@@ -721,9 +700,9 @@ public class ColorPicker extends JPanel {
      */
     public int[] getRGB() {
         return new int[]{
-                currentRed,
-                currentGreen,
-                currentBlue
+            currentRed,
+            currentGreen,
+            currentBlue
         };
     }
 
@@ -753,7 +732,7 @@ public class ColorPicker extends JPanel {
             alpha.spinner.setValue(v);
             if (lastOpacity != v) {
                 firePropertyChange(OPACITY_PROPERTY,
-                        Integer.valueOf(lastOpacity), Integer.valueOf(v));
+                    Integer.valueOf(lastOpacity), Integer.valueOf(v));
                 Color c = preview.getForeground();
                 preview.setForeground(new Color(c.getRed(), c.getGreen(), c.getBlue(), v));
             }
@@ -795,12 +774,12 @@ public class ColorPicker extends JPanel {
 
             if (mode == HUE || mode == SAT || mode == BRI) {
                 setHSB(hue.getFloatValue() / 360.0f,
-                        sat.getFloatValue() / 100.0f,
-                        bri.getFloatValue() / 100.0f);
+                    sat.getFloatValue() / 100.0f,
+                    bri.getFloatValue() / 100.0f);
             } else {
                 setRGB(red.getIntValue(),
-                        green.getIntValue(),
-                        blue.getIntValue());
+                    green.getIntValue(),
+                    blue.getIntValue());
 
             }
         } finally {
@@ -1095,9 +1074,9 @@ public class ColorPicker extends JPanel {
             // last, after the internal state has been updated
             spinner.addChangeListener(e -> {
                 if (adjustmentListener != null
-                        && adjustingSpinners == 0
-                        && !sliderUpdatingSpinner
-                        && adjustingOpacity == 0) {
+                    && adjustingSpinners == 0
+                    && !sliderUpdatingSpinner
+                    && adjustingOpacity == 0) {
                     adjustmentListener.accept(getColor());
                 }
             });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ import java.awt.Color;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Usually represents a user-created preset that stores configuration
@@ -105,9 +106,7 @@ public class UserPreset implements Preset {
             if (AppMode.isDevelopment()) {
                 System.out.println("UserPreset::get: no value found for the key " + key);
             }
-        }
-
-        else {
+        } else {
             // sept 2023: migration in Truchet Tiles
             if (Truchet.migration_helper.containsKey(value)) {
                 value = Truchet.migration_helper.get(value);
@@ -205,7 +204,7 @@ public class UserPreset implements Preset {
     public Color getColor(String key, Color defaultValue) {
         String color = get(key);
         try {
-            return (color != null) ? Colors.fromHTMLHex(color) : defaultValue;
+            return (color != null) ? Colors.fromHtmlHexRgba(color) : defaultValue;
         } catch (IllegalArgumentException e) {
             return defaultValue;
         }
@@ -218,13 +217,27 @@ public class UserPreset implements Preset {
     /**
      * Finds an enum constant by matching its toString() value.
      */
+    public <T extends Enum<T>> T getEnumByToString(String key, Class<T> clazz) {
+        return getEnumHelper(key, clazz, T::toString);
+    }
+
+    /**
+     * Finds an enum constant by matching its name() value. This method
+     * should be preferred to {@link #getEnumByToString(String, Class<T>)}
+     * if the enum's toString() is localized.
+     */
     public <T extends Enum<T>> T getEnum(String key, Class<T> clazz) {
+        return getEnumHelper(key, clazz, Enum::name);
+    }
+
+    private <T extends Enum<T>> T getEnumHelper(String key, Class<T> clazz,
+                                                Function<T, String> valueExtractor) {
         String storedValue = get(key);
         T[] enumConstants = clazz.getEnumConstants();
 
         if (storedValue != null) {
             for (T constant : enumConstants) {
-                if (constant.toString().equals(storedValue)) {
+                if (valueExtractor.apply(constant).equals(storedValue)) {
                     return constant;
                 }
             }

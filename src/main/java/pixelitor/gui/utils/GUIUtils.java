@@ -190,7 +190,7 @@ public final class GUIUtils {
             Thread.currentThread().interrupt();
             Messages.showExceptionOnEDT(e);
         } catch (InvocationTargetException e) {
-            Messages.showExceptionOnEDT(e);
+            Messages.showExceptionOnEDT(e.getCause());
         }
     }
 
@@ -241,7 +241,8 @@ public final class GUIUtils {
     }
 
     public static void runWithBusyCursor(Runnable task, Component parent) {
-        assert parent.isShowing() || AppMode.isUnitTesting();
+        assert (parent.isShowing() && EventQueue.isDispatchThread())
+            || AppMode.isUnitTesting();
         
         java.util.Timer timer = new Timer();
         var startBusyCursorTask = new TimerTask() {
@@ -290,7 +291,8 @@ public final class GUIUtils {
                 // probably because the popups are started by mousePressed
                 boolean shouldTriggerAction = component.isEnabled()
                     && !e.isPopupTrigger()
-                    && SwingUtilities.isLeftMouseButton(e);
+                    && SwingUtilities.isLeftMouseButton(e)
+                    && component.contains(e.getPoint());
 
                 if (shouldTriggerAction) {
                     action.run();
@@ -328,7 +330,10 @@ public final class GUIUtils {
                     desktop.browseFileDirectory(file);
                 } else if (desktop.isSupported(Desktop.Action.OPEN)) {
                     // just open the parent directory
-                    desktop.open(file.getParentFile());
+                    File parentDir = file.getParentFile();
+                    if (parentDir != null) {
+                        desktop.open(parentDir);
+                    }
                 }
                 // else give up
             }

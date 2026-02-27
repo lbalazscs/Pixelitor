@@ -48,8 +48,8 @@ public final class Invariants {
         assert selectionIsInsideCanvas(comp) : "selection outside the canvas in " + comp.getName();
         assert fadeWouldWorkOn(comp);
         assert imageCoversCanvas(comp);
-        assert layerDeleteActionEnabled();
-        assert addMaskActionEnabled();
+        assert layerDeleteActionEnabled(comp);
+        assert addMaskActionEnabled(comp);
     }
 
     public static boolean fadeWouldWorkOn(Composition comp) {
@@ -76,8 +76,7 @@ public final class Invariants {
             }
 
             if (isSizeDifferent(currentImg, previousImg)) {
-                differentSizeForFade(currentImg, previousImg);
-                return false;
+                throw new AssertionError(createDifferentSizeForFadeMsg(currentImg, previousImg));
             }
 
         }
@@ -88,12 +87,12 @@ public final class Invariants {
         return a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight();
     }
 
-    private static void differentSizeForFade(BufferedImage currentImg, BufferedImage previousImg) {
+    private static String createDifferentSizeForFadeMsg(BufferedImage currentImg, BufferedImage previousImg) {
         Debug.debugImage(currentImg, "current");
         Debug.debugImage(previousImg, "previous");
 
         String lastFadeableOp = History.getLastEditName();
-        throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now");
+        return "'Fade " + lastFadeableOp + "' would not work now";
     }
 
     public static void selectionActionsEnabledCheck(Composition comp) {
@@ -124,7 +123,7 @@ public final class Invariants {
             msg += "(no draft selection) ";
         }
 
-        throw new IllegalStateException(msg + " on " + Threads.threadName());
+        throw new AssertionError(msg + " on " + Threads.threadName());
     }
 
     public static boolean selectionShapeIsNotEmpty(Selection selection) {
@@ -177,13 +176,22 @@ public final class Invariants {
             return true;
         }
 
+        int tx = dr.getTx();
+        int ty = dr.getTy();
+        if (tx > 0) {
+            throw new AssertionError("tx = " + tx);
+        }
+        if (ty > 0) {
+            throw new AssertionError("ty = " + ty);
+        }
+
         var image = dr.getImage();
 
-        if (image.getWidth() < -dr.getTx() + canvas.getWidth()) {
+        if (image.getWidth() < -tx + canvas.getWidth()) {
             return imageDoesNotCoverCanvas(dr);
         }
 
-        if (image.getHeight() < -dr.getTy() + canvas.getHeight()) {
+        if (image.getHeight() < -ty + canvas.getHeight()) {
             return imageDoesNotCoverCanvas(dr);
         }
 
@@ -201,20 +209,17 @@ public final class Invariants {
             img.getWidth(), img.getHeight(),
             dr.getTx(), dr.getTy(), dr.getClass().getSimpleName(), dr.getName());
 
-        throw new IllegalStateException(msg);
+        throw new AssertionError(msg);
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean layerDeleteActionEnabled() {
+    public static boolean layerDeleteActionEnabled(Composition comp) {
         var action = DeleteActiveLayerAction.INSTANCE;
         if (action == null) {
-            // can be null at startup because this check is
-            // called while constructing the DeleteActiveLayerAction
-            return true;
+            return true; // DeleteActiveLayerAction not initialized yet
         }
 
-        var comp = Views.getActiveComp();
-        if (comp == null) {
+        if (comp == null || !comp.isActive()) {
             return true;
         }
 
@@ -234,7 +239,7 @@ public final class Invariants {
             }
             if (numLayers < minValue) {
                 String msg = "delete layer enabled for %s '%s', but numLayers = %d (minValue=%d)";
-                throw new IllegalStateException(msg.formatted(
+                throw new AssertionError(msg.formatted(
                     parent.getClass().getSimpleName(), parent.getName(), numLayers, minValue));
             }
         } else { // disabled
@@ -244,7 +249,7 @@ public final class Invariants {
             }
             if (numLayers > maxValue) {
                 String msg = "delete layer disabled for %s '%s', but numLayers = %d (maxValue=%d)";
-                throw new IllegalStateException(msg.formatted(
+                throw new AssertionError(msg.formatted(
                     parent.getClass().getSimpleName(), parent.getName(), numLayers, maxValue));
             }
         }
@@ -252,14 +257,13 @@ public final class Invariants {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean addMaskActionEnabled() {
+    public static boolean addMaskActionEnabled(Composition comp) {
         var action = AddLayerMaskAction.INSTANCE;
         if (action == null) {
-            return true;
+            return true; // AddLayerMaskAction not initialized yet
         }
 
-        var comp = Views.getActiveComp();
-        if (comp == null) {
+        if (comp == null || !comp.isActive()) {
             return true;
         }
 
@@ -271,7 +275,7 @@ public final class Invariants {
 
         String msg = checkLayerMask(layer);
         if (msg != null) {
-            throw new IllegalStateException(
+            throw new AssertionError(
                 msg.formatted(layer.getTypeStringLC(), layer.getName()));
         }
 
