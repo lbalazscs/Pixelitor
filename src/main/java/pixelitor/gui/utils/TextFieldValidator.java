@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.gui.utils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import java.io.File;
 import java.text.ParseException;
 
 /**
@@ -32,7 +33,7 @@ public interface TextFieldValidator {
     /**
      * Checks if the text field contains a positive double value.
      */
-    static ValidationResult hasPositiveDouble(JTextField textField, String label) {
+    static ValidationResult requirePositiveDouble(JTextField textField, String label) {
         String text = textField.getText().trim();
         if (text.isEmpty()) {
             return ValidationResult.invalidEmpty(label);
@@ -58,29 +59,29 @@ public interface TextFieldValidator {
     /**
      * Checks if the text field contains a positive integer value (> 0).
      */
-    static ValidationResult hasPositiveInt(JTextField textField, String label) {
+    static ValidationResult requirePositiveInt(JTextField textField, String label) {
         return checkInt(textField, label, false);
     }
 
     /**
      * Checks if the text field contains a non-negative integer value (>= 0).
      */
-    static ValidationResult hasNonNegativeInt(JTextField textField, String label) {
+    static ValidationResult requireNonNegativeInt(JTextField textField, String label) {
         return checkInt(textField, label, true);
     }
 
     /**
      * Creates a JLayer that validates its text field for a positive integer value (> 0).
      */
-    static JLayer<JTextField> createPositiveIntLayer(String label, JTextField tf) {
-        return TFValidationLayerUI.wrapWithValidation(tf, textField -> hasPositiveInt(textField, label));
+    static JLayer<JTextField> createPositiveIntLayer(JTextField tf, String label) {
+        return TFValidationLayerUI.wrapWithValidation(tf, textField -> requirePositiveInt(textField, label));
     }
 
     /**
      * Creates a JLayer that validates its text field for a non-negative integer value (>= 0).
      */
-    static JLayer<JTextField> createNonNegativeIntLayer(String label, JTextField tf) {
-        return TFValidationLayerUI.wrapWithValidation(tf, textField -> hasNonNegativeInt(textField, label));
+    static JLayer<JTextField> createNonNegativeIntLayer(JTextField tf, String label) {
+        return TFValidationLayerUI.wrapWithValidation(tf, textField -> requireNonNegativeInt(textField, label));
     }
 
     private static ValidationResult checkInt(JTextField textField, String label, boolean allowZero) {
@@ -104,5 +105,23 @@ public interface TextFieldValidator {
         }
         // value must be negative
         return ValidationResult.invalidNegative(label);
+    }
+
+    /**
+     * Checks if the text field contains a valid existing directory.
+     */
+    static ValidationResult requireExistingDir(JTextField textField, String label) {
+        String text = textField.getText().trim();
+        if (text.isEmpty()) {
+            return ValidationResult.invalidEmpty(label);
+        }
+        return ValidationResult.valid().requireExistingDir(new File(text), label);
+    }
+
+    /**
+     * Creates a JLayer that validates its text field for an existing directory.
+     */
+    static JLayer<JTextField> createExistingDirLayer(String label, JTextField tf) {
+        return TFValidationLayerUI.wrapWithValidation(tf, textField -> requireExistingDir(textField, label));
     }
 }

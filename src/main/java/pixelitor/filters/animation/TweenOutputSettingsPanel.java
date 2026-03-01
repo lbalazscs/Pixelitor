@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,14 +19,11 @@ package pixelitor.filters.animation;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.gui.utils.*;
-import pixelitor.io.Dirs;
+import pixelitor.io.RecentDirs;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.File;
 import java.text.ParseException;
 
@@ -35,6 +32,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
 import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
+import static pixelitor.gui.utils.TextFieldValidator.requirePositiveDouble;
 import static pixelitor.utils.Utils.parseLocalizedDouble;
 
 /**
@@ -49,14 +47,14 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
     private JComboBox<TimeInterpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;
     private final JCheckBox pingPongCB = new JCheckBox();
-    private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(
-        Dirs.getLastSavePath());
+    private final BrowseFilesSupport browseSupport = new BrowseFilesSupport(
+        RecentDirs.getLastSavePath());
     private JTextField fileNameTF;
 
     private final TextFieldValidator numSecondsValidator = textField ->
-        TextFieldValidator.hasPositiveDouble(textField, "Number of Seconds");
+        requirePositiveDouble(textField, "Number of Seconds");
     private final TextFieldValidator fpsValidator = textField ->
-        TextFieldValidator.hasPositiveDouble(textField, "Frames per Second");
+        requirePositiveDouble(textField, "Frames per Second");
     private final TextFieldValidator fileNameValidator = textField ->
         getOutputType().validate(new File(textField.getText().trim()));
 
@@ -89,17 +87,12 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
         gbh.addLabelAndControlNoStretch("Number of Seconds:",
             wrapWithValidation(numSecondsTF, numSecondsValidator));
 
-        KeyListener keyListener = new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent keyEvent) {
-                updateCalculations();
-            }
-        };
-        numSecondsTF.addKeyListener(keyListener);
+        var docListener = new SimpleDocumentListener(e -> updateCalculations());
+        numSecondsTF.getDocument().addDocumentListener(docListener);
 
         gbh.addLabelAndControlNoStretch("Frames per Second:",
             wrapWithValidation(fpsTF, fpsValidator));
-        fpsTF.addKeyListener(keyListener);
+        fpsTF.getDocument().addDocumentListener(docListener);
 
         updateCalculations();
         gbh.addLabelAndControl("Number of Frames:", numFramesLabel);
@@ -121,21 +114,21 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
     private void addFileSelector(GridBagHelper gbh) {
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(createTitledBorder("Output File/Folder"));
-        fileNameTF = browseFilesSupport.getPathTextField();
+        fileNameTF = browseSupport.getTextField();
         filePanel.add(wrapWithValidation(fileNameTF, fileNameValidator));
-        filePanel.add(browseFilesSupport.getBrowseButton());
+        filePanel.add(browseSupport.getBrowseButton());
         gbh.addFullRow(filePanel);
     }
 
     private void outputTypeChanged() {
         TweenOutputType outputType = getOutputType();
         if (outputType.needsDirectory()) {
-            browseFilesSupport.setSelectionMode(DIRECTORY);
-            browseFilesSupport.setChooserDialogTitle("Select Output Folder");
+            browseSupport.setSelectionMode(DIRECTORY);
+            browseSupport.setChooserDialogTitle("Select Output Folder");
         } else {
-            browseFilesSupport.setSelectionMode(FILE);
-            browseFilesSupport.setChooserDialogTitle("Select Output File");
-            browseFilesSupport.setFileFilter(outputType.getFileFilter());
+            browseSupport.setSelectionMode(FILE);
+            browseSupport.setChooserDialogTitle("Select Output File");
+            browseSupport.setFileFilter(outputType.getFileFilter());
         }
         if (fileNameTF != null) { // not the initial setup
             fileNameTF.repaint();
@@ -151,14 +144,14 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
             this.fps = currentFps;
             this.numFrames = (int) (numSeconds * currentFps);
 
-            numFramesLabel.setText(formatNumFramesText());
+            numFramesLabel.setText(createNumFramesText());
         } catch (ParseException e) {
             // expected when the user is typing in the text fields
             numFramesLabel.setText("??");
         }
     }
 
-    private String formatNumFramesText() {
+    private String createNumFramesText() {
         String labelText = String.valueOf(numFrames);
 
         if (pingPongCB.isSelected() && numFrames > 1) {
@@ -184,13 +177,13 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
         animation.setInterpolation((TimeInterpolation) ipCB.getSelectedItem());
         animation.setPingPong(pingPongCB.isSelected());
 
-        File outputLocation = browseFilesSupport.getSelectedFile();
+        File outputLocation = browseSupport.getSelectedFile();
         animation.setOutputLocation(outputLocation);
 
         if (outputLocation.isDirectory()) {
-            Dirs.setLastSave(outputLocation);
+            RecentDirs.setLastSave(outputLocation);
         } else {
-            Dirs.setLastSave(outputLocation.getParentFile());
+            RecentDirs.setLastSave(outputLocation.getParentFile());
         }
     }
 

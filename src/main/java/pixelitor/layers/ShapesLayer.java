@@ -87,7 +87,7 @@ public class ShapesLayer extends ContentLayer {
     @Override
     protected ShapesLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
         String duplicateName = copyType.createLayerCopyName(name);
-        var duplicate = new ShapesLayer(comp, duplicateName);
+        var duplicate = new ShapesLayer(newComp, duplicateName);
 
         if (styledShape != null) {
             duplicate.setStyledShape(styledShape.clone());

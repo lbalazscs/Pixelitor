@@ -529,7 +529,7 @@ public class RandomGUITest {
         animation.captureFinalState();
 
         double randomTime = Math.random();
-        FilterState intermediateState = animation.tween(randomTime);
+        FilterState intermediateState = animation.interpolateState(randomTime);
         paramSet.setState(intermediateState, true);
 
         // run everything without showing a modal dialog

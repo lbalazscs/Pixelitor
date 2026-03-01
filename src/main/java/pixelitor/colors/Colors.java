@@ -44,7 +44,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
-import static java.lang.String.format;
 
 /**
  * Color-related static utility methods.
@@ -120,7 +119,7 @@ public class Colors {
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;
-        return format("(%d, %d, %d, %d)", a, r, g, b);
+        return String.format("(%d, %d, %d, %d)", a, r, g, b);
     }
 
     public static int toPackedARGB(int a, int r, int g, int b) {
@@ -145,10 +144,10 @@ public class Colors {
     public static String toHTMLHex(Color c, boolean includeAlpha) {
         if (includeAlpha) {
             // RRGGBBAA format
-            return format(Locale.ENGLISH, "%02X%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+            return String.format(Locale.ROOT, "%02X%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
         } else {
             // RRGGBB format
-            return format(Locale.ENGLISH, "%06X", 0x00_FF_FF_FF & c.getRGB());
+            return String.format(Locale.ROOT, "%06X", 0x00_FF_FF_FF & c.getRGB());
         }
     }
 
@@ -238,7 +237,7 @@ public class Colors {
         }
 
         // try rgb(163, 69, 151) format
-        if (text.toLowerCase(Locale.ENGLISH).startsWith("rgb(") && text.endsWith(")")) {
+        if (text.toLowerCase(Locale.ROOT).startsWith("rgb(") && text.endsWith(")")) {
             try {
                 String[] components = text.substring(4, text.length() - 1).split("\\s*,\\s*");
                 if (components.length == 3) {
@@ -247,7 +246,7 @@ public class Colors {
                         parseInt(components[1].trim()),
                         parseInt(components[2].trim()));
                 }
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
                 return null;
             }
         }
@@ -377,7 +376,8 @@ public class Colors {
      * Format a color's value in the format expected by G'MIC.
      */
     public static String formatGMIC(Color color) {
-        return "%d,%d,%d,%d".formatted(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+        return String.format(Locale.ROOT, "%d,%d,%d,%d",
+            color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     }
 
     public static String formatForDebugging(Color color) {

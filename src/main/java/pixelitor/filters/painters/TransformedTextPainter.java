@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
  * A class similar to {@link TextPainter}, but it can have an extra
  * translation (so that text layers can be moved with the move tool).
  * It also supports the rotation, scaling and shearing of the text,
- * and text on path rendering.
+ * and text-on-a-path rendering.
  */
 public class TransformedTextPainter implements Debuggable {
     private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
@@ -99,6 +99,7 @@ public class TransformedTextPainter implements Debuggable {
 
     private TransformedRectangle transformedRect;
     private Rectangle boundingBox;
+    private Rectangle renderBounds; // the actual bounds for the cache image
     private Shape textShape;
     private float lineHeight;
     private double relLineHeight;
@@ -188,6 +189,9 @@ public class TransformedTextPainter implements Debuggable {
      * Note that this is an approximation.
      */
     public Rectangle getBoundingBox() {
+        if (renderBounds != null) {
+            return renderBounds;
+        }
         return transformedRect != null ? transformedRect.getBoundingBox() : boundingBox;
     }
 
@@ -305,26 +309,33 @@ public class TransformedTextPainter implements Debuggable {
         g.fill(baseShape);
 
         // paint the effects
+        // (effects that should appear behind the text, such as
+        // a drop shadow, are already clipped to the text shape)
         var tx = g.getTransform();
         g.setTransform(origTransform);
 
         if (hasEffects) {
-            // Transform the local shape into the final screen/cache coordinates.
+            // transform the local shape into the final screen/cache coordinates
             textShape = tx.createTransformedShape(baseShape);
-            // Apply effects to the final, transformed shape.
+            // apply effects to the final, transformed shape
             effects.apply(g, textShape);
         }
     }
 
     /**
-     * Renders a possibly off-canvas image, without recalculating the layout.
-     * (Recalculating the layout can cause rounding errors in the ORA export)
+     * Renders a possibly off-canvas image, without recalculating the layout
+     * (recalculating the layout can cause rounding errors in the ORA export).
      */
     public BufferedImage renderArea(Rectangle area) {
         BufferedImage img = new BufferedImage(area.width, area.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
+
+        // might not be the identity transform if HiDPI screen is used
+        AffineTransform origTransform = g2.getTransform();
+
         g2.translate(-area.x, -area.y);
-        paintText(g2, g2.getTransform());
+        paintText(g2, origTransform);
+
         g2.dispose();
         return img;
     }
@@ -399,6 +410,32 @@ public class TransformedTextPainter implements Debuggable {
 
         // calculate the final bounding box, which includes padding for effects
         boundingBox = calcBoundingBox(textWidth, textHeight, width, height);
+
+        // calculate actual render bounds to prevent clipping
+        Shape baseShape = calcUntransformedTextShape(g);
+        AffineTransform tx = new AffineTransform();
+        if (hasNoTransform()) {
+            tx.translate(boundingBox.x, boundingBox.y);
+        } else {
+            tx.translate(transformedRect.getTopLeftX(), transformedRect.getTopLeftY());
+            if (rotation != 0) {
+                tx.rotate(rotation);
+            }
+            if (scaleX != 1.0 || scaleY != 1.0) {
+                tx.scale(scaleX, scaleY);
+            }
+            if (shearX != 0 || shearY != 0) {
+                tx.shear(-shearX, -shearY);
+            }
+        }
+
+        Rectangle actualShapeBounds = tx.createTransformedShape(baseShape).getBounds();
+        if (effectsPadding > 0) {
+            actualShapeBounds.grow(effectsPadding, effectsPadding);
+        }
+        // save to renderBounds instead of mutating boundingBox
+        renderBounds = boundingBox.union(actualShapeBounds);
+
         invalidLayout = false;
     }
 
@@ -412,6 +449,7 @@ public class TransformedTextPainter implements Debuggable {
         Rectangle textShapeBounds = textShape.getBounds();
         textShapeBounds.grow(effectsPadding, effectsPadding);
         boundingBox = textShapeBounds;
+        renderBounds = boundingBox; // keep them synced on a path
 
         // text on path handles its own transformations: make sure
         // that a leftover transformed rectangle is not interfering
@@ -516,23 +554,23 @@ public class TransformedTextPainter implements Debuggable {
             double tangentAngle = Math.atan2(dy, dx);
 
             // build the transformation for the glyph
-            AffineTransform glyphTX = new AffineTransform();
-            glyphTX.setToTranslation(x, y);
-            glyphTX.rotate(tangentAngle + rotation);
+            AffineTransform glyphTransform = new AffineTransform();
+            glyphTransform.setToTranslation(x, y);
+            glyphTransform.rotate(tangentAngle + rotation);
             if (scaleX != 1.0 || scaleY != 1.0) {
-                glyphTX.scale(scaleX, scaleY);
+                glyphTransform.scale(scaleX, scaleY);
             }
             if (shearX != 0 || shearY != 0) {
-                glyphTX.shear(-shearX, -shearY);
+                glyphTransform.shear(-shearX, -shearY);
             }
 
             // translate the glyph locally so its baseline-center is at the origin
             Point2D origGlyphPos = glyphVector.getGlyphPosition(glyphIndex);
-            double unscaledHalfAdvance = metrics.getAdvance() / 2.0;
-            glyphTX.translate(-(origGlyphPos.getX() + unscaledHalfAdvance), -origGlyphPos.getY());
+            double baseHalfAdvance = metrics.getAdvance() / 2.0;
+            glyphTransform.translate(-(origGlyphPos.getX() + baseHalfAdvance), -origGlyphPos.getY());
 
             Shape glyph = glyphVector.getGlyphOutline(glyphIndex);
-            result.append(glyphTX.createTransformedShape(glyph), false);
+            result.append(glyphTransform.createTransformedShape(glyph), false);
 
             // update the position for the next glyph's left edge
             nextGlyphLeftEdgeDist += advance;
@@ -595,7 +633,7 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     public Shape getTextShape(Composition comp) {
-        // This image is created just to get a Graphics2D somehow...
+        // this image is created just to get a Graphics2D somehow...
         BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = tmp.createGraphics();
 
@@ -625,9 +663,12 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     public void setTranslation(int newTranslationX, int newTranslationY) {
-        this.translationX = newTranslationX;
-        this.translationY = newTranslationY;
-        invalidLayout = true;
+        if (this.translationX != newTranslationX || this.translationY != newTranslationY) {
+            this.translationX = newTranslationX;
+            this.translationY = newTranslationY;
+            // clearCache() is unnecessary here
+            invalidLayout = true;
+        }
     }
 
     public void setRotation(double newRotation) {
@@ -691,6 +732,7 @@ public class TransformedTextPainter implements Debuggable {
 
         copy.transformedRect = transformedRect;
         copy.boundingBox = boundingBox;
+        copy.renderBounds = renderBounds;
         copy.textShape = textShape;
 
         return copy;
@@ -712,21 +754,22 @@ public class TransformedTextPainter implements Debuggable {
         float currentY = effectsPadding + metrics.getAscent();
 
         for (String line : textLines) {
+            // anchor layout calculations against the bare shape to prevent bounding jitters
+            Shape bareLineShape = getLineShape(line, frc, metrics, hasKerning, hasLigatures, false, false);
+            Rectangle2D bareLineBounds = bareLineShape.getBounds2D();
+
             Shape lineShape = getLineShape(line, frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
-            Rectangle2D lineBounds = lineShape.getBounds2D();
 
             float drawX = switch (mlpAlignment) {
                 case MlpAlignmentSelector.LEFT -> effectsPadding;
                 case MlpAlignmentSelector.CENTER ->
-                    effectsPadding + (origTextWidth - (float) lineBounds.getWidth()) / 2.0f;
-                case MlpAlignmentSelector.RIGHT -> effectsPadding + origTextWidth - (float) lineBounds.getWidth();
+                    effectsPadding + (origTextWidth - (float) bareLineBounds.getWidth()) / 2.0f;
+                case MlpAlignmentSelector.RIGHT -> effectsPadding + origTextWidth - (float) bareLineBounds.getWidth();
                 default -> throw new IllegalStateException("alignment: " + mlpAlignment);
             };
 
             AffineTransform lineTransform = AffineTransform.getTranslateInstance(
-                drawX - lineBounds.getX(),
-                currentY
-            );
+                drawX - bareLineBounds.getX(), currentY);
 
             Shape positionedLineShape = lineTransform.createTransformedShape(lineShape);
             fullShape.append(positionedLineShape.getPathIterator(null), false);
@@ -849,8 +892,8 @@ public class TransformedTextPainter implements Debuggable {
     public void setText(String newText) {
         boolean change = !Objects.equals(text, newText);
         if (change) {
-            this.text = newText == null ? "" : newText;
-            textLines = newText.split("\n");
+            text = (newText == null) ? "" : newText;
+            textLines = text.split("\n");
             clearCache();
             invalidLayout = true;
         }
@@ -921,6 +964,7 @@ public class TransformedTextPainter implements Debuggable {
         node.addDouble("shear y", shearY);
 
         node.addNullableDebuggable("boundingBox", boundingBox, DebugNodes::createRectangleNode);
+        node.addNullableDebuggable("renderBounds", renderBounds, DebugNodes::createRectangleNode);
         node.addNullableDebuggable("transformedRect", transformedRect);
         node.addPresence("transformedShape", textShape);
 

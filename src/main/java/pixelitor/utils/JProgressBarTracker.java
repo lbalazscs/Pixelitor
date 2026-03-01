@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,15 +18,15 @@
 package pixelitor.utils;
 
 import javax.swing.*;
-import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.Window;
 
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
  * A {@link ThresholdProgressTracker} that tracks the progress
- * by using an arbitrary JProgressBar. Not to be confused
+ * by using a given JProgressBar. Not to be confused
  * with the {@link StatusBarProgressTracker},
  * which uses a specific progress bar in the status bar.
  * <p>
@@ -36,7 +36,7 @@ import static pixelitor.utils.Threads.calledOnEDT;
 public class JProgressBarTracker extends ThresholdProgressTracker {
     private final ProgressPanel progressPanel;
 
-    private final Container topContainer;
+    private final Window ownerWindow;
     private Cursor originalCursor;
 
     public JProgressBarTracker(ProgressPanel progressPanel) {
@@ -44,18 +44,18 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
         this.progressPanel = progressPanel;
         progressPanel.setProgress(0);
 
-        // Find the top-level container for cursor management.
-        // It can be a window, but if progressPanel is not added
-        // yet to a window, the broadest available GUI area will do.
-        topContainer = SwingUtilities.getWindowAncestor(progressPanel);
+        ownerWindow = SwingUtilities.getWindowAncestor(progressPanel);
+        if (ownerWindow == null) {
+            throw new IllegalStateException(); // the panel must be added to a window first
+        }
     }
 
     @Override
     protected void onProgressStart() {
         assert calledOnEDT() : callInfo();
 
-        originalCursor = topContainer.getCursor();
-        topContainer.setCursor(Cursors.BUSY);
+        originalCursor = ownerWindow.getCursor();
+        ownerWindow.setCursor(Cursors.BUSY);
 
         progressPanel.showProgressBar();
     }
@@ -78,9 +78,9 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
 
     private void restoreOriginalCursor() {
         if (originalCursor != null) {
-            topContainer.setCursor(originalCursor);
+            ownerWindow.setCursor(originalCursor);
         } else {
-            topContainer.setCursor(Cursors.DEFAULT);
+            ownerWindow.setCursor(Cursors.DEFAULT);
         }
     }
 }

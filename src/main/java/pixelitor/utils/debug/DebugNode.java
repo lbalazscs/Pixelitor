@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -189,11 +190,11 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addFloat(String name, float f) {
-        addValidJsonNode(name, format("%.2f", f));
+        addValidJsonNode(name, format(Locale.ROOT, "%.2f", f));
     }
 
     public void addDouble(String name, double f) {
-        addValidJsonNode(name, format("%.2f", f));
+        addValidJsonNode(name, format(Locale.ROOT, "%.2f", f));
     }
 
     public void addBoolean(String name, boolean b) {

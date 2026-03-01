@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.FileDialog;
 import java.io.File;
 
-import static pixelitor.io.FileChooserConfig.SelectableFormats.SINGLE;
+import static pixelitor.io.FileChooserConfig.FormatSelection.SINGLE;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 
@@ -38,25 +38,35 @@ public class AWTFilePicker implements FilePicker {
 
     @Override
     public File selectSupportedOpenFile() {
-        initOpenPicker();
+        initOpenDialog();
         GlobalEvents.modalDialogOpened();
         openDialog.setVisible(true);
         GlobalEvents.modalDialogClosed();
+
         String file = openDialog.getFile();
         if (file != null) {
             String directory = openDialog.getDirectory();
+
+            if (directory != null) {
+                RecentDirs.setLastOpen(new File(directory));
+            }
             return new File(directory, file);
         }
         return null;
     }
 
     @Override
-    public File showSaveDialog(FileChooserConfig config) {
-        initSavePicker();
+    public File selectSaveFile(FileChooserConfig config) {
+        initSaveDialog();
 
-        if (config.formats() == SINGLE) {
+        // setFilenameFilter has no effect on Windows (see its Javadoc)
+        if (config.formatSelection() == SINGLE) {
             saveDialog.setFilenameFilter((dir, name) ->
                 config.defaultFileFilter().accept(new File(dir, name)));
+        } else {
+            // clear the lingering cached file filter
+            // if we switch from SINGLE to ANY or SUPPORTED
+            saveDialog.setFilenameFilter(null);
         }
 
         String suggestedFileName = config.suggestedFileName();
@@ -84,23 +94,30 @@ public class AWTFilePicker implements FilePicker {
             }
         }
 
-        return new File(saveDialog.getDirectory(), selectedFileName);
+        String directory = saveDialog.getDirectory();
+
+        if (directory != null) {
+            RecentDirs.setLastSave(new File(directory));
+        }
+        return new File(directory, selectedFileName);
     }
 
-    private void initOpenPicker() {
+    private void initOpenDialog() {
         assert calledOnEDT() : callInfo();
         if (openDialog == null) {
             openDialog = new FileDialog(PixelitorWindow.get(), "Open File", FileDialog.LOAD);
         }
+        // always apply the globally tracked last open directory
+        openDialog.setDirectory(RecentDirs.getLastOpenPath());
     }
 
-    private void initSavePicker() {
+    private void initSaveDialog() {
         assert calledOnEDT() : callInfo();
         if (saveDialog == null) {
             saveDialog = new FileDialog(PixelitorWindow.get(), "Save File", FileDialog.SAVE);
-            File lastSaveDir = Dirs.getLastSave();
-            saveDialog.setDirectory(lastSaveDir.getAbsolutePath());
         }
+        // always apply the globally tracked last save directory
+        saveDialog.setDirectory(RecentDirs.getLastSavePath());
     }
 
     @Override
@@ -108,5 +125,15 @@ public class AWTFilePicker implements FilePicker {
         // the AWT chooser isn't configured with an extension
         // picker, so these two methods are identical in this class
         return selectSupportedOpenFile();
+    }
+
+    @Override
+    public void dispose() {
+        if (openDialog != null) {
+            openDialog.dispose();
+        }
+        if (saveDialog != null) {
+            saveDialog.dispose();
+        }
     }
 }

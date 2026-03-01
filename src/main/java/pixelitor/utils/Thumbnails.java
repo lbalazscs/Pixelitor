@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
  * Static utility methods related to thumbnails.
  */
 public class Thumbnails {
-    // the current layer thumbnail size
+    // the current maximum layer thumbnail size
     private static int maxSize;
 
     private Thumbnails() {
@@ -64,7 +64,8 @@ public class Thumbnails {
     }
 
     /**
-     * Creates a thumbnail by scaling the source image to fit within a square of the given size.
+     * Creates a thumbnail by scaling the source image to fit within
+     * a square of the given size while preserving the aspect ratio.
      */
     public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
         return createThumbnail(src, size, size, painter);

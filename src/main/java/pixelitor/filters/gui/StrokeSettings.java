@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,7 @@ import pixelitor.tools.shapes.StrokeJoin;
 import pixelitor.tools.shapes.StrokeType;
 
 import java.io.Serial;
-
-import static java.lang.String.format;
+import java.util.Locale;
 
 /**
  * Represents the configuration of a stroke, and also functions as the {@link ParamState} of {@link StrokeParam}.
@@ -55,10 +54,10 @@ public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
     }
 
     public String toSVGStyle() {
-        String svg = format("stroke-width=\"%.2f\" %s %s",
+        String svg = String.format(Locale.ROOT, "stroke-width=\"%.2f\" %s %s",
             width, cap.toSVGAttribute(), join.toSVGAttribute());
         if (dashed) {
-            svg += format(" stroke-dasharray=\"%.2f %.2f\"", 2 * width, 2 * width);
+            svg += String.format(Locale.ROOT, " stroke-dasharray=\"%.2f %.2f\"", 2 * width, 2 * width);
         }
         return svg;
     }

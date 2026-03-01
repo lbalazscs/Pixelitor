@@ -331,5 +331,10 @@ public class Tools {
         public static boolean isMouseDown() {
             return mouseDown;
         }
+
+        public static void resetMouseState() {
+            mouseDown = false;
+            lastEvent = null;
+        }
     }
 }

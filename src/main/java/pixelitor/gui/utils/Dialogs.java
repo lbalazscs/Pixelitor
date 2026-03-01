@@ -215,6 +215,11 @@ public class Dialogs {
         showErrorDialog(parent, "File not writable", msg);
     }
 
+    public static void showDirectoryNotFoundDialog(Component parent, File dir) {
+        String msg = format("<html>The folder <b>%s</b> was not found.", dir.getAbsolutePath());
+        showErrorDialog(parent, "Folder Not Found", msg);
+    }
+
     public static void showWarningDialog(String title, String msg) {
         showWarningDialog(getMainWindow(), title, msg);
     }

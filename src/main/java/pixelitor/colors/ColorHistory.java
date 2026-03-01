@@ -42,6 +42,12 @@ public class ColorHistory {
 
     private final SequencedSet<Color> colors;
 
+    // track the active dialog and its content panel
+    // to prevent duplication and allow dynamic updates
+    private JDialog dialog;
+    private JPanel swatchPanel;
+    private ColorSwatchClickHandler currentClickHandler;
+
     private ColorHistory() {
         // provides O(1) add/contains and maintains insertion order
         colors = new LinkedHashSet<>();
@@ -58,6 +64,9 @@ public class ColorHistory {
         if (colors.size() > MAX_HISTORY_CAPACITY) {
             colors.removeFirst();
         }
+
+        // dynamically update the modeless dialog whenever history changes
+        updateSwatchPanel();
     }
 
     public static void remember(Color newColor) {
@@ -73,32 +82,70 @@ public class ColorHistory {
         assert window != null;
         assert clickHandler != null;
 
-        JPanel swatchPanel = createSwatchPanel(clickHandler);
+        // prevent dialog duplication
+        if (dialog != null && dialog.isVisible()) {
+            // update the click handler just in case the context
+            // has changed (e.g. Filter mode vs Standard mode)
+            if (this.currentClickHandler != clickHandler) {
+                this.currentClickHandler = clickHandler;
+                updateSwatchPanel();
+            }
+            dialog.toFront();
+            return;
+        }
+
+        this.currentClickHandler = clickHandler;
+
+        swatchPanel = new JPanel();
+        swatchPanel.setBorder(createEmptyBorder(2, 2, 2, 2));
+        updateSwatchPanel(); // initially populate the panel
 
         String helpText = filterMode
             ? ColorSwatchClickHandler.FILTER_HTML_HELP
             : ColorSwatchClickHandler.STANDARD_HTML_HELP;
         Messages.showStatusMessage("Color History: " + helpText);
 
-        new DialogBuilder()
+        DialogBuilder builder = new DialogBuilder()
             .title("Color History")
             .owner(window)
             .content(swatchPanel)
             .modeless()
             .noOKButton()
             .noCancelButton()
-            .show();
+            // clean up the references if the user manually closes the dialog window
+            .cancelAction(() -> {
+                dialog = null;
+                swatchPanel = null;
+            });
+
+        builder.show();
+        dialog = builder.getDialog();
     }
 
-    private JPanel createSwatchPanel(ColorSwatchClickHandler clickHandler) {
-        int numColors = colors.size();
-        int numRows = 1 + (numColors - 1) / SWATCHES_PER_ROW;
+    /**
+     * Clears and repopulates the swatch panel.
+     */
+    private void updateSwatchPanel() {
+        if (swatchPanel != null) {
+            swatchPanel.removeAll();
 
-        JPanel swatchPanel = new JPanel(new GridLayout(numRows, SWATCHES_PER_ROW, 2, 2));
-        swatchPanel.setBorder(createEmptyBorder(2, 2, 2, 2));
-        for (Color color : colors) {
-            swatchPanel.add(new ColorSwatchButton(color, clickHandler));
+            int numColors = colors.size();
+            int numRows = 1 + Math.max(0, numColors - 1) / SWATCHES_PER_ROW;
+
+            swatchPanel.setLayout(new GridLayout(numRows, SWATCHES_PER_ROW, 2, 2));
+
+            // iterate in reverse order so newest colors appear first at the top-left
+            for (Color color : colors.reversed()) {
+                swatchPanel.add(new ColorSwatchButton(color, currentClickHandler));
+            }
+
+            swatchPanel.revalidate();
+            swatchPanel.repaint();
+
+            // expand or shrink the dialog height dynamically if it gains/loses rows
+            if (dialog != null && dialog.isVisible()) {
+                dialog.pack();
+            }
         }
-        return swatchPanel;
     }
 }

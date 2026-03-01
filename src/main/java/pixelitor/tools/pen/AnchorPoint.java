@@ -246,19 +246,19 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     private AnchorPointType calcHeuristicType() {
-        double dOutX = ctrlOut.x - x;
-        double dOutY = ctrlOut.y - y;
-        double dInX = ctrlIn.x - x;
-        double dInY = ctrlIn.y - y;
+        double dOutX = ctrlOut.imX - imX;
+        double dOutY = ctrlOut.imY - imY;
+        double dInX = ctrlIn.imX - imX;
+        double dInY = ctrlIn.imY - imY;
 
-        // Are they symmetric?
+        // are they symmetric?
         if (Math.abs(dOutX + dInX) < SYMMETRY_THRESHOLD
             && Math.abs(dOutY + dInY) < SYMMETRY_THRESHOLD) {
             return SYMMETRIC;
         }
 
-        // Are they at least collinear?
-        // Checks the slope equality while avoids dividing by 0
+        // are they at least collinear?
+        // (checks the slope equality while avoids dividing by 0)
         if (Math.abs(dOutY * dInX - dOutX * dInY) < COLLINEARITY_THRESHOLD) {
             return SMOOTH;
         }

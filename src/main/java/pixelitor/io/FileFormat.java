@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -121,8 +121,8 @@ public enum FileFormat {
     private void saveSingleLayered(Composition comp, SaveSettings settings) {
         BufferedImage img = comp.getCompositeImage();
         if (converter != null) {
-            // do the final conversion, which might be
-            // necessary before writing the image
+            // convert the image to the format-required
+            // color model before writing
             img = converter.apply(img);
         }
 
@@ -138,7 +138,7 @@ public enum FileFormat {
         return super.toString().toLowerCase(Locale.ENGLISH);
     }
 
-    public static Optional<FileFormat> fromFile(File file) {
+    public static Optional<FileFormat> fromExtension(File file) {
         String extension = FileUtils.getExtension(file.getName());
         return fromExtension(extension);
     }
@@ -159,13 +159,13 @@ public enum FileFormat {
         };
     }
 
-    private static volatile FileFormat lastSaveFormat = AppPreferences.loadLastSaveFormat();
+    private static volatile FileFormat lastSavedFormat = AppPreferences.loadLastSaveFormat();
 
     public static FileFormat getLastSaved() {
-        return lastSaveFormat;
+        return lastSavedFormat;
     }
 
     public static void setLastSaved(FileFormat format) {
-        lastSaveFormat = format;
+        lastSavedFormat = format;
     }
 }

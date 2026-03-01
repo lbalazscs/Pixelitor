@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.utils.MemoryInfo.NUM_BYTES_IN_MEGABYTE;
+import static pixelitor.utils.MemoryInfo.BYTES_PER_MEGABYTE;
 
 /**
  * Canny edge detector - see http://en.wikipedia.org/wiki/Canny_edge_detector
@@ -130,7 +130,7 @@ public class Canny extends ParametrizedFilter {
         int height = src.getHeight();
         long numPixels = (long) width * height;
         // 6 arrays with 4-byte data type
-        long estimatedMemoryMB = 6 * numPixels * 4 / NUM_BYTES_IN_MEGABYTE;
+        long estimatedMemoryMB = 6 * numPixels * 4 / BYTES_PER_MEGABYTE;
         // 1.8 was found experimentally, this is still needed to prevent OutOfMemory errors
         estimatedMemoryMB = (long) (estimatedMemoryMB * 1.8);
         return estimatedMemoryMB;

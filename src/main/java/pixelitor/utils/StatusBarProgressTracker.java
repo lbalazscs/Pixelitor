@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.utils;
 
 /**
- * Tracks the progress of some operation and shows a
- * status bar update if it takes a long time.
+ * Tracks the progress of an operation and shows progress
+ * in the status bar if the operation exceeds the threshold.
  */
 public class StatusBarProgressTracker extends ThresholdProgressTracker {
     private ProgressHandler progressHandler;

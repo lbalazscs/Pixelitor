@@ -105,7 +105,7 @@ public class PXCFormat {
             // file is transient in Composition because the pxc file can be renamed
             comp.setFile(file);
 
-            EventQueue.invokeLater(comp::checkFontsAreInstalled);
+            EventQueue.invokeLater(comp::warnIfFontsMissing);
         } catch (IOException | ClassNotFoundException e) {
             Messages.showException(e);
         }
@@ -249,7 +249,7 @@ public class PXCFormat {
     private static ProgressTracker getImageTracker() {
         if (workRatioForOneImage == -1) {
             // a pxc without images
-            return ProgressTracker.NULL_TRACKER;
+            return ProgressTracker.NO_OP_TRACKER;
         } else {
             return new SubtaskProgressTracker(workRatioForOneImage, mainPT);
         }

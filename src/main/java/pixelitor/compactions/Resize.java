@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static java.lang.String.format;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
@@ -147,7 +146,7 @@ public class Resize implements CompAction {
         view.revalidate(); // make sure the scrollbars are OK
 
         progressHandler.stopProgress();
-        Messages.showStatusMessage(format("<b>%s</b> was resized to %dx%d pixels.",
+        Messages.showStatusMessage(String.format("<b>%s</b> was resized to %dx%d pixels.",
             newComp.getName(), newCanvasSize.width, newCanvasSize.height));
 
         return newComp;

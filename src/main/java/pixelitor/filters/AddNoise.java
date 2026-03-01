@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,7 +92,7 @@ public class AddNoise extends ParametrizedFilter {
         int workUnit = 100_000;
         int counter = 0;
         int numWorkUnits = numPixels / workUnit;
-        var pt = ProgressTracker.createSafeTracker(numWorkUnits);
+        var pt = ProgressTracker.createTrackerIfNeeded(NAME, numWorkUnits);
 
         for (int i = 0; i < numPixels; i++) {
             // count at the beginning of the loop because of early returns
@@ -183,7 +183,7 @@ public class AddNoise extends ParametrizedFilter {
         int workUnit = 100_000;
         int counter = 0;
         int numWorkUnits = length / workUnit;
-        var pt = ProgressTracker.createSafeTracker(numWorkUnits);
+        var pt = ProgressTracker.createTrackerIfNeeded(NAME, numWorkUnits);
 
         double destWeight = opacityParam.getPercentage();
         double srcWeight = 1.0 - destWeight;

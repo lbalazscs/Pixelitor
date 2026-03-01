@@ -729,7 +729,7 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createDistortSubmenu());
         filterMenu.add(createFindEdgesSubmenu());
 
-        File gmicExe = FileUtils.findExecutable(AppPreferences.gmicDirName, "gmic");
+        File gmicExe = FileUtils.findExecutableInDir(AppPreferences.gmicDirName, "gmic");
         if (gmicExe != null) {
             GMICFilter.GMIC_PATH = gmicExe;
             filterMenu.add(createGMICSubmenu());

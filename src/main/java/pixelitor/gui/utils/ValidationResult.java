@@ -65,7 +65,7 @@ public class ValidationResult {
     }
 
     public static ValidationResult invalidNegative(String name) {
-        return invalid("<b>" + name + "</b> must be positive.");
+        return invalid("<b>" + name + "</b> can't be negative.");
     }
 
     public static ValidationResult invalidEmpty(String name) {

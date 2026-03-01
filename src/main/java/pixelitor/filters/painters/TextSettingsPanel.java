@@ -41,7 +41,7 @@ import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
- * Customization panel for the text filter and for text layers
+ * Customization panel for the text filter and for text layers.
  */
 public class TextSettingsPanel extends FilterGUI
     implements ParamAdjustmentListener, ActionListener, Consumer<TextSettings> {
@@ -78,7 +78,7 @@ public class TextSettingsPanel extends FilterGUI
     private BoxAlignment lastBoxAlignment;
 
     // multiline/path alignment settings
-    private boolean hasMLPAlign = true;
+    private boolean mlpAlignEnabled = true;
     private MlpAlignmentSelector mlpAlignmentSelector;
     private JLabel mlpLabel;
 
@@ -198,11 +198,11 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private void updateMLPAlignEnabled() {
-        boolean hasMLPAlignNow = getBoxAlignment().isPath() || textArea.getText().contains("\n");
-        if (hasMLPAlignNow != hasMLPAlign) {
-            hasMLPAlign = hasMLPAlignNow;
-            mlpLabel.setEnabled(hasMLPAlign);
-            mlpAlignmentSelector.setEnabled(hasMLPAlign);
+        boolean mlpAlignEnabledNow = getBoxAlignment().isPath() || textArea.getText().contains("\n");
+        if (mlpAlignEnabledNow != mlpAlignEnabled) {
+            mlpAlignEnabled = mlpAlignEnabledNow;
+            mlpLabel.setEnabled(mlpAlignEnabled);
+            mlpAlignmentSelector.setEnabled(mlpAlignEnabled);
         }
     }
 
@@ -403,8 +403,8 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     /**
-     * If the settings change while being edited for external
-     * reasons (preset), then the GUI is updated via this method.
+     * Updates the GUI when the settings are changed externally
+     * (e.g., when loading a preset).
      */
     @Override
     public void accept(TextSettings settings) {
@@ -439,6 +439,13 @@ public class TextSettingsPanel extends FilterGUI
                 fontInfo, settings.getRelLineHeight(),
                 settings.getScaleX(), settings.getScaleY(),
                 settings.getShearX(), settings.getShearY());
+        } else {
+            // if there is no advanced dialog, store the preset values for later
+            relLineHeight = settings.getRelLineHeight();
+            scaleX = settings.getScaleX();
+            scaleY = settings.getScaleY();
+            shearX = settings.getShearX();
+            shearY = settings.getShearY();
         }
 
         effectsPanel.setEffects(settings.getEffects());

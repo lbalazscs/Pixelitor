@@ -264,7 +264,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         }
 
         String copyName = copyType.createLayerCopyName(name);
-        return new ImageLayer(comp, imageCopy, copyName, getTx(), getTy());
+        return new ImageLayer(newComp, imageCopy, copyName, getTx(), getTy());
     }
 
     @Override

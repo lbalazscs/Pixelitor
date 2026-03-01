@@ -26,13 +26,13 @@ import javax.swing.*;
 import java.awt.Color;
 import java.io.Serial;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
@@ -215,7 +215,7 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return format("%s[name = '%s']", getClass().getSimpleName(), getName());
+        return String.format("%s[name = '%s']", getClass().getSimpleName(), getName());
     }
 
     public record GradientParamState(float[] thumbPositions,
@@ -256,7 +256,7 @@ public class GradientParam extends AbstractFilterParam {
         public String toSaveString() {
             String thumbsString = IntStream.range(0, thumbPositions.length)
                 .mapToDouble(i -> thumbPositions[i])
-                .mapToObj("%.2f"::formatted)
+                .mapToObj(d -> String.format(Locale.ROOT, "%.2f", d))
                 .collect(joining(",", "", "|"));
 
             String colorsString = Stream.of(colors)

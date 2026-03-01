@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,10 +25,8 @@ import pixelitor.tools.pen.SubPath;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.awt.Color.BLACK;
@@ -68,6 +66,12 @@ public class Shapes {
 
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
+
+            // ignore malformed segments that occur before the first SEG_MOVETO
+            if (lastSubPath == null && type != SEG_MOVETO) {
+                pathIterator.next();
+                continue;
+            }
 
             switch (type) {
                 case SEG_MOVETO -> lastSubPath = path.startNewSubpath(coords[0], coords[1], view);
@@ -242,7 +246,7 @@ public class Shapes {
 
         pathBuilder.append(command);
         for (int i = 0; i < numCoords; i++) {
-            pathBuilder.append(String.format("%.3f", coords[i]));
+            pathBuilder.append(String.format(Locale.ROOT, "%.3f", coords[i]));
             if (i != numCoords - 1) {
                 pathBuilder.append(' ');
             }
@@ -251,14 +255,15 @@ public class Shapes {
     }
 
     public static String getSvgFillRule(Shape shape) {
-        if (shape instanceof Path2D path) {
-            return switch (path.getWindingRule()) {
-                case Path2D.WIND_EVEN_ODD -> "evenodd";
-                case Path2D.WIND_NON_ZERO -> "nonzero";
-                default -> throw new IllegalStateException("Error: " + path.getWindingRule());
-            };
-        }
-        return "nonzero";
+        int windingRule = shape instanceof Path2D path
+            ? path.getWindingRule()
+            : shape.getPathIterator(null).getWindingRule();
+
+        return switch (windingRule) {
+            case Path2D.WIND_EVEN_ODD -> "evenodd";
+            case Path2D.WIND_NON_ZERO -> "nonzero";
+            default -> throw new IllegalStateException("Error: " + windingRule);
+        };
     }
 
     public static void debugPathIterator(Shape shape) {
@@ -276,7 +281,7 @@ public class Shapes {
                 case SEG_LINETO -> System.out.println("LINE TO " + arrayToString(coords, 2));
                 case SEG_QUADTO -> System.out.println("QUAD TO " + arrayToString(coords, 4));
                 case SEG_CUBICTO -> System.out.println("CUBIC TO " + arrayToString(coords, 6));
-                case SEG_CLOSE -> System.out.println("CLOSE " + arrayToString(coords, 2));
+                case SEG_CLOSE -> System.out.println("CLOSE " + arrayToString(coords, 0));
                 default -> throw new IllegalArgumentException("type = " + type);
             }
 
@@ -300,6 +305,12 @@ public class Shapes {
     public static boolean pathsAreEqual(Shape shape1, Shape shape2, double tolerance) {
         PathIterator pathIterator1 = shape1.getPathIterator(null);
         PathIterator pathIterator2 = shape2.getPathIterator(null);
+
+        int windingRule1 = pathIterator1.getWindingRule();
+        int windingRule2 = pathIterator2.getWindingRule();
+        if (windingRule1 != windingRule2) {
+            return false;
+        }
 
         double[] coords1 = new double[6];
         double[] coords2 = new double[6];
@@ -364,6 +375,9 @@ public class Shapes {
     }
 
     public static Rectangle2D calcBounds(List<? extends Point2D> points) {
+        if (points.isEmpty()) {
+            return null;
+        }
         BoundingBox boundingBox = new BoundingBox();
         for (Point2D point : points) {
             boundingBox.add(point);
@@ -439,6 +453,9 @@ public class Shapes {
             Point2D end = points.get(i + 1);
             centers[i] = Geometry.midPoint(start, end);
             lengths[i] = Geometry.distance(start, end);
+
+            // prevent 0 / 0 division by ensuring adjacent points are not identical
+            assert lengths[i] > 0;
         }
 
         for (int i = 1; i < numPoints; i++) {
@@ -509,7 +526,7 @@ public class Shapes {
         assert numPoints >= 3 : "There should be at least 3 points in the shape!!!";
 
         // the path is considered closed if the first and last points are identical
-        boolean isClosed = Geometry.areEqual(points.getFirst(), points.get(numPoints - 1));
+        boolean isClosed = Geometry.areEqual(points.getFirst(), points.getLast());
         int lastPointIndex = isClosed ? numPoints - 2 : numPoints - 1;
 
         // Every two alternate points represent a side. There are numPoints - 1 sides.
@@ -524,6 +541,9 @@ public class Shapes {
             Point2D nextPoint = points.get(i + 1);
             centers[i] = Geometry.midPoint(currentPoint, nextPoint);
             lengths[i] = Geometry.distance(currentPoint, nextPoint);
+
+            // prevent 0 / 0 division by ensuring adjacent points are not identical
+            assert lengths[i] > 0;
         }
 
         // controlPoints[i] represents the 2 control points after and before points[i]
@@ -575,6 +595,10 @@ public class Shapes {
             path.curveTo(oldQ.getX(), oldQ.getY(), P.getX(), P.getY(), A.getX(), A.getY());
         }
 
+        if (isClosed) {
+            path.closePath();
+        }
+        
         return path;
     }
 
@@ -638,10 +662,19 @@ public class Shapes {
             // create a line that can be distorted by nonlinear distortions
             int numSegments = 26;
             double dt = 1.0 / numSegments;
-            for (int i = 0; i <= numSegments; i++) {
+            for (int i = 0; i < numSegments; i++) {
                 double t = i * dt;
                 Point2D controlPoint = Geometry.interpolate(from, to, t + dt * 0.5);
-                Point2D segmentEnd = Geometry.interpolate(from, to, t + dt);
+
+                Point2D segmentEnd;
+                // guarantee exact target connection for the final
+                // segment to circumvent floating-point rounding errors
+                if (i == numSegments - 1) {
+                    segmentEnd = to;
+                } else {
+                    segmentEnd = Geometry.interpolate(from, to, t + dt);
+                }
+
                 path.curveTo(controlPoint.getX(), controlPoint.getY(),
                     controlPoint.getX(), controlPoint.getY(),
                     segmentEnd.getX(), segmentEnd.getY());
@@ -658,6 +691,8 @@ public class Shapes {
      */
     public static void curvedLine(Path2D path, double curvature,
                                   Point2D start, Point2D end) {
+        assert !start.equals(end);
+
         double endX = end.getX();
         double endY = end.getY();
 
@@ -700,9 +735,16 @@ public class Shapes {
     public static Shape resizeToFit(Shape shape, double width, double height, double margin,
                                     double startX, double startY) {
         Rectangle2D bounds = shape.getBounds2D();
+
+        // ensure bounds have non-zero dimensions to prevent division by zero
+        assert bounds.getWidth() > 0 && bounds.getHeight() > 0;
+
         double shapeAspectRatio = bounds.getWidth() / bounds.getHeight();
         double areaWidth = width - 2 * margin;
         double areaHeight = height - 2 * margin;
+
+        assert areaWidth > 0 && areaHeight > 0;
+
         double areaAspectRatio = areaWidth / areaHeight;
 
         Rectangle2D targetArea;

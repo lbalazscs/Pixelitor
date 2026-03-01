@@ -177,7 +177,7 @@ public class Geometry {
     }
 
     public static double distanceSq(Point2D a) {
-        return a.getX() * a.getX() + a.getY() + a.getY();
+        return a.getX() * a.getX() + a.getY() * a.getY();
     }
 
     public static Point2D add(Point2D a, double add) {
@@ -188,13 +188,6 @@ public class Geometry {
     public static Point2D add(Point2D a, Point2D b) {
         add(a, b, a);
         return a;
-    }
-
-    public static Point2D add(Point2D... a) {
-        for (int i = 1; i < a.length; i++) {
-            add(a[0], a[i], a[0]);
-        }
-        return a[0];
     }
 
     public static Point2D add(Point2D a, Point2D b, Point2D r) {

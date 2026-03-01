@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,7 +67,7 @@ class WebPExportSettings extends JPanel implements ExportSettings {
 
         command.add("-define");
         command.add("webp:lossless=" + lossless.isChecked());
-        command.add("webp:image-hint=" + imageHint.getSelectedItem().toString().toLowerCase(Locale.ENGLISH));
+        command.add("webp:image-hint=" + imageHint.getSelectedItem().toString().toLowerCase(Locale.ROOT));
     }
 
     @Override

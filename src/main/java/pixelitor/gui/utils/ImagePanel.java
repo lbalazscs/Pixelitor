@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,28 +30,28 @@ import java.awt.image.BufferedImage;
  */
 public class ImagePanel extends JPanel {
     protected BufferedImage image;
-    private final boolean checkerboardEnabled;
+    private final boolean useCheckerboard;
     private CheckerboardPainter checkerboardPainter;
 
-    public ImagePanel(boolean useCheckerBoard) {
-        checkerboardEnabled = useCheckerBoard;
-        if (useCheckerBoard) {
+    public ImagePanel(boolean useCheckerboard) {
+        this.useCheckerboard = useCheckerboard;
+        if (useCheckerboard) {
             checkerboardPainter = ImageUtils.createCheckerboardPainter();
         }
     }
 
-    public void replaceImage(BufferedImage newImage) {
-        // clean up resources of the previous image
+    public void setImageWithoutRepaint(BufferedImage newImage) {
+        // release resources of the previous image
         if (image != null) {
             image.flush();
         }
 
-        // sets the new image without repainting
+        // sets the new image without triggering repaint
         this.image = newImage;
     }
 
-    public void refreshImage(BufferedImage newImage) {
-        replaceImage(newImage);
+    public void setImageAndRepaint(BufferedImage newImage) {
+        setImageWithoutRepaint(newImage);
         repaint();
     }
 
@@ -65,7 +65,7 @@ public class ImagePanel extends JPanel {
         }
 
         try {
-            renderImage(g);
+            paintImage(g);
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         }
@@ -76,15 +76,15 @@ public class ImagePanel extends JPanel {
         g.fillRect(0, 0, getWidth(), getHeight());
     }
 
-    private void renderImage(Graphics g) {
+    private void paintImage(Graphics g) {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
 
-        // the position to center the image
+        // the position that centers the image
         int imgX = (getWidth() - imageWidth) / 2;
         int imgY = (getHeight() - imageHeight) / 2;
 
-        if (checkerboardEnabled) {
+        if (useCheckerboard) {
             Graphics2D g2 = (Graphics2D) g;
             // translate the checkerboard to the image position
             g2.translate(imgX, imgY);

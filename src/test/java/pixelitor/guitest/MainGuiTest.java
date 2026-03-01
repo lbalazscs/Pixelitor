@@ -42,10 +42,10 @@ import pixelitor.gui.*;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.history.History;
 import pixelitor.history.HistoryChecker;
-import pixelitor.io.Dirs;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileFormat;
 import pixelitor.io.FileUtils;
+import pixelitor.io.RecentDirs;
 import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
@@ -955,8 +955,8 @@ public class MainGuiTest {
         maskMode.apply(this);
 
         EDT.run(() -> {
-            Dirs.setLastOpen(inputDir);
-            Dirs.setLastSave(batchResizeOutputDir);
+            RecentDirs.setLastOpen(inputDir);
+            RecentDirs.setLastSave(batchResizeOutputDir);
             FileFormat.setLastSaved(FileFormat.JPG);
         });
 
@@ -977,8 +977,8 @@ public class MainGuiTest {
     private void testBatchFilter() {
         log(1, "testing batch filter");
 
-        Dirs.setLastOpen(inputDir);
-        Dirs.setLastSave(batchFilterOutputDir);
+        RecentDirs.setLastOpen(inputDir);
+        RecentDirs.setLastSave(batchFilterOutputDir);
 
         assertThat(EDT.getNumViews()).isGreaterThan(0);
         maskMode.apply(this);
@@ -1013,7 +1013,7 @@ public class MainGuiTest {
     private void testExportLayerToPNG() {
         log(1, "testing export layer to png");
 
-        Dirs.setLastSave(baseDir);
+        RecentDirs.setLastSave(baseDir);
 
         app.duplicateLayer(ImageLayer.class);
         app.invert();

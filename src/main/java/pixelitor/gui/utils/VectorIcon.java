@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class VectorIcon implements Icon, Cloneable {
 
     @Override
     public void paintIcon(Component c, Graphics g, int x, int y) {
-        Graphics2D g2 = (Graphics2D) g;
+        Graphics2D g2 = (Graphics2D) g.create();
 
         g2.translate(x, y);
         g2.setColor(color);
@@ -61,6 +61,8 @@ public class VectorIcon implements Icon, Cloneable {
         g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
         painter.accept(g2);
+
+        g2.dispose();
     }
 
     @Override
@@ -107,10 +109,6 @@ public class VectorIcon implements Icon, Cloneable {
     }
 
     public static VectorIcon createFilled(Shape shape, Color color, int width, int height) {
-        Consumer<Graphics2D> painter = g -> {
-            g.setColor(color);
-            g.fill(shape);
-        };
-        return new VectorIcon(color, width, height, painter);
+        return new VectorIcon(color, width, height, g -> g.fill(shape));
     }
 }

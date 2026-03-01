@@ -237,7 +237,7 @@ public class PlasmaFilter extends WholeImageFilter {
         if (workUnits > 0) {
             pt = createProgressTracker(workUnits);
         } else {
-            pt = ProgressTracker.NULL_TRACKER;
+            pt = ProgressTracker.NO_OP_TRACKER;
         }
 
         iterationCount = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -249,23 +249,23 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         effects.setDropShadow(dropShadowEffect);
     }
 
-    private void addTab(String name, EffectPanel configurator) {
+    private void addTab(String name, EffectPanel panel) {
         JPanel tabPanel = new JPanel(new FlowLayout(LEFT));
         JCheckBox tabCB = new JCheckBox();
-        tabCB.setModel(configurator.getEnabledModel());
+        tabCB.setModel(panel.getEnabledModel());
         tabCB.setName(name);
         tabPanel.add(tabCB);
         tabPanel.add(new JLabel(name));
 
         tabCB.addActionListener(e -> {
             if (tabCB.isSelected()) {
-                tabs.setSelectedIndex(tabs.indexOfComponent(configurator));
+                tabs.setSelectedIndex(tabs.indexOfComponent(panel));
             }
         });
 
         tabPanel.setOpaque(false);
 
-        tabs.addTab(name, configurator);
+        tabs.addTab(name, panel);
         tabs.setTabComponentAt(tabs.getTabCount() - 1, tabPanel);
     }
 

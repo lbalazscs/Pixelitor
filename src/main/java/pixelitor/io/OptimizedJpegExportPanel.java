@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,10 @@ public class OptimizedJpegExportPanel extends JPanel {
 
     private final BufferedImage sourceImage;
 
+    // shows the original image
     private ImagePanel original;
+
+    // shows the real-time preview of compression settings
     private ImagePanel optimized;
 
     private RangeParam qualityParam;
@@ -73,27 +76,27 @@ public class OptimizedJpegExportPanel extends JPanel {
 
         this.sourceImage = image;
 
-        add(createComparePanel(image), CENTER);
+        add(createComparisonPanel(image), CENTER);
         add(createSettingsPanel(), SOUTH);
 
         updatePreviewAsync();
     }
 
-    private JPanel createComparePanel(BufferedImage image) {
+    private JPanel createComparisonPanel(BufferedImage image) {
         JPanel comparePanel = new JPanel(new GridLayout(1, 2, GRID_GAP, GRID_GAP));
-        var imageSize = new Dimension(image.getWidth(), image.getHeight());
+        var imageDim = new Dimension(image.getWidth(), image.getHeight());
 
-        original = createImagePanel(imageSize);
-        original.replaceImage(image);
+        original = createImagePanel(imageDim);
+        original.setImageWithoutRepaint(image);
 
-        optimized = createImagePanel(imageSize);
+        optimized = createImagePanel(imageDim);
 
-        setupScrollPanes(comparePanel);
+        addScrollPanes(comparePanel);
 
         return comparePanel;
     }
 
-    private void setupScrollPanes(JPanel comparePanel) {
+    private void addScrollPanes(JPanel comparePanel) {
         JScrollPane originalSP = createScrollPane(original, "Original");
         JScrollPane optimizedSP = createScrollPane(optimized, "Optimized");
 
@@ -111,13 +114,14 @@ public class OptimizedJpegExportPanel extends JPanel {
         return scrollPane;
     }
 
-    private static ImagePanel createImagePanel(Dimension imageSize) {
-        // no checkerboard, because here transparency is shown as black
-        var viewPanel = new ImagePanel(false);
+    private static ImagePanel createImagePanel(Dimension imageDim) {
+        // no checkerboard because transparency is rendered as black,
+        // as it would appear in a saved JPEG image
+        var panel = new ImagePanel(false);
 
-        viewPanel.setPreferredSize(imageSize);
+        panel.setPreferredSize(imageDim);
 
-        return viewPanel;
+        return panel;
     }
 
     private JPanel createSettingsPanel() {
@@ -151,13 +155,13 @@ public class OptimizedJpegExportPanel extends JPanel {
     private void updatePreviewAsync() {
         CompletableFuture
             .supplyAsync(() -> generatePreview(getQuality(), isProgressive()), onPool)
-            .thenAcceptAsync(this::updatePreview, onEDT)
+            .thenAcceptAsync(this::applyPreview, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
     private PreviewInfo generatePreview(float quality, boolean progressive) {
         try {
-            return writeJPGtoPreviewImage(sourceImage,
+            return writeJpegToPreviewImage(sourceImage,
                 JpegSettings.createJpegCustomizer(quality, progressive),
                 new JProgressBarTracker(progressPanel));
         } catch (IOException e) {
@@ -165,10 +169,10 @@ public class OptimizedJpegExportPanel extends JPanel {
         }
     }
 
-    private void updatePreview(PreviewInfo previewInfo) {
-        optimized.refreshImage(previewInfo.image());
+    private void applyPreview(PreviewInfo previewInfo) {
+        optimized.setImageAndRepaint(previewInfo.image());
         sizeLabel.setText("  Size: "
-            + MemoryInfo.bytesToString(previewInfo.sizeInBytes()));
+            + MemoryInfo.formatBytes(previewInfo.sizeInBytes()));
     }
 
     private float getQuality() {
@@ -193,17 +197,17 @@ public class OptimizedJpegExportPanel extends JPanel {
             .show();
     }
 
-    private static PreviewInfo writeJPGtoPreviewImage(BufferedImage image,
-                                                      Consumer<ImageWriteParam> customizer,
-                                                      ProgressTracker pt) throws IOException {
+    private static PreviewInfo writeJpegToPreviewImage(BufferedImage image,
+                                                       Consumer<ImageWriteParam> customizer,
+                                                       ProgressTracker pt) throws IOException {
         assert Threads.calledOutsideEDT() : Threads.callInfo();
 
         var bos = new ByteArrayOutputStream(32768);
-        // Step 1: write JPEG with the given settings to memory.
-        // Approximately 70% of the total time is spent here.
+        // Step 1: write the JPEG with the given settings to memory.
+        // This step typically takes about 70% of the total time.
         ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
         var pt1 = new SubtaskProgressTracker(0.7, pt);
-        TrackedIO.writeToIOS(image, ios, "jpg", pt1, customizer);
+        TrackedIO.writeToImageStream(image, ios, "jpg", pt1, customizer);
 
         // Step 2: Read it back into the preview image.
         // Approximately 30% of the total time is spent here.
@@ -213,7 +217,7 @@ public class OptimizedJpegExportPanel extends JPanel {
 
         BufferedImage previewImage;
         try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
-            previewImage = TrackedIO.readFromIIS(iis, pt2);
+            previewImage = TrackedIO.readFromImageStream(iis, pt2);
         }
 
         pt.finished();
@@ -222,7 +226,7 @@ public class OptimizedJpegExportPanel extends JPanel {
     }
 
     /**
-     * An image and its estimated (jpeg-compressed) disk size.
+     * A preview image and its JPEG-compressed size in bytes.
      */
     private record PreviewInfo(BufferedImage image, int sizeInBytes) {
     }

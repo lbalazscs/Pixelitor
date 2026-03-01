@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static java.lang.String.format;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
@@ -48,20 +47,20 @@ public class BatchProcessor {
     private static final String OVERWRITE_NO = "No (Skip)";
     private static final String OVERWRITE_CANCEL = "Cancel Processing";
 
-    private boolean overwriteAll = false;
+    private volatile boolean overwriteAll = false;
     private volatile boolean stopProcessing = false;
 
     private final CompAction action;
-    private final String dialogTitle;
+    private final String progressDialogTitle;
     private final File inputDir;
     private final File outputDir;
 
-    public BatchProcessor(CompAction action, String dialogTitle) {
+    public BatchProcessor(CompAction action, String progressDialogTitle) {
         this.action = action;
-        this.dialogTitle = dialogTitle;
+        this.progressDialogTitle = progressDialogTitle;
 
-        inputDir = Dirs.getLastOpen();
-        outputDir = Dirs.getLastSave();
+        inputDir = RecentDirs.getLastOpen();
+        outputDir = RecentDirs.getLastSave();
     }
 
     /**
@@ -82,7 +81,7 @@ public class BatchProcessor {
         History.setIgnoreEdits(true);
 
         var worker = new SwingWorker<Void, Integer>() {
-            private final ProgressMonitor progressMonitor = GUIUtils.createPercentageProgressMonitor(dialogTitle);
+            private final ProgressMonitor progressMonitor = GUIUtils.createPercentageProgressMonitor(progressDialogTitle);
 
             @Override
             public Void doInBackground() {
@@ -92,8 +91,8 @@ public class BatchProcessor {
                     if (progressMonitor.isCanceled() || stopProcessing) {
                         break;
                     }
-                    processFile(filesToProcess.get(i));
                     publish(i);
+                    processFile(filesToProcess.get(i));
                 }
                 return null;
             }
@@ -137,10 +136,7 @@ public class BatchProcessor {
         var format = FileFormat.getLastSaved();
         File outputFile = createOutputPath(comp, format);
 
-        // so that it doesn't ask to save again after we just saved it
-        comp.setDirty(false);
-
-        var saveSettings = new SaveSettings.Simple(format, outputFile);
+        var saveSettings = new SaveSettings.Default(format, outputFile);
         CompletableFuture<Void> saveFuture = null;
 
         View view = comp.getView();
@@ -158,7 +154,8 @@ public class BatchProcessor {
                     overwriteAll = true;
                     break;
                 case OVERWRITE_NO:
-                    // do nothing
+                    // bypass the warning for explicitly skipped files
+                    comp.setDirty(false);
                     break;
                 case OVERWRITE_CANCEL:
                     Views.warnAndClose(view);
@@ -171,24 +168,31 @@ public class BatchProcessor {
             view.paintImmediately();
             saveFuture = comp.saveAsync(saveSettings, false);
         }
-        Views.warnAndClose(view);
-        stopProcessing = false;
 
         if (saveFuture != null) {
-            return saveFuture;
+            // chain the view closing to wait until the async save finishes
+            return saveFuture.whenCompleteAsync((v, e) -> {
+                // if save was successful, comp.dirty is naturally false => closes silently
+                // if save failed, comp.dirty is true (restored by saveAsync) => user gets prompted
+                Views.warnAndClose(view);
+            }, onEDT);
         } else {
+            // we are here if the user selected OVERWRITE_NO
+            Views.warnAndClose(view);
             return CompletableFuture.completedFuture(null);
         }
     }
 
     private File createOutputPath(Composition comp, FileFormat format) {
+        // works because all composition actions carry over the file reference from the original
         String inFileName = comp.getFile().getName();
+
         String outFileName = FileUtils.replaceExtension(inFileName, format.toString());
         return new File(outputDir, outFileName);
     }
 
     private static String promptOverwriteConfirmation(File outputFile) {
-        String msg = format("File %s already exists. Overwrite?", outputFile);
+        String msg = String.format("File %s already exists. Overwrite?", outputFile);
         var optionPane = new JOptionPane(msg, WARNING_MESSAGE);
 
         optionPane.setOptions(new String[]{

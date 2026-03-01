@@ -66,7 +66,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static pixelitor.io.FileUtils.removeExtension;
+import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
 import static pixelitor.utils.Threads.callInfo;
@@ -284,7 +284,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             compCopy.dirty = false;
             compCopy.file = null;
             compCopy.fileTimestamp = 0;
-            compCopy.name = createCopyName(removeExtension(name));
+            compCopy.name = createCopyName(stripExtension(name));
             if (guides != null) {
                 compCopy.guides = guides.copyIdentical(view);
             }
@@ -596,6 +596,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         String currentName = getName();
         String chosenName = JOptionPane.showInputDialog(owner,
             "New Name:", currentName);
+        if (chosenName == null) { // the user canceled or closed the dialog
+            return;
+        }
         rename(currentName, chosenName);
     }
 
@@ -1648,11 +1651,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * it could create multiple undo events instead of just one.
      */
     public void allImageLayersToCanvasSize() {
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer imageLayer) {
-                imageLayer.toCanvasSizeWithHistory();
-            }
-        }
+        forEachNestedLayerOfType(ImageLayer.class, ImageLayer::toCanvasSizeWithHistory);
     }
 
     /**
@@ -1673,11 +1672,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void fitCanvasToLayers() {
         Outsets enlargement = Outsets.createZero();
 
-        for (Layer layer : layerList) {
-            if (layer instanceof ContentLayer contentLayer) {
-                enlargement.ensureFitsContentOf(contentLayer);
-            }
-        }
+        forEachNestedLayerOfType(ContentLayer.class, enlargement::ensureFitsContentOf);
 
         if (enlargement.isZero()) {
             Dialogs.showInfoDialog(getDialogParent(), "Nothing To Be Done",
@@ -1955,11 +1950,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             return;
         }
         mode = newMode;
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer imageLayer) {
-                imageLayer.convertMode(newMode);
-            }
-        }
+        forEachNestedLayerOfType(ImageLayer.class, layer -> layer.convertMode(newMode));
         update();
     }
 
@@ -1989,6 +1980,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // if the whole composition wasn't reloaded, check nested
         // smart objects recursively, looking for linked contents
         CompletableFuture<Composition> reloadFuture = CompletableFuture.completedFuture(null);
+
+        // TODO Only converts the mode of top-level ImageLayers.
+        //  Any image layer inside a layer group is skipped.
+        //  Should use forEachNestedLayerOfType(...) instead of
+        //  iterating layerList directly.
         for (Layer layer : layerList) {
             if (layer instanceof SmartObject so) {
                 // open contents are checked directly via the view
@@ -2067,9 +2063,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Checks if all fonts of all text layers can be found on the current machine.
      */
-    public void checkFontsAreInstalled() {
+    public void warnIfFontsMissing() {
         assert calledOnEDT();
-        forEachNestedLayerOfType(TextLayer.class, TextLayer::checkFontIsInstalled);
+        forEachNestedLayerOfType(TextLayer.class, TextLayer::warnIfFontMissing);
     }
 
     @Override

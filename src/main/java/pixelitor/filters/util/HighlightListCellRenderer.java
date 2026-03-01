@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,9 @@ import javax.swing.*;
 import java.awt.Component;
 import java.util.Locale;
 
+/**
+ * A list cell renderer that highlights matching search text within selected list items.
+ */
 public class HighlightListCellRenderer extends DefaultListRenderer {
     private String searchText;
 

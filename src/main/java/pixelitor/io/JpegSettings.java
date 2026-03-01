@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,13 +26,13 @@ import static javax.imageio.ImageWriteParam.MODE_DISABLED;
 import static javax.imageio.ImageWriteParam.MODE_EXPLICIT;
 
 /**
- * Settings for writing JPEG images
+ * Settings used when writing JPEG images.
  */
 public record JpegSettings(File file, FileFormat format, float quality, boolean progressive) implements SaveSettings {
     private static final float DEFAULT_QUALITY = 0.87f;
 
-    public JpegSettings(float quality, boolean progressive, File outputFile) {
-        this(outputFile, FileFormat.JPG, quality, progressive);
+    public JpegSettings(File file, float quality, boolean progressive) {
+        this(file, FileFormat.JPG, quality, progressive);
     }
 
     /**
@@ -45,7 +45,7 @@ public record JpegSettings(File file, FileFormat format, float quality, boolean 
         if (settings instanceof JpegSettings jpegSettings) {
             return jpegSettings;
         }
-        return new JpegSettings(DEFAULT_QUALITY, false, settings.file());
+        return new JpegSettings(settings.file(), DEFAULT_QUALITY, false);
     }
 
     public Consumer<ImageWriteParam> toCustomizer() {

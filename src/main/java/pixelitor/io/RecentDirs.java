@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,13 +22,13 @@ import pixelitor.utils.AppPreferences;
 import java.io.File;
 
 /**
- * Static methods for keeping track of the last open and save directories
+ * Static methods for tracking the most recently used open and save directories.
  */
-public class Dirs {
+public class RecentDirs {
     private static volatile File lastOpenDir = AppPreferences.loadLastOpenDir();
     private static volatile File lastSaveDir = AppPreferences.loadLastSaveDir();
 
-    private Dirs() {
+    private RecentDirs() {
     }
 
     public static File getLastOpen() {
@@ -50,13 +50,13 @@ public class Dirs {
     }
 
     public static void setLastOpen(File dir) {
-        if (dir.exists() && dir.isDirectory()) {
+        if (dir != null && dir.exists() && dir.isDirectory()) {
             lastOpenDir = dir;
         }
     }
 
     public static void setLastSave(File dir) {
-        if (dir.exists() && dir.isDirectory()) {
+        if (dir != null && dir.exists() && dir.isDirectory()) {
             lastSaveDir = dir;
         }
     }

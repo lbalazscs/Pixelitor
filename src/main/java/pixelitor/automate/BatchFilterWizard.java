@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,14 +27,14 @@ import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
 
 /**
- * The batch filter wizard
+ * A wizard that applies a selected filter to multiple images in batch mode.
  */
 public class BatchFilterWizard extends Wizard {
     private Filter filter;
 
     public BatchFilterWizard(Drawable dr, String title) {
         super(SELECT_FILTER_AND_DIRS, title,
-            "Start Processing", 490, 500, dr);
+            "Start Processing", 600, 500, dr);
     }
 
     public Filter getFilter() {
@@ -47,17 +47,19 @@ public class BatchFilterWizard extends Wizard {
 
     @Override
     protected void onWizardComplete() {
-        var dialogTitle = "Batch Filter Progress";
+        var progressDialogTitle = "Batch Filter Progress";
 
         CompAction batchFilterAction = comp -> {
+            // since we are processing newly opened image files, we 
+            // assume that each has a single image layer (i.e. a Drawable)
             comp.getActiveDrawable().startFilter(filter, BATCH_AUTOMATE);
             return CompletableFuture.completedFuture(comp);
         };
-        new BatchProcessor(batchFilterAction, dialogTitle).processFiles();
+        new BatchProcessor(batchFilterAction, progressDialogTitle).processFiles();
     }
 
     @Override
     protected void performCleanup() {
-        // nothing to do
+        // no cleanup needed
     }
 }

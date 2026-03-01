@@ -30,15 +30,15 @@ import java.util.Optional;
  */
 public abstract class Wizard {
     private OKCancelDialog dialog = null;
-    private WizardPage activePage;
+    private WizardPage currentPage;
     private final String title;
     private final String finishButtonText;
     private final int initialWidth;
     private final int initialHeight;
     protected final Drawable dr;
 
-    protected Wizard(WizardPage initialPage, String title, String finishButtonText, int initialWidth, int initialHeight, Drawable dr) {
-        this.activePage = initialPage;
+    protected Wizard(WizardPage firstPage, String title, String finishButtonText, int initialWidth, int initialHeight, Drawable dr) {
+        this.currentPage = firstPage;
         this.title = title;
         this.finishButtonText = finishButtonText;
         this.initialWidth = initialWidth;
@@ -50,7 +50,7 @@ public abstract class Wizard {
      * Starts the wizard in a modal dialog.
      */
     public void start(JFrame dialogParent) {
-        // a wizard is not reusable and can be shown only once
+        // a wizard instance is single-use and can be shown only once
         assert dialog == null;
 
         try {
@@ -62,36 +62,36 @@ public abstract class Wizard {
     }
 
     private void createDialog(JFrame dialogParent) {
-        dialog = new OKCancelDialog(activePage.createPanel(this, dr), dialogParent, title, "Next") {
+        dialog = new OKCancelDialog(currentPage.createPanel(this, dr), dialogParent, title, "Next") {
             @Override
             protected void dialogCanceled() {
-                activePage.onWizardCanceled(dr);
+                currentPage.onWizardCanceled(dr);
                 super.dialogCanceled();
             }
 
             @Override
             protected void dialogAccepted() {
-                handleNextButtonPress();
+                handleNextAction();
             }
         };
-        dialog.setHeaderMessage(activePage.getHelpText(this));
+        dialog.setHeaderMessage(currentPage.getHelpText(this));
 
-        // it's packed already, but not correctly, because of the header message,
+        // it's already packed, but not correctly, because of the header message,
         // and anyway we don't know the size of the filter dialogs in advance
         dialog.setSize(initialWidth, initialHeight);
-        activePage.onPageShown(this, dialog);
+        currentPage.onPageShown(this, dialog);
     }
 
-    private void handleNextButtonPress() {
-        if (!activePage.validatePage(this, dialog)) {
+    private void handleNextAction() {
+        if (!currentPage.validatePage(this, dialog)) {
             return;
         }
 
-        activePage.onComplete(this, dr);
+        currentPage.onPageComplete(this, dr);
 
-        Optional<WizardPage> nextPage = activePage.getNextPage();
+        Optional<WizardPage> nextPage = currentPage.getNextPage();
         if (nextPage.isPresent()) {
-            transitionToNextPage(nextPage.get());
+            showNextPage(nextPage.get());
         } else {
             // wizard finished
             dialog.close();
@@ -99,15 +99,15 @@ public abstract class Wizard {
         }
     }
 
-    private void transitionToNextPage(WizardPage nextPage) {
+    private void showNextPage(WizardPage nextPage) {
         JComponent panel = nextPage.createPanel(this, dr);
         dialog.updateContent(panel);
         dialog.setHeaderMessage(nextPage.getHelpText(this));
-        activePage = nextPage;
+        currentPage = nextPage;
 
-        activePage.onPageShown(this, dialog);
+        currentPage.onPageShown(this, dialog);
 
-        if (activePage.isFinalPage()) {
+        if (currentPage.isFinalPage()) {
             dialog.setOKButtonText(finishButtonText);
         }
     }

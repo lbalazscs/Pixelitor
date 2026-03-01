@@ -513,7 +513,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         public String toSaveString() {
             StringBuilder sb = new StringBuilder();
             for (double value : values) {
-                sb.append(String.format(Locale.ENGLISH, "%.2f,", value));
+                sb.append(String.format(Locale.ROOT, "%.2f,", value));
             }
             sb.append(linked);
             return sb.toString();

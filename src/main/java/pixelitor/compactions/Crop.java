@@ -44,8 +44,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.concurrent.CompletableFuture;
 
-import static java.lang.String.format;
-
 /**
  * Crops a {@link Composition} based on a rectangle.
  */
@@ -177,7 +175,7 @@ public class Crop implements CompAction {
 
         croppedComp.update(true);
 
-        Messages.showStatusMessage(format(
+        Messages.showStatusMessage(String.format(
             "<b>%s</b> was cropped to %d x %d pixels.",
             croppedComp.getName(), cropRect.width, cropRect.height));
 

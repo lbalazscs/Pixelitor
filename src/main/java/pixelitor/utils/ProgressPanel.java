@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
  * A panel that can show or hide a {@link JProgressBar}.
- * The setVisibility method wouldn't work because of layout problems.
+ * The setVisible method wouldn't work because of layout issues.
  */
 public class ProgressPanel extends JPanel {
     private final JProgressBar progressBar;
@@ -45,15 +45,15 @@ public class ProgressPanel extends JPanel {
     }
 
     public void showProgressBar() {
-        cardLayout.next(this);
+        cardLayout.last(this);
     }
 
     public void hideProgressBar() {
         cardLayout.first(this);
     }
 
-    public void setProgress(int p) {
-        progressBar.setValue(p);
+    public void setProgress(int percent) {
+        progressBar.setValue(percent);
     }
 
     public void paintImmediately() {

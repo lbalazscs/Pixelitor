@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import pixelitor.layers.Drawable;
 import static pixelitor.filters.animation.TweenWizardPage.FILTER_SELECTION;
 
 /**
- * The {@link Wizard} used for tweening animations.
+ * A {@link Wizard} for configuring and rendering tweening animations.
  */
 public class TweenWizard extends Wizard {
     private static final int DEFAULT_DIALOG_WIDTH = 500;

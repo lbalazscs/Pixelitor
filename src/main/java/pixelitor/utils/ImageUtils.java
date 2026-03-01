@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -757,7 +757,7 @@ public class ImageUtils {
 
         // blur it
         var blur = new BoxBlurFilter(softness, softness, 1, "Blur");
-        blur.setProgressTracker(ProgressTracker.NULL_TRACKER);
+        blur.setProgressTracker(ProgressTracker.NO_OP_TRACKER);
         brushImage = blur.filter(brushImage, brushImage);
 
         return brushImage;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,33 +28,33 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 /**
- * Implements hand-tool-style mouse-drag panning for the content of a JViewport.
+ * Adds hand-tool-style panning behavior to a scroll pane’s view component.
  */
 public class ViewportPanner {
-    private int startX;
-    private int startY;
-    private int maxScrollPosX;
-    private int maxScrollPosY;
+    private int dragStartX;
+    private int dragStartY;
+    private int maxScrollX;
+    private int maxScrollY;
 
     public void mousePressed(MouseEvent e, JViewport viewport) {
-        startX = e.getX();
-        startY = e.getY();
+        dragStartX = e.getX();
+        dragStartY = e.getY();
 
         Dimension viewSize = viewport.getViewSize();
-        Dimension extentSize = viewport.getExtentSize(); // the size of the visible part of the view in view coordinates
+        Dimension extentSize = viewport.getExtentSize(); // size of the visible portion of the view, in view coordinates
 
-        maxScrollPosX = viewSize.width - extentSize.width;
-        maxScrollPosY = viewSize.height - extentSize.height;
+        maxScrollX = viewSize.width - extentSize.width;
+        maxScrollY = viewSize.height - extentSize.height;
     }
 
     public void mouseDragged(MouseEvent e, JViewport viewport) {
         Point scrollPos = viewport.getViewPosition();
         scrollPos.translate(
-            startX - e.getX(),
-            startY - e.getY());
+            dragStartX - e.getX(),
+            dragStartY - e.getY());
 
-        scrollPos.x = Math.clamp(scrollPos.x, 0, maxScrollPosX);
-        scrollPos.y = Math.clamp(scrollPos.y, 0, maxScrollPosY);
+        scrollPos.x = Math.clamp(scrollPos.x, 0, maxScrollX);
+        scrollPos.y = Math.clamp(scrollPos.y, 0, maxScrollY);
 
         viewport.setViewPosition(scrollPos);
     }

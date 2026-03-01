@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,7 +97,10 @@ public class Canvas implements Serializable, Debuggable {
 
         thumbDimension = null; // invalidate cache
         recalcCoSize(view, updateView);
-        activeCanvasSizeChanged(this);
+
+        if (view.isActive()) {
+            activeCanvasSizeChanged(this);
+        }
     }
 
     /**
@@ -252,7 +255,7 @@ public class Canvas implements Serializable, Debuggable {
     public Rectangle intersect(Rectangle rectangle) {
         return SwingUtilities.computeIntersection(
             0, 0, width, height,
-            rectangle
+            new Rectangle(rectangle) // avoid mutating the argument
         );
     }
 

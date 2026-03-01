@@ -44,7 +44,7 @@ public class UserPreset implements Preset {
     private final String name;
     private File file; // can be null for new or built-in presets
     private final String directoryName; // subdirectory for this type of preset
-    private boolean loaded; // whether the preset is in the memory
+    private boolean contentLoaded; // whether the preset content is loaded in memory
     private final Map<String, String> content = new LinkedHashMap<>();
 
     public static final String PRESETS_DIR = initPresetsDirectory();
@@ -70,7 +70,7 @@ public class UserPreset implements Preset {
     public UserPreset(String name, String directoryName) {
         this.name = name;
         this.directoryName = directoryName;
-        loaded = true;
+        contentLoaded = true;
     }
 
     /**
@@ -78,10 +78,10 @@ public class UserPreset implements Preset {
      * The preset's content is not loaded until it's first accessed.
      */
     public UserPreset(File file, String directoryName) {
-        this.name = FileUtils.removeExtension(file.getName());
+        this.name = FileUtils.stripExtension(file.getName());
         this.file = file;
         this.directoryName = directoryName;
-        loaded = false;
+        contentLoaded = false;
     }
 
     public String getName() {
@@ -177,7 +177,7 @@ public class UserPreset implements Preset {
     }
 
     public void putFloat(String key, float f) {
-        put(key, String.format(Locale.ENGLISH, "%.4f", f));
+        put(key, String.format(Locale.ROOT, "%.4f", f));
     }
 
     public double getDouble(String key) {
@@ -194,7 +194,7 @@ public class UserPreset implements Preset {
     }
 
     public void putDouble(String key, double d) {
-        put(key, String.format(Locale.ENGLISH, "%.4f", d));
+        put(key, String.format(Locale.ROOT, "%.4f", d));
     }
 
     public Color getColor(String key) {
@@ -247,16 +247,19 @@ public class UserPreset implements Preset {
         return enumConstants[0];
     }
 
-    // we use a simple key=value format; not using
-    // java.util.Properties to avoid escaping spaces in keys
+    //  uses a simple key=value format instead of
+    //  java.util.Properties to avoid escaping spaces in keys
     private void loadFromFile() throws IOException {
-        assert !loaded;
-        InputStream input = new FileInputStream(file);
-        Reader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
-        try (BufferedReader br = new BufferedReader(reader)) {
+        assert !contentLoaded;
+
+        try (InputStream input = new FileInputStream(file);
+             Reader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
+             BufferedReader br = new BufferedReader(reader)) {
+
             loadFromReader(br);
         }
-        loaded = true;
+
+        contentLoaded = true;
     }
 
     private void loadFromReader(BufferedReader br) throws IOException {
@@ -285,7 +288,7 @@ public class UserPreset implements Preset {
      */
     public void save() {
         assert file == null;
-        assert loaded;
+        assert contentLoaded;
 
         File presetFile = getSaveFile(true);
         try (PrintWriter writer = new PrintWriter(presetFile, StandardCharsets.UTF_8)) {
@@ -315,7 +318,7 @@ public class UserPreset implements Preset {
     @Override
     public Action createAction(PresetOwner owner) {
         return new TaskAction(name, () -> {
-            if (!loaded) {
+            if (!contentLoaded) {
                 try {
                     loadFromFile();
                 } catch (IOException ex) {
@@ -341,12 +344,11 @@ public class UserPreset implements Preset {
             return List.of();
         }
 
-        List<UserPreset> list = new ArrayList<>();
-        for (String fileName : fileNames) {
-            File presetFile = new File(presetsDir, fileName);
-            list.add(new UserPreset(presetFile, presetDirName));
-        }
-        return list;
+        return Arrays.stream(fileNames)
+            .sorted()
+            .map(fileName -> new File(presetsDir, fileName))
+            .map(file -> new UserPreset(file, presetDirName))
+            .toList();
     }
 
     public boolean fileExists() {

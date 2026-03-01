@@ -296,7 +296,7 @@ public class GMICFilterCreator {
         double minValue = Double.parseDouble(minString);
         double maxValue = Double.parseDouble(maxString);
 
-        String declaration = String.format("RangeParam %s = new RangeParam(\"%s\", %.0f, %.0f, %.0f);",
+        String declaration = String.format(Locale.ROOT, "RangeParam %s = new RangeParam(\"%s\", %.0f, %.0f, %.0f);",
             paramName,
             paramTitle,
             minValue * 100,

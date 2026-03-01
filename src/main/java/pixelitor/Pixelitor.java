@@ -43,7 +43,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.String.format;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
@@ -206,7 +205,7 @@ public class Pixelitor {
                 fileOpeningTasks.add(FileIO.openFileAsync(file, false));
             } else {
                 Messages.showError("File Not Found",
-                    format("<html>Unable to locate file: <b>%s</b>", file.getAbsolutePath()));
+                    String.format("<html>Unable to locate file: <b>%s</b>", file.getAbsolutePath()));
             }
         }
 
@@ -294,7 +293,7 @@ public class Pixelitor {
 
     private static String createUnsavedChangesMsg(List<Composition> unsavedComps) {
         if (unsavedComps.size() == 1) {
-            return format("<html>There are unsaved changes in <b>%s</b>." +
+            return String.format("<html>There are unsaved changes in <b>%s</b>." +
                     "<br>Are you sure you want to exit?",
                 unsavedComps.getFirst().getName());
         }

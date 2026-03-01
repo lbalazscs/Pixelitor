@@ -680,8 +680,8 @@ public class SubPath implements Serializable, Transformable {
         // https://stackoverflow.com/questions/3162645/convert-a-quadratic-bezier-to-a-cubic
         double qp1x = cx;
         double qp1y = cy;
-        double qp0x = last.x;
-        double qp0y = last.y;
+        double qp0x = last.imX;
+        double qp0y = last.imY;
         double qp2x = nextX;
         double qp2y = nextY;
 

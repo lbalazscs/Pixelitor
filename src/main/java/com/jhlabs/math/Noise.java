@@ -162,9 +162,9 @@ public class Noise {
         float b = lerp(sx, u, v);
 
         float rv = 1.5f * lerp(sy, a, b);
+
+        assert !Float.isNaN(rv);
         if (Float.isNaN(rv)) {
-            // it seems that this is very rarely, but happening when rendering marble
-            System.out.printf("Noise::noise2: failed for x = %.5f, y = %.5f%n", x, y);
             rv = 0.0f;
         }
 
@@ -271,14 +271,20 @@ public class Noise {
 
             g1[i] = (float) ((random() % (B + B)) - B) / B;
 
-            for (j = 0; j < 2; j++) {
-                g2[i][j] = (float) ((random() % (B + B)) - B) / B;
-            }
+            // reroll until we get a non-zero 2D vector
+            do {
+                for (j = 0; j < 2; j++) {
+                    g2[i][j] = (float) ((random() % (B + B)) - B) / B;
+                }
+            } while (g2[i][0] == 0.0f && g2[i][1] == 0.0f);
             normalize2(g2[i]);
 
-            for (j = 0; j < 3; j++) {
-                g3[i][j] = (float) ((random() % (B + B)) - B) / B;
-            }
+            // reroll until we get a non-zero 3D vector
+            do {
+                for (j = 0; j < 3; j++) {
+                    g3[i][j] = (float) ((random() % (B + B)) - B) / B;
+                }
+            } while (g3[i][0] == 0.0f && g3[i][1] == 0.0f && g3[i][2] == 0.0f);
             normalize3(g3[i]);
         }
 

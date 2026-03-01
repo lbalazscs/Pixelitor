@@ -98,7 +98,7 @@ public class LayerGroup extends CompositeLayer {
         for (Layer layer : layers) {
             layersCopy.add(layer.copy(copyType, true, newComp));
         }
-        return new LayerGroup(comp, copyName, layersCopy);
+        return new LayerGroup(newComp, copyName, layersCopy);
     }
 
     public void setLayers(List<Layer> layers) {

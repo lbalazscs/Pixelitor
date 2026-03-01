@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     private int completedUnits = 0;
     private int lastReportedPercent = 0;
 
-    private boolean isTrackingVisible = false;
+    private boolean isProgressVisible = false;
     private final boolean isRunningOnEDT;
 
     // In this class this field is used only for debugging.
@@ -63,8 +63,8 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     }
 
     private void update() {
-        // Check if we should start showing progress
-        if (!isTrackingVisible) {
+        // check if we should start showing progress
+        if (!isProgressVisible) {
             double elapsedTime = System.currentTimeMillis() - startTimeMillis;
             if (elapsedTime > VISIBILITY_THRESHOLD_MS) {
                 if (isRunningOnEDT) {
@@ -72,12 +72,12 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
                 } else {
                     EventQueue.invokeLater(this::onProgressStart);
                 }
-                isTrackingVisible = true;
+                isProgressVisible = true;
             }
         }
 
-        // Update progress if visible
-        if (isTrackingVisible) {
+        // update progress if visible
+        if (isProgressVisible) {
             int currentPercent = (int) (completedUnits * 100.0 / numTotalUnits);
             if (currentPercent > lastReportedPercent) {
                 if (isRunningOnEDT) {
@@ -92,13 +92,13 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
 
     @Override
     public void finished() {
-        if (isTrackingVisible) {
+        if (isProgressVisible) {
             if (isRunningOnEDT) {
                 onProgressComplete();
             } else {
                 EventQueue.invokeLater(this::onProgressComplete);
             }
-            isTrackingVisible = false;
+            isProgressVisible = false;
             lastReportedPercent = 0;
         }
     }

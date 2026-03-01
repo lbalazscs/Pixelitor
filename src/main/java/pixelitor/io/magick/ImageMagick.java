@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.*;
-import pixelitor.io.FileChooserConfig.SelectableFormats;
+import pixelitor.io.FileChooserConfig.FormatSelection;
 import pixelitor.utils.Messages;
 
 import javax.imageio.ImageIO;
@@ -62,10 +62,10 @@ public class ImageMagick {
         }
 
         BufferedImage image = comp.getCompositeImage();
-        String suggestedFileName = FileUtils.removeExtension(comp.getName());
+        String suggestedFileName = FileUtils.stripExtension(comp.getName());
 
-        File targetFile = FileChoosers.showSaveDialog(new FileChooserConfig(
-            suggestedFileName, null, SelectableFormats.ANY));
+        File targetFile = FileChoosers.selectSaveFile(new FileChooserConfig(
+            suggestedFileName, null, FormatSelection.ANY));
         if (targetFile == null) { // user canceled save dialog
             return;
         }
@@ -145,7 +145,7 @@ public class ImageMagick {
                 // always called, handles exceptions
                 if (exception != null) {
                     progressHandler.stopProgressOnEDT();
-                    FileIO.handleFileReadErrors(exception);
+                    FileIO.handleFileReadError(exception);
                 }
             });
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,6 +43,9 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     private final Drawable drawable;
     private final ProgressMonitor progressMonitor;
 
+    private AnimationWriter animationWriter;
+    private boolean hasError = false;
+
     public RenderTweenFramesTask(TweenAnimation animation, Drawable drawable) {
         assert Threads.calledOnEDT() : Threads.callInfo();
 
@@ -75,10 +78,8 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     protected Void doInBackground() {
         assert calledOutsideEDT() : "on EDT";
 
-        AnimationWriter animationWriter = animation.createWriter();
-        boolean hasError = false;
-
         try {
+            animationWriter = animation.createWriter();
             ParametrizedFilter filter = animation.getFilter();
             int baseFrameCount = animation.getNumFrames();
             int totalFrames = calcTotalFrameCount(baseFrameCount);
@@ -96,15 +97,25 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         } catch (Exception e) {
             hasError = true;
             Messages.showExceptionOnEDT(e);
-        } finally {
-            setProgress(100);
+        }
+        setProgress(100);
+        return null;
+    }
 
+    // invoked exactly once on the EDT
+    @Override
+    protected void done() {
+        drawable.stopPreviewing();
+
+        if (animationWriter != null) {
             // treat errors as cancellation for cleanup purposes
             boolean cancelled = isCancelled() || hasError;
-            SwingUtilities.invokeLater(() -> cleanupOnEDT(animationWriter, cancelled));
+            if (cancelled) {
+                animationWriter.cancel();
+            } else {
+                animationWriter.finish();
+            }
         }
-
-        return null;
     }
 
     private int calcTotalFrameCount(int baseFrameCount) {
@@ -145,7 +156,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         // filters must run on the EDT
         GUIUtils.invokeAndWait(() -> {
-            FilterState intermediateState = animation.tween(time);
+            FilterState intermediateState = animation.interpolateState(time);
             filter.getParamSet().setState(intermediateState, true);
             drawable.startFilter(filter, TWEEN_PREVIEW);
         });
@@ -155,14 +166,5 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         Composition comp = drawable.getComp();
         comp.repaint();
         return comp.getCompositeImage();
-    }
-
-    private void cleanupOnEDT(AnimationWriter animationWriter, boolean canceled) {
-        drawable.stopPreviewing();
-        if (canceled) {
-            animationWriter.cancel();
-        } else {
-            animationWriter.finish();
-        }
     }
 }

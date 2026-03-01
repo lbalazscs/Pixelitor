@@ -79,8 +79,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         applySettings(settings);
     }
 
-    public TextLayer(TextLayer other, String name) {
-        super(other.comp, name);
+    public TextLayer(TextLayer other, Composition newComp, String name) {
+        super(newComp, name);
 
         this.settings = other.settings.copy();
 
@@ -196,7 +196,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     protected TextLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
         String duplicateName = copyType.createLayerCopyName(name);
-        TextLayer d = new TextLayer(this, duplicateName);
+        TextLayer d = new TextLayer(this, newComp, duplicateName);
         d.setTranslation(getTx(), getTy());
         return d;
     }
@@ -204,8 +204,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     /**
      * Checks if the font used by this layer is installed on the system.
      */
-    public void checkFontIsInstalled() {
-        settings.checkFontIsInstalled(this);
+    public void warnIfFontMissing() {
+        settings.warnIfFontMissing(this);
     }
 
     @Override
@@ -236,9 +236,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
                     return 0x00_FF_FF_FF | maskAlpha << 24;
                 }
             }
-            // There is no pixel-perfect hit detection for text layers, this value
-            // signals that auto-select should select in the entire bounding box.
-            // TODO actually there should be an image cache in the painter
+            // Since there is no pixel-perfect hit detection for text layers, returning
+            // this value signals that auto-select should select the entire bounding box.
+            // TODO actually there is now an image cache in the painter that could be checked.
             return 0xFF_FF_FF_FF;
         } else {
             // signal that auto-select should ignore this layer

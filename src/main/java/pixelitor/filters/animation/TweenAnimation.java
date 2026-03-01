@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,10 @@ import pixelitor.gui.utils.Dialogs;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static java.nio.file.Files.isWritable;
 import static pixelitor.utils.Threads.callInfo;
@@ -62,8 +66,8 @@ public class TweenAnimation {
         finalState = filter.getParamSet().copyState(true);
     }
 
-    public FilterState tween(double time) {
-        double progress = interpolation.time2progress(time);
+    public FilterState interpolateState(double time) {
+        double progress = interpolation.timeToProgress(time);
         return initialState.interpolate(finalState, progress);
     }
 
@@ -119,11 +123,17 @@ public class TweenAnimation {
     private boolean checkOverwriteForDirectory(Component dialogParent) {
         assert outputLocation.isDirectory() : outputLocation.getAbsolutePath();
 
-        String[] files = outputLocation.list();
-        if (files == null || files.length == 0) {
-            return true; // empty directory: OK
-        } else {
-            return showFolderNotEmptyDialog(dialogParent);
+        Path dirPath = outputLocation.toPath();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath)) {
+            if (!stream.iterator().hasNext()) {
+                return true; // empty directory: OK
+            } else {
+                return showFolderNotEmptyDialog(dialogParent);
+            }
+        } catch (IOException e) {
+            Dialogs.showErrorDialog(dialogParent, "Folder Read Error",
+                "Could not read the contents of the folder:\n" + e.getMessage());
+            return false;
         }
     }
 

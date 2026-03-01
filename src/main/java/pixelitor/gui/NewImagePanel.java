@@ -35,7 +35,7 @@ import java.awt.event.KeyListener;
 
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.createEmptyBorder;
-import static pixelitor.utils.MemoryInfo.NUM_BYTES_IN_MEGABYTE;
+import static pixelitor.utils.MemoryInfo.BYTES_PER_MEGABYTE;
 
 /**
  * The panel in the "New Image" dialog.
@@ -160,8 +160,8 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner, Ke
                         "<br>An image of %dx%d pixels needs at least %d megabytes." +
                         "<br>Available memory is at most %d megabytes.",
                     width, height,
-                    requiredMemory / NUM_BYTES_IN_MEGABYTE,
-                    availableMemory / NUM_BYTES_IN_MEGABYTE));
+                    requiredMemory / BYTES_PER_MEGABYTE,
+                    availableMemory / BYTES_PER_MEGABYTE));
             }
         }
 

@@ -30,9 +30,9 @@ import pixelitor.gui.utils.Themes;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
-import pixelitor.io.Dirs;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileFormat;
+import pixelitor.io.RecentDirs;
 import pixelitor.layers.LayerGUILayout;
 import pixelitor.menus.file.BoundedUniqueList;
 import pixelitor.menus.file.RecentFileEntry;
@@ -252,13 +252,24 @@ public final class AppPreferences {
     }
 
     private static void saveRecentFiles(BoundedUniqueList<RecentFileEntry> recentFiles) {
+        // overwrite the beginning keys with the active items
         for (int i = 0; i < recentFiles.size(); i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
             String filePath = recentFiles.get(i).getFullPath();
             recentFilesPrefs.put(key, filePath);
         }
+
+        // erase any stale keys left over from previous runs
+        for (int i = recentFiles.size(); i < MAX_RECENT_FILES; i++) {
+            recentFilesPrefs.remove(RECENT_FILE_PREFS_KEY + i);
+        }
     }
 
+    /**
+     * Wipes out all recent files from the preferences.
+     * This method is called when the user clears the recent
+     * files menu, not during application shutdown.
+     */
     public static void removeRecentFiles() {
         for (int i = 0; i < MAX_RECENT_FILES; i++) {
             recentFilesPrefs.remove(RECENT_FILE_PREFS_KEY + i);
@@ -291,18 +302,18 @@ public final class AppPreferences {
     }
 
     private static void saveLastOpenDir() {
-        saveDir(Dirs.getLastOpen(), LAST_OPEN_DIR_KEY);
+        saveDir(RecentDirs.getLastOpen(), LAST_OPEN_DIR_KEY);
     }
 
     private static void saveLastSaveDir() {
-        saveDir(Dirs.getLastSave(), LAST_SAVE_DIR_KEY);
+        saveDir(RecentDirs.getLastSave(), LAST_SAVE_DIR_KEY);
     }
 
     private static void saveDir(File f, String key) {
         if (f != null) {
             mainPrefs.put(key, f.getAbsolutePath());
         } else {
-            mainPrefs.put(key, null);
+            mainPrefs.remove(key);
         }
     }
 
@@ -518,7 +529,12 @@ public final class AppPreferences {
 
     private static void saveUIFont() {
         mainPrefs.putInt(UI_FONT_SIZE_KEY, customUIFontSize);
-        mainPrefs.put(UI_FONT_TYPE_KEY, customUIFontType);
+
+        if (customUIFontType == null) { // should not happen
+            mainPrefs.remove(UI_FONT_TYPE_KEY);
+        } else {
+            mainPrefs.put(UI_FONT_TYPE_KEY, customUIFontType);
+        }
     }
 
     public static String loadLanguageCode() {

@@ -165,7 +165,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             .thenApplyAsync(this::handleReloadedComp, onEDT)
             .whenComplete((composition, exception) -> {
                 IOTasks.markReadingComplete(filePath);
-                FileIO.handleFileReadErrors(exception);
+                FileIO.handleFileReadError(exception);
             });
     }
 
@@ -788,7 +788,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public static void snappingSettingChanged(boolean newValue) {
-        AppPreferences.setFlag(AppPreferences.FLAG_PIXEL_SNAP, newValue);
         Tool activeTool = Tools.getActive();
         if (activeTool == Tools.CROP) {
             pixelSnapping = true; // the crop tool always snaps

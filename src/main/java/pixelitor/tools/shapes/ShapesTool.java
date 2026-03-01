@@ -944,7 +944,7 @@ public class ShapesTool extends DragTool {
         effectsParam.loadStateFrom(preset);
         updateEffects();
 
-        FgBgColors.loadStateFrom(preset);
+        FgBgColors.loadStateFrom(preset, false);
 
         shouldRegenerateShape = true;
         if (styledShape != null && regenerateStyledShape) {

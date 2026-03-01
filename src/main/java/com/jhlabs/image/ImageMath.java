@@ -491,8 +491,8 @@ public class ImageMath {
         int g3 = (se >> 8) & 0xff;
         int b3 = se & 0xff;
 
-        double cx = 1.0f - x;
-        double cy = 1.0f - y;
+        double cx = 1.0 - x;
+        double cy = 1.0 - y;
 
         m0 = cx * a0 + x * a1;
         m1 = cx * a2 + x * a3;
@@ -990,4 +990,3 @@ public class ImageMath {
         }
     }
 }
-

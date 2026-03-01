@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,9 +27,9 @@ import java.io.File;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
 
 /**
- * The GUI elements of a file/directory chooser (a textfield and a
- * "Browse..." button) are separated into this non-component class
- * so that they can be reused with different layout managers
+ * Encapsulates the UI elements of a file or directory chooser (a text
+ * field and a “Browse…” button) in a reusable helper that is not itself a
+ * Swing component, allowing it to be used with different layout managers.
  */
 public class BrowseFilesSupport {
     private static final String BROWSE_BUTTON_TEXT = "Browse...";
@@ -66,12 +66,11 @@ public class BrowseFilesSupport {
             }
 
             private static void configureFilter(FileNameExtensionFilter fileFilter, JFileChooser chooser) {
-                // First remove the "All Files" option...
+                // remove the "All Files" option
                 chooser.setAcceptAllFileFilterUsed(false);
-                // ... then add the extension filter corresponding to the saved file type...
+
+                // add the configured extension filter
                 chooser.addChoosableFileFilter(fileFilter);
-//            // ... then add back the "All Files" option so that it is at the end
-//            chooser.setAcceptAllFileFilterUsed(true);
             }
         };
 
@@ -95,22 +94,22 @@ public class BrowseFilesSupport {
     private void init(String defaultPath) {
         pathTF = new JTextField(PATH_FIELD_COLUMNS);
         pathTF.setText(defaultPath);
-        browseButton.addActionListener(e -> openChooserDialog(chooserDialogTitle));
+        browseButton.addActionListener(e -> showChooserDialog(chooserDialogTitle));
     }
 
     public void setSelectionMode(SelectionMode mode) {
         this.mode = mode;
     }
 
-    private void openChooserDialog(String title) {
+    private void showChooserDialog(String title) {
         JFileChooser chooser = mode.createChooser(pathTF.getText(), fileFilter);
 
         chooser.setDialogTitle(title);
         chooser.showOpenDialog(PixelitorWindow.get());
-        updateSelectedPath(chooser.getSelectedFile());
+        updatePathField(chooser.getSelectedFile());
     }
 
-    private void updateSelectedPath(File selectedFile) {
+    private void updatePathField(File selectedFile) {
         if (selectedFile != null) {
             String filePath = selectedFile.toString();
 
@@ -125,7 +124,7 @@ public class BrowseFilesSupport {
         }
     }
 
-    public JTextField getPathTextField() {
+    public JTextField getTextField() {
         return pathTF;
     }
 

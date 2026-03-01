@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,10 +26,10 @@ import java.util.StringJoiner;
  * A class that calculates a 2D bounding box from a set of points.
  */
 public class BoundingBox {
-    private double minX = Double.MAX_VALUE;
-    private double minY = Double.MAX_VALUE;
-    private double maxX = Double.MIN_VALUE;
-    private double maxY = Double.MIN_VALUE;
+    private double minX = Double.POSITIVE_INFINITY;
+    private double minY = Double.POSITIVE_INFINITY;
+    private double maxX = Double.NEGATIVE_INFINITY;
+    private double maxY = Double.NEGATIVE_INFINITY;
     private boolean initialized = false;
 
     public double getMinX() {
@@ -76,10 +76,10 @@ public class BoundingBox {
      * effectively removing all added points.
      */
     public void reset() {
-        minX = Double.MAX_VALUE;
-        minY = Double.MAX_VALUE;
-        maxX = Double.MIN_VALUE;
-        maxY = Double.MIN_VALUE;
+        minX = Double.POSITIVE_INFINITY;
+        minY = Double.POSITIVE_INFINITY;
+        maxX = Double.NEGATIVE_INFINITY;
+        maxY = Double.NEGATIVE_INFINITY;
 
         initialized = false;
     }

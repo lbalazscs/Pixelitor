@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,9 +31,9 @@ import pixelitor.filters.AbstractLights;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.utils.MlpAlignmentSelector;
-import pixelitor.io.Dirs;
 import pixelitor.io.FileFormat;
 import pixelitor.io.FileUtils;
+import pixelitor.io.RecentDirs;
 import pixelitor.io.SaveSettings;
 import pixelitor.layers.*;
 import pixelitor.tools.gradient.Gradient;
@@ -118,7 +118,7 @@ public class SplashImageCreator {
         comp.getView().paintImmediately();
 
         String fileName = format("splash%04d.%s", sequenceNumber, format);
-        comp.setFile(new File(Dirs.getLastSave(), fileName));
+        comp.setFile(new File(RecentDirs.getLastSave(), fileName));
 
         return comp;
     }
@@ -223,11 +223,11 @@ public class SplashImageCreator {
     }
 
     private static CompletableFuture<Void> saveAndCloseCompAsync(Composition comp, FileFormat format) {
-        var flatSettings = new SaveSettings.Simple(format, comp.getFile());
+        var flatSettings = new SaveSettings.Default(format, comp.getFile());
 
         var pxcFile = new File(comp.getFile().getParent(),
             FileUtils.replaceExtension(comp.getFile().getName(), "pxc"));
-        var pxcSettings = new SaveSettings.Simple(FileFormat.PXC, pxcFile);
+        var pxcSettings = new SaveSettings.Default(FileFormat.PXC, pxcFile);
 
         return comp.saveAsync(flatSettings, false)
             .thenCompose(v -> comp.saveAsync(pxcSettings, false))
@@ -238,6 +238,6 @@ public class SplashImageCreator {
                                                    ProgressHandler progressHandler) {
         progressHandler.stopProgress();
         Messages.showPlainStatusMessage(format("Finished saving %d splash images to %s",
-            numCreatedImages, Dirs.getLastSave()));
+            numCreatedImages, RecentDirs.getLastSave()));
     }
 }

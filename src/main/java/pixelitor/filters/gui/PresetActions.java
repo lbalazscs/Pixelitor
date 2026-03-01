@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,14 +39,19 @@ public class PresetActions {
     }
 
     /**
-     * Creates an action that opens the {@link UserPreset} directory
-     * in the system's file manager.
+     * Creates an action that opens the {@link UserPreset}
+     * directory in the system's file manager.
      */
-    public static TaskAction createManageAction(PresetOwner owner) {
+    public static TaskAction createManageAction(PresetOwner owner, Component dialogParent) {
         return new TaskAction("Manage Presets...", () -> {
             try {
                 String dirPath = PRESETS_DIR + File.separator + owner.getPresetDirName();
-                Desktop.getDesktop().open(new File(dirPath));
+                File directory = new File(dirPath);
+                if (!directory.exists()) {
+                    Dialogs.showDirectoryNotFoundDialog(dialogParent, directory);
+                    return;
+                }
+                Desktop.getDesktop().open(directory);
             } catch (IOException ex) {
                 Messages.showException(ex);
             }

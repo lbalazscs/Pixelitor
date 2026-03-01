@@ -42,6 +42,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
@@ -72,14 +74,14 @@ public class FileIO {
         }
         return loadCompAsync(file)
             .thenApplyAsync(Views::addJustLoadedComp, onEDT)
-            .whenComplete((comp, exception) -> handleFileReadErrors(exception));
+            .whenComplete((comp, exception) -> handleFileReadError(exception));
     }
 
     /**
      * Asynchronously loads a {@link Composition} from a file.
      */
     public static CompletableFuture<Composition> loadCompAsync(File file) {
-        Optional<FileFormat> fileFormat = FileFormat.fromFile(file);
+        Optional<FileFormat> fileFormat = FileFormat.fromExtension(file);
         if (fileFormat.isPresent()) {
             return fileFormat.get().readAsync(file);
         } else {
@@ -93,7 +95,7 @@ public class FileIO {
      * Synchronously loads a Composition from a file.
      */
     public static Composition loadCompSync(File file) {
-        Optional<FileFormat> fileFormat = FileFormat.fromFile(file);
+        Optional<FileFormat> fileFormat = FileFormat.fromExtension(file);
         if (fileFormat.isPresent()) {
             return fileFormat.get().readSync(file);
         } else {
@@ -106,27 +108,27 @@ public class FileIO {
     /**
      * Asynchronously adds a new image layer to an existing composition.
      */
-    public static void addNewImageLayerAsync(File file, Composition comp) {
+    public static void addImageLayerAsync(File file, Composition comp) {
         CompletableFuture
             .supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
             .thenAcceptAsync(img -> comp.addExternalImageAsNewLayer(
                     img, file.getName(), "Dropped Layer"),
                 onEDT)
-            .whenComplete((result, exception) -> handleFileReadErrors(exception));
+            .whenComplete((result, exception) -> handleFileReadError(exception));
     }
 
     /**
      * Handles errors that occur during file reading.
      * Can be called from any thread.
      */
-    public static void handleFileReadErrors(Throwable error) {
+    public static void handleFileReadError(Throwable error) {
         if (error == null) {
             return;
         }
         if (error instanceof CompletionException) {
             // if the exception was thrown in a previous
             // stage, handle it the same way
-            handleFileReadErrors(error.getCause());
+            handleFileReadError(error.getCause());
             return;
         }
         if (error instanceof DecodingException de) {
@@ -161,7 +163,7 @@ public class FileIO {
     /**
      * Saves a {@link Composition}, optionally using a file chooser
      * for the file location. Returns true if the file was saved,
-     * false if the user cancels the saving or if it could not be saved.
+     * false if the user cancels or if it could not be saved.
      */
     public static boolean save(Composition comp, boolean forceChooser) {
         boolean useFileChooser = forceChooser || comp.getFile() == null;
@@ -176,9 +178,9 @@ public class FileIO {
                 return false;
             }
         }
-        Optional<FileFormat> fileFormat = FileFormat.fromFile(targetFile);
+        Optional<FileFormat> fileFormat = FileFormat.fromExtension(targetFile);
         if (fileFormat.isPresent()) {
-            var saveSettings = new SaveSettings.Simple(fileFormat.get(), targetFile);
+            var saveSettings = new SaveSettings.Default(fileFormat.get(), targetFile);
             comp.saveAsync(saveSettings, true);
             return true;
         } else {
@@ -232,7 +234,7 @@ public class FileIO {
     public static void addAllImagesInDirAsLayers(File dir, Composition comp) {
         List<File> files = FileUtils.listSupportedInputFiles(dir);
         for (File file : files) {
-            addNewImageLayerAsync(file, comp);
+            addImageLayerAsync(file, comp);
         }
     }
 
@@ -250,7 +252,7 @@ public class FileIO {
         CompletableFuture
             .supplyAsync(() -> exportLayersToPNG(comp), onIOThread)
             .thenAcceptAsync(numImg -> Messages.showStatusMessage(
-                getSavedImagesMessage(numImg, Dirs.getLastSave())), onEDT)
+                getSavedImagesMessage(numImg, RecentDirs.getLastSave())), onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
@@ -279,11 +281,11 @@ public class FileIO {
                                        int layerIndex) {
         assert calledOutsideEDT() : "on EDT";
 
-        File outputDir = Dirs.getLastSave();
+        File outputDir = RecentDirs.getLastSave();
         String fileName = format("%03d_%s.png", layerIndex, FileUtils.sanitizeToFileName(layerName));
         File file = new File(outputDir, fileName);
 
-        saveImageToFile(image, new SaveSettings.Simple(FileFormat.PNG, file));
+        saveImageToFile(image, new SaveSettings.Default(FileFormat.PNG, file));
     }
 
     /**
@@ -295,10 +297,10 @@ public class FileIO {
         if (canceled) {
             return;
         }
-        File outputDir = Dirs.getLastSave();
+        File outputDir = RecentDirs.getLastSave();
         for (FileFormat format : FileFormat.values()) {
             File outFile = new File(outputDir, "all_formats." + format);
-            comp.saveAsync(new SaveSettings.Simple(format, outFile), false);
+            comp.saveAsync(new SaveSettings.Default(format, outFile), false);
         }
     }
 
@@ -308,7 +310,7 @@ public class FileIO {
         File selectedFile = FileChoosers.selectSaveFileForFormat(
             comp.suggestFileName("jpg"), FileChoosers.jpegFilter);
         if (selectedFile != null) {
-            comp.saveAsync(new JpegSettings(quality, progressive, selectedFile), true);
+            comp.saveAsync(new JpegSettings(selectedFile, quality, progressive), true);
         }
     }
 
@@ -382,41 +384,78 @@ public class FileIO {
      * Executes an external command that understands PNG on stdin and writes PNG to stdout.
      */
     public static Result<BufferedImage, String> runCommandLineFilter(BufferedImage src, List<String> command) {
+        ExecutorService ioExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new))
             .redirectInput(ProcessBuilder.Redirect.PIPE)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE);
-
-        BufferedImage out;
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectError(ProcessBuilder.Redirect.PIPE);
 
         try {
             Process process = pb.start();
 
-            writeToCommandLineProcess(src, process);
-            out = readFromCommandLineProcess(process);
+            try {
+                // drain stderr asynchronously to prevent pipe buffer deadlock
+                CompletableFuture<String> stderrFuture = CompletableFuture.supplyAsync(() -> {
+                    try (InputStream processError = process.getErrorStream()) {
+                        return new String(processError.readAllBytes(), UTF_8);
+                    } catch (IOException e) {
+                        return "Error reading stderr: " + e.getMessage();
+                    }
+                }, ioExecutor);
 
-            String errorMsg = null;
-            if (out == null) { // there was an error
-                // try to get the error message
-                // TODO this could deadlock if the command completely fills
-                //   the OS pipe buffer before finishing writing to stdout
-                try (InputStream processError = process.getErrorStream()) {
-                    errorMsg = new String(processError.readAllBytes(), UTF_8);
+                // feed stdin asynchronously to prevent blocking if stdout/stderr fills up early
+                CompletableFuture<Void> stdinFuture = CompletableFuture.runAsync(() -> {
+                    try {
+                        writeToCommandLineProcess(src, process);
+                    } catch (IOException e) {
+                        // this happens if the process terminates early (broken pipe)
+                        throw new CompletionException(e);
+                    }
+                }, ioExecutor);
+
+                // read stdout synchronously in the current thread
+                BufferedImage out = null;
+                try {
+                    out = readFromCommandLineProcess(process);
+                } catch (IOException e) {
+                    // will be handled using exit code and stderr
                 }
-            }
-            int exit = process.waitFor();
-            if (exit != 0 || errorMsg != null) {
-                if (errorMsg != null) {
-                    return Result.error(errorMsg);
-                } else {
-                    return Result.error("Process failed (exit=" + exit + ")");
+
+                int exit = process.waitFor();
+
+                // ensure the background write completes (or fails)
+                try {
+                    stdinFuture.join();
+                } catch (Exception e) {
+                    // ignored: a failure here is expected if the process exited early
+                }
+
+                // retrieve any captured error messages
+                String errorMsg = stderrFuture.join();
+
+                // check for errors
+                if (exit != 0 || out == null) {
+                    if (errorMsg != null && !errorMsg.isBlank()) {
+                        return Result.error(errorMsg.trim());
+                    } else {
+                        return Result.error("Process failed (exit=" + exit + ")");
+                    }
+                }
+
+                return Result.success(out);
+            } finally {
+                // guarantee process termination
+                if (process.isAlive()) {
+                    process.destroyForcibly();
                 }
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
-        return Result.success(out);
     }
 
     /**
@@ -424,9 +463,10 @@ public class FileIO {
      */
     public static BufferedImage readFromCommandLineProcess(Process process) throws IOException {
         BufferedImage image;
-        try (InputStream processOutput = process.getInputStream()) {
-            assert processOutput instanceof BufferedInputStream;
-
+        try (InputStream rawIn = process.getInputStream();
+             InputStream processOutput = rawIn instanceof BufferedInputStream
+                 ? rawIn
+                 : new BufferedInputStream(rawIn)) {
             image = ImageIO.read(processOutput);
         }
         return image;
@@ -436,19 +476,20 @@ public class FileIO {
      * Writes an image to the standard input of an external process.
      */
     public static void writeToCommandLineProcess(BufferedImage src, Process process) throws IOException {
-        try (OutputStream processInput = process.getOutputStream()) {
-            assert processInput instanceof BufferedOutputStream;
-
-            writeToCommandLineInputStream(src, processInput);
+        try (OutputStream rawOut = process.getOutputStream();
+             OutputStream processInput = rawOut instanceof BufferedOutputStream
+                 ? rawOut
+                 : new BufferedOutputStream(rawOut)) {
+            writePngToProcessStdin(src, processInput);
             processInput.flush();
         }
     }
 
     /**
-     * Writes the given image to the standard input stream
+     * Writes the given image to the standard input
      * of an external command-line program in PNG format.
      */
-    private static void writeToCommandLineInputStream(BufferedImage img, OutputStream commandLineInput) throws IOException {
+    private static void writePngToProcessStdin(BufferedImage img, OutputStream commandLineInput) throws IOException {
         // Write as png to ImageMagick and let it do
         // the conversion to the final format.
         // Explicitly setting a low compression level doesn't seem

@@ -92,7 +92,7 @@ public class RaysFilter extends MotionBlurOp {
         pt.unitDone();
         ProgressTracker savedTracker = pt;
         // do not track the super call, it is fast
-        pt = ProgressTracker.NULL_TRACKER;
+        pt = ProgressTracker.NO_OP_TRACKER;
 
         rays = super.filter(rays, null);
 

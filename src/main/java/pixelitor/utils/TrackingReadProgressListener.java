@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,24 +21,26 @@ import javax.imageio.ImageReader;
 import javax.imageio.event.IIOReadProgressListener;
 
 /**
- * Tracks the reading of a file with the help of a {@link ProgressTracker}.
+ * Tracks the progress of image reading using a {@link ProgressTracker}.
  */
 public class TrackingReadProgressListener implements IIOReadProgressListener {
     private final ProgressTracker tracker;
-    private int trackedPercentage = 0;
+    private int reportedPercentage = 0;
 
     public TrackingReadProgressListener(ProgressTracker tracker) {
         this.tracker = tracker;
     }
 
     @Override
-    public void sequenceStarted(ImageReader source, int minIndex) {
-
+    public void thumbnailStarted(ImageReader source, int imageIndex, int thumbnailIndex) {
     }
 
     @Override
-    public void sequenceComplete(ImageReader source) {
+    public void thumbnailProgress(ImageReader source, float percentageDone) {
+    }
 
+    @Override
+    public void thumbnailComplete(ImageReader source) {
     }
 
     @Override
@@ -47,10 +49,10 @@ public class TrackingReadProgressListener implements IIOReadProgressListener {
 
     @Override
     public void imageProgress(ImageReader source, float percentageDone) {
-        int currentPercentage = Math.round(percentageDone);
-        if (currentPercentage > trackedPercentage) {
-            tracker.unitsDone(currentPercentage - trackedPercentage);
-            trackedPercentage = currentPercentage;
+        int newPercentage = Math.round(percentageDone);
+        if (newPercentage > reportedPercentage) {
+            tracker.unitsDone(newPercentage - reportedPercentage);
+            reportedPercentage = newPercentage;
         }
     }
 
@@ -60,22 +62,16 @@ public class TrackingReadProgressListener implements IIOReadProgressListener {
     }
 
     @Override
-    public void thumbnailStarted(ImageReader source, int imageIndex, int thumbnailIndex) {
-
+    public void sequenceStarted(ImageReader source, int minIndex) {
     }
 
     @Override
-    public void thumbnailProgress(ImageReader source, float percentageDone) {
-
-    }
-
-    @Override
-    public void thumbnailComplete(ImageReader source) {
-
+    public void sequenceComplete(ImageReader source) {
+        // we call tracker.finished() in imageComplete() because
+        // we assume that the input contains only one image
     }
 
     @Override
     public void readAborted(ImageReader source) {
-
     }
 }

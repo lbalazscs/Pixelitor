@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import javax.swing.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.Locale;
 
 import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
@@ -179,7 +180,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         @Override
         public String toSaveString() {
             // 4 because range param has max 2 digits after the decimal point
-            return "%.4f,%.4f".formatted(relativeX, relativeY);
+            return String.format(Locale.ROOT, "%.4f,%.4f", relativeX, relativeY);
         }
     }
 }

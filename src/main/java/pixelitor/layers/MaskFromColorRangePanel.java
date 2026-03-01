@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -222,7 +222,7 @@ public class MaskFromColorRangePanel extends JPanel {
         colorPickerHeight = newHeight;
 
         colorPickerImg = createThumbnail(srcImage, newWidth, newHeight, null);
-        colorPickerPanel.refreshImage(colorPickerImg);
+        colorPickerPanel.setImageAndRepaint(colorPickerImg);
         updatePreview(referenceColor);
     }
 
@@ -290,7 +290,7 @@ public class MaskFromColorRangePanel extends JPanel {
         String previewMode = (String) previewModeCB.getSelectedItem();
 
         switch (previewMode) {
-            case PREVIEW_MODE_MASK -> previewPanel.refreshImage(rgbMask);
+            case PREVIEW_MODE_MASK -> previewPanel.setImageAndRepaint(rgbMask);
             case PREVIEW_MODE_RUBYLITH -> updateRubyPreview(rgbMask);
             case PREVIEW_MODE_BLACK_MATTE -> updateMattePreview(rgbMask, Color.BLACK);
             case PREVIEW_MODE_WHITE_MATTE -> updateMattePreview(rgbMask, Color.WHITE);
@@ -307,7 +307,7 @@ public class MaskFromColorRangePanel extends JPanel {
         g.setComposite(RUBYLITH_COMPOSITE);
         g.drawImage(ruby, 0, 0, null);
         g.dispose();
-        previewPanel.refreshImage(rubyPreview);
+        previewPanel.setImageAndRepaint(rubyPreview);
     }
 
     private void updateMattePreview(BufferedImage rgbMask, Color matteColor) {
@@ -329,7 +329,7 @@ public class MaskFromColorRangePanel extends JPanel {
         previewG.drawImage(thumbWithTransparency, 0, 0, null);
         previewG.dispose();
 
-        previewPanel.refreshImage(preview);
+        previewPanel.setImageAndRepaint(preview);
     }
 
     private BufferedImage getMaskImage() {

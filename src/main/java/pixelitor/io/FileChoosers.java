@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.io.FileChooserConfig.SelectableFormats;
+import pixelitor.io.FileChooserConfig.FormatSelection;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 
@@ -48,7 +48,7 @@ public class FileChoosers {
         "PAM files", "pam");
     public static final FileNameExtensionFilter pngFilter = new FileNameExtensionFilter(
         "PNG files", "png");
-    private static final FileNameExtensionFilter netPBMFilters = new FileNameExtensionFilter(
+    private static final FileNameExtensionFilter netPBMFilter = new FileNameExtensionFilter(
         "NetPBM files", "pam", "pbm", "pgm", "ppm", "pfm");
     public static final FileNameExtensionFilter ppmFilter = new FileNameExtensionFilter(
         "PPM files", "ppm");
@@ -63,10 +63,10 @@ public class FileChoosers {
     public static final FileNameExtensionFilter webpFilter = new FileNameExtensionFilter(
         "WebP files", "webp");
 
-    // All NetPBM files can be opened, but only PAM and PPM can be saved.
+    // All NetPBM formats can be opened, but only the PAM and PPM formats can be saved.
     // WebP can only be opened, but not saved.
     public static final FileNameExtensionFilter[] OPEN_FILTERS = {
-        bmpFilter, gifFilter, jpegFilter, netPBMFilters, oraFilter,
+        bmpFilter, gifFilter, jpegFilter, netPBMFilter, oraFilter,
         pngFilter, pxcFilter, tiffFilter, tgaFilter, webpFilter};
     public static final FileNameExtensionFilter[] SAVE_FILTERS = {
         bmpFilter, gifFilter, jpegFilter, oraFilter, pamFilter,
@@ -108,15 +108,15 @@ public class FileChoosers {
     }
 
     public static File selectSaveFileForFormat(String suggestedFileName, FileFilter fileFilter) {
-        return picker.showSaveDialog(new FileChooserConfig(
-            suggestedFileName, fileFilter, SelectableFormats.SINGLE));
+        return picker.selectSaveFile(new FileChooserConfig(
+            suggestedFileName, fileFilter, FormatSelection.SINGLE));
     }
 
     /**
      * Returns true if the given {@link Composition} was saved, false if the user cancels the saving.
      */
     public static boolean promptAndSaveComp(Composition comp) {
-        File file = picker.showSaveDialog(FileChooserConfig.forSavingComp(comp));
+        File file = picker.selectSaveFile(FileChooserConfig.forSavingComp(comp));
         if (file == null) {
             return false;
         }
@@ -129,20 +129,20 @@ public class FileChoosers {
             return false;
         }
 
-        if (!FileUtils.isSupportedOutputExt(extension)) {
+        if (!FileUtils.isSupportedSaveExt(extension)) {
             Messages.showError("Unsupported Extension",
                 "<html> The extension <b>" + extension + "</b> isn't supported.");
             return false;
         }
 
         FileFormat format = FileFormat.fromExtension(extension).orElseThrow();
-        SaveSettings settings = new SaveSettings.Simple(format, file);
+        SaveSettings settings = new SaveSettings.Default(format, file);
         comp.saveAsync(settings, true);
         return true;
     }
 
-    public static File showSaveDialog(FileChooserConfig config) {
-        return picker.showSaveDialog(config);
+    public static File selectSaveFile(FileChooserConfig config) {
+        return picker.selectSaveFile(config);
     }
 
     public static boolean useNativeDialogs() {
@@ -153,6 +153,11 @@ public class FileChoosers {
         // re-initialize only if the setting changes, or if it's the first time
         if (FileChoosers.useNativeDialogs == useNativeDialogs && picker != null) {
             return;
+        }
+
+        // clean up the old picker before replacing it
+        if (picker != null) {
+            picker.dispose();
         }
 
         FileChoosers.useNativeDialogs = useNativeDialogs;

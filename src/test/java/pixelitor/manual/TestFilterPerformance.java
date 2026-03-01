@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,7 +62,7 @@ public class TestFilterPerformance {
         var f = new KaleidoscopeFilter("Kaleidoscope Test");
         f.setZoom(1.0f);
 
-        f.setProgressTracker(ProgressTracker.NULL_TRACKER);
+        f.setProgressTracker(ProgressTracker.NO_OP_TRACKER);
         return f;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,13 @@ package pixelitor.utils;
 
 import static java.lang.String.format;
 
+/**
+ * Information about the current JVM memory usage.
+ */
 public class MemoryInfo {
-    public static final int NUM_BYTES_IN_MEGABYTE = 1_048_576;
-    private static final int NUM_BYTES_IN_KILOBYTE = 1_024;
+    public static final int BYTES_PER_MEGABYTE = 1_048_576;
+    private static final int BYTES_PER_KILOBYTE = 1_024;
+
     private final long freeMemoryMB;
     private final long totalMemoryMB;
     private final long usedMemoryMB;
@@ -35,32 +39,32 @@ public class MemoryInfo {
         long usedMemory = totalMemory - freeMemory;
         long maxMemory = runtime.maxMemory();
 
-        freeMemoryMB = freeMemory / NUM_BYTES_IN_MEGABYTE;
-        totalMemoryMB = totalMemory / NUM_BYTES_IN_MEGABYTE;
-        usedMemoryMB = usedMemory / NUM_BYTES_IN_MEGABYTE;
-        maxMemoryMB = maxMemory / NUM_BYTES_IN_MEGABYTE;
+        freeMemoryMB = freeMemory / BYTES_PER_MEGABYTE;
+        totalMemoryMB = totalMemory / BYTES_PER_MEGABYTE;
+        usedMemoryMB = usedMemory / BYTES_PER_MEGABYTE;
+        maxMemoryMB = maxMemory / BYTES_PER_MEGABYTE;
     }
 
-    public static String bytesToString(int bytes) {
-        if (bytes < NUM_BYTES_IN_KILOBYTE) {
+    public static String formatBytes(int bytes) {
+        if (bytes < BYTES_PER_KILOBYTE) {
             return bytes + " bytes";
-        } else if (bytes < NUM_BYTES_IN_MEGABYTE) {
-            float kiloBytes = ((float) bytes) / NUM_BYTES_IN_KILOBYTE;
-            return format("%.2f kilobytes", kiloBytes);
+        } else if (bytes < BYTES_PER_MEGABYTE) {
+            float kiloBytes = ((float) bytes) / BYTES_PER_KILOBYTE;
+            return format("%.2f KB", kiloBytes);
         } else {
-            float megaBytes = ((float) bytes) / NUM_BYTES_IN_MEGABYTE;
-            return format("%.2f megabytes", megaBytes);
+            float megaBytes = ((float) bytes) / BYTES_PER_MEGABYTE;
+            return format("%.2f MB", megaBytes);
         }
     }
 
-    public static int getMaxHeapMb() {
+    public static int getMaxHeapMB() {
         long heapMaxSize = Runtime.getRuntime().maxMemory();
-        return (int) (heapMaxSize / NUM_BYTES_IN_MEGABYTE);
+        return (int) (heapMaxSize / BYTES_PER_MEGABYTE);
     }
 
-    public static int getTotalMemoryMb() {
+    public static int getTotalMemoryMB() {
         long totalMemory = Runtime.getRuntime().totalMemory();
-        return (int) (totalMemory / NUM_BYTES_IN_MEGABYTE);
+        return (int) (totalMemory / BYTES_PER_MEGABYTE);
     }
 
     public String getFreeMemory() {
@@ -85,7 +89,7 @@ public class MemoryInfo {
 
     @Override
     public String toString() {
-        return format("allocated = %d, used = %d, free = %d, max = %d",
+        return format("allocated = %d MB, used = %d MB, free = %d MB, max = %d MB",
             totalMemoryMB, usedMemoryMB, freeMemoryMB, maxMemoryMB);
     }
 }

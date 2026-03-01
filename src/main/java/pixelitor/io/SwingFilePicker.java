@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,13 +28,14 @@ import pixelitor.utils.ProgressPanel;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.nio.file.Files;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
-import static pixelitor.io.FileChooserConfig.SelectableFormats.ANY;
-import static pixelitor.io.FileChooserConfig.SelectableFormats.SINGLE;
+import static pixelitor.io.FileChooserConfig.FormatSelection.ANY;
+import static pixelitor.io.FileChooserConfig.FormatSelection.SINGLE;
 import static pixelitor.io.FileChoosers.OPEN_FILTERS;
 import static pixelitor.io.FileChoosers.SAVE_FILTERS;
 import static pixelitor.utils.Texts.i18n;
@@ -47,39 +48,41 @@ import static pixelitor.utils.Threads.calledOnEDT;
 public class SwingFilePicker implements FilePicker {
     private JFileChooser openChooser;
     private SaveFileChooser saveChooser;
+    private final PropertyChangeListener lafListener;
 
     public SwingFilePicker() {
-        UIManager.addPropertyChangeListener(evt -> {
-            if (evt.getPropertyName().equals("lookAndFeel")) {
+        lafListener = evt -> {
+            if ("lookAndFeel".equals(evt.getPropertyName())) {
                 // force the reinitialization of the cached
                 // file pickers when the look and feel changes
                 openChooser = null;
                 saveChooser = null;
             }
-        });
+        };
+        UIManager.addPropertyChangeListener(lafListener);
     }
 
     @Override
     public File selectSupportedOpenFile() {
-        initOpenChooser();
+        initOpenDialog();
         GlobalEvents.modalDialogOpened();
         int userChoice = openChooser.showOpenDialog(PixelitorWindow.get());
         GlobalEvents.modalDialogClosed();
 
         if (userChoice == JFileChooser.APPROVE_OPTION) {
             File selectedFile = openChooser.getSelectedFile();
-            Dirs.setLastOpen(selectedFile.getParentFile());
+            RecentDirs.setLastOpen(selectedFile.getParentFile());
             return selectedFile;
         }
         return null;
     }
 
     @Override
-    public File showSaveDialog(FileChooserConfig config) {
-        initSaveChooser();
+    public File selectSaveFile(FileChooserConfig config) {
+        initSaveDialog();
 
         String suggestedFileName = config.suggestedFileName();
-        var selectableFormats = config.formats();
+        var selectableFormats = config.formatSelection();
         if (selectableFormats == ANY) {
             saveChooser.setAcceptAllFileFilterUsed(true);
             useSingleSaveFilter(saveChooser.getAcceptAllFileFilter()); // remove all custom file filters
@@ -90,7 +93,7 @@ public class SwingFilePicker implements FilePicker {
             } else {
                 // If the file is saved normally, don't suggest an extension,
                 // because the chooser should add it based on the selected file filter.
-                suggestedFileName = FileUtils.removeExtension(suggestedFileName);
+                suggestedFileName = FileUtils.stripExtension(suggestedFileName);
 
                 saveChooser.setFileFilter(fileFilter);
             }
@@ -100,14 +103,24 @@ public class SwingFilePicker implements FilePicker {
         assert saveChooser.getFileSelectionMode() == JFileChooser.FILES_ONLY;
 
         int userChoice;
+        File selectedFile = null;
         try {
             GlobalEvents.modalDialogOpened();
             userChoice = saveChooser.showSaveDialog(PixelitorWindow.get());
             GlobalEvents.modalDialogClosed();
+
+            if (userChoice == JFileChooser.APPROVE_OPTION) {
+                // has to be retrieved here, because the cleanup in the
+                // finally block overwrites the selected file in the picker
+                selectedFile = saveChooser.getSelectedFile();
+            }
         } catch (Exception e) {
             Messages.showException(e);
             return null;
         } finally {
+            if (selectableFormats == ANY) {
+                saveChooser.setAcceptAllFileFilterUsed(false);
+            }
             if (selectableFormats == ANY || selectableFormats == SINGLE) {
                 addDefaultSaveFileFilters();
             }
@@ -115,8 +128,7 @@ public class SwingFilePicker implements FilePicker {
 
         //noinspection IfCanBeSwitch
         if (userChoice == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = saveChooser.getSelectedFile();
-            Dirs.setLastSave(selectedFile.getParentFile());
+            RecentDirs.setLastSave(selectedFile.getParentFile());
             return selectedFile;
         } else if (userChoice == JFileChooser.CANCEL_OPTION) {
             // canceled
@@ -128,12 +140,12 @@ public class SwingFilePicker implements FilePicker {
         return null;
     }
 
-    private void initOpenChooser() {
+    private void initOpenDialog() {
         assert calledOnEDT() : callInfo();
         if (openChooser != null) {
             return;
         }
-        openChooser = new JFileChooser(Dirs.getLastOpen()) {
+        openChooser = new JFileChooser(RecentDirs.getLastOpen()) {
             @Override
             public void approveSelection() {
                 File selectedFile = getSelectedFile();
@@ -165,11 +177,11 @@ public class SwingFilePicker implements FilePicker {
         openChooser.addPropertyChangeListener(previewPanel);
     }
 
-    private void initSaveChooser() {
+    private void initSaveDialog() {
         assert calledOnEDT() : callInfo();
 
         if (saveChooser == null) {
-            saveChooser = new SaveFileChooser(Dirs.getLastSave());
+            saveChooser = new SaveFileChooser(RecentDirs.getLastSave());
             saveChooser.setName("save");
             saveChooser.setDialogTitle(i18n("save_as"));
             addDefaultSaveFileFilters();
@@ -211,7 +223,7 @@ public class SwingFilePicker implements FilePicker {
     @Override
     public File selectAnyOpenFile() {
         try {
-            initOpenChooser();
+            initOpenDialog();
             openChooser.setAcceptAllFileFilterUsed(true);
             useSingleOpenFilter(openChooser.getAcceptAllFileFilter()); // remove all custom file filters
             return selectSupportedOpenFile();
@@ -221,5 +233,10 @@ public class SwingFilePicker implements FilePicker {
         } finally {
             addDefaultOpenFileFilters();
         }
+    }
+
+    @Override
+    public void dispose() {
+        UIManager.removePropertyChangeListener(lafListener);
     }
 }

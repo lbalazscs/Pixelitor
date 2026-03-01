@@ -86,7 +86,7 @@ public class Themes {
     }
 
     public static void useAccentColor(Color color) {
-        ToolButton.setDarkThemeSelectedColor(color);
+        ToolButton.setDarkThemeActiveIconColor(color);
     }
 
     /**

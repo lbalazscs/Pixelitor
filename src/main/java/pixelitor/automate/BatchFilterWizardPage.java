@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,14 +22,15 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.Filters;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
+import java.awt.Component;
 import java.util.Optional;
 
 /**
- * A page in the batch filter wizard.
+ * A page in the {@link BatchFilterWizard}.
  */
 public enum BatchFilterWizardPage implements WizardPage {
     SELECT_FILTER_AND_DIRS {
@@ -46,7 +47,7 @@ public enum BatchFilterWizardPage implements WizardPage {
             var selectedAction = searchPanel.getSelectedFilter();
             var filter = selectedAction.getFilter();
             if (filter instanceof FilterWithGUI) {
-                return Optional.of(FILTER_GUI);
+                return Optional.of(FILTER_CONFIGURATION);
             } else {
                 return Optional.empty();
             }
@@ -66,12 +67,16 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onPageShown(Wizard wizard, OKCancelDialog dialog) {
-            JButton okButton = dialog.getOkButton();
+        public boolean validatePage(Wizard wizard, Component dialogParent) {
+            ValidationResult combinedResult = searchPanel.validateSettings()
+                .and(openSaveDirsPanel.validateSettings());
 
-            okButton.setEnabled(false);
-            searchPanel.addSelectionListener(e ->
-                okButton.setEnabled(searchPanel.hasSelection()));
+            if (!combinedResult.isValid()) {
+                combinedResult.showErrorDialog(dialogParent);
+                return false; // keeps user on the current wizard page
+            }
+
+            return true;
         }
 
         @Override
@@ -80,7 +85,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onComplete(Wizard wizard, Drawable dr) {
+        public void onPageComplete(Wizard wizard, Drawable dr) {
             var selectedAction = searchPanel.getSelectedFilter();
             var filter = selectedAction.getFilter();
 
@@ -88,7 +93,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
             openSaveDirsPanel.rememberSettings();
         }
-    }, FILTER_GUI {
+    }, FILTER_CONFIGURATION {
         @Override
         public String getHelpText(Wizard wizard) {
             return "<html> Select filter settings.";
@@ -117,7 +122,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onComplete(Wizard wizard, Drawable dr) {
+        public void onPageComplete(Wizard wizard, Drawable dr) {
             dr.stopPreviewing();
         }
     }

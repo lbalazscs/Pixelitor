@@ -50,6 +50,8 @@ import static java.awt.font.TextAttribute.KERNING_ON;
 /**
  * All the configurable properties of the text filter and text layers.
  * Edited by the {@link TextSettingsPanel}.
+ * This is almost an immutable object, since {@link TextSettingsPanel}
+ * creates new objects for every change, but loadUserPreset() still mutates it.
  */
 public class TextSettings implements Serializable, Debuggable {
     @Serial
@@ -88,8 +90,8 @@ public class TextSettings implements Serializable, Debuggable {
     private double shy;
     private double relLineHeight;
 
-    // this flag indicates that some newer fields (sx, sy, etc.) are
-    // present in a serialized pxc file
+    // a flag indicating whether newer transformation fields
+    // (sx, sy, etc.) are present in the serialized PXC file
     private boolean transformFieldsInPxc = true;
 
     private transient Consumer<TextSettings> guiUpdateCallback;
@@ -150,9 +152,7 @@ public class TextSettings implements Serializable, Debuggable {
     private TextSettings(TextSettings other) {
         text = other.text;
         font = other.font;
-        // even mutable objects can be shared, since they are re-created
-        // after every editing
-        areaEffects = other.areaEffects;
+        areaEffects = other.areaEffects.copy();
         color = other.color;
         verticalAlignment = other.verticalAlignment;
         horizontalAlignment = other.horizontalAlignment;
@@ -300,7 +300,9 @@ public class TextSettings implements Serializable, Debuggable {
 
         font = new FontInfo(preset).createFont();
 
+        areaEffects = new AreaEffects();
         areaEffects.loadStateFrom(preset);
+
         watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
         relLineHeight = preset.getDouble(PRESET_KEY_REL_LINE_HEIGHT, 1.0);
         sx = preset.getDouble(PRESET_KEY_SX, 1.0);
@@ -316,7 +318,7 @@ public class TextSettings implements Serializable, Debuggable {
     /**
      * Checks if the font used in these settings is installed on the system, showing an error if not.
      */
-    public void checkFontIsInstalled(TextLayer textLayer) {
+    public void warnIfFontMissing(TextLayer textLayer) {
         if (AppMode.isUnitTesting()) {
             // the fonts are not found when testing in the cloud, but that's OK
             return;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,12 @@ import javax.swing.filechooser.FileFilter;
  */
 public record FileChooserConfig(String suggestedFileName,
                                 FileFilter defaultFileFilter,
-                                SelectableFormats formats) {
+                                FormatSelection formatSelection) {
     public FileChooserConfig {
         if (suggestedFileName == null) {
             throw new IllegalArgumentException();
         }
-        if (!formats.isValidFilter(defaultFileFilter)) {
+        if (!formatSelection.isValid(defaultFileFilter)) {
             throw new IllegalArgumentException();
         }
     }
@@ -47,19 +47,19 @@ public record FileChooserConfig(String suggestedFileName,
             .getFileFilter();
 
         return new FileChooserConfig(suggestedFileName,
-            fileFilter, SelectableFormats.SUPPORTED);
+            fileFilter, FormatSelection.SUPPORTED);
     }
 
     /**
      * The file formats that can be chosen in the save dialog.
      */
-    public enum SelectableFormats {
+    public enum FormatSelection {
         /**
          * A single file format, determined by the default file filter.
          */
         SINGLE {
             @Override
-            public boolean isValidFilter(FileFilter defaultFileFilter) {
+            public boolean isValid(FileFilter defaultFileFilter) {
                 return defaultFileFilter != null;
             }
         },
@@ -68,21 +68,21 @@ public record FileChooserConfig(String suggestedFileName,
          */
         SUPPORTED {
             @Override
-            public boolean isValidFilter(FileFilter defaultFileFilter) {
+            public boolean isValid(FileFilter defaultFileFilter) {
                 return true;
             }
         },
         /**
-         * Any format (for the ImageMagick export).
+         * Any format (used for ImageMagick export).
          */
         ANY {
             @Override
-            public boolean isValidFilter(FileFilter defaultFileFilter) {
+            public boolean isValid(FileFilter defaultFileFilter) {
                 // no default file filter should be set for this mode
                 return defaultFileFilter == null;
             }
         };
 
-        public abstract boolean isValidFilter(FileFilter defaultFileFilter);
+        public abstract boolean isValid(FileFilter defaultFileFilter);
     }
 }

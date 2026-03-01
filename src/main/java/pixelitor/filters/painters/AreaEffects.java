@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ import java.util.Objects;
 /**
  * A collection of effects that can be applied to a shape.
  * Each effect can be independently enabled or disabled.
- * This class also functions as the {@link ParamState} of {@link EffectsParam}
+ * This class also functions as the {@link ParamState} of {@link EffectsParam}.
  */
 public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
     @Serial
@@ -150,6 +150,10 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
             || neonBorderEffect != null || dropShadowEffect != null;
     }
 
+    /**
+     * Interpolates between this {@link AreaEffects} and another one.
+     * It is assumed that the target state has exactly the same effects enabled as this one.
+     */
     @Override
     public AreaEffects interpolate(AreaEffects endState, double progress) {
         float progressFloat = (float) progress;
@@ -287,6 +291,17 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
         } else {
             preset.putBoolean(enabledKey, false);
         }
+    }
+
+    /**
+     * Creates a deep copy of this AreaEffects instance.
+     */
+    public AreaEffects copy() {
+        UserPreset tempPreset = new UserPreset("temp_copy");
+        this.saveStateTo(tempPreset);
+        AreaEffects copy = new AreaEffects();
+        copy.loadStateFrom(tempPreset);
+        return copy;
     }
 
     @Override

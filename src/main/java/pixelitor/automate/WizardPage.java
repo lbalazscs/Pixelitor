@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.util.Optional;
 
 /**
  * A single page in a {@link Wizard}.
- * Each page manages its own state, validation, and transition logic.
+ * Each page manages its own state, validation, and navigation logic.
  */
 public interface WizardPage {
     /**
@@ -59,7 +59,7 @@ public interface WizardPage {
     }
 
     /**
-     * Validates the current page's state before proceeding.
+     * Validates the current page's state before allowing navigation to the next page.
      */
     default boolean validatePage(Wizard wizard, Component dialogParent) {
         return true;
@@ -68,7 +68,7 @@ public interface WizardPage {
     /**
      * Performs completion actions for this page before transitioning to the next.
      */
-    void onComplete(Wizard wizard, Drawable dr);
+    void onPageComplete(Wizard wizard, Drawable dr);
 
     /**
      * Called if the wizard was canceled while on this page.

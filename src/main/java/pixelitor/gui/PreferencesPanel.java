@@ -346,8 +346,8 @@ public class PreferencesPanel extends JTabbedPane {
         undoLevelsTF.setName("undoLevelsTF");
         undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
         gbh.addLabelAndControl(UNDO_LEVELS_LABEL + ": ",
-            TextFieldValidator.createNonNegativeIntLayer(UNDO_LEVELS_LABEL,
-                undoLevelsTF));
+            TextFieldValidator.createNonNegativeIntLayer(undoLevelsTF, UNDO_LEVELS_LABEL
+            ));
     }
 
     private void addMagickDirField(GridBagHelper gbh) {
@@ -370,7 +370,7 @@ public class PreferencesPanel extends JTabbedPane {
     // validates and applies settings that are not handled by immediate action listeners
     private boolean validateAndApply(JDialog d) {
         // validate all fields first
-        ValidationResult result = TextFieldValidator.hasNonNegativeInt(undoLevelsTF, UNDO_LEVELS_LABEL)
+        ValidationResult result = TextFieldValidator.requireNonNegativeInt(undoLevelsTF, UNDO_LEVELS_LABEL)
             .checkOptionalDir(magickDirTF.getText(), IMAGEMAGICK_FOLDER_LABEL)
             .checkOptionalDir(gmicDirTF.getText(), GMIC_FOLDER_LABEL);
 
@@ -393,7 +393,11 @@ public class PreferencesPanel extends JTabbedPane {
         AppPreferences.gmicDirName = gmicDirTF.getText().trim();
         MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
-        View.snappingSettingChanged(snapCB.isSelected());
+
+        boolean newSnapping = snapCB.isSelected();
+        AppPreferences.setFlag(AppPreferences.FLAG_PIXEL_SNAP, newSnapping);
+        View.snappingSettingChanged(newSnapping);
+
         FileChoosers.setUseNativeDialogs(nativeChoosersCB.isSelected());
         Features.enableExperimental(experimentalCB.isSelected());
 

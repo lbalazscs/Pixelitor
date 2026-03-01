@@ -28,10 +28,10 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.Dimension;
 import java.io.Serial;
+import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntPredicate;
 
-import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
@@ -501,8 +501,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private static String formatDecimal(double d, int decimalPlaces) {
         return switch (decimalPlaces) {
             case 0 -> String.valueOf((int) d);
-            case 1 -> format("%.1f", d);
-            case 2 -> format("%.2f", d);
+            case 1 -> String.format(Locale.ROOT, "%.1f", d);
+            case 2 -> String.format(Locale.ROOT, "%.2f", d);
             default -> throw new IllegalStateException();
         };
     }
@@ -527,7 +527,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public String toString() {
-        return format("%s[name = '%s', value = %.2f]",
+        return String.format("%s[name = '%s', value = %.2f]",
             getClass().getSimpleName(), getName(), value);
     }
 
@@ -625,7 +625,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
         @Override
         public String toString() {
-            return format("%s[value=%.2f]",
+            return String.format("%s[value=%.2f]",
                 getClass().getSimpleName(), value);
         }
     }

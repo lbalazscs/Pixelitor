@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,50 +31,81 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static pixelitor.utils.Threads.callInfo;
+import static pixelitor.utils.Threads.calledOnEDT;
+
 /**
- * Image preview panel for the open file chooser
+ * Image preview panel for the open file chooser.
  */
 public class ImagePreviewPanel extends JPanel implements PropertyChangeListener {
-    private static final int SIZE = 200;
-    public static final int EMPTY_SPACE_AT_LEFT = 5;
-    private static final Map<String, SoftReference<ThumbInfo>> thumbsCache = new HashMap<>();
+    private static final int PANEL_SIZE = 200;
+    public static final int LEFT_MARGIN = 5;
 
+    // supports removing key-value pairs corresponding
+    // to garbage-collected thumbnails from the cache
+    private static final ReferenceQueue<ThumbInfo> gcQueue = new ReferenceQueue<>();
+
+    // a soft reference to a thumbnail that remembers its associated cache key
+    private static class KeyedSoftReference extends SoftReference<ThumbInfo> {
+        final String key;
+
+        KeyedSoftReference(String key, ThumbInfo referent) {
+            super(referent, gcQueue); // associate the thumb with the queue
+            this.key = key;
+        }
+    }
+
+    private static final int MAX_CACHE_SIZE = 200;
+    private static final Map<String, KeyedSoftReference> thumbsCache =
+        new LinkedHashMap<String, KeyedSoftReference>(16, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, KeyedSoftReference> eldest) {
+                return size() > MAX_CACHE_SIZE; // LRU cache
+            }
+        };
+
+    // information about the currently shown thumbnail
     private ThumbInfo thumbInfo;
+
     private final ProgressPanel progressPanel;
 
     public ImagePreviewPanel(ProgressPanel progressPanel) {
         this.progressPanel = progressPanel;
-        setPreferredSize(new Dimension(SIZE, SIZE));
+        setPreferredSize(new Dimension(PANEL_SIZE, PANEL_SIZE));
 
         this.progressPanel.setVisible(true);
     }
 
-    // the property change events form the JFileChooser
+    // the property change events from the JFileChooser
     @Override
     public void propertyChange(PropertyChangeEvent e) {
-        if (JFileChooser.SELECTED_FILE_CHANGED_PROPERTY.equals(e.getPropertyName())) {
+        String propertyName = e.getPropertyName();
+        if (JFileChooser.SELECTED_FILE_CHANGED_PROPERTY.equals(propertyName)) {
             File file = (File) e.getNewValue();
             if (file != null && FileUtils.hasSupportedInputExt(file)) {
                 thumbInfo = getOrCreateThumb(file);
             } else {
                 thumbInfo = null;
             }
-        } else {
+            repaint();
+        } else if (JFileChooser.DIRECTORY_CHANGED_PROPERTY.equals(propertyName)) {
             thumbInfo = null;
+            repaint();
         }
-
-        repaint();
     }
 
     private ThumbInfo getOrCreateThumb(File file) {
+        removeDeadThumbs();
+
         String filePath = file.getAbsolutePath();
-        if (thumbsCache.containsKey(filePath)) {
-            SoftReference<ThumbInfo> thumbRef = thumbsCache.get(filePath);
+        KeyedSoftReference thumbRef = thumbsCache.get(filePath);
+        if (thumbRef != null) {
             ThumbInfo cachedInfo = thumbRef.get();
             if (cachedInfo != null) {
                 return cachedInfo;
@@ -82,10 +113,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         }
 
         ThumbInfo readResult = readThumb(file);
-        if (readResult.isSuccess()) {
+        if (readResult.hasImage()) {
             // don't cache failures - perhaps the user
             // is retrying after fixing the problem
-            thumbsCache.put(filePath, new SoftReference<>(readResult));
+            thumbsCache.put(filePath, new KeyedSoftReference(filePath, readResult));
         }
         return readResult;
     }
@@ -101,7 +132,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             try {
                 BufferedImage thumbnail = PXCFormat.readThumbnail(file);
                 if (thumbnail == null) {
-                    // old pxc file, without thumbnail
+                    // old PXC file without an embedded thumbnail
                     return ThumbInfo.failure(ThumbInfo.NO_PREVIEW);
                 }
                 return ThumbInfo.success(thumbnail);
@@ -125,17 +156,32 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             }
         }
 
-        int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
-        int availableHeight = getHeight();
+        int panelWidth = getWidth();
+        if (panelWidth <= 0) { // the panel is not laid out yet
+            panelWidth = PANEL_SIZE;
+        }
+        int availableWidth = panelWidth - LEFT_MARGIN;
+
+        int panelHeight = getHeight();
+        if (panelHeight <= 0) {
+            panelHeight = PANEL_SIZE;
+        }
+        int availableHeight = panelHeight;
+
+        ProgressTracker pt = new JProgressBarTracker(progressPanel);
         try {
-            ProgressTracker pt = new JProgressBarTracker(progressPanel);
             return TrackedIO.readThumbnail(file, availableWidth, availableHeight, pt);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             return ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
+        } finally {
+            pt.finished();
         }
     }
 
+    // called when Pixelitor itself overwrites a file
     public static void removeThumbFromCache(File file) {
+        assert calledOnEDT() : callInfo(); // access the cache only on the EDT
+
         thumbsCache.remove(file.getAbsolutePath());
     }
 
@@ -148,5 +194,15 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             thumbInfo.paint((Graphics2D) g, this);
         }
     }
-}
 
+    // removes garbage-collected thumbnails from the cache
+    private static void removeDeadThumbs() {
+        KeyedSoftReference ref;
+        while ((ref = (KeyedSoftReference) gcQueue.poll()) != null) {
+            // using remove(key, value) prevents a race condition
+            // between the EDT and the GC where we might accidentally
+            // remove a newly created live reference under the same key
+            thumbsCache.remove(ref.key, ref);
+        }
+    }
+}

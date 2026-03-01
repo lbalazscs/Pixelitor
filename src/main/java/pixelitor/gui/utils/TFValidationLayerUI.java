@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,10 @@ package pixelitor.gui.utils;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
+import javax.swing.text.Document;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.beans.PropertyChangeListener;
 import java.util.function.Predicate;
 
 import static java.awt.Color.RED;
@@ -37,6 +39,13 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
     private static final int PADDING = 10;
 
     private final Predicate<JTextField> validator;
+
+    // cached validation state
+    private boolean isValid = true;
+
+    // listeners stored to allow clean removal during uninstallation
+    private SimpleDocumentListener docListener;
+    private PropertyChangeListener propListener;
 
     private TFValidationLayerUI(Predicate<JTextField> validator) {
         this.validator = validator;
@@ -55,14 +64,70 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
     }
 
     @Override
+    public void installUI(JComponent c) {
+        super.installUI(c);
+        @SuppressWarnings("unchecked")
+        JLayer<JTextField> jlayer = (JLayer<JTextField>) c;
+        JTextField textField = jlayer.getView();
+
+        // initial validation
+        isValid = validator.test(textField);
+
+        // update validation whenever text is typed/removed/changed
+        docListener = new SimpleDocumentListener(e -> updateValidation(jlayer));
+        textField.getDocument().addDocumentListener(docListener);
+
+        // keep document listener attached even if the underlying
+        // Document is swapped out programmatically
+        propListener = e -> {
+            if ("document".equals(e.getPropertyName())) {
+                if (e.getOldValue() instanceof Document oldDoc) {
+                    oldDoc.removeDocumentListener(docListener);
+                }
+                if (e.getNewValue() instanceof Document newDoc) {
+                    newDoc.addDocumentListener(docListener);
+                }
+                updateValidation(jlayer);
+            }
+        };
+        textField.addPropertyChangeListener("document", propListener);
+    }
+
+    @Override
+    public void uninstallUI(JComponent c) {
+        @SuppressWarnings("unchecked")
+        JLayer<JTextField> jlayer = (JLayer<JTextField>) c;
+        JTextField textField = jlayer.getView();
+
+        // clean up listeners to prevent memory leaks
+        if (docListener != null) {
+            textField.getDocument().removeDocumentListener(docListener);
+            docListener = null;
+        }
+        if (propListener != null) {
+            textField.removePropertyChangeListener("document", propListener);
+            propListener = null;
+        }
+
+        super.uninstallUI(c);
+    }
+
+    private void updateValidation(JLayer<JTextField> jlayer) {
+        JTextField textField = jlayer.getView();
+        boolean wasValid = isValid;
+        isValid = validator.test(textField);
+
+        // trigger a layer repaint if the state visibly changed
+        if (wasValid != isValid) {
+            jlayer.repaint();
+        }
+    }
+
+    @Override
     public void paint(Graphics g, JComponent c) {
         super.paint(g, c);
 
-        @SuppressWarnings("unchecked")
-        JLayer<JTextField> jLayer = (JLayer<JTextField>) c;
-
-        JTextField textField = jLayer.getView();
-        if (validator.test(textField)) {
+        if (isValid) {
             return; // skip painting if validation passes
         }
 

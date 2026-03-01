@@ -94,7 +94,7 @@ public abstract class ContentLayer extends Layer {
     }
 
     /**
-     * Similar to {@link  #getTx()}, but for the Y translation.
+     * Similar to {@link #getTx()}, but for the Y translation.
      */
     public int getTy() {
         return translationY + dragOffsetY;

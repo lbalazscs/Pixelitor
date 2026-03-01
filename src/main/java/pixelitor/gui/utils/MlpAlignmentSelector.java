@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,17 +24,18 @@ import java.awt.*;
 import java.awt.geom.Path2D;
 
 import static pixelitor.gui.utils.VectorIcon.LIGHT_FG;
-import static pixelitor.tools.gui.ToolButton.darkThemeSelectedColor;
+import static pixelitor.tools.gui.ToolButton.darkThemeActiveIconColor;
 
 /**
  * A panel for selecting a horizontal text alignment option
- * for multiline text or text on path.
+ * for multiline text or text on a path.
  */
 public class MlpAlignmentSelector extends JPanel {
-    private final JToggleButton leftAlign;
-    private final JToggleButton centerAlign;
-    private final JToggleButton rightAlign;
+    private final JToggleButton leftAlignButton;
+    private final JToggleButton centerAlignButton;
+    private final JToggleButton rightAlignButton;
 
+    // 0 is not used => it can be a sentinel value for old pxc files
     public static final int LEFT = 1;
     public static final int CENTER = 2;
     public static final int RIGHT = 3;
@@ -55,16 +56,16 @@ public class MlpAlignmentSelector extends JPanel {
         boolean darkTheme = Themes.getActive().isDark();
         ButtonGroup group = new ButtonGroup();
 
-        leftAlign = addButton(0, group, darkTheme);
-        centerAlign = addButton(1, group, darkTheme);
-        rightAlign = addButton(2, group, darkTheme);
+        leftAlignButton = addButton(0, group, darkTheme);
+        centerAlignButton = addButton(1, group, darkTheme);
+        rightAlignButton = addButton(2, group, darkTheme);
 
         setAlignment(defaultAlignment);
 
         // bind to the listener only after setting the default selection
-        leftAlign.addActionListener(e -> adjustmentListener.paramAdjusted());
-        centerAlign.addActionListener(e -> adjustmentListener.paramAdjusted());
-        rightAlign.addActionListener(e -> adjustmentListener.paramAdjusted());
+        leftAlignButton.addActionListener(e -> adjustmentListener.paramAdjusted());
+        centerAlignButton.addActionListener(e -> adjustmentListener.paramAdjusted());
+        rightAlignButton.addActionListener(e -> adjustmentListener.paramAdjusted());
     }
 
     private static void createIconShapes() {
@@ -83,7 +84,7 @@ public class MlpAlignmentSelector extends JPanel {
         button.setDisabledIcon(disabledIcon);
 
         if (darkTheme) {
-            button.setSelectedIcon(icon.copyWithColor(darkThemeSelectedColor));
+            button.setSelectedIcon(icon.copyWithColor(darkThemeActiveIconColor));
             button.setDisabledSelectedIcon(disabledIcon);
         }
 
@@ -111,6 +112,8 @@ public class MlpAlignmentSelector extends JPanel {
         Path2D shape = new Path2D.Double();
         for (int i = 0; i < 5; i++) {
             int y = i * (lineHeight + lineGap);
+
+            // alternating between full width and 60% width
             int lineWidth = (i % 2 == 0) ? ICON_SIZE : (int) (ICON_SIZE * 0.6);
 
             double x = switch (alignment) {
@@ -131,10 +134,10 @@ public class MlpAlignmentSelector extends JPanel {
     }
 
     public int getSelectedAlignment() {
-        if (centerAlign.isSelected()) {
+        if (centerAlignButton.isSelected()) {
             return CENTER;
         }
-        if (rightAlign.isSelected()) {
+        if (rightAlignButton.isSelected()) {
             return RIGHT;
         }
         return LEFT;
@@ -142,9 +145,9 @@ public class MlpAlignmentSelector extends JPanel {
 
     public void setAlignment(int alignment) {
         JToggleButton selectedButton = switch (alignment) {
-            case LEFT -> leftAlign;
-            case CENTER -> centerAlign;
-            case RIGHT -> rightAlign;
+            case LEFT -> leftAlignButton;
+            case CENTER -> centerAlignButton;
+            case RIGHT -> rightAlignButton;
             default -> throw new IllegalStateException("alignment: " + alignment);
         };
         selectedButton.setSelected(true);
@@ -152,8 +155,8 @@ public class MlpAlignmentSelector extends JPanel {
 
     @Override
     public void setEnabled(boolean enabled) {
-        leftAlign.setEnabled(enabled);
-        centerAlign.setEnabled(enabled);
-        rightAlign.setEnabled(enabled);
+        leftAlignButton.setEnabled(enabled);
+        centerAlignButton.setEnabled(enabled);
+        rightAlignButton.setEnabled(enabled);
     }
 }

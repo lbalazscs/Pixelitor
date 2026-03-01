@@ -44,7 +44,10 @@ import static org.jdesktop.swingx.prompt.PromptSupport.FocusBehavior.SHOW_PROMPT
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithSimpleValidation;
 
-public class FilterSearchPanel extends JPanel {
+/**
+ * A search-and-select panel that dynamically narrows a list of filters as the user types.
+ */
+public class FilterSearchPanel extends ValidatedPanel {
     private static final int PADDING = 4;
 
     private JTextField searchTF;
@@ -56,7 +59,7 @@ public class FilterSearchPanel extends JPanel {
         super(new BorderLayout(PADDING, PADDING));
 
         initSearchField();
-        initFiltersList(filters);
+        initFilterList(filters);
 
         add(wrapWithSimpleValidation(searchTF, tf -> getMatchingFilterCount() > 0), BorderLayout.NORTH);
         add(new JScrollPane(filterList), BorderLayout.CENTER);
@@ -105,12 +108,12 @@ public class FilterSearchPanel extends JPanel {
                 selectFilter(numFilters - 1);
             }
         } else {
-            forwardEventTo(filterList, e);
+            redirectKeyEvent(e, filterList);
         }
         filterList.requestFocusInWindow();
     }
 
-    private void initFiltersList(FilterAction[] filters) {
+    private void initFilterList(FilterAction[] filters) {
         filterList = new JXList(filters);
         filterList.setAutoCreateRowSorter(true);
         filterList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -130,22 +133,34 @@ public class FilterSearchPanel extends JPanel {
                         searchTF.requestFocusInWindow();
                     }
                 } else if (e.getKeyCode() == VK_BACK_SPACE) {
-                    forwardEventTo(searchTF, e);
+                    redirectKeyEvent(e, searchTF);
                 }
             }
 
             @Override
             public void keyTyped(KeyEvent e) {
                 if (Character.isLetter(e.getKeyChar())) {
-                    forwardEventTo(searchTF, e);
+                    redirectKeyEvent(e, searchTF);
                 }
             }
         });
     }
 
-    private static void forwardEventTo(JComponent target, KeyEvent e) {
-        e.setSource(target);
-        target.dispatchEvent(e);
+    private static void redirectKeyEvent(KeyEvent e, JComponent target) {
+        e.consume();
+
+        // a clean copy of the event targeted at the new component
+        KeyEvent newEvent = new KeyEvent(
+            target,
+            e.getID(),
+            e.getWhen(),
+            e.getModifiersEx(),
+            e.getKeyCode(),
+            e.getKeyChar(),
+            e.getKeyLocation()
+        );
+
+        target.dispatchEvent(newEvent);
         target.requestFocusInWindow();
     }
 
@@ -178,8 +193,8 @@ public class FilterSearchPanel extends JPanel {
             @Override
             public boolean include(Entry<? extends ListModel<FilterAction>, ? extends Integer> entry) {
                 String filterNameLC = entry.getStringValue(0).toLowerCase(Locale.getDefault());
-                // include filters that match the search text
-                // or show all filters if the search text is empty
+                // include only matching filter names (case-insensitive)
+                // or all filters when the search term is empty
                 return searchTextLC.isEmpty() || filterNameLC.contains(searchTextLC);
             }
         });
@@ -257,6 +272,14 @@ public class FilterSearchPanel extends JPanel {
 
         // will get here only after the dialog is closed
         return panel.getSelectedFilter();
+    }
+
+    @Override
+    public ValidationResult validateSettings() {
+        if (!hasSelection()) {
+            return ValidationResult.invalid("Please select a filter.");
+        }
+        return ValidationResult.valid();
     }
 
     private static void paintSearchIcon(Graphics2D g) {

@@ -39,9 +39,9 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
 import pixelitor.history.HistoryChecker;
-import pixelitor.io.Dirs;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.IOTasks;
+import pixelitor.io.RecentDirs;
 import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionModifyType;
@@ -843,13 +843,13 @@ public class AppRunner {
     }
 
     private static void rememberInitialSettings() {
-        initialOpenDir = Dirs.getLastOpen();
-        initialSaveDir = Dirs.getLastSave();
+        initialOpenDir = RecentDirs.getLastOpen();
+        initialSaveDir = RecentDirs.getLastSave();
     }
 
     private static void restoreInitialSettings() {
-        Dirs.setLastOpen(initialOpenDir);
-        Dirs.setLastSave(initialSaveDir);
+        RecentDirs.setLastOpen(initialOpenDir);
+        RecentDirs.setLastSave(initialSaveDir);
     }
 
     public void addLayerMask() {

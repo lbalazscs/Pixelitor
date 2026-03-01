@@ -134,7 +134,7 @@ public class ColorFillLayer extends Layer {
     protected ColorFillLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
         String copyName = copyType.createLayerCopyName(name);
         // java.awt.Color is immutable => it can be shared
-        return new ColorFillLayer(comp, copyName, color);
+        return new ColorFillLayer(newComp, copyName, color);
     }
 
     @Override

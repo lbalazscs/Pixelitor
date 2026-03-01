@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,20 +26,20 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A PixelitorEdit that represents the editing of a text layer
+ * A PixelitorEdit that represents the editing of a text layer.
  */
 public class TextLayerChangeEdit extends PixelitorEdit {
-    private TextSettings backupSettings;
+    private TextSettings prevSettings;
     private final TextLayer layer;
 
     public TextLayerChangeEdit(Composition comp, TextLayer layer,
-                               TextSettings backupSettings) {
+                               TextSettings prevSettings) {
         super("Edit Text Layer", comp);
 
-        this.backupSettings = backupSettings;
+        this.prevSettings = prevSettings;
         this.layer = layer;
 
-        if (backupSettings == layer.getSettings()) {
+        if (prevSettings == layer.getSettings()) {
             throw new IllegalArgumentException("same settings");
         }
     }
@@ -60,8 +60,8 @@ public class TextLayerChangeEdit extends PixelitorEdit {
 
     private void swapTextSettings() {
         TextSettings tmp = layer.getSettings();
-        layer.applySettings(backupSettings);
-        backupSettings = tmp;
+        layer.applySettings(prevSettings);
+        prevSettings = tmp;
 
         layer.updateLayerName();
 
@@ -72,7 +72,7 @@ public class TextLayerChangeEdit extends PixelitorEdit {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addNullableDebuggable("backup text settings", backupSettings);
+        node.addNullableDebuggable("previous text settings", prevSettings);
         node.add(layer.createDebugNode());
 
         return node;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,13 +38,13 @@ import java.util.List;
 import static java.lang.String.format;
 
 /**
- * Manages external files drag-and-dropped on the app
+ * Handles external files dragged and dropped onto the application.
  */
 public class DropListener extends DropTargetAdapter {
-    private final DropAction dropAction;
+    private final DropAction action;
 
     /**
-     * Defines how the dropped files should be handled.
+     * Defines how dropped files are handled after a successful drop.
      */
     public enum DropAction {
         /**
@@ -52,7 +52,7 @@ public class DropListener extends DropTargetAdapter {
          */
         OPEN_AS_NEW_IMAGES {
             @Override
-            protected void handleDrop(List<File> files, Component target) {
+            protected void handleDroppedFiles(List<File> files, Component target) {
                 for (File file : files) {
                     openFileAsNewImage(file, target);
                 }
@@ -63,12 +63,12 @@ public class DropListener extends DropTargetAdapter {
          */
         ADD_AS_NEW_LAYERS {
             @Override
-            protected void handleDrop(List<File> files, Component target) {
+            protected void handleDroppedFiles(List<File> files, Component target) {
                 Composition comp = Views.getActiveComp();
                 if (comp == null) {
-                    // If there is no active composition,
+                    // if there is no active composition,
                     // fall back to opening the files as new images
-                    OPEN_AS_NEW_IMAGES.handleDrop(files, target);
+                    OPEN_AS_NEW_IMAGES.handleDroppedFiles(files, target);
                     return;
                 }
 
@@ -78,28 +78,28 @@ public class DropListener extends DropTargetAdapter {
             }
         };
 
-        protected abstract void handleDrop(List<File> files, Component target);
+        protected abstract void handleDroppedFiles(List<File> files, Component target);
     }
 
-    public DropListener(DropAction dropAction) {
-        this.dropAction = dropAction;
-    }
-
-    @Override
-    public void dragEnter(DropTargetDragEvent dtde) {
-        handleOngoingDrag(dtde);
+    public DropListener(DropAction action) {
+        this.action = action;
     }
 
     @Override
-    public void dragOver(DropTargetDragEvent dtde) {
-        handleOngoingDrag(dtde);
+    public void dragEnter(DropTargetDragEvent dragEvent) {
+        validateDrag(dragEvent);
     }
 
-    private static void handleOngoingDrag(DropTargetDragEvent dtde) {
-        if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-            dtde.acceptDrag(DnDConstants.ACTION_COPY);
+    @Override
+    public void dragOver(DropTargetDragEvent dragEvent) {
+        validateDrag(dragEvent);
+    }
+
+    private static void validateDrag(DropTargetDragEvent dragEvent) {
+        if (dragEvent.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+            dragEvent.acceptDrag(DnDConstants.ACTION_COPY);
         } else {
-            dtde.rejectDrag();
+            dragEvent.rejectDrag();
         }
     }
 
@@ -110,18 +110,19 @@ public class DropListener extends DropTargetAdapter {
 
         for (DataFlavor flavor : flavors) {
             if (flavor.equals(DataFlavor.imageFlavor)) {
-                // it is unclear how this could be used
+                // not implemented: most external apps provide files or URLs;
+                // I found no app that actually sends raw imageFlavor
                 dropEvent.rejectDrop();
                 return;
             }
 
             if (flavor.isFlavorJavaFileListType()) {
-                // this is where we get after dropping a file or directory
+                // handle dropped files or directories
                 dropEvent.acceptDrop(DnDConstants.ACTION_COPY);
                 try {
                     @SuppressWarnings("unchecked")
                     List<File> files = (List<File>) transferable.getTransferData(flavor);
-                    dropAction.handleDrop(files, dropEvent.getDropTargetContext().getComponent());
+                    action.handleDroppedFiles(files, dropEvent.getDropTargetContext().getComponent());
                 } catch (UnsupportedFlavorException | IOException ex) {
                     Messages.showException(ex);
                     dropEvent.rejectDrop();
@@ -131,7 +132,7 @@ public class DropListener extends DropTargetAdapter {
             }
         }
 
-        // No recognized data flavors, reject the drop.
+        // no recognized data flavors, reject the drop
         dropEvent.rejectDrop();
     }
 
@@ -166,7 +167,7 @@ public class DropListener extends DropTargetAdapter {
                 Dialogs.showFileNotReadableError(target, file);
                 return;
             }
-            FileIO.addNewImageLayerAsync(file, comp);
+            FileIO.addImageLayerAsync(file, comp);
         }
     }
 }
