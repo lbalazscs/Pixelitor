@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,14 @@ import pixelitor.Views;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
+import pixelitor.utils.Distortion;
 import pixelitor.utils.Geometry;
+import pixelitor.utils.Transform;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -41,6 +44,9 @@ import static java.lang.Math.toRadians;
 
 public class Penrose extends ParametrizedFilter {
     public static final String NAME = "Penrose Tiling";
+
+    private static final double G = Geometry.GOLDEN_RATIO;
+    private static final double T = toRadians(36); // theta = 36°
 
     private static final int START_SUN = 0;
     private static final int START_STAR = 1;
@@ -75,7 +81,7 @@ public class Penrose extends ParametrizedFilter {
         TransparencyMode.OPAQUE_ONLY, false, false);
 
     private final RangeParam edgeWidth = new RangeParam("Edge Width", 0, 1, 5);
-    private final RangeParam zoom = new RangeParam("Zoom", 10, 100, 200);
+    private final Transform transform = new Transform();
 
     // a single tile in the Penrose P2 pattern
     static final class Tile {
@@ -102,7 +108,7 @@ public class Penrose extends ParametrizedFilter {
             return type.createPath(x, y, angle, size);
         }
 
-        // Normalizes an angle to the range [0, 2 * PI)
+        // normalizes an angle to the range [0, 2 * PI)
         private static double normalizeAngle(double angle) {
             double twoPi = 2 * PI;
             angle = angle % twoPi;
@@ -112,7 +118,7 @@ public class Penrose extends ParametrizedFilter {
             return angle;
         }
 
-        // Override equals for tile comparison (used in duplicate removal)
+        // override equals for tile comparison (used in duplicate removal)
         @Override
         public boolean equals(Object o) {
             Tile that = (Tile) o;
@@ -172,9 +178,6 @@ public class Penrose extends ParametrizedFilter {
         }
     }
 
-    private static final double G = Geometry.GOLDEN_RATIO;
-    private static final double T = toRadians(36); // theta = 36°
-
     public Penrose() {
         super(false);
 
@@ -185,7 +188,7 @@ public class Penrose extends ParametrizedFilter {
             iterations,
             colors,
             edgeWidth,
-            zoom
+            transform.createDialogParam()
         ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
     }
 
@@ -207,8 +210,8 @@ public class Penrose extends ParametrizedFilter {
 
         double currentEdgeWidth = edgeWidth.getValue();
         if (currentEdgeWidth > 0) {
-            double scale = zoom.getPercentage();
-            g.setStroke(new BasicStroke((float) (currentEdgeWidth * scale)));
+            double strokeScale = transform.getMinScale();
+            g.setStroke(new BasicStroke((float) (currentEdgeWidth * strokeScale)));
             g.setColor(colors.getColor(EDGE_COLOR_INDEX));
             for (ShapeWithColor shapeWithColor : shapes) {
                 g.draw(shapeWithColor.shape());
@@ -224,9 +227,7 @@ public class Penrose extends ParametrizedFilter {
      * Used both for drawing and SVG export.
      */
     private List<ShapeWithColor> createShapes(int width, int height) {
-        double scale = zoom.getPercentage();
-
-        Set<Tile> tiles = new HashSet<>(createPrototiles(width, height, scale));
+        Set<Tile> tiles = new HashSet<>(createPrototiles(width, height));
         tiles = deflateTiles(tiles, iterations.getValue());
 
         Color kiteColor = colors.getColor(KITE_COLOR_INDEX);
@@ -234,20 +235,35 @@ public class Penrose extends ParametrizedFilter {
 
         List<ShapeWithColor> shapes = new ArrayList<>();
 
+        Distortion distortion = null;
+        if (transform.hasNonlinDistort()) {
+            distortion = transform.createDistortion(width, height);
+        }
+        AffineTransform at = transform.calcAffineTransform(width, height);
+
         for (Tile tile : tiles) {
             Path2D tileShape = tile.createPath();
 
             Color color = (tile.type == Type.Dart) ? dartColor : kiteColor;
-            shapes.add(new ShapeWithColor(tileShape, color));
+            ShapeWithColor shapeWithColor = new ShapeWithColor(tileShape, color);
+
+            if (distortion != null) {
+                shapeWithColor = shapeWithColor.distort(distortion);
+            }
+            if (at != null) {
+                shapeWithColor = shapeWithColor.transform(at);
+            }
+
+            shapes.add(shapeWithColor);
         }
 
         return shapes;
     }
 
-    private List<Tile> createPrototiles(int width, int height, double scale) {
-        double centerX = width / 2.0;
-        double centerY = height / 2.0;
-        double baseSize = scale * Math.min(width, height) / 2.5;
+    private List<Tile> createPrototiles(int width, int height) {
+        double centerX = transform.getCx(width);
+        double centerY = transform.getCy(height);
+        double baseSize = Math.min(width, height) / 2.5;
 
         return switch (startType.getValue()) {
             case START_SUN -> createSunPattern(centerX, centerY, baseSize);
@@ -263,7 +279,8 @@ public class Penrose extends ParametrizedFilter {
 
     private static List<Tile> createSunPattern(double centerX, double centerY, double baseSize) {
         List<Tile> proto = new ArrayList<>();
-        for (double angle = PI / 2 + T; angle < 2.5 * PI; angle += 2 * T) {
+        for (int i = 0; i < 5; i++) {
+            double angle = PI / 2 + T + i * 2 * T;
             proto.add(new Tile(Type.Kite, centerX, centerY, angle, baseSize));
         }
         return proto;
@@ -271,7 +288,8 @@ public class Penrose extends ParametrizedFilter {
 
     private static List<Tile> createStarPattern(double centerX, double centerY, double baseSize) {
         List<Tile> proto = new ArrayList<>();
-        for (double angle = PI / 2; angle < 2.5 * PI; angle += 2 * T) {
+        for (int i = 0; i < 5; i++) {
+            double angle = PI / 2 + i * 2 * T;
             proto.add(new Tile(Type.Dart, centerX, centerY, angle, baseSize));
         }
         return proto;
@@ -322,9 +340,9 @@ public class Penrose extends ParametrizedFilter {
         proto.add(new Tile(Type.Kite, centerX + topKiteXOffset, topKiteStartY, PI * 1.5, baseSize));
 
         // two kites at the bottom
-        double boottomKiteStartY = centerY + baseSize * G;
-        proto.add(new Tile(Type.Kite, centerX, boottomKiteStartY, 1.5 * T, baseSize));
-        proto.add(new Tile(Type.Kite, centerX, boottomKiteStartY, 3.5 * T, baseSize));
+        double bottomKiteStartY = centerY + baseSize * G;
+        proto.add(new Tile(Type.Kite, centerX, bottomKiteStartY, 1.5 * T, baseSize));
+        proto.add(new Tile(Type.Kite, centerX, bottomKiteStartY, 3.5 * T, baseSize));
 
         return proto;
     }
@@ -412,7 +430,7 @@ public class Penrose extends ParametrizedFilter {
     private void exportSVG() {
         Canvas canvas = Views.getActiveComp().getCanvas();
         List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight());
-        double strokeWidth = edgeWidth.getValue() * zoom.getPercentage();
+        double strokeWidth = edgeWidth.getValue() * transform.getMinScale();
         Color strokeColor = colors.getColor(EDGE_COLOR_INDEX);
 
         String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, null, strokeWidth, strokeColor);
