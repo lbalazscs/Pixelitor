@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,8 +31,8 @@ import pixelitor.utils.Texts;
 import java.awt.Rectangle;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -60,7 +60,7 @@ class AbstractBrushToolTest {
     private Brush origBrush;
     private Drawable dr;
 
-    static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
+    static Stream<AbstractBrushTool> instancesToTest() throws InvocationTargetException, InterruptedException {
         // call it here, because this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
@@ -71,9 +71,7 @@ class AbstractBrushToolTest {
             TestHelper.initToolSettings(tool, resources);
         }
 
-        return Arrays.stream(brushTools)
-            .map(tool -> new Object[]{tool})
-            .toList();
+        return Arrays.stream(brushTools);
     }
 
     @BeforeAll

@@ -28,8 +28,8 @@ import pixelitor.filters.jhlabsproxies.JHWeave;
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
@@ -72,40 +72,39 @@ class FilterParamTest {
         param.setAdjustmentListener(mockAdjustmentListener);
     }
 
-    static Collection<Object[]> instancesToTest() {
+    static Stream<AbstractFilterParam> instancesToTest() {
         // this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
-        return Arrays.asList(new Object[][]{
-            {new RangeParam("Param Name", 0, 0, 10)},
-            {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 0, 100)},
-            {new GroupedRangeParam("Param Name", 0, 0, 100, true)},
-            {new GroupedRangeParam("Param Name", 0, 0, 100, false)},
-            {new ImagePositionParam("Param Name")},
-            {new GradientParam("Param Name", BLACK, WHITE)},
-            {new TextParam("Param Name", "default text", true)},
-            {new ColorParam("Param Name", BLACK, ALPHA_ENABLED)},
-            {new ColorParam("Param Name", WHITE, MANUAL_ALPHA_ONLY)},
-            {new ColorParam("Param Name", BLUE, OPAQUE_ONLY)},
-            {new ColorListParam("Param Name", 1, 1, BLACK, BLUE)},
-            {new GroupedColorsParam("Param Name", "Name 1", BLUE, "Name 2", BLUE, ALPHA_ENABLED, true, true)},
-            {new BooleanParam("Param Name", true, RandomizeMode.ALLOW_RANDOMIZE, true)},
-            {new AngleParam("Param Name", 0)},
-            {new ElevationAngleParam("Param Name", 0)},
-            {new IntChoiceParam("Param Name", new Item[]{
+        return Stream.of(
+            new RangeParam("Param Name", 0, 0, 10),
+            new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 0, 100),
+            new GroupedRangeParam("Param Name", 0, 0, 100, true),
+            new GroupedRangeParam("Param Name", 0, 0, 100, false),
+            new ImagePositionParam("Param Name"),
+            new GradientParam("Param Name", BLACK, WHITE),
+            new TextParam("Param Name", "default text", true),
+            new ColorParam("Param Name", BLACK, ALPHA_ENABLED),
+            new ColorParam("Param Name", WHITE, MANUAL_ALPHA_ONLY),
+            new ColorParam("Param Name", BLUE, OPAQUE_ONLY),
+            new ColorListParam("Param Name", 1, 1, BLACK, BLUE),
+            new GroupedColorsParam("Param Name", "Name 1", BLUE, "Name 2", BLUE, ALPHA_ENABLED, true, true),
+            new BooleanParam("Param Name", true, RandomizeMode.ALLOW_RANDOMIZE, true),
+            new AngleParam("Param Name", 0),
+            new ElevationAngleParam("Param Name", 0),
+            new IntChoiceParam("Param Name", new Item[]{
                 new Item("Better", 0),
                 new Item("Faster", 1),
-            })},
-            {new StrokeParam("Param Name")},
-            {new EffectsParam("Param Name")},
-            {new CompositeParam("Param Name",
+            }),
+            new StrokeParam("Param Name"),
+            new EffectsParam("Param Name"),
+            new CompositeParam("Param Name",
                 new RangeParam("Child 1", 0, 50, 100),
                 new AngleParam("Child 2", 0),
-                new BooleanParam("Child 3", true))
-            },
-            {new LogZoomParam("Param Name", 200, 200, 1000)},
-            {new GridParam("Param Name", JHWeave.WEAVE_PRESETS, GridCellPainter.createForWeave())}
-        });
+                new BooleanParam("Child 3", true)),
+            new LogZoomParam("Param Name", 200, 200, 1000),
+            new GridParam("Param Name", JHWeave.WEAVE_PRESETS, GridCellPainter.createForWeave())
+        );
     }
 
     @Test
@@ -135,8 +134,8 @@ class FilterParamTest {
         int columnCount = ((ParamGUI) param.createGUI()).getNumLayoutColumns();
 
         assertThat(columnCount)
-            .isGreaterThan(0)
-            .isLessThan(3);
+            .as("Layout column count must be exactly 1 or 2")
+            .isIn(1, 2);
 
         verifyNoParamAdjustments();
     }
@@ -174,16 +173,7 @@ class FilterParamTest {
         param.reset(false);
         String defaultValue = param.getValueAsString();
 
-        // we can change the value in a general way only through randomize
-        param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
-
-        // randomize until we get a non-default value
-        int attempts = 0;
-        while (param.isAtDefault() && attempts < 100) {
-            param.randomize();
-            verifyNoParamAdjustments();
-            attempts++;
-        }
+        randomizeUntilNotDefault();
 
         assertThat(param.getValueAsString())
             .isNotNull()
@@ -198,6 +188,20 @@ class FilterParamTest {
 
         // check that it was triggered once
         verify(mockAdjustmentListener, times(1)).paramAdjusted();
+    }
+
+    /**
+     * Randomizes the parameter until it is no longer at its default value.
+     * This is the only general way to change the value.
+     */
+    private void randomizeUntilNotDefault() {
+        param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
+        int attempts = 0;
+        while (param.isAtDefault() && attempts < 100) {
+            param.randomize();
+            verifyNoParamAdjustments();
+            attempts++;
+        }
     }
 
     @Test
@@ -248,7 +252,9 @@ class FilterParamTest {
     }
 
     @Test
-    void shouldDisableAuxiliaryButtonsWhenParamIsDisabled() {
+    void shouldDisableSideButtonsWhenParamIsDisabled() {
+        String paramClass = param.getClass().getSimpleName();
+
         // inject a side button with a known lookup name so we can find it in the GUI
         String sideButtonName = "testSideButton";
         FilterButtonModel sideButtonModel = new FilterButtonModel(
@@ -266,19 +272,19 @@ class FilterParamTest {
         }
 
         // find the specific components in the GUI hierarchy
-        ResetButton resetButton = findChildComponent(gui, ResetButton.class);
-        JButton sideButton = findChildComponentByName(gui, JButton.class, sideButtonName);
+        ResetButton resetButton = findChildComponent(gui, ResetButton.class, btn -> true);
+        JButton sideButton = findChildComponent(gui, JButton.class, btn -> sideButtonName.equals(btn.getName()));
 
         // disable the parameter and verify buttons are disabled
         param.setEnabled(false);
         if (resetButton != null) {
             assertThat(resetButton.isEnabled())
-                .as("ResetButton should be disabled when param is disabled")
+                .as(paramClass + ": ResetButton should be disabled when param is disabled")
                 .isFalse();
         }
         if (sideButton != null) {
             assertThat(sideButton.isEnabled())
-                .as("Side button should be disabled when param is disabled")
+                .as(paramClass + ": Side button should be disabled when param is disabled")
                 .isFalse();
         }
 
@@ -288,44 +294,29 @@ class FilterParamTest {
             // the reset button should only be enabled if the value is still not default
             boolean expectedState = !param.isAtDefault();
             assertThat(resetButton.isEnabled())
-                .as("ResetButton enabled state should match !isAtDefault() when param is enabled")
+                .as(paramClass + ": ResetButton enabled state should match !isAtDefault() when param is enabled")
                 .isEqualTo(expectedState);
         }
         if (sideButton != null) {
             assertThat(sideButton.isEnabled())
-                .as("Side button should be enabled when param is enabled")
+                .as(paramClass + ": Side button should be enabled when param is enabled")
                 .isTrue();
         }
     }
 
     /**
-     * Helper to find a component of a specific type in a Container hierarchy.
+     * Helper to find a component of a specific type matching a condition in a Container hierarchy.
      */
-    private static <T extends Component> T findChildComponent(Container container, Class<T> type) {
+    private static <T extends Component> T findChildComponent(Container container, Class<T> type, Predicate<T> matcher) {
         for (Component c : container.getComponents()) {
             if (type.isInstance(c)) {
-                return type.cast(c);
-            }
-            if (c instanceof Container) {
-                T found = findChildComponent((Container) c, type);
-                if (found != null) {
-                    return found;
+                T typedComp = type.cast(c);
+                if (matcher.test(typedComp)) {
+                    return typedComp;
                 }
             }
-        }
-        return null;
-    }
-
-    /**
-     * Helper to find a component by its name in a Container hierarchy.
-     */
-    private static <T extends Component> T findChildComponentByName(Container container, Class<T> type, String name) {
-        for (Component c : container.getComponents()) {
-            if (type.isInstance(c) && name.equals(c.getName())) {
-                return type.cast(c);
-            }
-            if (c instanceof Container) {
-                T found = findChildComponentByName((Container) c, type, name);
+            if (c instanceof Container childContainer) {
+                T found = findChildComponent(childContainer, type, matcher);
                 if (found != null) {
                     return found;
                 }

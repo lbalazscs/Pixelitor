@@ -630,12 +630,12 @@ public class ShapesTool extends DragTool {
 
         setIdleState();
 
-        Composition comp = Views.getActiveComp();
-        if (comp != null) {
+        View view = Views.getActive();
+        if (view != null) {
             if (hadShape) {
-                comp.getActiveLayer().update();
+                view.getComp().getActiveLayer().update();
             } else {
-                comp.repaint();
+                view.repaint();
             }
         }
         shapesLayer = null;

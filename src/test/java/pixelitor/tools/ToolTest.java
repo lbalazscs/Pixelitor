@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.tools;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -32,9 +33,9 @@ import pixelitor.utils.input.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 /**
  * Tests behavior that is common to all tools.
@@ -66,7 +67,7 @@ class ToolTest {
         TestHelper.setUnitTestingMode();
     }
 
-    static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
+    static Stream<Arguments> instancesToTest() throws InvocationTargetException, InterruptedException {
         // this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
@@ -75,7 +76,7 @@ class ToolTest {
         Tool[] tools = Tools.getAll();
 //        Tool[] tools = {Tools.BRUSH};
 
-        List<Object[]> instances = new ArrayList<>();
+        List<Arguments> instances = new ArrayList<>();
         ResourceBundle resources = Texts.getResources();
 
         for (Tool tool : tools) {
@@ -86,14 +87,14 @@ class ToolTest {
                 for (Ctrl ctrl : Ctrl.values()) {
                     for (Shift shift : Shift.values()) {
                         for (MouseButton mouseButton : MouseButton.values()) {
-                            instances.add(new Object[]{tool, alt, ctrl, shift, mouseButton});
+                            instances.add(Arguments.of(tool, alt, ctrl, shift, mouseButton));
                         }
                     }
                 }
             }
         }
 
-        return instances;
+        return instances.stream();
     }
 
     @BeforeEach
