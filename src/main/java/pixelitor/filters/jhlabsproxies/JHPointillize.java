@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static java.awt.Color.BLACK;
 import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 
 /**
- * Pointillize filter based on the JHLabs PointillizeFilter
+ * Pointillize filter based on the JHLabs {@link PointillizeFilter}.
  */
 public class JHPointillize extends ParametrizedFilter {
     @Serial

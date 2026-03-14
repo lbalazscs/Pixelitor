@@ -20,7 +20,7 @@ package pixelitor.automate;
 import pixelitor.compactions.Resize;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.IntDocumentFilter;
-import pixelitor.gui.utils.ValidatedPanel;
+import pixelitor.gui.utils.Validated;
 import pixelitor.gui.utils.ValidationResult;
 
 import javax.swing.*;
@@ -57,7 +57,7 @@ public class BatchResize {
     /**
      * The panel for batch resize settings.
      */
-    static class BatchResizePanel extends ValidatedPanel {
+    static class BatchResizePanel extends JPanel implements Validated {
         private final OpenSaveDirsPanel openSaveDirsPanel;
         private final JTextField widthTF;
         private final JTextField heightTF;

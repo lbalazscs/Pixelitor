@@ -38,7 +38,7 @@ public class CircleFilter extends TransformFilter {
     private float iHeight;
 
     /**
-     * Construct a CircleFilter.
+     * Constructs a CircleFilter.
      */
     public CircleFilter(String filterName) {
         super(filterName);
@@ -46,7 +46,7 @@ public class CircleFilter extends TransformFilter {
     }
 
     /**
-     * Set the height of the arc.
+     * Sets the height of the arc.
      *
      * @param height the height
      */
@@ -55,27 +55,25 @@ public class CircleFilter extends TransformFilter {
     }
 
     /**
-     * Set the angle of the arc.
+     * Sets the angle of the arc.
      *
      * @param angle the angle of the arc.
-     * @angle
      */
     public void setAngle(float angle) {
         this.angle = angle;
     }
 
     /**
-     * Set the spread angle of the arc.
+     * Sets the spread angle of the arc.
      *
      * @param spreadAngle the angle
-     * @angle
      */
     public void setSpreadAngle(float spreadAngle) {
         this.spreadAngle = spreadAngle;
     }
 
     /**
-     * Set the radius of the effect.
+     * Sets the radius of the effect.
      *
      * @param radius the radius
      * @min-value 0
@@ -85,7 +83,7 @@ public class CircleFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect in the Y direction as a proportion of the image size.
+     * Sets the center of the effect in the Y direction as a proportion of the image size.
      *
      * @param centerX the center
      */
@@ -94,7 +92,7 @@ public class CircleFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect in the Y direction as a proportion of the image size.
+     * Sets the center of the effect in the Y direction as a proportion of the image size.
      *
      * @param centerY the center
      */
@@ -103,7 +101,7 @@ public class CircleFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect as a proportion of the image size.
+     * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center
      */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,9 +29,9 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Abstract base class for filters that use {@link HalftoneFilter}
+ * Abstract base class for halftone filters that use gradient-based patterns as masks.
  */
-public abstract class JHMaskedHalftone extends ParametrizedFilter {
+public abstract class JHGradientMaskHalftone extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = -8785201913136925217L;
 
@@ -45,13 +45,13 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
         new Item("Symmetric", REPETITION_REFLECT),
         new Item("One-sided", REPETITION_REPEAT),
     });
-    protected final RangeParam shiftStripes = new RangeParam("Shift Stripes (%)", 0, 0, 100);
+    protected final RangeParam stripeShift = new RangeParam("Shift Stripes (%)", 0, 0, 100);
     protected final RangeParam softness = new RangeParam("Softness", 0, 10, 100);
 
     protected CycleMethod cycle;
     protected float distanceCorrection;
 
-    protected JHMaskedHalftone() {
+    protected JHGradientMaskHalftone() {
         super(true);
     }
 

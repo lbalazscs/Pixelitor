@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.util.List;
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
- * Weave filter based on the JHLabs WeaveFilter
+ * Weave filter based on the JHLabs {@link WeaveFilter}.
  */
 public class JHWeave extends ParametrizedFilter {
     @Serial
@@ -98,10 +98,10 @@ public class JHWeave extends ParametrizedFilter {
         }
 
         filter.setPattern(pattern.getData());
-        filter.setXWidth(size.getValue(0));
-        filter.setYWidth(size.getValue(1));
-        filter.setXGap(gap.getValue(0));
-        filter.setYGap(gap.getValue(1));
+        filter.setXWidth(size.getHorizontal());
+        filter.setYWidth(size.getVertical());
+        filter.setXGap(gap.getHorizontal());
+        filter.setYGap(gap.getVertical());
         filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setUseImageColors(useImageColors.isChecked());
         filter.setRoundThreads(roundThreads.isChecked());

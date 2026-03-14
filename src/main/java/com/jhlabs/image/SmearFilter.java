@@ -59,7 +59,6 @@ public class SmearFilter extends WholeImageFilter {
      * Sets the angle of the texture.
      *
      * @param angle the angle of the texture.
-     * @angle
      */
     public void setAngle(float angle) {
         this.angle = angle;
@@ -67,6 +66,10 @@ public class SmearFilter extends WholeImageFilter {
 
     public void setMix(float mix) {
         this.mix = mix;
+    }
+
+    public void setRandom(Random random) {
+        this.random = random;
     }
 
     @Override
@@ -307,9 +310,5 @@ public class SmearFilter extends WholeImageFilter {
     @Override
     public String toString() {
         return "Effects/Smear...";
-    }
-
-    public void setRandom(Random random) {
-        this.random = random;
     }
 }

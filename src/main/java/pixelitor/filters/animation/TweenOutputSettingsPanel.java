@@ -38,7 +38,7 @@ import static pixelitor.utils.Utils.parseLocalizedDouble;
 /**
  * A panel for configuring tweening animation output settings.
  */
-public class TweenOutputSettingsPanel extends ValidatedPanel {
+public class TweenOutputSettingsPanel extends JPanel implements Validated {
     private final JTextField numSecondsTF = new JTextField("2", 5);
     private final JTextField fpsTF = new JTextField("24", 5);
     private int numFrames;

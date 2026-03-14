@@ -78,11 +78,6 @@ public class JHPixelate extends ParametrizedFilter {
 
     private final RangeParam cellSizeParam = new RangeParam("Cell Size", 3, 20, 200);
 
-    private BlockFilter blockFilter;
-    private BrickBlockFilter brickBlockFilter;
-    private TriangleBlockFilter triangleBlockFilter;
-    private HexagonBlockFilter hexagonBlockFilter;
-
     public JHPixelate() {
         super(true);
 
@@ -105,32 +100,19 @@ public class JHPixelate extends ParametrizedFilter {
         if (style == STYLE_FLAT || style == STYLE_3D || style == STYLE_EMBEDDED) {
             switch (type) {
                 case TYPE_SQUARE -> {
-                    if (blockFilter == null) {
-                        blockFilter = new BlockFilter(NAME);
-                    }
-                    blockFilter.setBlockSize(cellSize);
+                    BlockFilter blockFilter = new BlockFilter(NAME, cellSize);
                     dest = blockFilter.filter(src, dest);
                 }
                 case TYPE_BRICK -> {
-                    if (brickBlockFilter == null) {
-                        brickBlockFilter = new BrickBlockFilter(NAME);
-                    }
-                    brickBlockFilter.setHorBlockSize(cellSize * 2);
-                    brickBlockFilter.setVerBlockSize(cellSize);
+                    BrickBlockFilter brickBlockFilter = new BrickBlockFilter(NAME, cellSize * 2, cellSize);
                     dest = brickBlockFilter.filter(src, dest);
                 }
                 case TYPE_TRIANGLE -> {
-                    if (triangleBlockFilter == null) {
-                        triangleBlockFilter = new TriangleBlockFilter(NAME);
-                    }
-                    triangleBlockFilter.setSize(cellSize);
+                    TriangleBlockFilter triangleBlockFilter = new TriangleBlockFilter(NAME, cellSize);
                     dest = triangleBlockFilter.filter(src, dest);
                 }
                 case TYPE_HEXAGON -> {
-                    if (hexagonBlockFilter == null) {
-                        hexagonBlockFilter = new HexagonBlockFilter(NAME);
-                    }
-                    hexagonBlockFilter.setSize(cellSize);
+                    HexagonBlockFilter hexagonBlockFilter = new HexagonBlockFilter(NAME, cellSize);
                     dest = hexagonBlockFilter.filter(src, dest);
                 }
             }

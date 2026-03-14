@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality;
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
- * Oil Painting filter based on the JHLabs OilFilter
+ * Oil Painting filter based on the JHLabs {@link OilFilter}.
  */
 public class JHOilPainting extends ParametrizedFilter {
     @Serial
@@ -68,8 +68,8 @@ public class JHOilPainting extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int brushX = brushSize.getValue(0);
-        int brushY = brushSize.getValue(1);
+        int brushX = brushSize.getHorizontal();
+        int brushY = brushSize.getVertical();
         if (brushX == 0 && brushY == 0) {
             return src;
         }

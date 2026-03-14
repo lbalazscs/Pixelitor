@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -120,8 +120,8 @@ public class TransformLayer extends ParametrizedFilter {
     }
 
     private void applyScaling(AffineTransform transform, Point2D pivotPoint) {
-        int scaleX = scaleParam.getValue(0);
-        int scaleY = scaleParam.getValue(1);
+        int scaleX = scaleParam.getHorizontal();
+        int scaleY = scaleParam.getVertical();
         if (scaleX != 100 || scaleY != 100) {
             transform.translate(pivotPoint.getX(), pivotPoint.getY());
             transform.scale(scaleX / 100.0, scaleY / 100.0);
@@ -130,8 +130,8 @@ public class TransformLayer extends ParametrizedFilter {
     }
 
     private void applyShearing(AffineTransform transform, Point2D pivotPoint) {
-        int shearX = shearParam.getValue(0);
-        int shearY = shearParam.getValue(1);
+        int shearX = shearParam.getHorizontal();
+        int shearY = shearParam.getVertical();
         if (shearX != 0 || shearY != 0) {
             transform.translate(pivotPoint.getX(), pivotPoint.getY());
             transform.shear(shearX / 100.0, shearY / 100.0);

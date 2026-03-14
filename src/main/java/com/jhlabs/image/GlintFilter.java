@@ -46,7 +46,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the threshold value.
+     * Sets the threshold value.
      *
      * @param threshold the threshold value
      */
@@ -55,7 +55,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the amount of glint.
+     * Sets the amount of glint.
      *
      * @param amount the amount
      * @min-value 0
@@ -66,7 +66,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the length of the stars.
+     * Sets the length of the stars.
      *
      * @param length the length
      */
@@ -75,7 +75,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the blur that is applied before thresholding.
+     * Sets the blur that is applied before thresholding.
      *
      * @param blur the blur radius
      */
@@ -84,7 +84,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set whether to render the stars and the image or only the stars.
+     * Sets whether to render the stars and the image or only the stars.
      *
      * @param glintOnly true to render only stars
      */
@@ -93,7 +93,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the colormap to be used for the filter.
+     * Sets the colormap to be used for the filter.
      *
      * @param colormap the colormap
      */
@@ -210,14 +210,14 @@ public class GlintFilter extends AbstractBufferedImageOp {
                 int xmin2 = Math.max(x - length2, 0) - x;
                 int xmax2 = Math.min(x + length2, width - 1) - x;
 
-                // Horizontal
+                // horizontal
                 for (int i = 0, k = 0; i <= xmax; i++, k++) {
                     dstPixels[index + i] = PixelUtils.addPixels(dstPixels[index + i], colors[k]);
                 }
                 for (int i = -1, k = 1; i >= xmin; i--, k++) {
                     dstPixels[index + i] = PixelUtils.addPixels(dstPixels[index + i], colors[k]);
                 }
-                // Vertical
+                // vertical
                 for (int i = 1, j = index + width, k = 0; i <= ymax; i++, j += width, k++) {
                     dstPixels[j] = PixelUtils.addPixels(dstPixels[j], colors[k]);
                 }
@@ -225,7 +225,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
                     dstPixels[j] = PixelUtils.addPixels(dstPixels[j], colors[k]);
                 }
 
-                // Diagonals
+                // diagonals
                 // SE
                 int count = Math.min(xmax2, ymax2);
                 for (int i = 1, j = index + width + 1, k = 0; i <= count; i++, j += width + 1, k++) {

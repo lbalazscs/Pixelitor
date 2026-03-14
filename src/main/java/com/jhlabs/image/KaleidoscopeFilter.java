@@ -30,8 +30,8 @@ public class KaleidoscopeFilter extends TransformFilter {
     private int sides = 3;
 
     // the center in relative coordinates
-    private double relCx = 0.5f;
-    private double relCy = 0.5f;
+    private double relCx = 0.5;
+    private double relCy = 0.5;
 
     // the center in pixel coordinates
     private double cx;
@@ -40,7 +40,7 @@ public class KaleidoscopeFilter extends TransformFilter {
     private float zoom;
 
     /**
-     * Construct a KaleidoscopeFilter with no distortion.
+     * Constructs a KaleidoscopeFilter with no distortion.
      */
     public KaleidoscopeFilter(String filterName) {
         super(filterName);
@@ -48,7 +48,7 @@ public class KaleidoscopeFilter extends TransformFilter {
     }
 
     /**
-     * Set the number of sides of the kaleidoscope.
+     * Sets the number of sides of the kaleidoscope.
      *
      * @param sides the number of sides
      * @min-value 2
@@ -58,27 +58,25 @@ public class KaleidoscopeFilter extends TransformFilter {
     }
 
     /**
-     * Set the angle of the kaleidoscope.
+     * Sets the angle of the kaleidoscope.
      *
      * @param angle the angle of the kaleidoscope.
-     * @angle
      */
     public void setAngle(float angle) {
         this.angle = angle;
     }
 
     /**
-     * Set the secondary angle of the kaleidoscope.
+     * Sets the secondary angle of the kaleidoscope.
      *
      * @param angle2 the angle
-     * @angle
      */
     public void setAngle2(float angle2) {
         this.angle2 = angle2;
     }
 
     /**
-     * Set the center of the effect as a proportion of the image size.
+     * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center
      */

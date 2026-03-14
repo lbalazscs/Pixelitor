@@ -28,100 +28,39 @@ import java.util.concurrent.ThreadLocalRandom;
  * This can be animated to get a bottom-of-the-swimming-pool effect.
  */
 public class CausticsFilter extends WholeImageFilter {
-    private float scale = 32.0f;
-    private int brightness = 10;
-    private float amount = 1.0f;
-    private float turbulence = 1.0f;
-    private float dispersion = 0.0f;
-    private float time = 0.0f;
-    private int samples = 2;
-    private int bgColor = 0xff799fff;
+    private final float scale;
+    private final int brightness;
+    private final float amount;
+    private final float turbulence;
+    private final float dispersion;
+    private final float time;
+    private final int samples;
+    private final int bgColor;
 
-    public CausticsFilter(String filterName) {
+    /**
+     * Constructs a new {@link CausticsFilter}.
+     *
+     * @param filterName the name of the filter
+     * @param scale      the scale of the texture (in the range 1..300+)
+     * @param brightness the brightness (in the range 0..1)
+     * @param amount     the amount of the effect (in the range 0..1)
+     * @param turbulence the turbulence of the texture (in the range 0..1)
+     * @param dispersion the color dispersion (in the range 0..1)
+     * @param time       the time, used to animate the effect
+     * @param samples    the number of samples per pixel. More samples means better quality, but slower rendering
+     * @param bgColor    the background color
+     */
+    public CausticsFilter(String filterName, float scale, int brightness, float amount,
+                          float turbulence, float dispersion, float time, int samples, int bgColor) {
         super(filterName);
-    }
-
-    /**
-     * Sets the scale of the texture.
-     *
-     * @param scale the scale of the texture.
-     * @min-value 1
-     * @max-value 300+
-     */
-    public void setScale(float scale) {
         this.scale = scale;
-    }
-
-    /**
-     * Sets the brightness.
-     *
-     * @param brightness the brightness.
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setBrightness(int brightness) {
         this.brightness = brightness;
-    }
-
-    /**
-     * Sets the turbulence of the texture.
-     *
-     * @param turbulence the turbulence of the texture.
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setTurbulence(float turbulence) {
-        this.turbulence = turbulence;
-    }
-
-    /**
-     * Sets the amount of the effect.
-     *
-     * @param amount the amount
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setAmount(float amount) {
         this.amount = amount;
-    }
-
-    /**
-     * Sets the color dispersion.
-     *
-     * @param dispersion the dispersion
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setDispersion(float dispersion) {
+        this.turbulence = turbulence;
         this.dispersion = dispersion;
-    }
-
-    /**
-     * Sets the time. Use this to animate the effect.
-     *
-     * @param time the time
-     */
-    public void setTime(float time) {
         this.time = time;
-    }
-
-    /**
-     * Sets the number of samples per pixel.
-     * More samples means better quality, but slower rendering.
-     *
-     * @param samples the number of samples
-     */
-    public void setSamples(int samples) {
         this.samples = samples;
-    }
-
-    /**
-     * Sets the background color.
-     *
-     * @param c the color
-     */
-    public void setBgColor(int c) {
-        bgColor = c;
+        this.bgColor = bgColor;
     }
 
     @Override

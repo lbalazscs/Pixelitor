@@ -47,7 +47,7 @@ import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithSimpleValidation;
 /**
  * A search-and-select panel that dynamically narrows a list of filters as the user types.
  */
-public class FilterSearchPanel extends ValidatedPanel {
+public class FilterSearchPanel extends JPanel implements Validated {
     private static final int PADDING = 4;
 
     private JTextField searchTF;

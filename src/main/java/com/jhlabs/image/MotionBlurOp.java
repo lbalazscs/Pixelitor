@@ -37,7 +37,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     private float zoom;
 
     /**
-     * Construct a MotionBlurOp.
+     * Constructs a MotionBlurOp.
      */
     public MotionBlurOp(String filterName) {
         super(filterName);
@@ -47,7 +47,6 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
      * Sets the angle of blur.
      *
      * @param angle the angle of blur.
-     * @angle
      */
     @Override
     public void setAngle(float angle) {
@@ -55,7 +54,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Set the distance of blur.
+     * Sets the distance of blur.
      *
      * @param distance the distance of blur.
      */
@@ -65,7 +64,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Set the blur rotation.
+     * Sets the blur rotation.
      *
      * @param rotation the angle of rotation.
      */
@@ -75,7 +74,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Set the blur zoom.
+     * Sets the blur zoom.
      *
      * @param zoom the zoom factor.
      */
@@ -85,7 +84,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Set the center of the effect in the X direction as a proportion of the image size.
+     * Sets the center of the effect in the X direction as a proportion of the image size.
      *
      * @param centerX the center
      */
@@ -95,7 +94,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Set the center of the effect in the Y direction as a proportion of the image size.
+     * Sets the center of the effect in the Y direction as a proportion of the image size.
      *
      * @param centerY the center
      */
@@ -105,7 +104,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     }
 
     /**
-     * Set the center of the effect as a proportion of the image size.
+     * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center
      */
@@ -166,7 +165,9 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
             g.setComposite(alphaComposite);
 
             g.translate(cx + translateX, cy + translateY);
-            g.scale(1.0001 + scale, 1.0001 + scale);  // The .0001 works round a bug on Windows where drawImage throws an ArrayIndexOutofBoundException
+            if (scale != 0) {
+                g.scale(1.0 + scale, 1.0 + scale);
+            }
             if (rotation != 0) {
                 g.rotate(rotate);
             }

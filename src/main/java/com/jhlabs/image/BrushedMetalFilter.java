@@ -27,28 +27,22 @@ import static com.jhlabs.image.PixelUtils.clamp;
  * A filter which produces an image simulating brushed metal.
  */
 public class BrushedMetalFilter extends AbstractBufferedImageOp {
-    private int radius = 10;
-    private float amount = 0.1f;
-    private int color = 0xff888888;
-    private float shine = 0.1f;
+    private final int radius;
+    private final float amount;
+    private final int color;
+    private final float shine;
+    
     private RandomGenerator random;
 
     /**
-     * Constructs a BrushedMetalFilter object.
-     */
-    public BrushedMetalFilter(String filterName) {
-        super(filterName);
-    }
-
-    /**
-     * Constructs a BrushedMetalFilter object.
+     * Constructs a {@link BrushedMetalFilter}.
      *
-     * @param color  an int specifying the metal color
-     * @param radius an int specifying the blur size
-     * @param amount a float specifying the amount of texture
-     * @param shine  a float specifying the shine to add
+     * @param color  the color of the metal
+     * @param radius the radius of the blur in the horizontal direction
+     * @param amount the amount of texture/noise to add in the range 0..1
+     * @param shine  the amount of shine to add to the range 0..1.
      */
-    public BrushedMetalFilter(int color, int radius, float amount, float shine, String filterName) {
+    public BrushedMetalFilter(String filterName, int color, int radius, float amount, float shine) {
         super(filterName);
 
         this.color = color;
@@ -171,48 +165,6 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
             tg += ((rgb1 & 0xff00) - (rgb2 & 0xff00)) >> 8;
             tb += (rgb1 & 0xff) - (rgb2 & 0xff);
         }
-    }
-
-    /**
-     * Set the horizontal size of the blur.
-     *
-     * @param radius the radius of the blur in the horizontal direction
-     * @min-value 0
-     * @max-value 100+
-     */
-    public void setRadius(int radius) {
-        this.radius = radius;
-    }
-
-    /**
-     * Set the amount of noise to add in the range 0..1.
-     *
-     * @param amount the amount of noise
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setAmount(float amount) {
-        this.amount = amount;
-    }
-
-    /**
-     * Set the amount of shine to add to the range 0..1.
-     *
-     * @param shine the amount of shine
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setShine(float shine) {
-        this.shine = shine;
-    }
-
-    /**
-     * Set the color of the metal.
-     *
-     * @param color the color in ARGB form
-     */
-    public void setColor(int color) {
-        this.color = color;
     }
 
     public void setRandom(RandomGenerator random) {

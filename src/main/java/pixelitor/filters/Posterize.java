@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.ColorSpaces;
-import pixelitor.utils.Dithering;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.*;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -39,6 +37,8 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class Posterize extends ParametrizedFilter {
     public static final String NAME = i18n("posterize");
+
+    private static final int NUM_WORK_UNITS = 20;
 
     @Serial
     private static final long serialVersionUID = 4448706459360371642L;
@@ -71,10 +71,10 @@ public class Posterize extends ParametrizedFilter {
             ditheringMethodParam
         );
 
-        colorSpace.addOnChangeTask(this::updateSliders);
+        colorSpace.addOnChangeTask(this::updateChannelSliderLabels);
     }
 
-    private void updateSliders() {
+    private void updateChannelSliderLabels() {
         switch (colorSpace.getSelected()) {
             case SRGB -> {
                 levels1.setName(i18n("red"));
@@ -108,10 +108,9 @@ public class Posterize extends ParametrizedFilter {
             return posterizeSrgbWithDithering(src, dest, srgbLookup);
         }
 
-        // simple case for sRGB without dithering
+        // fast path for sRGB posterization without dithering
         BufferedImageOp filterOp = srgbLookup.asFastLookupOp();
-        filterOp.filter(src, dest);
-        return dest;
+        return filterOp.filter(src, dest);
     }
 
     private BufferedImage posterizeOklab(BufferedImage src, BufferedImage dest) {
@@ -133,10 +132,15 @@ public class Posterize extends ParametrizedFilter {
         // Pre-pass to find the actual min/max range of a and b channels for this image.
         // This adapts the quantization to the image's content, avoiding the perceptual
         // artifacts caused by a fixed, symmetric range.
-        float minA = Float.MAX_VALUE, maxA = Float.MIN_VALUE;
-        float minB = Float.MAX_VALUE, maxB = Float.MIN_VALUE;
+        float minA = Float.POSITIVE_INFINITY, maxA = Float.NEGATIVE_INFINITY;
+        float minB = Float.POSITIVE_INFINITY, maxB = Float.NEGATIVE_INFINITY;
 
-        for (int srcPixel : srcPixels) {
+        int workUnit = Math.max(1, numPixels / NUM_WORK_UNITS);
+        var pt = new StatusBarProgressTracker(NAME, NUM_WORK_UNITS);
+        var prePassTracker = new SubtaskProgressTracker(0.2, pt);
+
+        for (int i = 0; i < numPixels; i++) {
+            int srcPixel = srcPixels[i];
             float[] oklab = ColorSpaces.srgbToOklab(srcPixel);
             float a = oklab[1];
             float b = oklab[2];
@@ -153,15 +157,22 @@ public class Posterize extends ParametrizedFilter {
             if (b > maxB) {
                 maxB = b;
             }
+
+            if ((i + 1) % workUnit == 0) {
+                prePassTracker.unitDone();
+            }
         }
+        prePassTracker.finished();
 
         if (ditheringEnabled) {
-            // use a copy of the image for dithering to diffuse errors
-            inputPixels = ImageUtils.getPixels(ImageUtils.copyImage(src));
+            // use a copy of the pixels for dithering to diffuse errors
+            inputPixels = srcPixels.clone();
         } else {
             // no dithering, process source pixels directly
             inputPixels = srcPixels;
         }
+
+        var quantizationTracker = new SubtaskProgressTracker(0.8, pt);
 
         for (int i = 0; i < numPixels; i++) {
             int inRGB = inputPixels[i];
@@ -196,7 +207,13 @@ public class Posterize extends ParametrizedFilter {
             }
 
             destPixels[i] = alpha | (outRGB & 0x00FFFFFF);
+
+            if ((i + 1) % workUnit == 0) {
+                quantizationTracker.unitDone();
+            }
         }
+        quantizationTracker.finished();
+        pt.finished();
 
         return dest;
     }
@@ -234,13 +251,15 @@ public class Posterize extends ParametrizedFilter {
         double diffusionStrength = ditheringAmountParam.getPercentage();
         int ditheringMethod = ditheringMethodParam.getValue();
 
-        BufferedImage input = ImageUtils.copyImage(src);
-        int[] inputPixels = ImageUtils.getPixels(input);
         int[] srcPixels = ImageUtils.getPixels(src);
+        int[] inputPixels = srcPixels.clone();
         int[] destPixels = ImageUtils.getPixels(dest);
 
         int width = src.getWidth();
         int numPixels = inputPixels.length;
+
+        int workUnit = Math.max(1, numPixels / NUM_WORK_UNITS);
+        var pt = new StatusBarProgressTracker(NAME, NUM_WORK_UNITS);
 
         short[] redLUT = rgbLookup.getRedLUT();
         short[] greenLUT = rgbLookup.getGreenLUT();
@@ -263,7 +282,12 @@ public class Posterize extends ParametrizedFilter {
             Dithering.ditherRGB(ditheringMethod, inputPixels, i, width, numPixels, errorR, errorG, errorB);
 
             destPixels[i] = a | outR << 16 | outG << 8 | outB;
+
+            if ((i + 1) % workUnit == 0) {
+                pt.unitDone();
+            }
         }
+        pt.finished();
 
         return dest;
     }

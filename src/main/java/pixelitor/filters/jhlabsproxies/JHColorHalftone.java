@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import java.io.Serial;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
- * Color Halftone filter based on the JHLabs ColorHalftoneFilter
+ * Color Halftone filter based on the JHLabs {@link ColorHalftoneFilter}.
  */
 public class JHColorHalftone extends ParametrizedFilter {
     public static final String NAME = "Color Halftone";

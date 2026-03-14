@@ -135,7 +135,7 @@ public class LayerAnimation {
         encoder.finish();
     }
 
-    public static class ConfigPanel extends ValidatedPanel {
+    public static class ConfigPanel extends JPanel implements Validated {
         private final JTextField delayTF;
         private final JCheckBox pingPongCB;
 

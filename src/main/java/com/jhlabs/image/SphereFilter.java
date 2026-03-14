@@ -46,7 +46,7 @@ public class SphereFilter extends TransformFilter {
     }
 
     /**
-     * Set the index of refraction.
+     * Sets the index of refraction.
      *
      * @param refractionIndex the index of refraction
      */
@@ -55,7 +55,7 @@ public class SphereFilter extends TransformFilter {
     }
 
     /**
-     * Set the radius of the effect.
+     * Sets the radius of the effect.
      *
      * @param r the radius
      * @min-value 0
@@ -66,7 +66,7 @@ public class SphereFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect in the X direction as a proportion of the image size.
+     * Sets the center of the effect in the X direction as a proportion of the image size.
      *
      * @param centerX the center
      */
@@ -75,7 +75,7 @@ public class SphereFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect in the Y direction as a proportion of the image size.
+     * Sets the center of the effect in the Y direction as a proportion of the image size.
      *
      * @param centerY the center
      */
@@ -84,7 +84,7 @@ public class SphereFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect as a proportion of the image size.
+     * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center
      */

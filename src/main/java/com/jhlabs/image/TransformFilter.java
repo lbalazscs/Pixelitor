@@ -31,9 +31,9 @@ import java.util.concurrent.Future;
  * the mapping between source and destination pixel coordinates.
  */
 public abstract class TransformFilter extends AbstractBufferedImageOp {
-    // image dimensions
-    protected int srcWidth;
-    protected int srcHeight;
+    // image dimensions (the source and destination sizes always match)
+    protected int width;
+    protected int height;
 
     // strategies for pixels that map outside the source image bounds
     public static final int TRANSPARENT = 0; // treat out-of-bounds pixels as transparent
@@ -42,14 +42,21 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     public static final int REFLECT = 4; // mirror the image at edges
     protected int edgeAction = REPEAT_EDGE;
 
-    // Interpolation methods for sampling between pixel centers
-    public static final int NEAREST_NEIGHBOUR = 0;
+    // interpolation methods for sampling between pixel centers
+    public static final int NEAREST_NEIGHBOR = 0;
     public static final int BILINEAR = 1;
     public static final int BICUBIC = 2;
     protected int interpolation = BILINEAR;
 
     protected TransformFilter(String filterName) {
         super(filterName);
+    }
+
+    protected TransformFilter(String filterName, int edgeAction, int interpolation) {
+        super(filterName);
+
+        this.edgeAction = edgeAction;
+        this.interpolation = interpolation;
     }
 
     /**
@@ -81,21 +88,22 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        srcWidth = src.getWidth();
-        srcHeight = src.getHeight();
+        width = src.getWidth();
+        height = src.getHeight();
 
         if (dst == null) {
             ColorModel dstCM = src.getColorModel();
-            dst = new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(0, 0), dstCM
-                .isAlphaPremultiplied(), null);
+            dst = new BufferedImage(dstCM,
+                dstCM.createCompatibleWritableRaster(width, height),
+                dstCM.isAlphaPremultiplied(), null);
         }
 
-        int[] inPixels = getRGB(src, 0, 0, srcWidth, srcHeight, null);
+        int[] inPixels = getRGB(src, 0, 0, width, height, null);
 
         return switch (interpolation) {
-            case BILINEAR -> filterPixelsBilinear(dst, srcWidth, srcHeight, inPixels);
-            case BICUBIC -> filterPixelsBicubic(dst, srcWidth, srcHeight, inPixels);
-            case NEAREST_NEIGHBOUR -> filterPixelsNN(dst, srcWidth, srcHeight, inPixels);
+            case BILINEAR -> filterPixelsBilinear(dst, inPixels);
+            case BICUBIC -> filterPixelsBicubic(dst, inPixels);
+            case NEAREST_NEIGHBOR -> filterPixelsNN(dst, inPixels);
             default -> throw new IllegalStateException("should not get here");
         };
     }
@@ -103,7 +111,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     /**
      * Applies the transform using nearest-neighbor interpolation.
      */
-    private BufferedImage filterPixelsNN(BufferedImage dst, int width, int height, int[] inPixels) {
+    private BufferedImage filterPixelsNN(BufferedImage dst, int[] inPixels) {
         pt = createProgressTracker(height);
 
         @SuppressWarnings("unchecked")
@@ -111,10 +119,10 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
         // process each output line in parallel
         for (int y = 0; y < height; y++) {
-            float[] out = new float[2];
             int finalY = y;
 
             Callable<int[]> rowTask = () -> {
+                float[] out = new float[2];
                 int[] outLine = new int[width];
 
                 for (int x = 0; x < width; x++) {
@@ -122,7 +130,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                     int srcX = (int) out[0];
                     int srcY = (int) out[1];
                     // int casting rounds towards zero, so we check out[0] < 0, not srcX < 0
-                    outLine[x] = sampleNN(inPixels, srcX, srcY, srcWidth, srcHeight, out);
+                    outLine[x] = sampleNN(inPixels, srcX, srcY, out);
                 }
 
                 return outLine;
@@ -140,7 +148,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     /**
      * Applies the transform using bilinear interpolation.
      */
-    private BufferedImage filterPixelsBilinear(BufferedImage dst, int width, int height, int[] inPixels) {
+    private BufferedImage filterPixelsBilinear(BufferedImage dst, int[] inPixels) {
         int maxSrcX = width - 1;
         int maxSrcY = height - 1;
 
@@ -150,10 +158,10 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
         // process each output line in parallel
         for (int y = 0; y < height; y++) {
-            float[] out = new float[2];
             int finalY = y;
 
             Callable<int[]> rowTask = () -> {
+                float[] out = new float[2];
                 int[] outLine = new int[width];
                 for (int x = 0; x < width; x++) {
                     transformInverse(x, finalY, out);
@@ -166,17 +174,17 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
                     if ((srcX >= 0) && (srcX < maxSrcX) && (srcY >= 0) && (srcY < maxSrcY)) {
                         // fast path when all pixels are within bounds
-                        int i = (srcWidth * srcY) + srcX;
+                        int i = (width * srcY) + srcX;
                         nw = inPixels[i];
                         ne = inPixels[i + 1];
-                        sw = inPixels[i + srcWidth];
-                        se = inPixels[i + srcWidth + 1];
+                        sw = inPixels[i + width];
+                        se = inPixels[i + width + 1];
                     } else {
-                        // some of the corners are off the image
-                        nw = sampleBL(inPixels, srcX, srcY, srcWidth, srcHeight);
-                        ne = sampleBL(inPixels, srcX + 1, srcY, srcWidth, srcHeight);
-                        sw = sampleBL(inPixels, srcX, srcY + 1, srcWidth, srcHeight);
-                        se = sampleBL(inPixels, srcX + 1, srcY + 1, srcWidth, srcHeight);
+                        // some of the sample points are outside the image bounds
+                        nw = sampleBL(inPixels, srcX, srcY);
+                        ne = sampleBL(inPixels, srcX + 1, srcY);
+                        sw = sampleBL(inPixels, srcX, srcY + 1);
+                        se = sampleBL(inPixels, srcX + 1, srcY + 1);
                     }
                     outLine[x] = ImageMath.bilinearInterpolate(xWeight, yWeight, nw, ne, sw, se);
                 }
@@ -195,17 +203,17 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     /**
      * Applies the transform using bicubic interpolation.
      */
-    private BufferedImage filterPixelsBicubic(BufferedImage dst, int width, int height, int[] inPixels) {
+    private BufferedImage filterPixelsBicubic(BufferedImage dst, int[] inPixels) {
         pt = createProgressTracker(height);
         @SuppressWarnings("unchecked")
         Future<int[]>[] rowFutures = new Future[height];
 
         // process each output line in parallel
         for (int y = 0; y < height; y++) {
-            float[] out = new float[2];
             int finalY = y;
 
             Callable<int[]> rowTask = () -> {
+                float[] out = new float[2];
                 int[] outLine = new int[width];
                 int[][] p = new int[4][4];
                 for (int x = 0; x < width; x++) {
@@ -219,21 +227,21 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                     float yWeight = srcY_f - srcY;
 
                     // check if the 4x4 neighborhood is completely within the image
-                    if (srcX >= 1 && srcX < srcWidth - 2 && srcY >= 1 && srcY < srcHeight - 2) {
+                    if (srcX >= 1 && srcX < width - 2 && srcY >= 1 && srcY < height - 2) {
                         // fast path
-                        int i = (srcWidth * (srcY - 1)) + srcX - 1;
+                        int i = (width * (srcY - 1)) + srcX - 1;
                         for (int row = 0; row < 4; row++) {
                             p[row][0] = inPixels[i];
                             p[row][1] = inPixels[i + 1];
                             p[row][2] = inPixels[i + 2];
                             p[row][3] = inPixels[i + 3];
-                            i += srcWidth;
+                            i += width;
                         }
                     } else {
                         // slow path with edge handling
                         for (int row = 0; row < 4; row++) {
                             for (int col = 0; col < 4; col++) {
-                                p[row][col] = sampleBL(inPixels, srcX - 1 + col, srcY - 1 + row, srcWidth, srcHeight);
+                                p[row][col] = sampleBL(inPixels, srcX - 1 + col, srcY - 1 + row);
                             }
                         }
                     }
@@ -254,16 +262,16 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     /**
      * Samples a pixel for bilinear interpolation.
      */
-    private int sampleBL(int[] pixels, int x, int y, int width, int height) {
+    private int sampleBL(int[] pixels, int x, int y) {
         if ((x < 0) || (x >= width)) {
             if ((y < 0) || (y >= height)) {
-                return sampleCorner(pixels, x, y, width, height);
+                return sampleCorner(pixels, x, y);
             } else {
-                return sampleVerEdge(pixels, x, y, width);
+                return sampleVerEdge(pixels, x, y);
             }
         } else {
             if ((y < 0) || (y >= height)) {
-                return sampleHorEdge(pixels, x, y, width, height);
+                return sampleHorEdge(pixels, x, y);
             } else {
                 return pixels[((y * width) + x)];
             }
@@ -273,23 +281,23 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     /**
      * Samples a pixel for nearest-neighbor interpolation.
      */
-    private int sampleNN(int[] inPixels, int x, int y, int width, int height, float[] out) {
+    private int sampleNN(int[] inPixels, int x, int y, float[] out) {
         if ((out[0] < 0) || (x >= width)) {
             if ((out[1] < 0) || (y >= height)) {
-                return sampleCorner(inPixels, x, y, width, height);
+                return sampleCorner(inPixels, x, y);
             } else {
-                return sampleVerEdge(inPixels, x, y, width);
+                return sampleVerEdge(inPixels, x, y);
             }
         } else {
             if ((out[1] < 0) || (y >= height)) {
-                return sampleHorEdge(inPixels, x, y, width, height);
+                return sampleHorEdge(inPixels, x, y);
             } else {
                 return inPixels[(width * y) + x];
             }
         }
     }
 
-    private int sampleCorner(int[] pixels, int x, int y, int width, int height) {
+    private int sampleCorner(int[] pixels, int x, int y) {
         return switch (edgeAction) {
             case TRANSPARENT -> 0;
             case WRAP_AROUND -> pixels[(ImageMath.mod(y, height) * width) + ImageMath.mod(x, width)];
@@ -303,7 +311,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         };
     }
 
-    private int sampleVerEdge(int[] pixels, int x, int y, int width) {
+    private int sampleVerEdge(int[] pixels, int x, int y) {
         return switch (edgeAction) {
             case TRANSPARENT -> 0;
             case WRAP_AROUND -> pixels[(y * width) + ImageMath.mod(x, width)];
@@ -316,7 +324,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         };
     }
 
-    private int sampleHorEdge(int[] pixels, int x, int y, int width, int height) {
+    private int sampleHorEdge(int[] pixels, int x, int y) {
         return switch (edgeAction) {
             case TRANSPARENT -> 0;
             case WRAP_AROUND -> pixels[(ImageMath.mod(y, height) * width) + x];

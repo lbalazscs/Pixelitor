@@ -39,7 +39,7 @@ public class StampFilter extends PointFilter {
     }
 
     /**
-     * Set the radius of the effect.
+     * Sets the radius of the effect.
      *
      * @param radius the radius
      * @min-value 0
@@ -49,7 +49,7 @@ public class StampFilter extends PointFilter {
     }
 
     /**
-     * Set the threshold value.
+     * Sets the threshold value.
      *
      * @param threshold the threshold value
      */
@@ -58,7 +58,7 @@ public class StampFilter extends PointFilter {
     }
 
     /**
-     * Set the softness of the effect in the range 0..1.
+     * Sets the softness of the effect in the range 0..1.
      *
      * @param softness the softness
      * @min-value 0
@@ -69,7 +69,7 @@ public class StampFilter extends PointFilter {
     }
 
     /**
-     * Set the color to be used for pixels above the upper threshold.
+     * Sets the color to be used for pixels above the upper threshold.
      *
      * @param white the color
      */
@@ -78,7 +78,7 @@ public class StampFilter extends PointFilter {
     }
 
     /**
-     * Set the color to be used for pixels below the lower threshold.
+     * Sets the color to be used for pixels below the lower threshold.
      *
      * @param black the color
      */

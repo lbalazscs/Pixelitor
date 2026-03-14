@@ -43,7 +43,7 @@ public class WaterFilter extends TransformFilter {
     }
 
     /**
-     * Set the wavelength of the ripples.
+     * Sets the wavelength of the ripples.
      *
      * @param wavelength the wavelength
      */
@@ -52,7 +52,7 @@ public class WaterFilter extends TransformFilter {
     }
 
     /**
-     * Set the amplitude of the ripples.
+     * Sets the amplitude of the ripples.
      *
      * @param amplitude the amplitude
      */
@@ -61,7 +61,7 @@ public class WaterFilter extends TransformFilter {
     }
 
     /**
-     * Set the phase of the ripples.
+     * Sets the phase of the ripples.
      *
      * @param phase the phase
      */
@@ -70,7 +70,7 @@ public class WaterFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect in the X direction as a proportion of the image size.
+     * Sets the center of the effect in the X direction as a proportion of the image size.
      *
      * @param centerX the center
      */
@@ -79,7 +79,7 @@ public class WaterFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect in the Y direction as a proportion of the image size.
+     * Sets the center of the effect in the Y direction as a proportion of the image size.
      *
      * @param centerY the center
      */
@@ -88,7 +88,7 @@ public class WaterFilter extends TransformFilter {
     }
 
     /**
-     * Set the center of the effect as a proportion of the image size.
+     * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center
      */
@@ -98,7 +98,7 @@ public class WaterFilter extends TransformFilter {
     }
 
     /**
-     * Set the radius of the effect.
+     * Sets the radius of the effect.
      *
      * @param radius the radius
      * @min-value 0

@@ -26,14 +26,14 @@ public class ArrayColormap implements Colormap, Cloneable {
     protected int[] map;
 
     /**
-     * Construct an all-black colormap.
+     * Constructs an all-black colormap.
      */
     public ArrayColormap() {
         map = new int[256];
     }
 
     /**
-     * Construct a colormap with the given map.
+     * Constructs a colormap with the given map.
      *
      * @param map the array of ARGB colors
      */
@@ -54,7 +54,7 @@ public class ArrayColormap implements Colormap, Cloneable {
     }
 
     /**
-     * Set the array of colors for the colormap.
+     * Sets the array of colors for the colormap.
      *
      * @param map the colors
      * @see #getMap
@@ -102,7 +102,7 @@ public class ArrayColormap implements Colormap, Cloneable {
     }
 
     /**
-     * Set the color at "index" to "color". Entries are interpolated linearly from
+     * Sets the color at "index" to "color". Entries are interpolated linearly from
      * the existing entries at "firstIndex" and "lastIndex" to the new entry.
      * firstIndex < index < lastIndex must hold.
      *
@@ -123,7 +123,7 @@ public class ArrayColormap implements Colormap, Cloneable {
     }
 
     /**
-     * Set a range of the colormap, interpolating between two colors.
+     * Sets a range of the colormap, interpolating between two colors.
      *
      * @param firstIndex the position of the first color
      * @param lastIndex  the position of the second color
@@ -137,7 +137,7 @@ public class ArrayColormap implements Colormap, Cloneable {
     }
 
     /**
-     * Set a range of the colormap to a single color.
+     * Sets a range of the colormap to a single color.
      *
      * @param firstIndex the position of the first color
      * @param lastIndex  the position of the second color
@@ -150,7 +150,7 @@ public class ArrayColormap implements Colormap, Cloneable {
     }
 
     /**
-     * Set one element of the colormap to a given color.
+     * Sets one element of the colormap to a given color.
      *
      * @param index the position of the color
      * @param color the color

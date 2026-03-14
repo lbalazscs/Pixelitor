@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,18 +27,12 @@ import java.awt.image.BufferedImage;
  * Pixelates in brick-style.
  */
 public class BrickBlockFilter extends AbstractBufferedImageOp {
-    private int horBlockSize = 10;
-    private int verBlockSize = 10;
+    private final int horBlockSize;
+    private final int verBlockSize;
 
-    public BrickBlockFilter(String filterName) {
+    public BrickBlockFilter(String filterName, int horBlockSize, int verBlockSize) {
         super(filterName);
-    }
-
-    public void setHorBlockSize(int horBlockSize) {
         this.horBlockSize = horBlockSize;
-    }
-
-    public void setVerBlockSize(int verBlockSize) {
         this.verBlockSize = verBlockSize;
     }
 

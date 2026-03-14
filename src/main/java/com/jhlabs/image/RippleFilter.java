@@ -34,7 +34,7 @@ public class RippleFilter extends RotatingEffectFilter {
     private double phaseY;
 
     /**
-     * Construct a RippleFilter.
+     * Constructs a RippleFilter.
      */
     public RippleFilter(String filterName) {
         super(filterName);
@@ -45,7 +45,7 @@ public class RippleFilter extends RotatingEffectFilter {
     }
 
     /**
-     * Set the amplitude of ripple in the X direction.
+     * Sets the amplitude of ripple in the X direction.
      *
      * @param xAmplitude the amplitude (in pixels).
      */
@@ -54,7 +54,7 @@ public class RippleFilter extends RotatingEffectFilter {
     }
 
     /**
-     * Set the wavelength of ripple in the X direction.
+     * Sets the wavelength of ripple in the X direction.
      *
      * @param xWavelength the wavelength (in pixels).
      */
@@ -63,7 +63,7 @@ public class RippleFilter extends RotatingEffectFilter {
     }
 
     /**
-     * Set the amplitude of ripple in the Y direction.
+     * Sets the amplitude of ripple in the Y direction.
      *
      * @param yAmplitude the amplitude (in pixels).
      */
@@ -72,7 +72,7 @@ public class RippleFilter extends RotatingEffectFilter {
     }
 
     /**
-     * Set the wavelength of ripple in the Y direction.
+     * Sets the wavelength of ripple in the Y direction.
      *
      * @param yWavelength the wavelength (in pixels).
      */
@@ -81,7 +81,7 @@ public class RippleFilter extends RotatingEffectFilter {
     }
 
     /**
-     * Set the wave type.
+     * Sets the wave type.
      *
      * @param waveType the type.
      */

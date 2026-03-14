@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -105,9 +105,9 @@ public class XYZTest extends ParametrizedFilter {
             xyz2rgb(xyz, rgb);
 
             if (linearize) {
-                r = ColorSpaces.linearToSRGBInt(rgb[0]);
-                g = ColorSpaces.linearToSRGBInt(rgb[1]);
-                b = ColorSpaces.linearToSRGBInt(rgb[2]);
+                r = ColorSpaces.linearToSrgbInt(rgb[0]);
+                g = ColorSpaces.linearToSrgbInt(rgb[1]);
+                b = ColorSpaces.linearToSrgbInt(rgb[2]);
             } else {
                 r = (int) (rgb[0] * 255);
                 g = (int) (rgb[1] * 255);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,8 +43,8 @@ public class CheckerboardTransition extends AbstractTransition {
 
     @Override
     Transition createTransition() {
-        int numRows = numDiv.getValue(0);
-        int numCols = numDiv.getValue(1);
+        int numRows = numDiv.getHorizontal();
+        int numCols = numDiv.getVertical();
         return new CheckerboardTransition2D(type.getValue(), numRows, numCols);
     }
 }

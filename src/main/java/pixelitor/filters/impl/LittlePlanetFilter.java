@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,18 +41,18 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         double dy = cy - y;
         double r = Math.sqrt(dx * dx + dy * dy);
 
-        double maxRadius = srcHeight * zoom / 2;
+        double maxRadius = height * zoom / 2;
         double angle = Geometry.atan2ToIntuitive(FastMath.atan2(dy, dx)) + rotationAngle;
 
         if (angle > 2 * Math.PI) {
             angle -= 2 * Math.PI;
         }
-        float srcX = (float) (angle * srcWidth / (2 * Math.PI));
+        float srcX = (float) (angle * width / (2 * Math.PI));
         float radiusRatio = (float) (r / maxRadius);
         float biasedRadiusRatio = ImageMath.bias(radiusRatio, innerZoom);
-        float srcY = biasedRadiusRatio * srcHeight;
+        float srcY = biasedRadiusRatio * height;
         if (!inverted) {
-            srcY = srcHeight - srcY;
+            srcY = height - srcY;
         }
 
         out[0] = srcX;

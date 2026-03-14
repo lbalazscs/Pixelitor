@@ -56,14 +56,14 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     private int edgeAction = CLAMP_EDGES;
 
     /**
-     * Construct a filter with a null kernel. This is only useful if you're going to change the kernel later on.
+     * Constructs a filter with a null kernel. This is only useful if you're going to change the kernel later on.
      */
     public ConvolveFilter(String filterName) {
         this(new float[9], filterName);
     }
 
     /**
-     * Construct a filter with the given 3x3 kernel.
+     * Constructs a filter with the given 3x3 kernel.
      *
      * @param matrix an array of 9 floats containing the kernel
      */
@@ -72,7 +72,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Construct a filter with the given kernel.
+     * Constructs a filter with the given kernel.
      *
      * @param rows   the number of rows in the kernel
      * @param cols   the number of columns in the kernel
@@ -83,7 +83,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Construct a filter with the given 3x3 kernel.
+     * Constructs a filter with the given 3x3 kernel.
      *
      * @param kernel the convolution kernel
      */
@@ -93,7 +93,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the convolution kernel.
+     * Sets the convolution kernel.
      *
      * @param kernel the kernel
      */
@@ -102,7 +102,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the action to perfomr for pixels off the image edges.
+     * Sets the action to perfomr for pixels off the image edges.
      *
      * @param edgeAction the action
      */
@@ -111,7 +111,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set whether to premultiply the alpha channel.
+     * Sets whether to premultiply the alpha channel.
      *
      * @param premultiplyAlpha true to premultiply the alpha
      */

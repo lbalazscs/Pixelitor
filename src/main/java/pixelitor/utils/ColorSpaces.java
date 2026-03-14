@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,6 @@ package pixelitor.utils;
 
 import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
-import pixelitor.colors.Colors;
-
-import java.awt.Color;
 
 /**
  * Utility methods for color space conversions.
@@ -38,17 +35,17 @@ public class ColorSpaces {
         }
     }
 
-    private static final int DOUBLE_RESOLUTION = 1000;
+    private static final int DOUBLE_RESOLUTION = 4096;
 
     /**
-     * Lookup table for transforming linear RGB (0..1) to sRGB (0..255).
+     * Lookup table for transforming linear RGB (0..1) to sRGB ints (0..255).
      */
     private static final int[] TO_SRGB_LUT = new int[DOUBLE_RESOLUTION + 1];
 
     static {
         double step = 1.0 / DOUBLE_RESOLUTION;
         for (int i = 0; i <= DOUBLE_RESOLUTION; i++) {
-            TO_SRGB_LUT[i] = (int) (255.0 * linearToSrgbExact(i * step));
+            TO_SRGB_LUT[i] = (int) (255.0 * linearToSrgbExact(i * step) + 0.5);
         }
     }
 
@@ -77,7 +74,7 @@ public class ColorSpaces {
     /**
      * Converts linear RGB (0..1) to sRGB int (0..255).
      */
-    public static int linearToSRGBInt(double lin) {
+    public static int linearToSrgbInt(double lin) {
         lin = ImageMath.clamp01(lin);
         int index = (int) (lin * DOUBLE_RESOLUTION + 0.5);
         return TO_SRGB_LUT[index];
@@ -96,11 +93,11 @@ public class ColorSpaces {
         double bLin = SRGB_TO_LINEAR_LUT[b];
 
         // L in [0,1], a in ~[-0.4,0.4], b in ~[-0.4,0.4]
-        return linearRGBToOklab(rLin, gLin, bLin);
+        return linearRgbToOklab(rLin, gLin, bLin);
     }
 
     /**
-     * Converts an array of packed sRGB ints to Oklab in packed float array form.
+     * Converts an array of packed sRGB ints to Oklab in a packed float array.
      */
     public static void srgbToOklabBulk(int[] src, float[] dst) {
         for (int i = 0, di = 0; i < src.length; i++, di += 3) {
@@ -113,7 +110,7 @@ public class ColorSpaces {
             double gLin = SRGB_TO_LINEAR_LUT[g];
             double bLin = SRGB_TO_LINEAR_LUT[b];
 
-            float[] lab = linearRGBToOklab(rLin, gLin, bLin);
+            float[] lab = linearRgbToOklab(rLin, gLin, bLin);
             dst[di] = lab[0];
             dst[di + 1] = lab[1];
             dst[di + 2] = lab[2];
@@ -126,9 +123,9 @@ public class ColorSpaces {
     public static int oklabToSrgb(float[] oklab) {
         double[] linear = oklabToLinearRGB(oklab);
 
-        int r = linearToSRGBInt(linear[0]);
-        int g = linearToSRGBInt(linear[1]);
-        int b = linearToSRGBInt(linear[2]);
+        int r = linearToSrgbInt(linear[0]);
+        int g = linearToSrgbInt(linear[1]);
+        int b = linearToSrgbInt(linear[2]);
 
         return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
@@ -140,19 +137,23 @@ public class ColorSpaces {
         for (int si = 0, i = 0; i < dst.length; i++, si += 3) {
             double[] linear = oklabToLinearRGB(src, si);
 
-            int r = linearToSRGBInt(linear[0]);
-            int g = linearToSRGBInt(linear[1]);
-            int b = linearToSRGBInt(linear[2]);
+            int r = linearToSrgbInt(linear[0]);
+            int g = linearToSrgbInt(linear[1]);
+            int b = linearToSrgbInt(linear[2]);
 
             dst[i] = 0xFF000000 | (r << 16) | (g << 8) | b;
         }
     }
 
+    /**
+     * Converts Oklab values to sRGB using precise
+     * gamma conversion instead of the lookup table.
+     */
     public static void oklabToSrgbBulkPrecise(float[] src, int[] dst) {
         for (int si = 0, i = 0; i < dst.length; i++, si += 3) {
             double[] linear = oklabToLinearRGB(src, si);
 
-            // precise version, doesn't call linearToSRGBInt
+            // precise version, doesn't use linearToSRGBInt
             double rLin = ImageMath.clamp01(linear[0]);
             double gLin = ImageMath.clamp01(linear[1]);
             double bLin = ImageMath.clamp01(linear[2]);
@@ -210,7 +211,7 @@ public class ColorSpaces {
     /**
      * Converts linear sRGB to Oklab.
      */
-    public static float[] linearRGBToOklab(double r, double g, double b) {
+    public static float[] linearRgbToOklab(double r, double g, double b) {
         double l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
         double m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
         double s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
@@ -227,9 +228,9 @@ public class ColorSpaces {
     }
 
     /**
-     * SIMD-friendly version: converts linear sRGB (double array offset) to Oklab without allocations.
+     * Zero-allocation version: converts linear sRGB (double array offset) to Oklab without allocations.
      */
-    private static float[] linearRGBToOklab(double r, double g, double b, float[] out, int off) {
+    private static float[] linearRgbToOklab(double r, double g, double b, float[] out, int off) {
         double l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
         double m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
         double s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
@@ -264,7 +265,7 @@ public class ColorSpaces {
     }
 
     /**
-     * SIMD-friendly version: converts Oklab from packed float array to linear RGB without allocations.
+     * Zero-allocation version: converts Oklab from packed float array to linear RGB without allocations.
      */
     private static double[] oklabToLinearRGB(float[] c, int off) {
         double l_ = c[off] + 0.3963377774 * c[off + 1] + 0.2158037573 * c[off + 2];
@@ -351,66 +352,5 @@ public class ColorSpaces {
 
         // pack into single int (full alpha)
         return 0xFF_00_00_00 | (ri << 16) | (gi << 8) | bi;
-    }
-
-    /**
-     * Test method to verify round-trip conversion accuracy
-     */
-    public static void main(String[] args) {
-        record NamedColor(Color color, String name) {
-        }
-
-        NamedColor[] testColors = {
-            new NamedColor(Color.RED, "red"),
-            new NamedColor(Color.GREEN, "green"),
-            new NamedColor(Color.BLUE, "blue"),
-            new NamedColor(Color.CYAN, "cyan"),
-            new NamedColor(Color.MAGENTA, "magenta"),
-            new NamedColor(Color.YELLOW, "yellow"),
-            new NamedColor(Color.WHITE, "white"),
-            new NamedColor(Color.BLACK, "black"),
-            new NamedColor(Color.GRAY, "gray"),
-            new NamedColor(Colors.CW_BLUE, "cw blue"),
-            new NamedColor(Colors.CW_GREEN, "cw green"),
-            new NamedColor(Colors.CW_ORANGE, "cw orange"),
-            new NamedColor(Colors.CW_RED, "cw red"),
-            new NamedColor(Colors.CW_TEAL, "cw teal"),
-            new NamedColor(Colors.CW_VIOLET, "cw violet"),
-            new NamedColor(Colors.CW_YELLOW, "cw yellow")
-        };
-
-        // initialize variables to track component ranges
-        float minY = Float.MAX_VALUE, maxY = Float.MIN_VALUE;
-        float minCb = Float.MAX_VALUE, maxCb = Float.MIN_VALUE;
-        float minCr = Float.MAX_VALUE, maxCr = Float.MIN_VALUE;
-
-        System.out.println("Testing round-trip conversion:");
-        for (NamedColor namedColor : testColors) {
-            int input = namedColor.color().getRGB();
-
-            // convert
-            float[] ycbcr = srgbToYCbCr(input);
-            int recovered = ycbcrToSrgb(ycbcr);
-
-            // update component ranges
-            minY = Math.min(minY, ycbcr[0]);
-            maxY = Math.max(maxY, ycbcr[0]);
-            minCb = Math.min(minCb, ycbcr[1]);
-            maxCb = Math.max(maxCb, ycbcr[1]);
-            minCr = Math.min(minCr, ycbcr[2]);
-            maxCr = Math.max(maxCr, ycbcr[2]);
-
-            System.out.printf("Original: 0x%06X (%s) -> YCbCr: [%.1f, %.1f, %.1f] -> Recovered: 0x%06X%n",
-                input, namedColor.name(), ycbcr[0], ycbcr[1], ycbcr[2], recovered);
-
-            if (input != recovered) {
-                throw new IllegalStateException("Round-trip conversion failed for color: " + namedColor.name());
-            }
-        }
-
-        System.out.println("\nYCbCr component ranges:");
-        System.out.printf("Y:  [%.1f, %.1f]%n", minY, maxY);
-        System.out.printf("Cb: [%.1f, %.1f]%n", minCb, maxCb);
-        System.out.printf("Cr: [%.1f, %.1f]%n", minCr, maxCr);
     }
 }

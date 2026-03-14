@@ -22,10 +22,9 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A filter which uses a another image as a mask to produce a halftoning effect.
+ * A filter which uses another image as a mask to produce a halftoning effect.
  */
 public class HalftoneFilter extends AbstractBufferedImageOp {
-
     public static final int GRID_TRIANGLE = 0;
     public static final int GRID_SQUARE = 1;
     public static final int GRID_RINGS = 2;
@@ -124,8 +123,8 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
         double r11 = Math.hypot(width - cx, height - cy); // distance to corner (width, height)
         int maxRadius = (int) Math.ceil(Math.max(Math.max(r00, r10), Math.max(r01, r11)));
 
-        double maxAdjustedRadius = maxRadius - firstRingRadius;
-        int numRings = (maxAdjustedRadius <= 0) ? 0 : (int) (maxAdjustedRadius / maskHeight) + 1;
+        double adjustedMaxRadius = maxRadius - firstRingRadius;
+        int numRings = (adjustedMaxRadius <= 0) ? 0 : (int) (adjustedMaxRadius / maskHeight) + 1;
 
         float[] thetaScales = new float[numRings];
         for (int i = 0; i < numRings; i++) {
@@ -227,25 +226,28 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the softness of the effect in the range 0..1.
+     * Sets the softness of the effect in the range 0..1.
      */
     public void setSoftness(float softness) {
         this.softness = softness;
     }
 
     /**
-     * Set the halftone mask.
+     * Sets the halftone mask.
      */
     public void setMask(BufferedImage mask) {
         this.mask = mask;
     }
 
+    /**
+     * Sets whether to invert the halftone mask.
+     */
     public void setInvert(boolean invert) {
         this.invert = invert;
     }
 
     /**
-     * Set whether to do monochrome halftoning.
+     * Sets whether to do monochrome halftoning.
      */
     public void setMonochrome(boolean monochrome) {
         this.monochrome = monochrome;

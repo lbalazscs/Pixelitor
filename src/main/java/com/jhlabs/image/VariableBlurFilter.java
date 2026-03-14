@@ -36,7 +36,7 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set whether to premultiply the alpha channel.
+     * Sets whether to premultiply the alpha channel.
      *
      * @param premultiplyAlpha true to premultiply the alpha
      */
@@ -180,7 +180,7 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the horizontal size of the blur.
+     * Sets the horizontal size of the blur.
      *
      * @param hRadius the radius of the blur in the horizontal direction
      * @min-value 0
@@ -190,7 +190,7 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the vertical size of the blur.
+     * Sets the vertical size of the blur.
      *
      * @param vRadius the radius of the blur in the vertical direction
      * @min-value 0
@@ -200,7 +200,7 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the radius of the effect.
+     * Sets the radius of the effect.
      *
      * @param radius the radius
      * @min-value 0
@@ -210,7 +210,7 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the number of iterations the blur is performed.
+     * Sets the number of iterations the blur is performed.
      *
      * @param iterations the number of iterations
      * @min-value 0
@@ -220,7 +220,7 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the mask used to give the amount of blur at each point.
+     * Sets the mask used to give the amount of blur at each point.
      *
      * @param blurMask the mask
      */

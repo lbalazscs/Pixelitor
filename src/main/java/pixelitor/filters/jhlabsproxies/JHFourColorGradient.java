@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.io.Serial;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
- * Four Color Gradient filter based on the JHLabs FourColorFilter
+ * Four Color Gradient filter based on the JHLabs {@link FourColorFilter}.
  */
 public class JHFourColorGradient extends ParametrizedFilter {
     public static final String NAME = "Four Color Gradient";

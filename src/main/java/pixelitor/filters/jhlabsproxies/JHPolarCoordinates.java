@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Polar Coordinates filter based on the JHLabs PolarFilter
+ * Polar Coordinates filter based on the JHLabs {@link PolarFilter}.
  */
 public class JHPolarCoordinates extends ParametrizedFilter {
     public static final String NAME = i18n("polar_coordinates");

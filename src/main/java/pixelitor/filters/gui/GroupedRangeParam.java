@@ -293,6 +293,14 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         return children[index].getValue();
     }
 
+    public int getHorizontal() {
+        return getValue(0);
+    }
+
+    public int getVertical() {
+        return getValue(1);
+    }
+
     public float getValueAsFloat(int index) {
         return children[index].getValueAsFloat();
     }

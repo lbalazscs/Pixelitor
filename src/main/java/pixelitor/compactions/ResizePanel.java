@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,18 +22,10 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.DimensionHelper;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.ValidatedPanel;
-import pixelitor.gui.utils.ValidationResult;
+import pixelitor.gui.utils.*;
 import pixelitor.utils.ResizeUnit;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
@@ -47,7 +39,7 @@ import static java.awt.FlowLayout.LEFT;
 /**
  * The GUI for the resize settings.
  */
-public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener, DialogMenuOwner, DimensionHelper.DimensionChangeCallback {
+public class ResizePanel extends JPanel implements Validated, KeyListener, ItemListener, DialogMenuOwner, DimensionHelper.DimensionChangeCallback {
     private final JCheckBox keepProportionsCB;
     private final TitledBorder titleBorder;
 

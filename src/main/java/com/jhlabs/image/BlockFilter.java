@@ -22,23 +22,16 @@ import java.awt.image.BufferedImage;
  * A Filter to pixellate images.
  */
 public class BlockFilter extends AbstractBufferedImageOp {
-    private int blockSize = 2;
+    private final int blockSize;
 
     /**
-     * Construct a BlockFilter.
-     */
-    public BlockFilter(String filterName) {
-        super(filterName);
-    }
-
-    /**
-     * Set the pixel block size.
+     * Constructs a BlockFilter.
      *
+     * @param filterName the name of the filter
      * @param blockSize the number of pixels along each block edge
-     * @min-value 1
-     * @max-value 100+
      */
-    public void setBlockSize(int blockSize) {
+    public BlockFilter(String filterName, int blockSize) {
+        super(filterName);
         this.blockSize = blockSize;
     }
 
@@ -99,4 +92,3 @@ public class BlockFilter extends AbstractBufferedImageOp {
         return "Pixellate/Mosaic...";
     }
 }
-

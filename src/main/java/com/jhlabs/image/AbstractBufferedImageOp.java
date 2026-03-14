@@ -27,7 +27,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ColorModel;
 
-import static java.awt.image.BufferedImage.*;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
  * A convenience class which implements those methods of BufferedImageOp which are rarely changed.
@@ -122,7 +124,6 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
      */
     public static int[] getRGB(BufferedImage image, int x, int y, int width, int height, int[] pixels) {
         int type = image.getType();
-//		if ( type == TYPE_INT_ARGB || type == TYPE_INT_RGB )
         if ((type == TYPE_INT_ARGB) || (type == TYPE_INT_RGB) || (type == TYPE_INT_ARGB_PRE)) {
             return (int[]) image.getRaster().getDataElements(x, y, width, height, pixels);
         }
@@ -135,15 +136,14 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
      *
      * @param image  a BufferedImage object
      * @param x      the left edge of the pixel block
-     * @param y      the right edge of the pixel block
-     * @param width  the width of the pixel arry
-     * @param height the height of the pixel arry
+     * @param y      the top edge of the pixel block
+     * @param width  the width of the pixel array
+     * @param height the height of the pixel array
      * @param pixels the array of pixels to set
      * @see #getRGB
      */
     public static void setRGB(BufferedImage image, int x, int y, int width, int height, int[] pixels) {
         int type = image.getType();
-//		if ( type == TYPE_INT_ARGB || type == TYPE_INT_RGB  )
         if ((type == TYPE_INT_ARGB) || (type == TYPE_INT_RGB) || (type == TYPE_INT_ARGB_PRE)) {
             image.getRaster().setDataElements(x, y, width, height, pixels);
         } else {

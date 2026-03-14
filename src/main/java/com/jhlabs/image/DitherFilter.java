@@ -103,12 +103,12 @@ public class DitherFilter extends PointFilter {
         169, 105, 153, 89, 165, 101, 149, 85, 170, 106, 154, 90, 166, 102, 150, 86,
         3, 233, 57, 217, 13, 229, 53, 213, 0, 234, 58, 218, 14, 230, 54, 214,
         131, 67, 185, 121, 141, 77, 181, 117, 128, 64, 186, 122, 142, 78, 182, 118,
-            35, 195, 19, 249, 45, 205, 29, 245, 32, 192, 16, 250, 46, 206, 30, 246,
-            163, 99, 147, 83, 173, 109, 157, 93, 160, 96, 144, 80, 174, 110, 158, 94,
-            11, 227, 51, 211, 7, 237, 61, 221, 8, 224, 48, 208, 4, 238, 62, 222,
-            139, 75, 179, 115, 135, 71, 189, 125, 136, 72, 176, 112, 132, 68, 190, 126,
-            43, 203, 27, 243, 39, 199, 23, 253, 40, 200, 24, 240, 36, 196, 20, 254,
-            171, 107, 155, 91, 167, 103, 151, 87, 168, 104, 152, 88, 164, 100, 148, 84};
+        35, 195, 19, 249, 45, 205, 29, 245, 32, 192, 16, 250, 46, 206, 30, 246,
+        163, 99, 147, 83, 173, 109, 157, 93, 160, 96, 144, 80, 174, 110, 158, 94,
+        11, 227, 51, 211, 7, 237, 61, 221, 8, 224, 48, 208, 4, 238, 62, 222,
+        139, 75, 179, 115, 135, 71, 189, 125, 136, 72, 176, 112, 132, 68, 190, 126,
+        43, 203, 27, 243, 39, 199, 23, 253, 40, 200, 24, 240, 36, 196, 20, 254,
+        171, 107, 155, 91, 167, 103, 151, 87, 168, 104, 152, 88, 164, 100, 148, 84};
 
     /**
      * Order-3 clustered dither.
@@ -148,12 +148,12 @@ public class DitherFilter extends PointFilter {
         65, 72, 80, 90, 91, 81, 73, 66, 62, 55, 47, 37, 36, 46, 54, 61,
         63, 58, 50, 40, 41, 51, 59, 60, 64, 69, 77, 87, 86, 76, 68, 67,
         57, 33, 27, 18, 19, 28, 34, 52, 70, 94, 100, 109, 108, 99, 93, 75,
-            49, 26, 13, 11, 12, 15, 29, 44, 78, 101, 114, 116, 115, 112, 98, 83,
-            39, 17, 4, 3, 2, 9, 20, 42, 88, 110, 123, 124, 125, 118, 107, 85,
-            38, 16, 5, 0, 1, 10, 21, 43, 89, 111, 122, 127, 126, 117, 106, 84,
-            48, 25, 8, 6, 7, 14, 30, 45, 79, 102, 119, 121, 120, 113, 97, 82,
-            56, 32, 24, 23, 22, 31, 35, 53, 71, 95, 103, 104, 105, 96, 92, 74,
-            62, 55, 47, 37, 36, 46, 54, 61, 65, 72, 80, 90, 91, 81, 73, 66};
+        49, 26, 13, 11, 12, 15, 29, 44, 78, 101, 114, 116, 115, 112, 98, 83,
+        39, 17, 4, 3, 2, 9, 20, 42, 88, 110, 123, 124, 125, 118, 107, 85,
+        38, 16, 5, 0, 1, 10, 21, 43, 89, 111, 122, 127, 126, 117, 106, 84,
+        48, 25, 8, 6, 7, 14, 30, 45, 79, 102, 119, 121, 120, 113, 97, 82,
+        56, 32, 24, 23, 22, 31, 35, 53, 71, 95, 103, 104, 105, 96, 92, 74,
+        62, 55, 47, 37, 36, 46, 54, 61, 65, 72, 80, 90, 91, 81, 73, 66};
 
     public static final int MATRIX_2x2 = 1;
     public static final int MATRIX_4x4_SQUARE = 2;
@@ -165,6 +165,20 @@ public class DitherFilter extends PointFilter {
     public static final int MATRIX_CLUSTER3 = 8;
     public static final int MATRIX_CLUSTER4 = 9;
     public static final int MATRIX_CLUSTER8 = 10;
+
+    private int[] matrix;
+    private int rows, cols, levels;
+    private int[] mod;
+    private int[] div;
+    private int[] map;
+    private boolean colorDither;
+
+    /**
+     * Constuct a DitherFilter.
+     */
+    public DitherFilter(String filterName) {
+        super(filterName);
+    }
 
     public void setMatrixMethod(int method) {
         matrix = switch (method) {
@@ -182,22 +196,8 @@ public class DitherFilter extends PointFilter {
         };
     }
 
-    private int[] matrix;
-    private int rows, cols, levels;
-    private int[] mod;
-    private int[] div;
-    private int[] map;
-    private boolean colorDither;
-
     /**
-     * Constuct a DitherFilter.
-     */
-    public DitherFilter(String filterName) {
-        super(filterName);
-    }
-
-    /**
-     * Set the dither matrix.
+     * Sets the dither matrix.
      *
      * @param matrix the dither matrix
      */
@@ -206,7 +206,7 @@ public class DitherFilter extends PointFilter {
     }
 
     /**
-     * Set the number of dither levels.
+     * Sets the number of dither levels.
      *
      * @param levels the number of levels
      */
@@ -216,7 +216,7 @@ public class DitherFilter extends PointFilter {
 
 
     /**
-     * Set whether to use a color dither.
+     * Sets whether to use a color dither.
      *
      * @param colorDither whether to use a color dither
      */
@@ -278,4 +278,3 @@ public class DitherFilter extends PointFilter {
         return "Colors/Dither...";
     }
 }
-

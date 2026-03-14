@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import com.jhlabs.image.AbstractBufferedImageOp;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.lang.ref.SoftReference;
 
 import static com.jhlabs.image.ImageMath.SQRT_3;
 
@@ -33,33 +34,30 @@ import static com.jhlabs.image.ImageMath.SQRT_3;
  * a tessellating pattern covering the entire image.
  */
 public class HexagonBlockFilter extends AbstractBufferedImageOp {
-    private int size = 20; // length of hexagon side
-    private int[][] hexagonIndices; // cache for pixel-to-hexagon mapping
-    private Rectangle[] hexagonBounds; // cache for hexagon boundaries
-    private int numHexagonsX;
-    private int numHexagonsY;
+    private final int size; // length of hexagon side
 
-    public HexagonBlockFilter(String filterName) {
-        super(filterName);
+    private record Cache(int width, int height, int size, int[] indices, Rectangle[] bounds, int numX, int numY) {
     }
 
-    public void setSize(int size) {
-        if (this.size != size) {
-            hexagonIndices = null;
-            hexagonBounds = null;
-        }
+    private static volatile SoftReference<Cache> cacheRef = new SoftReference<>(null);
+
+    public HexagonBlockFilter(String filterName, int size) {
+        super(filterName);
         this.size = size;
     }
 
-    // Builds the two cache arrays by analyzing the image dimensions.
-    private void initializeCaches(int width, int height) {
+    private Cache getOrCreateCache(int width, int height) {
+        Cache cache = cacheRef.get();
+        if (cache != null && cache.width() == width && cache.height() == height && cache.size() == size) {
+            return cache;
+        }
+
         // first pass to determine the range of indices
         int minCol = Integer.MAX_VALUE;
         int maxCol = Integer.MIN_VALUE;
         int minRow = Integer.MAX_VALUE;
         int maxRow = Integer.MIN_VALUE;
 
-        // find the range of indices
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Point idx = getHexagonIndex(x, y);
@@ -72,12 +70,12 @@ public class HexagonBlockFilter extends AbstractBufferedImageOp {
 
         int minColumnIndex = minCol;
         int minRowIndex = minRow;
-        numHexagonsX = maxCol - minCol + 1;
-        numHexagonsY = maxRow - minRow + 1;
+        int numX = maxCol - minCol + 1;
+        int numY = maxRow - minRow + 1;
 
-        // initialize arrays
-        hexagonIndices = new int[height][width];
-        hexagonBounds = new Rectangle[numHexagonsX * numHexagonsY];
+        // initialize flattened 1D array to reduce object allocations
+        int[] indices = new int[width * height];
+        Rectangle[] bounds = new Rectangle[numX * numY];
 
         // second pass to fill the caches
         for (int y = 0; y < height; y++) {
@@ -85,18 +83,21 @@ public class HexagonBlockFilter extends AbstractBufferedImageOp {
                 Point idx = getHexagonIndex(x, y);
                 int adjustedCol = idx.x - minColumnIndex;
                 int adjustedRow = idx.y - minRowIndex;
-                int hexId = adjustedCol + adjustedRow * numHexagonsX;
+                int hexId = adjustedCol + adjustedRow * numX;
 
-                hexagonIndices[y][x] = hexId;
+                indices[y * width + x] = hexId;
 
-                if (hexagonBounds[hexId] == null) {
-                    hexagonBounds[hexId] = new Rectangle(x, y, 1, 1);
+                if (bounds[hexId] == null) {
+                    bounds[hexId] = new Rectangle(x, y, 1, 1);
                 } else {
-                    Rectangle bounds = hexagonBounds[hexId];
-                    bounds.add(x, y);
+                    bounds[hexId].add(x, y);
                 }
             }
         }
+
+        cache = new Cache(width, height, size, indices, bounds, numX, numY);
+        cacheRef = new SoftReference<>(cache);
+        return cache;
     }
 
     @Override
@@ -108,21 +109,20 @@ public class HexagonBlockFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        if (hexagonIndices == null || hexagonBounds == null) {
-            initializeCaches(width, height);
-        }
+        Cache cache = getOrCreateCache(width, height);
+        int[] indices = cache.indices();
+        int numX = cache.numX();
+        int numY = cache.numY();
 
-        int[] hexagonAverages = new int[numHexagonsX * numHexagonsY];
-
-        // ensure that each hexagon’s average color is calculated only once
-        boolean[] processed = new boolean[numHexagonsX * numHexagonsY];
+        int[] hexagonAverages = new int[numX * numY];
+        boolean[] processed = new boolean[numX * numY];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int hexId = hexagonIndices[y][x];
+                int hexId = indices[y * width + x];
 
                 if (!processed[hexId]) {
-                    hexagonAverages[hexId] = calcHexagonAverageColor(src, hexId);
+                    hexagonAverages[hexId] = calcHexagonAverageColor(src, hexId, cache);
                     processed[hexId] = true;
                 }
 
@@ -134,15 +134,17 @@ public class HexagonBlockFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    // Calculates the average RGB color of all pixels in a given hexagon.
-    private int calcHexagonAverageColor(BufferedImage src, int hexId) {
-        Rectangle bounds = hexagonBounds[hexId];
+    private static int calcHexagonAverageColor(BufferedImage src, int hexId, Cache cache) {
+        Rectangle bounds = cache.bounds()[hexId];
+        int[] indices = cache.indices();
+        int width = cache.width();
+
         long totalR = 0, totalG = 0, totalB = 0;
         int count = 0;
 
         for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
             for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
-                if (hexagonIndices[y][x] == hexId) {
+                if (indices[y * width + x] == hexId) {
                     int rgb = src.getRGB(x, y);
                     totalR += (rgb >> 16) & 0xff;
                     totalG += (rgb >> 8) & 0xff;
@@ -163,7 +165,6 @@ public class HexagonBlockFilter extends AbstractBufferedImageOp {
         return (avgR << 16) | (avgG << 8) | avgB;
     }
 
-    // Converts pixel coordinates (x, y) into axial hexagon grid coordinates.
     private Point getHexagonIndex(int x, int y) {
         // convert pixel coordinates to axial coordinates
         double q = (2.0 / 3 * x) / size;

@@ -38,7 +38,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the radius of the kernel, and hence the amount of blur.
+     * Sets the radius of the kernel, and hence the amount of blur.
      *
      * @param radius the radius of the blur in pixels.
      */
@@ -47,7 +47,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the number of sides of the aperture.
+     * Sets the number of sides of the aperture.
      *
      * @param sides the number of sides
      */
@@ -56,7 +56,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the bloom factor.
+     * Sets the bloom factor.
      *
      * @param bloom the bloom factor
      */
@@ -65,7 +65,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the bloom threshold.
+     * Sets the bloom threshold.
      *
      * @param bloomThreshold the bloom threshold
      */

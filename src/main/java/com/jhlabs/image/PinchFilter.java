@@ -46,7 +46,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     }
 
     /**
-     * Set the angle of twirl in radians. 0 means no distortion.
+     * Sets the angle of twirl in radians. 0 means no distortion.
      *
      * @param angle the angle of twirl. This is the angle by which pixels at the nearest edge of the image will move.
      */
@@ -56,7 +56,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     }
 
     /**
-     * Set the center of the effect in the X direction as a proportion of the image size.
+     * Sets the center of the effect in the X direction as a proportion of the image size.
      *
      * @param centerX the center
      */
@@ -66,7 +66,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     }
 
     /**
-     * Set the center of the effect in the Y direction as a proportion of the image size.
+     * Sets the center of the effect in the Y direction as a proportion of the image size.
      *
      * @param centerY the center
      */
@@ -76,7 +76,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     }
 
     /**
-     * Set the center of the effect as a proportion of the image size.
+     * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center
      */
@@ -86,7 +86,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     }
 
     /**
-     * Set the radius of the effect.
+     * Sets the radius of the effect.
      *
      * @param radius the radius
      * @min-value 0
@@ -97,7 +97,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     }
 
     /**
-     * Set the amount of pinch.
+     * Sets the amount of pinch.
      *
      * @param amount the amount
      * @min-value -1

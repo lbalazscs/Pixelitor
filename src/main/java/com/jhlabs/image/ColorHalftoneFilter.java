@@ -32,18 +32,16 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the pixel block size.
+     * Sets the pixel block size.
      *
      * @param dotRadius the number of pixels along each block edge
-     * @min-value 1
-     * @max-value 100+
      */
     public void setdotRadius(float dotRadius) {
         this.dotRadius = dotRadius;
     }
 
     /**
-     * Set the cyan screen angle.
+     * Sets the cyan screen angle.
      *
      * @param cyanScreenAngle the cyan screen angle (in radians)
      */
@@ -52,7 +50,7 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the magenta screen angle.
+     * Sets the magenta screen angle.
      *
      * @param magentaScreenAngle the magenta screen angle (in radians)
      */
@@ -61,7 +59,7 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the yellow screen angle.
+     * Sets the yellow screen angle.
      *
      * @param yellowScreenAngle the yellow screen angle (in radians)
      */
@@ -156,4 +154,3 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
         return "Pixellate/Color Halftone...";
     }
 }
-

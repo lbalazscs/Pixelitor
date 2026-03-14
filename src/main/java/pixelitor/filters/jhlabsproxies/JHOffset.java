@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Offset filter based on the JHLabs OffsetFilter
+ * Offset filter based on the JHLabs {@link OffsetFilter}.
  */
 public class JHOffset extends ParametrizedFilter {
     public static final String NAME = "Offset";
@@ -54,7 +54,7 @@ public class JHOffset extends ParametrizedFilter {
         filter.setRelativeY(center.getRelativeY());
         filter.setUseRelative(true);
 
-        filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR);
+        filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOR);
 
         return filter.filter(src, dest);
     }

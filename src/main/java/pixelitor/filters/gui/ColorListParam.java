@@ -62,6 +62,12 @@ public class ColorListParam extends AbstractFilterParam {
         return colors;
     }
 
+    public int[] getColorsAsPackedInts() {
+        return Arrays.stream(colors)
+            .mapToInt(Color::getRGB)
+            .toArray();
+    }
+
     /**
      * Returns the color at the given index.
      */

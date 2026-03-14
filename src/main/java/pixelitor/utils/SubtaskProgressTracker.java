@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class SubtaskProgressTracker implements ProgressTracker {
 
     private void notifyParent() {
         if (accumulatedParentProgress < 1.0) {
-            return; // nothing to do as we don't have accumulated yet a parent work unit
+            return; // nothing to do as we haven't yet accumulated a parent work unit
         }
         if (accumulatedParentProgress < 2.0) {
             accumulatedParentProgress -= 1.0;

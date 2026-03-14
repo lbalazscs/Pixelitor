@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.MotionBlur;
+import com.jhlabs.image.MotionBlurFilter;
+import com.jhlabs.image.MotionBlurOp;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
@@ -29,7 +31,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * "Motion Blur" filter based on the JHLabs MotionBlurOp/MotionBlurFilter classes
+ * "Motion Blur" filter based on the JHLabs {@link MotionBlurOp} and {@link MotionBlurFilter} classes.
  */
 public class JHMotionBlur extends ParametrizedFilter {
     public static final String NAME = "Motion Blur";
@@ -54,17 +56,17 @@ public class JHMotionBlur extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int distanceValue = distance.getValue();
-        if (distanceValue == 0) {
+        int distancePixels = distance.getValue();
+        if (distancePixels == 0) {
             return src;
         }
 
-        MotionBlur filter = quality.getSelected().createFilter(NAME, src);
+        MotionBlur motionBlur = quality.getSelected().createFilter(NAME, src);
 
-        filter.setAngle((float) angle.getValueInIntuitiveRadians());
-        filter.setDistance(distance.getValueAsFloat());
+        motionBlur.setAngle((float) angle.getValueInIntuitiveRadians());
+        motionBlur.setDistance(distance.getValueAsFloat());
 
-        dest = filter.filter(src, dest);
+        dest = motionBlur.filter(src, dest);
 
         if (hpSharpening.isChecked()) {
             dest = ImageUtils.toHighPassSharpenedImage(src, dest);

@@ -25,7 +25,7 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
 
 /**
- * A filter which produces motion blur the slow, but higher-quality way.
+ * A filter which produces motion blur the slower, but higher-quality way.
  */
 public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionBlur {
     private float angle = 0.0f;
@@ -39,14 +39,14 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     private float centerY = 0.5f;
 
     /**
-     * Construct a MotionBlurFilter.
+     * Constructs a MotionBlurFilter.
      */
     public MotionBlurFilter(String filterName) {
         super(filterName);
     }
 
     /**
-     * Set the center of the effect in the X direction as a proportion of the image size.
+     * Sets the center of the effect in the X direction as a proportion of the image size.
      *
      * @param centerX the center
      */
@@ -56,7 +56,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Set the center of the effect in the Y direction as a proportion of the image size.
+     * Sets the center of the effect in the Y direction as a proportion of the image size.
      *
      * @param centerY the center
      */
@@ -66,7 +66,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Set the center of the effect as a proportion of the image size.
+     * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center
      */
@@ -80,7 +80,6 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
      * Sets the angle of blur.
      *
      * @param angle the angle of blur.
-     * @angle
      */
     @Override
     public void setAngle(float angle) {
@@ -91,7 +90,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Set the distance of blur.
+     * Sets the distance of blur.
      *
      * @param distance the distance of blur.
      */
@@ -101,7 +100,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Set the blur rotation.
+     * Sets the blur rotation.
      *
      * @param rotation the angle of rotation.
      */
@@ -111,7 +110,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Set the blur zoom.
+     * Sets the blur zoom.
      *
      * @param zoom the zoom factor.
      */
@@ -121,7 +120,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Set whether to wrap at the image edges.
+     * Sets whether to wrap at the image edges.
      *
      * @param wrapEdges true if it should wrap.
      */
@@ -130,7 +129,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Set whether to premultiply the alpha channel.
+     * Sets whether to premultiply the alpha channel.
      *
      * @param premultiplyAlpha true to premultiply the alpha
      */
@@ -307,4 +306,3 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
         }
     }
 }
-

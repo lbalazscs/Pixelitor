@@ -36,14 +36,14 @@ public class GaussianFilter extends ConvolveFilter {
     protected float radius;
 
     /**
-     * Construct a Gaussian filter.
+     * Constructs a Gaussian filter.
      */
     public GaussianFilter(String filterName) {
         this(2, filterName);
     }
 
     /**
-     * Construct a Gaussian filter.
+     * Constructs a Gaussian filter.
      *
      * @param radius blur radius in pixels
      */
@@ -53,11 +53,9 @@ public class GaussianFilter extends ConvolveFilter {
     }
 
     /**
-     * Set the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
+     * Sets the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
      * @param radius the radius of the blur in pixels.
-     * @min-value 0
-     * @max-value 100+
      */
     public void setRadius(float radius) {
         this.radius = radius;

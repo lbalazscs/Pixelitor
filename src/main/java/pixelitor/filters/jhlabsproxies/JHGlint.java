@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Glint filter based on the JHLabs GlintFilter
+ * Glint filter based on the JHLabs {@link GlintFilter}.
  */
 public class JHGlint extends ParametrizedFilter {
     public static final String NAME = "Glint";

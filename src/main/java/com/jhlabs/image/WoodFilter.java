@@ -36,7 +36,7 @@ public class WoodFilter extends PointFilter {
     private Colormap colormap = new LinearColormap(0xffe5c494, 0xff987b51);
 
     /**
-     * Construct a WoodFilter.
+     * Constructs a WoodFilter.
      */
     public WoodFilter(String filterName) {
         super(filterName);
@@ -57,8 +57,6 @@ public class WoodFilter extends PointFilter {
      * Sets the scale of the texture.
      *
      * @param scale the scale of the texture.
-     * @min-value 1
-     * @max-value 300+
      */
     public void setScale(float scale) {
         this.scale = scale;
@@ -68,8 +66,6 @@ public class WoodFilter extends PointFilter {
      * Sets the stretch factor of the texture.
      *
      * @param stretch the stretch factor of the texture.
-     * @min-value 1
-     * @max-value 50+
      */
     public void setStretch(float stretch) {
         this.stretch = stretch;
@@ -79,7 +75,6 @@ public class WoodFilter extends PointFilter {
      * Sets the angle of the texture.
      *
      * @param angle the angle of the texture.
-     * @angle
      */
     public void setAngle(float angle) {
         this.angle = angle;
@@ -125,7 +120,7 @@ public class WoodFilter extends PointFilter {
     }
 
     /**
-     * Set the colormap to be used for the filter.
+     * Sets the colormap to be used for the filter.
      *
      * @param colormap the colormap
      */

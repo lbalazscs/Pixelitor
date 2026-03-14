@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Focus filter based on the JHLabs VariableBlurFilter
+ * Focus filter based on the JHLabs {@link VariableBlurFilter}.
  */
 public class JHFocus extends ParametrizedFilter {
     public static final String NAME = "Focus";
@@ -65,12 +65,12 @@ public class JHFocus extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int hRadius = blurRadius.getValue(0);
-        int vRadius = blurRadius.getValue(1);
+        int hRadius = blurRadius.getHorizontal();
+        int vRadius = blurRadius.getVertical();
         if (hRadius == 0 && vRadius == 0) {
             return src;
         }
-        if (radius.getValue(0) == 0 || radius.getValue(1) == 0) {
+        if (radius.getHorizontal() == 0 || radius.getVertical() == 0) {
             if (invert.isChecked()) {
                 return src;
             }

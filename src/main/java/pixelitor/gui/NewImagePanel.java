@@ -22,7 +22,7 @@ import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.DimensionHelper;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.ValidatedPanel;
+import pixelitor.gui.utils.Validated;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.utils.ResizeUnit;
 
@@ -40,7 +40,7 @@ import static pixelitor.utils.MemoryInfo.BYTES_PER_MEGABYTE;
 /**
  * The panel in the "New Image" dialog.
  */
-public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner, KeyListener, ItemListener, DimensionHelper.DimensionChangeCallback {
+public class NewImagePanel extends JPanel implements Validated, DialogMenuOwner, KeyListener, ItemListener, DimensionHelper.DimensionChangeCallback {
     private static final int PANEL_PADDING = 7;
 
     private final JTextField nameTF;

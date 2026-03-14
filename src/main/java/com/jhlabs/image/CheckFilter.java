@@ -21,124 +21,103 @@ import net.jafama.FastMath;
 import java.util.Arrays;
 
 /**
- * A filter that draws a checkerboard pattern.
+ * A filter that renders a checkerboard pattern with optional
+ * rotation, distortion, fuzziness, and multiple colors.
  */
 public class CheckFilter extends PointFilter {
-    private int xScale = 8;
-    private int yScale = 8;
-    private int[] colors = {0xffffffff, 0xff000000};
-    private int fuzziness = 0;
-    private float m00 = 1.0f;
-    private float m01 = 0.0f;
-    private float m10 = 0.0f;
-    private float m11 = 1.0f;
+    private final int xScale;
+    private final int yScale;
+    private final int[] colors;
+    private final int fuzziness;
+    private final float m00;
+    private final float m01;
+    private final float m10;
+    private final float m11;
 
-    private float aaThresholdX = 0.05f;
-    private float aaThresholdY = 0.05f;
-    private float upperAaThresholdX;
-    private float upperAaThresholdY;
+    private final float aaThresholdX;
+    private final float aaThresholdY;
+    private final float upperAaThresholdX;
+    private final float upperAaThresholdY;
 
-    private int aaRes = 2;
-    private int aaRes2 = aaRes * aaRes;
-    private float aaShift;
-    private float invAaRes;
+    private final int aaRes;
+    private final int aaRes2;
+    private final float aaSampleOffset;
+    private final float invAaRes;
 
-    private boolean straight;
-    private double distortion;
-    private double phase;
+    private final boolean straight;
+    private final double distortion;
+    private final double phase;
 
-    private void setAaRes(int aaRes) {
-        this.aaRes = aaRes;
-        aaRes2 = aaRes * aaRes;
-        aaShift = 0.5f - 1.0f / (2 * aaRes);
-        invAaRes = 1.0f / aaRes;
-    }
-
-    public CheckFilter(String filterName) {
+    /**
+     * Constructs a CheckFilter.
+     *
+     * @param filterName the name of the filter.
+     * @param colors     the array of colors. Must contain at least two colors.
+     * @param xScale     the X scale of the texture.
+     * @param yScale     the Y scale of the texture.
+     * @param fuzziness  the fuzziness of the texture.
+     * @param angle      the angle of the texture.
+     * @param distortion the distortion amount.
+     * @param phase      the phase offset used for the wave distortion.
+     */
+    public CheckFilter(String filterName, int[] colors, int xScale, int yScale, int fuzziness, float angle, double distortion, double phase) {
         super(filterName);
-    }
 
-    public void setColors(int[] colors) {
         if (colors == null || colors.length < 2) {
             throw new IllegalArgumentException("colors = " + Arrays.toString(colors));
         }
         this.colors = colors;
-    }
 
-    /**
-     * Set the X scale of the texture.
-     *
-     * @param xScale the scale.
-     */
-    public void setXScale(int xScale) {
         this.xScale = xScale;
-        aaThresholdX = 1.0f / xScale;
-        upperAaThresholdX = 1.0f - aaThresholdX;
-    }
+        this.aaThresholdX = 1.0f / xScale;
+        this.upperAaThresholdX = 1.0f - aaThresholdX;
 
-    /**
-     * Set the Y scale of the texture.
-     *
-     * @param yScale the scale.
-     */
-    public void setYScale(int yScale) {
         this.yScale = yScale;
-        aaThresholdY = 1.0f / yScale;
-        upperAaThresholdY = 1.0f - aaThresholdY;
-    }
+        this.aaThresholdY = 1.0f / yScale;
+        this.upperAaThresholdY = 1.0f - aaThresholdY;
 
-    /**
-     * Set the fuzziness of the texture.
-     *
-     * @param fuzziness the fuzziness.
-     */
-    public void setFuzziness(int fuzziness) {
         this.fuzziness = fuzziness;
-    }
+        this.distortion = distortion;
+        this.phase = phase;
 
-    /**
-     * Set the angle of the texture.
-     *
-     * @param angle the angle of the texture.
-     * @angle
-     */
-    public void setAngle(float angle) {
         float cos = (float) FastMath.cos(angle);
         float sin = (float) FastMath.sin(angle);
-        m00 = cos;
-        m01 = sin;
-        m10 = -sin;
-        m11 = cos;
+        this.m00 = cos;
+        this.m01 = sin;
+        this.m10 = -sin;
+        this.m11 = cos;
 
-        // no AA is necessary if the angle is 0, 90, 180 or 270 grades
-        straight = ((Math.abs(sin) < 0.0000001) || (Math.abs(cos) < 0.0000001));
+        // no AA is necessary if the angle is 0, 90, 180 or 270 degrees
+        this.straight = ((Math.abs(sin) < 0.0000001) || (Math.abs(cos) < 0.0000001));
 
+        this.aaRes = calcAaRes(distortion, sin, cos);
+        this.aaRes2 = aaRes * aaRes;
+        this.aaSampleOffset = 0.5f - 1.0f / (2 * aaRes);
+        this.invAaRes = 1.0f / aaRes;
+    }
+
+    private int calcAaRes(double distortion, float sin, float cos) {
         boolean hasDistortion = distortion > 0;
+        int res = 2; // default
+
         if (!straight || hasDistortion) {
             // the necessary AA quality depends on the angle
             float minSinCos = Math.min(Math.abs(sin), Math.abs(cos));
             if ((minSinCos > 0.5) || (hasDistortion && distortion > 0.5)) {
-                setAaRes(3);
+                res = 3;
             } else if (minSinCos > 0.15 || (hasDistortion && distortion > 0.2)) {
-                setAaRes(4);
+                res = 4;
             } else if (minSinCos > 0.1 || (hasDistortion && distortion > 0.1)) {
-                setAaRes(5);
+                res = 5;
             } else if (minSinCos > 0.07 || (hasDistortion && distortion > 0.05)) {
-                setAaRes(6);
+                res = 6;
             } else if (minSinCos > 0.03 || (hasDistortion && distortion > 0.02)) {
-                setAaRes(7);
+                res = 7;
             } else {
-                setAaRes(8);
+                res = 8;
             }
         }
-    }
-
-    public void setDistortion(double distortion) {
-        this.distortion = distortion;
-    }
-
-    public void setPhase(double phase) {
-        this.phase = phase;
+        return res;
     }
 
     @Override
@@ -163,9 +142,9 @@ public class CheckFilter extends PointFilter {
         float dyFrac = pny - iny;
 
         boolean needsAA = false;
-        // the fuzziness condition is imperfect, because very small images benefit
-        // from AA even with a small fuzziness, but in larger images with small
-        // fuzziness, the AA is an artifact
+        // the fuzziness condition is imperfect: very small images
+        // benefit from AA even with low fuzziness, while in large
+        // images a small fuzziness may cause AA artifacts
         if ((!straight || distortion > 0) && fuzziness == 0) {
             needsAA = dxFrac < aaThresholdX || dyFrac < aaThresholdY || dxFrac > upperAaThresholdX || dyFrac > upperAaThresholdY;
         }
@@ -175,9 +154,9 @@ public class CheckFilter extends PointFilter {
             float p = 0;
 
             for (int i = 0; i < aaRes; i++) {
-                float yy = y + invAaRes * i - aaShift;
+                float yy = y + invAaRes * i - aaSampleOffset;
                 for (int j = 0; j < aaRes; j++) {
-                    float xx = x + invAaRes * j - aaShift;
+                    float xx = x + invAaRes * j - aaSampleOffset;
                     p += calcSubPixelInterpolation(xx, yy);
                 }
             }
@@ -230,10 +209,10 @@ public class CheckFilter extends PointFilter {
         // 1. fuzziness == 0
         // 2. fuzziness != 0 but pixel is outside the fuzz band
 
-        int colorIndexEven; // absolute sum for the even-sum-type diagonal in the pair
-        int colorIndexOdd;  // absolute sum for the odd-sum-type diagonal in the pair
+        int colorIndexEven; // sum for the even-sum-type diagonal in the pair
+        int colorIndexOdd;  // sum for the odd-sum-type diagonal in the pair
 
-        // determine the absolute sums for the even/odd pair of diagonals related to the current tile
+        // determine the sums for the even/odd pair of diagonals related to the current tile
         if (((tileSum % 2) + 2) % 2 == 0) {
             colorIndexEven = tileSum;
             colorIndexOdd = tileSum + 1;
@@ -282,4 +261,3 @@ public class CheckFilter extends PointFilter {
         return "Texture/Checkerboard...";
     }
 }
-

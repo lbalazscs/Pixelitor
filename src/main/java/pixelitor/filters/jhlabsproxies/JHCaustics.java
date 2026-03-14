@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
- * Renders caustics based on the JHLabs CausticsFilter
+ * Renders caustics based on the JHLabs {@link CausticsFilter}.
  */
 public class JHCaustics extends ParametrizedFilter {
     public static final String NAME = "Caustics";
@@ -49,8 +49,6 @@ public class JHCaustics extends ParametrizedFilter {
     private final RangeParam time = new RangeParam("Time", 0, 0, 800);
     private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 1, 10,
         true, BORDER, IGNORE_RANDOMIZE);
-
-    private CausticsFilter filter;
 
     public JHCaustics() {
         super(false);
@@ -70,18 +68,16 @@ public class JHCaustics extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new CausticsFilter(NAME);
-        }
-
-        filter.setAmount((float) focus.getPercentage());
-        filter.setBgColor(bgColor.getColor().getRGB());
-        filter.setBrightness(brightness.getValue());
-        filter.setDispersion((float) dispersion.getPercentage());
-        filter.setSamples(samples.getValue());
-        filter.setScale(zoom.getValueAsFloat());
-        filter.setTime((float) time.getPercentage());
-        filter.setTurbulence(turbulence.getValueAsFloat() / 25.0f);
+        CausticsFilter filter = new CausticsFilter(NAME,
+            zoom.getValueAsFloat(),
+            brightness.getValue(),
+            (float) focus.getPercentage(),
+            turbulence.getValueAsFloat() / 25.0f,
+            (float) dispersion.getPercentage(),
+            (float) time.getPercentage(),
+            samples.getValue(),
+            bgColor.getColor().getRGB()
+        );
 
         return filter.filter(src, dest);
     }

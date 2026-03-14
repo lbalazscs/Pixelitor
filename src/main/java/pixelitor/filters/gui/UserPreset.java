@@ -50,9 +50,19 @@ public class UserPreset implements Preset {
     public static final String PRESETS_DIR = initPresetsDirectory();
 
     private static String initPresetsDirectory() {
-        String baseDir = JVM.isWindows
-            ? System.getenv("APPDATA") + File.separator + "Pixelitor"
-            : System.getProperty("user.home") + File.separator + ".pixelitor";
+        String baseDir = null;
+
+        if (JVM.isWindows) {
+            String appData = System.getenv("APPDATA");
+            if (appData != null && !appData.isBlank()) {
+                baseDir = appData + File.separator + "Pixelitor";
+            }
+        }
+
+        if (baseDir == null) { // Linux, macOS, and Windows with missing APPDATA
+            baseDir = System.getProperty("user.home") + File.separator + ".pixelitor";
+        }
+
         return baseDir + File.separator + "presets";
     }
 

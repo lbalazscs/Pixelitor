@@ -133,10 +133,10 @@ public class DialogBuilder {
      * Uses the given component as the dialog's content,
      * and also sets up validation based on it.
      */
-    public DialogBuilder validatedContent(ValidatedPanel validatedPanel) {
-        content = validatedPanel;
+    public <T extends JComponent & Validated> DialogBuilder validatedContent(T validated) {
+        content = validated;
         return validator(d -> {
-            ValidationResult validationResult = validatedPanel.validateSettings();
+            ValidationResult validationResult = validated.validateSettings();
             if (validationResult.isValid()) {
                 return true; // valid, allow the closing of the dialog
             } else {

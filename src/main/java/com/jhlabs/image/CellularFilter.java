@@ -49,7 +49,6 @@ public class CellularFilter extends WholeImageFilter {
     protected float m01 = 0.0f;
     protected float m10 = 0.0f;
     protected float m11 = 1.0f;
-//    protected Point[] results = null;
 
     protected static final ThreadLocal<Point[]> resultsTL = ThreadLocal.withInitial(() -> {
         Point[] results = new Point[3];
@@ -61,14 +60,10 @@ public class CellularFilter extends WholeImageFilter {
 
     protected float randomness = 0;
 
-    private static byte[] poisson;
+    private static final byte[] poisson = initPoisson();
 
     public CellularFilter(String filterName) {
         super(filterName);
-
-        if (poisson == null) {
-            initPoisson();
-        }
     }
 
     /**
@@ -77,34 +72,35 @@ public class CellularFilter extends WholeImageFilter {
      * index to a specific outcome, representing the number of events,
      * enabling fast random sampling.
      */
-    private static void initPoisson() {
-        poisson = new byte[POISSON_ARRAY_SIZE];
+    private static byte[] initPoisson() {
+        byte[] arr = new byte[POISSON_ARRAY_SIZE];
         float factorial = 1;
         float total = 0; // the cumulative sum of probabilities
         float mean = 2.5f; // the λ parameter of the Poisson distribution
+        float expMean = (float) Math.exp(-mean);
+
         for (int k = 0; k < 10; k++) {
             if (k > 1) {
                 factorial *= k;
             }
 
             // the probability of an event occurring k times
-            float probability = (float) Math.pow(mean, k) * (float) Math.exp(-mean) / factorial;
+            float probability = (float) Math.pow(mean, k) * expMean / factorial;
 
             int start = (int) (total * POISSON_ARRAY_SIZE);
             total += probability;
             int end = (int) (total * POISSON_ARRAY_SIZE);
             for (int j = start; j < end; j++) {
-                poisson[j] = (byte) k;
+                arr[j] = (byte) k;
             }
         }
+        return arr;
     }
 
     /**
      * Sets the scale of the texture.
      *
      * @param scale the scale of the texture.
-     * @min-value 1
-     * @max-value 300+
      */
     public void setScale(float scale) {
         this.scale = scale;
@@ -114,8 +110,6 @@ public class CellularFilter extends WholeImageFilter {
      * Sets the stretch factor of the texture.
      *
      * @param stretch the stretch factor of the texture.
-     * @min-value 1
-     * @max-value 50+
      */
     public void setStretch(float stretch) {
         this.stretch = stretch;
@@ -125,7 +119,6 @@ public class CellularFilter extends WholeImageFilter {
      * Sets the angle of the texture.
      *
      * @param angle the angle of the texture.
-     * @angle
      */
     public void setAngle(float angle) {
         float cos = (float) Math.cos(angle);
@@ -232,41 +225,32 @@ public class CellularFilter extends WholeImageFilter {
                 random.setSeed(571 * cellX + 23 * cellY);
                 int randomIndex = random.nextInt() & 0x1fff;
                 int numPoints = poisson[randomIndex];
-                float weight = 1.0f;
                 for (int i = 0; i < numPoints; i++) {
                     float px = random.nextFloat();
                     float py = random.nextFloat();
-                    keepNearest3(x, y, cellX, cellY, results, px, py, weight);
+                    keepNearest3(x, y, cellX, cellY, results, px, py, 1.0f);
                 }
                 return results[2].distance;
             }
         }, SQUARE {
             @Override
             float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
-                CachedFloatRandom random = randomTL.get();
-                random.setSeed(571 * cellX + 23 * cellY);
                 float px = 0.5f;
                 float py = 0.5f;
                 if (randomness != 0) {
-                    px = (float) (px + randomness * (random.nextFloat() - 0.5));
-                    py = (float) (py + randomness * (random.nextFloat() - 0.5));
+                    CachedFloatRandom random = randomTL.get();
+                    random.setSeed(571 * cellX + 23 * cellY);
+                    px += randomness * (random.nextFloat() - 0.5f);
+                    py += randomness * (random.nextFloat() - 0.5f);
                 }
-                float weight = 1.0f;
-                keepNearest3(x, y, cellX, cellY, results, px, py, weight);
+                keepNearest3(x, y, cellX, cellY, results, px, py, 1.0f);
                 return results[2].distance;
             }
         }, HEXAGONAL {
             @Override
             float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
-//                random.setSeed(571 * cubeX + 23 * cubeY);
-                float px, py;
-                if ((cellX & 1) == 0) {
-                    px = 0.75f;
-                    py = 0;
-                } else {
-                    px = 0.75f;
-                    py = 0.5f;
-                }
+                float px = 0.75f;
+                float py = (cellX & 1) == 0 ? 0.0f : 0.5f;
                 if (randomness != 0) {
                     px += randomness * Noise.noise2(271 * (cellX + px), 271 * (cellY + py));
                     py += randomness * Noise.noise2(271 * (cellX + px) + 89, 271 * (cellY + py) + 137);
@@ -277,124 +261,81 @@ public class CellularFilter extends WholeImageFilter {
         }, OCTAGONAL {
             @Override
             float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
-//                random.setSeed(571 * cubeX + 23 * cubeY);
-                float weight = 1.0f;
+                float[] pxs = {0.207f, 0.707f};
+                float[] weights = {1.0f, 1.6f};
                 for (int i = 0; i < 2; i++) {
-                    float px = 0.0f;
-                    float py = 0.0f;
-                    switch (i) {
-                        case 0:
-                            px = 0.207f;
-                            py = 0.207f;
-                            break;
-                        case 1:
-                            px = 0.707f;
-                            py = 0.707f;
-                            weight = 1.6f;
-                            break;
-                    }
+                    float px = pxs[i];
+                    float py = pxs[i];
                     if (randomness != 0) {
                         px += randomness * Noise.noise2(271 * (cellX + px), 271 * (cellY + py));
                         py += randomness * Noise.noise2(271 * (cellX + px) + 89, 271 * (cellY + py) + 137);
                     }
-                    keepNearest3(x, y, cellX, cellY, results, px, py, weight);
+                    keepNearest3(x, y, cellX, cellY, results, px, py, weights[i]);
                 }
                 return results[2].distance;
             }
         }, TRIANGULAR {
             @Override
             float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
-//                random.setSeed(571 * cubeX + 23 * cubeY);
-                float weight = 1.0f;
+                boolean evenY = (cellY & 1) == 0;
+                float[] pxs = {evenY ? 0.25f : 0.75f, evenY ? 0.75f : 0.25f};
+                float[] pys = {0.35f, 0.65f};
                 for (int i = 0; i < 2; i++) {
-                    float px, py;
-                    if ((cellY & 1) == 0) {
-                        if (i == 0) {
-                            px = 0.25f;
-                            py = 0.35f;
-                        } else {
-                            px = 0.75f;
-                            py = 0.65f;
-                        }
-                    } else {
-                        if (i == 0) {
-                            px = 0.75f;
-                            py = 0.35f;
-                        } else {
-                            px = 0.25f;
-                            py = 0.65f;
-                        }
-                    }
+                    float px = pxs[i];
+                    float py = pys[i];
                     if (randomness != 0) {
                         px += randomness * Noise.noise2(271 * (cellX + px), 271 * (cellY + py));
                         py += randomness * Noise.noise2(271 * (cellX + px) + 89, 271 * (cellY + py) + 137);
                     }
-                    keepNearest3(x, y, cellX, cellY, results, px, py, weight);
+                    keepNearest3(x, y, cellX, cellY, results, px, py, 1.0f);
                 }
                 return results[2].distance;
             }
         };
 
-        static final ThreadLocal<CachedFloatRandom> randomTL =
-                ThreadLocal.withInitial(CachedFloatRandom::new);
+        static final ThreadLocal<CachedFloatRandom> randomTL = ThreadLocal.withInitial(CachedFloatRandom::new);
 
         /**
          * Checks a grid cell for a feature point and updates the list of nearest points.
-         *
-         * @param x          The fractional x-coordinate within the cell (0-1).
-         * @param y          The fractional y-coordinate within the cell (0-1).
-         * @param cellX      The integer x-coordinate of the cell.
-         * @param cellY      The integer y-coordinate of the cell.
-         * @param results    An array to store the three nearest points found so far. This array is modified by this method.
-         * @param randomness A randomness factor to jitter the feature point position.
-         * @return The distance to the third nearest point (used for optimization in some grid types).
          */
         abstract float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness);
 
         // maintains the result array such that it always contains
         // the three closest points found so far, sorted by distance
         static void keepNearest3(float x, float y, int cubeX, int cubeY, Point[] results, float px, float py, float weight) {
-            float dx = Math.abs(x - px);
-            float dy = Math.abs(y - py);
-            float d;
-            dx *= weight;
-            dy *= weight;
+            float dx = Math.abs(x - px) * weight;
+            float dy = Math.abs(y - py) * weight;
 
             // the distance between the current point and the new feature point
-            d = (float) FastMath.sqrt(dx * dx + dy * dy);  // sqrtQuick is ugly
+            float d = (float) FastMath.sqrt(dx * dx + dy * dy); // sqrtQuick is ugly
 
             if (d < results[0].distance) {
-                // closer than the the current closest point (at index 0):
+                // closer than the current closest point (at index 0):
                 // shift 0->1, 1->2, and insert the new point at 0
                 Point p = results[2];
                 results[2] = results[1];
                 results[1] = results[0];
                 results[0] = p;
-                p.distance = d;
-                p.dx = dx;
-                p.dy = dy;
-                p.x = cubeX + px;
-                p.y = cubeY + py;
+                updatePoint(p, d, dx, dy, cubeX + px, cubeY + py);
             } else if (d < results[1].distance) {
                 // closer than the second closest point:
                 // shifts 1->2, and inserts the new point at 1
                 Point p = results[2];
                 results[2] = results[1];
                 results[1] = p;
-                p.distance = d;
-                p.dx = dx;
-                p.dy = dy;
-                p.x = cubeX + px;
-                p.y = cubeY + py;
+                updatePoint(p, d, dx, dy, cubeX + px, cubeY + py);
             } else if (d < results[2].distance) {
                 // replace the point at index 2 with the current point
-                Point p = results[2];
-                p.distance = d;
-                p.dx = dx;
-                p.dy = dy;
-                p.x = cubeX + px;
-                p.y = cubeY + py;
+                updatePoint(results[2], d, dx, dy, cubeX + px, cubeY + py);
             }
+        }
+
+        private static void updatePoint(Point p, float d, float dx, float dy, float x, float y) {
+            p.distance = d;
+            p.dx = dx;
+            p.dy = dy;
+            p.x = x;
+            p.y = y;
         }
     }
 
@@ -423,7 +364,7 @@ public class CellularFilter extends WholeImageFilter {
             d = gridType.checkCell(fx, fy - 1, ix, iy + 1, results, randomness);
         }
         if (d > fx) {
-            gridType.checkCell(fx + 1, fy, ix - 1, iy, results, randomness);
+            d = gridType.checkCell(fx + 1, fy, ix - 1, iy, results, randomness);
             if (d > fy) {
                 d = gridType.checkCell(fx + 1, fy + 1, ix - 1, iy - 1, results, randomness);
             }
@@ -473,21 +414,16 @@ public class CellularFilter extends WholeImageFilter {
         f *= 2;
         f *= amount;
 
-        int a = 0xff000000;
-        int v;
-
         if (colormap != null) {
             return colormap.getColor(f);
-        } else {
-            v = PixelUtils.clamp((int) (f * 255));
-            int r = v << 16;
-            int g = v << 8;
-            int b = v;
-            return a | r | g | b;
         }
+
+        int v = PixelUtils.clamp((int) (f * 255));
+        return 0xff000000 | (v << 16) | (v << 8) | v;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected int[] filterPixels(int width, int height, int[] inPixels) {
         pt = createProgressTracker(height);
         int[] outPixels = new int[width * height];

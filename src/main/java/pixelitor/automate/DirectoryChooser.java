@@ -35,7 +35,7 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  * A panel that can be used to select a directory and optionally
  * specify an output format.
  */
-public class DirectoryChooser extends ValidatedPanel {
+public class DirectoryChooser extends JPanel implements Validated {
     private final BrowseFilesSupport directoryBrowser;
     private JComboBox<FileFormat> formatComboBox;
 

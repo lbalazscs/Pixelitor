@@ -19,7 +19,7 @@ package pixelitor.automate;
 
 import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.ValidatedPanel;
+import pixelitor.gui.utils.Validated;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.FileFormat;
 import pixelitor.io.RecentDirs;
@@ -35,7 +35,7 @@ import static pixelitor.gui.utils.TextFieldValidator.requireExistingDir;
 /**
  * A panel for selecting input/output folders and an output file format.
  */
-class OpenSaveDirsPanel extends ValidatedPanel {
+class OpenSaveDirsPanel extends JPanel implements Validated {
     private static final String INPUT_FOLDER_LABEL = "Input Folder";
     private final BrowseFilesSupport inputDirSelector
         = new BrowseFilesSupport(RecentDirs.getLastOpenPath(),

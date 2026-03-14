@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,13 +49,13 @@ public class PolarTilesFilter extends CenteredTransformFilter {
 
         float randomShift = 0;
         if (randomness > 0) {
-            randomShift = randomness * Noise.noise2((float) (dx / srcWidth), (float) (dy / srcHeight));
+            randomShift = randomness * Noise.noise2((float) (dx / width), (float) (dy / height));
         }
 
         double r = Math.sqrt(dx * dx + dy * dy);
         double rr = r;
         if (mode != MODE_CONCENTRIC) {
-            double spiralCorr = srcWidth * (Math.PI + angle + effectRotation) / (4 * Math.PI);
+            double spiralCorr = width * (Math.PI + angle + effectRotation) / (4 * Math.PI);
             if (mode == MODE_SPIRAL) {
                 spiralCorr /= numRDivisions;
             }
@@ -69,7 +69,7 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         }
 
         if (numRDivisions > 0) {
-            double tan = FastMath.tan(3 * randomShift + rr / srcWidth * 2 * Math.PI * numRDivisions);
+            double tan = FastMath.tan(3 * randomShift + rr / width * 2 * Math.PI * numRDivisions);
             double rShift = tan * numRDivisions * curvature / 2;
             r += rShift;
         }

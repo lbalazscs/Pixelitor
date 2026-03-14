@@ -36,7 +36,7 @@ public class MarbleFilter extends TransformFilter {
     }
 
     /**
-     * Set the X scale of the effect.
+     * Sets the X scale of the effect.
      *
      * @param scale the scale.
      */

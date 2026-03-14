@@ -232,9 +232,9 @@ public class FourColorFilter extends PointFilter {
                 yield (a << 24) | (r << 16) | (g << 8) | b;
             }
             case SPACE_LINEAR_RGB -> {
-                int r = ColorSpaces.linearToSRGBInt(c1);
-                int g = ColorSpaces.linearToSRGBInt(c2);
-                int b = ColorSpaces.linearToSRGBInt(c3);
+                int r = ColorSpaces.linearToSrgbInt(c1);
+                int g = ColorSpaces.linearToSrgbInt(c2);
+                int b = ColorSpaces.linearToSrgbInt(c3);
                 yield (a << 24) | (r << 16) | (g << 8) | b;
             }
             case SPACE_OKLAB -> {

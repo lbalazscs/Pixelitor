@@ -62,7 +62,7 @@ public class TritoneFilter extends PointFilter {
     }
 
     /**
-     * Set the shadow color.
+     * Sets the shadow color.
      *
      * @param shadowColor the shadow color
      */
@@ -71,7 +71,7 @@ public class TritoneFilter extends PointFilter {
     }
 
     /**
-     * Set the mid color.
+     * Sets the mid color.
      *
      * @param midColor the mid color
      */
@@ -80,7 +80,7 @@ public class TritoneFilter extends PointFilter {
     }
 
     /**
-     * Set the high color.
+     * Sets the high color.
      *
      * @param highColor the high color
      */
@@ -93,4 +93,3 @@ public class TritoneFilter extends PointFilter {
         return "Colors/Tritone...";
     }
 }
-

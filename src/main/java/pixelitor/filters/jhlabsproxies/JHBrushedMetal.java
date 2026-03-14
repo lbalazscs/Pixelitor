@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import static java.awt.Color.GRAY;
 import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 
 /**
- * Brushed Metal filter based on the JHLabs BrushedMetalFilter
+ * Brushed Metal filter based on the JHLabs {@link BrushedMetalFilter}.
  */
 public class JHBrushedMetal extends ParametrizedFilter {
     public static final String NAME = "Brushed Metal";
@@ -58,11 +58,12 @@ public class JHBrushedMetal extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         RandomGenerator rand = paramSet.getLastSeedOf("Xoroshiro128PlusPlus");
 
-        var filter = new BrushedMetalFilter(color.getColor().getRGB(),
+        var filter = new BrushedMetalFilter(NAME,
+            color.getColor().getRGB(),
             radius.getValue(),
             (float) amount.getPercentage(),
-            (float) shine.getPercentage(),
-            NAME);
+            (float) shine.getPercentage()
+        );
 
         filter.setRandom(rand);
 

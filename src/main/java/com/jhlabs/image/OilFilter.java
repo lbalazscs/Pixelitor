@@ -46,7 +46,7 @@ public class OilFilter extends WholeImageFilter {
     }
 
     /**
-     * Set the number of levels for the effect.
+     * Sets the number of levels for the effect.
      *
      * @param levels the number of levels
      */
@@ -146,4 +146,3 @@ public class OilFilter extends WholeImageFilter {
         return "Stylize/Oil...";
     }
 }
-

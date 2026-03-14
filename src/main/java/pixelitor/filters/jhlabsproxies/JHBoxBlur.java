@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Box Blur filter based on the JHLabs BoxBlurFilter
+ * Box Blur filter based on the JHLabs {@link BoxBlurFilter}.
  */
 public class JHBoxBlur extends ParametrizedFilter {
     public static final String NAME = "Box Blur";
@@ -57,10 +57,12 @@ public class JHBoxBlur extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         float hRadius = radius.getValueAsFloat(0);
         float vRadius = radius.getValueAsFloat(1);
-        if (hRadius == 0 && vRadius == 0) {
+
+        if (hRadius == 0.0f && vRadius == 0.0f) {
             return src;
         }
-        if (src.getWidth() == 1 || src.getHeight() == 1) {
+
+        if (src.getWidth() <= 1 || src.getHeight() <= 1) {
             // avoids ArrayIndexOutOfBoundsException in BoxBlurFilter
             return src;
         }

@@ -41,7 +41,7 @@ public class ShadowFilter extends AbstractBufferedImageOp {
     private int shadowColor = 0xff000000;
 
     /**
-     * Construct a ShadowFilter.
+     * Constructs a ShadowFilter.
      */
     public ShadowFilter(String filterName) {
         super(filterName);
@@ -51,14 +51,13 @@ public class ShadowFilter extends AbstractBufferedImageOp {
      * Sets the angle of the shadow.
      *
      * @param angle the angle of the shadow.
-     * @angle
      */
     public void setAngle(float angle) {
         this.angle = angle;
     }
 
     /**
-     * Set the distance of the shadow.
+     * Sets the distance of the shadow.
      *
      * @param distance the distance.
      */
@@ -67,7 +66,7 @@ public class ShadowFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
+     * Sets the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
      * @param radius the radius of the blur in pixels.
      */
@@ -76,7 +75,7 @@ public class ShadowFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the opacity of the shadow.
+     * Sets the opacity of the shadow.
      *
      * @param opacity the opacity.
      */
@@ -85,7 +84,7 @@ public class ShadowFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the color of the shadow.
+     * Sets the color of the shadow.
      *
      * @param shadowColor the color.
      */
@@ -94,7 +93,7 @@ public class ShadowFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set whether to increase the size of the output image to accomodate the shadow.
+     * Sets whether to increase the size of the output image to accomodate the shadow.
      *
      * @param addMargins true to add margins.
      */
@@ -103,7 +102,7 @@ public class ShadowFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set whether to only draw the shadow without the original image.
+     * Sets whether to only draw the shadow without the original image.
      *
      * @param shadowOnly true to only draw the shadow.
      */

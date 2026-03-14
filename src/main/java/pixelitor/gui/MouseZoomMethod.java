@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,59 +22,46 @@ import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 /**
  * Methods for zooming with the mouse wheel: with or without holding the Ctrl key.
  */
 public enum MouseZoomMethod {
-    WHEEL("Mouse Wheel", "wheel") {
-        @Override
-        public void installOnView(View view) {
-            removeExistingListeners(view);
-            view.addMouseWheelListener(e -> viewZoomed(view, e));
-        }
-
-        @Override
-        public void installOnOther(JComponent component) {
-            component.addMouseWheelListener(MouseZoomMethod::otherZoomed);
-        }
-    }, CTRL_WHEEL("Ctrl + Mouse Wheel", "ctrl-wheel") {
-        @Override
-        public void installOnView(View view) {
-            removeExistingListeners(view);
-
-            view.addMouseWheelListener(e -> {
-                if (e.isControlDown()) {
-                    viewZoomed(view, e);
-                }
-            });
-        }
-
-        @Override
-        public void installOnOther(JComponent component) {
-            component.addMouseWheelListener(e -> {
-                if (e.isControlDown()) {
-                    otherZoomed(e);
-                }
-            });
-        }
-    };
+    WHEEL("Mouse Wheel", "wheel", false),
+    CTRL_WHEEL("Ctrl + Mouse Wheel", "ctrl-wheel", true);
 
     public static MouseZoomMethod ACTIVE = WHEEL;
 
     private final String displayName;
     private final String saveCode;
+    private final boolean requiresCtrl;
 
-    MouseZoomMethod(String displayName, String saveCode) {
+    MouseZoomMethod(String displayName, String saveCode, boolean requiresCtrl) {
         this.displayName = displayName;
         this.saveCode = saveCode;
+        this.requiresCtrl = requiresCtrl;
     }
 
-    public abstract void installOnView(View view);
+    public void installOnView(View view) {
+        removeExistingListeners(view);
+        view.addMouseWheelListener(new ZoomListener(view, requiresCtrl));
+    }
 
     // used on other components, like the Navigator, where the
     // exact mouse position doesn't matter
-    public abstract void installOnOther(JComponent component);
+    public void installOnOther(JComponent component) {
+        removeExistingListeners(component);
+        component.addMouseWheelListener(new ZoomListener(null, requiresCtrl));
+    }
+
+    private static void removeExistingListeners(JComponent c) {
+        for (MouseWheelListener listener : c.getMouseWheelListeners()) {
+            if (listener instanceof ZoomListener) {
+                c.removeMouseWheelListener(listener);
+            }
+        }
+    }
 
     private static void viewZoomed(View view, MouseWheelEvent e) {
         if (e.getWheelRotation() < 0) { // up, away from the user
@@ -93,14 +80,6 @@ public enum MouseZoomMethod {
             view.zoomIn();
         } else {  // down, towards the user
             view.zoomOut();
-        }
-    }
-
-    private static void removeExistingListeners(JComponent c) {
-        var existingListeners = c.getMouseWheelListeners();
-        if (existingListeners.length > 0) {
-            assert existingListeners.length == 1;
-            c.removeMouseWheelListener(existingListeners[0]);
         }
     }
 
@@ -131,5 +110,19 @@ public enum MouseZoomMethod {
     @Override
     public String toString() {
         return displayName;
+    }
+
+    private record ZoomListener(View view, boolean requiresCtrl) implements MouseWheelListener {
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            if (requiresCtrl && !e.isControlDown()) {
+                return;
+            }
+            if (view != null) {
+                viewZoomed(view, e);
+            } else {
+                otherZoomed(e);
+            }
+        }
     }
 }

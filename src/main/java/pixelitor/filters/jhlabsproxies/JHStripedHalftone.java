@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,11 @@ import java.awt.image.BufferedImage;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 
-public class JHStripedHalftone extends JHMaskedHalftone {
+/**
+ * A halftone filter that generates a linear
+ * gradient mask to produce striped halftoning effects.
+ */
+public class JHStripedHalftone extends JHGradientMaskHalftone {
     public static final String NAME = "Striped Halftone";
 
     private final AngleParam angle = new AngleParam("Angle", 0);
@@ -38,7 +42,7 @@ public class JHStripedHalftone extends JHMaskedHalftone {
             angle,
             stripesDistance,
             repetitionType,
-            shiftStripes,
+            stripeShift,
             softness,
             monochrome
         );
@@ -51,14 +55,14 @@ public class JHStripedHalftone extends JHMaskedHalftone {
         float x1 = src.getWidth() / 2.0f;
         float y1 = src.getHeight() / 2.0f;
         float dist = stripesDistance.getValueAsFloat() / distanceCorrection;
-        double angleVal = angle.getValueInRadians() + Math.PI / 2;
-        double dx = dist * Math.cos(angleVal);
+        double angleRad = angle.getValueInRadians() + Math.PI / 2;
+        double dx = dist * Math.cos(angleRad);
         float x2 = (float) (x1 + dx);
-        double dy = dist * Math.sin(angleVal);
+        double dy = dist * Math.sin(angleRad);
         float y2 = (float) (y1 + dy);
-        double shiftPercent = shiftStripes.getPercentage() * distanceCorrection;
-        float shiftX = (float) (shiftPercent * dx);
-        float shiftY = (float) (shiftPercent * dy);
+        double shiftFraction = stripeShift.getPercentage() * distanceCorrection;
+        float shiftX = (float) (shiftFraction * dx);
+        float shiftY = (float) (shiftFraction * dy);
         x1 += shiftX;
         y1 += shiftY;
         x2 += shiftX;

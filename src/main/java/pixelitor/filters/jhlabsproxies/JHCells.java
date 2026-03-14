@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.io.Serial;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
- * Cells filter based on the JHLabs CellularFilter
+ * Cells filter based on the JHLabs {@link CellularFilter}.
  */
 public class JHCells extends ParametrizedFilter {
     public static final String NAME = "Cells";

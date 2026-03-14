@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import com.jhlabs.image.AbstractBufferedImageOp;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.lang.ref.SoftReference;
 
 import static com.jhlabs.image.ImageMath.HALF_SQRT_3;
 import static com.jhlabs.image.ImageMath.SQRT_3;
@@ -31,29 +32,27 @@ import static com.jhlabs.image.ImageMath.SQRT_3;
  * filling each triangle with its average color.
  */
 public class TriangleBlockFilter extends AbstractBufferedImageOp {
-    private int size = 20;
-    private int[][] triangleIndices; // cache for pixel-to-triangle mapping
-    private Rectangle[] triangleBounds; // cache for triangle boundaries
-    private int numTrianglesX;
-    private int numTrianglesY;
+    private final int size;
 
-    public TriangleBlockFilter(String filterName) {
-        super(filterName);
+    private record Cache(int width, int height, int size, int[] indices, Rectangle[] bounds, int numX, int numY) {
     }
 
-    public void setSize(int size) {
-        if (this.size != size) {
-            triangleIndices = null;
-            triangleBounds = null;
-        }
+    private static volatile SoftReference<Cache> cacheRef = new SoftReference<>(null);
+
+    public TriangleBlockFilter(String filterName, int size) {
+        super(filterName);
         this.size = size;
     }
 
-    private void initializeCaches(int width, int height) {
-        double h = size * HALF_SQRT_3;
-        numTrianglesY = (int) Math.ceil(height / h);
+    private Cache getOrCreateCache(int width, int height) {
+        Cache cache = cacheRef.get();
+        if (cache != null && cache.width() == width && cache.height() == height && cache.size() == size) {
+            return cache;
+        }
 
-        // first pass to determine the range of column indices
+        double h = size * HALF_SQRT_3;
+        int numY = (int) Math.ceil(height / h);
+
         int minColIndex = Integer.MAX_VALUE;
         int maxColIndex = Integer.MIN_VALUE;
 
@@ -65,27 +64,29 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
             }
         }
 
-        numTrianglesX = maxColIndex - minColIndex + 1;
-        triangleIndices = new int[height][width];
-        triangleBounds = new Rectangle[numTrianglesX * numTrianglesY];
+        int numX = maxColIndex - minColIndex + 1;
+        int[] indices = new int[width * height];
+        Rectangle[] bounds = new Rectangle[numX * numY];
 
-        // second pass to fill the caches with adjusted indices
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Point idx = getTriangleIndex(x, y, size);
-                // adjust the column index to be non-negative
                 int adjustedCol = idx.x - minColIndex;
-                int triangleId = adjustedCol + idx.y * numTrianglesX;
+                int triangleId = adjustedCol + idx.y * numX;
 
-                triangleIndices[y][x] = triangleId;
+                indices[y * width + x] = triangleId;
 
-                if (triangleBounds[triangleId] == null) {
-                    triangleBounds[triangleId] = new Rectangle(x, y, 1, 1);
+                if (bounds[triangleId] == null) {
+                    bounds[triangleId] = new Rectangle(x, y, 1, 1);
                 } else {
-                    triangleBounds[triangleId].add(x, y);
+                    bounds[triangleId].add(x, y);
                 }
             }
         }
+
+        cache = new Cache(width, height, size, indices, bounds, numX, numY);
+        cacheRef = new SoftReference<>(cache);
+        return cache;
     }
 
     @Override
@@ -97,21 +98,20 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        if (triangleIndices == null || triangleBounds == null) {
-            initializeCaches(width, height);
-        }
+        Cache cache = getOrCreateCache(width, height);
+        int[] indices = cache.indices();
+        int numX = cache.numX();
+        int numY = cache.numY();
 
-        int[] triangleAverages = new int[numTrianglesX * numTrianglesY];
-
-        // ensure that each triangle’s average color is calculated only once
-        boolean[] processed = new boolean[numTrianglesX * numTrianglesY];
+        int[] triangleAverages = new int[numX * numY];
+        boolean[] processed = new boolean[numX * numY];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int triangleId = triangleIndices[y][x];
+                int triangleId = indices[y * width + x];
 
                 if (!processed[triangleId]) {
-                    triangleAverages[triangleId] = calculateTriangleAverageColor(src, triangleId);
+                    triangleAverages[triangleId] = calculateTriangleAverageColor(src, triangleId, cache);
                     processed[triangleId] = true;
                 }
 
@@ -123,14 +123,17 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    private int calculateTriangleAverageColor(BufferedImage src, int triangleId) {
-        Rectangle bounds = triangleBounds[triangleId];
+    private static int calculateTriangleAverageColor(BufferedImage src, int triangleId, Cache cache) {
+        Rectangle bounds = cache.bounds()[triangleId];
+        int[] indices = cache.indices();
+        int width = cache.width();
+
         long totalR = 0, totalG = 0, totalB = 0;
         int count = 0;
 
         for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
             for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
-                if (triangleIndices[y][x] == triangleId) {
+                if (indices[y * width + x] == triangleId) {
                     int rgb = src.getRGB(x, y);
                     totalR += (rgb >> 16) & 0xff;
                     totalG += (rgb >> 8) & 0xff;

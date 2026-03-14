@@ -33,7 +33,7 @@ public class UnsharpFilter extends GaussianFilter {
     }
 
     /**
-     * Set the threshold value.
+     * Sets the threshold value.
      *
      * @param threshold the threshold value
      */
@@ -42,7 +42,7 @@ public class UnsharpFilter extends GaussianFilter {
     }
 
     /**
-     * Set the amount of sharpening.
+     * Sets the amount of sharpening.
      *
      * @param amount the amount
      * @min-value 0

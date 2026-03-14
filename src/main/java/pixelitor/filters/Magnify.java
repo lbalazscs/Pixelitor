@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,8 +65,8 @@ public class Magnify extends ParametrizedFilter {
             filter = new MagnifyFilter(NAME);
         }
 
-        int outerRadiusX = outerRadius.getValue(0);
-        int outerRadiusY = outerRadius.getValue(1);
+        int outerRadiusX = outerRadius.getHorizontal();
+        int outerRadiusY = outerRadius.getVertical();
         filter.setOuterRadiusX(outerRadiusX);
         filter.setOuterRadiusY(outerRadiusY);
 
@@ -85,4 +85,3 @@ public class Magnify extends ParametrizedFilter {
         return filter.filter(src, dest);
     }
 }
-

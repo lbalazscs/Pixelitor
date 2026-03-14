@@ -134,7 +134,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the horizontal size of the blur.
+     * Sets the horizontal size of the blur.
      *
      * @param hRadius the radius of the blur in the horizontal direction
      * @min-value 0
@@ -144,7 +144,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the vertical size of the blur.
+     * Sets the vertical size of the blur.
      *
      * @param vRadius the radius of the blur in the vertical direction
      * @min-value 0
@@ -154,7 +154,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the radius of the effect.
+     * Sets the radius of the effect.
      *
      * @param radius the radius
      * @min-value 0
@@ -164,7 +164,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the threshold value.
+     * Sets the threshold value.
      *
      * @param threshold the threshold value
      */

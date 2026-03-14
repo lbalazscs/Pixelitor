@@ -80,6 +80,9 @@ public class PresetActions {
 
         presetName = FileUtils.sanitizeToFileName(presetName);
         UserPreset preset = owner.createUserPreset(presetName);
+        if (preset == null) { // invalid input, the user was already warned
+            return;
+        }
 
         if (preset.fileExists()) {
             boolean overwrite = confirmOverwrite(parent, preset.getName());

@@ -37,7 +37,7 @@ import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.OPACITY;
 
 /**
- * Rays filter based on the JHLabs RaysFilter
+ * Rays filter based on the JHLabs {@link RaysFilter}.
  */
 public class JHRays extends ParametrizedFilter {
     public static final String NAME = "Rays";

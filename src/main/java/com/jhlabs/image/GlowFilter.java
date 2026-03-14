@@ -43,7 +43,7 @@ public class GlowFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the amount of glow.
+     * Sets the amount of glow.
      *
      * @param amount the amount
      * @min-value 0

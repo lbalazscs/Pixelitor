@@ -22,7 +22,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner.LabelPosition;
-import pixelitor.gui.utils.ValidatedPanel;
+import pixelitor.gui.utils.Validated;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.tools.AbstractBrushTool;
 
@@ -35,7 +35,7 @@ import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
 /**
  * Configuration panel for the "Auto Paint".
  */
-public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
+public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner {
     private static final String COLOR_MODE_FOREGROUND = "Foreground";
     private static final String COLOR_MODE_INTERPOLATED = "Foreground-Background Mix";
     private static final String COLOR_MODE_RANDOM = "Random";
@@ -162,6 +162,20 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
         if (AutoPaint.useColors(getSelectedTool())) {
             FgBgColors.loadStateFrom(preset, true);
         }
+    }
+
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        ValidationResult validation = validateSettings();
+        if (!validation.isValid()) {
+            validation.showErrorDialog(this);
+
+            // abort the save process
+            return null;
+        }
+
+        // settings are valid, proceed with default preset creation
+        return DialogMenuOwner.super.createUserPreset(presetName);
     }
 
     @Override

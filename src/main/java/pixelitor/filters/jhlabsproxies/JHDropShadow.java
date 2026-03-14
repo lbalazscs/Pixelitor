@@ -39,7 +39,7 @@ import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
- * Drop Shadow filter based on the JHLabs ShadowFilter
+ * Drop Shadow filter based on the JHLabs {@link ShadowFilter}.
  */
 public class JHDropShadow extends ParametrizedFilter {
     public static final String NAME = "Drop Shadow";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -108,8 +108,8 @@ public class PhotoCollage extends ParametrizedFilter {
         Colors.fillWith(bgColor.getColor(), g, dest.getWidth(), dest.getHeight());
 
         ShapeType shapeType = shapeTypeParam.getSelected();
-        int photoWidth = photoSize.getValue(0);
-        int photoHeight = photoSize.getValue(1);
+        int photoWidth = photoSize.getHorizontal();
+        int photoHeight = photoSize.getVertical();
         Shape outerShape = shapeType.createShape(0, 0, photoWidth, photoHeight);
         int margin = marginSize.getValue();
 

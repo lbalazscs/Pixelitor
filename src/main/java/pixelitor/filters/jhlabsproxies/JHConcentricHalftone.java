@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,11 @@ import java.awt.image.BufferedImage;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 
-public class JHConcentricHalftone extends JHMaskedHalftone {
+/**
+ * A halftone filter that generates a concentric or spiral
+ * gradient mask to produce curved or circular halftoning effects.
+ */
+public class JHConcentricHalftone extends JHGradientMaskHalftone {
     public static final String NAME = "Concentric Halftone";
     private static final int TYPE_CONCENTRIC = 1;
     private static final int TYPE_SPIRAL_CW = 2;

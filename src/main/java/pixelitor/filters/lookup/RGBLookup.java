@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.util.Arrays;
  * A lookup table for each of the red, green, and blue color channels.
  */
 public class RGBLookup {
-    private static final int ARRAY_LENGTH = 256;
+    private static final int LUT_SIZE = 256;
 
     private short[] redLUT;
     private short[] greenLUT;
@@ -45,7 +45,7 @@ public class RGBLookup {
     public RGBLookup(GrayScaleLookup gray) {
         allocateArrays();
 
-        for (short i = 0; i < ARRAY_LENGTH; i++) {
+        for (short i = 0; i < LUT_SIZE; i++) {
             short value = gray.map(i);
             redLUT[i] = value;
             greenLUT[i] = value;
@@ -62,7 +62,7 @@ public class RGBLookup {
                      GrayScaleLookup b) {
         allocateArrays();
 
-        for (short i = 0; i < ARRAY_LENGTH; i++) {
+        for (short i = 0; i < LUT_SIZE; i++) {
             // apply the base lookup first, then the channel-specific one
             short baseValue = base.map(i);
             redLUT[i] = r.map(baseValue);
@@ -72,9 +72,9 @@ public class RGBLookup {
     }
 
     private void allocateArrays() {
-        redLUT = new short[ARRAY_LENGTH];
-        greenLUT = new short[ARRAY_LENGTH];
-        blueLUT = new short[ARRAY_LENGTH];
+        redLUT = new short[LUT_SIZE];
+        greenLUT = new short[LUT_SIZE];
+        blueLUT = new short[LUT_SIZE];
     }
 
     /**
@@ -101,16 +101,16 @@ public class RGBLookup {
     }
 
     private static short[] createPosterizeLUT(int numLevels) {
-        short[] lut = new short[ARRAY_LENGTH];
+        short[] lut = new short[LUT_SIZE];
         if (numLevels <= 1) {
             // for a single level, map all colors to the middle value
-            Arrays.fill(lut, (short) (ARRAY_LENGTH / 2));
+            Arrays.fill(lut, (short) (LUT_SIZE / 2));
         } else {
-            for (int i = 0; i < ARRAY_LENGTH; i++) {
-                // map input value i (0-255) to a discrete level
-                int level = numLevels * i / ARRAY_LENGTH;
-                // map the discrete level back to an output value (0-255)
-                int mapping = (ARRAY_LENGTH - 1) * level / (numLevels - 1);
+            for (int i = 0; i < LUT_SIZE; i++) {
+                // map input value i (0-255) to a discrete quantization level
+                int level = numLevels * i / LUT_SIZE;
+                // map the quantization level back to an output value (0-255)
+                int mapping = (LUT_SIZE - 1) * level / (numLevels - 1);
                 lut[i] = (short) mapping;
             }
         }
@@ -120,7 +120,7 @@ public class RGBLookup {
     /**
      * Applies the lookup tables to a packed RGB integer value.
      */
-    public int mapRGBValue(int rgb) {
+    public int mapRgb(int rgb) {
         // alpha channel is preserved
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.io.Serial;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
- * A kaleidoscope filter based on the JHLabs KaleidoscopeFilter
+ * A kaleidoscope filter based on the JHLabs {@link KaleidoscopeFilter}.
  */
 public class JHKaleidoscope extends ParametrizedFilter {
     public static final String NAME = Texts.i18n("kaleidoscope");

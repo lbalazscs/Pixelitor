@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * A halftone filter that applies a clustered-dot halftoning effect.
+ * It procedurally generates a small, shaped dot matrix mask which is
+ * then tiled across the image using the chosen grid layout.
+ */
 public class JHDotsHalftone extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -55,7 +60,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
     private static final double SQRT_3 = 1.7320508075688772;
 
     private final RangeParam dotRadius = new RangeParam("Dot Radius", 1, 10, 100);
-    private final IntChoiceParam shapeParam = new IntChoiceParam("Dot Shape", new Item[]{
+    private final IntChoiceParam dotShape = new IntChoiceParam("Dot Shape", new Item[]{
         new Item("Circle", SHAPE_CIRCLE),
         new Item("Square", SHAPE_SQUARE),
         new Item("Diamond", SHAPE_DIAMOND),
@@ -67,7 +72,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
         new Item("Star", SHAPE_STAR),
     });
 
-    private final IntChoiceParam gridParam = new IntChoiceParam("Dot Grid", new Item[]{
+    private final IntChoiceParam dotGrid = new IntChoiceParam("Dot Grid", new Item[]{
         new Item("Triangle", HalftoneFilter.GRID_TRIANGLE),
         new Item("Square", HalftoneFilter.GRID_SQUARE),
         new Item("Rings", HalftoneFilter.GRID_RINGS),
@@ -83,12 +88,12 @@ public class JHDotsHalftone extends ParametrizedFilter {
         super(true);
 
         // enable the center selector only if the rings grid is selected
-        gridParam.setupEnableOtherIf(center, item -> item.valueIs(HalftoneFilter.GRID_RINGS));
+        dotGrid.setupEnableOtherIf(center, item -> item.valueIs(HalftoneFilter.GRID_RINGS));
 
         initParams(
             dotRadius,
-            shapeParam,
-            gridParam,
+            dotShape,
+            dotGrid,
             center,
             softness,
             monochrome,
@@ -112,7 +117,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
         filter.setMonochrome(monochrome.isChecked());
         filter.setSoftness((float) softness.getPercentage());
         filter.setInvert(invert.isChecked());
-        filter.setGridType(gridParam.getValue());
+        filter.setGridType(dotGrid.getValue());
         filter.setCenter(center.getAbsolutePoint(src));
 
         return filter.filter(src, dest);
@@ -123,7 +128,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
      */
     private BufferedImage createMaskImage(BufferedImage src) {
         int maskSize = 2 * dotRadius.getValue();
-        int[][] matrix = genClusteredDotMatrix(maskSize, shapeParam.getValue());
+        int[][] matrix = genClusteredDotMatrix(maskSize, dotShape.getValue());
         BufferedImage maskImage = ImageUtils.createImageWithSameCM(src, maskSize, maskSize);
 
         int[] maskPixels = ImageUtils.getPixels(maskImage);
@@ -146,12 +151,12 @@ public class JHDotsHalftone extends ParametrizedFilter {
     private static int[][] genClusteredDotMatrix(int matrixSize, int shape) {
         assert matrixSize % 2 == 0 : "matrixSize = " + matrixSize;
 
-        // stores a pixel's coordinates and its distance from the center
-        record MPoint(int x, int y, double dist) {
+        // binds a pixel's coordinates to its distance from the center
+        record DistPoint(int x, int y, double dist) {
         }
 
         int[][] matrix = new int[matrixSize][matrixSize];
-        List<MPoint> points = new ArrayList<>();
+        List<DistPoint> points = new ArrayList<>();
 
         int centerX = matrixSize / 2;
         int centerY = matrixSize / 2;
@@ -159,7 +164,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
         for (int y = 0; y < matrixSize; y++) {
             for (int x = 0; x < matrixSize; x++) {
                 double d = distanceToCenter(shape, x - centerX, y - centerY);
-                points.add(new MPoint(x, y, d));
+                points.add(new DistPoint(x, y, d));
             }
         }
 
@@ -169,7 +174,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
         // assign 0-255 threshold values
         int total = matrixSize * matrixSize;
         for (int i = 0; i < total; i++) {
-            MPoint p = points.get(i);
+            DistPoint p = points.get(i);
             matrix[p.x][p.y] = (int) Math.round((double) i / total * 255);
         }
 

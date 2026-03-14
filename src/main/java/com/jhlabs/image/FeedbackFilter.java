@@ -40,14 +40,14 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
     private int iterations;
 
     /**
-     * Construct a FeedbackFilter.
+     * Constructs a FeedbackFilter.
      */
     public FeedbackFilter(String filterName) {
         super(filterName);
     }
 
     /**
-     * Construct a FeedbackFilter.
+     * Constructs a FeedbackFilter.
      *
      * @param distance the distance to move on each iteration
      * @param angle    the angle to move on each iteration
@@ -67,7 +67,6 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
      * Sets the angle of each iteration.
      *
      * @param angle the angle of each iteration.
-     * @angle
      */
     public void setAngle(float angle) {
         this.angle = angle;
@@ -86,7 +85,6 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
      * Sets the amount of rotation on each iteration.
      *
      * @param rotation the angle of rotation
-     * @angle
      */
     public void setRotation(float rotation) {
         this.rotation = rotation;

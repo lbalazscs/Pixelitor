@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.MotionBlur;
+import com.jhlabs.image.MotionBlurFilter;
+import com.jhlabs.image.MotionBlurOp;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
@@ -29,7 +31,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * "Spin and Zoom Blur" filter based on the JHLabs MotionBlurOp/MotionBlurFilter classes
+ * "Spin and Zoom Blur" filter based on the JHLabs {@link MotionBlurOp} and {@link MotionBlurFilter} classes.
  */
 public class JHSpinZoomBlur extends ParametrizedFilter {
     public static final String NAME = "Spin and Zoom Blur";

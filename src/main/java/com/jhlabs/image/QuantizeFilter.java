@@ -45,7 +45,7 @@ public class QuantizeFilter extends WholeImageFilter {
     }
 
     /**
-     * Set the number of colors to quantize to.
+     * Sets the number of colors to quantize to.
      *
      * @param numColors the number of colors. The default is 256.
      */
@@ -54,7 +54,7 @@ public class QuantizeFilter extends WholeImageFilter {
     }
 
     /**
-     * Set whether to use dithering or not. If not, the image is posterized.
+     * Sets whether to use dithering or not. If not, the image is posterized.
      *
      * @param dither true to use dithering
      */
@@ -63,7 +63,7 @@ public class QuantizeFilter extends WholeImageFilter {
     }
 
     /**
-     * Set whether to use a serpentine pattern for return or not. This can reduce 'avalanche' artifacts in the output.
+     * Sets whether to use a serpentine pattern for return or not. This can reduce 'avalanche' artifacts in the output.
      *
      * @param serpentine true to use serpentine pattern
      */

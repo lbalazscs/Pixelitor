@@ -58,7 +58,7 @@ public class SparkleFilter extends PointFilter {
     }
 
     /**
-     * Set the amount of sparkle.
+     * Sets the amount of sparkle.
      *
      * @param amount the amount
      * @min-value 0
@@ -73,7 +73,7 @@ public class SparkleFilter extends PointFilter {
     }
 
     /**
-     * Set the radius of the effect.
+     * Sets the radius of the effect.
      *
      * @param radius the radius
      * @min-value 0

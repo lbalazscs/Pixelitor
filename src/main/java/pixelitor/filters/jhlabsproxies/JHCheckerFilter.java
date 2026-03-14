@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,12 +27,11 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-import java.util.Arrays;
 
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
- * Checker Pattern filter based on the JHLabs CheckFilter
+ * Checker pattern filter based on the JHLabs {@link CheckFilter}.
  */
 public class JHCheckerFilter extends ParametrizedFilter {
     public static final String NAME = "Checker Pattern";
@@ -40,7 +39,7 @@ public class JHCheckerFilter extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = -2525401637282008155L;
 
-    private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 1, 10, 100, true);
+    private final GroupedRangeParam tileSize = new GroupedRangeParam("Size", "Width", "Height", 1, 10, 100, true);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final ColorListParam colors = new ColorListParam("Colors", 2, 2,
         Color.BLACK, Color.WHITE, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
@@ -52,13 +51,11 @@ public class JHCheckerFilter extends ParametrizedFilter {
         new RangeParam("Phase (Time)", 0, 0, 100)}, false);
     private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, IGNORE_RANDOMIZE);
 
-    private CheckFilter filter;
-
     public JHCheckerFilter() {
         super(true);
 
         initParams(
-            size.withAdjustedRange(1.0),
+            tileSize.withAdjustedRange(1.0),
             angle,
             colors,
             fuzziness,
@@ -69,24 +66,16 @@ public class JHCheckerFilter extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new CheckFilter(NAME);
-        }
-
-        filter.setFuzziness(fuzziness.getValue());
-
-        var intColors = Arrays.stream(colors.getColors())
-            .mapToInt(Color::getRGB)
-            .toArray();
-        filter.setColors(intColors);
-
-        filter.setXScale(size.getValue(0));
-        filter.setYScale(size.getValue(1));
-        filter.setDistortion(distortion.getPercentage(0));
-        filter.setPhase(distortion.getPercentage(1) * ImageMath.TWO_PI);
-
-        // must be set after the distortion
-        filter.setAngle((float) angle.getValueInRadians());
+        CheckFilter filter = new CheckFilter(
+            NAME,
+            colors.getColorsAsPackedInts(),
+            tileSize.getHorizontal(),
+            tileSize.getVertical(),
+            fuzziness.getValue(),
+            (float) angle.getValueInRadians(),
+            distortion.getPercentage(0), // wave amount
+            distortion.getPercentage(1) * ImageMath.TWO_PI // wave phase
+        );
 
         dest = filter.filter(src, dest);
 

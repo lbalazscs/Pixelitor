@@ -37,22 +37,18 @@ public class DoGFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the radius of the first kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
+     * Sets the radius of the first kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
      * @param radius1 the radius of the blur in pixels.
-     * @min-value 0
-     * @max-value 100+
      */
     public void setRadius1(float radius1) {
         this.radius1 = radius1;
     }
 
     /**
-     * Set the radius of the second kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
+     * Sets the radius of the second kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
      * @param radius2 the radius of the blur in pixels.
-     * @min-value 0
-     * @max-value 100+
      */
     public void setRadius2(float radius2) {
         this.radius2 = radius2;

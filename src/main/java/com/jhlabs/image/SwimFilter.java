@@ -37,11 +37,9 @@ public class SwimFilter extends TransformFilter {
     }
 
     /**
-     * Set the amount of swim.
+     * Sets the amount of swim.
      *
      * @param amount the amount of swim
-     * @min-value 0
-     * @max-value 100+
      */
     public void setAmount(float amount) {
         this.amount = amount;
@@ -51,8 +49,6 @@ public class SwimFilter extends TransformFilter {
      * Sets the scale of the distortion.
      *
      * @param scale the scale of the distortion.
-     * @min-value 1
-     * @max-value 300+
      */
     public void setScale(float scale) {
         this.scale = scale;
@@ -62,8 +58,6 @@ public class SwimFilter extends TransformFilter {
      * Sets the stretch factor of the distortion.
      *
      * @param stretch the stretch factor of the distortion.
-     * @min-value 1
-     * @max-value 50+
      */
     public void setStretch(float stretch) {
         this.stretch = stretch;
@@ -73,7 +67,6 @@ public class SwimFilter extends TransformFilter {
      * Sets the angle of the effect.
      *
      * @param angle the angle of the effect.
-     * @angle
      */
     public void setAngle(float angle) {
         float cos = (float) Math.cos(angle);
@@ -88,7 +81,6 @@ public class SwimFilter extends TransformFilter {
      * Sets the time. Use this to animate the effect.
      *
      * @param time the time.
-     * @angle
      */
     public void setTime(float time) {
         this.time = time;

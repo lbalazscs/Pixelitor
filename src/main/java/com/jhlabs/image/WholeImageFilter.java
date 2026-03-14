@@ -25,7 +25,7 @@ import java.awt.image.ColorModel;
  */
 public abstract class WholeImageFilter extends AbstractBufferedImageOp {
     /**
-     * Construct a WholeImageFilter.
+     * Constructs a WholeImageFilter.
      */
     protected WholeImageFilter(String filterName) {
         super(filterName);
@@ -60,4 +60,3 @@ public abstract class WholeImageFilter extends AbstractBufferedImageOp {
      */
     protected abstract int[] filterPixels(int width, int height, int[] inPixels);
 }
-

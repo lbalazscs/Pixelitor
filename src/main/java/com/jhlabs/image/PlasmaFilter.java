@@ -51,15 +51,13 @@ public class PlasmaFilter extends WholeImageFilter {
      * Sets the turbulence of the texture.
      *
      * @param turbulence the turbulence of the texture.
-     * @min-value 0
-     * @max-value 10
      */
     public void setTurbulence(float turbulence) {
         this.turbulence = turbulence;
     }
 
     /**
-     * Set the colormap to be used for the filter.
+     * Sets the colormap to be used for the filter.
      *
      * @param colormap the colormap
      */

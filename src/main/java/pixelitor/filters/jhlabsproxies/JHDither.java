@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ import static com.jhlabs.image.DitherFilter.MATRIX_CLUSTER4;
 import static com.jhlabs.image.DitherFilter.MATRIX_CLUSTER8;
 
 /**
- * Ordered dithering filter based on the JHLabs DitherFilter.
+ * Ordered dithering filter based on the JHLabs {@link DitherFilter}.
  */
 public class JHDither extends ParametrizedFilter {
     public static final String NAME = "Ordered Dithering";

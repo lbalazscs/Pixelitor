@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -253,10 +253,11 @@ public class Views {
 
     /**
      * Closes the given view, prompting to save unsaved changes if necessary.
+     * Returns true if batch closing should continue.
      */
-    public static void warnAndClose(View view) {
+    public static boolean warnAndClose(View view) {
         if (RandomGUITest.isRunning()) {
-            return;
+            return true; // continue batch operations in tests
         }
 
         try {
@@ -269,24 +270,27 @@ public class Views {
                         boolean saved = FileIO.save(comp, false);
                         if (saved) {
                             view.close();
+                            return true;
                         }
-                        break;
+                        // the user cancelled the save dialog or save failed
+                        return false;
                     case NO_OPTION:  // "Don't Save"
                         view.close();
-                        break;
+                        return true;
                     case CANCEL_OPTION:
                     case CLOSED_OPTION:  // dialog closed by pressing X
-                        // do nothing
-                        return;
+                        return false;
                     default:
                         throw new IllegalStateException("answer = " + answer);
                 }
             } else {
                 // no unsaved changes, close directly
                 view.close();
+                return true;
             }
         } catch (Exception ex) {
             Messages.showException(ex);
+            return false;
         }
     }
 
@@ -308,7 +312,10 @@ public class Views {
         List<View> viewsToProcess = new ArrayList<>(views);
         for (View view : viewsToProcess) {
             if (condition.test(view)) {
-                warnAndClose(view);
+                boolean proceed = warnAndClose(view);
+                if (!proceed) {
+                    break; // short-circuit the entire batch operation
+                }
             }
         }
     }

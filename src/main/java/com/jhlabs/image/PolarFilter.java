@@ -52,7 +52,7 @@ public class PolarFilter extends TransformFilter {
 
 
     /**
-     * Construct a PolarFilter.
+     * Constructs a PolarFilter.
      */
     public PolarFilter(String filterName) {
         super(filterName);
@@ -71,7 +71,7 @@ public class PolarFilter extends TransformFilter {
     }
 
     /**
-     * Set the distortion type.
+     * Sets the distortion type.
      *
      * @param type the distortion type
      */

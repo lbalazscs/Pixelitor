@@ -16,9 +16,7 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -27,21 +25,12 @@ import java.awt.image.BufferedImage;
  * The filter maps the unit square onto an arbitrary convex quadrilateral or vice versa.
  */
 public class PerspectiveFilter extends TransformFilter {
-    private float x0, y0, x1, y1, x2, y2, x3, y3;
     private float A, B, C, D, E, F, G, H, I;
     private float a11, a12, a13, a21, a22, a23, a31, a32, a33;
     private boolean scaled;
-    private boolean clip = false;
 
     /**
-     * Construct a PerspectiveFilter.
-     */
-    public PerspectiveFilter(String filterName) {
-        this(0, 0, 1, 0, 1, 1, 0, 1, filterName);
-    }
-
-    /**
-     * Construct a PerspectiveFilter.
+     * Constructs a PerspectiveFilter.
      *
      * @param x0 the new position of the top left corner
      * @param y0 the new position of the top left corner
@@ -57,18 +46,9 @@ public class PerspectiveFilter extends TransformFilter {
         unitSquareToQuad(x0, y0, x1, y1, x2, y2, x3, y3);
     }
 
-    public void setClip(boolean clip) {
-        this.clip = clip;
-    }
-
-    public boolean getClip() {
-        return clip;
-    }
-
     /**
-     * Set the new positions of the image corners.
-     * This is the same as unitSquareToQuad, but the coordinates are in image pixels, not relative to the unit square.
-     * This method is provided as a convenience.
+     * Sets the transform to map the unit square onto a quadrilateral.
+     * When filtering, all coordinates will be scaled by the size of the image.
      *
      * @param x0 the new position of the top left corner
      * @param y0 the new position of the top left corner
@@ -79,34 +59,7 @@ public class PerspectiveFilter extends TransformFilter {
      * @param x3 the new position of the bottom left corner
      * @param y3 the new position of the bottom left corner
      */
-    public void setCorners(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) {
-        unitSquareToQuad(x0, y0, x1, y1, x2, y2, x3, y3);
-        scaled = true;
-    }
-
-    /**
-     * Set the transform to map the unit square onto a quadrilateral. When filtering, all coordinates will be scaled
-     * by the size of the image.
-     *
-     * @param x0 the new position of the top left corner
-     * @param y0 the new position of the top left corner
-     * @param x1 the new position of the top right corner
-     * @param y1 the new position of the top right corner
-     * @param x2 the new position of the bottom right corner
-     * @param y2 the new position of the bottom right corner
-     * @param x3 the new position of the bottom left corner
-     * @param y3 the new position of the bottom left corner
-     */
-    public void unitSquareToQuad(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) {
-        this.x0 = x0;
-        this.y0 = y0;
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.x3 = x3;
-        this.y3 = y3;
-
+    private void unitSquareToQuad(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) {
         float dx1 = x1 - x2;
         float dy1 = y1 - y2;
         float dx2 = x3 - x2;
@@ -137,7 +90,7 @@ public class PerspectiveFilter extends TransformFilter {
     }
 
     /**
-     * Set the transform to map a quadrilateral onto the unit square. When filtering, all coordinates will be scaled
+     * Sets the transform to map a quadrilateral onto the unit square. When filtering, all coordinates will be scaled
      * by the size of the image.
      *
      * @param x0 the old position of the top left corner
@@ -203,58 +156,6 @@ public class PerspectiveFilter extends TransformFilter {
         return super.filter(src, dst);
     }
 
-    // unused method
-    protected void transformSpace(Rectangle rect) {
-        if (scaled) {
-            rect.x = (int) Math.min(Math.min(x0, x1), Math.min(x2, x3));
-            rect.y = (int) Math.min(Math.min(y0, y1), Math.min(y2, y3));
-            rect.width = (int) Math.max(Math.max(x0, x1), Math.max(x2, x3)) - rect.x;
-            rect.height = (int) Math.max(Math.max(y0, y1), Math.max(y2, y3)) - rect.y;
-            return;
-        }
-        if (!clip) {
-            float w = (float) rect.getWidth(), h = (float) rect.getHeight();
-            Rectangle r = new Rectangle();
-            r.add(getPoint2D(new Point2D.Float(0, 0), null));
-            r.add(getPoint2D(new Point2D.Float(w, 0), null));
-            r.add(getPoint2D(new Point2D.Float(0, h), null));
-            r.add(getPoint2D(new Point2D.Float(w, h), null));
-            rect.setRect(r);
-        }
-    }
-
-    /**
-     * Get the origin of the output image. Use this for working out where to draw your new image.
-     *
-     * @return the X origin.
-     */
-    public float getOriginX() {
-        return x0 - (int) Math.min(Math.min(x0, x1), Math.min(x2, x3));
-    }
-
-    /**
-     * Get the origin of the output image. Use this for working out where to draw your new image.
-     *
-     * @return the Y origin.
-     */
-    public float getOriginY() {
-        return y0 - (int) Math.min(Math.min(y0, y1), Math.min(y2, y3));
-    }
-
-    @Override
-    public Rectangle2D getBounds2D(BufferedImage src) {
-        if (clip) {
-            return new Rectangle(0, 0, src.getWidth(), src.getHeight());
-        }
-        float w = src.getWidth(), h = src.getHeight();
-        Rectangle2D r = new Rectangle2D.Float();
-        r.add(getPoint2D(new Point2D.Float(0, 0), null));
-        r.add(getPoint2D(new Point2D.Float(w, 0), null));
-        r.add(getPoint2D(new Point2D.Float(0, h), null));
-        r.add(getPoint2D(new Point2D.Float(w, h), null));
-        return r;
-    }
-
     @Override
     public Point2D getPoint2D(Point2D srcPt, Point2D dstPt) {
         if (dstPt == null) {
@@ -269,8 +170,8 @@ public class PerspectiveFilter extends TransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        out[0] = srcWidth * (A * x + B * y + C) / (G * x + H * y + I);
-        out[1] = srcHeight * (D * x + E * y + F) / (G * x + H * y + I);
+        out[0] = width * (A * x + B * y + C) / (G * x + H * y + I);
+        out[1] = height * (D * x + E * y + F) / (G * x + H * y + I);
     }
 
     @Override
@@ -278,4 +179,3 @@ public class PerspectiveFilter extends TransformFilter {
         return "Distort/Perspective...";
     }
 }
-

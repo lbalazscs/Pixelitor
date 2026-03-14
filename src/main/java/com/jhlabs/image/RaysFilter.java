@@ -35,7 +35,7 @@ public class RaysFilter extends MotionBlurOp {
     }
 
     /**
-     * Set the threshold value.
+     * Sets the threshold value.
      *
      * @param threshold the threshold value
      */
@@ -44,7 +44,7 @@ public class RaysFilter extends MotionBlurOp {
     }
 
     /**
-     * Set the strength of the rays.
+     * Sets the strength of the rays.
      *
      * @param strength the strength.
      */
@@ -53,7 +53,7 @@ public class RaysFilter extends MotionBlurOp {
     }
 
     /**
-     * Set the colormap to be used for the filter.
+     * Sets the colormap to be used for the filter.
      *
      * @param colormap the colormap
      */

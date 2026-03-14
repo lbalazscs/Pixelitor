@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Turbulent Distortion filter based on the JHLabs MarbleFilter
+ * Turbulent Distortion filter based on the JHLabs {@link MarbleFilter}.
  */
 public class JHTurbulentDistortion extends ParametrizedFilter {
     public static final String NAME = "Turbulent Distortion";
