@@ -19,6 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.GlintFilter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.RangeParam;
 
@@ -40,9 +41,9 @@ public class JHGlint extends ParametrizedFilter {
 
     private final RangeParam lengthParam = new RangeParam("Length", 0, 20, 100);
     private final RangeParam blur = new RangeParam("Blur", 0, 1, 20);
-//    private BooleanParam glintOnly = new BooleanParam("Glint Only", false);
+    private final BooleanParam glintOnly = new BooleanParam("Glint Only", false);
 
-    private final GradientParam colors = GradientParam.createUniformWhite();
+    private final GradientParam colors = GradientParam.createWhiteToBlack("Colors");
 
     private GlintFilter filter;
 
@@ -55,8 +56,8 @@ public class JHGlint extends ParametrizedFilter {
             intensity,
             lengthParam, // slow for large images if it's adjusted to the image size
             blur,
-            colors
-//                glintOnly
+            colors,
+            glintOnly
         );
     }
 
@@ -64,7 +65,7 @@ public class JHGlint extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int length = lengthParam.getValue();
         if (length == 0) {
-            // mot just for performance, a 0 length would cause division by 0
+            // a 0 length would cause division by 0
             return src;
         }
 
@@ -78,6 +79,8 @@ public class JHGlint extends ParametrizedFilter {
         filter.setLength(length);
         filter.setBlur(blur.getValueAsFloat());
         filter.setColormap(colors.getColorMap());
+
+        filter.setGlintOnly(glintOnly.isChecked());
 
         return filter.filter(src, dest);
     }

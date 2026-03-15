@@ -25,17 +25,18 @@ import java.util.concurrent.ThreadLocalRandom;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
- * A filter which renders "glints" on bright parts of the image.
+ * A filter that finds the brightest spots (highlights) in an image
+ * and draw 8-pointed starbursts ("glints") on top of them.
  */
 public class GlintFilter extends AbstractBufferedImageOp {
-    private float threshold = 1.0f;
+    private int threshold = 255;
     private int length = 5;
     private float blur = 0.0f;
     private float amount = 0.1f;
     private boolean glintOnly = false;
     private Colormap colormap = new LinearColormap(0xffffffff, 0xff000000);
 
-    private float coverage = 1.0f; // probability in percentage
+    private float coverage = 1.0f; // probability between 0.0 and 1.0
 
     public GlintFilter(String filterName) {
         super(filterName);
@@ -48,18 +49,16 @@ public class GlintFilter extends AbstractBufferedImageOp {
     /**
      * Sets the threshold value.
      *
-     * @param threshold the threshold value
+     * @param threshold the threshold value in the range 0..1
      */
     public void setThreshold(float threshold) {
-        this.threshold = threshold;
+        this.threshold = (int) (255 * threshold);
     }
 
     /**
      * Sets the amount of glint.
      *
-     * @param amount the amount
-     * @min-value 0
-     * @max-value 1
+     * @param amount the amount in the range 0..1
      */
     public void setAmount(float amount) {
         this.amount = amount;
@@ -107,41 +106,24 @@ public class GlintFilter extends AbstractBufferedImageOp {
         int height = src.getHeight();
 
         if (blur != 0) {
-            // width+height for the Gaussian, then height again for further processing
+            // width+height for the blur, then height again for further processing
             pt = createProgressTracker(width + 2 * height);
         } else {
             pt = createProgressTracker(height);
         }
 
-        // in order to prevent division by 0
-        int calculatedLength2 = (int) (length / 1.414f);
-        int length2 = calculatedLength2 > 0 ? calculatedLength2 : 1;
+        // prevent division by 0
+        int diagonalLength = Math.max(1, (int) (length / 1.414f));
 
-        int[] colors = new int[length + 1];
-        int[] colors2 = new int[length2 + 1];
+        // the pre-calculated colors of the starburst arms
+        int[] orthogonalColors = calcArmColors(length);
+        int[] diagonalColors = calcArmColors(diagonalLength);
 
-        if (colormap != null) {
-            for (int i = 0; i <= length; i++) {
-                int argb = colormap.getColor((float) i / length);
-                int r = (argb >> 16) & 0xff;
-                int g = (argb >> 8) & 0xff;
-                int b = argb & 0xff;
-                argb = (argb & 0xff000000) | ((int) (amount * r) << 16) | ((int) (amount * g) << 8) | (int) (amount * b);
-                colors[i] = argb;
-            }
-            for (int i = 0; i <= length2; i++) {
-                int argb = colormap.getColor((float) i / length2);
-                int r = (argb >> 16) & 0xff;
-                int g = (argb >> 8) & 0xff;
-                int b = argb & 0xff;
-                argb = (argb & 0xff000000) | ((int) (amount * r) << 16) | ((int) (amount * g) << 8) | (int) (amount * b);
-                colors2[i] = argb;
-            }
-        }
-
+        // by extracting the highlights to a dedicated mask,
+        // the highlights can be blurred before drawing the glints
         BufferedImage mask = new BufferedImage(width, height, TYPE_INT_ARGB);
 
-        int threshold3 = (int) (threshold * 3 * 255);
+        int rgbThresholdSum = threshold * 3;
         int[] pixels = new int[width];
         for (int y = 0; y < height; y++) {
             getRGB(src, 0, y, width, 1, pixels);
@@ -152,9 +134,11 @@ public class GlintFilter extends AbstractBufferedImageOp {
                 int g = (rgb >> 8) & 0xff;
                 int b = rgb & 0xff;
                 int l = r + g + b;
-                if (l < threshold3) {
+                if (l < rgbThresholdSum) {
+                    // the mask is black if the lightness is lower than the threshold
                     pixels[x] = 0xff000000;
                 } else {
+                    // the mask is set to a grayscale value representing the lightness
                     l /= 3;
                     pixels[x] = a | (l << 16) | (l << 8) | l;
                 }
@@ -163,9 +147,14 @@ public class GlintFilter extends AbstractBufferedImageOp {
         }
 
         if (blur != 0) {
-            GaussianFilter gf = new GaussianFilter(blur, filterName);
-            gf.setProgressTracker(pt);
-            mask = gf.filter(mask, null);
+            AbstractBufferedImageOp blurFilter;
+            if (blur > 3) {
+                blurFilter = new BoxBlurFilter(blur, blur, 3, filterName);
+            } else {
+                blurFilter = new GaussianFilter(blur, filterName);
+            }
+            blurFilter.setProgressTracker(pt);
+            mask = blurFilter.filter(mask, null);
         }
 
         if (dst == null) {
@@ -175,17 +164,29 @@ public class GlintFilter extends AbstractBufferedImageOp {
         if (glintOnly) {
             dstPixels = new int[width * height];
         } else {
-            dstPixels = getRGB(src, 0, 0, width, height, null);//FIXME - only need 2*length
+            dstPixels = getRGB(src, 0, 0, width, height, null);
         }
 
-        Future<?>[] rowFutures = new Future[height];
-        for (int y = 0; y < height; y++) {
-            int finalY = y;
-            BufferedImage finalMask = mask;
-            Runnable rowTask = () -> processRow(width, height, pixels, length2, colors, colors2, finalMask, dstPixels, finalY);
-            rowFutures[y] = ThreadPool.submit(rowTask);
+        // use staggered execution phases to prevent thread contention
+        int maxSpread = Math.max(length, diagonalLength);
+        int phaseCount = 2 * maxSpread + 1;
+
+        for (int phase = 0; phase < phaseCount; phase++) {
+            if (phase >= height) {
+                break;
+            }
+            int rowsInPhase = (height - phase - 1) / phaseCount + 1;
+            Future<?>[] rowFutures = new Future[rowsInPhase];
+            int idx = 0;
+
+            for (int y = phase; y < height; y += phaseCount) {
+                int finalY = y;
+                BufferedImage finalMask = mask;
+                Runnable rowTask = () -> processRow(width, height, diagonalLength, orthogonalColors, diagonalColors, finalMask, dstPixels, finalY);
+                rowFutures[idx++] = ThreadPool.submit(rowTask);
+            }
+            ThreadPool.waitFor(rowFutures, pt);
         }
-        ThreadPool.waitFor(rowFutures, pt);
 
         setRGB(dst, 0, 0, width, height, dstPixels);
 
@@ -194,57 +195,82 @@ public class GlintFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    private void processRow(int width, int height, int[] pixels, int length2, int[] colors, int[] colors2, BufferedImage mask, int[] dstPixels, int y) {
+    private int[] calcArmColors(int length) {
+        int[] colors = new int[length + 1];
+        for (int i = 0; i <= length; i++) {
+            int argb = colormap.getColor((float) i / length);
+            int originalAlpha = (argb >> 24) & 0xff;
+            int r = (argb >> 16) & 0xff;
+            int g = (argb >> 8) & 0xff;
+            int b = argb & 0xff;
+
+            // to work properly on transparent backgrounds, alpha should fade with brightness
+            int brightness = Math.max(r, Math.max(g, b));
+            int a = (originalAlpha * brightness) / 255;
+
+            colors[i] = ((int) (amount * a) << 24) |
+                ((int) (amount * r) << 16) |
+                ((int) (amount * g) << 8) |
+                (int) (amount * b);
+        }
+        return colors;
+    }
+
+    private void processRow(int width, int height, int diagonalLength,
+                            int[] orthogonalColors, int[] diagonalColors,
+                            BufferedImage mask, int[] dstPixels, int y) {
         int index = y * width;
+        int[] pixels = new int[width];
         getRGB(mask, 0, y, width, 1, pixels);
         int ymin = Math.max(y - length, 0) - y;
         int ymax = Math.min(y + length, height - 1) - y;
-        int ymin2 = Math.max(y - length2, 0) - y;
-        int ymax2 = Math.min(y + length2, height - 1) - y;
+        int ymin2 = Math.max(y - diagonalLength, 0) - y;
+        int ymax2 = Math.min(y + diagonalLength, height - 1) - y;
+
+        // draws 8-pointed starbursts (glints) pixel-by-pixel,
+        // projecting outwards from a center point
         for (int x = 0; x < width; x++) {
-            float randomFloat = ThreadLocalRandom.current().nextFloat();
-            boolean createGlint = (coverage > randomFloat);
-            if (createGlint && (pixels[x] & 0xff) > threshold * 255) {
+            if ((pixels[x] & 0xff) > threshold && (coverage > ThreadLocalRandom.current().nextFloat())) {
                 int xmin = Math.max(x - length, 0) - x;
                 int xmax = Math.min(x + length, width - 1) - x;
-                int xmin2 = Math.max(x - length2, 0) - x;
-                int xmax2 = Math.min(x + length2, width - 1) - x;
+                int xmin2 = Math.max(x - diagonalLength, 0) - x;
+                int xmax2 = Math.min(x + diagonalLength, width - 1) - x;
 
                 // horizontal
                 for (int i = 0, k = 0; i <= xmax; i++, k++) {
-                    dstPixels[index + i] = PixelUtils.addPixels(dstPixels[index + i], colors[k]);
+                    dstPixels[index + i] = PixelUtils.addPixels(dstPixels[index + i], orthogonalColors[k]);
                 }
                 for (int i = -1, k = 1; i >= xmin; i--, k++) {
-                    dstPixels[index + i] = PixelUtils.addPixels(dstPixels[index + i], colors[k]);
+                    dstPixels[index + i] = PixelUtils.addPixels(dstPixels[index + i], orthogonalColors[k]);
                 }
                 // vertical
-                for (int i = 1, j = index + width, k = 0; i <= ymax; i++, j += width, k++) {
-                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], colors[k]);
+                for (int i = 1, j = index + width, k = 1; i <= ymax; i++, j += width, k++) {
+                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], orthogonalColors[k]);
                 }
-                for (int i = -1, j = index - width, k = 0; i >= ymin; i--, j -= width, k++) {
-                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], colors[k]);
+                for (int i = -1, j = index - width, k = 1; i >= ymin; i--, j -= width, k++) {
+                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], orthogonalColors[k]);
                 }
 
                 // diagonals
                 // SE
                 int count = Math.min(xmax2, ymax2);
-                for (int i = 1, j = index + width + 1, k = 0; i <= count; i++, j += width + 1, k++) {
-                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], colors2[k]);
+                for (int i = 1, j = index + width + 1, k = 1; i <= count; i++, j += width + 1, k++) {
+                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], diagonalColors[k]);
                 }
                 // NW
                 count = Math.min(-xmin2, -ymin2);
-                for (int i = 1, j = index - width - 1, k = 0; i <= count; i++, j -= width + 1, k++) {
-                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], colors2[k]);
+                for (int i = 1, j = index - width - 1, k = 1; i <= count; i++, j -= width + 1, k++) {
+                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], diagonalColors[k]);
                 }
                 // NE
                 count = Math.min(xmax2, -ymin2);
-                for (int i = 1, j = index - width + 1, k = 0; i <= count; i++, j += -width + 1, k++) {
-                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], colors2[k]);
+                for (int i = 1, j = index - width + 1, k = 1; i <= count; i++, j += -width + 1, k++) {
+                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], diagonalColors[k]);
                 }
                 // SW
                 count = Math.min(-xmin2, ymax2);
-                for (int i = 1, j = index + width - 1, k = 0; i <= count; i++, j += width - 1, k++) {
-                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], colors2[k]);
+                for (int i = 1, j = index + width - 1, k = 1; i <= count; i++, j += width - 1, k++) {
+                    dstPixels[j] = PixelUtils.addPixels(dstPixels[j], diagonalColors[k]);
                 }
             }
             index++;

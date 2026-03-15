@@ -118,17 +118,21 @@ public class PixelUtils {
         return (rgb2 & ~channelMask) | combinePixels(rgb1 & channelMask, rgb2, op, extraAlpha);
     }
 
-    // lbalazscs: same as combinePixels(rgb1, rgb2, PixelUtils.ADD, 0xff)
-    // but performance-optimized
     public static int addPixels(int rgb1, int rgb2) {
         int a1 = (rgb1 >> 24) & 0xff;
         int r1 = (rgb1 >> 16) & 0xff;
         int g1 = (rgb1 >> 8) & 0xff;
         int b1 = rgb1 & 0xff;
-//        int a2 = (rgb2 >> 24) & 0xff;
+
+        int a2 = (rgb2 >> 24) & 0xff;
         int r2 = (rgb2 >> 16) & 0xff;
         int g2 = (rgb2 >> 8) & 0xff;
         int b2 = rgb2 & 0xff;
+
+        a1 += a2; // add the alpha channel
+        if (a1 > 255) {
+            a1 = 255;
+        }
 
         r1 += r2;
         if (r1 > 255) {

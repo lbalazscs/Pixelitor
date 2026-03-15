@@ -74,6 +74,12 @@ public class GradientParam extends AbstractFilterParam {
             new Color[]{BLACK, GRAY, WHITE});
     }
 
+    public static GradientParam createWhiteToBlack(String name) {
+        return new GradientParam(name,
+            new float[]{0.0f, 0.5f, 1.0f},
+            new Color[]{WHITE, GRAY, BLACK});
+    }
+
     public static GradientParam createUniformWhite() {
         return new GradientParam("Colors",
             new float[]{0.0f, 0.5f, 1.0f},
