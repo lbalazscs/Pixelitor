@@ -423,6 +423,22 @@ public class ImageMath {
         return (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
     }
 
+    // a performance-optimized version, usable if one of the colors and the mix ratio is always the same
+    static int mixColors(int rgb1, int a2, int r2, int g2, int b2, int mixInt, int invMixInt) {
+        int a1 = (rgb1 >> 24) & 0xff;
+        int r1 = (rgb1 >> 16) & 0xff;
+        int g1 = (rgb1 >> 8) & 0xff;
+        int b1 = rgb1 & 0xff;
+
+        // fast integer blending
+        a1 = (a1 * invMixInt + a2 * mixInt) >> 8;
+        r1 = (r1 * invMixInt + r2 * mixInt) >> 8;
+        g1 = (g1 * invMixInt + g2 * mixInt) >> 8;
+        b1 = (b1 * invMixInt + b2 * mixInt) >> 8;
+
+        return (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
+    }
+
     /**
      * Bilinear interpolation of ARGB values.
      *
