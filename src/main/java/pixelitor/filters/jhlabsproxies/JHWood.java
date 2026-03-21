@@ -53,8 +53,6 @@ public class JHWood extends ParametrizedFilter {
             new Color(190, 160, 115),
             new Color(152, 123, 81)});
 
-    private WoodFilter filter;
-
     public JHWood() {
         super(false);
 
@@ -75,18 +73,17 @@ public class JHWood extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new WoodFilter(NAME);
-        }
-
-        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
-        filter.setScale(scale.getValueAsFloat());
-        filter.setStretch(stretch.getValueAsFloat() + 1.0f);
-        filter.setRings((float) rings.getPercentage());
-        filter.setTurbulence((float) turbulence.getPercentage());
-        filter.setFibres((float) fibres.getPercentage());
-        filter.setGain((float) gain.getPercentage());
-        filter.setColormap(gradient.getColorMap());
+        WoodFilter filter = new WoodFilter(
+            NAME,
+            (float) rings.getPercentage(),
+            scale.getValueAsFloat(),
+            stretch.getValueAsFloat() + 1.0f,
+            (float) (angle.getValueInRadians() + Math.PI / 2),
+            (float) turbulence.getPercentage(),
+            (float) fibres.getPercentage(),
+            (float) gain.getPercentage(),
+            gradient.getColorMap()
+        );
 
         return filter.filter(src, dest);
     }

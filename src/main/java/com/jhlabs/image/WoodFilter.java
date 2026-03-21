@@ -19,155 +19,76 @@ package com.jhlabs.image;
 import com.jhlabs.math.Noise;
 
 /**
- * A filter which produces a simulated wood texture. This is a bit of a hack, but might be usefult to some people.
+ * A filter which produces a simulated wood texture.
  */
 public class WoodFilter extends PointFilter {
-    private float scale = 200;
-    private float stretch = 10.0f;
-    private float angle = (float) Math.PI / 2;
-    private float rings = 0.5f;
-    private float turbulence = 0.0f;
-    private float fibres = 0.5f;
-    private float gain = 0.8f;
-    private float m00 = 1.0f;
-    private float m01 = 0.0f;
-    private float m10 = 0.0f;
-    private float m11 = 1.0f;
-    private Colormap colormap = new LinearColormap(0xffe5c494, 0xff987b51);
+    private final float invScale;
+    private final float invScaleStretch;
+    private final float rings;
+    private final float turbulence;
+    private final float fibres;
+    private final float gain;
+    private final float m00;
+    private final float m01;
+    private final float m10;
+    private final float m11;
+    private final Colormap colormap;
 
     /**
-     * Constructs a WoodFilter.
+     * Constructs a WoodFilter with specified properties.
+     *
+     * @param filterName the name of the filter
+     * @param rings      the rings value (in the range [0, 1])
+     * @param scale      the scale of the texture
+     * @param stretch    the stretch factor of the texture
+     * @param angle      the angle of the texture
+     * @param turbulence the turbulence of the texture (in the range [0, 1])
+     * @param fibres     the amount of fibres in the texture (in the range [0, 1])
+     * @param gain       the gain of the texture (in the range [0, 1])
+     * @param colormap   the colormap to be used for the filter
      */
-    public WoodFilter(String filterName) {
+    public WoodFilter(String filterName, float rings, float scale, float stretch, float angle,
+                      float turbulence, float fibres, float gain, Colormap colormap) {
         super(filterName);
-    }
+        this.rings = rings * 50.0f;
+        this.invScale = 1.0f / scale;
+        this.invScaleStretch = 1.0f / (scale * stretch);
 
-    /**
-     * Sets the rings value.
-     *
-     * @param rings the rings value.
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setRings(float rings) {
-        this.rings = rings;
-    }
-
-    /**
-     * Sets the scale of the texture.
-     *
-     * @param scale the scale of the texture.
-     */
-    public void setScale(float scale) {
-        this.scale = scale;
-    }
-
-    /**
-     * Sets the stretch factor of the texture.
-     *
-     * @param stretch the stretch factor of the texture.
-     */
-    public void setStretch(float stretch) {
-        this.stretch = stretch;
-    }
-
-    /**
-     * Sets the angle of the texture.
-     *
-     * @param angle the angle of the texture.
-     */
-    public void setAngle(float angle) {
-        this.angle = angle;
         float cos = (float) Math.cos(angle);
         float sin = (float) Math.sin(angle);
-        m00 = cos;
-        m01 = sin;
-        m10 = -sin;
-        m11 = cos;
-    }
+        this.m00 = cos;
+        this.m01 = sin;
+        this.m10 = -sin;
+        this.m11 = cos;
 
-    /**
-     * Sets the turbulence of the texture.
-     *
-     * @param turbulence the turbulence of the texture.
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setTurbulence(float turbulence) {
-        this.turbulence = turbulence;
-    }
-
-    /**
-     * Sets the amount of fibres in the texture.
-     *
-     * @param fibres the amount of fibres in the texture.
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setFibres(float fibres) {
+        this.turbulence = turbulence * 0.1f;
         this.fibres = fibres;
-    }
-
-    /**
-     * Sets the gain of the texture.
-     *
-     * @param gain the gain of the texture.
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setGain(float gain) {
         this.gain = gain;
-    }
-
-    /**
-     * Sets the colormap to be used for the filter.
-     *
-     * @param colormap the colormap
-     */
-    public void setColormap(Colormap colormap) {
         this.colormap = colormap;
     }
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        float nx = m00 * x + m01 * y;
-        float ny = m10 * x + m11 * y;
-        nx /= scale;
-        ny /= scale * stretch;
+        float projX = m00 * x + m01 * y;
+        float projY = m10 * x + m11 * y;
+        float nx = projX * invScale;
+        float ny = projY * invScaleStretch;
+
         float f = Noise.noise2(nx, ny);
-        f += 0.1f * turbulence * Noise.noise2(nx * 0.05f, ny * 20);
+        if (turbulence != 0.0f) {
+            f += turbulence * Noise.noise2(nx * 0.05f, ny * 20.0f);
+        }
         f = (f * 0.5f) + 0.5f;
 
-        f *= rings * 50;
-        f = f - (int) f;
-        f *= 1 - ImageMath.smoothStep(gain, 1.0f, f);
+        f *= rings;
+        f -= (int) f;
+        f *= 1.0f - ImageMath.smoothStep(gain, 1.0f, f);
 
-        f += fibres * Noise.noise2(nx * scale, ny * 50);
-
-        // happened during robot tests
-        if (Float.isNaN(f)) {
-            System.out.println("WoodFilter::filterRGB: x = " + x + ", y = " + y);
-            System.out
-                .printf("WoodFilter::filterRGB: m00 = %.2f, m01 = %.2f, m10 = %.2f, m11 = %.2f%n", m00, m01, m10, m11);
-            System.out
-                .printf("WoodFilter::filterRGB: scale = %.2f, stretch = %.2f, angle = %.2f%n", scale, stretch, angle);
-            System.out
-                .printf("WoodFilter::filterRGB: rings = %.2f, turbulence = %.2f, fibres = %.2f, gain = %.2f%n", rings, turbulence, fibres, gain);
+        if (fibres != 0.0f) {
+            f += fibres * Noise.noise2(projX, ny * 50.0f);
         }
 
-        int a = rgb & 0xff000000;
-        int v;
-        if (colormap != null) {
-            v = colormap.getColor(f);
-        } else {
-            v = PixelUtils.clamp((int) (f * 255));
-            int r = v << 16;
-            int g = v << 8;
-            int b = v;
-            v = a | r | g | b;
-        }
-
-        return v;
+        return colormap.getColor(f);
     }
 
     @Override
