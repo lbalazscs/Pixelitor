@@ -1629,6 +1629,7 @@ public class MainGuiTest {
         testFilterWithDialog("Orton Effect", FilterOptions.STANDARD);
         testFilterWithDialog("Photo Collage", FilterOptions.STANDARD_RESEED);
         testFilterWithDialog("Pointillize", FilterOptions.STANDARD_RESEED);
+        testFilterWithDialog("Radial Mosaic", FilterOptions.STANDARD);
         testFilterWithDialog("Smear", FilterOptions.STANDARD);
         testFilterWithDialog("Spheres", FilterOptions.STANDARD);
         testFilterWithDialog("Stamp", FilterOptions.STANDARD);

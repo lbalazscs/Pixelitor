@@ -57,6 +57,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     public enum LabelPosition {
         BORDER(true),
         WEST(false),
+        WEST_WITH_TICKS(true),
         NORTH(false),
         NONE(false),
         NONE_WITH_TICKS(true);
@@ -69,6 +70,10 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
         boolean shouldShowTicks() {
             return showTicks;
+        }
+
+        public boolean isWest() {
+            return this == WEST || this == WEST_WITH_TICKS;
         }
     }
 
@@ -131,7 +136,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             }
         }
 
-        if (labelPosition == LabelPosition.WEST) {
+        if (labelPosition.isWest()) {
             label = new JLabel(model.getName() + ": ");
             add(label, WEST);
         } else if (labelPosition == LabelPosition.NORTH) {

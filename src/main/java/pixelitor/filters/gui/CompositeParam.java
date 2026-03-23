@@ -37,16 +37,34 @@ import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 public class CompositeParam extends AbstractFilterParam {
     private final FilterParam[] children;
     private ResetButton resetButton;
+    private final boolean useDialog;
 
     public CompositeParam(String name, FilterParam... children) {
+        this(name, true, children);
+    }
+
+    private CompositeParam(String name, boolean useDialog, FilterParam... children) {
         super(name, ALLOW_RANDOMIZE);
+        this.useDialog = useDialog;
         this.children = children;
+    }
+
+    /**
+     * Creates a {@link CompositeParam} that groups the given params
+     * using a common border (and not with a dialog).
+     */
+    public static CompositeParam border(String name, FilterParam... children) {
+        return new CompositeParam(name, false, children);
     }
 
     @Override
     public JComponent createGUI() {
-        resetButton = new ResetButton(this);
-        paramGUI = new DialogLauncherGUI(this::configureDialog, resetButton);
+        if (useDialog) {
+            resetButton = new ResetButton(this);
+            paramGUI = new DialogLauncherGUI(this::configureDialog, resetButton);
+        } else {
+            paramGUI = new BorderGroupedParamGUI(this, children);
+        }
         syncWithGui();
         return (JComponent) paramGUI;
     }
