@@ -62,8 +62,6 @@ public class JHFourColorGradient extends ParametrizedFilter {
         new Item("sRGB", FourColorFilter.SPACE_SRGB)
     });
 
-    private FourColorFilter filter;
-
     public JHFourColorGradient() {
         super(false);
 
@@ -98,16 +96,15 @@ public class JHFourColorGradient extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new FourColorFilter(NAME);
-        }
-
-        filter.setColorNW(northWestParam.getColor().getRGB());
-        filter.setColorNE(northEastParam.getColor().getRGB());
-        filter.setColorSW(southWestParam.getColor().getRGB());
-        filter.setColorSE(southEastParam.getColor().getRGB());
-        filter.setInterpolation(interpolation.getValue());
-        filter.setColorSpace(space.getValue());
+        FourColorFilter filter = new FourColorFilter(
+            NAME,
+            northWestParam.getColor().getRGB(),
+            northEastParam.getColor().getRGB(),
+            southWestParam.getColor().getRGB(),
+            southEastParam.getColor().getRGB(),
+            interpolation.getValue(),
+            space.getValue()
+        );
 
         return filter.filter(src, dest);
     }

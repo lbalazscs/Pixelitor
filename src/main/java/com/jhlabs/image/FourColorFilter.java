@@ -31,17 +31,21 @@ public class FourColorFilter extends PointFilter {
     public static final int SPACE_LINEAR_RGB = 1;
     public static final int SPACE_SRGB = 2;
 
-    private int interpolation = INTERPOLATION_LINEAR;
-    private int colorSpace = SPACE_LINEAR_RGB;
+    private final int interpolation;
+    private final int colorSpace;
 
     private int width;
     private int height;
 
-    // a, R, G, B components in the corners
-    private int aNW, rNW, gNW, bNW;
-    private int aNE, rNE, gNE, bNE;
-    private int aSW, rSW, gSW, bSW;
-    private int aSE, rSE, gSE, bSE;
+    // horizontal and vertical interpolation weights
+    private float[] fxWeight;
+    private float[] fyWeight;
+
+    // A, R, G, B components in the corners
+    private final int aNW, rNW, gNW, bNW;
+    private final int aNE, rNE, gNE, bNE;
+    private final int aSW, rSW, gSW, bSW;
+    private final int aSE, rSE, gSE, bSE;
 
     // corner colors in the working color space
     private final float[] cNW = new float[3];
@@ -49,62 +53,42 @@ public class FourColorFilter extends PointFilter {
     private final float[] cSW = new float[3];
     private final float[] cSE = new float[3];
 
-    public FourColorFilter(String filterName) {
+    /**
+     * Constructs a FourColorFilter.
+     *
+     * @param filterName    the name of the filter.
+     * @param colorNW       the color at the North-West corner.
+     * @param colorNE       the color at the North-East corner.
+     * @param colorSW       the color at the South-West corner.
+     * @param colorSE       the color at the South-East corner.
+     * @param interpolation the interpolation type.
+     * @param colorSpace    the color space for interpolation.
+     */
+    public FourColorFilter(String filterName, int colorNW, int colorNE, int colorSW, int colorSE, int interpolation, int colorSpace) {
         super(filterName);
-    }
 
-    /**
-     * Sets the color at the North-West corner.
-     */
-    public void setColorNW(int color) {
-        aNW = (color >> 24) & 0xFF;
-        rNW = (color >> 16) & 0xFF;
-        gNW = (color >> 8) & 0xFF;
-        bNW = color & 0xFF;
-    }
-
-    /**
-     * Sets the color at the North-East corner.
-     */
-    public void setColorNE(int color) {
-        aNE = (color >> 24) & 0xFF;
-        rNE = (color >> 16) & 0xFF;
-        gNE = (color >> 8) & 0xFF;
-        bNE = color & 0xFF;
-    }
-
-    /**
-     * Sets the color at the South-West corner.
-     */
-    public void setColorSW(int color) {
-        aSW = (color >> 24) & 0xFF;
-        rSW = (color >> 16) & 0xFF;
-        gSW = (color >> 8) & 0xFF;
-        bSW = color & 0xFF;
-    }
-
-    /**
-     * Sets the color at the South-East corner.
-     */
-    public void setColorSE(int color) {
-        aSE = (color >> 24) & 0xFF;
-        rSE = (color >> 16) & 0xFF;
-        gSE = (color >> 8) & 0xFF;
-        bSE = color & 0xFF;
-    }
-
-    /**
-     * Sets the interpolation type.
-     */
-    public void setInterpolation(int interpolation) {
         this.interpolation = interpolation;
-    }
-
-    /**
-     * Sets the color space for interpolation.
-     */
-    public void setColorSpace(int colorSpace) {
         this.colorSpace = colorSpace;
+
+        this.aNW = colorNW >>> 24;
+        this.rNW = (colorNW >> 16) & 0xff;
+        this.gNW = (colorNW >> 8) & 0xff;
+        this.bNW = colorNW & 0xff;
+
+        this.aNE = colorNE >>> 24;
+        this.rNE = (colorNE >> 16) & 0xff;
+        this.gNE = (colorNE >> 8) & 0xff;
+        this.bNE = colorNE & 0xff;
+
+        this.aSW = colorSW >>> 24;
+        this.rSW = (colorSW >> 16) & 0xff;
+        this.gSW = (colorSW >> 8) & 0xff;
+        this.bSW = colorSW & 0xff;
+
+        this.aSE = colorSE >>> 24;
+        this.rSE = (colorSE >> 16) & 0xff;
+        this.gSE = (colorSE >> 8) & 0xff;
+        this.bSE = colorSE & 0xff;
     }
 
     @Override
@@ -112,9 +96,41 @@ public class FourColorFilter extends PointFilter {
         this.width = width;
         this.height = height;
         convertCornerColors();
+        precomputeInterpolationWeights();
         super.setDimensions(width, height);
     }
 
+    private void precomputeInterpolationWeights() {
+        fxWeight = new float[width];
+        for (int x = 0; x < width; x++) {
+            fxWeight[x] = calcInterpolatedWeight((float) x / width);
+        }
+
+        fyWeight = new float[height];
+        for (int y = 0; y < height; y++) {
+            fyWeight[y] = calcInterpolatedWeight((float) y / height);
+        }
+    }
+
+    private float calcInterpolatedWeight(float ratio) {
+        return switch (interpolation) {
+            case INTERPOLATION_CUBIC -> ImageMath.smoothStep01(ratio);
+            case INTERPOLATION_QUINTIC -> ImageMath.smootherStep01(ratio);
+            case INTERPOLATION_SEPTIC -> septicWeight(ratio);
+            default -> ratio;
+        };
+    }
+
+    private static float septicWeight(float ratio) {
+        float x2 = ratio * ratio;
+        float x4 = x2 * x2;
+        float x5 = x4 * ratio;
+        float x6 = x5 * ratio;
+        float x7 = x6 * ratio;
+        return 35 * x4 - 84 * x5 + 70 * x6 - 20 * x7;
+    }
+
+    // the corner colors are converted once at setup time into the chosen space
     private void convertCornerColors() {
         switch (colorSpace) {
             case SPACE_SRGB -> {
@@ -157,68 +173,26 @@ public class FourColorFilter extends PointFilter {
         corner[2] = oklab[2];
     }
 
-    private float interpolate(float a, float b, float ratio) {
-        return switch (interpolation) {
-            case INTERPOLATION_CUBIC -> qubic(a, b, ratio);
-            case INTERPOLATION_QUINTIC -> quintic(a, b, ratio);
-            case INTERPOLATION_SEPTIC -> septic(a, b, ratio);
-            default -> a * (1 - ratio) + b * ratio;
-        };
-    }
-
-    private static float qubic(float a, float b, float ratio) {
-        float x2 = ratio * ratio;
-        float x3 = ratio * x2;
-        float p = 3 * x2 - 2 * x3;
-
-        return a * (1 - p) + b * p;
-    }
-
-    private static float quintic(float a, float b, float ratio) {
-        float x2 = ratio * ratio;
-        float x3 = x2 * ratio;
-        float x4 = x3 * ratio;
-        float x5 = x4 * ratio;
-        float p = 6 * x5 - 15 * x4 + 10 * x3;
-
-        return a * (1 - p) + b * p;
-    }
-
-    private static float septic(float a, float b, float ratio) {
-        float x2 = ratio * ratio;
-        float x3 = x2 * ratio;
-        float x4 = x3 * ratio;
-        float x5 = x4 * ratio;
-        float x6 = x5 * ratio;
-        float x7 = x6 * ratio;
-        return a + (-35 * a + 35 * b) * x4 + (84 * a - 84 * b) * x5 + (-70 * a + 70 * b) * x6 + (20 * a - 20 * b) * x7;
+    private static float bilerp(float fx, float fy, float nw, float ne, float sw, float se) {
+        float top = ImageMath.lerp(fx, nw, ne);
+        float bottom = ImageMath.lerp(fx, sw, se);
+        return ImageMath.lerp(fy, top, bottom);
     }
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        // calculate normalized x and y coordinates (0.0 to 1.0)
-        float fx = (float) x / width;
-        float fy = (float) y / height;
-        float p, q;
+        float fx = fxWeight[x];
+        float fy = fyWeight[y];
 
-        // alpha is always interpolated in a linear way
-        p = interpolate(aNW, aNE, fx);
-        q = interpolate(aSW, aSE, fx);
-        int a = (int) (interpolate(p, q, fy) + 0.5f);
+        // interpolate alpha
+        int a = (int) (bilerp(fx, fy, aNW, aNE, aSW, aSE) + 0.5f);
 
         // interpolate color components in the chosen space
-        p = interpolate(cNW[0], cNE[0], fx);
-        q = interpolate(cSW[0], cSE[0], fx);
-        float c1 = interpolate(p, q, fy);
+        float c1 = bilerp(fx, fy, cNW[0], cNE[0], cSW[0], cSE[0]);
+        float c2 = bilerp(fx, fy, cNW[1], cNE[1], cSW[1], cSE[1]);
+        float c3 = bilerp(fx, fy, cNW[2], cNE[2], cSW[2], cSE[2]);
 
-        p = interpolate(cNW[1], cNE[1], fx);
-        q = interpolate(cSW[1], cSE[1], fx);
-        float c2 = interpolate(p, q, fy);
-
-        p = interpolate(cNW[2], cNE[2], fx);
-        q = interpolate(cSW[2], cSE[2], fx);
-        float c3 = interpolate(p, q, fy);
-
+        // convert back to sRGB for output
         return switch (colorSpace) {
             case SPACE_SRGB -> {
                 int r = ImageMath.clamp((int) (c1 + 0.5f), 0, 255);
@@ -233,15 +207,10 @@ public class FourColorFilter extends PointFilter {
                 yield (a << 24) | (r << 16) | (g << 8) | b;
             }
             case SPACE_OKLAB -> {
-                int srgb = ColorSpaces.oklabToSrgb(new float[]{c1, c2, c3});
+                int srgb = ColorSpaces.oklabToSrgb(c1, c2, c3);
                 yield (a << 24) | (srgb & 0x00_FF_FF_FF);
             }
             default -> throw new IllegalStateException("Unexpected value: " + colorSpace);
         };
-    }
-
-    @Override
-    public String toString() {
-        return "Texture/Four Color Fill...";
     }
 }

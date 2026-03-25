@@ -131,6 +131,29 @@ public class ColorSpaces {
     }
 
     /**
+     * Converts Oklab to a packed sRGB int without array allocations.
+     */
+    public static int oklabToSrgb(float l, float a, float b) {
+        double l_ = l + 0.3963377774 * a + 0.2158037573 * b;
+        double m_ = l - 0.1055613458 * a - 0.0638541728 * b;
+        double s_ = l - 0.0894841775 * a - 1.2914855480 * b;
+
+        double lCubed = l_ * l_ * l_;
+        double mCubed = m_ * m_ * m_;
+        double sCubed = s_ * s_ * s_;
+
+        double rLin = 4.0767416621 * lCubed - 3.3077115913 * mCubed + 0.2309699292 * sCubed;
+        double gLin = -1.2684380046 * lCubed + 2.6097574011 * mCubed - 0.3413193965 * sCubed;
+        double bLin = -0.0041960863 * lCubed - 0.7034186147 * mCubed + 1.7076147010 * sCubed;
+
+        int ri = linearToSrgbInt(rLin);
+        int gi = linearToSrgbInt(gLin);
+        int bi = linearToSrgbInt(bLin);
+
+        return 0xFF000000 | (ri << 16) | (gi << 8) | bi;
+    }
+
+    /**
      * Converts an array of Oklab (packed floats) to packed sRGB ints.
      */
     public static void oklabToSrgbBulk(float[] src, int[] dst) {
