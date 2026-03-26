@@ -16,102 +16,110 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.ThreadPool;
+
+import java.util.concurrent.Future;
+
 /**
  * A filter which performs a 3x3 median operation. Useful for removing dust and noise.
  */
 public class MedianFilter extends WholeImageFilter {
+    private static final int KERNEL_SIZE = 9;
+
     public MedianFilter(String filterName) {
         super(filterName);
     }
 
-//    private static int median(int[] array) {
-//        int max, maxIndex;
-//
-//        for (int i = 0; i < 4; i++) {
-//            max = 0;
-//            maxIndex = 0;
-//            for (int j = 0; j < 9; j++) {
-//                if (array[j] > max) {
-//                    max = array[j];
-//                    maxIndex = j;
-//                }
-//            }
-//            array[maxIndex] = 0;
-//        }
-//        max = 0;
-//        for (int i = 0; i < 9; i++) {
-//            if (array[i] > max) {
-//                max = array[i];
-//            }
-//        }
-//        return max;
-//    }
-
+    // finds the index of the median color
     private static int rgbMedian(int[] r, int[] g, int[] b) {
-        int sum, index = 0, min = Integer.MAX_VALUE;
+        // sorting channels independently would mix up colors =>
+        // the median is defined as the pixel with the minimum
+        // total L1 color distance to all other pixels
 
-        for (int i = 0; i < 9; i++) {
-            sum = 0;
-            for (int j = 0; j < 9; j++) {
-                sum += Math.abs(r[i] - r[j]);
-                sum += Math.abs(g[i] - g[j]);
-                sum += Math.abs(b[i] - b[j]);
-            }
-            if (sum < min) {
-                min = sum;
-                index = i;
+        // reusing this array saves no time
+        int[] sums = new int[KERNEL_SIZE];
+
+        // compute unique pairs only
+        for (int i = 0; i < KERNEL_SIZE - 1; i++) {
+            for (int j = i + 1; j < KERNEL_SIZE; j++) {
+                int dist = Math.abs(r[i] - r[j])
+                    + Math.abs(g[i] - g[j])
+                    + Math.abs(b[i] - b[j]);
+                sums[i] += dist;
+                sums[j] += dist;
             }
         }
-        return index;
+
+        int min = Integer.MAX_VALUE;
+        int medianIndex = 0;
+        for (int i = 0; i < sums.length; i++) {
+            if (sums[i] < min) {
+                min = sums[i];
+                medianIndex = i;
+            }
+        }
+        return medianIndex;
     }
 
     @Override
     protected int[] filterPixels(int width, int height, int[] inPixels) {
-        int index = 0;
-        int[] argb = new int[9];
-        int[] r = new int[9];
-        int[] g = new int[9];
-        int[] b = new int[9];
         int[] outPixels = new int[width * height];
 
         pt = createProgressTracker(height);
+        Future<?>[] rowFutures = new Future[height];
 
         for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int k = 0;
-                for (int dy = -1; dy <= 1; dy++) {
-                    int iy = y + dy;
-                    if (0 <= iy && iy < height) {
-                        int ioffset = iy * width;
-                        for (int dx = -1; dx <= 1; dx++) {
-                            int ix = x + dx;
-                            if (0 <= ix && ix < width) {
-                                int rgb = inPixels[ioffset + ix];
-                                argb[k] = rgb;
-                                r[k] = (rgb >> 16) & 0xff;
-                                g[k] = (rgb >> 8) & 0xff;
-                                b[k] = rgb & 0xff;
-                                k++;
-                            }
-                        }
-                    }
-                }
-                while (k < 9) {
-                    argb[k] = 0xff000000;
-                    r[k] = g[k] = b[k] = 0;
-                    k++;
-                }
-                outPixels[index++] = argb[rgbMedian(r, g, b)];
-            }
-            pt.unitDone();
+            int finalY = y;
+            Runnable rowTask = () -> processRow(width, height, inPixels, finalY, outPixels);
+            rowFutures[y] = ThreadPool.submit(rowTask);
         }
+
+        ThreadPool.waitFor(rowFutures, pt);
         finishProgressTracker();
         return outPixels;
     }
 
-    @Override
-    public String toString() {
-        return "Blur/Median";
+    private static void processRow(int width, int height, int[] inPixels, int finalY, int[] outPixels) {
+        // local instances for each thread
+        int[] argb = new int[KERNEL_SIZE];
+        int[] r = new int[KERNEL_SIZE];
+        int[] g = new int[KERNEL_SIZE];
+        int[] b = new int[KERNEL_SIZE];
+
+        // precalculate valid adjacent row offsets for the entire row width
+        int minDy = Math.max(-1, -finalY);
+        int maxDy = Math.min(1, height - 1 - finalY);
+        int[] rowOffsets = new int[maxDy - minDy + 1];
+        for (int dy = minDy; dy <= maxDy; dy++) {
+            rowOffsets[dy - minDy] = (finalY + dy) * width;
+        }
+
+        for (int x = 0; x < width; x++) {
+            int k = 0;
+
+            for (int ioffset : rowOffsets) {
+                for (int dx = -1; dx <= 1; dx++) {
+                    int ix = x + dx;
+                    if (ix < 0 || ix >= width) {
+                        continue;
+                    }
+                    // collect the neighbor's pixel components
+                    int rgb = inPixels[ioffset + ix];
+                    argb[k] = rgb;
+                    r[k] = (rgb >> 16) & 0xFF;
+                    g[k] = (rgb >> 8) & 0xFF;
+                    b[k] = rgb & 0xFF;
+                    k++;
+                }
+            }
+            // pixels outside the image boundary were skipped, and the
+            // remaining slots are padded with black (0xFF_00_00_00)
+            while (k < KERNEL_SIZE) {
+                argb[k] = 0xFF_00_00_00;
+                r[k] = g[k] = b[k] = 0;
+                k++;
+            }
+            outPixels[finalY * width + x] = argb[rgbMedian(r, g, b)];
+        }
     }
 }
-
