@@ -25,10 +25,15 @@ import java.util.Arrays;
  * rotation, distortion, fuzziness, and multiple colors.
  */
 public class CheckFilter extends PointFilter {
-    private final int xScale;
-    private final int yScale;
+    // offset used to safely translate coordinates to
+    // positive integers for modulo arithmetic
+    private static final int OFFSET = 100_000;
+
     private final int[] colors;
+
     private final int fuzziness;
+    private final float fuzzThreshold;
+
     private final float m00;
     private final float m01;
     private final float m10;
@@ -39,12 +44,11 @@ public class CheckFilter extends PointFilter {
     private final float upperAaThresholdX;
     private final float upperAaThresholdY;
 
+    private final boolean couldNeedAA;
     private final int aaRes;
-    private final int aaRes2;
-    private final float aaSampleOffset;
-    private final float invAaRes;
+    private final float[] subPixelOffsets;
+    private final float invAaRes2;
 
-    private final boolean straight;
     private final double distortion;
     private final double phase;
 
@@ -68,72 +72,88 @@ public class CheckFilter extends PointFilter {
         }
         this.colors = colors;
 
-        this.xScale = xScale;
         this.aaThresholdX = 1.0f / xScale;
         this.upperAaThresholdX = 1.0f - aaThresholdX;
 
-        this.yScale = yScale;
         this.aaThresholdY = 1.0f / yScale;
         this.upperAaThresholdY = 1.0f - aaThresholdY;
 
         this.fuzziness = fuzziness;
+        this.fuzzThreshold = fuzziness / 100.0f;
+
         this.distortion = distortion;
         this.phase = phase;
 
-        float cos = (float) FastMath.cos(angle);
-        float sin = (float) FastMath.sin(angle);
-        this.m00 = cos;
-        this.m01 = sin;
-        this.m10 = -sin;
-        this.m11 = cos;
+        double cos = FastMath.cos(angle);
+        double sin = FastMath.sin(angle);
+
+        // scale the transformation matrix
+        this.m00 = (float) (cos / xScale);
+        this.m01 = (float) (sin / xScale);
+        this.m10 = (float) (-sin / yScale);
+        this.m11 = (float) (cos / yScale);
 
         // no AA is necessary if the angle is 0, 90, 180 or 270 degrees
-        this.straight = ((Math.abs(sin) < 0.0000001) || (Math.abs(cos) < 0.0000001));
+        boolean straight = ((Math.abs(sin) < 0.0000001) || (Math.abs(cos) < 0.0000001));
+        this.couldNeedAA = (!straight || distortion > 0) && fuzziness == 0;
+        if (couldNeedAA) {
+            this.aaRes = calcAaRes(distortion, sin, cos, straight);
+            this.invAaRes2 = 1.0f / (aaRes * aaRes);
 
-        this.aaRes = calcAaRes(distortion, sin, cos);
-        this.aaRes2 = aaRes * aaRes;
-        this.aaSampleOffset = 0.5f - 1.0f / (2 * aaRes);
-        this.invAaRes = 1.0f / aaRes;
+            // precomputed sub-pixel sample positions as offsets around the pixel
+            this.subPixelOffsets = new float[aaRes];
+            float invAaRes = 1.0f / aaRes;
+            float aaSampleOffset = 0.5f - 1.0f / (2 * aaRes);
+            for (int i = 0; i < aaRes; i++) {
+                this.subPixelOffsets[i] = invAaRes * i - aaSampleOffset;
+            }
+        } else {
+            // final variables still have to be initialized
+            this.aaRes = 0;
+            this.invAaRes2 = 0.0f;
+            this.subPixelOffsets = null;
+        }
     }
 
-    private int calcAaRes(double distortion, float sin, float cos) {
-        boolean hasDistortion = distortion > 0;
-        int res = 2; // default
-
-        if (!straight || hasDistortion) {
-            // the necessary AA quality depends on the angle
-            float minSinCos = Math.min(Math.abs(sin), Math.abs(cos));
-            if ((minSinCos > 0.5) || (hasDistortion && distortion > 0.5)) {
-                res = 3;
-            } else if (minSinCos > 0.15 || (hasDistortion && distortion > 0.2)) {
-                res = 4;
-            } else if (minSinCos > 0.1 || (hasDistortion && distortion > 0.1)) {
-                res = 5;
-            } else if (minSinCos > 0.07 || (hasDistortion && distortion > 0.05)) {
-                res = 6;
-            } else if (minSinCos > 0.03 || (hasDistortion && distortion > 0.02)) {
-                res = 7;
-            } else {
-                res = 8;
-            }
+    // determines the anti-aliasing resolution
+    private static int calcAaRes(double distortion, double sin, double cos, boolean straight) {
+        if (straight && distortion <= 0) {
+            return 2; // default
         }
-        return res;
+
+        // the necessary AA resolution scales with how difficult the angle
+        // is: near-diagonal angles need less than almost aligned angles
+        double minSinCos = Math.min(Math.abs(sin), Math.abs(cos));
+        if (minSinCos > 0.5 || distortion > 0.5) {
+            return 3;
+        } else if (minSinCos > 0.15 || distortion > 0.2) {
+            return 4;
+        } else if (minSinCos > 0.1 || distortion > 0.1) {
+            return 5;
+        } else if (minSinCos > 0.07 || distortion > 0.05) {
+            return 6;
+        } else if (minSinCos > 0.03 || distortion > 0.02) {
+            return 7;
+        }
+        return 8;
     }
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        float nx = (m00 * x + m01 * y) / xScale;
-        float ny = (m10 * x + m11 * y) / yScale;
+        // transform into "checker space" where each unit square is one tile
+        float nx = m00 * x + m01 * y;
+        float ny = m10 * x + m11 * y;
+
         if (distortion > 0) {
             nx += (float) (distortion * FastMath.sinQuick(ny + phase));
             ny += (float) (distortion * FastMath.sinQuick(nx + phase));
         }
 
         // guaranteed to be positive
-        float pnx = nx + 100000;
-        float pny = ny + 100000;
+        float pnx = nx + OFFSET;
+        float pny = ny + OFFSET;
 
-        // integer parts
+        // integer parts: which tile the current pixel falls in
         int inx = (int) pnx;
         int iny = (int) pny;
 
@@ -141,33 +161,9 @@ public class CheckFilter extends PointFilter {
         float dxFrac = pnx - inx;
         float dyFrac = pny - iny;
 
-        boolean needsAA = false;
-        // the fuzziness condition is imperfect: very small images
-        // benefit from AA even with low fuzziness, while in large
-        // images a small fuzziness may cause AA artifacts
-        if ((!straight || distortion > 0) && fuzziness == 0) {
-            needsAA = dxFrac < aaThresholdX || dyFrac < aaThresholdY || dxFrac > upperAaThresholdX || dyFrac > upperAaThresholdY;
-        }
-
-        float f; // blend factor
-        if (needsAA) {
-            float p = 0;
-
-            for (int i = 0; i < aaRes; i++) {
-                float yy = y + invAaRes * i - aaSampleOffset;
-                for (int j = 0; j < aaRes; j++) {
-                    float xx = x + invAaRes * j - aaSampleOffset;
-                    p += calcSubPixelInterpolation(xx, yy);
-                }
-            }
-            f = p / aaRes2;
-        } else {
-            f = ((inx % 2) == (iny % 2)) ? 0.0f : 1.0f;
-        }
-
-        int actualTileX = inx - 100000;
-        int actualTileY = iny - 100000;
-        int tileSum = actualTileX + actualTileY;
+        int actualTileX = inx - OFFSET;
+        int actualTileY = iny - OFFSET;
+        int tileSum = actualTileX + actualTileY; // to cycle colors along diagonals
         int numColors = colors.length;
 
         if (fuzziness != 0) {
@@ -175,14 +171,14 @@ public class CheckFilter extends PointFilter {
             // the checker of http://doup.github.io/sapo.js/
 
             // fold coordinates to get distance from nearest edge
+            // (0.0 = tile edge and 0.5 = tile center)
             float dxFolded = dxFrac < 0.5f ? dxFrac : 1.0f - dxFrac;
             float dyFolded = dyFrac < 0.5f ? dyFrac : 1.0f - dyFrac;
             float minFoldedDist = Math.min(dxFolded, dyFolded);
 
-            float fuzzThreshold = (fuzziness / 100.0f);
             if (minFoldedDist < fuzzThreshold) { // pixel is in the fuzzy region
                 // the color of the tile the pixel is in
-                int currentColor = colors[(tileSum % numColors + numColors) % numColors];
+                int currentColor = colors[Math.floorMod(tileSum, numColors)];
 
                 // determine the color of the specific adjacent tile towards which fuzzing occurs
                 int neighborSum;
@@ -199,7 +195,7 @@ public class CheckFilter extends PointFilter {
                         neighborSum = tileSum + 1; // neighbor is below
                     }
                 }
-                int neighborColor = colors[(neighborSum % numColors + numColors) % numColors];
+                int neighborColor = colors[Math.floorMod(neighborSum, numColors)];
                 float mixingProportion = 0.5f + 0.5f * (minFoldedDist / fuzzThreshold);
                 return ImageMath.mixColors(mixingProportion, neighborColor, currentColor);
             }
@@ -209,11 +205,34 @@ public class CheckFilter extends PointFilter {
         // 1. fuzziness == 0
         // 2. fuzziness != 0 but pixel is outside the fuzz band
 
+        boolean needsAA = false;
+        // the fuzziness condition is imperfect: very small images
+        // benefit from AA even with low fuzziness, while in large
+        // images a small fuzziness may cause AA artifacts
+        if (couldNeedAA) {
+            needsAA = dxFrac < aaThresholdX || dyFrac < aaThresholdY || dxFrac > upperAaThresholdX || dyFrac > upperAaThresholdY;
+        }
+
+        float f; // blend factor
+        if (needsAA) {
+            float p = 0; // accumulator for sub-pixel samples
+            for (int i = 0; i < aaRes; i++) {
+                float yy = y + subPixelOffsets[i];
+                for (int j = 0; j < aaRes; j++) {
+                    float xx = x + subPixelOffsets[j];
+                    p += calcSubPixelInterpolation(xx, yy);
+                }
+            }
+            f = p * invAaRes2; // normalize into the range [0, 1]
+        } else {
+            f = ((inx & 1) == (iny & 1)) ? 0.0f : 1.0f;
+        }
+
         int colorIndexEven; // sum for the even-sum-type diagonal in the pair
         int colorIndexOdd;  // sum for the odd-sum-type diagonal in the pair
 
         // determine the sums for the even/odd pair of diagonals related to the current tile
-        if (((tileSum % 2) + 2) % 2 == 0) {
+        if ((tileSum & 1) == 0) {
             colorIndexEven = tileSum;
             colorIndexOdd = tileSum + 1;
         } else {
@@ -222,8 +241,8 @@ public class CheckFilter extends PointFilter {
         }
 
         // the color indices for the colors array
-        int index0 = (colorIndexEven % numColors + numColors) % numColors;
-        int index1 = (colorIndexOdd % numColors + numColors) % numColors;
+        int index0 = Math.floorMod(colorIndexEven, numColors);
+        int index1 = Math.floorMod(colorIndexOdd, numColors);
 
         int color0 = colors[index0]; // color for "even sum type" diagonal
         int color1 = colors[index1]; // color for "odd sum type" diagonal
@@ -237,27 +256,27 @@ public class CheckFilter extends PointFilter {
         return ImageMath.mixColors(f, color0, color1);
     }
 
+    /**
+     * Returns either 0.0f or 1.0f for each sample point, representing
+     * which of the two checker "color types" a sub-pixel position falls into.
+     */
     private float calcSubPixelInterpolation(float x, float y) {
-        float nx = (m00 * x + m01 * y) / xScale;
-        float ny = (m10 * x + m11 * y) / yScale;
+        float nx = m00 * x + m01 * y;
+        float ny = m10 * x + m11 * y;
+        
         if (distortion > 0) {
             nx += (float) (distortion * FastMath.sinQuick(ny + phase));
             ny += (float) (distortion * FastMath.sinQuick(nx + phase));
         }
 
         // guaranteed to be positive
-        float pnx = nx + 100000;
-        float pny = ny + 100000;
+        float pnx = nx + OFFSET;
+        float pny = ny + OFFSET;
 
         // integer parts
         int inx = (int) pnx;
         int iny = (int) pny;
 
-        return ((inx % 2) == (iny % 2)) ? 0.0f : 1.0f;
-    }
-
-    @Override
-    public String toString() {
-        return "Texture/Checkerboard...";
+        return ((inx & 1) == (iny & 1)) ? 0.0f : 1.0f;
     }
 }
