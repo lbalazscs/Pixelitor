@@ -17,11 +17,12 @@
 
 package pixelitor.filters.jhlabsproxies;
 
+import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.PointillizeFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Texts;
 
@@ -47,7 +48,7 @@ public class JHPointillize extends ParametrizedFilter {
     private final BooleanParam fadeEdges = new BooleanParam("Fade Instead of Fill", true);
 
     private final RangeParam randomness = new RangeParam("Grid Randomness (%)", 0, 0, 100);
-    private final IntChoiceParam gridType = IntChoiceParam.forGridType("Grid Type", randomness);
+    private final EnumParam<CellularFilter.GridType> gridType = EnumParam.forGridType("Grid Type", randomness);
 
     private PointillizeFilter filter;
 
@@ -80,7 +81,7 @@ public class JHPointillize extends ParametrizedFilter {
         filter.setRandomness((float) randomness.getPercentage());
         filter.setEdgeThickness((float) dotSize.getPercentage());
         filter.setFuzziness((float) fuzziness.getPercentage());
-        filter.setGridType(gridType.getValue());
+        filter.setGridType(gridType.getSelected());
         filter.setFadeEdges(fadeEdges.isChecked());
         filter.setEdgeColor(edgeColor.getColor().getRGB());
 

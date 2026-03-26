@@ -159,4 +159,9 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
             return null;
         }
     }
+
+    @Override
+    public String toString() {
+        return filterName;
+    }
 }

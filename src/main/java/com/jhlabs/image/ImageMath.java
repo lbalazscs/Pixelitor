@@ -182,7 +182,7 @@ public class ImageMath {
     /**
      * A "circle up" function. Returns y on a unit circle given 1-x. Useful for forming bevels.
      *
-     * @param x the input parameter in the range 0..1
+     * @param x the input parameter in the range [0, 1]
      * @return the output value
      */
     public static float circleUp(float x) {
@@ -193,7 +193,7 @@ public class ImageMath {
     /**
      * A "circle down" function. Returns 1-y on a unit circle given x. Useful for forming bevels.
      *
-     * @param x the input parameter in the range 0..1
+     * @param x the input parameter in the range [0, 1]
      * @return the output value
      */
     public static float circleDown(float x) {
@@ -271,29 +271,7 @@ public class ImageMath {
     }
 
     /**
-     * Return a mod b. This differs from the % operator with respect to negative numbers.
-     *
-     * @param a the dividend
-     * @param b the divisor
-     * @return a mod b
-     */
-    public static int mod(int a, int b) {
-        assert (b > 0);
-        if (a >= 0) {
-            return a % b;
-        }
-
-        int n = a / b;
-
-        a -= n * b;
-        if (a < 0) {
-            return a + b;
-        }
-        return a;
-    }
-
-    /**
-     * The triangle function. Returns a repeating triangle shape in the range 0..1 with wavelength 1.0
+     * The triangle function. Returns a repeating triangle shape in the range [0, 1] with wavelength 1.0
      *
      * @param x the input parameter
      * @return the output value
@@ -315,7 +293,7 @@ public class ImageMath {
      */
     public static int reflectTriangle(int x, int width) {
         int doubleWidth = 2 * width;
-        int mod = mod(x, doubleWidth);
+        int mod = Math.floorMod(x, doubleWidth);
 
         return mod >= width ? doubleWidth - mod - 1 : mod;
     }
@@ -391,14 +369,14 @@ public class ImageMath {
      * @return the interpolated value
      */
     public static int mixColors(float t, int rgb1, int rgb2) {
-        int a1 = (rgb1 >> 24) & 0xff;
-        int r1 = (rgb1 >> 16) & 0xff;
-        int g1 = (rgb1 >> 8) & 0xff;
-        int b1 = rgb1 & 0xff;
-        int a2 = (rgb2 >> 24) & 0xff;
-        int r2 = (rgb2 >> 16) & 0xff;
-        int g2 = (rgb2 >> 8) & 0xff;
-        int b2 = rgb2 & 0xff;
+        int a1 = rgb1 >>> 24;
+        int r1 = (rgb1 >> 16) & 0xFF;
+        int g1 = (rgb1 >> 8) & 0xFF;
+        int b1 = rgb1 & 0xFF;
+        int a2 = rgb2 >>> 24;
+        int r2 = (rgb2 >> 16) & 0xFF;
+        int g2 = (rgb2 >> 8) & 0xFF;
+        int b2 = rgb2 & 0xFF;
         a1 = lerp(t, a1, a2);
         r1 = lerp(t, r1, r2);
         g1 = lerp(t, g1, g2);
@@ -408,14 +386,14 @@ public class ImageMath {
 
     // mix colors with double precision
     public static int mixColors(double t, int rgb1, int rgb2) {
-        int a1 = (rgb1 >> 24) & 0xff;
-        int r1 = (rgb1 >> 16) & 0xff;
-        int g1 = (rgb1 >> 8) & 0xff;
-        int b1 = rgb1 & 0xff;
-        int a2 = (rgb2 >> 24) & 0xff;
-        int r2 = (rgb2 >> 16) & 0xff;
-        int g2 = (rgb2 >> 8) & 0xff;
-        int b2 = rgb2 & 0xff;
+        int a1 = rgb1 >>> 24;
+        int r1 = (rgb1 >> 16) & 0xFF;
+        int g1 = (rgb1 >> 8) & 0xFF;
+        int b1 = rgb1 & 0xFF;
+        int a2 = rgb2 >>> 24;
+        int r2 = (rgb2 >> 16) & 0xFF;
+        int g2 = (rgb2 >> 8) & 0xFF;
+        int b2 = rgb2 & 0xFF;
         a1 = lerp(t, a1, a2);
         r1 = lerp(t, r1, r2);
         g1 = lerp(t, g1, g2);
@@ -425,10 +403,10 @@ public class ImageMath {
 
     // a performance-optimized version, usable if one of the colors and the mix ratio is always the same
     static int mixColors(int rgb1, int a2, int r2, int g2, int b2, int mixInt, int invMixInt) {
-        int a1 = (rgb1 >> 24) & 0xff;
-        int r1 = (rgb1 >> 16) & 0xff;
-        int g1 = (rgb1 >> 8) & 0xff;
-        int b1 = rgb1 & 0xff;
+        int a1 = rgb1 >>> 24;
+        int r1 = (rgb1 >> 16) & 0xFF;
+        int g1 = (rgb1 >> 8) & 0xFF;
+        int b1 = rgb1 & 0xFF;
 
         // fast integer blending
         a1 = (a1 * invMixInt + a2 * mixInt) >> 8;
@@ -437,6 +415,11 @@ public class ImageMath {
         b1 = (b1 * invMixInt + b2 * mixInt) >> 8;
 
         return (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
+    }
+
+    public static int average(int rgb1, int rgb2) {
+        // averages all channels in parallel
+        return (rgb1 & rgb2) + (((rgb1 ^ rgb2) & 0xFE_FE_FE_FE) >>> 1);
     }
 
     /**
@@ -449,66 +432,25 @@ public class ImageMath {
      */
     public static int bilinearInterpolate(float x, float y, int nw, int ne, int sw, int se) {
         float m0, m1;
-        int a0 = (nw >> 24) & 0xff;
-        int r0 = (nw >> 16) & 0xff;
-        int g0 = (nw >> 8) & 0xff;
-        int b0 = nw & 0xff;
-        int a1 = (ne >> 24) & 0xff;
-        int r1 = (ne >> 16) & 0xff;
-        int g1 = (ne >> 8) & 0xff;
-        int b1 = ne & 0xff;
-        int a2 = (sw >> 24) & 0xff;
-        int r2 = (sw >> 16) & 0xff;
-        int g2 = (sw >> 8) & 0xff;
-        int b2 = sw & 0xff;
-        int a3 = (se >> 24) & 0xff;
-        int r3 = (se >> 16) & 0xff;
-        int g3 = (se >> 8) & 0xff;
-        int b3 = se & 0xff;
+        int a0 = nw >>> 24;
+        int r0 = (nw >> 16) & 0xFF;
+        int g0 = (nw >> 8) & 0xFF;
+        int b0 = nw & 0xFF;
+        int a1 = ne >>> 24;
+        int r1 = (ne >> 16) & 0xFF;
+        int g1 = (ne >> 8) & 0xFF;
+        int b1 = ne & 0xFF;
+        int a2 = sw >>> 24;
+        int r2 = (sw >> 16) & 0xFF;
+        int g2 = (sw >> 8) & 0xFF;
+        int b2 = sw & 0xFF;
+        int a3 = se >>> 24;
+        int r3 = (se >> 16) & 0xFF;
+        int g3 = (se >> 8) & 0xFF;
+        int b3 = se & 0xFF;
 
         float cx = 1.0f - x;
         float cy = 1.0f - y;
-
-        m0 = cx * a0 + x * a1;
-        m1 = cx * a2 + x * a3;
-        int a = (int) (cy * m0 + y * m1);
-
-        m0 = cx * r0 + x * r1;
-        m1 = cx * r2 + x * r3;
-        int r = (int) (cy * m0 + y * m1);
-
-        m0 = cx * g0 + x * g1;
-        m1 = cx * g2 + x * g3;
-        int g = (int) (cy * m0 + y * m1);
-
-        m0 = cx * b0 + x * b1;
-        m1 = cx * b2 + x * b3;
-        int b = (int) (cy * m0 + y * m1);
-
-        return (a << 24) | (r << 16) | (g << 8) | b;
-    }
-
-    public static int bilinearInterpolateD(double x, double y, int nw, int ne, int sw, int se) {
-        double m0, m1;
-        int a0 = (nw >> 24) & 0xff;
-        int r0 = (nw >> 16) & 0xff;
-        int g0 = (nw >> 8) & 0xff;
-        int b0 = nw & 0xff;
-        int a1 = (ne >> 24) & 0xff;
-        int r1 = (ne >> 16) & 0xff;
-        int g1 = (ne >> 8) & 0xff;
-        int b1 = ne & 0xff;
-        int a2 = (sw >> 24) & 0xff;
-        int r2 = (sw >> 16) & 0xff;
-        int g2 = (sw >> 8) & 0xff;
-        int b2 = sw & 0xff;
-        int a3 = (se >> 24) & 0xff;
-        int r3 = (se >> 16) & 0xff;
-        int g3 = (se >> 8) & 0xff;
-        int b3 = se & 0xff;
-
-        double cx = 1.0 - x;
-        double cy = 1.0 - y;
 
         m0 = cx * a0 + x * a1;
         m1 = cx * a2 + x * a3;
@@ -544,10 +486,10 @@ public class ImageMath {
         int v = 0;
         for (int i = 0; i < 4; i++) {
             int shift = i * 8;
-            float k0 = (p0 >> shift) & 0xff;
-            float k1 = (p1 >> shift) & 0xff;
-            float k2 = (p2 >> shift) & 0xff;
-            float k3 = (p3 >> shift) & 0xff;
+            float k0 = (p0 >> shift) & 0xFF;
+            float k1 = (p1 >> shift) & 0xFF;
+            float k2 = (p2 >> shift) & 0xFF;
+            float k3 = (p3 >> shift) & 0xFF;
 
             float c3 = m00 * k0 + m01 * k1 + m02 * k2 + m03 * k3;
             float c2 = m10 * k0 + m11 * k1 + m12 * k2 + m13 * k3;
@@ -587,9 +529,9 @@ public class ImageMath {
      * Returns the ITU-R BT.601 luminance of an sRGB value.
      */
     public static float calcLuminance(int rgb) {
-        int r = (rgb >> 16) & 0xff;
-        int g = (rgb >> 8) & 0xff;
-        int b = rgb & 0xff;
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
         return 0.299f * r + 0.587f * g + 0.114f * b;
     }
 
@@ -599,6 +541,19 @@ public class ImageMath {
             luma[i] = calcLuminance(inPixels[i]);
         }
         return luma;
+    }
+
+    /**
+     * Fast integer approximation of ITU-R BT.601 luminance.
+     * Returns an int between 0 and 255.
+     */
+    public static int calcLuminanceInt(int rgb) {
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
+        // avoids floating point math entirely: the max sum is
+        // 77*255 + 150*255 + 29*255 = 65280 (0xFF_00), and 65280 >> 8 = 255
+        return (77 * r + 150 * g + 29 * b) >> 8;
     }
 
     // Catmull-Rom splines
@@ -772,10 +727,10 @@ public class ImageMath {
         for (int i = 0; i < 4; i++) {
             int shift = i * 8;
 
-            k0 = (knots[span] >> shift) & 0xff;
-            k1 = (knots[span + 1] >> shift) & 0xff;
-            k2 = (knots[span + 2] >> shift) & 0xff;
-            k3 = (knots[span + 3] >> shift) & 0xff;
+            k0 = (knots[span] >> shift) & 0xFF;
+            k1 = (knots[span + 1] >> shift) & 0xFF;
+            k2 = (knots[span + 2] >> shift) & 0xFF;
+            k3 = (knots[span + 3] >> shift) & 0xFF;
 
             c3 = m00 * k0 + m01 * k1 + m02 * k2 + m03 * k3;
             c2 = m10 * k0 + m11 * k1 + m12 * k2 + m13 * k3;
@@ -831,10 +786,10 @@ public class ImageMath {
         for (int i = 0; i < 4; i++) {
             int shift = i * 8;
 
-            k0 = (yknots[span] >> shift) & 0xff;
-            k1 = (yknots[span + 1] >> shift) & 0xff;
-            k2 = (yknots[span + 2] >> shift) & 0xff;
-            k3 = (yknots[span + 3] >> shift) & 0xff;
+            k0 = (yknots[span] >> shift) & 0xFF;
+            k1 = (yknots[span + 1] >> shift) & 0xFF;
+            k2 = (yknots[span + 2] >> shift) & 0xFF;
+            k3 = (yknots[span + 3] >> shift) & 0xFF;
 
             c3 = m00 * k0 + m01 * k1 + m02 * k2 + m03 * k3;
             c2 = m10 * k0 + m11 * k1 + m12 * k2 + m13 * k3;
@@ -892,16 +847,16 @@ public class ImageMath {
         sizfac = outSegment;
         aSum = rSum = gSum = bSum = 0.0f;
         rgb = source[srcIndex];
-        a = (rgb >> 24) & 0xff;
-        r = (rgb >> 16) & 0xff;
-        g = (rgb >> 8) & 0xff;
-        b = rgb & 0xff;
+        a = rgb >>> 24;
+        r = (rgb >> 16) & 0xFF;
+        g = (rgb >> 8) & 0xFF;
+        b = rgb & 0xFF;
         srcIndex += stride;
         rgb = source[srcIndex];
-        nextA = (rgb >> 24) & 0xff;
-        nextR = (rgb >> 16) & 0xff;
-        nextG = (rgb >> 8) & 0xff;
-        nextB = rgb & 0xff;
+        nextA = rgb >>> 24;
+        nextR = (rgb >> 16) & 0xFF;
+        nextG = (rgb >> 8) & 0xFF;
+        nextB = rgb & 0xFF;
         srcIndex += stride;
         i = 1;
 
@@ -924,10 +879,10 @@ public class ImageMath {
                 if (srcIndex < lastIndex) {
                     rgb = source[srcIndex];
                 }
-                nextA = (rgb >> 24) & 0xff;
-                nextR = (rgb >> 16) & 0xff;
-                nextG = (rgb >> 8) & 0xff;
-                nextB = rgb & 0xff;
+                nextA = rgb >>> 24;
+                nextR = (rgb >> 16) & 0xFF;
+                nextG = (rgb >> 8) & 0xFF;
+                nextB = rgb & 0xFF;
                 srcIndex += stride;
             } else {
                 aSum += (aIntensity * outSegment);
@@ -954,20 +909,27 @@ public class ImageMath {
     }
 
     /**
-     * Premultiply a block of pixels
+     * Premultiply a block of pixels.
      */
     public static void premultiply(int[] p, int offset, int length) {
         length += offset;
         for (int i = offset; i < length; i++) {
             int rgb = p[i];
-            int a = (rgb >> 24) & 0xff;
-            int r = (rgb >> 16) & 0xff;
-            int g = (rgb >> 8) & 0xff;
-            int b = rgb & 0xff;
-            float f = a * (1.0f / 255.0f);
-            r = (int) (r * f);
-            g = (int) (g * f);
-            b = (int) (b * f);
+            int a = rgb >>> 24;
+            if (a == 255) {
+                continue;
+            }
+            if (a == 0) {
+                p[i] = 0;
+                continue;
+            }
+            int r = (rgb >> 16) & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
+            int b = rgb & 0xFF;
+
+            r = (r * a) / 255;
+            g = (g * a) / 255;
+            b = (b * a) / 255;
             p[i] = (a << 24) | (r << 16) | (g << 8) | b;
         }
     }
@@ -977,21 +939,22 @@ public class ImageMath {
     }
 
     /**
-     * Premultiply a block of pixels
+     * Unpremultiply a block of pixels.
      */
     public static void unpremultiply(int[] p, int offset, int length) {
         length += offset;
         for (int i = offset; i < length; i++) {
             int rgb = p[i];
-            int a = (rgb >> 24) & 0xff;
-            int r = (rgb >> 16) & 0xff;
-            int g = (rgb >> 8) & 0xff;
-            int b = rgb & 0xff;
+            int a = (rgb >>> 24);
             if (a != 0 && a != 255) {
-                float f = 255.0f / a;
-                r = (int) (r * f);
-                g = (int) (g * f);
-                b = (int) (b * f);
+                int r = (rgb >> 16) & 0xFF;
+                int g = (rgb >> 8) & 0xFF;
+                int b = rgb & 0xFF;
+
+                r = (r * 255) / a;
+                g = (g * 255) / a;
+                b = (b * 255) / a;
+
                 if (r > 255) {
                     r = 255;
                 }

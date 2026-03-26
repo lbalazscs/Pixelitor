@@ -20,7 +20,7 @@ package com.jhlabs.image;
  * An edge-detection filter.
  */
 public class EdgeFilter extends WholeImageFilter {
-    private static final float SQRT2 = (float) Math.sqrt(2);
+    private static final float SQRT_2 = (float) Math.sqrt(2);
 
     // Roberts cross vertical and horizontal edge detection matrices
     // https://en.wikipedia.org/wiki/Roberts_cross
@@ -64,13 +64,13 @@ public class EdgeFilter extends WholeImageFilter {
     // Frei-Chen vertical and horizontal edge detection matrices
     public static final float[] FREI_CHEN_V = {
         -1, 0, 1,
-        -SQRT2, 0, SQRT2,
+        -SQRT_2, 0, SQRT_2,
         -1, 0, 1,
     };
     public static final float[] FREI_CHEN_H = {
-        -1, -SQRT2, -1,
+        -1, -SQRT_2, -1,
         0, 0, 0,
-        1, SQRT2, 1,
+        1, SQRT_2, 1,
     };
 
     public static final int CHANNEL_RGB = 0;
@@ -113,34 +113,29 @@ public class EdgeFilter extends WholeImageFilter {
 
     private int[] findEdgesLuma(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
+        int index = 0;
 
         // pre-process to get luma values
         float[] luma = ImageMath.calcLuminance(inPixels);
 
         for (int y = 0; y < height; y++) {
-            int current_row_offset = y * width;
             for (int x = 0; x < width; x++) {
                 float ih = 0, iv = 0;
+                int matrixIndex = 0;
 
                 // convolve the 3x3 neighborhood around the current pixel
                 for (int row = -1; row <= 1; row++) {
-                    int iy = y + row;
-                    int ioffset;
-                    if (0 <= iy && iy < height) {
-                        ioffset = iy * width;
-                    } else {
-                        ioffset = y * width; // use current row for out-of-bounds
-                    }
-                    int moffset = 3 * (row + 1) + 1;
-                    for (int col = -1; col <= 1; col++) {
-                        int ix = x + col;
-                        if (!(0 <= ix && ix < width)) {
-                            ix = x; // use current column for out-of-bounds
-                        }
-                        float pixelLuma = luma[ioffset + ix];
-                        float h = hEdgeMatrix[moffset + col];
-                        float v = vEdgeMatrix[moffset + col];
+                    int iy = Math.clamp(y + row, 0, height - 1);
+                    int ioffset = iy * width;
 
+                    for (int col = -1; col <= 1; col++) {
+                        int ix = Math.clamp(x + col, 0, width - 1);
+
+                        float h = hEdgeMatrix[matrixIndex];
+                        float v = vEdgeMatrix[matrixIndex];
+                        matrixIndex++;
+
+                        float pixelLuma = luma[ioffset + ix];
                         ih += h * pixelLuma;
                         iv += v * pixelLuma;
                     }
@@ -148,8 +143,9 @@ public class EdgeFilter extends WholeImageFilter {
 
                 int i = (int) (Math.sqrt(ih * ih + iv * iv) / 1.8);
                 i = PixelUtils.clamp(i);
-                int a = inPixels[current_row_offset + x] & 0xff000000;
-                outPixels[current_row_offset + x] = a | (i << 16) | (i << 8) | i;
+
+                int a = inPixels[index] & 0xFF_00_00_00;
+                outPixels[index++] = a | (i << 16) | (i << 8) | i;
             }
             pt.unitDone();
         }
@@ -162,33 +158,29 @@ public class EdgeFilter extends WholeImageFilter {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int r = 0, g = 0, b = 0;
                 int rh = 0, gh = 0, bh = 0;
                 int rv = 0, gv = 0, bv = 0;
-                int a = inPixels[y * width + x] & 0xff000000;
+                int a = inPixels[index] & 0xFF_00_00_00;
+                int matrixIndex = 0;
 
                 // convolve the 3x3 neighborhood around the current pixel
                 for (int row = -1; row <= 1; row++) {
-                    int iy = y + row;
-                    int ioffset;
-                    if (0 <= iy && iy < height) {
-                        ioffset = iy * width;
-                    } else {
-                        ioffset = y * width;
-                    }
-                    int moffset = 3 * (row + 1) + 1;
-                    for (int col = -1; col <= 1; col++) {
-                        int ix = x + col;
-                        if (!(0 <= ix && ix < width)) {
-                            ix = x;
-                        }
-                        int rgb = inPixels[ioffset + ix];
-                        float h = hEdgeMatrix[moffset + col];
-                        float v = vEdgeMatrix[moffset + col];
+                    int iy = Math.clamp(y + row, 0, height - 1);
+                    int ioffset = iy * width;
 
-                        r = (rgb & 0xff0000) >> 16;
-                        g = (rgb & 0x00ff00) >> 8;
-                        b = rgb & 0x0000ff;
+                    for (int col = -1; col <= 1; col++) {
+                        int ix = Math.clamp(x + col, 0, width - 1);
+
+                        float h = hEdgeMatrix[matrixIndex];
+                        float v = vEdgeMatrix[matrixIndex];
+                        matrixIndex++;
+
+                        int rgb = inPixels[ioffset + ix];
+
+                        int r = (rgb & 0xFF_00_00) >> 16;
+                        int g = (rgb & 0x00_FF_00) >> 8;
+                        int b = rgb & 0x00_00_FF;
+
                         rh += (int) (h * r);
                         gh += (int) (h * g);
                         bh += (int) (h * b);
@@ -197,21 +189,19 @@ public class EdgeFilter extends WholeImageFilter {
                         bv += (int) (v * b);
                     }
                 }
-                r = (int) (Math.sqrt(rh * rh + rv * rv) / 1.8);
-                g = (int) (Math.sqrt(gh * gh + gv * gv) / 1.8);
-                b = (int) (Math.sqrt(bh * bh + bv * bv) / 1.8);
+
+                int r = (int) (Math.sqrt(rh * rh + rv * rv) / 1.8);
+                int g = (int) (Math.sqrt(gh * gh + gv * gv) / 1.8);
+                int b = (int) (Math.sqrt(bh * bh + bv * bv) / 1.8);
+
                 r = PixelUtils.clamp(r);
                 g = PixelUtils.clamp(g);
                 b = PixelUtils.clamp(b);
+
                 outPixels[index++] = a | (r << 16) | (g << 8) | b;
             }
             pt.unitDone();
         }
         return outPixels;
-    }
-
-    @Override
-    public String toString() {
-        return "Edges/Detect Edges";
     }
 }

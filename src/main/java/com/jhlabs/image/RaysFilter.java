@@ -75,13 +75,13 @@ public class RaysFilter extends MotionBlurOp {
             getRGB(src, 0, y, width, 1, pixels);
             for (int x = 0; x < width; x++) {
                 int rgb = pixels[x];
-                int a = rgb & 0xff000000;
-                int r = (rgb >> 16) & 0xff;
-                int g = (rgb >> 8) & 0xff;
-                int b = rgb & 0xff;
+                int a = rgb & 0xFF_00_00_00;
+                int r = (rgb >> 16) & 0xFF;
+                int g = (rgb >> 8) & 0xFF;
+                int b = rgb & 0xFF;
                 int l = r + g + b;
                 if (l < threshold3) {
-                    pixels[x] = 0xff000000;
+                    pixels[x] = 0xFF_00_00_00;
                 } else {
                     l /= 3;
                     pixels[x] = a | (l << 16) | (l << 8) | l;
@@ -104,10 +104,10 @@ public class RaysFilter extends MotionBlurOp {
 
             for (int x = 0; x < width; x++) {
                 int rgb = pixels[x];
-                int a = rgb & 0xff000000;
-                int r = (rgb >> 16) & 0xff;
-                int g = (rgb >> 8) & 0xff;
-                int b = rgb & 0xff;
+                int a = rgb & 0xFF_00_00_00;
+                int r = (rgb >> 16) & 0xFF;
+                int g = (rgb >> 8) & 0xFF;
+                int b = rgb & 0xFF;
 
                 int l = r + g + b;
                 // scale from 0-765 to 0.0-1.0
@@ -115,9 +115,9 @@ public class RaysFilter extends MotionBlurOp {
 
                 // get the mapped color
                 int color = colormap.getColor(v);
-                int cr = (color >> 16) & 0xff;
-                int cg = (color >> 8) & 0xff;
-                int cb = color & 0xff;
+                int cr = (color >> 16) & 0xFF;
+                int cg = (color >> 8) & 0xFF;
+                int cb = color & 0xFF;
 
                 // multiply the colormap's color by the ray's intensity (v)
                 r = PixelUtils.max255((int) (cr * v));
@@ -135,10 +135,5 @@ public class RaysFilter extends MotionBlurOp {
         finishProgressTracker();
 
         return rays;
-    }
-
-    @Override
-    public String toString() {
-        return "Stylize/Rays...";
     }
 }

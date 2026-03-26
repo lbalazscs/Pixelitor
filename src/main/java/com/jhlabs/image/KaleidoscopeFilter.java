@@ -50,8 +50,7 @@ public class KaleidoscopeFilter extends TransformFilter {
     /**
      * Sets the number of sides of the kaleidoscope.
      *
-     * @param sides the number of sides
-     * @min-value 2
+     * @param sides the number of sides (must be >= 2)
      */
     public void setSides(int sides) {
         this.sides = sides;
@@ -113,10 +112,5 @@ public class KaleidoscopeFilter extends TransformFilter {
         // convert back to cartesian coordinates
         out[0] = (float) (cx + zoomedR * FastMath.cos(theta));
         out[1] = (float) (cy + zoomedR * FastMath.sin(theta));
-    }
-
-    @Override
-    public String toString() {
-        return "Distort/Kaleidoscope...";
     }
 }

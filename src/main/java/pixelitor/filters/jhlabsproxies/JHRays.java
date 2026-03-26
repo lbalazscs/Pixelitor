@@ -112,22 +112,48 @@ public class JHRays extends ParametrizedFilter {
             rays = filter.filter(src, dest);
         }
 
-        // so far we have the rays image,
-        // which contains white rays on a black background
+        // RaysFilter outputs an image with an opaque black background
+        // (alpha=255, R=0, G=0, B=0) and the colored rays drawn over it
         if (raysOnly.isChecked()) {
-            // make sure we have a transparent background
-            if (dest == null) {
-                dest = filter.createCompatibleDestImage(src, null);
+            int[] rayPixels = ImageUtils.getPixels(rays);
+            float opacityMult = (float) opacity.getPercentage();
+            boolean isPremult = rays.isAlphaPremultiplied();
+
+            for (int i = 0; i < rayPixels.length; i++) {
+                int rgb = rayPixels[i];
+                int r = (rgb >> 16) & 0xff;
+                int g = (rgb >> 8) & 0xff;
+                int b = rgb & 0xff;
+
+                // use the maximum channel value as the alpha to preserve the true color intensity
+                int max = Math.max(r, Math.max(g, b));
+                int a = (int) (max * opacityMult);
+
+                if (a == 0) {
+                    rayPixels[i] = 0; // transparent black
+                } else {
+                    if (isPremult) {
+                        // if the image was converted to premultiplied
+                        // we must provide premultiplied RGB values
+                        int pr = (int) (r * opacityMult);
+                        int pg = (int) (g * opacityMult);
+                        int pb = (int) (b * opacityMult);
+                        rayPixels[i] = (a << 24) | (pr << 16) | (pg << 8) | pb;
+                    } else {
+                        // Unpremultiply the RGB channels for standard compositing.
+                        // Since `max` is at least 1, we divide safely.
+                        int ur = r * 255 / max;
+                        int ug = g * 255 / max;
+                        int ub = b * 255 / max;
+                        rayPixels[i] = (a << 24) | (ur << 16) | (ug << 8) | ub;
+                    }
+                }
             }
-            Graphics2D g = dest.createGraphics();
-            g.setComposite(new AddComposite((float) opacity.getPercentage()));
-            g.drawRenderedImage(rays, null);
-            g.dispose();
 
             pt.unitsDone(3);
             pt.finished();
 
-            return dest;
+            return rays; // return the modified image directly
         }
 
         // add the rays on top of the source
@@ -145,6 +171,11 @@ public class JHRays extends ParametrizedFilter {
 
     @Override
     public boolean supportsGray() {
+        return false;
+    }
+
+    @Override
+    protected boolean createDefaultDestImg() {
         return false;
     }
 }

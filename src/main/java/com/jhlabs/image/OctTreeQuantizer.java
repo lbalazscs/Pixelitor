@@ -127,9 +127,9 @@ public class OctTreeQuantizer implements Quantizer {
      */
     @Override
     public int getIndexForColor(int rgb) {
-        int red = (rgb >> 16) & 0xff;
-        int green = (rgb >> 8) & 0xff;
-        int blue = rgb & 0xff;
+        int red = (rgb >> 16) & 0xFF;
+        int green = (rgb >> 8) & 0xFF;
+        int blue = rgb & 0xFF;
 
         OctTreeNode node = root;
 
@@ -173,9 +173,9 @@ public class OctTreeQuantizer implements Quantizer {
     }
 
     private void insertColor(int rgb) {
-        int red = (rgb >> 16) & 0xff;
-        int green = (rgb >> 8) & 0xff;
-        int blue = rgb & 0xff;
+        int red = (rgb >> 16) & 0xFF;
+        int green = (rgb >> 8) & 0xFF;
+        int blue = rgb & 0xFF;
 
         OctTreeNode node = root;
 
@@ -307,7 +307,7 @@ public class OctTreeQuantizer implements Quantizer {
 
         if (node.isLeaf) {
             int count = node.numAssignedPixels;
-            table[index] = 0xff000000 |
+            table[index] = 0xFF_00_00_00 |
                            ((node.totalRed / count) << 16) |
                            ((node.totalGreen / count) << 8) |
                            node.totalBlue / count;

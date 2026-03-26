@@ -660,11 +660,15 @@ public class AppRunner {
     }
 
     JFileChooserFixture findOpenFileChooser() {
-        return JFileChooserFinder.findFileChooser("open").using(robot);
+        return JFileChooserFinder.findFileChooser("open")
+            .withTimeout(10, SECONDS)
+            .using(robot);
     }
 
     JFileChooserFixture findSaveFileChooser() {
-        return JFileChooserFinder.findFileChooser("save").using(robot);
+        return JFileChooserFinder.findFileChooser("save")
+            .withTimeout(10, SECONDS)
+            .using(robot);
     }
 
     public JButtonFixture findButtonByText(String text) {

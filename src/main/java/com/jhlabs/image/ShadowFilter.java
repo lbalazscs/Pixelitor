@@ -18,13 +18,9 @@ package com.jhlabs.image;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
@@ -32,113 +28,39 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
  * A filter which draws a drop shadow based on the alpha channel of the image.
  */
 public class ShadowFilter extends AbstractBufferedImageOp {
-    private float radius = 5;
-    private float angle = (float) Math.PI * 6 / 4;
-    private float distance = 5;
-    private float opacity = 0.5f;
-    private boolean addMargins = false;
-    private boolean shadowOnly = false;
-    private int shadowColor = 0xff000000;
+    private final float radius;
+    private final float angle;
+    private final float distance;
+    private final float opacity;
+    private final boolean shadowOnly;
+    private final int shadowColor;
 
     /**
      * Constructs a ShadowFilter.
+     *
+     * @param filterName  the name of the filter
+     * @param angle       the angle of the shadow.
+     * @param distance    the distance of the shadow.
+     * @param opacity     the opacity of the shadow.
+     * @param radius      the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
+     * @param shadowColor the color of the shadow.
+     * @param shadowOnly  true to only draw the shadow without the original image.
      */
-    public ShadowFilter(String filterName) {
+    public ShadowFilter(String filterName,
+                        float angle,
+                        float distance,
+                        float opacity,
+                        float radius,
+                        int shadowColor,
+                        boolean shadowOnly) {
         super(filterName);
-    }
 
-    /**
-     * Sets the angle of the shadow.
-     *
-     * @param angle the angle of the shadow.
-     */
-    public void setAngle(float angle) {
         this.angle = angle;
-    }
-
-    /**
-     * Sets the distance of the shadow.
-     *
-     * @param distance the distance.
-     */
-    public void setDistance(float distance) {
         this.distance = distance;
-    }
-
-    /**
-     * Sets the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
-     *
-     * @param radius the radius of the blur in pixels.
-     */
-    public void setRadius(float radius) {
-        this.radius = radius;
-    }
-
-    /**
-     * Sets the opacity of the shadow.
-     *
-     * @param opacity the opacity.
-     */
-    public void setOpacity(float opacity) {
         this.opacity = opacity;
-    }
-
-    /**
-     * Sets the color of the shadow.
-     *
-     * @param shadowColor the color.
-     */
-    public void setShadowColor(int shadowColor) {
+        this.radius = radius;
         this.shadowColor = shadowColor;
-    }
-
-    /**
-     * Sets whether to increase the size of the output image to accomodate the shadow.
-     *
-     * @param addMargins true to add margins.
-     */
-    public void setAddMargins(boolean addMargins) {
-        this.addMargins = addMargins;
-    }
-
-    /**
-     * Sets whether to only draw the shadow without the original image.
-     *
-     * @param shadowOnly true to only draw the shadow.
-     */
-    public void setShadowOnly(boolean shadowOnly) {
         this.shadowOnly = shadowOnly;
-    }
-
-    @Override
-    public Rectangle2D getBounds2D(BufferedImage src) {
-        Rectangle r = new Rectangle(0, 0, src.getWidth(), src.getHeight());
-        if (addMargins) {
-            float xOffset = distance * (float) Math.cos(angle);
-            float yOffset = -distance * (float) Math.sin(angle);
-            r.width += (int) (Math.abs(xOffset) + 2 * radius);
-            r.height += (int) (Math.abs(yOffset) + 2 * radius);
-        }
-        return r;
-    }
-
-    @Override
-    public Point2D getPoint2D(Point2D srcPt, Point2D dstPt) {
-        if (dstPt == null) {
-            dstPt = new Point2D.Double();
-        }
-
-        if (addMargins) {
-            float xOffset = distance * (float) Math.cos(angle);
-            float yOffset = -distance * (float) Math.sin(angle);
-            float topShadow = Math.max(0, radius - yOffset);
-            float leftShadow = Math.max(0, radius - xOffset);
-            dstPt.setLocation(srcPt.getX() + leftShadow, srcPt.getY() + topShadow);
-        } else {
-            dstPt.setLocation(srcPt.getX(), srcPt.getY());
-        }
-
-        return dstPt;
     }
 
     @Override
@@ -150,42 +72,28 @@ public class ShadowFilter extends AbstractBufferedImageOp {
         float yOffset = -distance * (float) Math.sin(angle);
 
         if (dst == null) {
-            if (addMargins) {
-                ColorModel cm = src.getColorModel();
-                dst = new BufferedImage(cm, cm
-                        .createCompatibleWritableRaster(src.getWidth() + (int) (Math.abs(xOffset) + radius), src
-                                .getHeight() + (int) (Math.abs(yOffset) + radius)), cm.isAlphaPremultiplied(), null);
-            } else {
-                dst = createCompatibleDestImage(src, null);
-            }
+            dst = createCompatibleDestImage(src, null);
         }
 
-        float shadowR = ((shadowColor >> 16) & 0xff) / 255.0f;
-        float shadowG = ((shadowColor >> 8) & 0xff) / 255.0f;
-        float shadowB = (shadowColor & 0xff) / 255.0f;
+        float shadowR = ((shadowColor >> 16) & 0xFF) / 255.0f;
+        float shadowG = ((shadowColor >> 8) & 0xFF) / 255.0f;
+        float shadowB = (shadowColor & 0xFF) / 255.0f;
 
-        // Make a black mask from the image's alpha channel
+        // make a black mask from the image's alpha channel
         float[][] extractAlpha = {
-                {0, 0, 0, shadowR},
-                {0, 0, 0, shadowG},
-                {0, 0, 0, shadowB},
-                {0, 0, 0, opacity}
+            {0, 0, 0, shadowR},
+            {0, 0, 0, shadowG},
+            {0, 0, 0, shadowB},
+            {0, 0, 0, opacity}
         };
         BufferedImage shadow = new BufferedImage(width, height, TYPE_INT_ARGB);
         new BandCombineOp(extractAlpha, null).filter(src.getRaster(), shadow.getRaster());
-//        shadow = new GaussianFilter(radius, filterName).filter(shadow, null);
         shadow = new BoxBlurFilter(radius, radius, 3, filterName).filter(shadow, null);
 
         Graphics2D g = dst.createGraphics();
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-        if (addMargins) {
-//            float radius2 = radius / 2;
-            float topShadow = Math.max(0, radius - yOffset);
-            float leftShadow = Math.max(0, radius - xOffset);
-            g.translate(leftShadow, topShadow);
-        }
-        g.drawRenderedImage(shadow, AffineTransform.getTranslateInstance(
-                xOffset, yOffset));
+        g.drawRenderedImage(shadow,
+            AffineTransform.getTranslateInstance(xOffset, yOffset));
         if (!shadowOnly) {
             g.setComposite(AlphaComposite.SrcOver);
             g.drawRenderedImage(src, null);
@@ -193,10 +101,5 @@ public class ShadowFilter extends AbstractBufferedImageOp {
         g.dispose();
 
         return dst;
-    }
-
-    @Override
-    public String toString() {
-        return "Stylize/Drop Shadow...";
     }
 }

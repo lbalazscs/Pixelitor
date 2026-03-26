@@ -24,8 +24,11 @@ import java.awt.image.Kernel;
 import java.util.concurrent.Future;
 
 /**
- * A filter which applies Gaussian blur to an image. This is a subclass of ConvolveFilter
- * which simply creates a kernel with a Gaussian distribution for blurring.
+ * A filter which applies Gaussian blur to an image.
+ * <p>
+ * While this is a subclass of ConvolveFilter, it overrides the default
+ * 2D convolution with an optimized, separable 1D convolution approach.
+ * It uses multithreading to apply a horizontal blur followed by a vertical blur.
  *
  * @author Jerry Huxtable
  */
@@ -39,7 +42,7 @@ public class GaussianFilter extends ConvolveFilter {
      * Constructs a Gaussian filter.
      */
     public GaussianFilter(String filterName) {
-        this(2, filterName);
+        this(filterName, 2);
     }
 
     /**
@@ -47,7 +50,7 @@ public class GaussianFilter extends ConvolveFilter {
      *
      * @param radius blur radius in pixels
      */
-    public GaussianFilter(float radius, String filterName) {
+    public GaussianFilter(String filterName, float radius) {
         super(filterName);
         setRadius(radius);
     }
@@ -67,7 +70,7 @@ public class GaussianFilter extends ConvolveFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        ProgressTracker pt = createProgressTracker(width + height);
+        pt = createProgressTracker(width + height);
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
@@ -79,8 +82,8 @@ public class GaussianFilter extends ConvolveFilter {
 
         if (radius > 0) {
             int[] outPixels = new int[width * height];
-            convolveAndTranspose(kernel, inPixels, outPixels, width, height, premultiplyAlpha, false, CLAMP_EDGES, pt);
-            convolveAndTranspose(kernel, outPixels, inPixels, height, width, false, premultiplyAlpha, CLAMP_EDGES, pt);
+            convolveAndTranspose(kernel, inPixels, outPixels, width, height, premultiplyAlpha, false, pt);
+            convolveAndTranspose(kernel, outPixels, inPixels, height, width, false, premultiplyAlpha, pt);
         }
 
         setRGB(dst, 0, 0, width, height, inPixels);
@@ -103,7 +106,7 @@ public class GaussianFilter extends ConvolveFilter {
      */
     public static void convolveAndTranspose(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height,
                                             boolean premultiply, boolean unpremultiply,
-                                            int edgeAction, ProgressTracker pt) {
+                                            ProgressTracker pt) {
         float[] matrix = kernel.getKernelData(null);
         int cols = kernel.getWidth();
         int cols2 = cols / 2;
@@ -111,14 +114,14 @@ public class GaussianFilter extends ConvolveFilter {
         Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable rowTask = () -> convolveAndTransposeRow(inPixels, outPixels, width, height, premultiply, unpremultiply, edgeAction, matrix, cols2, finalY);
+            Runnable rowTask = () -> convolveAndTransposeRow(inPixels, outPixels, width, height, premultiply, unpremultiply, matrix, cols2, finalY);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
 
         ThreadPool.waitFor(rowFutures, pt);
     }
 
-    private static void convolveAndTransposeRow(int[] inPixels, int[] outPixels, int width, int height, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {
+    private static void convolveAndTransposeRow(int[] inPixels, int[] outPixels, int width, int height, boolean premultiply, boolean unpremultiply, float[] matrix, int cols2, int y) {
         int index = y;
         int ioffset = y * width;
         for (int x = 0; x < width; x++) {
@@ -130,23 +133,15 @@ public class GaussianFilter extends ConvolveFilter {
                 if (f != 0) {
                     int ix = x + col;
                     if (ix < 0) {
-                        if (edgeAction == CLAMP_EDGES) {
-                            ix = 0;
-                        } else if (edgeAction == WRAP_EDGES) {
-                            ix = (x + width) % width;
-                        }
+                        ix = 0;
                     } else if (ix >= width) {
-                        if (edgeAction == CLAMP_EDGES) {
-                            ix = width - 1;
-                        } else if (edgeAction == WRAP_EDGES) {
-                            ix = (x + width) % width;
-                        }
+                        ix = width - 1;
                     }
                     int rgb = inPixels[ioffset + ix];
-                    int pa = (rgb >> 24) & 0xff;
-                    int pr = (rgb >> 16) & 0xff;
-                    int pg = (rgb >> 8) & 0xff;
-                    int pb = rgb & 0xff;
+                    int pa = rgb >>> 24;
+                    int pr = (rgb >> 16) & 0xFF;
+                    int pg = (rgb >> 8) & 0xFF;
+                    int pb = rgb & 0xFF;
                     if (premultiply) {
                         float a255 = pa * (1.0f / 255.0f);
                         pr = (int) (pr * a255);
@@ -183,35 +178,41 @@ public class GaussianFilter extends ConvolveFilter {
      * @return the kernel
      */
     public static Kernel makeKernel(float radius) {
-        int r = (int) Math.ceil(radius);
+        int r = (int) radius;
         int rows = r * 2 + 1;
         float[] matrix = new float[rows];
-        float sigma = radius / 3;
-        float sigma22 = 2 * sigma * sigma;
-        float sigmaPi2 = 2 * ImageMath.PI * sigma;
-        float sqrtSigmaPi2 = (float) Math.sqrt(sigmaPi2);
-        float radius2 = radius * radius;
-        float total = 0;
-        int index = 0;
-        for (int row = -r; row <= r; row++) {
-            float distance = row * row;
-            if (distance > radius2) {
-                matrix[index] = 0;
-            } else {
-                matrix[index] = (float) Math.exp(-distance / sigma22) / sqrtSigmaPi2;
-            }
-            total += matrix[index];
-            index++;
+
+        // if radius is < 1.0, return a 1x1 identity kernel.
+        if (r == 0) {
+            matrix[0] = 1.0f;
+            return new Kernel(rows, 1, matrix);
         }
+
+        float sigma = radius / 3.0f;
+        float sigma2Sq = 2.0f * sigma * sigma;
+        float total = 0.0f;
+
+        // center element
+        matrix[r] = 1.0f;  // exp(0) = 1
+        total += matrix[r];
+
+        // calculate one side and mirror it
+        for (int row = 1; row <= r; row++) {
+            float distSq = row * row;
+
+            // no constant multiplier, because it will be normalized anyway
+            float value = (float) Math.exp(-distSq / sigma2Sq);
+
+            matrix[r - row] = value; // left side
+            matrix[r + row] = value; // right side
+            total += 2.0f * value;   // add both sides to the total
+        }
+
+        // normalize the kernel so the sum of all elements equals 1.0
         for (int i = 0; i < rows; i++) {
             matrix[i] /= total;
         }
 
         return new Kernel(rows, 1, matrix);
-    }
-
-    @Override
-    public String toString() {
-        return "Blur/Gaussian Blur...";
     }
 }

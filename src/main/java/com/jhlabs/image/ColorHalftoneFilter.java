@@ -87,11 +87,11 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
         int[] inPixels = getRGB(src, 0, 0, width, height, null);
         for (int y = 0; y < height; y++) {
             for (int x = 0, ix = y * width; x < width; x++, ix++) {
-                outPixels[x] = (inPixels[ix] & 0xff000000) | 0xffffff;
+                outPixels[x] = (inPixels[ix] & 0xFF_00_00_00) | 0xFF_FF_FF;
             }
             for (int channel = 0; channel < 3; channel++) {
                 int shift = 16 - 8 * channel;
-                int mask = 0x000000ff << shift;
+                int mask = 0x00_00_00_FF << shift;
                 float angle = angles[channel];
                 float sin = (float) Math.sin(angle);
                 float cos = (float) Math.cos(angle);
@@ -107,8 +107,8 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
 
                     float f = 1;
 
-                    // TODO: Efficiency warning: Because the dots overlap, we need to check neighbouring grid squares.
-                    // We check all four neighbours, but in practice only one can ever overlap any given point.
+                    // TODO: Efficiency warning: Because the dots overlap, we need to check neighboring grid squares.
+                    // We check all four neighbors, but in practice only one can ever overlap any given point.
                     for (int i = 0; i < 5; i++) {
                         // Find neigbouring grid point
                         float ttx = tx + mx[i] * gridSize;
@@ -120,7 +120,7 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
                         int nx = ImageMath.clamp((int) ntx, 0, width - 1);
                         int ny = ImageMath.clamp((int) nty, 0, height - 1);
                         int argb = inPixels[ny * width + nx];
-                        int nr = (argb >> shift) & 0xff;
+                        int nr = (argb >> shift) & 0xFF;
                         float l = nr / 255.0f;
                         l = 1 - l * l;
                         l = (float) (l * (halfGridSize * 1.414));
@@ -136,7 +136,7 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
                     int v = (int) (255 * f);
                     v <<= shift;
                     v ^= ~mask;
-                    v |= 0xff000000;
+                    v |= 0xFF_00_00_00;
                     outPixels[x] &= v;
                 }
             }
@@ -147,10 +147,5 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
         finishProgressTracker();
 
         return dst;
-    }
-
-    @Override
-    public String toString() {
-        return "Pixellate/Color Halftone...";
     }
 }

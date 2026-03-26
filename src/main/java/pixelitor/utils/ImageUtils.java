@@ -801,10 +801,8 @@ public class ImageUtils {
                                         BufferedImage bumpImage,
                                         float azimuth, float bumpHeight,
                                         String filterName, boolean tile) {
-        var emboss = new EmbossFilter(filterName);
-        emboss.setAzimuth(azimuth);
-        emboss.setElevation((float) (Math.PI / 6.0));
-        emboss.setBumpHeight(bumpHeight);
+        var emboss = new EmbossFilter(filterName, azimuth,
+            (float) (Math.PI / 6.0), bumpHeight, false);
 
         BufferedImage bumpMap = emboss.filter(bumpImage, null);
 
@@ -833,47 +831,6 @@ public class ImageUtils {
         g.dispose();
 
         return dest;
-    }
-
-    public static int premultiply(int rgb) {
-        int a = (rgb >>> 24) & 0xFF;
-        int r = (rgb >>> 16) & 0xFF;
-        int g = (rgb >>> 8) & 0xFF;
-        int b = rgb & 0xFF;
-
-        float f = a * (1.0f / 255.0f);
-        r = (int) (r * f);
-        g = (int) (g * f);
-        b = (int) (b * f);
-
-        return (a << 24) | (r << 16) | (g << 8) | b;
-    }
-
-    public static int unPremultiply(int rgb) {
-        int a = (rgb >>> 24) & 0xFF;
-        int r = (rgb >>> 16) & 0xFF;
-        int g = (rgb >>> 8) & 0xFF;
-        int b = rgb & 0xFF;
-
-        if (a == 0 || a == 255) {
-            return rgb;
-        }
-
-        float f = 255.0f / a;
-        r = (int) (r * f);
-        g = (int) (g * f);
-        b = (int) (b * f);
-        if (r > 255) {
-            r = 255;
-        }
-        if (g > 255) {
-            g = 255;
-        }
-        if (b > 255) {
-            b = 255;
-        }
-
-        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     public static BufferedImage convertToGrayscaleImage(BufferedImage src) {
@@ -1178,12 +1135,12 @@ public class ImageUtils {
             return true;
         }
 
-        int a1 = (color1 >>> 24) & 0xFF;
+        int a1 = color1 >>> 24;
         int r1 = (color1 >>> 16) & 0xFF;
         int g1 = (color1 >>> 8) & 0xFF;
         int b1 = color1 & 0xFF;
 
-        int a2 = (color2 >>> 24) & 0xFF;
+        int a2 = color2 >>> 24;
         int r2 = (color2 >>> 16) & 0xFF;
         int g2 = (color2 >>> 8) & 0xFF;
         int b2 = color2 & 0xFF;
@@ -1308,6 +1265,55 @@ public class ImageUtils {
                         x = newX2;
                     }
                 }
+            }
+        }
+    }
+
+    // maximizes the contrast in the given image
+    public static void normalizeImage(BufferedImage img) {
+        int[] pixels = getPixels(img);
+        int max = 0;
+
+        boolean hasAlpha = img.getTransparency() != Transparency.OPAQUE;
+
+        // find the maximum channel value
+        for (int rgb : pixels) {
+            // ignore "hidden" colors in fully transparent pixels
+            if (hasAlpha && (rgb >>> 24) == 0) {
+                continue;
+            }
+
+            int r = (rgb >> 16) & 0xff;
+            int g = (rgb >> 8) & 0xff;
+            int b = rgb & 0xff;
+
+            int localMax = Math.max(r, Math.max(g, b));
+            if (localMax > max) {
+                max = localMax;
+            }
+        }
+
+        // normalize if the image isn't already stretched and isn't purely black
+        if (max > 0 && max < 255) {
+            // precompute a scaling look-up table
+            int[] lut = new int[256];
+            double sf = 255.0 / max;
+            for (int i = 0; i < 256; i++) {
+                lut[i] = Math.min(255, (int) Math.round(i * sf));
+            }
+
+            // apply the LUT to all pixels
+            for (int i = 0; i < pixels.length; i++) {
+                int rgb = pixels[i];
+
+                // preserve the original alpha channel bits
+                int a = rgb & 0xff000000;
+
+                int r = lut[(rgb >> 16) & 0xff];
+                int g = lut[(rgb >> 8) & 0xff];
+                int b = lut[rgb & 0xff];
+
+                pixels[i] = a | (r << 16) | (g << 8) | b;
             }
         }
     }

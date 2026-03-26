@@ -41,8 +41,6 @@ public class JHLensBlur extends ParametrizedFilter {
 
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
-    private LensBlurFilter filter;
-
     public JHLensBlur() {
         super(true);
 
@@ -57,14 +55,13 @@ public class JHLensBlur extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new LensBlurFilter(NAME);
-        }
-
-        filter.setRadius(amount.getValueAsFloat());
-        filter.setSides(numSides.getValue());
-        filter.setBloom(bloomFactor.getValueAsFloat());
-        filter.setBloomThreshold(bloomThreshold.getValueAsFloat());
+        LensBlurFilter filter = new LensBlurFilter(
+            NAME,
+            amount.getValueAsFloat(),
+            numSides.getValue(),
+            bloomFactor.getValueAsFloat(),
+            bloomThreshold.getValueAsFloat()
+        );
 
         dest = ImageUtils.filterPremultiplied(src, dest, filter);
 

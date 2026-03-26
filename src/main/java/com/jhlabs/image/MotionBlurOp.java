@@ -192,9 +192,4 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
 
         return dst;
     }
-
-    @Override
-    public String toString() {
-        return "Blur/Faster Motion Blur...";
-    }
 }

@@ -73,7 +73,7 @@ public class FastLookupOp implements BufferedImageOp {
 
         for (int i = 0; i < numPixels; i++) {
             int rgb = srcPixels[i];
-            int a = (rgb >>> 24) & 0xFF;
+            int a = rgb >>> 24;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;

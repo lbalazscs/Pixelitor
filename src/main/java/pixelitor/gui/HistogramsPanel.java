@@ -197,7 +197,7 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
 
         int[] pixels = ImageUtils.getPixels(image);
         for (int rgb : pixels) {
-            int a = (rgb >>> 24) & 0xFF;
+            int a = rgb >>> 24;
             if (a > 0) {
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;

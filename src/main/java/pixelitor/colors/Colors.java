@@ -115,7 +115,7 @@ public class Colors {
     }
 
     public static String argbToString(int rgb) {
-        int a = (rgb >>> 24) & 0xFF;
+        int a = rgb >>> 24;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;
@@ -368,7 +368,7 @@ public class Colors {
      * new alpha does not exceed the original alpha value.
      */
     public static int capAlpha(int rgb, int newAlpha) {
-        int origAlpha = (rgb >>> 24) & 0xFF;
+        int origAlpha = rgb >>> 24;
         return setAlpha(rgb, Math.min(origAlpha, newAlpha));
     }
 

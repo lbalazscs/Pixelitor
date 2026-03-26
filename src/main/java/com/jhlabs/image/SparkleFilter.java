@@ -16,7 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-
 import java.util.Random;
 
 import static com.jhlabs.image.ImageMath.PI;
@@ -31,11 +30,10 @@ public class SparkleFilter extends PointFilter {
     private int numRays = 50;
     private int radius = 25;
     private int amount = 50;
-    private int color = 0xffffffff;
+    private int color = 0xFFFFFFFF;
     private int randomness = 25;
-    //    private int width, height;
-    private int centerX, centerY;
-    //    private long seed = 371;
+    private int centerX;
+    private int centerY;
     private float[] rayLengths;
     private Random random;
 
@@ -60,9 +58,7 @@ public class SparkleFilter extends PointFilter {
     /**
      * Sets the amount of sparkle.
      *
-     * @param amount the amount
-     * @min-value 0
-     * @max-value 1
+     * @param amount the amount (in the range [0, 100])
      */
     public void setAmount(int amount) {
         this.amount = amount;
@@ -76,7 +72,6 @@ public class SparkleFilter extends PointFilter {
      * Sets the radius of the effect.
      *
      * @param radius the radius
-     * @min-value 0
      */
     public void setRadius(int radius) {
         this.radius = radius;
@@ -87,10 +82,17 @@ public class SparkleFilter extends PointFilter {
         centerX = (int) (width * relativeCenterX);
         centerY = (int) (height * relativeCenterY);
         super.setDimensions(width, height);
-        rayLengths = new float[numRays];
+
+        // make array size numRays + 2 to avoid using the modulo operator in processPixel
+        rayLengths = new float[numRays + 2];
+        float randomRadius = randomness / 100.0f * radius;
         for (int i = 0; i < numRays; i++) {
-            rayLengths[i] = radius + randomness / 100.0f * radius * (float) random.nextGaussian();
+            rayLengths[i] = radius + randomRadius * (float) random.nextGaussian();
         }
+
+        rayLengths[numRays] = rayLengths[0];
+        rayLengths[numRays + 1] = rayLengths[1];
+
         power = (100 - amount) / 50.0;
     }
 
@@ -98,31 +100,40 @@ public class SparkleFilter extends PointFilter {
     public int processPixel(int x, int y, int rgb) {
         float dx = x - centerX;
         float dy = y - centerY;
-        float distance = dx * dx + dy * dy;
+        float distSq = dx * dx + dy * dy;
         float angle = (float) atan2(dy, dx);
 
         float d = (angle + PI) / TWO_PI * numRays;
         int i = (int) d;
 
-        float f = d - i;
-
-        float length = lerp(f, rayLengths[i % numRays], rayLengths[(i + 1) % numRays]);
-        float g = length * length / (distance + 0.0001f);
-
-        if (amount != 50) { // if amount = 50 then power = 1, but safer to compare ints
-            g = (float) powQuick(g, power);
+        // safe-guard bounds to protect against edge-case float inaccuracies
+        if (i < 0) {
+            i = 0;
+        } else if (i > numRays) {
+            i = numRays;
         }
 
-        f -= 0.5f;
-//			f *= amount/50.0f;
-        f = 1 - f * f;
-        f *= g;
+        float fraction = d - i;
+        float length = lerp(fraction, rayLengths[i], rayLengths[i + 1]);
+        float intensity = length * length / (distSq + 0.0001f);
 
-        f = clamp01(f);
+        if (amount != 50) { // if amount = 50 then power = 1, but safer to compare ints
+            intensity = (float) powQuick(intensity, power);
+        }
+
+        float offset = fraction - 0.5f;
+        float rayWeight = (1.0f - offset * offset) * intensity;
+
+        float mixRatio = clamp01(rayWeight);
+
         if (lightOnly) {
-            return mixColors(f, 0, color);
+            // this has the effect of mixing with the
+            // transparent version (alpha = 0) of the light color
+            int origAlpha = color >>> 24;
+            int newAlpha = (int) (mixRatio * origAlpha);
+            return (newAlpha << 24) | (color & 0x00_FF_FF_FF);
         } else {
-            return mixColors(f, rgb, color);
+            return mixColors(mixRatio, rgb, color);
         }
     }
 
@@ -140,10 +151,5 @@ public class SparkleFilter extends PointFilter {
 
     public void setRandom(Random random) {
         this.random = random;
-    }
-
-    @Override
-    public String toString() {
-        return "Stylize/Sparkle...";
     }
 }

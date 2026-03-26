@@ -20,30 +20,24 @@ package com.jhlabs.image;
  * A class to emboss an image.
  */
 public class EmbossFilter extends WholeImageFilter {
-    private static final float pixelScale = 255.9f;
+    private static final float PIXEL_SCALE = 255.9f;
 
-    private float azimuth = 135.0f * ImageMath.PI / 180.0f, elevation = 30.0f * ImageMath.PI / 180.0f;
-    private boolean emboss = false;
-    private float width45 = 3.0f;
+    private final float azimuth;
+    private final float elevation;
+    private final boolean texture;
+    private final float width45;
 
-    public EmbossFilter(String filterName) {
+    public EmbossFilter(String filterName,
+                        float azimuth,
+                        float elevation,
+                        float bumpHeight,
+                        boolean texture) {
         super(filterName);
-    }
 
-    public void setAzimuth(float azimuth) {
         this.azimuth = azimuth + ImageMath.PI;
-    }
-
-    public void setElevation(float elevation) {
         this.elevation = elevation;
-    }
-
-    public void setBumpHeight(float bumpHeight) {
-        width45 = 3 * bumpHeight;
-    }
-
-    public void setEmboss(boolean emboss) {
-        this.emboss = emboss;
+        this.texture = texture;
+        this.width45 = 3 * bumpHeight;
     }
 
     @Override
@@ -52,17 +46,15 @@ public class EmbossFilter extends WholeImageFilter {
 
         // a bump map is derived from the brightness values of the
         // input image, and represents the the surface's height map
-        int bumpMapWidth = width;
-        int bumpMapHeight = height;
-        int[] bumpPixels = new int[bumpMapWidth * bumpMapHeight];
+        int[] bumpPixels = new int[inPixels.length];
         for (int i = 0; i < inPixels.length; i++) {
-            bumpPixels[i] = PixelUtils.brightness(inPixels[i]);
+            bumpPixels[i] = ImageMath.calcLuminanceInt(inPixels[i]);
         }
 
         // the light vector components based on azimuth and elevation
-        int Lx = (int) (Math.cos(azimuth) * Math.cos(elevation) * pixelScale);
-        int Ly = (int) (Math.sin(azimuth) * Math.cos(elevation) * pixelScale);
-        int Lz = (int) (Math.sin(elevation) * pixelScale);
+        int Lx = (int) (Math.cos(azimuth) * Math.cos(elevation) * PIXEL_SCALE);
+        int Ly = (int) (Math.sin(azimuth) * Math.cos(elevation) * PIXEL_SCALE);
+        int Lz = (int) (Math.sin(elevation) * PIXEL_SCALE);
 
         // surface normal vector: perpendicular to the surface at each point
         int Nx;
@@ -79,15 +71,16 @@ public class EmbossFilter extends WholeImageFilter {
         int[] outPixels = new int[width * height];
         int index = 0;
         int bumpIndex = 0;
-        for (int y = 0; y < height; y++, bumpIndex += bumpMapWidth) {
-            int s1 = bumpIndex - bumpMapWidth;  // previous row
-            int s2 = bumpIndex;                 // current row
-            int s3 = bumpIndex + bumpMapWidth;  // next row
+        for (int y = 0; y < height; y++, bumpIndex += width) {
+            int s1 = bumpIndex - width;  // previous row
+            int s2 = bumpIndex;          // current row
+            int s3 = bumpIndex + width;  // next row
 
+            boolean yInBounds = y > 0 && y < height - 1;
             for (int x = 0; x < width; x++, s1++, s2++, s3++) {
                 int shade; // the calculated intensity of reflected light at a specific pixel
 
-                if (y != 0 && y < height - 1 && x != 0 && x < width - 1) {
+                if (yInBounds && x > 0 && x < width - 1) {
                     Nx = bumpPixels[s1 - 1] + bumpPixels[s2 - 1] + bumpPixels[s3 - 1] - bumpPixels[s1 + 1] - bumpPixels[s2 + 1] - bumpPixels[s3 + 1];
                     Ny = bumpPixels[s3 - 1] + bumpPixels[s3] + bumpPixels[s3 + 1] - bumpPixels[s1 - 1] - bumpPixels[s1] - bumpPixels[s1 + 1];
 
@@ -111,12 +104,12 @@ public class EmbossFilter extends WholeImageFilter {
                 }
 
                 int rgb = inPixels[index];
-                int a = rgb & 0xff000000;
-                if (emboss) {
+                int a = rgb & 0xFF_00_00_00;
+                if (texture) {
                     // blend the shading with the original image's colors
-                    int r = (rgb >> 16) & 0xff;
-                    int g = (rgb >> 8) & 0xff;
-                    int b = rgb & 0xff;
+                    int r = (rgb >> 16) & 0xFF;
+                    int g = (rgb >> 8) & 0xFF;
+                    int b = rgb & 0xFF;
                     r = (r * shade) >> 8;
                     g = (g * shade) >> 8;
                     b = (b * shade) >> 8;
@@ -131,10 +124,5 @@ public class EmbossFilter extends WholeImageFilter {
         finishProgressTracker();
 
         return outPixels;
-    }
-
-    @Override
-    public String toString() {
-        return "Stylize/Emboss...";
     }
 }

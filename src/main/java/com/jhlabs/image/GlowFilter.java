@@ -26,31 +26,20 @@ import java.awt.image.BufferedImage;
  * @author Jerry Huxtable
  */
 public class GlowFilter extends AbstractBufferedImageOp {
-    private float amount = 0.5f;
+    private final float amount;
+    private final float radius;
 
     /**
-     * The blur radius.
-     */
-    protected float radius;
-
-    public GlowFilter(String filterName) {
-        super(filterName);
-        radius = 2;
-    }
-
-    public void setRadius(float radius) {
-        this.radius = radius;
-    }
-
-    /**
-     * Sets the amount of glow.
+     * Creates a new GlowFilter with the specified parameters.
      *
-     * @param amount the amount
-     * @min-value 0
-     * @max-value 1
+     * @param filterName the name of the filter
+     * @param amount     the amount of glow (in the range [0, 1])
+     * @param radius     the blur radius
      */
-    public void setAmount(float amount) {
+    public GlowFilter(String filterName, float amount, float radius) {
+        super(filterName);
         this.amount = amount;
+        this.radius = radius;
     }
 
     @Override
@@ -63,6 +52,8 @@ public class GlowFilter extends AbstractBufferedImageOp {
         int[] inPixels = ImageUtils.getPixels(src);
 
         if (radius > 0) {
+            // most of the time is spent here, so only
+            // the blur manages its progress tracker
             BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3, filterName);
             srcCopy = boxBlur.filter(srcCopy, srcCopy);
         }
@@ -75,32 +66,30 @@ public class GlowFilter extends AbstractBufferedImageOp {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int rgb1 = inPixels[index];
-                int r1 = (rgb1 >> 16) & 0xff;
-                int g1 = (rgb1 >> 8) & 0xff;
-                int b1 = rgb1 & 0xff;
+                int r1 = (rgb1 >> 16) & 0xFF;
+                int g1 = (rgb1 >> 8) & 0xFF;
+                int b1 = rgb1 & 0xFF;
 
                 int rgb2 = outPixels[index];
-                int r2 = (rgb2 >> 16) & 0xff;
-                int g2 = (rgb2 >> 8) & 0xff;
-                int b2 = rgb2 & 0xff;
+                int r2 = (rgb2 >> 16) & 0xFF;
+                int g2 = (rgb2 >> 8) & 0xFF;
+                int b2 = rgb2 & 0xFF;
 
                 r1 = PixelUtils.max255((int) (r1 + a * r2));
                 g1 = PixelUtils.max255((int) (g1 + a * g2));
                 b1 = PixelUtils.max255((int) (b1 + a * b2));
 
-                outPixels[index] = (rgb1 & 0xff000000) | (r1 << 16) | (g1 << 8) | b1;
+                outPixels[index] = (rgb1 & 0xFF_00_00_00) | (r1 << 16) | (g1 << 8) | b1;
                 index++;
             }
         }
 
-//        dst.setRGB(0, 0, width, height, inPixels, 0, width);
+        if (dst == null) {
+            return srcCopy;
+        }
+
         setRGB(dst, 0, 0, width, height, outPixels);
 
         return dst;
-    }
-
-    @Override
-    public String toString() {
-        return "Blur/Glow...";
     }
 }

@@ -19,6 +19,7 @@ package com.jhlabs.image;
 import com.jhlabs.math.Noise;
 import pixelitor.ThreadPool;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
@@ -42,10 +43,10 @@ public class CausticsFilter extends WholeImageFilter {
      *
      * @param filterName the name of the filter
      * @param scale      the scale of the texture (in the range 1..300+)
-     * @param brightness the brightness (in the range 0..1)
-     * @param amount     the amount of the effect (in the range 0..1)
-     * @param turbulence the turbulence of the texture (in the range 0..1)
-     * @param dispersion the color dispersion (in the range 0..1)
+     * @param brightness the brightness (in the range [0, 1])
+     * @param amount     the amount of the effect (in the range [0, 1])
+     * @param turbulence the turbulence of the texture (in the range [0, 1])
+     * @param dispersion the color dispersion (in the range [0, 1])
      * @param time       the time, used to animate the effect
      * @param samples    the number of samples per pixel. More samples means better quality, but slower rendering
      * @param bgColor    the background color
@@ -68,17 +69,9 @@ public class CausticsFilter extends WholeImageFilter {
         int[] pixels = new int[width * height];
 
         // initialize all pixels to the background color
-        int index = 0;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                pixels[index++] = bgColor;
-            }
-        }
+        Arrays.fill(pixels, bgColor);
 
-        int v = brightness / samples; // brightness per sample
-        if (v == 0) {
-            v = 1;
-        }
+        int v = Math.max(1, brightness / samples); // brightness per sample
 
         float rs = 1.0f / scale;
         float d = 0.95f;
@@ -88,8 +81,7 @@ public class CausticsFilter extends WholeImageFilter {
         Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            int finalV = v;
-            Runnable rowTask = () -> processRow(width, height, pixels, finalV, rs, d, finalY);
+            Runnable rowTask = () -> processRow(width, height, pixels, v, rs, d, finalY);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
         ThreadPool.waitFor(rowFutures, pt);
@@ -101,90 +93,75 @@ public class CausticsFilter extends WholeImageFilter {
 
     private void processRow(int width, int height, int[] pixels, int v, float rs, float d, int y) {
         Random random = ThreadLocalRandom.current();
-        for (int x = 0; x < width; x++) {
-            for (int sample = 0; sample < samples; sample++) {
-                float sx = x + random.nextFloat();
-                float sy = y + random.nextFloat();
-                float nx = sx * rs;
-                float ny = sy * rs;
-                float focus = 0.1f + amount;
-                float xDisplacement = evaluate(nx - d, ny) - evaluate(nx + d, ny);
-                float yDisplacement = evaluate(nx, ny + d) - evaluate(nx, ny - d);
+        float focus = 0.1f + amount;
+        float scaleFocus = scale * focus;
 
-                if (dispersion > 0) {
-                    applyDispersionEffect(pixels, width, height, sx, sy, v, focus, xDisplacement, yDisplacement);
-                } else {
-                    applyBasicEffect(pixels, width, height, sx, sy, v, focus, xDisplacement, yDisplacement);
+        if (dispersion > 0) {
+            // precalculate dispersed scales
+            float sfc0 = scaleFocus * 1; // channel 0 (blue)
+            float sfc1 = scaleFocus * (1 + dispersion); // channel 1 (green)
+            float sfc2 = scaleFocus * (1 + 2 * dispersion); // channel 2 (red)
+
+            for (int x = 0; x < width; x++) {
+                for (int sample = 0; sample < samples; sample++) {
+                    float sx = x + random.nextFloat();
+                    float sy = y + random.nextFloat();
+                    float nx = sx * rs;
+                    float ny = sy * rs;
+                    float xDisplacement = evaluate(nx - d, ny) - evaluate(nx + d, ny);
+                    float yDisplacement = evaluate(nx, ny + d) - evaluate(nx, ny - d);
+
+                    applyDispersionChannel(pixels, width, height, sx, sy, v, sfc0, xDisplacement, yDisplacement, 0);
+                    applyDispersionChannel(pixels, width, height, sx, sy, v, sfc1, xDisplacement, yDisplacement, 8);
+                    applyDispersionChannel(pixels, width, height, sx, sy, v, sfc2, xDisplacement, yDisplacement, 16);
                 }
             }
-        }
-    }
-
-    private void applyDispersionEffect(int[] pixels, int width, int height, float sx, float sy, int v, float focus, float xDisplacement, float yDisplacement) {
-        for (int channel = 0; channel < 3; channel++) {
-            float ca = (1 + channel * dispersion);
-            float scaleXFocusXca = scale * focus * ca;
-            float srcX = sx + scaleXFocusXca * xDisplacement;
-            float srcY = sy + scaleXFocusXca * yDisplacement;
-
-            if (srcX < 0 || srcX >= width - 1 || srcY < 0 || srcY >= height - 1) {
-            } else {
-                int i = ((int) srcY) * width + (int) srcX;
-                int rgb = pixels[i];
-                int r = (rgb >> 16) & 0xff;
-                int g = (rgb >> 8) & 0xff;
-                int b = rgb & 0xff;
-                if (channel == 2) {
-                    r += v;
-                } else if (channel == 1) {
-                    g += v;
-                } else {
-                    b += v;
-                }
-                if (r > 255) {
-                    r = 255;
-                }
-                if (g > 255) {
-                    g = 255;
-                }
-                if (b > 255) {
-                    b = 255;
-                }
-                pixels[i] = 0xff000000 | (r << 16) | (g << 8) | b;
-            }
-        }
-    }
-
-    private void applyBasicEffect(int[] pixels, int width, int height, float sx, float sy, int v, float focus, float xDisplacement, float yDisplacement) {
-        float srcX = sx + scale * focus * xDisplacement;
-        float srcY = sy + scale * focus * yDisplacement;
-
-        if (srcX < 0 || srcX >= width - 1 || srcY < 0 || srcY >= height - 1) {
         } else {
+            for (int x = 0; x < width; x++) {
+                for (int sample = 0; sample < samples; sample++) {
+                    float sx = x + random.nextFloat();
+                    float sy = y + random.nextFloat();
+                    float nx = sx * rs;
+                    float ny = sy * rs;
+                    float xDisplacement = evaluate(nx - d, ny) - evaluate(nx + d, ny);
+                    float yDisplacement = evaluate(nx, ny + d) - evaluate(nx, ny - d);
+
+                    applyBasicEffect(pixels, width, height, sx, sy, v, scaleFocus, xDisplacement, yDisplacement);
+                }
+            }
+        }
+    }
+
+    private static void applyDispersionChannel(int[] pixels, int width, int height, float sx, float sy, int v,
+                                               float sfc, float xDisplacement, float yDisplacement, int shift) {
+        float srcX = sx + sfc * xDisplacement;
+        float srcY = sy + sfc * yDisplacement;
+
+        if (srcX >= 0 && srcX < width - 1 && srcY >= 0 && srcY < height - 1) {
+            int i = ((int) srcY) * width + (int) srcX;
+            int mask = ~(0xFF << shift);
+            pixels[i] = (pixels[i] & mask) | (Math.min(((pixels[i] >> shift) & 0xFF) + v, 255) << shift);
+        }
+    }
+
+    private static void applyBasicEffect(int[] pixels, int width, int height, float sx, float sy, int v, float scaleFocus, float xDisplacement, float yDisplacement) {
+        float srcX = sx + scaleFocus * xDisplacement;
+        float srcY = sy + scaleFocus * yDisplacement;
+
+        if (srcX >= 0 && srcX < width - 1 && srcY >= 0 && srcY < height - 1) {
             int i = ((int) srcY) * width + (int) srcX;
             int rgb = pixels[i];
-            int r = (rgb >> 16) & 0xff;
-            int g = (rgb >> 8) & 0xff;
-            int b = rgb & 0xff;
-            r += v;
-            g += v;
-            b += v;
-            if (r > 255) {
-                r = 255;
-            }
-            if (g > 255) {
-                g = 255;
-            }
-            if (b > 255) {
-                b = 255;
-            }
-            pixels[i] = 0xff000000 | (r << 16) | (g << 8) | b;
+
+            int r = Math.min(((rgb >> 16) & 0xFF) + v, 255);
+            int g = Math.min(((rgb >> 8) & 0xFF) + v, 255);
+            int b = Math.min((rgb & 0xFF) + v, 255);
+
+            pixels[i] = 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
         }
     }
 
     private static float turbulence2(float x, float y, float time, float octaves) {
         float f = 1.0f;
-        int i;
 
         // to prevent "cascading" effects
         x += 371;
@@ -192,7 +169,7 @@ public class CausticsFilter extends WholeImageFilter {
 
         float value = 0.0f;
         float lacunarity = 2.0f;
-        for (i = 0; i < (int) octaves; i++) {
+        for (int i = 0; i < (int) octaves; i++) {
             value += Noise.noise3(x, y, time) / f;
             x *= lacunarity;
             y *= lacunarity;
@@ -211,10 +188,5 @@ public class CausticsFilter extends WholeImageFilter {
         float xt = x + time;
         float tt = x - time;
         return turbulence2(xt, y, tt, turbulence);
-    }
-
-    @Override
-    public String toString() {
-        return "Texture/Caustics...";
     }
 }

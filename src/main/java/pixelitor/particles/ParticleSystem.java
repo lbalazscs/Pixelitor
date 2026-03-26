@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,7 +91,7 @@ public class ParticleSystem<P extends Particle> {
     public Future<?>[] iterate(int iterations, int groupCount) {
         Future<?>[] futures = new Future[groupCount];
         int s = particles.size();
-        int groupSize = (int) FastMath.ceil(s / (double) groupCount);
+        int groupSize = (int) Math.ceil(s / (double) groupCount);
 
         for (int i = 0, k = 0; i < s; i += groupSize, k++) {
             int finalI = i;

@@ -16,49 +16,55 @@ limitations under the License.
 
 package com.jhlabs.math;
 
+/**
+ * Implements the Cooley-Tukey FFT algorithm for computing the
+ * Discrete Fourier Transform (DFT) and its inverse.
+ * It supports both 1D and 2D transforms.
+ */
 public class FFT {
-    // Weighting factors
-    protected final float[] w1;
-    protected final float[] w2;
-    protected final float[] w3;
+    private final float[] w2;
+    private final float[] w3;
 
     public FFT(int logN) {
         // Prepare the weighting factors
-        w1 = new float[logN];
         w2 = new float[logN];
         w3 = new float[logN];
         int N = 1;
         for (int k = 0; k < logN; k++) {
             N <<= 1;
             double angle = -2.0 * Math.PI / N;
-            w1[k] = (float) Math.sin(0.5 * angle);
-            w2[k] = -2.0f * w1[k] * w1[k];
+            double w1 = Math.sin(0.5 * angle);
+            w2[k] = (float) (-2.0f * w1 * w1);
             w3[k] = (float) Math.sin(angle);
         }
     }
 
-    private static void scramble(int n, float[] real, float[] imag) {
-        int j = 0;
-
+    /**
+     * Step one of FFT: bit-reversal permutation.
+     * Rearranges the input array by reversing the bits of each
+     * element's index. For example, index 110 (6) becomes 011 (3).
+     * This reordering is required so the butterfly stages can work in-place efficiently.
+     */
+    private static void scramble(int n, int logN, float[] real, float[] imag) {
         for (int i = 0; i < n; i++) {
+            // the FFT only needs the low logN bits reversed
+            int j = Integer.reverse(i) >>> (32 - logN);
             if (i > j) {
-                float t;
-                t = real[j];
+                float t = real[j];
                 real[j] = real[i];
                 real[i] = t;
                 t = imag[j];
                 imag[j] = imag[i];
                 imag[i] = t;
             }
-            int m = n >> 1;
-            while (j >= m && m >= 2) {
-                j -= m;
-                m >>= 1;
-            }
-            j += m;
         }
     }
 
+    /**
+     * Step two of FFT: butterfly operations (the core computation).
+     * The direction parameter controls the transform direction:
+     * +1 for forward (time → frequency), −1 for inverse (frequency → time).
+     */
     private void butterflies(int n, int logN, int direction, float[] real, float[] imag) {
         int N = 1;
 
@@ -66,7 +72,6 @@ public class FFT {
             float w_re, w_im, wp_re, wp_im, temp_re, temp_im, wt;
             int half_N = N;
             N <<= 1;
-//            wt = direction * w1[k];
             wp_re = w2[k];
             wp_im = direction * w3[k];
             w_re = 1.0f;
@@ -88,6 +93,7 @@ public class FFT {
                 w_im = w_im * wp_re + wt * wp_im + w_im;
             }
         }
+        // on an inverse transform, the results are also divided by n to normalize the output
         if (direction == -1) {
             float nr = 1.0f / n;
             for (int i = 0; i < n; i++) {
@@ -97,11 +103,20 @@ public class FFT {
         }
     }
 
-    public void transform1D(float[] real, float[] imag, int logN, int n, boolean forward) {
-        scramble(n, real, imag);
+    /**
+     * Transforms a single array of complex numbers (split into
+     * separate real and imag float arrays). n must be a power of 2.
+     */
+    private void transform1D(float[] real, float[] imag, int logN, int n, boolean forward) {
+        scramble(n, logN, real, imag);
         butterflies(n, logN, forward ? 1 : -1, real, imag);
     }
 
+    /**
+     * Applies the FFT to a 2D grid (e.g. an image) by exploiting the
+     * separability of the 2D DFT: it simply runs 1D FFTs across all rows
+     * first, then down all columns. Both dimensions must also be powers of 2.
+     */
     public void transform2D(float[] real, float[] imag, int cols, int rows, boolean forward) {
         int log2cols = log2(cols);
         int log2rows = log2(rows);
@@ -137,14 +152,15 @@ public class FFT {
         }
     }
 
+    /**
+     * Returns log₂(n) only if n is an exact power of two.
+     */
     private static int log2(int n) {
-        int m = 1;
-        int log2n = 0;
-
-        while (m < n) {
-            m *= 2;
-            log2n++;
+        int floorLog = (Integer.SIZE - 1) - Integer.numberOfLeadingZeros(n);
+        if ((1 << floorLog) == n) {
+            return floorLog;
         }
-        return m == n ? log2n : -1;
+        // not a power of two
+        throw new IllegalArgumentException("n = " + n);
     }
 }

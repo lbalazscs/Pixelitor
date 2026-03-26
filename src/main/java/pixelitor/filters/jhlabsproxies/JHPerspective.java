@@ -64,11 +64,11 @@ public class JHPerspective extends ParametrizedFilter {
         float southEastX = (float) southEast.getRelativeX();
         float southEastY = (float) southEast.getRelativeY();
 
-        var filter = new PerspectiveFilter(northWestX, northWestY, northEastX, northEastY,
-            southEastX, southEastY, southWestX, southWestY, NAME);
-
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        var filter = new PerspectiveFilter(NAME,
+            edgeAction.getValue(), interpolation.getValue(),
+            northWestX, northWestY, northEastX, northEastY,
+            southEastX, southEastY, southWestX, southWestY,
+            src.getWidth(), src.getHeight());
 
         return filter.filter(src, dest);
     }

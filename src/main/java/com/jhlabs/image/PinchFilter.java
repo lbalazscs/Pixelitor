@@ -17,132 +17,80 @@ limitations under the License.
 package com.jhlabs.image;
 
 import net.jafama.FastMath;
-import pixelitor.filters.jhlabsproxies.JHSwirlPinchBulge;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 
 /**
  * A filter which performs the popular whirl-and-pinch distortion effect.
  */
-public class PinchFilter extends TransformFilter implements SwirlMethod {
-    private float angle = 0;
-    private float centerX = 0.5f;
-    private float centerY = 0.5f;
-    private float radius = 100;
-    private float pinchBulgeAmount = 0.5f;
+public class PinchFilter extends TransformFilter {
+    private final float angle;
+    private final float radius;
+    private final float radius2;
+    private final float pinchBulgeAmount;
 
-    private float radius2 = 0;
-    private float icenterX;
-    private float icenterY;
+    private final float cx;
+    private final float cy;
 
-    private float zoom;
-    private float rotateResultAngle;
-
-    public PinchFilter() {
-        super(JHSwirlPinchBulge.NAME);
-    }
+    private final float zoom;
+    private final float rotateResultAngle;
 
     /**
-     * Sets the angle of twirl in radians. 0 means no distortion.
+     * Constructs a PinchFilter with all parameters specified.
      *
-     * @param angle the angle of twirl. This is the angle by which pixels at the nearest edge of the image will move.
+     * @param filterName        the name of the filter
+     * @param edgeAction        the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT)
+     * @param interpolation     the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC)
+     * @param swirlAmount       the angle of twirl in radians. 0 means no distortion.
+     *                          This is the angle by which pixels at the nearest edge of the image will move.
+     * @param pinchBulgeAmount  the amount of pinch/bulge in the range [-1, 1]
+     * @param radius            the radius of the effect (must be >= 0)
+     * @param center            the center of the effect in pixels
+     * @param zoom              the zoom factor (1 = no zoom)
+     * @param rotateResultAngle additional rotation applied to the result in radians
      */
-    @Override
-    public void setSwirlAmount(float angle) {
-        this.angle = -angle;
-    }
+    public PinchFilter(String filterName, int edgeAction, int interpolation,
+                       float swirlAmount, float pinchBulgeAmount, float radius,
+                       Point2D center, float zoom, float rotateResultAngle) {
+        super(filterName, edgeAction, interpolation);
 
-    /**
-     * Sets the center of the effect in the X direction as a proportion of the image size.
-     *
-     * @param centerX the center
-     */
-    @Override
-    public void setCenterX(float centerX) {
-        this.centerX = centerX;
-    }
+        this.angle = -swirlAmount;
+        this.pinchBulgeAmount = -pinchBulgeAmount;
 
-    /**
-     * Sets the center of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centerY the center
-     */
-    @Override
-    public void setCenterY(float centerY) {
-        this.centerY = centerY;
-    }
-
-    /**
-     * Sets the center of the effect as a proportion of the image size.
-     *
-     * @param center the center
-     */
-    public void setCenter(Point2D center) {
-        centerX = (float) center.getX();
-        centerY = (float) center.getY();
-    }
-
-    /**
-     * Sets the radius of the effect.
-     *
-     * @param radius the radius
-     * @min-value 0
-     */
-    @Override
-    public void setRadius(float radius) {
         this.radius = radius;
-    }
+        this.radius2 = radius * radius;
 
-    /**
-     * Sets the amount of pinch.
-     *
-     * @param amount the amount
-     * @min-value -1
-     * @max-value 1
-     */
-    @Override
-    public void setPinchBulgeAmount(float amount) {
-        pinchBulgeAmount = -amount;
-    }
+        this.cx = (float) center.getX();
+        this.cy = (float) center.getY();
 
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        float width = src.getWidth();
-        float height = src.getHeight();
-        icenterX = width * centerX;
-        icenterY = height * centerY;
-        if (radius == 0) {
-            radius = Math.min(icenterX, icenterY);
-        }
-        radius2 = radius * radius;
-        return super.filter(src, dst);
+        this.zoom = zoom;
+        this.rotateResultAngle = rotateResultAngle;
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - icenterX;
-        float dy = y - icenterY;
+        float dx = x - cx;
+        float dy = y - cy;
         float distance = dx * dx + dy * dy;
 
         if (distance > radius2 || distance == 0) {
-//            out[0] = x;
-//            out[1] = y;
-
-            double angle = FastMath.atan2(dy, dx);
-            angle += rotateResultAngle;
+            double theta = FastMath.atan2(dy, dx);
+            theta += rotateResultAngle;
             double r = Math.sqrt(distance);
             double zoomedR = r / zoom;
-            float u = (float) (zoomedR * FastMath.cos(angle));
-            float v = (float) (zoomedR * FastMath.sin(angle));
+            float u = (float) (zoomedR * FastMath.cos(theta));
+            float v = (float) (zoomedR * FastMath.sin(theta));
 
-            out[0] = (u + icenterX);
-            out[1] = (v + icenterY);
+            out[0] = (u + cx);
+            out[1] = (v + cy);
         } else {
             float scaledDist = (float) Math.sqrt(distance / radius2);
-            float pinchBulgeFactor = (float) FastMath.pow(FastMath.sin(Math.PI * 0.5 * scaledDist), -pinchBulgeAmount);
+            float pinchBulgeFactor = (float) FastMath.pow(
+                FastMath.sin(Math.PI * 0.5 * scaledDist),
+                -pinchBulgeAmount
+            );
 
             // pinch-bulge
             dx *= pinchBulgeFactor;
@@ -160,30 +108,14 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
             float u = (cos * dx - sin * dy) / zoom;
             float v = (sin * dx + cos * dy) / zoom;
 
-            out[0] = icenterX + u;
-            out[1] = icenterY + v;
+            out[0] = cx + u;
+            out[1] = cy + v;
         }
     }
 
-    @Override
-    public void setZoom(float zoom) {
-        this.zoom = zoom;
-    }
-
-    @Override
-    public void setRotateResultAngle(float rotateResultAngle) {
-        this.rotateResultAngle = rotateResultAngle;
-    }
-
-    @Override
-    public String toString() {
-        return "Distort/Pinch...";
-    }
-
-    @Override
     public Shape[] getAffectedAreaShapes() {
         return new Shape[]{
-            new Ellipse2D.Float(icenterX - radius, icenterY - radius, 2 * radius, 2 * radius)
+            new Ellipse2D.Float(cx - radius, cy - radius, 2 * radius, 2 * radius)
         };
     }
 }

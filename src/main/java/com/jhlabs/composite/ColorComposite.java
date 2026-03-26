@@ -16,7 +16,9 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.CompositeContext;
+import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class ColorComposite extends RGBComposite {
@@ -58,9 +60,9 @@ public final class ColorComposite extends RGBComposite {
                 dHSB[1] = sHSB[1];
 
                 int doRGB = Color.HSBtoRGB(dHSB[0], dHSB[1], dHSB[2]);
-                int dor = (doRGB & 0xff0000) >> 16;
-                int dog = (doRGB & 0xff00) >> 8;
-                int dob = (doRGB & 0xff);
+                int dor = (doRGB & 0xFF_00_00) >> 16;
+                int dog = (doRGB & 0xFF_00) >> 8;
+                int dob = (doRGB & 0xFF);
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

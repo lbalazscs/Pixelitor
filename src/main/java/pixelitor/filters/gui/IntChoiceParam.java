@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
 
@@ -142,14 +141,6 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
             interpolationMethods, IGNORE_RANDOMIZE);
     }
 
-    private static final Item[] gridTypeChoices = {
-        new Item("Fully Random", CellularFilter.GR_RANDOM),
-        new Item("Squares", CellularFilter.GR_SQUARE),
-        new Item("Hexagons", CellularFilter.GR_HEXAGONAL),
-        new Item("Octagons & Squares", CellularFilter.GR_OCTAGONAL),
-        new Item("Triangles", CellularFilter.GR_TRIANGULAR),
-    };
-
     private static final Item[] waveTypeChoices = {
         new Item("Sine", WaveType.SINE),
         new Item("Triangle", WaveType.TRIANGLE),
@@ -170,14 +161,6 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
             selected -> selected.valueIs(WaveType.NOISE));
 
         return withSideButton(reseedNoise);
-    }
-
-    public static IntChoiceParam forGridType(String name, RangeParam randomnessParam) {
-        var param = new IntChoiceParam(name, gridTypeChoices);
-        // enable the randomness slider only if the grid type isn't "Fully Random"
-        param.setupEnableOtherIf(randomnessParam, selected ->
-            selected.value() != CellularFilter.GR_RANDOM);
-        return param;
     }
 
     @Override

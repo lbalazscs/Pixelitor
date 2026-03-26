@@ -1718,9 +1718,9 @@ public class MainGuiTest {
         // Curves
         testFilterWithDialog("Circle Weave", FilterOptions.SHAPES);
         testFilterWithDialog("Flower of Life", FilterOptions.SHAPES);
-        testFilterWithDialog("L-Systems", FilterOptions.SHAPES);
         testFilterWithDialog("Grid", FilterOptions.SHAPES);
         testFilterWithDialog("Lissajous Curve", FilterOptions.SHAPES);
+        testFilterWithDialog("L-Systems", FilterOptions.SHAPES);
         testFilterWithDialog("Spider Web", FilterOptions.SHAPES);
         testFilterWithDialog("Spiral", FilterOptions.SHAPES);
         testFilterWithDialog("Spirograph", FilterOptions.SHAPES);

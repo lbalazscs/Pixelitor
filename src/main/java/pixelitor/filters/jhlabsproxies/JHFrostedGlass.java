@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.DiffuseFilter;
@@ -39,7 +40,6 @@ public class JHFrostedGlass extends ParametrizedFilter {
 
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
-    private DiffuseFilter filter;
 
     public JHFrostedGlass() {
         super(true);
@@ -56,13 +56,12 @@ public class JHFrostedGlass extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new DiffuseFilter(NAME);
-        }
-
-        filter.setScale(amount.getValueAsFloat());
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        DiffuseFilter filter = new DiffuseFilter(
+            NAME,
+            amount.getValueAsFloat(),
+            edgeAction.getValue(),
+            interpolation.getValue()
+        );
 
         return filter.filter(src, dest);
     }

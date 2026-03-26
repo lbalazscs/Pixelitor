@@ -116,7 +116,7 @@ public class VoronoiFilter extends PointFilter {
         int closestIndex = sampling.findClosestPointIndex(x, y,
             intPrecisionDistance);
         if (closestIndex == -1) {
-            // there wasn't a point in the cell or in its neighbours
+            // there wasn't a point in the cell or in its neighbors
             if (AppMode.isDevelopment()) {
                 throw new IllegalStateException(String.format(
                     "x = %d, y = %d", x, y));

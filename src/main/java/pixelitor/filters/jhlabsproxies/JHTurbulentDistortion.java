@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.MarbleFilter;
@@ -42,8 +43,6 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
-    private MarbleFilter filter;
-
     public JHTurbulentDistortion() {
         super(true);
 
@@ -63,16 +62,15 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new MarbleFilter(NAME);
-        }
-
-        filter.setTurbulence((float) turbulence.getPercentage());
-        filter.setScale(scale.getValueAsFloat());
-        filter.setAmount(amount.getValueAsFloat());
-        filter.setTime((float) (time.getPercentage() * 5));
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        MarbleFilter filter = new MarbleFilter(
+            NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            scale.getValueAsFloat(),
+            amount.getValueAsFloat(),
+            (float) turbulence.getPercentage(),
+            (float) (time.getPercentage() * 5)
+        );
 
         return filter.filter(src, dest);
     }

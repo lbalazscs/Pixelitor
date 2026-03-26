@@ -115,13 +115,13 @@ public class QuantizeFilter extends WholeImageFilter {
 
                     outPixels[index] = rgb2;
 
-                    int r1 = (rgb1 >> 16) & 0xff;
-                    int g1 = (rgb1 >> 8) & 0xff;
-                    int b1 = rgb1 & 0xff;
+                    int r1 = (rgb1 >> 16) & 0xFF;
+                    int g1 = (rgb1 >> 8) & 0xFF;
+                    int b1 = rgb1 & 0xFF;
 
-                    int r2 = (rgb2 >> 16) & 0xff;
-                    int g2 = (rgb2 >> 8) & 0xff;
-                    int b2 = rgb2 & 0xff;
+                    int r2 = (rgb2 >> 16) & 0xFF;
+                    int g2 = (rgb2 >> 8) & 0xFF;
+                    int b2 = rgb2 & 0xFF;
 
                     int er = r1 - r2;
                     int eg = g1 - g2;
@@ -142,9 +142,9 @@ public class QuantizeFilter extends WholeImageFilter {
                                     if (w != 0) {
                                         int k = reverse ? index - j : index + j;
                                         rgb1 = inPixels[k];
-                                        r1 = (rgb1 >> 16) & 0xff;
-                                        g1 = (rgb1 >> 8) & 0xff;
-                                        b1 = rgb1 & 0xff;
+                                        r1 = (rgb1 >> 16) & 0xFF;
+                                        g1 = (rgb1 >> 8) & 0xFF;
+                                        b1 = rgb1 & 0xFF;
                                         r1 += er * w / sum;
                                         g1 += eg * w / sum;
                                         b1 += eb * w / sum;
@@ -171,10 +171,5 @@ public class QuantizeFilter extends WholeImageFilter {
         quantize(inPixels, outPixels, width, height, numColors, dither, serpentine);
 
         return outPixels;
-    }
-
-    @Override
-    public String toString() {
-        return "Colors/Quantize...";
     }
 }

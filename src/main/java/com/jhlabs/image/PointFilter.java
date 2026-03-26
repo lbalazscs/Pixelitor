@@ -43,7 +43,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
         }
 
         if (src.getType() == TYPE_BYTE_GRAY) {
-            return grayFilter(src, dst);
+            return filterGrayscale(src, dst);
         }
 
         int[] inPixels = ImageUtils.getPixels(src);
@@ -68,7 +68,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    public BufferedImage grayFilter(BufferedImage src, BufferedImage dst) {
+    private BufferedImage filterGrayscale(BufferedImage src, BufferedImage dst) {
         int width = src.getWidth();
         int height = src.getHeight();
 
@@ -93,6 +93,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
     }
 
     public void setDimensions(int width, int height) {
+        // intended to be overridden by subclasses
     }
 
     public abstract int processPixel(int x, int y, int rgb);

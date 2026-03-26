@@ -132,7 +132,7 @@ public enum MaskInitMethod {
                 @Override
                 public int processPixel(int x, int y, int rgb) {
                     // map alpha (0-255) to RGB grayscale (R=a, G=a, B=a)
-                    int a = (rgb >>> 24) & 0xFF;
+                    int a = rgb >>> 24;
                     return 0xFF_00_00_00 | a << 16 | a << 8 | a;
                 }
             };

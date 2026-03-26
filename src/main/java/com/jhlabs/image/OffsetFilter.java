@@ -114,9 +114,4 @@ public class OffsetFilter extends TransformFilter {
         }
         return super.filter(src, dst);
     }
-
-    @Override
-    public String toString() {
-        return "Distort/Offset...";
-    }
 }

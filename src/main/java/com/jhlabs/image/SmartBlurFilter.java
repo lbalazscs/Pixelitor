@@ -25,8 +25,7 @@ import java.awt.image.Kernel;
  * A filter which performs a "smart blur". i.e. a blur which blurs smotth parts of the image while preserving edges.
  */
 public class SmartBlurFilter extends AbstractBufferedImageOp {
-    private int hRadius = 5;
-    private int vRadius = 5;
+    private int radius = 5;
     private int threshold = 10;
 
     public SmartBlurFilter(String filterName) {
@@ -48,7 +47,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
         int[] outPixels = new int[width * height];
         getRGB(src, 0, 0, width, height, inPixels);
 
-        Kernel kernel = GaussianFilter.makeKernel(hRadius);
+        Kernel kernel = GaussianFilter.makeKernel(radius);
         thresholdBlur(kernel, inPixels, outPixels, width, height, true, pt);
         thresholdBlur(kernel, outPixels, inPixels, height, width, true, pt);
 
@@ -63,7 +62,6 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
      * Convolve with a kernel consisting of one row
      */
     private void thresholdBlur(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, ProgressTracker pt) {
-//		int index = 0;
         float[] matrix = kernel.getKernelData(null);
         int cols = kernel.getWidth();
         int cols2 = cols / 2;
@@ -76,10 +74,10 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
                 int moffset = cols2;
 
                 int rgb1 = inPixels[ioffset + x];
-                int a1 = (rgb1 >> 24) & 0xff;
-                int r1 = (rgb1 >> 16) & 0xff;
-                int g1 = (rgb1 >> 8) & 0xff;
-                int b1 = rgb1 & 0xff;
+                int a1 = rgb1 >>> 24;
+                int r1 = (rgb1 >> 16) & 0xFF;
+                int g1 = (rgb1 >> 8) & 0xFF;
+                int b1 = rgb1 & 0xFF;
                 float af = 0, rf = 0, gf = 0, bf = 0;
                 for (int col = -cols2; col <= cols2; col++) {
                     float f = matrix[moffset + col];
@@ -90,10 +88,10 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
                             ix = x;
                         }
                         int rgb2 = inPixels[ioffset + ix];
-                        int a2 = (rgb2 >> 24) & 0xff;
-                        int r2 = (rgb2 >> 16) & 0xff;
-                        int g2 = (rgb2 >> 8) & 0xff;
-                        int b2 = rgb2 & 0xff;
+                        int a2 = rgb2 >>> 24;
+                        int r2 = (rgb2 >> 16) & 0xFF;
+                        int g2 = (rgb2 >> 8) & 0xFF;
+                        int b2 = rgb2 & 0xFF;
 
                         int d;
                         d = a1 - a2;
@@ -122,7 +120,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
                 r = rf == 0 ? r1 : r / rf;
                 g = gf == 0 ? g1 : g / gf;
                 b = bf == 0 ? b1 : b / bf;
-                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xff;
+                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xFF;
                 int ir = PixelUtils.clamp((int) (r + 0.5));
                 int ig = PixelUtils.clamp((int) (g + 0.5));
                 int ib = PixelUtils.clamp((int) (b + 0.5));
@@ -134,33 +132,12 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Sets the horizontal size of the blur.
-     *
-     * @param hRadius the radius of the blur in the horizontal direction
-     * @min-value 0
-     */
-    public void setHRadius(int hRadius) {
-        this.hRadius = hRadius;
-    }
-
-    /**
-     * Sets the vertical size of the blur.
-     *
-     * @param vRadius the radius of the blur in the vertical direction
-     * @min-value 0
-     */
-    public void setVRadius(int vRadius) {
-        this.vRadius = vRadius;
-    }
-
-    /**
      * Sets the radius of the effect.
      *
-     * @param radius the radius
-     * @min-value 0
+     * @param radius the radius (must be >= 0)
      */
     public void setRadius(int radius) {
-        hRadius = vRadius = radius;
+        this.radius = radius;
     }
 
     /**
@@ -170,10 +147,5 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
      */
     public void setThreshold(int threshold) {
         this.threshold = threshold;
-    }
-
-    @Override
-    public String toString() {
-        return "Blur/Smart Blur...";
     }
 }

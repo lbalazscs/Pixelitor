@@ -16,7 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 
 import java.awt.image.BufferedImage;
@@ -52,6 +51,13 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         super(filterName);
     }
 
+    /**
+     * Constructs a TransformFilter with explicit edge handling and interpolation.
+     *
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     */
     protected TransformFilter(String filterName, int edgeAction, int interpolation) {
         super(filterName);
 
@@ -127,10 +133,9 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
                 for (int x = 0; x < width; x++) {
                     transformInverse(x, finalY, out);
-                    int srcX = (int) out[0];
-                    int srcY = (int) out[1];
-                    // int casting rounds towards zero, so we check out[0] < 0, not srcX < 0
-                    outLine[x] = sampleNN(inPixels, srcX, srcY, out);
+                    int srcX = (int) Math.floor(out[0]);
+                    int srcY = (int) Math.floor(out[1]);
+                    outLine[x] = samplePixel(inPixels, srcX, srcY);
                 }
 
                 return outLine;
@@ -166,8 +171,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                 for (int x = 0; x < width; x++) {
                     transformInverse(x, finalY, out);
 
-                    int srcX = (int) FastMath.floor(out[0]);
-                    int srcY = (int) FastMath.floor(out[1]);
+                    int srcX = (int) Math.floor(out[0]);
+                    int srcY = (int) Math.floor(out[1]);
                     float xWeight = out[0] - srcX;
                     float yWeight = out[1] - srcY;
                     int nw, ne, sw, se;
@@ -181,10 +186,10 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                         se = inPixels[i + width + 1];
                     } else {
                         // some of the sample points are outside the image bounds
-                        nw = sampleBL(inPixels, srcX, srcY);
-                        ne = sampleBL(inPixels, srcX + 1, srcY);
-                        sw = sampleBL(inPixels, srcX, srcY + 1);
-                        se = sampleBL(inPixels, srcX + 1, srcY + 1);
+                        nw = samplePixel(inPixels, srcX, srcY);
+                        ne = samplePixel(inPixels, srcX + 1, srcY);
+                        sw = samplePixel(inPixels, srcX, srcY + 1);
+                        se = samplePixel(inPixels, srcX + 1, srcY + 1);
                     }
                     outLine[x] = ImageMath.bilinearInterpolate(xWeight, yWeight, nw, ne, sw, se);
                 }
@@ -221,8 +226,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
                     float srcX_f = out[0];
                     float srcY_f = out[1];
-                    int srcX = (int) FastMath.floor(srcX_f);
-                    int srcY = (int) FastMath.floor(srcY_f);
+                    int srcX = (int) Math.floor(srcX_f);
+                    int srcY = (int) Math.floor(srcY_f);
                     float xWeight = srcX_f - srcX;
                     float yWeight = srcY_f - srcY;
 
@@ -241,7 +246,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                         // slow path with edge handling
                         for (int row = 0; row < 4; row++) {
                             for (int col = 0; col < 4; col++) {
-                                p[row][col] = sampleBL(inPixels, srcX - 1 + col, srcY - 1 + row);
+                                p[row][col] = samplePixel(inPixels, srcX - 1 + col, srcY - 1 + row);
                             }
                         }
                     }
@@ -260,9 +265,9 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Samples a pixel for bilinear interpolation.
+     * Samples a pixel, handling out-of-bounds coordinates according to the edgeAction.
      */
-    private int sampleBL(int[] pixels, int x, int y) {
+    private int samplePixel(int[] pixels, int x, int y) {
         if ((x < 0) || (x >= width)) {
             if ((y < 0) || (y >= height)) {
                 return sampleCorner(pixels, x, y);
@@ -278,29 +283,10 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         }
     }
 
-    /**
-     * Samples a pixel for nearest-neighbor interpolation.
-     */
-    private int sampleNN(int[] inPixels, int x, int y, float[] out) {
-        if ((out[0] < 0) || (x >= width)) {
-            if ((out[1] < 0) || (y >= height)) {
-                return sampleCorner(inPixels, x, y);
-            } else {
-                return sampleVerEdge(inPixels, x, y);
-            }
-        } else {
-            if ((out[1] < 0) || (y >= height)) {
-                return sampleHorEdge(inPixels, x, y);
-            } else {
-                return inPixels[(width * y) + x];
-            }
-        }
-    }
-
     private int sampleCorner(int[] pixels, int x, int y) {
         return switch (edgeAction) {
             case TRANSPARENT -> 0;
-            case WRAP_AROUND -> pixels[(ImageMath.mod(y, height) * width) + ImageMath.mod(x, width)];
+            case WRAP_AROUND -> pixels[(Math.floorMod(y, height) * width) + Math.floorMod(x, width)];
             case REPEAT_EDGE -> pixels[(ImageMath.clamp(y, 0, height - 1) * width) + ImageMath.clamp(x, 0, width - 1)];
             case REFLECT -> {
                 int reflectedX = ImageMath.reflectTriangle(x, width);
@@ -314,7 +300,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     private int sampleVerEdge(int[] pixels, int x, int y) {
         return switch (edgeAction) {
             case TRANSPARENT -> 0;
-            case WRAP_AROUND -> pixels[(y * width) + ImageMath.mod(x, width)];
+            case WRAP_AROUND -> pixels[(y * width) + Math.floorMod(x, width)];
             case REPEAT_EDGE -> pixels[(y * width) + ImageMath.clamp(x, 0, width - 1)];
             case REFLECT -> {
                 int reflectedX = ImageMath.reflectTriangle(x, width);
@@ -327,7 +313,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     private int sampleHorEdge(int[] pixels, int x, int y) {
         return switch (edgeAction) {
             case TRANSPARENT -> 0;
-            case WRAP_AROUND -> pixels[(ImageMath.mod(y, height) * width) + x];
+            case WRAP_AROUND -> pixels[(Math.floorMod(y, height) * width) + x];
             case REPEAT_EDGE -> pixels[(ImageMath.clamp(y, 0, height - 1) * width) + x];
             case REFLECT -> {
                 int reflectedY = ImageMath.reflectTriangle(y, height);

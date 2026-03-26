@@ -19,22 +19,16 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.ShadowFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
 
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
 import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
@@ -54,8 +48,6 @@ public class JHDropShadow extends ParametrizedFilter {
     private final BooleanParam shadowOnly = new BooleanParam("Shadow Only");
     private final ColorParam color = new ColorParam("Color", BLACK, OPAQUE_ONLY);
 
-    private ShadowFilter filter;
-
     public JHDropShadow() {
         super(true);
 
@@ -73,52 +65,16 @@ public class JHDropShadow extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new ShadowFilter(NAME);
-        }
+        ShadowFilter filter = new ShadowFilter(NAME,
+            (float) angle.getValueInIntuitiveRadians(),
+            distance.getValueAsFloat(),
+            (float) opacity.getPercentage(),
+            softness.getValueAsFloat(),
+            color.getColor().getRGB(),
+            shadowOnly.isChecked()
+        );
 
-        filter.setAddMargins(false);
-        filter.setAngle((float) angle.getValueInIntuitiveRadians());
-        filter.setOpacity((float) opacity.getPercentage());
-        filter.setShadowColor(color.getColor().getRGB());
-        filter.setShadowOnly(shadowOnly.isChecked());
-
-        var helper = new ResizingFilterHelper(src);
-        boolean shouldResize = helper.shouldResize();
-        if (shouldResize) {
-            boolean addSource = !shadowOnly.isChecked();
-
-            int resizeUnits = helper.getResizeWorkUnits(BILINEAR_FAST);
-            int filterUnits = 2; // estimated
-            int workUnits = resizeUnits + filterUnits;
-            if (addSource) {
-                workUnits++;
-            }
-            var pt = new StatusBarProgressTracker(NAME, workUnits);
-            filter.setProgressTracker(ProgressTracker.NO_OP_TRACKER);
-
-            double resizeFactor = helper.getResizeFactor();
-            filter.setDistance((float) (distance.getValueAsFloat() / resizeFactor));
-            filter.setRadius((float) (softness.getValueAsFloat() / resizeFactor));
-            filter.setShadowOnly(true); // we only want to resize the shadow
-
-            dest = helper.invoke(BILINEAR_FAST, filter, pt, filterUnits);
-
-            if (addSource) {
-                Graphics2D g = dest.createGraphics();
-                g.setComposite(AlphaComposite.SrcOver);
-                g.drawRenderedImage(src, null);
-                g.dispose();
-
-                pt.unitDone();
-            }
-            pt.finished();
-        } else {
-            // normal case, no resizing
-            filter.setDistance(distance.getValueAsFloat());
-            filter.setRadius(softness.getValueAsFloat());
-            dest = filter.filter(src, dest);
-        }
+        dest = filter.filter(src, dest);
 
         return dest;
     }

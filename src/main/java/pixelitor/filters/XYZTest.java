@@ -74,8 +74,7 @@ public class XYZTest extends ParametrizedFilter {
 
         for (int i = 0; i < numPixels; i++) {
             int pixel = pixels[i];
-            int a = (pixel >>> 24) & 0xFF;
-
+            int a = pixel >>> 24;
             int r = (pixel >>> 16) & 0xFF;
             int g = (pixel >>> 8) & 0xFF;
             int b = pixel & 0xFF;

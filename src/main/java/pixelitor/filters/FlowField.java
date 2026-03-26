@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,6 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 import static net.jafama.FastMath.abs;
-import static net.jafama.FastMath.ceilToInt;
 import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.exp;
 import static net.jafama.FastMath.min;
@@ -452,7 +451,7 @@ public class FlowField extends ParametrizedFilter {
         float variantPI = (float) Math.PI * variance;
         float startAngle = (float) (r.nextFloat() * 2 * Math.PI);
 
-        int groupCount = IS_MULTI_THREADED ? ceilToInt(particleCount / (double) PARTICLES_PER_GROUP) : 1;
+        int groupCount = IS_MULTI_THREADED ? (int) Math.ceil(particleCount / (double) PARTICLES_PER_GROUP) : 1;
         var pt = new StatusBarProgressTracker(NAME, groupCount);
 
         Graphics2D g2 = dest.createGraphics();

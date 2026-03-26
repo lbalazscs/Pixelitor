@@ -201,15 +201,40 @@ public class Shapes {
         PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];
 
+        StringBuilder subpathBuilder = new StringBuilder();
+        boolean subpathIsValid = true;
+
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
-            appendSvgPathSegment(sb, type, coords);
+
+            if (type == SEG_MOVETO) {
+                // if the previous subpath was fully valid, commit it to the main builder
+                if (subpathIsValid && !subpathBuilder.isEmpty()) {
+                    sb.append(subpathBuilder);
+                }
+                subpathBuilder.setLength(0);
+                subpathIsValid = true;
+            }
+
+            if (subpathIsValid) {
+                // if any segment fails the check, mark the whole subpath as invalid
+                if (!appendSvgPathSegment(subpathBuilder, type, coords)) {
+                    subpathIsValid = false;
+                }
+            }
+
             pathIterator.next();
         }
+
+        // commit the final subpath
+        if (subpathIsValid && !subpathBuilder.isEmpty()) {
+            sb.append(subpathBuilder);
+        }
+
         return sb.toString();
     }
 
-    private static void appendSvgPathSegment(StringBuilder pathBuilder, int type, double[] coords) {
+    private static boolean appendSvgPathSegment(StringBuilder pathBuilder, int type, double[] coords) {
         int numCoords;
         String command;
 
@@ -239,8 +264,10 @@ public class Shapes {
 
         // NaNs are not a problem if they are in the unused part of the array
         for (int i = 0; i < numCoords; i++) {
-            if (Double.isNaN(coords[i])) {
-                throw new IllegalArgumentException("i = " + i);
+            boolean segmentValid = Double.isFinite(coords[i]);
+            assert segmentValid; // developers should be alerted, but end-users not
+            if (!segmentValid) {
+                return false; // invalid segment, will be ignored
             }
         }
 
@@ -252,6 +279,7 @@ public class Shapes {
             }
         }
         pathBuilder.append('\n');
+        return true; // success
     }
 
     public static String getSvgFillRule(Shape shape) {
@@ -658,6 +686,7 @@ public class Shapes {
      * "elastic" by breaking it into small curved segments.
      */
     public static void elasticLine(Path2D path, Point2D from, Point2D to, boolean elastic) {
+        assert !from.equals(to);
         if (elastic) {
             // create a line that can be distorted by nonlinear distortions
             int numSegments = 26;

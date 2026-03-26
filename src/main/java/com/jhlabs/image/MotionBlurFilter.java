@@ -152,17 +152,8 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
         int[] outPixels = new int[width * height];
         getRGB(src, 0, 0, width, height, inPixels);
 
-//		float sinAngle = (float)Math.sin(angle);
-//		float cosAngle = (float)Math.cos(angle);
-//
-//		float total;
-
-//		int cx = width/2;
-//		int cy = height/2;
         int cx = (int) (width * centerX);
         int cy = (int) (height * centerY);
-
-//        int index = 0;
 
         float imageRadius = (float) Math.sqrt(cx * cx + cy * cy);
         float translateX = (float) (distance * Math.cos(angle));
@@ -221,14 +212,14 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
                 }
                 if (newX < 0 || newX >= width) {
                     if (wrapEdges) {
-                        newX = ImageMath.mod(newX, width);
+                        newX = Math.floorMod(newX, width);
                     } else {
                         break;
                     }
                 }
                 if (newY < 0 || newY >= height) {
                     if (wrapEdges) {
-                        newY = ImageMath.mod(newY, height);
+                        newY = Math.floorMod(newY, height);
                     } else {
                         break;
                     }
@@ -236,10 +227,10 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
 
                 count++;
                 int rgb = inPixels[newY * width + newX];
-                a += (rgb >> 24) & 0xff;
-                r += (rgb >> 16) & 0xff;
-                g += (rgb >> 8) & 0xff;
-                b += rgb & 0xff;
+                a += (rgb >>> 24);
+                r += (rgb >> 16) & 0xFF;
+                g += (rgb >> 8) & 0xFF;
+                b += rgb & 0xFF;
             }
             if (count == 0) {
                 outPixels[index] = inPixels[index];
@@ -252,11 +243,6 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
             }
             index++;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Blur/Motion Blur...";
     }
 
     // an affine transform optimized for this specific filter

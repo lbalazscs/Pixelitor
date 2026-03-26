@@ -29,75 +29,51 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
  * and draw 8-pointed starbursts ("glints") on top of them.
  */
 public class GlintFilter extends AbstractBufferedImageOp {
-    private int threshold = 255;
-    private int length = 5;
-    private float blur = 0.0f;
-    private float amount = 0.1f;
-    private boolean glintOnly = false;
-    private Colormap colormap = new LinearColormap(0xffffffff, 0xff000000);
+    private final int threshold;
+    private final int length;
+    private final float blur;
+    private final float amount;
+    private final boolean glintOnly;
+    private final Colormap colormap;
+    private final float coverage;
 
-    private float coverage = 1.0f; // probability between 0.0 and 1.0
+    private final int transparentEdgeColor;
 
-    public GlintFilter(String filterName) {
+    /**
+     * Creates a new {@code GlintFilter} with fully defined, immutable parameters.
+     *
+     * @param filterName the name of the filter (used for progress tracking/logging)
+     * @param threshold  the threshold value in the range [0, 1]; pixels brighter than this
+     *                   are considered highlights
+     * @param coverage   the probability in the range [0, 1] that a highlight pixel
+     *                   will generate a glint
+     * @param amount     the intensity of the glint in the range [0, 1]
+     * @param length     the length of the starburst rays
+     * @param blur       the blur radius applied before thresholding
+     * @param colormap   the colormap used to color the glints
+     * @param glintOnly  if true, only the glints are rendered; otherwise the original
+     *                   image is combined with the glints
+     */
+    public GlintFilter(String filterName,
+                       float threshold,
+                       float coverage,
+                       float amount,
+                       int length,
+                       float blur,
+                       Colormap colormap,
+                       boolean glintOnly) {
         super(filterName);
-    }
 
-    public void setCoverage(float coverage) {
-        this.coverage = coverage;
-    }
-
-    /**
-     * Sets the threshold value.
-     *
-     * @param threshold the threshold value in the range 0..1
-     */
-    public void setThreshold(float threshold) {
         this.threshold = (int) (255 * threshold);
-    }
-
-    /**
-     * Sets the amount of glint.
-     *
-     * @param amount the amount in the range 0..1
-     */
-    public void setAmount(float amount) {
+        this.coverage = coverage;
         this.amount = amount;
-    }
-
-    /**
-     * Sets the length of the stars.
-     *
-     * @param length the length
-     */
-    public void setLength(int length) {
         this.length = length;
-    }
-
-    /**
-     * Sets the blur that is applied before thresholding.
-     *
-     * @param blur the blur radius
-     */
-    public void setBlur(float blur) {
         this.blur = blur;
-    }
-
-    /**
-     * Sets whether to render the stars and the image or only the stars.
-     *
-     * @param glintOnly true to render only stars
-     */
-    public void setGlintOnly(boolean glintOnly) {
-        this.glintOnly = glintOnly;
-    }
-
-    /**
-     * Sets the colormap to be used for the filter.
-     *
-     * @param colormap the colormap
-     */
-    public void setColormap(Colormap colormap) {
         this.colormap = colormap;
+        this.glintOnly = glintOnly;
+
+        // use the outer edge of the colormap (1.0f) for the transparent background
+        this.transparentEdgeColor = colormap.getColor(1.0f) & 0x00_FF_FF_FF;
     }
 
     @Override
@@ -129,14 +105,14 @@ public class GlintFilter extends AbstractBufferedImageOp {
             getRGB(src, 0, y, width, 1, pixels);
             for (int x = 0; x < width; x++) {
                 int rgb = pixels[x];
-                int a = rgb & 0xff000000;
-                int r = (rgb >> 16) & 0xff;
-                int g = (rgb >> 8) & 0xff;
-                int b = rgb & 0xff;
+                int a = rgb & 0xFF_00_00_00;
+                int r = (rgb >> 16) & 0xFF;
+                int g = (rgb >> 8) & 0xFF;
+                int b = rgb & 0xFF;
                 int l = r + g + b;
                 if (l < rgbThresholdSum) {
                     // the mask is black if the lightness is lower than the threshold
-                    pixels[x] = 0xff000000;
+                    pixels[x] = 0xFF_00_00_00;
                 } else {
                     // the mask is set to a grayscale value representing the lightness
                     l /= 3;
@@ -151,7 +127,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
             if (blur > 3) {
                 blurFilter = new BoxBlurFilter(blur, blur, 3, filterName);
             } else {
-                blurFilter = new GaussianFilter(blur, filterName);
+                blurFilter = new GaussianFilter(filterName, blur);
             }
             blurFilter.setProgressTracker(pt);
             mask = blurFilter.filter(mask, null);
@@ -188,6 +164,10 @@ public class GlintFilter extends AbstractBufferedImageOp {
             ThreadPool.waitFor(rowFutures, pt);
         }
 
+        if (glintOnly) {
+            postProcessGlintOnly(dstPixels);
+        }
+
         setRGB(dst, 0, 0, width, height, dstPixels);
 
         finishProgressTracker();
@@ -195,14 +175,34 @@ public class GlintFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
+    private void postProcessGlintOnly(int[] dstPixels) {
+        for (int i = 0; i < dstPixels.length; i++) {
+            int p = dstPixels[i];
+            int a = (p >>> 24);
+
+            if (a == 0) {
+                // fill completely empty areas with the transparent gradient-edge color
+                dstPixels[i] = transparentEdgeColor;
+            } else if (a < 255) {
+                // un-premultiply: this mathematically recovers the EXACT gradient color
+                // for this specific pixel, naturally handling arbitrary gradients and overlaps
+                int r = Math.min(255, (((p >> 16) & 0xFF) * 255) / a);
+                int g = Math.min(255, (((p >> 8) & 0xFF) * 255) / a);
+                int b = Math.min(255, ((p & 0xFF) * 255) / a);
+
+                dstPixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+            }
+        }
+    }
+
     private int[] calcArmColors(int length) {
         int[] colors = new int[length + 1];
         for (int i = 0; i <= length; i++) {
             int argb = colormap.getColor((float) i / length);
-            int originalAlpha = (argb >> 24) & 0xff;
-            int r = (argb >> 16) & 0xff;
-            int g = (argb >> 8) & 0xff;
-            int b = argb & 0xff;
+            int originalAlpha = argb >>> 24;
+            int r = (argb >> 16) & 0xFF;
+            int g = (argb >> 8) & 0xFF;
+            int b = argb & 0xFF;
 
             // to work properly on transparent backgrounds, alpha should fade with brightness
             int brightness = Math.max(r, Math.max(g, b));
@@ -230,7 +230,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
         // draws 8-pointed starbursts (glints) pixel-by-pixel,
         // projecting outwards from a center point
         for (int x = 0; x < width; x++) {
-            if ((pixels[x] & 0xff) > threshold && (coverage > ThreadLocalRandom.current().nextFloat())) {
+            if ((pixels[x] & 0xFF) > threshold && (coverage > ThreadLocalRandom.current().nextFloat())) {
                 int xmin = Math.max(x - length, 0) - x;
                 int xmax = Math.min(x + length, width - 1) - x;
                 int xmin2 = Math.max(x - diagonalLength, 0) - x;
@@ -275,10 +275,5 @@ public class GlintFilter extends AbstractBufferedImageOp {
             }
             index++;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Effects/Glint...";
     }
 }

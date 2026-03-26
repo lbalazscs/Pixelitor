@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,9 +82,12 @@ public class TaperingStroke implements Stroke {
                     break;
                 case PathIterator.SEG_CLOSE:
                     // check if it was closed before reaching the first
-                    Point2D first = points.getFirst();
-                    if (coords[0] != first.getX() || coords[1] != first.getY()) {
-                        points.add(first);
+                    if (!points.isEmpty()) {
+                        Point2D first = points.getFirst();
+                        Point2D last = points.getLast();
+                        if (first.distanceSq(last) > 1e-10) {
+                            points.add(first);
+                        }
                     }
                     break;
             }
@@ -105,9 +108,25 @@ public class TaperingStroke implements Stroke {
     // creates the tapered outline for a subpath,
     // always starting from the full width and going to zero
     private void createSubpathOutline(List<Point2D> points, Path2D result) {
-        if (points.size() < 2) {
+        // filter out identical adjacent points to avoid zero-length segments and division by zero
+        List<Point2D> uniquePoints = new ArrayList<>();
+        if (!points.isEmpty()) {
+            uniquePoints.add(points.getFirst());
+            for (int i = 1; i < points.size(); i++) {
+                Point2D prev = uniquePoints.getLast();
+                Point2D curr = points.get(i);
+                if (prev.distanceSq(curr) > 1e-10) {
+                    uniquePoints.add(curr);
+                }
+            }
+        }
+
+        // if the path evaluates to nothing or just a single point, do nothing
+        if (uniquePoints.size() < 2) {
             return;
         }
+
+        points = uniquePoints; // use the sanitized collection
 
         double[] segmentLengths = new double[points.size() - 1];
         double totalPathLength = 0;

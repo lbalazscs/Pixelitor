@@ -29,10 +29,10 @@ public class StampFilter extends PointFilter {
     private float threshold;
     private float softness = 0;
     private float radius = 5;
-    private float lowerThreshold3;
-    private float upperThreshold3;
-    private int white = 0xffffffff;
-    private int black = 0xff000000;
+    private float lowerThreshold;
+    private float upperThreshold;
+    private int light = 0xFF_FF_FF_FF;
+    private int dark = 0xFF_00_00_00;
 
     public StampFilter(String filterName) {
         super(filterName);
@@ -41,8 +41,7 @@ public class StampFilter extends PointFilter {
     /**
      * Sets the radius of the effect.
      *
-     * @param radius the radius
-     * @min-value 0
+     * @param radius the radius (must be >= 0)
      */
     public void setRadius(float radius) {
         this.radius = radius;
@@ -58,11 +57,9 @@ public class StampFilter extends PointFilter {
     }
 
     /**
-     * Sets the softness of the effect in the range 0..1.
+     * Sets the softness of the effect.
      *
-     * @param softness the softness
-     * @min-value 0
-     * @max-value 1
+     * @param softness the softness (in the range [0, 1])
      */
     public void setSoftness(float softness) {
         this.softness = softness;
@@ -71,19 +68,19 @@ public class StampFilter extends PointFilter {
     /**
      * Sets the color to be used for pixels above the upper threshold.
      *
-     * @param white the color
+     * @param light the color
      */
-    public void setWhite(int white) {
-        this.white = white;
+    public void setLight(int light) {
+        this.light = light;
     }
 
     /**
      * Sets the color to be used for pixels below the lower threshold.
      *
-     * @param black the color
+     * @param dark the color
      */
-    public void setBlack(int black) {
-        this.black = black;
+    public void setDark(int dark) {
+        this.dark = dark;
     }
 
     @Override
@@ -95,33 +92,29 @@ public class StampFilter extends PointFilter {
             }
             dst = new BoxBlurFilter(radius, radius, 3, filterName).filter(src, null);
         } else if (blurMethod == GAUSSIAN_BLUR) {
-            dst = new GaussianFilter(radius, filterName).filter(src, null);
+            dst = new GaussianFilter(filterName, radius).filter(src, null);
         } else {
             throw new IllegalStateException("blurMethod = " + blurMethod);
         }
 
-        lowerThreshold3 = 255 * 3 * (threshold - softness * 0.5f);
-        upperThreshold3 = 255 * 3 * (threshold + softness * 0.5f);
+        lowerThreshold = 255 * (threshold - softness * 0.5f);
+        upperThreshold = 255 * (threshold + softness * 0.5f);
         return super.filter(dst, dst);
     }
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-//        int a = rgb & 0xff000000;
-        int r = (rgb >> 16) & 0xff;
-        int g = (rgb >> 8) & 0xff;
-        int b = rgb & 0xff;
-        int l = r + g + b;
-        float f = ImageMath.smoothStep(lowerThreshold3, upperThreshold3, l);
-        return ImageMath.mixColors(f, black, white);
+        int origA = rgb & 0xFF_00_00_00;
+        int lum = ImageMath.calcLuminanceInt(rgb);
+        float f = ImageMath.smoothStep(lowerThreshold, upperThreshold, lum);
+
+        int mixed = ImageMath.mixColors(f, dark, light);
+        // TODO This keeps the blurred alpha, but it would be
+        //   better to keep the original src alpha
+        return origA | (mixed & 0x00_FF_FF_FF);
     }
 
     public void setBlurMethod(int blurMethod) {
         this.blurMethod = blurMethod;
-    }
-
-    @Override
-    public String toString() {
-        return "Stylize/Stamp...";
     }
 }

@@ -21,7 +21,7 @@ import pixelitor.filters.jhlabsproxies.JHPointillize;
 public class PointillizeFilter extends CellularFilter {
     private float edgeThickness = 0.4f;
     private boolean fadeEdges = false;
-    private int edgeColor = 0xff000000;
+    private int edgeColor = 0xFF_00_00_00;
     private float fuzziness = 0.1f;
 
     public PointillizeFilter() {
@@ -74,10 +74,5 @@ public class PointillizeFilter extends CellularFilter {
             v = ImageMath.mixColors(f, edgeColor, v);
         }
         return v;
-    }
-
-    @Override
-    public String toString() {
-        return "Pixellate/Pointillize...";
     }
 }

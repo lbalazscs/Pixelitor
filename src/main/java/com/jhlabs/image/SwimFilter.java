@@ -25,7 +25,6 @@ public class SwimFilter extends TransformFilter {
     private float scale = 32;
     private float stretch = 1.0f;
     private float amount = 1.0f;
-    //	private float turbulence = 1.0f; // Laszlo: commented out, because it did not seem to be useful
     private float time = 0.0f;
     private float m00 = 1.0f;
     private float m01 = 0.0f;
@@ -98,10 +97,5 @@ public class SwimFilter extends TransformFilter {
 
         out[0] = x + amount * noise3x;
         out[1] = y + amount * noise3y;
-    }
-
-    @Override
-    public String toString() {
-        return "Distort/Swim...";
     }
 }

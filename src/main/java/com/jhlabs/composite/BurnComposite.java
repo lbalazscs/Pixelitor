@@ -16,8 +16,11 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.*;
+import java.awt.CompositeContext;
+import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
+
+import static com.jhlabs.image.PixelUtils.clamp;
 
 public final class BurnComposite extends RGBComposite {
     public BurnComposite(float alpha) {

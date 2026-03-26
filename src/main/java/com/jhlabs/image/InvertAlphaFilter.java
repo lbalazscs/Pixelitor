@@ -26,11 +26,6 @@ public class InvertAlphaFilter extends PointFilter {
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        return rgb ^ 0xff000000;
-    }
-
-    @Override
-    public String toString() {
-        return "Alpha/Invert";
+        return rgb ^ 0xFF_00_00_00;
     }
 }

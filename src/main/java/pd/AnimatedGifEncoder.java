@@ -763,7 +763,7 @@ class NeuQuant {
 
             altersingle(alpha, j, b, g, r);
             if (rad != 0) {
-                alterneigh(rad, j, b, g, r); /* alter neighbours */
+                alterneigh(rad, j, b, g, r); /* alter neighbors */
             }
 
             pix += step;

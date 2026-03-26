@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,17 @@ public abstract class RotatingEffectFilter extends TransformFilter {
 
     protected RotatingEffectFilter(String filterName) {
         super(filterName);
+    }
+
+    /**
+     * Constructs a RotatingEffectFilter with explicit edge handling and interpolation.
+     *
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     */
+    protected RotatingEffectFilter(String filterName, int edgeAction, int interpolation) {
+        super(filterName, edgeAction, interpolation);
     }
 
     @Override

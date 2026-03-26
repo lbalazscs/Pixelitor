@@ -60,11 +60,11 @@ public class JHLensOverImage extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        float refraction = (float) refractionIndex.getPercentage();
-        int hRadius = radius.getHorizontal();
-        int vRadius = radius.getVertical();
+        double refraction = refractionIndex.getPercentage();
+        double hRadius = radius.getValueAsDouble(0);
+        double vRadius = radius.getValueAsDouble(1);
 
-        if (refraction == 1.0f || hRadius == 0 || vRadius == 0) {
+        if (refraction == 1.0 || hRadius == 0.0 || vRadius == 0.0) {
             return src;
         }
 
@@ -72,11 +72,9 @@ public class JHLensOverImage extends ParametrizedFilter {
             filter = new SphereFilter(NAME);
         }
 
-        filter.setCenter(center.getRelativePoint());
-
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setA(hRadius);
         filter.setB(vRadius);
-
         filter.setRefractionIndex(refraction);
         filter.setInterpolation(interpolation.getValue());
 

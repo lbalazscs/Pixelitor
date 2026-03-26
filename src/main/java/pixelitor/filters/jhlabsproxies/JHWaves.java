@@ -43,8 +43,6 @@ public class JHWaves extends ParametrizedFilter {
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
 
-    private RippleFilter filter;
-
     public JHWaves() {
         super(true);
 
@@ -68,24 +66,23 @@ public class JHWaves extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new RippleFilter(NAME);
-        }
-
         float xWavelength = wavelengthParam.getValueAsFloat(0);
         float yWavelength = wavelengthParam.getValueAsFloat(1);
 
-        filter.setXAmplitude(xAmplitude);
-        filter.setXWavelength(xWavelength);
-        filter.setYAmplitude(yAmplitude);
-        filter.setYWavelength(yWavelength);
-        filter.setAngle(angleParam.getValueInIntuitiveRadians());
-        filter.setWaveType(waveType.getValue());
-        filter.setPhaseX(phaseParam.getPercentage(0));
-        filter.setPhaseY(phaseParam.getPercentage(1));
+        RippleFilter filter = new RippleFilter(
+            NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            xAmplitude,
+            xWavelength,
+            yAmplitude,
+            yWavelength,
+            waveType.getValue(),
+            phaseParam.getHorPercentage(),
+            phaseParam.getVerPercentage()
+        );
 
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        filter.setAngle(angleParam.getValueInIntuitiveRadians());
 
         return filter.filter(src, dest);
     }

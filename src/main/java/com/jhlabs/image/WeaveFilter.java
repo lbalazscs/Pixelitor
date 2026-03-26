@@ -31,8 +31,8 @@ public class WeaveFilter extends PointFilter {
     private float yGap = 6;
     private int rows;
     private int cols;
-    public static final int H_THREAD_COLOR = 0xff8080ff;
-    public static final int V_THREAD_COLOR = 0xffff8080;
+    public static final int H_THREAD_COLOR = 0xFF_80_80_ff;
+    public static final int V_THREAD_COLOR = 0xFF_FF_80_80;
     private boolean useImageColors = true;
     private boolean roundThreads = false;
     private boolean shadeCrossings = true;
@@ -80,8 +80,8 @@ public class WeaveFilter extends PointFilter {
         double yInCell = ImageMath.mod(weaveY, totalYWidth);
 
         // determine which thread is on top from the weave pattern
-        int matrixRow = ImageMath.mod(gridY, rows);
-        int matrixCol = ImageMath.mod(gridX, cols);
+        int matrixRow = Math.floorMod(gridY, rows);
+        int matrixCol = Math.floorMod(gridX, cols);
         int patternValue = matrix[matrixRow][matrixCol];
         boolean isVerThreadOnTop = (patternValue == 0);
 
@@ -122,13 +122,13 @@ public class WeaveFilter extends PointFilter {
                     shade = 1.0 - shade;
                 }
                 shade *= 0.5;
-                finalColorX = ImageMath.mixColors(shade, finalColorX, 0xff000000);
+                finalColorX = ImageMath.mixColors(shade, finalColorX, 0xFF_00_00_00);
             } else if (!isVerThreadOnTop) {
-                finalColorX = ImageMath.mixColors(0.5, finalColorX, 0xff000000);
+                finalColorX = ImageMath.mixColors(0.5, finalColorX, 0xFF_00_00_00);
             }
         }
         if (roundThreads) {
-            finalColorX = ImageMath.mixColors(2 * dX, finalColorX, 0xff000000);
+            finalColorX = ImageMath.mixColors(2 * dX, finalColorX, 0xFF_00_00_00);
         }
 
         // calculate the final shaded color for the vertical thread (Y)
@@ -140,13 +140,13 @@ public class WeaveFilter extends PointFilter {
                     shade = 1.0 - shade;
                 }
                 shade *= 0.5;
-                finalColorY = ImageMath.mixColors(shade, finalColorY, 0xff000000);
+                finalColorY = ImageMath.mixColors(shade, finalColorY, 0xFF_00_00_00);
             } else if (isVerThreadOnTop) {
-                finalColorY = ImageMath.mixColors(0.5, finalColorY, 0xff000000);
+                finalColorY = ImageMath.mixColors(0.5, finalColorY, 0xFF_00_00_00);
             }
         }
         if (roundThreads) {
-            finalColorY = ImageMath.mixColors(2 * dY, finalColorY, 0xff000000);
+            finalColorY = ImageMath.mixColors(2 * dY, finalColorY, 0xFF_00_00_00);
         }
 
         // calculate thread coverage using a smooth pulse for anti-aliasing
@@ -175,7 +175,7 @@ public class WeaveFilter extends PointFilter {
         }
 
         // blend the bottom thread with the transparent background, then blend the top thread over it
-        int pixelColor = ImageMath.mixColors(bottomCoverage, 0x00000000, bottomColor);
+        int pixelColor = ImageMath.mixColors(bottomCoverage, 0x00_00_00_00, bottomColor);
         pixelColor = ImageMath.mixColors(topCoverage, pixelColor, topColor);
 
         return pixelColor;
@@ -265,10 +265,5 @@ public class WeaveFilter extends PointFilter {
      */
     public void setShadeCrossings(boolean shadeCrossings) {
         this.shadeCrossings = shadeCrossings;
-    }
-
-    @Override
-    public String toString() {
-        return "Texture/Weave...";
     }
 }

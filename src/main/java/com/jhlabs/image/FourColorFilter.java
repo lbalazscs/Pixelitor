@@ -51,51 +51,46 @@ public class FourColorFilter extends PointFilter {
 
     public FourColorFilter(String filterName) {
         super(filterName);
-
-        setColorNW(0xffff0000);
-        setColorNE(0xffff00ff);
-        setColorSW(0xff0000ff);
-        setColorSE(0xff00ffff);
     }
 
     /**
      * Sets the color at the North-West corner.
      */
     public void setColorNW(int color) {
-        aNW = (color >> 24) & 0xff;
-        rNW = (color >> 16) & 0xff;
-        gNW = (color >> 8) & 0xff;
-        bNW = color & 0xff;
+        aNW = (color >> 24) & 0xFF;
+        rNW = (color >> 16) & 0xFF;
+        gNW = (color >> 8) & 0xFF;
+        bNW = color & 0xFF;
     }
 
     /**
      * Sets the color at the North-East corner.
      */
     public void setColorNE(int color) {
-        aNE = (color >> 24) & 0xff;
-        rNE = (color >> 16) & 0xff;
-        gNE = (color >> 8) & 0xff;
-        bNE = color & 0xff;
+        aNE = (color >> 24) & 0xFF;
+        rNE = (color >> 16) & 0xFF;
+        gNE = (color >> 8) & 0xFF;
+        bNE = color & 0xFF;
     }
 
     /**
      * Sets the color at the South-West corner.
      */
     public void setColorSW(int color) {
-        aSW = (color >> 24) & 0xff;
-        rSW = (color >> 16) & 0xff;
-        gSW = (color >> 8) & 0xff;
-        bSW = color & 0xff;
+        aSW = (color >> 24) & 0xFF;
+        rSW = (color >> 16) & 0xFF;
+        gSW = (color >> 8) & 0xFF;
+        bSW = color & 0xFF;
     }
 
     /**
      * Sets the color at the South-East corner.
      */
     public void setColorSE(int color) {
-        aSE = (color >> 24) & 0xff;
-        rSE = (color >> 16) & 0xff;
-        gSE = (color >> 8) & 0xff;
-        bSE = color & 0xff;
+        aSE = (color >> 24) & 0xFF;
+        rSE = (color >> 16) & 0xFF;
+        gSE = (color >> 8) & 0xFF;
+        bSE = color & 0xFF;
     }
 
     /**
@@ -239,7 +234,7 @@ public class FourColorFilter extends PointFilter {
             }
             case SPACE_OKLAB -> {
                 int srgb = ColorSpaces.oklabToSrgb(new float[]{c1, c2, c3});
-                yield (a << 24) | (srgb & 0x00FFFFFF);
+                yield (a << 24) | (srgb & 0x00_FF_FF_FF);
             }
             default -> throw new IllegalStateException("Unexpected value: " + colorSpace);
         };

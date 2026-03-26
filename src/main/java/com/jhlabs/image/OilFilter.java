@@ -23,46 +23,50 @@ import java.util.concurrent.Future;
 /**
  * A filter which produces a "oil-painting" effect.
  *
- * Laszlo: the original algorithm from Jerry had three R,G,B histograms,
- * but this led to strange artifacts, so I changed it according to
+ * The original JH Labs implementation had three R,G,B histograms,
+ * but this led to strange artifacts. The current implementation follows
  * http://supercomputingblog.com/graphics/oil-painting-algorithm/
  * to use only one intensity-histogram.
  */
 public class OilFilter extends WholeImageFilter {
-    private int rangeX = 3;
-    private int rangeY = 3;
-    private int levels = 256;
-
-    public OilFilter(String filterName) {
-        super(filterName);
-    }
-
-    public void setRangeX(int rangeX) {
-        this.rangeX = rangeX;
-    }
-
-    public void setRangeY(int rangeY) {
-        this.rangeY = rangeY;
-    }
+    private final int rangeX;
+    private final int rangeY;
+    private final int levels;
 
     /**
-     * Sets the number of levels for the effect.
+     * Constructs an OilFilter with the specified parameters.
      *
-     * @param levels the number of levels
+     * @param filterName the name of the filter
+     * @param rangeX     the horizontal radius of the brush in pixels
+     * @param rangeY     the vertical radius of the brush in pixels
+     * @param levels     the number of intensity levels used when building
+     *                   the brightness histogram; higher values preserve
+     *                   more colour detail, lower values increase the
+     *                   painterly effect
      */
-    public void setLevels(int levels) {
+    public OilFilter(String filterName, int rangeX, int rangeY, int levels) {
+        super(filterName);
+        this.rangeX = rangeX;
+        this.rangeY = rangeY;
         this.levels = levels;
     }
 
     @Override
     protected int[] filterPixels(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
+        short[] bins = new short[width * height];
+
+        // precompute bins to avoid recalculating in the tight inner loops
+        for (int i = 0; i < inPixels.length; i++) {
+            int rgb = inPixels[i];
+            bins[i] = (short) (ImageMath.calcLuminanceInt(rgb) * levels / 256);
+        }
 
         pt = createProgressTracker(height);
         Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable rowTask = () -> processRow(width, height, inPixels, outPixels, finalY);
+            Runnable rowTask = () -> processRow(width, height, inPixels, outPixels, finalY, bins);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
 
@@ -72,51 +76,45 @@ public class OilFilter extends WholeImageFilter {
         return outPixels;
     }
 
-    private void processRow(int width, int height, int[] inPixels, int[] outPixels, int y) {
-        int index = y * width;
+    // Looks at all the pixels in the neighborhood and finds the
+    // most common brightness value. Then sets the current pixel
+    // to the average color of pixels that have that brightness.
+    private void processRow(int width, int height, int[] inPixels, int[] outPixels, int y, short[] bins) {
+        // how many pixels of each intensity level are in the window
+        int[] histogram = new int[levels];
+
+        // sum of R, G, B values for each intensity bin
         int[] rTotal = new int[levels];
         int[] gTotal = new int[levels];
         int[] bTotal = new int[levels];
-        int[] histogram = new int[levels];
-        for (int x = 0; x < width; x++) {
-            // The idea is that for each pixel the most frequently occuring
-            // intensity value in its neighborhood is found, and this will determine
-            // new value of the pixel
-            for (int i = 0; i < levels; i++) {
-                histogram[i] = rTotal[i] = gTotal[i] = bTotal[i] = 0;
-            }
 
-            // For each pixel, all pixels within the brush size will have to be examined.
-            for (int row = -rangeY; row <= rangeY; row++) {
-                int iy = y + row;
-                if (0 <= iy && iy < height) {
-                    int ioffset = iy * width;
-                    for (int col = -rangeX; col <= rangeX; col++) {
-                        int ix = x + col;
-                        if (0 <= ix && ix < width) {
-                            // examining each neighbor pixel which is within brush size
-                            int rgb = inPixels[ioffset + ix];
-                            int r = (rgb >> 16) & 0xff;
-                            int g = (rgb >> 8) & 0xff;
+        // pre-calculate valid row bounds for this y
+        int rowStart = Math.max(-rangeY, -y);
+        int rowEnd = Math.min(rangeY, height - 1 - y);
 
-                            int b = rgb & 0xff;
-                            int intensity = (r + g + b) / 3;
-                            // For each sub-pixel, calculate the intensity, and determine
-                            // which intensity bin that intensity number falls into
-                            int intensityI = intensity * levels / 256;
-                            histogram[intensityI]++;
-
-                            // Also maintain the total red, green, and blue values for each bin,
-                            // later these may be used to determine the final value of the pixel.
-                            rTotal[intensityI] += r;
-                            gTotal[intensityI] += g;
-                            bTotal[intensityI] += b;
-                        }
-                    }
+        // initialize the histogram for the first pixel (x = 0)
+        for (int row = rowStart; row <= rowEnd; row++) {
+            int iy = y + row;
+            for (int col = -rangeX; col <= rangeX; col++) {
+                int ix = col;
+                if (ix >= 0 && ix < width) {
+                    int index = iy * width + ix;
+                    int rgb = inPixels[index];
+                    int r = (rgb >> 16) & 0xFF;
+                    int g = (rgb >> 8) & 0xFF;
+                    int b = rgb & 0xFF;
+                    int bin = bins[index];
+                    histogram[bin] += 1;
+                    rTotal[bin] += r;
+                    gTotal[bin] += g;
+                    bTotal[bin] += b;
                 }
             }
+        }
 
-            // Determine which intensity bin has the most number of pixels in it.
+        int rowOffset = y * width;
+        for (int x = 0; x < width; x++) {
+            // find the most frequent intensity and set the output pixel
             int maxIndex = 0;
             int curMax = 0;
             for (int i = 0; i < levels; i++) {
@@ -126,23 +124,49 @@ public class OilFilter extends WholeImageFilter {
                 }
             }
 
-            // The final color of the pixel is the average of the colors
-            // in the bin with the highest number of pixels
             int r = rTotal[maxIndex] / curMax;
             int g = gTotal[maxIndex] / curMax;
             int b = bTotal[maxIndex] / curMax;
+            outPixels[rowOffset + x] = (inPixels[rowOffset + x] & 0xFF_00_00_00) | (r << 16) | (g << 8) | b;
 
-//                r = PixelUtils.clamp(r);
-//                g = PixelUtils.clamp(g);
-//                b = PixelUtils.clamp(b);
+            // slide the window for the next pixel (x + 1)
+            if (x + 1 < width) {
+                // subtract the column that is leaving the window
+                int leavingColX = x - rangeX;
+                if (leavingColX >= 0) {
+                    for (int row = rowStart; row <= rowEnd; row++) {
+                        int index = (y + row) * width + leavingColX;
+                        int rgb = inPixels[index];
+                        int r1 = (rgb >> 16) & 0xFF;
+                        int g1 = (rgb >> 8) & 0xFF;
+                        int b1 = rgb & 0xFF;
 
-            outPixels[index] = (inPixels[index] & 0xff000000) | (r << 16) | (g << 8) | b;
-            index++;
+                        int bin = bins[index];
+                        histogram[bin] += -1;
+                        rTotal[bin] -= r1;
+                        gTotal[bin] -= g1;
+                        bTotal[bin] -= b1;
+                    }
+                }
+
+                // add the column that is entering the window
+                int enteringColX = x + 1 + rangeX;
+                if (enteringColX < width) {
+                    for (int row = rowStart; row <= rowEnd; row++) {
+                        int index = (y + row) * width + enteringColX;
+                        int rgb = inPixels[index];
+                        int r1 = (rgb >> 16) & 0xFF;
+                        int g1 = (rgb >> 8) & 0xFF;
+                        int b1 = rgb & 0xFF;
+
+                        int bin = bins[index];
+                        histogram[bin] += 1;
+                        rTotal[bin] += r1;
+                        gTotal[bin] += g1;
+                        bTotal[bin] += b1;
+                    }
+                }
+            }
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Stylize/Oil...";
     }
 }

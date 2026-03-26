@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,9 +28,10 @@ import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.function.IntUnaryOperator;
 
 /**
- * Makes pixels transparent proportionally to a channel value
+ * Makes pixels transparent proportionally to a channel value.
  */
 public class ChannelToTransparency extends ParametrizedFilter {
     public static final String NAME = "Channel to Transparency";
@@ -71,67 +72,36 @@ public class ChannelToTransparency extends ParametrizedFilter {
         boolean invert = invertParam.isChecked();
         boolean keep = keepParam.isChecked();
 
-        ChannelToTransparencyFilter filter = switch (channel.getValue()) {
-            case LUMINOSITY -> new ChannelToTransparencyFilter(invert, keep) {
-                @Override
-                int getChannelValue(int rgb) {
-                    return (int) LuminanceLookup.from(rgb);
-                }
-            };
-            case RED -> new ChannelToTransparencyFilter(invert, keep) {
-                @Override
-                int getChannelValue(int rgb) {
-                    return (rgb >>> 16) & 0xFF;
-                }
-            };
-            case GREEN -> new ChannelToTransparencyFilter(invert, keep) {
-                @Override
-                int getChannelValue(int rgb) {
-                    return (rgb >>> 8) & 0xFF;
-                }
-            };
-            case BLUE -> new ChannelToTransparencyFilter(invert, keep) {
-                @Override
-                int getChannelValue(int rgb) {
-                    return rgb & 0xFF;
-                }
-            };
+        IntUnaryOperator extractor = switch (channel.getValue()) {
+            case LUMINOSITY -> rgb -> (int) LuminanceLookup.from(rgb);
+            case RED -> rgb -> (rgb >>> 16) & 0xFF;
+            case GREEN -> rgb -> (rgb >>> 8) & 0xFF;
+            case BLUE -> rgb -> rgb & 0xFF;
             default -> throw new IllegalStateException("unexpected value " + channel.getValue());
         };
 
+        var filter = new ChannelToTransparencyFilter(invert, keep, extractor);
         return filter.filter(src, dest);
     }
 
-    @Override
-    public void randomize() {
-        // no settings
-    }
-
-    abstract static class ChannelToTransparencyFilter extends PointFilter {
+    private static class ChannelToTransparencyFilter extends PointFilter {
         private final boolean invert;
         private final boolean keep;
+        private final IntUnaryOperator extractor;
 
-        protected ChannelToTransparencyFilter(boolean invert, boolean keep) {
+        ChannelToTransparencyFilter(boolean invert, boolean keep, IntUnaryOperator extractor) {
             super(NAME);
             this.invert = invert;
             this.keep = keep;
+            this.extractor = extractor;
         }
 
         @Override
         public int processPixel(int x, int y, int argb) {
-            int v = getChannelValue(argb);
+            int v = extractor.applyAsInt(argb);
             int newAlpha = invert ? v : 255 - v;
 
-            if (keep) {
-                int origAlpha = (argb >>> 24) & 0xFF;
-                if (origAlpha < newAlpha) {
-                    newAlpha = origAlpha;
-                }
-            }
-
-            return Colors.setAlpha(argb, newAlpha);
+            return keep ? Colors.capAlpha(argb, newAlpha) : Colors.setAlpha(argb, newAlpha);
         }
-
-        abstract int getChannelValue(int rgb);
     }
 }

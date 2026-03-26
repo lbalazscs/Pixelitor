@@ -49,8 +49,6 @@ public class JHEmboss extends ParametrizedFilter {
     private final BooleanParam texture = new BooleanParam(
         "Texture (Multiply with the Source Image)");
 
-    private EmbossFilter filter;
-
     public JHEmboss() {
         super(true);
 
@@ -64,17 +62,17 @@ public class JHEmboss extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new EmbossFilter(NAME);
-        }
+        float azimuth = (float) lightDirection.getValueInIntuitiveRadians();
+        float elevation = (float) lightElevation.getValueInIntuitiveRadians();
+        float adjustedDepth = (float) (Math.pow(2, depth.getValue()) / 100.0f);
+        boolean useTexture = texture.isChecked();
 
-        filter.setAzimuth((float) lightDirection.getValueInIntuitiveRadians());
-
-        float adjustedDepth = (float) (Math.pow(2, this.depth.getValue()) / 100.0);
-        filter.setBumpHeight(adjustedDepth);
-
-        filter.setElevation((float) lightElevation.getValueInIntuitiveRadians());
-        filter.setEmboss(texture.isChecked());
+        EmbossFilter filter = new EmbossFilter(NAME,
+            azimuth,
+            elevation,
+            adjustedDepth,
+            useTexture
+        );
 
         return filter.filter(src, dest);
     }

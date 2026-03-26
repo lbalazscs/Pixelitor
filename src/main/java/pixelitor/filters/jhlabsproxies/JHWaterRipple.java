@@ -71,7 +71,7 @@ public class JHWaterRipple extends ParametrizedFilter {
             filter = new WaterFilter(NAME);
         }
 
-        filter.setCenter(center.getRelativePoint());
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setRadius(radius.getValueAsFloat());
         filter.setWavelength(wavelength.getValueAsFloat());
         filter.setAmplitude((float) amplitude.getPercentage());

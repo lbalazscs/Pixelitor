@@ -90,9 +90,4 @@ public class WoodFilter extends PointFilter {
 
         return colormap.getColor(f);
     }
-
-    @Override
-    public String toString() {
-        return "Texture/Wood...";
-    }
 }

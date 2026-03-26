@@ -44,9 +44,7 @@ public class UnsharpFilter extends GaussianFilter {
     /**
      * Sets the amount of sharpening.
      *
-     * @param amount the amount
-     * @min-value 0
-     * @max-value 1
+     * @param amount the amount (in the range [0, 1])
      */
     public void setAmount(float amount) {
         this.amount = amount;
@@ -69,8 +67,8 @@ public class UnsharpFilter extends GaussianFilter {
 
         int[] outPixels = new int[width * height];
         if (radius > 0) {
-            convolveAndTranspose(kernel, inPixels, outPixels, width, height, premultiplyAlpha, false, CLAMP_EDGES, pt);
-            convolveAndTranspose(kernel, outPixels, inPixels, height, width, false, premultiplyAlpha, CLAMP_EDGES, pt);
+            convolveAndTranspose(kernel, inPixels, outPixels, width, height, premultiplyAlpha, false, pt);
+            convolveAndTranspose(kernel, outPixels, inPixels, height, width, false, premultiplyAlpha, pt);
         }
 
         // src.getRGB(0, 0, width, height, outPixels, 0, width);
@@ -83,14 +81,14 @@ public class UnsharpFilter extends GaussianFilter {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int rgb1 = outPixels[index];
-                int r1 = (rgb1 >> 16) & 0xff;
-                int g1 = (rgb1 >> 8) & 0xff;
-                int b1 = rgb1 & 0xff;
+                int r1 = (rgb1 >> 16) & 0xFF;
+                int g1 = (rgb1 >> 8) & 0xFF;
+                int b1 = rgb1 & 0xFF;
 
                 int rgb2 = inPixels[index];
-                int r2 = (rgb2 >> 16) & 0xff;
-                int g2 = (rgb2 >> 8) & 0xff;
-                int b2 = rgb2 & 0xff;
+                int r2 = (rgb2 >> 16) & 0xFF;
+                int g2 = (rgb2 >> 8) & 0xFF;
+                int b2 = rgb2 & 0xFF;
 
                 if (Math.abs(r1 - r2) >= threshold) {
                     r1 = PixelUtils.clamp((int) ((a + 1) * (r1 - r2) + r2));
@@ -102,7 +100,7 @@ public class UnsharpFilter extends GaussianFilter {
                     b1 = PixelUtils.clamp((int) ((a + 1) * (b1 - b2) + b2));
                 }
 
-                inPixels[index] = (rgb1 & 0xff000000) | (r1 << 16) | (g1 << 8) | b1;
+                inPixels[index] = (rgb1 & 0xFF_00_00_00) | (r1 << 16) | (g1 << 8) | b1;
                 index++;
             }
         }
@@ -112,10 +110,5 @@ public class UnsharpFilter extends GaussianFilter {
         finishProgressTracker();
 
         return dst;
-    }
-
-    @Override
-    public String toString() {
-        return "Blur/Unsharp Mask...";
     }
 }

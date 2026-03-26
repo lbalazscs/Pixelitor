@@ -24,52 +24,33 @@ import java.awt.image.BufferedImage;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
- * A filter which use FFTs to simulate lens blur on an image.
+ * A filter which uses FFTs to simulate lens blur on an image.
  */
 public class LensBlurFilter extends AbstractBufferedImageOp {
-    private float radius = 10;
-    private float bloom = 2;
-    private float bloomThreshold = 192;
-    private static final float angle = 0;
-    private int sides = 5;
+    private final float radius;
+    private final float bloom;
+    private final float bloomThreshold;
+    private final int sides;
 
-    public LensBlurFilter(String filterName) {
+    /**
+     * Creates a new {@link LensBlurFilter} with the given parameters.
+     *
+     * @param filterName     the name of the filter
+     * @param radius         the radius of the blur kernel in pixels; controls the amount of blur
+     * @param sides          the number of sides of the aperture shape
+     * @param bloom          the bloom factor applied to bright areas
+     * @param bloomThreshold the threshold above which pixel values are considered for blooming
+     */
+    public LensBlurFilter(String filterName,
+                          float radius,
+                          int sides,
+                          float bloom,
+                          float bloomThreshold) {
         super(filterName);
-    }
 
-    /**
-     * Sets the radius of the kernel, and hence the amount of blur.
-     *
-     * @param radius the radius of the blur in pixels.
-     */
-    public void setRadius(float radius) {
         this.radius = radius;
-    }
-
-    /**
-     * Sets the number of sides of the aperture.
-     *
-     * @param sides the number of sides
-     */
-    public void setSides(int sides) {
         this.sides = sides;
-    }
-
-    /**
-     * Sets the bloom factor.
-     *
-     * @param bloom the bloom factor
-     */
-    public void setBloom(float bloom) {
         this.bloom = bloom;
-    }
-
-    /**
-     * Sets the bloom threshold.
-     *
-     * @param bloomThreshold the bloom threshold
-     */
-    public void setBloomThreshold(float bloomThreshold) {
         this.bloomThreshold = bloomThreshold;
     }
 
@@ -96,6 +77,18 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
             cols *= 2;
             log2cols++;
         }
+
+        // ensure that the tile dimensions are strictly greater than
+        // 2 * iradius to prevent zero or negative loop step sizes
+        while (rows <= 2 * iradius) {
+            rows *= 2;
+            log2rows++;
+        }
+        while (cols <= 2 * iradius) {
+            cols *= 2;
+            log2cols++;
+        }
+
         int w = cols;
         int h = rows;
 
@@ -105,65 +98,25 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         FFT fft = new FFT(Math.max(log2rows, log2cols));
 
         int[] rgb = new int[w * h];
-        float[][] mask = new float[2][w * h];
         float[][] gb = new float[2][w * h];
         float[][] ar = new float[2][w * h];
 
-        // Create the kernel
-        double polyAngle = Math.PI / sides;
-        double polyScale = 1.0f / FastMath.cos(polyAngle);
-        double r2 = radius * radius;
-        double rangle = Math.toRadians(angle);
-        float total = 0;
-        int i = 0;
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                double dx = x - w / 2.0f;
-                double dy = y - h / 2.0f;
-                double r = dx * dx + dy * dy;
-                double f = r < r2 ? 1 : 0;
-                if (f != 0) {
-                    r = Math.sqrt(r);
-                    if (sides != 0) {
-                        double a = FastMath.atan2(dy, dx) + rangle;
-                        a = ImageMath.mod(a, polyAngle * 2) - polyAngle;
-                        f = FastMath.cos(a) * polyScale;
-                    } else {
-                        f = 1;
-                    }
-                    f = f * r < radius ? 1 : 0;
-                }
-                total += (float) f;
+        float[][] mask = createKernel(w, h);
 
-                mask[0][i] = (float) f;
-                mask[1][i] = 0;
-                i++;
-            }
-        }
-
-        // Normalize the kernel
-        i = 0;
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                mask[0][i] /= total;
-                i++;
-            }
-        }
-
+        // FFT-transform the the kernel upfront for efficiency 
         fft.transform2D(mask[0], mask[1], w, h, true);
 
-        int workUnits = 0;
-        // count the work units the same was as the code does...
-        for (int tileY = -iradius; tileY < height; tileY += tileHeight - 2 * iradius) {
-            workUnits++;
-        }
+        int stepY = tileHeight - 2 * iradius;
+        int workUnits = (height + stepY - 1) / stepY;
         pt = createProgressTracker(workUnits);
 
-        for (int tileY = -iradius; tileY < height; tileY += tileHeight - 2 * iradius) {
-            for (int tileX = -iradius; tileX < width; tileX += tileWidth - 2 * iradius) {
-//                System.out.println("Tile: "+tileX+" "+tileY+" "+tileWidth+" "+tileHeight);
+        int[] tilePixels = new int[tileWidth * tileHeight];
 
-                // Clip the tile to the image bounds
+        // the image is processed in overlapping tiles (each tile
+        // extends iradius pixels beyond its useful region on all sides)
+        for (int tileY = -iradius; tileY + iradius < height; tileY += tileHeight - 2 * iradius) {
+            for (int tileX = -iradius; tileX + iradius < width; tileX += tileWidth - 2 * iradius) {
+                // clip the tile to the image bounds
                 int tx = tileX, ty = tileY, tw = tileWidth, th = tileHeight;
                 int fx = 0, fy = 0;
                 if (tx < 0) {
@@ -182,40 +135,34 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                 if (ty + th > height) {
                     th = height - ty;
                 }
-                src.getRGB(tx, ty, tw, th, rgb, fy * w + fx, w);
-                // getRGB(src, tx, ty, tw, th, rgb);
 
-                // Create a float array from the pixels. Any pixels off the edge of the source image get duplicated from the edge.
-                i = 0;
+                getRGB(src, tx, ty, tw, th, tilePixels);
+                for (int row = 0; row < th; row++) {
+                    System.arraycopy(tilePixels, row * tw, rgb, (fy + row) * w + fx, tw);
+                }
+
+                // flatten 2D array lookups to avoid constant pointer dereferencing
+                float[] ar0 = ar[0], ar1 = ar[1], gb0 = gb[0], gb1 = gb[1];
+
+                // Create a float array from the pixels.
+                // Any pixels off the edge of the source image get duplicated from the edge.
+                int i = 0;
                 for (int y = 0; y < h; y++) {
                     int imageY = y + tileY;
-                    int j;
-                    if (imageY < 0) {
-                        j = fy;
-                    } else if (imageY > height) {
-                        j = fy + th - 1;
-                    } else {
-                        j = y;
-                    }
+                    int j = (imageY < 0) ? fy : (imageY >= height ? fy + th - 1 : y);
                     j *= w;
                     for (int x = 0; x < w; x++) {
                         int imageX = x + tileX;
-                        int k;
-                        if (imageX < 0) {
-                            k = fx;
-                        } else if (imageX > width) {
-                            k = fx + tw - 1;
-                        } else {
-                            k = x;
-                        }
+                        int k = (imageX < 0) ? fx : (imageX >= width ? fx + tw - 1 : x);
                         k += j;
 
-                        ar[0][i] = ((rgb[k] >> 24) & 0xff);
-                        float r = ((rgb[k] >> 16) & 0xff);
-                        float g = ((rgb[k] >> 8) & 0xff);
-                        float b = (rgb[k] & 0xff);
+                        // hoist color extraction & blooming logic
+                        int pixel = rgb[k];
+                        ar0[i] = pixel >>> 24;
+                        float r = (pixel >> 16) & 0xFF;
+                        float g = (pixel >> 8) & 0xFF;
+                        float b = pixel & 0xFF;
 
-                        // Bloom...
                         if (r > bloomThreshold) {
                             r *= bloom;
                         }
@@ -226,70 +173,55 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                             b *= bloom;
                         }
 
-                        ar[1][i] = r;
-                        gb[0][i] = g;
-                        gb[1][i] = b;
-
+                        ar1[i] = r;
+                        gb0[i] = g;
+                        gb1[i] = b;
                         i++;
                     }
                 }
 
-                // Transform into frequency space
+                // transform into frequency space
                 fft.transform2D(ar[0], ar[1], cols, rows, true);
                 fft.transform2D(gb[0], gb[1], cols, rows, true);
 
-                // Multiply the transformed pixels by the transformed kernel
-                i = 0;
-                for (int y = 0; y < h; y++) {
-                    for (int x = 0; x < w; x++) {
-                        float re = ar[0][i];
-                        float im = ar[1][i];
-                        float rem = mask[0][i];
-                        float imm = mask[1][i];
-                        ar[0][i] = re * rem - im * imm;
-                        ar[1][i] = re * imm + im * rem;
+                // multiply the transformed pixels by the transformed kernel
+                // (complex multiplication = convolution in spatial domain)
+                for (int j = 0; j < ar[0].length; j++) {
+                    float re = ar[0][j];
+                    float im = ar[1][j];
+                    float rem = mask[0][j];
+                    float imm = mask[1][j];
+                    ar[0][j] = re * rem - im * imm;
+                    ar[1][j] = re * imm + im * rem;
 
-                        re = gb[0][i];
-                        im = gb[1][i];
-                        gb[0][i] = re * rem - im * imm;
-                        gb[1][i] = re * imm + im * rem;
-                        i++;
-                    }
+                    re = gb[0][j];
+                    im = gb[1][j];
+                    gb[0][j] = re * rem - im * imm;
+                    gb[1][j] = re * imm + im * rem;
                 }
 
-                // Transform back
+                // transform back
                 fft.transform2D(ar[0], ar[1], cols, rows, false);
                 fft.transform2D(gb[0], gb[1], cols, rows, false);
 
-                // Convert back to RGB pixels, with quadrant remapping
-                int row_flip = w >> 1;
-                int col_flip = h >> 1;
+                // convert back to RGB pixels, with quadrant remapping
+                int row_flip = h >> 1;
+                int col_flip = w >> 1;
                 int index = 0;
 
-                int workaroundMax = w * h - 1;
-
                 //FIXME-don't bother converting pixels off image edges
-                for (int y = 0; y < w; y++) {
+                for (int y = 0; y < h; y++) {
                     int ym = y ^ row_flip;
-                    int yi = ym * cols;
+                    int yi = ym * w;
                     for (int x = 0; x < w; x++) {
                         int xm = yi + (x ^ col_flip);
-
-                        // Laszlo: not sure what is happening here, but for certain small images
-                        // with unusual image proportions (for example for any 100*20 input image)
-                        // we get an ArrayIndexOutOfBoundsException
-                        // This break does not result in a good-looking image, but at least
-                        // it avoids the exceptions during the automatic tests
-                        if (xm > workaroundMax) {
-                            break;
-                        }
 
                         int a = (int) ar[0][xm];
                         int r = (int) ar[1][xm];
                         int g = (int) gb[0][xm];
                         int b = (int) gb[1][xm];
 
-                        // Clamp high pixels due to blooming
+                        // clamp high pixels due to blooming
                         if (r > 255) {
                             r = 255;
                         }
@@ -304,7 +236,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                     }
                 }
 
-                // Clip to the output image
+                // clip to the output image
                 tx = tileX + iradius;
                 ty = tileY + iradius;
                 tw = tileWidth - 2 * iradius;
@@ -316,8 +248,10 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                     th = height - ty;
                 }
 
-                dst.setRGB(tx, ty, tw, th, rgb, iradius * w + iradius, w);
-                // setRGB(dst, tx, ty, tw, th, rgb);
+                for (int row = 0; row < th; row++) {
+                    System.arraycopy(rgb, (iradius + row) * w + iradius, tilePixels, row * tw, tw);
+                }
+                setRGB(dst, tx, ty, tw, th, tilePixels);
             }
             pt.unitDone();
         }
@@ -326,8 +260,42 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    @Override
-    public String toString() {
-        return "Blur/Lens Blur...";
+    /**
+     * Creates the blur kernel, a shape describing how each pixel spreads light onto its neighbors.
+     */
+    private float[][] createKernel(int w, int h) {
+        float[][] kernel = new float[2][w * h];
+        double polyAngle = Math.PI / sides;
+        double polyScale = 1.0 / FastMath.cos(polyAngle);
+        double r2 = radius * radius;
+        float total = 0;
+        int i = 0;
+        for (int y = 0; y < h; y++) {
+            double dy = y - h / 2.0;
+            for (int x = 0; x < w; x++) {
+                double dx = x - w / 2.0;
+                double r2_current = dx * dx + dy * dy;
+                double f = 0;
+                if (r2_current < r2) {
+                    double r = Math.sqrt(r2_current);
+                    if (sides != 0) { // polygonal aperture
+                        double a = FastMath.atan2(dy, dx);
+                        a = ImageMath.mod(a, polyAngle * 2) - polyAngle;
+                        f = FastMath.cos(a) * polyScale;
+                    } else { // circular aperture
+                        f = 1;
+                    }
+                    f = (f * r < radius) ? 1 : 0;
+                }
+                total += (float) f;
+                kernel[0][i++] = (float) f;
+            }
+        }
+
+        // normalize => the blur preserves overall image brightness
+        for (int j = 0; j < kernel[0].length; j++) {
+            kernel[0][j] /= total;
+        }
+        return kernel;
     }
 }

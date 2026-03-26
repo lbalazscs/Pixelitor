@@ -28,10 +28,10 @@ public abstract class TransferFilter extends PointFilter {
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        int a = rgb & 0xff000000;
-        int r = (rgb >> 16) & 0xff;
-        int g = (rgb >> 8) & 0xff;
-        int b = rgb & 0xff;
+        int a = rgb & 0xFF_00_00_00;
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
         r = rTable[r];
         g = gTable[g];
         b = bTable[b];

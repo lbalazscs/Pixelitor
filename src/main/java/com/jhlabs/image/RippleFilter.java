@@ -26,108 +26,70 @@ import pixelitor.filters.impl.RotatingEffectFilter;
  * pixels going off the edges are wrapped or not.
  */
 public class RippleFilter extends RotatingEffectFilter {
-    private float xAmplitude, yAmplitude;
-    private float xWavelength, yWavelength;
-    private int waveType;
-
-    private double phaseX;
-    private double phaseY;
-
-    /**
-     * Constructs a RippleFilter.
-     */
-    public RippleFilter(String filterName) {
-        super(filterName);
-
-        xAmplitude = 5.0f;
-        yAmplitude = 0.0f;
-        xWavelength = yWavelength = 16.0f;
-    }
+    private final float xAmplitude;
+    private final float yAmplitude;
+    private final double invXWavelength;
+    private final double invYWavelength;
+    private final int waveType;
+    private final double phaseX;
+    private final double phaseY;
 
     /**
-     * Sets the amplitude of ripple in the X direction.
+     * Constructs a {@link RippleFilter}.
      *
-     * @param xAmplitude the amplitude (in pixels).
+     * @param filterName    the filter name
+     * @param edgeAction    how pixels outside the image are handled
+     * @param interpolation the interpolation method
+     * @param xAmplitude    the amplitude of ripple in the X direction (in pixels)
+     * @param xWavelength   the wavelength of ripple in the X direction (in pixels)
+     * @param yAmplitude    the amplitude of ripple in the Y direction (in pixels)
+     * @param yWavelength   the wavelength of ripple in the Y direction (in pixels)
+     * @param waveType      the wave type
+     * @param phaseX        the phase of the ripple in the X direction (as a fraction, where 1.0 = full cycle)
+     * @param phaseY        the phase of the ripple in the Y direction (as a fraction, where 1.0 = full cycle)
      */
-    public void setXAmplitude(float xAmplitude) {
+    public RippleFilter(String filterName, int edgeAction, int interpolation,
+                        float xAmplitude, float xWavelength,
+                        float yAmplitude, float yWavelength,
+                        int waveType, double phaseX, double phaseY) {
+        super(filterName, edgeAction, interpolation);
+
         this.xAmplitude = xAmplitude;
-    }
-
-    /**
-     * Sets the wavelength of ripple in the X direction.
-     *
-     * @param xWavelength the wavelength (in pixels).
-     */
-    public void setXWavelength(float xWavelength) {
-        this.xWavelength = xWavelength;
-    }
-
-    /**
-     * Sets the amplitude of ripple in the Y direction.
-     *
-     * @param yAmplitude the amplitude (in pixels).
-     */
-    public void setYAmplitude(float yAmplitude) {
         this.yAmplitude = yAmplitude;
-    }
-
-    /**
-     * Sets the wavelength of ripple in the Y direction.
-     *
-     * @param yWavelength the wavelength (in pixels).
-     */
-    public void setYWavelength(float yWavelength) {
-        this.yWavelength = yWavelength;
-    }
-
-    /**
-     * Sets the wave type.
-     *
-     * @param waveType the type.
-     */
-    public void setWaveType(int waveType) {
+        this.invXWavelength = 1.0 / xWavelength;
+        this.invYWavelength = 1.0 / yWavelength;
         this.waveType = waveType;
-    }
-
-    public void setPhaseX(double phaseX) {
         this.phaseX = phaseX * Math.PI * 2;
-    }
-
-    public void setPhaseY(double phaseY) {
         this.phaseY = phaseY * Math.PI * 2;
     }
 
     @Override
     protected void coreTransformInverse(double x, double y, double[] out) {
-        double nx = y / xWavelength;
-        double ny = x / yWavelength;
+        double nx = y * invXWavelength - phaseY;
+        double ny = x * invYWavelength - phaseX;
+
         double fx, fy;
         switch (waveType) {
-            case WaveType.SINE:
-                fx = (float) FastMath.sin(nx - phaseY);
-                fy = (float) FastMath.sin(ny - phaseX);
-                break;
-            case WaveType.SAWTOOTH:
-                fx = ImageMath.sinLikeSawtooth(nx - phaseY);
-                fy = ImageMath.sinLikeSawtooth(ny - phaseX);
-                break;
-            case WaveType.TRIANGLE:
-                fx = ImageMath.sinLikeTriangle(nx - phaseY);
-                fy = ImageMath.sinLikeTriangle(ny - phaseX);
-                break;
-            case WaveType.NOISE:
-                fx = Noise.sinLikeNoise1((float) (nx - phaseY));
-                fy = Noise.sinLikeNoise1((float) (ny - phaseX));
-                break;
-            default:
-                throw new IllegalStateException("waveType = " + waveType);
+            case WaveType.SINE -> {
+                fx = FastMath.sin(nx);
+                fy = FastMath.sin(ny);
+            }
+            case WaveType.SAWTOOTH -> {
+                fx = ImageMath.sinLikeSawtooth(nx);
+                fy = ImageMath.sinLikeSawtooth(ny);
+            }
+            case WaveType.TRIANGLE -> {
+                fx = ImageMath.sinLikeTriangle(nx);
+                fy = ImageMath.sinLikeTriangle(ny);
+            }
+            case WaveType.NOISE -> {
+                fx = Noise.sinLikeNoise1((float) nx);
+                fy = Noise.sinLikeNoise1((float) ny);
+            }
+            default -> throw new IllegalStateException("waveType = " + waveType);
         }
+
         out[0] = x + xAmplitude * fx;
         out[1] = y + yAmplitude * fy;
-    }
-
-    @Override
-    public String toString() {
-        return "Distort/Ripple...";
     }
 }

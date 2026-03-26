@@ -139,11 +139,11 @@ public class GradientSliderUI extends MultiThumbSliderUI {
         float fraction;
         int i1 = 0;
         int i2 = 1;
-        int a1 = (argb[0] >> 24) & 0xff;
+        int a1 = argb[0] >>> 24;
         int r1 = (argb[0] & 0x00ff0000) >> 16;
         int g1 = (argb[0] & 0x0000ff00) >> 8;
         int b1 = (argb[0] & 0x000000ff);
-        int a2 = (argb[1] >> 24) & 0xff;
+        int a2 = argb[1] >>> 24;
         int r2 = (argb[1] & 0x00ff0000) >> 16;
         int g2 = (argb[1] & 0x0000ff00) >> 8;
         int b2 = (argb[1] & 0x000000ff);
@@ -155,11 +155,11 @@ public class GradientSliderUI extends MultiThumbSliderUI {
                     i2++;
                 }
 
-                a1 = (argb[i1] >> 24) & 0xff;
+                a1 = argb[i1] >>> 24;
                 r1 = (argb[i1] & 0x00ff0000) >> 16;
                 g1 = (argb[i1] & 0x0000ff00) >> 8;
                 b1 = (argb[i1] & 0x000000ff);
-                a2 = (argb[i2] >> 24) & 0xff;
+                a2 = argb[i2] >>> 24;
                 r2 = (argb[i2] & 0x00ff0000) >> 16;
                 g2 = (argb[i2] & 0x0000ff00) >> 8;
                 b2 = (argb[i2] & 0x000000ff);

@@ -18,68 +18,55 @@ package com.jhlabs.image;
 
 import com.jhlabs.math.Noise;
 
-import java.awt.image.BufferedImage;
-
 /**
  * This filter applies a marbling effect to an image, displacing pixels by random amounts.
  */
 public class MarbleFilter extends TransformFilter {
-    private float[] sinTable, cosTable;
-    private float scale = 4;
-    private float amount = 4;
-    private float turbulence = 1;
-    private float time;
-
-    public MarbleFilter(String filterName) {
-        super(filterName);
-        setEdgeAction(REPEAT_EDGE);
-    }
+    private static final int TABLE_SIZE = 256;
+    private final float[] sinTable;
+    private final float[] cosTable;
+    private final float scale;
+    private final float time;
 
     /**
-     * Sets the X scale of the effect.
+     * Constructs a MarbleFilter.
      *
-     * @param scale the scale.
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy.
+     * @param interpolation the interpolation method.
+     * @param scale         the X scale of the effect.
+     * @param amount        the amount of the effect.
+     * @param turbulence    the turbulence of the effect (in the range [0, 1]).
+     * @param time          the time of the effect.
      */
-    public void setScale(float scale) {
+    public MarbleFilter(String filterName, int edgeAction, int interpolation, float scale, float amount, float turbulence, float time) {
+        super(filterName, edgeAction, interpolation);
+
         this.scale = scale;
-    }
+        this.time = time;
 
-    public void setAmount(float amount) {
-        this.amount = amount;
-    }
+        sinTable = new float[TABLE_SIZE];
+        cosTable = new float[TABLE_SIZE];
 
-    /**
-     * Sets the turbulence of the effect.
-     *
-     * @param turbulence the turbulence of the effect.
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setTurbulence(float turbulence) {
-        this.turbulence = turbulence;
-    }
-
-    private void initialize() {
-        sinTable = new float[256];
-        cosTable = new float[256];
-        for (int i = 0; i < 256; i++) {
-            float angle = ImageMath.TWO_PI * i / 256.0f * turbulence;
+        float angleMultiplier = ImageMath.TWO_PI * turbulence / TABLE_SIZE;
+        for (int i = 0; i < TABLE_SIZE; i++) {
+            float angle = i * angleMultiplier;
 
             sinTable[i] = (float) (-amount * Math.sin(angle));
             cosTable[i] = (float) (amount * Math.cos(angle));
         }
 
-        // Laszlo: balance the arrays around 0
-        // so that the pixels are not shifted predominantly in one direction
+        // balance the arrays around 0 so that the pixels
+        // are not shifted predominantly in one direction
         float sinAverage = average(sinTable);
         float cosAverage = average(cosTable);
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < TABLE_SIZE; i++) {
             sinTable[i] -= sinAverage;
             cosTable[i] -= cosAverage;
         }
     }
 
-    static float average(float[] input) {
+    private static float average(float[] input) {
         float sum = 0.0f;
         for (float v : input) {
             sum += v;
@@ -87,31 +74,12 @@ public class MarbleFilter extends TransformFilter {
         return sum / input.length;
     }
 
-    private int displacementMap(int x, int y) {
-        float noise = Noise.noise3(x / scale, y / scale, time); // mostly between -1 and 1 but not distributed uniformly
-        return PixelUtils.clamp((int) (127 * (1 + noise)));
-    }
-
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        int displacement = displacementMap(x, y);
+        float noise = Noise.noise3(x / scale, y / scale, time); // mostly between -1 and 1 but not distributed uniformly
+        int displacement = PixelUtils.clamp((int) (127.0f * (1.0f + noise)));
 
         out[0] = x + sinTable[displacement];
         out[1] = y + cosTable[displacement];
-    }
-
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        initialize();
-        return super.filter(src, dst);
-    }
-
-    @Override
-    public String toString() {
-        return "Distort/Marble...";
-    }
-
-    public void setTime(float time) {
-        this.time = time;
     }
 }

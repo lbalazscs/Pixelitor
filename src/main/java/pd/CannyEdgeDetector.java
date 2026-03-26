@@ -573,7 +573,7 @@ public class CannyEdgeDetector {
         int[] pixels = (int[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
         for (int i = 0; i < picsize; i++) {
             int p = pixels[i];
-            int a = (p >>> 24) & 0xff;
+            int a = p >>> 24;
             int r = (p & 0xff0000) >> 16;
             int g = (p & 0xff00) >> 8;
             int b = p & 0xff;

@@ -122,7 +122,7 @@ public class RGBLookup {
      */
     public int mapRgb(int rgb) {
         // alpha channel is preserved
-        int a = (rgb >>> 24) & 0xFF;
+        int a = rgb >>> 24;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;

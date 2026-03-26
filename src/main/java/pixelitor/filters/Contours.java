@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,9 +56,10 @@ public class Contours extends ParametrizedFilter {
 
         int iterations = lineThickness.getValue();
         if (iterations > 0) {
-            var morphology = new MorphologyFilter(NAME);
-            morphology.setIterations(iterations);
-            morphology.setKernel(MorphologyFilter.KERNEL_DIAMOND);
+            var morphology = new MorphologyFilter(NAME,
+                MorphologyFilter.KERNEL_DIAMOND,
+                MorphologyFilter.CHANNEL_RGB,
+                iterations);
             morphology.setOp(MorphologyFilter.OP_ERODE);
 
             dest = morphology.filter(dest, dest);

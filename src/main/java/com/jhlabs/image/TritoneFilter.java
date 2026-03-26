@@ -16,27 +16,26 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.image.BufferedImage;
-
 /**
  * A filter which performs a tritone conversion on an image. Given three colors for shadows, midtones and highlights,
  * it converts the image to grayscale and then applies a color mapping based on the colors.
  */
 public class TritoneFilter extends PointFilter {
-    private int shadowColor = 0xff000000;
-    private int midColor = 0xff888888;
-    private int highColor = 0xffffffff;
-
     // lookup table for mapping grayscale values
     // to the corresponding tritone colors
-    private int[] lut;
+    private final int[] lut;
 
-    public TritoneFilter(String filterName) {
+    /**
+     * Constructs a {@link TritoneFilter} with the given colors for the tritone mapping.
+     *
+     * @param filterName  the name of the filter
+     * @param shadowColor the shadow color, applied to dark areas of the image
+     * @param midColor    the mid color, applied to midtone areas of the image
+     * @param highColor   the highlight color, applied to bright areas of the image
+     */
+    public TritoneFilter(String filterName, int shadowColor, int midColor, int highColor) {
         super(filterName);
-    }
 
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         lut = new int[256];
 
         // fill the LUT for shadow to midtone transition
@@ -50,46 +49,10 @@ public class TritoneFilter extends PointFilter {
             float t = (i - 127) / 128.0f;
             lut[i] = ImageMath.mixColors(t, midColor, highColor);
         }
-
-        dst = super.filter(src, dst);
-        lut = null;
-        return dst;
     }
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        return lut[PixelUtils.brightness(rgb)];
-    }
-
-    /**
-     * Sets the shadow color.
-     *
-     * @param shadowColor the shadow color
-     */
-    public void setShadowColor(int shadowColor) {
-        this.shadowColor = shadowColor;
-    }
-
-    /**
-     * Sets the mid color.
-     *
-     * @param midColor the mid color
-     */
-    public void setMidColor(int midColor) {
-        this.midColor = midColor;
-    }
-
-    /**
-     * Sets the high color.
-     *
-     * @param highColor the high color
-     */
-    public void setHighColor(int highColor) {
-        this.highColor = highColor;
-    }
-
-    @Override
-    public String toString() {
-        return "Colors/Tritone...";
+        return lut[ImageMath.calcLuminanceInt(rgb)];
     }
 }

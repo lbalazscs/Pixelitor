@@ -16,8 +16,9 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.colors.Colors;
+
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -30,12 +31,13 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
         super(filterName);
     }
 
+    // converts each pixel to a grayscale brightness
     private static void brightness(int[] row) {
         for (int i = 0; i < row.length; i++) {
             int rgb = row[i];
-            int r = rgb >> 16 & 0xff;
-            int g = rgb >> 8 & 0xff;
-            int b = rgb & 0xff;
+            int r = rgb >> 16 & 0xFF;
+            int g = rgb >> 8 & 0xFF;
+            int b = rgb & 0xFF;
             row[i] = (r + g + b) / 3;
         }
     }
@@ -47,89 +49,99 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
         }
         int width = src.getWidth();
         int height = src.getHeight();
-        if (height == 1) {
-            // lbalazscs: the algorithm will throw NullPointerException
-            // for images with height == 1, because then row3 is null, so
-            // simply return a black image
-            Graphics2D g = dst.createGraphics();
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, width, 1);
-            g.dispose();
+
+        if (width <= 1 || height <= 1) {
+            // return a black image
+            Colors.fillWith(Color.BLACK, dst);
             return dst;
         }
 
         pt = createProgressTracker(2 * height);
 
-        int[] row1 = null;
-        int[] row2 = null;
-        int[] row3 = null;
         int[] pixels = new int[width];
-        row1 = getRGB(src, 0, 0, width, 1, row1);
-        row2 = getRGB(src, 0, 0, width, 1, row2);
-        brightness(row1);
-        brightness(row2);
 
+        // a sliding 3-row window over the image
+        int[] prevRow = getRGB(src, 0, 0, width, 1, null);
+        int[] currRow = getRGB(src, 0, 0, width, 1, null);
+        int[] nextRow = null;
+
+        brightness(prevRow);
+        brightness(currRow);
+
+        // first pass: compute Laplacian and gradient + store sign + edge strength
         for (int y = 0; y < height; y++) {
             if (y < height - 1) {
-                row3 = getRGB(src, 0, y + 1, width, 1, row3);
-                brightness(row3);
+                nextRow = getRGB(src, 0, y + 1, width, 1, null);
+                brightness(nextRow);
             }
-            pixels[0] = pixels[width - 1] = 0xff000000;//FIXME
+            pixels[0] = pixels[width - 1] = 0xFF_00_00_00;//FIXME
             for (int x = 1; x < width - 1; x++) {
-                int l1 = row2[x - 1];
-                int l2 = row1[x];
-                int l3 = row3[x];
-                int l4 = row2[x + 1];
+                // applies the 3×3 Laplacian kernel
+                // (1  1  1
+                //  1 -8  1
+                //  1  1  1)
+                // to every interior pixel
+                int sum = prevRow[x - 1] + prevRow[x] + prevRow[x + 1] +
+                    currRow[x - 1] - (8 * currRow[x]) + currRow[x + 1] +
+                    nextRow[x - 1] + nextRow[x] + nextRow[x + 1];
 
-                int l = row2[x];
-                int max = Math.max(Math.max(l1, l2), Math.max(l3, l4));
-                int min = Math.min(Math.min(l1, l2), Math.min(l3, l4));
+                int center = currRow[x];
 
-                int gradient = (int) (0.5f * Math.max((max - l), (l - min)));
+                // local pixel values around center pixel
+                int left = currRow[x - 1];
+                int right = currRow[x + 1];
+                int top = prevRow[x];
+                int bottom = nextRow[x];
 
-                int r = ((row1[x - 1] + row1[x] + row1[x + 1] +
-                        row2[x - 1] - (8 * row2[x]) + row2[x + 1] +
-                        row3[x - 1] + row3[x] + row3[x + 1]) > 0) ?
-                        gradient : (128 + gradient);
+                // estimate gradient magnitude: if neighbors differ
+                // strongly from center => strong edge
+                int max = Math.max(Math.max(left, top), Math.max(bottom, right));
+                int min = Math.min(Math.min(left, top), Math.min(bottom, right));
+                int gradient = Math.max(max - center, center - min) / 2;
+
+                // encode the sign into the pixel value
+                int r = sum > 0
+                    ? gradient // one side of the edge: store 0-127
+                    : (128 + gradient); // other side: store 128–255
                 pixels[x] = r;
             }
             setRGB(dst, 0, y, width, 1, pixels);
-            int[] t = row1;
-            row1 = row2;
-            row2 = row3;
-            row3 = t;
+
+            // rolling buffer: reuse the row arrays
+            int[] t = prevRow;
+            prevRow = currRow;
+            currRow = nextRow;
+            nextRow = t; // will be passed to getRGB as a reusable buffer
 
             pt.unitDone();
         }
 
-        row1 = getRGB(dst, 0, 0, width, 1, row1);
-        row2 = getRGB(dst, 0, 0, width, 1, row2);
+        prevRow = getRGB(dst, 0, 0, width, 1, prevRow);
+        currRow = getRGB(dst, 0, 0, width, 1, currRow);
 
+        // second pass: detect zero-crossings (where sign flips => edges)
         for (int y = 0; y < height; y++) {
             if (y < height - 1) {
-                row3 = getRGB(dst, 0, y + 1, width, 1, row3);
+                nextRow = getRGB(dst, 0, y + 1, width, 1, nextRow);
             }
-            pixels[0] = pixels[width - 1] = 0xff000000;//FIXME
+            pixels[0] = pixels[width - 1] = 0xFF_00_00_00;//FIXME
             for (int x = 1; x < width - 1; x++) {
-                int r = row2[x];
-                r = (((r <= 128) &&
-                        ((row1[x - 1] > 128) ||
-                                (row1[x] > 128) ||
-                                (row1[x + 1] > 128) ||
-                                (row2[x - 1] > 128) ||
-                                (row2[x + 1] > 128) ||
-                                (row3[x - 1] > 128) ||
-                                (row3[x] > 128) ||
-                                (row3[x + 1] > 128))) ?
-                        ((r >= 128) ? (r - 128) : r) : 0);
+                boolean hasNeighborAbove128 =
+                    (prevRow[x - 1] > 128) || (prevRow[x] > 128) || (prevRow[x + 1] > 128) ||
+                    (currRow[x - 1] > 128) || (currRow[x + 1] > 128) ||
+                    (nextRow[x - 1] > 128) || (nextRow[x] > 128) || (nextRow[x + 1] > 128);
 
-                pixels[x] = 0xff000000 | (r << 16) | (r << 8) | r;
+                // detect sign change: keeps the pixel if it's on
+                // one side and a neighbor is on the opposite side
+                int v = currRow[x];
+                v = (v < 128 && hasNeighborAbove128) ? v : 0;
+                pixels[x] = 0xFF_00_00_00 | (v << 16) | (v << 8) | v;
             }
             setRGB(dst, 0, y, width, 1, pixels);
-            int[] t = row1;
-            row1 = row2;
-            row2 = row3;
-            row3 = t;
+            int[] t = prevRow;
+            prevRow = currRow;
+            currRow = nextRow;
+            nextRow = t;
 
             pt.unitDone();
         }
@@ -137,10 +149,5 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
         finishProgressTracker();
 
         return dst;
-    }
-
-    @Override
-    public String toString() {
-        return "Edges/Laplace...";
     }
 }

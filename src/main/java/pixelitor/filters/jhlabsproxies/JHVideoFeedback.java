@@ -41,8 +41,6 @@ public class JHVideoFeedback extends ParametrizedFilter {
     private final RangeParam startOpacity = new RangeParam("Start Opacity (%)", 0, 100, 100);
     private final RangeParam endOpacity = new RangeParam("End Opacity (%)", 0, 100, 100);
 
-    private FeedbackFilter filter;
-
     public JHVideoFeedback() {
         super(true);
 
@@ -62,16 +60,17 @@ public class JHVideoFeedback extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new FeedbackFilter(NAME);
-        }
-
-        filter.setRotation(rotation.getValueInRadians());
-        filter.setZoom((float) zoom.getPercentage());
-        filter.setCenter(center.getRelativePoint());
-        filter.setIterations(iterations.getValue());
-        filter.setStartAlpha((float) startOpacity.getPercentage());
-        filter.setEndAlpha((float) endOpacity.getPercentage());
+        FeedbackFilter filter = new FeedbackFilter(
+            NAME,
+            center.getRelativePoint(),
+            0,
+            0,
+            rotation.getValueInRadians(),
+            (float) zoom.getPercentage(),
+            (float) startOpacity.getPercentage(),
+            (float) endOpacity.getPercentage(),
+            iterations.getValue()
+        );
 
         return filter.filter(src, dest);
     }

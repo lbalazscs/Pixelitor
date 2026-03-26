@@ -16,29 +16,54 @@ limitations under the License.
 
 package com.jhlabs.math;
 
-import com.jhlabs.image.ImageMath;
-
 import java.util.Random;
 
+import static com.jhlabs.image.ImageMath.PI;
+import static com.jhlabs.image.ImageMath.smoothStep01;
+
 /**
- * Perlin Noise functions
+ * Perlin Noise functions.
  */
 public class Noise {
     private static final Random randomGenerator = new Random();
+
+    private Noise() {
+    }
 
     public static void reseed(long newSeed) {
         randomGenerator.setSeed(newSeed);
         init();
     }
 
+    // the base size of the permutation/gradient tables
     private static final int B = 0x100; // 256
-    private static final int BM = 0xff; // 255
+
+    // bitmask used as a fast modulo, because x % 256 == x & 255
+    // (keeps indices inside the 0–255 range)
+    private static final int BM = 0xFF; // 255
+
+    // offset added to input coordinates: guarantees that
+    // even negative coordinates produce a positive integer part
     private static final int N = 0x1000; // 4096
 
-    static final int[] p = new int[B + B + 2];
-    static final float[][] g3 = new float[B + B + 2][3];
-    static final float[][] g2 = new float[B + B + 2][2];
-    static final float[] g1 = new float[B + B + 2];
+    // the permutation table: turns any integer coordinate (ix, iy, iz)
+    // into a “random” but repeatable index into the gradient tables
+    private static final int[] p = new int[B + B + 2];
+
+    // 1-D gradients: a slope at each grid point
+    // (each entry is a random value in [-1, 1])
+    private static final float[] g1 = new float[B + B + 2];
+
+    // 2-D gradients: random directions on the unit circle
+    // (each pair is a unit vector pointing in a random direction)
+    private static final float[] g2x = new float[B + B + 2];
+    private static final float[] g2y = new float[B + B + 2];
+
+    // 3-D gradients: random unit vectors in 3D space
+    // (each triplet is a normalised random unit vector)
+    private static final float[] g3x = new float[B + B + 2];
+    private static final float[] g3y = new float[B + B + 2];
+    private static final float[] g3z = new float[B + B + 2];
 
     static {
         init();
@@ -49,25 +74,30 @@ public class Noise {
      *
      * @param x       the x value
      * @param y       the y value
-     * @param octaves number of octaves of turbulence
-     * @return turbulence value at (x,y)
+     * @param octaves the number of octaves of turbulence
+     * @return the turbulence value at (x, y)
      */
     public static double turbulence2(double x, double y, double octaves) {
         double t = 0.0;
 
-        for (double f = 1.0; f <= octaves; f *= 2) {
+        for (double f = 1.0; f <= octaves; f *= 2.0) {
             t += Math.abs(noise2((float) (f * x), (float) (f * y))) / f;
         }
         return t;
     }
 
     /**
-     * Same as above but without abs, results in a smoother look
+     * Compute smoother turbulence using Perlin noise without absolute value.
+     *
+     * @param x       the x value
+     * @param y       the y value
+     * @param octaves the number of octaves of turbulence
+     * @return the turbulence value at (x, y)
      */
     public static double turbulence2Smooth(double x, double y, double octaves) {
         double t = 0.0;
 
-        for (double f = 1.0; f <= octaves; f *= 2) {
+        for (double f = 1.0; f <= octaves; f *= 2.0) {
             t += noise2((float) (f * x), (float) (f * y)) / f;
         }
         return t;
@@ -78,24 +108,24 @@ public class Noise {
      *
      * @param x       the x value
      * @param y       the y value
-     * @param octaves number of octaves of turbulence
-     * @return turbulence value at (x,y)
+     * @param z       the z value
+     * @param octaves the number of octaves of turbulence
+     * @return the turbulence value at (x, y, z)
      */
     public static float turbulence3(float x, float y, float z, float octaves) {
         float t = 0.0f;
 
-        for (float f = 1.0f; f <= octaves; f *= 2) {
+        for (float f = 1.0f; f <= octaves; f *= 2.0f) {
             t += Math.abs(noise3(f * x, f * y, f * z)) / f;
         }
         return t;
     }
 
-
     /**
      * Compute 1-dimensional Perlin noise.
      *
      * @param x the x value
-     * @return noise value at x in the range -1..1
+     * @return the noise value at x in the range -1..1
      */
     public static float noise1(float x) {
         float t = x + N;
@@ -104,7 +134,7 @@ public class Noise {
         float rx0 = t - (int) t;
         float rx1 = rx0 - 1.0f;
 
-        float sx = ImageMath.smoothStep01(rx0);
+        float sx = smoothStep01(rx0);
 
         float u = rx0 * g1[p[bx0]];
         float v = rx1 * g1[p[bx1]];
@@ -112,10 +142,13 @@ public class Noise {
     }
 
     /**
-     * A noise function with a "period" of 2 PI and values between -1 and 1
+     * Compute a noise function with a period of 2 PI and values between -1 and 1.
+     *
+     * @param x the x value
+     * @return the noise value at x
      */
     public static float sinLikeNoise1(float x) {
-        return 2 * noise1(x / ImageMath.PI);
+        return 2.0f * noise1(x / PI);
     }
 
     /**
@@ -123,7 +156,7 @@ public class Noise {
      *
      * @param x the x coordinate
      * @param y the y coordinate
-     * @return noise value at (x,y) - a value between -1 and 1, but it can be a bit smaller like -1.0362637
+     * @return the noise value at (x, y)
      */
     public static float noise2(float x, float y) {
         float t = x + N;
@@ -146,39 +179,30 @@ public class Noise {
         int b01 = p[i + by1];
         int b11 = p[j + by1];
 
-        float sx = ImageMath.smoothStep01(rx0);
-        float sy = ImageMath.smoothStep01(ry0);
+        float sx = smoothStep01(rx0);
+        float sy = smoothStep01(ry0);
 
-        float[] q = g2[b00];
-        float u = rx0 * q[0] + ry0 * q[1];
-        q = g2[b10];
-        float v = rx1 * q[0] + ry0 * q[1];
+        float u = rx0 * g2x[b00] + ry0 * g2y[b00];
+        float v = rx1 * g2x[b10] + ry0 * g2y[b10];
         float a = lerp(sx, u, v);
 
-        q = g2[b01];
-        u = rx0 * q[0] + ry1 * q[1];
-        q = g2[b11];
-        v = rx1 * q[0] + ry1 * q[1];
+        u = rx0 * g2x[b01] + ry1 * g2y[b01];
+        v = rx1 * g2x[b11] + ry1 * g2y[b11];
         float b = lerp(sx, u, v);
 
         float rv = 1.5f * lerp(sy, a, b);
 
         assert !Float.isNaN(rv);
-        if (Float.isNaN(rv)) {
-            rv = 0.0f;
-        }
-
         return rv;
     }
-
 
     /**
      * Compute 3-dimensional Perlin noise.
      *
      * @param x the x coordinate
      * @param y the y coordinate
-     * @param y the y coordinate
-     * @return noise value at (x,y,z)
+     * @param z the z coordinate
+     * @return the noise value at (x, y, z)
      */
     public static float noise3(float x, float y, float z) {
         float t = x + N;
@@ -207,35 +231,27 @@ public class Noise {
         int b01 = p[i + by1];
         int b11 = p[j + by1];
 
-        t = ImageMath.smoothStep01(rx0);
-        float sy = ImageMath.smoothStep01(ry0);
-        float sz = ImageMath.smoothStep01(rz0);
+        float sx = smoothStep01(rx0);
+        float sy = smoothStep01(ry0);
+        float sz = smoothStep01(rz0);
 
-        float[] q = g3[b00 + bz0];
-        float u = rx0 * q[0] + ry0 * q[1] + rz0 * q[2];
-        q = g3[b10 + bz0];
-        float v = rx1 * q[0] + ry0 * q[1] + rz0 * q[2];
-        float a = lerp(t, u, v);
+        float u = rx0 * g3x[b00 + bz0] + ry0 * g3y[b00 + bz0] + rz0 * g3z[b00 + bz0];
+        float v = rx1 * g3x[b10 + bz0] + ry0 * g3y[b10 + bz0] + rz0 * g3z[b10 + bz0];
+        float a = lerp(sx, u, v);
 
-        q = g3[b01 + bz0];
-        u = rx0 * q[0] + ry1 * q[1] + rz0 * q[2];
-        q = g3[b11 + bz0];
-        v = rx1 * q[0] + ry1 * q[1] + rz0 * q[2];
-        float b = lerp(t, u, v);
+        u = rx0 * g3x[b01 + bz0] + ry1 * g3y[b01 + bz0] + rz0 * g3z[b01 + bz0];
+        v = rx1 * g3x[b11 + bz0] + ry1 * g3y[b11 + bz0] + rz0 * g3z[b11 + bz0];
+        float b = lerp(sx, u, v);
 
         float c = lerp(sy, a, b);
 
-        q = g3[b00 + bz1];
-        u = rx0 * q[0] + ry0 * q[1] + rz1 * q[2];
-        q = g3[b10 + bz1];
-        v = rx1 * q[0] + ry0 * q[1] + rz1 * q[2];
-        a = lerp(t, u, v);
+        u = rx0 * g3x[b00 + bz1] + ry0 * g3y[b00 + bz1] + rz1 * g3z[b00 + bz1];
+        v = rx1 * g3x[b10 + bz1] + ry0 * g3y[b10 + bz1] + rz1 * g3z[b10 + bz1];
+        a = lerp(sx, u, v);
 
-        q = g3[b01 + bz1];
-        u = rx0 * q[0] + ry1 * q[1] + rz1 * q[2];
-        q = g3[b11 + bz1];
-        v = rx1 * q[0] + ry1 * q[1] + rz1 * q[2];
-        b = lerp(t, u, v);
+        u = rx0 * g3x[b01 + bz1] + ry1 * g3y[b01 + bz1] + rz1 * g3z[b01 + bz1];
+        v = rx1 * g3x[b11 + bz1] + ry1 * g3y[b11 + bz1] + rz1 * g3z[b11 + bz1];
+        b = lerp(sx, u, v);
 
         float d = lerp(sy, a, b);
 
@@ -246,63 +262,57 @@ public class Noise {
         return a + t * (b - a);
     }
 
-    private static void normalize2(float[] v) {
-        float s = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-        v[0] = v[0] / s;
-        v[1] = v[1] / s;
-    }
-
-    static void normalize3(float[] v) {
-        float s = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-        v[0] = v[0] / s;
-        v[1] = v[1] / s;
-        v[2] = v[2] / s;
-    }
-
+    // returns a non-negative random integer
     private static int random() {
-        return randomGenerator.nextInt() & 0x7fffffff;
+        return randomGenerator.nextInt() & Integer.MAX_VALUE; // removes the sign bit
     }
 
     private static void init() {
-        int i, j;
-
-        for (i = 0; i < B; i++) {
+        for (int i = 0; i < B; i++) {
             p[i] = i;
 
             g1[i] = (float) ((random() % (B + B)) - B) / B;
 
             // reroll until we get a non-zero 2D vector
             do {
-                for (j = 0; j < 2; j++) {
-                    g2[i][j] = (float) ((random() % (B + B)) - B) / B;
-                }
-            } while (g2[i][0] == 0.0f && g2[i][1] == 0.0f);
-            normalize2(g2[i]);
+                g2x[i] = (float) ((random() % (B + B)) - B) / B;
+                g2y[i] = (float) ((random() % (B + B)) - B) / B;
+            } while (g2x[i] == 0.0f && g2y[i] == 0.0f);
+
+            float s2 = (float) Math.sqrt(g2x[i] * g2x[i] + g2y[i] * g2y[i]);
+            g2x[i] /= s2;
+            g2y[i] /= s2;
 
             // reroll until we get a non-zero 3D vector
             do {
-                for (j = 0; j < 3; j++) {
-                    g3[i][j] = (float) ((random() % (B + B)) - B) / B;
-                }
-            } while (g3[i][0] == 0.0f && g3[i][1] == 0.0f && g3[i][2] == 0.0f);
-            normalize3(g3[i]);
+                g3x[i] = (float) ((random() % (B + B)) - B) / B;
+                g3y[i] = (float) ((random() % (B + B)) - B) / B;
+                g3z[i] = (float) ((random() % (B + B)) - B) / B;
+            } while (g3x[i] == 0.0f && g3y[i] == 0.0f && g3z[i] == 0.0f);
+
+            float s3 = (float) Math.sqrt(g3x[i] * g3x[i] + g3y[i] * g3y[i] + g3z[i] * g3z[i]);
+            g3x[i] /= s3;
+            g3y[i] /= s3;
+            g3z[i] /= s3;
         }
 
-        for (i = B - 1; i >= 0; i--) {
+        for (int i = B - 1; i >= 0; i--) {
             int k = p[i];
-            p[i] = p[j = random() % B];
+            int j = random() % B;
+            p[i] = p[j];
             p[j] = k;
         }
 
-        for (i = 0; i < B + 2; i++) {
+        for (int i = 0; i < B + 2; i++) {
             p[B + i] = p[i];
             g1[B + i] = g1[i];
-            for (j = 0; j < 2; j++) {
-                g2[B + i][j] = g2[i][j];
-            }
-            for (j = 0; j < 3; j++) {
-                g3[B + i][j] = g3[i][j];
-            }
+
+            g2x[B + i] = g2x[i];
+            g2y[B + i] = g2y[i];
+
+            g3x[B + i] = g3x[i];
+            g3y[B + i] = g3y[i];
+            g3z[B + i] = g3z[i];
         }
     }
 }

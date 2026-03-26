@@ -131,10 +131,10 @@ public class SmearFilter extends WholeImageFilter {
     private void renderOneCross(int width, int height, int[] inPixels, int[] outPixels, int x, int y, int length) {
         int rgb = inPixels[y * width + x];
 
-        int a2 = (rgb >> 24) & 0xff;
-        int r2 = (rgb >> 16) & 0xff;
-        int g2 = (rgb >> 8) & 0xff;
-        int b2 = rgb & 0xff;
+        int a2 = rgb >>> 24;
+        int r2 = (rgb >> 16) & 0xFF;
+        int g2 = (rgb >> 8) & 0xFF;
+        int b2 = rgb & 0xFF;
 
         int mixInt = (int) (mix * 256);
         int invMixInt = 256 - mixInt;
@@ -196,10 +196,10 @@ public class SmearFilter extends WholeImageFilter {
         int dx = (int) (length * cos);
         int dy = (int) (length * sin);
 
-        int a2 = (rgb >> 24) & 0xff;
-        int r2 = (rgb >> 16) & 0xff;
-        int g2 = (rgb >> 8) & 0xff;
-        int b2 = rgb & 0xff;
+        int a2 = rgb >>> 24;
+        int r2 = (rgb >> 16) & 0xFF;
+        int g2 = (rgb >> 8) & 0xFF;
+        int b2 = rgb & 0xFF;
 
         int mixInt = (int) (mix * 256);
         int invMixInt = 256 - mixInt;
@@ -295,10 +295,10 @@ public class SmearFilter extends WholeImageFilter {
     private void renderOneShape(int width, int height, int[] inPixels, int[] outPixels, int radius, int radius2, int sx, int sy) {
         int rgb = inPixels[sy * width + sx];
 
-        int a2 = (rgb >> 24) & 0xff;
-        int r2 = (rgb >> 16) & 0xff;
-        int g2 = (rgb >> 8) & 0xff;
-        int b2 = rgb & 0xff;
+        int a2 = rgb >>> 24;
+        int r2 = (rgb >> 16) & 0xFF;
+        int g2 = (rgb >> 8) & 0xFF;
+        int b2 = rgb & 0xFF;
 
         int mixInt = (int) (mix * 256);
         int invMixInt = 256 - mixInt;
@@ -354,10 +354,5 @@ public class SmearFilter extends WholeImageFilter {
                 }
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Effects/Smear...";
     }
 }

@@ -45,8 +45,6 @@ public class JHGlint extends ParametrizedFilter {
 
     private final GradientParam colors = GradientParam.createWhiteToBlack("Colors");
 
-    private GlintFilter filter;
-
     public JHGlint() {
         super(true);
 
@@ -69,18 +67,16 @@ public class JHGlint extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new GlintFilter(NAME);
-        }
-
-        filter.setThreshold((float) threshold.getPercentage());
-        filter.setCoverage((float) coverage.getPercentage());
-        filter.setAmount((float) intensity.getPercentage());
-        filter.setLength(length);
-        filter.setBlur(blur.getValueAsFloat());
-        filter.setColormap(colors.getColorMap());
-
-        filter.setGlintOnly(glintOnly.isChecked());
+        GlintFilter filter = new GlintFilter(
+            NAME,
+            (float) threshold.getPercentage(),
+            (float) coverage.getPercentage(),
+            (float) intensity.getPercentage(),
+            length,
+            blur.getValueAsFloat(),
+            colors.getColorMap(),
+            glintOnly.isChecked()
+        );
 
         return filter.filter(src, dest);
     }

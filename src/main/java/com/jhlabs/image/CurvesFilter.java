@@ -67,10 +67,4 @@ public class CurvesFilter extends TransferFilter {
     public Curve[] getCurves() {
         return curves;
     }
-
-    @Override
-    public String toString() {
-        return "Colors/Curves...";
-    }
 }
-

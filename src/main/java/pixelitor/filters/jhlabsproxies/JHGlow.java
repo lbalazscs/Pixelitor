@@ -36,8 +36,6 @@ public class JHGlow extends ParametrizedFilter {
     private final RangeParam amount = new RangeParam("Amount", 0, 15, 100);
     private final RangeParam softness = new RangeParam("Softness Radius", 0, 20, 100);
 
-    private GlowFilter filter;
-
     public JHGlow() {
         super(true);
 
@@ -59,18 +57,18 @@ public class JHGlow extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new GlowFilter(NAME);
-        }
-
-        filter.setAmount(amountValue);
-        filter.setRadius(softness.getValueAsFloat());
+        GlowFilter filter = new GlowFilter(NAME, amountValue, softness.getValueAsFloat());
 
         return filter.filter(src, dest);
     }
 
     @Override
     public boolean supportsGray() {
+        return false;
+    }
+
+    @Override
+    protected boolean createDefaultDestImg() {
         return false;
     }
 }

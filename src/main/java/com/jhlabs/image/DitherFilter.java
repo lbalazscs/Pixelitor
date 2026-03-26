@@ -166,22 +166,27 @@ public class DitherFilter extends PointFilter {
     public static final int MATRIX_CLUSTER4 = 9;
     public static final int MATRIX_CLUSTER8 = 10;
 
-    private int[] matrix;
-    private int rows, cols, levels;
-    private int[] mod;
-    private int[] div;
-    private int[] map;
-    private boolean colorDither;
+    private final int[] matrix;
+    private final int rows;
+    private final int cols;
+    private final int[] mod;
+    private final int[] div;
+    private final int[] map;
+    private final boolean colorDither;
 
     /**
-     * Constuct a DitherFilter.
+     * Constructs a DitherFilter with all required configuration.
+     *
+     * @param filterName   the name of the filter
+     * @param matrixMethod the dithering matrix type.
+     * @param levels       the number of quantization levels used for dithering
+     * @param colorDither  whether to apply dithering independently to RGB channels
+     *                     (true) or use grayscale dithering (false)
      */
-    public DitherFilter(String filterName) {
+    public DitherFilter(String filterName, int matrixMethod, int levels, boolean colorDither) {
         super(filterName);
-    }
 
-    public void setMatrixMethod(int method) {
-        matrix = switch (method) {
+        matrix = switch (matrixMethod) {
             case MATRIX_2x2 -> ditherMagic2x2Matrix;
             case MATRIX_4x4_SQUARE -> ditherMagic4x4Matrix;
             case MATRIX_4x4_ORDERED -> ditherOrdered4x4Matrix;
@@ -192,53 +197,22 @@ public class DitherFilter extends PointFilter {
             case MATRIX_CLUSTER3 -> ditherCluster3Matrix;
             case MATRIX_CLUSTER4 -> ditherCluster4Matrix;
             case MATRIX_CLUSTER8 -> ditherCluster8Matrix;
-            default -> throw new IllegalStateException("Unexpected value: " + method);
+            default -> throw new IllegalStateException("Unexpected value: " + matrixMethod);
         };
-    }
 
-    /**
-     * Sets the dither matrix.
-     *
-     * @param matrix the dither matrix
-     */
-    public void setMatrix(int[] matrix) {
-        this.matrix = matrix;
-    }
-
-    /**
-     * Sets the number of dither levels.
-     *
-     * @param levels the number of levels
-     */
-    public void setLevels(int levels) {
-        this.levels = levels;
-    }
-
-
-    /**
-     * Sets whether to use a color dither.
-     *
-     * @param colorDither whether to use a color dither
-     */
-    public void setColorDither(boolean colorDither) {
         this.colorDither = colorDither;
-    }
 
-    /**
-     * Must be called after all the properties have been set.
-     */
-    public void initialize() {
-        rows = cols = (int) Math.sqrt(matrix.length);
+        this.rows = this.cols = (int) Math.sqrt(matrix.length);
 
         // map maps the levels to actual 0..255 values
-        map = new int[levels];
+        this.map = new int[levels];
         for (int i = 0; i < levels; i++) {
             int v = 255 * i / (levels - 1);
             map[i] = v;
         }
 
-        div = new int[256]; // pre-calculates the level of a 0..255 value
-        mod = new int[256];
+        this.div = new int[256]; // pre-calculates the level of a 0..255 value
+        this.mod = new int[256];
         int rc = (rows * cols + 1);
         for (int i = 0; i < 256; i++) {
             div[i] = (levels - 1) * i / 256;
@@ -246,14 +220,16 @@ public class DitherFilter extends PointFilter {
         }
     }
 
-    // In orderd dithering each pixel is processed independently based
-    // on its position relative to the tiling of the threshold matrix.
+    /**
+     * In ordered dithering each pixel is processed independently based
+     * on its position relative to the tiling of the threshold matrix.
+     */
     @Override
     public int processPixel(int x, int y, int rgb) {
-        int a = rgb & 0xff000000;
-        int r = (rgb >> 16) & 0xff;
-        int g = (rgb >> 8) & 0xff;
-        int b = rgb & 0xff;
+        int a = rgb & 0xFF_00_00_00;
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
 
         int col = x % cols;
         int row = y % rows;
@@ -271,10 +247,5 @@ public class DitherFilter extends PointFilter {
             r = g = b = map[mod[value] > v ? div[value] + 1 : div[value]];
         }
         return a | (r << 16) | (g << 8) | b;
-    }
-
-    @Override
-    public String toString() {
-        return "Colors/Dither...";
     }
 }

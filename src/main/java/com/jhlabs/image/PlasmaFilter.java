@@ -20,6 +20,8 @@ import pixelitor.utils.ProgressTracker;
 
 import java.util.SplittableRandom;
 
+import static com.jhlabs.image.ImageMath.average;
+
 /**
  * Generates plasma-like textures using a recursive diamond-square algorithm.
  * See https://en.wikipedia.org/wiki/Diamond-square_algorithm
@@ -29,7 +31,7 @@ public class PlasmaFilter extends WholeImageFilter {
     private int iterationCount = 0;
 
     public float turbulence = 1.0f;
-    private Colormap colormap = new LinearColormap();
+    private Colormap colormap;
     private SplittableRandom random;
     private boolean useColormap = false;
 
@@ -70,10 +72,7 @@ public class PlasmaFilter extends WholeImageFilter {
     }
 
     private int randomRGB() {
-        int r = random.nextInt(256);
-        int g = random.nextInt(256);
-        int b = random.nextInt(256);
-        return 0xff000000 | (r << 16) | (g << 8) | b;
+        return 0xFF_00_00_00 | random.nextInt(0x1_00_00_00);
     }
 
     private int changeColor(int rgb, float amount) {
@@ -81,48 +80,30 @@ public class PlasmaFilter extends WholeImageFilter {
             return rgb;
         }
 
-        int r = (rgb >> 16) & 0xff;
-        int g = (rgb >> 8) & 0xff;
-        int b = rgb & 0xff;
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
 
         if (lessColors) {
             // apply the same variation to all channels
-            int d = (int) (amount * (random.nextDouble() - 0.5));
+            int d = (int) (amount * random.nextDouble(-0.5, 0.5));
             r = PixelUtils.clamp(r + d);
             g = PixelUtils.clamp(g + d);
             b = PixelUtils.clamp(b + d);
         } else {
             // apply independent variations to each channel
-            int d1 = (int) (amount * (random.nextDouble() - 0.5));
-            int d2 = (int) (amount * (random.nextDouble() - 0.5));
-            int d3 = (int) (amount * (random.nextDouble() - 0.5));
+            int d1 = (int) (amount * random.nextDouble(-0.5, 0.5));
+            int d2 = (int) (amount * random.nextDouble(-0.5, 0.5));
+            int d3 = (int) (amount * random.nextDouble(-0.5, 0.5));
             r = PixelUtils.clamp(r + d1);
             g = PixelUtils.clamp(g + d2);
             b = PixelUtils.clamp(b + d3);
         }
 
-        return 0xff000000 | (r << 16) | (g << 8) | b;
+        return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
     }
 
-    private static int average(int rgb1, int rgb2) {
-        int a1 = (rgb1 >> 24) & 0xff;
-        int r1 = (rgb1 >> 16) & 0xff;
-        int g1 = (rgb1 >> 8) & 0xff;
-        int b1 = rgb1 & 0xff;
-
-//        int a2 = (rgb2 >> 24) & 0xff;
-        int r2 = (rgb2 >> 16) & 0xff;
-        int g2 = (rgb2 >> 8) & 0xff;
-        int b2 = rgb2 & 0xff;
-
-        r1 = (r1 + r2) / 2;
-        g1 = (g1 + g2) / 2;
-        b1 = (b1 + b2) / 2;
-
-        return (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
-    }
-
-    private boolean plasmaStep(int x1, int y1, int x2, int y2, int[] pixels, int stride, int depth, int scale) {
+    private boolean plasmaStep(int x1, int y1, int x2, int y2, int[] pixels, int stride, int depth, float amount) {
         iterationCount++;
         if (iterationCount == ITERATIONS_PER_UNIT) {
             iterationCount = 0;
@@ -133,70 +114,44 @@ public class PlasmaFilter extends WholeImageFilter {
         int midY = (y1 + y2) / 2;
 
         if (depth == 0) {
-            int ml, mr, mt, mb, mm, t;
-
-            int tl = pixels[y1 * stride + x1];
-            int bl = pixels[y2 * stride + x1];
-            int tr = pixels[y1 * stride + x2];
-            int br = pixels[y2 * stride + x2];
-
-            float amount = ((256.0f / (2.0f * scale)) * turbulence);
-
-            if (midX == x1 && midX == x2 && midY == y1 && midY == y2) {
+            if (x1 == x2 && y1 == y2) {
                 return true;
             }
 
-            if (midX != x1 || midX != x2) {
-                // left
-                ml = average(tl, bl);
-                ml = changeColor(ml, amount);
-                pixels[midY * stride + x1] = ml;
+            int y1Stride = y1 * stride;
+            int midYStride = midY * stride;
+            int y2Stride = y2 * stride;
 
-                if (x1 != x2) {
-                    // right
-                    mr = average(tr, br);
-                    mr = changeColor(mr, amount);
-                    pixels[midY * stride + x2] = mr;
-                }
+            int tl = pixels[y1Stride + x1];
+            int bl = pixels[y2Stride + x1];
+            int tr = pixels[y1Stride + x2];
+            int br = pixels[y2Stride + x2];
+
+            if (x1 != x2) {
+                pixels[midYStride + x1] = changeColor(average(tl, bl), amount);
+                pixels[midYStride + x2] = changeColor(average(tr, br), amount);
             }
 
-            if (midY != y1 || midY != y2) {
-                if (x1 != midX || midY != y2) {
-                    // bottom
-                    mb = average(bl, br);
-                    mb = changeColor(mb, amount);
-                    pixels[y2 * stride + midX] = mb;
-                }
-
-                if (y1 != y2) {
-                    // top
-                    mt = average(tl, tr);
-                    mt = changeColor(mt, amount);
-                    pixels[y1 * stride + midX] = mt;
-                }
+            if (y1 != y2) {
+                pixels[y2Stride + midX] = changeColor(average(bl, br), amount);
+                pixels[y1Stride + midX] = changeColor(average(tl, tr), amount);
             }
 
-            if (y1 != y2 || x1 != x2) {
-                // middle pixel
-                mm = average(tl, br);
-                t = average(bl, tr);
-                mm = average(mm, t);
-                mm = changeColor(mm, amount);
-                pixels[midY * stride + midX] = mm;
-            }
+            int mm = average(average(tl, br), average(bl, tr));
+            pixels[midYStride + midX] = changeColor(mm, amount);
 
             return x2 - x1 >= 3 || y2 - y1 >= 3;
         }
 
         // recursively process quadrants
         // top left
-        plasmaStep(x1, y1, midX, midY, pixels, stride, depth - 1, scale + 1);
+        plasmaStep(x1, y1, midX, midY, pixels, stride, depth - 1, amount);
         // bottom left
-        plasmaStep(x1, midY, midX, y2, pixels, stride, depth - 1, scale + 1);
+        plasmaStep(x1, midY, midX, y2, pixels, stride, depth - 1, amount);
         // top right
-        plasmaStep(midX, y1, x2, midY, pixels, stride, depth - 1, scale + 1);
+        plasmaStep(midX, y1, x2, midY, pixels, stride, depth - 1, amount);
         // bottom right
-        return plasmaStep(midX, midY, x2, y2, pixels, stride, depth - 1, scale + 1);
+        return plasmaStep(midX, midY, x2, y2, pixels, stride, depth - 1, amount);
     }
 
     @Override
@@ -209,16 +164,11 @@ public class PlasmaFilter extends WholeImageFilter {
             return outPixels;
         }
 
-//        random = new SplittableRandom(seed);
-        //random.setSeed(seed);
-
         int w1 = width - 1;
         int h1 = height - 1;
-        /*
-         * Puts in the seed pixels - one in each
-         * corner, and one in the center of each edge, plus one in the
-         * center of the image.
-         */
+
+        // puts in the seed pixels - one in each corner, and one in the
+        // center of each edge, plus one in the center of the image
         outPixels[0 * width + 0] = randomRGB();
         outPixels[0 * width + w1] = randomRGB();
         outPixels[h1 * width + 0] = randomRGB();
@@ -240,23 +190,22 @@ public class PlasmaFilter extends WholeImageFilter {
 
         iterationCount = 0;
 
-        /*
-         * Now we recurse through the image, going further each time.
-         */
+        // now we recurse through the image, going further each time
         int depth = 1;
-        while (plasmaStep(0, 0, width - 1, height - 1, outPixels, width, depth, 0)) {
+        while (true) {
+            float amount = (256.0f / (2.0f * depth)) * turbulence;
+            if (!plasmaStep(0, 0, width - 1, height - 1, outPixels, width, depth, amount)) {
+                break;
+            }
             depth++;
         }
 
         if (useColormap && colormap != null) {
-            int index = 0;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    outPixels[index] = colormap.getColor((outPixels[index] & 0xff) / 255.0f);
-                    index++;
-                }
+            for (int i = 0; i < outPixels.length; i++) {
+                outPixels[i] = colormap.getColor((outPixels[i] & 0xff) / 255.0f);
             }
         }
+
         finishProgressTracker();
         return outPixels;
     }
@@ -285,10 +234,5 @@ public class PlasmaFilter extends WholeImageFilter {
             // max size of more than 16 000 pixels
             return 119_304_641;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Texture/Plasma...";
     }
 }

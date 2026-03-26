@@ -16,56 +16,42 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.image.BufferedImage;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * This filter diffuses an image by moving its pixels in random directions.
  */
 public class DiffuseFilter extends TransformFilter {
-    private float[] sinTable, cosTable;
-    private float scale = 4;
-
-    public DiffuseFilter(String filterName) {
-        super(filterName);
-        setEdgeAction(REPEAT_EDGE);
-    }
+    private final float[] sinTable;
+    private final float[] cosTable;
 
     /**
-     * Sets the scale of the texture.
+     * Creates a diffuse filter with the given parameters.
      *
-     * @param scale the scale of the texture.
+     * @param filterName   the name of the filter
+     * @param amount       the maximum amount of the diffusion
+     * @param edgeAction   the action to take for pixels outside the image bounds
+     * @param interpolation the interpolation method to use
      */
-    public void setScale(float scale) {
-        this.scale = scale;
+    public DiffuseFilter(String filterName, float amount, int edgeAction, int interpolation) {
+        super(filterName, edgeAction, interpolation);
+
+        sinTable = new float[256];
+        cosTable = new float[256];
+
+        for (int i = 0; i < 256; i++) {
+            float angle = ImageMath.TWO_PI * i / 256.0f;
+            sinTable[i] = (float) (amount * Math.sin(angle));
+            cosTable[i] = (float) (amount * Math.cos(angle));
+        }
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        // int angle = (int) (Math.random() * 255);
-        int angle = ThreadLocalRandom.current().nextInt(255); // faster than Math.random
-
-        // float distance = (float) Math.random();
-        float distance = ThreadLocalRandom.current().nextFloat(); // faster than Math.random
+        int angle = ThreadLocalRandom.current().nextInt(256);
+        float distance = ThreadLocalRandom.current().nextFloat();
 
         out[0] = x + distance * sinTable[angle];
         out[1] = y + distance * cosTable[angle];
-    }
-
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        sinTable = new float[256];
-        cosTable = new float[256];
-        for (int i = 0; i < 256; i++) {
-            float angle = ImageMath.TWO_PI * i / 256.0f;
-            sinTable[i] = (float) (scale * Math.sin(angle));
-            cosTable[i] = (float) (scale * Math.cos(angle));
-        }
-        return super.filter(src, dst);
-    }
-
-    @Override
-    public String toString() {
-        return "Distort/Diffuse...";
     }
 }

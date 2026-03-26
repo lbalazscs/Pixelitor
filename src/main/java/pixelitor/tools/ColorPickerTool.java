@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -204,7 +204,7 @@ public class ColorPickerTool extends Tool {
         for (int sy = startY; sy <= endY; sy++) {
             for (int sx = startX; sx <= endX; sx++) {
                 int rgb = pixels[sx + sy * width];
-                a += (rgb >> 24) & 0xff;
+                a += rgb >>> 24;
                 r += (rgb >> 16) & 0xff;
                 g += (rgb >> 8) & 0xff;
                 b += rgb & 0xff;
@@ -222,7 +222,7 @@ public class ColorPickerTool extends Tool {
     }
 
     private static void showColorInfo(int x, int y, int rgb, boolean isGray) {
-        int a = (rgb >>> 24) & 0xFF;
+        int a = rgb >>> 24;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;

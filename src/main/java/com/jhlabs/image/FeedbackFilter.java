@@ -27,135 +27,45 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 
 /**
- * A filter which priduces a video feedback effect by repeated transformations.
+ * A filter which produces a video feedback effect by repeated transformations.
  */
 public class FeedbackFilter extends AbstractBufferedImageOp {
-    private float centerX = 0.5f, centerY = 0.5f;
-    private float distance;
-    private float angle;
-    private float rotation;
-    private float zoom;
-    private float startAlpha = 1;
-    private float endAlpha = 1;
-    private int iterations;
-
-    /**
-     * Constructs a FeedbackFilter.
-     */
-    public FeedbackFilter(String filterName) {
-        super(filterName);
-    }
+    private final float centerX;
+    private final float centerY;
+    private final float distance;
+    private final float angle;
+    private final float rotation;
+    private final float zoom;
+    private final float startAlpha;
+    private final float endAlpha;
+    private final int iterations;
 
     /**
      * Constructs a FeedbackFilter.
      *
-     * @param distance the distance to move on each iteration
-     * @param angle    the angle to move on each iteration
-     * @param rotation the amount to rotate on each iteration
-     * @param zoom     the amount to scale on each iteration
+     * @param filterName the display name of the filter
+     * @param center     the center of the effect as a proportion of the image size
+     * @param distance   the distance to move on each iteration
+     * @param angle      the angle to move on each iteration
+     * @param rotation   the amount to rotate on each iteration
+     * @param zoom       the amount to scale on each iteration
+     * @param startAlpha the alpha value at the first iteration (in the range [0, 1])
+     * @param endAlpha   the alpha value at the last iteration (in the range [0, 1])
+     * @param iterations the number of iterations (min-value: 0)
      */
-    public FeedbackFilter(float distance, float angle, float rotation, float zoom, String filterName) {
+    public FeedbackFilter(String filterName, Point2D center, float distance, float angle, float rotation,
+                          float zoom, float startAlpha, float endAlpha,
+                          int iterations) {
         super(filterName);
 
+        this.centerX = (float) center.getX();
+        this.centerY = (float) center.getY();
         this.distance = distance;
         this.angle = angle;
         this.rotation = rotation;
         this.zoom = zoom;
-    }
-
-    /**
-     * Sets the angle of each iteration.
-     *
-     * @param angle the angle of each iteration.
-     */
-    public void setAngle(float angle) {
-        this.angle = angle;
-    }
-
-    /**
-     * Sets the distance to move on each iteration.
-     *
-     * @param distance the distance
-     */
-    public void setDistance(float distance) {
-        this.distance = distance;
-    }
-
-    /**
-     * Sets the amount of rotation on each iteration.
-     *
-     * @param rotation the angle of rotation
-     */
-    public void setRotation(float rotation) {
-        this.rotation = rotation;
-    }
-
-    /**
-     * Sets the amount to scale on each iteration.
-     *
-     * @param zoom the zoom factor
-     */
-    public void setZoom(float zoom) {
-        this.zoom = zoom;
-    }
-
-    /**
-     * Sets the alpha value at the first iteration.
-     *
-     * @param startAlpha the alpha value
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setStartAlpha(float startAlpha) {
         this.startAlpha = startAlpha;
-    }
-
-    /**
-     * Sets the alpha value at the last iteration.
-     *
-     * @param endAlpha the alpha value
-     * @min-value 0
-     * @max-value 1
-     */
-    public void setEndAlpha(float endAlpha) {
         this.endAlpha = endAlpha;
-    }
-
-    /**
-     * Sets the center of the effect in the X direction as a proportion of the image size.
-     *
-     * @param centerX the center
-     */
-    public void setCenterX(float centerX) {
-        this.centerX = centerX;
-    }
-
-    /**
-     * Sets the center of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centerY the center
-     */
-    public void setCenterY(float centerY) {
-        this.centerY = centerY;
-    }
-
-    /**
-     * Sets the center of the effect as a proportion of the image size.
-     *
-     * @param center the center
-     */
-    public void setCenter(Point2D center) {
-        centerX = (float) center.getX();
-        centerY = (float) center.getY();
-    }
-
-    /**
-     * Sets the number of iterations.
-     *
-     * @param iterations the number of iterations
-     * @min-value 0
-     */
-    public void setIterations(int iterations) {
         this.iterations = iterations;
     }
 
@@ -166,7 +76,6 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
         }
         float cx = src.getWidth() * centerX;
         float cy = src.getHeight() * centerY;
-//        float imageRadius = (float)Math.sqrt( cx*cx + cy*cy );
         float translateX = (float) (distance * Math.cos(angle));
         float translateY = (float) (distance * -Math.sin(angle));
         float scale = (float) Math.exp(zoom);
@@ -187,11 +96,12 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
         for (int i = 0; i < iterations; i++) {
             g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
             g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ImageMath
-                    .lerp((float) i / (iterations - 1), startAlpha, endAlpha)));
+
+            float alpha = ImageMath.lerp((float) i / (iterations - 1), startAlpha, endAlpha);
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
             g.translate(cx + translateX, cy + translateY);
-            g.scale(scale, scale);  // The .0001 works round a bug on Windows where drawImage throws an ArrayIndexOutofBoundException
+            g.scale(scale, scale);
             if (rotation != 0) {
                 g.rotate(rotate);
             }
@@ -204,10 +114,5 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
 
         g.dispose();
         return dst;
-    }
-
-    @Override
-    public String toString() {
-        return "Effects/Feedback...";
     }
 }

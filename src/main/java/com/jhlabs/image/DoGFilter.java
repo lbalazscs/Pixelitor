@@ -66,16 +66,20 @@ public class DoGFilter extends AbstractBufferedImageOp {
 
         int singleBlurUnit = 3 * (width + height);
         int workUnits = 0;
+
         if (radius1 > 0.0f) {
             workUnits += singleBlurUnit;
         }
         if (radius2 > 0.0f) {
             workUnits += singleBlurUnit;
         }
-        workUnits += (singleBlurUnit / 2); // subtract
+
+        workUnits += singleBlurUnit / 2; // subtract
+
         if (doNormalize()) {
-            workUnits = (int) (workUnits + singleBlurUnit * 0.16); // normalize
+            workUnits += (int) (singleBlurUnit * 0.16); // normalize
         }
+
         pt = createProgressTracker(workUnits);
 
         if (radius1 > 0.0f) {
@@ -86,59 +90,25 @@ public class DoGFilter extends AbstractBufferedImageOp {
             image1 = src;
         }
 
+        Graphics2D dstG;
         if (radius2 > 0.0f) {
             BoxBlurFilter blur = new BoxBlurFilter(radius2, radius2, 3, filterName);
             blur.setProgressTracker(pt);
-            dst = blur.filter(src, null);
+            dst = blur.filter(src, dst);
+            dstG = dst.createGraphics();
         } else {
-            dst = ImageUtils.copyImage(src);
+            dstG = dst.createGraphics();
+            dstG.drawImage(src, 0, 0, null);
         }
 
-        Graphics2D g2d = dst.createGraphics();
-        g2d.setComposite(new SubtractComposite(1.0f));
-        g2d.drawImage(image1, 0, 0, null);
-        g2d.dispose();
+        dstG.setComposite(new SubtractComposite(1.0f));
+        dstG.drawImage(image1, 0, 0, null);
+        dstG.dispose();
 
         pt.unitsDone(singleBlurUnit / 2);
 
         if (doNormalize()) {
-            int[] pixels = null;
-            int max = 0;
-            for (int y = 0; y < height; y++) {
-                pixels = getRGB(dst, 0, y, width, 1, pixels);
-                for (int x = 0; x < width; x++) {
-                    int rgb = pixels[x];
-                    int r = (rgb >> 16) & 0xff;
-                    int g = (rgb >> 8) & 0xff;
-                    int b = rgb & 0xff;
-                    if (r > max) {
-                        max = r;
-                    }
-                    if (g > max) {
-                        max = g;
-                    }
-                    if (b > max) {
-                        max = b;
-                    }
-                }
-            }
-
-            if (max != 0) { // all-black images cannot be normalized
-                for (int y = 0; y < height; y++) {
-                    pixels = getRGB(dst, 0, y, width, 1, pixels);
-                    for (int x = 0; x < width; x++) {
-                        int rgb = pixels[x];
-                        int r = (rgb >> 16) & 0xff;
-                        int g = (rgb >> 8) & 0xff;
-                        int b = rgb & 0xff;
-                        r = r * 255 / max;
-                        g = g * 255 / max;
-                        b = b * 255 / max;
-                        pixels[x] = (rgb & 0xff000000) | (r << 16) | (g << 8) | b;
-                    }
-                    setRGB(dst, 0, y, width, 1, pixels);
-                }
-            }
+            ImageUtils.normalizeImage(dst);
         }
 
         finishProgressTracker();
@@ -148,10 +118,5 @@ public class DoGFilter extends AbstractBufferedImageOp {
 
     private boolean doNormalize() {
         return normalize && radius1 != radius2;
-    }
-
-    @Override
-    public String toString() {
-        return "Edges/Difference of Gaussians...";
     }
 }

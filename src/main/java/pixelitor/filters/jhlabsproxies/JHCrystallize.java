@@ -17,11 +17,12 @@
 
 package pixelitor.filters.jhlabsproxies;
 
+import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.CrystallizeFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Texts;
 
@@ -45,7 +46,7 @@ public class JHCrystallize extends ParametrizedFilter {
     private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, ALPHA_ENABLED);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Edges");
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 0, 100);
-    private final IntChoiceParam gridType = IntChoiceParam.forGridType("Shape", randomness);
+    private final EnumParam<CellularFilter.GridType> gridType = EnumParam.forGridType("Shape", randomness);
 
     private CrystallizeFilter filter;
 
@@ -72,7 +73,7 @@ public class JHCrystallize extends ParametrizedFilter {
         filter.setScale(size.getValueAsFloat());
         filter.setRandomness((float) randomness.getPercentage());
         filter.setEdgeColor(edgeColor.getColor().getRGB());
-        filter.setGridType(gridType.getValue());
+        filter.setGridType(gridType.getSelected());
         filter.setFadeEdges(fadeEdges.isChecked());
 
         return filter.filter(src, dest);

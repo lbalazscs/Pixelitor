@@ -62,8 +62,6 @@ public class JHDither extends ParametrizedFilter {
         new Item("Cluster 8", MATRIX_CLUSTER8),
     });
 
-    private DitherFilter filter;
-
     public JHDither() {
         super(true);
 
@@ -76,15 +74,12 @@ public class JHDither extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new DitherFilter(NAME);
-        }
-
-        filter.setLevels(levels.getValue());
-        filter.setColorDither(colorDither.isChecked());
-        filter.setMatrixMethod(matrixMethod.getValue());
-
-        filter.initialize();
+        DitherFilter filter = new DitherFilter(
+            NAME,
+            matrixMethod.getValue(),
+            levels.getValue(),
+            colorDither.isChecked()
+        );
 
         return filter.filter(src, dest);
     }

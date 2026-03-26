@@ -26,16 +26,14 @@ import java.awt.image.BufferedImage;
  */
 public class CircleFilter extends TransformFilter {
     private float radius = 10;
-    private float height = 20;
+    private float arcHeight = 20;
     private float angle = 0;
     private float spreadAngle = (float) Math.PI;
-    private float centerX = 0.5f;
-    private float centerY = 0.5f;
 
-    private float icenterX;
-    private float icenterY;
-    private float iWidth;
-    private float iHeight;
+    private float cx;
+    private float cy;
+    private float imgWidth;
+    private float imgHeight;
 
     /**
      * Constructs a CircleFilter.
@@ -48,10 +46,10 @@ public class CircleFilter extends TransformFilter {
     /**
      * Sets the height of the arc.
      *
-     * @param height the height
+     * @param arcHeight the height
      */
-    public void setHeight(float height) {
-        this.height = height;
+    public void setArcHeight(float arcHeight) {
+        this.arcHeight = arcHeight;
     }
 
     /**
@@ -75,66 +73,40 @@ public class CircleFilter extends TransformFilter {
     /**
      * Sets the radius of the effect.
      *
-     * @param radius the radius
-     * @min-value 0
+     * @param radius the radius (must be >= 0)
      */
     public void setRadius(float radius) {
         this.radius = radius;
     }
 
     /**
-     * Sets the center of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centerX the center
-     */
-    public void setCenterX(float centerX) {
-        this.centerX = centerX;
-    }
-
-    /**
-     * Sets the center of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centerY the center
-     */
-    public void setCenterY(float centerY) {
-        this.centerY = centerY;
-    }
-
-    /**
-     * Sets the center of the effect as a proportion of the image size.
+     * Sets the center of the effect in image pixels.
      *
      * @param center the center
      */
     public void setCenter(Point2D center) {
-        centerX = (float) center.getX();
-        centerY = (float) center.getY();
+        cx = (float) center.getX();
+        cy = (float) center.getY();
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        iWidth = src.getWidth();
-        iHeight = src.getHeight();
-        icenterX = iWidth * centerX;
-        icenterY = iHeight * centerY;
-        iWidth--;
+        imgWidth = src.getWidth();
+        imgHeight = src.getHeight();
+        imgWidth--;
         return super.filter(src, dst);
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - icenterX;
-        float dy = y - icenterY;
+        float dx = x - cx;
+        float dy = y - cy;
         float theta = (float) FastMath.atan2(-dy, -dx) + angle;
         float r = (float) Math.sqrt(dx * dx + dy * dy);
 
         theta = ImageMath.mod(theta, 2 * (float) Math.PI);
 
-        out[0] = iWidth * theta / (spreadAngle + 0.00001f);
-        out[1] = iHeight * (1 - (r - radius) / (height + 0.00001f));
-    }
-
-    @Override
-    public String toString() {
-        return "Distort/Circle...";
+        out[0] = imgWidth * theta / (spreadAngle + 0.00001f);
+        out[1] = imgHeight * (1 - (r - radius) / (arcHeight + 0.00001f));
     }
 }

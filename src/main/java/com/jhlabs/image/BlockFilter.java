@@ -60,9 +60,9 @@ public class BlockFilter extends AbstractBufferedImageOp {
                 for (int by = 0; by < h; by++) {
                     for (int bx = 0; bx < w; bx++) {
                         argb = pixels[i];
-                        r += (argb >> 16) & 0xff;
-                        g += (argb >> 8) & 0xff;
-                        b += argb & 0xff;
+                        r += (argb >> 16) & 0xFF;
+                        g += (argb >> 8) & 0xFF;
+                        b += argb & 0xFF;
                         i++;
                     }
                 }
@@ -76,7 +76,7 @@ public class BlockFilter extends AbstractBufferedImageOp {
                 i = 0;
                 for (int by = 0; by < h; by++) {
                     for (int bx = 0; bx < w; bx++) {
-                        pixels[i] = (pixels[i] & 0xff000000) | argb;
+                        pixels[i] = (pixels[i] & 0xFF_00_00_00) | argb;
                         i++;
                     }
                 }
@@ -85,10 +85,5 @@ public class BlockFilter extends AbstractBufferedImageOp {
         }
 
         return dst;
-    }
-
-    @Override
-    public String toString() {
-        return "Pixellate/Mosaic...";
     }
 }

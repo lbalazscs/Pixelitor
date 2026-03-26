@@ -67,9 +67,9 @@ public class JHWrapAroundArc extends ParametrizedFilter {
             filter = new CircleFilter(NAME);
         }
 
-        filter.setCenter(center.getRelativePoint());
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setRadius(radius.getValueAsFloat());
-        filter.setHeight(thickness.getValueAsFloat());
+        filter.setArcHeight(thickness.getValueAsFloat());
         filter.setAngle((float) rotateResult.getValueInIntuitiveRadians());
 
         double spreadValue = spread.getValueAsDouble();

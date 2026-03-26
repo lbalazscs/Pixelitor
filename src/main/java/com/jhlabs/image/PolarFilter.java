@@ -194,9 +194,4 @@ public class PolarFilter extends TransformFilter {
     public void setAngle(double angle) {
         this.angle = (float) angle;
     }
-
-    @Override
-    public String toString() {
-        return "Distort/Polar Coordinates...";
-    }
 }

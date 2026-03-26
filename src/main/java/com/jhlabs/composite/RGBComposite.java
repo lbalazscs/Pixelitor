@@ -16,7 +16,8 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.*;
+import java.awt.Composite;
+import java.awt.CompositeContext;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -59,8 +60,6 @@ public abstract class RGBComposite implements Composite {
 
     public abstract static class RGBCompositeContext implements CompositeContext {
         private final float alpha;
-//        private final ColorModel srcColorModel;
-//        private final ColorModel dstColorModel;
 
         protected RGBCompositeContext(float alpha, ColorModel srcColorModel, ColorModel dstColorModel) {
             this.alpha = alpha;
@@ -69,9 +68,6 @@ public abstract class RGBComposite implements Composite {
                 "# src components = " + srcColorModel.getNumComponents();
             assert dstColorModel.getNumComponents() == 4 :
                 "# dst components = " + dstColorModel.getNumComponents();
-
-//            this.srcColorModel = srcColorModel;
-//            this.dstColorModel = dstColorModel;
         }
 
         @Override
@@ -82,10 +78,6 @@ public abstract class RGBComposite implements Composite {
         static int multiply255(int a, int b) {
             int t = a * b + 0x80;
             return ((t >> 8) + t) >> 8;
-        }
-
-        static int clamp(int a) {
-            return a < 0 ? 0 : a > 255 ? 255 : a;
         }
 
         public abstract void composeRGB(int[] src, int[] dst, float alpha);
@@ -105,12 +97,6 @@ public abstract class RGBComposite implements Composite {
             for (int y = y0; y < y1; y++) {
                 srcPix = src.getPixels(x, y, w, 1, srcPix);
                 dstPix = dstIn.getPixels(x, y, w, 1, dstPix);
-//                int srclength = srcPix.length;
-//                int dstlength = dstPix.length;
-//                if(srclength > dstlength) {
-//                    continue;
-//                }
-                // System.out.println("RGBComposite$RGBCompositeContext.compose dstlength = " + dstlength + ", srclength = " + srclength);
                 composeRGB(srcPix, dstPix, alpha);
                 dstOut.setPixels(x, y, w, 1, dstPix);
             }

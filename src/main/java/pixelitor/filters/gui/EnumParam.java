@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.filters.gui;
+
+import com.jhlabs.image.CellularFilter;
 
 import java.util.List;
 
@@ -39,6 +41,14 @@ public class EnumParam<E extends Enum<E>> extends ChoiceParam<E> {
     public EnumParam(String name, String presetKey, List<E> choices) {
         super(name, choices, choices.getFirst(), RandomizeMode.ALLOW_RANDOMIZE);
         setPresetKey(presetKey);
+    }
+
+    public static EnumParam<CellularFilter.GridType> forGridType(String name, RangeParam randomnessParam) {
+        var param = new EnumParam<CellularFilter.GridType>(name, CellularFilter.GridType.class);
+        // enable the randomness slider only if the grid type isn't "Fully Random"
+        param.setupEnableOtherIf(randomnessParam, selected ->
+            selected != CellularFilter.GridType.RANDOM);
+        return param;
     }
 
     public EnumParam<E> withDefault(E item) {

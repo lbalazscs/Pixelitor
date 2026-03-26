@@ -63,8 +63,6 @@ public class JHSmartBlur extends ParametrizedFilter {
             filter = new SmartBlurFilter(NAME);
         }
 
-        // The SmartBlurFilter API allows setting the horizontal and vertical
-        // radii separately, but the implementation seems to be buggy
         filter.setRadius(radius);
 
         filter.setThreshold(threshold.getValue());

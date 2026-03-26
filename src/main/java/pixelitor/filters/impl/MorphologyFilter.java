@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import static java.lang.Math.min;
  * The implementation of the {@link Morphology} filter.
  */
 public class MorphologyFilter extends WholeImageFilter {
-    private int iterations = 1;
+    private final int iterations;
 
     public static final int OP_ERODE = 1;  // reduces bright areas
     public static final int OP_DILATE = 2; // expands bright areas
@@ -38,7 +38,7 @@ public class MorphologyFilter extends WholeImageFilter {
 
     public static final int KERNEL_DIAMOND = 3; // includes cross-shaped neighboring pixels
     public static final int KERNEL_SQUARE = 4; // includes all 8 surrounding pixels
-    private int kernel;
+    private final int kernel;
 
     // apply erosion or dilation independently to each R, G, B color channel
     public static final int CHANNEL_RGB = 0;
@@ -46,26 +46,18 @@ public class MorphologyFilter extends WholeImageFilter {
     public static final int CHANNEL_HSV = 1;
     // apply erosion or dilation to the luma (Y) channel while preserving chroma
     public static final int CHANNEL_YCBCR = 2;
-    private int channel = CHANNEL_RGB;
+    private final int channel;
 
-    public MorphologyFilter(String filterName) {
+    public MorphologyFilter(String filterName, int kernel, int channel, int iterations) {
         super(filterName);
-    }
 
-    public void setKernel(int kernel) {
         this.kernel = kernel;
+        this.channel = channel;
+        this.iterations = iterations;
     }
 
     public void setOp(int op) {
         this.op = op;
-    }
-
-    public void setChannel(int channel) {
-        this.channel = channel;
-    }
-
-    public void setIterations(int iterations) {
-        this.iterations = iterations;
     }
 
     @Override
@@ -115,7 +107,7 @@ public class MorphologyFilter extends WholeImageFilter {
                             int xOffset = ny * width;
                             for (int dx = -1; dx <= 1; dx++) {
                                 if (kernel == KERNEL_DIAMOND) {
-                                    // ignore the corner neighbours
+                                    // ignore the corner neighbors
                                     if (dx == dy && dx != 0) {
                                         continue;
                                     }
