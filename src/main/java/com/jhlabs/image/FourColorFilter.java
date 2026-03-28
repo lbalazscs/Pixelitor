@@ -33,6 +33,8 @@ public class FourColorFilter extends PointFilter {
 
     private final int interpolation;
     private final int colorSpace;
+    private final double relCx;
+    private final double relCy;
 
     private int width;
     private int height;
@@ -63,12 +65,19 @@ public class FourColorFilter extends PointFilter {
      * @param colorSE       the color at the South-East corner.
      * @param interpolation the interpolation type.
      * @param colorSpace    the color space for interpolation.
+     * @param relCx         the relative X coordinate (0.0 to 1.0) of the 50% midpoint.
+     * @param relCy         the relative Y coordinate (0.0 to 1.0) of the 50% midpoint.
      */
-    public FourColorFilter(String filterName, int colorNW, int colorNE, int colorSW, int colorSE, int interpolation, int colorSpace) {
+    public FourColorFilter(String filterName,
+                           int colorNW, int colorNE, int colorSW, int colorSE,
+                           int interpolation, int colorSpace,
+                           double relCx, double relCy) {
         super(filterName);
 
         this.interpolation = interpolation;
         this.colorSpace = colorSpace;
+        this.relCx = relCx;
+        this.relCy = relCy;
 
         this.aNW = colorNW >>> 24;
         this.rNW = (colorNW >> 16) & 0xff;
@@ -101,14 +110,26 @@ public class FourColorFilter extends PointFilter {
     }
 
     private void precomputeInterpolationWeights() {
+        // clamp the bias inside [0.001, 0.999] to avoid NaN/Infinity divisions if exactly 0.0 or 1.0
+        float xBias = 1.0f - (float) ImageMath.clamp(relCx, 0.001, 0.999);
+        float yBias = 1.0f - (float) ImageMath.clamp(relCy, 0.001, 0.999);
+
         fxWeight = new float[width];
         for (int x = 0; x < width; x++) {
-            fxWeight[x] = calcInterpolatedWeight((float) x / width);
+            float ratio = (float) x / width;
+            if (xBias != 0.5f) {
+                ratio = ImageMath.bias(ratio, xBias);
+            }
+            fxWeight[x] = calcInterpolatedWeight(ratio);
         }
 
         fyWeight = new float[height];
         for (int y = 0; y < height; y++) {
-            fyWeight[y] = calcInterpolatedWeight((float) y / height);
+            float ratio = (float) y / height;
+            if (yBias != 0.5f) {
+                ratio = ImageMath.bias(ratio, yBias);
+            }
+            fyWeight[y] = calcInterpolatedWeight(ratio);
         }
     }
 

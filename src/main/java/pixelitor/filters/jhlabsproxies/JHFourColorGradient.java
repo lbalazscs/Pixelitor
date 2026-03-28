@@ -49,6 +49,8 @@ public class JHFourColorGradient extends ParametrizedFilter {
     private final ColorParam southEastParam =
         new ColorParam("Southeast", new Color(200, 20, 20), MANUAL_ALPHA_ONLY);
 
+    private final ImagePositionParam midpoint = new ImagePositionParam("Midpoint");
+
     private final IntChoiceParam interpolation = new IntChoiceParam("Interpolation", new Item[]{
         new Item("Linear", FourColorFilter.INTERPOLATION_LINEAR),
         new Item("Cubic", FourColorFilter.INTERPOLATION_CUBIC),
@@ -75,6 +77,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
             northEastParam,
             southWestParam,
             southEastParam,
+            midpoint,
             interpolation,
             space
         ).withActionsAtFront(darkenAll, brightenAll);
@@ -103,7 +106,9 @@ public class JHFourColorGradient extends ParametrizedFilter {
             southWestParam.getColor().getRGB(),
             southEastParam.getColor().getRGB(),
             interpolation.getValue(),
-            space.getValue()
+            space.getValue(),
+            midpoint.getRelativeX(),
+            midpoint.getRelativeY()
         );
 
         return filter.filter(src, dest);
