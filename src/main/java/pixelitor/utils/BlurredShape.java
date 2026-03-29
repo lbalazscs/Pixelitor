@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,6 @@ package pixelitor.utils;
 
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.tools.shapes.ShapeType;
-import pixelitor.tools.shapes.StarSettings;
 
 import java.awt.geom.Point2D;
 
@@ -67,35 +65,13 @@ public interface BlurredShape {
             return createEmptyShape();
         }
 
-        return switch (type) {
-            case TYPE_ELLIPSE -> new BlurredEllipse(center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-            case TYPE_RECTANGLE -> GenericBlurredShape.of(
-                drag -> ShapeType.RECTANGLE.createShape(drag, null), center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-            case TYPE_HEART -> GenericBlurredShape.of(
-                drag -> ShapeType.HEART.createShape(drag, null), center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-            case TYPE_DIAMOND -> GenericBlurredShape.of(
-                drag -> ShapeType.DIAMOND.createShape(drag, null), center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-            case TYPE_HEXAGON -> GenericBlurredShape.of(
-                drag -> ShapeType.STAR.createShape(drag, new StarSettings(3, 100)), center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-            case TYPE_OCTAGON -> GenericBlurredShape.of(
-                drag -> ShapeType.STAR.createShape(drag, new StarSettings(4, 100)), center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-            case TYPE_STAR -> GenericBlurredShape.of(
-                drag -> ShapeType.STAR.createShape(drag, new StarSettings()), center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-            default -> throw new IllegalStateException();
-        };
+        if (type == TYPE_ELLIPSE) {
+            return new BlurredEllipse(center, innerRadiusY, outerRadiusX, outerRadiusY);
+        }
+
+        // delegate all generic shape instantiations
+        return GenericBlurredShape.of(type, center,
+            innerRadiusX, innerRadiusY,
+            outerRadiusX, outerRadiusY);
     }
 }

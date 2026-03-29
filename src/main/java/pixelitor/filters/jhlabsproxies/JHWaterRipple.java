@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.WaterFilter;
@@ -45,8 +46,6 @@ public class JHWaterRipple extends ParametrizedFilter {
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
-    private WaterFilter filter;
-
     public JHWaterRipple() {
         super(true);
 
@@ -67,20 +66,18 @@ public class JHWaterRipple extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new WaterFilter(NAME);
-        }
-
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setRadius(radius.getValueAsFloat());
-        filter.setWavelength(wavelength.getValueAsFloat());
-        filter.setAmplitude((float) amplitude.getPercentage());
-        filter.setPhase(phase.getValueInRadians());
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        WaterFilter filter = new WaterFilter(NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            center.getAbsolutePoint(src),
+            radius.getValueAsFloat(),
+            wavelength.getValueAsFloat(),
+            (float) amplitude.getPercentage(),
+            phase.getValueInRadians()
+        );
 
         dest = filter.filter(src, dest);
-//        setAffectedAreaShapes(filter.getAffectedAreaShapes());
+//    setAffectedAreaShapes(filter.getAffectedAreaShapes());
         return dest;
     }
 }

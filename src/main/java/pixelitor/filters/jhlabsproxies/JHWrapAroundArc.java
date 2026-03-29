@@ -36,8 +36,6 @@ public class JHWrapAroundArc extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 3136221427173608186L;
 
-    private CircleFilter filter;
-
     private final RangeParam radius = new RangeParam(GUIText.RADIUS, 0, 50, 500);
     private final RangeParam thickness = new RangeParam("Thickness", 0, 150, 500);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
@@ -63,22 +61,18 @@ public class JHWrapAroundArc extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new CircleFilter(NAME);
-        }
-
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setRadius(radius.getValueAsFloat());
-        filter.setArcHeight(thickness.getValueAsFloat());
-        filter.setAngle((float) rotateResult.getValueInIntuitiveRadians());
-
         double spreadValue = spread.getValueAsDouble();
         float spreadRadians = (float) (2 * Math.PI / spreadValue);
-        filter.setSpreadAngle(spreadRadians);
 
-        filter.setInterpolation(interpolation.getValue());
-        filter.setEdgeAction(edgeAction.getValue());
-
+        CircleFilter filter = new CircleFilter(NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            radius.getValueAsFloat(),
+            thickness.getValueAsFloat(),
+            (float) rotateResult.getValueInIntuitiveRadians(),
+            spreadRadians,
+            center.getAbsolutePoint(src));
+        
         return filter.filter(src, dest);
     }
 }

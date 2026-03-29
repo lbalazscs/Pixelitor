@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
@@ -42,8 +43,6 @@ public class Magnify extends ParametrizedFilter {
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
-    private MagnifyFilter filter;
-
     public Magnify() {
         super(true);
 
@@ -61,26 +60,25 @@ public class Magnify extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new MagnifyFilter(NAME);
-        }
+        int ox = outerRadius.getHorizontal();
+        int oy = outerRadius.getVertical();
+        double softnessRatio = softness.getPercentage() + 1.0;
+        float ix = (float) (ox / softnessRatio);
+        float iy = (float) (oy / softnessRatio);
 
-        int outerRadiusX = outerRadius.getHorizontal();
-        int outerRadiusY = outerRadius.getVertical();
-        filter.setOuterRadiusX(outerRadiusX);
-        filter.setOuterRadiusY(outerRadiusY);
-
-        double radiusRatio = softness.getPercentage() + 1.0;
-        filter.setInnerRadiusX((float) (outerRadiusX / radiusRatio));
-        filter.setInnerRadiusY((float) (outerRadiusY / radiusRatio));
-
-        filter.setMagnification(magnification.getPercentage());
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setInvert(invert.isChecked());
-        filter.setShape(shape.getValue());
-
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        MagnifyFilter filter = new MagnifyFilter(
+            NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            center.getAbsolutePoint(src),
+            magnification.getPercentage(),
+            ix,
+            iy,
+            (float) ox,
+            (float) oy,
+            shape.getValue(),
+            invert.isChecked()
+        );
 
         return filter.filter(src, dest);
     }

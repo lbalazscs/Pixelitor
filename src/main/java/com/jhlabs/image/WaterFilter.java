@@ -26,64 +26,43 @@ import java.awt.geom.Point2D;
  * A filter which produces a water ripple distortion.
  */
 public class WaterFilter extends TransformFilter {
-    private float wavelength = 16;
-    private float amplitude = 10;
-    private float phase = 0;
-    private float radius = 50;
+    private final float wavelength;
+    private final float amplitude;
+    private final float phase;
+    private final float radius;
 
-    private float radius2 = 0;
-    private float cx;
-    private float cy;
-
-    public WaterFilter(String filterName) {
-        super(filterName);
-    }
+    private final float radius2;
+    private final float cx;
+    private final float cy;
 
     /**
-     * Sets the wavelength of the ripples.
+     * Constructs a WaterFilter.
      *
-     * @param wavelength the wavelength
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy
+     *                      (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method
+     *                      (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param center        the center of the ripple effect in pixel coordinates.
+     * @param radius        the radius of the effect (must be >= 0).
+     * @param wavelength    the wavelength of the ripples.
+     * @param amplitude     the amplitude of the ripples.
+     * @param phase         the phase of the ripples.
      */
-    public void setWavelength(float wavelength) {
-        this.wavelength = wavelength;
-    }
+    public WaterFilter(String filterName, int edgeAction, int interpolation,
+                       Point2D center, float radius,
+                       float wavelength, float amplitude, float phase) {
+        super(filterName, edgeAction, interpolation);
 
-    /**
-     * Sets the amplitude of the ripples.
-     *
-     * @param amplitude the amplitude
-     */
-    public void setAmplitude(float amplitude) {
-        this.amplitude = amplitude;
-    }
+        this.cx = (float) center.getX();
+        this.cy = (float) center.getY();
 
-    /**
-     * Sets the phase of the ripples.
-     *
-     * @param phase the phase
-     */
-    public void setPhase(float phase) {
-        this.phase = phase;
-    }
-
-    /**
-     * Sets the center of the effect in pixel coordinates.
-     *
-     * @param center the center
-     */
-    public void setCenter(Point2D center) {
-        cx = (float) center.getX();
-        cy = (float) center.getY();
-    }
-
-    /**
-     * Sets the radius of the effect.
-     *
-     * @param radius the radius (must be >= 0)
-     */
-    public void setRadius(float radius) {
         this.radius = radius;
-        radius2 = radius * radius;
+        this.radius2 = radius * radius;
+
+        this.wavelength = wavelength;
+        this.amplitude = amplitude;
+        this.phase = phase;
     }
 
     @Override
@@ -91,6 +70,7 @@ public class WaterFilter extends TransformFilter {
         float dx = x - cx;
         float dy = y - cy;
         float distance2 = dx * dx + dy * dy;
+
         if (distance2 > radius2) {
             out[0] = x;
             out[1] = y;
@@ -98,9 +78,11 @@ public class WaterFilter extends TransformFilter {
             float distance = (float) Math.sqrt(distance2);
             float amount = amplitude * (float) FastMath.sin(distance / wavelength * ImageMath.TWO_PI - phase);
             amount *= (radius - distance) / radius;
+
             if (distance != 0) {
                 amount *= wavelength / distance;
             }
+
             out[0] = x + dx * amount;
             out[1] = y + dy * amount;
         }

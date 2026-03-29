@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,10 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
 import net.jafama.FastMath;
 import pixelitor.filters.Mirror;
+
+import java.awt.geom.Point2D;
 
 /**
  * The implementation of the {@link Mirror} filter.
@@ -27,45 +30,51 @@ public class MirrorFilter extends CenteredTransformFilter {
     private static final float HALF_PI = (float) (Math.PI / 2);
 
     // coefficients for the line equation ax + by + c = 0
-    private double a;
-    private double b;
-    private double c;
+    private final double a;
+    private final double b;
+    private final double c;
 
     // stores a² + b² as a precomputed value
-    private double aa_bb;
+    private final double aa_bb;
 
     // determines whether a point lies on one side of the reflection line or the other.
-    private double baseSideIndicator;
+    private final double baseSideIndicator;
 
-    public MirrorFilter() {
-        super(Mirror.NAME);
-    }
+    /**
+     * Constructs a new MirrorFilter.
+     *
+     * @param filterName    the name of the filter
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT)
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC)
+     * @param center        the center of the reflection line (in pixels)
+     * @param angle         the angle of the reflection line in radians.
+     */
+    public MirrorFilter(String filterName, int edgeAction, int interpolation,
+                        Point2D center, double angle) {
+        super(filterName, edgeAction, interpolation, center);
 
-    public void setAngle(double angle) {
         if ((Math.abs(angle) % HALF_PI) < QUARTER_PI) {
             // for angles near horizontal, the slope is calculated as tan(−angle)
-            double slope = FastMath.tan(-angle);
-            a = slope;
-            b = 1;
+            this.a = FastMath.tan(-angle);
+            this.b = 1;
         } else {
             // for angles near vertical, the slope is calculated using the reciprocal of tan(π/2+angle)
-            double reciprocalSlope = FastMath.tan(HALF_PI + angle);
-            a = 1;
-            b = reciprocalSlope;
+            this.a = 1;
+            this.b = FastMath.tan(HALF_PI + angle);
         }
 
         // the line equation coefficients a, b, c are determined
-        // such that the line passes through the center point
-        c = -(a * cx + b * cy);
+        // such that the line passes through the center point (cx, cy)
+        this.c = -(a * cx + b * cy);
 
-        aa_bb = a * a + b * b;
+        this.aa_bb = a * a + b * b;
 
-        // (cx, cy−1) is choosen because it simplifies the calculations.
+        // (cx, cy−1) is chosen because it simplifies the calculations.
         // (rx, ry) is (cx, cy−1) rotated by the angle around (cx, cy),
         // and it is consistent with the orientation of the reflection line.
         double rx = -FastMath.sin(angle) + cx;
         double ry = FastMath.cos(angle) + cy;
-        baseSideIndicator = FastMath.signum(a * rx + b * ry + c);
+        this.baseSideIndicator = FastMath.signum(a * rx + b * ry + c);
     }
 
     @Override
@@ -77,16 +86,16 @@ public class MirrorFilter extends CenteredTransformFilter {
         // the point's position relative to the line.
         double sideIndicator = a * x + b * y + c;
 
-        if (FastMath.signum(sideIndicator) == baseSideIndicator) {
+        if (Math.signum(sideIndicator) == baseSideIndicator) {
             // if the point is on the same side of the line
             // as the base point, it remains unchanged
             out[0] = x;
             out[1] = y;
             return;
         }
-        // otherwise compute the reflection of the point (x,y) about the line
 
-        // -2 * (a*x₁ + b*y₁ + c)
+        // otherwise compute the reflection of the point (x,y) about the line
+        // -2 * (a*x₁ + b*y₁ + c) / (a² + b²)
         double rhs = -2 * sideIndicator / aa_bb;
 
         // x₂ = x₁ + a * rhs

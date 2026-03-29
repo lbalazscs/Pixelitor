@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.OffsetFilter;
 import com.jhlabs.image.PointFilter;
+import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.utils.ImageUtils;
@@ -47,7 +48,6 @@ public class TileSeamless extends ParametrizedFilter {
 //    });
 
     private MaskMaker maskMaker = null;
-    private OffsetFilter offsetFilter = null;
 
     public TileSeamless() {
         super(true);
@@ -65,13 +65,9 @@ public class TileSeamless extends ParametrizedFilter {
         if (maskMaker == null) {
             maskMaker = new MaskMaker();
         }
-        if (offsetFilter == null) {
-            offsetFilter = new OffsetFilter(NAME);
-        }
 
-        offsetFilter.setRelativeX(center.getRelativeX());
-        offsetFilter.setRelativeY(center.getRelativeY());
-        offsetFilter.setUseRelative(true);
+        OffsetFilter offsetFilter = new OffsetFilter(NAME,
+            TransformFilter.WRAP_AROUND, center.getAbsolutePoint(src));
 
         BufferedImage offsetImage = offsetFilter.filter(src, dest);
 

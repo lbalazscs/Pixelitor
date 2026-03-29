@@ -19,6 +19,8 @@ package pixelitor.utils;
 
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.colors.Colors;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.StarSettings;
 import pixelitor.tools.util.Drag;
 
 import java.awt.Color;
@@ -27,7 +29,6 @@ import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
-import java.util.function.Function;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
@@ -35,61 +36,83 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
  * A generic {@link BlurredShape} with a customizable boundary.
  */
 public class GenericBlurredShape implements BlurredShape {
-    // the position of the image within the shape
-    private double imgTx;
-    private double imgTy;
-
-    private final int imgWidth, imgHeight;
-
-    private final Function<Drag, Shape> shapeFactory;
-    private final double innerRadiusX;
-    private final double innerRadiusY;
-    private final double outerRadiusX;
-    private final double outerRadiusY;
+    private final double imgTx;
+    private final double imgTy;
+    private final int imgWidth;
+    private final int imgHeight;
     private final byte[] pixels;
 
-    // cache the most recent instance since the image pixels don't
-    // need recalculation when only the shape center changes
-    private static WeakReference<GenericBlurredShape> instanceCache;
+    private static final Object LOCK = new Object();
 
-    public static GenericBlurredShape of(Function<Drag, Shape> shapeFactory,
+    // A helper class to hold the cache key and the heavy payload
+    private static class CacheEntry {
+        final int type;
+        final double innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY;
+        final WeakReference<byte[]> pixelsRef;
+
+        CacheEntry(int type, double inX, double inY, double outX, double outY, byte[] pixels) {
+            this.type = type;
+            this.innerRadiusX = inX;
+            this.innerRadiusY = inY;
+            this.outerRadiusX = outX;
+            this.outerRadiusY = outY;
+            this.pixelsRef = new WeakReference<>(pixels);
+        }
+
+        boolean matches(int type, double inX, double inY, double outX, double outY) {
+            return this.type == type
+                && this.innerRadiusX == inX
+                && this.innerRadiusY == inY
+                && this.outerRadiusX == outX
+                && this.outerRadiusY == outY;
+        }
+    }
+
+    private static CacheEntry lastCacheEntry;
+
+    public static GenericBlurredShape of(int type,
                                          Point2D center,
                                          double innerRadiusX, double innerRadiusY,
                                          double outerRadiusX, double outerRadiusY) {
-        GenericBlurredShape cachedShape = instanceCache != null ? instanceCache.get() : null;
 
-        if (cachedShape != null
-            && shapeFactory == cachedShape.shapeFactory
-            && innerRadiusX == cachedShape.innerRadiusX
-            && innerRadiusY == cachedShape.innerRadiusY
-            && outerRadiusX == cachedShape.outerRadiusX
-            && outerRadiusY == cachedShape.outerRadiusY) {
+        byte[] cachedPixels = null;
 
-            // reuse the image of the last blurred shape
-            cachedShape.updateCenter(center);
-            return cachedShape;
+        synchronized (LOCK) {
+            if (lastCacheEntry != null && lastCacheEntry.matches(type, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY)) {
+                cachedPixels = lastCacheEntry.pixelsRef.get();
+            }
         }
 
-        GenericBlurredShape newShape = new GenericBlurredShape(shapeFactory, center,
-            innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
-        instanceCache = new WeakReference<>(newShape);
-        return newShape;
+        // returns a new wrapper if the byte[] payload was cached
+        if (cachedPixels != null) {
+            return new GenericBlurredShape(cachedPixels, center, outerRadiusX, outerRadiusY);
+        }
+
+        // otherwise, generate the heavy payload
+        byte[] newPixels = generatePixels(type, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+
+        // update cache
+        synchronized (LOCK) {
+            lastCacheEntry = new CacheEntry(type, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY, newPixels);
+        }
+
+        return new GenericBlurredShape(newPixels, center, outerRadiusX, outerRadiusY);
     }
 
-    private GenericBlurredShape(Function<Drag, Shape> shapeFactory,
-                                Point2D center,
-                                double innerRadiusX, double innerRadiusY,
-                                double outerRadiusX, double outerRadiusY) {
-        this.shapeFactory = shapeFactory;
-        this.innerRadiusX = innerRadiusX;
-        this.innerRadiusY = innerRadiusY;
-        this.outerRadiusX = outerRadiusX;
-        this.outerRadiusY = outerRadiusY;
+    // maps an instance to the shared pixel array
+    private GenericBlurredShape(byte[] pixels, Point2D center, double outerRadiusX, double outerRadiusY) {
+        this.pixels = pixels;
+        this.imgWidth = (int) (2 * outerRadiusX);
+        this.imgHeight = (int) (2 * outerRadiusY);
+        this.imgTx = center.getX() - outerRadiusX;
+        this.imgTy = center.getY() - outerRadiusY;
+    }
 
-        updateCenter(center);
-
-        imgWidth = (int) (2 * outerRadiusX);
-        imgHeight = (int) (2 * outerRadiusY);
+    private static byte[] generatePixels(int type,
+                                         double innerRadiusX, double innerRadiusY,
+                                         double outerRadiusX, double outerRadiusY) {
+        int imgWidth = (int) (2 * outerRadiusX);
+        int imgHeight = (int) (2 * outerRadiusY);
         BufferedImage img = new BufferedImage(imgWidth, imgHeight, TYPE_BYTE_GRAY);
         Graphics2D g2 = img.createGraphics();
         Colors.fillWith(Color.WHITE, g2, imgWidth, imgHeight);
@@ -100,8 +123,8 @@ public class GenericBlurredShape implements BlurredShape {
         double shapeEndX = 2 * outerRadiusX - shapeStartX;
         double shapeEndY = 2 * outerRadiusY - shapeStartY;
 
-        Shape shape = shapeFactory.apply(
-            new Drag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
+        // use the type ID to extract the shape from the factory
+        Shape shape = createShapeForType(type, new Drag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
         g2.setClip(shape);
         Colors.fillWith(Color.BLACK, g2, imgWidth, imgHeight);
         g2.dispose();
@@ -109,7 +132,19 @@ public class GenericBlurredShape implements BlurredShape {
         var blurFilter = createBlurFilter(shapeStartX, shapeStartY);
         img = blurFilter.filter(img, null);
 
-        pixels = ImageUtils.getGrayPixels(img);
+        return ImageUtils.getGrayPixels(img);
+    }
+
+    private static Shape createShapeForType(int type, Drag drag) {
+        return switch (type) {
+            case BlurredShape.TYPE_RECTANGLE -> ShapeType.RECTANGLE.createShape(drag, null);
+            case BlurredShape.TYPE_HEART -> ShapeType.HEART.createShape(drag, null);
+            case BlurredShape.TYPE_DIAMOND -> ShapeType.DIAMOND.createShape(drag, null);
+            case BlurredShape.TYPE_HEXAGON -> ShapeType.STAR.createShape(drag, new StarSettings(3, 100));
+            case BlurredShape.TYPE_OCTAGON -> ShapeType.STAR.createShape(drag, new StarSettings(4, 100));
+            case BlurredShape.TYPE_STAR -> ShapeType.STAR.createShape(drag, new StarSettings());
+            default -> throw new IllegalArgumentException("type: " + type);
+        };
     }
 
     private static BoxBlurFilter createBlurFilter(double shapeStartX, double shapeStartY) {
@@ -117,19 +152,13 @@ public class GenericBlurredShape implements BlurredShape {
         // cast first to int in order to avoid fractional blurring
         float hRadius = (int) (shapeStartX / iterations);
         float vRadius = (int) (shapeStartY / iterations);
-        var blurFilter = new BoxBlurFilter(
-            hRadius, vRadius, iterations, "");
+        var blurFilter = new BoxBlurFilter(hRadius, vRadius, iterations, "");
         blurFilter.setPremultiplyAlpha(false);
 
         // it would be complicated to set up better progress tracking
         // because we would have to know in advance whether we can cache
         blurFilter.setProgressTracker(ProgressTracker.NO_OP_TRACKER);
         return blurFilter;
-    }
-
-    private void updateCenter(Point2D newCenter) {
-        imgTx = newCenter.getX() - outerRadiusX;
-        imgTy = newCenter.getY() - outerRadiusY;
     }
 
     @Override

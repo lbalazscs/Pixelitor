@@ -31,6 +31,12 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import static com.bric.swing.ColorPicker.Mode.BLUE;
+import static com.bric.swing.ColorPicker.Mode.BRI;
+import static com.bric.swing.ColorPicker.Mode.GREEN;
+import static com.bric.swing.ColorPicker.Mode.HUE;
+import static com.bric.swing.ColorPicker.Mode.RED;
+import static com.bric.swing.ColorPicker.Mode.SAT;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
@@ -77,9 +83,9 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g2.setColor(Color.black);
+        g2.setColor(Color.BLACK);
         g2.fill(polygon);
-        g2.setColor(Color.white);
+        g2.setColor(Color.WHITE);
         g2.setStroke(new BasicStroke(1));
         g2.draw(polygon);
     }
@@ -106,15 +112,15 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 
     @Override
     public synchronized void paintTrack(Graphics g) {
-        int mode = colorPicker.getMode();
-        if (mode == ColorPicker.HUE || mode == ColorPicker.BRI || mode == ColorPicker.SAT) {
+        ColorPicker.Mode mode = colorPicker.getMode();
+        if (mode == HUE || mode == BRI || mode == SAT) {
             float[] hsb = colorPicker.getHSB();
-            if (mode == ColorPicker.HUE) {
+            if (mode == HUE) {
                 for (int y = 0; y < trackRect.height; y++) {
                     float hue = ((float) y) / ((float) trackRect.height);
                     intArray[y] = Color.HSBtoRGB(hue, 1, 1);
                 }
-            } else if (mode == ColorPicker.SAT) {
+            } else if (mode == SAT) {
                 for (int y = 0; y < trackRect.height; y++) {
                     float sat = 1 - ((float) y) / ((float) trackRect.height);
                     intArray[y] = Color.HSBtoRGB(hsb[0], sat, hsb[2]);
@@ -127,17 +133,17 @@ public class ColorPickerSliderUI extends BasicSliderUI {
             }
         } else {
             int[] rgb = colorPicker.getRGB();
-            if (mode == ColorPicker.RED) {
+            if (mode == RED) {
                 for (int y = 0; y < trackRect.height; y++) {
                     int red = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
                     intArray[y] = (red << 16) + (rgb[1] << 8) + rgb[2];
                 }
-            } else if (mode == ColorPicker.GREEN) {
+            } else if (mode == GREEN) {
                 for (int y = 0; y < trackRect.height; y++) {
                     int green = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
                     intArray[y] = (rgb[0] << 16) + (green << 8) + rgb[2];
                 }
-            } else if (mode == ColorPicker.BLUE) {
+            } else if (mode == BLUE) {
                 for (int y = 0; y < trackRect.height; y++) {
                     int blue = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
                     intArray[y] = (rgb[0] << 16) + (rgb[1] << 8) + blue;

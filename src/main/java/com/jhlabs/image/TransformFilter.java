@@ -39,47 +39,25 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     public static final int REPEAT_EDGE = 1; // use the nearest edge pixel
     public static final int WRAP_AROUND = 2; // wrap around to the opposite edge
     public static final int REFLECT = 4; // mirror the image at edges
-    protected int edgeAction = REPEAT_EDGE;
+    protected final int edgeAction;
 
     // interpolation methods for sampling between pixel centers
     public static final int NEAREST_NEIGHBOR = 0;
     public static final int BILINEAR = 1;
     public static final int BICUBIC = 2;
-    protected int interpolation = BILINEAR;
-
-    protected TransformFilter(String filterName) {
-        super(filterName);
-    }
+    protected final int interpolation;
 
     /**
-     * Constructs a TransformFilter with explicit edge handling and interpolation.
+     * Constructs a new TransformFilter.
      *
      * @param filterName    the name of the filter.
-     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
-     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param edgeAction    the strategy for handling pixels that map outside the source image bounds (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method used when sampling between pixel centers (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
      */
     protected TransformFilter(String filterName, int edgeAction, int interpolation) {
         super(filterName);
 
         this.edgeAction = edgeAction;
-        this.interpolation = interpolation;
-    }
-
-    /**
-     * Sets the strategy for handling pixels that map outside the source image bounds.
-     *
-     * @param edgeAction one of TRANSPARENT, REPEAT_EDGE, REFLECT or WRAP_AROUND
-     */
-    public void setEdgeAction(int edgeAction) {
-        this.edgeAction = edgeAction;
-    }
-
-    /**
-     * Sets the interpolation method used when sampling between pixel centers.
-     *
-     * @param interpolation one of NEAREST_NEIGHBOUR, BILINEAR, or BICUBIC
-     */
-    public void setInterpolation(int interpolation) {
         this.interpolation = interpolation;
     }
 

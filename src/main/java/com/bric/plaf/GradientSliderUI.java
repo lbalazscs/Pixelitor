@@ -119,10 +119,10 @@ public class GradientSliderUI extends MultiThumbSliderUI {
         /* Now, finally paint */
         int[] argb = new int[c.length];
         for (int a = 0; a < argb.length; a++) {
-            argb[a] = ((c[a].getAlpha() & 0xff) << 24) +
-                    ((c[a].getRed() & 0xff) << 16) +
-                    ((c[a].getGreen() & 0xff) << 8) +
-                    (c[a].getBlue() & 0xff);
+            argb[a] = ((c[a].getAlpha() & 0xFF) << 24) +
+                ((c[a].getRed() & 0xFF) << 16) +
+                ((c[a].getGreen() & 0xFF) << 8) +
+                (c[a].getBlue() & 0xFF);
         }
         int max;
         if (slider.getOrientation() == MultiThumbSlider.HORIZONTAL) {
@@ -140,13 +140,13 @@ public class GradientSliderUI extends MultiThumbSliderUI {
         int i1 = 0;
         int i2 = 1;
         int a1 = argb[0] >>> 24;
-        int r1 = (argb[0] & 0x00ff0000) >> 16;
-        int g1 = (argb[0] & 0x0000ff00) >> 8;
-        int b1 = (argb[0] & 0x000000ff);
+        int r1 = (argb[0] & 0x00_FF_00_00) >> 16;
+        int g1 = (argb[0] & 0x00_00_FF_00) >> 8;
+        int b1 = (argb[0] & 0x00_00_00_FF);
         int a2 = argb[1] >>> 24;
-        int r2 = (argb[1] & 0x00ff0000) >> 16;
-        int g2 = (argb[1] & 0x0000ff00) >> 8;
-        int b2 = (argb[1] & 0x000000ff);
+        int r2 = (argb[1] & 0x00_FF_00_00) >> 16;
+        int g2 = (argb[1] & 0x00_00_FF_00) >> 8;
+        int b2 = (argb[1] & 0x00_00_00_FF);
         for (int z = 0; z < max; z++) {
             fraction = ((float) z) / ((float) (max - 1));
             if (fraction < 1 && fraction >= f[i2]) {
@@ -156,13 +156,13 @@ public class GradientSliderUI extends MultiThumbSliderUI {
                 }
 
                 a1 = argb[i1] >>> 24;
-                r1 = (argb[i1] & 0x00ff0000) >> 16;
-                g1 = (argb[i1] & 0x0000ff00) >> 8;
-                b1 = (argb[i1] & 0x000000ff);
+                r1 = (argb[i1] & 0x00_FF_00_00) >> 16;
+                g1 = (argb[i1] & 0x00_00_FF_00) >> 8;
+                b1 = (argb[i1] & 0x00_00_00_FF);
                 a2 = argb[i2] >>> 24;
-                r2 = (argb[i2] & 0x00ff0000) >> 16;
-                g2 = (argb[i2] & 0x0000ff00) >> 8;
-                b2 = (argb[i2] & 0x000000ff);
+                r2 = (argb[i2] & 0x00_FF_00_00) >> 16;
+                g2 = (argb[i2] & 0x00_00_FF_00) >> 8;
+                b2 = (argb[i2] & 0x00_00_00_FF);
             }
             float colorFraction = (fraction - f[i1]) / (f[i2] - f[i1]);
             if (colorFraction > 1) {
@@ -255,9 +255,9 @@ public class GradientSliderUI extends MultiThumbSliderUI {
         int k = 4;
         BufferedImage bi = new BufferedImage(2 * k, 2 * k, TYPE_INT_RGB);
         Graphics2D g = bi.createGraphics();
-        g.setColor(Color.white);
+        g.setColor(Color.WHITE);
         g.fillRect(0, 0, 2 * k, 2 * k);
-        g.setColor(Color.lightGray);
+        g.setColor(Color.LIGHT_GRAY);
         g.fillRect(0, 0, k, k);
         g.fillRect(k, k, k, k);
         checkerPaint = new TexturePaint(bi, new Rectangle(0, 0, bi.getWidth(), bi.getHeight()));

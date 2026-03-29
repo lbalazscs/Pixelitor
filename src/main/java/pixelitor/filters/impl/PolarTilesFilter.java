@@ -14,31 +14,61 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
 import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pixelitor.filters.PolarTiles;
 
+import java.awt.geom.Point2D;
+
 /**
  * The implementation of the {@link PolarTiles} filter.
  */
 public class PolarTilesFilter extends CenteredTransformFilter {
-    private double zoom;
-    private double imageRotation;
-    private float curvature;
-    private double effectRotation;
-    private int numADivisions;
-    private int numRDivisions;
-    private float randomness;
-
     public static final int MODE_CONCENTRIC = 0;
     public static final int MODE_SPIRAL = 1;
     public static final int MODE_VORTEX = 2;
-    private int mode = MODE_CONCENTRIC;
 
-    public PolarTilesFilter() {
-        super(PolarTiles.NAME);
+    private final int mode;
+    private final int numADivisions;
+    private final int numRDivisions;
+    private final float curvature;
+    private final double effectRotation;
+    private final float randomness;
+    private final double zoom;
+    private final double imageRotation;
+
+    /**
+     * Constructs a new PolarTilesFilter.
+     *
+     * @param filterName     the name of the filter.
+     * @param edgeAction     the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation  the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param center         the effect's center (in pixels).
+     * @param mode           the tile mode (CONCENTRIC, SPIRAL, or VORTEX).
+     * @param numADivisions  the number of angular divisions.
+     * @param numRDivisions  the number of radial divisions.
+     * @param curvature      the curvature factor of the glass tiles.
+     * @param effectRotation the rotation applied to the tile effect (0.0 to 1.0).
+     * @param randomness     the amount of random noise displacement (0.0 to 1.0).
+     * @param zoom           the image zoom percentage.
+     * @param imageRotation  the rotation of the underlying image in radians.
+     */
+    public PolarTilesFilter(String filterName, int edgeAction, int interpolation, Point2D center,
+                            int mode, int numADivisions, int numRDivisions, double curvature,
+                            double effectRotation, double randomness, double zoom, double imageRotation) {
+        super(filterName, edgeAction, interpolation, center);
+
+        this.mode = mode;
+        this.numADivisions = numADivisions;
+        this.numRDivisions = numRDivisions;
+        this.curvature = (float) (curvature * curvature / 10.0f);
+        this.effectRotation = Math.PI * effectRotation;
+        this.randomness = (float) (randomness * Math.PI);
+        this.zoom = zoom;
+        this.imageRotation = imageRotation;
     }
 
     @Override
@@ -82,37 +112,5 @@ public class PolarTilesFilter extends CenteredTransformFilter {
 
         out[0] = (float) (u + cx);
         out[1] = (float) (v + cy);
-    }
-
-    public void setZoom(double zoom) {
-        this.zoom = zoom;
-    }
-
-    public void setImageRotation(double imageRotation) {
-        this.imageRotation = imageRotation;
-    }
-
-    public void setEffectRotation(double effectRotation) {
-        this.effectRotation = Math.PI * effectRotation;
-    }
-
-    public void setNumADivisions(int numADivisions) {
-        this.numADivisions = numADivisions;
-    }
-
-    public void setNumRDivisions(int numRDivisions) {
-        this.numRDivisions = numRDivisions;
-    }
-
-    public void setCurvature(double curvature) {
-        this.curvature = (float) (curvature * curvature / 10.0f);
-    }
-
-    public void setRandomness(double randomness) {
-        this.randomness = (float) (randomness * Math.PI);
-    }
-
-    public void setMode(int mode) {
-        this.mode = mode;
     }
 }

@@ -29,8 +29,7 @@ import static java.lang.Math.PI;
 
 /**
  * In this transition the original image is split into 6 horizontal strips,
- * and they collapse downward to reveal the next image underneath. Here is a playback sample:
- * <p><img src="https://javagraphics.java.net/resources/transition/CollapseTransition2D/Collapse.gif" alt="CollapseTransition2D Demo">
+ * and they collapse downward to reveal the next image underneath.
  */
 public class CollapseTransition2D extends Transition2D {
     @Override

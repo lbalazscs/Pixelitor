@@ -32,7 +32,8 @@ import java.util.Random;
 
 /**
  * Generates a concentric Voronoi diagram with optional distortion
- * (randomness, spiral, pinch/bulge) and renders it using image colors.
+ * (randomness, spiral, pinch/bulge) and renders each cell using
+ * colors sampled from the source image.
  */
 public class RadialMosaic extends ParametrizedFilter {
     public static final String NAME = "Radial Mosaic";
@@ -98,7 +99,7 @@ public class RadialMosaic extends ParametrizedFilter {
     }
 
     private List<SeedPoint> generateConcentricSeeds(int width, int height) {
-        int distBetweenRings = size.getValue();
+        int ringSpacing = size.getValue();
         double cx = center.getRelativeX() * width;
         double cy = center.getRelativeY() * height;
         int arrangement = arrangementParam.getValue();
@@ -110,38 +111,38 @@ public class RadialMosaic extends ParametrizedFilter {
 
         // calculate how many rings are needed to fully cover the canvas
         double maxDist = Math.hypot(Math.max(cx, width - cx), Math.max(cy, height - cy));
-        int numRings = (int) Math.ceil(maxDist / distBetweenRings) + 1;
+        int numRings = (int) Math.ceil(maxDist / ringSpacing) + 1;
 
         int totalPoints = 1 + 3 * numRings * (numRings + 1);
-        List<SeedPoint> allSeeds = new ArrayList<>(totalPoints);
+        List<SeedPoint> seeds = new ArrayList<>(totalPoints);
 
         // jagged array because each ring contains a different number of points
         SeedPoint[][] rings = new SeedPoint[numRings][];
 
         // ensure the maximum offset scales with the distance to neighboring rings
-        double centerMaxOffset = getWarpedRadius(0, distBetweenRings, maxDist, pinchBulge) * 0.4 * randomness;
+        double centerMaxOffset = calcWarpedRadius(0, ringSpacing, maxDist, pinchBulge) * 0.4 * randomness;
         SeedPoint centerSeed = genCenterPoint(cx, cy, random, centerMaxOffset);
-        allSeeds.add(centerSeed);
+        seeds.add(centerSeed);
 
-        genRingPoints(rings, distBetweenRings, arrangement, random, randomness, cx, cy, allSeeds, maxDist, pinchBulge, spiral, numRings);
-        linkNeighbors(centerSeed, rings, numRings, arrangement, spiral);
+        genRingPoints(rings, ringSpacing, arrangement, random, randomness, cx, cy, seeds, maxDist, pinchBulge, spiral, numRings);
+        linkNeighbors(centerSeed, rings, arrangement, spiral);
 
-        return allSeeds;
+        return seeds;
     }
 
-    private static double getWarpedRadius(int r, int distBetweenRings, double maxDist, double pinchBulge) {
-        double radius = (r + 1) * distBetweenRings;
+    private static double calcWarpedRadius(int r, int ringSpacing, double maxDist, double pinchBulge) {
+        double radius = (r + 1) * ringSpacing;
         if (pinchBulge == 0) {
             return radius;
         }
 
-        // use a power curve interpolation ensuring total canvas coverage
+        // uses a power-curve interpolation that preserves full canvas coverage
         double t = radius / maxDist;
         double exponent = Math.pow(2.0, -pinchBulge * 2.0);
         return Math.pow(t, exponent) * maxDist;
     }
 
-    private static double getSpiralAngle(int r, int numRings, double spiral) {
+    private static double calcSpiralAngle(int r, int numRings, double spiral) {
         if (spiral == 0) {
             return 0;
         }
@@ -155,28 +156,28 @@ public class RadialMosaic extends ParametrizedFilter {
         return new SeedPoint(cx + centerOffsetX, cy + centerOffsetY);
     }
 
-    private static void genRingPoints(SeedPoint[][] rings, int distBetweenRings, int arrangement,
+    private static void genRingPoints(SeedPoint[][] rings, int ringSpacing, int arrangement,
                                       Random random, double randomness, double cx, double cy,
-                                      List<SeedPoint> allSeeds, double maxDist, double pinchBulge,
+                                      List<SeedPoint> seeds, double maxDist, double pinchBulge,
                                       double spiral, int numRings) {
         for (int r = 0; r < rings.length; r++) {
             int pointsInRing = 6 * (r + 1);
             rings[r] = new SeedPoint[pointsInRing];
 
-            double radius = getWarpedRadius(r, distBetweenRings, maxDist, pinchBulge);
+            double radius = calcWarpedRadius(r, ringSpacing, maxDist, pinchBulge);
 
-            // compute local distances to prevent randomness crossing inner/outer ring bounds
-            double prevRadius = r == 0 ? 0 : getWarpedRadius(r - 1, distBetweenRings, maxDist, pinchBulge);
-            double nextRadius = getWarpedRadius(r + 1, distBetweenRings, maxDist, pinchBulge);
+            // compute local distances to prevent randomness from crossing inner/outer ring bounds
+            double prevRadius = r == 0 ? 0 : calcWarpedRadius(r - 1, ringSpacing, maxDist, pinchBulge);
+            double nextRadius = calcWarpedRadius(r + 1, ringSpacing, maxDist, pinchBulge);
 
             double distIn = radius - prevRadius;
             double distOut = nextRadius - radius;
             double safeLocalDist = Math.min(distIn, distOut);
             double localMaxOffset = safeLocalDist * 0.4 * randomness;
 
-            // offset every second ring by a half angle if requested
+            // offsets every second ring by half the angular step if requested
             double ringOffset = (arrangement == ARRANGEMENT_OFFSET && r % 2 != 0) ? Math.PI / pointsInRing : 0;
-            double spiralAngle = getSpiralAngle(r, numRings, spiral);
+            double spiralAngle = calcSpiralAngle(r, numRings, spiral);
             double angleBase = ringOffset + spiralAngle;
 
             for (int i = 0; i < pointsInRing; i++) {
@@ -191,12 +192,14 @@ public class RadialMosaic extends ParametrizedFilter {
 
                 SeedPoint p = new SeedPoint(px, py);
                 rings[r][i] = p;
-                allSeeds.add(p);
+                seeds.add(p);
             }
         }
     }
 
-    private static void linkNeighbors(SeedPoint centerSeed, SeedPoint[][] rings, int numRings, int arrangement, double spiral) {
+    private static void linkNeighbors(SeedPoint centerSeed, SeedPoint[][] rings, int arrangement, double spiral) {
+        int numRings = rings.length;
+
         // center point cares about all innermost seeds
         for (int i = 0; i < 6; i++) {
             centerSeed.neighbors.add(rings[0][i]);
@@ -206,7 +209,7 @@ public class RadialMosaic extends ParametrizedFilter {
         for (int ringIndex = 0; ringIndex < numRings; ringIndex++) {
             int pointsInRing = 6 * (ringIndex + 1);
             double currentOffset = (arrangement == ARRANGEMENT_OFFSET && ringIndex % 2 != 0) ? Math.PI / pointsInRing : 0;
-            double currentSpiral = getSpiralAngle(ringIndex, numRings, spiral);
+            double currentSpiral = calcSpiralAngle(ringIndex, numRings, spiral);
             double currentAngleBase = currentOffset + currentSpiral;
 
             // precompute outer ring alignment
@@ -215,7 +218,7 @@ public class RadialMosaic extends ParametrizedFilter {
             double outerTotalOffset = 0;
             if (hasOuter) {
                 double outerOffset = (arrangement == ARRANGEMENT_OFFSET && (ringIndex + 1) % 2 != 0) ? Math.PI / outerPoints : 0;
-                double outerSpiral = getSpiralAngle(ringIndex + 1, numRings, spiral);
+                double outerSpiral = calcSpiralAngle(ringIndex + 1, numRings, spiral);
                 outerTotalOffset = outerOffset + outerSpiral;
             }
 
@@ -225,7 +228,7 @@ public class RadialMosaic extends ParametrizedFilter {
             double innerTotalOffset = 0;
             if (hasInner) {
                 double innerOffset = (arrangement == ARRANGEMENT_OFFSET && (ringIndex - 1) % 2 != 0) ? Math.PI / innerPoints : 0;
-                double innerSpiral = getSpiralAngle(ringIndex - 1, numRings, spiral);
+                double innerSpiral = calcSpiralAngle(ringIndex - 1, numRings, spiral);
                 innerTotalOffset = innerOffset + innerSpiral;
             }
 

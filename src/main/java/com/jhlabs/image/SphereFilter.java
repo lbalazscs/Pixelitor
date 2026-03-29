@@ -26,48 +26,40 @@ import java.awt.geom.Point2D;
  * A filter which simulates a lens placed over an image.
  */
 public class SphereFilter extends TransformFilter {
-    private double a = 0;
-    private double b = 0;
-    private double a2 = 0;
-    private double b2 = 0;
-    private double refractionIndex = 1.5f;
+    private final double a;
+    private final double b;
+    private final double a2;
+    private final double b2;
+    private final double refractionIndex;
 
-    private double cx;
-    private double cy;
-
-    public SphereFilter(String filterName) {
-        super(filterName);
-    }
+    private final double cx;
+    private final double cy;
 
     /**
-     * Sets the index of refraction.
+     * Constructs a SphereFilter.
      *
-     * @param refractionIndex the index of refraction
+     * @param filterName      the name of the filter.
+     * @param edgeAction      the edge handling strategy (TRANSPARENT, REPEAT_EDGE,
+     *                        WRAP_AROUND, REFLECT).
+     * @param interpolation   the interpolation method (NEAREST_NEIGHBOR, BILINEAR,
+     *                        BICUBIC).
+     * @param center          the center of the lens effect in pixels.
+     * @param a               the horizontal radius of the lens.
+     * @param b               the vertical radius of the lens.
+     * @param refractionIndex the index of refraction; controls how strongly the lens
+     *                        bends light — higher values produce more distortion.
      */
-    public void setRefractionIndex(double refractionIndex) {
-        this.refractionIndex = refractionIndex;
-    }
+    public SphereFilter(String filterName, int edgeAction, int interpolation,
+                        Point2D center, double a, double b, double refractionIndex) {
+        super(filterName, edgeAction, interpolation);
 
-    /**
-     * Sets the center of the effect in pixels
-     *
-     * @param center the center
-     */
-    public void setCenter(Point2D center) {
-        cx = center.getX();
-        cy = center.getY();
-    }
-
-    // sets the horizontal radius
-    public void setA(double a) {
+        this.cx = center.getX();
+        this.cy = center.getY();
         this.a = a;
-        this.a2 = a * a;
-    }
-
-    // sets the vertical radius
-    public void setB(double b) {
         this.b = b;
+        this.a2 = a * a;
         this.b2 = b * b;
+        this.refractionIndex = refractionIndex;
     }
 
     @Override

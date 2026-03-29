@@ -43,8 +43,6 @@ public class JHUnderWater extends ParametrizedFilter {
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
-    private SwimFilter filter;
-
     public JHUnderWater() {
         super(true);
 
@@ -69,17 +67,16 @@ public class JHUnderWater extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new SwimFilter(NAME);
-        }
-
-        filter.setAmount(amount.getValueAsFloat());
-        filter.setScale(scale.getValueAsFloat());
-        filter.setStretch((float) Math.pow(10.0, stretch.getPercentage()));
-        filter.setTime((float) time.getPercentage());
-        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2.0));
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        SwimFilter filter = new SwimFilter(
+            NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            amount.getValueAsFloat(),
+            scale.getValueAsFloat(),
+            (float) Math.pow(10.0, stretch.getPercentage()),
+            (float) (angle.getValueInRadians() + Math.PI / 2.0),
+            (float) time.getPercentage()
+        );
 
         return filter.filter(src, dest);
     }

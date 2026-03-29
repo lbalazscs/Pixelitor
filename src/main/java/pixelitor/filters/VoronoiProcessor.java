@@ -106,7 +106,7 @@ public class VoronoiProcessor {
      * clipping a large bounding rectangle using the seed’s neighbors.
      */
     private static List<Point> computeCell(SeedPoint seed, int width, int height, int edgeWidth) {
-        // start with a large enough bounding box
+        // starts with a bounding box large enough to cover the entire image
         int x = -edgeWidth;
         int y = -edgeWidth;
         int maxX = width + edgeWidth;
@@ -147,26 +147,7 @@ public class VoronoiProcessor {
                 continue;
             }
 
-            Path2D path = new Path2D.Double();
-            Point firstPoint = cell.getFirst();
-            path.moveTo(firstPoint.x(), firstPoint.y());
-
-            for (int j = 1; j < cell.size(); j++) {
-                Point p = cell.get(j);
-                path.lineTo(p.x(), p.y());
-            }
-            path.closePath();
-
-            int sampleX = Math.clamp((int) seed.x, 0, width - 1);
-            int sampleY = Math.clamp((int) seed.y, 0, height - 1);
-            g2.setColor(new Color(src.getRGB(sampleX, sampleY)));
-
-            g2.fill(path);
-
-            if (edgeWidth > 0) {
-                g2.setColor(edgeColor);
-                g2.draw(path);
-            }
+            renderCell(cell, seed, g2, src, edgeWidth, edgeColor, width, height);
 
             pt.unitDone();
         }
@@ -175,6 +156,29 @@ public class VoronoiProcessor {
             for (SeedPoint seed : seeds) {
                 seed.debugRender(g2);
             }
+        }
+    }
+
+    private static void renderCell(List<Point> cell, SeedPoint seed, Graphics2D g2, BufferedImage src, int edgeWidth, Color edgeColor, int width, int height) {
+        Path2D path = new Path2D.Double();
+        Point firstPoint = cell.getFirst();
+        path.moveTo(firstPoint.x(), firstPoint.y());
+
+        for (int j = 1; j < cell.size(); j++) {
+            Point p = cell.get(j);
+            path.lineTo(p.x(), p.y());
+        }
+        path.closePath();
+
+        int sampleX = Math.clamp((int) seed.x, 0, width - 1);
+        int sampleY = Math.clamp((int) seed.y, 0, height - 1);
+        g2.setColor(new Color(src.getRGB(sampleX, sampleY)));
+
+        g2.fill(path);
+
+        if (edgeWidth > 0) {
+            g2.setColor(edgeColor);
+            g2.draw(path);
         }
     }
 }

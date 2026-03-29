@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,8 +45,6 @@ public class RadialWaves extends ParametrizedFilter {
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
-    private RadialWavesFilter filter;
-
     public RadialWaves() {
         super(true);
 
@@ -66,18 +64,16 @@ public class RadialWaves extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new RadialWavesFilter();
-        }
-
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
-        filter.setPhase(phase.getPercentage());
-        filter.setAngularDivision(angularDivision.getValue());
-        filter.setRadialAmplitude(radialAmplitude.getValueAsDouble());
-        filter.setZoom(zoom.getPercentage());
-        filter.setWaveType(waveType.getValue());
+        RadialWavesFilter filter = new RadialWavesFilter(NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            center.getAbsolutePoint(src),
+            angularDivision.getValue(),
+            radialAmplitude.getValueAsDouble(),
+            phase.getPercentage(),
+            zoom.getPercentage(),
+            waveType.getValue()
+        );
 
         return filter.filter(src, dest);
     }

@@ -29,8 +29,7 @@ import java.awt.geom.Rectangle2D;
  * This splits a frame down the middle and squishes the two left and
  * right halves, as if a curtain is being opened.
  *
- * <P>This is basically a "Split Vertical", except the two halves are squished. Here is a playback sample:
- * <p><img src="https://javagraphics.java.net/resources/transition/CurtainTransition2D/Curtain.gif" alt="CurtainTransition2D Demo">
+ * <P>This is basically a "Split Vertical", except the two halves are squished.
  */
 public class CurtainTransition2D extends Transition2D {
     @Override

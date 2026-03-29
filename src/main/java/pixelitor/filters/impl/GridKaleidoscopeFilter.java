@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,57 +29,57 @@ import java.awt.image.BufferedImage;
 public class GridKaleidoscopeFilter extends TransformFilter {
     public static final int STYLE_MIRROR = 1;
     public static final int STYLE_REPEAT = 2;
-    private int style;
 
-    private double gridSizeX = 50;
-    private double gridSizeY = 50;
-    private double angle = 0;
-    private double distortionX = 0;
-    private double distortionY = 0;
+    private final int style;
 
-    private double relCx = 0.5;
-    private double relCy = 0.5;
+    private final double gridSizeX;
+    private final double gridSizeY;
+    private final double angle;
+    private final double distortionX;
+    private final double distortionY;
+
+    private final double relCx;
+    private final double relCy;
+
+    private final double cos;
+    private final double sin;
 
     private double cx;
     private double cy;
 
-    private double cos;
-    private double sin;
+    /**
+     * Constructs a GridKaleidoscopeFilter with all required parameters.
+     *
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param gridSizeX     the horizontal size of the grid cells in pixels.
+     * @param gridSizeY     the vertical size of the grid cells in pixels.
+     * @param angle         the rotation angle of the grid in radians.
+     * @param distortionX   the horizontal sine-wave distortion amount.
+     * @param distortionY   the vertical sine-wave distortion amount.
+     * @param center        the relative center point of the effect (values between 0 and 1).
+     * @param style         the grid style (STYLE_MIRROR or STYLE_REPEAT).
+     */
+    public GridKaleidoscopeFilter(String filterName,
+                                  int edgeAction, int interpolation,
+                                  double gridSizeX, double gridSizeY,
+                                  double angle,
+                                  double distortionX, double distortionY,
+                                  Point2D center, int style) {
+        super(filterName, edgeAction, interpolation);
 
-    public GridKaleidoscopeFilter(String filterName) {
-        super(filterName);
-    }
-
-    public void setGridSizeX(double size) {
-        this.gridSizeX = size;
-    }
-
-    public void setGridSizeY(double size) {
-        this.gridSizeY = size;
-    }
-
-    public void setGridAngle(double angle) {
+        this.gridSizeX = gridSizeX;
+        this.gridSizeY = gridSizeY;
         this.angle = angle;
-
-        cos = Math.cos(this.angle);
-        sin = Math.sin(this.angle);
-    }
-
-    public void setDistortionX(double distortion) {
-        this.distortionX = distortion;
-    }
-
-    public void setDistortionY(double distortion) {
-        this.distortionY = distortion;
-    }
-
-    public void setCenter(Point2D center) {
+        this.distortionX = distortionX;
+        this.distortionY = distortionY;
         this.relCx = center.getX();
         this.relCy = center.getY();
-    }
-
-    public void setStyle(int style) {
         this.style = style;
+
+        this.cos = Math.cos(angle);
+        this.sin = Math.sin(angle);
     }
 
     @Override

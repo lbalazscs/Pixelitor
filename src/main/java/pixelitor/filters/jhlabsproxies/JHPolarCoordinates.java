@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PolarFilter;
@@ -53,30 +54,27 @@ public class JHPolarCoordinates extends ParametrizedFilter {
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
     private final AngleParam angle = new AngleParam("Angle", 0);
 
-    private PolarFilter filter;
-
     public JHPolarCoordinates() {
         super(true);
 
         type.setPresetKey("Type");
         zoom.setPresetKey("Zoom (%)");
 
-        initParams(center, type, zoom, angle, edgeAction, interpolation);
+        initParams(type, center, zoom, angle, edgeAction, interpolation);
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new PolarFilter(NAME);
-        }
-
-        filter.setType(type.getValue());
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setRelativeCenterX((float) center.getRelativeX());
-        filter.setRelativeCenterY((float) center.getRelativeY());
-        filter.setInterpolation(interpolation.getValue());
-        filter.setZoom((float) zoom.getPercentage());
-        filter.setAngle(angle.getValueInIntuitiveRadians());
+        PolarFilter filter = new PolarFilter(
+            NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            type.getValue(),
+            (float) zoom.getPercentage(),
+            angle.getValueInIntuitiveRadians(),
+            (float) center.getRelativeX(),
+            (float) center.getRelativeY()
+        );
 
         return filter.filter(src, dest);
     }

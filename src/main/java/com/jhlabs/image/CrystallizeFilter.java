@@ -28,8 +28,6 @@ public class CrystallizeFilter extends CellularFilter {
 
     public CrystallizeFilter() {
         super(JHCrystallize.NAME);
-        setScale(16);
-        setRandomness(0.0f);
     }
 
     public void setEdgeThickness(float edgeThickness) {

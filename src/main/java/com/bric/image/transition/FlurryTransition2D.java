@@ -36,17 +36,6 @@ import java.util.Random;
  * In this transition one image breaks into several smaller tiles
  * and then is whisked away as if by a wind. Or, seen backwards, a flurry of incoming tiles assemble into
  * the incoming image.
- * <p>Here are playback samples:
- * <p><table summary="Sample Animations of FlurryTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/FlurryTransition2D/FlurryIn.gif" alt="Flurry In">
- * <p>Flurry In
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/FlurryTransition2D/FlurryOut.gif" alt="Flurry Out">
- * <p>Flurry Out
- * </td>
- * </tr></table>
  */
 public class FlurryTransition2D extends Transition2D {
     private final int type;

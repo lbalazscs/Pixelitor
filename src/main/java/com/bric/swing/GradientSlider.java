@@ -42,8 +42,6 @@ import java.io.Serial;
  * of this slider in the default {@link com.bric.plaf.GradientSliderUI} class.
  * <P>The UI for each slider is loaded from the UIManager property: "GradientSliderUI".
  * By default this is "com.bric.plaf.GradientSliderUI".
- * <p>The {@link GradientSliderDemoHelper} creates this sample graphic:
- * <br><img src="https://javagraphics.java.net/blurbs/GradientSlider.png" alt="Screenshot of the GradientSlider">
  *
  * @see com.bric.swing.GradientSliderDemo
  */
@@ -72,7 +70,7 @@ public class GradientSlider extends MultiThumbSlider {
      * @param orientation HORIZONTAL or VERTICAL
      */
     public GradientSlider(int orientation) {
-        this(orientation, new float[]{0.0f, 1.0f}, new Color[]{Color.white, Color.black});
+        this(orientation, new float[]{0.0f, 1.0f}, new Color[]{Color.WHITE, Color.BLACK});
     }
 
     /**
@@ -241,7 +239,7 @@ public class GradientSlider extends MultiThumbSlider {
                     .getProperty(GradientSlider.this, "GradientSlider.includeOpacity", "true").equals("true");
 
             mini = new ColorPicker(false, includeOpacity);
-            mini.setMode(ColorPicker.HUE);
+            mini.setMode(ColorPicker.Mode.HUE);
             mini.setPreferredSize(new Dimension(220, 200));
             PropertyChangeListener p = evt -> {
                 ColorPicker p1 = (ColorPicker) evt.getSource();

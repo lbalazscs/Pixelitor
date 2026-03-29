@@ -127,9 +127,8 @@ public class Colors {
     }
 
     public static Color toGray(Color c) {
-        int gray = (2 * c.getRed() + 3 * c.getGreen() + c.getBlue()) / 6;
-
-        return new Color(gray << 16 | gray << 8 | gray);
+        int gray = ImageMath.calcLuminanceInt(c.getRGB());
+        return new Color(gray, gray, gray, c.getAlpha());
     }
 
     public static float[] toHSB(Color c) {
@@ -161,7 +160,7 @@ public class Colors {
                 parseInt(text.substring(2, 4), 16),
                 parseInt(text.substring(4, 6), 16),
                 parseInt(text.substring(6, 8), 16));
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -175,7 +174,7 @@ public class Colors {
                 parseInt(text.substring(0, 2), 16),
                 parseInt(text.substring(2, 4), 16),
                 parseInt(text.substring(4, 6), 16));
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -207,6 +206,8 @@ public class Colors {
             colorChangeListener.accept(prevColor);
             return false;
         } else {
+            // it's the color selector's responsibility to ensure that any
+            // valid color selection is already in passed to the change listener
             return true;
         }
     }

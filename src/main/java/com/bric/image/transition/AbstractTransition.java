@@ -72,19 +72,19 @@ public abstract class AbstractTransition implements Transition {
         Graphics2D g = bi.createGraphics();
         if (useGradients) {
             if (light) {
-                g.setPaint(new GradientPaint(0, bi.getHeight(), Color.red, bi.getWidth(), 0, Color.yellow, true));
+                g.setPaint(new GradientPaint(0, bi.getHeight(), Color.RED, bi.getWidth(), 0, Color.YELLOW, true));
             } else {
-                g.setPaint(new GradientPaint(0, 0, Color.blue, bi.getWidth(), bi.getHeight(), Color.green, true));
+                g.setPaint(new GradientPaint(0, 0, Color.BLUE, bi.getWidth(), bi.getHeight(), Color.GREEN, true));
             }
         } else {
             if (light) {
-                g.setPaint(new Color(0xE19839));
+                g.setPaint(new Color(0xE1_98_39));
             } else {
-                g.setPaint(new Color(0x3B4E92));
+                g.setPaint(new Color(0x3B_4E_92));
             }
         }
         g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
-        g.setColor(Color.black);
+        g.setColor(Color.BLACK);
         g.setFont(font);
         float width = (float) font.getStringBounds(text, frc).getWidth();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

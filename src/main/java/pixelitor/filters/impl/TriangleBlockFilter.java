@@ -41,6 +41,7 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
 
     public TriangleBlockFilter(String filterName, int size) {
         super(filterName);
+
         this.size = size;
     }
 

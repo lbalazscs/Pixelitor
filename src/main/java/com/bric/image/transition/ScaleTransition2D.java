@@ -27,17 +27,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * This zooms one frame in/out from the center. Here are playback samples:
- * <p><table summary="Sample Animations of ScaleTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/ScaleTransition2D/ScaleIn.gif" alt="Scale In">
- * <p>Scale In
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/ScaleTransition2D/ScaleOut.gif" alt="Scale Out">
- * <p>Scale Out
- * </td>
- * </tr></table>
+ * This zooms one frame in/out from the center.
  */
 public class ScaleTransition2D extends Transition2D {
     private final int type;

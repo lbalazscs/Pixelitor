@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,21 +14,42 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
+import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.Slice;
 
 /**
  * The implementation of the {@link Slice} filter.
  */
 public class SliceFilter extends RotatingEffectFilter {
-    private double horizontalShift;
-    private double verticalShift;
-    private int offset;
-    private int size;
+    private final double horizontalShift;
+    private final double verticalShift;
+    private final int offset;
+    private final int size;
 
-    public SliceFilter(String filterName) {
-        super(filterName);
+    /**
+     * Constructs a new SliceFilter with the specified parameters.
+     *
+     * @param filterName         the name of the filter.
+     * @param edgeAction         the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation      the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param angle              the effect's rotation angle (in radians).
+     * @param offset             the distance pixels are shifted within a slice.
+     * @param size               the thickness of each slice in pixels.
+     * @param horizontalShiftPct the horizontal shift as a percentage (0.0 to 1.0) of the slice size.
+     * @param verticalShiftPct   the vertical shift as a percentage (0.0 to 1.0) of the slice size.
+     */
+    public SliceFilter(String filterName, int edgeAction, double angle,
+                       int offset, int size,
+                       double horizontalShiftPct, double verticalShiftPct) {
+        super(filterName, edgeAction, TransformFilter.NEAREST_NEIGHBOR, angle);
+
+        this.offset = offset;
+        this.size = size;
+        this.horizontalShift = horizontalShiftPct * size;
+        this.verticalShift = verticalShiftPct * size;
     }
 
     @Override
@@ -42,21 +63,5 @@ public class SliceFilter extends RotatingEffectFilter {
         int bandIndex = (int) Math.floor((coord - phase) / size);
         // alternate the offset for odd and even bands to create the slice effect
         return (bandIndex & 1) == 1 ? offset : -offset;
-    }
-
-    public void setHorizontalShift(double t) {
-        horizontalShift = t * size;
-    }
-
-    public void setVerticalShift(double t) {
-        verticalShift = t * size;
-    }
-
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
     }
 }

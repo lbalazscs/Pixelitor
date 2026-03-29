@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,8 +43,6 @@ public class CircleToSquare extends ParametrizedFilter {
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
-    private CircleToSquareFilter filter;
-
     public CircleToSquare() {
         super(true);
 
@@ -59,20 +57,18 @@ public class CircleToSquare extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new CircleToSquareFilter();
-        }
-
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setRadiusX(radius.getValueAsFloat(0));
-        filter.setRadiusY(radius.getValueAsFloat(1));
-        filter.setAmount((float) amount.getPercentage());
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        var filter = new CircleToSquareFilter(
+            NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            center.getAbsolutePoint(src),
+            radius.getValueAsFloat(0),
+            radius.getValueAsFloat(1),
+            (float) amount.getPercentage()
+        );
 
         dest = filter.filter(src, dest);
 //        setAffectedAreaShapes(filter.getAffectedAreaShapes());
         return dest;
     }
 }
-

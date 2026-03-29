@@ -20,6 +20,7 @@
 package com.bric.swing;
 
 import com.bric.plaf.PlafPaintUtils;
+import com.bric.swing.ColorPicker.Mode;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -34,7 +35,12 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bric.swing.ColorPicker.*;
+import static com.bric.swing.ColorPicker.Mode.BLUE;
+import static com.bric.swing.ColorPicker.Mode.BRI;
+import static com.bric.swing.ColorPicker.Mode.GREEN;
+import static com.bric.swing.ColorPicker.Mode.HUE;
+import static com.bric.swing.ColorPicker.Mode.RED;
+import static com.bric.swing.ColorPicker.Mode.SAT;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -43,16 +49,17 @@ import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.sin;
 
 /**
- * This is the large graphic element in the <code>ColorPicker</code>
- * that depicts a wide range of colors.
+ * This class is responsible for drawing the large, interactive color
+ * area (the square or circle) within {@link ColorPicker}, where the
+ * user actually clicks to pick a color.
  * <P>This panel can operate in 6 different modes.  In each mode a different
  * property is held constant: hue, saturation, brightness, red, green, or blue.
- * (Each property is identified with a constant in the <code>ColorPicker</code> class,
- * such as: <code>ColorPicker.HUE</code> or <code>ColorPicker.GREEN</code>.)
+ * (Each property is identified with a value from the <code>ColorPicker.Mode</code> enum,
+ * such as: <code>ColorPicker.Mode.HUE</code> or <code>ColorPicker.Mode.GREEN</code>.)
  * <P>In saturation and brightness mode, a wheel is used.  Although it doesn't
- * use as many pixels as a square does: it is a very aesthetic model since the hue can
+ * use as many pixels as a square does, it is a very aesthetic model since the hue can
  * wrap around in a complete circle.  (Also, on top of looks, this is how most
- * people learn to think the color spectrum, so it has that advantage, too).
+ * people learn to think of the color spectrum, so it has that advantage, too).
  * In all other modes a square is used.
  * <P>The user can click in this panel to select a new color.  The selected color is
  * highlighted with a circle drawn around it.  Also once this
@@ -75,17 +82,21 @@ public class ColorPickerPanel extends JPanel {
     /**
      * The maximum size the graphic will be.  No matter
      * how big the panel becomes, the graphic will not exceed
-     * this length.
+     * this size.
      * <P>(This is enforced because only 1 BufferedImage is used
      * to render the graphic.  This image is created once at a fixed
      * size and is never replaced.)
      */
     public static final int MAX_SIZE = 325;
 
+    private static final Color SHADOW_20 = new Color(0, 0, 0, 20);
+    private static final Color SHADOW_40 = new Color(0, 0, 0, 40);
+    private static final Color SHADOW_80 = new Color(0, 0, 0, 80);
+
     /**
      * This controls how the colors are displayed.
      */
-    private int mode = BRI;
+    private Mode mode = BRI;
 
     /**
      * The point used to indicate the selected color.
@@ -125,8 +136,7 @@ public class ColorPickerPanel extends JPanel {
             ColorPickerPanel.this.adjusting = adjusting;
             requestFocus();
             Point p = e.getPoint();
-            if (mode == BRI || mode == SAT ||
-                    mode == HUE) {
+            if (mode == BRI || mode == SAT || mode == HUE) {
                 float[] hsb = getHSB(p);
                 setHSB(hsb[0], hsb[1], hsb[2]);
             } else {
@@ -177,17 +187,16 @@ public class ColorPickerPanel extends JPanel {
                 multiplier = 5;
             }
             if (dx != 0 || dy != 0) {
-                int size = Math.min(MAX_SIZE, Math
-                        .min(getWidth() - imagePadding.left - imagePadding.right, getHeight() - imagePadding.top - imagePadding.bottom));
+                int size = calcGraphicsSize();
 
                 int offsetX = getWidth() / 2 - size / 2;
                 int offsetY = getHeight() / 2 - size / 2;
                 mouseListener.mousePressed(new MouseEvent(ColorPickerPanel.this,
-                        MouseEvent.MOUSE_PRESSED,
-                        System.currentTimeMillis(), 0,
-                        point.x + multiplier * dx + offsetX,
-                        point.y + multiplier * dy + offsetY,
-                        1, false
+                    MouseEvent.MOUSE_PRESSED,
+                    System.currentTimeMillis(), 0,
+                    point.x + multiplier * dx + offsetX,
+                    point.y + multiplier * dy + offsetY,
+                    1, false
                 ));
             }
         }
@@ -212,7 +221,7 @@ public class ColorPickerPanel extends JPanel {
      */
     public ColorPickerPanel() {
         setMaximumSize(new Dimension(MAX_SIZE + imagePadding.left + imagePadding.right,
-                MAX_SIZE + imagePadding.top + imagePadding.bottom));
+            MAX_SIZE + imagePadding.top + imagePadding.bottom));
         setPreferredSize(new Dimension((int) (MAX_SIZE * 0.75), (int) (MAX_SIZE * 0.75)));
 
         setRGB(0, 0, 0);
@@ -225,12 +234,12 @@ public class ColorPickerPanel extends JPanel {
 
         setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    regeneratePoint();
-                    regenerateImage();
-                }
-            });
+            @Override
+            public void componentResized(ComponentEvent e) {
+                regeneratePoint();
+                regenerateImage();
+            }
+        });
     }
 
     /**
@@ -272,13 +281,11 @@ public class ColorPickerPanel extends JPanel {
         super.paint(g);
 
         Graphics2D g2 = (Graphics2D) g;
-        int size = Math.min(MAX_SIZE,
-                Math.min(getWidth() - imagePadding.left - imagePadding.right,
-                        getHeight() - imagePadding.top - imagePadding.bottom));
+        int size = calcGraphicsSize();
 
         g2.translate(
-                getWidth() / 2 - size / 2,
-                getHeight() / 2 - size / 2);
+            getWidth() / 2 - size / 2,
+            getHeight() / 2 - size / 2);
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Shape shape;
@@ -296,18 +303,17 @@ public class ColorPickerPanel extends JPanel {
         if (!(shape instanceof Rectangle)) {
             //paint a circular shadow
             g2.translate(2, 2);
-            g2.setColor(new Color(0, 0, 0, 20));
+            g2.setColor(SHADOW_20);
             g2.fill(new Ellipse2D.Float(-2, -2, size + 4, size + 4));
-            g2.setColor(new Color(0, 0, 0, 40));
+            g2.setColor(SHADOW_40);
             g2.fill(new Ellipse2D.Float(-1, -1, size + 2, size + 2));
-            g2.setColor(new Color(0, 0, 0, 80));
+            g2.setColor(SHADOW_80);
             g2.fill(new Ellipse2D.Float(0, 0, size, size));
             g2.translate(-2, -2);
         }
 
         g2.drawImage(image, 0, 0, size, size, 0, 0, size, size, null);
 
-        g2.setStroke(new BasicStroke(1));
         if (shape instanceof Rectangle r) {
             PlafPaintUtils.drawBevel(g2, r);
         } else {
@@ -315,25 +321,20 @@ public class ColorPickerPanel extends JPanel {
             g2.draw(shape);
         }
 
-        g2.setColor(Color.white);
-        g2.setStroke(new BasicStroke(1));
+        g2.setColor(Color.WHITE);
         g2.draw(new Ellipse2D.Float(point.x - 3, point.y - 3, 6, 6));
-        g2.setColor(Color.black);
+        g2.setColor(Color.BLACK);
         g2.draw(new Ellipse2D.Float(point.x - 4, point.y - 4, 8, 8));
 
         g.translate(-imagePadding.left, -imagePadding.top);
     }
 
     /**
-     * Set the mode of this panel.
-     *
-     * @param mode This must be one of the following constants from the <code>ColorPicker</code> class:
-     *             <code>HUE</code>, <code>SAT</code>, <code>BRI</code>, <code>RED</code>, <code>GREEN</code>, or <code>BLUE</code>
+     * Sets the mode of this panel.
      */
-    public void setMode(int mode) {
-        if (!(mode == HUE || mode == SAT || mode == BRI ||
-                mode == RED || mode == GREEN || mode == BLUE)) {
-            throw new IllegalArgumentException("The mode must be HUE, SAT, BRI, RED, GREEN, or BLUE.");
+    public void setMode(Mode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("The mode must not be null.");
         }
 
         if (this.mode == mode) {
@@ -367,9 +368,7 @@ public class ColorPickerPanel extends JPanel {
         }
 
         if (red != r || green != g || blue != b) {
-            if (mode == RED ||
-                    mode == GREEN ||
-                    mode == BLUE) {
+            if (mode == RED || mode == GREEN || mode == BLUE) {
                 int lastR = red;
                 int lastG = green;
                 int lastB = blue;
@@ -425,15 +424,13 @@ public class ColorPickerPanel extends JPanel {
      * @return the HSB values at the point provided.
      */
     public float[] getHSB(Point p) {
-        if (mode == RED || mode == GREEN ||
-                mode == BLUE) {
+        if (mode == RED || mode == GREEN || mode == BLUE) {
             int[] rgb = getRGB(p);
             float[] hsb = Color.RGBtoHSB(rgb[0], rgb[1], rgb[2], null);
             return hsb;
         }
 
-        int size = Math.min(MAX_SIZE, Math
-                .min(getWidth() - imagePadding.left - imagePadding.right, getHeight() - imagePadding.top - imagePadding.bottom));
+        int size = calcGraphicsSize();
         p.translate(-(getWidth() / 2 - size / 2), -(getHeight() / 2 - size / 2));
         if (mode == BRI || mode == SAT) {
             //the two circular views:
@@ -449,31 +446,23 @@ public class ColorPickerPanel extends JPanel {
 
             if (mode == BRI) {
                 return new float[]{
-                        (float) (theta + 0.25f),
-                        (float) r,
-                        bri};
+                    (float) (theta + 0.25f),
+                    (float) r,
+                    bri};
             } else {
                 return new float[]{
-                        (float) (theta + 0.25f),
-                        sat,
-                        (float) r
+                    (float) (theta + 0.25f),
+                    sat,
+                    (float) r
                 };
             }
         } else {
             float s = ((float) p.x) / ((float) size);
             float b = ((float) p.y) / ((float) size);
-            if (s < 0) {
-                s = 0;
-            }
-            if (s > 1) {
-                s = 1;
-            }
-            if (b < 0) {
-                b = 0;
-            }
-            if (b > 1) {
-                b = 1;
-            }
+
+            s = Math.clamp(s, 0.0f, 1.0f);
+            b = Math.clamp(b, 0.0f, 1.0f);
+
             return new float[]{hue, s, b};
         }
     }
@@ -485,41 +474,29 @@ public class ColorPickerPanel extends JPanel {
      * @return the RGB values at the point provided.
      */
     public int[] getRGB(Point p) {
-        if (mode == BRI || mode == SAT ||
-                mode == HUE) {
+        if (mode == BRI || mode == SAT || mode == HUE) {
             float[] hsb = getHSB(p);
             int rgb = Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
-            int r = (rgb & 0xff0000) >> 16;
-            int g = (rgb & 0xff00) >> 8;
-            int b = (rgb & 0xff);
+            int r = (rgb & 0xFF_00_00) >> 16;
+            int g = (rgb & 0xFF_00) >> 8;
+            int b = (rgb & 0xFF);
             return new int[]{r, g, b};
         }
 
-        int size = Math.min(MAX_SIZE, Math
-                .min(getWidth() - imagePadding.left - imagePadding.right, getHeight() - imagePadding.top - imagePadding.bottom));
+        int size = calcGraphicsSize();
         p.translate(-(getWidth() / 2 - size / 2), -(getHeight() / 2 - size / 2));
 
-        int x2 = p.x * 255 / size;
-        int y2 = p.y * 255 / size;
-        if (x2 < 0) {
-            x2 = 0;
-        }
-        if (x2 > 255) {
-            x2 = 255;
-        }
-        if (y2 < 0) {
-            y2 = 0;
-        }
-        if (y2 > 255) {
-            y2 = 255;
-        }
+        int scaledX = p.x * 255 / size;
+        int scaledY = p.y * 255 / size;
+        scaledX = Math.clamp(scaledX, 0, 255);
+        scaledY = Math.clamp(scaledY, 0, 255);
 
         if (mode == RED) {
-            return new int[]{red, x2, y2};
+            return new int[]{red, scaledX, scaledY};
         } else if (mode == GREEN) {
-            return new int[]{x2, green, y2};
+            return new int[]{scaledX, green, scaledY};
         } else {
-            return new int[]{x2, y2, blue};
+            return new int[]{scaledX, scaledY, blue};
         }
     }
 
@@ -546,9 +523,7 @@ public class ColorPickerPanel extends JPanel {
         }
 
         if (hue != h || sat != s || bri != b) {
-            if (mode == HUE ||
-                    mode == BRI ||
-                    mode == SAT) {
+            if (mode == HUE || mode == BRI || mode == SAT) {
                 float lastHue = hue;
                 float lastBri = bri;
                 float lastSat = sat;
@@ -591,47 +566,42 @@ public class ColorPickerPanel extends JPanel {
      * Recalculates the (x,y) point used to indicate the selected color.
      */
     private void regeneratePoint() {
-        int size = Math.min(MAX_SIZE,
-                Math.min(getWidth() - imagePadding.left - imagePadding.right,
-                        getHeight() - imagePadding.top - imagePadding.bottom));
-        if (mode == HUE || mode == SAT || mode == BRI) {
-            if (mode == HUE) {
-                point = new Point(
-                        (int) (sat * size + 0.5),
-                        (int) (bri * size + 0.5));
-            } else if (mode == SAT) {
+        int size = calcGraphicsSize();
+        point = switch (mode) {
+            case HUE -> new Point(
+                Math.round(sat * size),
+                Math.round(bri * size));
+            case SAT -> {
                 double theta = hue * 2 * PI - PI / 2;
                 if (theta < 0) {
                     theta += 2 * PI;
                 }
 
                 double r = bri * size / 2;
-                point = new Point(
-                        (int) (r * cos(theta) + 0.5 + size / 2.0),
-                        (int) (r * sin(theta) + 0.5 + size / 2.0));
-            } else if (mode == BRI) {
+                yield new Point(
+                    (int) Math.round(r * cos(theta) + size / 2.0),
+                    (int) Math.round(r * sin(theta) + size / 2.0));
+            }
+            case BRI -> {
                 double theta = hue * 2 * PI - PI / 2;
                 if (theta < 0) {
                     theta += 2 * PI;
                 }
                 double r = sat * size / 2;
-                point = new Point(
-                        (int) (r * cos(theta) + 0.5 + size / 2.0),
-                        (int) (r * sin(theta) + 0.5 + size / 2.0));
+                yield new Point(
+                    (int) Math.round(r * cos(theta) + size / 2.0),
+                    (int) Math.round(r * sin(theta) + size / 2.0));
             }
-        } else if (mode == RED) {
-            point = new Point(
-                    (int) (green * size / 255.0f + 0.49f),
-                    (int) (blue * size / 255.0f + 0.49f));
-        } else if (mode == GREEN) {
-            point = new Point(
-                    (int) (red * size / 255.0f + 0.49f),
-                    (int) (blue * size / 255.0f + 0.49f));
-        } else if (mode == BLUE) {
-            point = new Point(
-                    (int) (red * size / 255.0f + 0.49f),
-                    (int) (green * size / 255.0f + 0.49f));
-        }
+            case RED -> new Point(
+                Math.round(green * size / 255.0f),
+                Math.round(blue * size / 255.0f));
+            case GREEN -> new Point(
+                Math.round(red * size / 255.0f),
+                Math.round(blue * size / 255.0f));
+            case BLUE -> new Point(
+                Math.round(red * size / 255.0f),
+                Math.round(green * size / 255.0f));
+        };
     }
 
     /**
@@ -640,87 +610,96 @@ public class ColorPickerPanel extends JPanel {
     private final int[] row = new int[MAX_SIZE];
 
     /**
-     * Regenerates the image.
+     * Regenerates the image drawn by this panel.
      */
-    private synchronized void regenerateImage() {
-        int size = Math.min(MAX_SIZE,
-                Math.min(getWidth() - imagePadding.left - imagePadding.right,
-                        getHeight() - imagePadding.top - imagePadding.bottom));
+    private void regenerateImage() {
+        int size = calcGraphicsSize();
 
-        if (mode == BRI || mode == SAT) {
-            float bri2 = this.bri;
-            float sat2 = this.sat;
-            float radius = size / 2.0f;
-            float hue2;
-            float k = 1.2f; //the number of pixels to antialias
-            for (int y = 0; y < size; y++) {
-                float y2 = (y - size / 2.0f);
-                for (int x = 0; x < size; x++) {
-                    float x2 = (x - size / 2.0f);
-                    double theta = Math.atan2(y2, x2) - 3 * PI / 2.0;
-                    if (theta < 0) {
-                        theta += 2 * PI;
-                    }
-
-                    double r = Math.sqrt(x2 * x2 + y2 * y2);
-                    if (r <= radius) {
-                        if (mode == BRI) {
-                            hue2 = (float) (theta / (2 * PI));
-                            sat2 = (float) (r / radius);
-                        } else { //SAT
-                            hue2 = (float) (theta / (2 * PI));
-                            bri2 = (float) (r / radius);
-                        }
-                        row[x] = Color.HSBtoRGB(hue2, sat2, bri2);
-                        if (r > radius - k) {
-                            int alpha = (int) (255 - 255 * (r - radius + k) / k);
-                            if (alpha < 0) {
-                                alpha = 0;
-                            }
-                            if (alpha > 255) {
-                                alpha = 255;
-                            }
-                            row[x] = row[x] & 0xffffff + (alpha << 24);
-                        }
-                    } else {
-                        row[x] = 0x00000000;
-                    }
-                }
-                image.getRaster().setDataElements(0, y, size, 1, row);
-            }
-        } else if (mode == HUE) {
-            float hue2 = this.hue;
-            for (int y = 0; y < size; y++) {
-                float y2 = ((float) y) / ((float) size);
-                for (int x = 0; x < size; x++) {
-                    float x2 = ((float) x) / ((float) size);
-                    row[x] = Color.HSBtoRGB(hue2, x2, y2);
-                }
-                image.getRaster().setDataElements(0, y, image.getWidth(), 1, row);
-            }
-        } else { //mode is RED, GREEN, or BLUE
-            int red2 = red;
-            int green2 = green;
-            int blue2 = blue;
-            for (int y = 0; y < size; y++) {
-                float y2 = ((float) y) / ((float) size);
-                for (int x = 0; x < size; x++) {
-                    float x2 = ((float) x) / ((float) size);
-                    if (mode == RED) {
-                        green2 = (int) (x2 * 255 + 0.49);
-                        blue2 = (int) (y2 * 255 + 0.49);
-                    } else if (mode == GREEN) {
-                        red2 = (int) (x2 * 255 + 0.49);
-                        blue2 = (int) (y2 * 255 + 0.49);
-                    } else {
-                        red2 = (int) (x2 * 255 + 0.49);
-                        green2 = (int) (y2 * 255 + 0.49);
-                    }
-                    row[x] = 0xFF000000 + (red2 << 16) + (green2 << 8) + blue2;
-                }
-                image.getRaster().setDataElements(0, y, size, 1, row);
-            }
+        switch (mode) {
+            case BRI, SAT -> regenerateBriSatImage(size);
+            case HUE -> regenerateHueImage(size);
+            case RED, GREEN, BLUE -> regenerateRgbImage(size);
         }
         repaint();
+    }
+
+    private void regenerateBriSatImage(int size) {
+        float pixelBri = this.bri;
+        float pixelSat = this.sat;
+        float radius = size / 2.0f;
+        float pixelHue;
+        float antiAliasRadius = 1.2f;
+        for (int y = 0; y < size; y++) {
+            float relY = (y - size / 2.0f);
+            for (int x = 0; x < size; x++) {
+                float relX = (x - size / 2.0f);
+                double theta = Math.atan2(relY, relX) - 3 * PI / 2.0;
+                if (theta < 0) {
+                    theta += 2 * PI;
+                }
+
+                double r = Math.sqrt(relX * relX + relY * relY);
+                if (r <= radius) {
+                    if (mode == BRI) {
+                        pixelHue = (float) (theta / (2 * PI));
+                        pixelSat = (float) (r / radius);
+                    } else { //SAT
+                        pixelHue = (float) (theta / (2 * PI));
+                        pixelBri = (float) (r / radius);
+                    }
+                    row[x] = Color.HSBtoRGB(pixelHue, pixelSat, pixelBri);
+                    if (r > radius - antiAliasRadius) {
+                        int alpha = (int) (255 - 255 * (r - radius + antiAliasRadius) / antiAliasRadius);
+                        alpha = Math.clamp(alpha, 0, 255);
+                        row[x] = (alpha << 24) | (row[x] & 0x00_FF_FF_FF);
+                    }
+                } else {
+                    row[x] = 0x00_00_00_00;
+                }
+            }
+            image.getRaster().setDataElements(0, y, size, 1, row);
+        }
+    }
+
+    private void regenerateHueImage(int size) {
+        float currentHue = this.hue;
+        for (int y = 0; y < size; y++) {
+            float relY = ((float) y) / ((float) size);
+            for (int x = 0; x < size; x++) {
+                float relX = ((float) x) / ((float) size);
+                row[x] = Color.HSBtoRGB(currentHue, relX, relY);
+            }
+            image.getRaster().setDataElements(0, y, image.getWidth(), 1, row);
+        }
+    }
+
+    private void regenerateRgbImage(int size) {
+        int pixelRed = red;
+        int pixelGreen = green;
+        int pixelBlue = blue;
+        for (int y = 0; y < size; y++) {
+            float relY = ((float) y) / ((float) size);
+            for (int x = 0; x < size; x++) {
+                float relX = ((float) x) / ((float) size);
+                if (mode == RED) {
+                    pixelGreen = Math.round(relX * 255);
+                    pixelBlue = Math.round(relY * 255);
+                } else if (mode == GREEN) {
+                    pixelRed = Math.round(relX * 255);
+                    pixelBlue = Math.round(relY * 255);
+                } else {
+                    pixelRed = Math.round(relX * 255);
+                    pixelGreen = Math.round(relY * 255);
+                }
+                row[x] = 0xFF_00_00_00 | (pixelRed << 16) | (pixelGreen << 8) | pixelBlue;
+            }
+            image.getRaster().setDataElements(0, y, size, 1, row);
+        }
+    }
+
+    private int calcGraphicsSize() {
+        return Math.min(MAX_SIZE, Math.min(
+            getWidth() - imagePadding.left - imagePadding.right,
+            getHeight() - imagePadding.top - imagePadding.bottom));
     }
 }

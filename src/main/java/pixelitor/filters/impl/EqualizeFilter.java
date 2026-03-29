@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,6 @@ import java.awt.Color;
  * Performs histogram equalization on a single channel of a given color space.
  */
 public class EqualizeFilter extends WholeImageFilter {
-
     private final int numBins;
     private final Equalizer equalizer;
 
@@ -164,6 +163,7 @@ public class EqualizeFilter extends WholeImageFilter {
 
     public EqualizeFilter(String name, int numBins, Equalizer equalizer) {
         super(name);
+
         this.numBins = numBins;
         this.equalizer = equalizer;
     }

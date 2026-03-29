@@ -54,6 +54,7 @@ public class CausticsFilter extends WholeImageFilter {
     public CausticsFilter(String filterName, float scale, int brightness, float amount,
                           float turbulence, float dispersion, float time, int samples, int bgColor) {
         super(filterName);
+
         this.scale = scale;
         this.brightness = brightness;
         this.amount = amount;

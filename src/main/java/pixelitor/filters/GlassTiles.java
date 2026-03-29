@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AngleParam;
@@ -25,7 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Glass Tiles filter
+ * The "Glass Tiles" filter.
  */
 public class GlassTiles extends ParametrizedFilter {
     public static final String NAME = "Glass Tiles";
@@ -39,8 +40,6 @@ public class GlassTiles extends ParametrizedFilter {
     private final AngleParam angle = new AngleParam("Rotate Tiles", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
-
-    private TilesFilter filter;
 
     public GlassTiles() {
         super(true);
@@ -57,19 +56,18 @@ public class GlassTiles extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new TilesFilter(NAME);
-        }
-
-        filter.setSizeX(size.getValueAsDouble(0), phase.getPercentage(0));
-        filter.setSizeY(size.getValueAsDouble(1), phase.getPercentage(1));
-        filter.setCurvatureX(curvature.getValueAsDouble(0));
-        filter.setCurvatureY(curvature.getValueAsDouble(1));
-        filter.setAngle(angle.getValueInIntuitiveRadians());
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
+        TilesFilter filter = new TilesFilter(NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            angle.getValueInIntuitiveRadians(),
+            size.getValueAsDouble(0),
+            phase.getPercentage(0),
+            size.getValueAsDouble(1),
+            phase.getPercentage(1),
+            curvature.getValueAsDouble(0),
+            curvature.getValueAsDouble(1)
+        );
 
         return filter.filter(src, dest);
     }
 }
-

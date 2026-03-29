@@ -38,6 +38,7 @@ public class GlowFilter extends AbstractBufferedImageOp {
      */
     public GlowFilter(String filterName, float amount, float radius) {
         super(filterName);
+
         this.amount = amount;
         this.radius = radius;
     }

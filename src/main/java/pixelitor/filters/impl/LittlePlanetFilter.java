@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.ImageMath;
@@ -21,18 +22,40 @@ import net.jafama.FastMath;
 import pixelitor.filters.LittlePlanet;
 import pixelitor.utils.Geometry;
 
+import java.awt.geom.Point2D;
+
 /**
  * The implementation of the {@link LittlePlanet} filter.
  * This is actually a rectangular -> polar filter with some extra features.
  */
 public class LittlePlanetFilter extends CenteredTransformFilter {
-    private double rotationAngle;
-    private double zoom;
-    private float innerZoom;
-    private boolean inverted = false;
+    private final double rotationAngle;
+    private final double zoom;
+    private final float innerZoom;
+    private final boolean inverted;
 
-    public LittlePlanetFilter() {
-        super(LittlePlanet.NAME);
+    /**
+     * Constructs a new LittlePlanetFilter.
+     *
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param center        the effect's center (in pixels).
+     * @param rotationAngle the angle (in radians) to rotate the resulting "planet".
+     * @param zoom          the global zoom level (percentage).
+     * @param innerZoom     the inner zoom percentage, used to bias the radial transformation.
+     * @param inverted      if true, the polar mapping is inverted.
+     */
+    public LittlePlanetFilter(String filterName, int edgeAction, int interpolation, Point2D center,
+                              double rotationAngle, double zoom, double innerZoom, boolean inverted) {
+        super(filterName, edgeAction, interpolation, center);
+
+        this.rotationAngle = rotationAngle;
+        this.zoom = zoom;
+
+        // converts percentage to bias float
+        this.innerZoom = (float) (1 - innerZoom / 2.0);
+        this.inverted = inverted;
     }
 
     @Override
@@ -57,21 +80,5 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
 
         out[0] = srcX;
         out[1] = srcY;
-    }
-
-    public void setRotationAngle(double turn) {
-        rotationAngle = turn;
-    }
-
-    public void setZoom(double zoom) {
-        this.zoom = zoom;
-    }
-
-    public void setInverted(boolean inverted) {
-        this.inverted = inverted;
-    }
-
-    public void setInnerZoom(double innerZoom) {
-        this.innerZoom = (float) (1 - innerZoom / 2.0);
     }
 }

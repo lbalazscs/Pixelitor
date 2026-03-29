@@ -38,7 +38,7 @@ class SeedPoint {
     }
 
     /**
-     * Draws the seed point and arrows to its neighbors (for debugging/visualization)
+     * Draws the seed point and arrows to its neighbors (for debugging/visualization).
      */
     void debugRender(Graphics2D g2) {
         for (SeedPoint neighbor : neighbors) {

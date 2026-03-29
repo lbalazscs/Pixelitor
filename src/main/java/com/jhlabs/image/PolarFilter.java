@@ -21,12 +21,9 @@ import net.jafama.FastMath;
 import java.awt.image.BufferedImage;
 
 /**
- * A filter which distorts and image by performing coordinate conversions between rectangular and polar coordinates.
+ * A filter which distorts an image by performing coordinate conversions between rectangular and polar coordinates.
  */
 public class PolarFilter extends TransformFilter {
-    private float zoom;
-    private float angle;
-
     /**
      * Convert from rectangular to polar coordinates.
      */
@@ -42,20 +39,39 @@ public class PolarFilter extends TransformFilter {
      */
     public static final int INVERT_IN_CIRCLE = 2;
 
-    private int type;
+    private final int type;
+    private final float zoom;
+    private final float angle;
+    private final float relativeCenterX;
+    private final float relativeCenterY;
+
     private float width, height;
     private float centerX, centerY;
     private float radius;
 
-    private float relativeCenterX = 0.5f;
-    private float relativeCenterY = 0.5f;
-
-
     /**
      * Constructs a PolarFilter.
+     *
+     * @param filterName     the name of the filter.
+     * @param edgeAction     the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation  the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param type           the distortion type: {@link #RECT_TO_POLAR}, {@link #POLAR_TO_RECT},
+     *                       or {@link #INVERT_IN_CIRCLE}.
+     * @param zoom           the zoom factor applied during the coordinate transformation.
+     * @param angle          the rotation angle (in radians) applied during the transformation.
+     * @param relativeCenterX the horizontal center of the transformation as a fraction of the image width (0.0–1.0).
+     * @param relativeCenterY the vertical center of the transformation as a fraction of the image height (0.0–1.0).
      */
-    public PolarFilter(String filterName) {
-        super(filterName);
+    public PolarFilter(String filterName, int edgeAction, int interpolation,
+                       int type, float zoom, double angle,
+                       float relativeCenterX, float relativeCenterY) {
+        super(filterName, edgeAction, interpolation);
+
+        this.type = type;
+        this.zoom = zoom;
+        this.angle = (float) angle;
+        this.relativeCenterX = relativeCenterX;
+        this.relativeCenterY = relativeCenterY;
     }
 
     @Override
@@ -68,15 +84,6 @@ public class PolarFilter extends TransformFilter {
 
         radius = Math.max(centerY, centerX);
         return super.filter(src, dst);
-    }
-
-    /**
-     * Sets the distortion type.
-     *
-     * @param type the distortion type
-     */
-    public void setType(int type) {
-        this.type = type;
     }
 
     private static float sqr(float x) {
@@ -115,7 +122,6 @@ public class PolarFilter extends TransformFilter {
                     }
                 }
                 theta += angle;
-
                 r /= zoom;
 
                 out[0] = (width - 1) - (((width - 1) / ImageMath.TWO_PI) * theta);
@@ -124,7 +130,6 @@ public class PolarFilter extends TransformFilter {
                 break;
             case POLAR_TO_RECT:
                 theta = x / width * ImageMath.TWO_PI;
-
                 theta += angle;
 
                 float theta2;
@@ -172,26 +177,9 @@ public class PolarFilter extends TransformFilter {
                 out[0] = centerX + relX;
                 out[1] = centerY + relY;
 
-                // lbalazscs: interesting effect...
                 out[0] -= (width - 1) / ImageMath.TWO_PI * angle;
 
                 break;
         }
-    }
-
-    public void setZoom(float zoom) {
-        this.zoom = zoom;
-    }
-
-    public void setRelativeCenterX(float relativeCenterX) {
-        this.relativeCenterX = relativeCenterX;
-    }
-
-    public void setRelativeCenterY(float relativeCenterY) {
-        this.relativeCenterY = relativeCenterY;
-    }
-
-    public void setAngle(double angle) {
-        this.angle = (float) angle;
     }
 }

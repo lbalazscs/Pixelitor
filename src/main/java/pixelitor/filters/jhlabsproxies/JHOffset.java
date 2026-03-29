@@ -17,9 +17,9 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.OffsetFilter;
-import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ImagePositionParam;
+import pixelitor.filters.gui.IntChoiceParam;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -36,25 +36,18 @@ public class JHOffset extends ParametrizedFilter {
     private final ImagePositionParam center =
         new ImagePositionParam("Translate Top Left Point To");
 
-    private OffsetFilter filter;
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
 
     public JHOffset() {
         super(true);
 
-        initParams(center);
+        initParams(center, edgeAction);
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new OffsetFilter(NAME);
-        }
-
-        filter.setRelativeX(center.getRelativeX());
-        filter.setRelativeY(center.getRelativeY());
-        filter.setUseRelative(true);
-
-        filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOR);
+        OffsetFilter filter = new OffsetFilter(NAME,
+            edgeAction.getValue(), center.getAbsolutePoint(src));
 
         return filter.filter(src, dest);
     }

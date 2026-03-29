@@ -29,21 +29,7 @@ import java.util.Random;
 /**
  * In this transition the current frame splits off into several
  * tiles that calmly "explode" towards the viewer, revealing the
- * next frame underneath. Here are playback samples:
- * <p><table summary="Sample Animations of SquaresTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/SquaresTransition2D/Squares(10x10).gif" alt="Squares (10x10)">
- * <p>Squares (10x10)
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/SquaresTransition2D/Squares(20x20).gif" alt="Squares (20x20)">
- * <p>Squares (20x20)
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/SquaresTransition2D/Squares(30x30).gif" alt="Squares (30x30)">
- * <p>Squares (30x30)
- * </td>
- * </tr></table>
+ * next frame underneath.
  */
 public class SquaresTransition2D extends Transition2D {
     private final float[][] accels;

@@ -26,8 +26,6 @@ public class PointillizeFilter extends CellularFilter {
 
     public PointillizeFilter() {
         super(JHPointillize.NAME);
-        setScale(16);
-        setRandomness(0.0f);
     }
 
     public void setEdgeThickness(float edgeThickness) {

@@ -31,8 +31,7 @@ import static net.jafama.FastMath.cos;
 /**
  * This breaks the existing image into 6 horizontal strips, and then
  * (after a gently wobbly start) that levitate/accelerate up and out of
- * the frame, revealing the next image. Here is a playback sample:
- * <p><img src="https://javagraphics.java.net/resources/transition/LevitateTransition2D/Levitate.gif" alt="LevitateTransition2D Demo">
+ * the frame, revealing the next image.
  */
 public class LevitateTransition2D extends Transition2D {
     @Override

@@ -22,67 +22,43 @@ import com.jhlabs.math.Noise;
  * A filter which distorts an image as if it were underwater.
  */
 public class SwimFilter extends TransformFilter {
-    private float scale = 32;
-    private float stretch = 1.0f;
-    private float amount = 1.0f;
-    private float time = 0.0f;
-    private float m00 = 1.0f;
-    private float m01 = 0.0f;
-    private float m10 = 0.0f;
-    private float m11 = 1.0f;
-
-    public SwimFilter(String filterName) {
-        super(filterName);
-    }
+    private final float scale;
+    private final float stretch;
+    private final float amount;
+    private final float time;
+    private final float m00;
+    private final float m01;
+    private final float m10;
+    private final float m11;
 
     /**
-     * Sets the amount of swim.
+     * Constructs a SwimFilter.
      *
-     * @param amount the amount of swim
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param amount        the amount of swim distortion.
+     * @param scale         the scale of the distortion.
+     * @param stretch       the stretch factor of the distortion.
+     * @param angle         the angle of the effect, in radians. Used to animate the distortion
+     *                      direction by computing a rotation matrix.
+     * @param time          the time offset; use this to animate the effect.
      */
-    public void setAmount(float amount) {
+    public SwimFilter(String filterName, int edgeAction, int interpolation,
+                      float amount, float scale, float stretch, float angle, float time) {
+        super(filterName, edgeAction, interpolation);
+
         this.amount = amount;
-    }
-
-    /**
-     * Sets the scale of the distortion.
-     *
-     * @param scale the scale of the distortion.
-     */
-    public void setScale(float scale) {
         this.scale = scale;
-    }
-
-    /**
-     * Sets the stretch factor of the distortion.
-     *
-     * @param stretch the stretch factor of the distortion.
-     */
-    public void setStretch(float stretch) {
         this.stretch = stretch;
-    }
+        this.time = time;
 
-    /**
-     * Sets the angle of the effect.
-     *
-     * @param angle the angle of the effect.
-     */
-    public void setAngle(float angle) {
         float cos = (float) Math.cos(angle);
         float sin = (float) Math.sin(angle);
-        m00 = cos;
-        m01 = sin;
-        m10 = -sin;
-        m11 = cos;
-    }
-
-    /**
-     * Sets the time. Use this to animate the effect.
-     *
-     * @param time the time.
-     */
-    public void setTime(float time) {
-        this.time = time;
+        this.m00 = cos;
+        this.m01 = sin;
+        this.m10 = -sin;
+        this.m11 = cos;
     }
 
     @Override

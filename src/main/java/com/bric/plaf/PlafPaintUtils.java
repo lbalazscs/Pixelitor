@@ -27,7 +27,11 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.awt.RenderingHints.*;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_STROKE_CONTROL;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_STROKE_NORMALIZE;
+import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
@@ -231,7 +235,7 @@ public class PlafPaintUtils {
     private static Map<String, TexturePaint> checkers;
 
     public static TexturePaint getCheckerBoard(int checkerSize) {
-        return getCheckerBoard(checkerSize, Color.white, Color.lightGray);
+        return getCheckerBoard(checkerSize, Color.WHITE, Color.LIGHT_GRAY);
     }
 
     public static TexturePaint getCheckerBoard(int checkerSize, Color color1, Color color2) {

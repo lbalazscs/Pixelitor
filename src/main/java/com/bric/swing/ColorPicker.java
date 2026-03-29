@@ -22,32 +22,33 @@ package com.bric.swing;
 import com.bric.plaf.ColorPickerSliderUI;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.Serial;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+
+import static com.bric.swing.ColorPicker.Mode.BLUE;
+import static com.bric.swing.ColorPicker.Mode.BRI;
+import static com.bric.swing.ColorPicker.Mode.GREEN;
+import static com.bric.swing.ColorPicker.Mode.HUE;
+import static com.bric.swing.ColorPicker.Mode.RED;
+import static com.bric.swing.ColorPicker.Mode.SAT;
 
 /**
  * <p>This is a panel that offers a robust set of controls to pick a color.
  * <P>This was originally intended to replace the <code>JColorChooser</code>.
  * To use this class to create a color choosing dialog, simply call:
  * <BR><code>ColorPicker.showDialog(frame, originalColor);</code>
- * <P>Here is a screenshot of the dialog that call will invoke:
- * <br><IMG SRC="https://javagraphics.java.net/resources/colorpicker.png" alt="ColorPicker Screenshot">
- * <p>However this does not have to invoked as a black-box color dialog. This class
+ * <p>However this does not have to be invoked as a black-box color dialog. This class
  * is simply a panel, and you can customize and resize it for other looks.
  * For example, you might try the following panel:</p>
  * <BR><code>ColorPicker picker = new ColorPicker(false, false);</code>
  * <BR><code>picker.setPreferredSize(new Dimension(200,160));</code>
- * <BR><code>picker.setMode(ColorPicker.HUE);</code>
- * <br><IMG SRC="https://javagraphics.java.net/resources/colorpicker3.png" alt="ColorPicker Small Screenshot">
+ * <BR><code>picker.setMode(ColorPicker.Mode.HUE);</code>
  * <P>This will create a miniature color picker that still lets the user choose
  * from every available color, but it does not include all the buttons and
  * numeric controls on the right side of the panel. This might be ideal if you
@@ -71,16 +72,14 @@ public class ColorPicker extends JPanel {
      * The localized strings used in this (and related) panel(s).
      */
     private static final ResourceBundle strings = ResourceBundle.getBundle("com.bric.swing.resources.ColorPicker");
-    private Consumer<Color> adjustmentListener;
+    private Consumer<Color> colorChangeListener;
 
     /**
      * This creates a modal dialog prompting the user to select a color.
      * <P>This uses a generic dialog title: "Choose a Color".
      *
-     * @param owner          the dialog this new dialog belongs to.  This must be a Frame or a Dialog.
-     *                       Java 1.6 supports Windows here, but this package is designed/compiled to work in Java 1.4,
-     *                       so an <code>IllegalArgumentException</code> will be thrown if this component is a <code>Window</code>.
-     * @param originalColor  the color the <code>ColorPicker</code> initially points to.
+     * @param owner          the window this new dialog belongs to.
+     * @param originalColor  the color the <code>ColorPicker</code> initially selects.
      * @param includeOpacity whether to add a control for the opacity of the color.
      * @return the <code>Color</code> the user chooses, or <code>null</code> if the user cancels the dialog.
      */
@@ -92,17 +91,17 @@ public class ColorPicker extends JPanel {
     /**
      * This creates a modal dialog prompting the user to select a color.
      *
-     * @param owner              the dialog this new dialog belongs to
-     * @param title              the title for the dialog.
-     * @param originalColor      the color the <code>ColorPicker</code> initially points to.
-     * @param includeOpacity     whether to add a control for the opacity of the color.
-     * @param adjustmentListener a callback notified of real-time color adjustments
+     * @param owner               the window this new dialog belongs to
+     * @param title               the title for the dialog.
+     * @param originalColor       the color the <code>ColorPicker</code> initially selects.
+     * @param includeOpacity      whether to add a control for the opacity of the color.
+     * @param colorChangeListener a callback notified of color adjustments (except drag events)
      * @return the <code>Color</code> the user chooses, or <code>null</code> if the user cancels the dialog.
      */
     public static Color showDialog(Window owner, String title,
                                    Color originalColor, boolean includeOpacity,
-                                   Consumer<Color> adjustmentListener) {
-        var d = new ColorPickerDialog(owner, originalColor, includeOpacity, adjustmentListener);
+                                   Consumer<Color> colorChangeListener) {
+        var d = new ColorPickerDialog(owner, originalColor, includeOpacity, colorChangeListener);
 
         d.setTitle(title == null ?
             strings.getString("ColorPickerDialogTitle") :
@@ -115,7 +114,7 @@ public class ColorPicker extends JPanel {
     /**
      * <code>PropertyChangeEvents</code> will be triggered for this property when the selected color
      * changes.
-     * <P>(Events are only created when then RGB values of the color change.  This means, for example,
+     * <P>(Events are only created when the RGB values of the color change.  This means, for example,
      * that the change from HSB(0,0,0) to HSB(.4,0,0) will <i>not</i> generate events, because when the
      * brightness stays zero the RGB color remains (0,0,0).  So although the hue moved around, the color
      * is still black, so no events are created.)
@@ -140,30 +139,32 @@ public class ColorPicker extends JPanel {
      */
     public static final String MODE_PROPERTY = "mode";
 
-    /**
-     * Used to indicate when we're in "hue mode".
-     */
-    public static final int HUE = 0;
-    /**
-     * Used to indicate when we're in "brightness mode".
-     */
-    public static final int BRI = 1;
-    /**
-     * Used to indicate when we're in "saturation mode".
-     */
-    public static final int SAT = 2;
-    /**
-     * Used to indicate when we're in "red mode".
-     */
-    public static final int RED = 3;
-    /**
-     * Used to indicate when we're in "green mode".
-     */
-    public static final int GREEN = 4;
-    /**
-     * Used to indicate when we're in "blue mode".
-     */
-    public static final int BLUE = 5;
+    public enum Mode {
+        /**
+         * Used to indicate when we're in "hue mode".
+         */
+        HUE,
+        /**
+         * Used to indicate when we're in "brightness mode".
+         */
+        BRI,
+        /**
+         * Used to indicate when we're in "saturation mode".
+         */
+        SAT,
+        /**
+         * Used to indicate when we're in "red mode".
+         */
+        RED,
+        /**
+         * Used to indicate when we're in "green mode".
+         */
+        GREEN,
+        /**
+         * Used to indicate when we're in "blue mode".
+         */
+        BLUE
+    }
 
     /**
      * The vertical slider
@@ -174,150 +175,38 @@ public class ColorPicker extends JPanel {
     private int currentGreen = 0;
     private int currentBlue = 0;
 
-    private final ChangeListener changeListener = new ChangeListener() {
-        @Override
-        public void stateChanged(ChangeEvent e) {
-            Object src = e.getSource();
-
-            if (hue.contains(src) || sat.contains(src) || bri.contains(src)) {
-                if (adjustingSpinners > 0) {
-                    return;
-                }
-
-                setHSB(hue.getFloatValue() / 360.0f,
-                    sat.getFloatValue() / 100.0f,
-                    bri.getFloatValue() / 100.0f);
-            } else if (red.contains(src) || green.contains(src) || blue.contains(src)) {
-                if (adjustingSpinners > 0) {
-                    return;
-                }
-
-                setRGB(red.getIntValue(),
-                    green.getIntValue(),
-                    blue.getIntValue());
-            } else if (src == colorPanel) {
-                if (adjustingColorPanel > 0) {
-                    return;
-                }
-
-                int mode = getMode();
-                if (mode == HUE || mode == BRI || mode == SAT) {
-                    float[] hsb = colorPanel.getHSB();
-                    setHSB(hsb[0], hsb[1], hsb[2]);
-                } else {
-                    int[] rgb = colorPanel.getRGB();
-                    setRGB(rgb[0], rgb[1], rgb[2]);
-                }
-            } else if (src == slider) {
-                if (adjustingSlider > 0) {
-                    return;
-                }
-
-                int v = slider.getValue();
-                Option option = getSelectedOption();
-                try {
-                    // lbalazscs: increasing adjustingSpinners doesn't
-                    // work because the spinners must be triggered
-                    // in order to update the color
-                    sliderUpdatingSpinner = true;
-                    option.setValue(v);
-                } finally {
-                    sliderUpdatingSpinner = false;
-                }
-            } else if (alpha.contains(src)) {
-                if (adjustingOpacity > 0) {
-                    return;
-                }
-                int v = alpha.getIntValue();
-                setOpacity(v);
-            } else if (src == opacitySlider) {
-                if (adjustingOpacity > 0) {
-                    return;
-                }
-
-                setOpacity(opacitySlider.getValue());
-            }
-        }
-    };
-
-    private final ActionListener actionListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            Object src = e.getSource();
-            if (src == hue.radioButton) {
-                setMode(HUE);
-            } else if (src == bri.radioButton) {
-                setMode(BRI);
-            } else if (src == sat.radioButton) {
-                setMode(SAT);
-            } else if (src == red.radioButton) {
-                setMode(RED);
-            } else if (src == green.radioButton) {
-                setMode(GREEN);
-            } else if (src == blue.radioButton) {
-                setMode(BLUE);
-            }
-        }
-    };
-
     /**
-     * @return the currently selected <code>Option</code>
+     * Returns the currently selected {@link ChannelUI}.
      */
-    private Option getSelectedOption() {
+    private ChannelUI getSelectedChannelUI() {
         return switch (getMode()) {
             case HUE -> hue;
             case SAT -> sat;
             case BRI -> bri;
             case RED -> red;
             case GREEN -> green;
-            default -> blue;
+            case BLUE -> blue;
         };
     }
 
-    class SetRGBRunnable implements Runnable {
-        final int red, green, blue;
-
-        SetRGBRunnable(int red, int green, int blue) {
-            this.red = red;
-            this.green = green;
-            this.blue = blue;
-        }
-
-        @Override
-        public void run() {
-            int pos = hexField.getCaretPosition();
-            setRGB(red, green, blue);
-            pos = Math.min(pos, hexField.getText().length());
-            hexField.setCaretPosition(pos);
-            if (adjustmentListener != null && adjustingHexField == 0) {
-                adjustmentListener.accept(getColor());
-            }
-        }
-    }
-
     class HexDocumentListener implements DocumentListener {
-
-        /* The delay (in ms) to commit text that might not be finished.
-         *
-         */
+        // the delay (in ms) to commit text that might not be finished
         static final int DELAY = 1500;
+
         String uncommittedText = null;
 
-        final Timer delayedUpdater = new Timer(DELAY, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (uncommittedText != null) {
-                    int pos = hexField.getCaretPosition();
-                    pos = Math.min(pos, uncommittedText.length());
-                    hexField.setText(uncommittedText);
-                    hexField.setCaretPosition(pos);
-                }
+        final Timer delayedUpdater = new Timer(DELAY, e -> {
+            if (uncommittedText != null) {
+                int pos = hexField.getCaretPosition();
+                pos = Math.min(pos, uncommittedText.length());
+                hexField.setText(uncommittedText);
+                hexField.setCaretPosition(pos);
             }
         });
 
         @Override
         public void changedUpdate(DocumentEvent e) {
-            if (adjustingHexField > 0) {
+            if (hexFieldUpdateDepth > 0) {
                 return;
             }
 
@@ -327,22 +216,19 @@ public class ColorPicker extends JPanel {
             /* If we don't have 6 characters, then use a delay.
              * If, after a second or two, the user has just
              * stopped typing: then we can try to make
-             * sense of what they input even if its
-             * incomplete.
+             * sense of what they input even if it's incomplete.
              */
             boolean delay = false;
             if (s.length() < 6) {
                 delay = true;
-                while (s.length() < 6) {
-                    s = s + "0";
-                }
+                s += "0".repeat(6 - s.length());
             }
 
             try {
                 int i = Integer.parseInt(s, 16);
-                int red = ((i >> 16) & 0xff);
-                int green = ((i >> 8) & 0xff);
-                int blue = (i & 0xff);
+                int r = ((i >> 16) & 0xFF);
+                int g = ((i >> 8) & 0xFF);
+                int b = (i & 0xFF);
 
                 if (delay) {
                     delayedUpdater.setRepeats(false);
@@ -352,10 +238,18 @@ public class ColorPicker extends JPanel {
                     delayedUpdater.stop();
 
                     /* Be sure to invoke this separately, otherwise we'll risk getting
-                     * a "attempt to mutate in notification".
+                     * an "attempt to mutate in notification".
                      * ( https://java.net/jira/browse/JAVAGRAPHICS-19 )
                      */
-                    SwingUtilities.invokeLater(new SetRGBRunnable(red, green, blue));
+                    SwingUtilities.invokeLater(() -> {
+                        int pos = hexField.getCaretPosition();
+                        setRGB(r, g, b);
+                        pos = Math.min(pos, hexField.getText().length());
+                        hexField.setCaretPosition(pos);
+                        if (colorChangeListener != null && hexFieldUpdateDepth == 0) {
+                            colorChangeListener.accept(getColor());
+                        }
+                    });
                     uncommittedText = null;
                 }
                 return;
@@ -374,7 +268,7 @@ public class ColorPicker extends JPanel {
          * characters and is not longer than <code>charLimit</code>.
          */
         private static String stripToHex(String s, int charLimit) {
-            s = s.toUpperCase(Locale.ENGLISH);
+            s = s.toUpperCase(Locale.ROOT);
             StringBuilder returnValue = new StringBuilder(6);
             for (int a = 0; a < s.length() && returnValue.length() < charLimit; a++) {
                 char c = s.charAt(a);
@@ -397,13 +291,13 @@ public class ColorPicker extends JPanel {
         }
     }
 
-    private final Option alpha = new Option(strings.getString("alphaLabel"), 255);
-    private final Option hue = new Option(strings.getString("hueLabel"), 360);
-    private final Option sat = new Option(strings.getString("saturationLabel"), 100);
-    private final Option bri = new Option(strings.getString("brightnessLabel"), 100);
-    private final Option red = new Option(strings.getString("redLabel"), 255);
-    private final Option green = new Option(strings.getString("greenLabel"), 255);
-    private final Option blue = new Option(strings.getString("blueLabel"), 255);
+    private final ChannelUI alpha = new ChannelUI(strings.getString("alphaLabel"), 255);
+    private final ChannelUI hue = new ChannelUI(strings.getString("hueLabel"), 360);
+    private final ChannelUI sat = new ChannelUI(strings.getString("saturationLabel"), 100);
+    private final ChannelUI bri = new ChannelUI(strings.getString("brightnessLabel"), 100);
+    private final ChannelUI red = new ChannelUI(strings.getString("redLabel"), 255);
+    private final ChannelUI green = new ChannelUI(strings.getString("greenLabel"), 255);
+    private final ChannelUI blue = new ChannelUI(strings.getString("blueLabel"), 255);
     private final ColorSwatch preview = new ColorSwatch(50);
     private final JLabel hexLabel = new JLabel(strings.getString("hexLabel"));
     private final JTextField hexField = new JTextField("000000");
@@ -414,7 +308,7 @@ public class ColorPicker extends JPanel {
      * If this is not equal to zero, then incoming events are triggered by another method
      * that's already responding to the user's actions.
      */
-    private int adjustingSpinners = 0;
+    private int spinnerUpdateDepth = 0;
 
     /**
      * Used to indicate when we're internally adjusting the value of the slider.
@@ -422,7 +316,7 @@ public class ColorPicker extends JPanel {
      * If this is not equal to zero, then incoming events are triggered by another method
      * that's already responding to the user's actions.
      */
-    private int adjustingSlider = 0;
+    private int sliderUpdateDepth = 0;
 
     /**
      * Used to indicate when we're internally adjusting the selected color of the ColorPanel.
@@ -430,7 +324,7 @@ public class ColorPicker extends JPanel {
      * If this is not equal to zero, then incoming events are triggered by another method
      * that's already responding to the user's actions.
      */
-    private int adjustingColorPanel = 0;
+    private int colorPanelUpdateDepth = 0;
 
     /**
      * Used to indicate when we're internally adjusting the value of the hex field.
@@ -438,7 +332,7 @@ public class ColorPicker extends JPanel {
      * If this is not equal to zero, then incoming events are triggered by another method
      * that's already responding to the user's actions.
      */
-    private int adjustingHexField = 0;
+    private int hexFieldUpdateDepth = 0;
 
     /**
      * Used to indicate when we're internally adjusting the value of the opacity.
@@ -446,10 +340,10 @@ public class ColorPicker extends JPanel {
      * If this is not equal to zero, then incoming events are triggered by another method
      * that's already responding to the user's actions.
      */
-    private int adjustingOpacity = 0;
+    private int opacityUpdateDepth = 0;
 
-    // lbalazscs: introducing a new flag because
-    // the variables above don't fully work as described.
+    // this new flag is needed because
+    // the variables above don't fully work as described
     private boolean sliderUpdatingSpinner = false;
 
     /**
@@ -487,7 +381,7 @@ public class ColorPicker extends JPanel {
         Insets normalInsets = new Insets(3, 3, 3, 3);
         Insets tallInsets = new Insets(normalInsets.top + 10, normalInsets.left, normalInsets.bottom, normalInsets.right);
 
-        JPanel options = new JPanel(new GridBagLayout());
+        JPanel channelUIs = new JPanel(new GridBagLayout());
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
@@ -496,11 +390,11 @@ public class ColorPicker extends JPanel {
         ButtonGroup bg = new ButtonGroup();
 
         // put them in order
-        Option[] optionsArray = {
+        ChannelUI[] channelUIsArray = {
             hue, sat, bri, red, green, blue
         };
 
-        for (int a = 0; a < optionsArray.length; a++) {
+        for (int a = 0; a < channelUIsArray.length; a++) {
             if (a == 3 || a == 6) {
                 c.insets = tallInsets;
             } else {
@@ -508,35 +402,35 @@ public class ColorPicker extends JPanel {
             }
             c.anchor = GridBagConstraints.EAST;
             c.fill = GridBagConstraints.NONE;
-            options.add(optionsArray[a].label, c);
+            channelUIs.add(channelUIsArray[a].label, c);
             c.gridx++;
             c.anchor = GridBagConstraints.WEST;
             c.fill = GridBagConstraints.HORIZONTAL;
-            options.add(optionsArray[a].spinner, c);
+            channelUIs.add(channelUIsArray[a].spinner, c);
             c.gridx++;
             c.fill = GridBagConstraints.NONE;
-            options.add(optionsArray[a].radioButton, c);
+            channelUIs.add(channelUIsArray[a].radioButton, c);
             c.gridy++;
             c.gridx = 0;
-            bg.add(optionsArray[a].radioButton);
+            bg.add(channelUIsArray[a].radioButton);
         }
         c.insets = tallInsets;
         c.anchor = GridBagConstraints.EAST;
         c.fill = GridBagConstraints.NONE;
-        options.add(hexLabel, c);
+        channelUIs.add(hexLabel, c);
         c.gridx++;
         c.anchor = GridBagConstraints.WEST;
         c.fill = GridBagConstraints.HORIZONTAL;
-        options.add(hexField, c);
+        channelUIs.add(hexField, c);
         c.gridy++;
         c.gridx = 0;
         c.anchor = GridBagConstraints.EAST;
         c.fill = GridBagConstraints.NONE;
-        options.add(alpha.label, c);
+        channelUIs.add(alpha.label, c);
         c.gridx++;
         c.anchor = GridBagConstraints.WEST;
         c.fill = GridBagConstraints.HORIZONTAL;
-        options.add(alpha.spinner, c);
+        channelUIs.add(alpha.spinner, c);
 
         c.gridx = 0;
         c.gridy = 0;
@@ -591,14 +485,97 @@ public class ColorPicker extends JPanel {
         c.weighty = 0;
         c.anchor = GridBagConstraints.CENTER;
         c.insets = new Insets(normalInsets.top, normalInsets.left, 0, normalInsets.right);
-        expertControls.add(options, c);
+        expertControls.add(channelUIs, c);
 
         preview.setOpaque(true);
         int colorPanelSize = expertControls.getPreferredSize().height;
         colorPanel.setPreferredSize(new Dimension(colorPanelSize, colorPanelSize));
 
-        slider.addChangeListener(changeListener);
-        colorPanel.addChangeListener(changeListener);
+        ChangeListener hsbChangeListener = e -> {
+            if (spinnerUpdateDepth > 0) {
+                return;
+            }
+            setHSB(hue.getValue() / 360.0f,
+                sat.getValue() / 100.0f,
+                bri.getValue() / 100.0f);
+
+            // dispatch notification event when state explicitly updates internal mechanisms
+            if (colorChangeListener != null && !sliderUpdatingSpinner && opacityUpdateDepth == 0) {
+                colorChangeListener.accept(getColor());
+            }
+        };
+        hue.spinner.addChangeListener(hsbChangeListener);
+        sat.spinner.addChangeListener(hsbChangeListener);
+        bri.spinner.addChangeListener(hsbChangeListener);
+
+        ChangeListener rgbChangeListener = e -> {
+            if (spinnerUpdateDepth > 0) {
+                return;
+            }
+            setRGB(red.getValue(),
+                green.getValue(),
+                blue.getValue());
+
+            if (colorChangeListener != null && !sliderUpdatingSpinner && opacityUpdateDepth == 0) {
+                colorChangeListener.accept(getColor());
+            }
+        };
+        red.spinner.addChangeListener(rgbChangeListener);
+        green.spinner.addChangeListener(rgbChangeListener);
+        blue.spinner.addChangeListener(rgbChangeListener);
+
+        alpha.spinner.addChangeListener(e -> {
+            if (opacityUpdateDepth > 0) {
+                return;
+            }
+            int v = alpha.getValue();
+            setOpacity(v);
+
+            if (colorChangeListener != null && spinnerUpdateDepth == 0 && !sliderUpdatingSpinner) {
+                colorChangeListener.accept(getColor());
+            }
+        });
+
+        hue.radioButton.addActionListener(e -> setMode(HUE));
+        sat.radioButton.addActionListener(e -> setMode(SAT));
+        bri.radioButton.addActionListener(e -> setMode(BRI));
+        red.radioButton.addActionListener(e -> setMode(RED));
+        green.radioButton.addActionListener(e -> setMode(GREEN));
+        blue.radioButton.addActionListener(e -> setMode(BLUE));
+
+        slider.addChangeListener(e -> {
+            if (sliderUpdateDepth > 0) {
+                return;
+            }
+
+            int v = slider.getValue();
+            ChannelUI channelUI = getSelectedChannelUI();
+            try {
+                // increasing adjustingSpinners doesn't
+                // work because the spinners must be triggered
+                // in order to update the color
+                sliderUpdatingSpinner = true;
+                channelUI.setValue(v);
+            } finally {
+                sliderUpdatingSpinner = false;
+            }
+        });
+
+        colorPanel.addChangeListener(e -> {
+            if (colorPanelUpdateDepth > 0) {
+                return;
+            }
+
+            Mode mode = getMode();
+            if (mode == HUE || mode == BRI || mode == SAT) {
+                float[] hsb = colorPanel.getHSB();
+                setHSB(hsb[0], hsb[1], hsb[2]);
+            } else {
+                int[] rgb = colorPanel.getRGB();
+                setRGB(rgb[0], rgb[1], rgb[2]);
+            }
+        });
+
         slider.setUI(new ColorPickerSliderUI(slider, this));
         hexField.getDocument().addDocumentListener(new HexDocumentListener());
         setMode(BRI);
@@ -607,7 +584,12 @@ public class ColorPicker extends JPanel {
 
         setOpacityVisible(includeOpacity);
 
-        opacitySlider.addChangeListener(changeListener);
+        opacitySlider.addChangeListener(e -> {
+            if (opacityUpdateDepth > 0) {
+                return;
+            }
+            setOpacity(opacitySlider.getValue());
+        });
 
         setOpacity(255);
         setOpaque(this, false);
@@ -615,38 +597,38 @@ public class ColorPicker extends JPanel {
         preview.setForeground(getColor());
     }
 
-    public void setupAdjListener(Consumer<Color> adjustmentListener) {
-        this.adjustmentListener = adjustmentListener;
-        // notify the listener, but only if the value is not adjusting
+    public void setupColorChangeListener(Consumer<Color> colorChangeListener) {
+        this.colorChangeListener = colorChangeListener;
+        // notify the color change listener, but only if the value is not adjusting
         opacitySlider.addChangeListener(e -> {
-            if (adjustingOpacity == 0 && !opacitySlider.getValueIsAdjusting()) {
-                adjustmentListener.accept(getColor());
+            if (opacityUpdateDepth == 0 && !opacitySlider.getValueIsAdjusting()) {
+                colorChangeListener.accept(getColor());
             }
         });
         slider.addChangeListener(e -> {
-            if (adjustingSlider == 0 && !slider.getValueIsAdjusting()) {
-                adjustmentListener.accept(getColor());
+            if (sliderUpdateDepth == 0 && !slider.getValueIsAdjusting()) {
+                colorChangeListener.accept(getColor());
             }
         });
         colorPanel.addChangeListener(e -> {
-            if (adjustingColorPanel == 0 && !colorPanel.isAdjusting()) {
-                adjustmentListener.accept(getColor());
+            if (colorPanelUpdateDepth == 0 && !colorPanel.isAdjusting()) {
+                colorChangeListener.accept(getColor());
             }
         });
     }
 
-    private static void setOpaque(JComponent jc, boolean opaque) {
-        if (jc instanceof JTextField) {
+    private static void setOpaque(JComponent c, boolean opaque) {
+        if (c instanceof JTextField) {
             return;
         }
 
-        jc.setOpaque(opaque);
-        if (jc instanceof JSpinner) {
+        c.setOpaque(opaque);
+        if (c instanceof JSpinner) {
             return;
         }
 
-        for (int a = 0; a < jc.getComponentCount(); a++) {
-            JComponent child = (JComponent) jc.getComponent(a);
+        for (int a = 0; a < c.getComponentCount(); a++) {
+            JComponent child = (JComponent) c.getComponent(a);
             setOpaque(child, opaque);
         }
     }
@@ -688,9 +670,9 @@ public class ColorPicker extends JPanel {
      */
     public float[] getHSB() {
         return new float[]{
-            hue.getFloatValue() / 360.0f,
-            sat.getFloatValue() / 100.0f,
-            bri.getFloatValue() / 100.0f
+            hue.getValue() / 360.0f,
+            sat.getValue() / 100.0f,
+            bri.getValue() / 100.0f
         };
     }
 
@@ -708,8 +690,6 @@ public class ColorPicker extends JPanel {
 
     /**
      * Returns the currently selected opacity (a float between 0 and 1).
-     *
-     * @return the currently selected opacity (a float between 0 and 1).
      */
     public float getOpacity() {
         return opacitySlider.getValue() / 255.0f;
@@ -726,19 +706,18 @@ public class ColorPicker extends JPanel {
         if (v < 0 || v > 255) {
             throw new IllegalArgumentException("The opacity (" + v + ") must be between 0 and 255.");
         }
-        adjustingOpacity++;
+        opacityUpdateDepth++;
         try {
             opacitySlider.setValue(v);
             alpha.spinner.setValue(v);
             if (lastOpacity != v) {
-                firePropertyChange(OPACITY_PROPERTY,
-                    Integer.valueOf(lastOpacity), Integer.valueOf(v));
+                firePropertyChange(OPACITY_PROPERTY, lastOpacity, v);
                 Color c = preview.getForeground();
                 preview.setForeground(new Color(c.getRed(), c.getGreen(), c.getBlue(), v));
             }
             lastOpacity = v;
         } finally {
-            adjustingOpacity--;
+            opacityUpdateDepth--;
         }
     }
 
@@ -747,11 +726,11 @@ public class ColorPicker extends JPanel {
      * This is especially useful if this picker is in non-expert mode, so
      * the radio buttons are not visible for the user to directly select.
      *
-     * @param mode must be HUE, SAT, BRI, RED, GREEN or BLUE.
+     * @param mode the mode to set.
      */
-    public void setMode(int mode) {
-        if (!(mode == HUE || mode == SAT || mode == BRI || mode == RED || mode == GREEN || mode == BLUE)) {
-            throw new IllegalArgumentException("mode must be HUE, SAT, BRI, REd, GREEN, or BLUE");
+    public void setMode(Mode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("mode must not be null");
         }
         putClientProperty(MODE_PROPERTY, mode);
         hue.radioButton.setSelected(mode == HUE);
@@ -762,28 +741,28 @@ public class ColorPicker extends JPanel {
         blue.radioButton.setSelected(mode == BLUE);
 
         colorPanel.setMode(mode);
-        adjustingSlider++;
+        sliderUpdateDepth++;
         try {
             slider.setValue(0);
-            Option option = getSelectedOption();
+            ChannelUI channelUI = getSelectedChannelUI();
             slider.setInverted(mode == HUE);
-            int max = option.getMaximum();
+            int max = channelUI.getMaximum();
             slider.setMaximum(max);
-            slider.setValue(option.getIntValue());
+            slider.setValue(channelUI.getValue());
             slider.repaint();
 
             if (mode == HUE || mode == SAT || mode == BRI) {
-                setHSB(hue.getFloatValue() / 360.0f,
-                    sat.getFloatValue() / 100.0f,
-                    bri.getFloatValue() / 100.0f);
+                setHSB(hue.getValue() / 360.0f,
+                    sat.getValue() / 100.0f,
+                    bri.getValue() / 100.0f);
             } else {
-                setRGB(red.getIntValue(),
-                    green.getIntValue(),
-                    blue.getIntValue());
+                setRGB(red.getValue(),
+                    green.getValue(),
+                    blue.getValue());
 
             }
         } finally {
-            adjustingSlider--;
+            sliderUpdateDepth--;
         }
     }
 
@@ -792,8 +771,6 @@ public class ColorPicker extends JPanel {
      * <P>(These buttons appear next to the spinners in the expert controls.)
      * <P>Note these live inside the "expert controls", so if <code>setExpertControlsVisible(false)</code>
      * has been called, then these will never be visible.
-     *
-     * @param b
      */
     public void setModeControlsVisible(boolean b) {
         hue.radioButton.setVisible(b && hue.isVisible());
@@ -807,17 +784,14 @@ public class ColorPicker extends JPanel {
 
     /**
      * @return the current mode of this <code>ColorPicker</code>.
-     * <BR>This will return <code>HUE</code>,  <code>SAT</code>,  <code>BRI</code>,
-     * <code>RED</code>,  <code>GREEN</code>, or <code>BLUE</code>.
-     * <P>The default mode is <code>BRI</code>, because that provides the most
+     * <BR>This will return <code>Mode.HUE</code>,  <code>Mode.SAT</code>,  <code>Mode.BRI</code>,
+     * <code>Mode.RED</code>,  <code>Mode.GREEN</code>, or <code>Mode.BLUE</code>.
+     * <P>The default mode is <code>Mode.BRI</code>, because that provides the most
      * aesthetic/recognizable color wheel.
      */
-    public int getMode() {
-        Integer i = (Integer) getClientProperty(MODE_PROPERTY);
-        if (i == null) {
-            return -1;
-        }
-        return i;
+    public Mode getMode() {
+        Mode m = (Mode) getClientProperty(MODE_PROPERTY);
+        return m == null ? BRI : m;
     }
 
     /**
@@ -851,29 +825,29 @@ public class ColorPicker extends JPanel {
 
         Color lastColor = getColor();
 
-        boolean updateRGBSpinners = adjustingSpinners == 0;
+        boolean updateRGBSpinners = spinnerUpdateDepth == 0;
 
-        adjustingSpinners++;
-        adjustingColorPanel++;
-        int alpha = this.alpha.getIntValue();
+        spinnerUpdateDepth++;
+        colorPanelUpdateDepth++;
+        int a = this.alpha.getValue();
         try {
             if (updateRGBSpinners) {
                 red.setValue(r);
                 green.setValue(g);
                 blue.setValue(b);
             }
-            preview.setForeground(new Color(r, g, b, alpha));
+            preview.setForeground(new Color(r, g, b, a));
             float[] hsb = new float[3];
             Color.RGBtoHSB(r, g, b, hsb);
-            hue.setValue((int) (hsb[0] * 360.0f + 0.49f));
-            sat.setValue((int) (hsb[1] * 100.0f + 0.49f));
-            bri.setValue((int) (hsb[2] * 100.0f + 0.49f));
+            hue.setValue(Math.round(hsb[0] * 360.0f));
+            sat.setValue(Math.round(hsb[1] * 100.0f));
+            bri.setValue(Math.round(hsb[2] * 100.0f));
             colorPanel.setRGB(r, g, b);
             updateHexField();
             updateSlider();
         } finally {
-            adjustingSpinners--;
-            adjustingColorPanel--;
+            spinnerUpdateDepth--;
+            colorPanelUpdateDepth--;
         }
         currentRed = r;
         currentGreen = g;
@@ -896,21 +870,19 @@ public class ColorPicker extends JPanel {
     }
 
     private void updateSlider() {
-        adjustingSlider++;
+        sliderUpdateDepth++;
         try {
-            int mode = getMode();
-            int newValue = switch (mode) {
-                case HUE -> hue.getIntValue();
-                case SAT -> sat.getIntValue();
-                case BRI -> bri.getIntValue();
-                case RED -> red.getIntValue();
-                case GREEN -> green.getIntValue();
-                case BLUE -> blue.getIntValue();
-                default -> throw new IllegalStateException("Unexpected value: " + mode);
+            int newValue = switch (getMode()) {
+                case HUE -> hue.getValue();
+                case SAT -> sat.getValue();
+                case BRI -> bri.getValue();
+                case RED -> red.getValue();
+                case GREEN -> green.getValue();
+                case BLUE -> blue.getValue();
             };
             slider.setValue(newValue);
         } finally {
-            adjustingSlider--;
+            sliderUpdateDepth--;
         }
         slider.repaint();
     }
@@ -956,11 +928,9 @@ public class ColorPicker extends JPanel {
 
     /**
      * This shows or hides the alpha controls.
-     * <P>Note the alpha spinner live inside the "expert controls", so if <code>setExpertControlsVisible(false)</code>
+     * <P>Note the alpha spinner lives inside the "expert controls", so if <code>setExpertControlsVisible(false)</code>
      * has been called, then this method does not affect that spinner.
-     * However, the opacity slider is <i>not</i> affected by the visibility of the export controls.
-     *
-     * @param b
+     * However, the opacity slider is <i>not</i> affected by the visibility of the expert controls.
      */
     public void setOpacityVisible(boolean b) {
         opacityLabel.setVisible(b);
@@ -1004,19 +974,19 @@ public class ColorPicker extends JPanel {
 
         Color lastColor = getColor();
 
-        boolean updateHSBSpinners = adjustingSpinners == 0;
-        adjustingSpinners++;
-        adjustingColorPanel++;
+        boolean updateHSBSpinners = spinnerUpdateDepth == 0;
+        spinnerUpdateDepth++;
+        colorPanelUpdateDepth++;
         try {
             if (updateHSBSpinners) {
-                hue.setValue((int) (h * 360.0f + 0.49f));
-                sat.setValue((int) (s * 100.0f + 0.49f));
-                bri.setValue((int) (b * 100.0f + 0.49f));
+                hue.setValue(Math.round(h * 360.0f));
+                sat.setValue(Math.round(s * 100.0f));
+                bri.setValue(Math.round(b * 100.0f));
             }
 
             Color c = new Color(Color.HSBtoRGB(h, s, b));
-            int alpha = this.alpha.getIntValue();
-            c = new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
+            int a = this.alpha.getValue();
+            c = new Color(c.getRed(), c.getGreen(), c.getBlue(), a);
             preview.setForeground(c);
             currentRed = c.getRed();
             currentGreen = c.getGreen();
@@ -1029,8 +999,8 @@ public class ColorPicker extends JPanel {
             updateSlider();
             slider.repaint();
         } finally {
-            adjustingSpinners--;
-            adjustingColorPanel--;
+            spinnerUpdateDepth--;
+            colorPanelUpdateDepth--;
         }
         Color newColor = getColor();
         if (!lastColor.equals(newColor)) {
@@ -1039,14 +1009,14 @@ public class ColorPicker extends JPanel {
     }
 
     private void updateHexField() {
-        adjustingHexField++;
+        hexFieldUpdateDepth++;
         try {
-            int r = red.getIntValue();
-            int g = green.getIntValue();
-            int b = blue.getIntValue();
+            int r = red.getValue();
+            int g = green.getValue();
+            int b = blue.getValue();
 
-            int i = (r << 16) + (g << 8) + b;
-            String s = Integer.toHexString(i).toUpperCase(Locale.ENGLISH);
+            int rgb = (r << 16) + (g << 8) + b;
+            String s = Integer.toHexString(rgb).toUpperCase(Locale.ROOT);
             while (s.length() < 6) {
                 s = "0" + s;
             }
@@ -1054,38 +1024,21 @@ public class ColorPicker extends JPanel {
                 hexField.setText(s);
             }
         } finally {
-            adjustingHexField--;
+            hexFieldUpdateDepth--;
         }
     }
 
     /**
      * The UI controls for a single color channel.
      */
-    class Option {
+    class ChannelUI {
         final JRadioButton radioButton = new JRadioButton();
         final JSpinner spinner;
         final JLabel label;
 
-        public Option(String text, int max) {
+        public ChannelUI(String text, int max) {
             spinner = new JSpinner(new SpinnerNumberModel(0, 0, max, 5));
-
-            // since the listeners are notified in reverse order
-            // of addition, this app notification listener will execute
-            // last, after the internal state has been updated
-            spinner.addChangeListener(e -> {
-                if (adjustmentListener != null
-                    && adjustingSpinners == 0
-                    && !sliderUpdatingSpinner
-                    && adjustingOpacity == 0) {
-                    adjustmentListener.accept(getColor());
-                }
-            });
-
-            // this internal state change listener will execute first
-            spinner.addChangeListener(changeListener);
-
             label = new JLabel(text);
-            radioButton.addActionListener(actionListener);
         }
 
         public void setValue(int i) {
@@ -1096,15 +1049,7 @@ public class ColorPicker extends JPanel {
             return ((Number) ((SpinnerNumberModel) spinner.getModel()).getMaximum()).intValue();
         }
 
-        public boolean contains(Object src) {
-            return (src == spinner || src == radioButton || src == label);
-        }
-
-        public float getFloatValue() {
-            return getIntValue();
-        }
-
-        public int getIntValue() {
+        public int getValue() {
             return ((Number) spinner.getValue()).intValue();
         }
 
@@ -1114,9 +1059,9 @@ public class ColorPicker extends JPanel {
 
         public void setVisible(boolean b) {
             boolean radioButtonsAllowed = true;
-            Boolean z = (Boolean) getClientProperty(MODE_CONTROLS_VISIBLE_PROPERTY);
-            if (z != null) {
-                radioButtonsAllowed = z;
+            Boolean modeVisible = (Boolean) getClientProperty(MODE_CONTROLS_VISIBLE_PROPERTY);
+            if (modeVisible != null) {
+                radioButtonsAllowed = modeVisible;
             }
 
             radioButton.setVisible(b && radioButtonsAllowed);

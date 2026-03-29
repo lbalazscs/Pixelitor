@@ -27,9 +27,8 @@ import java.io.Serial;
 import java.util.function.Consumer;
 
 /**
- * This wraps a <code>ColorPicker</code> in a simple dialog with "OK" and "Cancel" options.
- * <P>(This object is used by the static calls in <code>ColorPicker</code> to show a dialog.)
- * <br><IMG SRC="https://javagraphics.java.net/resources/colorpicker.png" alt="Screenshot of ColorPickerDialog">
+ * This wraps a {@link ColorPicker} in a simple dialog with "OK" and "Cancel" options.
+ * <P>(This object is used by the static calls in {@link ColorPicker} to show a dialog.)
  *
  * @see ColorPicker
  * @see ColorPickerPanel
@@ -39,9 +38,9 @@ class ColorPickerDialog extends JDialog {
     private static final long serialVersionUID = 2L;
 
     private final ColorPicker cp;
-    private Color returnValue = null;
+    private Color selectedColor = null;
 
-    public ColorPickerDialog(Window owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
+    public ColorPickerDialog(Window owner, Color color, boolean includeOpacity, Consumer<Color> colorChangeListener) {
         super(owner);
 
         cp = new ColorPicker(true, includeOpacity);
@@ -59,7 +58,7 @@ class ColorPickerDialog extends JDialog {
         getContentPane().add(cp, c);
         c.gridy++;
         DialogFooter footer = DialogFooter.createDialogFooter(new JComponent[]{},
-                DialogFooter.OK_CANCEL_OPTION, DialogFooter.OK_OPTION, EscapeKeyBehavior.TRIGGERS_CANCEL);
+            DialogFooter.OK_CANCEL_OPTION, DialogFooter.OK_OPTION, EscapeKeyBehavior.TRIGGERS_CANCEL);
         c.gridy++;
         c.weighty = 0;
         getContentPane().add(footer, c);
@@ -70,11 +69,11 @@ class ColorPickerDialog extends JDialog {
 
         footer.getButton(DialogFooter.OK_OPTION).addActionListener(e -> setReturnValue());
 
-        cp.setupAdjListener(adjustmentListener);
+        cp.setupColorChangeListener(colorChangeListener);
     }
 
     private void setReturnValue() {
-        returnValue = cp.getColor();
+        selectedColor = cp.getColor();
     }
 
     /**
@@ -82,6 +81,6 @@ class ColorPickerDialog extends JDialog {
      * if the user canceled this dialog, or exited via the close decoration.
      */
     public Color getColor() {
-        return returnValue;
+        return selectedColor;
     }
 }

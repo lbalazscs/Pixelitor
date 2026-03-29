@@ -29,7 +29,6 @@ public class UnsharpFilter extends GaussianFilter {
 
     public UnsharpFilter(String filterName) {
         super(filterName);
-        radius = 2;
     }
 
     /**

@@ -33,21 +33,7 @@ import java.util.Random;
 
 /**
  * In this transition geometric shapes (squares and circles)
- * trickle downwards revealing the next frame. Here are playback samples:
- * <p><table summary="Sample Animations of SquareRainTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/SquareRainTransition2D/SquareRain(6).gif" alt="Square Rain (6)">
- * <p>Square Rain (6)
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/SquareRainTransition2D/SquareRain(12).gif" alt="Square Rain (12)">
- * <p>Square Rain (12)
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/SquareRainTransition2D/SquareRain(24).gif" alt="Square Rain (24)">
- * <p>Square Rain (24)
- * </td>
- * </tr></table>
+ * trickle downwards revealing the next frame.
  */
 public class SquareRainTransition2D extends AbstractClippedTransition2D {
     private final float[] offset;

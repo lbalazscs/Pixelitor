@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
 import pixelitor.filters.GlassTiles;
@@ -26,42 +27,48 @@ import static net.jafama.FastMath.tan;
  * Inspired by the Paint.net tile effect
  */
 public class TilesFilter extends RotatingEffectFilter {
-    private double sizeX;
-    private double sizeY;
-    private double curvatureX;
-    private double curvatureY;
-    private double phaseAngleX;
-    private double phaseAngleY;
+    private final double sizeX;
+    private final double sizeY;
+    private final double curvatureX;
+    private final double curvatureY;
+    private final double phaseAngleX;
+    private final double phaseAngleY;
 
-    public TilesFilter(String filterName) {
-        super(filterName);
+    /**
+     * Constructs a new TilesFilter.
+     *
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param angle         the rotation angle of the tiles (in radians).
+     * @param sizeXVal      the horizontal size of the tiles.
+     * @param shiftX        the horizontal phase shift/movement of the tiles.
+     * @param sizeYVal      the vertical size of the tiles.
+     * @param shiftY        the vertical phase shift/movement of the tiles.
+     * @param curvatureXVal the horizontal curvature intensity.
+     * @param curvatureYVal the vertical curvature intensity.
+     */
+    public TilesFilter(String filterName, int edgeAction, int interpolation, double angle,
+                       double sizeXVal, double shiftX,
+                       double sizeYVal, double shiftY,
+                       double curvatureXVal, double curvatureYVal) {
+        super(filterName, edgeAction, interpolation, angle);
+
+        // for some reason the effect looks nice only
+        // with the reduced double => float precision
+        this.sizeX = (float) (Math.PI / sizeXVal);
+        this.sizeY = (float) (Math.PI / sizeYVal);
+
+        this.phaseAngleX = shiftX / this.sizeX;
+        this.phaseAngleY = shiftY / this.sizeY;
+
+        this.curvatureX = (curvatureXVal * curvatureXVal) / 10.0;
+        this.curvatureY = (curvatureYVal * curvatureYVal) / 10.0;
     }
 
     @Override
     protected void coreTransformInverse(double x, double y, double[] out) {
         out[0] = x + curvatureX * tan(x * sizeX - phaseAngleX);
         out[1] = y + curvatureY * tan(y * sizeY - phaseAngleY);
-    }
-
-    public void setSizeX(double size, double shiftX) {
-        // for some reason the effect looks nice only
-        // with the reduced double => float precision
-        sizeX = (float) (Math.PI / size);
-
-        phaseAngleX = shiftX / sizeX;
-    }
-
-    public void setSizeY(double size, double shiftY) {
-        sizeY = (float) (Math.PI / size);
-
-        phaseAngleY = shiftY / sizeY;
-    }
-
-    public void setCurvatureX(double curvature) {
-        curvatureX = curvature * curvature / 10.0;
-    }
-
-    public void setCurvatureY(double curvature) {
-        curvatureY = curvature * curvature / 10.0;
     }
 }

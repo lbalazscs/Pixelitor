@@ -32,6 +32,7 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
 
     public BrickBlockFilter(String filterName, int horBlockSize, int verBlockSize) {
         super(filterName);
+
         this.horBlockSize = horBlockSize;
         this.verBlockSize = verBlockSize;
     }

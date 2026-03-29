@@ -73,6 +73,7 @@ public class JHWaves extends ParametrizedFilter {
             NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
+            angleParam.getValueInIntuitiveRadians(),
             xAmplitude,
             xWavelength,
             yAmplitude,
@@ -81,8 +82,6 @@ public class JHWaves extends ParametrizedFilter {
             phaseParam.getHorPercentage(),
             phaseParam.getVerPercentage()
         );
-
-        filter.setAngle(angleParam.getValueInIntuitiveRadians());
 
         return filter.filter(src, dest);
     }

@@ -37,17 +37,7 @@ import static net.jafama.FastMath.sin;
 
 /**
  * In this transition the current frame splits apart into
- * shrinking stars that spin off towards a distant point. Here are playback samples:
- * <p><table summary="Sample Animations of StarsTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/StarsTransition2D/StarsLeft.gif" alt="Stars Left">
- * <p>Stars Left
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/StarsTransition2D/StarsRight.gif" alt="Stars Right">
- * <p>Stars Right
- * </td>
- * </tr></table>
+ * shrinking stars that spin off towards a distant point.
  */
 public class StarsTransition2D extends AbstractClippedTransition2D {
     private static final GeneralPath[] star = {

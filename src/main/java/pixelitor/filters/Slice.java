@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
-import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Slice filter
+ * The Slice filter.
  */
 public class Slice extends ParametrizedFilter {
     public static final String NAME = "Slice";
@@ -41,8 +41,6 @@ public class Slice extends ParametrizedFilter {
         "Shift Effect (Size %)", 0, 0, 100, false);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
-
-    private SliceFilter filter;
 
     public Slice() {
         super(true);
@@ -58,17 +56,14 @@ public class Slice extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new SliceFilter(NAME);
-        }
-
-        filter.setOffset(offset.getValue());
-        filter.setSize(size.getValue());
-        filter.setHorizontalShift(shift.getPercentage(0));
-        filter.setVerticalShift(shift.getPercentage(1));
-        filter.setAngle(angle.getValueInIntuitiveRadians());
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOR); // no difference
+        SliceFilter filter = new SliceFilter(NAME,
+            edgeAction.getValue(),
+            angle.getValueInIntuitiveRadians(),
+            offset.getValue(),
+            size.getValue(),
+            shift.getPercentage(0),
+            shift.getPercentage(1)
+        );
 
         return filter.filter(src, dest);
     }

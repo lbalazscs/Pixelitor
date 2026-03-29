@@ -22,9 +22,7 @@ package com.bric.image.transition;
 import java.awt.Dimension;
 
 /**
- * Also know as the "Fade" transition, this simply fades in the opacity of the incoming
- * frame. Here is a playback sample:
- * <p><img src="https://javagraphics.java.net/resources/transition/BlendTransition2D/Blend.gif" alt="BlendTransition2D demo">
+ * Also know as the "Fade" transition, this simply fades in the opacity of the incoming frame.
  */
 public class BlendTransition2D extends Transition2D {
     @Override

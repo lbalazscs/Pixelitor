@@ -28,8 +28,7 @@ import java.util.List;
 /**
  * This transition "zooms in" on the existing image into the incoming image
  * comes into view.  (The incoming image is overlayed on the pixels of the
- * original image with increasing opacity.) Here is a playback sample:
- * <p><img src="https://javagraphics.java.net/resources/transition/MicroscopeTransition2D/Microscope.gif" alt="MicroscopeTransition2D Demo">
+ * original image with increasing opacity.)
  */
 public class MicroscopeTransition2D extends Transition2D {
     private static final float min = 0.05f;

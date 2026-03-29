@@ -46,6 +46,7 @@ public class OilFilter extends WholeImageFilter {
      */
     public OilFilter(String filterName, int rangeX, int rangeY, int levels) {
         super(filterName);
+
         this.rangeX = rangeX;
         this.rangeY = rangeY;
         this.levels = levels;

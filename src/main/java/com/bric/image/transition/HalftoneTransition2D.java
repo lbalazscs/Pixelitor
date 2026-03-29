@@ -33,17 +33,6 @@ import java.util.List;
  * tiny circles that shrink in size.  Or, seen backwards,
  * several incoming tiny circles swirl together and merge
  * into the new image.
- * <p>Here are playback samples:
- * <p><table summary="Sample Animations of HalftoneTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/HalftoneTransition2D/HalftoneIn.gif" alt="Halftone In">
- * <p>Halftone In
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/HalftoneTransition2D/HalftoneOut.gif" alt="Halftone Out">
- * <p>Halftone Out
- * </td>
- * </tr></table>
  */
 public class HalftoneTransition2D extends Transition2D {
     private final int type;

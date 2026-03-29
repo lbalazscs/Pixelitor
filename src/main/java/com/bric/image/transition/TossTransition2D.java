@@ -29,17 +29,7 @@ import static java.lang.Math.PI;
 
 /**
  * In this transition the incoming frame is tossed into place,
- * and after a little bit of wobbling it settles down. Here are playback samples:
- * <p><table summary="Sample Animations of TossTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/TossTransition2D/TossLeft.gif" alt="Toss Left">
- * <p>Toss Left
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/TossTransition2D/TossRight.gif" alt="Toss Right">
- * <p>Toss Right
- * </td>
- * </tr></table>
+ * and after a little bit of wobbling it settles down.
  */
 public class TossTransition2D extends Transition2D {
     private final int type;

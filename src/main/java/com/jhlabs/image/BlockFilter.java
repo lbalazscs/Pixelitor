@@ -32,6 +32,7 @@ public class BlockFilter extends AbstractBufferedImageOp {
      */
     public BlockFilter(String filterName, int blockSize) {
         super(filterName);
+
         this.blockSize = blockSize;
     }
 

@@ -44,7 +44,7 @@ public abstract class AbstractPlanarTransition2D extends Transition2D {
     private final Color background;
 
     protected AbstractPlanarTransition2D() {
-        this(Color.black);
+        this(Color.BLACK);
     }
 
     protected AbstractPlanarTransition2D(Color background) {

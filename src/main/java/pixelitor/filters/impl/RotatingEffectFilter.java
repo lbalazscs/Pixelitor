@@ -31,23 +31,24 @@ public abstract class RotatingEffectFilter extends TransformFilter {
     private double centerX;
     private double centerY;
 
-    private double angle;
-    private double sin = 0;
-    private double cos = 1;
-
-    protected RotatingEffectFilter(String filterName) {
-        super(filterName);
-    }
+    private final double angle;
+    private final double sin;
+    private final double cos;
 
     /**
-     * Constructs a RotatingEffectFilter with explicit edge handling and interpolation.
+     * Constructs a RotatingEffectFilter.
      *
      * @param filterName    the name of the filter.
      * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
      * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param angle         the effect's rotation angle (in radians).
      */
-    protected RotatingEffectFilter(String filterName, int edgeAction, int interpolation) {
+    protected RotatingEffectFilter(String filterName, int edgeAction, int interpolation, double angle) {
         super(filterName, edgeAction, interpolation);
+
+        this.angle = angle;
+        cos = FastMath.cos(angle);
+        sin = FastMath.sin(angle);
     }
 
     @Override
@@ -99,10 +100,4 @@ public abstract class RotatingEffectFilter extends TransformFilter {
      * Subclasses implement this to define the inverse transformation.
      */
     protected abstract void coreTransformInverse(double x, double y, double[] out);
-
-    public void setAngle(double angle) {
-        this.angle = angle;
-        cos = FastMath.cos(angle);
-        sin = FastMath.sin(angle);
-    }
 }

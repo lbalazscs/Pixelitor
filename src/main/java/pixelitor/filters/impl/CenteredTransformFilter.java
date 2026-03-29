@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,17 +26,21 @@ import java.awt.geom.Point2D;
  */
 public abstract class CenteredTransformFilter extends TransformFilter {
     // center coordinates in pixels
-    protected double cx;
-    protected double cy;
+    protected final double cx;
+    protected final double cy;
 
-    protected CenteredTransformFilter(String filterName) {
-        super(filterName);
-    }
+    /**
+     * Constructs a CenteredTransformFilter.
+     *
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param center        the effect's center (in pixels).
+     */
+    protected CenteredTransformFilter(String filterName, int edgeAction, int interpolation, Point2D center) {
+        super(filterName, edgeAction, interpolation);
 
-    public void setCenter(Point2D c) {
-        // sets absolute values (pixel coordinates), because some filters
-        // use these values in other setters, before the filtering begins
-        cx = c.getX();
-        cy = c.getY();
+        cx = center.getX();
+        cy = center.getY();
     }
 }

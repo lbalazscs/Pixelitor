@@ -48,11 +48,12 @@ public class RippleFilter extends RotatingEffectFilter {
      * @param phaseX        the phase of the ripple in the X direction (as a fraction, where 1.0 = full cycle)
      * @param phaseY        the phase of the ripple in the Y direction (as a fraction, where 1.0 = full cycle)
      */
-    public RippleFilter(String filterName, int edgeAction, int interpolation,
+    public RippleFilter(String filterName, int edgeAction,
+                        int interpolation, double angle,
                         float xAmplitude, float xWavelength,
                         float yAmplitude, float yWavelength,
                         int waveType, double phaseX, double phaseY) {
-        super(filterName, edgeAction, interpolation);
+        super(filterName, edgeAction, interpolation, angle);
 
         this.xAmplitude = xAmplitude;
         this.yAmplitude = yAmplitude;

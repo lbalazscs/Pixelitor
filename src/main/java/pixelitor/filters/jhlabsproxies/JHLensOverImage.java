@@ -17,6 +17,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SphereFilter;
+import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
@@ -44,8 +45,6 @@ public class JHLensOverImage extends ParametrizedFilter {
 
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
-    private SphereFilter filter;
-
     public JHLensOverImage() {
         super(true);
 
@@ -68,15 +67,15 @@ public class JHLensOverImage extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new SphereFilter(NAME);
-        }
-
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setA(hRadius);
-        filter.setB(vRadius);
-        filter.setRefractionIndex(refraction);
-        filter.setInterpolation(interpolation.getValue());
+        SphereFilter filter = new SphereFilter(
+            NAME,
+            TransformFilter.REPEAT_EDGE, // hardcode the default
+            interpolation.getValue(),
+            center.getAbsolutePoint(src),
+            hRadius,
+            vRadius,
+            refraction
+        );
 
         dest = filter.filter(src, dest);
 //        setAffectedAreaShapes(filter.getAffectedAreaShapes());

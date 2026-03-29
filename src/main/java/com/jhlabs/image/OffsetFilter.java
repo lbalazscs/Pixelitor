@@ -16,102 +16,22 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.image.BufferedImage;
+import java.awt.geom.Point2D;
 
 public class OffsetFilter extends TransformFilter {
-    private int width, height;
-    private int xOffset, yOffset;
-    private boolean wrap;
+    private final int xOffset;
+    private final int yOffset;
 
-    private double relativeX;
-    private double relativeY;
-    private boolean useRelative = false;
+    public OffsetFilter(String filterName, int edgeAction, Point2D offset) {
+        super(filterName, edgeAction, TransformFilter.NEAREST_NEIGHBOR);
 
-    public OffsetFilter(String filterName) {
-        this(0, 0, true, filterName);
-    }
-
-    public OffsetFilter(int xOffset, int yOffset, boolean wrap, String filterName) {
-        super(filterName);
-
-        this.xOffset = xOffset;
-        this.yOffset = yOffset;
-        this.wrap = wrap;
-        setEdgeAction(TRANSPARENT);
-    }
-
-    public void setRelativeX(double relativeX) {
-        this.relativeX = relativeX;
-    }
-
-    public void setRelativeY(double relativeY) {
-        this.relativeY = relativeY;
-    }
-
-    public double getRelativeX() {
-        return relativeX;
-    }
-
-    public double getRelativeY() {
-        return relativeY;
-    }
-
-    public boolean isUseRelative() {
-        return useRelative;
-    }
-
-    /**
-     * When useRelative is set, the relative settings overwrite the absolute settings
-     *
-     * @param useRelative
-     */
-    public void setUseRelative(boolean useRelative) {
-        this.useRelative = useRelative;
-    }
-
-    public void setXOffset(int xOffset) {
-        this.xOffset = xOffset;
-    }
-
-    public void setYOffset(int yOffset) {
-        this.yOffset = yOffset;
-    }
-
-    public void setWrap(boolean wrap) {
-        this.wrap = wrap;
+        xOffset = (int) (offset.getX());
+        yOffset = (int) (offset.getY());
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        if (wrap) {
-            out[0] = (x + width - xOffset) % width;
-            out[1] = (y + height - yOffset) % height;
-        } else {
-            out[0] = x - xOffset;
-            out[1] = y - yOffset;
-        }
-    }
-
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        width = src.getWidth();
-        height = src.getHeight();
-
-        if (useRelative) {
-            xOffset = (int) (width * relativeX);
-            yOffset = (int) (height * relativeY);
-        }
-
-        if (wrap) {
-            while (xOffset < 0) {
-                xOffset += width;
-            }
-            while (yOffset < 0) {
-                yOffset += height;
-            }
-            xOffset %= width;
-            yOffset %= height;
-        }
-        return super.filter(src, dst);
+        out[0] = x - xOffset;
+        out[1] = y - yOffset;
     }
 }

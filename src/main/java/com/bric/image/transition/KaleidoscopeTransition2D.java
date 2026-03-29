@@ -29,8 +29,7 @@ import java.util.List;
 import static java.lang.Math.PI;
 
 /**
- * This resembles looking through a kaleidoscope. Here is a playback sample:
- * <p><img src="https://javagraphics.java.net/resources/transition/KaleidoscopeTransition2D/Kaleidoscope.gif" alt="KaleidoscopeTransition2D Demo">
+ * This resembles looking through a kaleidoscope.
  */
 public class KaleidoscopeTransition2D extends Transition2D {
     @Override

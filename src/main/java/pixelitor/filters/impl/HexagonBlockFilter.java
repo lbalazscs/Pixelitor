@@ -43,6 +43,7 @@ public class HexagonBlockFilter extends AbstractBufferedImageOp {
 
     public HexagonBlockFilter(String filterName, int size) {
         super(filterName);
+
         this.size = size;
     }
 

@@ -25,68 +25,41 @@ import java.awt.image.BufferedImage;
  * A filter which wraps an image around a circular arc.
  */
 public class CircleFilter extends TransformFilter {
-    private float radius = 10;
-    private float arcHeight = 20;
-    private float angle = 0;
-    private float spreadAngle = (float) Math.PI;
+    private final float radius;
+    private final float arcHeight;
+    private final float angle;
+    private final float spreadAngle;
+    private final float cx;
+    private final float cy;
 
-    private float cx;
-    private float cy;
     private float imgWidth;
     private float imgHeight;
 
     /**
      * Constructs a CircleFilter.
-     */
-    public CircleFilter(String filterName) {
-        super(filterName);
-        setEdgeAction(TRANSPARENT);
-    }
-
-    /**
-     * Sets the height of the arc.
      *
-     * @param arcHeight the height
+     * @param filterName  the name of the filter.
+     * @param edgeAction  the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param radius      the radius of the effect (must be >= 0).
+     * @param arcHeight   the height of the arc.
+     * @param angle       the angle of the arc.
+     * @param spreadAngle the spread angle of the arc.
+     * @param center      the center of the effect in image pixels.
      */
-    public void setArcHeight(float arcHeight) {
-        this.arcHeight = arcHeight;
-    }
+    public CircleFilter(String filterName,
+                        int edgeAction, int interpolation,
+                        float radius, float arcHeight,
+                        float angle, float spreadAngle,
+                        Point2D center) {
+        super(filterName, edgeAction, interpolation);
 
-    /**
-     * Sets the angle of the arc.
-     *
-     * @param angle the angle of the arc.
-     */
-    public void setAngle(float angle) {
-        this.angle = angle;
-    }
-
-    /**
-     * Sets the spread angle of the arc.
-     *
-     * @param spreadAngle the angle
-     */
-    public void setSpreadAngle(float spreadAngle) {
-        this.spreadAngle = spreadAngle;
-    }
-
-    /**
-     * Sets the radius of the effect.
-     *
-     * @param radius the radius (must be >= 0)
-     */
-    public void setRadius(float radius) {
         this.radius = radius;
-    }
-
-    /**
-     * Sets the center of the effect in image pixels.
-     *
-     * @param center the center
-     */
-    public void setCenter(Point2D center) {
-        cx = (float) center.getX();
-        cy = (float) center.getY();
+        this.arcHeight = arcHeight;
+        this.angle = angle;
+        this.spreadAngle = spreadAngle;
+        this.cx = (float) center.getX();
+        this.cy = (float) center.getY();
     }
 
     @Override

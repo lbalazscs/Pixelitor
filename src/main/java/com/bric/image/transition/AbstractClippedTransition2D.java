@@ -61,14 +61,14 @@ public abstract class AbstractClippedTransition2D extends Transition2D {
         float w = getStrokeWidth(progress, size);
         if (w == 0) {
             return new Transition2DInstruction[]{
-                    new ImageInstruction(true),
-                    new ImageInstruction(false, null, area)
+                new ImageInstruction(true),
+                new ImageInstruction(false, null, area)
             };
         } else {
             return new Transition2DInstruction[]{
-                    new ImageInstruction(true),
-                    new ImageInstruction(false, null, area),
-                    new ShapeInstruction(area, null, Color.black, w)
+                new ImageInstruction(true),
+                new ImageInstruction(false, null, area),
+                new ShapeInstruction(area, null, Color.BLACK, w)
             };
         }
     }

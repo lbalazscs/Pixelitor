@@ -25,66 +25,42 @@ import java.awt.image.BufferedImage;
  * A Filter which produces the effect of looking into a kaleidoscope.
  */
 public class KaleidoscopeFilter extends TransformFilter {
-    private float angle = 0;
-    private float angle2 = 0;
-    private int sides = 3;
+    private final float angle;
+    private final float angle2;
+    private final int sides;
 
     // the center in relative coordinates
-    private double relCx = 0.5;
-    private double relCy = 0.5;
+    private final double relCx;
+    private final double relCy;
 
     // the center in pixel coordinates
     private double cx;
     private double cy;
 
-    private float zoom;
+    private final float zoom;
 
     /**
-     * Constructs a KaleidoscopeFilter with no distortion.
-     */
-    public KaleidoscopeFilter(String filterName) {
-        super(filterName);
-        setEdgeAction(REPEAT_EDGE);
-    }
-
-    /**
-     * Sets the number of sides of the kaleidoscope.
+     * Constructs a KaleidoscopeFilter.
      *
-     * @param sides the number of sides (must be >= 2)
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param angle         the angle of the kaleidoscope.
+     * @param angle2        the secondary angle of the kaleidoscope (rotates the result).
+     * @param sides         the number of sides of the kaleidoscope (must be >= 2).
+     * @param center        the center of the effect as a proportion of the image size.
+     * @param zoom          the zoom factor applied to the kaleidoscope effect.
      */
-    public void setSides(int sides) {
-        this.sides = sides;
-    }
+    public KaleidoscopeFilter(String filterName, int edgeAction, int interpolation,
+                              float angle, float angle2, int sides,
+                              Point2D center, float zoom) {
+        super(filterName, edgeAction, interpolation);
 
-    /**
-     * Sets the angle of the kaleidoscope.
-     *
-     * @param angle the angle of the kaleidoscope.
-     */
-    public void setAngle(float angle) {
         this.angle = angle;
-    }
-
-    /**
-     * Sets the secondary angle of the kaleidoscope.
-     *
-     * @param angle2 the angle
-     */
-    public void setAngle2(float angle2) {
         this.angle2 = angle2;
-    }
-
-    /**
-     * Sets the center of the effect as a proportion of the image size.
-     *
-     * @param center the center
-     */
-    public void setCenter(Point2D center) {
-        relCx = center.getX();
-        relCy = center.getY();
-    }
-
-    public void setZoom(float zoom) {
+        this.sides = sides;
+        this.relCx = center.getX();
+        this.relCy = center.getY();
         this.zoom = zoom;
     }
 

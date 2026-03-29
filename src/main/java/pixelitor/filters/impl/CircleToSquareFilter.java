@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,30 +22,35 @@ import pixelitor.filters.CircleToSquare;
 import pixelitor.utils.CustomShapes;
 
 import java.awt.Shape;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
  * The implementation of the {@link CircleToSquare} filter.
- * Distorts a circle into a square
+ * Distorts a circle into a square.
  */
 public class CircleToSquareFilter extends CenteredTransformFilter {
-    private float radiusX = 500;
-    private float radiusY = 500;
-    private float amount = 1.0f;
+    private final float radiusX;
+    private final float radiusY;
+    private final float amount;
 
-    public CircleToSquareFilter() {
-        super(CircleToSquare.NAME);
-    }
+    /**
+     * Constructs a {@link CircleToSquareFilter}.
+     *
+     * @param filterName    the name of the filter.
+     * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
+     * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
+     * @param center        the effect's center (in pixels).
+     * @param radiusX       the horizontal radius of the transformation area.
+     * @param radiusY       the vertical radius of the transformation area.
+     * @param amount        the intensity of the distortion.
+     */
+    public CircleToSquareFilter(String filterName, int edgeAction, int interpolation, Point2D center,
+                                float radiusX, float radiusY, float amount) {
+        super(filterName, edgeAction, interpolation, center);
 
-    public void setRadiusX(float radius) {
-        radiusX = radius;
-    }
-
-    public void setRadiusY(float radius) {
-        radiusY = radius;
-    }
-
-    public void setAmount(float amount) {
+        this.radiusX = radiusX;
+        this.radiusY = radiusY;
         this.amount = amount;
     }
 

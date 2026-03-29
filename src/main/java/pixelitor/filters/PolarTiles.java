@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,8 +51,6 @@ public class PolarTiles extends ParametrizedFilter {
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
-    private PolarTilesFilter filter;
-
     public PolarTiles() {
         super(true);
 
@@ -74,21 +72,19 @@ public class PolarTiles extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new PolarTilesFilter();
-        }
-
-        filter.setMode(modeParam.getValue());
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
-        filter.setImageRotation((float) imageRotation.getValueInIntuitiveRadians());
-        filter.setZoom(zoom.getPercentage());
-        filter.setEffectRotation(effectRotation.getPercentage());
-        filter.setNumADivisions(numAngDivisions.getValue());
-        filter.setNumRDivisions(numRadDivisions.getValue());
-        filter.setCurvature(curvature.getValueAsDouble());
-        filter.setRandomness(randomness.getPercentage());
+        PolarTilesFilter filter = new PolarTilesFilter(NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            center.getAbsolutePoint(src),
+            modeParam.getValue(),
+            numAngDivisions.getValue(),
+            numRadDivisions.getValue(),
+            curvature.getValueAsDouble(),
+            effectRotation.getPercentage(),
+            randomness.getPercentage(),
+            zoom.getPercentage(),
+            imageRotation.getValueInIntuitiveRadians()
+        );
 
         return filter.filter(src, dest);
     }

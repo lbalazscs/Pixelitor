@@ -23,17 +23,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
 /**
- * This clips to the shape of a circle zooming in/out. Here are playback samples:
- * <p><table summary="Sample Animations of CircleTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/CircleTransition2D/CircleIn.gif" alt="Circle In">
- * <p>Circle In
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/CircleTransition2D/CircleOut.gif" alt="Circle Out">
- * <p>Circle Out
- * </td>
- * </tr></table>
+ * This clips to the shape of a circle zooming in/out.
  */
 public class CircleTransition2D extends AbstractShapeTransition2D {
     /**

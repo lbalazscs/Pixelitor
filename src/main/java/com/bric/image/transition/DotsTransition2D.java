@@ -31,8 +31,7 @@ import static net.jafama.FastMath.sin;
 
 /**
  * This is a playful series of dots bubbling up from nowhere to
- * produce the incoming image. Here is a playback sample:
- * <p><img src="https://javagraphics.java.net/resources/transition/DotsTransition2D/Dots.gif" alt="DotsTransition2D Demo">
+ * produce the incoming image.
  */
 public class DotsTransition2D extends AbstractClippedTransition2D {
     private final Ellipse2D[] bubbles = {

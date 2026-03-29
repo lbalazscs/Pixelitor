@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AngleParam;
@@ -26,7 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * Mirror filter
+ * The Mirror filter.
  */
 public class Mirror extends ParametrizedFilter {
     public static final String NAME = GUIText.MIRROR;
@@ -38,8 +39,6 @@ public class Mirror extends ParametrizedFilter {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
-
-    private MirrorFilter filter;
 
     public Mirror() {
         super(true);
@@ -54,16 +53,13 @@ public class Mirror extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new MirrorFilter();
-        }
-
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setEdgeAction(edgeAction.getValue());
-        filter.setInterpolation(interpolation.getValue());
-        filter.setAngle(angle.getValueInRadians());
+        MirrorFilter filter = new MirrorFilter(NAME,
+            edgeAction.getValue(),
+            interpolation.getValue(),
+            center.getAbsolutePoint(src),
+            angle.getValueInRadians()
+        );
 
         return filter.filter(src, dest);
     }
 }
-

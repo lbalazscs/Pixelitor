@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.tools.Symmetry;
  * A mirroring effect achieved with negative scaling.
  * Not to be confused with {@link Symmetry}.
  */
-public enum Mirror {
+public enum CloneMirror {
     NONE("None", 1.0, 1.0),
     VERTICAL("Vertical", -1.0, 1.0),
     HORIZONTAL("Horizontal", 1.0, -1.0);
@@ -32,7 +32,7 @@ public enum Mirror {
     private final double multX;
     private final double multY;
 
-    Mirror(String displayName, double multX, double multY) {
+    CloneMirror(String displayName, double multX, double multY) {
         this.displayName = displayName;
         this.multX = multX;
         this.multY = multY;

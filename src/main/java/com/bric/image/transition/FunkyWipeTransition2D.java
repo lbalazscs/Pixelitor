@@ -40,17 +40,6 @@ import static net.jafama.FastMath.sin;
  * on the same side of the frame.
  * <P>(This is loosely based on a transition I saw while
  * watching Royal Pains on Hulu one weekend...)
- * <p>Here are playback samples:
- * <p><table summary="Sample Animations of FunkyWipeTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/FunkyWipeTransition2D/FunkyWipeCircular.gif" alt="Funky Wipe Circular">
- * <p>Funky Wipe Circular
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/FunkyWipeTransition2D/FunkyWipeAcross.gif" alt="Funky Wipe Across">
- * <p>Funky Wipe Across
- * </td>
- * </tr></table>
  */
 public class FunkyWipeTransition2D extends Transition2D {
     private static final GeneralPath pathCyclic = createPathCyclic();

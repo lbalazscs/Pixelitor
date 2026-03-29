@@ -32,17 +32,7 @@ import java.awt.geom.Rectangle2D;
 /**
  * This reveals the next frame as if a giant eraser is
  * scribbling away the current frame.  (Or as if a coin is
- * scratching a scratch-and-win game ticket.) Here are playback samples:
- * <p><table summary="Sample Animations of ScribbleTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/ScribbleTransition2D/Scribble.gif" alt="Scribble">
- * <p>Scribble
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/ScribbleTransition2D/ScribbleTwice.gif" alt="Scribble Twice">
- * <p>Scribble Twice
- * </td>
- * </tr></table>
+ * scratching a scratch-and-win game ticket.)
  */
 public class ScribbleTransition2D extends Transition2D {
     private final Shape scribble;
