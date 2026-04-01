@@ -53,20 +53,6 @@ public interface MotionBlur extends BufferedImageOp {
     void setZoom(float zoom);
 
     /**
-     * Sets the center of the effect in the X direction as a proportion of the image size.
-     *
-     * @param centerX the center
-     */
-    void setCenterX(float centerX);
-
-    /**
-     * Sets the center of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centerY the center
-     */
-    void setCenterY(float centerY);
-
-    /**
      * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center

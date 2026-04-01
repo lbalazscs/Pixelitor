@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,7 +62,7 @@ public class SpiderWeb extends CurveFilter {
     protected Path2D createCurve(int width, int height) {
         Path2D path = new Path2D.Double();
 
-        Random random = paramSet.getLastSeedRandom();
+        Random random = paramSet.getRandomWithLastSeed();
         double randomness = randomnessParam.getValue() / 100.0;
 
         double cx = transform.getCx(width);
@@ -81,6 +81,7 @@ public class SpiderWeb extends CurveFilter {
             path.moveTo(cx, cy);
 
             // draw a branch as multiple segments using the precalculated points
+            // instead of a single segment to enable distortions like swirl
             for (int conn = 0; conn < numConnections; conn++) {
                 Point2D.Double point = connectionPoints[br][conn];
                 path.lineTo(point.x, point.y);
@@ -90,29 +91,27 @@ public class SpiderWeb extends CurveFilter {
         // draw the connections
         int curvature = curvatureParam.getValue();
         for (int conn = 0; conn < numConnections; conn++) {
-            Point2D startPoint = null;
-            Point2D prevPoint = null;
+            Point2D startPoint = connectionPoints[0][conn];
+            path.moveTo(startPoint.getX(), startPoint.getY());
 
-            for (int br = 0; br < numBranches; br++) {
-                Point2D.Double point = connectionPoints[br][conn];
-
-                if (br == 0) {
-                    startPoint = point;
-                    path.moveTo(point.x, point.y);
-                } else {
-                    connect(prevPoint, point, center, path, curvature, random, randomness);
-                }
+            Point2D prevPoint = startPoint;
+            for (int br = 1; br < numBranches; br++) {
+                Point2D point = connectionPoints[br][conn];
+                connect(prevPoint, point, center, path, curvature, random, randomness);
                 prevPoint = point;
             }
             connect(prevPoint, startPoint, center, path, curvature, random, randomness);
+            path.closePath();
         }
 
-        path.closePath();
         return path;
     }
 
+    /**
+     * Connects two points on the spider web with either a straight line or a curve.
+     */
     private static void connect(Point2D start, Point2D end, Point2D center,
-                                Path2D shape, int curvature,
+                                Path2D path, int curvature,
                                 Random random, double randomness) {
         double startX = start.getX();
         double startY = start.getY();
@@ -120,7 +119,7 @@ public class SpiderWeb extends CurveFilter {
         double endY = end.getY();
 
         if (curvature == 0) {
-            shape.lineTo(endX, endY);
+            path.lineTo(endX, endY);
         } else {
             double midX = (startX + endX) / 2;
             double midY = (startY + endY) / 2;
@@ -136,10 +135,13 @@ public class SpiderWeb extends CurveFilter {
             double controlX = ImageMath.lerp(centerPull, midX, center.getX());
             double controlY = ImageMath.lerp(centerPull, midY, center.getY());
 
-            shape.quadTo(controlX, controlY, endX, endY);
+            path.quadTo(controlX, controlY, endX, endY);
         }
     }
 
+    /**
+     * Calculates the points where the web's branches and connections intersect.
+     */
     private static Point2D.Double[][] calcConnectionPoints(int numBranches, int numConnections,
                                                            double baseRadius, double cx, double cy,
                                                            Random random, double randomness) {
@@ -155,14 +157,13 @@ public class SpiderWeb extends CurveFilter {
 
             double branchRadius = randomizeValue(baseRadius, maxRadiusDeviation, randomness, random);
             double connectionSpacing = branchRadius / numConnections;
+            double maxDeviation = connectionSpacing * 0.45; // prevent crossing
 
             double cos = FastMath.cos(angle);
             double sin = FastMath.sin(angle);
 
             for (int conn = 0; conn < numConnections; conn++) {
-                double baseDistance = branchRadius * (conn + 1) / numConnections;
-
-                double maxDeviation = connectionSpacing * 0.45; // prevent crossing
+                double baseDistance = connectionSpacing * (conn + 1);
                 double distance = randomizeValue(baseDistance, maxDeviation, randomness, random);
 
                 double x = distance * cos + cx;
@@ -173,6 +174,9 @@ public class SpiderWeb extends CurveFilter {
         return points;
     }
 
+    /**
+     * Randomizes a base value within a maximum deviation depending on the randomness factor.
+     */
     private static double randomizeValue(double baseValue, double maxDeviation, double randomness, Random random) {
         if (randomness == 0) {
             return baseValue;

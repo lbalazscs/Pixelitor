@@ -46,26 +46,6 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     }
 
     /**
-     * Sets the center of the effect in the X direction as a proportion of the image size.
-     *
-     * @param centerX the center
-     */
-    @Override
-    public void setCenterX(float centerX) {
-        this.centerX = centerX;
-    }
-
-    /**
-     * Sets the center of the effect in the Y direction as a proportion of the image size.
-     *
-     * @param centerY the center
-     */
-    @Override
-    public void setCenterY(float centerY) {
-        this.centerY = centerY;
-    }
-
-    /**
      * Sets the center of the effect as a proportion of the image size.
      *
      * @param center the center

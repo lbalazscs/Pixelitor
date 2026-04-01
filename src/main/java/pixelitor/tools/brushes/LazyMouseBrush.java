@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class LazyMouseBrush extends BrushDecorator {
 
     // the lazy mouse distance is shared between the tools
     private static int lazyDist = DEFAULT_LAZY_DIST;
-    private static double lazyDist2 = DEFAULT_LAZY_DIST * DEFAULT_LAZY_DIST;
+    private static double lazyDistSq = DEFAULT_LAZY_DIST * DEFAULT_LAZY_DIST;
 
     public LazyMouseBrush(Brush delegate) {
         super(delegate);
@@ -67,7 +67,7 @@ public class LazyMouseBrush extends BrushDecorator {
 
     public static void setLazyDist(int value) {
         lazyDist = value;
-        lazyDist2 = value * value;
+        lazyDistSq = value * value;
     }
 
     private void updateSpacing() {
@@ -111,21 +111,21 @@ public class LazyMouseBrush extends BrushDecorator {
 
         double dx = mouseX - drawX;
         double dy = mouseY - drawY;
-        double dist2 = dx * dx + dy * dy;
+        double distSq = dx * dx + dy * dy;
 
-        if (dist2 <= spacing * spacing) {
+        if (distSq <= spacing * spacing) {
             return; // Skip if within a single step
         }
 
-        double dist = Math.sqrt(dist2);
+        double dist = Math.sqrt(distSq);
         double unitDx = dx / dist;
         double unitDy = dy / dist;
         double stepDx = unitDx * spacing;
         double stepDy = unitDy * spacing;
 
-        double remainingDist2 = lazyDist2 + spacing * spacing;
+        double remainingDistSq = lazyDistSq + spacing * spacing;
 
-        while (dist2 > remainingDist2) {
+        while (distSq > remainingDistSq) {
             drawX += stepDx;
             drawY += stepDy;
             PPoint drawPoint = PPoint.fromIm(drawX, drawY, view);
@@ -133,7 +133,7 @@ public class LazyMouseBrush extends BrushDecorator {
 
             dx = mouseX - drawX;
             dy = mouseY - drawY;
-            dist2 = dx * dx + dy * dy;
+            distSq = dx * dx + dy * dy;
         }
     }
 

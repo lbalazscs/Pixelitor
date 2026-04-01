@@ -42,8 +42,8 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.colors.FgBgColors.getBgColor;
+import static pixelitor.colors.FgBgColors.getFgColor;
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
@@ -87,7 +87,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
         new Item("Transparent", FG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
 
-    private final BooleanParam waterMark = new BooleanParam("Watermarking", false, IGNORE_RANDOMIZE);
+    private final BooleanParam watermark = new BooleanParam("Watermarking", false, IGNORE_RANDOMIZE);
     protected final Transform transform = new Transform();
 
     private transient Shape exportedShape;
@@ -98,15 +98,15 @@ public abstract class CurveFilter extends ParametrizedFilter {
         initParams(
             background,
             foreground,
-            waterMark,
+            watermark,
             transform.createDialogParam(),
             strokeParam.withDefaultStrokeWidth(2),
             effectsParam
         ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
 
         // disable foreground and background if watermarking is selected
-        waterMark.setupDisableOtherIfChecked(foreground);
-        waterMark.setupDisableOtherIfChecked(background);
+        watermark.setupDisableOtherIfChecked(foreground);
+        watermark.setupDisableOtherIfChecked(background);
     }
 
     @Override
@@ -117,7 +117,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
         Graphics2D g2;
         BufferedImage bumpImage = null;
 
-        boolean watermarking = waterMark.isChecked();
+        boolean watermarking = watermark.isChecked();
         if (watermarking) {
             bumpImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_RGB);
             g2 = bumpImage.createGraphics();
@@ -226,7 +226,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
         int bg = background.getValue();
         switch (bg) {
             case BG_BLACK -> Colors.fillWith(BLACK, g2, srcWidth, srcHeight);
-            case BG_TOOL -> Colors.fillWith(getBGColor(), g2, srcWidth, srcHeight);
+            case BG_TOOL -> Colors.fillWith(getBgColor(), g2, srcWidth, srcHeight);
             case BG_ORIGINAL -> g2.drawImage(src, 0, 0, null);
             case BG_TRANSPARENT -> {
             }
@@ -239,7 +239,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
         switch (fg) {
             case FG_WHITE -> g2.setColor(WHITE);
             case FG_BLACK -> g2.setColor(BLACK);
-            case FG_TOOL -> g2.setColor(getFGColor());
+            case FG_TOOL -> g2.setColor(getFgColor());
             case FG_GRADIENT -> setupGradientForeground(g2, srcWidth, srcHeight);
             case FG_TRANSPARENT -> g2.setComposite(AlphaComposite.Clear);
             default -> throw new IllegalStateException("Unexpected value: " + fg);
@@ -251,7 +251,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
         float cy = srcHeight / 2.0f;
         float radius = getGradientRadius(cx, cy);
         float[] fractions = {0.0f, 1.0f};
-        Color[] colors = {getFGColor(), getBGColor()};
+        Color[] colors = {getFgColor(), getBgColor()};
         g2.setPaint(new RadialGradientPaint(cx, cy, radius, fractions, colors));
     }
 
@@ -259,6 +259,13 @@ public abstract class CurveFilter extends ParametrizedFilter {
         return (float) Math.sqrt(cx * cx + cy * cy);
     }
 
+    /**
+     * Creates the geometric shape that represents the curve.
+     *
+     * @param width  the width of the image
+     * @param height the height of the image
+     * @return the generated shape, or null if no shape is generated
+     */
     protected abstract Shape createCurve(int width, int height);
 
     @Override
@@ -268,7 +275,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
 
     @Override
     public boolean supportsGray() {
-        return !waterMark.isChecked();
+        return !watermark.isChecked();
     }
 
     private void exportSVG() {

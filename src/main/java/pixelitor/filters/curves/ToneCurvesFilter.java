@@ -53,8 +53,8 @@ public class ToneCurvesFilter extends FilterWithGUI {
     }
 
     @Override
-    public ToneCurvesGUI createGUI(Filterable layer, boolean reset) {
-        if (reset) {
+    public ToneCurvesGUI createGUI(Filterable layer, boolean resetSettings) {
+        if (resetSettings) {
             curves.reset();
             // default to sRGB and its master channel
             curves.setColorSpace(ColorSpace.SRGB);

@@ -37,8 +37,8 @@ import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.colors.FgBgColors.getBgColor;
+import static pixelitor.colors.FgBgColors.getFgColor;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 import static pixelitor.utils.ImageUtils.isGrayscale;
 
@@ -118,7 +118,7 @@ public class PaintBucketTool extends Tool {
         int tx = dr.getTx();
         int ty = dr.getTy();
 
-        // the click position relative to image coordinates
+        // the coordinates of the clicked pixel
         int x = (int) e.getImX() - tx;
         int y = (int) e.getImY() - ty;
 
@@ -126,7 +126,7 @@ public class PaintBucketTool extends Tool {
         int imgHeight = targetImage.getHeight();
         int imgWidth = targetImage.getWidth();
         if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight) {
-            return;
+            return; // do nothing if the click was outside the image boundaries
         }
 
         BufferedImage backupForUndo = ImageUtils.copyImage(targetImage);
@@ -149,8 +149,8 @@ public class PaintBucketTool extends Tool {
         int rgbAtMouse = workingImage.getRGB(x, y);
 
         int fillRGB = switch (getSelectedFill()) {
-            case Fill.FOREGROUND -> getFGColor().getRGB();
-            case Fill.BACKGROUND -> getBGColor().getRGB();
+            case Fill.FOREGROUND -> getFgColor().getRGB();
+            case Fill.BACKGROUND -> getBgColor().getRGB();
             case Fill.TRANSPARENT -> 0x00_00_00_00;
             case Fill.CLICKED -> rgbAtMouse;
         };
@@ -253,12 +253,12 @@ public class PaintBucketTool extends Tool {
             }
         }
 
-        // Return the replaced area, which is the entire image.
+        // return the replaced area, which is the entire image
         return new Rectangle(0, 0, img.getWidth(), img.getHeight());
     }
 
     @Override
-    public boolean allowOnlyDrawables() {
+    public boolean allowsOnlyDrawables() {
         return true;
     }
 

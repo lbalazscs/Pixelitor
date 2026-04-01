@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class DropDownSlider extends JComboBox<String> {
             setSelectedItem(String.valueOf(slider.getValue())));
     }
 
-    // called when initializating and when the look and feel changes
+    // called when initializing and when the look and feel changes
     @Override
     public void updateUI() {
         super.updateUI();
@@ -81,7 +81,7 @@ public class DropDownSlider extends JComboBox<String> {
             }
         };
 
-        // it this necessary?
+        // is this necessary?
         GUIUtils.replaceMouseListeners(this, popupMouseListener);
 
         for (Component c : getComponents()) {

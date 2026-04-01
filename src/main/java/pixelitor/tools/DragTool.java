@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,10 +48,10 @@ public abstract class DragTool extends Tool {
     // of 45 degree angles when Shift is pressed
     private final boolean shiftConstrains;
 
-    protected DragTool(String name, char hotkey, String toolMessage,
+    protected DragTool(String name, char hotkey, String statusBarMessage,
                        Cursor cursor, boolean shiftConstrains) {
 
-        super(name, hotkey, toolMessage, cursor);
+        super(name, hotkey, statusBarMessage, cursor);
 
         this.shiftConstrains = shiftConstrains;
     }
@@ -76,20 +76,19 @@ public abstract class DragTool extends Tool {
         if (drag.isCanceled()) {
             return;
         }
-        if (repositionOnSpace) {
-            drag.saveEndValues();
-        }
+
         if (shiftConstrains) {
             drag.setAngleConstrained(e.isShiftDown());
         }
 
-        drag.setEnd(e);
+        // if panning is active, skip constraint recalculations and perfectly translate the shape
+        if (repositionOnSpace && endPointInitialized && GlobalEvents.isSpaceDown()) {
+            drag.pan(e);
+        } else {
+            drag.setEnd(e);
+        }
 
         if (repositionOnSpace) {
-            if (endPointInitialized && GlobalEvents.isSpaceDown()) {
-                drag.panStartPoint(e.getView());
-            }
-
             endPointInitialized = true;
         }
 
@@ -122,7 +121,7 @@ public abstract class DragTool extends Tool {
     protected abstract void ongoingDrag(PMouseEvent e);
 
     /**
-     * Called when a drag is finished
+     * Called when a drag is finished.
      */
     protected abstract void dragFinished(PMouseEvent e);
 

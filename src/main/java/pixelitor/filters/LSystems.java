@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,12 +45,10 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
                     case 'F' -> "";
                     case 'X' -> "FX+FX+FXFY-FY-";
                     case 'Y' -> "+FX+FXFY-FY-FY";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -72,9 +70,8 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
                     case 'F' -> "FF+F+F+F+FF";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -86,9 +83,8 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
                     case 'F' -> "FF+F++F+F";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -100,13 +96,9 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
-                    case '[' -> "[";
-                    case ']' -> "]";
                     case 'A' -> "F+[[A]-A]-F[-FA]+A";
                     case 'F' -> "FF";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -118,11 +110,9 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
                     case 'F' -> "F-G--G+F++FF+G-";
                     case 'G' -> "+F-GG--G-F++F+G";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -134,12 +124,9 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
-                    case 'F' -> "F";
                     case 'A' -> "+BF-AFA-FB+";
                     case 'B' -> "-AF+BFB+FA-";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -151,16 +138,12 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
-                    case '[' -> "[";
-                    case ']' -> "]";
                     case 'A' -> "CF++DF----BF[-CF----AF]++";
                     case 'B' -> "+CF--DF[---AF--BF]+";
                     case 'C' -> "-AF++BF[+++CF++DF]-";
                     case 'D' -> "--CF++++AF[+DF++++BF]--BF";
                     case 'F' -> "";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -172,10 +155,8 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
                     case 'F' -> "F++F++F+++++F-F++F";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -187,10 +168,8 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
                     case 'F' -> "FF+F+F+F+F+F-F";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -202,12 +181,8 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
-                    case 'F' -> "F";
-                    case 'G' -> "G";
                     case 'X' -> "XF+G+XF--F--XF+G+X";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -219,11 +194,8 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
-                    case 'F' -> "F";
                     case 'X' -> "XF-F+F-XF+F+XF-F+F-X";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -235,12 +207,9 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
-                    case 'F' -> "F";
                     case 'X' -> "YF+XF+Y";
                     case 'Y' -> "XF-YF-X";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -253,11 +222,9 @@ public class LSystems extends CurveFilter {
             @Override
             RewriteRule rewriteRule() {
                 return c -> switch (c) {
-                    case '+' -> "+";
-                    case '-' -> "-";
                     case 'F' -> "F-G+F+G-F";
                     case 'G' -> "GG";
-                    default -> throw new IllegalStateException("c = " + c);
+                    default -> null;
                 };
             }
 
@@ -270,7 +237,7 @@ public class LSystems extends CurveFilter {
         private final String displayName;
         private final String axiom;
 
-        // Whether to draw the axiom in the first iteration
+        // whether to draw the axiom in the first iteration
         private final boolean drawAxiom;
 
         Type(String displayName, String axiom, boolean drawAxiom) {
@@ -279,8 +246,14 @@ public class LSystems extends CurveFilter {
             this.drawAxiom = drawAxiom;
         }
 
+        /**
+         * Returns the rewrite rule for this L-system type.
+         */
         abstract RewriteRule rewriteRule();
 
+        /**
+         * Creates a turtle configured for the specified max iteration number.
+         */
         abstract Turtle createTurtle(int n);
 
         @Override
@@ -319,20 +292,33 @@ public class LSystems extends CurveFilter {
             transform.getVerOffset(height));
     }
 
-    private static String iterate(Type type, int order) {
+    /**
+     * Generates the L-system command string for the given type and number of iterations.
+     */
+    private static String iterate(Type type, int iterations) {
         RewriteRule rule = type.rewriteRule();
         StringBuilder in = new StringBuilder(type.axiom);
 
-        for (int i = 0; i < order; i++) {
-            StringBuilder out = new StringBuilder();
+        for (int i = 0; i < iterations; i++) {
+            StringBuilder out = new StringBuilder(in.length() * 4);
             for (int j = 0, n = in.length(); j < n; j++) {
-                out.append(rule.replace(in.charAt(j)));
+                char c = in.charAt(j);
+                String replacement = rule.replace(c);
+                if (replacement != null) {
+                    out.append(replacement);
+                } else {
+                    // preserve characters that don't have a rewrite rule
+                    out.append(c);
+                }
             }
             in = out;
         }
         return in.toString();
     }
 
+    /**
+     * Interprets L-system commands to draw a path.
+     */
     private static class Turtle {
         private double x, y;
 
@@ -341,7 +327,7 @@ public class LSystems extends CurveFilter {
         private int angle;
         private final int turnAngle;
 
-        // The current state of the turtle.
+        // the current state of the turtle
         private record State(double x, double y, int angle) {
         }
 
@@ -364,6 +350,9 @@ public class LSystems extends CurveFilter {
             path.moveTo(x, y);
         }
 
+        /**
+         * Processes a sequence of L-system commands and returns the resulting path.
+         */
         public Path2D interpret(String s) {
             for (int i = 0, n = s.length(); i < n; i++) {
                 switch (s.charAt(i)) {
@@ -414,6 +403,9 @@ public class LSystems extends CurveFilter {
      * Defines the rewriting rules for an L-system.
      */
     private interface RewriteRule {
+        /**
+         * Returns the replacement string for the character, or null if it should remain unchanged.
+         */
         String replace(char c);
     }
 }

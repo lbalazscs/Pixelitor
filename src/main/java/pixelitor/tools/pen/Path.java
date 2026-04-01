@@ -249,7 +249,7 @@ public class Path implements Serializable, Debuggable {
 
         comp.setActivePath(null);
 
-        assert Tools.activeIsPathTool();
+        assert Tools.isPathToolActive();
         PathTool tool = (PathTool) Tools.getActive();
 
         // create the edit before the actual removing

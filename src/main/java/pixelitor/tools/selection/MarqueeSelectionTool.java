@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,11 +57,11 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
 
         // determine if Alt means "expand from center"
         // this is true if Alt is down, but wasn't pressed *at the start* for subtraction
-        boolean expandFromCenter = !altMeansSubtract && altDown;
+        boolean expandFromCenter = !isAltSubtracting && altDown;
 
         // if Alt is released mid-drag, it no longer means subtract for this drag
         if (!altDown) {
-            altMeansSubtract = false;
+            isAltSubtracting = false;
         }
 
         drag.setExpandFromCenter(expandFromCenter);
@@ -78,7 +78,7 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     public void altPressed() {
         // handle pressing Alt *during* a drag: if Alt wasn't already
         // down and wasn't for subtraction, enable expand-from-center
-        if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
+        if (!altDown && !isAltSubtracting && drag != null && drag.isDragging()) {
             drag.setExpandFromCenter(true);
             selectionBuilder.updateDraftSelection(drag);
         }
@@ -89,7 +89,7 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     public void altReleased() {
         // handle releasing Alt *during* a drag: if Alt wasn't
         // for subtraction, disable expand-from-center
-        if (!altMeansSubtract && drag != null && drag.isDragging()) {
+        if (!isAltSubtracting && drag != null && drag.isDragging()) {
             drag.setExpandFromCenter(false);
             selectionBuilder.updateDraftSelection(drag);
         }
@@ -103,4 +103,3 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
             : ToolIcons::paintEllipseSelectionIcon;
     }
 }
-

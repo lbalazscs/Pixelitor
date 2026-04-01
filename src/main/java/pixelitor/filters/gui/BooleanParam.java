@@ -219,7 +219,7 @@ public class BooleanParam extends AbstractFilterParam {
         private final String saveString;
 
         BooleanParamState() {
-            this.saveString = super.toString().toLowerCase(Locale.ENGLISH);
+            this.saveString = super.toString().toLowerCase(Locale.ROOT);
         }
 
         @Override

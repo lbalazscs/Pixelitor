@@ -98,7 +98,7 @@ public class CropTool extends DragTool {
 
     public CropTool() {
         super("Crop", 'C',
-            "<b>drag</b> to start or <b>Alt-drag</b> to start form the center. " +
+            "<b>drag</b> to start or <b>Alt-drag</b> to start from the center. " +
                 "After handles appear: " +
                 "<b>Shift-drag</b> to keep aspect ratio, " +
                 "<b>Double-click</b> to crop, <b>Esc</b> to cancel.",
@@ -228,7 +228,7 @@ public class CropTool extends DragTool {
             0, 0, max, 1));
         spinner.addChangeListener(listener);
         spinner.setToolTipText(toolTip);
-        // setting it to 3 columns seems enough
+        // setting it to 3 columns looks enough (Swing adds extra space)
         // for the range 1-9999, but leave it as 4 for safety
         ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setColumns(4);
         return spinner;
@@ -340,7 +340,7 @@ public class CropTool extends DragTool {
         } else if (state == INITIAL_DRAG) {
             // define the initial crop rectangle
             drag.setExpandFromCenter(e.isAltDown());
-            drag.setEnforceEqualDimensions(e.isShiftDown());
+            drag.setForceSquareAspectRatio(e.isShiftDown());
         }
 
         // update the size spinners continuously
@@ -365,7 +365,7 @@ public class CropTool extends DragTool {
             // else ignore clicks - double clicks are handled separately
             return;
         }
-        if (drag.isEmptyRect() && state == INITIAL_DRAG) {
+        if (drag.isCoRectEmpty() && state == INITIAL_DRAG) {
             reset(); // can't create a crop box from an empty rectangle
             return;
         }
@@ -750,7 +750,7 @@ public class CropTool extends DragTool {
         Rectangle2D cropRect = getCropRect(view).getIm();
         if (cropRect.isEmpty()) {
             Messages.showInfo("Empty Crop Rectangle",
-                "Can't crop to %dx%d image.".formatted(
+                "Can't crop to a %dx%d image.".formatted(
                     (int) cropRect.getWidth(),
                     (int) cropRect.getHeight()));
             return false;

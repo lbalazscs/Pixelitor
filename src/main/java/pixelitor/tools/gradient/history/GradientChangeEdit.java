@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,8 +43,8 @@ public class GradientChangeEdit extends PixelitorEdit {
         this.before = before;
         this.after = after;
 
-        // if both gradients are solid overlays, then simply re-rendering
-        // the gradient is enough to perfectly restore the pixel state
+        // if both gradients are solid overlays, simply re-rendering
+        // the gradient is sufficient to perfectly restore the pixel state
         imageEditNeeded = !before.isSolidOverlay() || !after.isSolidOverlay();
 
         if (imageEditNeeded) {

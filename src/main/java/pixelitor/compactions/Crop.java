@@ -215,7 +215,7 @@ public class Crop implements CompAction {
     /**
      * Starts a crop based on the selection in the active composition.
      */
-    public static void selectionCropActiveComp() {
+    public static void cropActiveCompToSelection() {
         Views.onActiveComp(Crop::selectionCrop);
     }
 
@@ -250,7 +250,7 @@ public class Crop implements CompAction {
             "<li><b>Only Crop:</b> Crop to the rectangular bounds of the selection.</li>" +
             "<li><b>Only Hide:</b> Add a mask based on the selection without changing the canvas size.</li></ul>";
         String[] options = {"Crop and Hide", "Only Crop", "Only Hide", GUIText.CANCEL};
-        int answer = Dialogs.showManyOptionsDialog(comp.getDialogParent(), title, question,
+        int answer = Dialogs.showCustomOptionsDialog(comp.getDialogParent(), title, question,
             options, JOptionPane.QUESTION_MESSAGE);
         switch (answer) {
             case 0: // crop and hide

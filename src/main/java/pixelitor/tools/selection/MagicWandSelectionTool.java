@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
  * A tool that creates selections based on color similarity by clicking.
  */
 public class MagicWandSelectionTool extends AbstractSelectionTool {
-    private static final String TOLERANCE_TEXT = "Tolerance";
+    private static final String PRESET_KEY_TOLERANCE = "Tolerance";
 
     private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
     private final SliderSpinner toleranceSlider = new SliderSpinner(toleranceParam, WEST, false);
@@ -84,12 +84,13 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     @Override
     public void mouseClicked(PMouseEvent e) {
         Composition comp = e.getComp();
-        initCombinatorAndBuilder(e, SelectionType.MAGIC_WAND);
 
         if (e.isRight()) {
             // right-click always cancels
             cancelSelection(comp);
-        } else if (selectionBuilder != null && e.getClickCount() == 1) {
+        } else if (e.getClickCount() == 1) { // ignore the second click of a double click
+            initCombinatorAndBuilder(e, SelectionType.MAGIC_WAND);
+
             try {
                 // calculate the selection shape based on the click event
                 selectionBuilder.updateDraftSelection(e);
@@ -126,14 +127,14 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     public void saveStateTo(UserPreset preset) {
         super.saveStateTo(preset);
 
-        preset.putInt(TOLERANCE_TEXT, getTolerance());
+        preset.putInt(PRESET_KEY_TOLERANCE, getTolerance());
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
         super.loadUserPreset(preset);
 
-        toleranceParam.setValue(preset.getInt(TOLERANCE_TEXT, 20));
+        toleranceParam.setValue(preset.getInt(PRESET_KEY_TOLERANCE, 20));
     }
 
     /**

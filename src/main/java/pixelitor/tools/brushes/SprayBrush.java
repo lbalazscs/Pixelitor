@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,8 +67,8 @@ public class SprayBrush extends AbstractBrush {
 
         // the Graphics2D is not completely configured yet, so we can't check
         // its composite to see if this is called from the eraser tool
-        isErasing = Tools.activeIs(Tools.ERASER);
-        baseColor = FgBgColors.getFGColor();
+        isErasing = Tools.isActive(Tools.ERASER);
+        baseColor = FgBgColors.getFgColor();
     }
 
     @Override

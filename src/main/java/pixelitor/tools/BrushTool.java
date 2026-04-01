@@ -31,8 +31,8 @@ import java.awt.Shape;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.colors.FgBgColors.getBgColor;
+import static pixelitor.colors.FgBgColors.getFgColor;
 
 /**
  * The brush tool.
@@ -79,16 +79,16 @@ public class BrushTool extends BlendingModeBrushTool {
     @Override
     protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         super.prepareProgrammaticBrushStroke(dr, start);
-        brushContext.setColor(getFGColor());
+        brushContext.setColor(getFgColor());
     }
 
     private void initDrawingColor(PMouseEvent e) {
-        drawingColor = e.isRight() ? getBGColor() : getFGColor();
+        drawingColor = e.isRight() ? getBgColor() : getFgColor();
     }
 
     @Override
     public void trace(Drawable dr, Shape shape) {
-        drawingColor = getFGColor();
+        drawingColor = getFgColor();
         super.trace(dr, shape);
     }
 

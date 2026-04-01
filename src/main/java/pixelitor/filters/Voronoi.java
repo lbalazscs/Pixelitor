@@ -74,7 +74,7 @@ public class Voronoi extends ParametrizedFilter {
             filter = new VoronoiFilter(NAME);
         }
 
-        filter.setRand(paramSet.getLastSeedSRandom());
+        filter.setRand(paramSet.getSRandomWithLastSeed());
         filter.setDistanceBetweenPoints(distance.getValueAsDouble());
         filter.setMetric(metric.getSelected(), src.getWidth() / 2, src.getHeight() / 2);
         filter.setUseImageColors(useImageColors.isChecked());

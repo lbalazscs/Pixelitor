@@ -207,7 +207,7 @@ public class Colors {
             return false;
         } else {
             // it's the color selector's responsibility to ensure that any
-            // valid color selection is already in passed to the change listener
+            // valid color selection is already passed to the change listener
             return true;
         }
     }
@@ -312,9 +312,9 @@ public class Colors {
 
         popup.addSeparator();
         popup.add(new TaskAction("Set to Foreground Color", () ->
-            colorSetter.accept(FgBgColors.getFGColor())));
+            colorSetter.accept(FgBgColors.getFgColor())));
         popup.add(new TaskAction("Set to Background Color", () ->
-            colorSetter.accept(FgBgColors.getBGColor())));
+            colorSetter.accept(FgBgColors.getBgColor())));
 
         return popup;
     }

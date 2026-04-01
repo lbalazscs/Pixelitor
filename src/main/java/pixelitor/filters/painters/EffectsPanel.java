@@ -82,7 +82,6 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
      * Sets the listener to be notified of parameter adjustments.
      */
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        assert listener != null;
         for (EffectPanel panel : panels) {
             panel.setAdjustmentListener(listener);
         }

@@ -74,7 +74,7 @@ public class JHPerspective extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUI createGUI(Filterable layer, boolean reset) {
-        return new GridAdjustmentPanel(this, layer, false, true, reset);
+    public FilterGUI createGUI(Filterable layer, boolean resetSettings) {
+        return new GridAdjustmentPanel(this, layer, false, true, resetSettings);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,14 +45,14 @@ public class AffectedArea implements Debuggable {
     }
 
     /**
-     * Update the area with a brush position
+     * Updates the area with a brush position.
      */
     public void extendStrokeTo(PPoint p) {
         boundingBox.add(p.getImX(), p.getImY());
     }
 
     /**
-     * Returns the rectangle affected by a brush stroke for the undo
+     * Returns the rectangle affected by a brush stroke for the undo.
      */
     public Rectangle toRectangle(double radius) {
         return boundingBox.toRectangle(radius + 1.0);

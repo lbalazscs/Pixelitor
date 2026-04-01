@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 
 import static javax.swing.SwingUtilities.isRightMouseButton;
-import static pixelitor.colors.FgBgColors.setBGColor;
-import static pixelitor.colors.FgBgColors.setFGColor;
+import static pixelitor.colors.FgBgColors.setBgColor;
+import static pixelitor.colors.FgBgColors.setFgColor;
 
 /**
  * Handles user clicks on a color swatch.
@@ -37,9 +37,9 @@ public interface ColorSwatchClickHandler {
     // sets the foreground color for left-clicks and the background color for right-clicks
     ColorSwatchClickHandler STANDARD = (newColor, e) -> {
         if (isRightMouseButton(e)) {
-            setBGColor(newColor);
+            setBgColor(newColor);
         } else {
-            setFGColor(newColor);
+            setFgColor(newColor);
         }
     };
 

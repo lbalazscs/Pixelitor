@@ -172,7 +172,7 @@ public class Flashlight extends ParametrizedFilter {
             bgRGBA = switch (bg) {
                 case BG_BLACK -> 0xFF_00_00_00;
                 case BG_WHITE -> 0xFF_FF_FF_FF;
-                case BG_TOOL_BG -> FgBgColors.getBGColor().getRGB();
+                case BG_TOOL_BG -> FgBgColors.getBgColor().getRGB();
                 case BG_TRANSPARENT -> 0;
                 default -> throw new IllegalArgumentException("bg = " + bg);
             };

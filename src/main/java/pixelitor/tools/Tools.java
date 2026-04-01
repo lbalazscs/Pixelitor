@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * Tool-related static utility methods
+ * Tool-related static utility methods.
  */
 public class Tools {
     private Tools() {
@@ -152,15 +152,15 @@ public class Tools {
         return activeTool;
     }
 
-    public static boolean activeIs(Tool t) {
+    public static boolean isActive(Tool t) {
         return activeTool == t;
     }
 
-    public static boolean activeIsPathTool() {
+    public static boolean isPathToolActive() {
         return activeTool instanceof PathTool;
     }
 
-    public static boolean isShapesDrawing() {
+    public static boolean isDrawingShapes() {
         return activeTool == SHAPES && SHAPES.shouldDrawOverLayer();
     }
 

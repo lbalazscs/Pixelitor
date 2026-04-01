@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.filters.gmic.GMICFilter;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.CachedFloatRandom;
 import pixelitor.utils.Icons;
+import pixelitor.utils.Threads;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -33,7 +34,6 @@ import java.util.function.LongConsumer;
 import java.util.random.RandomGenerator;
 import java.util.random.RandomGeneratorFactory;
 
-import static java.util.Locale.Category.FORMAT;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING_STATE;
 
 /**
@@ -73,9 +73,9 @@ public class ParamSet implements Debuggable {
     }
 
     /**
-     * Adds the given parameters before the existing ones
+     * Adds the given parameters before the existing ones.
      */
-    public void addParamsToFront(FilterParam[] newParams) {
+    public void addParamsToFront(FilterParam... newParams) {
         params.addAll(0, Arrays.asList(newParams));
     }
 
@@ -92,10 +92,8 @@ public class ParamSet implements Debuggable {
         return this;
     }
 
-    public ParamSet withActionsAtFront(FilterButtonModel... newActions) {
-        for (FilterButtonModel action : newActions) {
-            actions.addFirst(action);
-        }
+    public ParamSet withActionsAtFront(List<FilterButtonModel> newActions) {
+        actions.addAll(0, newActions);
         return this;
     }
 
@@ -160,13 +158,12 @@ public class ParamSet implements Debuggable {
      * Randomizes the values of all parameters without triggering a filter preview update.
      */
     public void randomize() {
-        long before = Filter.executionCount;
+        long executionsBefore = Filter.executionCount;
 
         params.forEach(FilterParam::randomize);
 
         // check that the filter wasn't triggered
-        long after = Filter.executionCount;
-        assert before == after : "before = " + before + ", after = " + after;
+        assert Filter.executionCount == executionsBefore : "executionsBefore = " + executionsBefore + ", executionsAfter = " + Filter.executionCount;
     }
 
     /**
@@ -262,8 +259,7 @@ public class ParamSet implements Debuggable {
             if (forAnimation && !param.isAnimatable()) {
                 continue;
             }
-            String name = param.getName();
-            ParamState<?> newParamState = newState.get(name);
+            ParamState<?> newParamState = newState.get(param.getPresetKey());
 
             if (newParamState != null) { // a preset doesn't have to contain all key-value pairs
                 param.loadStateFrom(newParamState, !forAnimation);
@@ -312,17 +308,11 @@ public class ParamSet implements Debuggable {
      * Saves the current parameter values to a {@link UserPreset}.
      */
     public void saveStateTo(UserPreset preset) {
-        Locale locale = Locale.getDefault(FORMAT);
-        try {
-            Locale.setDefault(FORMAT, Locale.US);
-            for (FilterParam param : params) {
-                param.saveStateTo(preset);
-            }
-            if (savesSeed) {
-                preset.putLong(SEED_KEY, seed);
-            }
-        } finally {
-            Locale.setDefault(FORMAT, locale);
+        for (FilterParam param : params) {
+            param.saveStateTo(preset);
+        }
+        if (savesSeed) {
+            preset.putLong(SEED_KEY, seed);
         }
     }
 
@@ -334,6 +324,7 @@ public class ParamSet implements Debuggable {
         for (FilterParam param : params) {
             if (param.getName().equals(paramName)) {
                 modified = param;
+                break;
             }
         }
         if (modified == null) {
@@ -368,7 +359,7 @@ public class ParamSet implements Debuggable {
         return singleParam.isComplex();
     }
 
-    // reseed support methods form here
+    // reseed support methods from here
 
     /**
      * Adds a "Reseed" action button.
@@ -408,7 +399,7 @@ public class ParamSet implements Debuggable {
      * in order to make sure that the filter runs with the same random
      * numbers as before.
      */
-    public Random getLastSeedRandom() {
+    public Random getRandomWithLastSeed() {
         random.setSeed(seed);
         return random;
     }
@@ -417,7 +408,7 @@ public class ParamSet implements Debuggable {
      * Returns a non thread-safe random number generator that is
      * faster than {@link Random}, seeded to the last value.
      */
-    public RandomGenerator getLastSeedSRandom() {
+    public RandomGenerator getSRandomWithLastSeed() {
         // apparently this is a bit faster than "Xoroshiro128PlusPlus"
         // in the case of "Add Noise"
         return new SplittableRandom(seed);
@@ -425,7 +416,9 @@ public class ParamSet implements Debuggable {
 
     private static final Map<String, RandomGeneratorFactory> rndFactoryMap = new HashMap<>();
 
-    public RandomGenerator getLastSeedOf(String className) {
+    public RandomGenerator getGeneratorWithLastSeed(String className) {
+        assert Threads.calledOnEDT();
+
         RandomGeneratorFactory factory = rndFactoryMap.computeIfAbsent(
             className,
             s -> RandomGeneratorFactory.of(className));
@@ -435,7 +428,7 @@ public class ParamSet implements Debuggable {
     /**
      * Similar to the method above, but for simplex noise
      */
-    public OpenSimplex2F getLastSeedSimplex() {
+    public OpenSimplex2F getSimplexWithLastSeed() {
         if (simplex == null) {
             simplex = new OpenSimplex2F(seed);
         }
@@ -520,8 +513,8 @@ public class ParamSet implements Debuggable {
     /**
      * Creates a "Reseed" button model for simplex noise.
      */
-    public FilterButtonModel createReseedSimplexAction() {
-        initReseedSupport(true);
+    public FilterButtonModel createReseedSimplexAction(boolean createRandom) {
+        initReseedSupport(createRandom);
         return FilterButtonModel.createReseed(this::reseedSimplex);
     }
 

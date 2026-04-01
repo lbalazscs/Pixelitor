@@ -20,6 +20,7 @@ package pixelitor.tools.shapes;
 import com.jhlabs.awt.WobbleStroke;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.ParamState;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
@@ -54,8 +55,6 @@ import java.util.Objects;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.TRANSPARENT;
 
@@ -285,7 +284,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             // ability to drag exactly horizontally or vertically
             drag.setAngleConstrained(shiftDown);
         } else {
-            drag.setEnforceEqualDimensions(shiftDown);
+            drag.setForceSquareAspectRatio(shiftDown);
         }
 
         origDrag = drag;
@@ -377,8 +376,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private void updateColors() {
-        this.fgColor = getFGColor();
-        this.bgColor = getBGColor();
+        this.fgColor = FgBgColors.getFgColor();
+        this.bgColor = FgBgColors.getBgColor();
     }
 
     // called after a change in the shape type or settings
@@ -431,7 +430,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             // for directional shapes, zero-width or zero-height drags are allowed
             box = createRotatedBox(view, origDrag.calcAngle());
         } else {
-            if (origDrag.isEmptyImRect()) {
+            if (origDrag.isImRectEmpty()) {
                 return null;
             }
             Rectangle2D origImRect = origDrag.toPosImRect();

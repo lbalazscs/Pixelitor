@@ -29,7 +29,6 @@ import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.FullPalette;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.compactions.*;
-import pixelitor.filters.Mirror;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
 import pixelitor.filters.convolve.Convolve;
@@ -1304,7 +1303,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createTestSubmenu() {
         PMenu sub = new PMenu("Test");
 
-        sub.add(new TaskAction("Create All Filters", Filters::createAllFilters));
+        sub.add(new TaskAction("Instantiate All Filters", Filters::instantiateAllFilters));
 
         sub.addFilter(ParamTestFilter.NAME, ParamTestFilter::new);
 

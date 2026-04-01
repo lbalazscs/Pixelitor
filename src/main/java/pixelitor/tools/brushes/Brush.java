@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,8 @@ public interface Brush extends Debuggable {
 
     /**
      * Returns true if the brush is currently in an active drawing state.
-     * This means that the mouse is down, except when automated (tracing, auto paint).
+     * This generally means that the mouse is pressed,
+     * except during automated actions (e.g., tracing or auto-painting).
      *
      * This is a low-level method, used only by delegating brushes.
      * In the case of shift-clicking, a single user-level brush stroke
@@ -106,7 +107,7 @@ public interface Brush extends Debuggable {
     double getMaxEffectiveRadius();
 
     /**
-     * Returns the space between the between brush applications (dabs) in image-space pixels.
+     * Returns the space between brush applications (dabs) in image-space pixels.
      *
      * If the brush doesn't use uniform spacing, it can return
      * any spacing that looks good, or 0 to skip the decision.

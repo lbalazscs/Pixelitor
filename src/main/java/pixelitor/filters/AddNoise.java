@@ -69,7 +69,7 @@ public class AddNoise extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        RandomGenerator rand = paramSet.getLastSeedSRandom();
+        RandomGenerator rand = paramSet.getSRandomWithLastSeed();
 
         return isGrayscale(src)
             ? addNoiseToGray(src, dest, rand)

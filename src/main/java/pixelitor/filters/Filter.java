@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,13 +56,13 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
      * Executes the filter, handling grayscale conversion if necessary.
      */
     public BufferedImage transformImage(BufferedImage src) {
-        boolean grayConversion = false;
+        boolean convertedToRgb = false;
 
         // handle grayscale images (in layer masks) if
         // the filter doesn't support them directly
         if (isGrayscale(src) && !supportsGray()) {
             // converting grayscale to RGB
-            grayConversion = true;
+            convertedToRgb = true;
             src = ImageUtils.toSysCompatibleImage(src);
         }
 
@@ -73,7 +73,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         // apply the filter transformation
         dest = transform(src, dest);
 
-        if (grayConversion) { // convert the result back
+        if (convertedToRgb) { // convert the result back
             dest = ImageUtils.convertToGrayscaleImage(dest);
         }
 
@@ -115,19 +115,20 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
     /**
      * Returns true if this filter can be used as a smart filter.
-     * One condition is that the filter must have a no-arg constructor.
-     * Another condition is that is must support user presets.
+     * One condition is that the filter must have a public no-arg constructor.
+     * Another condition is that it must support user presets.
      * Some filters are excluded for other reasons (for example an
      * experimental filter that should not be serialized).
      */
     public boolean canBeSmart() {
+        // overridden in subclasses that can't be smart
         return true;
     }
 
     /**
      * Returns a string representation of the filter's parameters (for debugging).
      */
-    public String paramsAsString() {
+    public String getParamsAsString() {
         return "";
     }
 
@@ -215,21 +216,24 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         protected Object readResolve() {
             Filter filter = null;
             try {
-                // serializable filters must have a no-argument constructor
+                // serializable filters must have a public no-argument constructor
                 filter = filterClass.getDeclaredConstructor().newInstance();
+                restoreFilter(filter);
             } catch (Exception e) {
                 String msg = "Could not instantiate " + filterClass.getName();
                 Messages.showException(new RuntimeException(msg, e));
             }
+            return filter;
+        }
 
-            // restore the filter's name and state
+        // restore the filter's name and state
+        private void restoreFilter(Filter filter) {
             filter.setName(filterName);
             if (filter.supportsUserPresets() && filterState != null) {
                 UserPreset preset = new UserPreset("", null);
                 preset.loadFromString(filterState);
                 filter.loadUserPreset(preset);
             }
-            return filter;
         }
     }
 }

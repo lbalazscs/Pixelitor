@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.util.Objects;
 
 /**
  * Represents the change of a selection shape
- * (via add, subtract, intersect, invert, move)
+ * (via add, subtract, intersect, invert, move).
  */
 public class SelectionShapeChangeEdit extends PixelitorEdit {
     private Shape backupShape;

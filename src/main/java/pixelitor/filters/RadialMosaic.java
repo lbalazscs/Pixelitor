@@ -104,7 +104,7 @@ public class RadialMosaic extends ParametrizedFilter {
         double cy = center.getRelativeY() * height;
         int arrangement = arrangementParam.getValue();
 
-        Random random = paramSet.getLastSeedRandom();
+        Random random = paramSet.getRandomWithLastSeed();
         double randomness = randomnessParam.getPercentage();
         double pinchBulge = pinchBulgeParam.getPercentage();
         double spiral = spiralParam.getPercentage();

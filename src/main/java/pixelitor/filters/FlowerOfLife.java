@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,13 +27,16 @@ import pixelitor.utils.CustomShapes;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.io.Serial;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.jhlabs.image.ImageMath.HALF_SQRT_3;
 import static com.jhlabs.image.ImageMath.SQRT_2;
 
 /**
- * "Flower of Life" shape filter
+ * "Flower of Life" filter.
  */
 public class FlowerOfLife extends CurveFilter {
     @Serial
@@ -77,11 +80,19 @@ public class FlowerOfLife extends CurveFilter {
         int gridType = grid.getValue();
         int numIterations = iterations.getValue();
 
+        List<Circle> newlyAdded = List.of(firstCircle);
         for (int it = 2; it <= numIterations; it++) {
-            List<Circle> circlesSoFar = new ArrayList<>(circlesSet);
-            for (Circle circle : circlesSoFar) {
-                circlesSet.addAll(circle.calcNeighbors(gridType));
+            List<Circle> nextNew = new ArrayList<>();
+            // only computes neighbors for the circles that were
+            // newly added during the preceding iteration
+            for (Circle circle : newlyAdded) {
+                for (Circle neighbor : circle.calcNeighbors(gridType)) {
+                    if (circlesSet.add(neighbor)) {
+                        nextNew.add(neighbor);
+                    }
+                }
             }
+            newlyAdded = nextNew;
         }
 
         boolean manyPoints = transform.hasNonlinDistort();
@@ -103,62 +114,42 @@ public class FlowerOfLife extends CurveFilter {
         }
 
         private List<Circle> calcTriangleGridNeighbors() {
-            List<Circle> n = new ArrayList<>(6);
             double rowHeight = r * HALF_SQRT_3;
             double halfRadius = r / 2;
-            n.add(new Circle(cx + r, cy, r)); // right
-            n.add(new Circle(cx - r, cy, r)); // left
-            n.add(new Circle(cx - halfRadius, cy - rowHeight, r)); // top left
-            n.add(new Circle(cx + halfRadius, cy - rowHeight, r)); // top right
-            n.add(new Circle(cx - halfRadius, cy + rowHeight, r)); // bottom left
-            n.add(new Circle(cx + halfRadius, cy + rowHeight, r)); // bottom right
-            return n;
+            return List.of(
+                new Circle(cx + r, cy, r), // right
+                new Circle(cx - r, cy, r), // left
+                new Circle(cx - halfRadius, cy - rowHeight, r), // top left
+                new Circle(cx + halfRadius, cy - rowHeight, r), // top right
+                new Circle(cx - halfRadius, cy + rowHeight, r), // bottom left
+                new Circle(cx + halfRadius, cy + rowHeight, r) // bottom right
+            );
         }
 
         private List<Circle> calcSquareGridNeighbors() {
-            List<Circle> n = new ArrayList<>(6);
             double distance = r * SQRT_2;
-            n.add(new Circle(cx - distance, cy, r)); // left
-            n.add(new Circle(cx + distance, cy, r)); // right
-            n.add(new Circle(cx, cy - distance, r)); // top
-            n.add(new Circle(cx, cy + distance, r)); // bottom
-            return n;
+            return List.of(
+                new Circle(cx - distance, cy, r), // left
+                new Circle(cx + distance, cy, r), // right
+                new Circle(cx, cy - distance, r), // top
+                new Circle(cx, cy + distance, r) // bottom
+            );
         }
 
         private List<Circle> calcSquare2GridNeighbors() {
-            List<Circle> n = new ArrayList<>(6);
             double distance = r * SQRT_2;
-            n.add(new Circle(cx - distance, cy - distance, r)); // top left
-            n.add(new Circle(cx + distance, cy - distance, r)); // top right
-            n.add(new Circle(cx - distance, cy + distance, r)); // bottom left
-            n.add(new Circle(cx + distance, cy + distance, r)); // bottom right
-            return n;
+            return List.of(
+                new Circle(cx - distance, cy - distance, r), // top left
+                new Circle(cx + distance, cy - distance, r), // top right
+                new Circle(cx - distance, cy + distance, r), // bottom left
+                new Circle(cx + distance, cy + distance, r) // bottom right
+            );
         }
 
         Shape toShape(boolean manyPoints) {
-            if (manyPoints) {
-                return CustomShapes.createCircle(cx, cy, r, 24);
-            } else {
-                return CustomShapes.createCircle(cx, cy, r);
-            }
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Circle circle = (Circle) o;
-            return Double.compare(circle.cx, cx) == 0 &&
-                Double.compare(circle.cy, cy) == 0;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(cx, cy);
+            return manyPoints
+                ? CustomShapes.createCircle(cx, cy, r, 24)
+                : CustomShapes.createCircle(cx, cy, r);
         }
     }
 

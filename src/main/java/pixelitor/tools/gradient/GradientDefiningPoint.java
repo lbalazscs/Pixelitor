@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.awt.geom.Point2D;
  */
 public class GradientDefiningPoint extends DraggablePoint {
     private final GradientHandles gradientHandles;
-    private GradientDefiningPoint other;
+    private GradientDefiningPoint opposite;
     private GradientCenterPoint center;
 
     public GradientDefiningPoint(String name, PPoint pos, View view,
@@ -41,8 +41,8 @@ public class GradientDefiningPoint extends DraggablePoint {
         this.gradientHandles = gradientHandles;
     }
 
-    public void setOther(GradientDefiningPoint other) {
-        this.other = other;
+    public void setOpposite(GradientDefiningPoint opposite) {
+        this.opposite = opposite;
     }
 
     public void setCenter(GradientCenterPoint center) {
@@ -54,8 +54,8 @@ public class GradientDefiningPoint extends DraggablePoint {
         super.setLocation(coX, coY);
 
         // also move the center point
-        double cx = (coX + other.x) / 2.0;
-        double cy = (coY + other.y) / 2.0;
+        double cx = (coX + opposite.x) / 2.0;
+        double cy = (coY + opposite.y) / 2.0;
         center.setLocationOnlyForThis(cx, cy);
     }
 
@@ -63,7 +63,7 @@ public class GradientDefiningPoint extends DraggablePoint {
     public void setConstrainedLocation(double mouseX, double mouseY) {
         // constrain it relative to the other point:
         // it seems more useful than constraining it relative to its own drag start
-        Point2D p = Utils.constrainToNearestAngle(other.x, other.y, mouseX, mouseY);
+        Point2D p = Utils.constrainToNearestAngle(opposite.x, opposite.y, mouseX, mouseY);
         setLocation(p.getX(), p.getY());
     }
 

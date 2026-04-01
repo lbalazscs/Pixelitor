@@ -36,8 +36,8 @@ import static pixelitor.tools.pen.PathActions.setActionsEnabled;
  * Base class for path-related tools.
  */
 public abstract class PathTool extends Tool {
-    protected PathTool(String name, String toolMessage, Cursor cursor) {
-        super(name, 'P', toolMessage, cursor);
+    protected PathTool(String name, String statusBarMessage, Cursor cursor) {
+        super(name, 'P', statusBarMessage, cursor);
 
         pixelSnapping = true;
     }

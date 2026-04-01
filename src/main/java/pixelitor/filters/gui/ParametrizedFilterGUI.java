@@ -37,25 +37,25 @@ import static java.awt.BorderLayout.SOUTH;
  */
 public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentListener {
     private ShowOriginalCheckbox showOriginalCB;
+    private final ParamSet paramSet;
 
     public ParametrizedFilterGUI(ParametrizedFilter filter, Filterable layer,
-                                 boolean addShowOriginal, boolean reset) {
-        this(filter, layer, addShowOriginal, reset, null);
+                                 boolean addShowOriginal, boolean resetSettings) {
+        this(filter, layer, addShowOriginal, resetSettings, null);
     }
 
+    // a version with an extra Action[] presets parameter,
+    // which is used only by the ChannelMixerGUI subclass
     public ParametrizedFilterGUI(ParametrizedFilter filter,
                                  Filterable layer,
                                  boolean addShowOriginal,
-                                 boolean reset,
+                                 boolean resetSettings,
                                  Action[] presets) {
         super(filter, layer);
 
-        ParamSet paramSet = filter.getParamSet();
+        paramSet = filter.getParamSet();
 
-        // detach the previous dialog's listener
-        paramSet.setAdjustmentListener(null);
-
-        if (reset) {
+        if (resetSettings) {
             paramSet.reset();
 
             // if the filter is not reset, then the ranges should
@@ -80,7 +80,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
     }
 
     /**
-     * This can be overridden if a custom arrangement is necessary
+     * This can be overridden if a custom arrangement is necessary.
      */
     public JPanel createFilterParamsPanel(ParamSet paramSet) {
         return GUIUtils.createVerticalPanel(paramSet);
@@ -122,9 +122,11 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
     @Override
     public void paramAdjusted() {
         if (hasShowOriginal()) {
-            // Stops "Show Original" mode if any parameter changes.
+            // deselects the "Show Original" checkbox if any parameter changes
             showOriginalCB.deselectWithoutTriggering();
         }
+        // if the Filterable was in "Show Original" state,
+        // this will put it into a "Show Preview" state
         startPreview(false);
     }
 
@@ -133,6 +135,12 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
      */
     private boolean hasShowOriginal() {
         return showOriginalCB != null;
+    }
+
+    @Override
+    public void dispose() {
+        // prevents a memory leak, because the Filter object lives indefinitely
+        paramSet.setAdjustmentListener(null);
     }
 
     /**

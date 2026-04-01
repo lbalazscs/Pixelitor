@@ -263,7 +263,7 @@ public class Views {
         try {
             Composition comp = view.getComp();
             if (comp.hasUnsavedChanges()) {
-                int answer = Dialogs.showCloseWarningDialog(comp.getName());
+                int answer = Dialogs.showUnsavedChangesDialog(comp.getName());
 
                 switch (answer) {
                     case YES_OPTION:  // "Save"

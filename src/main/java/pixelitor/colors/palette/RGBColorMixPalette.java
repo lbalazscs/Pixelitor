@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jhlabs.image.ImageMath.mixColors;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.colors.FgBgColors.getBgColor;
+import static pixelitor.colors.FgBgColors.getFgColor;
 
 /**
  * A palette that mixes foreground and background colors using RGB interpolation.
@@ -51,8 +51,8 @@ public class RGBColorMixPalette extends DynamicPalette {
         super(lastRowCount, lastColumnCount);
         this.startWithFg = startWithFg;
 
-        Color colorA = startWithFg ? getFGColor() : getBGColor();
-        Color colorB = startWithFg ? getBGColor() : getFGColor();
+        Color colorA = startWithFg ? getFgColor() : getBgColor();
+        Color colorB = startWithFg ? getBgColor() : getFgColor();
 
         rgbA = colorA.getRGB();
         rgbB = colorB.getRGB();

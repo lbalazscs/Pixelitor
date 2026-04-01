@@ -90,10 +90,10 @@ public class ParticleSystem<P extends Particle> {
      */
     public Future<?>[] iterate(int iterations, int groupCount) {
         Future<?>[] futures = new Future[groupCount];
-        int s = particles.size();
-        int groupSize = (int) Math.ceil(s / (double) groupCount);
+        int size = particles.size();
+        int groupSize = (int) Math.ceil(size / (double) groupCount);
 
-        for (int i = 0, k = 0; i < s; i += groupSize, k++) {
+        for (int i = 0, k = 0; i < size; i += groupSize, k++) {
             int finalI = i;
             futures[k] = ThreadPool.submit(() -> iterate(iterations, finalI, finalI + groupSize));
         }
@@ -139,7 +139,7 @@ public class ParticleSystem<P extends Particle> {
      * A builder for creating {@link ParticleSystem} instances.
      */
     public static class ParticleSystemBuilder<P extends Particle> {
-        private final List<Modifier<P>> modifiers = new ArrayList<>();
+        private final List<Modifier<P>> initializers = new ArrayList<>();
         private final List<Modifier<P>> updaters = new ArrayList<>();
         private Supplier<P> particleCreator = () -> null;
         private final int particles;
@@ -159,8 +159,8 @@ public class ParticleSystem<P extends Particle> {
         /**
          * Adds a modifier to be applied once when a particle is initialized or reset.
          */
-        public ParticleSystemBuilder<P> addModifier(Modifier<P> modifier) {
-            modifiers.add(modifier);
+        public ParticleSystemBuilder<P> addInitializer(Modifier<P> modifier) {
+            initializers.add(modifier);
             return this;
         }
 
@@ -176,7 +176,7 @@ public class ParticleSystem<P extends Particle> {
          * Builds and returns the configured particle system.
          */
         public ParticleSystem<P> build() {
-            return new ParticleSystem<>(particles, modifiers, updaters, particleCreator);
+            return new ParticleSystem<>(particles, initializers, updaters, particleCreator);
         }
     }
 }

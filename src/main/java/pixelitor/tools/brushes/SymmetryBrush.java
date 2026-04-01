@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,9 +79,9 @@ public class SymmetryBrush implements Brush {
 
     @Override
     public PPoint getPrevious() {
-        // the sub-brushes manage their own previous points, but don't
-        // throw an exception, because the lazy mouse brush calls this
-        return null;
+        // used by the lazy mouse brush, when the user’s first action
+        // after enabling lazy mouse is a Shift-click line connect
+        return brushes[0].getPrevious();
     }
 
     @Override
@@ -201,39 +201,39 @@ public class SymmetryBrush implements Brush {
     /**
      * Starts a brush stroke for a specific internal brush.
      */
-    public void startAt(int brushNo, PPoint p) {
+    public void startAt(int brushIndex, PPoint p) {
         // the tracking of the shared affected area is done at this level
-        if (brushNo == 0) {
+        if (brushIndex == 0) {
             affectedArea.startStrokeAt(p);
         } else {
             affectedArea.extendStrokeTo(p);
         }
 
         // do the actual drawing
-        brushes[brushNo].startStrokeAt(p);
+        brushes[brushIndex].startStrokeAt(p);
     }
 
     /**
      * Continues a brush stroke for a specific internal brush.
      */
-    public void continueTo(int brushNo, PPoint p) {
+    public void continueTo(int brushIndex, PPoint p) {
         affectedArea.extendStrokeTo(p);
-        brushes[brushNo].continueTo(p);
+        brushes[brushIndex].continueTo(p);
     }
 
     /**
      * Connects the last point with a line for a specific internal brush.
      */
-    public void lineConnectTo(int brushNo, PPoint p) {
+    public void lineConnectTo(int brushIndex, PPoint p) {
         affectedArea.extendStrokeTo(p);
-        brushes[brushNo].lineConnectTo(p);
+        brushes[brushIndex].lineConnectTo(p);
     }
 
     /**
      * Finishes the brush stroke for a specific internal brush.
      */
-    public void finishBrushStroke(int brushNo) {
-        brushes[brushNo].finishBrushStroke();
+    public void finishBrushStroke(int brushIndex) {
+        brushes[brushIndex].finishBrushStroke();
     }
 
     @Override

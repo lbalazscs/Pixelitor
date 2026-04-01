@@ -73,8 +73,8 @@ public class Convolve extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Filterable layer, boolean reset) {
-        return new ConvolveGUI(this, layer, reset);
+    public FilterGUI createGUI(Filterable layer, boolean resetSettings) {
+        return new ConvolveGUI(this, layer, resetSettings);
     }
 
     @Override

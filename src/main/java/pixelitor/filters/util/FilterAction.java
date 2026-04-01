@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.SimpleForwardingFilter;
 import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.history.History;
 import pixelitor.layers.*;
 import pixelitor.utils.Messages;
 
@@ -66,14 +65,14 @@ public class FilterAction extends AbstractViewEnabledAction {
     }
 
     /**
-     * Creates a a {@link FilterAction} for a simple filter type
+     * Creates a {@link FilterAction} for a simple filter type
      * that just wraps an {@link AbstractBufferedImageOp}.
      */
     public static FilterAction forwarding(String name,
-                                          Supplier<AbstractBufferedImageOp> op,
+                                          Supplier<AbstractBufferedImageOp> factory,
                                           boolean supportsGray) {
         return new FilterAction(name,
-            () -> new SimpleForwardingFilter(op, supportsGray)).withoutDialog();
+            () -> new SimpleForwardingFilter(factory, supportsGray)).withoutDialog();
     }
 
     /**
@@ -90,7 +89,8 @@ public class FilterAction extends AbstractViewEnabledAction {
         if (layer.isMaskEditing()) {
             applyToFilterable(layer.getMask());
         } else if (layer instanceof SmartFilter smartFilter) {
-            // smart filters are Filterable, but the filter should be started on their smart object
+            // smart filters are Filterable, but the filter
+            // should be started on their containing smart object
             applyToSmartObject(smartFilter.getSmartObject());
         } else if (layer instanceof AdjustmentLayer) {
             // adjustment layers are Filterable, so this must be
@@ -115,9 +115,9 @@ public class FilterAction extends AbstractViewEnabledAction {
         }
     }
 
-    private void applyToFilterable(Filterable dr) {
+    private void applyToFilterable(Filterable filterable) {
         ensureFilterCreated();
-        dr.startFilter(filter, true);
+        filterable.startFilter(filter, true);
     }
 
     // adds this filter as a new, non-destructive smart filter
@@ -162,7 +162,7 @@ public class FilterAction extends AbstractViewEnabledAction {
 
     /**
      * Configures this filter action to not display a GUI dialog.
-     * Overrides the constructor parameter for simplifying builders.
+     * Overrides the constructor parameter to simplify fluent instantiation.
      */
     public FilterAction withoutDialog() {
         hasDialog = false;
@@ -181,9 +181,6 @@ public class FilterAction extends AbstractViewEnabledAction {
             return false;
         }
         if (!pf.isAnimatable()) {
-            return false;
-        }
-        if (filter instanceof Fade && !History.canFade()) {
             return false;
         }
         return true;

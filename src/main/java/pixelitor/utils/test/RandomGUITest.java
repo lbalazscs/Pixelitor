@@ -367,7 +367,7 @@ public class RandomGUITest {
     }
 
     private static boolean canUseTool(Tool tool) {
-        if (tool.allowOnlyDrawables()) {
+        if (tool.allowsOnlyDrawables()) {
             return (Views.getActiveLayer() instanceof Drawable);
         }
         return true;
@@ -1111,7 +1111,7 @@ public class RandomGUITest {
             assert preferredTweenFilter.isAnimatable();
             return preferredTweenFilter;
         }
-        FilterAction filterAction = Filters.getRandomAnimationFilter();
+        FilterAction filterAction = Rnd.chooseFrom(Filters.getAnimationFilters());
         return (ParametrizedFilter) filterAction.getFilter();
     }
 
@@ -1159,7 +1159,7 @@ public class RandomGUITest {
     }
 
     private void deletePath() {
-        if (!Tools.activeIsPathTool()) {
+        if (!Tools.isPathToolActive()) {
             return;
         }
         if (PathActions.deletePathAction.isEnabled()) {

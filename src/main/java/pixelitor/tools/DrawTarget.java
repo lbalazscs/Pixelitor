@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,20 +41,15 @@ public enum DrawTarget {
         }
 
         @Override
-        public void prepareForBrushStroke(Drawable dr) {
-            // no preparation needed
-        }
-
-        @Override
-        public void finishBrushStroke(Drawable dr) {
-            dr.mergeTmpDrawingLayerDown();
-        }
-
-        @Override
-        public BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool) {
-            // it can simply return the drawable image because
-            // the drawing was on the temporary layer
+        public BufferedImage prepareForBrushStroke(Drawable dr) {
+            // it can simply return the drawable's image because
+            // the drawing was done on a temporary layer
             return dr.getImage();
+        }
+
+        @Override
+        public void finishBrushStroke(Drawable dr, BufferedImage originalImg) {
+            dr.mergeTmpDrawingLayerDown();
         }
     },
     /**
@@ -63,8 +58,6 @@ public enum DrawTarget {
      * opacity for the brush strokes.
      */
     DIRECT {
-        private BufferedImage backupImg;
-
         @Override
         public Graphics2D createGraphics(Drawable dr, Composite composite) {
             // ignores the composite!
@@ -72,39 +65,30 @@ public enum DrawTarget {
         }
 
         @Override
-        public void prepareForBrushStroke(Drawable dr) {
+        public BufferedImage prepareForBrushStroke(Drawable dr) {
             BufferedImage image = dr.getImage();
-
             assert Assertions.rasterStartsAtOrigin(image);
 
-            // store the original image for undo support
-            backupImg = ImageUtils.copyImage(image);
+            return ImageUtils.copyImage(image);
         }
 
         @Override
-        public void finishBrushStroke(Drawable dr) {
-            backupImg.flush();
-            backupImg = null;
-        }
-
-        @Override
-        public BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool) {
-            if (backupImg == null) {
-                throw new IllegalStateException("no backup image in " + tool.getName());
+        public void finishBrushStroke(Drawable dr, BufferedImage backupImg) {
+            if (backupImg != null) {
+                backupImg.flush();
             }
-
-            return backupImg;
         }
     };
 
     public abstract Graphics2D createGraphics(Drawable dr, Composite composite);
 
-    public abstract void prepareForBrushStroke(Drawable dr);
-
-    public abstract void finishBrushStroke(Drawable dr);
+    /**
+     * Returns the backup/original image for undo support.
+     */
+    public abstract BufferedImage prepareForBrushStroke(Drawable dr);
 
     /**
-     * Returns the original (unchanged) image for undo support.
+     * Flushes/merges state to finalize the drawing.
      */
-    public abstract BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool);
+    public abstract void finishBrushStroke(Drawable dr, BufferedImage originalImg);
 }

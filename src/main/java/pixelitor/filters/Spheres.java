@@ -133,7 +133,7 @@ public class Spheres extends ParametrizedFilter {
 
         boolean addHighlights = addHighLightsCB.isChecked();
 
-        Random rand = paramSet.getLastSeedRandom();
+        Random rand = paramSet.getRandomWithLastSeed();
         double radiusStep = (maxR - minR) / numCircles;
         for (int i = 0; i < numCircles; i++) {
             double r = minR == maxR ? minR : maxR - i * radiusStep;

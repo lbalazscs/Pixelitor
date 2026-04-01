@@ -41,11 +41,11 @@ public class FgBgColors {
         return selector;
     }
 
-    public static Color getFGColor() {
+    public static Color getFgColor() {
         return selector.getFgColor();
     }
 
-    public static Color getBGColor() {
+    public static Color getBgColor() {
         return selector.getBgColor();
     }
 
@@ -57,19 +57,19 @@ public class FgBgColors {
         return selector.getActualBgColor();
     }
 
-    public static void setFGColor(Color c) {
+    public static void setFgColor(Color c) {
         selector.setFgColor(c, true);
     }
 
-    public static void setFGColor(Color c, boolean notifyListeners) {
+    public static void setFgColor(Color c, boolean notifyListeners) {
         selector.setFgColor(c, notifyListeners);
     }
 
-    public static void setBGColor(Color c) {
+    public static void setBgColor(Color c) {
         selector.setBgColor(c, true);
     }
 
-    public static void setBGColor(Color c, boolean notifyListeners) {
+    public static void setBgColor(Color c, boolean notifyListeners) {
         selector.setBgColor(c, notifyListeners);
     }
 
@@ -86,12 +86,12 @@ public class FgBgColors {
     }
 
     public static void saveStateTo(UserPreset preset) {
-        preset.putColor("FG", getFGColor());
-        preset.putColor("BG", getBGColor());
+        preset.putColor("FG", getFgColor());
+        preset.putColor("BG", getBgColor());
     }
 
     public static void loadStateFrom(UserPreset preset, boolean notifyListeners) {
-        setFGColor(preset.getColor("FG", Color.BLACK), false);
-        setBGColor(preset.getColor("BG", Color.WHITE), notifyListeners);
+        setFgColor(preset.getColor("FG", Color.BLACK), false);
+        setBgColor(preset.getColor("BG", Color.WHITE), notifyListeners);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -120,7 +120,7 @@ public record AngleGradientPaint(Drag drag, Color startColor, Color endColor,
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
-                        double distance = drag.taxiCabMetric(x, y);
+                        double distance = drag.taxicabDistTo(x, y);
                         double threshold = 0.2 / distance;
                         needsAA = interpolated > (1.0 - threshold) || interpolated < threshold;
                     }
@@ -223,7 +223,7 @@ public record AngleGradientPaint(Drag drag, Color startColor, Color endColor,
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
-                        double distance = drag.taxiCabMetric(x, y);
+                        double distance = drag.taxicabDistTo(x, y);
                         double threshold = 0.2 / distance;
                         needsAA = interpolated > (1.0 - threshold) || interpolated < threshold;
                     }

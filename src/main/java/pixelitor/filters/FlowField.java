@@ -92,16 +92,16 @@ public class FlowField extends ParametrizedFilter {
         out.multiply(magnitude);
     }
 
-    private static void createNoiseForce(float magnitude, float startAngle, float variantPI,
+    private static void createNoiseForce(float magnitude, float startAngle, float variancePI,
                                          double sampleX, double sampleY, double sampleZ,
                                          int turbulence, OpenSimplex2F noise, Vector2D out) {
-        double angle = startAngle + noise.turbulence3(sampleX, sampleY, sampleZ, turbulence) * variantPI;
+        double angle = startAngle + noise.turbulence3(sampleX, sampleY, sampleZ, turbulence) * variancePI;
         out.set((float) cos(angle), (float) sin(angle));
         out.setMagnitude(magnitude);
     }
 
     private enum ForceMode implements Modifier<FlowFieldParticle> {
-        FORCE_MODE_VELOCITY("No Mass") {
+        VELOCITY("No Mass") {
             @Override
             public void modify(FlowFieldParticle particle) {
                 particle.pos.setLocation(
@@ -110,7 +110,7 @@ public class FlowField extends ParametrizedFilter {
                 );
             }
         },
-        FORCE_MODE_ACCELERATION("Uniform Mass") {
+        ACCELERATION("Uniform Mass") {
             @Override
             public void modify(FlowFieldParticle particle) {
                 particle.vel.add(particle.delta);
@@ -120,7 +120,7 @@ public class FlowField extends ParametrizedFilter {
                 );
             }
         },
-        FORCE_MODE_JOLT("Jolt") {
+        JOLT("Jolt") {
             @Override
             public void modify(FlowFieldParticle particle) {
                 particle.acc.add(particle.delta);
@@ -131,7 +131,7 @@ public class FlowField extends ParametrizedFilter {
                 );
             }
         },
-        FORCE_MODE_VELOCITY_AND_NOISE_BASED_RANDOMNESS("Thicken") {
+        VELOCITY_AND_NOISE_BASED_RANDOMNESS("Thicken") {
             @Override
             public void modify(FlowFieldParticle particle) {
                 particle.delta.add(Noise.noise2((float) particle.delta.x, (float) particle.delta.y) * 10);
@@ -179,13 +179,13 @@ public class FlowField extends ParametrizedFilter {
                 return rgbColorFromAcceleration(particle.delta, particle.startingColor);
             }
         },
-        HSB_Cycle("HSB Cycle", false) {
+        HSB_CYCLE("HSB Cycle", false) {
             @Override
             Color getColor(FlowFieldParticle particle) {
                 return hsbColorFromAcceleration(particle.delta, particle.startingColor, 6);
             }
         },
-        Warm("Warm", false) {
+        WARM("Warm", false) {
             @Override
             Color getColor(FlowFieldParticle particle) {
                 return hsbColorFromAcceleration(particle.delta, particle.startingColor, 400);
@@ -273,7 +273,7 @@ public class FlowField extends ParametrizedFilter {
 
             advancedParam
 
-        ).withAction(paramSet.createReseedSimplexAction());
+        ).withAction(paramSet.createReseedSimplexAction(true));
 
         UserPreset confetti = createConfettiPreset();
         UserPreset smoke = createSmokePreset();
@@ -287,10 +287,10 @@ public class FlowField extends ParametrizedFilter {
 
         noiseAdjustmentParam.setToolTip("Some additional tweaks to manipulate the evaluation system.");
         zoomParam
-            .setToolTip("Change zoom to make fields look bigger or smaller. Please note, that particle width will not take any effect.");
+            .setToolTip("Change zoom to make fields look bigger or smaller. Particle width will have no effect.");
         varianceParam.setToolTip("Increase variance to add more turns and twists to the flow.");
         turbulenceParam.setToolTip("Increase to make the flow path rougher.");
-        windParam.setToolTip("Spreads away the particles against the flow path.");
+        windParam.setToolTip("Spreads the particles away from the flow path.");
 
         advancedParam.setToolTip("Advanced or rarely used settings.");
         forceModeParam.setToolTip("Advanced control over how forces act.");
@@ -306,7 +306,7 @@ public class FlowField extends ParametrizedFilter {
         initialColorsParam
             .setToolTip("Make particles use the same color from their positions on the source image.");
         startFlowFromSourceParam.setToolTip("Prevent particles from spawning at any transparent regions.");
-        colorRandomnessParam.setToolTip("Increase to impart the particle color with some randomness.");
+        colorRandomnessParam.setToolTip("Increase to add randomness to the particle color.");
         widthRandomnessParam.setToolTip("Increase to draw particles with a randomised width.");
     }
 
@@ -442,13 +442,13 @@ public class FlowField extends ParametrizedFilter {
         float fieldDensity = fieldWidth * 1.0f / imgWidth;
         int fieldHeight = (int) (imgHeight * fieldDensity);
 
-        Random r = paramSet.getLastSeedRandom();
-        OpenSimplex2F noise = paramSet.getLastSeedSimplex();
+        Random r = paramSet.getRandomWithLastSeed();
+        OpenSimplex2F noise = paramSet.getSimplexWithLastSeed();
 
         Vector2D center = new Vector2D(fieldWidth / 2.0f, fieldHeight / 2.0f);
         Rectangle bounds = new Rectangle(-PAD, -PAD,
             fieldWidth + PAD * 2, fieldHeight + PAD * 2);
-        float variantPI = (float) Math.PI * variance;
+        float variancePI = (float) Math.PI * variance;
         float startAngle = (float) (r.nextFloat() * 2 * Math.PI);
 
         int groupCount = IS_MULTI_THREADED ? (int) Math.ceil(particleCount / (double) PARTICLES_PER_GROUP) : 1;
@@ -479,7 +479,7 @@ public class FlowField extends ParametrizedFilter {
         }
 
         initializeAcceleration(multiplierNoise, multiplierSink, multiplierRevolve,
-            zoom, turbulence, fieldWidth, fieldHeight, noise, center, variantPI, startAngle, fieldAccelerations);
+            zoom, turbulence, fieldWidth, fieldHeight, noise, center, variancePI, startAngle, fieldAccelerations);
 
         List<Point2D> spawns = null;
         if (inheritSpawnPoints) {
@@ -489,7 +489,7 @@ public class FlowField extends ParametrizedFilter {
         GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
         FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1,
             fieldDensity, bounds, tolerance, maximumVelocitySq, wind, zoom,
-            turbulence, noise, multiplierNoise, startAngle, variantPI, forceMode, goldenRatio, fieldColors, imgWidth, sourcePixels);
+            turbulence, noise, multiplierNoise, startAngle, variancePI, forceMode, goldenRatio, fieldColors, imgWidth, sourcePixels);
 
         if (useColorField) {
             if (colorRandomness != 0) {
@@ -508,8 +508,8 @@ public class FlowField extends ParametrizedFilter {
         ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
             .setParticleCreator(() -> new FlowFieldParticle(graphicsCopies, randomizeWidth ? strokes[
                 r.nextInt(strokes.length)] : stroke, meta))
-            .addModifier(positionRandomizer)
-            .addModifier(particleInitializer)
+            .addInitializer(positionRandomizer)
+            .addInitializer(particleInitializer)
             .addUpdater(forceModeUpdater)
             .addUpdater(colorSource)
             .build();
@@ -531,7 +531,7 @@ public class FlowField extends ParametrizedFilter {
         return false;
     }
 
-    private static void initializeAcceleration(float multiplierNoise, float multiplierSink, float multiplierRevolve, float zoom, int turbulence, int fieldWidth, int fieldHeight, OpenSimplex2F noise, Vector2D center, float variantPI, float startAngle, Vector2D[][] fieldAccelerations) {
+    private static void initializeAcceleration(float multiplierNoise, float multiplierSink, float multiplierRevolve, float zoom, int turbulence, int fieldWidth, int fieldHeight, OpenSimplex2F noise, Vector2D center, float variancePI, float startAngle, Vector2D[][] fieldAccelerations) {
         Vector2D position = new Vector2D();
         Vector2D noiseForce = new Vector2D();
         Vector2D sinkForce = new Vector2D();
@@ -543,7 +543,7 @@ public class FlowField extends ParametrizedFilter {
 
                 createSinkForce(position, center, multiplierSink, sinkForce);
                 createRevolveForce(position, center, multiplierRevolve, revolutionForce);
-                createNoiseForce(multiplierNoise, startAngle, variantPI, position.x / zoom,
+                createNoiseForce(multiplierNoise, startAngle, variancePI, position.x / zoom,
                     position.y / zoom, 0, turbulence, noise, noiseForce);
 
                 fieldAccelerations[i][j] = Vector2D.add(revolutionForce, sinkForce, noiseForce);
@@ -604,8 +604,8 @@ public class FlowField extends ParametrizedFilter {
             (float) particleColor.getAlpha() / 255.0f);
     }
 
-    private static Color hsbColorFromAcceleration(Vector2D acc, Color particleColor, float dividend) {
-        int hsbColor = Color.HSBtoRGB((float) (acc.x + acc.y) / dividend, 0.8f, 1.0f);
+    private static Color hsbColorFromAcceleration(Vector2D acc, Color particleColor, float divisor) {
+        int hsbColor = Color.HSBtoRGB((float) (acc.x + acc.y) / divisor, 0.8f, 1.0f);
         int r = (hsbColor >> 16) & 0xFF;
         int g = (hsbColor >> 8) & 0xFF;
         int b = hsbColor & 0xFF;
@@ -717,7 +717,7 @@ public class FlowField extends ParametrizedFilter {
                 double sampleY = pos.getY() / meta.zoom;
                 double sampleZ = meta.wind * iterationIndex;
                 Vector2D noiseDelta = new Vector2D();
-                createNoiseForce(meta.multiplierNoise, meta.startAngle, meta.variantPI,
+                createNoiseForce(meta.multiplierNoise, meta.startAngle, meta.variancePI,
                     sampleX, sampleY, sampleZ, meta.turbulence, meta.noise, noiseDelta);
                 delta.add(noiseDelta);
             }
@@ -751,7 +751,7 @@ public class FlowField extends ParametrizedFilter {
     public record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds,
                                 double tolerance,
                                 float maximumVelocitySq, double wind, double zoom, int turbulence,
-                                OpenSimplex2F noise, float multiplierNoise, float startAngle, float variantPI,
+                                OpenSimplex2F noise, float multiplierNoise, float startAngle, float variancePI,
                                 ForceMode forceMode, GoldenRatio goldenRatio,
                                 Color[][] fieldColors, int imgWidth, int[] sourcePixels) {
     }

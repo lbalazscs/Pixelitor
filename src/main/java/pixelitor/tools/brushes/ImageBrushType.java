@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,8 +46,8 @@ public enum ImageBrushType {
     private static final int SIZE = 2 * AbstractBrushTool.MAX_BRUSH_RADIUS;
 
     /**
-     * Creates a brush template that is not colorized yet. Areas that should be transparent in the final
-     * brush image are white, and semi-transparent images are gray
+     * Creates a brush template that is not colorized yet. Areas that should be transparent
+     * in the final brush image are white, and semi-transparent pixels are gray.
      */
     public abstract BufferedImage createTemplateImage();
 }

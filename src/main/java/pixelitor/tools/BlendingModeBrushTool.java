@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,9 +39,9 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     // tracks if this tool is currently editing a layer mask
     private boolean maskEditing;
 
-    protected BlendingModeBrushTool(String name, char hotKey, String toolMessage,
+    protected BlendingModeBrushTool(String name, char hotKey, String statusBarMessage,
                                     Cursor cursor, boolean addSymmetry) {
-        super(name, hotKey, toolMessage, cursor, addSymmetry);
+        super(name, hotKey, statusBarMessage, cursor, addSymmetry);
         drawTarget = DrawTarget.DIRECT;
         maskEditing = false;
 

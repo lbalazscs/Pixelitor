@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import pixelitor.gui.GUIText;
 import java.awt.Color;
 
 import static pixelitor.colors.Colors.TRANSPARENT_BLACK;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.colors.FgBgColors.getBgColor;
+import static pixelitor.colors.FgBgColors.getFgColor;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -49,12 +49,12 @@ public enum FillType {
     }, FOREGROUND(GUIText.FG_COLOR) {
         @Override
         public Color getColor() {
-            return getFGColor();
+            return getFgColor();
         }
     }, BACKGROUND(GUIText.BG_COLOR) {
         @Override
         public Color getColor() {
-            return getBGColor();
+            return getBgColor();
         }
     };
 

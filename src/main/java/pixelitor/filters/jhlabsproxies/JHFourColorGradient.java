@@ -28,6 +28,7 @@ import pixelitor.layers.Filterable;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.List;
 
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
@@ -80,7 +81,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
             midpoint,
             interpolation,
             space
-        ).withActionsAtFront(darkenAll, brightenAll);
+        ).withActionsAtFront(List.of(brightenAll, darkenAll));
     }
 
     private void darkenColors() {
@@ -115,7 +116,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUI createGUI(Filterable layer, boolean reset) {
-        return new GridAdjustmentPanel(this, layer, true, false, reset);
+    public FilterGUI createGUI(Filterable layer, boolean resetSettings) {
+        return new GridAdjustmentPanel(this, layer, true, false, resetSettings);
     }
 }

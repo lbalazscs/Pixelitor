@@ -56,7 +56,7 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
 import static pixelitor.utils.Threads.threadName;
 
 /**
- * Static utility methods related to dialogs
+ * Static utility methods related to dialogs.
  */
 public class Dialogs {
     private static boolean mainWindowInitialized = false;
@@ -103,14 +103,14 @@ public class Dialogs {
         return showYesNoDialog(parent, title, msg, QUESTION_MESSAGE);
     }
 
-    public static int showManyOptionsDialog(String title, String question,
-                                            Object[] options, int messageType) {
-        return showManyOptionsDialog(getMainWindow(), title, question, options, messageType);
+    public static int showCustomOptionsDialog(String title, String question,
+                                              Object[] options, int messageType) {
+        return showCustomOptionsDialog(getMainWindow(), title, question, options, messageType);
     }
 
-    public static int showManyOptionsDialog(Component parent, String title,
-                                            String question, Object[] options,
-                                            int messageType) {
+    public static int showCustomOptionsDialog(Component parent, String title,
+                                              String question, Object[] options,
+                                              int messageType) {
         assert !(parent instanceof View);
         GlobalEvents.modalDialogOpened();
         int answer = JOptionPane.showOptionDialog(parent, new JLabel(question),
@@ -354,14 +354,14 @@ public class Dialogs {
         showErrorDialog(title, msg);
     }
 
-    public static int showCloseWarningDialog(String compName) {
+    public static int showUnsavedChangesDialog(String compName) {
         Object[] options = {"Save", "Don't Save", GUIText.CANCEL};
         String question = format(
             "<html><b>Do you want to save the changes made to %s?</b>" +
                 "<br>Your changes will be lost if you don't save them.</html>",
             compName);
 
-        return showManyOptionsDialog("Unsaved Changes",
+        return showCustomOptionsDialog("Unsaved Changes",
             question, options, WARNING_MESSAGE);
     }
 
@@ -413,9 +413,9 @@ public class Dialogs {
     public static ShapeCombinator showShapeCombinatorDialog(Composition comp) {
         String[] options = {"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL};
         String msg = "<html>There is already a selection on " + comp.getName() +
-            ".<br>How do you want to combine new selection with the existing one?";
+            ".<br>How do you want to combine the new selection with the existing one?";
 
-        int userChoice = showManyOptionsDialog(
+        int userChoice = showCustomOptionsDialog(
             comp.getDialogParent(),
             "Existing Selection",
             msg,

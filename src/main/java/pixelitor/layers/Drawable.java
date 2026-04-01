@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -115,7 +115,7 @@ public interface Drawable extends Filterable {
                 filter.getName(),
                 getComp().getDebugName(),
                 getName(), getClass().getSimpleName(),
-                filter.paramsAsString());
+                filter.getParamsAsString());
 
             var ise = new IllegalStateException(errorDetails, e);
             if (RandomGUITest.isRunning()) {

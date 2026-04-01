@@ -79,7 +79,7 @@ public class JHSparkle extends ParametrizedFilter {
         filter.setAmount(shine.getValue());
         filter.setRandomness(randomness.getValue());
         filter.setColor(color.getColor().getRGB());
-        filter.setRandom(paramSet.getLastSeedRandom());
+        filter.setRandom(paramSet.getRandomWithLastSeed());
 
         return filter.filter(src, dest);
     }

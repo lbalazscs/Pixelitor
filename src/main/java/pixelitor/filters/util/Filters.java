@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class Filters {
     private static final FilterAction[] EMPTY_FA_ARRAY = new FilterAction[0];
 
     private static Filter lastFilter = null;
-    private static boolean finishedRegistering = false;
+    private static boolean registrationFinished = false;
 
     private Filters() {
         // there are only static utility functions in this class
@@ -51,36 +51,33 @@ public class Filters {
 
     // it returns an array because JComboBox does not accept Lists as constructor arguments
     public static FilterAction[] getAllFilters() {
-        assert finishedRegistering;
+        assert registrationFinished;
         return allFilters.toArray(EMPTY_FA_ARRAY);
     }
 
     // used only for debugging
     public static void forEachSmartFilter(Consumer<? super Filter> action) {
-        assert finishedRegistering;
+        assert registrationFinished;
         allFilters.stream()
             .map(FilterAction::getFilter)
             .filter(Filter::canBeSmart)
             .forEach(action);
     }
 
-    // used only for testing
-    public static FilterAction getRandomAnimationFilter() {
-        assert finishedRegistering;
-        return Rnd.chooseFrom(getAnimationFilters());
-    }
-
     public static FilterAction[] getAnimationFilters() {
-        assert finishedRegistering;
+        assert registrationFinished;
+
+        // TODO this instantiates all filters
         return allFilters.stream()
             .filter(FilterAction::isAnimationFilter)
             .toArray(FilterAction[]::new);
     }
 
     public static Filter getRandomFilter(Predicate<Filter> conditions) {
-        assert finishedRegistering;
+        assert registrationFinished;
 
         // tries to avoid the instantiation of filters
+        // (pre-filtering the list would instantiate all of them)
         FilterAction filterAction;
         do {
             // try a random filter until all conditions are true
@@ -111,32 +108,32 @@ public class Filters {
     }
 
     public static void register(FilterAction filter) {
-        assert !finishedRegistering;
+        assert !registrationFinished;
         allFilters.add(filter);
     }
 
     public static void finishedRegistering() {
-        finishedRegistering = true;
+        registrationFinished = true;
         allFilters.sort(comparing(FilterAction::getName));
     }
 
     // only used for testing
-    public static void createAllFilters() {
-        assert finishedRegistering;
+    public static void instantiateAllFilters() {
+        assert registrationFinished;
 
         long startTime = System.nanoTime();
 
         allFilters.forEach(FilterAction::getFilter);
 
         double elapsedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-        System.out.printf("FilterUtils::createAllFilters: elapsedSeconds = '%.2f'%n", elapsedSeconds);
+        System.out.printf("Filters::instantiateAllFilters: elapsedSeconds = '%.2f'%n", elapsedSeconds);
     }
 
     /**
      * Tests whether all filters that can be smart have a no-argument constructor.
      */
     public static void testFilterConstructors() {
-        assert finishedRegistering;
+        assert registrationFinished;
 
         List<String> problems = new ArrayList<>();
         for (FilterAction action : allFilters) {
@@ -153,7 +150,7 @@ public class Filters {
     }
 
     public static FilterAction getFilterActionByName(String filterName) {
-        assert finishedRegistering;
+        assert registrationFinished;
 
         for (FilterAction action : allFilters) {
             if (action.getName().equals(filterName)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.utils;
 import java.awt.Cursor;
 
 /**
- * A convenience class for keeping track of mouse cursors
+ * A convenience class for keeping track of mouse cursors.
  */
 public class Cursors {
     public static final Cursor MOVE = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);

@@ -44,7 +44,7 @@ public class ConvolveGUI extends FilterGUI {
     private Box presetsBox;
     private final int kernelSize;
 
-    public ConvolveGUI(Convolve filter, Filterable layer, boolean reset) {
+    public ConvolveGUI(Convolve filter, Filterable layer, boolean resetSettings) {
         super(filter, layer);
         setLayout(new BoxLayout(this, X_AXIS));
 
@@ -53,7 +53,7 @@ public class ConvolveGUI extends FilterGUI {
         initLeftPanel();
         initPresetPanel();
 
-        if (reset) {
+        if (resetSettings) {
             resetKernel(kernelSize);
         } else {
             // use the last values

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.geom.Path2D;
 import java.io.Serial;
 
 /**
- * A shape filter rendering a Lissajous curve.
+ * The "Render/Curves/Lissajous" filter.
  */
 public class Lissajous extends CurveFilter {
     @Serial
@@ -69,7 +69,9 @@ public class Lissajous extends CurveFilter {
 
         PathConnector connector = new PathConnector(NUM_STEPS + 1, distThreshold, angleThreshold);
 
+        // map the time percentage (0 to 100) to an angle of 0 to 2*π
         double maxT = Math.PI * time.getValueAsDouble() / 50.0;
+
         for (double t = 0; t < maxT; t += dt) {
             double x = w * FastMath.sin(aVal * t + deltaVal) + cx;
             double y = h * FastMath.sin(bVal * t) + cy;
@@ -83,17 +85,18 @@ public class Lissajous extends CurveFilter {
         return path;
     }
 
+    /**
+     * Calculates the angle threshold for path simplification.
+     */
     private static double calcAngleThreshold(double aVal, double bVal) {
-        double angleThreshold;
         double maxRatio = Math.max(aVal / bVal, bVal / aVal);
         if (maxRatio > 10) {
-            // sharp angles
-            angleThreshold = 0.05;
-        } else if (maxRatio > 5) {
-            angleThreshold = 0.1;
-        } else {
-            angleThreshold = 0.2;
+            // sharp angles require a smaller threshold
+            return 0.05;
         }
-        return angleThreshold;
+        if (maxRatio > 5) {
+            return 0.1;
+        }
+        return 0.2;
     }
 }

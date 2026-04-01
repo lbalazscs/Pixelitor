@@ -25,7 +25,7 @@ import java.awt.Composite;
 import static java.awt.AlphaComposite.DST_OUT;
 
 /**
- * The blending modes
+ * The blending modes.
  */
 public enum BlendingMode {
     PASS_THROUGH("Pass Through", "") {

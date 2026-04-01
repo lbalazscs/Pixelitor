@@ -34,8 +34,8 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.colors.FgBgColors.getBgColor;
+import static pixelitor.colors.FgBgColors.getFgColor;
 
 /**
  * A panel that displays color swatches in a grid. It can display both
@@ -199,7 +199,7 @@ public class PalettePanel extends JPanel implements Scrollable {
 
     public static void showVariationsDialog(PixelitorWindow pw, boolean fg) {
         var palette = new VariationsPalette(
-            fg ? getFGColor() : getBGColor(),
+            fg ? getFgColor() : getBgColor(),
             fg ? "Foreground Color Variations" : "Background Color Variations"
         );
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);

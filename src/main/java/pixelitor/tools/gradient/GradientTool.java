@@ -51,13 +51,13 @@ import java.util.function.Consumer;
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
-import static pixelitor.colors.FgBgColors.setBGColor;
-import static pixelitor.colors.FgBgColors.setFGColor;
+import static pixelitor.colors.FgBgColors.setBgColor;
+import static pixelitor.colors.FgBgColors.setFgColor;
 import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
 /**
- * The gradient tool
+ * The gradient tool.
  */
 public class GradientTool extends DragTool {
     private static final String CYCLE_NONE = "No Cycle";
@@ -167,7 +167,7 @@ public class GradientTool extends DragTool {
         Gradient newGradient = createGradient(renderedDrag);
 
         // if the new gradient is identical to the last one, do nothing
-        if (lastGradient != null && lastGradient.equals(newGradient)) {
+        if (newGradient.equals(lastGradient)) {
             return;
         }
 
@@ -291,9 +291,9 @@ public class GradientTool extends DragTool {
         }
     }
 
-    // TODO for some reason it is necessary to check the active
-    //   layer again when the mouse is released - somehow a gradient
-    //   layer can be activated without the tool noticing it.
+    // TODO investigate why re-checking the active layer is needed
+    //  on mouse release - a gradient layer can seemingly become
+    //  active without notifying the tool
     private void checkActiveLayer(Composition comp) {
         Layer layer = comp.getActiveLayer();
         if (layer instanceof GradientFillLayer gfl) {
@@ -526,8 +526,8 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void maskEditingChanged(boolean editMask) {
-        blendingModePanel.setEnabled(!editMask);
+    public void maskEditingChanged(boolean editing) {
+        blendingModePanel.setEnabled(!editing);
     }
 
     // called only by history edits
@@ -577,14 +577,14 @@ public class GradientTool extends DragTool {
             blendingModePanel.setOpacity(gradient.getOpacity());
         }
 
-        setFGColor(gradient.getFgColor(), false);
-        setBGColor(gradient.getBgColor(), false);
+        setFgColor(gradient.getFgColor(), false);
+        setBgColor(gradient.getBgColor(), false);
 
         ignoreRegenerate = false;
     }
 
     @Override
-    public boolean allowOnlyDrawables() {
+    public boolean allowsOnlyDrawables() {
         return true;
     }
 

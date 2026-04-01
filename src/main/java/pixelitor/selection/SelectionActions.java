@@ -49,10 +49,10 @@ import static pixelitor.utils.Texts.i18n;
  */
 public final class SelectionActions {
     // shape stored for copy/paste
-    private static Shape copiedSelShape = null;
+    private static Shape clipboardShape = null;
 
     private static final Action crop = new TaskAction(i18n("crop_selection"),
-        Crop::selectionCropActiveComp);
+        Crop::cropActiveCompToSelection);
 
     private static final Action deselect = new TaskAction(i18n("deselect"), () ->
         getActiveComp().deselect(true));
@@ -72,7 +72,7 @@ public final class SelectionActions {
      * @noinspection NonFinalStaticVariableUsedInClassInitialization
      */
     private static final Action pasteSel = new TaskAction(i18n("paste_sel"), () -> {
-        SelectionChangeResult result = getActiveComp().updateSelectionInteractively(copiedSelShape);
+        SelectionChangeResult result = getActiveComp().updateSelectionInteractively(clipboardShape);
         if (result.isSuccess()) {
             History.add(result.getEdit());
             Tools.notifySelectionChanged();
@@ -99,7 +99,7 @@ public final class SelectionActions {
             @Override
             public void viewActivated(View oldView, View newView) {
                 // enable the paste selection menu only if a shape has been copied
-                pasteSel.setEnabled(copiedSelShape != null);
+                pasteSel.setEnabled(clipboardShape != null);
             }
 
             @Override
@@ -114,7 +114,7 @@ public final class SelectionActions {
      * Copies the active composition's selection shape to the internal clipboard.
      */
     private static void copySelection() {
-        copiedSelShape = getActiveComp().getSelectionShape();
+        clipboardShape = getActiveComp().getSelectionShape();
         pasteSel.setEnabled(true);
     }
 

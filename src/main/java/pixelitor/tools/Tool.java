@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ import java.util.function.Consumer;
 public abstract class Tool implements PresetOwner, Debuggable {
     private final String name;
     private final String shortName;
-    private final String toolMessage;
+    private final String statusBarMessage;
     private final char hotkey;
     private final Cursor cursor;
 
@@ -62,21 +62,21 @@ public abstract class Tool implements PresetOwner, Debuggable {
     private ToolButton toolButton;
     protected ToolSettingsPanel settingsPanel;
 
-    // holding the alt key down generates continuously
-    // altPressed calls, but only the first one is relevant
+    // holding the Alt key down continuously generates multiple
+    // altPressed() calls, but only the first one should be processed
     protected boolean altDown = false;
 
     // Whether pixel snapping should be turned on as far as the tool is concerned.
     // The actual snapping also depends on the Preferences setting.
     protected boolean pixelSnapping = false;
 
-    protected Tool(String name, char hotkey, String toolMessage, Cursor cursor) {
+    protected Tool(String name, char hotkey, String statusBarMessage, Cursor cursor) {
         this.hotkey = hotkey;
         assert Character.isUpperCase(hotkey);
 
         this.shortName = name;
         this.name = name + " Tool";
-        this.toolMessage = toolMessage;
+        this.statusBarMessage = statusBarMessage;
         this.cursor = cursor;
 
         eventHandlerChain = new ToolHandlerChain(this, cursor);
@@ -119,7 +119,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     public boolean isActive() {
-        return Tools.activeIs(this);
+        return Tools.isActive(this);
     }
 
     /**
@@ -256,7 +256,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Signals that the tool should finish what it started
+     * Signals that the tool should finish what it started.
      */
     public void forceFinish() {
         // empty by default
@@ -274,14 +274,14 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Called when a layer mask is activated or deactivated
+     * Called when a layer mask is activated or deactivated.
      */
     public void maskEditingChanged(boolean maskEditing) {
         // empty by default
     }
 
     /**
-     * Called when the component space coordinates of the pixels change,
+     * Called when the component-space coordinates of the pixels change,
      * but the image coordinates remain the same (zooming, view resizing).
      *
      * The component coordinates of the widgets must be restored
@@ -315,7 +315,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     /**
      * Whether this tool can only be used with layers that implement {@link Drawable}.
      */
-    public boolean allowOnlyDrawables() {
+    public boolean allowsOnlyDrawables() {
         return false;
     }
 
@@ -327,7 +327,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     public String getStatusBarMessage() {
-        return name + ": " + toolMessage;
+        return name + ": " + statusBarMessage;
     }
 
     public void setButton(ToolButton toolButton) {

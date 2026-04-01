@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -93,7 +93,7 @@ public abstract class AbstractBrush implements Brush {
     @Override
     public void startStrokeAt(PPoint p) {
         // when starting a new stroke, the previous
-        // variables should not be set to (0, 0)
+        // point should not be set to (0, 0)
         // because it causes unnecessary repainting
         setPrevious(p);
 
@@ -114,8 +114,8 @@ public abstract class AbstractBrush implements Brush {
         assert !drawing : "already initialized in " + getClass().getSimpleName();
 
         if (previous == null) {
-            // can happen if the first click (in the tool of after a
-            // symmetry activation) is a shift-click
+            // can happen if the first click (in the tool or
+            // after a symmetry activation) is a shift-click
             startStrokeAt(p);
         } else {
             initDrawing(p);

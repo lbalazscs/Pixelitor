@@ -126,8 +126,8 @@ public class SplashImageCreator {
     public static Composition createSplashComp() {
         assert calledOnEDT() : callInfo();
 
-        FgBgColors.setFGColor(WHITE);
-        FgBgColors.setBGColor(Rnd.createRandomColor().darker().darker().darker());
+        FgBgColors.setFgColor(WHITE);
+        FgBgColors.setBgColor(Rnd.createRandomColor().darker().darker().darker());
 
         Composition comp = NewImage.addNewImage(FillType.WHITE,
             SPLASH_WIDTH, SPLASH_HEIGHT, "Splash", Composition.DEFAULT_DPI);
@@ -149,7 +149,7 @@ public class SplashImageCreator {
     }
 
     private static void addTextLayers(Composition comp) {
-        FgBgColors.setFGColor(WHITE);
+        FgBgColors.setFgColor(WHITE);
 
         Font smallFont = createSplashFont(SPLASH_SMALL_FONT, 20);
         addTextLayer(comp, "version " + Pixelitor.VERSION, smallFont, 50);

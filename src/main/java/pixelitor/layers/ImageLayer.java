@@ -1013,7 +1013,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     protected void paintWithoutTmpLayer(Graphics2D g,
                                         BufferedImage visibleImage,
                                         boolean firstVisibleLayer) {
-        if (Tools.isShapesDrawing() && isActive() && !isMaskEditing()) {
+        if (Tools.isDrawingShapes() && isActive() && !isMaskEditing()) {
             paintLayerWithShapes(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
             g.drawImage(visibleImage, getTx(), getTy(), null);

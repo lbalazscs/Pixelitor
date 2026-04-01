@@ -39,43 +39,37 @@ public class SmearFilter extends WholeImageFilter {
     public static final int SQUARES = 3;
     public static final int DIAMONDS = 4;
 
-    private float angle = 0;
-    private float density = 0.5f;
-    private int distance = 8;
-    private Random random;
-    private int shape = LINES;
-    private float mix = 0.5f;
-
-    public SmearFilter(String filterName) {
-        super(filterName);
-    }
-
-    public void setShape(int shape) {
-        this.shape = shape;
-    }
-
-    public void setDistance(int distance) {
-        this.distance = distance;
-    }
-
-    public void setDensity(float density) {
-        this.density = density;
-    }
+    private final float angle;
+    private final float density;
+    private final int distance;
+    private final Random random;
+    private final int shape;
+    private final float mix;
 
     /**
-     * Sets the angle.
+     * Constructs a new {@link SmearFilter}.
      *
-     * @param angle the angle
+     * @param filterName the name of the filter
+     * @param shape      the shape used to smear pixels; one of
+     *                   {@link #LINES}, {@link #CROSSES}, {@link #CIRCLES},
+     *                   {@link #SQUARES}, or {@link #DIAMONDS}
+     * @param distance   the maximum size (radius or half-length) of each
+     *                   drawn shape, in pixels; must be positive
+     * @param density    the relative number of shapes drawn per unit area, in the range [0, 1]
+     * @param angle      the orientation of the shapes in radians; only
+     *                   meaningful when {@code shape} is {@link #LINES}
+     * @param mix        the blending weight of each drawn shape over the
+     *                   existing pixels, in the range [0, 1]
+     * @param random     the {@link Random} instance used for placing shapes
      */
-    public void setAngle(float angle) {
+    public SmearFilter(String filterName, int shape, int distance,
+                       float density, float angle, float mix, Random random) {
+        super(filterName);
+        this.shape = shape;
+        this.distance = distance;
+        this.density = density;
         this.angle = angle;
-    }
-
-    public void setMix(float mix) {
         this.mix = mix;
-    }
-
-    public void setRandom(Random random) {
         this.random = random;
     }
 

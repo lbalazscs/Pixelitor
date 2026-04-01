@@ -254,7 +254,7 @@ public class Pixelitor {
 
         String[] options = {"Wait 10 seconds", "Exit now", GUIText.CANCEL};
 
-        return Dialogs.showManyOptionsDialog(
+        return Dialogs.showCustomOptionsDialog(
             "Warning",
             msg.toString(),
             options,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,24 +92,22 @@ public interface Filterable {
      *
      * @return true if the filter was not canceled
      */
-    default boolean startFilter(Filter filter, boolean reset) {
+    default boolean startFilter(Filter filter, boolean resetSettings) {
         assert Threads.calledOnEDT();
 
         if (filter instanceof FilterWithGUI fwg) {
             PixelitorWindow.get().setCursor(Cursors.BUSY);
             View view = Views.getActive();
 
-            // Save the view cursor set by the current tool
-            // so that it can be restored later.
+            // save the view cursor set by the current
+            // tool so that it can be restored later
             Cursor toolViewCursor = view.getCursor();
             view.setCursor(Cursors.BUSY);
 
             startPreviewing();
-
             Tools.forceFinish();
 
-            FilterGUI gui = fwg.createGUI(this, reset);
-
+            FilterGUI gui = fwg.createGUI(this, resetSettings);
             MouseZoomMethod.ACTIVE.installOnOther(gui);
             ZoomMenu.setupZoomKeys(gui);
 
@@ -129,6 +127,11 @@ public interface Filterable {
             view.setCursor(toolViewCursor);
 
             GUIUtils.showDialog(dialog, FRAME_RIGHT);
+
+            // since the dialog is modal, this is the point where
+            // we know that it has been closed => clean up resources
+            gui.dispose();
+
             return dialogBuilder.wasAccepted();
         }
         startFilter(filter, FILTER_WITHOUT_DIALOG);

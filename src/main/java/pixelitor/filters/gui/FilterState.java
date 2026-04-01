@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class FilterState implements Preset {
             paramStream = paramStream.filter(FilterParam::isAnimatable);
         }
         states = paramStream.collect(
-            Collectors.toMap(FilterSetting::getName, FilterParam::copyState));
+            Collectors.toMap(FilterParam::getPresetKey, FilterParam::copyState));
     }
 
     /**
@@ -79,18 +79,28 @@ public class FilterState implements Preset {
         
         Map<String, ParamState<?>> interpolatedStates = new HashMap<>();
 
+        // each ParamState is interpolated independently
         for (Map.Entry<String, ParamState<?>> entry : states.entrySet()) {
-            // each ParamState is interpolated independently
-            String paramName = entry.getKey();
-            @SuppressWarnings("rawtypes")
-            ParamState state = entry.getValue();
-            ParamState<?> endParamState = endState.get(paramName);
+            String key = entry.getKey();
+            ParamState<?> startState = entry.getValue();
 
-            @SuppressWarnings("unchecked")
-            ParamState<?> interpolated = state.interpolate(endParamState, progress);
-            interpolatedStates.put(paramName, interpolated);
+            // if the key was present in this state, it must also be present in the end state
+            ParamState<?> endParamState = endState.get(key);
+
+            ParamState<?> interpolated = interpolateSafely(startState, endParamState, progress);
+            interpolatedStates.put(key, interpolated);
         }
         return new FilterState(interpolatedStates);
+    }
+
+    /**
+     * Helper to capture the wildcard and localize the necessary cast.
+     */
+    @SuppressWarnings("unchecked")
+    private static <S extends ParamState<S>> ParamState<S> interpolateSafely(ParamState<S> start, ParamState<?> end, double progress) {
+        // we know that 'start' and 'end' share the same key
+        // and therefore share the exact same ParamState type 'S'
+        return start.interpolate((S) end, progress);
     }
 
     /**
@@ -105,7 +115,7 @@ public class FilterState implements Preset {
      * Useful when building a state incrementally.
      */
     public FilterState with(FilterParam param, ParamState<?> state) {
-        states.put(param.getName(), state);
+        states.put(param.getPresetKey(), state);
         return this;
     }
 

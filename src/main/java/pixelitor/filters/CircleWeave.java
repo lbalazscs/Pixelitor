@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import net.jafama.FastMath;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -28,6 +27,9 @@ import pixelitor.utils.Shapes;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+
+import static net.jafama.FastMath.cos;
+import static net.jafama.FastMath.sin;
 
 /**
  * The "Circle Weave" filter.
@@ -101,18 +103,22 @@ public class CircleWeave extends CurveFilter {
         Point2D center = new Point2D.Double(cx, cy);
 
         double radiusTuning = tuning / 100.0;
+        double t = innerRatio / 2;
 
         Path2D path = new Path2D.Double();
         for (int i = 0; i < vertices.length; i++) {
             double angle = 2 * Math.PI * i / vertices.length;
-            double radiusVariation = 1.0 + radiusTuning * Math.sin(angle);
+            double radiusVariation = 1.0 + radiusTuning * sin(angle);
             double radius = baseRadius * radiusVariation;
 
-            addInterpolatedCircle(path, vertices[i], center, innerRatio / 2, radius, distorted);
+            addInterpolatedCircle(path, vertices[i], center, t, radius, distorted);
         }
         return path;
     }
 
+    /**
+     * Appends a circle interpolated between the given point and the image center.
+     */
     private static void addInterpolatedCircle(Path2D path, Point2D point, Point2D imageCenter, double t, double radius, boolean distorted) {
         Point2D c = Geometry.interpolate(point, imageCenter, t);
         Shape circle = distorted
@@ -126,15 +132,16 @@ public class CircleWeave extends CurveFilter {
 
         int multiplier = 1 + Math.abs(tuning);
         double innerRadius = outerRadius * innerRatio;
+        double kFactor = multiplier * Math.PI / 180.0;
 
         path.moveTo(cx, cy);
         for (int t = 1; t <= 360; t++) {
-            double k = multiplier * Math.toRadians(t);
+            double k = t * kFactor;
             double r = t % 2 == 0
-                ? outerRadius * FastMath.sin(numPetals * k)
-                : innerRadius * FastMath.sin(numPetals * k);
-            double x = cx + r * FastMath.cos(k);
-            double y = cy + r * FastMath.sin(k);
+                ? outerRadius * sin(numPetals * k)
+                : innerRadius * sin(numPetals * k);
+            double x = cx + r * cos(k);
+            double y = cy + r * sin(k);
             path.lineTo(x, y);
         }
 
@@ -216,8 +223,8 @@ public class CircleWeave extends CurveFilter {
         for (int i = 0; i < numPoints; i++) {
             double angle = i * angleIncrement - Math.PI / 2.0;
             points[i] = new Point2D.Double(
-                cx + radius * Math.cos(angle),
-                cy + radius * Math.sin(angle));
+                cx + radius * cos(angle),
+                cy + radius * sin(angle));
         }
         return points;
     }

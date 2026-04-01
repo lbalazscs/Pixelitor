@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,7 +67,7 @@ public class KMeans extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int[] srcPixels = ImageUtils.getPixels(src);
         int[] destPixels = ImageUtils.getPixels(dest);
-        Random random = paramSet.getLastSeedRandom();
+        Random random = paramSet.getRandomWithLastSeed();
         int numIterations = iterations.getValue();
 
         boolean dither = diffusionStrengthParam.getValue() != 0;

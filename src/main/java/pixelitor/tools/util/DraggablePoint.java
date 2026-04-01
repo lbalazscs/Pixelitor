@@ -39,7 +39,7 @@ import static java.lang.Double.isNaN;
 import static java.lang.String.format;
 
 /**
- * A point that can be dragged with the help of a handle.
+ * A point that can be dragged using a handle.
  * It maintains both component-space and image-space coordinates.
  *
  * The x, y coordinates will be integers most of the time as they
@@ -60,8 +60,8 @@ public class DraggablePoint extends Point2D.Double {
 
     protected final String name; // used only for debugging
 
-    // Coordinates in image space (relative to the image, considering zooming).
-    // All other coordinates are in component space, relative to the view.
+    // Coordinates in image-space (relative to the image, considering zooming).
+    // All other coordinates are in component-space, relative to the view.
     public double imX;
     public double imY;
 
@@ -162,7 +162,7 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     /**
-     * Recalculates component space coordinates from image space coordinates.
+     * Recalculates component-space coordinates from image-space coordinates.
      * This should be called when the view size or zooming changes.
      */
     public void restoreCoordsFromImSpace(View view) {
@@ -264,7 +264,7 @@ public class DraggablePoint extends Point2D.Double {
 
     /**
      * Creates the shape used to draw the handle. Returns a
-     * square by default, but it can be overriden to customize it.
+     * square by default, but it can be overridden to customize it.
      */
     protected Shape createShape(double startX, double startY) {
         return new Rectangle2D.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);

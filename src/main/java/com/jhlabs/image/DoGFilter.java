@@ -28,33 +28,23 @@ import java.awt.image.BufferedImage;
  * @author Jerry Huxtable
  */
 public class DoGFilter extends AbstractBufferedImageOp {
-    private float radius1 = 1;
-    private float radius2 = 2;
-    private boolean normalize = true;
+    private final float radius1;
+    private final float radius2;
+    private final boolean normalize;
 
-    public DoGFilter(String filterName) {
+    /**
+     * Creates a new Difference of Gaussians filter.
+     *
+     * @param filterName the name of the filter
+     * @param radius1    the radius of the first Gaussian blur kernel, in pixels
+     * @param radius2    the radius of the second Gaussian blur kernel, in pixels
+     * @param normalize  whether to normalize (maximize contrast of) the output image
+     */
+    public DoGFilter(String filterName, float radius1, float radius2, boolean normalize) {
         super(filterName);
-    }
 
-    /**
-     * Sets the radius of the first kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
-     *
-     * @param radius1 the radius of the blur in pixels.
-     */
-    public void setRadius1(float radius1) {
         this.radius1 = radius1;
-    }
-
-    /**
-     * Sets the radius of the second kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
-     *
-     * @param radius2 the radius of the blur in pixels.
-     */
-    public void setRadius2(float radius2) {
         this.radius2 = radius2;
-    }
-
-    public void setNormalize(boolean normalize) {
         this.normalize = normalize;
     }
 

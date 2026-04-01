@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,10 +39,10 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
      * Creates a new {@link FilterGUI} panel for this GUI filter.
      * Panel creation should trigger the initial preview based on default settings.
      * @param layer the layer to which this filter is applied
-     * @param reset if true, resets the GUI to default settings
+     * @param resetSettings if true, resets the GUI to default settings
      * @return a newly created FilterGUI instance configured with this filter
      */
-    public abstract FilterGUI createGUI(Filterable layer, boolean reset);
+    public abstract FilterGUI createGUI(Filterable layer, boolean resetSettings);
 
     /**
      * Randomizes the filter's parameters.

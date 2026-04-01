@@ -192,7 +192,7 @@ public class LayerMask extends ImageLayer {
     protected void paintWithoutTmpLayer(Graphics2D g,
                                         BufferedImage visibleImage,
                                         boolean firstVisibleLayer) {
-        if (Tools.isShapesDrawing()) {
+        if (Tools.isDrawingShapes()) {
             paintLayerWithShapes(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
             g.drawImage(visibleImage, getTx(), getTy(), null);
@@ -212,7 +212,7 @@ public class LayerMask extends ImageLayer {
      * potentially including a preview of active shape tool drawing.
      */
     public BufferedImage getTransparencyImage() {
-        if (!owner.isMaskEditing() || !Tools.isShapesDrawing()) {
+        if (!owner.isMaskEditing() || !Tools.isDrawingShapes()) {
             // simple case
             return transparencyImage;
         } else {

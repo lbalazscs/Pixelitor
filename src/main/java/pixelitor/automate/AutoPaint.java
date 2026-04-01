@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,11 +36,11 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
 
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.colors.FgBgColors.getBgColor;
+import static pixelitor.colors.FgBgColors.getFgColor;
 import static pixelitor.colors.FgBgColors.randomizeColors;
-import static pixelitor.colors.FgBgColors.setBGColor;
-import static pixelitor.colors.FgBgColors.setFGColor;
+import static pixelitor.colors.FgBgColors.setBgColor;
+import static pixelitor.colors.FgBgColors.setFgColor;
 import static pixelitor.tools.Tools.BRUSH;
 import static pixelitor.tools.Tools.CLONE;
 import static pixelitor.tools.Tools.ERASER;
@@ -133,7 +133,7 @@ public class AutoPaint {
         if (settings.useRandomColors()) {
             randomizeColors();
         } else if (settings.useInterpolatedColors()) {
-            setFGColor(Colors.interpolateRGB(origFg, origBg, rand.nextDouble()));
+            setFgColor(Colors.interpolateRGB(origFg, origBg, rand.nextDouble()));
         }
     }
 
@@ -160,15 +160,15 @@ public class AutoPaint {
     }
 
     private static void rememberOriginalColors() {
-        origFg = getFGColor();
-        origBg = getBGColor();
+        origFg = getFgColor();
+        origBg = getBgColor();
     }
 
     private static void restoreOriginalColors(AutoPaintSettings settings) {
         // if colors were changed, restore the original
         if (settings.changeColors()) {
-            setFGColor(origFg);
-            setBGColor(origBg);
+            setFgColor(origFg);
+            setBgColor(origBg);
         }
     }
 }

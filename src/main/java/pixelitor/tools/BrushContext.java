@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import static java.awt.AlphaComposite.DST_OUT;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -36,8 +37,13 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  */
 public class BrushContext {
     private final Graphics2D graphics;
+
+    // a brush stroke begins, operates, and finishes on the same Drawable, even
+    // if the adctive layer changes via keyboard shortcut while the mouse is dragged
     private final Drawable dr;
+
     private final DrawTarget drawTarget;
+    private final BufferedImage originalImage; // individual stroke backup
 
     /**
      * Creates and initializes a graphics context for a new brush stroke.
@@ -46,8 +52,8 @@ public class BrushContext {
         this.dr = dr;
         this.drawTarget = drawTarget;
 
-        // prepare the target drawable (e.g., backup image for direct drawing)
-        drawTarget.prepareForBrushStroke(dr);
+        // prepare the target drawable and store the backup image
+        this.originalImage = drawTarget.prepareForBrushStroke(dr);
 
         Composition comp = dr.getComp();
 
@@ -67,6 +73,10 @@ public class BrushContext {
         brush.setTarget(dr, graphics);
     }
 
+    public BufferedImage getOriginalImage() {
+        return originalImage;
+    }
+
     public void setColor(Color color) {
         graphics.setColor(color);
     }
@@ -79,13 +89,18 @@ public class BrushContext {
     /**
      * Disposes graphics resources and finalizes the drawing on the target drawable.
      */
-    public void finish(Drawable dr) {
-        assert this.dr == dr;
-
+    public void finish() {
         graphics.dispose();
 
-        drawTarget.finishBrushStroke(dr);
+        drawTarget.finishBrushStroke(dr, originalImage);
         dr.update();
         dr.updateIconImage();
+    }
+
+    /**
+     * Returns the {@link Drawable} on which the brush stroke started.
+     */
+    public Drawable getDrawable() {
+        return dr;
     }
 }

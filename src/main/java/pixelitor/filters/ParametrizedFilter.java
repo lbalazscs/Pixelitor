@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,8 +51,8 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Filterable layer, boolean reset) {
-        return new ParametrizedFilterGUI(this, layer, addShowOriginal, reset);
+    public FilterGUI createGUI(Filterable layer, boolean resetSettings) {
+        return new ParametrizedFilterGUI(this, layer, addShowOriginal, resetSettings);
     }
 
     /**
@@ -139,13 +139,13 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public String paramsAsString() {
+    public String getParamsAsString() {
         UserPreset tmpPreset = new UserPreset(getName(), "Debug");
         paramSet.saveStateTo(tmpPreset);
         return tmpPreset.toString();
     }
 
-    public void set(String paramName, String value) {
+    public void setParamValue(String paramName, String value) {
         paramSet.set(paramName, value);
     }
 
@@ -163,6 +163,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     @Override
     public int hashCode() {
+        // TODO currently it's based on mutable state
         return Objects.hash(paramSet);
     }
 

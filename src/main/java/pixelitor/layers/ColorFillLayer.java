@@ -65,7 +65,7 @@ public class ColorFillLayer extends Layer {
         holder.add(layer);
 
         String dialogTitle = "Add Color Fill Layer";
-        Color defaultColor = FgBgColors.getFGColor();
+        Color defaultColor = FgBgColors.getFgColor();
         layer.changeColor(defaultColor, false);
         if (Colors.selectColorWithDialog(PixelitorWindow.get(), dialogTitle,
             defaultColor, true, c -> layer.changeColor(c, false))) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,8 @@ import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 
 /**
- * The draggable point at the half distance between the
- * start and end points, which moves the whole gradient.
+ * The draggable point halfway between the start
+ * and end points, which moves the entire gradient.
  */
 public class GradientCenterPoint extends DraggablePoint {
     private final GradientDefiningPoint start;

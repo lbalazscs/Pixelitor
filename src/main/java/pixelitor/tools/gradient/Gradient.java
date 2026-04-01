@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.tools.gradient;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.colors.FgBgColors;
 import pixelitor.compactions.Outsets;
 import pixelitor.gui.View;
 import pixelitor.layers.BlendingMode;
@@ -39,8 +40,6 @@ import java.util.StringJoiner;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * A vector graphics gradient with all necessary information for rendering.
@@ -79,8 +78,8 @@ public class Gradient implements Serializable, Debuggable {
         this.blendingMode = blendingMode;
         this.opacity = opacity;
 
-        fgColor = getFGColor();
-        bgColor = getBGColor();
+        fgColor = FgBgColors.getFgColor();
+        bgColor = FgBgColors.getBgColor();
         colors = initColors(colorType, reversed);
     }
 

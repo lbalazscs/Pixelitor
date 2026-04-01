@@ -40,8 +40,8 @@ import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
-import static pixelitor.colors.FgBgColors.setBGColor;
-import static pixelitor.colors.FgBgColors.setFGColor;
+import static pixelitor.colors.FgBgColors.setBgColor;
+import static pixelitor.colors.FgBgColors.setFgColor;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 import static pixelitor.utils.ImageUtils.isGrayscale;
 import static pixelitor.utils.ImageUtils.isWithinBounds;
@@ -138,9 +138,9 @@ public class ColorPickerTool extends Tool {
 
             Color pickedColor = new Color(sampledRGB);
             if (selectBackground) {
-                setBGColor(pickedColor);
+                setBgColor(pickedColor);
             } else {
-                setFGColor(pickedColor);
+                setFgColor(pickedColor);
             }
         }
     }

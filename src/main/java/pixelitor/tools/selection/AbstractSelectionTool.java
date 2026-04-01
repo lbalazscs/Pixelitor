@@ -37,7 +37,8 @@ import java.util.ResourceBundle;
  * Abstract base class for tools that create selections.
  */
 public abstract class AbstractSelectionTool extends DragTool {
-    private static final String NEW_SELECTION_TEXT = "New Selection";
+    private static final String PRESET_KEY_COMBINATOR = "New Selection";
+    private static final String NEW_SELECTION_TEXT = PRESET_KEY_COMBINATOR;
 
     private final EnumComboBoxModel<ShapeCombinator> combinatorModel
         = new EnumComboBoxModel<>(ShapeCombinator.class);
@@ -47,14 +48,14 @@ public abstract class AbstractSelectionTool extends DragTool {
     private ShapeCombinator prevShapeCombinator;
 
     // true if the Alt key is pressed and used for subtraction mode
-    protected boolean altMeansSubtract = false;
+    protected boolean isAltSubtracting = false;
 
     // manages the building of the current selection shape
     protected SelectionBuilder selectionBuilder;
 
-    protected AbstractSelectionTool(String name, char hotKey, String toolMessage, Cursor cursor, boolean shiftConstrains) {
+    protected AbstractSelectionTool(String name, char hotKey, String statusBarMessage, Cursor cursor, boolean shiftConstrains) {
         super(name, hotKey,
-            toolMessage + " <b>Shift</b> adds, <b>Alt</b> subtracts, <b>Shift+Alt</b> intersects.",
+            statusBarMessage + " <b>Shift</b> adds, <b>Alt</b> subtracts, <b>Shift+Alt</b> intersects.",
             cursor, shiftConstrains);
     }
 
@@ -95,7 +96,7 @@ public abstract class AbstractSelectionTool extends DragTool {
         altDown = e.isAltDown();
 
         // alt always means subtract if pressed before the start of the drag
-        altMeansSubtract = altDown;
+        isAltSubtracting = altDown;
 
         if (shiftDown || altDown) {
             prevShapeCombinator = getCombinator();
@@ -130,7 +131,7 @@ public abstract class AbstractSelectionTool extends DragTool {
         assert !comp.hasDraftSelection() : "draft selection is = " + comp.getDraftSelection();
         assert !comp.hasSelection() : "selection is = " + comp.getSelection();
 
-        altMeansSubtract = false;
+        isAltSubtracting = false;
 
         if (AppMode.isDevelopment()) {
             Invariants.selectionActionsEnabledCheck(comp);
@@ -145,6 +146,8 @@ public abstract class AbstractSelectionTool extends DragTool {
             selectionBuilder.cancelIfNotFinished();
             selectionBuilder = null;
         }
+
+        resetCombinator();
     }
 
     /**
@@ -167,7 +170,7 @@ public abstract class AbstractSelectionTool extends DragTool {
         if (view != null) {
             // nudges the existing selection using arrow keys
             Selection selection = view.getComp().getSelection();
-            if (selection != null) {
+            if (selection != null && !selection.isHidden()) {
                 selection.nudge(key);
                 return true; // key event consumed
             }
@@ -188,14 +191,13 @@ public abstract class AbstractSelectionTool extends DragTool {
         Composition comp = e.getComp();
         Selection draftSelection = comp.getDraftSelection();
         if (draftSelection == null) {
-            // can happen, if we called cancelSelectionBuilder()
-            // for some exceptional reason
+            cancelSelectionBuilder();
             return;
         }
 
         // finish the selection process (update shape, combine, cleanup)
         resetCombinator();
-        boolean expandFromCenter = !altMeansSubtract && e.isAltDown();
+        boolean expandFromCenter = !isAltSubtracting && e.isAltDown();
         drag.setExpandFromCenter(expandFromCenter);
         selectionBuilder.updateDraftSelection(drag);
         selectionBuilder.combineShapes();
@@ -203,7 +205,7 @@ public abstract class AbstractSelectionTool extends DragTool {
         assert !comp.hasDraftSelection();
 
         // reset state for the next operation
-        altMeansSubtract = false;
+        isAltSubtracting = false;
 
         assert Invariants.selectionShapeIsNotEmpty(comp.getSelection()) : "selection is empty";
         assert Invariants.selectionIsInsideCanvas(comp) : "selection is outside";
@@ -211,11 +213,11 @@ public abstract class AbstractSelectionTool extends DragTool {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.put(NEW_SELECTION_TEXT, getCombinator().name());
+        preset.put(PRESET_KEY_COMBINATOR, getCombinator().name());
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        setCombinator(preset.getEnum(NEW_SELECTION_TEXT, ShapeCombinator.class));
+        setCombinator(preset.getEnum(PRESET_KEY_COMBINATOR, ShapeCombinator.class));
     }
 }

@@ -71,7 +71,7 @@ import static java.lang.String.format;
 import static pixelitor.utils.Threads.onPool;
 
 /**
- * Static image-related utility methods
+ * Static image-related utility methods.
  */
 public class ImageUtils {
     private static final double DEG_315_IN_RADIANS = Math.PI / 4;
@@ -219,13 +219,13 @@ public class ImageUtils {
         boolean isTranslucent = img.getTransparency() != Transparency.OPAQUE;
 
         if (progressiveBilinear) {
-            // Use multi-step technique: start with original size, then
+            // use multi-step technique: start with original size, then
             // scale down in multiple passes with drawImage()
             // until the target size is reached
             w = img.getWidth();
             h = img.getHeight();
         } else {
-            // Use one-step technique: scale directly from original
+            // use one-step technique: scale directly from original
             // size to target size with a single drawImage() call
             w = targetWidth;
             h = targetHeight;
@@ -249,7 +249,7 @@ public class ImageUtils {
             }
 
             if (scratchImage == null || isTranslucent) {
-                // Use a single scratch buffer for all iterations
+                // use a single scratch buffer for all iterations
                 // and then copy to the final, correctly-sized image
                 // before returning
                 scratchImage = new BufferedImage(w, h, type);
@@ -267,7 +267,7 @@ public class ImageUtils {
             g2.dispose();
         }
 
-        // If we used a scratch buffer that is larger than our target size,
+        // if we used a scratch buffer that is larger than our target size,
         // create an image of the right size and copy the results into it
         if (targetWidth != ret.getWidth() || targetHeight != ret.getHeight()) {
             scratchImage = new BufferedImage(targetWidth, targetHeight, type);
@@ -281,7 +281,7 @@ public class ImageUtils {
     }
 
     /**
-     * Also an iterative approach, but using even smaller steps
+     * Also an iterative approach, but using even smaller steps.
      */
     public static BufferedImage enlargeSmoothly(BufferedImage src,
                                                 int targetWidth, int targetHeight,
@@ -291,7 +291,7 @@ public class ImageUtils {
         double factorX = targetWidth / (double) srcWidth;
         double factorY = targetHeight / (double) srcHeight;
 
-        // they should be the same, but rounding errors can cause small problems
+        // they should be the same, but rounding errors can cause small discrepancies
         assert Math.abs(factorX - factorY) < 0.05;
 
         double factor = (factorX + factorY) / 2.0;
@@ -370,10 +370,10 @@ public class ImageUtils {
             DataBufferInt srcDataBuffer = (DataBufferInt) src.getRaster().getDataBuffer();
             pixels = srcDataBuffer.getData();
         } else {
-            // If the image's pixels are not stored in an int array,
+            // if the image's pixels are not stored in an int array,
             // a correct int array could still be retrieved with
             // src.getRGB(0, 0, width, height, null, 0, width);
-            // but modifying that array wouldn't have any effect on the image.
+            // but modifying that array wouldn't have any effect on the image
             throw new UnsupportedOperationException("type is " + Debug.bufferedImageTypeToString(src.getType()));
         }
 
@@ -547,7 +547,7 @@ public class ImageUtils {
 
     // There are two cases when this method can't be used to
     // copy an image: (1) for images with an IndexColorModel
-    // this returns an image with a shared raster (jdk bug?)
+    // this returns an image with a shared raster (JDK bug?)
     // (2) for an image created with BufferedImage.getSubimage
     // it throws an exception if the raster doesn't start at (0, 0).
     public static BufferedImage copyImage(BufferedImage src) {
@@ -563,7 +563,7 @@ public class ImageUtils {
         return copy;
     }
 
-    public static Boolean isSubImage(BufferedImage src) {
+    public static boolean isSubImage(BufferedImage src) {
         WritableRaster raster = src.getRaster();
         return raster.getSampleModelTranslateX() != 0
             || raster.getSampleModelTranslateY() != 0;
@@ -684,7 +684,7 @@ public class ImageUtils {
         assert original != null;
         assert blurred != null;
 
-        // The blurred image is the low-pass filtered version of the image,
+        // the blurred image is the low-pass filtered version of the image,
         // so we subtract it from the original by inverting it...
         blurred = Invert.invertImage(blurred);
         // ... and blending it at 50% with the original
@@ -811,8 +811,8 @@ public class ImageUtils {
         Graphics2D g = dest.createGraphics();
         g.setComposite(BlendComposite.HardLight);
         if (tile) {
-            // If 3 is not subtracted here, then for some reason
-            // there are 3 pixel wide gaps between the tiles.
+            // TODO if 3 is not subtracted here, then for some reason
+            //   there are 3-pixel-wide gaps between the tiles
             int bumpMapWidth = Math.max(bumpMap.getWidth() - 3, 1);
             int bumpMapHeight = Math.max(bumpMap.getHeight() - 3, 1);
 

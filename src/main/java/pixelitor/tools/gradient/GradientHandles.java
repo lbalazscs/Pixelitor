@@ -49,9 +49,9 @@ public class GradientHandles implements ToolWidget, Debuggable {
         end = new GradientDefiningPoint("end", endPos, view, this);
         center = new GradientCenterPoint(start, end, view);
 
-        end.setOther(start);
+        end.setOpposite(start);
         end.setCenter(center);
-        start.setOther(end);
+        start.setOpposite(end);
         start.setCenter(center);
     }
 

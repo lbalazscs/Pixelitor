@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,11 +31,11 @@ import java.util.List;
 public abstract class SmoothPathParticle extends Particle {
     private final List<Point2D> pathPoints;
     private Graphics2D g2 = null;
-    private final Graphics2D[] gc;
+    private final Graphics2D[] graphicsCopies;
 
-    protected SmoothPathParticle(Graphics2D[] gc) {
+    protected SmoothPathParticle(Graphics2D[] graphicsCopies) {
         this.pathPoints = new ArrayList<>();
-        this.gc = gc;
+        this.graphicsCopies = graphicsCopies;
     }
 
     /**
@@ -70,9 +70,9 @@ public abstract class SmoothPathParticle extends Particle {
     protected Graphics2D getGraphics() {
         if (g2 != null) {
             return g2;
-        } else if (gc != null) {
+        } else if (graphicsCopies != null) {
             if (groupIndex != -1) {
-                return g2 = gc[groupIndex];
+                return g2 = graphicsCopies[groupIndex];
             }
         }
         throw new IllegalStateException("Graphics context is not available for this particle.");

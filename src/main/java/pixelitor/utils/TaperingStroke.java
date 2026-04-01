@@ -41,6 +41,9 @@ import static pixelitor.utils.Geometry.subtract;
  * A {@link Stroke} implementation that creates a stroke that gradually tapers along its path.
  */
 public class TaperingStroke implements Stroke {
+    // floating-point tolerance for squared distances
+    private static final double EPSILON_SQ = 1.0e-10;
+    
     private final double maxStrokeWidth;
     private final boolean reverse;
 
@@ -85,7 +88,7 @@ public class TaperingStroke implements Stroke {
                     if (!points.isEmpty()) {
                         Point2D first = points.getFirst();
                         Point2D last = points.getLast();
-                        if (first.distanceSq(last) > 1e-10) {
+                        if (first.distanceSq(last) > EPSILON_SQ) {
                             points.add(first);
                         }
                     }
@@ -115,7 +118,7 @@ public class TaperingStroke implements Stroke {
             for (int i = 1; i < points.size(); i++) {
                 Point2D prev = uniquePoints.getLast();
                 Point2D curr = points.get(i);
-                if (prev.distanceSq(curr) > 1e-10) {
+                if (prev.distanceSq(curr) > EPSILON_SQ) {
                     uniquePoints.add(curr);
                 }
             }
@@ -176,6 +179,17 @@ public class TaperingStroke implements Stroke {
             // average the perpendicular vectors to create smooth transitions
             Point2D avgLeft = Geometry.midPoint(prevPerp1, nextPerp2);
             Point2D avgRight = Geometry.midPoint(prevPerp2, nextPerp1);
+
+            // When the path makes a 180-degree turn, the perpendicular vectors
+            // cancel out (their midpoint evaluates to the current point itself).
+            // This would result in a zero vector and lead to NaN upon normalization.
+            // In such cases, fall back to the incoming segment's perpendiculars.
+            if (avgLeft.distanceSq(current) < EPSILON_SQ) {
+                avgLeft.setLocation(prevPerp1);
+            }
+            if (avgRight.distanceSq(current) < EPSILON_SQ) {
+                avgRight.setLocation(prevPerp2);
+            }
 
             // normalize and scale the vectors to current stroke width
             normalizeAndScale(avgLeft, current, currentWidth);

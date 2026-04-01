@@ -178,7 +178,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         dest = ImageUtils.copyImage(src);
         Graphics2D g = dest.createGraphics();
 
-        Random random = paramSet.getLastSeedRandom();
+        Random random = paramSet.getRandomWithLastSeed();
 
         int width = dest.getWidth();
         int height = dest.getHeight();
@@ -303,7 +303,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         Canvas canvas = Views.getActiveComp().getCanvas();
         Arrangement arrangement = arrangementParam.getSelected();
         List<ShapeWithColor> shapes = createShapes(canvas.getWidth(), canvas.getHeight(),
-            paramSet.getLastSeedRandom(), tuning.getPercentage(), arrangement);
+            paramSet.getRandomWithLastSeed(), tuning.getPercentage(), arrangement);
         Color bgColor = arrangement == Arrangement.NESTED ? null : colorsParam.getColor(0);
         String svgContent = ShapeWithColor.createSvgContent(shapes, canvas, bgColor);
         FileIO.saveSVG(svgContent, this);

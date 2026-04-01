@@ -137,7 +137,7 @@ public class AbstractLights extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        Random random = paramSet.getLastSeedRandom();
+        Random random = paramSet.getRandomWithLastSeed();
         int iterations = iterationsParam.getValue();
         int width = dest.getWidth();
         int height = dest.getHeight();

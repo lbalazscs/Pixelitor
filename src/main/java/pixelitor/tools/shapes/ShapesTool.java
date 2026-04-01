@@ -705,8 +705,8 @@ public class ShapesTool extends DragTool {
             shapesLayer.updateIconImage();
         }
 
-        FgBgColors.setFGColor(styledShape.getFgColor(), false);
-        FgBgColors.setBGColor(styledShape.getBgColor(), false);
+        FgBgColors.setFgColor(styledShape.getFgColor(), false);
+        FgBgColors.setBgColor(styledShape.getBgColor(), false);
 
         updateUIFromShape(styledShape);
     }
@@ -805,7 +805,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public boolean allowOnlyDrawables() {
+    public boolean allowsOnlyDrawables() {
         return true;
     }
 

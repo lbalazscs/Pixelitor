@@ -156,7 +156,7 @@ public class Selection implements Transformable {
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
         float[] dash;
-        if (viewScale == 1.0) { // optimize for common case
+        if (viewScale == 1.0) { // optimize for the common case
             dash = MARCHING_ANTS_DASH;
         } else {
             float scaledDashLength = (float) (DASH_LENGTH / viewScale);

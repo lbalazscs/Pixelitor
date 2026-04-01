@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,22 +37,22 @@ import static java.lang.String.format;
 
 /**
  * Represents the changes made to a part of an image (for example brush strokes).
- * Only the affected pixels are saved in order to reduce the memory usage
+ * Only the affected pixels are saved in order to reduce the memory usage.
  */
 public class PartialImageEdit extends FadeableEdit {
-    private final Rectangle saveRect;
+    private final Rectangle affectedBounds;
     private SoftReference<Raster> backupRasterRef;
 
     private final Drawable dr;
 
     private PartialImageEdit(String name, Composition comp, Drawable dr,
-                             BufferedImage image, Rectangle saveRect) {
+                             BufferedImage image, Rectangle affectedBounds) {
         super(name, comp, dr);
 
         this.dr = dr;
-        this.saveRect = saveRect;
+        this.affectedBounds = affectedBounds;
 
-        Raster backupRaster = image.getData(this.saveRect);
+        Raster backupRaster = image.getData(this.affectedBounds);
         backupRasterRef = new SoftReference<>(backupRaster);
     }
 
@@ -124,11 +124,11 @@ public class PartialImageEdit extends FadeableEdit {
 
         Raster tmpRaster = null;
         try {
-            tmpRaster = image.getData(saveRect);
+            tmpRaster = image.getData(affectedBounds);
             image.setData(backupRaster);
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.printf("PartialImageEdit.swapRasters saveRect = %s, width = %d, height = %d%n",
-                saveRect, image.getWidth(), image.getHeight());
+                affectedBounds, image.getWidth(), image.getHeight());
 
             debugRaster("tmpRaster", tmpRaster);
             debugRaster("backupRaster", backupRaster);
@@ -199,7 +199,7 @@ public class PartialImageEdit extends FadeableEdit {
 
         node.addNullableDebuggable("backup raster",
             backupRasterRef.get(), DebugNodes::createRasterNode);
-        node.add(DebugNodes.createRectangleNode("saveRect", saveRect));
+        node.add(DebugNodes.createRectangleNode("affectedBounds", affectedBounds));
 
         return node;
     }
