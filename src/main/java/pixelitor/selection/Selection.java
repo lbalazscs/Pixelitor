@@ -70,8 +70,7 @@ public class Selection implements Transformable {
     private boolean disposed = false;
 
     public Selection(Shape shape, View view) {
-        // the shape can be null, because this Selection
-        // object can be created after a mouse press
+        assert shape != null;
         assert view != null;
 
         this.shape = shape;
@@ -82,9 +81,7 @@ public class Selection implements Transformable {
             frozen = true;
         }
 
-        if (shape != null) {
-            startMarching();
-        }
+        startMarching();
     }
 
     public Selection(Selection orig) {
@@ -144,7 +141,7 @@ public class Selection implements Transformable {
         assert Threads.calledOnEDT() : Threads.callInfo();
         assert !disposed : "disposed selection";
 
-        if (shape == null || hidden) {
+        if (hidden) {
             return;
         }
 
@@ -202,12 +199,7 @@ public class Selection implements Transformable {
         assert newShape != null;
         assert !disposed;
 
-        boolean hadNoShape = (shape == null);
         shape = newShape;
-
-        if (hadNoShape) {
-            startMarching();
-        }
     }
 
     public Shape getShape() {
@@ -437,8 +429,8 @@ public class Selection implements Transformable {
     public String toString() {
         return "Selection{" +
             "composition=" + view.getComp().getName() +
-            ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
-            ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
+            ", shape-class=" + shape.getClass().getName() +
+            ", shapeBounds=" + shape.getBounds() +
             '}';
     }
 }

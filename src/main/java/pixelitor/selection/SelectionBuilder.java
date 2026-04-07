@@ -62,9 +62,6 @@ public class SelectionBuilder {
         wasHidden = existingSelection.isHidden();
         wasFrozen = existingSelection.isFrozen();
 
-        // the shape itself will be set in updateDraftSelection
-        comp.setDraftSelection(new Selection(null, comp.getView()));
-
         if (combinator == ShapeCombinator.REPLACE) {
             prevSelShape = existingSelection.getShape();
             // At this point the mouse was pressed, and it's clear that the

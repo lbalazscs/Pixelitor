@@ -612,7 +612,9 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             return new Rectangle(getTx(), getTy(), image.getWidth(), image.getHeight());
         } else {
             Rectangle rect = ImageUtils.calcOpaqueBounds(image);
-            rect.translate(getTx(), getTy());
+            if (rect != null) {
+                rect.translate(getTx(), getTy());
+            }
             return rect;
         }
     }

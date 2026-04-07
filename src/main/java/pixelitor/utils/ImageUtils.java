@@ -538,13 +538,6 @@ public class ImageUtils {
         return dest;
     }
 
-    public static void main(String[] args) {
-        BufferedImage img = createSysCompatibleImage(100, 100);
-        copyImage(img);
-        BufferedImage sub = img.getSubimage(20, 20, 50, 50);
-        copyImage(sub); // throws exception
-    }
-
     // There are two cases when this method can't be used to
     // copy an image: (1) for images with an IndexColorModel
     // this returns an image with a shared raster (JDK bug?)
@@ -1036,9 +1029,15 @@ public class ImageUtils {
 
     /**
      * Returns the minimum enclosing rectangle around the non-transparent region in the given image.
+     * Returns null if the image is entirely transparent.
      */
     public static Rectangle calcOpaqueBounds(BufferedImage image) {
         WritableRaster alphaRaster = image.getAlphaRaster();
+        if (alphaRaster == null) {
+            // no alpha channel implies the whole image is opaque
+            return new Rectangle(0, 0, image.getWidth(), image.getHeight());
+        }
+
         int width = alphaRaster.getWidth();
         int height = alphaRaster.getHeight();
 
@@ -1055,7 +1054,7 @@ public class ImageUtils {
         // iterates through the rows from the top and stops
         // when it finds the first non-transparent pixel
         topLabel:
-        for (; top < bottom; top++) {
+        for (; top <= bottom; top++) { // use <= so we don't miss the final row
             for (int x = 0; x < width; x++) {
                 if (alphaRaster.getSample(x, top, 0) != 0) {
                     minRight = x;
@@ -1063,6 +1062,10 @@ public class ImageUtils {
                     break topLabel;
                 }
             }
+        }
+
+        if (top > bottom) { // we found no opaque pixels
+            return null;
         }
 
         // iterates through the columns from the left
@@ -1154,22 +1157,21 @@ public class ImageUtils {
     public static int getPixelAt(ContentLayer layer, BufferedImage image, Point p) {
         int x = p.x - layer.getTx();
         int y = p.y - layer.getTy();
-        if (isWithinBounds(x, y, image)) {
-            if (layer.hasMask() && layer.isMaskEnabled()) {
-                int maskPixel = layer.getMask().getPixelAtPoint(p);
-                if (maskPixel != 0) {
-                    int imagePixel = image.getRGB(x, y);
-                    float maskAlpha = (maskPixel & 0xFF) / 255.0f;
-                    int imageAlpha = (imagePixel >> 24) & 0xFF;
-                    int effectiveAlpha = (int) (imageAlpha * maskAlpha);
-                    return Colors.setAlpha(imagePixel, effectiveAlpha);
-                }
-            }
 
-            return image.getRGB(x, y);
+        if (!isWithinBounds(x, y, image)) {
+            return 0x00_00_00_00;
         }
 
-        return 0x00_00_00_00;
+        if (layer.hasMask() && layer.isMaskEnabled()) {
+            int maskPixel = layer.getMask().getPixelAtPoint(p);
+            int imagePixel = image.getRGB(x, y);
+            float maskAlpha = (maskPixel & 0xFF) / 255.0f;
+            int imageAlpha = (imagePixel >> 24) & 0xFF;
+            int effectiveAlpha = (int) (imageAlpha * maskAlpha);
+            return Colors.setAlpha(imagePixel, effectiveAlpha);
+        }
+
+        return image.getRGB(x, y);
     }
 
     /**

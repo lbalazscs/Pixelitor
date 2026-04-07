@@ -34,6 +34,8 @@ import pixelitor.utils.ImageUtils;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
@@ -50,6 +52,7 @@ public class GradientFillLayer extends ContentLayer {
     private transient Gradient backupGradient;
 
     private transient BufferedImage cachedImage;
+    private transient boolean cacheValid = false;
 
     private static int count;
 
@@ -58,6 +61,14 @@ public class GradientFillLayer extends ContentLayer {
 
     public GradientFillLayer(Composition comp, String name) {
         super(comp, name);
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // defaults for transient fields
+        cacheValid = false;
+
+        in.defaultReadObject();
     }
 
     public static void createNew(Composition comp) {
@@ -82,8 +93,6 @@ public class GradientFillLayer extends ContentLayer {
         String copyName = copyType.createLayerCopyName(name);
         var copy = new GradientFillLayer(newComp, copyName);
         if (gradient != null) {
-            // could be shared, because it is overwritten
-            // when editing, but make a copy for safety
             copy.gradient = gradient.copy();
         }
         return copy;
@@ -103,12 +112,28 @@ public class GradientFillLayer extends ContentLayer {
             || gradient.hasCustomTransparency();
 
         if (needsCache) {
-            if (cachedImage == null) {
+            // only allocate new memory if the image doesn't exist or canvas size changed
+            if (cachedImage == null || cachedImage.getWidth() != width || cachedImage.getHeight() != height) {
+                if (cachedImage != null) {
+                    cachedImage.flush();
+                }
                 cachedImage = ImageUtils.createSysCompatibleImage(width, height);
+                cacheValid = false;
+            }
+
+            // if the gradient state changed, clear and redraw onto the existing buffer
+            if (!cacheValid) {
                 Graphics2D imgG = cachedImage.createGraphics();
+                // clear the image buffer completely in case of transparency
+                imgG.setComposite(AlphaComposite.Clear);
+                imgG.fillRect(0, 0, width, height);
+
+                imgG.setComposite(AlphaComposite.SrcOver);
                 gradient.paintOnGraphics(imgG, width, height);
                 imgG.dispose();
+                cacheValid = true;
             }
+            // draw at (0,0) - translation relies strictly on gradient math
             g.drawImage(cachedImage, 0, 0, null);
         } else {
             gradient.paintOnGraphics(g, width, height);
@@ -182,7 +207,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     private void invalidateGradientCache() {
-        cachedImage = null;
+        cacheValid = false;
     }
 
     public Gradient getGradient() {
@@ -235,10 +260,14 @@ public class GradientFillLayer extends ContentLayer {
 
     @Override
     public void moveWhileDragging(double imDx, double imDy) {
+        // gradient fill layers ignore dragOffsetX/Y in paint()
+        // because the gradient always must cover the full canvas
         super.moveWhileDragging(imDx, imDy);
+
         if (gradient != null) {
             Drag newDrag = origDrag.imTranslatedCopy(imDx, imDy);
             gradient.setDrag(newDrag);
+            invalidateGradientCache();
         }
     }
 
@@ -251,6 +280,8 @@ public class GradientFillLayer extends ContentLayer {
 
         // the movement is captured in the gradient state
         setTranslation(0, 0);
+
+        invalidateGradientCache();
 
         return edit;
     }

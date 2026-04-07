@@ -201,8 +201,9 @@ public class Crop implements CompAction {
     public static void contentCrop(Composition comp) {
         Rectangle2D bounds = comp.calcContentBounds(false);
         if (bounds == null) {
-            Messages.showError("Cannot Determine Bounds",
-                "<html>No bounds found in <b>%s</b>".formatted(comp.getName()));
+            Messages.showError("Transparent Image",
+                ("<html><b>%s</b> is completely transparent." +
+                    "<br>There’s no visible content to keep after cropping.").formatted(comp.getName()));
         } else if (bounds.equals(comp.getCanvasBounds())) {
             Messages.showInfo("Nothing to Crop",
                 "<html><b>%s</b> has no transparent border pixels to remove.".formatted(comp.getName()));

@@ -203,12 +203,21 @@ public class PaintBucketTool extends Tool {
     private static Rectangle scanlineFloodFill(BufferedImage img,
                                                int x, int y, int tolerance,
                                                int newRGB) {
+        // fast path: if tolerance is 0 and the start color
+        // already matches, it is guaranteed to be a no-op
+        if (tolerance == 0 && img.getRGB(x, y) == newRGB) {
+            return null;
+        }
+
         int imgHeight = img.getHeight();
         int imgWidth = img.getWidth();
         int[] pixels = ImageUtils.getPixels(img);
 
-        // Initialize with the starting point.
+        // initialize with the starting point
         Rectangle bounds = new Rectangle(x, y, 1, 1);
+
+        // tracker to check if any pixels were actually changed during the traversal
+        boolean[] modified = new boolean[1];
 
         ImageUtils.floodFill(pixels, imgWidth, imgHeight, x, y, tolerance,
             // define the action: fill pixels and expand the bounding box
@@ -220,23 +229,18 @@ public class PaintBucketTool extends Tool {
                 // fill the pixels in the segment with the new color
                 int offset = segY * imgWidth;
                 for (int i = segX1; i <= segX2; i++) {
-                    pixels[offset + i] = newRGB;
+                    // only write if the color is actually different
+                    if (pixels[offset + i] != newRGB) {
+                        pixels[offset + i] = newRGB;
+                        modified[0] = true;
+                    }
                 }
             });
 
-        // The flood fill utility needs the start color to work, but if the start pixel
-        // itself doesn't match (e.g., tolerance 0 and start color != start color),
-        // the fill won't happen. We check if the start pixel was changed.
-        if (pixels[y * imgWidth + x] != newRGB) {
-            // The starting pixel itself was not similar enough to be filled.
-            // This can happen if the start color is the same as the fill color.
-            // We check if the original color was similar to itself.
-            int originalColor = img.getRGB(x, y);
-            if (ImageUtils.isSimilar(originalColor, originalColor, tolerance)) {
-                pixels[y * imgWidth + x] = newRGB;
-            } else {
-                return null; // nothing was changed
-            }
+        // if the traversal found no pixels that needed changing,
+        // abort to avoid pushing an empty undo history state
+        if (!modified[0]) {
+            return null;
         }
 
         bounds.grow(1, 1);
@@ -246,11 +250,25 @@ public class PaintBucketTool extends Tool {
     private static Rectangle globalReplaceColor(BufferedImage img,
                                                 int tolerance,
                                                 int rgbAtMouse, int newRGB) {
+        // fast path optimization
+        if (tolerance == 0 && rgbAtMouse == newRGB) {
+            return null;
+        }
+
         int[] pixels = ImageUtils.getPixels(img);
+        boolean modified = false;
+
         for (int i = 0; i < pixels.length; i++) {
             if (ImageUtils.isSimilar(pixels[i], rgbAtMouse, tolerance)) {
-                pixels[i] = newRGB;
+                if (pixels[i] != newRGB) {
+                    pixels[i] = newRGB;
+                    modified = true;
+                }
             }
+        }
+
+        if (!modified) {
+            return null;
         }
 
         // return the replaced area, which is the entire image

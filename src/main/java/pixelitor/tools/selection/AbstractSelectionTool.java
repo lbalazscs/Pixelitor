@@ -116,11 +116,6 @@ public abstract class AbstractSelectionTool extends DragTool {
         Views.onActiveComp(this::cancelSelection);
     }
 
-    @Override
-    public void mouseClicked(PMouseEvent e) {
-        cancelSelection(e.getComp());
-    }
-
     protected void cancelSelection(Composition comp) {
         // if a selection is being built, cancel it first
         cancelSelectionBuilder();
@@ -182,9 +177,14 @@ public abstract class AbstractSelectionTool extends DragTool {
      * Finalizes the selection after a drag operation for Marquee or Lasso tools.
      */
     protected void finalizeDragBasedSelection(PMouseEvent e) {
-        if (drag.isClick()) { // clicks are handled by mouseClicked
-            // reset combinator if modifier keys were pressed but resulted in a click
-            resetCombinator();
+        if (drag.isClick()) {
+            if (e.isRight() || getCombinator() == ShapeCombinator.REPLACE) {
+                cancelSelection(e.getComp()); // normal click-to-deselect
+            } else {
+                // we assume that a 0-pixel click is an accidentally aborted drag
+                cancelSelectionBuilder(); // abort the empty drag, keep existing selection
+                isAltSubtracting = false; // reset the drag modifier state
+            }
             return;
         }
 
