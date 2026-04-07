@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        java-version: [ 21, 25 ]
+        java-version: [ 21, 26 ]
 
     name: Build with Java ${{ matrix.java-version }}
 
