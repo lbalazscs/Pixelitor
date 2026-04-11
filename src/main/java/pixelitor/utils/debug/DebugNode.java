@@ -202,7 +202,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addColor(String name, Color c) {
-        addNode(name, Colors.toHTMLHex(c, true), DebugNode::quote);
+        addNode(name, Colors.toHtmlHex(c, true), DebugNode::quote);
     }
 
     public void addClass() {

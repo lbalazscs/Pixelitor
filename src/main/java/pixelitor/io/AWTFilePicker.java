@@ -89,7 +89,7 @@ public class AWTFilePicker implements FilePicker {
                 selectedFileName += "." + extension;
             } else {
                 // this shouldn't happen with the current configuration options
-                Dialogs.showNoExtensionDialog(null);
+                Dialogs.showNoExtensionError(null);
                 return null;
             }
         }

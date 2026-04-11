@@ -25,7 +25,7 @@ import java.util.concurrent.Future;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
- * An abstract superclass for point filters. The interface is the same as the old RGBImageFilter.
+ * An abstract superclass for point filters.
  */
 public abstract class PointFilter extends AbstractBufferedImageOp {
     protected PointFilter(String filterName) {

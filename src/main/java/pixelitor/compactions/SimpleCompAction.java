@@ -35,8 +35,8 @@ import java.awt.geom.AffineTransform;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A {@link CompAction} where the processing can be simplified
- * by using the template method pattern.
+ * An abstract base class for the {@link CompAction} implementations
+ * whose processing can be simplified using the template method pattern.
  */
 public abstract class SimpleCompAction extends AbstractViewEnabledAction implements CompAction {
     private final boolean affectsCanvasSize;
@@ -55,8 +55,8 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
 
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
-        if (disableForSmartObjects() && srcComp.containsLayerOfType(SmartObject.class)) {
-            Messages.showSmartObjectUnsupportedWarning(getText());
+        if (shouldDisableForSmartObjects() && srcComp.containsLayerOfType(SmartObject.class)) {
+            Messages.showSmartObjectUnsupportedInfo(getText());
             return CompletableFuture.completedFuture(srcComp);
         }
 
@@ -65,14 +65,14 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         Canvas newCanvas = newComp.getCanvas();
         Canvas srcCanvas = srcComp.getCanvas();
 
-        var canvasTransform = createCanvasTransform(newCanvas);
-        newComp.imCoordsChanged(canvasTransform, false, view);
+        var canvasTransform = createCanvasTransform(srcCanvas);
 
         newComp.forEachNestedLayerAndMask(this::transformLayer);
 
         if (affectsCanvasSize) {
             updateCanvasSize(newCanvas, view);
         }
+        newComp.imCoordsChanged(canvasTransform, false, view);
 
         History.add(new CompositionReplacedEdit(
             getEditName(), view, srcComp, newComp, canvasTransform, false));
@@ -85,8 +85,8 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
             newComp.setGuides(newGuides);
         }
 
-        // Only after the canvas size was updated, because
-        // they are based on the canvas-sized subimage
+        // update icon images only after the canvas size is updated,
+        // because they are based on the canvas-sized subimage
         newComp.updateAllIconImages();
 
         newComp.update(true);
@@ -99,7 +99,7 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         return CompletableFuture.completedFuture(newComp);
     }
 
-    public abstract boolean disableForSmartObjects();
+    public abstract boolean shouldDisableForSmartObjects();
 
     private void transformLayer(Layer layer) {
         if (layer instanceof ContentLayer contentLayer) {

@@ -194,7 +194,7 @@ public class ShapesLayer extends ContentLayer {
 
     @Override
     public void enlargeCanvas(Outsets out) {
-        transform(AffineTransform.getTranslateInstance(out.left, out.top));
+        transform(out.getTopLeftTranslation());
     }
 
     /**

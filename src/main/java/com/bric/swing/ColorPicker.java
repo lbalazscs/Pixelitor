@@ -551,9 +551,6 @@ public class ColorPicker extends JPanel {
             int v = slider.getValue();
             ChannelUI channelUI = getSelectedChannelUI();
             try {
-                // increasing adjustingSpinners doesn't
-                // work because the spinners must be triggered
-                // in order to update the color
                 sliderUpdatingSpinner = true;
                 channelUI.setValue(v);
             } finally {
@@ -592,7 +589,7 @@ public class ColorPicker extends JPanel {
         });
 
         setOpacity(255);
-        setOpaque(this, false);
+        setDescendantsOpaque(this, false);
 
         preview.setForeground(getColor());
     }
@@ -617,7 +614,7 @@ public class ColorPicker extends JPanel {
         });
     }
 
-    private static void setOpaque(JComponent c, boolean opaque) {
+    private static void setDescendantsOpaque(JComponent c, boolean opaque) {
         if (c instanceof JTextField) {
             return;
         }
@@ -629,7 +626,7 @@ public class ColorPicker extends JPanel {
 
         for (int a = 0; a < c.getComponentCount(); a++) {
             JComponent child = (JComponent) c.getComponent(a);
-            setOpaque(child, opaque);
+            setDescendantsOpaque(child, opaque);
         }
     }
 

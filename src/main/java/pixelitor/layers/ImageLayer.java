@@ -649,7 +649,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
             setImage(bi);
         } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
+            Dialogs.showOutOfMemoryError(e);
         }
     }
 
@@ -789,15 +789,15 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
                 super.crop(cropRect, false, allowGrowing);
             } else {
                 // the image still has to be enlarged, but the translation will not be zero
-                int westEnlargement = Math.max(0, -cropX);
-                int newWidth = westEnlargement + Math.max(
+                int leftEnlargement = Math.max(0, -cropX);
+                int newWidth = leftEnlargement + Math.max(
                     image.getWidth(), cropX + cropRect.width);
-                int northEnlargement = Math.max(0, -cropY);
-                int newHeight = northEnlargement + Math.max(
+                int topEnlargement = Math.max(0, -cropY);
+                int newHeight = topEnlargement + Math.max(
                     image.getHeight(), cropY + cropRect.height);
 
                 BufferedImage newImage = ImageUtils.crop(image,
-                    -westEnlargement, -northEnlargement, newWidth, newHeight);
+                    -leftEnlargement, -topEnlargement, newWidth, newHeight);
                 setImage(newImage);
                 setTranslation(Math.min(-cropX, 0), Math.min(-cropY, 0));
             }
@@ -878,15 +878,15 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         Rectangle imageBounds = getContentBounds();
         Rectangle canvasBounds = comp.getCanvasBounds();
 
-        int newX = canvasBounds.x - out.left;
-        int newY = canvasBounds.y - out.top;
-        int newWidth = canvasBounds.width + out.left + out.right;
-        int newHeight = canvasBounds.height + out.top + out.bottom;
+        int newX = canvasBounds.x - out.left();
+        int newY = canvasBounds.y - out.top();
+        int newWidth = canvasBounds.width + out.left() + out.right();
+        int newHeight = canvasBounds.height + out.top() + out.bottom();
         var newCanvasBounds = new Rectangle(newX, newY, newWidth, newHeight);
 
         if (imageBounds.contains(newCanvasBounds)) {
             // even after the canvas enlargement, the image does not need to be enlarged
-            setTranslation(getTx() + out.left, getTy() + out.top);
+            setTranslation(getTx() + out.left(), getTy() + out.top());
         } else {
             enlargeImage(newCanvasBounds);
         }

@@ -23,15 +23,16 @@ import com.bric.image.transition.Transition;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.gui.GUIText;
 
 public class CheckerboardTransition extends AbstractTransition {
     public static final String NAME = "Checkerboard Transition";
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
-        new Item("Left", BlindsTransition2D.LEFT),
-        new Item("Right", BlindsTransition2D.RIGHT),
-        new Item("Up", BlindsTransition2D.UP),
-        new Item("Down", BlindsTransition2D.DOWN),
+        new Item(GUIText.LEFT, BlindsTransition2D.LEFT),
+        new Item(GUIText.RIGHT, BlindsTransition2D.RIGHT),
+        new Item(GUIText.UP, BlindsTransition2D.UP),
+        new Item(GUIText.DOWN, BlindsTransition2D.DOWN),
     });
     private final GroupedRangeParam numDiv = new GroupedRangeParam(
         "Number of Divisions", "Rows", "Columns",

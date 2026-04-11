@@ -72,7 +72,7 @@ public class Views {
         i18n("close"), comp -> warnAndClose(comp.getView()));
 
     public static final Action CLOSE_ALL_UNMODIFIED_ACTION = new ViewEnabledAction(
-        "Close Unmodified", comp -> warnAndCloseUnmodified());
+        "Close Unmodified", comp -> closeUnmodified());
 
     private Views() {
     }
@@ -263,7 +263,7 @@ public class Views {
         try {
             Composition comp = view.getComp();
             if (comp.hasUnsavedChanges()) {
-                int answer = Dialogs.showUnsavedChangesDialog(comp.getName());
+                int answer = Dialogs.showUnsavedChangesWarning(comp.getName());
 
                 switch (answer) {
                     case YES_OPTION:  // "Save"
@@ -298,12 +298,12 @@ public class Views {
         warnAndCloseAllIf(view -> true);
     }
 
-    public static void warnAndCloseAllBut(View ignored) {
-        warnAndCloseAllIf(view -> view != ignored);
+    public static void warnAndCloseAllBut(View viewToKeep) {
+        warnAndCloseAllIf(view -> view != viewToKeep);
     }
 
-    private static void warnAndCloseUnmodified() {
-        warnAndCloseAllIf(view -> !view.getComp().isDirty());
+    private static void closeUnmodified() {
+        warnAndCloseAllIf(view -> !view.getComp().hasUnsavedChanges());
     }
 
     // close all views matching a predicate, prompting for unsaved changes
@@ -322,7 +322,7 @@ public class Views {
 
     public static boolean doesAnyViewAllowPixelGrid() {
         for (View view : views) {
-            if (view.allowPixelGrid()) {
+            if (view.getZoomLevel().allowsPixelGrid()) {
                 return true;
             }
         }
@@ -516,7 +516,7 @@ public class Views {
         String msg = "<html>The file <b>" + file.getAbsolutePath()
             + "</b> is already opened.";
         String[] options = {"Open Again", GUIText.CANCEL};
-        boolean again = Dialogs.showOKCancelDialog(view.getDialogParent(),
+        boolean again = Dialogs.showOKCancelQuestion(view.getDialogParent(),
             msg, title, options, 1, WARNING_MESSAGE);
         return again;
     }
@@ -538,7 +538,7 @@ public class Views {
         for (View view : views) {
             // make sure that the next reload is not started
             // before the previous one is finished
-            chainedChecks = chainedChecks.thenCompose(comp -> view.checkForExternalModifications());
+            chainedChecks = chainedChecks.thenCompose(comp -> view.checkAutoReload());
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,15 +22,16 @@ import com.bric.image.transition.Transition;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 
 public class BlindsTransition extends AbstractTransition {
     public static final String NAME = "Blinds Transition";
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
-        new Item("Left", BlindsTransition2D.LEFT),
-        new Item("Right", BlindsTransition2D.RIGHT),
-        new Item("Up", BlindsTransition2D.UP),
-        new Item("Down", BlindsTransition2D.DOWN),
+        new Item(GUIText.LEFT, BlindsTransition2D.LEFT),
+        new Item(GUIText.RIGHT, BlindsTransition2D.RIGHT),
+        new Item(GUIText.UP, BlindsTransition2D.UP),
+        new Item(GUIText.DOWN, BlindsTransition2D.DOWN),
     });
     private final RangeParam numBlinds = new RangeParam("Number of Blinds", 1, 10, 50);
 

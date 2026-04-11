@@ -33,6 +33,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.SmartObject;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
+import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
@@ -85,7 +86,7 @@ public class Crop implements CompAction {
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
         if (srcComp.containsLayerOfType(SmartObject.class)) {
-            Messages.showSmartObjectUnsupportedWarning("Cropping");
+            Messages.showSmartObjectUnsupportedInfo("Cropping");
             return CompletableFuture.completedFuture(srcComp);
         }
 
@@ -115,13 +116,6 @@ public class Crop implements CompAction {
         // create a copy for undo; copy selection only if the crop didn't originate
         // from the selection itself (if it did, the selection is consumed by the crop)
         Composition croppedComp = srcComp.copy(CopyType.UNDO, !fromSelection);
-
-        // crop guides relative to the new canvas origin and size
-        Guides guides = srcComp.getGuides();
-        if (guides != null) {
-            Guides newGuides = guides.copyCropped(cropRect, view);
-            croppedComp.setGuides(newGuides);
-        }
 
         if (!fromSelection) {
             // if cropping wasn't based on a selection,
@@ -170,6 +164,12 @@ public class Crop implements CompAction {
 
         view.replaceComp(croppedComp);
 
+        Guides guides = srcComp.getGuides();
+        if (guides != null) {
+            Guides newGuides = guides.copyCropped(cropRect, view, srcCanvas);
+            croppedComp.setGuides(newGuides);
+        }
+
         croppedComp.updateAllIconImages();
         SelectionActions.update(croppedComp);
 
@@ -217,10 +217,10 @@ public class Crop implements CompAction {
      * Starts a crop based on the selection in the active composition.
      */
     public static void cropActiveCompToSelection() {
-        Views.onActiveComp(Crop::selectionCrop);
+        Views.onActiveComp(Crop::cropToSelection);
     }
 
-    private static void selectionCrop(Composition comp) {
+    private static void cropToSelection(Composition comp) {
         Selection sel = comp.getSelection();
         if (sel == null) {
             // the menu should be disabled
@@ -229,12 +229,12 @@ public class Crop implements CompAction {
 
         if (RandomGUITest.isRunning()) {
             // ask no questions, just do the simplest crop
-            rectangularSelectionCrop(comp, sel, false);
+            cropToRectangularSelection(comp, sel, false);
             return;
         }
 
         if (sel.isRectangular()) {
-            rectangularSelectionCrop(comp, sel, false);
+            cropToRectangularSelection(comp, sel, false);
         } else {
             askNonRectangularSelectionCropType(comp, sel);
         }
@@ -251,14 +251,14 @@ public class Crop implements CompAction {
             "<li><b>Only Crop:</b> Crop to the rectangular bounds of the selection.</li>" +
             "<li><b>Only Hide:</b> Add a mask based on the selection without changing the canvas size.</li></ul>";
         String[] options = {"Crop and Hide", "Only Crop", "Only Hide", GUIText.CANCEL};
-        int answer = Dialogs.showCustomOptionsDialog(comp.getDialogParent(), title, question,
+        int answer = Dialogs.showCustomOptions(comp.getDialogParent(), title, question,
             options, JOptionPane.QUESTION_MESSAGE);
         switch (answer) {
             case 0: // crop and hide
-                rectangularSelectionCrop(comp, sel, true);
+                cropToRectangularSelection(comp, sel, true);
                 break;
             case 1: // only crop
-                rectangularSelectionCrop(comp, sel, false);
+                cropToRectangularSelection(comp, sel, false);
                 break;
             case 2: // only hide
                 addMaskDerivedFromShape(comp, sel.getShape(), true);
@@ -275,11 +275,18 @@ public class Crop implements CompAction {
     /**
      * Crops based on the rectangular bounds of a selection.
      */
-    private static void rectangularSelectionCrop(Composition comp,
-                                                 Selection sel,
-                                                 boolean addHidingMask) {
+    private static void cropToRectangularSelection(Composition comp,
+                                                   Selection sel,
+                                                   boolean addHidingMask) {
+        boolean deleteCroppedPixels = true;
+        if (addHidingMask) {
+            // the pixels inside the selection's bounding box will be hidden,
+            // and the fate of the pixels outside it depends on the tool setting
+            deleteCroppedPixels = Tools.CROP.shouldDeleteCroppedPixels();
+        }
+
         new Crop(sel.getShapeBounds2D(), true,
-            true, true, addHidingMask, null).process(comp);
+            true, deleteCroppedPixels, addHidingMask, null).process(comp);
     }
 
     /**

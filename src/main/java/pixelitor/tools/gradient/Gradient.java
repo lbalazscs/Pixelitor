@@ -222,7 +222,7 @@ public class Gradient implements Serializable, Debuggable {
     }
 
     public void enlargeCanvas(Outsets enlargement) {
-        drag = drag.imTranslatedCopy(enlargement.left, enlargement.top);
+        drag = drag.imTranslatedCopy(enlargement.left(), enlargement.top());
     }
 
     public void imTransform(AffineTransform at) {

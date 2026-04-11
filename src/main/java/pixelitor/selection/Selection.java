@@ -60,7 +60,7 @@ public class Selection implements Transformable {
     // the view displaying this selection
     private View view;
 
-    // if true, the "marching ants" are not marching
+    // if true, the marching ants animation is paused
     private boolean frozen = false;
 
     // if true, the "marching ants" are not painted at all
@@ -318,9 +318,9 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Returns true if this selection is still active and usable.
+     * Returns true if this selection is still valid and usable.
      */
-    public boolean isUsable() {
+    public boolean isValid() {
         return !disposed;
     }
 

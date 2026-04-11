@@ -67,7 +67,7 @@ public class ImagePanel extends JPanel {
         try {
             paintImage(g);
         } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
+            Dialogs.showOutOfMemoryError(e);
         }
     }
 

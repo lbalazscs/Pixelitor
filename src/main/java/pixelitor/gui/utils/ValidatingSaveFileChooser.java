@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,19 +49,19 @@ public class ValidatingSaveFileChooser extends JFileChooser {
             // this can happen when exporting with an "all files"
             // file filter, because then getSelectedFile() won't
             // automatically add an extension based on the file filter.
-            Dialogs.showNoExtensionDialog(this);
+            Dialogs.showNoExtensionError(this);
             return;
         }
 
         if (f.exists()) {
             String msg = "<html><b>" + fileName + "</b> already exists." +
                 "<br>Do you want to replace it?";
-            boolean overwrite = Dialogs.showYesNoQuestionDialog(this, "Confirmation", msg);
+            boolean overwrite = Dialogs.showYesNoQuestion(this, "Confirmation", msg);
             if (!overwrite) {
                 return;
             }
             if (!isWritable(f.toPath())) {
-                Dialogs.showFileNotWritableDialog(this, f);
+                Dialogs.showFileNotWritableError(this, f);
                 return;
             }
         }
@@ -75,7 +75,7 @@ public class ValidatingSaveFileChooser extends JFileChooser {
             if (fileName.indexOf(ch) != -1) {
                 // no HTML in the message, because then the display
                 // of the < and > characters becomes problematic
-                Dialogs.showErrorDialog(this, "Invalid filename",
+                Dialogs.showError(this, "Invalid filename",
                     "The file name cannot contain the character " + ch + ".");
                 return true;
             }

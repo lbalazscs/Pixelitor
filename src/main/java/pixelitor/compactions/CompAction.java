@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,8 +26,8 @@ import java.util.concurrent.CompletableFuture;
 public interface CompAction {
     /**
      * Processes the given {@link Composition}, possibly asynchronously.
-     * If there was any change, then the returned value is a different
-     * instance, and the original instance is used as backup for the undo.
+     * If there was any change, then the returned value is a new instance,
+     * and the original instance is used as a backup for the undo.
      */
     CompletableFuture<Composition> process(Composition srcComp);
 }

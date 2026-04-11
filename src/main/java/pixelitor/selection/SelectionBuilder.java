@@ -56,7 +56,7 @@ public class SelectionBuilder {
             return;
         }
 
-        assert existingSelection.isUsable() : "disposed selection";
+        assert existingSelection.isValid() : "disposed selection";
 
         // remember the original state
         wasHidden = existingSelection.isHidden();
@@ -85,7 +85,7 @@ public class SelectionBuilder {
         if (draftSelection == null) {
             createNewDraftSelectionFromDrag(drag);
         } else {
-            assert draftSelection.isUsable() : "disposed draft selection";
+            assert draftSelection.isValid() : "disposed draft selection";
             updateExistingDraftSelectionFromDrag(draftSelection, drag);
         }
     }
@@ -104,7 +104,7 @@ public class SelectionBuilder {
         if (draftSelection == null) {
             createNewDraftSelectionFromEvent(mouseEvent);
         } else {
-            assert draftSelection.isUsable() : "disposed draft selection";
+            assert draftSelection.isValid() : "disposed draft selection";
             updateExistingDraftSelectionFromEvent(draftSelection, mouseEvent);
         }
     }

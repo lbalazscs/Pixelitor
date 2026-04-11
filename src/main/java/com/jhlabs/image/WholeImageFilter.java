@@ -38,9 +38,9 @@ public abstract class WholeImageFilter extends AbstractBufferedImageOp {
 
         if (dst == null) {
             ColorModel dstCM = src.getColorModel();
-            dst = new BufferedImage(dstCM, dstCM
-                    .createCompatibleWritableRaster(width, height), dstCM
-                    .isAlphaPremultiplied(), null);
+            dst = new BufferedImage(dstCM,
+                dstCM.createCompatibleWritableRaster(width, height),
+                dstCM.isAlphaPremultiplied(), null);
         }
 
         int[] inPixels = getRGB(src, 0, 0, width, height, null);

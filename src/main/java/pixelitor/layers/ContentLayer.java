@@ -102,6 +102,7 @@ public abstract class ContentLayer extends Layer {
 
     /**
      * Returns the rectangle representing the content, relative to the canvas.
+     * Can return null, for example for {@link GradientFillLayer}s and for uninitialized {@link ShapesLayer}s.
      */
     public Rectangle getContentBounds() {
         return getContentBounds(true);

@@ -90,8 +90,8 @@ public abstract class OKCancelDialog extends JDialog {
             }
         });
 
-        GUIUtils.setupCloseAction(this, this::dialogCanceled);
-        GUIUtils.setupEscAction(this, this::dialogCanceled);
+        GUIUtils.installCloseHandler(this, this::dialogCanceled);
+        GUIUtils.installEscHandler(this, this::dialogCanceled);
     }
 
     public void setOKButtonText(String text) {

@@ -126,7 +126,7 @@ class TextLayerTest {
 
     @Test
     void enlargeCanvas() {
-        layer.enlargeCanvas(new Outsets(5, 5, 5, 10));
+        layer.enlargeCanvas(new Outsets(5, 10, 5, 5));
 
         iconChecker.verifyUpdateCounts(0, 0);
     }

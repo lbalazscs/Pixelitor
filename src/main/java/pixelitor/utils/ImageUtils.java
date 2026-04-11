@@ -551,7 +551,7 @@ public class ImageUtils {
             WritableRaster raster = src.copyData(null);
             copy = new BufferedImage(src.getColorModel(), raster, src.isAlphaPremultiplied(), null);
         } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
+            Dialogs.showOutOfMemoryError(e);
         }
         return copy;
     }
@@ -898,14 +898,27 @@ public class ImageUtils {
             g.dispose();
             return src;
         } else {  // non-rectangular selection: do soft clipping
-            BufferedImage tmpImg = createSysCompatibleImage(selBounds);
-            Graphics2D tmpG = createSoftSelectionMask(tmpImg, selection.getShape(), selBounds.x, selBounds.y);
+            // 1. create the mask for the selection
+            BufferedImage maskImg = createSysCompatibleImage(selBounds);
+            Graphics2D maskG = createSoftSelectionMask(maskImg, selection.getShape(), selBounds.x, selBounds.y);
+            maskG.dispose();
 
-            tmpG.drawImage(replacement, 0, 0, null);
-            tmpG.dispose();
+            // 2. prepare a temporary buffer the exact size of the selection to avoid Java2D coordinate bugs
+            BufferedImage blended = createSysCompatibleImage(selBounds);
+            Graphics2D blendG = blended.createGraphics();
 
+            // 3. extract the background from the source image by drawing it with a negative offset
+            blendG.drawImage(src, -(selBounds.x - tx), -(selBounds.y - ty), null);
+
+            // 4. blend the replacement using the custom composite cleanly at 0,0
+            blendG.setComposite(new MaskedReplaceComposite(maskImg, 0, 0));
+            blendG.drawImage(replacement, 0, 0, null);
+            blendG.dispose();
+
+            // 5. overwrite the original image with the fully composited tile
             Graphics2D srcG = src.createGraphics();
-            srcG.drawImage(tmpImg, selBounds.x - tx, selBounds.y - ty, null);
+            srcG.setComposite(AlphaComposite.Src); // force replace mode
+            srcG.drawImage(blended, selBounds.x - tx, selBounds.y - ty, null);
             srcG.dispose();
 
             return src;
@@ -1104,26 +1117,6 @@ public class ImageUtils {
     }
 
     /**
-     * Blends two source images based on a mask image. The blend ratio for
-     * each pixel is determined by the corresponding pixel in the mask image.
-     */
-    public static BufferedImage blendWithMask(BufferedImage srcA, BufferedImage srcB, BufferedImage mask) {
-        BufferedImage dest = createImageWithSameCM(srcA);
-        int[] srcAPixels = getPixels(srcA);
-        int[] srcBPixels = getPixels(srcB);
-        int[] maskPixels = getPixels(mask);
-        int[] destPixels = getPixels(dest);
-
-        for (int i = 0, numPixels = destPixels.length; i < numPixels; i++) {
-            // take the blue channel, assuming that all channels are the same
-            float transparency = (maskPixels[i] & 0xFF) / 255.0f;
-            destPixels[i] = ImageMath.mixColors(transparency, srcAPixels[i], srcBPixels[i]);
-        }
-
-        return dest;
-    }
-
-    /**
      * Returns true if the coordinates (x, y) are within the image.
      */
     public static boolean isWithinBounds(int x, int y, BufferedImage img) {
@@ -1273,6 +1266,10 @@ public class ImageUtils {
 
     // maximizes the contrast in the given image
     public static void normalizeImage(BufferedImage img) {
+        // stretching the color channels without unpremultiplying them first
+        // would break the premultiplication invariant (color channels must be <= alpha)
+        assert !img.isAlphaPremultiplied();
+
         int[] pixels = getPixels(img);
         int max = 0;
 

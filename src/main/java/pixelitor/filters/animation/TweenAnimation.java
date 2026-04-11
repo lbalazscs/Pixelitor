@@ -131,7 +131,7 @@ public class TweenAnimation {
                 return showFolderNotEmptyDialog(dialogParent);
             }
         } catch (IOException e) {
-            Dialogs.showErrorDialog(dialogParent, "Folder Read Error",
+            Dialogs.showError(dialogParent, "Folder Read Error",
                 "Could not read the contents of the folder:\n" + e.getMessage());
             return false;
         }
@@ -146,7 +146,7 @@ public class TweenAnimation {
                 if (isWritable(outputLocation.toPath())) {
                     return true;
                 } else {
-                    Dialogs.showFileNotWritableDialog(outputLocation);
+                    Dialogs.showFileNotWritableError(outputLocation);
                     return false;
                 }
             } else {
@@ -158,14 +158,14 @@ public class TweenAnimation {
     }
 
     private boolean showFolderNotEmptyDialog(Component dialogParent) {
-        return Dialogs.showYesNoWarningDialog(dialogParent, "Folder Not Empty",
+        return Dialogs.showYesNoWarning(dialogParent, "Folder Not Empty",
             String.format("<html>The folder <b>%s</b> is not empty. " +
                     "<br>Some files might be overwritten. Are you sure you want to continue?",
                 outputLocation.getAbsolutePath()));
     }
 
     private boolean showFileExistsDialog(Component dialogParent) {
-        return Dialogs.showYesNoWarningDialog(dialogParent, "File exists",
+        return Dialogs.showYesNoWarning(dialogParent, "File exists",
             outputLocation.getAbsolutePath() + " exists already. Overwrite?");
     }
 }

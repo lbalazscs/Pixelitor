@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -106,7 +106,7 @@ public class ImageArea {
     }
 
     public static boolean isActiveMode(Mode m) {
-        return getMode() == m;
+        return mode == m;
     }
 
     public static void toggleUI() {
@@ -159,7 +159,7 @@ public class ImageArea {
         if (mode == FRAMES) {
             ((FramesUI) ui).cascadeWindows();
         } else {
-            // the "Cascade Windows" menu should be disabled
+            // the "Cascade Windows" menu item should be disabled
             throw new IllegalStateException("mode = " + mode);
         }
     }
@@ -168,7 +168,7 @@ public class ImageArea {
         if (mode == FRAMES) {
             ((FramesUI) ui).tileWindows();
         } else {
-            // the "Tile Windows" menu should be disabled
+            // the "Tile Windows" menu item should be disabled
             throw new IllegalStateException("mode = " + mode);
         }
     }
@@ -181,18 +181,18 @@ public class ImageArea {
         ImageArea.tabPlacement = tabPlacement;
     }
 
+    // called when the global pixel grid switch was turned on
     public static void pixelGridEnabled() {
-        // the global pixel grid switch was turned on
         if (isActiveMode(FRAMES)) {
             if (Views.doesAnyViewAllowPixelGrid()) {
                 Views.repaintAll();
             } else {
                 showNoPixelGridMessage();
             }
-        } else { // Tabs: check only the active view
+        } else { // tabs: check only the active view
             View view = Views.getActive();
             if (view != null) {
-                if (view.allowPixelGrid()) {
+                if (view.getZoomLevel().allowsPixelGrid()) {
                     view.repaint();
                 } else {
                     showNoPixelGridMessage();

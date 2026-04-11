@@ -114,7 +114,7 @@ public class Themes {
                 originalDefaultFont = UIManager.getFont("defaultFont");
             }
         } catch (Exception e) {
-            Dialogs.showExceptionDialog(e);
+            Dialogs.showException(e);
         }
     }
 

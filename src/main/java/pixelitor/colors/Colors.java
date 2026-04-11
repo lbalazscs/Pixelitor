@@ -79,15 +79,11 @@ public class Colors {
     }
 
     /**
-     * Calculates the average of two colors in the RGB space.
-     * Full opacity is assumed.
+     * Calculates the average of two colors in the RGB color space.
      */
     public static Color averageRGB(Color c1, Color c2) {
-        int r = (c1.getRed() + c2.getRed()) / 2;
-        int g = (c1.getGreen() + c2.getGreen()) / 2;
-        int b = (c1.getBlue() + c2.getBlue()) / 2;
-
-        return new Color(r, g, b);
+        int averageRGB = ImageMath.average(c1.getRGB(), c2.getRGB());
+        return new Color(averageRGB, true);
     }
 
     /**
@@ -140,7 +136,7 @@ public class Colors {
         return setAlpha(col, alpha);
     }
 
-    public static String toHTMLHex(Color c, boolean includeAlpha) {
+    public static String toHtmlHex(Color c, boolean includeAlpha) {
         if (includeAlpha) {
             // RRGGBBAA format
             return String.format(Locale.ROOT, "%02X%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
@@ -181,39 +177,39 @@ public class Colors {
 
     public static void selectColorWithDialog(JComponent component, String title,
                                              Color defaultColor, boolean allowTransparency,
-                                             Consumer<Color> colorChangeListener) {
+                                             Consumer<Color> colorSetter) {
         Window owner = SwingUtilities.getWindowAncestor(component);
-        selectColorWithDialog(owner, title, defaultColor, allowTransparency, colorChangeListener);
+        selectColorWithDialog(owner, title, defaultColor, allowTransparency, colorSetter);
     }
 
     // returns true if the dialog was accepted
     public static boolean selectColorWithDialog(Window owner, String title,
                                                 Color defaultColor, boolean allowTransparency,
-                                                Consumer<Color> colorChangeListener) {
+                                                Consumer<Color> colorSetter) {
         if (RandomGUITest.isRunning()) {
             return false;
         }
-        assert colorChangeListener != null;
+        assert colorSetter != null;
 
         Color prevColor = defaultColor;
         GlobalEvents.modalDialogOpened();
         Color color = ColorPicker.showDialog(owner, title, defaultColor,
-            allowTransparency, colorChangeListener);
+            allowTransparency, colorSetter);
         GlobalEvents.modalDialogClosed();
 
         if (color == null) {
             // cancel was pressed, reset the previous color
-            colorChangeListener.accept(prevColor);
+            colorSetter.accept(prevColor);
             return false;
         } else {
             // it's the color selector's responsibility to ensure that any
-            // valid color selection is already passed to the change listener
+            // valid color selection is already passed to the color setter
             return true;
         }
     }
 
     private static void copyColorToClipboard(Color c) {
-        Utils.copyStringToClipboard(toHTMLHex(c, false));
+        Utils.copyStringToClipboard(toHtmlHex(c, false));
     }
 
     private static Color getColorFromClipboard() {
@@ -263,9 +259,9 @@ public class Colors {
      * @param colorSource a supplier for the current color (used for 'Copy Color')
      * @param colorSetter a consumer for the newly selected color
      */
-    public static void setupFilterColorsPopupMenu(JComponent parent, ColorSwatch swatch,
-                                                  Supplier<Color> colorSource,
-                                                  Consumer<Color> colorSetter) {
+    public static void setupFilterColorPopupMenu(JComponent parent, ColorSwatch swatch,
+                                                 Supplier<Color> colorSource,
+                                                 Consumer<Color> colorSetter) {
         Lazy<JPopupMenu> popupHolder = Lazy.of(() ->
             createFilterColorPopup(parent, colorSource, colorSetter));
 
@@ -328,7 +324,7 @@ public class Colors {
         return new TaskAction("Paste Color", () -> {
             Color color = getColorFromClipboard();
             if (color == null) {
-                Dialogs.showNotAColorOnClipboardDialog(window);
+                Dialogs.showClipboardNotColorWarning(window);
             } else {
                 colorSetter.accept(color);
             }

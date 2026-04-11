@@ -62,7 +62,7 @@ public class AddGridGuidesPanel extends JPanel {
     private void setup(Guides guides) {
         int horDivisions = getNumHorDivisions();
         int verDivisions = getNumVerDivisions();
-        guides.addRelativeGrid(horDivisions, verDivisions);
+        guides.addGrid(horDivisions, verDivisions);
         guides.setName(format("horDivisions = %d, verDivisions = %d%n",
             horDivisions, verDivisions));
     }

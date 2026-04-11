@@ -54,7 +54,7 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
 
             GUIUtils.addClickAction(swatches[i], () -> showColorDialog(index));
 
-            Colors.setupFilterColorsPopupMenu(this, swatches[i],
+            Colors.setupFilterColorPopupMenu(this, swatches[i],
                 () -> model.getColor(index),
                 newColor -> updateColor(index, newColor));
 

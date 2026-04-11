@@ -182,7 +182,7 @@ public class ColorListParam extends AbstractFilterParam {
         @Override
         public String toSaveString() {
             return Stream.of(colors)
-                .map(c -> Colors.toHTMLHex(c, true))
+                .map(c -> Colors.toHtmlHex(c, true))
                 .collect(joining(","));
         }
     }

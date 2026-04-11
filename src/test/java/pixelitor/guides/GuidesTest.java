@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,35 +54,21 @@ class GuidesTest {
     @Test
     @DisplayName("horizontal line, relative")
     void addHorRelative() {
-        guides.addHorRelative(0.25);
+        guides.addHorizontal(0.25);
         assertThat(guides.getHorizontals()).containsOnly(0.25);
-    }
-
-    @Test
-    @DisplayName("horizontal line, absolute")
-    void addHorAbsolute() {
-        guides.addHorAbsolute((int) (TestHelper.TEST_WIDTH * 0.75), comp.getCanvas());
-        assertThat(guides.getHorizontals()).containsOnly(0.75);
     }
 
     @Test
     @DisplayName("vertical line, relative")
     void addVerRelative() {
-        guides.addVerRelative(0.33);
+        guides.addVertical(0.33);
         assertThat(guides.getVerticals()).containsOnly(0.33);
-    }
-
-    @Test
-    @DisplayName("vertical line, absolute")
-    void addVerAbsolute() {
-        guides.addVerAbsolute((int) (TestHelper.TEST_HEIGHT * 0.5), comp.getCanvas());
-        assertThat(guides.getVerticals()).containsOnly(0.5);
     }
 
     @Test
     @DisplayName("relative grid")
     void addRelativeGrid() {
-        guides.addRelativeGrid(4, 4);
+        guides.addGrid(4, 4);
         assertThat(guides.getHorizontals()).containsOnly(0.25, 0.5, 0.75);
         assertThat(guides.getVerticals()).containsOnly(0.25, 0.5, 0.75);
     }
@@ -90,8 +76,8 @@ class GuidesTest {
     @Test
     @DisplayName("flip horizontally")
     void copyFlippedHorizontally() {
-        guides.addVerRelative(0.25);
-        guides.addHorRelative(0.4);
+        guides.addVertical(0.25);
+        guides.addHorizontal(0.4);
 
         Guides flippedGuides = guides.copyFlipped(FlipDirection.HORIZONTAL, view);
 
@@ -102,8 +88,8 @@ class GuidesTest {
     @Test
     @DisplayName("flip vertically")
     void copyFlippedVertically() {
-        guides.addVerRelative(0.25);
-        guides.addHorRelative(0.4);
+        guides.addVertical(0.25);
+        guides.addHorizontal(0.4);
 
         Guides flippedGuides = guides.copyFlipped(FlipDirection.VERTICAL, view);
 
@@ -114,8 +100,8 @@ class GuidesTest {
     @Test
     @DisplayName("rotate 90 degrees")
     void copyRotated90() {
-        guides.addHorRelative(0.2);
-        guides.addVerRelative(0.4);
+        guides.addHorizontal(0.2);
+        guides.addVertical(0.4);
 
         Guides rotatedGuides = guides.copyRotated(QuadrantAngle.ANGLE_90, view);
 
@@ -128,8 +114,8 @@ class GuidesTest {
     @Test
     @DisplayName("rotate 180 degrees")
     void copyRotated180() {
-        guides.addHorRelative(0.2);
-        guides.addVerRelative(0.4);
+        guides.addHorizontal(0.2);
+        guides.addVertical(0.4);
 
         Guides rotatedGuides = guides.copyRotated(QuadrantAngle.ANGLE_180, view);
 
@@ -142,8 +128,8 @@ class GuidesTest {
     @Test
     @DisplayName("rotate 270 degrees")
     void copyRotated270() {
-        guides.addHorRelative(0.2);
-        guides.addVerRelative(0.4);
+        guides.addHorizontal(0.2);
+        guides.addVertical(0.4);
 
         Guides rotatedGuides = guides.copyRotated(QuadrantAngle.ANGLE_270, view);
 

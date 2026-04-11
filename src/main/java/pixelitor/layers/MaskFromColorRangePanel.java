@@ -262,7 +262,7 @@ public class MaskFromColorRangePanel extends JPanel {
 
     private boolean validate(JDialog d) {
         if (getSelectedColor() == null) {
-            Dialogs.showInfoDialog(d, "No color selected", SAMPLING_HELP_TEXT);
+            Dialogs.showInfo(d, "No color selected", SAMPLING_HELP_TEXT);
             return false;
         }
         return true;

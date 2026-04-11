@@ -106,7 +106,7 @@ public class PreferencesPanel extends JTabbedPane {
             Language language = languages.getSelectedItem();
             if (language != Language.getActive()) {
                 Language.setActive(language);
-                EventQueue.invokeLater(() -> Dialogs.showInfoDialog(this,
+                EventQueue.invokeLater(() -> Dialogs.showInfo(this,
                     "Needs Restart",
                     "Changing the display language will take effect after restarting Pixelitor."));
             }
@@ -351,13 +351,13 @@ public class PreferencesPanel extends JTabbedPane {
     }
 
     private void addMagickDirField(GridBagHelper gbh) {
-        magickDirTF = new JTextField(AppPreferences.magickDirName);
+        magickDirTF = new JTextField(AppPreferences.magickDirPath);
         magickDirTF.setColumns(10);
         gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
     }
 
     private void addGmicDirField(GridBagHelper gbh) {
-        gmicDirTF = new JTextField(AppPreferences.gmicDirName);
+        gmicDirTF = new JTextField(AppPreferences.gmicDirPath);
         gmicDirTF.setColumns(10);
         gbh.addLabelAndControl(GMIC_FOLDER_LABEL + ": ", gmicDirTF);
     }
@@ -389,8 +389,8 @@ public class PreferencesPanel extends JTabbedPane {
 
         // apply remaining settings
         // (these can't be set interactively => set them here)
-        AppPreferences.magickDirName = magickDirTF.getText().trim();
-        AppPreferences.gmicDirName = gmicDirTF.getText().trim();
+        AppPreferences.magickDirPath = magickDirTF.getText().trim();
+        AppPreferences.gmicDirPath = gmicDirTF.getText().trim();
         MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
 

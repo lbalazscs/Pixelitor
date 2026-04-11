@@ -46,7 +46,7 @@ public class CopyAction extends ViewEnabledAction {
     private static void copy(Composition comp, CopySource source) {
         switch (source.getImage(comp)) {
             case Success<BufferedImage, ?>(var img) -> startAsyncCopy(img);
-            case Error<?, String>(var errorMsg) -> Dialogs.showErrorDialog(
+            case Error<?, String>(var errorMsg) -> Dialogs.showError(
                 "Copy Failed", "Could not copy because " + errorMsg);
         }
     }

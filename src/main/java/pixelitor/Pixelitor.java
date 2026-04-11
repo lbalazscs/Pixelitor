@@ -117,7 +117,7 @@ public class Pixelitor {
             try {
                 createAndShowGUI(args);
             } catch (Exception e) {
-                Dialogs.showExceptionDialog(e);
+                Dialogs.showException(e);
             }
         });
     }
@@ -139,7 +139,7 @@ public class Pixelitor {
 
         // ensure that after GUI initialization the focus isn't grabbed
         // by a textfield, and keyboard shortcuts work properly
-        FgBgColors.getGUI().requestFocus();
+        FgBgColors.getUI().requestFocus();
 
         TipsOfTheDay.showTips(mainWindow, false);
 
@@ -254,7 +254,7 @@ public class Pixelitor {
 
         String[] options = {"Wait 10 seconds", "Exit now", GUIText.CANCEL};
 
-        return Dialogs.showCustomOptionsDialog(
+        return Dialogs.showCustomOptions(
             "Warning",
             msg.toString(),
             options,
@@ -278,7 +278,7 @@ public class Pixelitor {
             return;
         }
 
-        boolean proceedWithExit = Dialogs.showYesNoWarningDialog(mainWindow,
+        boolean proceedWithExit = Dialogs.showYesNoWarning(mainWindow,
             "Unsaved Changes", createUnsavedChangesMsg(unsavedWork));
         if (proceedWithExit) {
             exit(mainWindow);

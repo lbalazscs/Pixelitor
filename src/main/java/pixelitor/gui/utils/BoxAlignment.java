@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,8 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.gui.GUIText;
+
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 
@@ -25,14 +27,14 @@ import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignmen
  */
 public enum BoxAlignment {
     CENTER_CENTER("Center", HorizontalAlignment.CENTER, VerticalAlignment.CENTER),
-    TOP_CENTER("Top", HorizontalAlignment.CENTER, VerticalAlignment.TOP),
-    CENTER_LEFT("Left", HorizontalAlignment.LEFT, VerticalAlignment.CENTER),
-    CENTER_RIGHT("Right", HorizontalAlignment.RIGHT, VerticalAlignment.CENTER),
-    BOTTOM_CENTER("Bottom", HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM),
-    TOP_LEFT("Top Left", HorizontalAlignment.LEFT, VerticalAlignment.TOP),
-    TOP_RIGHT("Top Right", HorizontalAlignment.RIGHT, VerticalAlignment.TOP),
-    BOTTOM_LEFT("Bottom Left", HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM),
-    BOTTOM_RIGHT("Bottom Right", HorizontalAlignment.RIGHT, VerticalAlignment.BOTTOM),
+    TOP_CENTER(GUIText.TOP, HorizontalAlignment.CENTER, VerticalAlignment.TOP),
+    CENTER_LEFT(GUIText.LEFT, HorizontalAlignment.LEFT, VerticalAlignment.CENTER),
+    CENTER_RIGHT(GUIText.RIGHT, HorizontalAlignment.RIGHT, VerticalAlignment.CENTER),
+    BOTTOM_CENTER(GUIText.BOTTOM, HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM),
+    TOP_LEFT(GUIText.TOP + " " + GUIText.LEFT, HorizontalAlignment.LEFT, VerticalAlignment.TOP),
+    TOP_RIGHT(GUIText.TOP + " " + GUIText.RIGHT, HorizontalAlignment.RIGHT, VerticalAlignment.TOP),
+    BOTTOM_LEFT(GUIText.BOTTOM + " " + GUIText.LEFT, HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM),
+    BOTTOM_RIGHT(GUIText.BOTTOM + " " + GUIText.RIGHT, HorizontalAlignment.RIGHT, VerticalAlignment.BOTTOM),
 
     // special case: text aligned along a path
     PATH("Text Along Path", null, null);

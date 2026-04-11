@@ -66,7 +66,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
 
         workUnits += singleBlurUnit / 2; // subtract
 
-        if (doNormalize()) {
+        if (shouldNormalize()) {
             workUnits += (int) (singleBlurUnit * 0.16); // normalize
         }
 
@@ -97,7 +97,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
 
         pt.unitsDone(singleBlurUnit / 2);
 
-        if (doNormalize()) {
+        if (shouldNormalize()) {
             ImageUtils.normalizeImage(dst);
         }
 
@@ -106,7 +106,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    private boolean doNormalize() {
+    private boolean shouldNormalize() {
         return normalize && radius1 != radius2;
     }
 }

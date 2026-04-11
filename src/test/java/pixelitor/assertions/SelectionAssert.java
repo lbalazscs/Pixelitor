@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,21 +31,21 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         super(actual, SelectionAssert.class);
     }
 
-    public SelectionAssert isUsable() {
+    public SelectionAssert isValid() {
         isNotNull();
 
-        if (!actual.isUsable()) {
-            failWithMessage("Not usable");
+        if (!actual.isValid()) {
+            failWithMessage("disposed");
         }
 
         return this;
     }
 
-    public SelectionAssert isNotUsable() {
+    public SelectionAssert isNotValid() {
         isNotNull();
 
-        if (actual.isUsable()) {
-            failWithMessage("Usable");
+        if (actual.isValid()) {
+            failWithMessage("valid");
         }
 
         return this;

@@ -59,6 +59,15 @@ public class GUIText {
     public static final String COLOR_SPACE = "Color Space";
     public static final String CHANNEL = "Channel";
 
+    public static final String TOP = "Top";
+    public static final String RIGHT = "Right";
+    public static final String BOTTOM = "Bottom";
+    public static final String LEFT = "Left";
+
+    public static final String UP = "Up";
+    public static final String DOWN = "Down";
+
+
     private GUIText() {
     }
 }

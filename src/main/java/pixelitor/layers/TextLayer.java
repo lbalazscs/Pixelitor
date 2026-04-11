@@ -360,15 +360,15 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         }
 
         int newTx = getTx() + switch (alignment.getHorizontal()) {
-            case LEFT -> out.left;
-            case CENTER -> (out.left - out.right) / 2;
-            case RIGHT -> -out.right;
+            case LEFT -> out.left();
+            case CENTER -> (out.left() - out.right()) / 2;
+            case RIGHT -> -out.right();
         };
 
         int newTy = getTy() + switch (alignment.getVertical()) {
-            case TOP -> out.top;
-            case CENTER -> (out.top - out.bottom) / 2;
-            case BOTTOM -> -out.bottom;
+            case TOP -> out.top();
+            case CENTER -> (out.top() - out.bottom()) / 2;
+            case BOTTOM -> -out.bottom();
         };
 
         setTranslation(newTx, newTy);
@@ -407,7 +407,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
         // ...and do a negative enlargement
         enlargeCanvas(new Outsets(
-            -northMargin, -eastMargin, -southMargin, -westMargin));
+            -northMargin, -westMargin, -southMargin, -eastMargin));
     }
 
     @Override

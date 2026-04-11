@@ -153,7 +153,7 @@ public class FileIO {
 
     private static void promptImageMagickRetry(DecodingException de, String msg) {
         String[] options = {"Try with ImageMagick Import", GUIText.CANCEL};
-        boolean retryWithMagick = Dialogs.showOKCancelDialog(msg, "Error",
+        boolean retryWithMagick = Dialogs.showOKCancelQuestion(msg, "Error",
             options, 0, JOptionPane.ERROR_MESSAGE);
         if (retryWithMagick) {
             ImageMagick.importComposition(de.getFile(), false);
@@ -174,7 +174,7 @@ public class FileIO {
         File targetFile = comp.getFile();
         if (targetFile.exists()) { // if it was not deleted in the meantime...
             if (!isWritable(targetFile.toPath())) {
-                Dialogs.showFileNotWritableDialog(targetFile);
+                Dialogs.showFileNotWritableError(targetFile);
                 return false;
             }
         }

@@ -221,7 +221,7 @@ public class GlobalEvents {
 
     public static void assertDialogNestingIs(int expectedCount) {
         if (modalDialogNesting != expectedCount) {
-            throw new AssertionError("numNestedDialogs = " + modalDialogNesting
+            throw new AssertionError("modalDialogNesting = " + modalDialogNesting
                 + ", expectedCount = " + expectedCount);
         }
     }

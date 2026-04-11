@@ -768,10 +768,14 @@ public class CropTool extends DragTool {
         );
 
         Crop.toolCrop(view.getComp(), cropRect,
-            allowGrowingCB.isSelected(), deleteCroppedCB.isSelected(),
+            allowGrowingCB.isSelected(), shouldDeleteCroppedPixels(),
             cropBoxRestorationEdit);
         reset();
         return true;
+    }
+
+    public boolean shouldDeleteCroppedPixels() {
+        return deleteCroppedCB.isSelected();
     }
 
     private void cancel() {
@@ -827,7 +831,7 @@ public class CropTool extends DragTool {
         maskOpacity.saveStateTo(preset);
         preset.put(CompositionGuideType.PRESET_KEY, getSelectedGuides().name());
 
-        preset.putBoolean(DELETE_CROPPED_TEXT, deleteCroppedCB.isSelected());
+        preset.putBoolean(DELETE_CROPPED_TEXT, shouldDeleteCroppedPixels());
         preset.putBoolean(ALLOW_GROWING_TEXT, allowGrowingCB.isSelected());
     }
 
@@ -845,7 +849,7 @@ public class CropTool extends DragTool {
         DebugNode node = super.createDebugNode(key);
 
         node.addDouble("mask opacity", maskOpacity.getPercentage());
-        node.addBoolean("delete cropped", deleteCroppedCB.isSelected());
+        node.addBoolean("delete cropped", shouldDeleteCroppedPixels());
         node.addBoolean("allow growing", allowGrowingCB.isSelected());
         node.addAsString("guide type", getSelectedGuides());
         node.addNullableDebuggable("cropBox", cropBox);

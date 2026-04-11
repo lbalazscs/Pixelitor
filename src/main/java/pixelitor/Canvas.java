@@ -41,7 +41,7 @@ import java.io.Serializable;
 /**
  * The canvas represents the size of a composition.
  * A layer can be larger than the canvas if it's partially hidden,
- * for example because it was moved with the Move Tool).
+ * for example because it was moved with the Move Tool.
  * The saved images always have the size of the canvas.
  */
 public class Canvas implements Serializable, Debuggable {
@@ -57,7 +57,7 @@ public class Canvas implements Serializable, Debuggable {
     private transient int coHeight;
 
     // cached thumbnail dimensions (calculated lazily)
-    private transient Dimension thumbDimension;
+    private transient Dimension thumbSize;
 
     @Serial
     private static final long serialVersionUID = -1459254568616232274L;
@@ -95,7 +95,7 @@ public class Canvas implements Serializable, Debuggable {
         width = newWidth;
         height = newHeight;
 
-        thumbDimension = null; // invalidate cache
+        thumbSize = null; // invalidate cache
         recalcCoSize(view, updateView);
 
         if (view.isActive()) {
@@ -292,11 +292,11 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     public Dimension getThumbSize() {
-        if (thumbDimension == null) {
-            thumbDimension = Thumbnails.calcThumbDimensions(
+        if (thumbSize == null) {
+            thumbSize = Thumbnails.calcThumbDimensions(
                 width, height, Thumbnails.getMaxSize(), true);
         }
-        return thumbDimension;
+        return thumbSize;
     }
 
     public String createSVGElement() {

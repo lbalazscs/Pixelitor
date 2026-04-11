@@ -559,14 +559,14 @@ public class AppRunner {
         keyboard.undoRedo("Resize");
     }
 
-    public void enlargeCanvas(int north, int west, int east, int south) {
+    public void enlargeCanvas(int top, int right, int bottom, int left) {
         runMenuCommand("Enlarge Canvas...");
         var dialog = findDialogByTitle("Enlarge Canvas");
 
-        dialog.slider("north").slideTo(north);
-        dialog.slider("west").slideTo(west);
-        dialog.slider("east").slideTo(east);
-        dialog.slider("south").slideTo(south);
+        dialog.slider("top").slideTo(top);
+        dialog.slider("right").slideTo(right);
+        dialog.slider("bottom").slideTo(bottom);
+        dialog.slider("left").slideTo(left);
 
         dialog.button("ok").click();
         dialog.requireNotVisible();

@@ -105,7 +105,7 @@ public interface Drawable extends Filterable {
                 filterWithoutDialogFinished(dest, context, filter.getName());
             }
         } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
+            Dialogs.showOutOfMemoryError(e);
         } catch (Throwable e) {
             String errorDetails = String.format(
                 "Error while running the filter '%s'%n" +

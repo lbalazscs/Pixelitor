@@ -18,10 +18,7 @@
 package pixelitor.utils;
 
 import com.bric.util.JVM;
-import pixelitor.Features;
-import pixelitor.NewImage;
-import pixelitor.Pixelitor;
-import pixelitor.TipsOfTheDay;
+import pixelitor.*;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Screens;
@@ -122,14 +119,14 @@ public final class AppPreferences {
     public static final long FLAG_PIXEL_SNAP = 1L;
     // subsequent flag masks would be 1L << 1, 1L << 2, etc.
 
-    // the default settings for the flags (binary OR between
-    // the masks of the flags that are true by default)
+    // the default settings for the flags
+    // (0 means all flags are false by default)
     private static final long FLAG_DEFAULTS = 0;
 
     // loaded and stored here to avoid initializing the ImageMagick class
     // (which also searches for this directory), if ImageMagick is not needed
-    public static String magickDirName = "";
-    public static String gmicDirName = "";
+    public static String magickDirPath = "";
+    public static String gmicDirPath = "";
 
     static {
         loadPaths();
@@ -357,10 +354,13 @@ public final class AppPreferences {
         mainPrefs.putInt(THUMB_SIZE_KEY, Thumbnails.getMaxSize());
     }
 
-    public static synchronized GuideStyle getGuideStyle() {
+    public static GuideStyle getGuideStyle() {
+        assert Threads.calledOnEDT() || AppMode.isUnitTesting();
+        
         if (guideStyle == null) {
             int colorRGB = mainPrefs.getInt(GUIDE_COLOR_KEY, Color.BLACK.getRGB());
             int strokeId = mainPrefs.getInt(GUIDE_STROKE_KEY, GuideStrokeType.DASHED.ordinal());
+            //noinspection NonThreadSafeLazyInitialization
             guideStyle = new GuideStyle();
             guideStyle.setColorA(new Color(colorRGB));
             guideStyle.setStrokeType(GuideStrokeType.values()[strokeId]);
@@ -369,10 +369,13 @@ public final class AppPreferences {
         return guideStyle;
     }
 
-    public static synchronized GuideStyle getCropGuideStyle() {
+    public static GuideStyle getCropGuideStyle() {
+        assert Threads.calledOnEDT() || AppMode.isUnitTesting();
+
         if (cropGuideStyle == null) {
             int colorRGB = mainPrefs.getInt(CROP_GUIDE_COLOR_KEY, Color.BLACK.getRGB());
             int strokeId = mainPrefs.getInt(CROP_GUIDE_STROKE_KEY, GuideStrokeType.SOLID.ordinal());
+            //noinspection NonThreadSafeLazyInitialization
             cropGuideStyle = new GuideStyle();
             cropGuideStyle.setColorA(new Color(colorRGB));
             cropGuideStyle.setStrokeType(GuideStrokeType.values()[strokeId]);
@@ -381,16 +384,18 @@ public final class AppPreferences {
         return cropGuideStyle;
     }
 
-    private static void saveGuideStyles() {
-        GuideStyle style = getGuideStyle();
-        mainPrefs.putInt(GUIDE_COLOR_KEY, style.getColorA().getRGB());
-        mainPrefs.putInt(GUIDE_STROKE_KEY, style.getStrokeType().ordinal());
+    private static void saveGuideStyle() {
+        if (guideStyle != null) { // was loaded
+            mainPrefs.putInt(GUIDE_COLOR_KEY, guideStyle.getColorA().getRGB());
+            mainPrefs.putInt(GUIDE_STROKE_KEY, guideStyle.getStrokeType().ordinal());
+        }
     }
 
-    private static void saveCropGuideStyles() {
-        GuideStyle style = getCropGuideStyle();
-        mainPrefs.putInt(CROP_GUIDE_COLOR_KEY, style.getColorA().getRGB());
-        mainPrefs.putInt(CROP_GUIDE_STROKE_KEY, style.getStrokeType().ordinal());
+    private static void saveCropGuideStyle() {
+        if (cropGuideStyle != null) { // was loaded
+            mainPrefs.putInt(CROP_GUIDE_COLOR_KEY, cropGuideStyle.getColorA().getRGB());
+            mainPrefs.putInt(CROP_GUIDE_STROKE_KEY, cropGuideStyle.getStrokeType().ordinal());
+        }
     }
 
     public static void savePreferences() {
@@ -407,8 +412,8 @@ public final class AppPreferences {
         TipsOfTheDay.saveNextTipIndex();
         saveNewImageSize();
         saveLastToolName();
-        saveGuideStyles();
-        saveCropGuideStyles();
+        saveGuideStyle();
+        saveCropGuideStyle();
         saveTheme();
         saveUIFont();
         saveLanguage();
@@ -562,13 +567,13 @@ public final class AppPreferences {
     }
 
     private static void loadPaths() {
-        magickDirName = mainPrefs.get(MAGICK_DIR_KEY, "");
-        gmicDirName = mainPrefs.get(GMIC_DIR_KEY, "");
+        magickDirPath = mainPrefs.get(MAGICK_DIR_KEY, "");
+        gmicDirPath = mainPrefs.get(GMIC_DIR_KEY, "");
     }
 
     private static void savePaths() {
-        mainPrefs.put(MAGICK_DIR_KEY, magickDirName);
-        mainPrefs.put(GMIC_DIR_KEY, gmicDirName);
+        mainPrefs.put(MAGICK_DIR_KEY, magickDirPath);
+        mainPrefs.put(GMIC_DIR_KEY, gmicDirPath);
     }
 
     private static void loadFlags() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -115,7 +115,7 @@ public class DrawableAction extends AbstractViewEnabledAction {
             return;
         }
 
-        boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
+        boolean rasterize = Dialogs.showRasterizeQuestion(layer, name);
         if (rasterize) {
             ImageLayer rasterizedLayer = layer.replaceWithRasterized();
             action.accept(rasterizedLayer);
@@ -124,7 +124,7 @@ public class DrawableAction extends AbstractViewEnabledAction {
 
     private void handleUnsupportedLayer(Layer layer) {
         if (layer instanceof AdjustmentLayer) {
-            Dialogs.showErrorDialog("Adjustment Layer",
+            Dialogs.showError("Adjustment Layer",
                 name + " can't be used on adjustment layers.");
         } else if (layer instanceof LayerGroup group) {
             // isolated groups can be rasterized and are handled by handleRasterizableLayer
@@ -143,7 +143,7 @@ public class DrawableAction extends AbstractViewEnabledAction {
             }
             return;
         }
-        boolean rasterize = Dialogs.showRasterizeDialog(so, name);
+        boolean rasterize = Dialogs.showRasterizeQuestion(so, name);
         if (rasterize) {
             ImageLayer rasterizedLayer = so.replaceWithRasterized();
             action.accept(rasterizedLayer);

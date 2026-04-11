@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.OffsetFilter;
-import com.jhlabs.image.PointFilter;
 import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.ImagePositionParam;
@@ -28,106 +27,55 @@ import pixelitor.utils.ImageUtils;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-/**
- * The "Tile Seamless" filter.
- */
 public class TileSeamless extends ParametrizedFilter {
     public static final String NAME = "Tile Seamless";
 
-//    private static final int SHOW_FINAL = 0;
-//    private static final int SHOW_MASK = 1;
-//    private static final int SHOW_OFFSET = 2;
-
-    private final ImagePositionParam center =
-        new ImagePositionParam("Center");
-
-//    private final IntChoiceParam showParam = new IntChoiceParam("Show", new IntChoiceParam.Item[]{
-//        new IntChoiceParam.Item("Final", SHOW_FINAL),
-//        new IntChoiceParam.Item("Mask", SHOW_MASK),
-//        new IntChoiceParam.Item("Final", SHOW_OFFSET),
-//    });
-
-    private MaskMaker maskMaker = null;
+    private final ImagePositionParam center = new ImagePositionParam("Center");
 
     public TileSeamless() {
         super(true);
-
-        help = Help.fromHTML("Modifies an image to make it \"seamless,\" meaning it can be tiled (repeated) without visible edges or discontinuities.");
-
-        initParams(
-//            showParam,
-            center
-        );
+        help = Help.fromHTML("Modifies an image to make it \"seamless\", meaning it<br>can be tiled (repeated) without visible edges or discontinuities.");
+        initParams(center);
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (maskMaker == null) {
-            maskMaker = new MaskMaker();
+        if (dest == null) {
+            dest = ImageUtils.createImageWithSameCM(src);
         }
 
-        OffsetFilter offsetFilter = new OffsetFilter(NAME,
-            TransformFilter.WRAP_AROUND, center.getAbsolutePoint(src));
+        Point2D p = center.getAbsolutePoint(src);
+        double cx = p.getX();
+        double cy = p.getY();
+        int width = src.getWidth();
+        int height = src.getHeight();
 
-        BufferedImage offsetImage = offsetFilter.filter(src, dest);
+        // generate the offset image into the destination buffer
+        OffsetFilter offsetFilter = new OffsetFilter(NAME, TransformFilter.WRAP_AROUND, p);
+        offsetFilter.filter(src, dest);
 
-        maskMaker.setCenter(center.getAbsolutePoint(src));
-        maskMaker.setSize(src);
-        BufferedImage maskImage = maskMaker.filter(src, ImageUtils.createImageWithSameCM(src));
+        int[] srcPixels = ImageUtils.getPixels(src);
+        int[] destPixels = ImageUtils.getPixels(dest);
 
-        return ImageUtils.blendWithMask(src, offsetImage, maskImage);
-//        return switch (showParam.getSelected().getValue()) {
-//            case SHOW_FINAL -> ImageUtils.blendWithMask(src, offsetImage, maskImage);
-//            case SHOW_OFFSET -> offsetImage;
-//            case SHOW_MASK -> maskImage;
-//            default -> throw new IllegalStateException("Unexpected value: " + showParam.getSelected().getValue());
-//        };
-    }
+        int i = 0;
+        for (int y = 0; y < height; y++) {
+            // y distance for the entire row
+            double distY = (y > cy) ? (y - cy) / (height - cy) : (cy - y) / cy;
 
-    /**
-     * Generates a mask image based on the distance of each pixel from the center.
-     */
-    private static class MaskMaker extends PointFilter {
-        double cx;
-        double cy;
-        double width;
-        double height;
+            for (int x = 0; x < width; x++) {
+                double distX = (x > cx) ? (x - cx) / (width - cx) : (cx - x) / cx;
 
-        protected MaskMaker() {
-            super(NAME);
-        }
+                double mul = distX * distY;
+                double denominator = mul + (1.0 - distX) * (1.0 - distY);
+                double f = denominator == 0 ? 0 : mul / denominator;
 
-        public void setCenter(Point2D p) {
-            this.cx = p.getX();
-            this.cy = p.getY();
-        }
-
-        public void setSize(BufferedImage src) {
-            width = src.getWidth();
-            height = src.getHeight();
-        }
-
-        @Override
-        public int processPixel(int x, int y, int rgb) {
-            double distX;
-            double distY;
-
-            if (x > cx) {
-                distX = (x - cx) / (width - cx);
-            } else {
-                distX = (cx - x) / cx;
+                // blend original src pixel with the offset pixel
+                destPixels[i] = ImageMath.mixColors((float) f, srcPixels[i], destPixels[i]);
+                i++;
             }
-            if (y > cy) {
-                distY = (y - cy) / (height - cy);
-            } else {
-                distY = (cy - y) / cy;
-            }
-
-            double bri01 = distX * distY / (distX * distY + (1.0 - distX) * (1.0 - distY));
-            int bri = ImageMath.clamp((int) (bri01 * 255), 0, 255);
-
-            return 0xFF_00_00_00 | bri << 16 | bri << 8 | bri;
         }
+
+        return dest;
     }
 
     @Override

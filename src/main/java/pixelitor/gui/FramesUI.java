@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,7 @@ import java.beans.PropertyVetoException;
 import java.util.List;
 
 /**
- * An {@link ImageAreaUI} implementation
- * where the edited images are in internal frames
+ * An {@link ImageAreaUI} implementation where the {@link View}s are in internal frames.
  */
 public final class FramesUI extends JDesktopPane implements ImageAreaUI {
     private static final int CASCADE_OFFSET_X = 15;
@@ -139,7 +138,7 @@ public final class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     private void showNoViewsDialog(String action) {
-        Dialogs.showInfoDialog(this, "No Open Images",
+        Dialogs.showInfo(this, "No Open Images",
             "There are no open images to " + action + ".");
     }
 

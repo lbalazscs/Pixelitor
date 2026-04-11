@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.util.Queue;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A message handler implementation for unit tests.
+ * A {@link MessageHandler} implementation for unit tests.
  * Can be used to verify that the correct messages are being displayed
  * and to simulate user responses.
  */
@@ -141,7 +141,7 @@ public class TestMessageHandler implements MessageHandler {
 
     @Override
     public void showExceptionOnEDT(Throwable exception) {
-        // Execute immediately in unit tests rather than scheduling on EDT
+        // execute immediately in unit tests rather than scheduling on EDT
         showException(exception);
     }
 
@@ -152,7 +152,7 @@ public class TestMessageHandler implements MessageHandler {
 
         captureMessage(MessageType.INFO, title, msg, null);
 
-        // Return queued response or default to true
+        // returns the queued response or defaults to true
         return yesNoResponses.isEmpty() ? true : yesNoResponses.poll();
     }
 

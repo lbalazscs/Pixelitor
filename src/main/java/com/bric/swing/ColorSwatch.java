@@ -42,16 +42,16 @@ public class ColorSwatch extends JPanel {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final int w;
+    private final int size;
 
-    public ColorSwatch(int width) {
-        w = width;
-        setPreferredSize(new Dimension(width, width));
-        setMinimumSize(new Dimension(width, width));
+    public ColorSwatch(int size) {
+        this.size = size;
+        setPreferredSize(new Dimension(size, size));
+        setMinimumSize(new Dimension(size, size));
     }
 
-    public ColorSwatch(Color color, int width) {
-        this(width);
+    public ColorSwatch(Color color, int size) {
+        this(size);
         setForeground(color);
     }
 
@@ -73,31 +73,31 @@ public class ColorSwatch extends JPanel {
     }
 
     @Override
-    public void paint(Graphics g0) {
-        super.paint(g0); //may be necessary for some look-and-feels?
+    public void paint(Graphics g) {
+        super.paint(g); //may be necessary for some look-and-feels?
 
-        Graphics2D g = (Graphics2D) g0;
+        Graphics2D g2 = (Graphics2D) g;
 
         Color c = getForeground();
-        int w2 = Math.min(getWidth(), w);
-        int h2 = Math.min(getHeight(), w);
+        int w2 = Math.min(getWidth(), size);
+        int h2 = Math.min(getHeight(), size);
         Rectangle r = new Rectangle(getWidth() / 2 - w2 / 2, getHeight() / 2 - h2 / 2, w2, h2);
 
         if (!isEnabled()) {
             // lbalazscs: respecting the enabled setting
-            g.setColor(getBackground());
-            g.fillRect(0, 0, getWidth(), getHeight());
-            PlafPaintUtils.drawBevel(g, r);
+            g2.setColor(getBackground());
+            g2.fillRect(0, 0, getWidth(), getHeight());
+            PlafPaintUtils.drawBevel(g2, r);
             return;
         }
 
         if (c.getAlpha() < 255) {
             TexturePaint checkers = getCheckerPaint();
-            g.setPaint(checkers);
-            g.fillRect(r.x, r.y, r.width, r.height);
+            g2.setPaint(checkers);
+            g2.fillRect(r.x, r.y, r.width, r.height);
         }
-        g.setColor(c);
-        g.fillRect(r.x, r.y, r.width, r.height);
-        PlafPaintUtils.drawBevel(g, r);
+        g2.setColor(c);
+        g2.fillRect(r.x, r.y, r.width, r.height);
+        PlafPaintUtils.drawBevel(g2, r);
     }
 }

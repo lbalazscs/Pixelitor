@@ -216,7 +216,7 @@ public final class GUIUtils {
      * Prevents the given dialog from closing when the user
      * clicks the X button, and instead triggers the given action.
      */
-    public static void setupCloseAction(JDialog d, Runnable action) {
+    public static void installCloseHandler(JDialog d, Runnable action) {
         d.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         d.addWindowListener(new WindowAdapter() {
             @Override
@@ -230,7 +230,7 @@ public final class GUIUtils {
      * Registers the given action to be run when the
      * escape key is pressed in the given dialog.
      */
-    public static void setupEscAction(JDialog d, Runnable action) {
+    public static void installEscHandler(JDialog d, Runnable action) {
         JComponent contentPane = (JComponent) d.getContentPane();
         contentPane.registerKeyboardAction(e -> action.run(),
             ESC, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -265,7 +265,7 @@ public final class GUIUtils {
             timer.schedule(startBusyCursorTask, delay);
             task.run(); // on this thread!
         } finally {
-            // reset the cursor when the original task has stopped running
+            // reset the cursor after the task completes
             timer.cancel();
             parent.setCursor(DEFAULT);
         }
@@ -306,7 +306,7 @@ public final class GUIUtils {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    openFileInFolder(file);
+                    revealFileInFolder(file);
                 } catch (IOException ex) {
                     Messages.showException(ex);
                 }
@@ -314,7 +314,7 @@ public final class GUIUtils {
         };
     }
 
-    private static void openFileInFolder(File file) throws IOException {
+    private static void revealFileInFolder(File file) throws IOException {
         // this line should work in a platform-independent way, but
         // https://bugs.openjdk.java.net/browse/JDK-8233994
         // Desktop.getDesktop().browseFileDirectory(file);
@@ -350,7 +350,7 @@ public final class GUIUtils {
                     "Do you want to save your changes now?";
 
                 String[] options = {"Save and Print", GUIText.CANCEL};
-                boolean saveAndPrint = Dialogs.showOKCancelDialog(parent, msg,
+                boolean saveAndPrint = Dialogs.showOKCancelQuestion(parent, msg,
                     "Unsaved Changes", options, 0, QUESTION_MESSAGE);
                 if (!saveAndPrint) {
                     return;
@@ -424,15 +424,15 @@ public final class GUIUtils {
     }
 
     public static void removeAllMouseListeners(JComponent c) {
-        MouseListener[] mouseListeners = c.getMouseListeners();
-        for (MouseListener mouseListener : mouseListeners) {
-            c.removeMouseListener(mouseListener);
+        MouseListener[] listeners = c.getMouseListeners();
+        for (MouseListener listener : listeners) {
+            c.removeMouseListener(listener);
         }
     }
 
-    public static void replaceMouseListeners(JComponent c, MouseListener newMouseListener) {
+    public static void replaceMouseListeners(JComponent c, MouseListener newListener) {
         removeAllMouseListeners(c);
-        c.addMouseListener(newMouseListener);
+        c.addMouseListener(newListener);
     }
 
     public static JCheckBox createLinkCheckBox(Linkable linkable) {

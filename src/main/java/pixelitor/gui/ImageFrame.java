@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Messages;
@@ -112,11 +113,11 @@ public class ImageFrame extends JInternalFrame
     }
 
     public void setToCanvasSize() {
-        setSize(view.getCanvas().getCoSize());
+        Canvas canvas = view.getCanvas();
+        setContentSize(canvas.getCoWidth(), canvas.getCoHeight());
     }
 
-    @Override
-    public void setSize(int contentWidth, int contentHeight) {
+    private void setContentSize(int contentWidth, int contentHeight) {
         // the required size for the frame to hold the content
         int requiredWidth = contentWidth + SCROLLBAR_SAFETY_HOR;
         int requiredHeight = contentHeight + frameDecorationHeight + SCROLLBAR_SAFETY_VER;
@@ -132,7 +133,7 @@ public class ImageFrame extends JInternalFrame
         int finalWidth = Math.min(requiredWidth, maxWidth);
         int finalHeight = Math.min(requiredHeight, maxHeight);
 
-        super.setSize(finalWidth, finalHeight);
+        setSize(finalWidth, finalHeight);
     }
 
     public void ensurePositiveLocation() {
@@ -150,7 +151,7 @@ public class ImageFrame extends JInternalFrame
     }
 
     @Override
-    public void updateTitle(View view) {
+    public void updateTitle() {
         setTitle(view.createTitleWithZoom());
     }
 }

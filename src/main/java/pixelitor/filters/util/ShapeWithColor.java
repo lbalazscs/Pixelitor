@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public record ShapeWithColor(Shape shape, Color color) {
             .append("\n");
         if (bgColor != null) {
             content.append(String.format("<rect width=\"100%%\" height=\"100%%\" fill=\"#%s\"/>\n",
-                Colors.toHTMLHex(bgColor, true)));
+                Colors.toHtmlHex(bgColor, true)));
         }
         appendSvgPaths(content, shapes, strokeWidth, strokeColor);
         content.append("</svg>");
@@ -66,14 +66,14 @@ public record ShapeWithColor(Shape shape, Color color) {
             String pathData = Shapes.toSvgPath(shape.shape());
             sb.append("<path d=\"").append(pathData).append("\" ");
 
-            String colorHex = Colors.toHTMLHex(shape.color(), false);
+            String colorHex = Colors.toHtmlHex(shape.color(), false);
             sb.append("fill=\"#").append(colorHex).append("\" ");
 
             String svgFillRule = Shapes.getSvgFillRule(shape.shape());
             sb.append("fill-rule=\"").append(svgFillRule).append("\"");
 
             if (strokeWidth > 0 && strokeColor != null) {
-                String strokeColorHex = Colors.toHTMLHex(strokeColor, false);
+                String strokeColorHex = Colors.toHtmlHex(strokeColor, false);
                 sb.append(" stroke=\"#").append(strokeColorHex).append("\"");
                 sb.append(" stroke-width=\"").append(strokeWidth).append("\"");
                 sb.append(" stroke-linecap=\"butt\"");

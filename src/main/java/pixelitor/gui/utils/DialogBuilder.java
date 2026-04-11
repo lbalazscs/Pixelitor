@@ -275,8 +275,8 @@ public class DialogBuilder {
         addContent();
         addButtons();
 
-        GUIUtils.setupCloseAction(dialog, this::dialogCanceled);
-        GUIUtils.setupEscAction(dialog, this::dialogCanceled);
+        GUIUtils.installCloseHandler(dialog, this::dialogCanceled);
+        GUIUtils.installEscHandler(dialog, this::dialogCanceled);
 
         if (enableCopyShortcuts) {
             JComponent contentPane = (JComponent) dialog.getContentPane();

@@ -248,7 +248,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
             sb.append(linked);
             for (Color color : colors) {
                 sb.append(',');
-                sb.append(Colors.toHTMLHex(color, true));
+                sb.append(Colors.toHtmlHex(color, true));
             }
             return sb.toString();
         }

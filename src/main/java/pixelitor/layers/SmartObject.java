@@ -263,7 +263,7 @@ public class SmartObject extends CompositeLayer {
         String title = linkedContentFile.getName() + " not found.";
         String msg = "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() +
             "</b> was not found.<br>You can search for it or use a transparent image.";
-        boolean search = Dialogs.showOKCancelDialog(msg, title,
+        boolean search = Dialogs.showOKCancelQuestion(msg, title,
             new String[]{"Search...", "Use Transparent Image"}, 0, JOptionPane.ERROR_MESSAGE);
 
         File newFile = null;
@@ -582,7 +582,7 @@ public class SmartObject extends CompositeLayer {
         return comp.findParentView();
     }
 
-    public CompletableFuture<Composition> checkForAutoReload() {
+    public CompletableFuture<Composition> checkAutoReload() {
         assert !isContentOpen();
         assert checkInvariants();
 
@@ -602,7 +602,7 @@ public class SmartObject extends CompositeLayer {
         }
 
         // recursively check nested smart objects within the content
-        return content.checkForExternalModifications();
+        return content.checkAutoReload();
     }
 
     private CompletableFuture<Composition> reloadLinkedContentAsync() {

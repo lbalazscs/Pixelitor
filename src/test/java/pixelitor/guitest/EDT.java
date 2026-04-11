@@ -108,6 +108,10 @@ public class EDT {
         return call(Views::getActiveSelection);
     }
 
+    public static boolean hasActiveSelection() {
+        return queryActiveComp(Composition::hasSelection);
+    }
+
     public static Guides getActiveGuides() {
         return queryActiveComp(Composition::getGuides);
     }

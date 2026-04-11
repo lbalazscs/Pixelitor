@@ -104,7 +104,7 @@ public final class SelectionChangeResult {
             case CANCELLED -> {
                 // do nothing, as the user intentionally cancelled
             }
-            case OUT_OF_BOUNDS -> Dialogs.showInfoDialog("No Selection",
+            case OUT_OF_BOUNDS -> Dialogs.showInfo("No Selection",
                 String.format("No selection was created because the %s is outside the canvas.", source));
         }
     }

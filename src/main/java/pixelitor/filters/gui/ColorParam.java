@@ -187,7 +187,7 @@ public class ColorParam extends AbstractFilterParam {
 
         @Override
         public String toSaveString() {
-            return Colors.toHTMLHex(color, true);
+            return Colors.toHtmlHex(color, true);
         }
     }
 }

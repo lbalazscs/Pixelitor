@@ -41,7 +41,7 @@ public class Help {
     }
 
     public static Help fromHTML(String htmlText) {
-        return new Help(htmlText, false);
+        return new Help("<html>" + htmlText, false);
     }
 
     public JMenu createMenu() {
@@ -63,7 +63,7 @@ public class Help {
         helpMenu.add(new AbstractAction("Help") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Dialogs.showInfoDialog("Help", helpText);
+                Dialogs.showInfo("Help", helpText);
             }
         });
     }

@@ -201,6 +201,6 @@ public class ValidationResult {
             throw new IllegalStateException("is valid");
         }
         assert !errorMsg.startsWith("<html>") : "errorMsg = " + errorMsg;
-        Dialogs.showErrorDialog(dialogParent, "Error", "<html>" + errorMsg);
+        Dialogs.showError(dialogParent, "Error", "<html>" + errorMsg);
     }
 }

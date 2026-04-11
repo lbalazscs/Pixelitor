@@ -48,7 +48,7 @@ public class PresetActions {
                 String dirPath = PRESETS_DIR + File.separator + owner.getPresetDirName();
                 File directory = new File(dirPath);
                 if (!directory.exists()) {
-                    Dialogs.showDirectoryNotFoundDialog(dialogParent, directory);
+                    Dialogs.showDirectoryNotFoundError(dialogParent, directory);
                     return;
                 }
                 Desktop.getDesktop().open(directory);
@@ -72,7 +72,7 @@ public class PresetActions {
     private static void promptAndSave(PresetOwner owner, Component parent,
                                       Consumer<UserPreset> menuAdder,
                                       Consumer<UserPreset> menuRemover) {
-        String presetName = Dialogs.showInputDialog(
+        String presetName = Dialogs.showInputQuestion(
             parent, "Preset Name", "Preset Name:");
         if (presetName == null || presetName.isBlank()) {
             return;
@@ -102,6 +102,6 @@ public class PresetActions {
         String msg = String.format("The preset \"%s\" already exists. Overwrite?",
             presetName);
         int msgType = JOptionPane.WARNING_MESSAGE;
-        return Dialogs.showYesNoDialog(parent, title, msg, msgType);
+        return Dialogs.showYesNoQuestion(parent, title, msg, msgType);
     }
 }

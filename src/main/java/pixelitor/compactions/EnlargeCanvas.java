@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,8 +42,8 @@ public class EnlargeCanvas extends SimpleCompAction {
     private final Outsets enlargement;
     private Dimension newCanvasSize;
 
-    public EnlargeCanvas(int north, int east, int south, int west) {
-        this(new Outsets(north, west, south, east));
+    public EnlargeCanvas(int top, int right, int bottom, int left) {
+        this(new Outsets(top, right, bottom, left));
     }
 
     public EnlargeCanvas(Outsets outsets) {
@@ -53,7 +53,7 @@ public class EnlargeCanvas extends SimpleCompAction {
     }
 
     @Override
-    public boolean disableForSmartObjects() {
+    public boolean shouldDisableForSmartObjects() {
         return true;
     }
 
@@ -75,7 +75,7 @@ public class EnlargeCanvas extends SimpleCompAction {
 
     @Override
     protected AffineTransform createCanvasTransform(Canvas canvas) {
-        return AffineTransform.getTranslateInstance(enlargement.left, enlargement.top);
+        return enlargement.getTopLeftTranslation();
     }
 
     @Override

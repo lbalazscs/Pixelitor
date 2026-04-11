@@ -221,7 +221,7 @@ public class UserPreset implements Preset {
     }
 
     public void putColor(String key, Color c) {
-        put(key, Colors.toHTMLHex(c, true));
+        put(key, Colors.toHtmlHex(c, true));
     }
 
     /**

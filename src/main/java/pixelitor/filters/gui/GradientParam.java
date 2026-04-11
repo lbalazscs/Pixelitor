@@ -266,7 +266,7 @@ public class GradientParam extends AbstractFilterParam {
                 .collect(joining(",", "", "|"));
 
             String colorsString = Stream.of(colors)
-                .map(c -> Colors.toHTMLHex(c, true))
+                .map(c -> Colors.toHtmlHex(c, true))
                 .collect(joining(","));
 
             return thumbsString + colorsString;

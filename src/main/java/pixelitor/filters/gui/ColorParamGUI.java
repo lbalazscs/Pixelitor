@@ -49,7 +49,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 
         GUIUtils.addClickAction(colorSwatch, this::showColorDialog);
 
-        Colors.setupFilterColorsPopupMenu(this, colorSwatch,
+        Colors.setupFilterColorPopupMenu(this, colorSwatch,
             model::getColor, this::applySelectedColor);
 
         if (extraAction != null) {

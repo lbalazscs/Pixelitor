@@ -37,7 +37,7 @@ public class FgBgColors {
         FgBgColors.selector = selector;
     }
 
-    public static FgBgColorSelector getGUI() {
+    public static FgBgColorSelector getUI() {
         return selector;
     }
 

@@ -1116,14 +1116,14 @@ public class RandomGUITest {
     }
 
     private void randomEnlargeCanvas() {
-        int north = rand.nextInt(3);
-        int east = rand.nextInt(3);
-        int south = rand.nextInt(3);
-        int west = rand.nextInt(3);
-        log(String.format("enlarge canvas north = %d, east = %d, south = %d, west = %d",
-            north, east, south, west));
+        int top = rand.nextInt(3);
+        int right = rand.nextInt(3);
+        int bottom = rand.nextInt(3);
+        int left = rand.nextInt(3);
+        log(String.format("enlarge canvas top = %d, right = %d, bottom = %d, left = %d",
+            top, right, bottom, left));
         var comp = Views.getActiveComp();
-        new EnlargeCanvas(north, east, south, west).process(comp);
+        new EnlargeCanvas(top, right, bottom, left).process(comp);
     }
 
     private void randomGuides() {
@@ -1141,10 +1141,10 @@ public class RandomGUITest {
     private void randomGuidesSetup(Guides guides) {
         if (rand.nextBoolean()) {
             log("add relative horizontal guide");
-            guides.addHorRelative(rand.nextFloat());
+            guides.addHorizontal(rand.nextFloat());
         } else {
             log("add relative vertical guide");
-            guides.addVerRelative(rand.nextFloat());
+            guides.addVertical(rand.nextFloat());
         }
     }
 

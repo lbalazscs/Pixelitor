@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,9 +32,6 @@ import static pixelitor.utils.Threads.calledOnEDT;
  * This is used normally (except in unit-testing code).
  */
 public class GUIMessageHandler implements MessageHandler {
-    public GUIMessageHandler() {
-    }
-
     @Override
     public void showInStatusBar(String msg) {
         assert calledOnEDT() : callInfo();
@@ -51,22 +48,22 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showInfo(String title, String msg, Component parent) {
-        Dialogs.showInfoDialog(parent, title, msg);
+        Dialogs.showInfo(parent, title, msg);
     }
 
     @Override
     public void showWarning(String title, String msg, Component parent) {
-        Dialogs.showWarningDialog(parent, title, msg);
+        Dialogs.showWarning(parent, title, msg);
     }
 
     @Override
     public void showError(String title, String msg, Component parent) {
-        Dialogs.showErrorDialog(parent, title, msg);
+        Dialogs.showError(parent, title, msg);
     }
 
     @Override
     public void showException(Throwable exception) {
-        Dialogs.showExceptionDialog(exception);
+        Dialogs.showException(exception);
     }
 
     @Override
@@ -76,11 +73,11 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showException(Throwable exception, Thread srcThread) {
-        Dialogs.showExceptionDialog(exception, srcThread);
+        Dialogs.showException(exception, srcThread);
     }
 
     @Override
     public boolean showYesNoQuestion(String title, String msg) {
-        return Dialogs.showYesNoQuestionDialog(title, msg);
+        return Dialogs.showYesNoQuestion(title, msg);
     }
 }

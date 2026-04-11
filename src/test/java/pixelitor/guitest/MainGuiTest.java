@@ -2733,7 +2733,7 @@ public class MainGuiTest {
 
     private void testSelectionToolsAndMenus() {
         log(1, "selection tools and the selection menus");
-        boolean hadSelectionAtStart = EDT.getActiveSelection() != null;
+        boolean hadSelectionAtStart = EDT.hasActiveSelection();
 
         // make sure we are at 100%
         keyboard.actualPixels();
@@ -2743,8 +2743,13 @@ public class MainGuiTest {
 
         mouse.randomAltClick();
         if (hadSelectionAtStart) {
-            // if a previous test left a selection, then this click added a deselect edit
-            keyboard.undoRedo("Deselect");
+            if (EDT.hasActiveSelection()) {
+                // this alt-click didn't deselect
+                app.deselect();
+            } else {
+                // this alt-click deselected and added an edit
+                keyboard.undoRedo("Deselect");
+            }
         }
 
         // the Alt should change the interaction only temporarily, while the mouse is down
@@ -2938,7 +2943,7 @@ public class MainGuiTest {
     private static void checkAfterSelectionCropUndone(int origCanvasWidth, int origCanvasHeight) {
         assertThat(EDT.getActiveSelection())
             .isNotNull()
-            .isUsable()
+            .isValid()
             .isMarching();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);
     }

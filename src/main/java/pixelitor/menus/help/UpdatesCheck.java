@@ -21,7 +21,6 @@ import pixelitor.Pixelitor;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
-import pixelitor.utils.Result;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,7 +86,7 @@ public class UpdatesCheck {
         }
         String title = "New Version Available";
         Object[] options = {"Visit Pixelitor Homepage", CLOSE_DIALOG};
-        if (Dialogs.showOKCancelWarningDialog(msg, title, options, 0)) {
+        if (Dialogs.showOKCancelWarning(msg, title, options, 0)) {
             new OpenInBrowserAction(null, WEBSITE_URL).actionPerformed(null);
         }
     }
@@ -122,6 +121,6 @@ public class UpdatesCheck {
             message.append("\nError details: ").append(errorDetails);
         }
 
-        Dialogs.showErrorDialog(title, message.toString());
+        Dialogs.showError(title, message.toString());
     }
 }

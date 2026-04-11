@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class Guides implements Serializable, Debuggable {
     private static final long serialVersionUID = -1168950961227421664L;
 
     // guide positions are stored as ratios (0.0 to 1.0) relative to the
-    // canvas so that resizing does not affect their image-space position
+    // canvas so that resizing preserves their position relative to the content
     private final List<Double> horizontals = new ArrayList<>();
     private final List<Double> verticals = new ArrayList<>();
 
@@ -146,8 +146,8 @@ public class Guides implements Serializable, Debuggable {
         Guides copy = new Guides();
         copy.setName("copy with enlargement: " + enlargement.toString());
 
-        copyVerticalsEnlarging(copy, enlargement.right, enlargement.left, canvas);
-        copyHorizontalsEnlarging(copy, enlargement.top, enlargement.bottom, canvas);
+        copyVerticalsEnlarging(copy, enlargement.right(), enlargement.left(), canvas);
+        copyHorizontalsEnlarging(copy, enlargement.top(), enlargement.bottom(), canvas);
 
         copy.regenerateLines(view);
         return copy;
@@ -181,36 +181,26 @@ public class Guides implements Serializable, Debuggable {
         }
     }
 
-    public Guides copyCropped(Rectangle cropRect, View view) {
-        Canvas canvas = view.getCanvas();
+    public Guides copyCropped(Rectangle cropRect, View view, Canvas srcCanvas) {
         int topMargin = cropRect.y;
         int leftMargin = cropRect.x;
-        int bottomMargin = canvas.getHeight() - cropRect.height - cropRect.y;
-        int rightMargin = canvas.getWidth() - cropRect.width - cropRect.x;
-        Outsets margin = new Outsets(topMargin, leftMargin, bottomMargin, rightMargin);
+        int bottomMargin = srcCanvas.getHeight() - cropRect.height - cropRect.y;
+        int rightMargin = srcCanvas.getWidth() - cropRect.width - cropRect.x;
 
         // a crop is a negative enlargement
-        margin.negate();
-        return copyEnlarged(margin, view, canvas);
+        Outsets margin = new Outsets(-topMargin, -rightMargin, -bottomMargin, -leftMargin);
+        return copyEnlarged(margin, view, srcCanvas);
     }
 
-    public void addHorRelative(double rel) {
-        horizontals.add(rel);
+    public void addHorizontal(double value) {
+        horizontals.add(value);
     }
 
-    public void addHorAbsolute(int pixels, Canvas canvas) {
-        horizontals.add(pixels / (double) canvas.getWidth());
+    public void addVertical(double value) {
+        verticals.add(value);
     }
 
-    public void addVerRelative(double rel) {
-        verticals.add(rel);
-    }
-
-    public void addVerAbsolute(int pixels, Canvas canvas) {
-        verticals.add(pixels / (double) canvas.getHeight());
-    }
-
-    public void addRelativeGrid(int numHorDivisions, int numVerDivisions) {
+    public void addGrid(int numHorDivisions, int numVerDivisions) {
         // horizontal lines
         double divisionHeight = 1.0 / numHorDivisions;
         for (int i = 1; i < numHorDivisions; i++) {

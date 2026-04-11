@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,14 +37,14 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    public boolean disableForSmartObjects() {
+    public boolean shouldDisableForSmartObjects() {
         return false;
     }
 
     @Override
     protected void updateCanvasSize(Canvas newCanvas, View view) {
         // a flip doesn't change the canvas size
-        throw new IllegalStateException("should not be called");
+        throw new UnsupportedOperationException();
     }
 
     @Override

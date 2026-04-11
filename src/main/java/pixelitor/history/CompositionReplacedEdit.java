@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.lang.ref.SoftReference;
 
 /**
- * Used when a composition is replaced either because
- * of a "file reload" or because of a multi-layer edit
+ * Used when a {@link Composition} is replaced in its {@link View},
+ * for example during a file reload or a multi-layer edit.
  */
 public class CompositionReplacedEdit extends PixelitorEdit {
     private SoftReference<Composition> backupCompRef;
@@ -56,8 +56,8 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         assert oldComp != newComp;
 
         if (canvasTransform != null || isReload) {
-            boolean allowNull = !isReload;
-            if (!oldComp.hasSameFileAs(newComp, allowNull)) {
+            boolean allowBothNull = !isReload;
+            if (!oldComp.hasSameFileAs(newComp, allowBothNull)) {
                 throw new IllegalStateException("old = " + oldComp.getFile() + ", new = " + newComp.getFile());
             }
         }

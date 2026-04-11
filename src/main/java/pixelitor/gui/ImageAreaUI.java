@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,7 @@ package pixelitor.gui;
 import java.awt.Dimension;
 
 /**
- * A common interface for the two UI modes
- * (internal frames and tabs)
+ * A common interface for the two UI modes (internal frames and tabs).
  */
 public sealed interface ImageAreaUI permits FramesUI, TabsUI {
     void activateView(View view);

@@ -71,7 +71,7 @@ class PNGExportSettings extends JPanel implements ExportSettings {
         Type type = getType();
         if (type == Type.RGB) {
             command.add("-background");
-            command.add("#" + Colors.toHTMLHex(FgBgColors.getBgColor(), false));
+            command.add("#" + Colors.toHtmlHex(FgBgColors.getBgColor(), false));
 
             // remove: composite the image over the background color.
             command.add("-alpha");

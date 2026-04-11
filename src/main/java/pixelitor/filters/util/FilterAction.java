@@ -95,14 +95,14 @@ public class FilterAction extends AbstractViewEnabledAction {
         } else if (layer instanceof AdjustmentLayer) {
             // adjustment layers are Filterable, so this must be
             // checked first to prevent running unrelated filters on them
-            Dialogs.showErrorDialog("Adjustment Layer",
+            Dialogs.showError("Adjustment Layer",
                 name + " can't be used on adjustment layers.");
         } else if (layer instanceof Filterable filterable) {
             applyToFilterable(filterable);
         } else if (layer instanceof SmartObject so) {
             applyToSmartObject(so);
         } else if (layer.isRasterizable()) {
-            boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
+            boolean rasterize = Dialogs.showRasterizeQuestion(layer, name);
             if (rasterize) {
                 ImageLayer newImageLayer = layer.replaceWithRasterized();
                 applyToFilterable(newImageLayer);

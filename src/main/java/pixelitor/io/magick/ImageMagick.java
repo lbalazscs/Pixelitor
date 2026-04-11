@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.utils.AppPreferences.magickDirName;
+import static pixelitor.utils.AppPreferences.magickDirPath;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
 
@@ -72,7 +72,7 @@ public class ImageMagick {
 
         ExportSettings settings = determineExportSettings(targetFile);
         if (settings instanceof JPanel) { // has a configuration GUI
-            boolean dialogAccepted = Dialogs.showOKCancelDialog(settings,
+            boolean dialogAccepted = Dialogs.showOKCancelQuestion(settings,
                 settings.getFormatName() + " Export Options for " + targetFile.getName(),
                 new String[]{"Export", GUIText.CANCEL}, 0,
                 JOptionPane.PLAIN_MESSAGE);
@@ -242,19 +242,19 @@ public class ImageMagick {
     }
 
     private static boolean checkImageMagickInstalled() {
-        File foundExecutable = FileUtils.locateExecutable(magickDirName, "magick");
+        File foundExecutable = FileUtils.locateExecutable(magickDirPath, "magick");
         if (foundExecutable == null) {
             return false;
         }
 
         magickExecutable = foundExecutable;
         // if found, also update the preference to point to the containing directory
-        magickDirName = magickExecutable.getParent();
+        magickDirPath = magickExecutable.getParent();
         return true;
     }
 
     private static void showNotInstalledDialog() {
-        Dialogs.showInfoDialog("ImageMagick 7 Not Found",
+        Dialogs.showInfo("ImageMagick 7 Not Found",
             "<html>ImageMagick 7 was not found in the PATH" +
                 "<br>or in the folder configured in Preferences." +
                 "<br><br>It can be downloaded from https://imagemagick.org");

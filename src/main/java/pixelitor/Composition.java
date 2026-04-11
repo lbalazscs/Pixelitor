@@ -1451,7 +1451,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         // modify existing selection
-        ShapeCombinator combinator = Dialogs.showShapeCombinatorDialog(this);
+        ShapeCombinator combinator = Dialogs.showShapeCombinatorQuestion(this);
         if (combinator == null) {
             // the user cancelled the dialog
             return SelectionChangeResult.cancelled();
@@ -1500,7 +1500,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public void promoteSelection() {
         assert draftSelection != null;
-        assert draftSelection.isUsable();
+        assert draftSelection.isValid();
 
         if (selection != null) {
             selection.dispose();
@@ -1670,12 +1670,39 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Enlarges the canvas to fit the content of all layers.
      */
     public void fitCanvasToLayers() {
-        Outsets enlargement = Outsets.createZero();
+        // mutable accumulator and Outsets builder
+        class BoundsAccumulator {
+            private int top = 0, right = 0, bottom = 0, left = 0;
 
-        forEachNestedLayerOfType(ContentLayer.class, enlargement::ensureFitsContentOf);
+            private void include(ContentLayer contentLayer) {
+                var contentBounds = contentLayer.getContentBounds();
+                if (contentBounds == null) {
+                    return;
+                }
+
+                left = Math.max(left, -contentBounds.x);
+                top = Math.max(top, -contentBounds.y);
+
+                int contentMaxX = contentBounds.x + contentBounds.width;
+                right = Math.max(right, contentMaxX - canvas.getWidth());
+
+                int contentMaxY = contentBounds.y + contentBounds.height;
+                bottom = Math.max(bottom, contentMaxY - canvas.getHeight());
+            }
+
+            private Outsets build() {
+                return new Outsets(top, right, bottom, left);
+            }
+        }
+
+        var accumulator = new BoundsAccumulator();
+
+        forEachNestedLayerOfType(ContentLayer.class, accumulator::include);
+
+        Outsets enlargement = accumulator.build();
 
         if (enlargement.isZero()) {
-            Dialogs.showInfoDialog(getDialogParent(), "Nothing To Be Done",
+            Dialogs.showInfo(getDialogParent(), "Nothing To Be Done",
                 "The canvas is already large enough to show all layer content.");
             return;
         }
@@ -1726,12 +1753,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (activeTopLevelLayer.getComp() != this) {
             throw new AssertionError(
                 "bad comp in active top-level layer '%s' (that comp='%s', this='%s')".formatted(
-                activeTopLevelLayer.getName(), activeTopLevelLayer.getComp().getDebugName(), getDebugName()));
+                    activeTopLevelLayer.getName(), activeTopLevelLayer.getComp().getDebugName(), getDebugName()));
         }
         if (activeLayer.getComp() != this) {
             throw new AssertionError(
                 "bad comp in active layer '%s' (that comp='%s', this='%s')".formatted(
-                activeLayer.getName(), activeLayer.getComp().getDebugName(), getDebugName()));
+                    activeLayer.getName(), activeLayer.getComp().getDebugName(), getDebugName()));
         }
         if (!layerList.contains(activeTopLevelLayer)) {
             throw new AssertionError(format(
@@ -1747,7 +1774,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (layer.getHolder() != this) {
                 throw new AssertionError(
                     "bad holder in layer '%s' (that holder='%s', this='%s')".formatted(
-                    layer.getName(), layer.getHolder().getName(), getDebugName()));
+                        layer.getName(), layer.getHolder().getName(), getDebugName()));
             }
         }
 
@@ -1756,7 +1783,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (layer.getComp() != this) {
                 throw new AssertionError(
                     "bad comp in '%s' (that comp='%s', this='%s')".formatted(
-                    layer.getName(), layer.getComp().getDebugName(), getDebugName()));
+                        layer.getName(), layer.getComp().getDebugName(), getDebugName()));
             }
         });
 
@@ -1962,7 +1989,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Checks if this composition or any of its smart object contents
      * need to be reloaded due to external file modifications.
      */
-    public CompletableFuture<Composition> checkForExternalModifications() {
+    public CompletableFuture<Composition> checkAutoReload() {
         // check only the open compositions here; hidden
         // smart object contents will be checked later
         if (file != null && isOpen()) {
@@ -1989,7 +2016,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (layer instanceof SmartObject so) {
                 // open contents are checked directly via the view
                 if (!so.isContentOpen()) {
-                    reloadFuture = reloadFuture.thenCompose(comp -> so.checkForAutoReload());
+                    reloadFuture = reloadFuture.thenCompose(comp -> so.checkAutoReload());
                 }
             }
         }

@@ -75,11 +75,11 @@ public class Dialogs {
         return null;
     }
 
-    public static void showInfoDialog(String title, String msg) {
-        showInfoDialog(getMainWindow(), title, msg);
+    public static void showInfo(String title, String msg) {
+        showInfo(getMainWindow(), title, msg);
     }
 
-    public static void showInfoDialog(Component parent, String title, String msg) {
+    public static void showInfo(Component parent, String title, String msg) {
         assert !(parent instanceof View);
         if (RandomGUITest.isRunning()) { // avoid dialogs
             return;
@@ -94,23 +94,23 @@ public class Dialogs {
         GlobalEvents.modalDialogClosed();
     }
 
-    public static boolean showYesNoQuestionDialog(String title, String msg) {
-        return showYesNoQuestionDialog(getMainWindow(), title, msg);
+    public static boolean showYesNoQuestion(String title, String msg) {
+        return showYesNoQuestion(getMainWindow(), title, msg);
     }
 
-    public static boolean showYesNoQuestionDialog(Component parent, String title,
-                                                  String msg) {
-        return showYesNoDialog(parent, title, msg, QUESTION_MESSAGE);
+    public static boolean showYesNoQuestion(Component parent, String title,
+                                            String msg) {
+        return showYesNoQuestion(parent, title, msg, QUESTION_MESSAGE);
     }
 
-    public static int showCustomOptionsDialog(String title, String question,
-                                              Object[] options, int messageType) {
-        return showCustomOptionsDialog(getMainWindow(), title, question, options, messageType);
+    public static int showCustomOptions(String title, String question,
+                                        Object[] options, int messageType) {
+        return showCustomOptions(getMainWindow(), title, question, options, messageType);
     }
 
-    public static int showCustomOptionsDialog(Component parent, String title,
-                                              String question, Object[] options,
-                                              int messageType) {
+    public static int showCustomOptions(Component parent, String title,
+                                        String question, Object[] options,
+                                        int messageType) {
         assert !(parent instanceof View);
         GlobalEvents.modalDialogOpened();
         int answer = JOptionPane.showOptionDialog(parent, new JLabel(question),
@@ -120,17 +120,17 @@ public class Dialogs {
         return answer;
     }
 
-    public static boolean showYesNoWarningDialog(String title, String msg) {
-        return showYesNoWarningDialog(getMainWindow(), title, msg);
+    public static boolean showYesNoWarning(String title, String msg) {
+        return showYesNoWarning(getMainWindow(), title, msg);
     }
 
-    public static boolean showYesNoWarningDialog(Component parent, String title,
-                                                 String msg) {
-        return showYesNoDialog(parent, title, msg, WARNING_MESSAGE);
+    public static boolean showYesNoWarning(Component parent, String title,
+                                           String msg) {
+        return showYesNoQuestion(parent, title, msg, WARNING_MESSAGE);
     }
 
-    public static boolean showYesNoDialog(Component parent, String title,
-                                          String msg, int messageType) {
+    public static boolean showYesNoQuestion(Component parent, String title,
+                                            String msg, int messageType) {
         assert !(parent instanceof View);
 
         GlobalEvents.modalDialogOpened();
@@ -140,25 +140,25 @@ public class Dialogs {
         return reply == YES_OPTION;
     }
 
-    public static boolean showOKCancelWarningDialog(String msg, String title,
-                                                    Object[] options,
-                                                    int initialOptionIndex) {
-        return showOKCancelDialog(msg, title, options, initialOptionIndex, WARNING_MESSAGE);
+    public static boolean showOKCancelWarning(String msg, String title,
+                                              Object[] options,
+                                              int initialOptionIndex) {
+        return showOKCancelQuestion(msg, title, options, initialOptionIndex, WARNING_MESSAGE);
     }
 
-    public static boolean showOKCancelDialog(Object msg, String title,
-                                             Object[] options,
-                                             int initialOptionIndex,
-                                             int messageType) {
-        return showOKCancelDialog(getMainWindow(), msg, title, options,
+    public static boolean showOKCancelQuestion(Object msg, String title,
+                                               Object[] options,
+                                               int initialOptionIndex,
+                                               int messageType) {
+        return showOKCancelQuestion(getMainWindow(), msg, title, options,
             initialOptionIndex, messageType);
     }
 
-    public static boolean showOKCancelDialog(Component parent,
-                                             Object msg, String title,
-                                             Object[] options,
-                                             int initialOptionIndex,
-                                             int messageType) {
+    public static boolean showOKCancelQuestion(Component parent,
+                                               Object msg, String title,
+                                               Object[] options,
+                                               int initialOptionIndex,
+                                               int messageType) {
         assert !(parent instanceof View);
 
         GlobalEvents.modalDialogOpened();
@@ -170,11 +170,11 @@ public class Dialogs {
         return userAnswer == OK_OPTION;
     }
 
-    public static void showErrorDialog(String title, String msg) {
-        showErrorDialog(getMainWindow(), title, msg);
+    public static void showError(String title, String msg) {
+        showError(getMainWindow(), title, msg);
     }
 
-    public static void showErrorDialog(Component parent, String title, String msg) {
+    public static void showError(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
         if (RandomGUITest.isRunning()) { // avoid dialogs
@@ -194,7 +194,7 @@ public class Dialogs {
         GlobalEvents.modalDialogClosed();
     }
 
-    public static String showInputDialog(Component parent, String title, String msg) {
+    public static String showInputQuestion(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
         GlobalEvents.modalDialogOpened();
@@ -204,32 +204,32 @@ public class Dialogs {
         return userInput;
     }
 
-    public static void showFileNotWritableDialog(File file) {
-        showFileNotWritableDialog(getMainWindow(), file);
+    public static void showFileNotWritableError(File file) {
+        showFileNotWritableError(getMainWindow(), file);
     }
 
-    public static void showFileNotWritableDialog(Component parent, File file) {
+    public static void showFileNotWritableError(Component parent, File file) {
         String msg = format("<html>The file <b>%s</b> is not writable." +
             "<br>To keep your changes, save the image " +
             "with a new name or in another folder.", file.getAbsolutePath());
-        showErrorDialog(parent, "File not writable", msg);
+        showError(parent, "File not writable", msg);
     }
 
-    public static void showDirectoryNotFoundDialog(Component parent, File dir) {
+    public static void showDirectoryNotFoundError(Component parent, File dir) {
         String msg = format("<html>The folder <b>%s</b> was not found.", dir.getAbsolutePath());
-        showErrorDialog(parent, "Folder Not Found", msg);
+        showError(parent, "Folder Not Found", msg);
     }
 
-    public static void showWarningDialog(String title, String msg) {
-        showWarningDialog(getMainWindow(), title, msg);
+    public static void showWarning(String title, String msg) {
+        showWarning(getMainWindow(), title, msg);
     }
 
-    public static void showNotAColorOnClipboardDialog(Window parent) {
-        showWarningDialog(parent, "Not a Color",
+    public static void showClipboardNotColorWarning(Window parent) {
+        showWarning(parent, "Not a Color",
             "The clipboard contents could not be interpreted as a color");
     }
 
-    public static void showWarningDialog(Component parent, String title, String msg) {
+    public static void showWarning(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
         GlobalEvents.modalDialogOpened();
@@ -237,21 +237,21 @@ public class Dialogs {
         GlobalEvents.modalDialogClosed();
     }
 
-    public static void showExceptionDialog(Throwable e) {
-        showExceptionDialog(e, Thread.currentThread());
+    public static void showException(Throwable e) {
+        showException(e, Thread.currentThread());
     }
 
-    public static void showExceptionDialog(Throwable e, Thread srcThread) {
+    public static void showException(Throwable e, Thread srcThread) {
         if (calledOutsideEDT()) {
-            System.err.printf("ERROR: Dialogs.showExceptionDialog called on %s%n", threadName());
+            System.err.printf("ERROR: Dialogs.showException called on %s%n", threadName());
 
             // call this method on the EDT
             Throwable finalE = e;
-            EventQueue.invokeLater(() -> showExceptionDialog(finalE, srcThread));
+            EventQueue.invokeLater(() -> showException(finalE, srcThread));
             return;
         }
 
-        System.err.printf("%nDialogs.showExceptionDialog: Exception in the thread '%s'%n",
+        System.err.printf("%nDialogs.showException: Exception in the thread '%s'%n",
             srcThread.getName());
         //noinspection CallToPrintStackTrace
         e.printStackTrace();
@@ -259,11 +259,11 @@ public class Dialogs {
         RandomGUITest.stop();
 
         if (e instanceof OutOfMemoryError) {
-            showOutOfMemoryDialog((OutOfMemoryError) e);
+            showOutOfMemoryError((OutOfMemoryError) e);
             return;
         }
 
-        showMoreDevelopmentInfo(e);
+        notifyIfGuiTest(e);
 
         // unwrap exceptions
         while (e instanceof CompletionException ||
@@ -277,39 +277,39 @@ public class Dialogs {
         }
 
         Frame parent = getMainWindow();
-        String basicErrorMessage = """
+        String errorReportMessage = """
             A program error occurred.
                         
             Please consider reporting this error to the developers by creating a new issue on github.com (see "Help/Report an Issue..." in the menus).
             If you do, then open "Details", click "Copy to Clipboard", and paste the details into the issue.""";
         var errorInfo = new ErrorInfo("Program Error",
-            basicErrorMessage, null, null, e,
+            errorReportMessage, null, null, e,
             Level.SEVERE, null);
         JXErrorPane.showDialog(parent, errorInfo);
     }
 
-    private static void showMoreDevelopmentInfo(Throwable e) {
+    private static void notifyIfGuiTest(Throwable e) {
         if (!AppMode.isDevelopment()) {
             return;
         }
 
         boolean randomGUITest = false;
-        boolean assertJSwingTest = false;
+        boolean mainGuiTest = false;
         StackTraceElement[] stackTraceElements = e.getStackTrace();
         for (StackTraceElement ste : stackTraceElements) {
             String className = ste.getClassName();
             if (className.contains("RandomGUITest")) {
                 randomGUITest = true;
                 break;
-            } else if (className.contains("AssertJSwingTest")) {
-                assertJSwingTest = true;
+            } else if (className.contains("MainGuiTest")) {
+                mainGuiTest = true;
                 break;
             }
         }
 
-        // the following should happen only for the GUI tests,
-        // which are running for a long time
-        boolean guiTest = randomGUITest || assertJSwingTest;
+        // the sound notification should happen only for
+        // the GUI tests, which are running for a long time
+        boolean guiTest = randomGUITest || mainGuiTest;
         if (!guiTest) {
             return;
         }
@@ -320,7 +320,7 @@ public class Dialogs {
 
     private static void playWarningSound() {
         int maxVolume = 90;
-        int sound = 65;
+        int midiNote = 65;
 
         try (Synthesizer synthesizer = MidiSystem.getSynthesizer()) {
             synthesizer.open();
@@ -328,9 +328,9 @@ public class Dialogs {
 
             for (int i = 0; i < 10; i++) {
                 Thread.sleep(100);
-                channel.noteOn(sound + i, maxVolume);
+                channel.noteOn(midiNote + i, maxVolume);
                 Thread.sleep(100);
-                channel.noteOff(sound + i);
+                channel.noteOff(midiNote + i);
             }
         } catch (MidiUnavailableException e) {
             Messages.showException(e);
@@ -340,7 +340,7 @@ public class Dialogs {
         }
     }
 
-    public static void showOutOfMemoryDialog(OutOfMemoryError e) {
+    public static void showOutOfMemoryError(OutOfMemoryError e) {
         if (AppMode.isDevelopment()) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
@@ -350,72 +350,66 @@ public class Dialogs {
             "<li>decreasing the number of layers" +
             "<li>working with smaller images" +
             "<li>putting more RAM into your computer";
-        String title = "Out of memory error.";
-        showErrorDialog(title, msg);
+        String title = "Out of memory error";
+        showError(title, msg);
     }
 
-    public static int showUnsavedChangesDialog(String compName) {
+    public static int showUnsavedChangesWarning(String compName) {
         Object[] options = {"Save", "Don't Save", GUIText.CANCEL};
         String question = format(
             "<html><b>Do you want to save the changes made to %s?</b>" +
                 "<br>Your changes will be lost if you don't save them.</html>",
             compName);
 
-        return showCustomOptionsDialog("Unsaved Changes",
+        return showCustomOptions("Unsaved Changes",
             question, options, WARNING_MESSAGE);
     }
 
     public static void showFileNotReadableError(Component parent, File f) {
-        showErrorDialog(parent, "File not readable",
+        showError(parent, "File not readable",
             "<html>The file <b>" + f.getAbsolutePath()
-                + " </b> isn't readable. " +
+                + "</b> isn't readable. " +
                 "<br>Change the file's permissions and try again."
         );
     }
 
-    public static void showNoExtensionDialog(JComponent parent) {
-        String title = "No File Extension";
-        String msg = """
+    public static void showNoExtensionError(Component parent) {
+        showError(parent, "No File Extension", """
             The file name has no extension.
             An extension (such as ".png") must be added at the end,
-            because the file format depends on it.""";
-        if (parent == null) {
-            JOptionPane.showMessageDialog(getMainWindow(), msg, title, ERROR_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
-        }
+            because the file format depends on it.""");
     }
 
-    public static boolean showRasterizeDialog(Layer layer, String actionName) {
+    public static boolean showRasterizeQuestion(Layer layer, String actionName) {
         if (RandomGUITest.isRunning()) {
             return true;
         }
 
         boolean isNoun = actionName.contains("Tool");
-        String firstName = isNoun ? "The " + actionName : actionName;
-        String secondName = isNoun ? "the " + actionName : actionName;
+        String capitalizedAction = isNoun ? "The " + actionName : actionName;
+        String lowercaseAction = isNoun ? "the " + actionName : actionName;
 
         String typeStringLC = layer.getTypeStringLC();
         String msg = format("<html>The active layer <i>\"%s\"</i> is a %s.<br><br>" +
                 "%s cannot be used on %ss.<br>" +
                 "If you rasterize this %s, you can use %s,<br>" +
                 "but the layer will become a regular image layer.",
-            layer.getName(), typeStringLC, firstName,
-            typeStringLC, typeStringLC, secondName);
+            layer.getName(), typeStringLC, capitalizedAction,
+            typeStringLC, typeStringLC, lowercaseAction);
 
         String[] options = {"Rasterize", GUIText.CANCEL};
 
-        boolean rasterize = showOKCancelWarningDialog(msg,
+        boolean rasterize = showOKCancelWarning(msg,
             layer.getTypeString(), options, 1);
         return rasterize;
     }
 
-    public static ShapeCombinator showShapeCombinatorDialog(Composition comp) {
+    public static ShapeCombinator showShapeCombinatorQuestion(Composition comp) {
         String[] options = {"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL};
         String msg = "<html>There is already a selection on " + comp.getName() +
             ".<br>How do you want to combine the new selection with the existing one?";
 
-        int userChoice = showCustomOptionsDialog(
+        int userChoice = showCustomOptions(
             comp.getDialogParent(),
             "Existing Selection",
             msg,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,6 +50,6 @@ public class Features {
             "<br><br>Some experimental features will be fully activated<br>only after restarting Pixelitor.";
         // show the new dialog only after the main dialog is closed
         EventQueue.invokeLater(() ->
-            Dialogs.showWarningDialog("Experimental Features", msg));
+            Dialogs.showWarning("Experimental Features", msg));
     }
 }

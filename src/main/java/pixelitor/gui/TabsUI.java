@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,12 +27,11 @@ import static pixelitor.utils.Keys.CTRL_SHIFT_TAB;
 import static pixelitor.utils.Keys.CTRL_TAB;
 
 /**
- * An {@link ImageAreaUI} implementation
- * where the edited images are in tabs
+ * An {@link ImageAreaUI} implementation where the {@link View}s are in tabs.
  */
 public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     private final Lazy<JMenu> cachedPlacementMenu = Lazy.of(this::createTabPlacementMenu);
-    private boolean suppressChangeEvent = false;
+    private boolean eventsSuppressed = false;
 
     public TabsUI() {
         setTabPlacement(ImageArea.getTabPlacement());
@@ -44,7 +43,7 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     private void tabsChanged() {
-        if (suppressChangeEvent) {
+        if (eventsSuppressed) {
             return;
         }
 
@@ -69,10 +68,10 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
         int newTabIndex = getTabCount();
 
         try {
-            suppressChangeEvent = true;
+            eventsSuppressed = true;
             addTab(view.getName(), newTab);
         } finally {
-            suppressChangeEvent = false;
+            eventsSuppressed = false;
         }
 
         TabHeader header = new TabHeader(view.getName(), newTab);
@@ -94,10 +93,10 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     private JMenu createTabPlacementMenu() {
         JMenu menu = new JMenu("Tab Placement");
 
-        JRadioButtonMenuItem topMI = createTabPlacementMenuItem("Top", TOP);
-        JRadioButtonMenuItem bottomMI = createTabPlacementMenuItem("Bottom", BOTTOM);
-        JRadioButtonMenuItem leftMI = createTabPlacementMenuItem("Left", LEFT);
-        JRadioButtonMenuItem rightMI = createTabPlacementMenuItem("Right", RIGHT);
+        JRadioButtonMenuItem topMI = createTabPlacementMenuItem(GUIText.TOP, TOP);
+        JRadioButtonMenuItem bottomMI = createTabPlacementMenuItem(GUIText.BOTTOM, BOTTOM);
+        JRadioButtonMenuItem leftMI = createTabPlacementMenuItem(GUIText.LEFT, LEFT);
+        JRadioButtonMenuItem rightMI = createTabPlacementMenuItem(GUIText.RIGHT, RIGHT);
 
         ButtonGroup group = new ButtonGroup();
         group.add(topMI);

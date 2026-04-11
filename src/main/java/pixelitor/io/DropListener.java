@@ -141,7 +141,7 @@ public class DropListener extends DropTargetAdapter {
             String question = format("<html>You have dropped the folder <b>\"%s\"</b>."
                 + "<br>Do you want to open all image files inside it?", file.getName());
 
-            if (Dialogs.showYesNoQuestionDialog(target, "Dropped Folder", question)) {
+            if (Dialogs.showYesNoQuestion(target, "Dropped Folder", question)) {
                 FileIO.openAllSupportedImagesInDir(file);
             }
         } else if (file.isFile()) {
@@ -159,7 +159,7 @@ public class DropListener extends DropTargetAdapter {
                     "Do you want all image files inside it to be added as layers to \"%s\"?",
                 file.getName(), comp.getName());
 
-            if (Dialogs.showYesNoQuestionDialog(target, "Dropped Folder", question)) {
+            if (Dialogs.showYesNoQuestion(target, "Dropped Folder", question)) {
                 FileIO.addAllImagesInDirAsLayers(file, comp);
             }
         } else if (file.isFile()) {
