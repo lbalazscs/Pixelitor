@@ -689,6 +689,30 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         }
     }
 
+    @Override
+    public void rotate(double angleRadians, boolean layerTransform) {
+        if (Math.abs(angleRadians) < 1.0e-12) {
+            return;
+        }
+
+        Point2D canvasCenter = comp.getCanvas().getImCenter();
+        AffineTransform at = AffineTransform.getRotateInstance(
+            angleRadians, canvasCenter.getX(), canvasCenter.getY());
+        at.translate(getTx(), getTy());
+
+        TransformResult result = applyTransform(image, at, VALUE_INTERPOLATION_BILINEAR);
+        if (result == null) {
+            throw new IllegalStateException("transform resulted in an empty image");
+        }
+
+        if (layerTransform) {
+            replaceTranslatedImage(result.image, "Rotate Layer", result.tx, result.ty);
+        } else {
+            setTranslation(result.tx, result.ty);
+            setImage(result.image);
+        }
+    }
+
     // this is a layer-only transform, the canvas does not change
     private void rotateOnlyThisLayer(QuadrantAngle angle) {
         Point2D canvasCenter = comp.getCanvas().getImCenter();

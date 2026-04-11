@@ -207,6 +207,14 @@ public abstract class ContentLayer extends Layer {
     public abstract void rotate(QuadrantAngle angle, boolean layerTransform);
 
     /**
+     * Rotates the layer content by an arbitrary angle (in radians).
+     */
+    public void rotate(double angleRadians, boolean layerTransform) {
+        throw new UnsupportedOperationException(getClass().getSimpleName()
+            + " does not support arbitrary-angle rotation.");
+    }
+
+    /**
      * Adjusts the layer content in response to canvas enlargement.
      */
     public abstract void enlargeCanvas(Outsets out);

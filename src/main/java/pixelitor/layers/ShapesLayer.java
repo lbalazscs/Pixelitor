@@ -193,6 +193,13 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
+    public void rotate(double angleRadians, boolean layerTransform) {
+        var center = comp.getCanvas().getImCenter();
+        transform(AffineTransform.getRotateInstance(
+            angleRadians, center.getX(), center.getY()));
+    }
+
+    @Override
     public void enlargeCanvas(Outsets out) {
         transform(AffineTransform.getTranslateInstance(out.left, out.top));
     }

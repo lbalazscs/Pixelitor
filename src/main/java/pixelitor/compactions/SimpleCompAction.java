@@ -28,6 +28,7 @@ import pixelitor.history.History;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.SmartObject;
+import pixelitor.layers.TextLayer;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
 
@@ -57,6 +58,10 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
     public CompletableFuture<Composition> process(Composition srcComp) {
         if (disableForSmartObjects() && srcComp.containsLayerOfType(SmartObject.class)) {
             Messages.showSmartObjectUnsupportedWarning(getText());
+            return CompletableFuture.completedFuture(srcComp);
+        }
+        if (disableForTextLayers() && srcComp.containsLayerOfType(TextLayer.class)) {
+            Messages.showTextLayerUnsupportedWarning(getText());
             return CompletableFuture.completedFuture(srcComp);
         }
 
@@ -100,6 +105,10 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
     }
 
     public abstract boolean disableForSmartObjects();
+
+    protected boolean disableForTextLayers() {
+        return false;
+    }
 
     private void transformLayer(Layer layer) {
         if (layer instanceof ContentLayer contentLayer) {
