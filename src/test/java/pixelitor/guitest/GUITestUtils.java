@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ public class GUITestUtils {
         // should not be instantiated
     }
 
-    static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
+    public static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
         var matcher = JButtonMatcher.withText(text).andShowing();
         return container.button(matcher);
     }
@@ -111,7 +111,7 @@ public class GUITestUtils {
         slider.slideTo(Rnd.intInRange(min, max));
     }
 
-    static boolean change(JComboBoxFixture combo, String newValue) {
+    public static boolean change(JComboBoxFixture combo, String newValue) {
         String prevValue = combo.selectedItem();
         if (!newValue.equals(prevValue)) {
             combo.selectItem(newValue);
@@ -125,7 +125,7 @@ public class GUITestUtils {
         combo.selectItem(newValue);
     }
 
-    static boolean checkRandomly(JCheckBoxFixture checkBox) {
+    public static boolean checkRandomly(JCheckBoxFixture checkBox) {
         boolean wasChecked = checkBox.target().isSelected();
         boolean willBeChecked = Rnd.nextBoolean();
         checkBox.check(willBeChecked);

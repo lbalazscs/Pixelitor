@@ -37,6 +37,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.guitest.main.TestContext;
 import pixelitor.history.History;
 import pixelitor.history.HistoryChecker;
 import pixelitor.io.FileChoosers;
@@ -50,6 +51,7 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.GradientColorType;
 import pixelitor.tools.gradient.GradientType;
+import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.utils.Language;
@@ -181,7 +183,7 @@ public class AppRunner {
         }
     }
 
-    void configureRobotDelay() {
+    public void configureRobotDelay() {
         // for example -Drobot.delay.millis=500 could be added to
         // the command line to slow it down
         String customDelay = System.getProperty("robot.delay.millis");
@@ -196,11 +198,11 @@ public class AppRunner {
         robot.settings().eventPostingDelay(2 * millis);
     }
 
-    void runSlowly() {
+    public void runSlowly() {
         setRobotDelay(SLOW_ROBOT_DELAY);
     }
 
-    void exit() {
+    public void exit() {
         countDownBeforeExit();
         restoreInitialSettings();
         
@@ -282,7 +284,7 @@ public class AppRunner {
         clickRandomly(0.1, dialog.button("resetHistNow"));
     }
 
-    void clickTool(Tool tool) {
+    public void clickTool(Tool tool) {
         pw.toggleButton(tool.getName() + " Button").click();
 
         Utils.sleep(200, MILLISECONDS);
@@ -341,7 +343,7 @@ public class AppRunner {
         EDT.assertNumLayersInActiveHolderIs(1);
     }
 
-    void duplicateLayer(Class<? extends Layer> expectedLayerType) {
+    public void duplicateLayer(Class<? extends Layer> expectedLayerType) {
         EDT.assertActiveLayerTypeIs(expectedLayerType);
         int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
@@ -358,7 +360,7 @@ public class AppRunner {
         EDT.assertActiveLayerTypeIs(expectedLayerType);
     }
 
-    void runMenuCommand(String text) {
+    public void runMenuCommand(String text) {
         assert calledOutsideEDT() : callInfo();
 
         findMenuItemByText(text)
@@ -367,7 +369,7 @@ public class AppRunner {
         Utils.sleep(200, MILLISECONDS);
     }
 
-    void runMenuCommandByName(String name) {
+    public void runMenuCommandByName(String name) {
         assert calledOutsideEDT() : callInfo();
 
         pw.menuItem(name)
@@ -391,7 +393,7 @@ public class AppRunner {
         keyboard.undoRedo("Raise Layer Selection");
     }
 
-    void deleteLayerMask() {
+    public void deleteLayerMask() {
         runMenuCommand("Delete");
         keyboard.undoRedo("Delete Layer Mask");
     }
@@ -414,7 +416,7 @@ public class AppRunner {
         keyboard.undoRedo("Invert");
     }
 
-    void acceptSaveDialog(File dir, String fileName) {
+    public void acceptSaveDialog(File dir, String fileName) {
         var saveDialog = findSaveFileChooser();
         if (fileName == null) {
             // use the file name that was pre-selected in the dialog
@@ -434,7 +436,7 @@ public class AppRunner {
         assertThat(file).exists().isFile();
     }
 
-    void openFileWithDialog(String command, File dir, String fileName) {
+    public void openFileWithDialog(String command, File dir, String fileName) {
         runMenuCommand(command);
         var openDialog = findOpenFileChooser();
         File file = new File(dir, fileName);
@@ -459,7 +461,7 @@ public class AppRunner {
         }
     }
 
-    void waitForProgressMonitorEnd() {
+    public void waitForProgressMonitorEnd() {
         Utils.sleep(2, SECONDS); // wait until progress monitor comes up
 
         boolean dialogVisible = true;
@@ -482,7 +484,7 @@ public class AppRunner {
         }, Timeout.timeout(5, SECONDS));
     }
 
-    void closeCurrentView(ExpectConfirmation expectConfirmation) {
+    public void closeCurrentView(ExpectConfirmation expectConfirmation) {
         boolean unsaved = EDT.queryActiveComp(Composition::hasUnsavedChanges);
 
         // verify that the expectation of a confirmation dialog matches the actual unsaved state
@@ -505,7 +507,7 @@ public class AppRunner {
         }
     }
 
-    void closeAll() {
+    public void closeAll() {
         runMenuCommand("Close All");
 
         // close all warnings
@@ -522,11 +524,11 @@ public class AppRunner {
         EDT.assertNumViewsIs(0);
     }
 
-    void resize(int targetWidth) {
+    public void resize(int targetWidth) {
         resize(targetWidth, -1);
     }
 
-    void resize(int targetWidth, int targetHeight) {
+    public void resize(int targetWidth, int targetHeight) {
         runMenuCommand("Resize...");
         var dialog = findDialogByTitle("Resize");
 
@@ -585,7 +587,7 @@ public class AppRunner {
         keyboard.undoRedo("Modify Selection");
     }
 
-    static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
+    public static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
         clickPopupMenu(popupMenu, text, true);
     }
 
@@ -595,13 +597,13 @@ public class AppRunner {
             .click();
     }
 
-    void expectAndCloseErrorDialog() {
+    public void expectAndCloseErrorDialog() {
         var errorDialog = findDialogByTitle("Error");
         GUITestUtils.findButtonByText(errorDialog, "OK").click();
         errorDialog.requireNotVisible();
     }
 
-    static String getCurrentTimeHM() {
+    public static String getCurrentTimeHM() {
         return TIME_FORMAT_HM.format(LocalTime.now());
     }
 
@@ -623,13 +625,13 @@ public class AppRunner {
         }));
     }
 
-    DialogFixture findFilterDialog() {
+    public DialogFixture findFilterDialog() {
         return WindowFinder.findDialog("filterDialog")
             .withTimeout(1, TimeUnit.MINUTES)
             .using(robot);
     }
 
-    DialogFixture findDialogByTitle(String title) {
+    public DialogFixture findDialogByTitle(String title) {
         return findDialogByTitle(s -> s.equals(title));
     }
 
@@ -649,7 +651,7 @@ public class AppRunner {
         }));
     }
 
-    JOptionPaneFixture findJOptionPane(String expectedTitle) {
+    public JOptionPaneFixture findJOptionPane(String expectedTitle) {
         JOptionPaneFixture pane = JOptionPaneFinder.findOptionPane()
             .withTimeout(10, SECONDS)
             .using(robot);
@@ -659,7 +661,7 @@ public class AppRunner {
         return pane;
     }
 
-    JFileChooserFixture findOpenFileChooser() {
+    public JFileChooserFixture findOpenFileChooser() {
         return JFileChooserFinder.findFileChooser("open")
             .withTimeout(10, SECONDS)
             .using(robot);
@@ -1114,6 +1116,114 @@ public class AppRunner {
         });
     }
 
+    /**
+     * Finds a layer's UI component by its name.
+     */
+    public LayerGUIFixture findLayerButton(String layerName) {
+        return new LayerGUIFixture(robot, robot.finder()
+            .find(new GenericTypeMatcher<>(LayerGUI.class) {
+                @Override
+                protected boolean isMatching(LayerGUI layerGUI) {
+                    return layerGUI.getLayerName().equals(layerName);
+                }
+
+                @Override
+                public String toString() {
+                    return "LayerButton Matcher, layerName = " + layerName;
+                }
+            }));
+    }
+
+    public void addTranslation() {
+        clickTool(Tools.MOVE);
+        pw.comboBox("modeSelector").selectItem(MoveMode.MOVE_LAYER_ONLY.toString());
+
+        mouse.moveToCanvas(400, 400);
+        mouse.dragToCanvas(200, 300);
+
+        keyboard.undoRedo(MoveMode.MOVE_LAYER_ONLY.getEditName());
+    }
+
+    public void addSelection() {
+        clickTool(Tools.RECTANGLE_SELECTION);
+        mouse.moveToCanvas(200, 200);
+        mouse.dragToCanvas(600, 500);
+        keyboard.undoRedo("Create Selection");
+    }
+
+    public void testTextDialog(DialogFixture dialog, String expectedText) {
+        dialog.textBox("textArea")
+            .requireText(expectedText)
+            .deleteText()
+            .enterText("my text");
+
+        dialog.slider("fontSize").slideTo(250);
+        dialog.checkBox("boldCB").check().uncheck();
+        dialog.checkBox("italicCB").check().uncheck().check();
+
+        GUITestUtils.findButtonByText(dialog, "Advanced...").click();
+
+        var advDialog = findDialogByTitle("Advanced Text Settings");
+        advDialog.checkBox("underlineCB").check().uncheck();
+        advDialog.checkBox("strikeThroughCB").check().uncheck();
+        advDialog.checkBox("kerningCB").check().uncheck();
+        advDialog.checkBox("ligaturesCB").check().uncheck();
+        advDialog.slider("trackingGUI").slideTo(10);
+
+        advDialog.button("ok").click();
+        advDialog.requireNotVisible();
+    }
+
+    public void runWithSelectionTranslationCombinations(Runnable task, TestContext context) {
+        context.log(1, "without selection or translation");
+
+        EDT.requireNoSelection();
+        EDT.assertNoTranslation();
+
+        task.run();
+
+        if (context.skip(0.5)) {
+            return;
+        }
+
+        context.log(1, "with selection, without translation");
+        addSelection();
+        task.run();
+        deselect();
+
+        if (context.skip(0.5)) {
+            return;
+        }
+
+        context.log(1, "without selection, with translation");
+        addTranslation();
+        task.run();
+
+        if (context.skip(0.5)) {
+            keyboard.undo("Move Layer");
+            EDT.assertNoTranslation();
+            return;
+        }
+
+        context.log(1, "with selection and translation");
+        addSelection();
+        task.run();
+
+        keyboard.undo("Create Selection");
+        EDT.requireNoSelection();
+
+        keyboard.undo("Move Layer");
+        EDT.assertNoTranslation();
+    }
+
+    public void runWithSelectionTranslationCombinations(boolean squashedImage, Runnable task, TestContext context) {
+        if (squashedImage) {
+            task.run();
+        } else {
+            runWithSelectionTranslationCombinations(task, context);
+        }
+    }
+
     public void setMaxUntestedEdits(int newLimit) {
         if (historyChecker != null) {
             historyChecker.setMaxUntestedEdits(newLimit);
@@ -1145,24 +1255,6 @@ public class AppRunner {
 
     public FrameFixture getPW() {
         return pw;
-    }
-
-    // what GUI widgets should be tested on for a filter
-    public record FilterOptions(boolean randomize, boolean reseed, boolean showOriginal, boolean exportSvg) {
-        // nothing
-        static final FilterOptions NONE = new FilterOptions(false, false, false, false);
-        // show original
-        static final FilterOptions TRIVIAL = new FilterOptions(false, false, true, false);
-        // randomize + show original
-        static final FilterOptions STANDARD = new FilterOptions(true, false, true, false);
-        // randomize + show original + resed
-        static final FilterOptions STANDARD_RESEED = new FilterOptions(true, true, true, false);
-        // randomize
-        static final FilterOptions RENDERING = new FilterOptions(true, false, false, false);
-        // randomize + reseed
-        static final FilterOptions RENDERING_RESEED = new FilterOptions(true, true, false, false);
-        // randomize + svg export
-        static final FilterOptions SHAPES = new FilterOptions(true, false, false, true);
     }
 
     // Whether we expect a save modified image confirmation dialog

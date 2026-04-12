@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,7 +64,7 @@ public class Keyboard {
         this.historyChecker = historyChecker;
     }
 
-    void undo(String editName) {
+    public void undo(String editName) {
         if (historyChecker != null) {
             historyChecker.registerUndo(editName);
         }
@@ -80,7 +80,7 @@ public class Keyboard {
         robot.waitForIdle();
     }
 
-    void redo(String editName) {
+    public void redo(String editName) {
         if (historyChecker != null) {
             historyChecker.registerRedo(editName);
         }
@@ -95,18 +95,18 @@ public class Keyboard {
         robot.waitForIdle();
     }
 
-    void undoRedo(String edit) {
+    public void undoRedo(String edit) {
         undo(edit);
         redo(edit);
     }
 
-    void undoRedoUndo(String edit) {
+    public void undoRedoUndo(String edit) {
         undo(edit);
         redo(edit);
         undo(edit);
     }
 
-    void undoRedo(String firstEdit, String secondEdit) {
+    public void undoRedo(String firstEdit, String secondEdit) {
         undo(secondEdit);
         undo(firstEdit);
         redo(firstEdit);
@@ -133,7 +133,7 @@ public class Keyboard {
         }
     }
 
-    void fgBgDefaults() {
+    public void fgBgDefaults() {
         if (USE_OS_LEVEL_EVENTS) {
             // press D
             pressKeys(VK_D);
@@ -142,7 +142,7 @@ public class Keyboard {
         }
     }
 
-    void randomizeColors() {
+    public void randomizeColors() {
         if (USE_OS_LEVEL_EVENTS) {
             pressKeys(VK_R);
         } else {
@@ -150,7 +150,7 @@ public class Keyboard {
         }
     }
 
-    void actualPixels() {
+    public void actualPixels() {
         if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-0
             pressKeys(VK_CONTROL, VK_0);
@@ -159,7 +159,7 @@ public class Keyboard {
         }
     }
 
-    void nudge() {
+    public void nudge() {
         nudge(ArrowKey.SHIFT_RIGHT);
     }
 
@@ -183,7 +183,7 @@ public class Keyboard {
     }
 
     // can be sent to a dialog or to the main frame
-    static <S, C extends Window, D extends WindowDriver>
+    public static <S, C extends Window, D extends WindowDriver>
     void pressCtrlPlus(AbstractWindowFixture<S, C, D> window, int times) {
         for (int i = 0; i < times; i++) {
             if (USE_OS_LEVEL_EVENTS) {
@@ -198,7 +198,7 @@ public class Keyboard {
     }
 
     // can be sent to a dialog or to the main frame
-    static <S, C extends Window, D extends WindowDriver>
+    public static <S, C extends Window, D extends WindowDriver>
     void pressCtrlMinus(AbstractWindowFixture<S, C, D> window, int times) {
         for (int i = 0; i < times; i++) {
             if (USE_OS_LEVEL_EVENTS) {
@@ -216,7 +216,7 @@ public class Keyboard {
         press(VK_ENTER);
     }
 
-    void pressEsc() {
+    public void pressEsc() {
         press(VK_ESCAPE);
     }
 
@@ -224,7 +224,7 @@ public class Keyboard {
         press(c);
     }
 
-    void press(int keyCode) {
+    public void press(int keyCode) {
         if (USE_OS_LEVEL_EVENTS) {
             pw.pressKey(keyCode);
             pw.releaseKey(keyCode);

@@ -29,7 +29,6 @@ import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.TabsUI;
 import pixelitor.guitest.AppRunner.ExpectConfirmation;
-import pixelitor.guitest.AppRunner.FilterOptions;
 import pixelitor.history.HistoryChecker;
 import pixelitor.layers.*;
 import pixelitor.tools.BrushType;
