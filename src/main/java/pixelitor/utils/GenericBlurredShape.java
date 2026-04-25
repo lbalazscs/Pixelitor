@@ -175,6 +175,6 @@ public class GenericBlurredShape implements BlurredShape {
         // inside the image bounds return the normalized pixel intensity
         int pixel = pixels[imgX + imgWidth * imgY];
         // transform from unsigned byte to int
-        return (pixel & 0xff) / 255.0;
+        return (pixel & 0xFF) / 255.0;
     }
 }

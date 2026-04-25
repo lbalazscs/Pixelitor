@@ -127,7 +127,7 @@ public class ColorSpaces {
         int g = linearToSrgbInt(linear[1]);
         int b = linearToSrgbInt(linear[2]);
 
-        return 0xFF000000 | (r << 16) | (g << 8) | b;
+        return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
     }
 
     /**
@@ -150,7 +150,7 @@ public class ColorSpaces {
         int gi = linearToSrgbInt(gLin);
         int bi = linearToSrgbInt(bLin);
 
-        return 0xFF000000 | (ri << 16) | (gi << 8) | bi;
+        return 0xFF_00_00_00 | (ri << 16) | (gi << 8) | bi;
     }
 
     /**
@@ -164,7 +164,7 @@ public class ColorSpaces {
             int g = linearToSrgbInt(linear[1]);
             int b = linearToSrgbInt(linear[2]);
 
-            dst[i] = 0xFF000000 | (r << 16) | (g << 8) | b;
+            dst[i] = 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
         }
     }
 
@@ -185,7 +185,7 @@ public class ColorSpaces {
             int g = (int) (255.0 * linearToSrgbExact(gLin) + 0.5);
             int b = (int) (255.0 * linearToSrgbExact(bLin) + 0.5);
 
-            dst[i] = 0xFF000000 | (r << 16) | (g << 8) | b;
+            dst[i] = 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
         }
     }
 
@@ -207,7 +207,7 @@ public class ColorSpaces {
         assert r >= 0 && g >= 0 && b >= 0;
         assert r <= 0xFF && g <= 0xFF && b <= 0xFF;
 
-        return 0xFF000000 | (r << 16) | (g << 8) | b;
+        return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
     }
 
     /**

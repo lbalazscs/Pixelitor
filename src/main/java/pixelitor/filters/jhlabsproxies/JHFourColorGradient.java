@@ -18,9 +18,10 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.FourColorFilter;
+import com.jhlabs.image.FourColorFilter.ColorSpaceType;
+import com.jhlabs.image.FourColorFilter.InterpolationType;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
-import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.GUIText;
 import pixelitor.layers.Filterable;
@@ -52,18 +53,11 @@ public class JHFourColorGradient extends ParametrizedFilter {
 
     private final ImagePositionParam midpoint = new ImagePositionParam("Midpoint");
 
-    private final IntChoiceParam interpolation = new IntChoiceParam("Interpolation", new Item[]{
-        new Item("Linear", FourColorFilter.INTERPOLATION_LINEAR),
-        new Item("Cubic", FourColorFilter.INTERPOLATION_CUBIC),
-        new Item("Quintic", FourColorFilter.INTERPOLATION_QUINTIC),
-        new Item("Septic", FourColorFilter.INTERPOLATION_SEPTIC),
-    });
+    private final EnumParam<InterpolationType> interpolation = new EnumParam<>(
+        "Interpolation", InterpolationType.class);
 
-    private final IntChoiceParam space = new IntChoiceParam(GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, new Item[]{
-        new Item("Oklab", FourColorFilter.SPACE_OKLAB),
-        new Item("Linear RGB", FourColorFilter.SPACE_LINEAR_RGB),
-        new Item("sRGB", FourColorFilter.SPACE_SRGB)
-    });
+    private final EnumParam<ColorSpaceType> space = new EnumParam<>(
+        GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, ColorSpaceType.class);
 
     public JHFourColorGradient() {
         super(false);
@@ -106,8 +100,8 @@ public class JHFourColorGradient extends ParametrizedFilter {
             northEastParam.getColor().getRGB(),
             southWestParam.getColor().getRGB(),
             southEastParam.getColor().getRGB(),
-            interpolation.getValue(),
-            space.getValue(),
+            interpolation.getSelected(),
+            space.getSelected(),
             midpoint.getRelativeX(),
             midpoint.getRelativeY()
         );

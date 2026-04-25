@@ -538,7 +538,7 @@ public class CannyEdgeDetector {
 
     private void thresholdEdges() {
         for (int i = 0; i < picsize; i++) {
-            luminance[i] = luminance[i] > 0 ? -1 : 0xff000000;
+            luminance[i] = luminance[i] > 0 ? -1 : 0xFF_00_00_00;
         }
     }
 
@@ -562,9 +562,9 @@ public class CannyEdgeDetector {
         int[] pixels = (int[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
         for (int i = 0; i < picsize; i++) {
             int p = pixels[i];
-            int r = (p & 0xff0000) >> 16;
-            int g = (p & 0xff00) >> 8;
-            int b = p & 0xff;
+            int r = (p & 0xFF_00_00) >> 16;
+            int g = (p & 0xFF_00) >> 8;
+            int b = p & 0xFF;
             luminance[i] = luminance(r, g, b);
         }
     }
@@ -574,9 +574,9 @@ public class CannyEdgeDetector {
         for (int i = 0; i < picsize; i++) {
             int p = pixels[i];
             int a = p >>> 24;
-            int r = (p & 0xff0000) >> 16;
-            int g = (p & 0xff00) >> 8;
-            int b = p & 0xff;
+            int r = (p & 0xFF_00_00) >> 16;
+            int g = (p & 0xFF_00) >> 8;
+            int b = p & 0xFF;
             int lum = luminance(r, g, b);
             if (a != 255) {
                 if (a == 0) {
@@ -596,14 +596,14 @@ public class CannyEdgeDetector {
     private void readByteGrayLuminance() {
         byte[] pixels = (byte[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
         for (int i = 0; i < picsize; i++) {
-            luminance[i] = (pixels[i] & 0xff);
+            luminance[i] = (pixels[i] & 0xFF);
         }
     }
 
     private void readShortGrayLuminance() {
         short[] pixels = (short[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
         for (int i = 0; i < picsize; i++) {
-            luminance[i] = (pixels[i] & 0xffff) / 256;
+            luminance[i] = (pixels[i] & 0xFF_FF) / 256;
         }
     }
 
@@ -611,9 +611,9 @@ public class CannyEdgeDetector {
         byte[] pixels = (byte[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
         int offset = 0;
         for (int i = 0; i < picsize; i++) {
-            int b = pixels[offset++] & 0xff;
-            int g = pixels[offset++] & 0xff;
-            int r = pixels[offset++] & 0xff;
+            int b = pixels[offset++] & 0xFF;
+            int g = pixels[offset++] & 0xFF;
+            int r = pixels[offset++] & 0xFF;
             luminance[i] = luminance(r, g, b);
         }
     }

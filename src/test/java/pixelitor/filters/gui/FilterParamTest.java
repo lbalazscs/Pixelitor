@@ -28,6 +28,8 @@ import pixelitor.filters.jhlabsproxies.JHWeave;
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -49,11 +51,11 @@ import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
 
 /**
  * Checks whether different {@link FilterParam} implementations
- * implement the interface contract correctly.
+ * adhere to the interface contract.
  */
 @ParameterizedClass
 @MethodSource("instancesToTest")
-@DisplayName("filter param tests")
+@DisplayName("Filter Parameter Tests")
 @TestMethodOrder(MethodOrderer.Random.class)
 class FilterParamTest {
     @Parameter
@@ -134,7 +136,7 @@ class FilterParamTest {
         int columnCount = ((ParamGUI) param.createGUI()).getNumLayoutColumns();
 
         assertThat(columnCount)
-            .as("Layout column count must be exactly 1 or 2")
+            .as("layout column count")
             .isIn(1, 2);
 
         verifyNoParamAdjustments();
@@ -221,7 +223,7 @@ class FilterParamTest {
     }
 
     @Test
-    void simpleMethodsShouldNotTriggerFilter() {
+    void shouldNotTriggerFilterForStateChanges() {
         assertThat(param)
             .as(param.toString())
             .hasName("Param Name");
@@ -230,14 +232,14 @@ class FilterParamTest {
 
         param.isAnimatable();
 
-        // Test APP_LOGIC disable/enable
+        // test FILTER_LOGIC disable/enable
         param.setEnabled(false, FILTER_LOGIC);
         assertIsDisabled(gui);
 
         param.setEnabled(true, FILTER_LOGIC);
         assertIsEnabled(gui);
 
-        // Test ANIMATION_ENDING_STATE disable/enable
+        // test ANIMATION_ENDING_STATE disable/enable
         param.setEnabled(false, ANIMATION_ENDING_STATE);
         if (param.isAnimatable()) {
             assertIsEnabled(gui); // unaffected
@@ -263,7 +265,7 @@ class FilterParamTest {
         param.withSideButton(sideButtonModel);
         JComponent gui = param.createGUI();
 
-        // randomize until we are NOT at default => the reset button should be enabled
+        // randomize until the parent parameter is NOT at default
         param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
         int attempts = 0;
         while (param.isAtDefault() && attempts < 100) {
@@ -271,14 +273,21 @@ class FilterParamTest {
             attempts++;
         }
 
-        // find the specific components in the GUI hierarchy
-        ResetButton resetButton = findChildComponent(gui, ResetButton.class, btn -> true);
+        // find ALL reset buttons and the side button (some parameters,
+        // such as GroupedRangeParam, don't have a single reset button
+        // for the group itself because the children have their own reset buttons)
+        List<ResetButton> resetButtons = findAllChildComponents(gui, ResetButton.class);
         JButton sideButton = findChildComponent(gui, JButton.class, btn -> sideButtonName.equals(btn.getName()));
 
-        // disable the parameter and verify buttons are disabled
+        // capture the expected state of each reset button BEFORE disabling
+        List<Boolean> expectedResetStates = resetButtons.stream()
+            .map(ResetButton::isEnabled)
+            .toList();
+
+        // disable the parameter and verify all buttons are disabled
         param.setEnabled(false);
-        if (resetButton != null) {
-            assertThat(resetButton.isEnabled())
+        for (ResetButton btn : resetButtons) {
+            assertThat(btn.isEnabled())
                 .as(paramClass + ": ResetButton should be disabled when param is disabled")
                 .isFalse();
         }
@@ -288,20 +297,34 @@ class FilterParamTest {
                 .isFalse();
         }
 
-        // re-enable the parameter and verify buttons
+        // re-enable the parameter and verify all buttons return to their captured expected states
         param.setEnabled(true);
-        if (resetButton != null) {
-            // the reset button should only be enabled if the value is still not default
-            boolean expectedState = !param.isAtDefault();
-            assertThat(resetButton.isEnabled())
-                .as(paramClass + ": ResetButton enabled state should match !isAtDefault() when param is enabled")
-                .isEqualTo(expectedState);
+        for (int i = 0; i < resetButtons.size(); i++) {
+            assertThat(resetButtons.get(i).isEnabled())
+                .as(paramClass + ": ResetButton enabled state should be correctly restored")
+                .isEqualTo(expectedResetStates.get(i));
         }
         if (sideButton != null) {
             assertThat(sideButton.isEnabled())
                 .as(paramClass + ": Side button should be enabled when param is enabled")
                 .isTrue();
         }
+    }
+
+    /**
+     * Helper to find all components of a specific type in a Container hierarchy.
+     */
+    private static <T extends Component> List<T> findAllChildComponents(Container container, Class<T> type) {
+        List<T> found = new ArrayList<>();
+        for (Component c : container.getComponents()) {
+            if (type.isInstance(c)) {
+                found.add(type.cast(c));
+            }
+            if (c instanceof Container childContainer) {
+                found.addAll(findAllChildComponents(childContainer, type));
+            }
+        }
+        return found;
     }
 
     /**

@@ -77,7 +77,7 @@ public class ThemedImageIcon extends ImageIcon {
         int[] darkThemePixels = ImageUtils.getPixels(darkThemeImage);
         for (int i = 0; i < lightThemePixels.length; i++) {
             int pixel = lightThemePixels[i];
-            int alpha = pixel & 0xFF000000;
+            int alpha = pixel & 0xFF_00_00_00;
             darkThemePixels[i] = alpha | darkThemePixelColor;
         }
     }

@@ -128,8 +128,6 @@ public class ToolTests {
         context.afterTestActions();
     }
 
-//<editor-fold desc="move tool">
-
     private void testMoveTool() {
         context.log(1, "move tool");
 
@@ -226,9 +224,6 @@ public class ToolTests {
         }
     }
 
-//</editor-fold>
-//<editor-fold desc="crop tool">
-
     private void testCropTool() {
         context.log(1, "crop tool");
 
@@ -291,9 +286,6 @@ public class ToolTests {
     private static void checkCropBoxDoesNotExist() {
         assert !EDT.call(Tools.CROP::hasCropBox);
     }
-
-//</editor-fold>
-//<editor-fold desc="selections">
 
     private void testSelectionToolsAndMenus() {
         context.log(1, "selection tools and the selection menus");
@@ -413,10 +405,6 @@ public class ToolTests {
         app.runModifySelection(EXPAND, 24);
         keyboard.undo("Modify Selection");
     }
-
-//</editor-fold>
-
-//<editor-fold desc="path tools">
 
     private void testPathTools() {
         testPenTool();
@@ -581,10 +569,6 @@ public class ToolTests {
         keyboard.undoRedo("Brush Tool");
     }
 
-//</editor-fold>
-
-//<editor-fold desc="hand tool">
-
     private void testHandTool() {
         context.log(1, "hand tool");
 
@@ -599,10 +583,6 @@ public class ToolTests {
 
         context.afterTestActions();
     }
-
-//</editor-fold>
-
-//<editor-fold desc="zooming">
 
     private void testZooming() {
         context.log(1, "zoom tool");
@@ -752,8 +732,6 @@ public class ToolTests {
 
         pw.releaseKey(VK_CONTROL);
     }
-//</editor-fold>
-//<editor-fold desc="color selector">
 
     private void testColorSelector() {
         context.log(1, "color selector");
@@ -929,9 +907,6 @@ public class ToolTests {
         }
     }
 
-//</editor-fold>
-//<editor-fold desc="gradient tool">
-
     private void testGradientTool() {
         context.log(1, "gradient tool");
 
@@ -1008,9 +983,6 @@ public class ToolTests {
         context.afterTestActions();
     }
 
-//</editor-fold>
-//<editor-fold desc="paint bucket tool">
-
     private void testPaintBucketTool() {
         context.log(1, "paint bucket tool");
         app.clickTool(Tools.PAINT_BUCKET);
@@ -1025,9 +997,6 @@ public class ToolTests {
         context.afterTestActions();
     }
 
-//</editor-fold>
-//<editor-fold desc="color picker tool">
-
     private void testColorPickerTool() {
         context.log(1, "color picker tool");
 
@@ -1041,9 +1010,6 @@ public class ToolTests {
 
         context.afterTestActions();
     }
-
-//</editor-fold>
-//<editor-fold desc="shapes tool">
 
     private void testShapesTool() {
         context.log(1, "shapes tool");
@@ -1172,7 +1138,4 @@ public class ToolTests {
         dialog.button("ok").click();
         dialog.requireNotVisible();
     }
-
-//</editor-fold>
-
 }

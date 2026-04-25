@@ -36,7 +36,7 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    public boolean shouldDisableForSmartObjects() {
+    public boolean disableForSmartObjects() {
         return true;
     }
 

@@ -76,10 +76,11 @@ public class JHPlasma extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        filter.setLessColors(type.getValue() != MORE_COLORS);
+        int colorType = type.getValue();
+
+        filter.setUniformChannelVariation(colorType != MORE_COLORS); // also true for gradients
         filter.setTurbulence((float) turbulence.getPercentage());
-        filter.setUseColormap(type.getValue() == GRADIENT_COLORS);
-        filter.setColormap(gradient.getColorMap());
+        filter.setColormap(colorType == GRADIENT_COLORS ? gradient.getColorMap() : null);
         filter.setSeed(paramSet.getLastSeed());
 
         return filter.filter(src, dest);

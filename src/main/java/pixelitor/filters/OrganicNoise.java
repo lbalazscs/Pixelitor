@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public class OrganicNoise extends ParametrizedFilter {
     private final RangeParam pingPongStrength
         = new RangeParam("Ping-pong Strength", 1, 200, 500);
 
-    private final EnumParam<CellularDistanceFunction> cdf
+    private final EnumParam<CellularDistanceFunction> cellDistFunc
         = new EnumParam<>("Cellular Distance Function", CellularDistanceFunction.class);
     private final RangeParam cellularJitter
         = new RangeParam("Cellular Randomness", 0, 100, 100);
@@ -71,27 +71,27 @@ public class OrganicNoise extends ParametrizedFilter {
     private final EnumParam<DomainWarpFractalType> domainWarpFractalType
         = new EnumParam<>("Distortion Fractal", DomainWarpFractalType.class);
 
-    private Impl impl;
+    private OrganicNoiseFilter filter;
 
     public OrganicNoise() {
         super(false);
 
         zoom.setPresetKey("Zoom");
 
-        Predicate<DomainWarpType> domainWarpEnabled = t -> t != DomainWarpType.None;
+        Predicate<DomainWarpType> domainWarpEnabled = t -> t != DomainWarpType.NONE;
         domainWarpType.setupEnableOtherIf(domainWarpAmp, domainWarpEnabled);
         domainWarpType.setupEnableOtherIf(domainWarpFractalType, domainWarpEnabled);
 
         CompositeParam cellDetails = new CompositeParam("Cellular Details",
-            cdf, cellularJitter, cellularReturnType);
-        type.setupDisableOtherIf(cellDetails, t -> t != NoiseType.Cellular);
+            cellDistFunc, cellularJitter, cellularReturnType);
+        type.setupDisableOtherIf(cellDetails, t -> t != NoiseType.CELLULAR);
 
-        Predicate<FractalType> fractalEnabled = t -> t != FractalType.None;
+        Predicate<FractalType> fractalEnabled = t -> t != FractalType.NONE;
         fractalType.setupEnableOtherIf(octaves, fractalEnabled);
         fractalType.setupEnableOtherIf(lacunarity, fractalEnabled);
         fractalType.setupEnableOtherIf(gain, fractalEnabled);
         fractalType.setupEnableOtherIf(weightedStrength, fractalEnabled);
-        fractalType.setupEnableOtherIf(pingPongStrength, t -> t == FractalType.PingPong);
+        fractalType.setupEnableOtherIf(pingPongStrength, t -> t == FractalType.PING_PONG);
 
         initParams(
             type,
@@ -120,40 +120,40 @@ public class OrganicNoise extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (impl == null) {
-            impl = new Impl();
+        if (filter == null) {
+            filter = new OrganicNoiseFilter();
         }
 
-        impl.setCenter(src.getWidth() / 2.0f, src.getHeight() / 2.0f);
-        impl.setScale((float) zoom.getPercentage());
-        impl.setAngle(angle.getValueInRadians());
-//        impl.setColors(colors.getColor(0), colors.getColor(1));
-        impl.setNoiseType(type.getSelected());
-        impl.setFractalType(fractalType.getSelected());
-        impl.setOctaves(octaves.getValue());
-        impl.setFractalLacunarity((float) lacunarity.getPercentage());
-        impl.setFractalGain((float) gain.getPercentage());
-        impl.setFractalWeightedStrength((float) weightedStrength.getPercentage());
-        impl.setFractalPingPongStrength((float) pingPongStrength.getPercentage());
+        filter.setCenter(src.getWidth() / 2.0, src.getHeight() / 2.0);
+        filter.setScale(zoom.getPercentage());
+        filter.setAngle(angle.getValueInRadians());
+//        filter.setColors(colors.getColor(0), colors.getColor(1));
+        filter.setNoiseType(type.getSelected());
+        filter.setFractalType(fractalType.getSelected());
+        filter.setOctaves(octaves.getValue());
+        filter.setFractalLacunarity(lacunarity.getPercentage());
+        filter.setFractalGain(gain.getPercentage());
+        filter.setFractalWeightedStrength(weightedStrength.getPercentage());
+        filter.setFractalPingPongStrength(pingPongStrength.getPercentage());
 
-        impl.setCellularDistanceFunction(cdf.getSelected());
-        impl.setCellularJitter((float) cellularJitter.getPercentage());
-        impl.setCellularReturnType(cellularReturnType.getSelected());
+        filter.setCellularDistanceFunction(cellDistFunc.getSelected());
+        filter.setCellularJitter(cellularJitter.getPercentage());
+        filter.setCellularReturnType(cellularReturnType.getSelected());
 
-        boolean doDomainWarp = domainWarpType.getSelected() != DomainWarpType.None;
-        impl.setDomainWarp(doDomainWarp);
+        boolean doDomainWarp = domainWarpType.getSelected() != DomainWarpType.NONE;
+        filter.setDomainWarp(doDomainWarp);
         if (doDomainWarp) {
-            impl.setDomainWarpType(domainWarpType.getSelected());
-            impl.setDomainWarpAmp(domainWarpAmp.getValueAsFloat());
-            impl.setDomainWarpFractalType(domainWarpFractalType.getSelected());
+            filter.setDomainWarpType(domainWarpType.getSelected());
+            filter.setDomainWarpAmp(domainWarpAmp.getValueAsDouble());
+            filter.setDomainWarpFractalType(domainWarpFractalType.getSelected());
         }
 
-        return impl.filter(src, dest);
+        return filter.filter(src, dest);
     }
 
     private void setSeed(long seed) {
-        if (impl != null) {
-            impl.setSeed(seed);
+        if (filter != null) {
+            filter.setSeed(seed);
         }
     }
 
@@ -168,18 +168,18 @@ public class OrganicNoise extends ParametrizedFilter {
     }
 }
 
-class Impl extends PointFilter {
+class OrganicNoiseFilter extends PointFilter {
     private final FastNoiseLite fastNoise;
     private boolean domainWarp;
-    private float scale;
-    private float cx;
-    private float cy;
+    private double scale;
+    private double cx;
+    private double cy;
 
     private boolean rotate;
     private double cos;
     private double sin;
 
-    protected Impl() {
+    protected OrganicNoiseFilter() {
         super(OrganicNoise.NAME);
         fastNoise = new FastNoiseLite();
     }
@@ -198,56 +198,56 @@ class Impl extends PointFilter {
 
         if (domainWarp) {
             Vector2 vec = new Vector2(sampleX, sampleY);
-            fastNoise.DomainWarp(vec);
+            fastNoise.domainWarp(vec);
             sampleX = vec.x;
             sampleY = vec.y;
         }
 
-        // GetNoise should return floats between -1 and 1, but has errors
-        float noise = fastNoise.GetNoise(sampleX, sampleY);
-        int v = (int) (127.5 * (noise + 1.0f));
+        // getNoise should return values between -1 and 1, but has errors
+        double noise = fastNoise.getNoise(sampleX, sampleY);
+        int v = (int) (127.5 * (noise + 1.0));
         if (v < 0) {
             v = 0;
         }
         if (v > 255) {
             v = 255;
         }
-        return 0xFF000000 | (v << 16) | (v << 8) | v;
+        return 0xFF_00_00_00 | (v << 16) | (v << 8) | v;
     }
 
     public void setNoiseType(NoiseType type) {
-        fastNoise.SetNoiseType(type);
+        fastNoise.setNoiseType(type);
     }
 
     public void setFractalType(FractalType type) {
-        fastNoise.SetFractalType(type);
+        fastNoise.setFractalType(type);
     }
 
     public void setCellularDistanceFunction(CellularDistanceFunction cdf) {
-        fastNoise.SetCellularDistanceFunction(cdf);
+        fastNoise.setCellularDistanceFunction(cdf);
     }
 
-    public void setCellularJitter(float cj) {
-        fastNoise.SetCellularJitter(cj);
+    public void setCellularJitter(double cj) {
+        fastNoise.setCellularJitter(cj);
     }
 
     public void setCellularReturnType(CellularReturnType type) {
-        fastNoise.SetCellularReturnType(type);
+        fastNoise.setCellularReturnType(type);
     }
 
     public void setDomainWarpType(DomainWarpType type) {
-        fastNoise.SetDomainWarpType(type);
+        fastNoise.setDomainWarpType(type);
     }
 
-    public void setDomainWarpAmp(float dwa) {
-        fastNoise.SetDomainWarpAmp(dwa);
+    public void setDomainWarpAmp(double dwa) {
+        fastNoise.setDomainWarpAmp(dwa);
     }
 
     public void setDomainWarp(boolean domainWarp) {
         this.domainWarp = domainWarp;
     }
 
-    public void setScale(float scale) {
+    public void setScale(double scale) {
         this.scale = scale;
     }
 
@@ -256,30 +256,30 @@ class Impl extends PointFilter {
     }
 
     public void setDomainWarpFractalType(DomainWarpFractalType fractalType) {
-        fastNoise.SetDomainFractalType(fractalType);
+        fastNoise.setDomainFractalType(fractalType);
     }
 
     public void setOctaves(int octaves) {
-        fastNoise.SetFractalOctaves(octaves);
+        fastNoise.setFractalOctaves(octaves);
     }
 
-    public void setFractalLacunarity(float lacunarity) {
-        fastNoise.SetFractalLacunarity(lacunarity);
+    public void setFractalLacunarity(double lacunarity) {
+        fastNoise.setFractalLacunarity(lacunarity);
     }
 
-    public void setFractalGain(float gain) {
-        fastNoise.SetFractalGain(gain);
+    public void setFractalGain(double gain) {
+        fastNoise.setFractalGain(gain);
     }
 
-    public void setFractalWeightedStrength(float weightedStrength) {
-        fastNoise.SetFractalWeightedStrength(weightedStrength);
+    public void setFractalWeightedStrength(double weightedStrength) {
+        fastNoise.setFractalWeightedStrength(weightedStrength);
     }
 
-    public void setFractalPingPongStrength(float pingPongStrength) {
-        fastNoise.SetFractalPingPongStrength(pingPongStrength);
+    public void setFractalPingPongStrength(double pingPongStrength) {
+        fastNoise.setFractalPingPongStrength(pingPongStrength);
     }
 
-    public void setCenter(float cx, float cy) {
+    public void setCenter(double cx, double cy) {
         this.cx = cx;
         this.cy = cy;
     }
@@ -293,6 +293,6 @@ class Impl extends PointFilter {
     }
 
     public void setSeed(long seed) {
-        fastNoise.SetSeed((int) (seed % Integer.MAX_VALUE));
+        fastNoise.setSeed((int) (seed % Integer.MAX_VALUE));
     }
 }

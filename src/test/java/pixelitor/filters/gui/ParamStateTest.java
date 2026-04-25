@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,13 +80,11 @@ class ParamStateTest {
     @ParameterizedTest(name = "#{index}: interpolate between {0} and {1}")
     @MethodSource("instancesToTest")
     <T extends ParamState<T>> void interpolate(T start, T end) {
-        ParamState<T> interpolated = start.interpolate(end, 0.0);
-        assertThat(interpolated).isNotNull();
+        double[] progresses = {0.0, 0.5, 1.0};
 
-        interpolated = start.interpolate(end, 0.5);
-        assertThat(interpolated).isNotNull();
-
-        interpolated = start.interpolate(end, 1.0);
-        assertThat(interpolated).isNotNull();
+        for (double progress : progresses) {
+            ParamState<T> interpolated = start.interpolate(end, progress);
+            assertThat(interpolated).isNotNull();
+        }
     }
 }

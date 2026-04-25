@@ -88,9 +88,9 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
         for (int by = 0; by < h; by++) {
             for (int bx = 0; bx < w; bx++) {
                 rgb = pixels[i];
-                r += (rgb >> 16) & 0xff;
-                g += (rgb >> 8) & 0xff;
-                b += rgb & 0xff;
+                r += (rgb >> 16) & 0xFF;
+                g += (rgb >> 8) & 0xFF;
+                b += rgb & 0xFF;
                 i++;
             }
         }

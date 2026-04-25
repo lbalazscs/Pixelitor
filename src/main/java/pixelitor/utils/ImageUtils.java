@@ -568,7 +568,7 @@ public class ImageUtils {
     }
 
     /**
-     * Unlike BufferedImage.getSubimage, this method creates a copy of the data
+     * Unlike BufferedImage.getSubimage, this method creates a copy of the data.
      */
     public static BufferedImage copySubImage(BufferedImage src, Rectangle bounds) {
         assert src != null;
@@ -679,14 +679,14 @@ public class ImageUtils {
 
         // the blurred image is the low-pass filtered version of the image,
         // so we subtract it from the original by inverting it...
-        blurred = Invert.invertImage(blurred);
+        BufferedImage retVal = Invert.invertImage(blurred);
         // ... and blending it at 50% with the original
-        Graphics2D g = blurred.createGraphics();
+        Graphics2D g = retVal.createGraphics();
         g.setComposite(AlphaComposite.getInstance(SRC_OVER, 0.5f));
         g.drawImage(original, 0, 0, null);
         g.dispose();
 
-        return blurred;
+        return retVal;
     }
 
     public static BufferedImage toHighPassSharpenedImage(BufferedImage original, BufferedImage blurred) {
@@ -709,7 +709,7 @@ public class ImageUtils {
         BufferedImage brushImage = new BufferedImage(diameter, diameter, TYPE_BYTE_GRAY);
 
         int radius = diameter / 2;
-        int radius2 = radius * radius;
+        int radiusSq = radius * radius;
         Random random = new Random();
 
         byte[] pixels = getGrayPixels(brushImage);
@@ -717,9 +717,9 @@ public class ImageUtils {
             for (int y = 0; y < diameter; y++) {
                 int dx = x - radius;
                 int dy = y - radius;
-                int centerDistance2 = dx * dx + dy * dy;
+                int centerDistSq = dx * dx + dy * dy;
                 int index = x + y * diameter;
-                if (centerDistance2 < radius2) {
+                if (centerDistSq < radiusSq) {
                     float rn = random.nextFloat();
                     if (density > rn) {
                         pixels[index] = (byte) random.nextInt(256);
@@ -1282,9 +1282,9 @@ public class ImageUtils {
                 continue;
             }
 
-            int r = (rgb >> 16) & 0xff;
-            int g = (rgb >> 8) & 0xff;
-            int b = rgb & 0xff;
+            int r = (rgb >> 16) & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
+            int b = rgb & 0xFF;
 
             int localMax = Math.max(r, Math.max(g, b));
             if (localMax > max) {
@@ -1306,11 +1306,11 @@ public class ImageUtils {
                 int rgb = pixels[i];
 
                 // preserve the original alpha channel bits
-                int a = rgb & 0xff000000;
+                int a = rgb & 0xFF_00_00_00;
 
-                int r = lut[(rgb >> 16) & 0xff];
-                int g = lut[(rgb >> 8) & 0xff];
-                int b = lut[rgb & 0xff];
+                int r = lut[(rgb >> 16) & 0xFF];
+                int g = lut[(rgb >> 8) & 0xFF];
+                int b = lut[rgb & 0xFF];
 
                 pixels[i] = a | (r << 16) | (g << 8) | b;
             }

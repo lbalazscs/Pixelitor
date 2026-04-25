@@ -298,7 +298,7 @@ public class AnimatedGifEncoder {
         // map image pixels to new palette
         int k = 0;
         for (int i = 0; i < nPix; i++) {
-            int index = nq.map(pixels[k++] & 0xff, pixels[k++] & 0xff, pixels[k++] & 0xff);
+            int index = nq.map(pixels[k++] & 0xFF, pixels[k++] & 0xFF, pixels[k++] & 0xFF);
             usedEntry[index] = true;
             indexedPixels[i] = (byte) index;
         }
@@ -325,9 +325,9 @@ public class AnimatedGifEncoder {
         int dmin = 256 * 256 * 256;
         int len = colorTab.length;
         for (int i = 0; i < len; ) {
-            int dr = r - (colorTab[i++] & 0xff);
-            int dg = g - (colorTab[i++] & 0xff);
-            int db = b - (colorTab[i] & 0xff);
+            int dr = r - (colorTab[i++] & 0xFF);
+            int dg = g - (colorTab[i++] & 0xFF);
+            int db = b - (colorTab[i] & 0xFF);
             int d = dr * dr + dg * dg + db * db;
             int index = i / 3;
             if (usedEntry[index] && (d < dmin)) {
@@ -432,7 +432,7 @@ public class AnimatedGifEncoder {
      */
     private void writeNetscapeExt() throws IOException {
         out.write(0x21); // extension introducer
-        out.write(0xff); // app extension label
+        out.write(0xFF); // app extension label
         out.write(11); // block size
         writeString("NETSCAPE" + "2.0"); // app id + auth code
         out.write(3); // sub-block size
@@ -464,8 +464,8 @@ public class AnimatedGifEncoder {
      * Write 16-bit value to output stream, LSB first
      */
     private void writeShort(int value) throws IOException {
-        out.write(value & 0xff);
-        out.write((value >> 8) & 0xff);
+        out.write(value & 0xFF);
+        out.write((value >> 8) & 0xFF);
     }
 
     /**
@@ -756,9 +756,9 @@ class NeuQuant {
 
         i = 0;
         while (i < samplepixels) {
-            b = (p[pix + 0] & 0xff) << netbiasshift;
-            g = (p[pix + 1] & 0xff) << netbiasshift;
-            r = (p[pix + 2] & 0xff) << netbiasshift;
+            b = (p[pix + 0] & 0xFF) << netbiasshift;
+            g = (p[pix + 1] & 0xFF) << netbiasshift;
+            r = (p[pix + 2] & 0xFF) << netbiasshift;
             j = contest(b, g, r);
 
             altersingle(alpha, j, b, g, r);
@@ -1252,7 +1252,7 @@ class LZWEncoder {
 
         byte pix = pixAry[curPixel++];
 
-        return pix & 0xff;
+        return pix & 0xFF;
     }
 
     private void output(int code, OutputStream outs) throws IOException {
@@ -1267,7 +1267,7 @@ class LZWEncoder {
         cur_bits += n_bits;
 
         while (cur_bits >= 8) {
-            char_out((byte) (cur_accum & 0xff), outs);
+            char_out((byte) (cur_accum & 0xFF), outs);
             cur_accum >>= 8;
             cur_bits -= 8;
         }
@@ -1291,7 +1291,7 @@ class LZWEncoder {
         if (code == EOFCode) {
             // At EOF, write the rest of the buffer.
             while (cur_bits > 0) {
-                char_out((byte) (cur_accum & 0xff), outs);
+                char_out((byte) (cur_accum & 0xFF), outs);
                 cur_accum >>= 8;
                 cur_bits -= 8;
             }

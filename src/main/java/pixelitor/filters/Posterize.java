@@ -177,7 +177,7 @@ public class Posterize extends ParametrizedFilter {
         for (int i = 0; i < numPixels; i++) {
             int inRGB = inputPixels[i];
             // always get the alpha from the original, unmodified source image
-            int alpha = srcPixels[i] & 0xFF000000;
+            int alpha = srcPixels[i] & 0xFF_00_00_00;
 
             float[] oklab = ColorSpaces.srgbToOklab(inRGB);
 

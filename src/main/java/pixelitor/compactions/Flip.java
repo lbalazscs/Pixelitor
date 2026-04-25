@@ -37,7 +37,7 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    public boolean shouldDisableForSmartObjects() {
+    public boolean disableForSmartObjects() {
         return false;
     }
 

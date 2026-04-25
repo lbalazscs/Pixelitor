@@ -31,7 +31,7 @@ public class WeaveFilter extends PointFilter {
     private float yGap = 6;
     private int rows;
     private int cols;
-    public static final int H_THREAD_COLOR = 0xFF_80_80_ff;
+    public static final int H_THREAD_COLOR = 0xFF_80_80_FF;
     public static final int V_THREAD_COLOR = 0xFF_FF_80_80;
     private boolean useImageColors = true;
     private boolean roundThreads = false;
@@ -40,17 +40,8 @@ public class WeaveFilter extends PointFilter {
 
     private int[][] matrix;
 
-    // A default pattern for initialization before the GUI model provides one.
-    private static final int[][] DEFAULT_PLAIN_PATTERN = {
-        {0, 1, 0, 1},
-        {1, 0, 1, 0},
-        {0, 1, 0, 1},
-        {1, 0, 1, 0},
-    };
-
     public WeaveFilter(String filterName) {
         super(filterName);
-        setPattern(DEFAULT_PLAIN_PATTERN);
     }
 
     @Override

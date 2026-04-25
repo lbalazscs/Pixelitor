@@ -205,9 +205,9 @@ public class ColorPickerTool extends Tool {
             for (int sx = startX; sx <= endX; sx++) {
                 int rgb = pixels[sx + sy * width];
                 a += rgb >>> 24;
-                r += (rgb >> 16) & 0xff;
-                g += (rgb >> 8) & 0xff;
-                b += rgb & 0xff;
+                r += (rgb >> 16) & 0xFF;
+                g += (rgb >> 8) & 0xFF;
+                b += rgb & 0xFF;
                 sampledPixels++;
             }
         }

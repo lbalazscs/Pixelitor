@@ -34,7 +34,9 @@
 
 package org.jdesktop.swingx.graphics;
 
-import java.awt.*;
+import java.awt.Composite;
+import java.awt.CompositeContext;
+import java.awt.RenderingHints;
 import java.awt.image.*;
 
 /**
@@ -277,11 +279,11 @@ public final class BlendComposite implements Composite {
         if (cm instanceof DirectColorModel directCM &&
                 cm.getTransferType() == DataBuffer.TYPE_INT) {
 
-            return directCM.getRedMask() == 0x00FF0000 &&
-                    directCM.getGreenMask() == 0x0000FF00 &&
-                    directCM.getBlueMask() == 0x000000FF &&
+            return directCM.getRedMask() == 0x00_FF_00_00 &&
+                directCM.getGreenMask() == 0x00_00_FF_00 &&
+                directCM.getBlueMask() == 0x00_00_00_FF &&
                     (directCM.getNumComponents() == 3 ||
-                            directCM.getAlphaMask() == 0xFF000000);
+                        directCM.getAlphaMask() == 0xFF_00_00_00);
         }
 
         return false;
@@ -291,11 +293,11 @@ public final class BlendComposite implements Composite {
         if (cm instanceof DirectColorModel directCM &&
                 cm.getTransferType() == DataBuffer.TYPE_INT) {
 
-            return directCM.getRedMask() == 0x000000FF &&
-                    directCM.getGreenMask() == 0x0000FF00 &&
-                    directCM.getBlueMask() == 0x00FF0000 &&
+            return directCM.getRedMask() == 0x00_00_00_FF &&
+                directCM.getGreenMask() == 0x00_00_FF_00 &&
+                directCM.getBlueMask() == 0x00_FF_00_00 &&
                     (directCM.getNumComponents() == 3 ||
-                            directCM.getAlphaMask() == 0xFF000000);
+                        directCM.getAlphaMask() == 0xFF_00_00_00);
         }
 
         return false;

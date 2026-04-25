@@ -17,6 +17,7 @@
 
 package pixelitor.filters.jhlabsproxies;
 
+import com.jhlabs.image.AbstractBufferedImageOp;
 import com.jhlabs.image.BlockFilter;
 import pixelitor.colors.Colors;
 import pixelitor.filters.ParametrizedFilter;
@@ -29,7 +30,6 @@ import pixelitor.filters.impl.TriangleBlockFilter;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -97,26 +97,14 @@ public class JHPixelate extends ParametrizedFilter {
 
         int cellSize = cellSizeParam.getValue();
 
-        if (style == STYLE_FLAT || style == STYLE_3D || style == STYLE_EMBEDDED) {
-            switch (type) {
-                case TYPE_SQUARE -> {
-                    BlockFilter blockFilter = new BlockFilter(NAME, cellSize);
-                    dest = blockFilter.filter(src, dest);
-                }
-                case TYPE_BRICK -> {
-                    BrickBlockFilter brickBlockFilter = new BrickBlockFilter(NAME, cellSize * 2, cellSize);
-                    dest = brickBlockFilter.filter(src, dest);
-                }
-                case TYPE_TRIANGLE -> {
-                    TriangleBlockFilter triangleBlockFilter = new TriangleBlockFilter(NAME, cellSize);
-                    dest = triangleBlockFilter.filter(src, dest);
-                }
-                case TYPE_HEXAGON -> {
-                    HexagonBlockFilter hexagonBlockFilter = new HexagonBlockFilter(NAME, cellSize);
-                    dest = hexagonBlockFilter.filter(src, dest);
-                }
-            }
-        }
+        AbstractBufferedImageOp imageOp = switch (type) {
+            case TYPE_SQUARE -> new BlockFilter(NAME, cellSize);
+            case TYPE_BRICK -> new BrickBlockFilter(NAME, cellSize * 2, cellSize);
+            case TYPE_TRIANGLE -> new TriangleBlockFilter(NAME, cellSize);
+            case TYPE_HEXAGON -> new HexagonBlockFilter(NAME, cellSize);
+            default -> throw new IllegalStateException("type = " + type);
+        };
+        dest = imageOp.filter(src, dest);
 
         if (style == STYLE_3D || style == STYLE_EMBEDDED) {
             int width = dest.getWidth();
@@ -124,36 +112,31 @@ public class JHPixelate extends ParametrizedFilter {
 
             BufferedImage bumpSource = (style == STYLE_EMBEDDED)
                 ? dest
-                : createBumpSource(type, cellSize, width, height, src);
+                : createGrid(type, cellSize, width, height, src);
             dest = ImageUtils.bumpMap(dest, bumpSource, NAME);
         }
 
         return dest;
     }
 
-    private static BufferedImage createBumpSource(int type, int cellSize, int width, int height, BufferedImage src) {
-        BufferedImage bumpSource = ImageUtils.createImageWithSameCM(src);
+    private static BufferedImage createGrid(int type, int cellSize, int width, int height, BufferedImage src) {
+        BufferedImage gridImg = ImageUtils.createImageWithSameCM(src);
 
-        Graphics2D g = bumpSource.createGraphics();
+        Graphics2D g = gridImg.createGraphics();
         Colors.fillWith(WHITE, g, width, height);
 
-//        int gapWidth = (cellSize < 15) ? 1 : 2;
-        int gapWidth = 1;
-        if (gapWidth != 1) {
-            g.setStroke(new BasicStroke(gapWidth));
-        }
         g.setColor(GRAY);
 
         switch (type) {
-            case TYPE_SQUARE -> renderGrid(g, gapWidth, cellSize, width, height);
+            case TYPE_SQUARE -> renderSquareGrid(g, cellSize, width, height);
             case TYPE_BRICK -> renderBrickGrid(g, cellSize, width, height);
             case TYPE_TRIANGLE -> renderTriangleGrid(g, cellSize, width, height);
             case TYPE_HEXAGON -> renderHexagonGrid(g, cellSize, width, height);
-            default -> throw new IllegalStateException("Unexpected value: " + type);
+            default -> throw new IllegalStateException("type = " + type);
         }
 
         g.dispose();
-        return bumpSource;
+        return gridImg;
     }
 
     @Override
@@ -161,23 +144,17 @@ public class JHPixelate extends ParametrizedFilter {
         return false;
     }
 
-    public static void renderGrid(Graphics2D g,
-                                  int lineWidth, int spacing,
-                                  int width, int height) {
-        assert lineWidth > 0;
+    public static void renderSquareGrid(Graphics2D g, int spacing, int width, int height) {
         assert spacing > 0;
 
         // horizontal lines
-        int halfLineThickness = lineWidth / 2;
         for (int y = 0; y < height; y += spacing) {
-            int startY = y - halfLineThickness;
-            //noinspection SuspiciousNameCombination
-            g.fillRect(0, startY, width, lineWidth);
+            g.drawLine(0, y, width, y);
         }
 
         // vertical lines
         for (int x = 0; x < width; x += spacing) {
-            g.fillRect(x - halfLineThickness, 0, lineWidth, height);
+            g.drawLine(x, 0, x, height);
         }
     }
 
@@ -188,43 +165,34 @@ public class JHPixelate extends ParametrizedFilter {
         }
 
         int brickWidth = brickHeight * 2;
-        int currentY = 0;
-        int rowCount = 0;
 
-        while (currentY <= height) {
+        for (int y = 0, rowCount = 0; y <= height; y += brickHeight, rowCount++) {
             // horizontal lines
-            g.drawLine(0, currentY, width, currentY);
+            g.drawLine(0, y, width, y);
 
-            // only draw vertical lines if we're not at the last line
-            if (currentY < height) {
-                // vertical lines
-                int horOffset = ((rowCount % 2) == 1) ? brickHeight : 0;
+            // vertical lines
+            if (y < height) {
+                int horOffset = (rowCount % 2 != 0) ? brickHeight : 0;
                 for (int x = horOffset; x < width; x += brickWidth) {
-                    g.drawLine(x, currentY, x, Math.min(currentY + brickHeight, height));
+                    g.drawLine(x, y, x, Math.min(y + brickHeight, height));
                 }
             }
-
-            currentY += brickHeight;
-            rowCount++;
         }
     }
 
     public static void renderTriangleGrid(Graphics2D g, int size,
                                           int width, int height) {
-        double halfSize = size / 2.0;
         double triangleHeight = size * HALF_SQRT_3;
-        double tan30 = halfSize / triangleHeight;
-        double cotan30 = triangleHeight / halfSize;
+        double tan30 = 1.0 / SQRT_3;
+        double cotan30 = SQRT_3;
 
         // horizontal lines
-        double currentY = triangleHeight;
-        while (currentY < height) {
-            g.draw(new Line2D.Double(0, currentY, width, currentY));
-            currentY += triangleHeight;
+        for (double y = triangleHeight; y < height; y += triangleHeight) {
+            g.draw(new Line2D.Double(0, y, width, y));
         }
 
         // slanted lines downwards to the right
-        // starting from the top edge (startX = 0)
+        // starting from the left edge (startX = 0)
         for (double startY = 0; startY <= height; startY += 2 * triangleHeight) {
             double startX = 0;
 
@@ -241,7 +209,7 @@ public class JHPixelate extends ParametrizedFilter {
         }
 
         // slanted lines downwards to the right
-        // starting from the left edge (startY = 0)
+        // starting from the top edge (startY = 0)
         for (double x = 0; x <= width; x += size) {
             double startX = x;
             double startY = 0;
@@ -297,7 +265,7 @@ public class JHPixelate extends ParametrizedFilter {
         }
     }
 
-    // Converts pixel (x, y) to axial (q, r) assuming a flat top hexagon
+    // Converts pixel (x, y) to axial (q, r) assuming a flat-top hexagon
     private static Point2D.Double pixelToAxial(double x, double y, double s) {
         double q = (2.0 / 3.0 * x) / s;
         double r = (-1.0 / 3.0 * x + SQRT_3 / 3.0 * y) / s;
@@ -309,7 +277,7 @@ public class JHPixelate extends ParametrizedFilter {
      */
     public static void renderHexagonGrid(Graphics2D g, int size,
                                          int width, int height) {
-        // Axial coordinates that uniquely identify a hexagon.
+        // axial coordinates that uniquely identify a hexagon
         record AxialCoord(int q, int r) implements Comparable<AxialCoord> {
             @Override
             public int compareTo(AxialCoord other) {
@@ -320,7 +288,7 @@ public class JHPixelate extends ParametrizedFilter {
             }
         }
 
-        // An edge is uniquely defined by the two hexagons it separates.
+        // an edge is uniquely defined by the two hexagons it separates
         record EdgeKey(AxialCoord c1, AxialCoord c2) {
             EdgeKey(AxialCoord c1, AxialCoord c2) {
                 // ensure that the edge key is independent of the order of the hexagons
@@ -342,20 +310,20 @@ public class JHPixelate extends ParametrizedFilter {
         // vertical distance from center to horizontal sides
         double hexHeight = s * HALF_SQRT_3;
 
-        // horizontal distance from center to vertical sides
+        // horizontal spacing between the centers of adjacent hexagon columns
         double hexWidth = s * 1.5;
 
         // determine iteration range based on filter's coordinate system
-        double W = width;
-        double H = height;
+        double w = width;
+        double h = height;
         // a buffer to catch hexagons overlapping the edges
         double buffer = s * 1.1;
 
         // check axial coordinates for the buffered bounding box corners
         Point2D.Double tl = pixelToAxial(-buffer, -buffer, s);
-        Point2D.Double tr = pixelToAxial(W + buffer, -buffer, s);
-        Point2D.Double bl = pixelToAxial(-buffer, H + buffer, s);
-        Point2D.Double br = pixelToAxial(W + buffer, H + buffer, s);
+        Point2D.Double tr = pixelToAxial(w + buffer, -buffer, s);
+        Point2D.Double bl = pixelToAxial(-buffer, h + buffer, s);
+        Point2D.Double br = pixelToAxial(w + buffer, h + buffer, s);
 
         // the integer iteration range based on the min/max axial coordinates
         int qMin = (int) Math.floor(Math.min(tl.x, bl.x));
@@ -368,7 +336,7 @@ public class JHPixelate extends ParametrizedFilter {
 
         for (int q = qMin; q <= qMax; q++) {
             for (int r = rMin; r <= rMax; r++) {
-                // center (cx, cy) for axial coordinates (q, r) in a flat top hexagon
+                // center (cx, cy) for axial coordinates (q, r) in a flat-top hexagon
                 double cx = hexWidth * q;
                 double cy = hexHeight * q + 2.0 * hexHeight * r;
 
@@ -379,7 +347,7 @@ public class JHPixelate extends ParametrizedFilter {
                 double hexMaxY = cy + hexHeight;
 
                 // skip hexagon if its bounding box is entirely outside the canvas
-                if (hexMaxX <= 0 || hexMinX >= W || hexMaxY <= 0 || hexMinY >= H) {
+                if (hexMaxX <= 0 || hexMinX >= w || hexMaxY <= 0 || hexMinY >= h) {
                     continue;
                 }
 
@@ -389,15 +357,15 @@ public class JHPixelate extends ParametrizedFilter {
                 // the vertices for the flat-top hexagon centered at (cx, cy)
                 Point2D.Double[] vertices = {
                     new Point2D.Double(cx + s, cy),                   // right
-                    new Point2D.Double(cx + s / 2.0, cy + hexHeight), // top-right
-                    new Point2D.Double(cx - s / 2.0, cy + hexHeight), // top-left
+                    new Point2D.Double(cx + s / 2.0, cy + hexHeight), // bottom-right
+                    new Point2D.Double(cx - s / 2.0, cy + hexHeight), // bottom-left
                     new Point2D.Double(cx - s, cy),                   // left
-                    new Point2D.Double(cx - s / 2.0, cy - hexHeight), // bottom-left
-                    new Point2D.Double(cx + s / 2.0, cy - hexHeight), // bottom-right
+                    new Point2D.Double(cx - s / 2.0, cy - hexHeight), // top-left
+                    new Point2D.Double(cx + s / 2.0, cy - hexHeight), // top-right
                 };
 
-                // Define neighbors based on edge index for flat-top grid
-                // Matches edge indices to neighbor axial coordinate offsets
+                // Define neighbors based on edge index for flat-top grid.
+                // Matches edge indices to neighbor axial coordinate offsets.
                 AxialCoord[] neighbors = {
                     new AxialCoord(q + 1, r),     // neighbor for edge 0 (vertices 0-1)
                     new AxialCoord(q, r + 1),     // neighbor for edge 1 (vertices 1-2)

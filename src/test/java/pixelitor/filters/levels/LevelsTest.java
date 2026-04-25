@@ -171,7 +171,7 @@ class LevelsTest {
         OklabLevelsFilter oklabFilter = (OklabLevelsFilter) op;
 
         // black (L=0) should be unaffected by an input range adjustment that starts at 100
-        int black = 0xFF000000;
+        int black = 0xFF_00_00_00;
         assertThat(oklabFilter.processPixel(0, 0, black)).isEqualTo(black);
 
         // White (L=1.0) should also be unaffected.

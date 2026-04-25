@@ -42,7 +42,7 @@ public class GridTester extends JFrame {
         SQUARE("Square") {
             @Override
             public void renderGrid(Graphics2D g, int size, int canvasWidth, int canvasHeight) {
-                JHPixelate.renderGrid(g, STROKE_WIDTH, size, canvasWidth, canvasHeight);
+                JHPixelate.renderSquareGrid(g, size, canvasWidth, canvasHeight);
             }
         }, BRICK("Brick") {
             @Override

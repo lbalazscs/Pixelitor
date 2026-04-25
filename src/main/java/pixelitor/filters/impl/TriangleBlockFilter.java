@@ -116,7 +116,7 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
                     processed[triangleId] = true;
                 }
 
-                int alpha = src.getRGB(x, y) & 0xff000000;
+                int alpha = src.getRGB(x, y) & 0xFF_00_00_00;
                 dst.setRGB(x, y, alpha | triangleAverages[triangleId]);
             }
         }
@@ -136,9 +136,9 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
             for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
                 if (indices[y * width + x] == triangleId) {
                     int rgb = src.getRGB(x, y);
-                    totalR += (rgb >> 16) & 0xff;
-                    totalG += (rgb >> 8) & 0xff;
-                    totalB += rgb & 0xff;
+                    totalR += (rgb >> 16) & 0xFF;
+                    totalG += (rgb >> 8) & 0xFF;
+                    totalB += rgb & 0xFF;
                     count++;
                 }
             }

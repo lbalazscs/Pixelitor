@@ -55,7 +55,7 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
 
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
-        if (shouldDisableForSmartObjects() && srcComp.containsLayerOfType(SmartObject.class)) {
+        if (disableForSmartObjects() && srcComp.containsLayerOfType(SmartObject.class)) {
             Messages.showSmartObjectUnsupportedInfo(getText());
             return CompletableFuture.completedFuture(srcComp);
         }
@@ -99,7 +99,7 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         return CompletableFuture.completedFuture(newComp);
     }
 
-    public abstract boolean shouldDisableForSmartObjects();
+    public abstract boolean disableForSmartObjects();
 
     private void transformLayer(Layer layer) {
         if (layer instanceof ContentLayer contentLayer) {
