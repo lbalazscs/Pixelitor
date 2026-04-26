@@ -385,6 +385,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
+    public void rotate(double angleRadians, boolean layerTransform) {
+        throw new UnsupportedOperationException("TextLayer arbitrary-angle rotation is not implemented.");
+    }
+
+    @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
         // TODO
         return CompletableFuture.completedFuture(null);

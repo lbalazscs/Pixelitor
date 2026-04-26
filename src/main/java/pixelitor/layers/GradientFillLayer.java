@@ -199,6 +199,16 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
+    public void rotate(double angleRadians, boolean layerTransform) {
+        if (gradient != null) {
+            var center = comp.getCanvas().getImCenter();
+            gradient.imTransform(AffineTransform.getRotateInstance(
+                angleRadians, center.getX(), center.getY()));
+            invalidateGradientCache();
+        }
+    }
+
+    @Override
     public void enlargeCanvas(Outsets out) {
         if (gradient != null) {
             gradient.enlargeCanvas(out);

@@ -29,6 +29,8 @@ import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.SmartObject;
+import pixelitor.layers.TextLayer;
 import pixelitor.testutils.LayerCount;
 import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithSelection;
@@ -41,6 +43,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
 
@@ -352,6 +356,44 @@ class CompActionTest {
             flippedSelOrigin.x, flippedSelOrigin.y,
             origSelection.width, origSelection.height
         ));
+    }
+
+    @Test
+    void straighten() {
+        testActionWithUndoRedo(
+            new Straighten(5.0),
+            Straighten.NAME,
+            comp -> checkStateAfterStraighten());
+    }
+
+    private void checkStateAfterStraighten() {
+        Composition straightenedComp = view.getComp();
+        assertThat(straightenedComp)
+            .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT);
+
+        ImageLayer activeLayer = (ImageLayer) straightenedComp.getActiveLayer();
+        assertTrue(activeLayer.getImage().getWidth() >= ORIG_CANVAS_WIDTH);
+        assertTrue(activeLayer.getImage().getHeight() >= ORIG_CANVAS_HEIGHT);
+    }
+
+    @Test
+    void straightenWithTextLayerIsRejected() {
+        TextLayer textLayer = TestHelper.createTextLayer(origComp, "text");
+        origComp.addLayerWithoutUI(textLayer);
+
+        Composition result = new Straighten(5.0).process(origComp).join();
+        assertSame(origComp, result);
+        History.assertNumEditsIs(0);
+    }
+
+    @Test
+    void straightenWithSmartObjectIsRejected() {
+        SmartObject smartObject = (SmartObject) TestHelper.createLayer(SmartObject.class, origComp);
+        origComp.addLayerWithoutUI(smartObject);
+
+        Composition result = new Straighten(5.0).process(origComp).join();
+        assertSame(origComp, result);
+        History.assertNumEditsIs(0);
     }
 
     @Test
