@@ -121,8 +121,8 @@ public class Curve {
 
         for (int i = 0; i < 2048; i++) {
             float f = i / 2048.0f;
-            int x = (int) (255 * ImageMath.splineClamped(f, nx.length, nx) + 0.5f);
-            int y = (int) (255 * ImageMath.spline(f, nx.length, ny) + 0.5f);
+            int x = (int) (255 * ImageMath.spline(f, nx.length, nx, true) + 0.5f);
+            int y = (int) (255 * ImageMath.spline(f, nx.length, ny, false) + 0.5f);
             x = ImageMath.clamp(x, 0, 255);
             y = ImageMath.clamp(y, 0, 255);
             table[x] = y;

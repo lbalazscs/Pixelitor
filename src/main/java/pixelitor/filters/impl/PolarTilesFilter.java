@@ -77,36 +77,36 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         double dy = y - cy;
         double angle = FastMath.atan2(dy, dx);
 
-        float randomShift = 0;
+        float noiseOffset = 0;
         if (randomness > 0) {
-            randomShift = randomness * Noise.noise2((float) (dx / width), (float) (dy / height));
+            noiseOffset = randomness * Noise.noise2((float) (dx / width), (float) (dy / height));
         }
 
-        double r = Math.sqrt(dx * dx + dy * dy);
-        double rr = r;
+        double radius = Math.sqrt(dx * dx + dy * dy);
+        double adjustedRadius = radius;
         if (mode != MODE_CONCENTRIC) {
             double spiralCorr = width * (Math.PI + angle + effectRotation) / (4 * Math.PI);
             if (mode == MODE_SPIRAL) {
                 spiralCorr /= numRDivisions;
             }
-            rr += spiralCorr;
+            adjustedRadius += spiralCorr;
         }
 
         if (numADivisions > 0) {
-            double tan = FastMath.tan(randomShift + effectRotation + angle * numADivisions / 2);
-            double angleShift = tan * curvature * (numADivisions / 4.0) / r;
+            double tan = FastMath.tan(noiseOffset + effectRotation + angle * numADivisions / 2);
+            double angleShift = tan * curvature * (numADivisions / 4.0) / radius;
             angle += angleShift;
         }
 
         if (numRDivisions > 0) {
-            double tan = FastMath.tan(3 * randomShift + rr / width * 2 * Math.PI * numRDivisions);
+            double tan = FastMath.tan(3 * noiseOffset + adjustedRadius / width * 2 * Math.PI * numRDivisions);
             double rShift = tan * numRDivisions * curvature / 2;
-            r += rShift;
+            radius += rShift;
         }
 
         angle += imageRotation;
 
-        double zoomedR = r / zoom;
+        double zoomedR = radius / zoom;
         double u = zoomedR * FastMath.cos(angle);
         double v = zoomedR * FastMath.sin(angle);
 

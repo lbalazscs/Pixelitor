@@ -152,8 +152,7 @@ public class GenericBlurredShape implements BlurredShape {
         // cast first to int in order to avoid fractional blurring
         float hRadius = (int) (shapeStartX / iterations);
         float vRadius = (int) (shapeStartY / iterations);
-        var blurFilter = new BoxBlurFilter(hRadius, vRadius, iterations, "");
-        blurFilter.setPremultiplyAlpha(false);
+        var blurFilter = new BoxBlurFilter("", hRadius, vRadius, iterations, false);
 
         // it would be complicated to set up better progress tracking
         // because we would have to know in advance whether we can cache

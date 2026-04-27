@@ -124,7 +124,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
         if (blur != 0) {
             AbstractBufferedImageOp blurFilter;
             if (blur > 3) {
-                blurFilter = new BoxBlurFilter(blur, blur, 3, filterName);
+                blurFilter = new BoxBlurFilter(filterName, blur, blur, 3);
             } else {
                 blurFilter = new GaussianFilter(filterName, blur);
             }

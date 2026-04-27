@@ -35,9 +35,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -50,6 +48,8 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     private static final String PIXEL_CARD = "pixel";
     private static final String PERCENT_CARD = "percent";
+
+    private static final String PRESET_KEY_USE_PIXELS = "Pixels";
 
     // percentage-based sliders (0-100%)
     private final RangeParam topPercentage = new RangeParam(GUIText.TOP, 0, 0, 100);
@@ -65,7 +65,6 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
     private final List<RangeParam> pixelParams;
     private final List<RangeParam> percentParams;
-    private final Map<RangeParam, RangeParam> percentToPixelMap;
 
     private final JRadioButton usePixelsRadio = new JRadioButton("Pixels");
     private final JRadioButton usePercentsRadio = new JRadioButton("Percentage");
@@ -81,8 +80,8 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         INDEPENDENT("None"),
         UNIFORM_BORDER("Uniform Border"),
         KEEP_ASPECT_RATIO("Keep Aspect Ratio"),
-        HORIZONTAL("Horizontal"),
-        VERTICAL("Vertical");
+        HORIZONTAL("Center Horizontally"),
+        VERTICAL("Center Vertically");
 
         private final String displayName;
 
@@ -123,12 +122,6 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         pixelParams = List.of(topPixels, rightPixels, bottomPixels, leftPixels);
         percentParams = List.of(topPercentage, rightPercentage, bottomPercentage, leftPercentage);
 
-        percentToPixelMap = new IdentityHashMap<>();
-        percentToPixelMap.put(topPercentage, topPixels);
-        percentToPixelMap.put(rightPercentage, rightPixels);
-        percentToPixelMap.put(bottomPercentage, bottomPixels);
-        percentToPixelMap.put(leftPercentage, leftPixels);
-
         topCardPanel = createSliderCardPanel(topPercentage, topPixels, "top", SliderSpinner.HORIZONTAL);
         rightCardPanel = createSliderCardPanel(rightPercentage, rightPixels, "right", SliderSpinner.VERTICAL);
         bottomCardPanel = createSliderCardPanel(bottomPercentage, bottomPixels, "bottom", SliderSpinner.HORIZONTAL);
@@ -152,7 +145,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
         // symmetry controls at the top
         JPanel symmetryPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        symmetryPanel.add(new JLabel("Link Edges:"));
+        symmetryPanel.add(new JLabel("Constraints:"));
         symmetryPanel.add(symmetryComboBox);
         c.gridx = 0;
         c.gridy = 0;
@@ -339,33 +332,35 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     }
 
     private void linkAll(boolean basedOnPixels) {
-        List<RangeParam> allParams = new ArrayList<>();
-        allParams.addAll(pixelParams);
-        allParams.addAll(percentParams);
-
-        for (RangeParam source : allParams) {
-            ChangeListener listener = e -> {
-                if (isUpdatingFromLink) {
-                    return;
-                }
-                isUpdatingFromLink = true;
-
-                if (basedOnPixels) {
-                    // uniform border: sync all to a single pixel value
-                    double newPixelValue = getPixelValueFromSource(source);
-                    setAllPixelValues(newPixelValue);
-                    syncAllPairsTo(ResizeUnit.PERCENTAGE);
-                } else {
-                    // keep aspect ratio: sync all to a single percentage value
-                    double newPercentValue = getPercentValueFromSource(source);
-                    setAllPercentValues(newPercentValue);
-                    syncAllPairsTo(ResizeUnit.PIXELS);
-                }
-
-                isUpdatingFromLink = false;
-            };
-            activeLinks.add(new ListenerSubscription(source, listener));
+        for (RangeParam source : pixelParams) {
+            activeLinks.add(new ListenerSubscription(source, e ->
+                onLinkAllChanged(source, basedOnPixels)));
         }
+        for (RangeParam source : percentParams) {
+            activeLinks.add(new ListenerSubscription(source, e ->
+                onLinkAllChanged(source, basedOnPixels)));
+        }
+    }
+
+    private void onLinkAllChanged(RangeParam source, boolean basedOnPixels) {
+        if (isUpdatingFromLink) {
+            return;
+        }
+        isUpdatingFromLink = true;
+
+        if (basedOnPixels) {
+            // uniform border: sync all to a single pixel value
+            double newPixelValue = getPixelValueFromSource(source);
+            setAllPixelValues(newPixelValue);
+            syncAllPairsTo(ResizeUnit.PERCENTAGE);
+        } else {
+            // keep aspect ratio: sync all to a single percentage value
+            double newPercentValue = getPercentValueFromSource(source);
+            setAllPercentValues(newPercentValue);
+            syncAllPairsTo(ResizeUnit.PIXELS);
+        }
+
+        isUpdatingFromLink = false;
     }
 
     private double getPixelValueFromSource(RangeParam source) {
@@ -398,11 +393,12 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     }
 
     private RangeParam getCorrespondingPixelParam(RangeParam percentParam) {
-        RangeParam pixelParam = percentToPixelMap.get(percentParam);
-        if (pixelParam == null) {
+        int index = percentParams.indexOf(percentParam);
+        if (index == -1) {
             throw new IllegalArgumentException("Unknown percentage param: " + percentParam.getName());
         }
-        return pixelParam;
+        // the two lists use the same index order
+        return pixelParams.get(index);
     }
 
     private int getEnlargementInPixels(RangeParam pixels, RangeParam percent, int canvasDim) {
@@ -442,10 +438,8 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
             getSouth(canvas), getWest(canvas));
     }
 
-    private RangeParam[] getActiveRangeParams() {
-        return usePixels()
-            ? pixelParams.toArray(new RangeParam[0])
-            : percentParams.toArray(new RangeParam[0]);
+    private List<RangeParam> getActiveRangeParams() {
+        return usePixels() ? pixelParams : percentParams;
     }
 
     @Override
@@ -455,7 +449,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.putBoolean("Pixels", usePixels());
+        preset.putBoolean(PRESET_KEY_USE_PIXELS, usePixels());
         for (RangeParam param : getActiveRangeParams()) {
             param.saveStateTo(preset);
         }
@@ -463,7 +457,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        boolean usePixels = preset.getBoolean("Pixels");
+        boolean usePixels = preset.getBoolean(PRESET_KEY_USE_PIXELS);
         if (usePixels) {
             usePixelsRadio.doClick();
         } else {

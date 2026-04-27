@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.math;
 
+import com.jhlabs.image.ImageMath;
+
 /**
  * Implements the Cooley-Tukey FFT algorithm for computing the
  * Discrete Fourier Transform (DFT) and its inverse.
@@ -156,7 +158,7 @@ public class FFT {
      * Returns log₂(n) only if n is an exact power of two.
      */
     private static int log2(int n) {
-        int floorLog = (Integer.SIZE - 1) - Integer.numberOfLeadingZeros(n);
+        int floorLog = ImageMath.floorLog2(n);
         if ((1 << floorLog) == n) {
             return floorLog;
         }

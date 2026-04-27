@@ -208,8 +208,8 @@ public class PlasmaFilter extends WholeImageFilter {
         // a minimum of 1 to safely handle 1x1 or 2x2 edge cases)
         int s = Math.max(1, maxSize - 1);
 
-        // the highest depth recursive subdivisions (ceil(log2(s)) - 1)
-        int d = Math.max(1, 31 - Integer.numberOfLeadingZeros(s - 1));
+        // the highest depth of recursive subdivisions
+        int d = Math.max(1, ImageMath.ceilLog2(s) - 1);
 
         // computes Sum_{i=1}^{d} (4^{i+1} - 1) / 3
         // using the geometric series formula: (16 * 4^d - 3d - 16) / 9

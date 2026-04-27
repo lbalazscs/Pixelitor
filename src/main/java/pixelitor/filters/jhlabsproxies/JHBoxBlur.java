@@ -41,8 +41,6 @@ public class JHBoxBlur extends ParametrizedFilter {
     private final RangeParam numIterations = new RangeParam("Iterations (Quality)", 1, 3, 10);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
-    private BoxBlurFilter filter;
-
     public JHBoxBlur() {
         super(true);
 
@@ -62,19 +60,7 @@ public class JHBoxBlur extends ParametrizedFilter {
             return src;
         }
 
-        if (src.getWidth() <= 1 || src.getHeight() <= 1) {
-            // avoids ArrayIndexOutOfBoundsException in BoxBlurFilter
-            return src;
-        }
-
-        if (filter == null) {
-            filter = new BoxBlurFilter(NAME);
-        }
-
-        filter.setHRadius(hRadius);
-        filter.setVRadius(vRadius);
-        filter.setIterations(numIterations.getValue());
-        filter.setPremultiplyAlpha(!src.isAlphaPremultiplied() && ImageUtils.hasPackedIntArray(src));
+        BoxBlurFilter filter = new BoxBlurFilter(NAME, hRadius, vRadius, numIterations.getValue());
 
         dest = filter.filter(src, dest);
 

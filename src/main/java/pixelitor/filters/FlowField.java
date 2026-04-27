@@ -88,8 +88,6 @@ public class FlowField extends ParametrizedFilter {
         out.subtract(position);
         out.rotateBy90Degrees();
         out.setMagnitude(magnitude);
-        out.normalizeIfNonZero();
-        out.multiply(magnitude);
     }
 
     private static void createNoiseForce(float magnitude, float startAngle, float variancePI,
@@ -134,7 +132,15 @@ public class FlowField extends ParametrizedFilter {
         VELOCITY_AND_NOISE_BASED_RANDOMNESS("Thicken") {
             @Override
             public void modify(FlowFieldParticle particle) {
-                particle.delta.add(Noise.noise2((float) particle.delta.x, (float) particle.delta.y) * 10);
+                float x = (float) particle.delta.x;
+                float y = (float) particle.delta.y;
+                if (!Float.isFinite(x) || !Float.isFinite(y)) {
+                    // TODO sometimes NaN values are found here
+                    return;
+                }
+
+                particle.delta.add(Noise.noise2(x, y) * 10);
+
                 particle.pos.setLocation(
                     particle.pos.getX() + particle.delta.x,
                     particle.pos.getY() + particle.delta.y

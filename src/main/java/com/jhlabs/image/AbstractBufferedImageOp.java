@@ -65,7 +65,7 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
 
     protected ProgressTracker createProgressTracker(int workUnits) {
         if (!usedAsHelper) {
-            pt = new StatusBarProgressTracker(filterName, workUnits);
+            pt = StatusBarProgressTracker.create(filterName, workUnits);
         }
         return pt;
     }

@@ -17,7 +17,6 @@
 
 package pixelitor.filters.impl;
 
-import net.jafama.FastMath;
 import pixelitor.filters.CircleToSquare;
 import pixelitor.utils.CustomShapes;
 
@@ -27,7 +26,7 @@ import java.awt.geom.Rectangle2D;
 
 /**
  * The implementation of the {@link CircleToSquare} filter.
- * Distorts a circle into a square.
+ * Distorts a circle into a square, or an ellipse into a rectangle.
  */
 public class CircleToSquareFilter extends CenteredTransformFilter {
     private final float radiusX;
@@ -54,12 +53,6 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
         this.amount = amount;
     }
 
-    public Shape[] getAffectedAreaShapes() {
-        Shape rect = new Rectangle2D.Double(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
-        Shape ellipse = CustomShapes.createEllipse(cx, cy, radiusX, radiusY);
-        return new Shape[]{rect, ellipse};
-    }
-
     @Override
     protected void transformInverse(int x, int y, float[] out) {
         double dx = x - cx;
@@ -74,40 +67,47 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
             return;
         }
 
-        double sdx, sdy, sXDist, sYDist;
+        // we need the amount by which a pixel is pushed outward, but
+        // since this in an inverse mapping, we calculate its inverse
+        double magnificationInverse = calcMagnificationInverse(xDist, yDist);
+
+        double srcX = cx + dx * magnificationInverse;
+        double srcY = cy + dy * magnificationInverse;
+
+        if (amount == 1.0f) { // the default value of the slider
+            out[0] = (float) srcX;
+            out[1] = (float) srcY;
+        } else {
+            out[0] = interpolate(x, srcX);
+            out[1] = interpolate(y, srcY);
+        }
+    }
+
+    private double calcMagnificationInverse(double xDist, double yDist) {
+        double scaledXDist, scaledYDist;
         if (radiusX == radiusY) {
-            sdx = dx;
-            sdy = dy;
-            sXDist = xDist;
-            sYDist = yDist;
+            scaledXDist = xDist;
+            scaledYDist = yDist;
         } else {
-            // if the coordinates are stretched, then it becomes an
-            // ellipse-to-rectangle distortion
-            sdx = dx / radiusX;
-            sdy = dy / radiusY;
-            sXDist = xDist / radiusX;
-            sYDist = yDist / radiusY;
+            // normalize the ellipse to a circle; only the angle matters, not the radius
+            scaledXDist = xDist / radiusX;
+            scaledYDist = yDist / radiusY;
         }
 
-        double angle;
-        if (sXDist >= sYDist) { // we want to move from a vertical line  to the circle
-            angle = FastMath.atan2(sdy, sXDist);
-        } else { // move from horizontal line
-            //noinspection SuspiciousNameCombination
-            angle = FastMath.atan2(sdx, sYDist);
-        }
+        double maxScaledDist = Math.max(scaledXDist, scaledYDist);
+        double distSq = scaledXDist * scaledXDist + scaledYDist * scaledYDist;
 
-        double magnificationInverse = FastMath.cos(angle);
+        // close to an axis, the return value is ≈ 1, close to a diagonal it's ≈ 0.7
+        return distSq == 0.0 ? 1.0 : maxScaledDist / Math.sqrt(distSq);
+    }
 
-        double transformedX = cx + dx * magnificationInverse;
-        double transformedY = cy + dy * magnificationInverse;
+    private float interpolate(int original, double transformed) {
+        return (float) (original + amount * (transformed - original));
+    }
 
-        if (amount == 1.0f) {
-            out[0] = (float) transformedX;
-            out[1] = (float) transformedY;
-        } else {
-            out[0] = (float) (x + amount * (transformedX - x));
-            out[1] = (float) (y + amount * (transformedY - y));
-        }
+    public Shape[] getAffectedAreaShapes() {
+        Shape rect = new Rectangle2D.Double(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
+        Shape ellipse = CustomShapes.createEllipse(cx, cy, radiusX, radiusY);
+        return new Shape[]{rect, ellipse};
     }
 }

@@ -38,13 +38,6 @@ public interface ProgressTracker {
      */
     void finished();
 
-    static ProgressTracker createTrackerIfNeeded(String name, int numWorkUnits) {
-        if (numWorkUnits > 0) {
-            return new StatusBarProgressTracker(name, numWorkUnits);
-        }
-        return NO_OP_TRACKER;
-    }
-
     /**
      * A no-op implementation that discards all progress updates.
      */

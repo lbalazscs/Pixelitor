@@ -49,12 +49,9 @@ public class JHStamp extends ParametrizedFilter {
 
     private final IntChoiceParam blurMethod = new IntChoiceParam("Blur Method",
         new Item[]{
-            // this is calculated with floats, but the animation is still not smooth
             new Item("Fast", StampFilter.BOX3_BLUR),
             new Item("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
         }, IGNORE_RANDOMIZE);
-
-    private StampFilter filter;
 
     public JHStamp() {
         super(true);
@@ -74,16 +71,13 @@ public class JHStamp extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new StampFilter(NAME);
-        }
-
-        filter.setDark(darkColor.getColor().getRGB());
-        filter.setLight(lightColor.getColor().getRGB());
-        filter.setRadius(smoothness.getValueAsFloat());
-        filter.setSoftness((float) soften.getPercentage());
-        filter.setThreshold((float) lightDarkBalance.getPercentage());
-        filter.setBlurMethod(blurMethod.getValue());
+        StampFilter filter = new StampFilter(NAME,
+            smoothness.getValueAsFloat(),     // blur radius
+            lightDarkBalance.getPercentage(), // threshold
+            soften.getPercentage(),           // softness
+            lightColor.getColor().getRGB(),
+            darkColor.getColor().getRGB(),
+            blurMethod.getValue());
 
         return filter.filter(src, dest);
     }

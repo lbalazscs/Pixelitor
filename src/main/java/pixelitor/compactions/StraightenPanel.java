@@ -99,6 +99,8 @@ public class StraightenPanel extends JPanel implements ChangeListener {
 
         private final BufferedImage image;
         private final DoubleConsumer angleConsumer;
+
+        // the start and end of the drawn line in image-space
         private Point2D.Double start;
         private Point2D.Double end;
 
@@ -183,9 +185,8 @@ public class StraightenPanel extends JPanel implements ChangeListener {
             double x = (p.x - rect.x) * (double) image.getWidth() / rect.width;
             double y = (p.y - rect.y) * (double) image.getHeight() / rect.height;
             return new Point2D.Double(
-                Math.max(0, Math.min(image.getWidth(), x)),
-                Math.max(0, Math.min(image.getHeight(), y))
-            );
+                Math.clamp(x, 0, image.getWidth()),
+                Math.clamp(y, 0, image.getHeight()));
         }
 
         private Point2D.Double toComponentCoords(Point2D.Double p) {
@@ -196,7 +197,7 @@ public class StraightenPanel extends JPanel implements ChangeListener {
         }
 
         private void updateAngleFromCurrentLine() {
-            if (start == null || end == null || start.equals(end)) {
+            if (hasNoLine()) {
                 return;
             }
             double dx = end.x - start.x;
@@ -206,10 +207,10 @@ public class StraightenPanel extends JPanel implements ChangeListener {
         }
 
         /**
-         * Rotates an already drawn line around is current midpoint.
+         * Rotates an already drawn line around its current midpoint.
          */
         public void updateLineAngle(double degrees) {
-            if (start == null || end == null || start.equals(end)) {
+            if (hasNoLine()) {
                 return;
             }
 
@@ -228,6 +229,10 @@ public class StraightenPanel extends JPanel implements ChangeListener {
             end.setLocation(cx + dx, cy + dy);
 
             repaint();
+        }
+
+        private boolean hasNoLine() {
+            return start == null || end == null || start.equals(end);
         }
     }
 }

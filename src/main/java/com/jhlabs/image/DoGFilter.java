@@ -28,6 +28,8 @@ import java.awt.image.BufferedImage;
  * @author Jerry Huxtable
  */
 public class DoGFilter extends AbstractBufferedImageOp {
+    private static final int BLUR_ITERATIONS = 3;
+
     private final float radius1;
     private final float radius2;
     private final boolean normalize;
@@ -54,8 +56,9 @@ public class DoGFilter extends AbstractBufferedImageOp {
         int height = src.getHeight();
         BufferedImage image1;
 
-        int singleBlurUnit = 3 * (width + height);
-        int workUnits = 0;
+        int singleBlurUnit = BLUR_ITERATIONS * (width + height);
+        int subtractWorkUnits = singleBlurUnit / 2;
+        int workUnits = subtractWorkUnits;
 
         if (radius1 > 0.0f) {
             workUnits += singleBlurUnit;
@@ -63,8 +66,6 @@ public class DoGFilter extends AbstractBufferedImageOp {
         if (radius2 > 0.0f) {
             workUnits += singleBlurUnit;
         }
-
-        workUnits += singleBlurUnit / 2; // subtract
 
         if (shouldNormalize()) {
             workUnits += (int) (singleBlurUnit * 0.16); // normalize
@@ -73,7 +74,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
         pt = createProgressTracker(workUnits);
 
         if (radius1 > 0.0f) {
-            BoxBlurFilter blur = new BoxBlurFilter(radius1, radius1, 3, filterName);
+            BoxBlurFilter blur = new BoxBlurFilter(filterName, radius1, radius1, BLUR_ITERATIONS);
             blur.setProgressTracker(pt);
             image1 = blur.filter(src, null);
         } else {
@@ -82,7 +83,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
 
         Graphics2D dstG;
         if (radius2 > 0.0f) {
-            BoxBlurFilter blur = new BoxBlurFilter(radius2, radius2, 3, filterName);
+            BoxBlurFilter blur = new BoxBlurFilter(filterName, radius2, radius2, BLUR_ITERATIONS);
             blur.setProgressTracker(pt);
             dst = blur.filter(src, dst);
             dstG = dst.createGraphics();
@@ -95,7 +96,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
         dstG.drawImage(image1, 0, 0, null);
         dstG.dispose();
 
-        pt.unitsDone(singleBlurUnit / 2);
+        pt.unitsDone(subtractWorkUnits);
 
         if (shouldNormalize()) {
             ImageUtils.normalizeImage(dst);

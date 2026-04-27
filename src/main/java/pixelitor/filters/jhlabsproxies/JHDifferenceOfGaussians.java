@@ -57,15 +57,6 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (src.getWidth() == 1 || src.getHeight() == 1) {
-            // BoxBlurFilter throws ArrayIndexOutOfBoundsException for such images
-
-            // Give up. A workaround would be to use a filter that can use another
-            // blurring algorithm, but it isn't worth it, because this case is very
-            // unlikely to occur.
-            return src;
-        }
-
         DoGFilter filter = new DoGFilter(NAME,
             radius1.getValueAsFloat(),
             radius2.getValueAsFloat(),

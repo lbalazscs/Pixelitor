@@ -88,7 +88,7 @@ public class ShadowFilter extends AbstractBufferedImageOp {
         };
         BufferedImage shadow = new BufferedImage(width, height, TYPE_INT_ARGB);
         new BandCombineOp(extractAlpha, null).filter(src.getRaster(), shadow.getRaster());
-        shadow = new BoxBlurFilter(radius, radius, 3, filterName).filter(shadow, null);
+        shadow = new BoxBlurFilter(filterName, radius, radius, 3).filter(shadow, null);
 
         Graphics2D g = dst.createGraphics();
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));

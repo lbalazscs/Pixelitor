@@ -192,7 +192,10 @@ public class Noise {
 
         float rv = 1.5f * lerp(sy, a, b);
 
-        assert !Float.isNaN(rv);
+        assert !Float.isNaN(rv) : String.format(
+            "noise2() produced NaN! Input parameters x=%s, y=%s. State: sx=%s, sy=%s, a=%s, b=%s",
+            x, y, sx, sy, a, b
+        );
         return rv;
     }
 

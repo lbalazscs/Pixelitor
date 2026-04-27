@@ -52,13 +52,7 @@ public class JHGlow extends ParametrizedFilter {
             return src;
         }
 
-        if (src.getWidth() == 1 || src.getHeight() == 1) {
-            // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
-            return src;
-        }
-
         GlowFilter filter = new GlowFilter(NAME, amountValue, softness.getValueAsFloat());
-
         return filter.filter(src, dest);
     }
 

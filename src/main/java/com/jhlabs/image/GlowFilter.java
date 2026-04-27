@@ -55,7 +55,7 @@ public class GlowFilter extends AbstractBufferedImageOp {
         if (radius > 0) {
             // most of the time is spent here, so only
             // the blur manages its progress tracker
-            BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3, filterName);
+            BoxBlurFilter boxBlur = new BoxBlurFilter(filterName, radius, radius, 3);
             srcCopy = boxBlur.filter(srcCopy, srcCopy);
         }
 

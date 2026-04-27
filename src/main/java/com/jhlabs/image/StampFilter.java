@@ -24,81 +24,53 @@ import java.awt.image.BufferedImage;
 public class StampFilter extends PointFilter {
     public static final int BOX3_BLUR = 2;
     public static final int GAUSSIAN_BLUR = 3;
-    private int blurMethod = BOX3_BLUR;
 
-    private float threshold;
-    private float softness = 0;
-    private float radius = 5;
+    private final int blurMethod;
+    private final double threshold;
+    private final double softness;
+    private final float radius;
+    private final int light;
+    private final int dark;
+
     private float lowerThreshold;
     private float upperThreshold;
-    private int light = 0xFF_FF_FF_FF;
-    private int dark = 0xFF_00_00_00;
 
-    public StampFilter(String filterName) {
+    /**
+     * Creates a new {@link StampFilter}.
+     *
+     * @param filterName the name of the filter
+     * @param radius     the blur radius controlling the spread of the stamp effect
+     * @param threshold  the luminance threshold that separates dark from light regions,
+     *                   expressed as a fraction in the range [0, 1]
+     * @param softness   the width of the transition zone around the threshold,
+     *                   expressed as a fraction in the range [0, 1]; 0 produces a hard edge
+     * @param light      the ARGB color applied to pixels above the upper threshold
+     * @param dark       the ARGB color applied to pixels below the lower threshold
+     * @param blurMethod the blur algorithm to use
+     */
+    public StampFilter(String filterName, float radius, double threshold,
+                       double softness, int light, int dark, int blurMethod) {
         super(filterName);
-    }
-
-    /**
-     * Sets the radius of the effect.
-     *
-     * @param radius the radius (must be >= 0)
-     */
-    public void setRadius(float radius) {
         this.radius = radius;
-    }
-
-    /**
-     * Sets the threshold value.
-     *
-     * @param threshold the threshold value
-     */
-    public void setThreshold(float threshold) {
         this.threshold = threshold;
-    }
-
-    /**
-     * Sets the softness of the effect.
-     *
-     * @param softness the softness (in the range [0, 1])
-     */
-    public void setSoftness(float softness) {
         this.softness = softness;
-    }
-
-    /**
-     * Sets the color to be used for pixels above the upper threshold.
-     *
-     * @param light the color
-     */
-    public void setLight(int light) {
         this.light = light;
-    }
-
-    /**
-     * Sets the color to be used for pixels below the lower threshold.
-     *
-     * @param dark the color
-     */
-    public void setDark(int dark) {
         this.dark = dark;
+        this.blurMethod = blurMethod;
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         if (blurMethod == BOX3_BLUR) {
-            if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
-                // avoid ArrayIndexOutOfBoundsException in BoxBlurFilter
-                return src;
-            }
-            dst = new BoxBlurFilter(radius, radius, 3, filterName).filter(src, null);
+            dst = new BoxBlurFilter(filterName, radius, radius, 3).filter(src, null);
         } else if (blurMethod == GAUSSIAN_BLUR) {
             dst = new GaussianFilter(filterName, radius).filter(src, null);
         } else {
             throw new IllegalStateException("blurMethod = " + blurMethod);
         }
 
-        lowerThreshold = 255 * (threshold - softness * 0.5f);
-        upperThreshold = 255 * (threshold + softness * 0.5f);
+        lowerThreshold = (float) (255 * (threshold - softness * 0.5));
+        upperThreshold = (float) (255 * (threshold + softness * 0.5));
         return super.filter(dst, dst);
     }
 
@@ -112,9 +84,5 @@ public class StampFilter extends PointFilter {
         // TODO This keeps the blurred alpha, but it would be
         //   better to keep the original src alpha
         return origA | (mixed & 0x00_FF_FF_FF);
-    }
-
-    public void setBlurMethod(int blurMethod) {
-        this.blurMethod = blurMethod;
     }
 }

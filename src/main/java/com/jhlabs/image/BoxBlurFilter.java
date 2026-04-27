@@ -25,43 +25,35 @@ import java.awt.image.BufferedImage;
  * and a number of iterations can be given which allows an approximation to Gaussian blur.
  */
 public class BoxBlurFilter extends AbstractBufferedImageOp {
-    private float hRadius;
-    private float vRadius;
-    private int iterations = 1;
-    private boolean premultiplyAlpha = true;
-
-    /**
-     * Constructs a default BoxBlurFilter.
-     *
-     * @param filterName the name of the filter
-     */
-    public BoxBlurFilter(String filterName) {
-        super(filterName);
-    }
+    private final float hRadius;
+    private final float vRadius;
+    private final int iterations;
+    private final boolean premultiplyAlpha;
 
     /**
      * Constructs a BoxBlurFilter.
      *
+     * @param filterName the name of the filter
      * @param hRadius    the horizontal radius of blur
      * @param vRadius    the vertical radius of blur
      * @param iterations the number of times to iterate the blur
-     * @param filterName the name of the filter
      */
-    public BoxBlurFilter(float hRadius, float vRadius, int iterations, String filterName) {
+    public BoxBlurFilter(String filterName, float hRadius, float vRadius, int iterations, boolean premultiplyAlpha) {
         super(filterName);
+
+        if (hRadius < 0 || vRadius < 0 || iterations <= 0) {
+            throw new IllegalArgumentException("hRadius = %.2f, vRadius = %.2f, iterations = %d"
+                .formatted(hRadius, vRadius, iterations));
+        }
 
         this.hRadius = hRadius;
         this.vRadius = vRadius;
         this.iterations = iterations;
+        this.premultiplyAlpha = premultiplyAlpha;
     }
 
-    /**
-     * Sets whether to premultiply the alpha channel.
-     *
-     * @param premultiplyAlpha true to premultiply the alpha
-     */
-    public void setPremultiplyAlpha(boolean premultiplyAlpha) {
-        this.premultiplyAlpha = premultiplyAlpha;
+    public BoxBlurFilter(String filterName, float hRadius, float vRadius, int iterations) {
+        this(filterName, hRadius, vRadius, iterations, true);
     }
 
     @Override
@@ -81,7 +73,8 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
         int[] outPixels = new int[width * height];
         getRGB(src, 0, 0, width, height, inPixels);
 
-        if (premultiplyAlpha) {
+        boolean premultiply = premultiplyAlpha && !src.isAlphaPremultiplied();
+        if (premultiply) {
             ImageMath.premultiply(inPixels, 0, inPixels.length);
         }
 
@@ -98,7 +91,7 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
             blurFractional(outPixels, inPixels, height, width, vRadius);
         }
 
-        if (premultiplyAlpha) {
+        if (premultiply) {
             ImageMath.unpremultiply(inPixels, 0, inPixels.length);
         }
         setRGB(dst, 0, 0, width, height, inPixels);
@@ -185,8 +178,22 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      * @param radius the fractional radius of blur
      */
     private static void blurFractional(int[] in, int[] out, int width, int height, float radius) {
-        radius -= (int) radius;
-        float f = 1.0f / (1.0f + 2.0f * radius);
+        float frac = radius - (int) radius;
+
+        // skip fractional blurring if negligible or if there aren't enough pixels to blur
+        if (frac <= 0.001f || width < 2) {
+            int inIndex = 0;
+            for (int y = 0; y < height; y++) {
+                int outIndex = y;
+                for (int x = 0; x < width; x++) {
+                    out[outIndex] = in[inIndex++];
+                    outIndex += height;
+                }
+            }
+            return;
+        }
+
+        float f = 1.0f / (1.0f + 2.0f * frac);
         int inIndex = 0;
 
         for (int y = 0; y < height; y++) {
@@ -216,51 +223,17 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
                 int g3 = (rgb3 >> 8) & 0xFF;
                 int b3 = rgb3 & 0xFF;
 
-                a1 = a2 + (int) ((a1 + a3) * radius);
-                r1 = r2 + (int) ((r1 + r3) * radius);
-                g1 = g2 + (int) ((g1 + g3) * radius);
-                b1 = b2 + (int) ((b1 + b3) * radius);
+                int a = (int) ((a2 + (a1 + a3) * frac) * f);
+                int r = (int) ((r2 + (r1 + r3) * frac) * f);
+                int g = (int) ((g2 + (g1 + g3) * frac) * f);
+                int b = (int) ((b2 + (b1 + b3) * frac) * f);
 
-                a1 = (int) (a1 * f);
-                r1 = (int) (r1 * f);
-                g1 = (int) (g1 * f);
-                b1 = (int) (b1 * f);
-
-                out[outIndex] = (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
+                out[outIndex] = (a << 24) | (r << 16) | (g << 8) | b;
                 outIndex += height;
             }
 
-            // If either the width or the height of the image is one pixel, an array index out-of-bounds exception occurs here.
-            // In Pixelitor these cases are handled before we get here.
             out[outIndex] = in[inIndex + width - 1];
             inIndex += width;
         }
-    }
-
-    /**
-     * Sets the horizontal size of the blur.
-     *
-     * @param hRadius the radius of the blur in the horizontal direction (must be >= 0)
-     */
-    public void setHRadius(float hRadius) {
-        this.hRadius = hRadius;
-    }
-
-    /**
-     * Sets the vertical size of the blur.
-     *
-     * @param vRadius the radius of the blur in the vertical direction (must be >= 0)
-     */
-    public void setVRadius(float vRadius) {
-        this.vRadius = vRadius;
-    }
-
-    /**
-     * Sets the number of iterations the blur is performed.
-     *
-     * @param iterations the number of iterations (must be >= 0)
-     */
-    public void setIterations(int iterations) {
-        this.iterations = iterations;
     }
 }

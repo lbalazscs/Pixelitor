@@ -46,8 +46,6 @@ public class JHFocus extends ParametrizedFilter {
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
     private final IntChoiceParam shape = BlurredShape.getChoices();
 
-    private FocusImpl filter;
-
     public JHFocus() {
         super(true);
 
@@ -74,37 +72,33 @@ public class JHFocus extends ParametrizedFilter {
             if (invert.isChecked()) {
                 return src;
             }
-            return new BoxBlurFilter(hRadius, vRadius, numIterations.getValue(), getName()).filter(src, dest);
+            return new BoxBlurFilter(getName(), hRadius, vRadius, numIterations.getValue()).filter(src, dest);
         }
 
-        if (src.getWidth() == 1 || src.getHeight() == 1) {
-            // otherwise we can get ArrayIndexOutOfBoundsException
-            // in VariableBlurFilter.blur
-            return src;
-        }
-
-        if (filter == null) {
-            filter = new FocusImpl(NAME);
-        }
-
-        filter.setCenter(
-            src.getWidth() * center.getRelativeX(),
-            src.getHeight() * center.getRelativeY()
-        );
-
+        double cx = src.getWidth() * center.getRelativeX();
+        double cy = src.getHeight() * center.getRelativeY();
         double radiusX = radius.getValueAsDouble(0);
         double radiusY = radius.getValueAsDouble(1);
         double softnessFactor = softness.getPercentage();
-        filter.setRadius(radiusX, radiusY, softnessFactor);
+        boolean inverted = invert.isChecked();
+        float blurHorRadius = blurRadius.getValueAsFloat(0);
+        float blurVerRadius = blurRadius.getValueAsFloat(1);
+        int iterations = numIterations.getValue();
+        int shapeType = shape.getValue();
 
-        filter.setInverted(invert.isChecked());
-
-        filter.setHRadius(blurRadius.getValueAsFloat(0));
-        filter.setVRadius(blurRadius.getValueAsFloat(1));
-
-        filter.setIterations(numIterations.getValue());
-        filter.setPremultiplyAlpha(!src.isAlphaPremultiplied() && ImageUtils.hasPackedIntArray(src));
-        filter.setShape(shape.getValue());
+        FocusImpl filter = new FocusImpl(
+            NAME,
+            blurHorRadius,
+            blurVerRadius,
+            iterations,
+            cx,
+            cy,
+            radiusX,
+            radiusY,
+            softnessFactor,
+            inverted,
+            shapeType
+        );
 
         dest = filter.filter(src, dest);
 
@@ -121,29 +115,28 @@ public class JHFocus extends ParametrizedFilter {
     }
 
     private static class FocusImpl extends VariableBlurFilter {
-        private Point2D center;
-        private double innerRadiusX;
-        private double innerRadiusY;
-        private double outerRadiusX;
-        private double outerRadiusY;
-        private boolean inverted;
+        private final boolean inverted;
+        private final BlurredShape shape;
 
-        private BlurredShape shape;
+        public FocusImpl(String filterName, float hRadius, float vRadius, int iterations,
+                         double cx, double cy, double radiusX, double radiusY, double softness,
+                         boolean inverted, int shapeType) {
 
-        public FocusImpl(String filterName) {
-            super(filterName);
-        }
+            // instead of using a blur mask, we override blurRadiusAt
+            super(filterName, hRadius, vRadius, iterations, null, true);
 
-        public void setCenter(double cx, double cy) {
-            center = new Point2D.Double(cx, cy);
-        }
+            Point2D center = new Point2D.Double(cx, cy);
 
-        public void setRadius(double radiusX, double radiusY, double softness) {
-            innerRadiusX = radiusX - radiusX * softness;
-            innerRadiusY = radiusY - radiusY * softness;
+            double innerRadiusX = radiusX - radiusX * softness;
+            double innerRadiusY = radiusY - radiusY * softness;
+            double outerRadiusX = radiusX + radiusX * softness;
+            double outerRadiusY = radiusY + radiusY * softness;
 
-            outerRadiusX = radiusX + radiusX * softness;
-            outerRadiusY = radiusY + radiusY * softness;
+            this.inverted = inverted;
+
+            this.shape = BlurredShape.create(shapeType, center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
         }
 
         @Override
@@ -153,17 +146,6 @@ public class JHFocus extends ParametrizedFilter {
                 return (float) (1 - outside);
             }
             return (float) outside;
-        }
-
-        public void setInverted(boolean inverted) {
-            this.inverted = inverted;
-        }
-
-        // must be called after the shape arguments!
-        public void setShape(int type) {
-            shape = BlurredShape.create(type, center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
         }
     }
 }

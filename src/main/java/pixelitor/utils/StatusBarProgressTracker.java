@@ -29,6 +29,13 @@ public class StatusBarProgressTracker extends ThresholdProgressTracker {
         assert opName != null;
     }
 
+    public static ProgressTracker create(String name, int numWorkUnits) {
+        if (numWorkUnits > 0) {
+            return new StatusBarProgressTracker(name, numWorkUnits);
+        }
+        return NO_OP_TRACKER;
+    }
+
     @Override
     protected void onProgressStart() {
         progressHandler = Messages.startProgress(opName, 100);

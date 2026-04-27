@@ -749,7 +749,7 @@ public class ImageUtils {
         g.dispose();
 
         // blur it
-        var blur = new BoxBlurFilter(softness, softness, 1, "Blur");
+        var blur = new BoxBlurFilter("Blur", softness, softness, 1);
         blur.setProgressTracker(ProgressTracker.NO_OP_TRACKER);
         brushImage = blur.filter(brushImage, brushImage);
 

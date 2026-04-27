@@ -27,8 +27,8 @@ import static net.jafama.FastMath.tan;
  * Inspired by the Paint.net tile effect
  */
 public class TilesFilter extends RotatingEffectFilter {
-    private final double sizeX;
-    private final double sizeY;
+    private final double freqX;
+    private final double freqY;
     private final double curvatureX;
     private final double curvatureY;
     private final double phaseAngleX;
@@ -41,26 +41,26 @@ public class TilesFilter extends RotatingEffectFilter {
      * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
      * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
      * @param angle         the rotation angle of the tiles (in radians).
-     * @param sizeXVal      the horizontal size of the tiles.
+     * @param sizeX         the horizontal size of the tiles.
      * @param shiftX        the horizontal phase shift/movement of the tiles.
-     * @param sizeYVal      the vertical size of the tiles.
+     * @param sizeY         the vertical size of the tiles.
      * @param shiftY        the vertical phase shift/movement of the tiles.
      * @param curvatureXVal the horizontal curvature intensity.
      * @param curvatureYVal the vertical curvature intensity.
      */
     public TilesFilter(String filterName, int edgeAction, int interpolation, double angle,
-                       double sizeXVal, double shiftX,
-                       double sizeYVal, double shiftY,
+                       double sizeX, double shiftX,
+                       double sizeY, double shiftY,
                        double curvatureXVal, double curvatureYVal) {
         super(filterName, edgeAction, interpolation, angle);
 
         // for some reason the effect looks nice only
         // with the reduced double => float precision
-        this.sizeX = (float) (Math.PI / sizeXVal);
-        this.sizeY = (float) (Math.PI / sizeYVal);
+        this.freqX = (float) (Math.PI / sizeX);
+        this.freqY = (float) (Math.PI / sizeY);
 
-        this.phaseAngleX = shiftX / this.sizeX;
-        this.phaseAngleY = shiftY / this.sizeY;
+        this.phaseAngleX = shiftX / this.freqX;
+        this.phaseAngleY = shiftY / this.freqY;
 
         this.curvatureX = (curvatureXVal * curvatureXVal) / 10.0;
         this.curvatureY = (curvatureYVal * curvatureYVal) / 10.0;
@@ -68,7 +68,7 @@ public class TilesFilter extends RotatingEffectFilter {
 
     @Override
     protected void coreTransformInverse(double x, double y, double[] out) {
-        out[0] = x + curvatureX * tan(x * sizeX - phaseAngleX);
-        out[1] = y + curvatureY * tan(y * sizeY - phaseAngleY);
+        out[0] = x + curvatureX * tan(x * freqX - phaseAngleX);
+        out[1] = y + curvatureY * tan(y * freqY - phaseAngleY);
     }
 }

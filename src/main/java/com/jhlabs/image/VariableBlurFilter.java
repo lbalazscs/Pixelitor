@@ -25,22 +25,34 @@ import java.awt.image.BufferedImage;
  * providing a blur mask image or by overriding the blurRadiusAt method.
  */
 public class VariableBlurFilter extends AbstractBufferedImageOp {
-    private float hRadius = 1;
-    private float vRadius = 1;
-    private int iterations = 1;
-    private BufferedImage blurMask;
-    private boolean premultiplyAlpha = true;
-
-    public VariableBlurFilter(String filterName) {
-        super(filterName);
-    }
+    private final float hRadius;
+    private final float vRadius;
+    private final int iterations;
+    private final BufferedImage blurMask;
+    private final boolean premultiplyAlpha;
 
     /**
-     * Sets whether to premultiply the alpha channel.
+     * Constructs a VariableBlurFilter with the specified parameters.
      *
-     * @param premultiplyAlpha true to premultiply the alpha
+     * @param filterName       the name of the filter to be tracked/identified by
+     * @param hRadius          the radius of the blur in the horizontal direction (must be >= 0)
+     * @param vRadius          the radius of the blur in the vertical direction (must be >= 0)
+     * @param iterations       the number of iterations the blur is performed (must be >= 0)
+     * @param blurMask         the mask used to give the amount of blur at each point (can be null)
+     * @param premultiplyAlpha true to premultiply the alpha channel before blurring
      */
-    public void setPremultiplyAlpha(boolean premultiplyAlpha) {
+    public VariableBlurFilter(String filterName, float hRadius, float vRadius, int iterations, BufferedImage blurMask, boolean premultiplyAlpha) {
+        super(filterName);
+
+        if (hRadius < 0 || vRadius < 0 || iterations <= 0) {
+            throw new IllegalArgumentException("hRadius = %.2f, vRadius = %.2f, iterations = %d"
+                .formatted(hRadius, vRadius, iterations));
+        }
+
+        this.hRadius = hRadius;
+        this.vRadius = vRadius;
+        this.iterations = iterations;
+        this.blurMask = blurMask;
         this.premultiplyAlpha = premultiplyAlpha;
     }
 
@@ -59,7 +71,8 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
         int[] outPixels = new int[width * height];
         getRGB(src, 0, 0, width, height, inPixels);
 
-        if (premultiplyAlpha) {
+        boolean premultiply = premultiplyAlpha && !src.isAlphaPremultiplied();
+        if (premultiply) {
             ImageMath.premultiply(inPixels, 0, inPixels.length);
         }
 
@@ -68,7 +81,7 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
             blur(outPixels, inPixels, height, width, vRadius, 2, pt);
         }
 
-        if (premultiplyAlpha) {
+        if (premultiply) {
             ImageMath.unpremultiply(inPixels, 0, inPixels.length);
         }
 
@@ -80,12 +93,23 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
     }
 
     public void blur(int[] in, int[] out, int width, int height, float radius, int pass, ProgressTracker pt) {
+        if (width == 1) {
+            // fast-path for 1-pixel widths/heights (no-op mathematically)
+            System.arraycopy(in, 0, out, 0, width * height);
+            pt.unitsDone(height);
+            return;
+        }
+
         int widthMinus1 = width - 1;
         int[] r = new int[width];
         int[] g = new int[width];
         int[] b = new int[width];
         int[] a = new int[width];
-        int[] mask = new int[width];
+
+        int[] mask = null;
+        if (blurMask != null) {
+            mask = new int[width];
+        }
 
         int inIndex = 0;
 
@@ -115,19 +139,15 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
             }
 
             for (int x = 0; x < width; x++) {
-                // Get the blur radius at x, y
+                // get the blur radius at x, y
                 int ra;
                 if (blurMask != null) {
-                    if (pass == 1) {
-                        ra = (int) ((mask[x] & 0xFF) * hRadius / 255.0f);
-                    } else {
-                        ra = (int) ((mask[x] & 0xFF) * vRadius / 255.0f);
-                    }
+                    ra = (int) ((mask[x] & 0xFF) * radius / 255.0f);
                 } else {
                     if (pass == 1) {
-                        ra = (int) (blurRadiusAt(x, y) * hRadius);
+                        ra = (int) (blurRadiusAt(x, y) * radius);
                     } else {
-                        ra = (int) (blurRadiusAt(y, x) * vRadius);
+                        ra = (int) (blurRadiusAt(y, x) * radius);
                     }
                 }
 
@@ -169,58 +189,11 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
     /**
      * Override this to get a different blur radius at each point.
      *
-     * @param width  the width of the image
-     * @param height the height of the image
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x the x coordinate
+     * @param y the y coordinate
      * @return the blur radius
      */
     protected float blurRadiusAt(int x, int y) {
         return 0.0f;
-    }
-
-    /**
-     * Sets the horizontal size of the blur.
-     *
-     * @param hRadius the radius of the blur in the horizontal direction (must be >= 0)
-     */
-    public void setHRadius(float hRadius) {
-        this.hRadius = hRadius;
-    }
-
-    /**
-     * Sets the vertical size of the blur.
-     *
-     * @param vRadius the radius of the blur in the vertical direction (must be >= 0)
-     */
-    public void setVRadius(float vRadius) {
-        this.vRadius = vRadius;
-    }
-
-    /**
-     * Sets the radius of the effect.
-     *
-     * @param radius the radius (must be >= 0)
-     */
-    public void setRadius(float radius) {
-        hRadius = vRadius = radius;
-    }
-
-    /**
-     * Sets the number of iterations the blur is performed.
-     *
-     * @param iterations the number of iterations (must be >= 0)
-     */
-    public void setIterations(int iterations) {
-        this.iterations = iterations;
-    }
-
-    /**
-     * Sets the mask used to give the amount of blur at each point.
-     *
-     * @param blurMask the mask
-     */
-    public void setBlurMask(BufferedImage blurMask) {
-        this.blurMask = blurMask;
     }
 }
