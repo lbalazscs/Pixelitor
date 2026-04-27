@@ -18,11 +18,13 @@
 package pixelitor.compactions;
 
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
 import java.awt.geom.AffineTransform;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Rotates all layers around the canvas center by an arbitrary angle.
@@ -37,6 +39,15 @@ public class Straighten extends SimpleCompAction {
         super(NAME, false);
         this.angleDegrees = angleDegrees;
         this.angleRadians = Math.toRadians(angleDegrees);
+    }
+
+    @Override
+    public CompletableFuture<Composition> process(Composition srcComp) {
+        if (angleDegrees == 0.0) {
+            // don't add an unnecessary history step
+            return CompletableFuture.completedFuture(srcComp);
+        }
+        return super.process(srcComp);
     }
 
     @Override
@@ -73,12 +84,12 @@ public class Straighten extends SimpleCompAction {
 
     @Override
     protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
-        // Arbitrary-angle guide transform is not available yet.
+        // guides don't support arbitrary-angle guide transforms
         return srcGuides.copyIdentical(view);
     }
 
     @Override
     protected String getStatusBarMessage() {
-        return "Image straightened by " + String.format("%.2f°", angleDegrees);
+        return String.format("Image straightened by %.2f°", angleDegrees);
     }
 }

@@ -603,8 +603,6 @@ public class MenuBar extends JMenuBar {
         // rotate
         imageMenu.addViewEnabled(Straighten.NAME + "...",
             StraightenPanel::showInDialog);
-        imageMenu.addSeparator();
-
         imageMenu.add(new Rotate(ANGLE_90), "comp_rot_90");
         imageMenu.add(new Rotate(ANGLE_180), "comp_rot_180");
         imageMenu.add(new Rotate(ANGLE_270), "comp_rot_270");
