@@ -352,6 +352,23 @@ public class ImageMath {
     }
 
     /**
+     * Bilinear interpolation.
+     *
+     * @param fx the interpolation parameter along the x-axis
+     * @param fy the interpolation parameter along the y-axis
+     * @param nw the value at the north-west corner
+     * @param ne the value at the north-east corner
+     * @param sw the value at the south-west corner
+     * @param se the value at the south-east corner
+     * @return the interpolated value
+     */
+    public static float bilerp(float fx, float fy, float nw, float ne, float sw, float se) {
+        float top = lerp(fx, nw, ne);
+        float bottom = lerp(fx, sw, se);
+        return lerp(fy, top, bottom);
+    }
+
+    /**
      * Linear interpolation of ARGB values.
      *
      * @param t    the interpolation parameter
