@@ -28,6 +28,8 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.font.TextAttribute;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
@@ -72,6 +74,10 @@ public class Rnd {
         return items.get(nextInt(items.size()));
     }
 
+    public static <T> T chooseFrom(List<T> items, Random rnd) {
+        return items.get(rnd.nextInt(items.size()));
+    }
+
     /**
      * Chooses a random element from the given List that satisfies the condition.
      */
@@ -91,6 +97,12 @@ public class Rnd {
 
     public static Point pointInRect(int minX, int maxX, int minY, int maxY) {
         return new Point(intInRange(minX, maxX), intInRange(minY, maxY));
+    }
+
+    public static Point2D point2DInRect(Rectangle2D bounds, Random rnd) {
+        return new Point2D.Double(
+            bounds.getX() + bounds.getWidth() * rnd.nextDouble(),
+            bounds.getY() + bounds.getHeight() * rnd.nextDouble());
     }
 
     /**

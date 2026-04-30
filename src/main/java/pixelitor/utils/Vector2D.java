@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,14 +74,24 @@ public class Vector2D {
         y += other.y;
     }
 
-    public void add(float scalar) {
+    public void add(double scalar) {
         this.x += scalar;
         this.y += scalar;
+    }
+
+    public void add(double dx, double dy) {
+        this.x += dx;
+        this.y += dy;
     }
 
     public void add(Point2D point) {
         x += point.getX();
         y += point.getY();
+    }
+
+    // translates the given point (not this vector!)
+    public void translatePoint(Point2D point) {
+        point.setLocation(point.getX() + x, point.getY() + y);
     }
 
     public void subtract(Vector2D other) {
@@ -110,8 +120,12 @@ public class Vector2D {
     }
 
     public void setMagnitude(double magnitude) {
-        normalize();
-        multiply(magnitude);
+        double len = length();
+        if (len != 0) {
+            multiply(magnitude / len);
+        } else {
+            set(0, 0);
+        }
     }
 
     public void setMagnitudeOfUnitVector(double magnitude) {
@@ -131,6 +145,14 @@ public class Vector2D {
             return;
         }
         normalize();
+    }
+
+    public static Vector2D add(Vector2D v1, Vector2D v2, Vector2D v3) {
+        Vector2D res = new Vector2D();
+        res.add(v1);
+        res.add(v2);
+        res.add(v3);
+        return res;
     }
 
     public static Vector2D add(Vector2D... vectors) {

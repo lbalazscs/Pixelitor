@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import com.jhlabs.math.Noise;
 import pd.OpenSimplex2F;
 import pixelitor.ThreadPool;
@@ -24,9 +25,6 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.GroupedRangeParam.GroupedRangeParamState;
 import pixelitor.filters.gui.RangeParam.RangeParamState;
-import pixelitor.particles.Modifier;
-import pixelitor.particles.ParticleSystem;
-import pixelitor.particles.SmoothPathParticle;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.*;
 
@@ -40,13 +38,12 @@ import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
-import static net.jafama.FastMath.abs;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.exp;
-import static net.jafama.FastMath.min;
 import static net.jafama.FastMath.pow;
 import static net.jafama.FastMath.sin;
-import static net.jafama.FastMath.toRange;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
 import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
@@ -71,6 +68,7 @@ public class FlowField extends ParametrizedFilter {
 
     private static void createSinkForce(Vector2D position, Vector2D center, float magnitude, Vector2D out) {
         if (magnitude == 0) {
+            out.set(0, 0);
             return;
         }
 
@@ -81,6 +79,7 @@ public class FlowField extends ParametrizedFilter {
 
     private static void createRevolveForce(Vector2D position, Vector2D center, float magnitude, Vector2D out) {
         if (magnitude == 0) {
+            out.set(0, 0);
             return;
         }
 
@@ -90,61 +89,47 @@ public class FlowField extends ParametrizedFilter {
         out.setMagnitude(magnitude);
     }
 
-    private static void createNoiseForce(float magnitude, float startAngle, float variancePI,
+    private static void createNoiseForce(float magnitude, float startAngle, float variance,
                                          double sampleX, double sampleY, double sampleZ,
                                          int turbulence, OpenSimplex2F noise, Vector2D out) {
-        double angle = startAngle + noise.turbulence3(sampleX, sampleY, sampleZ, turbulence) * variancePI;
-        out.set((float) cos(angle), (float) sin(angle));
-        out.setMagnitude(magnitude);
+        double angle = startAngle + noise.turbulence3(sampleX, sampleY, sampleZ, turbulence) * variance;
+        out.set(cos(angle) * magnitude, sin(angle) * magnitude);
     }
 
-    private enum ForceMode implements Modifier<FlowFieldParticle> {
+    /**
+     * Force modes define how the forces affect a particle's movement.
+     */
+    private enum ForceMode {
         VELOCITY("No Mass") {
             @Override
-            public void modify(FlowFieldParticle particle) {
-                particle.pos.setLocation(
-                    particle.pos.getX() + particle.delta.x,
-                    particle.pos.getY() + particle.delta.y
-                );
+            public void modify(Particle particle) {
+                particle.delta.translatePoint(particle.pos);
             }
         },
         ACCELERATION("Uniform Mass") {
             @Override
-            public void modify(FlowFieldParticle particle) {
+            public void modify(Particle particle) {
                 particle.vel.add(particle.delta);
-                particle.pos.setLocation(
-                    particle.pos.getX() + particle.vel.x,
-                    particle.pos.getY() + particle.vel.y
-                );
+                particle.vel.translatePoint(particle.pos);
             }
         },
         JOLT("Jolt") {
             @Override
-            public void modify(FlowFieldParticle particle) {
+            public void modify(Particle particle) {
                 particle.acc.add(particle.delta);
                 particle.vel.add(particle.acc);
-                particle.pos.setLocation(
-                    particle.pos.getX() + particle.vel.x,
-                    particle.pos.getY() + particle.vel.y
-                );
+                particle.vel.translatePoint(particle.pos);
             }
         },
         VELOCITY_AND_NOISE_BASED_RANDOMNESS("Thicken") {
             @Override
-            public void modify(FlowFieldParticle particle) {
+            public void modify(Particle particle) {
                 float x = (float) particle.delta.x;
                 float y = (float) particle.delta.y;
-                if (!Float.isFinite(x) || !Float.isFinite(y)) {
-                    // TODO sometimes NaN values are found here
-                    return;
-                }
+                assert Float.isFinite(x) && Float.isFinite(y);
 
                 particle.delta.add(Noise.noise2(x, y) * 10);
-
-                particle.pos.setLocation(
-                    particle.pos.getX() + particle.delta.x,
-                    particle.pos.getY() + particle.delta.y
-                );
+                particle.delta.translatePoint(particle.pos);
             }
         };
 
@@ -154,46 +139,48 @@ public class FlowField extends ParametrizedFilter {
             name = s;
         }
 
+        public abstract void modify(Particle particle);
+
         @Override
         public String toString() {
             return name;
         }
     }
 
-    private enum ColorSource implements Modifier<FlowFieldParticle> {
+    private enum ColorSource {
         DEFAULT("Default", false) {
             @Override
-            Color getColor(FlowFieldParticle particle) {
+            Color getColor(Particle particle) {
                 return particle.startingColor;
             }
         },
         SOURCE_IMAGE("Source Image", true) {
             @Override
-            public void initializeColorField(FlowFieldMeta meta) {
-                fill(meta.fieldColors, meta.fieldWidth, meta.fieldHeight, (x, y) -> meta.goldenRatio
-                    .next(colorFromSourceImage(x, y, meta.imgWidth, meta.sourcePixels, meta.fieldDensity)));
+            public void initializeColorField(Config config) {
+                fill(config.fieldColors(), config.fieldWidth(), config.fieldHeight(), (x, y) -> config.hueWalker()
+                    .next(colorFromSourceImage(x, y, config.imgWidth(), config.sourcePixels(), config.fieldDensity())));
             }
 
             @Override
-            Color getColor(FlowFieldParticle particle) {
-                return particle.meta.fieldColors[particle.getFieldX()][particle.getFieldY()];
+            Color getColor(Particle particle) {
+                return particle.config.fieldColors()[particle.getFieldX()][particle.getFieldY()];
             }
         },
         RGB("RGB", false) {
             @Override
-            Color getColor(FlowFieldParticle particle) {
+            Color getColor(Particle particle) {
                 return rgbColorFromAcceleration(particle.delta, particle.startingColor);
             }
         },
         HSB_CYCLE("HSB Cycle", false) {
             @Override
-            Color getColor(FlowFieldParticle particle) {
+            Color getColor(Particle particle) {
                 return hsbColorFromAcceleration(particle.delta, particle.startingColor, 6);
             }
         },
         WARM("Warm", false) {
             @Override
-            Color getColor(FlowFieldParticle particle) {
+            Color getColor(Particle particle) {
                 return hsbColorFromAcceleration(particle.delta, particle.startingColor, 400);
             }
         };
@@ -206,15 +193,10 @@ public class FlowField extends ParametrizedFilter {
             this.requiresColorField = requiresColorField;
         }
 
-        public void initializeColorField(FlowFieldMeta meta) {
+        public void initializeColorField(Config config) {
         }
 
-        @Override
-        public void modify(FlowFieldParticle particle) {
-            particle.color = getColor(particle);
-        }
-
-        abstract Color getColor(FlowFieldParticle particle);
+        abstract Color getColor(Particle particle);
 
         @Override
         public String toString() {
@@ -300,7 +282,7 @@ public class FlowField extends ParametrizedFilter {
 
         advancedParam.setToolTip("Advanced or rarely used settings.");
         forceModeParam.setToolTip("Advanced control over how forces act.");
-        maxVelocityParam.setToolTip("Adjust maximum velocity to make particles look more organised.");
+        maxVelocityParam.setToolTip("Adjust maximum velocity to make particles look more organized.");
         pathLengthParam.setToolTip("Make individual particles cover longer paths.");
 
         numParticlesParam.setToolTip("Adjust the number of particles flowing in the field.");
@@ -313,7 +295,7 @@ public class FlowField extends ParametrizedFilter {
             .setToolTip("Make particles use the same color from their positions on the source image.");
         startFlowFromSourceParam.setToolTip("Prevent particles from spawning at any transparent regions.");
         colorRandomnessParam.setToolTip("Increase to add randomness to the particle color.");
-        widthRandomnessParam.setToolTip("Increase to draw particles with a randomised width.");
+        widthRandomnessParam.setToolTip("Increase to draw particles with a randomized width.");
     }
 
     private static UserPreset createConfettiPreset() {
@@ -415,12 +397,11 @@ public class FlowField extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         float zoom = zoomParam.getValue() * 0.25f;
-        float variance = varianceParam.getValue() / 10.0f;
         int turbulence = turbulenceParam.getValue();
         float wind = windParam.getValueAsFloat() / 10000;
 
         ForceMode forceMode = forceModeParam.getSelected();
-        float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
+        float maxVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
         int iterationCount = pathLengthParam.getValue() + 1;
 
         int particleCount = numParticlesParam.getValue();
@@ -433,13 +414,13 @@ public class FlowField extends ParametrizedFilter {
         double colorRandomness = colorRandomnessParam.getPercentage();
         float widthRandomness = (float) widthRandomnessParam.getPercentage();
 
-        float quality = min(QUALITY, SMOOTHNESS / zoom);
-        int tolerance = min(TOLERANCE, ((int) (iterationCount * ITERATION_TO_TOLERANCE_RATIO)));
-        float force = min(FORCE_MAGNITUDE, iterationCount * ITERATION_TO_FORCE_RATIO);
+        float quality = Math.min(QUALITY, SMOOTHNESS / zoom);
+        int tolerance = Math.min(TOLERANCE, ((int) (iterationCount * ITERATION_TO_TOLERANCE_RATIO)));
+        float force = Math.min(FORCE_MAGNITUDE, iterationCount * ITERATION_TO_FORCE_RATIO);
 
-        float multiplierNoise = (float) (noiseParam.getPercentage() * force);
-        float multiplierSink = (float) (sinkParam.getPercentage() * force);
-        float multiplierRevolve = (float) (revolveParam.getPercentage() * force);
+        float noiseMultiplier = (float) (noiseParam.getPercentage() * force);
+        float sinkMultiplier = (float) (sinkParam.getPercentage() * force);
+        float revolveMultiplier = (float) (revolveParam.getPercentage() * force);
 
         int imgWidth = dest.getWidth();
         int imgHeight = dest.getHeight();
@@ -454,7 +435,7 @@ public class FlowField extends ParametrizedFilter {
         Vector2D center = new Vector2D(fieldWidth / 2.0f, fieldHeight / 2.0f);
         Rectangle bounds = new Rectangle(-PAD, -PAD,
             fieldWidth + PAD * 2, fieldHeight + PAD * 2);
-        float variancePI = (float) Math.PI * variance;
+        float variance = (float) Math.PI * (varianceParam.getValue() / 10.0f);
         float startAngle = (float) (r.nextFloat() * 2 * Math.PI);
 
         int groupCount = IS_MULTI_THREADED ? (int) Math.ceil(particleCount / (double) PARTICLES_PER_GROUP) : 1;
@@ -468,61 +449,58 @@ public class FlowField extends ParametrizedFilter {
         Colors.fillWith(bgColor, g2, imgWidth, imgHeight);
         g2.setColor(particleColor);
         if (antialias) {
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         }
         Graphics2D[] graphicsCopies = new Graphics2D[groupCount];
         for (int i = 0; i < groupCount; i++) {
             graphicsCopies[i] = (Graphics2D) g2.create();
         }
 
-        Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
-        Stroke[] strokes = getIf(randomizeWidth, () -> new Stroke[100]);
+        Color[][] fieldColors = useColorField ? new Color[fieldWidth][fieldHeight] : null;
+        Stroke[] strokes = randomizeWidth ? new Stroke[100] : null;
         Vector2D[][] fieldAccelerations = new Vector2D[fieldWidth][fieldHeight];
-        int[] sourcePixels = getIf(useColorField || inheritSpawnPoints, () -> ImageUtils.getPixels(src));
+        int[] sourcePixels = useColorField || inheritSpawnPoints ? ImageUtils.getPixels(src) : null;
 
         if (randomizeWidth) {
-            fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, widthRandomness));
+            for (int i = 0; i < strokes.length; i++) {
+                strokes[i] = strokeParam.createStrokeWithRandomWidth(r, widthRandomness);
+            }
         }
 
-        initializeAcceleration(multiplierNoise, multiplierSink, multiplierRevolve,
-            zoom, turbulence, fieldWidth, fieldHeight, noise, center, variancePI, startAngle, fieldAccelerations);
+        initializeAcceleration(noiseMultiplier, sinkMultiplier, revolveMultiplier,
+            zoom, turbulence, fieldWidth, fieldHeight, noise, center, variance, startAngle, fieldAccelerations);
 
-        List<Point2D> spawns = null;
-        if (inheritSpawnPoints) {
-            spawns = initializeSpawnPoints(imgWidth, fieldDensity, sourcePixels);
+        List<Point2D> spawns = inheritSpawnPoints
+            ? initializeSpawnPoints(imgWidth, fieldDensity, sourcePixels)
+            : null;
+
+        Supplier<Point2D> spawnSupplier;
+        if (spawns == null || spawns.isEmpty()) {
+            spawnSupplier = () -> Rnd.point2DInRect(bounds, r);
+        } else {
+            spawnSupplier = () -> Rnd.chooseFrom(spawns, r);
         }
 
-        GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
-        FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1,
-            fieldDensity, bounds, tolerance, maximumVelocitySq, wind, zoom,
-            turbulence, noise, multiplierNoise, startAngle, variancePI, forceMode, goldenRatio, fieldColors, imgWidth, sourcePixels);
+        HueWalker hueWalker = new HueWalker(r, particleColor, colorRandomness);
+        Config config = new Config(fieldWidth, fieldHeight,
+            fieldDensity, bounds, tolerance, maxVelocitySq, wind, zoom,
+            turbulence, noise, noiseMultiplier, startAngle, variance, forceMode, hueWalker, fieldColors, imgWidth, sourcePixels,
+            fieldAccelerations, colorSource, particleColor, useColorField, spawnSupplier);
 
         if (useColorField) {
-            if (colorRandomness != 0) {
-                fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
-            }
-
-            if (colorSource.requiresColorField) {
-                colorSource.initializeColorField(meta);
+            if (colorSource.requiresColorField()) {
+                colorSource.initializeColorField(config);
+            } else if (colorRandomness != 0) {
+                fill(fieldColors, fieldWidth, fieldHeight, hueWalker::next);
             }
         }
 
-        PositionRandomizer positionRandomizer = new PositionRandomizer(bounds.x, bounds.y, bounds.width, bounds.height, spawns, r);
-        ParticleInitializer particleInitializer = new ParticleInitializer(particleColor, useColorField, fieldColors);
-        ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
+        ParticleSystem particleSystem = new ParticleSystem(particleCount, () -> new Particle(
+            randomizeWidth ? strokes[r.nextInt(strokes.length)] : stroke, config));
 
-        ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-            .setParticleCreator(() -> new FlowFieldParticle(graphicsCopies, randomizeWidth ? strokes[
-                r.nextInt(strokes.length)] : stroke, meta))
-            .addInitializer(positionRandomizer)
-            .addInitializer(particleInitializer)
-            .addUpdater(forceModeUpdater)
-            .addUpdater(colorSource)
-            .build();
-
-        Future<?>[] futures = particleSystem.iterate(iterationCount, groupCount);
+        Future<?>[] futures = particleSystem.iterate(iterationCount, groupCount, graphicsCopies);
         ThreadPool.waitFor(futures, pt);
-        particleSystem.flush();
+        particleSystem.flush(g2);
         pt.finished();
         for (Graphics2D copy : graphicsCopies) {
             copy.dispose();
@@ -537,7 +515,8 @@ public class FlowField extends ParametrizedFilter {
         return false;
     }
 
-    private static void initializeAcceleration(float multiplierNoise, float multiplierSink, float multiplierRevolve, float zoom, int turbulence, int fieldWidth, int fieldHeight, OpenSimplex2F noise, Vector2D center, float variancePI, float startAngle, Vector2D[][] fieldAccelerations) {
+    private static void initializeAcceleration(float noiseMultiplier, float sinkMultiplier, float revolveMultiplier,
+                                               float zoom, int turbulence, int fieldWidth, int fieldHeight, OpenSimplex2F noise, Vector2D center, float variance, float startAngle, Vector2D[][] fieldAccelerations) {
         Vector2D position = new Vector2D();
         Vector2D noiseForce = new Vector2D();
         Vector2D sinkForce = new Vector2D();
@@ -547,9 +526,9 @@ public class FlowField extends ParametrizedFilter {
             for (int j = 0; j < fieldHeight; j++) {
                 position.set(i, j);
 
-                createSinkForce(position, center, multiplierSink, sinkForce);
-                createRevolveForce(position, center, multiplierRevolve, revolutionForce);
-                createNoiseForce(multiplierNoise, startAngle, variancePI, position.x / zoom,
+                createSinkForce(position, center, sinkMultiplier, sinkForce);
+                createRevolveForce(position, center, revolveMultiplier, revolutionForce);
+                createNoiseForce(noiseMultiplier, startAngle, variance, position.x / zoom,
                     position.y / zoom, 0, turbulence, noise, noiseForce);
 
                 fieldAccelerations[i][j] = Vector2D.add(revolutionForce, sinkForce, noiseForce);
@@ -561,25 +540,12 @@ public class FlowField extends ParametrizedFilter {
         List<Point2D> spawns = new ArrayList<>();
         for (int i = 0; i < sourcePixels.length; i++) {
             if ((sourcePixels[i] & 0xFF_00_00_00) != 0) {
+                int x = i % imgWidth;
                 int y = i / imgWidth;
-                int x = i - y * imgWidth;
-                spawns.add(new Point((int) (x * fieldDensity), (int) (y * fieldDensity)));
+                spawns.add(new Point2D.Double(x * fieldDensity, y * fieldDensity));
             }
         }
         return spawns;
-    }
-
-    private static <T> T getIf(boolean value, Supplier<T> supplier) {
-        if (value) {
-            return supplier.get();
-        }
-        return null;
-    }
-
-    public static <T> void fill(T[] array, int w, Supplier<T> value) {
-        for (int i = 0; i < w; i++) {
-            array[i] = value.get();
-        }
     }
 
     public static <T> void fill(T[][] array, int w, int h, Supplier<T> value) {
@@ -597,17 +563,18 @@ public class FlowField extends ParametrizedFilter {
     private static Color colorFromSourceImage(int x, int y, int imgWidth, int[] sourcePixels, float fieldDensity) {
         x = (int) (x / fieldDensity);
         y = (int) (y / fieldDensity);
-        int i = toRange(0, sourcePixels.length, x + y * imgWidth);
+        int i = ImageMath.clamp(x + y * imgWidth, 0, sourcePixels.length - 1);
         return new Color(sourcePixels[i], true);
     }
 
     private static Color rgbColorFromAcceleration(Vector2D acc, Color particleColor) {
-        double ra = sigmoidFit(acc.x) / 255, rb = sigmoidFit(acc.y) / 255;
+        float normAccX = (float) sigmoidFit(acc.x) / 255.0f;
+        float normAccY = (float) sigmoidFit(acc.y) / 255.0f;
         return new Color(
-            (float) ra * particleColor.getRed(),
-            (float) rb * particleColor.getGreen(),
-            (float) ra * particleColor.getBlue(),
-            (float) particleColor.getAlpha() / 255.0f);
+            normAccX * particleColor.getRed(),
+            normAccY * particleColor.getGreen(),
+            normAccX * particleColor.getBlue(),
+            particleColor.getAlpha() / 255.0f);
     }
 
     private static Color hsbColorFromAcceleration(Vector2D acc, Color particleColor, float divisor) {
@@ -635,130 +602,224 @@ public class FlowField extends ParametrizedFilter {
         T get(int x, int y);
     }
 
-    private static class PositionRandomizer implements Modifier<FlowFieldParticle> {
-        final Modifier<FlowFieldParticle> modifier;
-
-        public PositionRandomizer(int x, int y, int width, int height, List<Point2D> spawnPoints, Random random) {
-            if (spawnPoints == null || spawnPoints.isEmpty()) {
-                modifier = new RandomizePosition<>(x, y, width, height, random);
-            } else {
-                int size = spawnPoints.size();
-                modifier = particle -> particle.pos.setLocation(spawnPoints.get(random.nextInt(size)));
-            }
-        }
-
-        @Override
-        public void modify(FlowFieldParticle particle) {
-            modifier.modify(particle);
-        }
+    /**
+     * A read-only configuration object holding the pre-calculated
+     * field, bounds, user parameters, and random number generators.
+     */
+    private record Config(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds,
+                          double tolerance, float maxVelocitySq, double wind, double zoom, int turbulence,
+                          OpenSimplex2F noise, float noiseMultiplier, float startAngle, float variance,
+                          ForceMode forceMode, HueWalker hueWalker, Color[][] fieldColors, int imgWidth,
+                          int[] sourcePixels, Vector2D[][] fieldAccelerations, ColorSource colorSource,
+                          Color particleColor, boolean randomizeColor, Supplier<Point2D> spawnSupplier) {
     }
 
-    private record ParticleInitializer(Color particleColor,
-                                       boolean randomizeColor,
-                                       Color[][] fieldColors) implements Modifier<FlowFieldParticle> {
+    /**
+     * A single point moving through the flow field.
+     */
+    private static class Particle {
+        Point2D pos = new Point2D.Double();
+        Point2D lastPos = new Point2D.Double();
+        final Vector2D delta = new Vector2D();
 
-        @Override
-        public void modify(FlowFieldParticle particle) {
-            particle.addPoint(particle.pos);
-            int fieldX = particle.getFieldX();
-            int fieldY = particle.getFieldY();
-            particle.startingColor = particle.color = randomizeColor ? fieldColors[fieldX][fieldY] : particleColor;
-        }
-    }
+        Vector2D vel = new Vector2D();
+        final Vector2D acc = new Vector2D();
 
-    private record ForceModeUpdater(ForceMode forceMode,
-                                    Vector2D[][] fieldAccelerations) implements Modifier<FlowFieldParticle> {
-        @Override
-        public void modify(FlowFieldParticle particle) {
-            particle.delta.set(fieldAccelerations[particle.getFieldX()][particle.getFieldY()]);
-        }
-    }
+        Color startingColor;
+        Color color;
 
-    public static class FlowFieldParticle extends SmoothPathParticle {
-        public final Vector2D delta = new Vector2D();
-        public final Vector2D acc = new Vector2D();
-        public Color startingColor;
+        int index; // the particle's index in the list of all particles
+
+        private final List<Point2D> pathPoints = new ArrayList<>();
 
         private final Stroke stroke;
-        private final FlowFieldMeta meta;
+        final Config config;
 
-        public FlowFieldParticle(Graphics2D[] gc, Stroke stroke, FlowFieldMeta meta) {
-            super(gc);
-            this.vel = new Vector2D();
-            this.pos = new Point2D.Float();
-            this.lastPos = new Point2D.Float();
-
+        public Particle(Stroke stroke, Config config) {
             this.stroke = stroke;
-            this.meta = meta;
+            this.config = config;
         }
 
-        @Override
+        /**
+         * Called when the particle is initialized or respawned.
+         */
+        public void init() {
+            // clears its path history, and places itself at a starting point
+            // (either random or based on the source image)
+            pathPoints.clear();
+            this.pos.setLocation(config.spawnSupplier().get());
+            addPoint(this.pos);
+
+            // picks a starting color
+            int fieldX = getFieldX();
+            int fieldY = getFieldY();
+            this.startingColor = this.color = config.randomizeColor()
+                ? config.fieldColors()[fieldX][fieldY]
+                : config.particleColor();
+
+            reset();
+        }
+
+        /**
+         * Called at every simulation iteration.
+         */
+        private void step(int index, Graphics2D g) {
+            if (isDead()) {
+                flush(g);
+                init();
+            }
+            this.index = index;
+            update();
+        }
+
         public void addPoint(Point2D point) {
             lastPos.setLocation(point);
-            super.addPoint(Geometry.deScale(Geometry.copyPoint(point), meta.fieldDensity));
+            pathPoints.add(new Point2D.Double(
+                point.getX() / config.fieldDensity(),
+                point.getY() / config.fieldDensity()
+            ));
         }
 
-        @Override
-        public void flush() {
-            getGraphics().setStroke(stroke);
-            super.flush();
+        /**
+         * Draws the current path onto the image when a particle dies, or when the simulation ends.
+         */
+        public void flush(Graphics2D g) {
+            if (isPathReady()) {
+                g.setStroke(stroke);
+                g.setColor(color);
+                g.draw(getPath());
+            }
+            pathPoints.clear();
         }
 
-        @Override
+        private boolean isPathReady() {
+            return pathPoints.size() >= 3;
+        }
+
+        private Shape getPath() {
+            return Shapes.smoothConnect(pathPoints, 0.5);
+        }
+
         public void reset() {
             lastPos.setLocation(pos);
         }
 
-        @Override
+        /**
+         * Whether the particle has drifted outside the image boundaries.
+         */
         public boolean isDead() {
-            return !meta.bounds.contains(pos);
+            return !config.bounds().contains(pos);
         }
 
-        @Override
+        /**
+         * The physics engine for the particle.
+         */
         public void update() {
+            // retrieves the pre-calculated acceleration vector
+            this.delta.set(config.fieldAccelerations()[getFieldX()][getFieldY()]);
+
+            this.color = config.colorSource().getColor(this);
             Vector2D oldVel = new Vector2D(vel.x, vel.y);
 
-            if (meta.wind != 0) {
-                double sampleX = pos.getX() / meta.zoom;
-                double sampleY = pos.getY() / meta.zoom;
-                double sampleZ = meta.wind * iterationIndex;
+            // if wind is enabled, calculate an additional real-time noise
+            // force to push the particle slightly off its predetermined path
+            if (config.wind() != 0) {
+                double sampleX = pos.getX() / config.zoom();
+                double sampleY = pos.getY() / config.zoom();
+                double sampleZ = config.wind() * index;
                 Vector2D noiseDelta = new Vector2D();
-                createNoiseForce(meta.multiplierNoise, meta.startAngle, meta.variancePI,
-                    sampleX, sampleY, sampleZ, meta.turbulence, meta.noise, noiseDelta);
+                createNoiseForce(config.noiseMultiplier(), config.startAngle(), config.variance(),
+                    sampleX, sampleY, sampleZ, config.turbulence(), config.noise(), noiseDelta);
                 delta.add(noiseDelta);
             }
 
-            meta.forceMode.modify(this);
+            // apply the force to the particle's movement
+            config.forceMode().modify(this);
 
-            if (vel.lengthSq() > meta.maximumVelocitySq) {
+            // caps the maximum velocity
+            if (vel.lengthSq() > config.maxVelocitySq()) {
                 vel.set(oldVel);
             }
 
             if (positionChangedEnough()) {
-                addPoint(Geometry.copyPoint(pos));
+                addPoint(pos);
             }
         }
 
         private boolean positionChangedEnough() {
-            double xChange = abs(lastPos.getX() - pos.getX());
-            double yChange = abs(lastPos.getY() - pos.getY());
-            return xChange > meta.tolerance || yChange > meta.tolerance;
+            double xChange = Math.abs(lastPos.getX() - pos.getX());
+            double yChange = Math.abs(lastPos.getY() - pos.getY());
+            return xChange > config.tolerance() || yChange > config.tolerance();
         }
 
         public int getFieldX() {
-            return toRange(0, meta.fieldWidth, (int) pos.getX());
+            return ImageMath.clamp((int) pos.getX(), 0, config.fieldWidth() - 1);
         }
 
         public int getFieldY() {
-            return toRange(0, meta.fieldHeight, (int) pos.getY());
+            return ImageMath.clamp((int) pos.getY(), 0, config.fieldHeight() - 1);
         }
     }
 
-    public record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds,
-                                double tolerance,
-                                float maximumVelocitySq, double wind, double zoom, int turbulence,
-                                OpenSimplex2F noise, float multiplierNoise, float startAngle, float variancePI,
-                                ForceMode forceMode, GoldenRatio goldenRatio,
-                                Color[][] fieldColors, int imgWidth, int[] sourcePixels) {
+    /**
+     * Manages a collection of particles, handling their lifecycle and updates.
+     */
+    private static class ParticleSystem {
+        private final List<Particle> particles;
+
+        ParticleSystem(int particleCount, Supplier<Particle> creator) {
+            this.particles = new ArrayList<>(particleCount);
+            for (int i = 0; i < particleCount; i++) {
+                Particle particle = creator.get();
+                particle.init();
+                particles.add(particle);
+            }
+        }
+
+        /**
+         * Advances the simulation by a single step for the given range of particles.
+         */
+        private void step(int start, int end, Graphics2D g) {
+            for (int i = start, s = Math.min(particles.size(), end); i < s; i++) {
+                particles.get(i).step(i, g);
+            }
+        }
+
+        /**
+         * Runs the simulation for a given number of iterations.
+         */
+        private void iterate(int iterations, int start, int end, Graphics2D g) {
+            for (int i = 0; i < iterations; i++) {
+                step(start, end, g);
+            }
+        }
+
+        /**
+         * Runs the simulation for the given number of iterations using multiple threads.
+         */
+        public Future<?>[] iterate(int iterations, int groupCount, Graphics2D[] graphicsCopies) {
+            Future<?>[] futures = new Future[groupCount];
+            int size = particles.size();
+            int groupSize = (int) Math.ceil(size / (double) groupCount);
+
+            // divides the particles into equal-sized chunks (groups),
+            // then submits a task to the thread pool for each chunk
+            for (int i = 0, k = 0; i < size; i += groupSize, k++) {
+                int finalI = i;
+                Graphics2D g = graphicsCopies[k];
+                futures[k] = ThreadPool.submit(() -> iterate(iterations, finalI, finalI + groupSize, g));
+            }
+
+            return futures;
+        }
+
+        /**
+         * Flushes all particles, forcing them to draw their final state.
+         */
+        public void flush(Graphics2D g) {
+            for (Particle particle : particles) {
+                particle.flush(g);
+            }
+        }
     }
 }
