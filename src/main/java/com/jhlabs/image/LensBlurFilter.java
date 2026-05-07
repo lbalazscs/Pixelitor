@@ -31,6 +31,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
     private final float bloom;
     private final float bloomThreshold;
     private final int sides;
+    private final float angle;
 
     /**
      * Creates a new {@link LensBlurFilter} with the given parameters.
@@ -40,18 +41,21 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
      * @param sides          the number of sides of the aperture shape
      * @param bloom          the bloom factor applied to bright areas
      * @param bloomThreshold the threshold above which pixel values are considered for blooming
+     * @param angle          the rotation angle of the simulated aperture in radians
      */
     public LensBlurFilter(String filterName,
                           float radius,
                           int sides,
                           float bloom,
-                          float bloomThreshold) {
+                          float bloomThreshold,
+                          float angle) {
         super(filterName);
 
         this.radius = radius;
         this.sides = sides;
         this.bloom = bloom;
         this.bloomThreshold = bloomThreshold;
+        this.angle = angle;
     }
 
     @Override
@@ -103,7 +107,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
 
         float[][] mask = createKernel(w, h);
 
-        // FFT-transform the the kernel upfront for efficiency 
+        // FFT-transform the the kernel upfront for efficiency
         fft.transform2D(mask[0], mask[1], w, h, true);
 
         int stepY = tileHeight - 2 * iradius;
@@ -279,7 +283,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                 if (r2_current < r2) {
                     double r = Math.sqrt(r2_current);
                     if (sides != 0) { // polygonal aperture
-                        double a = FastMath.atan2(dy, dx);
+                        double a = FastMath.atan2(dy, dx) - angle;
                         a = ImageMath.mod(a, polyAngle * 2) - polyAngle;
                         f = FastMath.cos(a) * polyScale;
                     } else { // circular aperture
