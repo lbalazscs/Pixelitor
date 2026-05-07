@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage;
 /**
  * A kind of compound edit used when an image
  * and its mask are changed together.
- * It extends ImageEdit so that it can be used
+ * It extends {@link ImageEdit} so that it can be used
  * as a replacement.
  */
 public class ImageAndMaskEdit extends ImageEdit {

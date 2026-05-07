@@ -60,6 +60,7 @@ import java.awt.image.IndexColorModel;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -263,7 +264,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         compCopy.newLayerCount = newLayerCount;
-        compCopy.mode = mode;
 
         if (options.copySelection() && selection != null) {
             compCopy.setSelection(new Selection(selection));
@@ -279,10 +279,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             compCopy.dirty = dirty;
             compCopy.file = file;
             compCopy.fileTimestamp = fileTimestamp;
-        } else {
-            compCopy.dirty = false;
-            compCopy.file = null;
-            compCopy.fileTimestamp = 0;
         }
 
         compCopy.name = options.createCompCopyName(name);
@@ -416,7 +412,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         FileIO.loadCompAsync(linkedContentFile)
             .thenAcceptAsync(content ->
-                add(new SmartObject(linkedContentFile, this, content)), onEDT)
+                getHolderForNewLayers().add(new SmartObject(linkedContentFile, this, content)), onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
@@ -637,15 +633,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public boolean hasSameFileAs(Composition other, boolean allowBothNull) {
-        if (file == null) {
-            if (allowBothNull) {
-                return other.file == null;
-            } else {
-                return false;
-            }
-        } else {
-            return file.equals(other.file);
+        if (file == null && other.file == null) {
+            return allowBothNull;
         }
+        return Objects.equals(file, other.file);
     }
 
     public boolean hasNoLayers() {
@@ -676,7 +667,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String editName) {
         Layer newLayer = ImageLayer.fromExternalImage(image, this, layerName);
-        addWithHistory(newLayer, editName);
+        getHolderForNewLayers().addWithHistory(newLayer, editName);
     }
 
     /**
@@ -814,7 +805,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             History.add(new DeleteLayerEdit(this, layer, deletedIndex));
         }
 
-        layerList.remove(layer);
+        layerList.remove(deletedIndex);
 
         if (layer.contains(activeLayer)) {
             // the active layer was deleted, a new one must be selected
@@ -1011,16 +1002,16 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Counts the total number of images in this composition including any mask images.
      */
     public int countImages() {
-        int count = 0;
-        for (Layer layer : layerList) {
+        int[] count = {0};
+        forEachNestedLayer(layer -> {
             if (layer instanceof ImageLayer) {
-                count++;
+                count[0]++;
             }
             if (layer.hasMask()) {
-                count++;
+                count[0]++;
             }
-        }
-        return count;
+        }, false);
+        return count[0];
     }
 
     @Override
@@ -1037,8 +1028,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Shows only the given layer and hides all others.
      */
-    public void isolateLayer(Layer layer, boolean addHistory) {
-        if (addHistory) { // not undoing an "isolate"
+    public void isolateLayer(Layer layer, boolean addToHistory) {
+        if (addToHistory) { // not undoing an "isolate"
             // check if we should undo the last isolation of the same layer
             if (History.getEditToBeUndone() instanceof IsolateEdit isolateEdit) {
                 if (isolateEdit.getLayer() == layer) {
@@ -1084,11 +1075,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Applies an action to all nested layers of a specific type.
      */
-    @SuppressWarnings("unchecked")
     public <T extends Layer> void forEachNestedLayerOfType(Class<T> layerType, Consumer<T> action) {
         forEachNestedLayer(layer -> {
-            if (layerType.isAssignableFrom(layer.getClass())) {
-                action.accept((T) layer);
+            if (layerType.isInstance(layer)) {
+                action.accept(layerType.cast(layer));
             }
         }, false);
     }
@@ -1146,10 +1136,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     private Layer getActiveMoveTarget() {
-        if (activeLayer.isMaskEditing()) {
-            return activeLayer.getMask();
-        }
-        return activeLayer;
+        return activeLayer.isMaskEditing() ? activeLayer.getMask() : activeLayer;
     }
 
     /**
@@ -1159,11 +1146,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert checkInvariants();
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
-        } else if (activeLayer instanceof Drawable dr) {
-            return dr;
-        } else {
-            return null;
         }
+        return activeLayer instanceof Drawable dr ? dr : null;
     }
 
     /**
@@ -1174,10 +1158,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
-        if (activeLayer instanceof Filterable) {
-            return (Filterable) activeLayer;
-        }
-        return null;
+        return activeLayer instanceof Filterable f ? f : null;
     }
 
     /**
@@ -1650,12 +1631,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Resizes the active image layer to match canvas dimensions.
      */
     public void activeLayerToCanvasSize() {
-        if (!(activeLayer instanceof ImageLayer)) {
+        if (activeLayer instanceof ImageLayer imageLayer) {
+            imageLayer.toCanvasSizeWithHistory();
+        } else {
             Messages.showNotImageLayerError(activeLayer);
-            return;
         }
-
-        ((ImageLayer) activeLayer).toCanvasSizeWithHistory();
     }
 
     /**
@@ -1706,6 +1686,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Recursively checks if this composition contains
      * the given layer at any nesting level.
      */
+    @Override
     public boolean contains(Layer searched) {
         for (Layer layer : layerList) {
             if (layer.contains(searched)) {
@@ -2000,16 +1981,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // smart objects recursively, looking for linked contents
         CompletableFuture<Composition> reloadFuture = CompletableFuture.completedFuture(null);
 
-        // TODO Only converts the mode of top-level ImageLayers.
-        //  Any image layer inside a layer group is skipped.
-        //  Should use forEachNestedLayerOfType(...) instead of
-        //  iterating layerList directly.
-        for (Layer layer : layerList) {
-            if (layer instanceof SmartObject so) {
-                // open contents are checked directly via the view
-                if (!so.isContentOpen()) {
-                    reloadFuture = reloadFuture.thenCompose(comp -> so.checkAutoReload());
-                }
+        List<SmartObject> nestedSOs = new ArrayList<>();
+        forEachNestedLayerOfType(SmartObject.class, nestedSOs::add);
+
+        for (SmartObject so : nestedSOs) {
+            // open contents are checked directly via the view
+            if (!so.isContentOpen()) {
+                reloadFuture = reloadFuture.thenCompose(comp -> so.checkAutoReload());
             }
         }
         return reloadFuture;

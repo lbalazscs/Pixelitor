@@ -293,9 +293,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void setTranslation(int x, int y) {
-        super.setTranslation(x, y);
-        painter.setTranslation(x, y);
+    public void setTranslation(int tx, int ty) {
+        super.setTranslation(tx, ty);
+        painter.setTranslation(tx, ty);
     }
 
     /**
@@ -428,9 +428,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public JPopupMenu createLayerIconPopupMenu() {
         JPopupMenu popup = super.createLayerIconPopupMenu();
-        if (popup == null) {
-            popup = new JPopupMenu();
-        }
 
         var editMenuItem = new JMenuItem("Edit");
         editMenuItem.addActionListener(e -> edit());

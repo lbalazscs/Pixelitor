@@ -354,18 +354,18 @@ public class GradientTool extends DragTool {
         hideHandles(true);
     }
 
-    private void hideHandles(boolean addHistory) {
+    private void hideHandles(boolean addToHistory) {
         if (handles != null) {
-            hideHandles(Views.getActiveComp(), addHistory);
+            hideHandles(Views.getActiveComp(), addToHistory);
         }
     }
 
-    private void hideHandles(Composition comp, boolean addHistory) {
+    private void hideHandles(Composition comp, boolean addToHistory) {
         if (isEditingGradientLayer()) {
             return;
         }
 
-        if (addHistory) {
+        if (addToHistory) {
             History.add(new GradientHandlesHiddenEdit(comp, lastGradient));
         }
 

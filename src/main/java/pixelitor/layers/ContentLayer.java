@@ -181,9 +181,9 @@ public abstract class ContentLayer extends Layer {
      * Programmatically sets the translation, bypassing layer
      * enlargement checks and without affecting linked layers.
      */
-    public void setTranslation(int x, int y) {
-        translationX = x;
-        translationY = y;
+    public void setTranslation(int tx, int ty) {
+        translationX = tx;
+        translationY = ty;
     }
 
     @Override

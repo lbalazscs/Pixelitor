@@ -763,13 +763,13 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     @Override
-    public void setTranslation(int x, int y) {
+    public void setTranslation(int tx, int ty) {
         // don't allow positive translations for image layers,
         // because the image must always fully cover the canvas
-        if (x > 0 || y > 0) {
-            throw new IllegalArgumentException("x = " + x + ", y = " + y + ", this = " + this);
+        if (tx > 0 || ty > 0) {
+            throw new IllegalArgumentException("tx = " + tx + ", ty = " + ty + ", this = " + this);
         }
-        super.setTranslation(x, y);
+        super.setTranslation(tx, ty);
         invalidateMaskedImageCache();
     }
 
@@ -1125,7 +1125,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     @Override
     public BufferedImage createIconThumbnail() {
         BufferedImage bigImg = getCanvasSizedSubImage();
-        return createThumbnail(bigImg, thumbCheckerBoardPainter);
+        return createThumbnail(bigImg, thumbCheckerboardPainter);
     }
 
     /**

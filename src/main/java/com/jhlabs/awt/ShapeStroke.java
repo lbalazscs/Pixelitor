@@ -26,7 +26,7 @@ import static java.awt.geom.PathIterator.SEG_MOVETO;
 
 /**
  * A Stroke implementation that repeatedly draws a sequence
- * of given shapes along a target path.
+ * of given shapes along the target path.
  * See http://jhlabs.com/java/java2d/strokes/
  */
 public class ShapeStroke implements Stroke {

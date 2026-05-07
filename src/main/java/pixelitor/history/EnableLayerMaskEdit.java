@@ -25,7 +25,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A PixelitorEdit that represents the enabling or disabling of a layer mask
+ * A {@link PixelitorEdit} that represents the enabling or disabling of a layer mask.
  */
 public class EnableLayerMaskEdit extends PixelitorEdit {
     private final Layer layer;

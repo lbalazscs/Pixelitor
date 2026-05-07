@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,12 +31,12 @@ public class LayerGUIFixture extends JToggleButtonFixture {
     }
 
     public void setOpenEye(boolean b) {
-        EDT.run(() -> ((LayerGUI) target()).setOpenEye(b));
+        EDT.run(() -> ((LayerGUI) target()).setEyeIconOpen(b));
         robot().waitForIdle();
     }
 
     private boolean isEyeOpen() {
-        return EDT.call(() -> ((LayerGUI) target()).isEyeOpen());
+        return EDT.call(() -> ((LayerGUI) target()).isEyeIconOpen());
     }
 
     public void requireOpenEye() {

@@ -275,7 +275,7 @@ class LayerGroupTest {
         assertThat(comp).activeLayerIs(layer4);
 
         // ungroup
-        group.unGroup();
+        group.ungroup();
         TestHelper.assertHistoryEditsAre("Ungrouping");
         assertThat(comp)
             .numLayersIs(4)

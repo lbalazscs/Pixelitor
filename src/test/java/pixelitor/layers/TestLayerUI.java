@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,12 +59,12 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void setOpenEye(boolean newVisibility) {
+    public void setEyeIconOpen(boolean newVisibility) {
         showVisibility = newVisibility;
     }
 
     @Override
-    public boolean isEyeOpen() {
+    public boolean isEyeIconOpen() {
         assert layer.isVisible() == showVisibility;
         return showVisibility;
     }

@@ -95,13 +95,13 @@ public class ColorFillLayer extends Layer {
         return false;
     }
 
-    public void changeColor(Color color, boolean addHistory) {
+    public void changeColor(Color newColor, boolean addToHistory) {
         Color prevColor = this.color;
-        this.color = color;
+        this.color = newColor;
         update();
         updateIconImage();
-        if (addHistory) {
-            History.add(new ColorFillLayerChangeEdit(this, prevColor, color));
+        if (addToHistory) {
+            History.add(new ColorFillLayerChangeEdit(this, prevColor, newColor));
         }
     }
 
@@ -118,11 +118,7 @@ public class ColorFillLayer extends Layer {
     @Override
     public JPopupMenu createLayerIconPopupMenu() {
         JPopupMenu popup = super.createLayerIconPopupMenu();
-        if (popup == null) {
-            popup = new JPopupMenu();
-        } else {
-            popup.addSeparator();
-        }
+        popup.addSeparator();
 
         popup.add(Colors.createCopyColorAction(() -> color));
         popup.add(Colors.createPasteColorAction(PixelitorWindow.get(), c -> changeColor(c, true)));

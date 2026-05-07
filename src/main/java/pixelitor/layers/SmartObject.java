@@ -1154,7 +1154,7 @@ public class SmartObject extends CompositeLayer {
     @Override
     public BufferedImage createIconThumbnail() {
         // TODO: The thumbnail isn't created from the canvas-visible region of the image.
-        return createThumbnail(getVisibleImage(), thumbCheckerBoardPainter);
+        return createThumbnail(getVisibleImage(), thumbCheckerboardPainter);
     }
 
     @Override

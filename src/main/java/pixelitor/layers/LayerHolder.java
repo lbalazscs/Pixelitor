@@ -58,6 +58,16 @@ public interface LayerHolder extends Debuggable {
 
     /**
      * Recursively checks if this layer holder contains
+     * the given layer at any nesting level.
+     */
+    boolean contains(Layer layer);
+
+    default boolean containsActiveLayer() {
+        return contains(getComp().getActiveLayer());
+    }
+
+    /**
+     * Recursively checks if this layer holder contains
      * a layer of the given type at any nesting level.
      */
     boolean containsLayerOfType(Class<? extends Layer> type);
@@ -391,7 +401,7 @@ public interface LayerHolder extends Debuggable {
      * Converts the layers at the given indices to a group,
      * optionally using an existing group as the target.
      */
-    default void convertToGroup(int[] indices, LayerGroup target, boolean addHistory) {
+    default void convertToGroup(int[] indices, LayerGroup target, boolean addToHistory) {
         List<Layer> movedLayers = new ArrayList<>(indices.length);
         for (int index : indices) {
             movedLayers.add(getLayer(index));
@@ -403,13 +413,13 @@ public interface LayerHolder extends Debuggable {
         LayerGroup newGroup;
         if (target != null) {
             // history edits must use a specific instance for consistency
-            assert !addHistory;
+            assert !addToHistory;
             newGroup = target;
             newGroup.setLayers(movedLayers);
             // restore the UI-level invariants
             newGroup.updateChildrenUI();
         } else {
-            assert addHistory;
+            assert addToHistory;
             newGroup = new LayerGroup(getComp(), LayerGroup.generateName(), movedLayers);
         }
 
@@ -417,7 +427,7 @@ public interface LayerHolder extends Debuggable {
         int newIndex = lastMovedIndex + 1 - indices.length;
         adder().atIndex(newIndex).add(newGroup);
 
-        if (addHistory) {
+        if (addToHistory) {
             History.add(new GroupingEdit(this, newGroup, indices, null, true));
         }
     }

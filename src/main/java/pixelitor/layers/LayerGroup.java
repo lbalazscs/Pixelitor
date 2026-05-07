@@ -460,7 +460,7 @@ public class LayerGroup extends CompositeLayer {
         if (isPassThrough()) {
             thumb = Thumbnails.createCircleThumb(new Color(0, 138, 0));
         } else if (cachedImage != null) {
-            thumb = createThumbnail(cachedImage, thumbCheckerBoardPainter);
+            thumb = createThumbnail(cachedImage, thumbCheckerboardPainter);
         } else {
             // isolated groups should always have a cached image
             throw new IllegalStateException();
@@ -471,7 +471,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void unGroup() {
+    public void ungroup() {
         if (layers.isEmpty() && isTopLevel() && comp.getNumLayers() == 1) {
             String msg = "<html>The empty layer group <b>" + name + "</b> can't be ungrouped"
                 + "<br>because a composition must always have at least one layer.";
@@ -611,9 +611,6 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public JPopupMenu createLayerIconPopupMenu() {
         JPopupMenu popup = super.createLayerIconPopupMenu();
-        if (popup == null) {
-            popup = new JPopupMenu();
-        }
 
         popup.add(new TaskAction("Ungroup", () ->
             replaceWithUnGrouped(null, true)));

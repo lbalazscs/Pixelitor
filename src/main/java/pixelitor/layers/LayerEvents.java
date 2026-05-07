@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,18 +42,24 @@ public class LayerEvents {
     }
 
     public static void fireMaskAdded(Layer layer) {
+        assert layer.isActive();
+
         for (var listener : maskListeners) {
             listener.maskAdded(layer);
         }
     }
 
     public static void fireMaskDeleted(Layer layer) {
+        assert layer.isActive();
+
         for (var listener : maskListeners) {
             listener.maskDeleted(layer);
         }
     }
 
     public static void fireLayerCountChanged(LayerHolder holder, int newLayerCount) {
+        assert holder.containsActiveLayer();
+
         for (var listener : holderListeners) {
             listener.layerCountChanged(holder, newLayerCount);
         }

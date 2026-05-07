@@ -26,7 +26,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A PixelitorEdit that represents the editing of a text layer.
+ * A {@link PixelitorEdit} that represents the editing of a text layer.
  */
 public class TextLayerChangeEdit extends PixelitorEdit {
     private TextSettings prevSettings;

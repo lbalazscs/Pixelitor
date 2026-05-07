@@ -457,7 +457,7 @@ public class MenuBar extends JMenuBar {
             comp -> comp.getHolderForGrouping().convertVisibleLayersToGroup(), CTRL_SHIFT_G);
 
         sub.addViewEnabled("Ungroup",
-            comp -> comp.getActiveLayer().unGroup(), CTRL_U);
+            comp -> comp.getActiveLayer().ungroup(), CTRL_U);
 
         return sub;
     }

@@ -56,7 +56,7 @@ public class GradientFillLayer extends ContentLayer {
 
     private static int count;
 
-    // helper for Move Tool support
+    // helper capturing the drag state at the beginning of a Move Tool drag
     private transient Drag origDrag;
 
     public GradientFillLayer(Composition comp, String name) {
@@ -154,7 +154,7 @@ public class GradientFillLayer extends ContentLayer {
         Graphics2D g2 = img.createGraphics();
 
         if (gradient == null || gradient.hasTransparency()) {
-            thumbCheckerBoardPainter.paint(g2, null, thumbDim.width, thumbDim.height);
+            thumbCheckerboardPainter.paint(g2, null, thumbDim.width, thumbDim.height);
         }
         if (gradient != null) {
             gradient.paintThumbnail(g2, comp.getCanvas(), thumbDim);
@@ -224,9 +224,9 @@ public class GradientFillLayer extends ContentLayer {
         return gradient;
     }
 
-    public void setGradient(Gradient newGradient, boolean addHistory) {
+    public void setGradient(Gradient newGradient, boolean addToHistory) {
         // the new gradient can be null if this is called while undoing the first gradient
-        assert newGradient != null || !addHistory;
+        assert newGradient != null || !addToHistory;
 
         Gradient prevGradient = this.gradient;
 
@@ -235,7 +235,7 @@ public class GradientFillLayer extends ContentLayer {
         update();
         updateIconImage();
 
-        if (addHistory) {
+        if (addToHistory) {
             History.add(new GradientFillLayerChangeEdit(
                 "Gradient Fill Layer Change", this, prevGradient, newGradient));
         } else { // called from the undo/redo

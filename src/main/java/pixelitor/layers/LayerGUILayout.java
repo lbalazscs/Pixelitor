@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.Dimension;
 import java.awt.LayoutManager;
 
 /**
- * The layout manager for a {@link LayerGUI}
+ * The layout manager for a {@link LayerGUI}.
  */
 public class LayerGUILayout implements LayoutManager {
     private Component nameEditor;
@@ -45,7 +45,7 @@ public class LayerGUILayout implements LayoutManager {
     public static final String LAYER = "LAYER";
     public static final String MASK = "MASK";
     public static final String NAME_EDITOR = "NAME_EDITOR";
-    public static final String CHILDREN = "FILTERS";
+    public static final String CHILDREN = "CHILDREN";
 
     // the size of the icon
     private static final int CHECKBOX_WIDTH = 24;
@@ -56,11 +56,12 @@ public class LayerGUILayout implements LayoutManager {
 
     private static boolean isNimbus = Themes.getActive().isNimbus();
 
-    // The labels will appear to have thumbSize, but in reality
+    // the labels will appear to have thumbSize, but in reality
     // they must be larger in order to leave space to the borders
     private int labelSize;
 
-    private int height;
+    // the height without the children panel
+    private int baseHeight;
 
     static {
         Themes.addThemeChangeListener(LayerGUILayout::themeChanged);
@@ -77,9 +78,9 @@ public class LayerGUILayout implements LayoutManager {
         assert Threads.calledOnEDT();
 
         if (layerIconShowsThumbnail) {
-            height = newThumbSize + 2 * GAP;
+            baseHeight = newThumbSize + 2 * GAP;
         } else {
-            height = SMALL_THUMB_SIZE + 2 * GAP;
+            baseHeight = SMALL_THUMB_SIZE + 2 * GAP;
         }
         labelSize = newThumbSize + 2 * LayerGUI.BORDER_WIDTH;
     }
@@ -115,8 +116,8 @@ public class LayerGUILayout implements LayoutManager {
         assert Threads.calledOnEDT();
 
         return childrenPanel == null
-            ? height
-            : height + childrenPanel.getPreferredSize().height;
+            ? baseHeight
+            : baseHeight + childrenPanel.getPreferredSize().height;
     }
 
     @Override
@@ -144,7 +145,7 @@ public class LayerGUILayout implements LayoutManager {
         if (cbPrefSize.width != CHECKBOX_WIDTH || cbPrefSize.height != CHECKBOX_HEIGHT) {
             throw new IllegalStateException("width = " + cbPrefSize.width + ", height = " + cbPrefSize.height);
         }
-        checkBox.setBounds(startX, (height - CHECKBOX_HEIGHT) / 2, CHECKBOX_WIDTH, CHECKBOX_HEIGHT);
+        checkBox.setBounds(startX, (baseHeight - CHECKBOX_HEIGHT) / 2, CHECKBOX_WIDTH, CHECKBOX_HEIGHT);
         startX += (CHECKBOX_WIDTH + GAP - LayerGUI.BORDER_WIDTH);
 
         // lay out the layer icon
@@ -154,7 +155,7 @@ public class LayerGUILayout implements LayoutManager {
             layerLabel.setBounds(startX, labelStartY, labelSize, labelSize);
             startX += labelSize;
         } else {
-            layerLabel.setBounds(startX, (height - SMALL_THUMB_SIZE) / 2, SMALL_THUMB_SIZE, SMALL_THUMB_SIZE);
+            layerLabel.setBounds(startX, (baseHeight - SMALL_THUMB_SIZE) / 2, SMALL_THUMB_SIZE, SMALL_THUMB_SIZE);
             startX += SMALL_THUMB_SIZE;
         }
 
@@ -171,14 +172,14 @@ public class LayerGUILayout implements LayoutManager {
         int editorHeight = (int) nameEditor.getPreferredSize().getHeight();
 
         int remainingWidth = parent.getWidth() - startX;
-        // the textfield in Nimbus has two invisible pixels around it
+        // the text field in Nimbus has two invisible pixels around it
         int adjustment = isNimbus ? 2 : 0;
-        nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - GAP + 2 * adjustment, editorHeight);
+        nameEditor.setBounds(startX - adjustment, (baseHeight - editorHeight) / 2, remainingWidth - GAP + 2 * adjustment, editorHeight);
 
         if (childrenPanel != null) {
             Dimension sfSize = childrenPanel.getPreferredSize();
             int sfX = layerIconStartX - adjustment;
-            int sfY = height;
+            int sfY = baseHeight;
             int sfWidth = parent.getWidth() - sfX;
             int sfHeight = sfSize.height;
             childrenPanel.setBounds(sfX, sfY, sfWidth, sfHeight);

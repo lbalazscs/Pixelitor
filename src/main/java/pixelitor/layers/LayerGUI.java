@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -58,8 +59,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     public static final Color UNSELECTED_COLOR = new Color(214, 217, 223);
     public static final Color SELECTED_COLOR = new Color(48, 76, 111);
     private static final Color SELECTED_DARK_COLOR = new Color(16, 16, 16);
-    private static final Color SEMI_SELECTED_COLOR = new Color(131, 146, 167);
-    private static final Color SEMI_SELECTED_DARK_COLOR = new Color(38, 39, 40);
+    private static final Color INACTIVE_SELECTED_COLOR = new Color(131, 146, 167);
+    private static final Color INACTIVE_SELECTED_DARK_COLOR = new Color(38, 39, 40);
 
     private SelectionState selectionState;
 
@@ -243,14 +244,19 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     private void layerPopupTriggered(MouseEvent e) {
         JPopupMenu popup = layer.createLayerIconPopupMenu();
-        if (popup != null) {
-            if (AppMode.isDevelopment()) {
-                popup.addSeparator();
-                popup.add(new TaskAction("Internal State...", () ->
-                    Debug.showTree(layer, layer.getTypeString())));
-            }
+        boolean hasActions = popup.getComponentCount() > 0;
 
-            popup.show(this, e.getX(), e.getY());
+        if (AppMode.isDevelopment()) {
+            if (hasActions) {
+                popup.addSeparator();
+            }
+            popup.add(new TaskAction("Internal State...", () ->
+                Debug.showTree(layer, layer.getTypeString())));
+            hasActions = true;
+        }
+
+        if (hasActions) {
+            popup.show(e.getComponent(), e.getX(), e.getY());
         }
     }
 
@@ -327,7 +333,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     private void buttonActivationChanged() {
         if (isSelected()) {
-            // during comp actions, the active layer might already be inside the layer
+            // during comp actions, the active layer might already be
+            // inside the layer (which could be a composite layer)
             if (!layer.contains(layer.getComp().getActiveLayer())) {
                 layer.activate();
             }
@@ -339,13 +346,13 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void setOpenEye(boolean newVisibility) {
+    public void setEyeIconOpen(boolean newVisibility) {
         visibilityCB.setSelected(newVisibility);
         layer.setVisible(newVisibility, true, true);
     }
 
     @Override
-    public boolean isEyeOpen() {
+    public boolean isEyeIconOpen() {
         return visibilityCB.isSelected();
     }
 
@@ -462,7 +469,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             }
         };
 
-        new Thread(notEDT).start();
+        CompletableFuture.runAsync(notEDT);
     }
 
     private void updateIconOnEDT(Layer layer, BufferedImage thumb) {
@@ -526,7 +533,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         if (altClick && shiftClick) {
             // shift-alt-click switches to RUBYLITH
-            // except when it already is in RUBYLITH
+            // except when it is already in RUBYLITH
             if (view.getMaskViewMode() == MaskViewMode.RUBYLITH) {
                 view.setMaskViewMode(MaskViewMode.EDIT_MASK, layer);
             } else {
@@ -534,7 +541,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             }
         } else if (altClick) {
             // alt-click switches to VIEW_MASK
-            // except when it already is in VIEW_MASK
+            // except when it is already in VIEW_MASK
             if (view.getMaskViewMode() == MaskViewMode.VIEW_MASK) {
                 view.setMaskViewMode(MaskViewMode.EDIT_MASK, layer);
             } else {
@@ -614,7 +621,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public void updateUI() {
-        // don't use any UI
+        // no need for a Swing Look and Feel delegate
     }
 
     @Override
@@ -646,7 +653,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         if (layer.isActive()) {
             return darkTheme ? SELECTED_DARK_COLOR : SELECTED_COLOR;
         } else {
-            return darkTheme ? SEMI_SELECTED_DARK_COLOR : SEMI_SELECTED_COLOR;
+            return darkTheme ? INACTIVE_SELECTED_DARK_COLOR : INACTIVE_SELECTED_COLOR;
         }
     }
 

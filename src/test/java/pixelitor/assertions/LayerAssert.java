@@ -81,13 +81,13 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
 
     public S uiIsVisible() {
         isNotNull();
-        assertThat(actual.getUI().isEyeOpen()).isTrue();
+        assertThat(actual.getUI().isEyeIconOpen()).isTrue();
         return myself;
     }
 
     public S uiIsNotVisible() {
         isNotNull();
-        assertThat(actual.getUI().isEyeOpen()).isFalse();
+        assertThat(actual.getUI().isEyeIconOpen()).isFalse();
         return myself;
     }
 

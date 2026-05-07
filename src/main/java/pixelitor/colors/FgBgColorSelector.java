@@ -258,20 +258,20 @@ public class FgBgColorSelector extends JLayeredPane {
         setFgColor(color, notifyListeners, true);
     }
 
-    private void setFgColor(Color color, boolean notifyListeners, boolean addHistory) {
-        setColor(color, true, notifyListeners, addHistory);
+    private void setFgColor(Color color, boolean notifyListeners, boolean addToHistory) {
+        setColor(color, true, notifyListeners, addToHistory);
     }
 
     public void setBgColor(Color color, boolean notifyListeners) {
         setBgColor(color, notifyListeners, true);
     }
 
-    private void setBgColor(Color color, boolean notifyListeners, boolean addHistory) {
-        setColor(color, false, notifyListeners, addHistory);
+    private void setBgColor(Color color, boolean notifyListeners, boolean addToHistory) {
+        setColor(color, false, notifyListeners, addToHistory);
     }
 
     private void setColor(Color color, boolean fg,
-                          boolean notifyListeners, boolean addHistory) {
+                          boolean notifyListeners, boolean addToHistory) {
         Color displayColor;
         if (layerMaskEditing) {
             displayColor = Colors.toGray(color);
@@ -295,7 +295,7 @@ public class FgBgColorSelector extends JLayeredPane {
             updateBgButtonColor(displayColor);
         }
 
-        if (addHistory) {
+        if (addToHistory) {
             ColorHistory.remember(displayColor);
         }
 

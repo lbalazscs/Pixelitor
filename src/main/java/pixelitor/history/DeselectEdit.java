@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.awt.Shape;
 import java.util.Objects;
 
 /**
- * Represents a deselect
+ * Represents a deselection operation.
  */
 public class DeselectEdit extends PixelitorEdit {
     private final Shape backupShape;

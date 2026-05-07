@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.layers.Drawable;
 import java.awt.image.BufferedImage;
 
 /**
- * Abstract superclass of all PixelitorEdits that can be faded
+ * Abstract superclass of all {@link PixelitorEdit}s that can be faded.
  */
 public abstract class FadeableEdit extends PixelitorEdit {
     private final Drawable fadingLayer;

@@ -109,10 +109,10 @@ public class ShapesLayer extends ContentLayer {
         if (styledShape == null) {
             return;
         }
-        // the custom blending modes don't work with gradients
-        boolean useCachedImage = g.getComposite().getClass() != AlphaComposite.class
+        // the custom blending modes don't work with shape-filling gradients
+        boolean needsCache = g.getComposite().getClass() != AlphaComposite.class
             && styledShape.hasBlendingIssue();
-        if (useCachedImage) {
+        if (needsCache) {
             if (cachedImage == null) {
                 cachedImage = ImageUtils.createSysCompatibleImage(comp.getCanvas());
                 Graphics2D imgG = cachedImage.createGraphics();
@@ -162,7 +162,7 @@ public class ShapesLayer extends ContentLayer {
         Graphics2D g2 = img.createGraphics();
 
         if (styledShape == null) {
-            Thumbnails.paintBackground(g2, thumbCheckerBoardPainter);
+            Thumbnails.paintBackground(g2, thumbCheckerboardPainter);
         } else {
             styledShape.paintIconThumbnail(g2);
         }

@@ -571,10 +571,10 @@ public class CropTool extends DragTool {
 
         if (intersection.isEmpty()) {
             // true if a box was moved out, false if the initial drag was off-canvas
-            boolean addHistory = origRect != null;
+            boolean addToHistory = origRect != null;
 
             // crop box is entirely outside the canvas => cancel the crop
-            reset(addHistory, origRect, origAllowGrowing);
+            reset(addToHistory, origRect, origAllowGrowing);
             return BoxAdjustmentResult.RESET;
         }
         boolean needsAdjustment = !intersection.equals(currentImRect);
@@ -593,13 +593,13 @@ public class CropTool extends DragTool {
         reset();
     }
 
-    private void reset(boolean addHistory,
+    private void reset(boolean addToHistory,
                        Rectangle2D rectBeforeDismissal,
                        boolean allowGrowingBeforeDismissal) {
         View activeView = Views.getActive();
         Composition comp = (activeView != null) ? activeView.getComp() : null;
 
-        if (addHistory && comp != null) {
+        if (addToHistory && comp != null) {
             assert rectBeforeDismissal != null;
             History.add(new CropBoxChangedEdit("Dismiss Crop Box", comp,
                 rectBeforeDismissal, null,
