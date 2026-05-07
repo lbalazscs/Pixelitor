@@ -21,10 +21,7 @@ import com.jhlabs.composite.AddComposite;
 import com.jhlabs.image.RaysFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.ResizingFilterHelper;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -33,7 +30,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.OPACITY;
 
 /**
@@ -54,7 +50,7 @@ public class JHRays extends ParametrizedFilter {
     private final GradientParam colors = GradientParam.createUniformWhite();
 
     private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 25, 100);
-    private final BooleanParam raysOnly = new BooleanParam("Rays Only", false, IGNORE_RANDOMIZE);
+    private final BooleanParam raysOnly = new BooleanParam("Rays Only", false, RandomizeMode.IGNORE);
 
     private RaysFilter filter;
 

@@ -88,8 +88,8 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
      * the shape to accommodate all effects.
      */
     public double calcMaxEffectPadding() {
-        // inner glow is not considered here as it doesn't
-        // extend beyond the shape's bounds
+        // inner glow is not considered here because
+        // it renders inside the shape, not outside
         double maxPadding = 0;
         
         if (glowEffect != null) {
@@ -173,12 +173,12 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
             var endEffect = endState.getGlow();
             float newOpacity = glowEffect.interpolateOpacity(
                 endEffect.getOpacity(), progressFloat);
-            var newGlowEffect = new GlowPathEffect(newOpacity);
+            var newGlow = new GlowPathEffect(newOpacity);
             Color newBrushColor = glowEffect.interpolateBrushColor(
                 endEffect.getBrushColor(), progress);
-            glowEffect.setBrushColor(newBrushColor);
+            newGlow.setBrushColor(newBrushColor);
 
-            interpolatedEffects.setGlow(newGlowEffect);
+            interpolatedEffects.setGlow(newGlow);
         }
         if (innerGlowEffect != null) {
             var endEffect = endState.getInnerGlow();
@@ -228,7 +228,7 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
     }
 
     @Override
-    public String toSaveString() {
+    public String toPresetString() {
         throw new UnsupportedOperationException();
     }
 

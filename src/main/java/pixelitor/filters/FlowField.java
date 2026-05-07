@@ -45,8 +45,7 @@ import static net.jafama.FastMath.exp;
 import static net.jafama.FastMath.pow;
 import static net.jafama.FastMath.sin;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
-import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
+import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 public class FlowField extends ParametrizedFilter {
@@ -219,15 +218,17 @@ public class FlowField extends ParametrizedFilter {
 
     private final EnumParam<ForceMode> forceModeParam = new EnumParam<>("Force Mode", ForceMode.class);
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
-    private final RangeParam pathLengthParam = new RangeParam("Path Length", 1, 100, 100, true, BORDER, IGNORE_RANDOMIZE);
+    private final RangeParam pathLengthParam = new RangeParam("Path Length",
+        1, 100, 100, true, BORDER, RandomizeMode.IGNORE);
 
-    private final RangeParam numParticlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
+    private final RangeParam numParticlesParam = new RangeParam("Particle Count",
+        1, 1000, 20000, true, BORDER, RandomizeMode.IGNORE);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final BooleanParam antiAliasParam = new BooleanParam("Use Antialiasing");
-    private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), ALPHA_ENABLED);
-    private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), ALPHA_ENABLED);
+    private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), RANDOMIZED_ALPHA);
+    private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), RANDOMIZED_ALPHA);
     private final EnumParam<ColorSource> initialColorsParam = new EnumParam<>("Initialize Colors", ColorSource.class);
-    private final BooleanParam startFlowFromSourceParam = new BooleanParam("Start Flow from Source Image", false, IGNORE_RANDOMIZE);
+    private final BooleanParam startFlowFromSourceParam = new BooleanParam("Start Flow from Source Image", false, RandomizeMode.IGNORE);
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
     private final RangeParam widthRandomnessParam = new RangeParam("Stroke Width Randomness (%)", 0, 0, 100);
 
@@ -241,7 +242,7 @@ public class FlowField extends ParametrizedFilter {
         }, false).autoNormalized();
 
         CompositeParam noiseAdjustmentParam = new CompositeParam("Noise", zoomParam, varianceParam, turbulenceParam, windParam);
-        noiseParam.setupEnableOtherIfNotZero(noiseAdjustmentParam);
+        noiseParam.enableOtherWhenNotZero(noiseAdjustmentParam);
 
         CompositeParam advancedParam = new CompositeParam("Advanced", forceModeParam, maxVelocityParam, pathLengthParam);
 
@@ -388,7 +389,7 @@ public class FlowField extends ParametrizedFilter {
     private FilterState createVortexPreset(GroupedRangeParam forceMixerParam) {
         return new FilterState("Vortex")
             .with(forceMixerParam, new GroupedRangeParamState(new double[]{5, 35, 60}, false))
-            .with(strokeParam, StrokeSettings.defaultsWith(StrokeType.TAPERING_REV, 4))
+            .with(strokeParam, StrokeSettings.createWithDefaults(StrokeType.TAPERING_REV, 4))
             .with(widthRandomnessParam, new RangeParamState(100))
             .with(antiAliasParam, YES)
             .withReset();

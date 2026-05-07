@@ -61,28 +61,38 @@ public class MaskFromColorRangePanel extends JPanel {
     private static final int DEFAULT_THUMB_SIZE = 512;
     private static final String SAMPLING_HELP_TEXT = "Select a color by clicking or dragging on the image";
 
-    private static final String PREVIEW_MODE_MASK = "Mask";
-    private static final String PREVIEW_MODE_BLACK_MATTE = "Black Matte";
-    private static final String PREVIEW_MODE_WHITE_MATTE = "White Matte";
-    private static final String PREVIEW_MODE_RUBYLITH = "Rubylith";
-    private final JComboBox<String> previewModeCB = new JComboBox<>(
-        new String[]{PREVIEW_MODE_MASK,
-            PREVIEW_MODE_BLACK_MATTE,
-            PREVIEW_MODE_WHITE_MATTE,
-            PREVIEW_MODE_RUBYLITH});
+    private enum PreviewMode {
+        MASK("Mask"),
+        BLACK_MATTE("Black Matte"),
+        WHITE_MATTE("White Matte"),
+        RUBYLITH("Rubylith");
+
+        private final String displayName;
+
+        PreviewMode(String displayName) {
+            this.displayName = displayName;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    private final JComboBox<PreviewMode> previewModeCB = new JComboBox<>(PreviewMode.values());
 
     private static final String IMG_SRC_LAYER = "Current Layer";
     private static final String IMG_SRC_COMP = "Composite Image";
     private final JComboBox<String> imageSourceCB = new JComboBox<>(
         new String[]{IMG_SRC_LAYER, IMG_SRC_COMP});
 
-    private JComboBox<Item> distMetricCombo;
+    private final JComboBox<Item> distMetricCombo;
     private final RangeParam tolerance = new RangeParam("Tolerance", 0, 10, 150);
     private final RangeParam softness = new RangeParam("   Softness", 0, 10, 100);
-    private JCheckBox invertMaskCheckBox;
+    private final JCheckBox invertMaskCheckBox;
 
-    private int colorSamplerWidth;
-    private int colorSamplerHeight;
+    private int colorSamplingWidth;
+    private int colorSamplingHeight;
 
     private final ImagePanel previewPanel = new ImagePanel(false);
 
@@ -93,7 +103,7 @@ public class MaskFromColorRangePanel extends JPanel {
 
     // a thumbnail-sized version of the source image
     // used for picking a color
-    private BufferedImage colorSamplerImg;
+    private BufferedImage colorSamplingImg;
 
     private Color selectedColor;
     private final Layer layer;
@@ -104,12 +114,12 @@ public class MaskFromColorRangePanel extends JPanel {
         this.layer = layer;
 
         // by default use the layer image
-        createLayerBasedSourceImage();
+        srcImage = createLayerBasedSourceImage();
         srcIsLayer = true;
         imageSourceCB.addActionListener(e -> updateImageSource(comp));
 
-        createInvertCheckBox();
-        createColorSpaceComboBox();
+        invertMaskCheckBox = createInvertCheckBox();
+        distMetricCombo = createColorSpaceComboBox();
 
         add(createNorthPanel(), NORTH);
         add(createImagesPanel(srcImage), CENTER);
@@ -117,40 +127,42 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     private void updateImageSource(Composition comp) {
-        Object selectedSource = imageSourceCB.getSelectedItem();
-        if (selectedSource.equals(IMG_SRC_LAYER) && !srcIsLayer) {
-            // change to layer-based
-            createLayerBasedSourceImage();
-            srcIsLayer = true;
-            updateColorSamplerImage(true);
-        } else if (srcIsLayer) {
-            // change to composite-based
-            srcImage = comp.getCompositeImage();
-            srcIsLayer = false;
-            updateColorSamplerImage(true);
+        boolean srcIsLayerNow = IMG_SRC_LAYER.equals(imageSourceCB.getSelectedItem());
+        if (srcIsLayer == srcIsLayerNow) {
+            return; // no change
         }
+
+        srcIsLayer = srcIsLayerNow;
+        srcImage = srcIsLayer
+            ? createLayerBasedSourceImage()
+            : comp.getCompositeImage();
+
+        updateColorSamplingImage(true);
     }
 
-    private void createLayerBasedSourceImage() {
-        srcImage = layer.toImage(false, false);
-        if (isSubImage(srcImage)) { // can happen for big image layers
-            srcImage = copySubImage(srcImage);
+    private BufferedImage createLayerBasedSourceImage() {
+        BufferedImage img = layer.toImage(false, false);
+        if (isSubImage(img)) { // can happen for big image layers
+            img = copySubImage(img);
         }
+        return img;
     }
 
-    private void createInvertCheckBox() {
-        invertMaskCheckBox = new JCheckBox();
-        invertMaskCheckBox.setName("invertMaskCheckBox");
+    private static JCheckBox createInvertCheckBox() {
+        JCheckBox checkBox = new JCheckBox();
+        checkBox.setName("invertMaskCheckBox");
+        return checkBox;
     }
 
-    private void createColorSpaceComboBox() {
-        distMetricCombo = new JComboBox<>(new Item[]{
+    private static JComboBox<Item> createColorSpaceComboBox() {
+        JComboBox<Item> combo = new JComboBox<>(new Item[]{
             new Item("HSB", MaskFromColorRangeFilter.HSB),
             new Item("Hue", MaskFromColorRangeFilter.HUE),
             new Item("Sat", MaskFromColorRangeFilter.SAT),
             new Item("RGB", MaskFromColorRangeFilter.RGB),
         });
-        distMetricCombo.setName("distMetricCombo");
+        combo.setName("distMetricCombo");
+        return combo;
     }
 
     private JPanel createNorthPanel() {
@@ -174,35 +186,36 @@ public class MaskFromColorRangePanel extends JPanel {
         Dimension thumbDim = calcThumbDimensions(
             image.getWidth(), image.getHeight(), DEFAULT_THUMB_SIZE, true);
 
-        createColorSamplerPanel(thumbDim);
+        colorSamplingPanel = createColorSamplingPanel(thumbDim);
         previewPanel.setPreferredSize(thumbDim);
 
-        JPanel samplerContainer = new JPanel(new BorderLayout());
-        samplerContainer.setBorder(createTitledBorder(SAMPLING_HELP_TEXT));
-        samplerContainer.add(colorSamplingPanel, CENTER);
+        JPanel samplingContainer = new JPanel(new BorderLayout());
+        samplingContainer.setBorder(createTitledBorder(SAMPLING_HELP_TEXT));
+        samplingContainer.add(colorSamplingPanel, CENTER);
 
         JPanel previewContainer = new JPanel(new BorderLayout());
         previewContainer.setBorder(createTitledBorder("Preview"));
         previewContainer.add(previewPanel, CENTER);
 
         JPanel imagesPanel = new JPanel(new GridLayout(1, 2, 5, 5));
-        imagesPanel.add(samplerContainer);
+        imagesPanel.add(samplingContainer);
         imagesPanel.add(previewContainer);
         return imagesPanel;
     }
 
-    private void createColorSamplerPanel(Dimension size) {
-        colorSamplingPanel = new ColorSamplingPanel(colorSamplerImg, this::handleColorSelection);
+    private ColorSamplingPanel createColorSamplingPanel(Dimension size) {
+        ColorSamplingPanel panel = new ColorSamplingPanel(colorSamplingImg, this::handleColorSelection);
 
-        colorSamplingPanel.addComponentListener(new ComponentAdapter() {
+        panel.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                updateColorSamplerImage(false);
+                updateColorSamplingImage(false);
             }
         });
 
-        colorSamplingPanel.setCursor(Cursors.CROSSHAIR);
-        colorSamplingPanel.setPreferredSize(size);
+        panel.setCursor(Cursors.CROSSHAIR);
+        panel.setPreferredSize(size);
+        return panel;
     }
 
     private void handleColorSelection(Color selectedColor) {
@@ -210,19 +223,19 @@ public class MaskFromColorRangePanel extends JPanel {
         updatePreview(selectedColor);
     }
 
-    private void updateColorSamplerImage(boolean forceUpdate) {
+    private void updateColorSamplingImage(boolean forceUpdate) {
         int newWidth = colorSamplingPanel.getWidth();
         int newHeight = colorSamplingPanel.getHeight();
 
-        if (!forceUpdate && newWidth == colorSamplerWidth && newHeight == colorSamplerHeight) {
+        if (!forceUpdate && newWidth == colorSamplingWidth && newHeight == colorSamplingHeight) {
             return;
         }
 
-        colorSamplerWidth = newWidth;
-        colorSamplerHeight = newHeight;
+        colorSamplingWidth = newWidth;
+        colorSamplingHeight = newHeight;
 
-        colorSamplerImg = createThumbnail(srcImage, newWidth, newHeight, null);
-        colorSamplingPanel.setImageAndRepaint(colorSamplerImg);
+        colorSamplingImg = createThumbnail(srcImage, newWidth, newHeight, null);
+        colorSamplingPanel.setImageAndRepaint(colorSamplingImg);
         updatePreview(selectedColor);
     }
 
@@ -260,24 +273,24 @@ public class MaskFromColorRangePanel extends JPanel {
         return southPanel;
     }
 
-    private boolean validate(JDialog d) {
-        if (getSelectedColor() == null) {
+    private boolean validateSettings(JDialog d) {
+        if (selectedColor == null) {
             Dialogs.showInfo(d, "No color selected", SAMPLING_HELP_TEXT);
             return false;
         }
         return true;
     }
 
-    private MaskFromColorRangeFilter createFilter(Color c) {
-        MaskFromColorRangeFilter filter = new MaskFromColorRangeFilter(NAME);
-
+    private MaskFromColorRangeFilter createFilter(Color color) {
         int distMetric = ((Item) distMetricCombo.getSelectedItem()).value();
-        filter.setDistanceMetric(distMetric);
-        filter.setReferenceColor(c);
-        filter.setTolerance(tolerance.getValue(), softness.getPercentage());
-        filter.setInvertMask(invertMaskCheckBox.isSelected());
 
-        return filter;
+        return new MaskFromColorRangeFilter(NAME,
+            distMetric,
+            color,
+            tolerance.getValue(),
+            softness.getPercentage(),
+            invertMaskCheckBox.isSelected()
+        );
     }
 
     private void updatePreview(Color c) {
@@ -285,16 +298,14 @@ public class MaskFromColorRangePanel extends JPanel {
             return; // the color was not set yet
         }
         MaskFromColorRangeFilter filter = createFilter(c);
-        BufferedImage rgbMask = filter.filter(colorSamplerImg, null);
+        BufferedImage rgbMask = filter.filter(colorSamplingImg, null);
 
-        String previewMode = (String) previewModeCB.getSelectedItem();
-
+        PreviewMode previewMode = (PreviewMode) previewModeCB.getSelectedItem();
         switch (previewMode) {
-            case PREVIEW_MODE_MASK -> previewPanel.setImageAndRepaint(rgbMask);
-            case PREVIEW_MODE_RUBYLITH -> updateRubyPreview(rgbMask);
-            case PREVIEW_MODE_BLACK_MATTE -> updateMattePreview(rgbMask, Color.BLACK);
-            case PREVIEW_MODE_WHITE_MATTE -> updateMattePreview(rgbMask, Color.WHITE);
-            default -> throw new IllegalStateException("previewMode = " + previewMode);
+            case MASK -> previewPanel.setImageAndRepaint(rgbMask);
+            case RUBYLITH -> updateRubyPreview(rgbMask);
+            case BLACK_MATTE -> updateMattePreview(rgbMask, Color.BLACK);
+            case WHITE_MATTE -> updateMattePreview(rgbMask, Color.WHITE);
         }
     }
 
@@ -302,7 +313,7 @@ public class MaskFromColorRangePanel extends JPanel {
         BufferedImage grayMask = convertToGrayscaleImage(rgbMask);
         BufferedImage ruby = new BufferedImage(RUBYLITH_COLOR_MODEL,
             grayMask.getRaster(), false, null);
-        BufferedImage rubyPreview = copyImage(colorSamplerImg);
+        BufferedImage rubyPreview = copyImage(colorSamplingImg);
         Graphics2D g = rubyPreview.createGraphics();
         g.setComposite(RUBYLITH_COMPOSITE);
         g.drawImage(ruby, 0, 0, null);
@@ -316,7 +327,7 @@ public class MaskFromColorRangePanel extends JPanel {
             TRANSPARENCY_COLOR_MODEL, grayMask.getRaster(),
             false, null);
 
-        BufferedImage thumbWithTransparency = copyImage(colorSamplerImg);
+        BufferedImage thumbWithTransparency = copyImage(colorSamplingImg);
         Graphics2D g = thumbWithTransparency.createGraphics();
         g.setComposite(DstIn);
         g.drawImage(transparencyImage, 0, 0, null);
@@ -340,10 +351,6 @@ public class MaskFromColorRangePanel extends JPanel {
         return convertToGrayscaleImage(rgbMask);
     }
 
-    private Color getSelectedColor() {
-        return selectedColor;
-    }
-
     public static void showInDialog(Composition comp) {
         var layer = comp.getActiveLayer();
         var panel = new MaskFromColorRangePanel(comp, layer);
@@ -356,7 +363,7 @@ public class MaskFromColorRangePanel extends JPanel {
                 BufferedImage maskImage = panel.getMaskImage();
                 layer.addOrReplaceMaskImage(maskImage, NAME);
             })
-            .validator(panel::validate)
+            .validator(panel::validateSettings)
             .show();
     }
 }

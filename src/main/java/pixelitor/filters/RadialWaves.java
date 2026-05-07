@@ -72,8 +72,7 @@ public class RadialWaves extends ParametrizedFilter {
             radialAmplitude.getValueAsDouble(),
             phase.getPercentage(),
             zoom.getPercentage(),
-            waveType.getValue()
-        );
+            waveType.getValue());
 
         return filter.filter(src, dest);
     }

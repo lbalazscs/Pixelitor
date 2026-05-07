@@ -28,7 +28,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     /**
      * The convolution kernel.
      */
-    protected Kernel kernel = null;
+    protected Kernel kernel;
 
     /**
      * Whether to premultiply the alpha before convolving.

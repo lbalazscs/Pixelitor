@@ -60,7 +60,7 @@ public class ChannelSelectorPanel extends JPanel {
 
     private void wireComboBoxes(Consumer<Channel> channelChangedCallback) {
         // when the color space changes, update the list of available channels
-        colorSpaceParam.addOnChangeTask(() -> {
+        colorSpaceParam.addSelectionListener(() -> {
             List<Channel> newChoices = colorSpaceParam.getSelected().getChannels();
             // updating choices implicitly selects the first, triggering the channel change listener
             channelParam.setChoices(newChoices, false);
@@ -68,7 +68,7 @@ public class ChannelSelectorPanel extends JPanel {
         });
 
         // when the channel selection changes, notify the callback
-        channelParam.addOnChangeTask(() -> {
+        channelParam.addSelectionListener(() -> {
             if (channelChangedCallback != null) {
                 channelChangedCallback.accept(channelParam.getSelected());
             }
@@ -79,7 +79,7 @@ public class ChannelSelectorPanel extends JPanel {
      * Adds a listener to be notified when the color space selection changes.
      */
     public void addColorSpaceChangedListener(Consumer<ColorSpace> listener) {
-        colorSpaceParam.addOnChangeTask(() -> listener.accept(colorSpaceParam.getSelected()));
+        colorSpaceParam.addSelectionListener(() -> listener.accept(colorSpaceParam.getSelected()));
     }
 
     public Channel getSelectedChannel() {

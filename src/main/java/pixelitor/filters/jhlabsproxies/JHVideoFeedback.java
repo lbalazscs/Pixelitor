@@ -60,8 +60,7 @@ public class JHVideoFeedback extends ParametrizedFilter {
             return src;
         }
 
-        FeedbackFilter filter = new FeedbackFilter(
-            NAME,
+        FeedbackFilter filter = new FeedbackFilter(NAME,
             center.getRelativePoint(),
             0,
             0,
@@ -69,8 +68,7 @@ public class JHVideoFeedback extends ParametrizedFilter {
             (float) zoom.getPercentage(),
             (float) startOpacity.getPercentage(),
             (float) endOpacity.getPercentage(),
-            iterations.getValue()
-        );
+            iterations.getValue());
 
         return filter.filter(src, dest);
     }

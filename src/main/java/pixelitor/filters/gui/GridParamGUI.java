@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -38,14 +37,14 @@ public class GridParamGUI extends JPanel implements ParamGUI {
     private final GridEditorPanel gridEditorPanel;
     private final ResetButton resetButton;
 
-    private final RangeParam gridWidthParam;
-    private final RangeParam gridHeightParam;
+    private final RangeParam gridColsParam;
+    private final RangeParam gridRowsParam;
     private final JComboBox<String> presetComboBox;
     private final ActionListener presetListener;
     private final JButton randomizeButton;
 
     /**
-     * Constructs the GUI for the given GridParam model.
+     * Constructs the GUI for the given {@link GridParam} model.
      */
     public GridParamGUI(GridParam model) {
         super(new BorderLayout(5, 0));
@@ -54,11 +53,11 @@ public class GridParamGUI extends JPanel implements ParamGUI {
         this.gridEditorPanel = new GridEditorPanel(model, model.getPainters());
         this.resetButton = new ResetButton(model);
 
-        presetComboBox = new JComboBox<>(model.getPresetNames().toArray(new String[0]));
+        presetComboBox = new JComboBox<>(model.getSelectablePresetNames());
         this.presetListener = e -> {
-            String selected = (String) presetComboBox.getSelectedItem();
-            if (selected != null && !selected.equals(model.getSelectedPresetName())) {
-                model.selectPreset(selected);
+            String selectedPreset = (String) presetComboBox.getSelectedItem();
+            if (selectedPreset != null && !selectedPreset.equals(model.getSelectedPresetName())) {
+                model.selectPreset(selectedPreset);
             }
         };
 
@@ -69,11 +68,11 @@ public class GridParamGUI extends JPanel implements ParamGUI {
         });
         randomizeButton.setToolTipText("Randomize " + model.getName());
 
-        int defaultWidth = model.getGridCols();
-        int defaultHeight = model.getGridRows();
+        int defaultCols = model.getGridCols();
+        int defaultRows = model.getGridRows();
 
-        gridWidthParam = new RangeParam("Columns", 2, defaultWidth, 8, false, NONE);
-        gridHeightParam = new RangeParam("Rows", 2, defaultHeight, 8, false, NONE);
+        gridColsParam = new RangeParam("Columns", 2, defaultCols, 8, false, NONE);
+        gridRowsParam = new RangeParam("Rows", 2, defaultRows, 8, false, NONE);
 
         add(createSettingsPanel(), BorderLayout.WEST);
         add(gridEditorPanel, BorderLayout.CENTER);
@@ -96,14 +95,14 @@ public class GridParamGUI extends JPanel implements ParamGUI {
         presetPanel.add(randomizeButton);
         gbh.addLabelAndControlNoStretch("Preset:", presetPanel);
 
-        gridWidthParam.setAdjustmentListener(() ->
-            model.setGridWidth(gridWidthParam.getValue()));
+        gridColsParam.setAdjustmentListener(() ->
+            model.setGridCols(gridColsParam.getValue()));
 
-        gridHeightParam.setAdjustmentListener(() ->
-            model.setGridHeight(gridHeightParam.getValue()));
+        gridRowsParam.setAdjustmentListener(() ->
+            model.setGridRows(gridRowsParam.getValue()));
 
-        gbh.addParam(gridWidthParam);
-        gbh.addParam(gridHeightParam);
+        gbh.addParam(gridColsParam);
+        gbh.addParam(gridRowsParam);
 
         return p;
     }
@@ -115,8 +114,8 @@ public class GridParamGUI extends JPanel implements ParamGUI {
         presetComboBox.setSelectedItem(model.getSelectedPresetName());
         presetComboBox.addActionListener(presetListener);
 
-        gridWidthParam.setValue(model.getGridCols(), false);
-        gridHeightParam.setValue(model.getGridRows(), false);
+        gridColsParam.setValue(model.getGridCols(), false);
+        gridRowsParam.setValue(model.getGridRows(), false);
         gridEditorPanel.gridModelChanged();
         resetButton.updateState();
     }
@@ -127,8 +126,8 @@ public class GridParamGUI extends JPanel implements ParamGUI {
 
         presetComboBox.setEnabled(b);
         randomizeButton.setEnabled(b);
-        gridWidthParam.setEnabled(b);
-        gridHeightParam.setEnabled(b);
+        gridColsParam.setEnabled(b);
+        gridRowsParam.setEnabled(b);
 
         gridEditorPanel.setEnabled(b);
         // the reset button's enabled state is also managed by its own logic (isAtDefault)

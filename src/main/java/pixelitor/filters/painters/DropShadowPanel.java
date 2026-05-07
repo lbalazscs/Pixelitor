@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.painters;
 
 import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.AngleUI;
+import pixelitor.filters.gui.AngleSelector;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
@@ -50,8 +50,8 @@ public class DropShadowPanel extends EffectPanel {
         gbh.addLabelAndControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", defaultAngle);
-        var angleUI = new AngleUI(angleParam);
-        gbh.addLabelAndControl("Angle:", angleUI);
+        var angleSelector = new AngleSelector(angleParam);
+        gbh.addLabelAndControl("Angle:", angleSelector);
 
         spreadParam = new RangeParam("Spread:", 1, defaultSpread, 100);
         var spreadSlider = SliderSpinner.from(spreadParam);

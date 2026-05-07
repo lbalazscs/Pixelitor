@@ -25,14 +25,15 @@ import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
 
 /**
- * A {@link Stroke} which takes an array of existing {@link Shape}s,
- * and draws them along the path to be drawn.
+ * A Stroke implementation that repeatedly draws a sequence
+ * of given shapes along a target path.
  * See http://jhlabs.com/java/java2d/strokes/
  */
 public class ShapeStroke implements Stroke {
     private final Shape[] shapes;
     private final float advance;
     private final AffineTransform t = new AffineTransform();
+
     private static final float FLATNESS = 1;
 
     public ShapeStroke(Shape shape, float advance) {
@@ -43,7 +44,7 @@ public class ShapeStroke implements Stroke {
         this.advance = advance;
         this.shapes = new Shape[shapes.length];
 
-        // Move each shape to be centered at the origin
+        // move each shape to be centered at the origin
         for (int i = 0; i < this.shapes.length; i++) {
             Rectangle2D bounds = shapes[i].getBounds2D();
             t.setToTranslation(-bounds.getCenterX(), -bounds.getCenterY());
@@ -59,8 +60,8 @@ public class ShapeStroke implements Stroke {
 
         float moveX = 0, moveY = 0;
         float lastX = 0, lastY = 0;
-        float thisX = 0, thisY = 0;
-        int type = 0;
+        float currentX, currentY;
+        int type;
         float thresholdDist = 0;
 
         int shapeIndex = 0;
@@ -82,14 +83,14 @@ public class ShapeStroke implements Stroke {
                 // fall through
 
                 case SEG_LINETO:
-                    thisX = points[0];
-                    thisY = points[1];
-                    float dx = thisX - lastX;
-                    float dy = thisY - lastY;
+                    currentX = points[0];
+                    currentY = points[1];
+                    float dx = currentX - lastX;
+                    float dy = currentY - lastY;
                     float distance = (float) Math.sqrt(dx * dx + dy * dy);
                     if (distance >= thresholdDist) {
                         float angle = (float) Math.atan2(dy, dx);
-                        // handles segments which are long enough
+                        // handles segments that are long enough
                         // to require several shapes along their length
                         while (shapeIndex < numShapes && distance >= thresholdDist) {
                             float x = lastX + thresholdDist * dx / distance;
@@ -103,8 +104,8 @@ public class ShapeStroke implements Stroke {
                         }
                     }
                     thresholdDist -= distance;
-                    lastX = thisX;
-                    lastY = thisY;
+                    lastX = currentX;
+                    lastY = currentY;
                     break;
             }
             it.next();

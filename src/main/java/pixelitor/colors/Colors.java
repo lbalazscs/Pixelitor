@@ -372,7 +372,7 @@ public class Colors {
     /**
      * Format a color's value in the format expected by G'MIC.
      */
-    public static String formatGMIC(Color color) {
+    public static String formatGmic(Color color) {
         return String.format(Locale.ROOT, "%d,%d,%d,%d",
             color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     }

@@ -55,13 +55,11 @@ public class JHLensBlur extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        LensBlurFilter filter = new LensBlurFilter(
-            NAME,
+        LensBlurFilter filter = new LensBlurFilter(NAME,
             amount.getValueAsFloat(),
             numSides.getValue(),
             bloomFactor.getValueAsFloat(),
-            bloomThreshold.getValueAsFloat()
-        );
+            bloomThreshold.getValueAsFloat());
 
         dest = ImageUtils.filterPremultiplied(src, dest, filter);
 

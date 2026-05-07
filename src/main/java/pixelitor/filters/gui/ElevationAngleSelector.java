@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,8 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 /**
  * A GUI component for selecting elevation angles between 0 and 90 degrees with the mouse.
  */
-public class ElevationAngleUI extends AbstractAngleUI {
-    public ElevationAngleUI(ElevationAngleParam param) {
+public class ElevationAngleSelector extends AbstractAngleSelector {
+    public ElevationAngleSelector(ElevationAngleParam param) {
         super(param);
 
         // the rotation center is at the bottom-left corner
@@ -46,12 +46,12 @@ public class ElevationAngleUI extends AbstractAngleUI {
         boolean darkTheme = Themes.getActive().isDark();
 
         // draw lines representing 0 degrees (horizon) and 90 degrees (zenith)
-        setupOuterColor(g2, darkTheme);
+        setOuterColor(g2, darkTheme);
         g2.drawLine(0, 0, 0, SELECTOR_SIZE);
         g2.drawLine(0, SELECTOR_SIZE, SELECTOR_SIZE, SELECTOR_SIZE);
 
         // draw the elevation indicator arrow
-        setupArrowColor(g2, darkTheme);
+        setArrowColor(g2, darkTheme);
         double angle = model.getValueInRadians();
         float radius = SELECTOR_SIZE;
         float endX = (float) (centerX + radius * Math.cos(angle));

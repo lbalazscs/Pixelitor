@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
+import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 
 /**
  * Crystallize filter based on the JHLabs {@link CrystallizeFilter}.
@@ -43,7 +43,7 @@ public class JHCrystallize extends ParametrizedFilter {
 
     private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);
     private final RangeParam size = new RangeParam("Size", 1, 20, 200);
-    private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, ALPHA_ENABLED);
+    private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, RANDOMIZED_ALPHA);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Edges");
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 0, 100);
     private final EnumParam<CellularFilter.GridType> gridType = EnumParam.forGridType("Shape", randomness);
@@ -66,7 +66,7 @@ public class JHCrystallize extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new CrystallizeFilter();
+            filter = new CrystallizeFilter(NAME);
         }
 
         filter.setEdgeThickness((float) edgeThickness.getPercentage());

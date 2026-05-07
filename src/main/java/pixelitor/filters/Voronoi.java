@@ -26,8 +26,6 @@ import pixelitor.utils.Metric;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
-
 /**
  * Voronoi Diagram filter
  */
@@ -39,16 +37,14 @@ public class Voronoi extends ParametrizedFilter {
 
     private final RangeParam distance = new RangeParam("Distance between Points", 10, 20, 400);
     private final EnumParam<Metric> metric = new EnumParam<>("Distance", Metric.class);
-    private final BooleanParam showPoints = new BooleanParam("Show Points", false, IGNORE_RANDOMIZE);
-    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, IGNORE_RANDOMIZE);
+    private final BooleanParam showPoints = new BooleanParam("Show Points", false, RandomizeMode.IGNORE);
+    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, RandomizeMode.IGNORE);
     private final IntChoiceParam antiAliasing = new IntChoiceParam("Anti-aliasing", new Item[]{
         new Item("None (Faster)", 0),
         new Item("2x2 (Better, slower)", 2),
         new Item("4x4 (Best, slowest)", 4),
-    }, IGNORE_RANDOMIZE);
-    private final BooleanParam debugGrid = new BooleanParam("Debug Grid", false, IGNORE_RANDOMIZE);
-
-    private VoronoiFilter filter;
+    }, RandomizeMode.IGNORE);
+    private final BooleanParam debugGrid = new BooleanParam("Debug Grid", false, RandomizeMode.IGNORE);
 
     public Voronoi() {
         super(false);
@@ -70,22 +66,20 @@ public class Voronoi extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new VoronoiFilter(NAME);
-        }
-
-        filter.setRand(paramSet.getSRandomWithLastSeed());
-        filter.setDistanceBetweenPoints(distance.getValueAsDouble());
-        filter.setMetric(metric.getSelected(), src.getWidth() / 2, src.getHeight() / 2);
-        filter.setUseImageColors(useImageColors.isChecked());
+        VoronoiFilter filter = new VoronoiFilter(NAME,
+            paramSet.getSRandomWithLastSeed(),
+            distance.getValueAsDouble(),
+            metric.getSelected(),
+            src.getWidth() / 2,
+            src.getHeight() / 2,
+            useImageColors.isChecked());
 
         dest = filter.filter(src, dest);
 
         // apply post-processing
         int aaRes = antiAliasing.getValue();
         if (aaRes != 0) {
-            filter.setAaRes(aaRes);
-            filter.antiAlias(dest);
+            filter.antiAlias(dest, aaRes);
         }
 
         if (showPoints.isChecked()) {

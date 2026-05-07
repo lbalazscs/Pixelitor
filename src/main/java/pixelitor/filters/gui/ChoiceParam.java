@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,11 +38,11 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     private final EventListenerList eventListeners = new EventListenerList();
 
     public ChoiceParam(String name, E[] choices) {
-        this(name, choices, RandomizeMode.ALLOW_RANDOMIZE);
+        this(name, choices, RandomizeMode.ALLOW);
     }
 
     public ChoiceParam(String name, E[] choices, E defaultValue) {
-        this(name, List.of(choices), defaultValue, RandomizeMode.ALLOW_RANDOMIZE);
+        this(name, List.of(choices), defaultValue, RandomizeMode.ALLOW);
     }
 
     public ChoiceParam(String name, E[] choices, RandomizeMode randomizeMode) {
@@ -212,22 +212,22 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     /**
      * Sets up the automatic enabling of another {@link FilterSetting} depending on the selected item.
      */
-    public void setupEnableOtherIf(FilterSetting other,
-                                   Predicate<E> condition) {
-        setupOther(other, condition, true);
+    public void enableOtherWhen(FilterSetting other,
+                                Predicate<E> condition) {
+        setupDependentSetting(other, condition, true);
     }
 
     /**
      * Sets up the automatic disabling of another {@link FilterSetting} depending on the selected item.
      */
-    public void setupDisableOtherIf(FilterSetting other,
-                                    Predicate<E> condition) {
-        setupOther(other, condition, false);
+    public void disableOtherWhen(FilterSetting other,
+                                 Predicate<E> condition) {
+        setupDependentSetting(other, condition, false);
     }
 
-    private void setupOther(FilterSetting other, Predicate<E> condition, boolean enable) {
+    private void setupDependentSetting(FilterSetting other, Predicate<E> condition, boolean enable) {
         other.setEnabled(!enable);
-        addOnChangeTask(() -> {
+        addSelectionListener(() -> {
             if (condition.test(getSelected())) {
                 other.setEnabled(enable);
             } else {
@@ -239,8 +239,8 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     /**
      * Sets up the automatic limiting of a {@link RangeParam} to a maximum value that depends on the selected item.
      */
-    public void setupLimitOtherToMax(RangeParam other, ToIntFunction<E> mapper) {
-        addOnChangeTask(() -> {
+    public void limitOtherMaxWhen(RangeParam other, ToIntFunction<E> mapper) {
+        addSelectionListener(() -> {
             int maxValue = mapper.applyAsInt(getSelected());
             if (other.getValue() > maxValue) {
                 other.setValueNoTrigger(maxValue);
@@ -251,7 +251,7 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     /**
      * Adds a listener that will be notified when the selected value changes.
      */
-    public void addOnChangeTask(Runnable task) {
+    public void addSelectionListener(Runnable task) {
         addListDataListener(new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {
@@ -281,7 +281,7 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             return value.toString();
         }
     }

@@ -71,8 +71,7 @@ public class JHDropShadow extends ParametrizedFilter {
             (float) opacity.getPercentage(),
             softness.getValueAsFloat(),
             color.getColor().getRGB(),
-            shadowOnly.isChecked()
-        );
+            shadowOnly.isChecked());
 
         dest = filter.filter(src, dest);
 

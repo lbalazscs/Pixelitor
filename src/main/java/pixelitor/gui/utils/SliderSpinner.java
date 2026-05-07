@@ -40,7 +40,7 @@ import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
- * A GUI Component for selecting a value within a range.
+ * A GUI component for selecting a value within a range.
  * It consists of a JSlider and a JSpinner synchronized with each other,
  * allowing users to select values either by sliding or direct numeric
  * input.
@@ -418,7 +418,9 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         }
     }
 
-    // sets an independently created label reference
+    /**
+     * Sets an independently created label reference.
+     */
     public void setLabel(JLabel label) {
         this.label = label;
     }

@@ -43,7 +43,7 @@ public class ColorSamplingPanel extends ImagePanel {
     private void initMouseHandlers(Consumer<Color> colorConsumer) {
         var ma = new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 sampleColorAt(e.getX(), e.getY());
             }
 
@@ -53,8 +53,11 @@ public class ColorSamplingPanel extends ImagePanel {
             }
 
             private void sampleColorAt(int x, int y) {
-                if (isWithinBounds(x, y, image)) {
-                    int rgb = image.getRGB(x, y);
+                int imgX = x - imgOffsetX;
+                int imgY = y - imgOffsetY;
+
+                if (isWithinBounds(imgX, imgY, image)) {
+                    int rgb = image.getRGB(imgX, imgY);
                     colorConsumer.accept(new Color(rgb));
                 }
             }

@@ -23,13 +23,12 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.RandomizeMode;
 import pixelitor.filters.util.Channel;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Convolution Edge Detection filter based on the JHLabs {@link EdgeFilter}.
@@ -61,9 +60,8 @@ public class JHConvolutionEdge extends ParametrizedFilter {
         new Item("None", METHOD_NONE),
     });
 
-    private final BooleanParam invertImage = new BooleanParam("Invert", false, IGNORE_RANDOMIZE);
+    private final BooleanParam invertImage = new BooleanParam("Invert", false, RandomizeMode.IGNORE);
 
-    private EdgeFilter filter;
     private static final int METHOD_SOBEL = 1;
     private static final int METHOD_PREWITT = 2;
     private static final int METHOD_ROBERTS = 3;
@@ -87,32 +85,27 @@ public class JHConvolutionEdge extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new EdgeFilter(NAME);
-        }
-
-        filter.setChannel(channel.getValue());
-
         int horizontal = horizontalMethod.getValue();
-        switch (horizontal) {
-            case METHOD_SOBEL -> filter.setHEdgeMatrix(EdgeFilter.SOBEL_H);
-            case METHOD_PREWITT -> filter.setHEdgeMatrix(EdgeFilter.PREWITT_H);
-            case METHOD_ROBERTS -> filter.setHEdgeMatrix(EdgeFilter.ROBERTS_H);
-            case METHOD_FREI_CHEN -> filter.setHEdgeMatrix(EdgeFilter.FREI_CHEN_H);
-            case METHOD_NONE -> filter.setHEdgeMatrix(NONE_MATRIX);
+        float[] hMatrix = switch (horizontal) {
+            case METHOD_SOBEL -> EdgeFilter.SOBEL_H;
+            case METHOD_PREWITT -> EdgeFilter.PREWITT_H;
+            case METHOD_ROBERTS -> EdgeFilter.ROBERTS_H;
+            case METHOD_FREI_CHEN -> EdgeFilter.FREI_CHEN_H;
+            case METHOD_NONE -> NONE_MATRIX;
             default -> throw new IllegalStateException("horizontal = " + horizontal);
-        }
+        };
 
         int vertical = verticalMethod.getValue();
-        switch (vertical) {
-            case METHOD_SOBEL -> filter.setVEdgeMatrix(EdgeFilter.SOBEL_V);
-            case METHOD_PREWITT -> filter.setVEdgeMatrix(EdgeFilter.PREWITT_V);
-            case METHOD_ROBERTS -> filter.setVEdgeMatrix(EdgeFilter.ROBERTS_V);
-            case METHOD_FREI_CHEN -> filter.setVEdgeMatrix(EdgeFilter.FREI_CHEN_V);
-            case METHOD_NONE -> filter.setVEdgeMatrix(NONE_MATRIX);
+        float[] vMatrix = switch (vertical) {
+            case METHOD_SOBEL -> EdgeFilter.SOBEL_V;
+            case METHOD_PREWITT -> EdgeFilter.PREWITT_V;
+            case METHOD_ROBERTS -> EdgeFilter.ROBERTS_V;
+            case METHOD_FREI_CHEN -> EdgeFilter.FREI_CHEN_V;
+            case METHOD_NONE -> NONE_MATRIX;
             default -> throw new IllegalStateException("vertical = " + vertical);
-        }
+        };
 
+        EdgeFilter filter = new EdgeFilter(NAME, channel.getValue(), hMatrix, vMatrix);
         dest = filter.filter(src, dest);
 
         if (invertImage.isChecked()) {

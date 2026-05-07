@@ -44,7 +44,6 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static pixelitor.colors.FgBgColors.getBgColor;
 import static pixelitor.colors.FgBgColors.getFgColor;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Abstract superclass for the "Render/Curves" filters.
@@ -76,7 +75,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
         new Item("Transparent", BG_TRANSPARENT),
 //        new Item(GUIText.BG_COLOR, BG_TOOL),
         new Item("Background Color", BG_TOOL),
-    }, IGNORE_RANDOMIZE);
+    }, RandomizeMode.IGNORE);
 
     private final IntChoiceParam foreground = new IntChoiceParam("Foreground", new Item[]{
         new Item("White", FG_WHITE),
@@ -85,9 +84,9 @@ public abstract class CurveFilter extends ParametrizedFilter {
 //        new Item(GUIText.FG_COLOR, FG_TOOL),
         new Item("Foreground Color", FG_TOOL),
         new Item("Transparent", FG_TRANSPARENT),
-    }, IGNORE_RANDOMIZE);
+    }, RandomizeMode.IGNORE);
 
-    private final BooleanParam watermark = new BooleanParam("Watermarking", false, IGNORE_RANDOMIZE);
+    private final BooleanParam watermark = new BooleanParam("Watermarking", false, RandomizeMode.IGNORE);
     protected final Transform transform = new Transform();
 
     private transient Shape exportedShape;
@@ -105,8 +104,8 @@ public abstract class CurveFilter extends ParametrizedFilter {
         ).withAction(FilterButtonModel.createExportSvg(this::exportSVG));
 
         // disable foreground and background if watermarking is selected
-        watermark.setupDisableOtherIfChecked(foreground);
-        watermark.setupDisableOtherIfChecked(background);
+        watermark.disableOtherWhenChecked(foreground);
+        watermark.disableOtherWhenChecked(background);
     }
 
     @Override

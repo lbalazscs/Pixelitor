@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.Help;
-import pixelitor.filters.impl.ComplexFractalImpl;
-import pixelitor.filters.impl.ComplexFractalImpl.IterationStrategy;
+import pixelitor.filters.impl.ComplexFractalFilter;
+import pixelitor.filters.impl.ComplexFractalFilter.IterationStrategy;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -44,27 +44,45 @@ public class MandelbrotSet extends ComplexFractal {
     public BufferedImage renderFractal(BufferedImage src, BufferedImage dest) {
         IterationStrategy iterator = createIterator();
         Rectangle2D view = iterator.getComplexView();
-        MandelbrotSetImpl filter = new MandelbrotSetImpl(view, insideOutParam.isChecked());
-
-        filter.setIterator(iterator);
-        filter.setZoom(zoomParam.getZoomRatio());
-        filter.setZoomCenter(zoomCenter.getRelativeX(), zoomCenter.getRelativeY());
-
         int iterations = iterationsParam.getValue();
-        filter.setColors(getColors(colorsParam.getValue(), iterations));
-        filter.setMaxIterations(iterations);
+
+        MandelbrotSetFilter filter = new MandelbrotSetFilter(
+            view,
+            iterator,
+            zoomParam.getZoomRatio(),
+            zoomCenterParam.getRelativeX(),
+            zoomCenterParam.getRelativeY(),
+            iterations,
+            getColors(colorsParam.getValue(), iterations),
+            insideOutParam.isChecked()
+        );
 
         return filter.filter(src, dest);
     }
 }
 
-class MandelbrotSetImpl extends ComplexFractalImpl {
+class MandelbrotSetFilter extends ComplexFractalFilter {
     private final boolean insideOut;
 
-    protected MandelbrotSetImpl(Rectangle2D view, boolean insideOut) {
+    /**
+     * Constructs a new MandelbrotSetFilter.
+     *
+     * @param view          The starting view in the complex plane for this fractal.
+     * @param iterator      The iteration strategy for the fractal.
+     * @param zoom          The zoom level for the fractal.
+     * @param zoomCenterX   The x-coordinate of the center point for zooming.
+     * @param zoomCenterY   The y-coordinate of the center point for zooming.
+     * @param maxIterations The maximum number of iterations for the escape time algorithm.
+     * @param colors        The color palette used for rendering.
+     * @param insideOut     True to invert the complex constant c using f(c) = 1/c, false otherwise.
+     */
+    protected MandelbrotSetFilter(Rectangle2D view, IterationStrategy iterator, double zoom,
+                                  double zoomCenterX, double zoomCenterY, int maxIterations,
+                                  int[] colors, boolean insideOut) {
         super(MandelbrotSet.NAME,
             view.getX(), view.getX() + view.getWidth(),
-            view.getY(), view.getY() + view.getHeight());
+            view.getY(), view.getY() + view.getHeight(),
+            iterator, zoom, zoomCenterX, zoomCenterY, maxIterations, colors);
         this.insideOut = insideOut;
     }
 

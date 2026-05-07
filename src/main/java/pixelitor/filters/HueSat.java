@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,9 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.util.ColorSpace;
-import pixelitor.gui.GUIText;
+import pixelitor.filters.util.CylColorSpace;
 import pixelitor.utils.ColorSpaces;
 
 import java.awt.Color;
@@ -43,28 +41,10 @@ public class HueSat extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = -5215830710090103691L;
 
-    private static final int MIN_HUE = -180;
-    private static final int MAX_HUE = 180;
-    private static final int DEFAULT_HUE = 0;
-
-    private static final int MIN_SAT = -100;
-    private static final int MAX_SAT = 100;
-    private static final int DEFAULT_SAT = 0;
-
-    private static final int MIN_BRI = -100;
-    private static final int MAX_BRI = 100;
-    private static final int DEFAULT_BRI = 0;
-
-    private static final int COLOR_SPACE_HSV = 0;
-    private static final int COLOR_SPACE_OKLCH = 1;
-
-    private final IntChoiceParam colorSpace = new IntChoiceParam(GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, new Item[]{
-        new Item("HSV (Faster)", COLOR_SPACE_HSV),
-        new Item("Oklch (Better)", COLOR_SPACE_OKLCH),
-    });
-    private final RangeParam hue = new RangeParam(HUE, MIN_HUE, DEFAULT_HUE, MAX_HUE);
-    private final RangeParam saturation = new RangeParam(SATURATION, MIN_SAT, DEFAULT_SAT, MAX_SAT);
-    private final RangeParam brightness = new RangeParam(BRIGHTNESS, MIN_BRI, DEFAULT_BRI, MAX_BRI);
+    private final EnumParam<CylColorSpace> colorSpace = CylColorSpace.asParam();
+    private final RangeParam hue = new RangeParam(HUE, -180, 0, 180);
+    private final RangeParam saturation = new RangeParam(SATURATION, -100, 0, 100);
+    private final RangeParam brightness = new RangeParam(BRIGHTNESS, -100, 0, 100);
 
     public HueSat() {
         super(true);
@@ -87,35 +67,38 @@ public class HueSat extends ParametrizedFilter {
             return src;
         }
 
-        if (colorSpace.valueIs(COLOR_SPACE_OKLCH)) {
-            float hueShift = hue.getValueAsFloat();
-            // satFactor is a multiplier, e.g., 1.5 for a 50% increase
-            float satFactor = 1.0f + (float) saturation.getPercentage();
-            float briShift = (float) brightness.getPercentage();
+        return switch (colorSpace.getSelected()) {
+            case HSV -> filterHsv(src, dest);
+            case OKLCH -> filterOkLch(src, dest);
+        };
+    }
 
-            dest = new OklchImpl(hueShift, satFactor, briShift).filter(src, dest);
-            return dest;
-        }
-
-        // HSV color space
+    private BufferedImage filterHsv(BufferedImage src, BufferedImage dest) {
         float satShift = (float) saturation.getPercentage();
         float briShift = (float) brightness.getPercentage();
         float hueRot = hue.getValueAsFloat() / 360.0f;
 
-        dest = new HsvImpl(hueRot, satShift, briShift).filter(src, dest);
+        return new HsvFilter(hueRot, satShift, briShift).filter(src, dest);
+    }
 
-        return dest;
+    private BufferedImage filterOkLch(BufferedImage src, BufferedImage dest) {
+        float hueShift = hue.getValueAsFloat();
+        // satFactor is a multiplier, e.g., 1.5 for a 50% increase
+        float satFactor = 1.0f + (float) saturation.getPercentage();
+        float briShift = (float) brightness.getPercentage();
+
+        return new OklchFilter(hueShift, satFactor, briShift).filter(src, dest);
     }
 
     /**
      * An implementation of the filter that works in the Oklch color space.
      */
-    private static class OklchImpl extends PointFilter {
+    private static class OklchFilter extends PointFilter {
         private final float hueShift;
         private final float satFactor;
         private final float briShift;
 
-        protected OklchImpl(float hueShift, float satFactor, float briShift) {
+        protected OklchFilter(float hueShift, float satFactor, float briShift) {
             super(NAME);
             this.hueShift = hueShift;
             this.satFactor = satFactor;
@@ -126,8 +109,7 @@ public class HueSat extends ParametrizedFilter {
         public int processPixel(int x, int y, int rgb) {
             int a = rgb & 0xFF_00_00_00;
 
-            // for the multithreaded performance it's better to
-            // create this array here instead of reusing it as a class field
+            // create this array here for thread safety
             float[] oklch = ColorSpaces.srgbToOklch(rgb);
 
             // L is in [0, 1], C is >= 0, h is in [0, 360)
@@ -162,12 +144,12 @@ public class HueSat extends ParametrizedFilter {
         }
     }
 
-    private static class HsvImpl extends PointFilter {
+    private static class HsvFilter extends PointFilter {
         private final float hueRot;
         private final float satShift;
         private final float briShift;
 
-        protected HsvImpl(float hueRot, float satShift, float briShift) {
+        protected HsvFilter(float hueRot, float satShift, float briShift) {
             super(NAME);
             this.hueRot = hueRot;
             this.satShift = satShift;
@@ -181,15 +163,14 @@ public class HueSat extends ParametrizedFilter {
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            // for the multithreaded performance it's better to
-            // create this array here instead of reusing it as a class field
-            float[] tmpHSBArray = {0.0f, 0.0f, 0.0f};
+            // create this array here for thread safety
+            float[] hsbValues = {0.0f, 0.0f, 0.0f};
 
-            tmpHSBArray = Color.RGBtoHSB(r, g, b, tmpHSBArray);
+            hsbValues = Color.RGBtoHSB(r, g, b, hsbValues);
 
-            float newHue = tmpHSBArray[0] + hueRot;
-            float newSat = tmpHSBArray[1] + satShift;
-            float newBri = tmpHSBArray[2] + briShift;
+            float newHue = hsbValues[0] + hueRot;
+            float newSat = hsbValues[1] + satShift;
+            float newBri = hsbValues[2] + briShift;
 
             newSat = ImageMath.clamp01(newSat);
             newBri = ImageMath.clamp01(newBri);
@@ -201,7 +182,7 @@ public class HueSat extends ParametrizedFilter {
 
             int newRGB = Color.HSBtoRGB(newHue, newSat, newBri);  // alpha is 255 here
             newRGB &= 0x00_FF_FF_FF;  // set alpha to 0
-            return a | newRGB; // add the real alpha
+            return a | newRGB; // restore the original alpha
         }
     }
 }

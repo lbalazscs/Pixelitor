@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.util.List;
  */
 public interface GridCellPainter {
     /**
-     * Paints the visual representation for a cell's value.
+     * Paints the visual representation of a cell's value.
      *
      * @param g        The Graphics2D context to draw on. The coordinate system is translated
      *                 so that (0,0) is the top-left corner of the cell.
@@ -39,6 +39,9 @@ public interface GridCellPainter {
      */
     void paint(Graphics2D g, int cellSize);
 
+    /**
+     * Creates a list of painters for a binary pixel mask grid.
+     */
     static List<GridCellPainter> createForPixelMask() {
         // painter for value 0: black
         GridCellPainter painter0 = (g, cellSize) ->
@@ -56,43 +59,38 @@ public interface GridCellPainter {
      */
     static List<GridCellPainter> createForWeave() {
         // colors from WeaveFilter
-        Color HOR_THREAD_COLOR = new Color(WeaveFilter.H_THREAD_COLOR, true);
-        Color VER_THREAD_COLOR = new Color(WeaveFilter.V_THREAD_COLOR, true);
-
-        // the thread thickness is a fixed percentage of the cell size
-        // corresponding to the default settings of the Weave filter
-        double threadThicknessRatio = 0.62;
+        Color horThreadColor = new Color(WeaveFilter.H_THREAD_COLOR, true);
+        Color verThreadColor = new Color(WeaveFilter.V_THREAD_COLOR, true);
 
         // painter for value 0: vertical thread is on top
         GridCellPainter painter0 = (g, cellSize) -> {
-            int thickness = (int) (cellSize * threadThicknessRatio);
-            int halfThickness = thickness / 2;
-            int center = cellSize / 2;
-
-            // draw horizontal thread at the bottom
-            g.setColor(HOR_THREAD_COLOR);
-            g.fillRect(0, center - halfThickness, cellSize, thickness);
-
-            // draw vertical thread on top
-            g.setColor(VER_THREAD_COLOR);
-            g.fillRect(center - halfThickness, 0, thickness, cellSize);
+            paintWeaveThread(g, cellSize, horThreadColor, true);
+            paintWeaveThread(g, cellSize, verThreadColor, false);
         };
 
         // painter for value 1: horizontal thread is on top
         GridCellPainter painter1 = (g, cellSize) -> {
-            int thickness = (int) (cellSize * threadThicknessRatio);
-            int halfThickness = thickness / 2;
-            int center = cellSize / 2;
-
-            // draw vertical thread at the bottom
-            g.setColor(VER_THREAD_COLOR);
-            g.fillRect(center - halfThickness, 0, thickness, cellSize);
-
-            // draw horizontal thread on top
-            g.setColor(HOR_THREAD_COLOR);
-            g.fillRect(0, center - halfThickness, cellSize, thickness);
+            paintWeaveThread(g, cellSize, verThreadColor, false);
+            paintWeaveThread(g, cellSize, horThreadColor, true);
         };
 
         return List.of(painter0, painter1);
+    }
+
+    private static void paintWeaveThread(Graphics2D g, int cellSize, Color color, boolean isHorizontal) {
+        // the thread thickness is a percentage of the cell size
+        // corresponding to the default settings of the Weave filter
+        double threadThicknessRatio = 0.62;
+
+        int thickness = (int) (cellSize * threadThicknessRatio);
+        int halfThickness = thickness / 2;
+        int center = cellSize / 2;
+
+        g.setColor(color);
+        if (isHorizontal) {
+            g.fillRect(0, center - halfThickness, cellSize, thickness);
+        } else {
+            g.fillRect(center - halfThickness, 0, thickness, cellSize);
+        }
     }
 }

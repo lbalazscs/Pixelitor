@@ -33,7 +33,7 @@ import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Polar Coordinates filter based on the JHLabs {@link PolarFilter}.
+ * The "Polar Coordinates" filter, based on the JHLabs {@link PolarFilter}.
  */
 public class JHPolarCoordinates extends ParametrizedFilter {
     public static final String NAME = i18n("polar_coordinates");
@@ -43,12 +43,12 @@ public class JHPolarCoordinates extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private static final Item[] gridTypeChoices = {
-        new Item("Rectangular to Polar ", PolarFilter.RECT_TO_POLAR),
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
+        new Item("Rectangular to Polar", PolarFilter.RECT_TO_POLAR),
         new Item("Polar to Rectangular", PolarFilter.POLAR_TO_RECT),
         new Item("Invert in Circle", PolarFilter.INVERT_IN_CIRCLE),
-    };
-    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, gridTypeChoices);
+    });
+
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
@@ -65,16 +65,13 @@ public class JHPolarCoordinates extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        PolarFilter filter = new PolarFilter(
-            NAME,
+        PolarFilter filter = new PolarFilter(NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
             type.getValue(),
             (float) zoom.getPercentage(),
             angle.getValueInIntuitiveRadians(),
-            (float) center.getRelativeX(),
-            (float) center.getRelativeY()
-        );
+            center.getAbsolutePoint(src));
 
         return filter.filter(src, dest);
     }

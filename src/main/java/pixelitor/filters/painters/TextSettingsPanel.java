@@ -80,7 +80,7 @@ public class TextSettingsPanel extends FilterGUI
     // multiline/path alignment settings
     private boolean mlpAlignEnabled = true;
     private MlpAlignmentSelector mlpAlignmentSelector;
-    private JLabel mlpLabel;
+    private JLabel mlpAlignLabel;
 
     /**
      * Used for the text filter on images
@@ -159,11 +159,11 @@ public class TextSettingsPanel extends FilterGUI
 
         JPanel alignPanel = new JPanel(new FlowLayout(LEFT));
         alignPanel.add(boxAlignmentCB);
-        mlpLabel = new JLabel("     Multiline/Path Alignment:");
-        alignPanel.add(mlpLabel);
+        mlpAlignLabel = new JLabel("     Multiline/Path Alignment:");
+        alignPanel.add(mlpAlignLabel);
         mlpAlignmentSelector = new MlpAlignmentSelector(settings.getMLPAlignment(), this);
         alignPanel.add(mlpAlignmentSelector);
-        updateMLPAlignEnabled();
+        updateMlpAlignEnabled();
 
         gbh.addControl(alignPanel);
 
@@ -180,7 +180,7 @@ public class TextSettingsPanel extends FilterGUI
         }
 
         lastBoxAlignment = selectedAlignment;
-        updateMLPAlignEnabled();
+        updateMlpAlignEnabled();
         actionPerformed(e);
     }
 
@@ -193,15 +193,15 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private void textChanged() {
-        updateMLPAlignEnabled();
+        updateMlpAlignEnabled();
         paramAdjusted();
     }
 
-    private void updateMLPAlignEnabled() {
+    private void updateMlpAlignEnabled() {
         boolean mlpAlignEnabledNow = getBoxAlignment().isPath() || textArea.getText().contains("\n");
         if (mlpAlignEnabledNow != mlpAlignEnabled) {
             mlpAlignEnabled = mlpAlignEnabledNow;
-            mlpLabel.setEnabled(mlpAlignEnabled);
+            mlpAlignLabel.setEnabled(mlpAlignEnabled);
             mlpAlignmentSelector.setEnabled(mlpAlignEnabled);
         }
     }
@@ -289,7 +289,7 @@ public class TextSettingsPanel extends FilterGUI
         int size = fontSizeSlider.getValue();
         boolean bold = boldCB.isSelected();
         boolean italic = italicCB.isSelected();
-        fontInfo.updateBasic(fontFamily, size, bold, italic);
+        fontInfo.updateBasicProperties(fontFamily, size, bold, italic);
 
         if (advancedSettingsDialog != null) {
             advancedSettingsPanel.updateFontInfo(fontInfo);
@@ -424,7 +424,7 @@ public class TextSettingsPanel extends FilterGUI
         rotationParam.setValue(settings.getRotation(), false);
         boxAlignmentCB.setSelectedItem(settings.getAlignment());
         mlpAlignmentSelector.setAlignment(settings.getMLPAlignment());
-        updateMLPAlignEnabled();
+        updateMlpAlignEnabled();
 
         Font font = settings.getFont();
         fontSizeSlider.setValue(font.getSize());

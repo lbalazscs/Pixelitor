@@ -121,7 +121,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     // TODO this enables a shapes layer to invalidate the image cache
     //  when the styled shape changes. Instead of this, either the need for an
     //  image cache should be eliminated or the image should be cached in this class.
-    private transient Runnable changeListener;
+    private transient Runnable shapeChangeListener;
 
     public StyledShape(ShapesTool tool) {
         updateShapeType(tool);
@@ -146,7 +146,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             stroke = null;
         }
         state = State.DESERIALIZED;
-        changeListener = null;
+        shapeChangeListener = null;
         assert checkInvariants();
     }
 
@@ -165,7 +165,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         }
 
         if (transformedDrag.isImClick()) {
-            // if the mouse dragging comes back exactly to the starting
+            // if the mouse drag comes back exactly to the starting
             // point, then there is a shape object, but it's empty
             return;
         }
@@ -226,7 +226,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         //  https://bugs.openjdk.java.net/browse/JDK-6357341
         //  with Tapering stroke + neon border
         var strokeClass = stroke.getClass();
-        if (strokeClass == WobbleStroke.class || (strokeClass == TaperingStroke.class && shapeType.hasAreaProblem())) {
+        if (strokeClass == WobbleStroke.class || (strokeClass == TaperingStroke.class && shapeType.hasAreaBug())) {
             // give up, use the original shape, ignoring the stroke's width
             return shape;
         }
@@ -672,13 +672,13 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return fillPaint.hasBlendingIssue() || strokePaint.hasBlendingIssue();
     }
 
-    public void setChangeListener(Runnable changeListener) {
-        this.changeListener = changeListener;
+    public void setShapeChangeListener(Runnable shapeChangeListener) {
+        this.shapeChangeListener = shapeChangeListener;
     }
 
     private void notifyChangeListener() {
-        if (changeListener != null) {
-            changeListener.run();
+        if (shapeChangeListener != null) {
+            shapeChangeListener.run();
         }
     }
 

@@ -79,19 +79,19 @@ public class OrganicNoise extends ParametrizedFilter {
         zoom.setPresetKey("Zoom");
 
         Predicate<DomainWarpType> domainWarpEnabled = t -> t != DomainWarpType.NONE;
-        domainWarpType.setupEnableOtherIf(domainWarpAmp, domainWarpEnabled);
-        domainWarpType.setupEnableOtherIf(domainWarpFractalType, domainWarpEnabled);
+        domainWarpType.enableOtherWhen(domainWarpAmp, domainWarpEnabled);
+        domainWarpType.enableOtherWhen(domainWarpFractalType, domainWarpEnabled);
 
         CompositeParam cellDetails = new CompositeParam("Cellular Details",
             cellDistFunc, cellularJitter, cellularReturnType);
-        type.setupDisableOtherIf(cellDetails, t -> t != NoiseType.CELLULAR);
+        type.disableOtherWhen(cellDetails, t -> t != NoiseType.CELLULAR);
 
         Predicate<FractalType> fractalEnabled = t -> t != FractalType.NONE;
-        fractalType.setupEnableOtherIf(octaves, fractalEnabled);
-        fractalType.setupEnableOtherIf(lacunarity, fractalEnabled);
-        fractalType.setupEnableOtherIf(gain, fractalEnabled);
-        fractalType.setupEnableOtherIf(weightedStrength, fractalEnabled);
-        fractalType.setupEnableOtherIf(pingPongStrength, t -> t == FractalType.PING_PONG);
+        fractalType.enableOtherWhen(octaves, fractalEnabled);
+        fractalType.enableOtherWhen(lacunarity, fractalEnabled);
+        fractalType.enableOtherWhen(gain, fractalEnabled);
+        fractalType.enableOtherWhen(weightedStrength, fractalEnabled);
+        fractalType.enableOtherWhen(pingPongStrength, t -> t == FractalType.PING_PONG);
 
         initParams(
             type,

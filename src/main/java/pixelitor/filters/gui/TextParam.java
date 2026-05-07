@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import java.io.Serial;
 import java.util.List;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * A filter parameter for text input.
@@ -43,7 +42,7 @@ public class TextParam extends AbstractFilterParam {
     private List<String> randomCommands;
 
     public TextParam(String name, String defaultValue, boolean command) {
-        super(name, ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
         this.defaultValue = defaultValue;
         this.value = defaultValue;
         this.command = command;
@@ -156,7 +155,7 @@ public class TextParam extends AbstractFilterParam {
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             return Utils.encodeNewlines(value);
         }
     }

@@ -36,7 +36,7 @@ public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public static StrokeSettings defaultsWith(StrokeType type, double width) {
+    public static StrokeSettings createWithDefaults(StrokeType type, double width) {
         return new StrokeSettings(width, StrokeCap.ROUND, StrokeJoin.ROUND,
             type, StrokeParam.DEFAULT_SHAPE_TYPE, false);
     }
@@ -49,7 +49,7 @@ public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
     }
 
     @Override
-    public String toSaveString() {
+    public String toPresetString() {
         throw new UnsupportedOperationException();
     }
 

@@ -44,9 +44,8 @@ public class Contours extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        var edgeFilter = new EdgeFilter(NAME);
-        edgeFilter.setHEdgeMatrix(EdgeFilter.SOBEL_H);
-        edgeFilter.setVEdgeMatrix(EdgeFilter.SOBEL_V);
+        var edgeFilter = new EdgeFilter(NAME,
+            EdgeFilter.CHANNEL_RGB, EdgeFilter.SOBEL_H, EdgeFilter.SOBEL_V);
 
         dest = edgeFilter.filter(src, dest);
         dest = Invert.invertImage(dest);

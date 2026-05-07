@@ -85,7 +85,7 @@ public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner
         gbh.addParam(curvature);
         gbh.addParam(colorMode, "colorsCB");
 
-        toolsParam.setupEnableOtherIf(colorMode, AutoPaint::useColors);
+        toolsParam.enableOtherWhen(colorMode, AutoPaint::useColors);
     }
 
     /**

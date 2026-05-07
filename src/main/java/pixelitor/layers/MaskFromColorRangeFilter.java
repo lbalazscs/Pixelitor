@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.layers;
 
 import com.jhlabs.image.PointFilter;
-import net.jafama.FastMath;
 
 import java.awt.Color;
 
@@ -31,84 +30,66 @@ class MaskFromColorRangeFilter extends PointFilter {
     public static final int HSB = 2;
     public static final int HUE = 3;
     public static final int SAT = 4;
-    private int distanceMetric = HSB;
+
+    private final int distanceMetric;
 
     private static final int WHITE_PIXEL = 0xFF_FF_FF_FF;
     private static final int BLACK_PIXEL = 0xFF_00_00_00;
 
-    private double maxTolerance;
-    private double minTolerance;
+    private final double minTolerance;
+    private final double maxTolerance;
 
-    private int refR, refG, refB; // the reference color in RGB
-    private float refHue, refSat, refBri; // the reference color in HSB
+    private final int refR, refG, refB; // the reference color in RGB
+    private final float refHue, refSat, refBri; // the reference color in HSB
 
-    private boolean inverted;
-
-    protected MaskFromColorRangeFilter(String filterName) {
-        super(filterName);
-    }
+    private final boolean inverted;
 
     /**
-     * Sets the reference color against which other colors will be compared.
+     * Constructs a MaskFromColorRangeFilter.
+     *
+     * @param filterName     the name of the filter
+     * @param distanceMetric the color distance calculation method
+     * @param referenceColor the reference color against which other colors will be compared
+     * @param tolerance      the tolerance parameter for the mask creation
+     * @param softness       the softness parameter for the mask creation
+     * @param inverted       whether the mask should be inverted (exclude matching colors instead of including them)
      */
-    public void setReferenceColor(Color c) {
-        refR = c.getRed();
-        refG = c.getGreen();
-        refB = c.getBlue();
+    protected MaskFromColorRangeFilter(String filterName, int distanceMetric, Color referenceColor, double tolerance, double softness, boolean inverted) {
+        super(filterName);
+
+        this.distanceMetric = distanceMetric;
+        this.inverted = inverted;
+
+        this.refR = referenceColor.getRed();
+        this.refG = referenceColor.getGreen();
+        this.refB = referenceColor.getBlue();
 
         if (distanceMetric != RGB) {
             float[] hsb = Color.RGBtoHSB(refR, refG, refB, null);
-            refHue = hsb[0];
-            refSat = hsb[1];
-            refBri = hsb[2];
+            this.refHue = hsb[0];
+            this.refSat = hsb[1];
+            this.refBri = hsb[2];
+        } else {
+            this.refHue = 0;
+            this.refSat = 0;
+            this.refBri = 0;
         }
-    }
 
-    /**
-     * Sets the color distance calculation method.
-     */
-    public void setDistanceMetric(int distanceMetric) {
-        this.distanceMetric = distanceMetric;
-    }
-
-    /**
-     * Sets the tolerance and softness parameters for the mask creation.
-     */
-    public void setTolerance(double tolerance, double softness) {
-        // otherwise tolerance = 0 does not select exact matches - why?
-        double adjustedTolerance = tolerance + 0.1;
-
-        maxTolerance = adjustedTolerance * (1.0 - softness);
-        minTolerance = adjustedTolerance * (1.0 + softness);
-    }
-
-    /**
-     * Sets whether the mask should be inverted
-     * (exclude matching colors instead of including them).
-     */
-    public void setInvertMask(boolean inverted) {
-        this.inverted = inverted;
+        this.minTolerance = tolerance * (1.0 - softness);
+        this.maxTolerance = tolerance * (1.0 + softness);
     }
 
     @Override
     public int processPixel(int x, int y, int rgb) {
         double dist = calcDistance(rgb);
 
-        if (dist > minTolerance) {
-            if (inverted) {
-                return WHITE_PIXEL;
-            } else {
-                return BLACK_PIXEL;
-            }
-        } else if (dist < maxTolerance) {
-            if (inverted) {
-                return BLACK_PIXEL;
-            } else {
-                return WHITE_PIXEL;
-            }
+        if (dist > maxTolerance) {
+            return inverted ? WHITE_PIXEL : BLACK_PIXEL;
+        } else if (dist <= minTolerance) {
+            return inverted ? BLACK_PIXEL : WHITE_PIXEL;
         } else {
             // linear interpolation
-            int v = (int) ((minTolerance - dist) * 255 / (minTolerance - maxTolerance));
+            int v = (int) ((maxTolerance - dist) * 255 / (maxTolerance - minTolerance));
             if (inverted) {
                 v = 255 - v;
             }
@@ -135,7 +116,7 @@ class MaskFromColorRangeFilter extends PointFilter {
         int deltaG = g - refG;
         int deltaB = b - refB;
 
-        return FastMath.sqrtQuick(deltaR * deltaR + deltaG * deltaG + deltaB * deltaB);
+        return Math.sqrt(deltaR * deltaR + deltaG * deltaG + deltaB * deltaB);
     }
 
     private double calcHSBDistance(int r, int g, int b) {
@@ -152,7 +133,7 @@ class MaskFromColorRangeFilter extends PointFilter {
             deltaHue = 1.0f + deltaHue;
         }
 
-        return 150 * FastMath.sqrtQuick(deltaHue * deltaHue + deltaSat * deltaSat + deltaBri * deltaBri);
+        return 150 * Math.sqrt(deltaHue * deltaHue + deltaSat * deltaSat + deltaBri * deltaBri);
     }
 
     private double calcHueDistance(int r, int g, int b) {

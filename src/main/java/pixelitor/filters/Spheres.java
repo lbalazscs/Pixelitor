@@ -81,13 +81,13 @@ public class Spheres extends ParametrizedFilter {
 
         // enable "Light Direction" and "Highlight Elevation"
         // only if "Add Highlights" is checked
-        addHighLightsCB.setupEnableOtherIfChecked(lightAzimuth);
-        addHighLightsCB.setupEnableOtherIfChecked(lightElevation);
+        addHighLightsCB.enableOtherWhenChecked(lightAzimuth);
+        addHighLightsCB.enableOtherWhenChecked(lightElevation);
 
         opacity.setPresetKey("Opacity");
 
         FilterButtonModel reseedAction = paramSet.createReseedAction();
-        layout.setupEnableOtherIf(reseedAction, layoutType -> layoutType == Layout.RANDOM);
+        layout.enableOtherWhen(reseedAction, layoutType -> layoutType == Layout.RANDOM);
 
         initParams(
             layout.withSideButton(reseedAction),

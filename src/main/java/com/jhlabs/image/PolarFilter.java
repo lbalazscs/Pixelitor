@@ -18,7 +18,7 @@ package com.jhlabs.image;
 
 import net.jafama.FastMath;
 
-import java.awt.image.BufferedImage;
+import java.awt.geom.Point2D;
 
 /**
  * A filter which distorts an image by performing coordinate conversions between rectangular and polar coordinates.
@@ -35,19 +35,16 @@ public class PolarFilter extends TransformFilter {
     public static final int POLAR_TO_RECT = 1;
 
     /**
-     * Invert the image in a circle.
+     * Invert the image in a circle/ellipse.
      */
     public static final int INVERT_IN_CIRCLE = 2;
 
     private final int type;
     private final float zoom;
     private final float angle;
-    private final float relativeCenterX;
-    private final float relativeCenterY;
 
-    private float width, height;
-    private float centerX, centerY;
-    private float radius;
+    private final float cx, cy;
+    private final float radius;
 
     /**
      * Constructs a PolarFilter.
@@ -59,127 +56,125 @@ public class PolarFilter extends TransformFilter {
      *                       or {@link #INVERT_IN_CIRCLE}.
      * @param zoom           the zoom factor applied during the coordinate transformation.
      * @param angle          the rotation angle (in radians) applied during the transformation.
-     * @param relativeCenterX the horizontal center of the transformation as a fraction of the image width (0.0–1.0).
-     * @param relativeCenterY the vertical center of the transformation as a fraction of the image height (0.0–1.0).
+     * @param center         the center of the transformation in pixels.
      */
     public PolarFilter(String filterName, int edgeAction, int interpolation,
-                       int type, float zoom, double angle,
-                       float relativeCenterX, float relativeCenterY) {
+                       int type, float zoom, double angle, Point2D center) {
         super(filterName, edgeAction, interpolation);
 
         this.type = type;
         this.zoom = zoom;
         this.angle = (float) angle;
-        this.relativeCenterX = relativeCenterX;
-        this.relativeCenterY = relativeCenterY;
-    }
 
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        width = src.getWidth();
-        height = src.getHeight();
-
-        centerX = width * relativeCenterX;
-        centerY = height * relativeCenterY;
-
-        radius = Math.max(centerY, centerX);
-        return super.filter(src, dst);
-    }
-
-    private static float sqr(float x) {
-        return x * x;
+        this.cx = (float) center.getX();
+        this.cy = (float) center.getY();
+        this.radius = Math.max(cy, cx);
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float theta;
-        float r = 0;
-
         switch (type) {
             case RECT_TO_POLAR:
-                theta = 0;
-                if (x >= centerX) {
-                    if (y > centerY) {
-                        theta = ImageMath.PI - (float) FastMath.atan((x - centerX) / (y - centerY));
-                        r = (float) Math.sqrt(sqr(x - centerX) + sqr(y - centerY));
-                    } else if (y < centerY) {
-                        theta = (float) FastMath.atan((x - centerX) / (centerY - y));
-                        r = (float) Math.sqrt(sqr(x - centerX) + sqr(centerY - y));
-                    } else {
-                        theta = ImageMath.HALF_PI;
-                        r = x - centerX;
-                    }
-                } else if (x < centerX) {
-                    if (y < centerY) {
-                        theta = ImageMath.TWO_PI - (float) FastMath.atan((centerX - x) / (centerY - y));
-                        r = (float) Math.sqrt(sqr(centerX - x) + sqr(centerY - y));
-                    } else if (y > centerY) {
-                        theta = ImageMath.PI + (float) FastMath.atan((centerX - x) / (y - centerY));
-                        r = (float) Math.sqrt(sqr(centerX - x) + sqr(y - centerY));
-                    } else {
-                        theta = 1.5f * ImageMath.PI;
-                        r = centerX - x;
-                    }
-                }
-                theta += angle;
-                r /= zoom;
-
-                out[0] = (width - 1) - (((width - 1) / ImageMath.TWO_PI) * theta);
-                out[1] = height * r / radius;
-
+                rectToPolar(x, y, out);
                 break;
             case POLAR_TO_RECT:
-                theta = x / width * ImageMath.TWO_PI;
-                theta += angle;
-
-                float theta2;
-
-                if (theta >= 1.5f * ImageMath.PI) {
-                    theta2 = ImageMath.TWO_PI - theta;
-                } else if (theta >= ImageMath.PI) {
-                    theta2 = theta - ImageMath.PI;
-                } else if (theta >= 0.5f * ImageMath.PI) {
-                    theta2 = ImageMath.PI - theta;
-                } else {
-                    theta2 = theta;
-                }
-                r = radius * y / height;
-                r /= zoom;
-
-                float nx = -r * (float) FastMath.sin(theta2);
-                float ny = r * (float) FastMath.cos(theta2);
-
-                if (theta >= 1.5f * ImageMath.PI) {
-                    out[0] = centerX - nx;
-                    out[1] = centerY - ny;
-                } else if (theta >= Math.PI) {
-                    out[0] = centerX - nx;
-                    out[1] = centerY + ny;
-                } else if (theta >= 0.5 * Math.PI) {
-                    out[0] = centerX + nx;
-                    out[1] = centerY + ny;
-                } else {
-                    out[0] = centerX + nx;
-                    out[1] = centerY - ny;
-                }
+                polarToRect(x, y, out);
                 break;
             case INVERT_IN_CIRCLE:
-                float dx = x - centerX;
-                float dy = y - centerY;
-                float distance2 = dx * dx + dy * dy;
-
-                float relX = centerX * centerX * dx / distance2;
-                float relY = centerY * centerY * dy / distance2;
-
-                relX *= zoom;
-                relY *= zoom;
-
-                out[0] = centerX + relX;
-                out[1] = centerY + relY;
-
-                out[0] -= (width - 1) / ImageMath.TWO_PI * angle;
-
+                invertInCircle(x, y, out);
                 break;
         }
+    }
+
+    private void rectToPolar(int x, int y, float[] out) {
+        float theta = 0;
+        float r = 0;
+        if (x >= cx) {
+            if (y > cy) {
+                theta = ImageMath.PI - (float) FastMath.atan((x - cx) / (y - cy));
+                r = fastHypot(x - cx, y - cy);
+            } else if (y < cy) {
+                theta = (float) FastMath.atan((x - cx) / (cy - y));
+                r = fastHypot(x - cx, y - cy);
+            } else {
+                theta = ImageMath.HALF_PI;
+                r = x - cx;
+            }
+        } else if (x < cx) {
+            if (y < cy) {
+                theta = ImageMath.TWO_PI - (float) FastMath.atan((cx - x) / (cy - y));
+                r = fastHypot(x - cx, y - cy);
+            } else if (y > cy) {
+                theta = ImageMath.PI + (float) FastMath.atan((cx - x) / (y - cy));
+                r = fastHypot(x - cx, y - cy);
+            } else {
+                theta = 1.5f * ImageMath.PI;
+                r = cx - x;
+            }
+        }
+        theta += angle;
+        r /= zoom;
+
+        out[0] = (width - 1) - (((width - 1) / ImageMath.TWO_PI) * theta);
+        out[1] = height * r / radius;
+    }
+
+    private void polarToRect(int x, int y, float[] out) {
+        float theta;
+        float r;
+        theta = (float) x / width * ImageMath.TWO_PI;
+        theta += angle;
+
+        float refAngle;
+
+        if (theta >= 1.5f * ImageMath.PI) {
+            refAngle = ImageMath.TWO_PI - theta;
+        } else if (theta >= ImageMath.PI) {
+            refAngle = theta - ImageMath.PI;
+        } else if (theta >= 0.5f * ImageMath.PI) {
+            refAngle = ImageMath.PI - theta;
+        } else {
+            refAngle = theta;
+        }
+        r = radius * y / height;
+        r /= zoom;
+
+        float dx = -r * (float) FastMath.sin(refAngle);
+        float dy = r * (float) FastMath.cos(refAngle);
+
+        if (theta >= 1.5f * ImageMath.PI) {
+            out[0] = cx - dx;
+            out[1] = cy - dy;
+        } else if (theta >= Math.PI) {
+            out[0] = cx - dx;
+            out[1] = cy + dy;
+        } else if (theta >= 0.5 * Math.PI) {
+            out[0] = cx + dx;
+            out[1] = cy + dy;
+        } else {
+            out[0] = cx + dx;
+            out[1] = cy - dy;
+        }
+    }
+
+    private void invertInCircle(int x, int y, float[] out) {
+        float dx = x - cx;
+        float dy = y - cy;
+        float distSq = dx * dx + dy * dy;
+
+        float relX = cx * cx * dx / distSq;
+        float relY = cy * cy * dy / distSq;
+
+        relX *= zoom;
+        relY *= zoom;
+
+        out[0] = cx + relX;
+        out[1] = cy + relY;
+
+        out[0] -= (width - 1) / ImageMath.TWO_PI * angle;
+    }
+
+    private static float fastHypot(float dx, float dy) {
+        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 }

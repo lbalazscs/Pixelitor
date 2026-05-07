@@ -68,13 +68,12 @@ public class JHWood extends ParametrizedFilter {
             gain
         ).withReseedNoiseAction();
 
-        stretch.setupEnableOtherIfNotZero(angle);
+        stretch.enableOtherWhenNotZero(angle);
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        WoodFilter filter = new WoodFilter(
-            NAME,
+        WoodFilter filter = new WoodFilter(NAME,
             (float) rings.getPercentage(),
             scale.getValueAsFloat(),
             stretch.getValueAsFloat() + 1.0f,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,25 +49,27 @@ public enum GuideStrokeType {
     );
 
     private final String displayName;
-    private final Stroke strokeA;
-    private final Stroke strokeB;
+    private final Stroke primaryStroke;
+    private final Stroke secondaryStroke;
 
-    GuideStrokeType(String displayName, Stroke strokeA, Stroke strokeB) {
+    GuideStrokeType(String displayName, Stroke primaryStroke, Stroke secondaryStroke) {
+        assert primaryStroke != null;
+
         this.displayName = displayName;
-        this.strokeA = strokeA;
-        this.strokeB = strokeB;
+        this.primaryStroke = primaryStroke; // never null
+        this.secondaryStroke = secondaryStroke; // possibly null
     }
 
-    public Stroke getStrokeA() {
-        return strokeA;
+    public Stroke getPrimaryStroke() {
+        return primaryStroke;
     }
 
-    public Stroke getStrokeB() {
-        return strokeB;
+    public Stroke getSecondaryStroke() {
+        return secondaryStroke;
     }
 
     public boolean hasDoubleStroke() {
-        return strokeB != null;
+        return secondaryStroke != null;
     }
 
     @Override

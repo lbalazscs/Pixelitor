@@ -47,13 +47,11 @@ public class JHSparkle extends ParametrizedFilter {
     private final RangeParam shine = new RangeParam("Shine", 0, 50, 100);
     private final RangeParam randomness = new RangeParam("Randomness", 0, 24, 48);
 
-    private SparkleFilter filter;
-
     public JHSparkle() {
         super(true);
 
         var reseed = paramSet.createReseedAction("", "Reseed Randomness");
-        randomness.setupEnableOtherIfNotZero(reseed);
+        randomness.enableOtherWhenNotZero(reseed);
         initParams(
             center,
             lightOnly,
@@ -67,19 +65,15 @@ public class JHSparkle extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new SparkleFilter(NAME);
-        }
-
-        filter.setLightOnly(lightOnly.isChecked());
-        filter.setRelativeCenterX((float) center.getRelativeX());
-        filter.setRelativeCenterY((float) center.getRelativeY());
-        filter.setRadius(radius.getValue());
-        filter.setNumRays(numRays.getValue());
-        filter.setAmount(shine.getValue());
-        filter.setRandomness(randomness.getValue());
-        filter.setColor(color.getColor().getRGB());
-        filter.setRandom(paramSet.getRandomWithLastSeed());
+        SparkleFilter filter = new SparkleFilter(NAME,
+            lightOnly.isChecked(),
+            center.getAbsolutePoint(src),
+            radius.getValue(),
+            numRays.getValue(),
+            shine.getValue(),
+            randomness.getValue(),
+            color.getColor().getRGB(),
+            paramSet.getRandomWithLastSeed());
 
         return filter.filter(src, dest);
     }

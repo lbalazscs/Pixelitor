@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ package pixelitor.filters.gui;
  */
 public enum TransparencyMode {
     /**
-     * Transparent colors can't be selected.
+     * Colors with transparency can't be selected.
      */
     OPAQUE_ONLY(false, false),
 
@@ -34,7 +34,7 @@ public enum TransparencyMode {
     /**
      * The user can select an alpha value, and randomizing will also randomize the alpha.
      */
-    ALPHA_ENABLED(true, true);
+    RANDOMIZED_ALPHA(true, true);
 
     private final boolean allowTransparency;
     private final boolean randomizeTransparency;
@@ -47,14 +47,14 @@ public enum TransparencyMode {
     /**
      * Whether the user is allowed to select a color with transparency.
      */
-    public boolean allowTransparency() {
+    public boolean isTransparencyAllowed() {
         return allowTransparency;
     }
 
     /**
      * Whether the alpha channel should also be randomized.
      */
-    public boolean randomizeTransparency() {
+    public boolean isTransparencyRandomized() {
         return randomizeTransparency;
     }
 }

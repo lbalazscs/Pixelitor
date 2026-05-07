@@ -29,7 +29,6 @@ import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 /**
@@ -81,11 +80,11 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
      * Linking makes sense only if they have the same ranges.
      */
     public GroupedRangeParam(String name, RangeParam[] children, boolean linked) {
-        super(name, ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
         this.children = children;
 
         for (RangeParam child : children) {
-            child.setAddResetButton(true);
+            child.setHasResetButton(true);
             child.setLabelPosition(NONE);
         }
 
@@ -526,7 +525,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             StringBuilder sb = new StringBuilder();
             for (double value : values) {
                 sb.append(String.format(Locale.ROOT, "%.2f,", value));

@@ -254,7 +254,7 @@ public abstract class AbstractBrushTool extends Tool {
         var distSlider = lazyMouseDist.createGUI("distSlider");
         gbh.addLabelAndControl(lazyMouseDist.getName() + ":", distSlider);
 
-        lazyMouseEnabled.setupEnableOtherIfChecked(lazyMouseDist);
+        lazyMouseEnabled.enableOtherWhenChecked(lazyMouseDist);
         return panel;
     }
 

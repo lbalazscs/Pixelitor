@@ -21,8 +21,6 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.util.Objects;
 
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
-
 /**
  * A base class for implementations of {@link FilterParam}.
  */
@@ -137,7 +135,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public boolean shouldRandomize() {
-        return randomizeMode == ALLOW_RANDOMIZE && enabledByFilterLogic;
+        return randomizeMode == RandomizeMode.ALLOW && enabledByFilterLogic;
     }
 
     @Override
@@ -173,11 +171,6 @@ public abstract class AbstractFilterParam implements FilterParam {
         return "<html>Reset the value of <b>" + name + "</b>";
     }
 
-    @Override
-    public boolean isComplex() {
-        return false;
-    }
-
     public FilterButtonModel getSideButtonModel() {
         return sideButtonModel;
     }
@@ -191,15 +184,12 @@ public abstract class AbstractFilterParam implements FilterParam {
             return false;
         }
         AbstractFilterParam that = (AbstractFilterParam) o;
-
-        // two parameters are considered equal if their values are equal
-        // (this is used to compare filter states)
-        return getValueAsString().equals(that.getValueAsString());
+        return name.equals(that.name) && getValueAsString().equals(that.getValueAsString());
     }
 
     @Override
     public int hashCode() {
-        return getValueAsString().hashCode();
+        return Objects.hash(name, getValueAsString());
     }
 
     @Override

@@ -65,8 +65,7 @@ public class JHKaleidoscope extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        KaleidoscopeFilter filter = new KaleidoscopeFilter(
-            NAME,
+        KaleidoscopeFilter filter = new KaleidoscopeFilter(NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
             (float) angle.getValueInRadians(),

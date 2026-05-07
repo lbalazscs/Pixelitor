@@ -29,7 +29,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.function.BooleanSupplier;
 
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.utils.Texts.i18n;
 
@@ -62,9 +61,9 @@ public class ChannelMixer extends ParametrizedFilter {
     private final RangeParam blueFromBlue = from(BLUE, BLUE, 100);
 
     private final BooleanParam preserveBrightnessParam = new BooleanParam(
-        "Preserve Brightness", true, IGNORE_RANDOMIZE);
+        "Preserve Brightness", true, RandomizeMode.IGNORE);
     private final BooleanParam autoBWParam = new BooleanParam(
-        "Allow only Black and White", false, IGNORE_RANDOMIZE);
+        "Allow only Black and White", false, RandomizeMode.IGNORE);
 
     private final Action swapRedGreen = new TaskAction("Swap Red-Green", () -> withoutNormalization(() -> {
         setRedSource(0, 100, 0);

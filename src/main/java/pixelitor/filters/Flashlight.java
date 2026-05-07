@@ -17,22 +17,16 @@
 
 package pixelitor.filters;
 
-import com.jhlabs.image.ImageMath;
-import com.jhlabs.image.PointFilter;
-import pixelitor.colors.Colors;
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.impl.FlashlightFilter;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.BlurredShape;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * The "Flashlight" filter.
@@ -48,16 +42,14 @@ public class Flashlight extends ParametrizedFilter {
     private final RangeParam softness = new RangeParam("Edge Softness", 0, 20, 100);
     private final IntChoiceParam shape = BlurredShape.getChoices();
     private final IntChoiceParam bg = new IntChoiceParam("Background", new Item[]{
-        new Item("Black", FlashLightFilter.BG_BLACK),
-        new Item("White", FlashLightFilter.BG_WHITE),
-        new Item("Background Color", FlashLightFilter.BG_TOOL_BG),
-        new Item("Transparent", FlashLightFilter.BG_TRANSPARENT),
-    }, IGNORE_RANDOMIZE);
+        new Item("Black", FlashlightFilter.BG_BLACK),
+        new Item("White", FlashlightFilter.BG_WHITE),
+        new Item("Background Color", FlashlightFilter.BG_TOOL_BG),
+        new Item("Transparent", FlashlightFilter.BG_TRANSPARENT),
+    }, RandomizeMode.IGNORE);
     private final BooleanParam invert = new BooleanParam("Invert");
     private final RangeParam opacity =
         new RangeParam(GUIText.OPACITY, 0, 100, 100);
-
-    private FlashLightFilter filter;
 
     public Flashlight() {
         super(true);
@@ -77,21 +69,14 @@ public class Flashlight extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new FlashLightFilter();
-        }
-
-        filter.setCenter(
-            src.getWidth() * center.getRelativeX(),
-            src.getHeight() * center.getRelativeY()
-        );
-        filter.setRadius(
+        FlashlightFilter filter = new FlashlightFilter(NAME,
+            center.getAbsolutePoint(src),
             radius.getValueAsDouble(0),
             radius.getValueAsDouble(1),
-            softness.getPercentage());
-        filter.setShape(shape.getValue());
-        filter.setBackgroundType(bg.getValue());
-        filter.setInvert(invert.isChecked());
+            softness.getPercentage(),
+            shape.getValue(),
+            bg.getValue(),
+            invert.isChecked());
 
         BufferedImage filtered = filter.filter(src, dest);
 
@@ -104,89 +89,6 @@ public class Flashlight extends ParametrizedFilter {
             g.drawImage(src, 0, 0, null);
             g.dispose();
             return filtered;
-        }
-    }
-
-    /**
-     * Flashlight implementation.
-     */
-    private static class FlashLightFilter extends PointFilter {
-        public static final int BG_BLACK = 0;
-        public static final int BG_WHITE = 1;
-        public static final int BG_TRANSPARENT = 2;
-        public static final int BG_TOOL_BG = 3;
-
-        private Point2D center;
-        private double innerRadiusX;
-        private double innerRadiusY;
-        private double outerRadiusX;
-        private double outerRadiusY;
-        private int bgRGBA;
-        private BlurredShape shape;
-        private boolean invert;
-
-        public FlashLightFilter() {
-            super(NAME);
-        }
-
-        @Override
-        public int processPixel(int x, int y, int rgb) {
-            int srcAlpha = rgb >>> 24;
-            double outside = shape.isOutside(x, y);
-            if (invert) {
-                outside = 1.0 - outside;
-            }
-
-            if (outside == 1.0) {
-                // outside the blurred shape set the background color
-                // while preserving the transparency of the source
-                return Colors.capAlpha(bgRGBA, srcAlpha);
-            } else if (outside == 0.0) {
-                return rgb;
-            } else {
-                if (bgRGBA == 0) {
-                    // Don't mix, because it would darken the image.
-                    // Take the smaller alpha in order to preserve existing transparency.
-                    int calcAlpha = (int) (255.0 * (1.0 - outside));
-                    return Colors.capAlpha(rgb, calcAlpha);
-                } else {
-                    int mixed = ImageMath.mixColors((float) outside, rgb, bgRGBA);
-                    return Colors.capAlpha(mixed, srcAlpha);
-                }
-            }
-        }
-
-        public void setCenter(double cx, double cy) {
-            center = new Point2D.Double(cx, cy);
-        }
-
-        public void setRadius(double radiusX, double radiusY, double softness) {
-            innerRadiusX = radiusX - radiusX * softness;
-            innerRadiusY = radiusY - radiusY * softness;
-
-            outerRadiusX = radiusX + radiusX * softness;
-            outerRadiusY = radiusY + radiusY * softness;
-        }
-
-        public void setBackgroundType(int bg) {
-            bgRGBA = switch (bg) {
-                case BG_BLACK -> 0xFF_00_00_00;
-                case BG_WHITE -> 0xFF_FF_FF_FF;
-                case BG_TOOL_BG -> FgBgColors.getBgColor().getRGB();
-                case BG_TRANSPARENT -> 0;
-                default -> throw new IllegalArgumentException("bg = " + bg);
-            };
-        }
-
-        // must be called after the radius/center settings
-        public void setShape(int type) {
-            shape = BlurredShape.create(type, center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
-        }
-
-        public void setInvert(boolean invert) {
-            this.invert = invert;
         }
     }
 }

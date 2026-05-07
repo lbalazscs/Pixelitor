@@ -28,7 +28,6 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.tools.shapes.StrokeType.SHAPE;
 
@@ -48,21 +47,21 @@ public class StrokeParam extends AbstractFilterParam {
     private ResetButton resetButton;
     private JComponent previewer;
 
-    private final FilterParam[] allParams = {
+    private final FilterParam[] childParams = {
         strokeWidthParam, strokeCapParam, strokeJoinParam,
         strokeTypeParam, shapeTypeParam, dashedParam};
 
     public StrokeParam(String name) {
-        super(name, ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
 
         shapeTypeParam.withDefault(DEFAULT_SHAPE_TYPE);
 
         // enable shape type only when stroke type is SHAPE
-        strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
+        strokeTypeParam.enableOtherWhen(shapeTypeParam,
             strokeType -> strokeType == SHAPE);
 
         // disable dashed option for stroke types that don't support it
-        strokeTypeParam.setupDisableOtherIf(dashedParam,
+        strokeTypeParam.disableOtherWhen(dashedParam,
             strokeType -> !strokeType.supportsDashes());
     }
 
@@ -88,7 +87,7 @@ public class StrokeParam extends AbstractFilterParam {
 
         super.setAdjustmentListener(decoratedListener);
 
-        for (FilterParam param : allParams) {
+        for (FilterParam param : childParams) {
             param.setAdjustmentListener(decoratedListener);
         }
     }
@@ -154,14 +153,14 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        StrokeSettings setting = (StrokeSettings) state;
+        StrokeSettings settings = (StrokeSettings) state;
 
-        strokeWidthParam.setValueNoTrigger(setting.width());
-        strokeCapParam.setSelectedItem(setting.cap(), false);
-        strokeJoinParam.setSelectedItem(setting.join(), false);
-        strokeTypeParam.setSelectedItem(setting.type(), false);
-        shapeTypeParam.setSelectedItem(setting.shapeType(), false);
-        dashedParam.setValue(setting.dashed(), updateGUI, false);
+        strokeWidthParam.setValueNoTrigger(settings.width());
+        strokeCapParam.setSelectedItem(settings.cap(), false);
+        strokeJoinParam.setSelectedItem(settings.join(), false);
+        strokeTypeParam.setSelectedItem(settings.type(), false);
+        shapeTypeParam.setSelectedItem(settings.shapeType(), false);
+        dashedParam.setValue(settings.dashed(), updateGUI, false);
     }
 
     @Override
@@ -171,7 +170,7 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(UserPreset preset) {
-        for (FilterParam param : allParams) {
+        for (FilterParam param : childParams) {
             String savedString = preset.get(param.getPresetKey());
             if (savedString != null) { // presets don't have to include everything
                 param.loadStateFrom(savedString);
@@ -182,8 +181,8 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        for (FilterParam param : allParams) {
-            preset.put(param.getPresetKey(), param.copyState().toSaveString());
+        for (FilterParam param : childParams) {
+            preset.put(param.getPresetKey(), param.copyState().toPresetString());
         }
     }
 
@@ -192,14 +191,14 @@ public class StrokeParam extends AbstractFilterParam {
         // call super to set the enabled state of the launching button
         super.setEnabled(enabled, reason);
 
-        for (FilterParam param : allParams) {
+        for (FilterParam param : childParams) {
             param.setEnabled(enabled, EnabledReason.PARENT_PARAM);
         }
     }
 
     @Override
     public boolean isAtDefault() {
-        for (FilterParam param : allParams) {
+        for (FilterParam param : childParams) {
             if (!param.isAtDefault()) {
                 return false;
             }
@@ -209,7 +208,7 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean trigger) {
-        for (FilterParam param : allParams) {
+        for (FilterParam param : childParams) {
             // trigger the listener only once at the end
             param.reset(false);
         }
@@ -239,7 +238,7 @@ public class StrokeParam extends AbstractFilterParam {
             .okText(CLOSE_DIALOG);
     }
 
-    public FilterParam withDefaultStrokeWidth(int newWidth) {
+    public StrokeParam withDefaultStrokeWidth(int newWidth) {
         strokeWidthParam.setDefaultValue(newWidth);
         return this;
     }
@@ -303,7 +302,7 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public String getValueAsString() {
-        return Stream.of(allParams)
+        return Stream.of(childParams)
             .map(FilterParam::getValueAsString)
             .collect(joining(", ", "[", "]"));
     }

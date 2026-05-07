@@ -28,8 +28,6 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
-
 /**
  * Checker pattern filter based on the JHLabs {@link CheckFilter}.
  */
@@ -49,7 +47,7 @@ public class JHCheckerFilter extends ParametrizedFilter {
         "Waves", new RangeParam[]{
         new RangeParam("Amount", 0, 0, 100),
         new RangeParam("Phase (Time)", 0, 0, 100)}, false);
-    private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, IGNORE_RANDOMIZE);
+    private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, RandomizeMode.IGNORE);
 
     public JHCheckerFilter() {
         super(true);
@@ -68,7 +66,7 @@ public class JHCheckerFilter extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         CheckFilter filter = new CheckFilter(
             NAME,
-            colors.getColorsAsPackedInts(),
+            colors.getColorsAsArgb(),
             tileSize.getHorizontal(),
             tileSize.getVertical(),
             fuzziness.getValue(),

@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
+import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 
 /**
  * Pointillize filter based on the JHLabs {@link PointillizeFilter}.
@@ -44,7 +44,7 @@ public class JHPointillize extends ParametrizedFilter {
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);
     private final RangeParam dotSize = new RangeParam("Dot Relative Size (%)", 0, 45, 100);
     private final RangeParam fuzziness = new RangeParam("Fill Fuzziness (%)", 0, 0, 100);
-    private final ColorParam edgeColor = new ColorParam("Fill Color", BLACK, ALPHA_ENABLED);
+    private final ColorParam edgeColor = new ColorParam("Fill Color", BLACK, RANDOMIZED_ALPHA);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Instead of Fill", true);
 
     private final RangeParam randomness = new RangeParam("Grid Randomness (%)", 0, 0, 100);
@@ -65,9 +65,9 @@ public class JHPointillize extends ParametrizedFilter {
             fuzziness
         ).withAction(paramSet.createReseedCachedAndNoiseAction());
 
-        fadeEdges.setupDisableOtherIfChecked(edgeColor);
-        fadeEdges.setupDisableOtherIfChecked(dotSize);
-        fadeEdges.setupDisableOtherIfChecked(fuzziness);
+        fadeEdges.disableOtherWhenChecked(edgeColor);
+        fadeEdges.disableOtherWhenChecked(dotSize);
+        fadeEdges.disableOtherWhenChecked(fuzziness);
     }
 
     @Override

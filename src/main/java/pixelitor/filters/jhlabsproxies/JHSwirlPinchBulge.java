@@ -67,8 +67,7 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        PinchFilter filter = new PinchFilter(
-            NAME,
+        PinchFilter filter = new PinchFilter(NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
             swirlAmount.getValueInRadians(),
@@ -76,8 +75,7 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
             radius.getValueAsFloat(),
             center.getAbsolutePoint(src),
             (float) zoom.getPercentage(),
-            (float) rotateResult.getValueInIntuitiveRadians()
-        );
+            (float) rotateResult.getValueInIntuitiveRadians());
         
         dest = filter.filter(src, dest);
 //        setAffectedAreaShapes(filter.getAffectedAreaShapes());

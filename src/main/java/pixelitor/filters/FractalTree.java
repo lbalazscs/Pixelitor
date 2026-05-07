@@ -18,11 +18,8 @@
 package pixelitor.filters;
 
 import net.jafama.FastMath;
-import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -37,7 +34,6 @@ import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
@@ -71,7 +67,7 @@ public class FractalTree extends ParametrizedFilter {
     private final IntChoiceParam quality = new IntChoiceParam("Quality", new Item[]{
         new Item("Better", QUALITY_BETTER),
         new Item("Faster", QUALITY_FASTER)
-    }, IGNORE_RANDOMIZE);
+    }, RandomizeMode.IGNORE);
 
     // precalculated objects for different depths of the tree
     private Stroke[] strokeLookup;
@@ -84,7 +80,7 @@ public class FractalTree extends ParametrizedFilter {
 
     private final GradientParam colors = new GradientParam("Colors",
         new float[]{0.25f, 0.75f},
-        new Color[]{BROWN, GREEN}, IGNORE_RANDOMIZE);
+        new Color[]{BROWN, GREEN}, RandomizeMode.IGNORE);
     private double defaultLength;
     private double lengthDeviation;
     private double angleDeviation;

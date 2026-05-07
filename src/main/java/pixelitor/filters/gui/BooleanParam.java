@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * A filter parameter for managing a boolean value, represented by a checkbox in the GUI.
@@ -37,32 +35,32 @@ import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean value;
-    private final boolean addResetButton;
+    private final boolean hasResetButton;
     private List<ItemListener> pendingItemListeners;
 
     public BooleanParam(String name) {
-        this(name, false, ALLOW_RANDOMIZE);
+        this(name, false, RandomizeMode.ALLOW);
     }
 
     public BooleanParam(String name, boolean defaultValue) {
-        this(name, defaultValue, ALLOW_RANDOMIZE);
+        this(name, defaultValue, RandomizeMode.ALLOW);
     }
 
     public BooleanParam(String name, boolean defaultValue, RandomizeMode randomizeMode) {
         this(name, defaultValue, randomizeMode, false);
     }
 
-    public BooleanParam(String name, boolean defaultValue, RandomizeMode randomizeMode, boolean addResetButton) {
+    public BooleanParam(String name, boolean defaultValue, RandomizeMode randomizeMode, boolean hasResetButton) {
         super(name, randomizeMode);
 
         this.defaultValue = defaultValue;
         this.value = defaultValue;
-        this.addResetButton = addResetButton;
+        this.hasResetButton = hasResetButton;
     }
 
     @Override
     public JComponent createGUI() {
-        var gui = new BooleanParamGUI(this, addResetButton, sideButtonModel);
+        var gui = new BooleanParamGUI(this, hasResetButton, sideButtonModel);
         paramGUI = gui;
         syncWithGui();
 
@@ -79,24 +77,24 @@ public class BooleanParam extends AbstractFilterParam {
 
     public static BooleanParam forHPSharpening() {
         return new BooleanParam("High-Pass Sharpening",
-            false, IGNORE_RANDOMIZE);
+            false, RandomizeMode.IGNORE);
     }
 
     /**
      * Configures another {@link FilterSetting} to be enabled when this one is checked.
      */
-    public void setupEnableOtherIfChecked(FilterSetting other) {
-        setupDependentOther(other, true);
+    public void enableOtherWhenChecked(FilterSetting other) {
+        setupDependentSetting(other, true);
     }
 
     /**
      * Configures another {@link FilterSetting} to be disabled when this one is checked.
      */
-    public void setupDisableOtherIfChecked(FilterSetting other) {
-        setupDependentOther(other, false);
+    public void disableOtherWhenChecked(FilterSetting other) {
+        setupDependentSetting(other, false);
     }
 
-    private void setupDependentOther(FilterSetting other, boolean enableWhenChecked) {
+    private void setupDependentSetting(FilterSetting other, boolean enableWhenChecked) {
         other.setEnabled(enableWhenChecked
             ? isChecked()
             : !isChecked());
@@ -132,9 +130,9 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     /**
-     * Returns the checked state in the format expected by G'MIC
+     * Returns the checked state in the format expected by G'MIC.
      */
-    public String isCheckedStr() {
+    public String getGmicChecked() {
         return value ? "1" : "0";
     }
 
@@ -228,7 +226,7 @@ public class BooleanParam extends AbstractFilterParam {
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             return saveString;
         }
     }

@@ -22,14 +22,27 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Kernel;
 
 /**
- * A filter which performs a "smart blur". i.e. a blur which blurs smotth parts of the image while preserving edges.
+ * A filter which performs a "smart blur", i.e. a blur that smooths
+ * homogeneous regions of an image while preserving edges.
  */
 public class SmartBlurFilter extends AbstractBufferedImageOp {
-    private int radius = 5;
-    private int threshold = 10;
+    private final int radius;
+    private final int threshold;
 
-    public SmartBlurFilter(String filterName) {
+    /**
+     * Creates a new smart blur filter.
+     *
+     * @param filterName the name of the filter.
+     * @param radius     the blur radius.
+     * @param threshold  the threshold used to decide whether neighboring pixels
+     *                   are similar enough to be blurred together. Smaller values
+     *                   preserve edges more aggressively.
+     */
+    public SmartBlurFilter(String filterName, int radius, int threshold) {
         super(filterName);
+
+        this.radius = radius;
+        this.threshold = threshold;
     }
 
     @Override
@@ -48,8 +61,8 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
         getRGB(src, 0, 0, width, height, inPixels);
 
         Kernel kernel = GaussianFilter.makeKernel(radius);
-        thresholdBlur(kernel, inPixels, outPixels, width, height, true, pt);
-        thresholdBlur(kernel, outPixels, inPixels, height, width, true, pt);
+        thresholdBlur(kernel, inPixels, outPixels, width, height, pt);
+        thresholdBlur(kernel, outPixels, inPixels, height, width, pt);
 
         setRGB(dst, 0, 0, width, height, inPixels);
 
@@ -59,9 +72,10 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Convolve with a kernel consisting of one row
+     * Convolve with a kernel consisting of one row.
      */
-    private void thresholdBlur(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, ProgressTracker pt) {
+    private void thresholdBlur(Kernel kernel, int[] inPixels, int[] outPixels,
+                               int width, int height, ProgressTracker pt) {
         float[] matrix = kernel.getKernelData(null);
         int cols = kernel.getWidth();
         int cols2 = cols / 2;
@@ -78,74 +92,66 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
                 int r1 = (rgb1 >> 16) & 0xFF;
                 int g1 = (rgb1 >> 8) & 0xFF;
                 int b1 = rgb1 & 0xFF;
+
                 float af = 0, rf = 0, gf = 0, bf = 0;
+
                 for (int col = -cols2; col <= cols2; col++) {
                     float f = matrix[moffset + col];
+                    if (f == 0) {
+                        continue;
+                    }
 
-                    if (f != 0) {
-                        int ix = x + col;
-                        if (!(0 <= ix && ix < width)) {
-                            ix = x;
-                        }
-                        int rgb2 = inPixels[ioffset + ix];
-                        int a2 = rgb2 >>> 24;
-                        int r2 = (rgb2 >> 16) & 0xFF;
-                        int g2 = (rgb2 >> 8) & 0xFF;
-                        int b2 = rgb2 & 0xFF;
+                    int ix = x + col;
+                    if (ix < 0 || ix >= width) {
+                        ix = x;
+                    }
 
-                        int d;
-                        d = a1 - a2;
-                        if (d >= -threshold && d <= threshold) {
-                            a += f * a2;
-                            af += f;
-                        }
-                        d = r1 - r2;
-                        if (d >= -threshold && d <= threshold) {
-                            r += f * r2;
-                            rf += f;
-                        }
-                        d = g1 - g2;
-                        if (d >= -threshold && d <= threshold) {
-                            g += f * g2;
-                            gf += f;
-                        }
-                        d = b1 - b2;
-                        if (d >= -threshold && d <= threshold) {
-                            b += f * b2;
-                            bf += f;
-                        }
+                    int rgb2 = inPixels[ioffset + ix];
+                    int a2 = rgb2 >>> 24;
+                    int r2 = (rgb2 >> 16) & 0xFF;
+                    int g2 = (rgb2 >> 8) & 0xFF;
+                    int b2 = rgb2 & 0xFF;
+
+                    int d;
+
+                    d = a1 - a2;
+                    if (d >= -threshold && d <= threshold) {
+                        a += f * a2;
+                        af += f;
+                    }
+                    d = r1 - r2;
+                    if (d >= -threshold && d <= threshold) {
+                        r += f * r2;
+                        rf += f;
+                    }
+                    d = g1 - g2;
+                    if (d >= -threshold && d <= threshold) {
+                        g += f * g2;
+                        gf += f;
+                    }
+                    d = b1 - b2;
+                    if (d >= -threshold && d <= threshold) {
+                        b += f * b2;
+                        bf += f;
                     }
                 }
-                a = af == 0 ? a1 : a / af;
-                r = rf == 0 ? r1 : r / rf;
-                g = gf == 0 ? g1 : g / gf;
-                b = bf == 0 ? b1 : b / bf;
-                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xFF;
+
+                // the accumulation variables will never be 0,
+                // because a Gaussian kernel center is always positive
+                a = a / af;
+                r = r / rf;
+                g = g / gf;
+                b = b / bf;
+
+                int ia = PixelUtils.clamp((int) (a + 0.5));
                 int ir = PixelUtils.clamp((int) (r + 0.5));
                 int ig = PixelUtils.clamp((int) (g + 0.5));
                 int ib = PixelUtils.clamp((int) (b + 0.5));
+
                 outPixels[outIndex] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
                 outIndex += height;
             }
             pt.unitDone();
         }
-    }
-
-    /**
-     * Sets the radius of the effect.
-     *
-     * @param radius the radius (must be >= 0)
-     */
-    public void setRadius(int radius) {
-        this.radius = radius;
-    }
-
-    /**
-     * Sets the threshold value.
-     *
-     * @param threshold the threshold value
-     */
-    public void setThreshold(int threshold) {
-        this.threshold = threshold;
     }
 }

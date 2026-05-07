@@ -86,8 +86,7 @@ public class JHFocus extends ParametrizedFilter {
         int iterations = numIterations.getValue();
         int shapeType = shape.getValue();
 
-        FocusImpl filter = new FocusImpl(
-            NAME,
+        FocusFilter filter = new FocusFilter(NAME,
             blurHorRadius,
             blurVerRadius,
             iterations,
@@ -97,8 +96,7 @@ public class JHFocus extends ParametrizedFilter {
             radiusY,
             softnessFactor,
             inverted,
-            shapeType
-        );
+            shapeType);
 
         dest = filter.filter(src, dest);
 
@@ -114,13 +112,13 @@ public class JHFocus extends ParametrizedFilter {
         return !hpSharpening.isChecked();
     }
 
-    private static class FocusImpl extends VariableBlurFilter {
+    private static class FocusFilter extends VariableBlurFilter {
         private final boolean inverted;
         private final BlurredShape shape;
 
-        public FocusImpl(String filterName, float hRadius, float vRadius, int iterations,
-                         double cx, double cy, double radiusX, double radiusY, double softness,
-                         boolean inverted, int shapeType) {
+        public FocusFilter(String filterName, float hRadius, float vRadius, int iterations,
+                           double cx, double cy, double radiusX, double radiusY, double softness,
+                           boolean inverted, int shapeType) {
 
             // instead of using a blur mask, we override blurRadiusAt
             super(filterName, hRadius, vRadius, iterations, null, true);

@@ -1165,7 +1165,7 @@ public class AppRunner {
 
         var advDialog = findDialogByTitle("Advanced Text Settings");
         advDialog.checkBox("underlineCB").check().uncheck();
-        advDialog.checkBox("strikeThroughCB").check().uncheck();
+        advDialog.checkBox("strikethroughCB").check().uncheck();
         advDialog.checkBox("kerningCB").check().uncheck();
         advDialog.checkBox("ligaturesCB").check().uncheck();
         advDialog.slider("trackingGUI").slideTo(10);

@@ -55,7 +55,7 @@ public class PolarTiles extends ParametrizedFilter {
         super(true);
 
         var reseedRandomness = paramSet.createReseedNoiseAction("", "Reseed Randomness");
-        randomness.setupEnableOtherIfNotZero(reseedRandomness);
+        randomness.enableOtherWhenNotZero(reseedRandomness);
         initParams(
             modeParam,
             center,
@@ -83,8 +83,7 @@ public class PolarTiles extends ParametrizedFilter {
             effectRotation.getPercentage(),
             randomness.getPercentage(),
             zoom.getPercentage(),
-            imageRotation.getValueInIntuitiveRadians()
-        );
+            imageRotation.getValueInIntuitiveRadians());
 
         return filter.filter(src, dest);
     }

@@ -25,8 +25,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.Locale;
 
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
-
 /**
  * A {@link FilterParam} that allows selecting a point within an image using
  * relative coordinates (0.0 to 1.0) that are independent of the actual image size.
@@ -44,7 +42,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     public ImagePositionParam(String name, double relX, double relY) {
-        super(name, ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
 
         relativeX = relX;
         relativeY = relY;
@@ -163,7 +161,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     /**
-     * Encapsulates the state of a {@link ImagePositionParam} as a memento object.
+     * Encapsulates the state of an {@link ImagePositionParam} as a memento object.
      */
     public record ImagePositionParamState(double relativeX,
                                           double relativeY) implements ParamState<ImagePositionParamState> {
@@ -178,7 +176,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             // 4 because range param has max 2 digits after the decimal point
             return String.format(Locale.ROOT, "%.4f,%.4f", relativeX, relativeY);
         }

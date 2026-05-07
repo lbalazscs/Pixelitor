@@ -67,15 +67,13 @@ public class JHLensOverImage extends ParametrizedFilter {
             return src;
         }
 
-        SphereFilter filter = new SphereFilter(
-            NAME,
+        SphereFilter filter = new SphereFilter(NAME,
             TransformFilter.REPEAT_EDGE, // hardcode the default
             interpolation.getValue(),
             center.getAbsolutePoint(src),
             hRadius,
             vRadius,
-            refraction
-        );
+            refraction);
 
         dest = filter.filter(src, dest);
 //        setAffectedAreaShapes(filter.getAffectedAreaShapes());

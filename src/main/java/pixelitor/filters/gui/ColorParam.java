@@ -28,7 +28,6 @@ import java.io.Serial;
 import java.util.Objects;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * A filter parameter for selecting a color.
@@ -39,12 +38,12 @@ public class ColorParam extends AbstractFilterParam {
     private final TransparencyMode transparencyMode;
 
     public ColorParam(String name, Color defaultColor) {
-        this(name, defaultColor, TransparencyMode.ALPHA_ENABLED);
+        this(name, defaultColor, TransparencyMode.RANDOMIZED_ALPHA);
     }
 
     public ColorParam(String name, Color defaultColor,
                       TransparencyMode transparencyMode) {
-        super(name, ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
 
         this.defaultColor = defaultColor;
         color = defaultColor;
@@ -84,7 +83,7 @@ public class ColorParam extends AbstractFilterParam {
     @Override
     protected void doRandomize() {
         setColor(Rnd.createRandomColor(
-            transparencyMode.randomizeTransparency()), false);
+            transparencyMode.isTransparencyRandomized()), false);
     }
 
     public Color getColor() {
@@ -94,12 +93,12 @@ public class ColorParam extends AbstractFilterParam {
     /**
      * Returns the color in the format expected by G'MIC.
      */
-    public String getColorStr() {
-        return Colors.formatGMIC(color);
+    public String getGmicColorStr() {
+        return Colors.formatGmic(color);
     }
 
     /**
-     * Sets a new color and optionally triggers an adjustment event.
+     * Sets a new color and optionally triggers the adjustment listener.
      */
     public void setColor(Color newColor, boolean trigger) {
         assert newColor != null;
@@ -119,16 +118,19 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     public void darken() {
-        // TODO use something better
-        setColor(color.darker(), false);
+        float[] hsb = Colors.toHSB(color);
+        hsb[2] = Math.max(0.0f, hsb[2] - 0.1f); // decrease brightness by 10%
+        setColor(new Color(Colors.hsbToARGB(hsb, color.getAlpha()), true), false);
     }
 
     public void brighten() {
-        setColor(color.brighter(), false);
+        float[] hsb = Colors.toHSB(color);
+        hsb[2] = Math.min(1.0f, hsb[2] + 0.1f); // increase brightness by 10%
+        setColor(new Color(Colors.hsbToARGB(hsb, color.getAlpha()), true), false);
     }
 
-    public boolean allowTransparency() {
-        return transparencyMode.allowTransparency();
+    public boolean isTransparencyAllowed() {
+        return transparencyMode.isTransparencyAllowed();
     }
 
     @Override
@@ -186,7 +188,7 @@ public class ColorParam extends AbstractFilterParam {
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             return Colors.toHtmlHex(color, true);
         }
     }

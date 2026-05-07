@@ -62,7 +62,7 @@ public class CircleWeave extends CurveFilter {
 //        typeParam.setupDisableOtherIf(innerRadiusPercent, maurer.or(times));
 //        typeParam.setupEnableOtherIf(multiplierParam, maurer.or(times));
 
-        typeParam.setupLimitOtherToMax(numPointsParam, selected ->
+        typeParam.limitOtherMaxWhen(numPointsParam, selected ->
             switch (selected.value()) {
                 case TYPE_CIRCLE_GRID -> 50;
                 case TYPE_MAURER_ROSE, TYPE_TIMES_TABLE -> 200;

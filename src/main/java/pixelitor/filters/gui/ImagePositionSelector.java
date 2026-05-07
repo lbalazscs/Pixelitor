@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         addMouseMotionListener(this);
 
         if (AppMode.isUnitTesting()) {
-            // Had spurious failures on Linux in createTumbnail().
+            // Had spurious failures on Linux in createThumbnail().
             // This workaround should no longer be necessary.
             return;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,8 +55,8 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     String getPresetKey();
 
     /**
-     * Loads the given state into this parameter, optionally
-     * updating the GUI, and without triggering the filter.
+     * Loads the state from the given string into this parameter,
+     * optionally updating the GUI, and without triggering the filter.
      */
     void loadStateFrom(ParamState<?> state, boolean updateGUI);
 
@@ -84,7 +84,7 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
      */
     default void saveStateTo(UserPreset preset) {
         // overridden in the composite params
-        preset.put(getPresetKey(), copyState().toSaveString());
+        preset.put(getPresetKey(), copyState().toPresetString());
     }
 
     /**
@@ -115,8 +115,10 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     String getValueAsString();
 
     /**
-     * Returns true if the filter should have presets
-     * even if it has just one {@link FilterParam} (i.e. this one).
+     * Returns true if the filter should support presets
+     * even if this is its only parameter.
      */
-    boolean isComplex();
+    default boolean isComplex() {
+        return false;
+    }
 }

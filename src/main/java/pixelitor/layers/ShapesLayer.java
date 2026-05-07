@@ -251,7 +251,7 @@ public class ShapesLayer extends ContentLayer {
         // register a listener to invalidate the layer's
         // image cache when the styled shape changes
         if (styledShape != null) {
-            styledShape.setChangeListener(() -> cachedImage = null);
+            styledShape.setShapeChangeListener(() -> cachedImage = null);
         } else {
             cachedImage = null; // clear the cache if the shape is removed
         }

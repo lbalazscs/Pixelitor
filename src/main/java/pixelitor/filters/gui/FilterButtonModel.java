@@ -73,7 +73,7 @@ public final class FilterButtonModel implements FilterSetting {
 
     /**
      * Creates a custom filter button model for re-seeding
-     * with given label and tooltip.
+     * with the given label and tooltip.
      */
     public static FilterButtonModel createReseed(Runnable reseedTask,
                                                  String text,

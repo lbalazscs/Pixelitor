@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -148,9 +148,9 @@ class CompositionGuideTest {
     }
 
     @Test
-    @DisplayName("triangles, from top left to bottom down")
-    void draw_Type_TRIANGLES_top_left_to_bottom_down() {
-        // orientation: 0 (diagonal line from top left to bottom down)
+    @DisplayName("triangles, from top left to bottom")
+    void draw_Type_TRIANGLES_top_left_to_bottom() {
+        // orientation: 0 (diagonal line from top left to bottom)
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
         compositionGuide.setType(TRIANGLES);
         compositionGuide.setOrientation(0);
@@ -166,9 +166,9 @@ class CompositionGuideTest {
     }
 
     @Test
-    @DisplayName("triangles, from bottom down to top left")
-    void draw_Type_TRIANGLES_bottom_down_to_top_left() {
-        // orientation: 1 (diagonal line from bottom down to top left)
+    @DisplayName("triangles, from bottom left to top")
+    void draw_Type_TRIANGLES_bottom_left_to_top() {
+        // orientation: 1 (diagonal line from bottom left to top)
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
         compositionGuide.setType(TRIANGLES);
         compositionGuide.setOrientation(1);
@@ -243,8 +243,8 @@ class CompositionGuideTest {
 
     @Test
     @DisplayName("spiral, starts from bottom left")
-    void draw_Type_SPIRAL_orientation_0() {
-        // orientation: 0 (spiral that starts from bottom left)
+    void draw_Type_GOLDEN_SPIRAL_bottom_left() {
+        // orientation 0: spiral that starts from bottom left
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
         compositionGuide.setType(GOLDEN_SPIRAL);
         compositionGuide.setOrientation(0);
@@ -255,22 +255,23 @@ class CompositionGuideTest {
 }
 
 class DrawMatcherLine2D implements ArgumentMatcher<List<Shape>> {
-    private final List<Line2D> shapes;
+    private static final double TOLERANCE = 1.0e-10;
+
+    private final List<Line2D> expectedShapes;
 
     public DrawMatcherLine2D(Line2D[] shapes) {
-        this.shapes = Arrays.asList(shapes);
+        this.expectedShapes = Arrays.asList(shapes);
     }
 
     @Override
-    public boolean matches(List<Shape> shapes) {
-        for (int i = 0; i < shapes.size(); i++) {
-            if (shapes.get(i) instanceof Line2D line) {
-                Line2D line2 = this.shapes.get(i);
-                double tolerance = 1.0e-10;
-                assertThat(line.getX1()).isCloseTo(line2.getX1(), within(tolerance));
-                assertThat(line.getY1()).isCloseTo(line2.getY1(), within(tolerance));
-                assertThat(line.getX2()).isCloseTo(line2.getX2(), within(tolerance));
-                assertThat(line.getY2()).isCloseTo(line2.getY2(), within(tolerance));
+    public boolean matches(List<Shape> actualShapes) {
+        for (int i = 0; i < actualShapes.size(); i++) {
+            if (actualShapes.get(i) instanceof Line2D line) {
+                Line2D line2 = this.expectedShapes.get(i);
+                assertThat(line.getX1()).isCloseTo(line2.getX1(), within(TOLERANCE));
+                assertThat(line.getY1()).isCloseTo(line2.getY1(), within(TOLERANCE));
+                assertThat(line.getX2()).isCloseTo(line2.getX2(), within(TOLERANCE));
+                assertThat(line.getY2()).isCloseTo(line2.getY2(), within(TOLERANCE));
             }
         }
         return true;

@@ -73,27 +73,28 @@ public class EdgeFilter extends WholeImageFilter {
         1, SQRT_2, 1,
     };
 
+    private static final double EDGE_SCALE = 1.8;
+
     public static final int CHANNEL_RGB = 0;
     public static final int CHANNEL_LUMINANCE = 1;
 
-    private int channel = CHANNEL_RGB;
+    private final int channel;
+    private final float[] vEdgeMatrix;
+    private final float[] hEdgeMatrix;
 
-    private float[] vEdgeMatrix = SOBEL_V;
-    private float[] hEdgeMatrix = SOBEL_H;
-
-    public EdgeFilter(String filterName) {
+    /**
+     * Constructs a new EdgeFilter.
+     *
+     * @param filterName  the name of the filter
+     * @param channel     the color channel(s) to process
+     * @param hEdgeMatrix the 3x3 convolution matrix for horizontal edge detection
+     * @param vEdgeMatrix the 3x3 convolution matrix for vertical edge detection
+     */
+    public EdgeFilter(String filterName, int channel, float[] hEdgeMatrix, float[] vEdgeMatrix) {
         super(filterName);
-    }
 
-    public void setChannel(int channel) {
         this.channel = channel;
-    }
-
-    public void setVEdgeMatrix(float[] vEdgeMatrix) {
         this.vEdgeMatrix = vEdgeMatrix;
-    }
-
-    public void setHEdgeMatrix(float[] hEdgeMatrix) {
         this.hEdgeMatrix = hEdgeMatrix;
     }
 
@@ -141,7 +142,7 @@ public class EdgeFilter extends WholeImageFilter {
                     }
                 }
 
-                int i = (int) (Math.sqrt(ih * ih + iv * iv) / 1.8);
+                int i = (int) (Math.sqrt(ih * ih + iv * iv) / EDGE_SCALE);
                 i = PixelUtils.clamp(i);
 
                 int a = inPixels[index] & 0xFF_00_00_00;
@@ -158,8 +159,8 @@ public class EdgeFilter extends WholeImageFilter {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int rh = 0, gh = 0, bh = 0;
-                int rv = 0, gv = 0, bv = 0;
+                float rh = 0, gh = 0, bh = 0;
+                float rv = 0, gv = 0, bv = 0;
                 int a = inPixels[index] & 0xFF_00_00_00;
                 int matrixIndex = 0;
 
@@ -181,18 +182,18 @@ public class EdgeFilter extends WholeImageFilter {
                         int g = (rgb & 0x00_FF_00) >> 8;
                         int b = rgb & 0x00_00_FF;
 
-                        rh += (int) (h * r);
-                        gh += (int) (h * g);
-                        bh += (int) (h * b);
-                        rv += (int) (v * r);
-                        gv += (int) (v * g);
-                        bv += (int) (v * b);
+                        rh += h * r;
+                        gh += h * g;
+                        bh += h * b;
+                        rv += v * r;
+                        gv += v * g;
+                        bv += v * b;
                     }
                 }
 
-                int r = (int) (Math.sqrt(rh * rh + rv * rv) / 1.8);
-                int g = (int) (Math.sqrt(gh * gh + gv * gv) / 1.8);
-                int b = (int) (Math.sqrt(bh * bh + bv * bv) / 1.8);
+                int r = (int) (Math.sqrt(rh * rh + rv * rv) / EDGE_SCALE);
+                int g = (int) (Math.sqrt(gh * gh + gv * gv) / EDGE_SCALE);
+                int b = (int) (Math.sqrt(bh * bh + bv * bv) / EDGE_SCALE);
 
                 r = PixelUtils.clamp(r);
                 g = PixelUtils.clamp(g);

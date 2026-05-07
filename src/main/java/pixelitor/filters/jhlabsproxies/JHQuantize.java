@@ -38,13 +38,11 @@ public class JHQuantize extends ParametrizedFilter {
     private final BooleanParam dither = new BooleanParam("Dither");
     private final BooleanParam serpentine = new BooleanParam("Dither with Serpentine");
 
-    private QuantizeFilter filter;
-
     public JHQuantize() {
         super(true);
 
         // enable serpentine only if dither is checked
-        dither.setupEnableOtherIfChecked(serpentine);
+        dither.enableOtherWhenChecked(serpentine);
 
         initParams(
             numColors,
@@ -55,13 +53,10 @@ public class JHQuantize extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new QuantizeFilter(NAME);
-        }
-
-        filter.setNumColors(numColors.getValue());
-        filter.setDither(dither.isChecked());
-        filter.setSerpentine(serpentine.isChecked());
+        QuantizeFilter filter = new QuantizeFilter(NAME,
+            numColors.getValue(),
+            dither.isChecked(),
+            serpentine.isChecked());
 
         return filter.filter(src, dest);
     }

@@ -62,8 +62,7 @@ public class Slice extends ParametrizedFilter {
             offset.getValue(),
             size.getValue(),
             shift.getPercentage(0),
-            shift.getPercentage(1)
-        );
+            shift.getPercentage(1));
 
         return filter.filter(src, dest);
     }

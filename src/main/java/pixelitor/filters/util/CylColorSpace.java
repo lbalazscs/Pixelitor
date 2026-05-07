@@ -15,25 +15,32 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.gui;
+package pixelitor.filters.util;
+
+import pixelitor.filters.gui.EnumParam;
+import pixelitor.gui.GUIText;
 
 /**
- * The GUI for a {@link FilterParam}.
+ * A cylindrical color space.
  */
-public interface ParamGUI {
-    /**
-     * Updates the GUI to reflect changes in the underlying model.
-     */
-    void updateGUI();
+public enum CylColorSpace {
+    HSV("HSV (Faster)"),
+    OKLCH("Oklch (Better)");
 
-    void setEnabled(boolean b);
+    private final String displayName;
 
-    void setToolTip(String tip);
+    CylColorSpace(String displayName) {
+        this.displayName = displayName;
+    }
 
-    /**
-     * Return the number of layout columns, either 1 or 2.
-     * If 2 is returned, then a label based on the name is added
-     * to the GUI.
-     */
-    int getNumLayoutColumns();
+    @Override
+    public String toString() {
+        return displayName;
+    }
+
+    public static EnumParam<CylColorSpace> asParam() {
+        return new EnumParam<>(
+            GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, CylColorSpace.class
+        );
+    }
 }

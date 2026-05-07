@@ -54,7 +54,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
                               String[] names, Color[] colors,
                               TransparencyMode transparencyMode,
                               boolean linkable, boolean linked) {
-        super(name, RandomizeMode.ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
 
         this.names = names;
         this.transparencyMode = transparencyMode;
@@ -93,8 +93,8 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     /**
      * Returns the color at the given index in the format expected by G'MIC.
      */
-    public String getColorStr(int index) {
-        return Colors.formatGMIC(colors[index]);
+    public String getGmicColorStr(int index) {
+        return Colors.formatGmic(colors[index]);
     }
 
     public String getName(int index) {
@@ -102,9 +102,9 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     }
 
     /**
-     * Sets a color, applying it to all swatches if they are linked.
+     * Sets a color at the given index, applying it to all swatches if they are linked.
      */
-    public void setColor(Color newColor, int index, boolean trigger) {
+    public void setColor(int index, Color newColor, boolean trigger) {
         Color[] newColors = colors.clone();
         if (isLinked()) {
             Arrays.fill(newColors, newColor);
@@ -140,16 +140,16 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     @Override
     public String createLinkedToolTip() {
         if (names.length == 2) {
-            return "<html>Whether the <b>%s</b> and <b>%s</b> colors are the same"
+            return "<html>Whether the <b>%s</b> and <b>%s</b> colors are linked"
                 .formatted(names[0], names[1]);
         } else {
-            return "Whether the colors are the same";
+            return "Whether the colors are linked";
         }
     }
 
     @Override
     public ParamState<?> copyState() {
-        return new GroupedColorsParamState(colors, isLinked());
+        return new GroupedColorsParamState(colors.clone(), isLinked());
     }
 
     @Override
@@ -177,8 +177,8 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         setColors(newColors, false);
     }
 
-    public boolean allowTransparency() {
-        return transparencyMode.allowTransparency();
+    public boolean isTransparencyAllowed() {
+        return transparencyMode.isTransparencyAllowed();
     }
 
     @Override
@@ -198,18 +198,14 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
     @Override
     protected void doRandomize() {
-        int numColors = colors.length;
-        boolean randomAlpha = transparencyMode.randomizeTransparency();
-        Color firstNewColor = Rnd.createRandomColor(randomAlpha);
+        boolean useRandomAlpha = transparencyMode.isTransparencyRandomized();
+        Color[] newColors = new Color[colors.length];
 
-        Color[] newColors = new Color[numColors];
         if (isLinked()) {
-            Arrays.fill(newColors, firstNewColor);
+            Color randomColor = Rnd.createRandomColor(useRandomAlpha);
+            Arrays.fill(newColors, randomColor);
         } else {
-            newColors[0] = firstNewColor;
-            for (int i = 1; i < numColors; i++) {
-                newColors[i] = Rnd.createRandomColor(randomAlpha);
-            }
+            Arrays.setAll(newColors, i -> Rnd.createRandomColor(useRandomAlpha));
         }
         setColors(newColors, false);
     }
@@ -243,7 +239,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             StringBuilder sb = new StringBuilder();
             sb.append(linked);
             for (Color color : colors) {

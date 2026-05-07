@@ -21,13 +21,11 @@ import pixelitor.filters.jhlabsproxies.JHWeave;
 
 import javax.swing.*;
 import java.io.Serial;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A {@link FilterParam} that is the data model for a grid editor filter parameter.
@@ -44,8 +42,8 @@ public class GridParam extends AbstractFilterParam {
     private int[][] data;
     private final int[][] defaultData;
     private final List<GridCellPainter> painters;
-    private final int originalWidth;
-    private final int originalHeight;
+    private final int origCols;
+    private final int origRows;
 
     private final List<Preset> presets;
     private String selectedPresetName;
@@ -55,7 +53,7 @@ public class GridParam extends AbstractFilterParam {
     }
 
     public GridParam(String name, List<Preset> presets, List<GridCellPainter> painters, int defaultPresetIndex) {
-        super(name, RandomizeMode.ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
 
         if (presets.isEmpty()) {
             throw new IllegalArgumentException();
@@ -77,8 +75,8 @@ public class GridParam extends AbstractFilterParam {
 
         validateData(this.data, this.painters.size());
 
-        this.originalWidth = getGridCols();
-        this.originalHeight = getGridRows();
+        this.origCols = getGridCols();
+        this.origRows = getGridRows();
     }
 
     @Override
@@ -102,11 +100,11 @@ public class GridParam extends AbstractFilterParam {
     protected void doRandomize() {
         int rows = data.length;
         int cols = data[0].length;
-        int numPainters = painters.size();
+        int numCellStates = painters.size();
         int[][] newData = new int[rows][cols];
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                newData[r][c] = ThreadLocalRandom.current().nextInt(numPainters);
+                newData[r][c] = ThreadLocalRandom.current().nextInt(numCellStates);
             }
         }
         setData(newData, false);
@@ -143,18 +141,18 @@ public class GridParam extends AbstractFilterParam {
             throw new IllegalArgumentException();
         }
         try {
-            String[] rows = savedValue.split(";", -1);
-            if (rows.length == 0) {
+            String[] rowTokens = savedValue.split(";", -1);
+            if (rowTokens.length == 0) {
                 throw new IllegalArgumentException();
             }
 
             // determine dimensions from the first row
-            String[] firstRowValues = rows[0].split(",", -1);
+            String[] firstRowValues = rowTokens[0].split(",", -1);
             int numCols = firstRowValues.length;
-            int[][] newData = new int[rows.length][numCols];
+            int[][] newData = new int[rowTokens.length][numCols];
 
-            for (int r = 0; r < rows.length; r++) {
-                String[] values = rows[r].split(",", -1);
+            for (int r = 0; r < rowTokens.length; r++) {
+                String[] values = rowTokens[r].split(",", -1);
                 if (values.length != numCols) {
                     // inconsistent number of columns in the saved data
                     throw new IllegalArgumentException();
@@ -185,7 +183,7 @@ public class GridParam extends AbstractFilterParam {
 
     @Override
     public String getValueAsString() {
-        return new GridParamState(data).toSaveString();
+        return new GridParamState(data).toPresetString();
     }
 
     /**
@@ -239,9 +237,9 @@ public class GridParam extends AbstractFilterParam {
     /**
      * Replaces the internal data array after validation, returning true if a change occurred.
      */
-    private boolean internalSetData(int[][] newData, boolean force) {
+    private boolean internalSetData(int[][] newData, boolean forceUpdate) {
         validateData(newData, painters.size());
-        if (!force && Arrays.deepEquals(data, newData)) {
+        if (!forceUpdate && Arrays.deepEquals(data, newData)) {
             return false; // no change
         }
         this.data = deepCopy(newData);
@@ -262,14 +260,12 @@ public class GridParam extends AbstractFilterParam {
     /**
      * Returns a list of all available preset names, including "Custom".
      */
-    public List<String> getPresetNames() {
-        List<String> names = new ArrayList<>();
-
-        for (Preset preset : presets) {
-            names.add(preset.name());
+    public String[] getSelectablePresetNames() {
+        String[] names = new String[presets.size() + 1];
+        for (int i = 0; i < presets.size(); i++) {
+            names[i] = presets.get(i).name();
         }
-        names.add(CUSTOM_PRESET_NAME);
-
+        names[presets.size()] = CUSTOM_PRESET_NAME;
         return names;
     }
 
@@ -310,134 +306,134 @@ public class GridParam extends AbstractFilterParam {
     }
 
     /**
-     * Dynamically changes the width of the grid.
+     * Dynamically changes the number of columns in the grid.
      * <p>
-     * When increasing the width, new columns are padded with 0s and added in an
+     * When increasing the number of columns, new columns are padded with 0s and added in an
      * alternating fashion to keep the original grid centered: the first
      * new column is added to the right, the second to the left, and so on.
      * When decreasing, columns are removed in the reverse order.
      */
-    public void setGridWidth(int newWidth) {
-        int currentWidth = getGridCols();
-        if (newWidth == currentWidth) {
+    public void setGridCols(int newCols) {
+        int currentCols = getGridCols();
+        if (newCols == currentCols) {
             return; // no change
         }
 
-        if (newWidth > currentWidth) {
-            for (int i = currentWidth; i < newWidth; i++) {
-                incrementGridWidth();
+        if (newCols > currentCols) {
+            for (int i = currentCols; i < newCols; i++) {
+                incrementGridCols();
             }
         } else {
-            for (int i = currentWidth; i > newWidth; i--) {
-                decrementGridWidth();
+            for (int i = currentCols; i > newCols; i--) {
+                decrementGridCols();
             }
         }
     }
 
     /**
-     * Dynamically changes the height of the grid.
+     * Dynamically changes the number of rows in the grid.
      * <p>
-     * When increasing the height, new rows are padded with 0s and added in an
+     * When increasing the number of rows, new rows are padded with 0s and added in an
      * alternating fashion to keep the original grid centered: the first
      * new row is added to the bottom, the second to the top, and so on.
      * When decreasing, rows are removed in the reverse order.
      */
-    public void setGridHeight(int newHeight) {
-        int currentHeight = getGridRows();
-        if (newHeight == currentHeight) {
+    public void setGridRows(int newRows) {
+        int currentRows = getGridRows();
+        if (newRows == currentRows) {
             return; // no change
         }
 
-        if (newHeight > currentHeight) {
-            for (int i = currentHeight; i < newHeight; i++) {
-                incrementGridHeight();
+        if (newRows > currentRows) {
+            for (int i = currentRows; i < newRows; i++) {
+                incrementGridRows();
             }
         } else {
-            for (int i = currentHeight; i > newHeight; i--) {
-                decrementGridHeight();
+            for (int i = currentRows; i > newRows; i--) {
+                decrementGridRows();
             }
         }
     }
 
     /**
-     * Increases the grid width by one column, adding it to the left or right to maintain centering.
+     * Increases the number of columns in the grid by one, adding it to the left or right to maintain centering.
      */
-    private void incrementGridWidth() {
+    private void incrementGridCols() {
         int[][] currentData = getData();
-        int currentHeight = getGridRows();
-        int currentWidth = getGridCols();
-        int newWidth = currentWidth + 1;
+        int currentRows = getGridRows();
+        int currentCols = getGridCols();
+        int newCols = currentCols + 1;
 
-        int[][] newData = new int[currentHeight][newWidth];
+        int[][] newData = new int[currentRows][newCols];
 
-        int totalColsAdded = currentWidth - originalWidth;
+        int totalColsAdded = currentCols - origCols;
         // alternating logic: 1st=right, 2nd=left, 3rd=right...
         // add left if the number of columns already added is odd
         boolean addLeft = (totalColsAdded % 2 != 0);
 
         if (addLeft) {
             // add new column at the left (index 0), copy old data after it
-            for (int r = 0; r < currentHeight; r++) {
+            for (int r = 0; r < currentRows; r++) {
                 // newData[r][0] is already 0 by default
-                System.arraycopy(currentData[r], 0, newData[r], 1, currentWidth);
+                System.arraycopy(currentData[r], 0, newData[r], 1, currentCols);
             }
         } else {
             // add new column at the right, copy old data first
-            for (int r = 0; r < currentHeight; r++) {
-                System.arraycopy(currentData[r], 0, newData[r], 0, currentWidth);
-                // newData[r][newWidth - 1] is already 0 by default
+            for (int r = 0; r < currentRows; r++) {
+                System.arraycopy(currentData[r], 0, newData[r], 0, currentCols);
+                // newData[r][newCols - 1] is already 0 by default
             }
         }
         setData(newData);
     }
 
     /**
-     * Decreases the grid width by one column, removing it from the left or right to maintain centering.
+     * Decreases the number of columns in the grid by one, removing it from the left or right to maintain centering.
      */
-    private void decrementGridWidth() {
+    private void decrementGridCols() {
         int[][] currentData = getData();
-        int currentHeight = getGridRows();
-        int currentWidth = getGridCols();
-        int newWidth = currentWidth - 1;
+        int currentRows = getGridRows();
+        int currentCols = getGridCols();
+        int newCols = currentCols - 1;
 
         // prevent shrinking to nothing
-        if (newWidth <= 0) {
+        if (newCols <= 0) {
             return;
         }
 
-        int[][] newData = new int[currentHeight][newWidth];
+        int[][] newData = new int[currentRows][newCols];
 
-        int totalColsAdded = currentWidth - originalWidth;
+        int totalColsAdded = currentCols - origCols;
         // remove the last column that was added to reverse the process
         // if totalColsAdded is even (and >0), the last add was to the left
         boolean removeLeft = (totalColsAdded > 0) && (totalColsAdded % 2 == 0);
 
         if (removeLeft) {
             // remove leftmost column by copying from the second column
-            for (int r = 0; r < currentHeight; r++) {
-                System.arraycopy(currentData[r], 1, newData[r], 0, newWidth);
+            for (int r = 0; r < currentRows; r++) {
+                System.arraycopy(currentData[r], 1, newData[r], 0, newCols);
             }
         } else {
             // remove rightmost column by copying all but the last column
-            for (int r = 0; r < currentHeight; r++) {
-                System.arraycopy(currentData[r], 0, newData[r], 0, newWidth);
+            for (int r = 0; r < currentRows; r++) {
+                System.arraycopy(currentData[r], 0, newData[r], 0, newCols);
             }
         }
         setData(newData);
     }
 
     /**
-     * Increases the grid height by one row, adding it to the top or bottom to maintain centering.
+     * Increases the number of rows in the grid by one, adding it to the top or bottom to maintain centering.
      */
-    private void incrementGridHeight() {
+    private void incrementGridRows() {
         int[][] currentData = getData();
-        int currentHeight = getGridRows();
-        int currentWidth = getGridCols();
-        int newHeight = currentHeight + 1;
+        int currentRows = getGridRows();
+        int currentCols = getGridCols();
+        int newRows = currentRows + 1;
 
-        int[][] newData = new int[newHeight][currentWidth];
+        int[][] newData = new int[newRows][currentCols];
 
-        int totalRowsAdded = currentHeight - originalHeight;
+        int totalRowsAdded = currentRows - origRows;
         // alternating logic: 1st=bottom, 2nd=top, 3rd=bottom...
         // add top if the number of rows already added is odd
         boolean addTop = (totalRowsAdded % 2 != 0);
@@ -446,43 +442,43 @@ public class GridParam extends AbstractFilterParam {
             // add new row at the top (index 0)
             // newData[0] is already an array of 0s
             // copy old data to newData starting from index 1
-            System.arraycopy(currentData, 0, newData, 1, currentHeight);
+            System.arraycopy(currentData, 0, newData, 1, currentRows);
         } else {
             // add new row at the bottom
             // copy old data to newData starting from index 0
-            System.arraycopy(currentData, 0, newData, 0, currentHeight);
-            // newData[newHeight - 1] is already an array of 0s
+            System.arraycopy(currentData, 0, newData, 0, currentRows);
+            // newData[newRows - 1] is already an array of 0s
         }
         setData(newData);
     }
 
     /**
-     * Decreases the grid height by one row, removing it from the top or bottom to maintain centering.
+     * Decreases the number of rows in the grid by one, removing it from the top or bottom to maintain centering.
      */
-    private void decrementGridHeight() {
+    private void decrementGridRows() {
         int[][] currentData = getData();
-        int currentHeight = getGridRows();
-        int currentWidth = getGridCols();
-        int newHeight = currentHeight - 1;
+        int currentRows = getGridRows();
+        int currentCols = getGridCols();
+        int newRows = currentRows - 1;
 
         // prevent shrinking to nothing
-        if (newHeight <= 0) {
+        if (newRows <= 0) {
             return;
         }
 
-        int[][] newData = new int[newHeight][currentWidth];
+        int[][] newData = new int[newRows][currentCols];
 
-        int totalRowsAdded = currentHeight - originalHeight;
+        int totalRowsAdded = currentRows - origRows;
         // remove the last row that was added to reverse the process
         // if totalRowsAdded is even (and >0), the last add was to the top
         boolean removeTop = (totalRowsAdded > 0) && (totalRowsAdded % 2 == 0);
 
         if (removeTop) {
             // remove topmost row, copy from currentData[1] onwards
-            System.arraycopy(currentData, 1, newData, 0, newHeight);
+            System.arraycopy(currentData, 1, newData, 0, newRows);
         } else {
             // remove bottommost row, copy from currentData[0] onwards
-            System.arraycopy(currentData, 0, newData, 0, newHeight);
+            System.arraycopy(currentData, 0, newData, 0, newRows);
         }
         setData(newData);
     }
@@ -498,7 +494,7 @@ public class GridParam extends AbstractFilterParam {
     /**
      * Validates the integrity of a grid data array.
      */
-    private static void validateData(int[][] data, int numPainters) {
+    private static void validateData(int[][] data, int numCellStates) {
         Objects.requireNonNull(data, "Data array cannot be null.");
         if (data.length == 0) {
             throw new IllegalArgumentException("Data array cannot have zero rows.");
@@ -517,9 +513,9 @@ public class GridParam extends AbstractFilterParam {
             }
             for (int c = 0; c < data[r].length; c++) {
                 int value = data[r][c];
-                if (value < 0 || value >= numPainters) {
+                if (value < 0 || value >= numCellStates) {
                     throw new IllegalArgumentException(
-                        "Data value " + value + " at [" + r + "][" + c + "] is out of the valid range [0, " + (numPainters - 1) + "]."
+                        "Data value " + value + " at [" + r + "][" + c + "] is out of the valid range [0, " + (numCellStates - 1) + "]."
                     );
                 }
             }
@@ -535,7 +531,7 @@ public class GridParam extends AbstractFilterParam {
         }
         int[][] result = new int[original.length][];
         for (int i = 0; i < original.length; i++) {
-            result[i] = Arrays.copyOf(original[i], original[i].length);
+            result[i] = original[i].clone();
         }
         return result;
     }
@@ -553,15 +549,19 @@ public class GridParam extends AbstractFilterParam {
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             if (data == null) {
                 return "";
             }
-            return Stream.of(data)
-                .map(row -> Arrays.stream(row)
-                    .mapToObj(String::valueOf)
-                    .collect(Collectors.joining(",")))
-                .collect(Collectors.joining(";"));
+            StringJoiner rowsJoiner = new StringJoiner(";");
+            for (int[] row : data) {
+                StringJoiner colsJoiner = new StringJoiner(",");
+                for (int val : row) {
+                    colsJoiner.add(String.valueOf(val));
+                }
+                rowsJoiner.add(colsJoiner.toString());
+            }
+            return rowsJoiner.toString();
         }
     }
 }

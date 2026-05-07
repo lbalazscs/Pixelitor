@@ -25,13 +25,11 @@ import pixelitor.filters.Sepia;
  * Originally this was contributed by Daniel Wreczycki
  */
 public class SepiaFilter extends PointFilter {
-    private int intensity = 20;
+    private final int intensity;
 
-    public SepiaFilter(String filterName) {
+    public SepiaFilter(String filterName, int intensity) {
         super(filterName);
-    }
 
-    public void setIntensity(int intensity) {
         this.intensity = intensity;
     }
 

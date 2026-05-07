@@ -40,8 +40,6 @@ public class JHSmartBlur extends ParametrizedFilter {
     private final RangeParam threshold = new RangeParam("Threshold", 0, 10, 256);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
-    private SmartBlurFilter filter;
-
     public JHSmartBlur() {
         super(true);
 
@@ -59,13 +57,9 @@ public class JHSmartBlur extends ParametrizedFilter {
             return src;
         }
 
-        if (filter == null) {
-            filter = new SmartBlurFilter(NAME);
-        }
-
-        filter.setRadius(radius);
-
-        filter.setThreshold(threshold.getValue());
+        SmartBlurFilter filter = new SmartBlurFilter(NAME,
+            radius,
+            threshold.getValue());
 
         dest = ImageUtils.filterPremultiplied(src, dest, filter);
 

@@ -57,8 +57,8 @@ public class JHUnderWater extends ParametrizedFilter {
             interpolation
         ).withAction(reseed);
 
-        amount.setupEnableOtherIfNotZero(reseed);
-        stretch.setupEnableOtherIfNotZero(angle);
+        amount.enableOtherWhenNotZero(reseed);
+        stretch.enableOtherWhenNotZero(angle);
     }
 
     @Override
@@ -67,16 +67,14 @@ public class JHUnderWater extends ParametrizedFilter {
             return src;
         }
 
-        SwimFilter filter = new SwimFilter(
-            NAME,
+        SwimFilter filter = new SwimFilter(NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
             amount.getValueAsFloat(),
             scale.getValueAsFloat(),
             (float) Math.pow(10.0, stretch.getPercentage()),
             (float) (angle.getValueInRadians() + Math.PI / 2.0),
-            (float) time.getPercentage()
-        );
+            (float) time.getPercentage());
 
         return filter.filter(src, dest);
     }

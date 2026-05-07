@@ -71,8 +71,7 @@ public class JHEmboss extends ParametrizedFilter {
             azimuth,
             elevation,
             adjustedDepth,
-            useTexture
-        );
+            useTexture);
 
         return filter.filter(src, dest);
     }

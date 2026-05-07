@@ -35,7 +35,7 @@ import static java.awt.font.TextAttribute.UNDERLINE;
 import static java.awt.font.TextAttribute.UNDERLINE_ON;
 
 /**
- * Wraps a {@link Font} into a more usable API.
+ * Wraps a {@link Font} to provide a more usable API.
  */
 public class FontInfo {
     // basic properties
@@ -105,15 +105,15 @@ public class FontInfo {
         preset.putInt("tracking", tracking);
     }
 
-    public void updateBasic(String name, int size, boolean bold, boolean italic) {
+    public void updateBasicProperties(String name, int size, boolean bold, boolean italic) {
         this.name = name;
         this.size = size;
         this.bold = bold;
         this.italic = italic;
     }
 
-    public void updateAdvanced(boolean strikethrough, boolean kerning, boolean ligatures,
-                               boolean underline, int tracking) {
+    public void updateAdvancedProperties(boolean strikethrough, boolean kerning, boolean ligatures,
+                                         boolean underline, int tracking) {
         this.strikethrough = strikethrough;
         this.kerning = kerning;
         this.ligatures = ligatures;
@@ -149,7 +149,7 @@ public class FontInfo {
         return new Font(family, style, size);
     }
 
-    public boolean hasStrikeThrough() {
+    public boolean hasStrikethrough() {
         return strikethrough;
     }
 

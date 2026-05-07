@@ -145,6 +145,13 @@ public class Rnd {
         return ThreadLocalRandom.current().nextFloat();
     }
 
+    /**
+     * Returns a random angle in the range [-π, π].
+     */
+    public static double nextAngle() {
+        return nextDouble() * 2 * Math.PI - Math.PI;
+    }
+
     public static Color createRandomColor() {
         return createRandomColor(false);
     }

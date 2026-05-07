@@ -263,7 +263,7 @@ public class LSystems extends CurveFilter {
     }
 
     public LSystems() {
-        type.setupLimitOtherToMax(iterations, selected -> 3);
+        type.limitOtherMaxWhen(iterations, selected -> 3);
 
         addParamsToFront(
             type,

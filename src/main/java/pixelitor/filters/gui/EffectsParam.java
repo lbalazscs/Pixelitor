@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,50 +26,41 @@ import javax.swing.*;
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
 
-import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
- * A {@link FilterParam} for shape effects in a dialog.
+ * A {@link FilterParam} that configures shape effects via a dialog.
  */
 public class EffectsParam extends AbstractFilterParam {
     private EffectsPanel effectsPanel;
-    private final boolean separateDialog;
 
     public EffectsParam(String name) {
         // ignore randomize because effects (especially
         // inner glow) can be very slow in shape filters
-        super(name, IGNORE_RANDOMIZE);
-        separateDialog = true;
+        super(name, RandomizeMode.IGNORE);
     }
 
     @Override
     public JComponent createGUI() {
         assert adjustmentListener != null;
-        ensureEffectsPanelIsCreated();
+        ensureEffectsPanelCreated();
 
-        if (separateDialog) {
-            var resetButton = new ResetButton(effectsPanel);
-            effectsPanel.setResetButton(resetButton);
+        var resetButton = new ResetButton(effectsPanel);
+        effectsPanel.setResetButton(resetButton);
 
-            var configureParamGUI = new DialogLauncherGUI(
-                this::configureDialog, resetButton);
+        var launcherGUI = new DialogLauncherGUI(
+            this::configureDialog, resetButton);
 
-            paramGUI = configureParamGUI;
-            syncWithGui();
-            return configureParamGUI;
-        } else {
-            effectsPanel.setBorder(createTitledBorder("Effects"));
-            return effectsPanel;
-        }
+        paramGUI = launcherGUI;
+        syncWithGui();
+        return launcherGUI;
     }
 
     /**
      * Configures the effects dialog using the provided builder.
      */
     public void configureDialog(DialogBuilder builder) {
-        ensureEffectsPanelIsCreated();
+        ensureEffectsPanelCreated();
         builder
             .title("Effects")
             .content(effectsPanel)
@@ -82,11 +73,11 @@ public class EffectsParam extends AbstractFilterParam {
      * Gets the current effects configuration from the GUI panel.
      */
     public AreaEffects getEffects() {
-        ensureEffectsPanelIsCreated();
+        ensureEffectsPanelCreated();
         return effectsPanel.getEffects();
     }
 
-    private void ensureEffectsPanelIsCreated() {
+    private void ensureEffectsPanelCreated() {
         if (effectsPanel == null) {
             effectsPanel = new EffectsPanel(null);
             if (adjustmentListener != null) { // the listener was set before this
@@ -101,7 +92,7 @@ public class EffectsParam extends AbstractFilterParam {
     public void setEffects(AreaEffects effects) {
         assert effectsPanel != null;
         if (effectsPanel == null) { // probably never true
-            ensureEffectsPanelIsCreated();
+            ensureEffectsPanelCreated();
         }
 
         effectsPanel.setEffects(effects);
@@ -118,7 +109,7 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        ensureEffectsPanelIsCreated(); // can be necessary in unit tests
+        ensureEffectsPanelCreated(); // can be necessary in unit tests
         effectsPanel.randomize();
     }
 
@@ -143,13 +134,13 @@ public class EffectsParam extends AbstractFilterParam {
             if (!EventQueue.isDispatchThread()) {
                 // happens while loading smart filters from pxc
                 try {
-                    EventQueue.invokeAndWait(this::ensureEffectsPanelIsCreated);
+                    EventQueue.invokeAndWait(this::ensureEffectsPanelCreated);
                 } catch (InterruptedException | InvocationTargetException e) {
                     Messages.showException(e);
                 }
             } else {
                 // for safety
-                ensureEffectsPanelIsCreated();
+                ensureEffectsPanelCreated();
             }
         }
         effectsPanel.loadStateFrom(preset);
@@ -158,7 +149,7 @@ public class EffectsParam extends AbstractFilterParam {
     @Override
     public void saveStateTo(UserPreset preset) {
         if (effectsPanel == null) { // can happen in tests
-            ensureEffectsPanelIsCreated();
+            ensureEffectsPanelCreated();
         }
         effectsPanel.saveStateTo(preset);
     }

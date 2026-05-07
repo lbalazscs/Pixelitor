@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,8 +31,8 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * Displays a circle with an arrow that can be rotated to any angle
  * by dragging with the mouse.
  */
-public class AngleUI extends AbstractAngleUI {
-    public AngleUI(AngleParam angleParam) {
+public class AngleSelector extends AbstractAngleSelector {
+    public AngleSelector(AngleParam angleParam) {
         super(angleParam);
 
         // the center is at the middle of the component
@@ -50,11 +50,11 @@ public class AngleUI extends AbstractAngleUI {
         boolean darkTheme = Themes.getActive().isDark();
 
         // draw the outer circle
-        setupOuterColor(g2, darkTheme);
+        setOuterColor(g2, darkTheme);
         g2.draw(new Ellipse2D.Float(0, 0, SELECTOR_SIZE, SELECTOR_SIZE));
 
         // draw the direction arrow
-        setupArrowColor(g2, darkTheme);
+        setArrowColor(g2, darkTheme);
         double angle = model.getValueInRadians();
         float radius = SELECTOR_SIZE / 2.0f;
         float endX = (float) (centerX + radius * Math.cos(angle));

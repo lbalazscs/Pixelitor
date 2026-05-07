@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,14 +28,13 @@ import java.io.Serial;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
-import static pixelitor.filters.impl.ComplexFractalImpl.BurningShipStrategy;
-import static pixelitor.filters.impl.ComplexFractalImpl.IterationStrategy;
-import static pixelitor.filters.impl.ComplexFractalImpl.MandelbrotStrategy;
-import static pixelitor.filters.impl.ComplexFractalImpl.MultibrotStrategy3;
-import static pixelitor.filters.impl.ComplexFractalImpl.MultibrotStrategy4;
-import static pixelitor.filters.impl.ComplexFractalImpl.MultibrotStrategy5;
-import static pixelitor.filters.impl.ComplexFractalImpl.TricornStrategy;
+import static pixelitor.filters.impl.ComplexFractalFilter.BurningShipStrategy;
+import static pixelitor.filters.impl.ComplexFractalFilter.IterationStrategy;
+import static pixelitor.filters.impl.ComplexFractalFilter.MandelbrotStrategy;
+import static pixelitor.filters.impl.ComplexFractalFilter.MultibrotStrategy3;
+import static pixelitor.filters.impl.ComplexFractalFilter.MultibrotStrategy4;
+import static pixelitor.filters.impl.ComplexFractalFilter.MultibrotStrategy5;
+import static pixelitor.filters.impl.ComplexFractalFilter.TricornStrategy;
 
 /**
  * Common superclass for the Julia and Mandelbrot sets.
@@ -73,7 +72,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     });
     protected final BooleanParam insideOutParam = new BooleanParam("Inside Out", false);
     protected final LogZoomParam zoomParam = new LogZoomParam(GUIText.ZOOM, 200, 200, 1000);
-    protected final ImagePositionParam zoomCenter;
+    protected final ImagePositionParam zoomCenterParam;
     protected final RangeParam iterationsParam;
     protected final IntChoiceParam colorsParam = new IntChoiceParam("Colors", new Item[]{
         new Item("Contrasting", COLORS_CONTRASTING),
@@ -83,7 +82,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     private final IntChoiceParam aaParam = new IntChoiceParam("Supersampling", new Item[]{
         new Item("None (Faster)", AA_NONE),
         new Item("2x2 (Better, Slower)", AA_2x2),
-    }, IGNORE_RANDOMIZE);
+    }, RandomizeMode.IGNORE);
 
     protected ComplexFractal(int defaultIterations, float zoomX) {
         super(false);
@@ -92,17 +91,17 @@ public abstract class ComplexFractal extends ParametrizedFilter {
             .min(2)
             .def(defaultIterations)
             .max(998)
-            .randomizeMode(IGNORE_RANDOMIZE)
+            .randomizeMode(RandomizeMode.IGNORE)
             .build();
 
         zoomParam.setPresetKey("Zoom");
 
-        zoomCenter = new ImagePositionParam("Zoom Center", zoomX, 0.5f);
+        zoomCenterParam = new ImagePositionParam("Zoom Center", zoomX, 0.5f);
         initParams(
             iterationTypeParam,
             insideOutParam,
             zoomParam,
-            zoomCenter.withDecimalPlaces(2),
+            zoomCenterParam.withDecimalPlaces(2),
             iterationsParam,
             colorsParam,
             aaParam);

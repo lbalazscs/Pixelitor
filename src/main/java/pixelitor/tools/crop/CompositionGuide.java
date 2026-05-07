@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -182,7 +182,7 @@ public class CompositionGuide {
             endX = rect.getX() + rect.getWidth();
             endY = rect.getY() + rect.getHeight();
         } else {
-            // diagonal line form bottom left to top right
+            // diagonal line from bottom left to top right
             startX = rect.getX();
             startY = rect.getY() + rect.getHeight();
             endX = rect.getX() + rect.getWidth();
@@ -203,16 +203,17 @@ public class CompositionGuide {
         double arcHeight = rect.getHeight();
 
         switch (orientation % 4) {
-            case 0 -> createSpiral0(rect, arcs, arcWidth, arcHeight);
-            case 1 -> createSpiral1(rect, arcs, arcWidth, arcHeight);
-            case 2 -> createSpiral2(rect, arcs, arcWidth, arcHeight);
-            case 3 -> createSpiral3(rect, arcs, arcWidth, arcHeight);
+            case 0 -> createSpiralBottomLeft(rect, arcs, arcWidth, arcHeight);
+            case 1 -> createSpiralTopLeft(rect, arcs, arcWidth, arcHeight);
+            case 2 -> createSpiralBottomRight(rect, arcs, arcWidth, arcHeight);
+            case 3 -> createSpiralTopRight(rect, arcs, arcWidth, arcHeight);
         }
 
         renderShapes(arcs, g);
     }
 
-    private static void createSpiral0(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
+    // creates a spiral starting in the bottom left corner
+    private static void createSpiralBottomLeft(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
         double angle = 180;
         Point2D center = new Point2D.Double(rect.getX() + arcWidth, rect.getY() + arcHeight);
 
@@ -229,7 +230,8 @@ public class CompositionGuide {
         }
     }
 
-    private static void createSpiral1(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
+    // creates a spiral starting in the top left corner
+    private static void createSpiralTopLeft(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
         double angle = 180;
         Point2D center = new Point2D.Double(rect.getX() + arcWidth, rect.getY());
 
@@ -246,7 +248,8 @@ public class CompositionGuide {
         }
     }
 
-    private static void createSpiral2(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
+    // creates a spiral starting in the bottom right corner
+    private static void createSpiralBottomRight(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
         double angle = 0;
         Point2D center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY() + rect.getHeight());
 
@@ -263,7 +266,8 @@ public class CompositionGuide {
         }
     }
 
-    private static void createSpiral3(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
+    // creates a spiral starting in the top right corner
+    private static void createSpiralTopRight(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
         double angle = 0;
         Point2D center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY());
 

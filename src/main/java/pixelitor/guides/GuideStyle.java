@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,10 +25,10 @@ import java.awt.Stroke;
  */
 public final class GuideStyle {
     private GuideStrokeType strokeType = GuideStrokeType.DASHED;
-    private Color colorA = Color.BLACK;
+    private Color primaryColor = Color.BLACK;
 
     // used only for some styles, currently not configurable via UI
-    private Color colorB = Color.WHITE;
+    private Color secondaryColor = Color.WHITE;
 
     public GuideStrokeType getStrokeType() {
         return strokeType;
@@ -38,27 +38,27 @@ public final class GuideStyle {
         this.strokeType = strokeType;
     }
 
-    public Stroke getStrokeA() {
-        return strokeType.getStrokeA();
+    public Stroke getPrimaryStroke() {
+        return strokeType.getPrimaryStroke();
     }
 
-    public Stroke getStrokeB() {
-        return strokeType.getStrokeB();
+    public Stroke getSecondaryStroke() {
+        return strokeType.getSecondaryStroke();
     }
 
-    public Color getColorA() {
-        return colorA;
+    public Color getPrimaryColor() {
+        return primaryColor;
     }
 
-    public void setColorA(Color colorA) {
-        this.colorA = colorA;
+    public void setPrimaryColor(Color primaryColor) {
+        this.primaryColor = primaryColor;
     }
 
-    public Color getColorB() {
-        return colorB;
+    public Color getSecondaryColor() {
+        return secondaryColor;
     }
 
-    public void setColorB(Color colorB) {
-        this.colorB = colorB;
+    public void setSecondaryColor(Color secondaryColor) {
+        this.secondaryColor = secondaryColor;
     }
 }

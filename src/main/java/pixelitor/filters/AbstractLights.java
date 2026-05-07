@@ -36,7 +36,6 @@ import java.util.Random;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.AbstractLights.Type.STAR;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * The "Abstract Lights" filter.
@@ -106,23 +105,23 @@ public class AbstractLights extends ParametrizedFilter {
         super(false);
 
         // disable hue variation when complexity is 1 (two particles)
-        complexityParam.setupDisableOtherIf(hueRandomnessParam, value -> value == 1);
+        complexityParam.disableOtherWhen(hueRandomnessParam, value -> value == 1);
 
         // disable hue controls when fully white blend is selected
-        whiteBlendParam.setupDisableOtherIf(hueParam, value -> value == 100);
-        whiteBlendParam.setupDisableOtherIf(hueRandomnessParam, value -> value == 100);
+        whiteBlendParam.disableOtherWhen(hueParam, value -> value == 100);
+        whiteBlendParam.disableOtherWhen(hueRandomnessParam, value -> value == 100);
 
         CompositeParam advancedParam = new CompositeParam("Advanced",
             hueRandomnessParam, whiteBlendParam, blurParam, speedParam, bounceParam);
-        advancedParam.setRandomizeMode(IGNORE_RANDOMIZE);
+        advancedParam.setRandomizeMode(RandomizeMode.IGNORE);
 
         CompositeParam starSettingsParam = new CompositeParam("Star Settings",
             starSizeParam, starCenterParam);
 
         // show star settings only for the star type
-        typeParam.setupEnableOtherIf(starSettingsParam, type -> type == STAR);
+        typeParam.enableOtherWhen(starSettingsParam, type -> type == STAR);
         // disable bounce if the type doesn't allow it
-        typeParam.setupDisableOtherIf(bounceParam, type -> !type.canBounce());
+        typeParam.disableOtherWhen(bounceParam, type -> !type.canBounce());
 
         initParams(
             typeParam,
@@ -193,7 +192,7 @@ public class AbstractLights extends ParametrizedFilter {
      */
     private List<Particle> createParticles(int width, int height, Random random, float bri) {
         int numParticles = complexityParam.getValue() + 1;
-        int baseHue = hueParam.getValueInNonIntuitiveDegrees();
+        int baseHue = hueParam.getValueInAtan2Degrees();
         int hueRandomness = (int) (hueRandomnessParam.getValue() * 3.6);
 
         Type type = typeParam.getSelected();

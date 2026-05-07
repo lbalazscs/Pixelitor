@@ -39,43 +39,35 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * Voronoi Diagram filter implementation
  */
 public class VoronoiFilter extends PointFilter {
-    private double distanceBetweenPoints;
-    private boolean useImageColors;
-
-    private int aaRes = 2;
-    private int numSamples = aaRes * aaRes;
+    private final double distanceBetweenPoints;
+    private final boolean useImageColors;
 
     private PoissonDiskSampling sampling;
     private int[] colors;
 
-    private RandomGenerator rand;
-    private DistanceFunction intPrecisionDistance;
-    private DistanceFunction doublePrecisionDistance;
+    private final RandomGenerator rand;
+    private final DistanceFunction intPrecisionDistance;
+    private final DistanceFunction doublePrecisionDistance;
 
-    public VoronoiFilter(String filterName) {
+    /**
+     * Constructs a new VoronoiFilter.
+     *
+     * @param filterName            the name of the filter
+     * @param rand                  the random generator used for generating points and assigning colors
+     * @param distanceBetweenPoints the minimum distance between points
+     * @param metric                the distance metric used to calculate the nearest point
+     * @param cx                    the center x-coordinate of the source image, used by the distance metric
+     * @param cy                    the center y-coordinate of the source image, used by the distance metric
+     * @param useImageColors        if true, the regions will use colors sampled from the source image; if false, random colors are generated
+     */
+    public VoronoiFilter(String filterName, RandomGenerator rand, double distanceBetweenPoints, Metric metric, int cx, int cy, boolean useImageColors) {
         super(filterName);
-    }
 
-    public void setRand(RandomGenerator rand) {
         this.rand = rand;
-    }
-
-    public void setDistanceBetweenPoints(double distanceBetweenPoints) {
         this.distanceBetweenPoints = distanceBetweenPoints;
-    }
-
-    public void setMetric(Metric metric, int cx, int cy) {
-        intPrecisionDistance = metric.asIntPrecisionDistance(cx, cy);
-        doublePrecisionDistance = metric.asDoublePrecisionDistance(cx, cy);
-    }
-
-    public void setUseImageColors(boolean useImageColors) {
+        this.intPrecisionDistance = metric.asIntPrecisionDistance(cx, cy);
+        this.doublePrecisionDistance = metric.asDoublePrecisionDistance(cx, cy);
         this.useImageColors = useImageColors;
-    }
-
-    public void setAaRes(int aaRes) {
-        this.aaRes = aaRes;
-        numSamples = aaRes * aaRes;
     }
 
     @Override
@@ -113,13 +105,11 @@ public class VoronoiFilter extends PointFilter {
     @Override
     public int processPixel(int x, int y, int rgb) {
         // find the closest sampled point to the current pixel
-        int closestIndex = sampling.findClosestPointIndex(x, y,
-            intPrecisionDistance);
+        int closestIndex = sampling.findClosestPointIndex(x, y, intPrecisionDistance);
         if (closestIndex == -1) {
             // there wasn't a point in the cell or in its neighbors
             if (AppMode.isDevelopment()) {
-                throw new IllegalStateException(String.format(
-                    "x = %d, y = %d", x, y));
+                throw new IllegalStateException(String.format("x = %d, y = %d", x, y));
             }
             return 0xFF_FF_FF_FF;
         }
@@ -152,7 +142,7 @@ public class VoronoiFilter extends PointFilter {
     /**
      * Calculates the average color for a pixel using sub-pixel sampling.
      */
-    private int calcSuperSampledColor(int x, int y) {
+    private int calcSuperSampledColor(int x, int y, int aaRes, int numSamples) {
         int r = 0;
         int g = 0;
         int b = 0;
@@ -182,11 +172,13 @@ public class VoronoiFilter extends PointFilter {
     }
 
     // called after the first pass
-    public void antiAlias(BufferedImage imgSoFar) {
+    public void antiAlias(BufferedImage imgSoFar, int aaRes) {
         assert aaRes != 0;
         int width = imgSoFar.getWidth();
         int height = imgSoFar.getHeight();
         int[] pixels = ImageUtils.getPixels(imgSoFar);
+
+        int numSamples = aaRes * aaRes;
 
         // since this code runs outside the superclass-powered
         // parallelization, use parallel streams
@@ -196,7 +188,7 @@ public class VoronoiFilter extends PointFilter {
                 int i = y * width + x;
                 // only pixels at the edges are supersampled
                 if (isEdge(x, y, i, pixels, width, height)) {
-                    aaPixels[i] = calcSuperSampledColor(x, y);
+                    aaPixels[i] = calcSuperSampledColor(x, y, aaRes, numSamples);
                 } else {
                     aaPixels[i] = pixels[i];
                 }

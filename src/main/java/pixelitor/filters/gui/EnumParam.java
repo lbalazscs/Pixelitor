@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class EnumParam<E extends Enum<E>> extends ChoiceParam<E> {
     public EnumParam(String name, Class<E> enumClass) {
-        super(name, enumClass.getEnumConstants(), RandomizeMode.ALLOW_RANDOMIZE);
+        super(name, enumClass.getEnumConstants(), RandomizeMode.ALLOW);
     }
 
     public EnumParam(String name, String presetKey, Class<E> enumClass) {
@@ -35,18 +35,18 @@ public class EnumParam<E extends Enum<E>> extends ChoiceParam<E> {
     }
 
     public EnumParam(String name, List<E> choices) {
-        super(name, choices, choices.getFirst(), RandomizeMode.ALLOW_RANDOMIZE);
+        super(name, choices, choices.getFirst(), RandomizeMode.ALLOW);
     }
 
     public EnumParam(String name, String presetKey, List<E> choices) {
-        super(name, choices, choices.getFirst(), RandomizeMode.ALLOW_RANDOMIZE);
+        super(name, choices, choices.getFirst(), RandomizeMode.ALLOW);
         setPresetKey(presetKey);
     }
 
     public static EnumParam<CellularFilter.GridType> forGridType(String name, RangeParam randomnessParam) {
-        var param = new EnumParam<CellularFilter.GridType>(name, CellularFilter.GridType.class);
+        var param = new EnumParam<>(name, CellularFilter.GridType.class);
         // enable the randomness slider only if the grid type isn't "Fully Random"
-        param.setupEnableOtherIf(randomnessParam, selected ->
+        param.enableOtherWhen(randomnessParam, selected ->
             selected != CellularFilter.GridType.RANDOM);
         return param;
     }

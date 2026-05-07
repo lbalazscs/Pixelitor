@@ -62,15 +62,13 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
             return src;
         }
 
-        MarbleFilter filter = new MarbleFilter(
-            NAME,
+        MarbleFilter filter = new MarbleFilter(NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
             scale.getValueAsFloat(),
             amount.getValueAsFloat(),
             (float) turbulence.getPercentage(),
-            (float) (time.getPercentage() * 5)
-        );
+            (float) (time.getPercentage() * 5));
 
         return filter.filter(src, dest);
     }

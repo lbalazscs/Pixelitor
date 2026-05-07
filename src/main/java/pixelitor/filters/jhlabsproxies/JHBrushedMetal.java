@@ -62,8 +62,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
             color.getColor().getRGB(),
             radius.getValue(),
             (float) amount.getPercentage(),
-            (float) shine.getPercentage()
-        );
+            (float) shine.getPercentage());
 
         filter.setRandom(rand);
 

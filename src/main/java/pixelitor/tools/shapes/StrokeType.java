@@ -46,8 +46,8 @@ public enum StrokeType {
     }, ZIGZAG("Zigzag", false, true) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
-            Stroke tmp = BASIC.createStroke(width, cap, join, dashPattern);
-            return new ZigzagStroke(tmp, width, width);
+            Stroke baseStroke = BASIC.createStroke(width, cap, join, dashPattern);
+            return new ZigzagStroke(baseStroke, width, width);
         }
 
         @Override

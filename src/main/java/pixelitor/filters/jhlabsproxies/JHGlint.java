@@ -67,16 +67,14 @@ public class JHGlint extends ParametrizedFilter {
             return src;
         }
 
-        GlintFilter filter = new GlintFilter(
-            NAME,
+        GlintFilter filter = new GlintFilter(NAME,
             (float) threshold.getPercentage(),
             (float) coverage.getPercentage(),
             (float) intensity.getPercentage(),
             length,
             blur.getValueAsFloat(),
             colors.getColorMap(),
-            glintOnly.isChecked()
-        );
+            glintOnly.isChecked());
 
         return filter.filter(src, dest);
     }

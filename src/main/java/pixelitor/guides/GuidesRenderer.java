@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,15 +43,15 @@ public class GuidesRenderer {
      * Draws the given shapes using the configured guide style.
      */
     public void draw(Graphics2D g2, List<? extends Shape> shapes) {
-        g2.setStroke(style.getStrokeA());
-        g2.setColor(style.getColorA());
+        g2.setStroke(style.getPrimaryStroke());
+        g2.setColor(style.getPrimaryColor());
         for (Shape shape : shapes) {
             g2.draw(shape);
         }
 
-        if (style.getStrokeB() != null) {
-            g2.setStroke(style.getStrokeB());
-            g2.setColor(style.getColorB());
+        if (style.getSecondaryStroke() != null) {
+            g2.setStroke(style.getSecondaryStroke());
+            g2.setColor(style.getSecondaryColor());
             for (Shape shape : shapes) {
                 g2.draw(shape);
             }

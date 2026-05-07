@@ -62,7 +62,7 @@ public class Posterize extends ParametrizedFilter {
     public Posterize() {
         super(true);
 
-        ditheringAmountParam.setupEnableOtherIfNotZero(ditheringMethodParam);
+        ditheringAmountParam.enableOtherWhenNotZero(ditheringMethodParam);
 
         initParams(
             colorSpace,
@@ -71,7 +71,7 @@ public class Posterize extends ParametrizedFilter {
             ditheringMethodParam
         );
 
-        colorSpace.addOnChangeTask(this::updateChannelSliderLabels);
+        colorSpace.addSelectionListener(this::updateChannelSliderLabels);
     }
 
     private void updateChannelSliderLabels() {

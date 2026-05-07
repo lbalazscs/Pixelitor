@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.assertions.PixelitorAssertions.assertThatThrownBy;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 @DisplayName("RangeParam tests")
@@ -41,7 +40,7 @@ class RangeParamTest {
     @DisplayName("randomize() with IGNORE_RANDOMIZE should not change value")
     void randomize_whenModeIsIgnore_shouldNotChangeValue() {
         var param = new RangeParam("Test", 0, 100, 1000,
-            true, NONE, IGNORE_RANDOMIZE);
+            true, NONE, RandomizeMode.IGNORE);
         for (int i = 0; i < 5; i++) {
             param.randomize();
             assertThat(param.getValue()).isEqualTo(100);

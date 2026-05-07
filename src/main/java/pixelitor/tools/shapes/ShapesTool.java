@@ -496,8 +496,8 @@ public class ShapesTool extends DragTool {
     }
 
     /**
-     * After this method the shape becomes part of the {@link Drawable}'s
-     * pixels (before it was only drawn above it).
+     * After calling this method the shape becomes part of the
+     * {@link Drawable}'s pixels (before it was only drawn above it).
      */
     private void rasterize(Composition comp) {
         assert hasBox();
@@ -655,7 +655,7 @@ public class ShapesTool extends DragTool {
     }
 
     /**
-     * Restores a previously removed transform box as part of an undo/redo operation
+     * Restores a previously removed transform box as part of an undo/redo operation.
      */
     public void restoreBox(StyledShape shape, TransformBox box) {
         assert box.getTarget() == shape;

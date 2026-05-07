@@ -52,7 +52,7 @@ public class KMeans extends ParametrizedFilter {
     public KMeans() {
         super(true);
 
-        diffusionStrengthParam.setupEnableOtherIfNotZero(ditheringMethodParam);
+        diffusionStrengthParam.enableOtherWhenNotZero(ditheringMethodParam);
 
         initParams(
             k,

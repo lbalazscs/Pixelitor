@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,21 +30,21 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 /**
  * The GUI for an {@link AngleParam}, which can also be
- * an {@link ElevationAngleParam}
+ * an {@link ElevationAngleParam}.
  */
 public class AngleParamGUI extends JPanel implements ParamGUI {
     private boolean userChangedSlider = true;
     private final SliderSpinner sliderSpinner;
-    private final AbstractAngleUI angleUI;
+    private final AbstractAngleSelector selector;
 
     public AngleParamGUI(AngleParam angleParam) {
         super(new BorderLayout(10, 0));
 
         // the selector UI depends on the specific class
-        angleUI = angleParam.getAngleSelectorUI();
-        add(angleUI, WEST);
+        selector = angleParam.getAngleSelector();
+        add(selector, WEST);
 
-        sliderSpinner = createSliderSpinner(angleParam, angleUI);
+        sliderSpinner = createSliderSpinner(angleParam, selector);
         add(sliderSpinner, CENTER);
 
         setBorder(createTitledBorder(angleParam.getName()));
@@ -59,7 +59,7 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
     }
 
     private SliderSpinner createSliderSpinner(AngleParam angleParam,
-                                              AbstractAngleUI angleUI) {
+                                              AbstractAngleSelector angleSelector) {
         var sliderModel = angleParam.asRangeParam();
         sliderModel.addChangeListener(e ->
             sliderModelChanged(angleParam, sliderModel));
@@ -68,7 +68,7 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
         setupSliderTicks(retVal, angleParam.getMaxAngleInDegrees());
 
         angleParam.addChangeListener(e ->
-            angleParamChanged(angleParam, angleUI, sliderModel));
+            angleParamChanged(angleParam, angleSelector, sliderModel));
         return retVal;
     }
 
@@ -82,9 +82,9 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
     }
 
     private void angleParamChanged(AngleParam angleParam,
-                                   AbstractAngleUI angleUI,
+                                   AbstractAngleSelector angleSelector,
                                    RangeParam sliderModel) {
-        angleUI.repaint();
+        angleSelector.repaint();
         try {
             userChangedSlider = false;
             double degrees = angleParam.getValueInDegrees();
@@ -118,7 +118,7 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void setEnabled(boolean enabled) {
-        angleUI.setEnabled(enabled);
+        selector.setEnabled(enabled);
         sliderSpinner.setEnabled(enabled);
         super.setEnabled(enabled);
     }
@@ -134,7 +134,7 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
     @Override
     public void setToolTip(String tip) {
         setToolTipText(tip);
-        angleUI.setToolTipText(tip);
+        selector.setToolTipText(tip);
         sliderSpinner.setToolTip(tip);
     }
 
@@ -143,4 +143,3 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
         return 1;
     }
 }
-

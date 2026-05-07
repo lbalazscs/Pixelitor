@@ -88,12 +88,12 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
 
         GUIUtils.addClickAction(swatch, () -> showColorDialog(index));
         Colors.setupFilterColorPopupMenu(this, swatch,
-            () -> model.getColor(index), c -> updateColor(c, index));
+            () -> model.getColor(index), c -> updateColor(index, c));
     }
 
     private void numColorsChanged(int newNumColors) {
         changeNumVisibleSwatches(newNumColors);
-        updateModelColors();
+        syncColorsToModel();
     }
 
     private void changeNumVisibleSwatches(int newNum) {
@@ -107,7 +107,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
                 swatches.get(i).setVisible(false);
             }
         } else { // newNum > numVisibleSwatches
-            // show existing swatches or create new ones
+            // show hidden swatches or create new ones
             for (int i = numVisibleSwatches; i < newNum; i++) {
                 if (i < swatches.size()) {
                     swatches.get(i).setVisible(true);
@@ -122,7 +122,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         numVisibleSwatches = newNum;
     }
 
-    private void updateModelColors() {
+    private void syncColorsToModel() {
         Color[] newColors = new Color[numVisibleSwatches];
         for (int i = 0; i < numVisibleSwatches; i++) {
             newColors[i] = swatches.get(i).getForeground();
@@ -133,10 +133,10 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
     private void showColorDialog(int index) {
         Colors.selectColorWithDialog(this, model.getName(),
             model.getColor(index), false,
-            color -> updateColor(color, index));
+            color -> updateColor(index, color));
     }
 
-    private void updateColor(Color color, int index) {
+    private void updateColor(int index, Color color) {
         ColorSwatch swatch = swatches.get(index);
         swatch.setForeground(color);
 

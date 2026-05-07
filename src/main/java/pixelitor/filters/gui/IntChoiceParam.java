@@ -23,8 +23,6 @@ import com.jhlabs.image.WaveType;
 import java.util.Objects;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * A {@link ChoiceParam} for selecting a labeled int value.
@@ -35,11 +33,11 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
     }
 
     public IntChoiceParam(String name, Item[] choices) {
-        this(name, choices, ALLOW_RANDOMIZE);
+        this(name, choices, RandomizeMode.ALLOW);
     }
 
     public IntChoiceParam(String name, String presetKey, Item[] choices) {
-        this(name, choices, ALLOW_RANDOMIZE);
+        this(name, choices, RandomizeMode.ALLOW);
         setPresetKey(presetKey);
     }
 
@@ -59,8 +57,8 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
         return selectedValue.value();
     }
 
-    public boolean valueIs(int value) {
-        return selectedValue.valueIs(value);
+    public boolean hasValue(int value) {
+        return selectedValue.hasValue(value);
     }
 
     /**
@@ -68,7 +66,7 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
      */
     public IntChoiceParam withDefaultChoice(int defaultValue) {
         for (Item choice : choices) {
-            if (choice.valueIs(defaultValue)) {
+            if (choice.hasValue(defaultValue)) {
                 this.defaultValue = choice;
                 setSelectedItem(choice, false);
                 break;
@@ -81,12 +79,8 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
      * Represents an integer value with a string description.
      */
     public record Item(String name, int value) {
-        public boolean valueIs(int v) {
+        public boolean hasValue(int v) {
             return value == v;
-        }
-
-        public boolean valueIsNot(int v) {
-            return value != v;
         }
 
         @Override
@@ -111,7 +105,7 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
         }
     }
 
-    private static final Item[] edgeActions = {
+    private static final Item[] EDGE_ACTIONS = {
         new Item("Repeat Image", TransformFilter.WRAP_AROUND),
         new Item("Reflect Image", TransformFilter.REFLECT),
         new Item("Repeat Edge Pixels", TransformFilter.REPEAT_EDGE),
@@ -123,14 +117,14 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
     }
 
     public static IntChoiceParam forEdgeAction(boolean reflectFirst) {
-        var param = new IntChoiceParam("Edge Action", edgeActions, ALLOW_RANDOMIZE);
+        var param = new IntChoiceParam("Edge Action", EDGE_ACTIONS, RandomizeMode.ALLOW);
         if (reflectFirst) {
             param.withDefaultChoice(TransformFilter.REFLECT);
         }
         return param;
     }
 
-    private static final Item[] interpolationMethods = {
+    private static final Item[] INTERPOLATION_METHODS = {
         new Item("Bilinear (Smooth, Balanced)", TransformFilter.BILINEAR),
         new Item("Nearest Neighbor (Fastest)", TransformFilter.NEAREST_NEIGHBOR),
         new Item("Bicubic (High Quality)", TransformFilter.BICUBIC),
@@ -138,10 +132,10 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
 
     public static IntChoiceParam forInterpolation() {
         return new IntChoiceParam("Interpolation",
-            interpolationMethods, IGNORE_RANDOMIZE);
+            INTERPOLATION_METHODS, RandomizeMode.IGNORE);
     }
 
-    private static final Item[] waveTypeChoices = {
+    private static final Item[] WAVE_TYPE_CHOICES = {
         new Item("Sine", WaveType.SINE),
         new Item("Triangle", WaveType.TRIANGLE),
         new Item("Sawtooth", WaveType.SAWTOOTH),
@@ -149,7 +143,7 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
     };
 
     public static IntChoiceParam forWaveType() {
-        return new IntChoiceParam("Wave Type", waveTypeChoices);
+        return new IntChoiceParam("Wave Type", WAVE_TYPE_CHOICES);
     }
 
     public FilterParam configureWaveType(ParamSet paramSet) {
@@ -157,8 +151,8 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
             "Reinitialize the randomness of the noise.");
 
         // enable the "Reseed Noise" button only if the wave type is "Noise"
-        setupEnableOtherIf(reseedNoise,
-            selected -> selected.valueIs(WaveType.NOISE));
+        enableOtherWhen(reseedNoise,
+            selected -> selected.hasValue(WaveType.NOISE));
 
         return withSideButton(reseedNoise);
     }

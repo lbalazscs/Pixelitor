@@ -74,12 +74,10 @@ public class JHDither extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        DitherFilter filter = new DitherFilter(
-            NAME,
+        DitherFilter filter = new DitherFilter(NAME,
             matrixMethod.getValue(),
             levels.getValue(),
-            colorDither.isChecked()
-        );
+            colorDither.isChecked());
 
         return filter.filter(src, dest);
     }

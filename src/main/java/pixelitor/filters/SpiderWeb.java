@@ -48,7 +48,7 @@ public class SpiderWeb extends CurveFilter {
     public SpiderWeb() {
         FilterButtonModel reseedAction = paramSet.createReseedAction("", "Reseed Randomness");
 
-        randomnessParam.setupEnableOtherIfNotZero(reseedAction);
+        randomnessParam.enableOtherWhenNotZero(reseedAction);
 
         addParamsToFront(
             numBranchesParam,

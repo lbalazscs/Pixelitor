@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorListParam;
+import pixelitor.filters.gui.RandomizeMode;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.PoissonDiskSampling;
 
@@ -31,7 +32,6 @@ import java.util.random.RandomGenerator;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Filter for testing Poisson Disk Sampling
@@ -45,7 +45,7 @@ public class PoissonDiskTester extends ParametrizedFilter {
     private final RangeParam distance = new RangeParam("Distance", 10, 20, 300);
     private final RangeParam k = new RangeParam("k", 1, 30, 100);
     private final BooleanParam improved = new BooleanParam("Improved");
-    private final BooleanParam debugGrid = new BooleanParam("Debug Grid", false, IGNORE_RANDOMIZE);
+    private final BooleanParam debugGrid = new BooleanParam("Debug Grid", false, RandomizeMode.IGNORE);
 
     private final ColorListParam colors = new ColorListParam("Colors",
         1, 1, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ public class ColorWheel extends ParametrizedFilter {
     public enum ColorSpaceType {
         Oklch {
             @Override
-            int toRGB(double angle, double sat, double bri) {
+            int toSrgb(double angle, double sat, double bri) {
                 float L = (float) bri;
                 // map saturation 0-1 to chroma 0-0.4, a reasonable range for C
                 float C = (float) (sat * 0.4);
@@ -61,14 +61,14 @@ public class ColorWheel extends ParametrizedFilter {
             }
         }, HSB {
             @Override
-            int toRGB(double angle, double sat, double bri) {
+            int toSrgb(double angle, double sat, double bri) {
                 // HSBtoRGB handles hue wrapping automatically
                 float hue = (float) (angle / (2 * Math.PI));
                 return Color.HSBtoRGB(hue, (float) sat, (float) bri);
             }
         }, HSL {
             @Override
-            int toRGB(double angle, double sat, double bri) {
+            int toSrgb(double angle, double sat, double bri) {
                 float hue = (float) (angle / (2 * Math.PI));
                 int[] buffer = new int[3];
                 // HSL hue is also 0-1
@@ -77,7 +77,7 @@ public class ColorWheel extends ParametrizedFilter {
             }
         };
 
-        abstract int toRGB(double angle, double sat, double bri);
+        abstract int toSrgb(double angle, double sat, double bri);
     }
 
     private final EnumParam<ColorSpaceType> type = new EnumParam<>(GUIText.COLOR_SPACE, ColorSpace.PRESET_KEY, ColorSpaceType.class);
@@ -137,7 +137,7 @@ public class ColorWheel extends ParametrizedFilter {
     private static void processRow(int[] destPixels, int width, int y,
                                    double cx, double cy, double hueRot,
                                    double saturation, double brightness,
-                                   ColorSpaceType model, double spiral) {
+                                   ColorSpaceType colorSpace, double spiral) {
         for (int x = 0; x < width; x++) {
             double yDiff = cy - y;
             double xDiff = x - cx;
@@ -149,9 +149,8 @@ public class ColorWheel extends ParametrizedFilter {
                 angle += spiralAngleOffset;
             }
 
-            // Pass the angle directly, not the normalized hue.
-            // The ColorSpaceType enum is responsible for interpreting the angle.
-            destPixels[x + y * width] = model.toRGB(angle, saturation, brightness);
+            // pass the angle directly, not the normalized hue
+            destPixels[x + y * width] = colorSpace.toSrgb(angle, saturation, brightness);
         }
     }
 

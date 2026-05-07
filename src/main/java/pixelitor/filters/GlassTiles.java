@@ -65,8 +65,7 @@ public class GlassTiles extends ParametrizedFilter {
             size.getValueAsDouble(1),
             phase.getPercentage(1),
             curvature.getValueAsDouble(0),
-            curvature.getValueAsDouble(1)
-        );
+            curvature.getValueAsDouble(1));
 
         return filter.filter(src, dest);
     }

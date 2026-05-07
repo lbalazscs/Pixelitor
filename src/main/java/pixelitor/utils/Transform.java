@@ -36,7 +36,7 @@ public class Transform {
 
     public Transform() {
         // enable the amount slider only if the selected nonlinear distortion type has an amount property
-        distortType.setupEnableOtherIf(distortAmount, NonlinTransform::hasAmount);
+        distortType.enableOtherWhen(distortAmount, NonlinTransform::hasAmount);
     }
 
     public CompositeParam createDialogParam() {

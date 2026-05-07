@@ -86,7 +86,7 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
         FILTER_LOGIC,
         /**
          * The enabled state is determined by the app's animation mode
-         * (disabling non-animatable parameters when configuting an animation's end frame).
+         * (disabling non-animatable parameters when configuring an animation's end frame).
          */
         ANIMATION_ENDING_STATE,
 

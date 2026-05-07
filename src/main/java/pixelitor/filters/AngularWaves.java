@@ -73,8 +73,7 @@ public class AngularWaves extends ParametrizedFilter {
             phase.getPercentage(),
             zoom.getPercentage(),
             amount.getPercentage(),
-            waveType.getValue()
-        );
+            waveType.getValue());
 
         return filter.filter(src, dest);
     }

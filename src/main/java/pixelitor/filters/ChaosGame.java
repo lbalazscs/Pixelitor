@@ -42,7 +42,6 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.lang.Math.PI;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.NO;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
@@ -68,17 +67,17 @@ public class ChaosGame extends ParametrizedFilter {
     private final RangeParam numVerticesParam = new RangeParam("Number of Vertices", 3, 3, 10);
     private final RangeParam fraction = new RangeParam("Jump Fraction (%)", 1, 50, 99);
     private final RangeParam iterations = new RangeParam("Iterations (millions)",
-        1, 1, 10, true, BORDER, IGNORE_RANDOMIZE);
+        1, 1, 10, true, BORDER, RandomizeMode.IGNORE);
     private final IntChoiceParam colors = new IntChoiceParam("Colors", new Item[]{
         new Item("None", COLORS_BW),
         new Item("Last Vertex", COLORS_LAST_VERTEX),
         new Item("Last but One", COLORS_LAST_BUT_ONE),
         new Item("Last but Two", COLORS_LAST_BUT_TWO),
-    }, IGNORE_RANDOMIZE);
+    }, RandomizeMode.IGNORE);
     private final BooleanParam centerJump = new BooleanParam("Jump to Center");
     private final BooleanParam midpointJump = new BooleanParam("Jump to Midpoints");
     private final BooleanParam restrict = new BooleanParam("No Vertex Repetition");
-    private final BooleanParam showPoly = new BooleanParam("Show Polygon", false, IGNORE_RANDOMIZE);
+    private final BooleanParam showPoly = new BooleanParam("Show Polygon", false, RandomizeMode.IGNORE);
 
     public ChaosGame() {
         super(false);

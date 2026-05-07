@@ -104,9 +104,9 @@ public class PoissonDiskSampling {
                 candidate.add(activePoint);
 
                 boolean reject;
-                if (candidate.x < 0 || candidate.x > width) {
+                if (candidate.x < 0 || candidate.x >= width) {
                     reject = true;
-                } else if (candidate.y < 0 || candidate.y > height) {
+                } else if (candidate.y < 0 || candidate.y >= height) {
                     reject = true;
                 } else {
                     reject = hasNearbyPoints(candidate);
@@ -137,12 +137,12 @@ public class PoissonDiskSampling {
         int gridX = (int) (candidate.x / cellWidth);
         int gridY = (int) (candidate.y / cellHeight);
 
-        // check neighboring cells for nearby points
-        for (int gx = gridX - 1; gx <= gridX + 1; gx++) {
+        // check neighboring cells for nearby points (must be a 5x5 grid)
+        for (int gx = gridX - 2; gx <= gridX + 2; gx++) {
             if (gx < 0 || gx >= numHorCells) {
                 continue;
             }
-            for (int gy = gridY - 1; gy <= gridY + 1; gy++) {
+            for (int gy = gridY - 2; gy <= gridY + 2; gy++) {
                 if (gy < 0 || gy >= numVerCells) {
                     continue;
                 }
@@ -183,60 +183,64 @@ public class PoissonDiskSampling {
     /**
      * Returns the index of the closest sample.
      */
-    public int findClosestPointIndex(double x, double y,
-                                     DistanceFunction distanceFunction) {
-        // check the immediate cell containing the point first,
-        // then expand outwards in rings
-        int searchDist = 0;
-        while (true) {
-            int index = searchNeighborhood(x, y, searchDist, distanceFunction);
-            if (index != -1) {
-                return index;
-            }
-            searchDist++;
-        }
-    }
-
-    private int searchNeighborhood(double x, double y, int searchDist,
-                                   DistanceFunction distanceFunction) {
+    public int findClosestPointIndex(double x, double y, DistanceFunction distanceFunction) {
         int gridX = (int) (x / cellWidth);
         int gridY = (int) (y / cellHeight);
+
         double minDistSoFar = Double.POSITIVE_INFINITY;
         int indexOfClosest = -1;
 
-        for (int gx = gridX - searchDist; gx <= gridX + searchDist; gx++) {
-            if (gx < 0 || gx >= numHorCells) {
-                continue;
-            }
-            for (int gy = gridY - searchDist; gy <= gridY + searchDist; gy++) {
-                if (gy < 0 || gy >= numVerCells) {
+        int searchDist = 0;
+        // search additional rings after finding the first point to
+        // cover all cells that could possibly contain a closer point
+        int extraRings = 1; // seems to be enough
+
+        while (true) {
+            for (int gx = gridX - searchDist; gx <= gridX + searchDist; gx++) {
+                if (gx < 0 || gx >= numHorCells) {
                     continue;
                 }
-
-                if (searchDist > 0) {
-                    int dx = Math.abs(gx - gridX);
-                    int dy = Math.abs(gy - gridY);
-
-                    // skips the inner area that was already checked in
-                    // the previous iteration (where searchDist was smaller),
-                    // only processing the outer "ring" of the current square
-                    if (dx < searchDist && dy < searchDist) {
+                for (int gy = gridY - searchDist; gy <= gridY + searchDist; gy++) {
+                    if (gy < 0 || gy >= numVerCells) {
                         continue;
                     }
-                }
 
-                int index = grid[gx][gy];
-                if (index != -1) {
-                    Point2D point = samples.get(index);
-                    double dist = distanceFunction.apply(x, y, point.getX(), point.getY());
-                    if (dist < minDistSoFar) {
-                        minDistSoFar = dist;
-                        indexOfClosest = index;
+                    if (searchDist > 0) {
+                        int dx = Math.abs(gx - gridX);
+                        int dy = Math.abs(gy - gridY);
+
+                        // skips the inner area that was already checked in previous iterations
+                        if (dx < searchDist && dy < searchDist) {
+                            continue;
+                        }
+                    }
+
+                    int index = grid[gx][gy];
+                    if (index != -1) {
+                        Point2D point = samples.get(index);
+                        double dist = distanceFunction.apply(x, y, point.getX(), point.getY());
+                        if (dist < minDistSoFar) {
+                            minDistSoFar = dist;
+                            indexOfClosest = index;
+                        }
                     }
                 }
             }
+
+            if (indexOfClosest != -1) {
+                // we've searched the necessary buffer area to guarantee the absolute closest point
+                if (extraRings <= 0) {
+                    return indexOfClosest;
+                }
+                extraRings--;
+            }
+            searchDist++;
+
+            // fallback safety break if the grid is abnormally sparse
+            if (searchDist > Math.max(numHorCells, numVerCells)) {
+                return indexOfClosest;
+            }
         }
-        return indexOfClosest;
     }
 
     public List<Point2D> getSamples() {

@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import static com.jhlabs.image.PixelUtils.clamp;
+
 /**
  * A filter which quantizes an image to a set number of colors - useful for producing
  * images which are to be encoded using an index color model. The filter can perform
@@ -30,44 +32,30 @@ public class QuantizeFilter extends WholeImageFilter {
      * Floyd-Steinberg dithering matrix.
      */
     protected static final int[] matrix = {
-            0, 0, 0,
-            0, 0, 7,
-            3, 5, 1,
+        0, 0, 0,
+        0, 0, 7,
+        3, 5, 1,
     };
     private static final int sum = 3 + 5 + 7 + 1;
 
-    private boolean dither;
-    private int numColors = 256;
-    private boolean serpentine = true;
+    private final boolean dither;
+    private final int numColors;
+    private final boolean serpentine;
 
-    public QuantizeFilter(String filterName) {
+    /**
+     * Creates a filter which quantizes an image to a set number of colors.
+     *
+     * @param filterName the name of the filter
+     * @param numColors  the number of colors to quantize to
+     * @param dither     true to use dithering; if false, the image is posterized
+     * @param serpentine true to use a serpentine scan pattern when dithering; this can
+     *                   reduce "avalanche" artifacts in the output
+     */
+    public QuantizeFilter(String filterName, int numColors, boolean dither, boolean serpentine) {
         super(filterName);
-    }
 
-    /**
-     * Sets the number of colors to quantize to.
-     *
-     * @param numColors the number of colors. The default is 256.
-     */
-    public void setNumColors(int numColors) {
-        this.numColors = Math.min(Math.max(numColors, 8), 256);
-    }
-
-    /**
-     * Sets whether to use dithering or not. If not, the image is posterized.
-     *
-     * @param dither true to use dithering
-     */
-    public void setDither(boolean dither) {
+        this.numColors = Math.clamp(numColors, 8, 256);
         this.dither = dither;
-    }
-
-    /**
-     * Sets whether to use a serpentine pattern for return or not. This can reduce 'avalanche' artifacts in the output.
-     *
-     * @param serpentine true to use serpentine pattern
-     */
-    public void setSerpentine(boolean serpentine) {
         this.serpentine = serpentine;
     }
 
@@ -98,7 +86,7 @@ public class QuantizeFilter extends WholeImageFilter {
             }
             pt.unitDone(); // this computation is relatively fast
         } else {
-            int index = 0;
+            int index;
             for (int y = 0; y < height; y++) {
                 boolean reverse = serpentine && (y & 1) == 1;
                 int direction;
@@ -131,16 +119,12 @@ public class QuantizeFilter extends WholeImageFilter {
                         int iy = i + y;
                         if (0 <= iy && iy < height) {
                             for (int j = -1; j <= 1; j++) {
+                                int col = reverse ? -j : j;
                                 int jx = j + x;
                                 if (0 <= jx && jx < width) {
-                                    int w;
-                                    if (reverse) {
-                                        w = matrix[(i + 1) * 3 - j + 1];
-                                    } else {
-                                        w = matrix[(i + 1) * 3 + j + 1];
-                                    }
+                                    int w = matrix[(i + 1) * 3 + col + 1];
                                     if (w != 0) {
-                                        int k = reverse ? index - j : index + j;
+                                        int k = index + col;
                                         rgb1 = inPixels[k];
                                         r1 = (rgb1 >> 16) & 0xFF;
                                         g1 = (rgb1 >> 8) & 0xFF;
@@ -148,8 +132,7 @@ public class QuantizeFilter extends WholeImageFilter {
                                         r1 += er * w / sum;
                                         g1 += eg * w / sum;
                                         b1 += eb * w / sum;
-                                        inPixels[k] = (PixelUtils.clamp(r1) << 16) | (PixelUtils
-                                                .clamp(g1) << 8) | PixelUtils.clamp(b1);
+                                        inPixels[k] = (clamp(r1) << 16) | (clamp(g1) << 8) | clamp(b1);
                                     }
                                 }
                             }

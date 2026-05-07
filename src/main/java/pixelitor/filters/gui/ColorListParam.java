@@ -39,7 +39,7 @@ public class ColorListParam extends AbstractFilterParam {
     private final Color[] defaultColors;
 
     public ColorListParam(String name, int defaultNumColors, int minNumColors, Color... candidateColors) {
-        super(name, RandomizeMode.ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
         this.minNumColors = minNumColors;
         this.candidateColors = candidateColors;
         this.colors = Arrays.copyOf(candidateColors, defaultNumColors);
@@ -62,7 +62,7 @@ public class ColorListParam extends AbstractFilterParam {
         return colors;
     }
 
-    public int[] getColorsAsPackedInts() {
+    public int[] getColorsAsArgb() {
         return Arrays.stream(colors)
             .mapToInt(Color::getRGB)
             .toArray();
@@ -95,7 +95,7 @@ public class ColorListParam extends AbstractFilterParam {
      */
     public void setColors(Color[] newColors, boolean trigger) {
         if (newColors.length < minNumColors) {
-            throw new IllegalArgumentException("Expected min " + minNumColors + ", got " + newColors.length);
+            throw new IllegalArgumentException("Expected at least " + minNumColors + " colors, got " + newColors.length);
         }
 
         if (Arrays.equals(colors, newColors)) {
@@ -119,15 +119,13 @@ public class ColorListParam extends AbstractFilterParam {
     protected void doRandomize() {
         int numNewColors = Rnd.intInRange(minNumColors, candidateColors.length);
         Color[] newColors = new Color[numNewColors];
-        for (int i = 0; i < numNewColors; i++) {
-            newColors[i] = Rnd.createRandomColor();
-        }
+        Arrays.setAll(newColors, i -> Rnd.createRandomColor());
         setColors(newColors, false);
     }
 
     @Override
     public ColorListParamState copyState() {
-        return new ColorListParamState(colors);
+        return new ColorListParamState(colors.clone());
     }
 
     @Override
@@ -180,7 +178,7 @@ public class ColorListParam extends AbstractFilterParam {
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             return Stream.of(colors)
                 .map(c -> Colors.toHtmlHex(c, true))
                 .collect(joining(","));

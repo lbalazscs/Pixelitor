@@ -56,12 +56,10 @@ public class JHFrostedGlass extends ParametrizedFilter {
             return src;
         }
 
-        DiffuseFilter filter = new DiffuseFilter(
-            NAME,
+        DiffuseFilter filter = new DiffuseFilter(NAME,
             amount.getValueAsFloat(),
             edgeAction.getValue(),
-            interpolation.getValue()
-        );
+            interpolation.getValue());
 
         return filter.filter(src, dest);
     }

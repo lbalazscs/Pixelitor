@@ -37,7 +37,7 @@ import static java.awt.Color.WHITE;
 import static java.awt.FlowLayout.LEFT;
 
 /**
- * A GUI panel for configuring the effects in an {@link AreaEffects}.
+ * A GUI panel for configuring the effects in an {@link AreaEffects} object.
  * This class acts as the {@link ParamGUI} for an {@link EffectsParam}.
  */
 public class EffectsPanel extends JPanel implements Resettable, ParamGUI {

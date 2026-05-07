@@ -22,11 +22,10 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.utils.Texts;
 
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.List;
-
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 /**
  * Weave filter based on the JHLabs {@link WeaveFilter}.
@@ -73,9 +72,7 @@ public class JHWeave extends ParametrizedFilter {
 
     private final BooleanParam roundThreads = new BooleanParam("Round Threads");
     private final BooleanParam shadeCrossings = new BooleanParam("Shade Crossings", true);
-    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", true, IGNORE_RANDOMIZE);
-
-    private WeaveFilter filter;
+    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", true, RandomizeMode.IGNORE);
 
     public JHWeave() {
         super(true);
@@ -93,19 +90,15 @@ public class JHWeave extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new WeaveFilter(NAME);
-        }
+        Point2D center = new Point2D.Double(src.getWidth() / 2.0, src.getHeight() / 2.0);
 
-        filter.setPattern(pattern.getData());
-        filter.setXWidth(size.getHorizontal());
-        filter.setYWidth(size.getVertical());
-        filter.setXGap(gap.getHorizontal());
-        filter.setYGap(gap.getVertical());
-        filter.setAngle(angle.getValueInIntuitiveRadians());
-        filter.setUseImageColors(useImageColors.isChecked());
-        filter.setRoundThreads(roundThreads.isChecked());
-        filter.setShadeCrossings(shadeCrossings.isChecked());
+        WeaveFilter filter = new WeaveFilter(NAME, pattern.getData(),
+            size.getHorizontal(), size.getVertical(),
+            gap.getHorizontal(), gap.getVertical(),
+            angle.getValueInIntuitiveRadians(), center,
+            useImageColors.isChecked(),
+            roundThreads.isChecked(),
+            shadeCrossings.isChecked());
 
         return filter.filter(src, dest);
     }

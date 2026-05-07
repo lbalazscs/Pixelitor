@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition;
  */
 public class AdvancedTextSettingsPanel extends JPanel {
     private JCheckBox underlineCB;
-    private JCheckBox strikeThroughCB;
+    private JCheckBox strikethroughCB;
 
     private JCheckBox kerningCB;
     private JCheckBox ligaturesCB;
@@ -64,8 +64,8 @@ public class AdvancedTextSettingsPanel extends JPanel {
     }
 
     private void addCheckboxes(FontInfo font) {
-        strikeThroughCB = addCheckBox("Strikethrough:",
-            "strikeThroughCB", font.hasStrikeThrough());
+        strikethroughCB = addCheckBox("Strikethrough:",
+            "strikethroughCB", font.hasStrikethrough());
         underlineCB = addCheckBox("Underline:",
             "underlineCB", font.hasUnderline());
         kerningCB = addCheckBox("Kerning:",
@@ -125,8 +125,8 @@ public class AdvancedTextSettingsPanel extends JPanel {
     }
 
     public void updateFontInfo(FontInfo fontInfo) {
-        fontInfo.updateAdvanced(
-            strikeThroughCB.isSelected(),
+        fontInfo.updateAdvancedProperties(
+            strikethroughCB.isSelected(),
             kerningCB.isSelected(),
             ligaturesCB.isSelected(),
             underlineCB.isSelected(),
@@ -136,7 +136,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
     public void setUIValues(FontInfo font, double lineHeightRatio,
                             double scaleX, double scaleY,
                             double shearX, double shearY) {
-        strikeThroughCB.setSelected(font.hasStrikeThrough());
+        strikethroughCB.setSelected(font.hasStrikethrough());
         underlineCB.setSelected(font.hasUnderline());
 
         kerningCB.setSelected(font.hasKerning());

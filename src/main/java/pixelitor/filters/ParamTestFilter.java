@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
 import static java.awt.RenderingHints.VALUE_RENDER_QUALITY;
 import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB;
-import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
+import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 
 /**
  * A test {@link ParametrizedFilter} with all {@link FilterParam} objects
@@ -133,8 +133,8 @@ public class ParamTestFilter extends ParametrizedFilter {
                 new Item("value 1", 1),
                 new Item("value 2", 2),
             }),
-            new ColorParam("ColorParam", WHITE, ALPHA_ENABLED),
-            new GroupedColorsParam("GroupedColorsParam", "A", WHITE, "B", Color.YELLOW, ALPHA_ENABLED, true, false),
+            new ColorParam("ColorParam", WHITE, RANDOMIZED_ALPHA),
+            new GroupedColorsParam("GroupedColorsParam", "A", WHITE, "B", Color.YELLOW, RANDOMIZED_ALPHA, true, false),
             new AngleParam("AngleParam", 0),
             new ElevationAngleParam("ElevationAngleParam", 0),
             new BlendingModeParam(BlendingMode.values()),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -110,9 +110,9 @@ public class GridEditorPanel extends JPanel {
             return;
         }
 
-        int cellWidthBasedOnPanel = panelWidth / cols;
-        int cellHeightBasedOnPanel = panelHeight / rows;
-        cellSize = Math.min(cellWidthBasedOnPanel, cellHeightBasedOnPanel);
+        int availableCellWidth = panelWidth / cols;
+        int availableCellHeight = panelHeight / rows;
+        cellSize = Math.min(availableCellWidth, availableCellHeight);
 
         int totalGridWidth = cols * cellSize;
         int totalGridHeight = rows * cellSize;

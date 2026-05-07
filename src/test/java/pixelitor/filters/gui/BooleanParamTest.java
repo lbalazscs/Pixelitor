@@ -25,7 +25,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 
 @DisplayName("BooleanParam tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -43,7 +42,7 @@ class BooleanParamTest {
     @Test
     @DisplayName("randomize() with IGNORE_RANDOMIZE should not change value")
     void randomize_whenModeIsIgnore_shouldNotChangeValue() {
-        var param = new BooleanParam("Test", true, IGNORE_RANDOMIZE);
+        var param = new BooleanParam("Test", true, RandomizeMode.IGNORE);
         for (int i = 0; i < 10; i++) {
             param.randomize();
             assertThat(param).valueAsStringIs("yes");

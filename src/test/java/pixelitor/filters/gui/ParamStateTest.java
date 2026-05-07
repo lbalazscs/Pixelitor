@@ -32,7 +32,7 @@ import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
+import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 @DisplayName("ParamState tests")
@@ -63,8 +63,8 @@ class ParamStateTest {
         var imagePositionParamStart = new ImagePositionParam("ImagePositionParam", 0.1f, 0.0f);
         var imagePositionParamEnd = new ImagePositionParam("ImagePositionParam", 0.9f, 1.0f);
 
-        var colorParamStart = new ColorParam("ColorParam", RED, ALPHA_ENABLED);
-        var colorParamEnd = new ColorParam("ColorParam", BLUE, ALPHA_ENABLED);
+        var colorParamStart = new ColorParam("ColorParam", RED, RANDOMIZED_ALPHA);
+        var colorParamEnd = new ColorParam("ColorParam", BLUE, RANDOMIZED_ALPHA);
 
         return Stream.of(
             Arguments.of(angleParamStart.copyState(), angleParamEnd.copyState()),

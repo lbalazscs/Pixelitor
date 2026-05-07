@@ -62,10 +62,10 @@ public class RadialMosaic extends ParametrizedFilter {
         FilterButtonModel reseedAction = paramSet.createReseedAction("", "Reseed Randomness");
 
         // enable the reseed randomness button only if randomness > 0
-        randomnessParam.setupEnableOtherIfNotZero(reseedAction);
+        randomnessParam.enableOtherWhenNotZero(reseedAction);
 
         // enable edge color selection only if edge width > 0
-        edgeWidth.setupEnableOtherIfNotZero(edgeColor);
+        edgeWidth.enableOtherWhenNotZero(edgeColor);
 
         initParams(
             center,

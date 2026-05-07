@@ -16,17 +16,11 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.geom.Point2D;
-
 /**
  * A filter which performs a perspective distortion on an image.
  * It maps an image onto an arbitrary convex quadrilateral.
  */
 public class PerspectiveFilter extends TransformFilter {
-    // the projective transformation matrix that maps normalized source
-    // coordinates (u, v) in [0,1]² to a point in the destination quad
-    private final float a11, a12, a13, a21, a22, a23, a31, a32, a33;
-
     // the inverse matrix that maps destination pixel
     // coordinates back to source pixel coordinates
     private final float A, B, C, D, E, F, G, H, I;
@@ -62,6 +56,10 @@ public class PerspectiveFilter extends TransformFilter {
         float dx3 = x0 - x1 + x2 - x3;
         float dy3 = y0 - y1 + y2 - y3;
 
+        // the projective transformation matrix that maps normalized source
+        // coordinates (u, v) in [0,1]² to a point in the destination quad
+        float a11, a12, a13, a21, a22, a23, a31, a32;
+
         if (dx3 == 0 && dy3 == 0) {
             // the quad is a parallelogram and the transform
             // simplifies to a pure affine mapping
@@ -82,7 +80,7 @@ public class PerspectiveFilter extends TransformFilter {
             a22 = y3 - y0 + a23 * y3;
             a32 = y0;
         }
-        a33 = 1; // a normalization convention in homogeneous coordinates
+        float a33 = 1; // a normalization convention in homogeneous coordinates
 
         float invWidth = 1.0f / srcWidth;
         float invHeight = 1.0f / srcHeight;
@@ -99,18 +97,6 @@ public class PerspectiveFilter extends TransformFilter {
         G = (a12 * a23 - a22 * a13) * invWidth;
         H = (a21 * a13 - a11 * a23) * invHeight;
         I = a11 * a22 - a21 * a12;
-    }
-
-    @Override
-    public Point2D getPoint2D(Point2D srcPt, Point2D dstPt) {
-        if (dstPt == null) {
-            dstPt = new Point2D.Float();
-        }
-        float x = (float) srcPt.getX();
-        float y = (float) srcPt.getY();
-        float f = 1.0f / (x * a13 + y * a23 + a33);
-        dstPt.setLocation((x * a11 + y * a21 + a31) * f, (x * a12 + y * a22 + a32) * f);
-        return dstPt;
     }
 
     @Override

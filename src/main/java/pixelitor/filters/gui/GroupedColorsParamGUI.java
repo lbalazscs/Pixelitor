@@ -47,18 +47,7 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
         swatches = new ColorSwatch[numColors];
 
         for (int i = 0; i < numColors; i++) {
-            int index = i; // final copy for the lambdas
-            add(new JLabel(model.getName(i) + ":"));
-
-            swatches[i] = new ColorSwatch(model.getColor(i), BUTTON_SIZE);
-
-            GUIUtils.addClickAction(swatches[i], () -> showColorDialog(index));
-
-            Colors.setupFilterColorPopupMenu(this, swatches[i],
-                () -> model.getColor(index),
-                newColor -> updateColor(index, newColor));
-
-            add(swatches[i]);
+            createAndAddSwatch(i);
         }
 
         if (model.isLinkable()) {
@@ -69,12 +58,24 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
         add(resetButton);
     }
 
+    private void createAndAddSwatch(int index) {
+        add(new JLabel(model.getName(index) + ":"));
+        swatches[index] = new ColorSwatch(model.getColor(index), BUTTON_SIZE);
+
+        GUIUtils.addClickAction(swatches[index], () -> showColorDialog(index));
+        Colors.setupFilterColorPopupMenu(this, swatches[index],
+            () -> model.getColor(index),
+            newColor -> updateColor(index, newColor));
+
+        add(swatches[index]);
+    }
+
     /**
      * Shows the color chooser dialog for a specific color swatch.
      */
     private void showColorDialog(int index) {
         Colors.selectColorWithDialog(this, model.getName(),
-            model.getColor(index), model.allowTransparency(),
+            model.getColor(index), model.isTransparencyAllowed(),
             color -> updateColor(index, color));
     }
 
@@ -85,7 +86,7 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
         swatches[index].setForeground(color);
         swatches[index].paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 
-        model.setColor(color, index, true);
+        model.setColor(index, color, true);
     }
 
     @Override

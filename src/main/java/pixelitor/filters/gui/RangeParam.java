@@ -32,7 +32,6 @@ import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntPredicate;
 
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
@@ -53,7 +52,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double value;
 
     private boolean adjusting;
-    private boolean addResetButton;
+    private boolean hasResetButton;
     private SliderSpinner.LabelPosition labelPosition;
 
     private ChangeEvent changeEvent = null;
@@ -67,12 +66,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         this(name, min, def, max, true, BORDER);
     }
 
-    public RangeParam(String name, int min, double def, int max, boolean addResetButton,
+    public RangeParam(String name, int min, double def, int max, boolean hasResetButton,
                       SliderSpinner.LabelPosition position) {
-        this(name, min, def, max, addResetButton, position, ALLOW_RANDOMIZE);
+        this(name, min, def, max, hasResetButton, position, RandomizeMode.ALLOW);
     }
 
-    public RangeParam(String name, int min, double def, int max, boolean addResetButton,
+    public RangeParam(String name, int min, double def, int max, boolean hasResetButton,
                       SliderSpinner.LabelPosition position, RandomizeMode randomizeMode) {
         super(name, randomizeMode);
 
@@ -82,13 +81,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         value = def;
         assert checkInvariants();
 
-        this.addResetButton = addResetButton;
+        this.hasResetButton = hasResetButton;
         labelPosition = position;
     }
 
     @Override
     public JComponent createGUI() {
-        var sliderSpinner = new SliderSpinner(this, labelPosition, addResetButton);
+        var sliderSpinner = new SliderSpinner(this, labelPosition, hasResetButton);
         paramGUI = sliderSpinner;
         syncWithGui();
 
@@ -101,7 +100,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * Typically used when this is a randomness slider, and the other
      * is a "reseed randomness" button.
      */
-    public void setupEnableOtherIfNotZero(FilterSetting other) {
+    public void enableOtherWhenNotZero(FilterSetting other) {
         other.setEnabled(getValue() != 0);
         addChangeListener(e ->
             other.setEnabled(getValue() != 0));
@@ -111,7 +110,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * Sets up the automatic disabling of another {@link FilterSetting}
      * when this parameter's value matches a condition.
      */
-    public void setupDisableOtherIf(FilterSetting other, IntPredicate condition) {
+    public void disableOtherWhen(FilterSetting other, IntPredicate condition) {
         other.setEnabled(true);
         addChangeListener(e ->
             other.setEnabled(!condition.test(getValue())));
@@ -271,10 +270,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return (int) value;
     }
 
-    public String getValueStr() {
-        return getValue() + "";
-    }
-
     public float getValueAsFloat() {
         return (float) value;
     }
@@ -304,12 +299,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             // to the canvas size, but this adjustment didn't happen yet).
             // The trigger condition is important, because when used outside
             // the filters paramGUI could be null even if a GUI was created.
-            if (v > maxValue) {
-                v = maxValue;
-            }
-            if (v < minValue) {
-                v = minValue;
-            }
+            v = Math.clamp(v, minValue, maxValue);
         }
 
         if (Math.abs(v - value) > 0.001) { // there are max 2 decimal places in the GUI
@@ -372,20 +362,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     // using a ChangeListener instead of the ParamAdjustmentListener
     // results in continuous updates while the slider is dragged
     @Override
-    public void addChangeListener(ChangeListener x) {
-        assert x != null;
-        listenerList.add(ChangeListener.class, x);
+    public void addChangeListener(ChangeListener listener) {
+        assert listener != null;
+        listenerList.add(ChangeListener.class, listener);
     }
 
     @Override
-    public void removeChangeListener(ChangeListener x) {
-        listenerList.remove(ChangeListener.class, x);
-    }
-
-    public void removeAllChangeListeners() {
-        for (ChangeListener listener : listenerList.getListeners(ChangeListener.class)) {
-            listenerList.remove(ChangeListener.class, listener);
-        }
+    public void removeChangeListener(ChangeListener listener) {
+        listenerList.remove(ChangeListener.class, listener);
     }
 
     private void fireStateChanged() {
@@ -422,7 +406,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             maxValue = minValue + 1;
         }
 
-        // make sure that the tic/label for max value is painted
+        // make sure that the tick/label for max value is painted
         // (the range is divisible by 4), see issue #91
         int remainder = (maxValue - minValue) % 4;
         if (remainder != 0) {
@@ -452,8 +436,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         defaultValue = Math.clamp(newDefault, minValue, maxValue);
     }
 
-    public void setAddResetButton(boolean addResetButton) {
-        this.addResetButton = addResetButton;
+    public void setHasResetButton(boolean hasResetButton) {
+        this.hasResetButton = hasResetButton;
     }
 
     public void setLabelPosition(SliderSpinner.LabelPosition labelPosition) {
@@ -489,7 +473,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             double v = Double.parseDouble(savedValue);
             setValueNoTrigger(v);
         } catch (NumberFormatException e) {
-            throw new IllegalStateException("Could not parse " + savedValue);
+            throw new IllegalStateException("Could not parse " + savedValue, e);
         }
     }
 
@@ -536,10 +520,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         private int min;
         private double def;
         private int max;
-        private boolean addResetButton = true;
+        private boolean hasResetButton = true;
         private int decimalPlaces = 0;
         private SliderSpinner.LabelPosition labelPosition = BORDER;
-        private RandomizeMode randomizeMode = ALLOW_RANDOMIZE;
+        private RandomizeMode randomizeMode = RandomizeMode.ALLOW;
 
         public Builder(String name) {
             this.name = name;
@@ -565,12 +549,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             return this;
         }
 
-        public Builder addResetButton(boolean addResetButton) {
-            this.addResetButton = addResetButton;
+        public Builder hasResetButton(boolean hasResetButton) {
+            this.hasResetButton = hasResetButton;
             return this;
         }
 
-        public Builder textPosition(SliderSpinner.LabelPosition labelPosition) {
+        public Builder labelPosition(SliderSpinner.LabelPosition labelPosition) {
             this.labelPosition = labelPosition;
             return this;
         }
@@ -582,7 +566,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
         public RangeParam build() {
             RangeParam rp = new RangeParam(name, min, def, max,
-                addResetButton, labelPosition, randomizeMode);
+                hasResetButton, labelPosition, randomizeMode);
             rp.setDecimalPlaces(decimalPlaces);
             return rp;
         }
@@ -619,7 +603,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
 
         @Override
-        public String toSaveString() {
+        public String toPresetString() {
             return formatDecimal(value, decimalPlaces);
         }
 

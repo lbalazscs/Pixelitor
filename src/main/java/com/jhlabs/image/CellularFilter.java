@@ -377,7 +377,7 @@ public class CellularFilter extends WholeImageFilter {
                 d = gridType.checkCell(fx - 1, fy + 1, ix + 1, iy - 1, results, randomness);
             }
             if (d > 1 - fy) {
-                d = gridType.checkCell(fx - 1, fy - 1, ix + 1, iy + 1, results, randomness);
+                gridType.checkCell(fx - 1, fy - 1, ix + 1, iy + 1, results, randomness);
             }
         }
 

@@ -73,8 +73,7 @@ public class JHWaterRipple extends ParametrizedFilter {
             radius.getValueAsFloat(),
             wavelength.getValueAsFloat(),
             (float) amplitude.getPercentage(),
-            phase.getValueInRadians()
-        );
+            phase.getValueInRadians());
 
         dest = filter.filter(src, dest);
 //    setAffectedAreaShapes(filter.getAffectedAreaShapes());

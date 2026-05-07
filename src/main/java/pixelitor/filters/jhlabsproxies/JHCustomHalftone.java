@@ -54,7 +54,7 @@ public class JHCustomHalftone extends ParametrizedFilter {
         super(true);
 
         // enable the center selector only if the rings grid is selected
-        dotGrid.setupEnableOtherIf(center, item -> item.valueIs(HalftoneFilter.GRID_RINGS));
+        dotGrid.enableOtherWhen(center, item -> item.hasValue(HalftoneFilter.GRID_RINGS));
 
         initParams(
             maskImage,

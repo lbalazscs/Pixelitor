@@ -33,6 +33,9 @@ public class ImagePanel extends JPanel {
     private final boolean useCheckerboard;
     private CheckerboardPainter checkerboardPainter;
 
+    protected int imgOffsetX = 0;
+    protected int imgOffsetY = 0;
+
     public ImagePanel(boolean useCheckerboard) {
         this.useCheckerboard = useCheckerboard;
         if (useCheckerboard) {
@@ -81,17 +84,17 @@ public class ImagePanel extends JPanel {
         int imageHeight = image.getHeight();
 
         // the position that centers the image
-        int imgX = (getWidth() - imageWidth) / 2;
-        int imgY = (getHeight() - imageHeight) / 2;
+        imgOffsetX = (getWidth() - imageWidth) / 2;
+        imgOffsetY = (getHeight() - imageHeight) / 2;
 
         if (useCheckerboard) {
             Graphics2D g2 = (Graphics2D) g;
             // translate the checkerboard to the image position
-            g2.translate(imgX, imgY);
+            g2.translate(imgOffsetX, imgOffsetY);
             checkerboardPainter.paint(g2, null, imageWidth, imageHeight);
-            g2.translate(-imgX, -imgY);
+            g2.translate(-imgOffsetX, -imgOffsetY);
         }
 
-        g.drawImage(image, imgX, imgY, null);
+        g.drawImage(image, imgOffsetX, imgOffsetY, null);
     }
 }

@@ -69,8 +69,7 @@ public class JHWaves extends ParametrizedFilter {
         float xWavelength = wavelengthParam.getValueAsFloat(0);
         float yWavelength = wavelengthParam.getValueAsFloat(1);
 
-        RippleFilter filter = new RippleFilter(
-            NAME,
+        RippleFilter filter = new RippleFilter(NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
             angleParam.getValueInIntuitiveRadians(),
@@ -80,8 +79,7 @@ public class JHWaves extends ParametrizedFilter {
             yWavelength,
             waveType.getValue(),
             phaseParam.getHorPercentage(),
-            phaseParam.getVerPercentage()
-        );
+            phaseParam.getVerPercentage());
 
         return filter.filter(src, dest);
     }

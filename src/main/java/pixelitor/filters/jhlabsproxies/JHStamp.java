@@ -22,6 +22,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.RandomizeMode;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
@@ -29,7 +30,6 @@ import java.io.Serial;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
@@ -51,7 +51,7 @@ public class JHStamp extends ParametrizedFilter {
         new Item[]{
             new Item("Fast", StampFilter.BOX3_BLUR),
             new Item("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
-        }, IGNORE_RANDOMIZE);
+        }, RandomizeMode.IGNORE);
 
     public JHStamp() {
         super(true);

@@ -362,7 +362,7 @@ public final class AppPreferences {
             int strokeId = mainPrefs.getInt(GUIDE_STROKE_KEY, GuideStrokeType.DASHED.ordinal());
             //noinspection NonThreadSafeLazyInitialization
             guideStyle = new GuideStyle();
-            guideStyle.setColorA(new Color(colorRGB));
+            guideStyle.setPrimaryColor(new Color(colorRGB));
             guideStyle.setStrokeType(GuideStrokeType.values()[strokeId]);
         }
 
@@ -377,7 +377,7 @@ public final class AppPreferences {
             int strokeId = mainPrefs.getInt(CROP_GUIDE_STROKE_KEY, GuideStrokeType.SOLID.ordinal());
             //noinspection NonThreadSafeLazyInitialization
             cropGuideStyle = new GuideStyle();
-            cropGuideStyle.setColorA(new Color(colorRGB));
+            cropGuideStyle.setPrimaryColor(new Color(colorRGB));
             cropGuideStyle.setStrokeType(GuideStrokeType.values()[strokeId]);
         }
 
@@ -386,14 +386,14 @@ public final class AppPreferences {
 
     private static void saveGuideStyle() {
         if (guideStyle != null) { // was loaded
-            mainPrefs.putInt(GUIDE_COLOR_KEY, guideStyle.getColorA().getRGB());
+            mainPrefs.putInt(GUIDE_COLOR_KEY, guideStyle.getPrimaryColor().getRGB());
             mainPrefs.putInt(GUIDE_STROKE_KEY, guideStyle.getStrokeType().ordinal());
         }
     }
 
     private static void saveCropGuideStyle() {
         if (cropGuideStyle != null) { // was loaded
-            mainPrefs.putInt(CROP_GUIDE_COLOR_KEY, cropGuideStyle.getColorA().getRGB());
+            mainPrefs.putInt(CROP_GUIDE_COLOR_KEY, cropGuideStyle.getPrimaryColor().getRGB());
             mainPrefs.putInt(CROP_GUIDE_STROKE_KEY, cropGuideStyle.getStrokeType().ordinal());
         }
     }

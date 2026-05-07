@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,15 +74,15 @@ class GuidesRendererTest {
 
         // verify that Graphics properties are set before drawing
         InOrder inOrder = inOrder(g2);
-        inOrder.verify(g2).setStroke(guideStyle.getStrokeA());
-        inOrder.verify(g2).setColor(guideStyle.getColorA());
+        inOrder.verify(g2).setStroke(guideStyle.getPrimaryStroke());
+        inOrder.verify(g2).setColor(guideStyle.getPrimaryColor());
         inOrder.verify(g2).draw(lines.getFirst());
         inOrder.verify(g2).draw(lines.getLast());
 
         // verify second pass for double strokes
         if (strokeType.hasDoubleStroke()) {
-            inOrder.verify(g2).setStroke(guideStyle.getStrokeB());
-            inOrder.verify(g2).setColor(guideStyle.getColorB());
+            inOrder.verify(g2).setStroke(guideStyle.getSecondaryStroke());
+            inOrder.verify(g2).setColor(guideStyle.getSecondaryColor());
             inOrder.verify(g2).draw(lines.getFirst());
             inOrder.verify(g2).draw(lines.getLast());
         }

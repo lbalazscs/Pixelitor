@@ -32,16 +32,17 @@ import static java.awt.FlowLayout.LEFT;
  */
 public class ColorParamGUI extends JPanel implements ParamGUI {
     public static final int BUTTON_SIZE = 30;
+
     private final ColorParam model;
-    private final FilterButtonModel extraAction;
+    private final FilterButtonModel sideButtonModel;
     private final ColorSwatch colorSwatch;
     private ResetButton resetButton;
 
-    public ColorParamGUI(ColorParam model, FilterButtonModel extraAction, boolean addResetButton) {
+    public ColorParamGUI(ColorParam model, FilterButtonModel sideButtonModel, boolean addResetButton) {
         super(new FlowLayout(LEFT));
 
         this.model = model;
-        this.extraAction = extraAction;
+        this.sideButtonModel = sideButtonModel;
 
         Color color = model.getColor();
         colorSwatch = new ColorSwatch(color, BUTTON_SIZE);
@@ -52,8 +53,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         Colors.setupFilterColorPopupMenu(this, colorSwatch,
             model::getColor, this::applySelectedColor);
 
-        if (extraAction != null) {
-            add(extraAction.createGUI());
+        if (sideButtonModel != null) {
+            add(sideButtonModel.createGUI());
         }
 
         if (addResetButton) {
@@ -64,7 +65,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 
     private void showColorDialog() {
         Colors.selectColorWithDialog(this, model.getName(),
-            model.getColor(), model.allowTransparency(), this::applySelectedColor);
+            model.getColor(), model.isTransparencyAllowed(), this::applySelectedColor);
     }
 
     // updates the swatch and the model with the new selected color
@@ -92,8 +93,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled); // so that isEnabled() works
         colorSwatch.setEnabled(enabled);
-        if (extraAction != null) {
-            extraAction.setEnabled(enabled);
+        if (sideButtonModel != null) {
+            sideButtonModel.setEnabled(enabled);
         }
         if (resetButton != null) {
             resetButton.setEnabled(enabled);

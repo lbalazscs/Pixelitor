@@ -20,13 +20,13 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CausticsFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.RandomizeMode;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
@@ -48,7 +48,7 @@ public class JHCaustics extends ParametrizedFilter {
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 25, 100);
     private final RangeParam time = new RangeParam("Time", 0, 0, 800);
     private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 1, 10,
-        true, BORDER, IGNORE_RANDOMIZE);
+        true, BORDER, RandomizeMode.IGNORE);
 
     public JHCaustics() {
         super(false);
@@ -76,8 +76,7 @@ public class JHCaustics extends ParametrizedFilter {
             (float) dispersion.getPercentage(),
             (float) time.getPercentage(),
             samples.getValue(),
-            bgColor.getColor().getRGB()
-        );
+            bgColor.getColor().getRGB());
 
         return filter.filter(src, dest);
     }

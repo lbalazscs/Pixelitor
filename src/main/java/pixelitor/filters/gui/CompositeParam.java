@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
-
 /**
  * A composite {@link FilterParam} that groups child parameters
  * and displays them in a modal dialog.
@@ -44,7 +42,7 @@ public class CompositeParam extends AbstractFilterParam {
     }
 
     private CompositeParam(String name, boolean useDialog, FilterParam... children) {
-        super(name, ALLOW_RANDOMIZE);
+        super(name, RandomizeMode.ALLOW);
         this.useDialog = useDialog;
         this.children = children;
     }
@@ -118,7 +116,7 @@ public class CompositeParam extends AbstractFilterParam {
     @Override
     public void saveStateTo(UserPreset preset) {
         for (FilterParam child : children) {
-            preset.put(child.getPresetKey(), child.copyState().toSaveString());
+            preset.put(child.getPresetKey(), child.copyState().toPresetString());
         }
     }
 

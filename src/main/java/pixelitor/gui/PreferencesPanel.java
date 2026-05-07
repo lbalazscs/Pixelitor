@@ -250,7 +250,7 @@ public class PreferencesPanel extends JTabbedPane {
 
         int currentSize = Thumbnails.getMaxSize();
         for (int i = 0; i < thumbSizeCB.getItemCount(); i++) {
-            if (thumbSizeCB.getItemAt(i).valueIs(currentSize)) {
+            if (thumbSizeCB.getItemAt(i).hasValue(currentSize)) {
                 thumbSizeCB.setSelectedIndex(i);
                 break;
             }
@@ -302,7 +302,7 @@ public class PreferencesPanel extends JTabbedPane {
      * Configures either regular guides or composition guides in the crop tool.
      */
     private static void configureGuideStyle(GuideStyle guideStyle, String labelPrefix, String comboName, GridBagHelper gbh) {
-        var guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
+        var guideColorSwatch = new ColorSwatch(guideStyle.getPrimaryColor(), 20);
         var guideStyleCB = new JComboBox<>(GuideStrokeType.values());
         guideStyleCB.setName(comboName);
         guideStyleCB.setSelectedItem(guideStyle.getStrokeType());
@@ -311,7 +311,7 @@ public class PreferencesPanel extends JTabbedPane {
         gbh.addLabelAndControlNoStretch(labelPrefix + " Style: ", guideStyleCB);
 
         new ColorPickerHelper(guideColorSwatch, e -> {
-            guideStyle.setColorA(guideColorSwatch.getForeground());
+            guideStyle.setPrimaryColor(guideColorSwatch.getForeground());
             ImageArea.getUI().repaint();
         });
 

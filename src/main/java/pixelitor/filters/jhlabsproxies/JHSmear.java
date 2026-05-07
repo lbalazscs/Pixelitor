@@ -65,9 +65,9 @@ public class JHSmear extends ParametrizedFilter {
             mix
         );
 
-        // disable the angle if the shape isn't "lines"
-        shape.setupDisableOtherIf(angle,
-            selected -> selected.valueIsNot(SmearFilter.LINES));
+        // disable the angle selector if the shape isn't "lines"
+        shape.disableOtherWhen(angle,
+            selected -> !selected.hasValue(SmearFilter.LINES));
     }
 
     @Override
@@ -83,8 +83,7 @@ public class JHSmear extends ParametrizedFilter {
             (float) density.getPercentage(),
             (float) angle.getValueInRadians(),
             (float) mix.getPercentage(),
-            paramSet.getRandomWithLastSeed()
-        );
+            paramSet.getRandomWithLastSeed());
 
         return filter.filter(src, dest);
     }

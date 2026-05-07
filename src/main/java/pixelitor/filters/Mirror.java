@@ -57,8 +57,7 @@ public class Mirror extends ParametrizedFilter {
             edgeAction.getValue(),
             interpolation.getValue(),
             center.getAbsolutePoint(src),
-            angle.getValueInRadians()
-        );
+            angle.getValueInRadians());
 
         return filter.filter(src, dest);
     }

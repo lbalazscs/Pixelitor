@@ -32,7 +32,6 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.ORANGE;
 import static java.awt.Color.RED;
 import static java.awt.Color.YELLOW;
-import static pixelitor.filters.gui.RandomizeMode.ALLOW_RANDOMIZE;
 
 /**
  * Plasma filter based on the JHLabs {@link PlasmaFilter}.
@@ -53,7 +52,7 @@ public class JHPlasma extends ParametrizedFilter {
         new Item("Less", LESS_COLORS),
         new Item("More", MORE_COLORS),
         new Item("Use Gradient", GRADIENT_COLORS),
-    }, ALLOW_RANDOMIZE);
+    });
 
     // initialize here, otherwise it doesn't load from pxc smart filter
     private final PlasmaFilter filter = new PlasmaFilter(NAME);
@@ -65,7 +64,8 @@ public class JHPlasma extends ParametrizedFilter {
     public JHPlasma() {
         super(false);
 
-        type.setupEnableOtherIf(gradient, v -> v.valueIs(GRADIENT_COLORS));
+        // enable the gradient selector only if the color type is "use gradient"
+        type.enableOtherWhen(gradient, v -> v.hasValue(GRADIENT_COLORS));
 
         initParams(
             turbulence,

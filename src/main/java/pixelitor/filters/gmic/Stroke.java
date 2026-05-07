@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,8 @@ import java.awt.Color;
 import java.io.Serial;
 import java.util.List;
 
-import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
+import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 
 public class Stroke extends GMICFilter {
     @Serial
@@ -58,7 +58,7 @@ public class Stroke extends GMICFilter {
     private final GroupedColorsParam fillColor = new GroupedColorsParam("Fill Color",
         "Inside", Colors.TRANSPARENT_BLACK,
         "Outside", Colors.TRANSPARENT_BLACK,
-        ALPHA_ENABLED, true, true);
+        RANDOMIZED_ALPHA, true, true);
 
     public Stroke() {
         initParams(thickness,
@@ -78,10 +78,10 @@ public class Stroke extends GMICFilter {
                 zoom.getValue() + "," +
                 shift.getValue(0) + "," +
                 shift.getValue(1) + "," +
-                strokeColor.getColorStr(0) + "," +
-                strokeColor.getColorStr(1) + "," +
-                fillColor.getColorStr(0) + "," +
-                fillColor.getColorStr(1) + ",0,1", "blend", "alpha"
+                strokeColor.getGmicColorStr(0) + "," +
+                strokeColor.getGmicColorStr(1) + "," +
+                fillColor.getGmicColorStr(0) + "," +
+                fillColor.getGmicColorStr(1) + ",0,1", "blend", "alpha"
         );
     }
 }

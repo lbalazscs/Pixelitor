@@ -93,7 +93,7 @@ public class ColorBalance extends ParametrizedFilter {
             range3
         );
 
-        colorSpace.addOnChangeTask(this::updateSliders);
+        colorSpace.addSelectionListener(this::updateSliders);
     }
 
     private void updateSliders() {

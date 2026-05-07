@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,8 +34,8 @@ public class ElevationAngleParam extends AngleParam {
     }
 
     @Override
-    public AbstractAngleUI getAngleSelectorUI() {
-        return new ElevationAngleUI(this);
+    public AbstractAngleSelector getAngleSelector() {
+        return new ElevationAngleSelector(this);
     }
 
     @Override
@@ -44,17 +44,17 @@ public class ElevationAngleParam extends AngleParam {
     }
 
     @Override
-    public void setValue(double r, boolean trigger) {
-        if (r >= 1.5 * Math.PI) {
+    public void setValue(double a, boolean trigger) {
+        if (a >= 1.5 * Math.PI) {
             // values between 1.5*π and 2*π are coming
             // when the user drags the slider, they are OK
-        } else if (r > 0) {
-            r = 0; // clamp to horizontal
-        } else if (r < -Math.PI / 2) {
-            r = -Math.PI / 2; // clamp to vertical
+        } else if (a > 0) {
+            a = 0; // clamp to horizontal
+        } else if (a < -Math.PI / 2) {
+            a = -Math.PI / 2; // clamp to vertical
         }
 
-        super.setValue(r, trigger);
+        super.setValue(a, trigger);
     }
 
     @Override

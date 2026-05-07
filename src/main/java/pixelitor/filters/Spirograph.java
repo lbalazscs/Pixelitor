@@ -17,11 +17,8 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.Help;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.geom.Path2D;
@@ -29,7 +26,6 @@ import java.io.Serial;
 
 import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.sin;
-import static pixelitor.filters.gui.RandomizeMode.IGNORE_RANDOMIZE;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
@@ -56,7 +52,7 @@ public class Spirograph extends CurveFilter {
     private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Hypotrochoid", TYPE_HYPOTROCHOID),
         new Item("Epitrochoid", TYPE_EPITROCHOID),
-    }, IGNORE_RANDOMIZE);
+    }, RandomizeMode.IGNORE);
 
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 701);
 

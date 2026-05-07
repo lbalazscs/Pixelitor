@@ -45,9 +45,9 @@ import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING_STATE;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FILTER_LOGIC;
-import static pixelitor.filters.gui.TransparencyMode.ALPHA_ENABLED;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
+import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 
 /**
  * Checks whether different {@link FilterParam} implementations
@@ -86,12 +86,12 @@ class FilterParamTest {
             new ImagePositionParam("Param Name"),
             new GradientParam("Param Name", BLACK, WHITE),
             new TextParam("Param Name", "default text", true),
-            new ColorParam("Param Name", BLACK, ALPHA_ENABLED),
+            new ColorParam("Param Name", BLACK, RANDOMIZED_ALPHA),
             new ColorParam("Param Name", WHITE, MANUAL_ALPHA_ONLY),
             new ColorParam("Param Name", BLUE, OPAQUE_ONLY),
             new ColorListParam("Param Name", 1, 1, BLACK, BLUE),
-            new GroupedColorsParam("Param Name", "Name 1", BLUE, "Name 2", BLUE, ALPHA_ENABLED, true, true),
-            new BooleanParam("Param Name", true, RandomizeMode.ALLOW_RANDOMIZE, true),
+            new GroupedColorsParam("Param Name", "Name 1", BLUE, "Name 2", BLUE, RANDOMIZED_ALPHA, true, true),
+            new BooleanParam("Param Name", true, RandomizeMode.ALLOW, true),
             new AngleParam("Param Name", 0),
             new ElevationAngleParam("Param Name", 0),
             new IntChoiceParam("Param Name", new Item[]{
@@ -145,14 +145,14 @@ class FilterParamTest {
     @Test
     void shouldHandleRandomization() {
         // test allowed randomization
-        param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
+        param.setRandomizeMode(RandomizeMode.ALLOW);
         assertThat(param).shouldRandomize();
         param.randomize();
         verifyNoParamAdjustments();
 
         // test ignored randomization
         String origValue = param.getValueAsString();
-        param.setRandomizeMode(RandomizeMode.IGNORE_RANDOMIZE);
+        param.setRandomizeMode(RandomizeMode.IGNORE);
         assertThat(param).shouldNotRandomize();
         param.randomize();
         assertThat(param).valueAsStringIs(origValue); // it didn't change
@@ -197,7 +197,7 @@ class FilterParamTest {
      * This is the only general way to change the value.
      */
     private void randomizeUntilNotDefault() {
-        param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
+        param.setRandomizeMode(RandomizeMode.ALLOW);
         int attempts = 0;
         while (param.isAtDefault() && attempts < 100) {
             param.randomize();
@@ -266,7 +266,7 @@ class FilterParamTest {
         JComponent gui = param.createGUI();
 
         // randomize until the parent parameter is NOT at default
-        param.setRandomizeMode(RandomizeMode.ALLOW_RANDOMIZE);
+        param.setRandomizeMode(RandomizeMode.ALLOW);
         int attempts = 0;
         while (param.isAtDefault() && attempts < 100) {
             param.randomize();
