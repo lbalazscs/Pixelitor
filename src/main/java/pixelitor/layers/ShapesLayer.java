@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.compactions.FlipDirection;
@@ -85,8 +85,8 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    protected ShapesLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        String duplicateName = copyType.createLayerCopyName(name);
+    protected ShapesLayer createTypeSpecificCopy(CopyOptions options, Composition newComp) {
+        String duplicateName = options.createLayerCopyName(name);
         var duplicate = new ShapesLayer(newComp, duplicateName);
 
         if (styledShape != null) {

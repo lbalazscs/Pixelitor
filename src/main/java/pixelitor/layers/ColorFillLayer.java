@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.PixelitorWindow;
@@ -131,8 +131,8 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    protected ColorFillLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        String copyName = copyType.createLayerCopyName(name);
+    protected ColorFillLayer createTypeSpecificCopy(CopyOptions options, Composition newComp) {
+        String copyName = options.createLayerCopyName(name);
         // java.awt.Color is immutable => it can be shared
         return new ColorFillLayer(newComp, copyName, color);
     }

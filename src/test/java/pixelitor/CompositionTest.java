@@ -817,7 +817,7 @@ class CompositionTest {
 
     @Test
     void copyComposition() {
-        Composition copy = comp.copy(CopyType.DUPLICATE_COMP, true);
+        Composition copy = comp.copy(CopyOptions.duplicateComposition());
 
         assertThat(copy)
             .isNotSameAs(comp)

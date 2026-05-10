@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import org.junit.jupiter.api.*;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
@@ -73,7 +73,7 @@ class ShapesLayerTest {
     void duplicate() {
         assertBoxIsAtOrigPosition(layer.getTransformBox());
 
-        ShapesLayer duplicate = (ShapesLayer) layer.copy(CopyType.DUPLICATE_LAYER, true, comp);
+        ShapesLayer duplicate = (ShapesLayer) layer.copy(CopyOptions.duplicateLayer(), comp);
 
         assertBoxIsAtOrigPosition(duplicate.getTransformBox());
     }
@@ -81,7 +81,7 @@ class ShapesLayerTest {
     @Test
     void resize() {
         assertBoxIsAtOrigPosition(layer.getTransformBox());
-        comp.addLayerWithoutUI(layer.copy(CopyType.DUPLICATE_LAYER, false, comp));
+        comp.addLayerWithoutUI(layer.copy(CopyOptions.duplicateLayer(), comp));
 
         Composition smallComp = TestHelper.resize(comp, 10, 5);
 

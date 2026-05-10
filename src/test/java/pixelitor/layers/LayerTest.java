@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
 import pixelitor.history.LayerOpacityEdit;
@@ -181,18 +181,18 @@ class LayerTest {
 
     @Test
     void duplicating() {
-        Layer copy1 = verifyCopy(layer, CopyType.DUPLICATE_LAYER, "layer 1 copy");
-        Layer copy2 = verifyCopy(copy1, CopyType.DUPLICATE_LAYER, "layer 1 copy 2");
-        Layer copy3 = verifyCopy(copy2, CopyType.DUPLICATE_LAYER, "layer 1 copy 3");
+        Layer copy1 = verifyCopy(layer, CopyOptions.duplicateLayer(), "layer 1 copy");
+        Layer copy2 = verifyCopy(copy1, CopyOptions.duplicateLayer(), "layer 1 copy 2");
+        Layer copy3 = verifyCopy(copy2, CopyOptions.duplicateLayer(), "layer 1 copy 3");
 
         // in this case the name shouldn't change
-        Layer exactCopy = verifyCopy(layer, CopyType.UNDO, "layer 1");
+        Layer exactCopy = verifyCopy(layer, CopyOptions.fullStateBackup(), "layer 1");
 
         iconChecker.verifyUpdateCounts(0, 0);
     }
 
-    private Layer verifyCopy(Layer source, CopyType copyType, String expectedName) {
-        Layer copy = source.copy(copyType, true, comp);
+    private Layer verifyCopy(Layer source, CopyOptions copyOptions, String expectedName) {
+        Layer copy = source.copy(copyOptions, comp);
 
         copy.createUI();
         assertThat(copy)

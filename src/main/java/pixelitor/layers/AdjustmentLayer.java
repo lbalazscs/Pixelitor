@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
@@ -73,8 +73,8 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    protected AdjustmentLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        String copyName = copyType.createLayerCopyName(name);
+    protected AdjustmentLayer createTypeSpecificCopy(CopyOptions options, Composition newComp) {
+        String copyName = options.createLayerCopyName(name);
         // the filter is copied to ensure the new layer has its own filter instance
         return new AdjustmentLayer(newComp, copyName, filter.copy());
     }

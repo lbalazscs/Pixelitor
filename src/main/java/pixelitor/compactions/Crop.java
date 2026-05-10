@@ -19,7 +19,7 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
@@ -113,9 +113,8 @@ public class Crop implements CompAction {
         var canvasTransform = createCropTransform(cropRect);
 
         View view = srcComp.getView();
-        // create a copy for undo; copy selection only if the crop didn't originate
-        // from the selection itself (if it did, the selection is consumed by the crop)
-        Composition croppedComp = srcComp.copy(CopyType.UNDO, !fromSelection);
+        // selection crop should deselect
+        Composition croppedComp = srcComp.copy(CopyOptions.fullStateBackup(!fromSelection, false));
 
         if (!fromSelection) {
             // if cropping wasn't based on a selection,

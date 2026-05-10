@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
 import pixelitor.compactions.QuadrantAngle;
@@ -92,11 +92,11 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    protected Layer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        String copyName = copyType.createLayerCopyName(name);
+    protected Layer createTypeSpecificCopy(CopyOptions options, Composition newComp) {
+        String copyName = options.createLayerCopyName(name);
         List<Layer> layersCopy = new ArrayList<>();
         for (Layer layer : layers) {
-            layersCopy.add(layer.copy(copyType, true, newComp));
+            layersCopy.add(layer.copy(options, newComp));
         }
         return new LayerGroup(newComp, copyName, layersCopy);
     }

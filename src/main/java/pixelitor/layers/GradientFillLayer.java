@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
 import pixelitor.compactions.QuadrantAngle;
@@ -89,8 +89,8 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    protected GradientFillLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        String copyName = copyType.createLayerCopyName(name);
+    protected GradientFillLayer createTypeSpecificCopy(CopyOptions options, Composition newComp) {
+        String copyName = options.createLayerCopyName(name);
         var copy = new GradientFillLayer(newComp, copyName);
         if (gradient != null) {
             copy.gradient = gradient.copy();

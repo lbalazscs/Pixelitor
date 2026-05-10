@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.Views;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
@@ -137,12 +137,12 @@ public class SmartObject extends CompositeLayer {
     }
 
     // constructor for duplication.
-    private SmartObject(SmartObject orig, CopyType copyType, Composition newComp) {
-        super(newComp, copyType.createLayerCopyName(orig.getName()));
+    private SmartObject(SmartObject orig, CopyOptions copyOptions, Composition newComp) {
+        super(newComp, copyOptions.createLayerCopyName(orig.getName()));
         assert orig.content.checkInvariants();
-        if (copyType.isDeepContentCopy()) {
+        if (copyOptions.deepContentCopy()) {
             Composition origContent = orig.content;
-            Composition newContent = origContent.copy(copyType, true);
+            Composition newContent = origContent.copy(copyOptions);
             setContent(newContent);
             assert origContent.checkInvariants();
         } else {
@@ -151,7 +151,7 @@ public class SmartObject extends CompositeLayer {
         image = orig.image;
 
         for (SmartFilter origFilter : orig.filters) {
-            SmartFilter copy = (SmartFilter) origFilter.copy(copyType, true, newComp);
+            SmartFilter copy = (SmartFilter) origFilter.copy(copyOptions, newComp);
             copy.setSmartObject(this);
             addSmartFilter(copy, false, false);
         }
@@ -294,11 +294,12 @@ public class SmartObject extends CompositeLayer {
             int numLayers = group.getNumLayers();
             assert numLayers > 0;
             for (int i = 0; i < numLayers; i++) {
-                Layer layerCopy = group.getLayer(i).copy(CopyType.UNDO, true, newContent);
+                Layer layerCopy = group.getLayer(i).copy(CopyOptions.duplicateLayer(true), newContent);
                 newContent.addLayerWithoutUI(layerCopy);
             }
         } else {
-            Layer contentLayer = layer.copy(CopyType.UNDO, false, newContent);
+            CopyOptions options = CopyOptions.duplicateLayer(true).withoutMask();
+            Layer contentLayer = layer.copy(options, newContent);
             contentLayer.setName("original content", false);
             contentLayer.setHolder(newContent);
             newContent.addLayerWithoutUI(contentLayer);
@@ -385,8 +386,8 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    protected SmartObject createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        return new SmartObject(this, copyType, newComp);
+    protected SmartObject createTypeSpecificCopy(CopyOptions options, Composition newComp) {
+        return new SmartObject(this, options, newComp);
     }
 
     @Override
@@ -411,7 +412,7 @@ public class SmartObject extends CompositeLayer {
         if (SmartFilter.copiedSmartFilter != null) {
             popup.add(new TaskAction("Paste " + SmartFilter.copiedSmartFilter.getName(), () -> {
                 // copy again, so it can be pasted multiple times
-                SmartFilter newSF = (SmartFilter) SmartFilter.copiedSmartFilter.copy(CopyType.DUPLICATE_LAYER, true, comp);
+                SmartFilter newSF = (SmartFilter) SmartFilter.copiedSmartFilter.copy(CopyOptions.duplicateLayer(), comp);
                 newSF.setSmartObject(this);
                 addSmartFilter(newSF, true, true);
             }));
@@ -806,8 +807,9 @@ public class SmartObject extends CompositeLayer {
     }
 
     public SmartObject shallowDuplicate() {
-        SmartObject d = new SmartObject(this, CopyType.CLONE_SMART_OBJECT, comp);
-        copyMaskTo(d, CopyType.CLONE_SMART_OBJECT, comp);
+        CopyOptions options = CopyOptions.smartObjectShallowDuplicate();
+        SmartObject d = new SmartObject(this, options, comp);
+        copyMaskTo(d, options, comp);
         return d;
     }
 

@@ -582,7 +582,7 @@ public class MenuBar extends JMenuBar {
             comp -> ResizePanel.showInDialog(comp, resizeText), CTRL_ALT_I);
 
         imageMenu.addViewEnabled(i18n, "duplicate",
-            comp -> addNew(comp.copy(CopyType.DUPLICATE_COMP, true)));
+            comp -> addNew(comp.copy(CopyOptions.duplicateComposition())));
 
         if (Features.enableImageMode) {
             imageMenu.add(createModeSubmenu());

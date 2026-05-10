@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterAction;
@@ -97,8 +97,8 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
-    protected SmartFilter createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        return new SmartFilter(this, newComp, copyType.createLayerCopyName(name));
+    protected SmartFilter createTypeSpecificCopy(CopyOptions options, Composition newComp) {
+        return new SmartFilter(this, newComp, options.createLayerCopyName(name));
     }
 
     @Override
@@ -334,7 +334,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         popup.add(new TaskAction("Delete " + getName(), () ->
             smartObject.deleteSmartFilter(this, true, true)));
         popup.add(new TaskAction("Copy " + getName(), () ->
-            copiedSmartFilter = (SmartFilter) copy(CopyType.UNDO, true, comp)));
+            copiedSmartFilter = (SmartFilter) copy(CopyOptions.fullStateBackup(), comp)));
 
         if (!hasMask()) {
             popup.add(new TaskAction("Add Layer Mask", () -> addMask(false)));

@@ -478,7 +478,7 @@ class ImageLayerTest {
 
     @Test
     void duplicate() {
-        ImageLayer duplicate = (ImageLayer) layer.copy(CopyType.DUPLICATE_LAYER, true, comp);
+        ImageLayer duplicate = (ImageLayer) layer.copy(CopyOptions.duplicateLayer(), comp);
 
         assertThat(duplicate)
             .contentBoundsIsEqualTo(layer.getContentBounds())

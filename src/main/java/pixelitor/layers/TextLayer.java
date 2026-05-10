@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
 import pixelitor.compactions.QuadrantAngle;
@@ -194,8 +194,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    protected TextLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
-        String duplicateName = copyType.createLayerCopyName(name);
+    protected TextLayer createTypeSpecificCopy(CopyOptions options, Composition newComp) {
+        String duplicateName = options.createLayerCopyName(name);
         TextLayer d = new TextLayer(this, newComp, duplicateName);
         d.setTranslation(getTx(), getTy());
         return d;

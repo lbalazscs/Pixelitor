@@ -256,14 +256,14 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     @Override
-    protected ImageLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
+    protected ImageLayer createTypeSpecificCopy(CopyOptions options, Composition newComp) {
         BufferedImage imageCopy = copyImage(image);
         if (imageCopy == null) {
             // there was an out of memory error
             return null;
         }
 
-        String copyName = copyType.createLayerCopyName(name);
+        String copyName = options.createLayerCopyName(name);
         return new ImageLayer(newComp, imageCopy, copyName, getTx(), getTy());
     }
 

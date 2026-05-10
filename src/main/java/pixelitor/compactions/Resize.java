@@ -19,7 +19,7 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
@@ -76,7 +76,7 @@ public class Resize implements CompAction {
         // to update, and to enable the parallel resizing of multiple layers.
         var progressHandler = Messages.startProgress("<html>Resizing <b>" + srcComp.getName() + "</b>", -1);
         return CompletableFuture
-            .supplyAsync(() -> srcComp.copy(CopyType.UNDO, true), onPool)
+            .supplyAsync(() -> srcComp.copy(CopyOptions.fullStateBackup(true, false)), onPool)
             .thenCompose(newComp -> resizeLayersInParallel(newComp, targetSize))
             .thenApplyAsync(newComp -> finishResize(srcComp, newComp, targetSize, progressHandler), onEDT)
             .handle((newComp, ex) -> {

@@ -20,7 +20,7 @@ package pixelitor.layers;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.Features;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
@@ -196,8 +196,8 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Creates a copy of this layer.
      */
-    public final Layer copy(CopyType copyType, boolean copyMask, Composition newComp) {
-        Layer copy = createTypeSpecificCopy(copyType, newComp);
+    public final Layer copy(CopyOptions options, Composition newComp) {
+        Layer copy = createTypeSpecificCopy(options, newComp);
         assert copy.comp == newComp : "layer type = " + getClass().getSimpleName();
 
         copyCommonPropertiesTo(copy);
@@ -206,8 +206,8 @@ public abstract class Layer implements Serializable, Debuggable {
             newComp.setActiveLayerRef(copy);
         }
 
-        if (copyMask) {
-            copyMaskTo(copy, copyType, newComp);
+        if (options.copyMask()) {
+            copyMaskTo(copy, options, newComp);
         }
 
         return copy;
@@ -217,7 +217,7 @@ public abstract class Layer implements Serializable, Debuggable {
      * Creates a copy of the subclass-specific content,
      * without handling the common layer properties or mask.
      */
-    protected abstract Layer createTypeSpecificCopy(CopyType copyType, Composition newComp);
+    protected abstract Layer createTypeSpecificCopy(CopyOptions options, Composition newComp);
 
     /**
      * Copies common layer properties to the target layer.
@@ -231,10 +231,10 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Copies the mask of this layer to the target layer.
      */
-    protected void copyMaskTo(Layer target, CopyType copyType, Composition newComp) {
+    protected void copyMaskTo(Layer target, CopyOptions options, Composition newComp) {
         if (hasMask()) {
             LayerMask newMask = mask.duplicate(target, newComp);
-            if (copyType == CopyType.UNDO) {
+            if (options.skipUIUpdates()) {
                 // this could be running outside the EDT, and direct assignment is fine
                 // as no UI interaction or history is needed for UNDO mask restoration
                 target.mask = newMask;

@@ -19,7 +19,7 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.CopyType;
+import pixelitor.CopyOptions;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.guides.Guides;
@@ -66,7 +66,7 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         }
 
         View view = srcComp.getView();
-        Composition newComp = srcComp.copy(CopyType.UNDO, true);
+        Composition newComp = srcComp.copy(CopyOptions.fullStateBackup(true, false));
         Canvas newCanvas = newComp.getCanvas();
         Canvas srcCanvas = srcComp.getCanvas();
 

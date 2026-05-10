@@ -66,14 +66,12 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
-import static pixelitor.utils.Utils.createCopyName;
 import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
 
 /**
@@ -246,7 +244,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * In the case of undo, the view will be transferred later.
      * (Two comps should never point to the same view).
      */
-    public Composition copy(CopyType copyType, boolean copySelection) {
+    public Composition copy(CopyOptions options) {
         assert checkInvariants();
         var compCopy = new Composition(canvas.copy(), mode, dpi);
 
@@ -254,7 +252,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         for (Layer layer : layerList) {
             // Layer.copy handles recursion, and also sets the
             // active layer of the copied composition
-            var layerCopy = layer.copy(copyType, true, compCopy);
+            var layerCopy = layer.copy(options, compCopy);
 
             // fully setup only the top-level stuff here
             layerCopy.setHolder(compCopy);
@@ -267,38 +265,32 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         compCopy.newLayerCount = newLayerCount;
         compCopy.mode = mode;
 
-        if (copySelection && selection != null) {
+        if (options.copySelection() && selection != null) {
             compCopy.setSelection(new Selection(selection));
+        }
+        if (options.copyGuides() && guides != null) {
+            compCopy.guides = guides.copyIdentical(view);
         }
         if (paths != null) {
             compCopy.paths = paths.deepCopy(compCopy);
         }
 
-        if (copyType == CopyType.UNDO) {
+        if (options.preserveFileState()) {
             compCopy.dirty = dirty;
             compCopy.file = file;
             compCopy.fileTimestamp = fileTimestamp;
-            compCopy.name = name;
-            // the new guides are set in the action that needed undo
         } else {
             compCopy.dirty = false;
             compCopy.file = null;
             compCopy.fileTimestamp = 0;
-            compCopy.name = createCopyName(stripExtension(name));
-            if (guides != null) {
-                compCopy.guides = guides.copyIdentical(view);
-            }
         }
+
+        compCopy.name = options.createCompCopyName(name);
+
         compCopy.createDebugName();
 
         assert checkInvariants();
         assert compCopy.checkInvariants();
-
-        // if it's an undo, then the active layer names must match
-        assert copyType != CopyType.UNDO || compCopy.activeLayer.getName().equals(activeLayer.getName())
-            : "copyType = " + copyType
-            + ", compCopy.activeLayer.getName() = " + compCopy.activeLayer.getName()
-            + ", activeLayer.getName() = " + activeLayer.getName();
 
         return compCopy;
     }
@@ -705,7 +697,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Duplicates the currently active layer and adds it above the original.
      */
     public void duplicateActiveLayer() {
-        Layer duplicate = activeLayer.copy(CopyType.DUPLICATE_LAYER, true, this);
+        Layer duplicate = activeLayer.copy(CopyOptions.duplicateLayer(), this);
         if (duplicate == null) {
             // there was an out of memory error
             return;
@@ -2055,7 +2047,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         content.setName("visible");
 
         // create a copy of the current composition to become the new main one
-        Composition newMainComp = copy(CopyType.UNDO, true);
+        Composition newMainComp = copy(CopyOptions.fullStateBackup());
 
         // move visible layers from the copy to the content composition
         List<Layer> visibleLayers = newMainComp.layerList.stream()
