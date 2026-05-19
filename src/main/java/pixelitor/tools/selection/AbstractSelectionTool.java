@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.Invariants;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.selection.*;
 import pixelitor.tools.DragTool;
@@ -53,8 +54,8 @@ public abstract class AbstractSelectionTool extends DragTool {
     // manages the building of the current selection shape
     protected SelectionBuilder selectionBuilder;
 
-    protected AbstractSelectionTool(String name, char hotKey, String statusBarMessage, Cursor cursor, boolean shiftConstrains) {
-        super(name, hotKey,
+    protected AbstractSelectionTool(String name, char hotkey, String statusBarMessage, Cursor cursor, boolean shiftConstrains) {
+        super(name, hotkey,
             statusBarMessage + " <b>Shift</b> adds, <b>Alt</b> subtracts, <b>Shift+Alt</b> intersects.",
             cursor, shiftConstrains);
     }
@@ -93,7 +94,9 @@ public abstract class AbstractSelectionTool extends DragTool {
      */
     protected void setupCombinatorWithKeyModifiers(PMouseEvent e) {
         boolean shiftDown = e.isShiftDown();
-        altDown = e.isAltDown();
+        boolean altDown = e.isAltDown();
+        assert altDown == GlobalEvents.isAltDown() || AppMode.isUnitTesting()
+            : "altDown = " + altDown + ", GlobalEvents.isAltDown() = " + GlobalEvents.isAltDown();
 
         // alt always means subtract if pressed before the start of the drag
         isAltSubtracting = altDown;
@@ -113,6 +116,7 @@ public abstract class AbstractSelectionTool extends DragTool {
 
     @Override
     public void escPressed() {
+        super.escPressed();
         Views.onActiveComp(this::cancelSelection);
     }
 

@@ -251,6 +251,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
     @Override
     protected void toolActivated(View view) {
         super.toolActivated(view);
+
         if (freeTransformCheckBox.isSelected()) {
             createTransformBox();
             if (!isFreeTransforming()) {
@@ -300,8 +301,8 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
     }
 
     @Override
-    public void editingTargetChanged(Layer activeLayer) {
-        if (activeMode.movesLayer()) {
+    public void editingTargetChanged(Layer activeLayer, boolean toolActivation) {
+        if (!toolActivation && activeMode.movesLayer()) {
             // switching to another layer implicitly cancels the transform
             cancelTransform(true);
         }

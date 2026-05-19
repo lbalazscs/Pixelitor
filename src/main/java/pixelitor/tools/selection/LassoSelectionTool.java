@@ -17,6 +17,8 @@
 
 package pixelitor.tools.selection;
 
+import pixelitor.AppMode;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.ToolIcons;
 import pixelitor.tools.util.OverlayType;
@@ -41,9 +43,6 @@ public class LassoSelectionTool extends AbstractSelectionTool {
     @Override
     protected void dragStarted(PMouseEvent e) {
         initCombinatorAndBuilder(e, SelectionType.LASSO);
-
-        // TODO add the starting point immediately?
-        // selectionBuilder.updateDraftSelection(drag, e.getComp(), e);
     }
 
     @Override
@@ -53,7 +52,10 @@ public class LassoSelectionTool extends AbstractSelectionTool {
             dragStarted(e);
         }
 
-        altDown = e.isAltDown();
+        boolean altDown = e.isAltDown();
+        assert altDown == GlobalEvents.isAltDown() || AppMode.isUnitTesting()
+            : "altDown = " + altDown + ", GlobalEvents.isAltDown() = " + GlobalEvents.isAltDown();
+
         // if Alt is released mid-drag, it no longer means subtract for this drag
         if (!altDown) {
             isAltSubtracting = false;

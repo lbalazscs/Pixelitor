@@ -256,7 +256,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         LayerEvents.fireActiveCompChanged(newComp, reloaded);
 
-        // TODO is this needed?
         setMaskViewMode(newMaskViewMode, newComp.getActiveLayer());
 
         repaintNavigator(true);
@@ -281,37 +280,37 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Tools.EventDispatcher.mouseClicked(e, this);
+        Tools.MouseDispatcher.mouseClicked(e, this);
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        Tools.EventDispatcher.mouseEntered(e, this);
+        Tools.MouseDispatcher.mouseEntered(e, this);
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        Tools.EventDispatcher.mouseExited(e, this);
+        Tools.MouseDispatcher.mouseExited(e, this);
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        Tools.EventDispatcher.mousePressed(e, this);
+        Tools.MouseDispatcher.mousePressed(e, this);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        Tools.EventDispatcher.mouseReleased(e, this);
+        Tools.MouseDispatcher.mouseReleased(e, this);
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        Tools.EventDispatcher.mouseDragged(e, this);
+        Tools.MouseDispatcher.mouseDragged(e, this);
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        Tools.EventDispatcher.mouseMoved(e, this);
+        Tools.MouseDispatcher.mouseMoved(e, this);
     }
 
     public void setViewContainer(ViewContainer container) {

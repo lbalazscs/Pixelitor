@@ -298,7 +298,7 @@ public class Colors {
         Window window = SwingUtilities.windowForComponent(parent);
 
         popup.add(new TaskAction("Color Variations...", () ->
-            PalettePanel.showFilterVariationsDialog(window, colorSource.get(), clickHandler)));
+            PalettePanel.showFilterVariationsDialog(colorSource.get(), clickHandler)));
         popup.add(new TaskAction("Color History...", () ->
             ColorHistory.INSTANCE.showDialog(window, clickHandler, true)));
 

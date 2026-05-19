@@ -152,7 +152,7 @@ public class RandomGUITest {
 
         pastedImagesCount = 0;
 
-        registerHotKeys();
+        registerHotkeys();
 
         System.out.printf("RandomGUITest started at %s, the '%s' key stops, the '%s' key exits.%n",
             timestampFormatter.format(LocalDateTime.now()), PAUSE_KEY_CHAR, EXIT_KEY_CHAR);
@@ -182,7 +182,7 @@ public class RandomGUITest {
         return robot;
     }
 
-    private void registerHotKeys() {
+    private void registerHotkeys() {
         // make sure it can be stopped by pressing a key
         GlobalEvents.registerHotkey(PAUSE_KEY_CHAR, new TaskAction(() -> {
                 System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
@@ -367,7 +367,7 @@ public class RandomGUITest {
     }
 
     private static boolean canUseTool(Tool tool) {
-        if (tool.allowsOnlyDrawables()) {
+        if (tool.requiresDrawables()) {
             return (Views.getActiveLayer() instanceof Drawable);
         }
         return true;

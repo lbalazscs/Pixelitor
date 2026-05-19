@@ -434,13 +434,12 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void altPressed() {
-        if (!altDown && state == INITIAL_DRAG && drag.isDragging() && !drag.isClick()) {
+        if (state == INITIAL_DRAG && drag.isDragging() && !drag.isClick()) {
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, true, false);
 
             Views.getActiveLayer().update();
         }
-        altDown = true;
     }
 
     @Override
@@ -453,7 +452,6 @@ public class ShapesTool extends DragTool {
 
             Views.getActiveLayer().update();
         }
-        altDown = false;
     }
 
     @Override
@@ -650,7 +648,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void editingTargetChanged(Layer activeLayer) {
+    public void editingTargetChanged(Layer activeLayer, boolean toolActivation) {
         layerActivated(activeLayer);
     }
 
@@ -805,7 +803,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public boolean allowsOnlyDrawables() {
+    public boolean requiresDrawables() {
         return true;
     }
 
@@ -831,15 +829,6 @@ public class ShapesTool extends DragTool {
 
     private boolean isEditingShapesLayer() {
         return shapesLayer != null;
-    }
-
-    @Override
-    protected void toolActivated(View view) {
-        super.toolActivated(view);
-
-        if (view != null) {
-            layerActivated(view.getComp().getActiveLayer());
-        }
     }
 
     @Override

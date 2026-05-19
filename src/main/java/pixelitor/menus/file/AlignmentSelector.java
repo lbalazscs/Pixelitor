@@ -90,7 +90,7 @@ public class AlignmentSelector extends JPanel {
     private void fireActionPerformed(ActionEvent e) {
         for (ActionListener listener : listeners) {
             // forward the event with this as the source
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, e.getActionCommand()));
         }
     }
 

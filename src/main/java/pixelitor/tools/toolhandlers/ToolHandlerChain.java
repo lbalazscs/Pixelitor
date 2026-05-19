@@ -46,7 +46,7 @@ public class ToolHandlerChain {
             lastHandler = appendNext(handToolHandler);
         }
 
-        if (tool.allowsOnlyDrawables()) {
+        if (tool.requiresDrawables()) {
             // ensures proper layer type for the tool
             lastHandler = appendNext(new DrawableCheckHandler(tool));
         }

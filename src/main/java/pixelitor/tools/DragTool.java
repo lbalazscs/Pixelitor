@@ -18,7 +18,9 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
+import pixelitor.Views;
 import pixelitor.gui.GlobalEvents;
+import pixelitor.gui.View;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
@@ -45,7 +47,7 @@ public abstract class DragTool extends Tool {
     protected boolean repositionOnSpace = false;
 
     // whether movement is constrained to multiples
-    // of 45 degree angles when Shift is pressed
+    // of 45-degree angles when Shift is pressed
     private final boolean shiftConstrains;
 
     protected DragTool(String name, char hotkey, String statusBarMessage,
@@ -124,6 +126,20 @@ public abstract class DragTool extends Tool {
      * Called when a drag is finished.
      */
     protected abstract void dragFinished(PMouseEvent e);
+
+    @Override
+    public void escPressed() {
+        if (drag != null && drag.isDragging()) {
+            drag.cancel();
+
+            // wipe the measurement overlay visually
+            View view = Views.getActive();
+            if (view != null) {
+                view.repaint();
+            }
+        }
+        super.escPressed();
+    }
 
     @Override
     public void paintOverCanvas(Graphics2D g2, Composition comp) {

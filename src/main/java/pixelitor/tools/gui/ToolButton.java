@@ -30,6 +30,7 @@ import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 
 /**
@@ -37,6 +38,9 @@ import java.awt.event.ItemEvent;
  */
 public class ToolButton extends JToggleButton {
     public static final int ICON_SIZE = 28;
+    public static final int SIZE = ICON_SIZE + 14;
+    private static final Dimension SIZE_DIM = new Dimension(SIZE, SIZE);
+
     public static Color darkThemeActiveIconColor = Themes.DEFAULT_ACCENT_COLOR.asColor();
 
     private final Tool tool;
@@ -67,7 +71,7 @@ public class ToolButton extends JToggleButton {
         });
 
         if (tool.shouldHaveUserPresetsMenu()) {
-            initPresetsPopup(tool);
+            initPresetsPopup();
         }
     }
 
@@ -91,10 +95,10 @@ public class ToolButton extends JToggleButton {
     }
 
     /**
-     * Creates a right-click popup menu that can be used to save, load,
-     * and manage configuration presets for the tool represented by this button.
+     * Creates a right-click popup menu that can be used to save,
+     * load, and manage configuration presets for this tool.
      */
-    private void initPresetsPopup(Tool tool) {
+    private void initPresetsPopup() {
         presetsMenu = new JPopupMenu();
 
         // the popup menu is populated only when it is about to become visible
@@ -139,5 +143,20 @@ public class ToolButton extends JToggleButton {
 
     public static void setDarkThemeActiveIconColor(Color darkThemeActiveIconColor) {
         ToolButton.darkThemeActiveIconColor = darkThemeActiveIconColor;
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return SIZE_DIM;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return SIZE_DIM;
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return SIZE_DIM;
     }
 }

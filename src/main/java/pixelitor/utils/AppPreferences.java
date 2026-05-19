@@ -136,15 +136,17 @@ public final class AppPreferences {
     private AppPreferences() {
     }
 
-    public static void loadFramePreferences(PixelitorWindow pw, Dimension screen) {
+    public static void loadFramePreferences(PixelitorWindow pw) {
+        Dimension screenSize = Screens.getMaxWindowSize();
+
         int x = mainPrefs.getInt(FRAME_X_KEY, 0);
         int y = mainPrefs.getInt(FRAME_Y_KEY, 0);
         int width = mainPrefs.getInt(FRAME_WIDTH_KEY, 0);
         int height = mainPrefs.getInt(FRAME_HEIGHT_KEY, 0);
 
         if (width <= 0 || height <= 0) {
-            width = screen.width;
-            height = screen.height;
+            width = screenSize.width;
+            height = screenSize.height;
         }
 
         if (!Screens.isMultiMonitorSetup()) {
@@ -156,14 +158,14 @@ public final class AppPreferences {
                 y = 0;
             }
 
-            // if there are multiple monitors, then screen refers to the
+            // if there are multiple monitors, then screenSize refers to the
             // primary monitor while the actual coordinates could be
             // for the secondary one
-            if (width > screen.width) {
-                width = screen.width;
+            if (width > screenSize.width) {
+                width = screenSize.width;
             }
-            if (height > screen.height) {
-                height = screen.height;
+            if (height > screenSize.height) {
+                height = screenSize.height;
             }
         }
 

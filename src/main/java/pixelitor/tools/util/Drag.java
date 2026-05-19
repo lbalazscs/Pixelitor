@@ -383,6 +383,7 @@ public class Drag implements Serializable, Debuggable {
 
     public void cancel() {
         canceled = true;
+        dragging = false; // to stop drag overlays
     }
 
     public void mouseReleased() {
@@ -482,53 +483,20 @@ public class Drag implements Serializable, Debuggable {
      * Creates a Rectangle where the width and height are >= 0, regardless of the drawing direction.
      */
     public Rectangle2D createPositiveImRect() {
-        double x;
-        double y;
-        double width;
-        double height;
+        double x, y, width, height;
 
         if (expandFromCenter) {
-            double halfWidth;  // positive or zero
-            if (imEndX > imStartX) {
-                halfWidth = imEndX - imStartX;
-                x = imStartX - halfWidth;
-            } else {
-                halfWidth = imStartX - imEndX;
-                x = imEndX;
-            }
-
-            double halfHeight; // positive or zero
-            if (imEndY > imStartY) {
-                halfHeight = imEndY - imStartY;
-                y = imStartY - halfHeight;
-            } else {
-                halfHeight = imStartY - imEndY;
-                y = imEndY;
-            }
-
+            double halfWidth = Math.abs(imEndX - imStartX);
+            double halfHeight = Math.abs(imEndY - imStartY);
+            x = imStartX - halfWidth;
+            y = imStartY - halfHeight;
             width = 2 * halfWidth;
             height = 2 * halfHeight;
         } else {
-            double tmpEndX;
-            if (imEndX > imStartX) {
-                x = imStartX;
-                tmpEndX = imEndX;
-            } else {
-                x = imEndX;
-                tmpEndX = imStartX;
-            }
-
-            double tmpEndY;
-            if (imEndY > imStartY) {
-                y = imStartY;
-                tmpEndY = imEndY;
-            } else {
-                y = imEndY;
-                tmpEndY = imStartY;
-            }
-
-            width = tmpEndX - x;
-            height = tmpEndY - y;
+            x = Math.min(imStartX, imEndX);
+            y = Math.min(imStartY, imEndY);
+            width = Math.abs(imEndX - imStartX);
+            height = Math.abs(imEndY - imStartY);
         }
         return new Rectangle2D.Double(x, y, width, height);
     }
@@ -554,11 +522,11 @@ public class Drag implements Serializable, Debuggable {
         return length;
     }
 
-    public double taxicabDistTo(int x, int y) {
+    public double taxicabDistTo(double x, double y) {
         return Math.abs(x - imStartX) + Math.abs(y - imStartY);
     }
 
-    public double calcStartDistanceFrom(double x, double y) {
+    public double calcDistFromStart(double x, double y) {
         double dx = imStartX - x;
         double dy = imStartY - y;
         return Math.sqrt(dx * dx + dy * dy);
@@ -578,7 +546,7 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public double calcDrawAngle() {
-        return Math.atan2(imEndX - imStartX, imEndY - imStartY); //  between -PI and PI
+        return Math.atan2(imEndX - imStartX, imEndY - imStartY); // between -PI and PI
     }
 
     public double calcAngleFromStartTo(double x, double y) {
@@ -684,7 +652,7 @@ public class Drag implements Serializable, Debuggable {
         int dragLength = (int) calcImLength();
         String distInfo = "d = " + dragLength + " px";
 
-        MeasurementOverlay overlay = new MeasurementOverlay(g, MeasurementOverlay.BG_WIDTH_PIXELS);
+        MeasurementOverlay overlay = new MeasurementOverlay(g, MeasurementOverlay.BG_WIDTH_ANGLES);
         overlay.drawTwoLines(angleInfo, distInfo, calcAngleDistOverlayPosition());
         overlay.cleanup();
     }

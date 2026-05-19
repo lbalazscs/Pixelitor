@@ -50,7 +50,6 @@ public class FgBgColorSelector extends JLayeredPane {
     public static final String DEFAULTS_BUTTON_NAME = "resetColorsButton";
     public static final String SWAP_BUTTON_NAME = "swapColorsButton";
 
-    private final PixelitorWindow pw;
     private JButton fgButton;
     private JButton bgButton;
     private final ColorIcon fgColorIcon;
@@ -76,8 +75,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private Action resetToDefaultAction;
     private Action swapColorsAction;
 
-    public FgBgColorSelector(PixelitorWindow pw) {
-        this.pw = pw;
+    public FgBgColorSelector() {
         setLayout(null);
 
         Color initialFg = AppPreferences.loadFgColor();
@@ -130,22 +128,22 @@ public class FgBgColorSelector extends JLayeredPane {
         String mixName = fg ? "Background" : "Foreground";
 
         popup.add(new TaskAction(activeName + " Color Variations...", () ->
-            PalettePanel.showVariationsDialog(pw, fg)));
+            PalettePanel.showVariationsDialog(fg)));
 
         popup.add(new TaskAction("HSB Mix with " + mixName + "...", () ->
-            PalettePanel.showHSBMixDialog(pw, fg)));
+            PalettePanel.showHSBMixDialog(fg)));
 
         popup.add(new TaskAction("RGB Mix with " + mixName + "...", () ->
-            PalettePanel.showRGBMixDialog(pw, fg)));
+            PalettePanel.showRGBMixDialog(fg)));
 
         popup.add(new TaskAction("Color History...", () ->
-            ColorHistory.INSTANCE.showDialog(pw, ColorSwatchClickHandler.STANDARD, false)));
+            ColorHistory.INSTANCE.showDialog(PixelitorWindow.get(), ColorSwatchClickHandler.STANDARD, false)));
 
         popup.addSeparator();
 
         popup.add(Colors.createCopyColorAction(() -> fg ? getFgColor() : getBgColor()));
 
-        popup.add(Colors.createPasteColorAction(pw, color -> {
+        popup.add(Colors.createPasteColorAction(PixelitorWindow.get(), color -> {
             if (fg) {
                 setFgColor(color, true);
             } else {
@@ -184,7 +182,7 @@ public class FgBgColorSelector extends JLayeredPane {
         Color newFgColor = getBgColor();
         Color newBgColor = getFgColor();
 
-        // no history and notify the listeners only once
+        // skip color history and notify the listeners only once
         setFgColor(newFgColor, false, false);
         setBgColor(newBgColor, true, false);
     }
@@ -222,7 +220,7 @@ public class FgBgColorSelector extends JLayeredPane {
         String title = fg ? GUIText.FG_COLOR : GUIText.BG_COLOR;
         Consumer<Color> onColorChange = color -> setColor(color, fg, true, true);
 
-        selectColorWithDialog(pw, title,
+        selectColorWithDialog(PixelitorWindow.get(), title,
             currentColor, false, onColorChange);
     }
 

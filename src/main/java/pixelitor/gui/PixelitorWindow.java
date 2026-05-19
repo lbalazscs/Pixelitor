@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Pixelitor;
 import pixelitor.Views;
-import pixelitor.gui.utils.Screens;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
 import pixelitor.menus.help.AboutDialog;
@@ -72,14 +71,13 @@ public class PixelitorWindow extends JFrame {
 
         workSpace = new WorkSpace();
 
-        Dimension screenSize = Screens.getMaxWindowSize();
-        AppPreferences.loadFramePreferences(this, screenSize);
+        AppPreferences.loadFramePreferences(this);
 
         addMenuBar();
         addImageArea();
         addSidePanel();
         addStatusBar();
-        addToolsPanel(screenSize);
+        addToolsPanel();
         Tools.setDefaultTool();
 
         initIcons();
@@ -165,8 +163,8 @@ public class PixelitorWindow extends JFrame {
         add(sidePanel, EAST);
     }
 
-    private void addToolsPanel(Dimension screenSize) {
-        toolsPanel = new ToolsPanel(this, screenSize);
+    private void addToolsPanel() {
+        toolsPanel = new ToolsPanel();
 
         if (workSpace.areToolsVisible()) {
             add(ToolSettingsPanelContainer.get(), NORTH);

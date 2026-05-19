@@ -403,7 +403,7 @@ public class DraggablePoint extends Point2D.Double {
             activePoint = this;
             lastActive = this;
         } else {
-            activePoint = null;
+            clearActivePoint();
         }
     }
 
@@ -500,6 +500,10 @@ public class DraggablePoint extends Point2D.Double {
 
     public boolean shouldSnap() {
         return true;
+    }
+
+    public static void clearActivePoint() {
+        activePoint = null;
     }
 
     @Override

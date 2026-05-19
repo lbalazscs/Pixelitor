@@ -17,6 +17,8 @@
 
 package pixelitor.tools.selection;
 
+import pixelitor.AppMode;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.ToolIcons;
 import pixelitor.tools.util.PMouseEvent;
@@ -53,7 +55,9 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
         }
 
         // update alt state if Alt was pressed mid-drag
-        altDown = e.isAltDown();
+        boolean altDown = e.isAltDown();
+        assert altDown == GlobalEvents.isAltDown() || AppMode.isUnitTesting()
+            : "altDown = " + altDown + ", GlobalEvents.isAltDown() = " + GlobalEvents.isAltDown();
 
         // determine if Alt means "expand from center"
         // this is true if Alt is down, but wasn't pressed *at the start* for subtraction
@@ -78,11 +82,12 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     public void altPressed() {
         // handle pressing Alt *during* a drag: if Alt wasn't already
         // down and wasn't for subtraction, enable expand-from-center
-        if (!altDown && !isAltSubtracting && drag != null && drag.isDragging()) {
+        if (!isAltSubtracting && drag != null && drag.isDragging()) {
             drag.setExpandFromCenter(true);
-            selectionBuilder.updateDraftSelection(drag);
+            if (selectionBuilder != null) {
+                selectionBuilder.updateDraftSelection(drag);
+            }
         }
-        altDown = true;
     }
 
     @Override
@@ -91,9 +96,10 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
         // for subtraction, disable expand-from-center
         if (!isAltSubtracting && drag != null && drag.isDragging()) {
             drag.setExpandFromCenter(false);
-            selectionBuilder.updateDraftSelection(drag);
+            if (selectionBuilder != null) {
+                selectionBuilder.updateDraftSelection(drag);
+            }
         }
-        altDown = false;
     }
 
     @Override

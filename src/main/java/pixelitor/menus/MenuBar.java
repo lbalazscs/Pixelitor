@@ -1067,12 +1067,12 @@ public class MenuBar extends JMenuBar {
         // color palette
         String colorPaletteText = i18n.getString("color_palette");
         viewMenu.add(new TaskAction(colorPaletteText + "...", () ->
-            PalettePanel.showDialog(pw, new FullPalette(colorPaletteText),
+            PalettePanel.showDialog(new FullPalette(colorPaletteText),
                 ColorSwatchClickHandler.STANDARD)));
 
         // static palette (TODO unfinished feature)
         viewMenu.add(new TaskAction("Static Palette...", () ->
-            PalettePanel.showStaticPaletteDialog(pw, "Static Palette")));
+            PalettePanel.showStaticPaletteDialog("Static Palette")));
 
         viewMenu.addSeparator();
 
@@ -1122,24 +1122,24 @@ public class MenuBar extends JMenuBar {
     private JMenu createColorVariationsSubmenu() {
         PMenu variations = new PMenu("Color Variations");
         variations.add(new TaskAction("Foreground...", () ->
-            PalettePanel.showVariationsDialog(pw, true)));
+            PalettePanel.showVariationsDialog(true)));
         variations.add(new TaskAction(
             "HSB Mix Foreground with Background...", () ->
-            PalettePanel.showHSBMixDialog(pw, true)));
+            PalettePanel.showHSBMixDialog(true)));
         variations.add(new TaskAction(
             "RGB Mix Foreground with Background...", () ->
-            PalettePanel.showRGBMixDialog(pw, true)));
+            PalettePanel.showRGBMixDialog(true)));
 
         variations.addSeparator();
 
         variations.add(new TaskAction("Background...", () ->
-            PalettePanel.showVariationsDialog(pw, false)));
+            PalettePanel.showVariationsDialog(false)));
         variations.add(new TaskAction(
             "HSB Mix Background with Foreground...", () ->
-            PalettePanel.showHSBMixDialog(pw, false)));
+            PalettePanel.showHSBMixDialog(false)));
         variations.add(new TaskAction(
             "RGB Mix Background with Foreground...", () ->
-            PalettePanel.showRGBMixDialog(pw, false)));
+            PalettePanel.showRGBMixDialog(false)));
         return variations;
     }
 

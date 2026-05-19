@@ -676,7 +676,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public boolean allowsOnlyDrawables() {
+    public boolean requiresDrawables() {
         return true; // brush tools operate on drawable layers or on masks
     }
 

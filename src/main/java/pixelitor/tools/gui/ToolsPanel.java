@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,6 @@ package pixelitor.tools.gui;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.GlobalEvents;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.StatusBar;
-import pixelitor.gui.WorkSpace;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.tools.Tool;
@@ -30,7 +27,7 @@ import pixelitor.tools.Tools;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,45 +38,18 @@ import java.util.Set;
  * The panel with the tool buttons and the color selector
  */
 public class ToolsPanel extends JPanel {
-    public ToolsPanel(PixelitorWindow pw, Dimension screenSize) {
-        Dimension buttonSize = calcToolButtonSize(screenSize, pw);
-
-        JComponent colorSelector = createColorSelector(pw);
-        int heightHint = calcHeightHint(pw, colorSelector, buttonSize);
-
-        JPanel buttonsPanel = new JPanel(new ToolButtonsLayout(buttonSize.width, buttonSize.height, 0, heightHint));
-        addToolButtons(buttonsPanel);
-
+    public ToolsPanel() {
         setLayout(new BorderLayout());
-        add(buttonsPanel, BorderLayout.CENTER);
-        add(colorSelector, BorderLayout.SOUTH);
 
-        setupTShortCut();
+        add(createButtonsPanel(), BorderLayout.NORTH);
+        add(createColorSelector(), BorderLayout.SOUTH);
+
+        setupTHotkey();
     }
 
-    private static int calcHeightHint(PixelitorWindow pw, JComponent colorSelector, Dimension buttonSize) {
-        // get the preferred heights of all other components that take up vertical space.
-        int menuBarHeight = pw.getJMenuBar().getPreferredSize().height;
-        WorkSpace workSpace = pw.getWorkSpace();
-        int toolSettingsHeight = workSpace.areToolsVisible() ? ToolSettingsPanelContainer.get().getPreferredSize().height : 0;
-        int statusBarHeight = workSpace.isStatusBarVisible() ? StatusBar.get().getPreferredSize().height : 0;
-        int colorSelectorHeight = colorSelector.getPreferredSize().height;
-
-        // the window's insets include the title bar
-        int windowInsetsHeight = pw.getInsets().top + pw.getInsets().bottom;
-
-        // sum of all vertical space NOT available to the buttons panel
-        int totalOtherHeight = menuBarHeight + toolSettingsHeight + statusBarHeight + colorSelectorHeight + windowInsetsHeight;
-
-        // the total window height minus all other components
-        int heightHint = pw.getHeight() - totalOtherHeight;
-
-        // ensure the hint is a positive value
-        heightHint = Math.max(heightHint, buttonSize.height);
-        return heightHint;
-    }
-
-    private static void addToolButtons(JPanel buttonContainer) {
+    private static JPanel createButtonsPanel() {
+        int numCols = 2;
+        JPanel buttonsPanel = new JPanel(new GridLayout(0, numCols));
         ButtonGroup group = new ButtonGroup();
 
         List<Tool[]> sharedHotkeyGroups = Tools.getSharedHotkeyGroups();
@@ -92,48 +62,29 @@ public class ToolsPanel extends JPanel {
             Collections.addAll(toolsWithSharedHotkeys, toolGroup);
         }
 
-        for (Tool tool : Tools.getAll()) {
+        Tool[] tools = Tools.getAll();
+        for (Tool tool : tools) {
             ToolButton toolButton = new ToolButton(tool);
-            buttonContainer.add(toolButton);
+            buttonsPanel.add(toolButton);
             group.add(toolButton);
 
             if (!toolsWithSharedHotkeys.contains(tool)) {
                 setupHotkey(tool);
             }
         }
+        return buttonsPanel;
     }
 
-    private static JComponent createColorSelector(PixelitorWindow pw) {
-        FgBgColorSelector colorSelector = new FgBgColorSelector(pw);
+    private static JComponent createColorSelector() {
+        FgBgColorSelector colorSelector = new FgBgColorSelector();
         FgBgColors.setUI(colorSelector);
         return colorSelector;
     }
 
-    private static void setupTShortCut() {
+    private static void setupTHotkey() {
         // There is no text tool, but pressing T should add a text layer.
         // In the menu it was added using T, not t.
         GlobalEvents.registerHotkey('T', AddTextLayerAction.INSTANCE);
-    }
-
-    private static Dimension calcToolButtonSize(Dimension screen, PixelitorWindow pw) {
-        int effectiveScreenHeight = (int) (screen.height / pw.getHiDPIScaling().getScaleY());
-
-        int heightAdjustment;
-        if (effectiveScreenHeight < 700) {
-            // 720 is the lowest supported height.
-            // The taskbar is already subtracted from the screen size.
-            heightAdjustment = 8;
-        } else if (effectiveScreenHeight < 770) {
-            // Laptops with the height of 768 px are also common.
-            heightAdjustment = 10;
-        } else {
-            // in the ideal case the button can be square
-            heightAdjustment = 14;
-        }
-
-        return new Dimension(
-            ToolButton.ICON_SIZE + 14,
-            ToolButton.ICON_SIZE + heightAdjustment);
     }
 
     private static void setupHotkey(Tool tool) {
@@ -146,26 +97,26 @@ public class ToolsPanel extends JPanel {
         GlobalEvents.registerHotkey(tool.getHotkey(), activateToolAction);
     }
 
-    private static void setupSharedHotkey(Tool... sharingTools) {
+    private static void setupSharedHotkey(Tool... toolGroup) {
         Action cycleToolsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int activeIndex = -1;
-                for (int i = 0; i < sharingTools.length; i++) {
-                    if (sharingTools[i].isActive()) {
+                for (int i = 0; i < toolGroup.length; i++) {
+                    if (toolGroup[i].isActive()) {
                         activeIndex = i;
                         break;
                     }
                 }
 
                 // activate the next tool, or the first tool if
-                // none of the sharing tools were active
-                int nextIndex = (activeIndex + 1) % sharingTools.length;
-                sharingTools[nextIndex].activate();
+                // none of the tools in the group were active
+                int nextIndex = (activeIndex + 1) % toolGroup.length;
+                toolGroup[nextIndex].activate();
             }
         };
         // all tools in a group are expected to have the same hotkey
-        char key = sharingTools[0].getHotkey();
+        char key = toolGroup[0].getHotkey();
         GlobalEvents.registerHotkey(key, cycleToolsAction);
     }
 }

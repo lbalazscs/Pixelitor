@@ -69,7 +69,10 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         }
 
         backupCompRef = new SoftReference<>(oldComp);
+
+        // saving this is needed for example when reloading a composition
         oldMaskViewMode = view.getMaskViewMode();
+
         this.view = view;
         this.canvasTransform = canvasTransform;
 

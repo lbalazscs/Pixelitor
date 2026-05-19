@@ -941,7 +941,7 @@ public class AppRunner {
             dialog.releaseKey(VK_T).releaseKey(VK_CONTROL);
         }
 
-        GlobalEvents.assertDialogNestingIs(1);
+        GlobalEvents.assertModalDialogNestingIs(1);
 
         customizer.accept(dialog);
 

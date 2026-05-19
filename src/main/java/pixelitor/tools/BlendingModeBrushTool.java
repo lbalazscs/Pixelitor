@@ -39,9 +39,9 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     // tracks if this tool is currently editing a layer mask
     private boolean maskEditing;
 
-    protected BlendingModeBrushTool(String name, char hotKey, String statusBarMessage,
+    protected BlendingModeBrushTool(String name, char hotkey, String statusBarMessage,
                                     Cursor cursor, boolean addSymmetry) {
-        super(name, hotKey, statusBarMessage, cursor, addSymmetry);
+        super(name, hotkey, statusBarMessage, cursor, addSymmetry);
         drawTarget = DrawTarget.DIRECT;
         maskEditing = false;
 

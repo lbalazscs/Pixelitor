@@ -95,7 +95,7 @@ public final class TestContext {
     }
 
     private void checkConsistency(int expectedDialogNesting) {
-        GlobalEvents.assertDialogNestingIs(expectedDialogNesting);
+        GlobalEvents.assertModalDialogNestingIs(expectedDialogNesting);
 
         Layer layer = EDT.getActiveLayer();
         if (layer == null) { // no open image

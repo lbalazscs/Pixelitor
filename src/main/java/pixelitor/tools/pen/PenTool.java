@@ -193,7 +193,7 @@ public class PenTool extends PathTool {
             return;
         }
 
-        boolean mouseDown = Tools.EventDispatcher.isMouseDown();
+        boolean mouseDown = Tools.MouseDispatcher.isMouseDown();
         if (mouseDown) {
             setBuildState(DRAGGING_LAST_CONTROL);
         } else {
@@ -536,7 +536,7 @@ public class PenTool extends PathTool {
             if (handle != null) {
                 handle.setActive(true);
             } else {
-                activePoint = null;
+                DraggablePoint.clearActivePoint();
             }
         } else {
             if (buildState == IDLE) {
@@ -566,7 +566,7 @@ public class PenTool extends PathTool {
             if (isOverFirst) {
                 first.setActive(true);
             } else {
-                activePoint = null;
+                DraggablePoint.clearActivePoint();
             }
         }
 

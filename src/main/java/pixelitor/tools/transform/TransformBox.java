@@ -430,7 +430,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             mousePressedOn(hit, x, y);
             return true;
         } else {
-            activePoint = null;
+            DraggablePoint.clearActivePoint();
             if (contains(x, y)) {
                 if (e.isPopupTrigger()) {
                     showPopup(e);
@@ -490,7 +490,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             activePoint.mouseReleased(x, y);
             if (!activePoint.isHitBy(e)) {
                 // can happen if the handle has a constrained position
-                activePoint = null;
+                DraggablePoint.clearActivePoint();
             }
             target.updateUI(view);
             updateDirections(); // necessary if dragged through the opposite corner
@@ -598,7 +598,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             view.setCursor(hit.getCursor());
         } else {
             if (activePoint != null) {
-                activePoint = null;
+                DraggablePoint.clearActivePoint();
                 view.repaint();
             }
 

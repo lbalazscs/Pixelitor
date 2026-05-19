@@ -233,7 +233,7 @@ public class GradientTool extends DragTool {
             if (!activePoint.isHitBy(e)) {
                 // we can get here if the handle has a
                 // constrained position
-                activePoint = null;
+                DraggablePoint.clearActivePoint();
             }
 
             renderedDrag = handles.toDrag(e.getView());
@@ -285,7 +285,7 @@ public class GradientTool extends DragTool {
         } else {
             // ...otherwise deactivate any previously active handle
             if (activePoint != null) {
-                activePoint = null;
+                DraggablePoint.clearActivePoint();
                 view.repaint();
             }
         }
@@ -325,7 +325,7 @@ public class GradientTool extends DragTool {
     @Override
     public void reset() {
         handles = null;
-        activePoint = null;
+        DraggablePoint.clearActivePoint();
         lastGradient = null;
         gradientLayer = null;
         Views.repaintActive();
@@ -340,7 +340,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void editingTargetChanged(Layer activeLayer) {
+    public void editingTargetChanged(Layer activeLayer, boolean toolActivation) {
         layerActivated(activeLayer);
     }
 
@@ -374,7 +374,7 @@ public class GradientTool extends DragTool {
 
     private void hideHandlesUnchecked(Composition comp) {
         handles = null;
-        activePoint = null;
+        DraggablePoint.clearActivePoint();
         lastGradient = null;
         comp.repaint();
     }
@@ -488,15 +488,6 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    protected void toolActivated(View view) {
-        super.toolActivated(view);
-
-        if (view != null) {
-            layerActivated(view.getComp().getActiveLayer());
-        }
-    }
-
-    @Override
     protected void toolDeactivated(View view) {
         super.toolDeactivated(view);
 
@@ -584,7 +575,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public boolean allowsOnlyDrawables() {
+    public boolean requiresDrawables() {
         return true;
     }
 

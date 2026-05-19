@@ -51,7 +51,7 @@ class PathToolsTest {
 
     @BeforeEach
     void beforeEachTest() {
-        Tools.EventDispatcher.resetMouseState();
+        Tools.MouseDispatcher.resetMouseState();
         Tools.setActiveTool(Tools.PEN);
 
         // A real composition that can store paths.

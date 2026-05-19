@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.selection.SelectionType;
@@ -122,25 +123,45 @@ public class Tools {
     }
 
     // This doesn't select the button, because it is either
-    // called by the button event handler or by testing code!
-    // Normally the Tool's activate() method should be called instead.
+    // called by the button event handler or by testing code.
+    // The Tool's activate() method should be called to select the button.
     public static void start(Tool newTool) {
-        // showing the message could be useful even if the tool didn't change
-        Messages.showStatusMessage(newTool.getStatusBarMessage());
-
-        Tool previousTool = activeTool;
-        if (previousTool == newTool) {
+        Tool prevTool = activeTool;
+        if (prevTool == newTool) {
             return;
         }
 
+        Messages.showStatusMessage(newTool.getStatusBarMessage());
         View view = Views.getActive();
-        if (previousTool != null) {
-            previousTool.toolDeactivated(view);
-            EventDispatcher.toolChanged(previousTool, newTool);
+
+        if (prevTool != null) {
+            // release stuck modifier keys for the previous tool before it is deactivated
+            if (GlobalEvents.isAltDown()) {
+                prevTool.altReleased();
+            }
+            if (GlobalEvents.isSpaceDown()) {
+                prevTool.spaceReleased();
+            }
+
+            // simulate mouse release on the previous tool while it is still active
+            MouseDispatcher.beforeToolChange(prevTool);
+
+            // deactivate the previous tool
+            prevTool.toolDeactivated(view);
         }
 
         setActiveTool(newTool);
         newTool.toolActivated(view);
+        MouseDispatcher.afterToolChange(newTool);
+
+        // apply global modifier states to the new tool immediately
+        if (GlobalEvents.isAltDown()) {
+            newTool.altPressed();
+        }
+        if (GlobalEvents.isSpaceDown()) {
+            newTool.spacePressed();
+        }
+
         ToolSettingsPanelContainer.get().showSettingsOf(newTool);
     }
 
@@ -210,15 +231,18 @@ public class Tools {
 
         // don't switch from the Move Tool, because it's confusing and
         // bug-prone if the tool is changed during an auto-select
+        boolean activated = false;
         if (activeTool != MOVE) {
             Tool preferredTool = activeLayer.getPreferredTool();
             if (preferredTool != null && preferredTool != activeTool) {
                 preferredTool.activate();
+                activated = true;
             }
         }
 
-        if (activeTool != null) {
-            activeTool.editingTargetChanged(activeLayer);
+        // if this was a tool activation, then editingTargetChanged was already called
+        if (!activated && activeTool != null) {
+            activeTool.editingTargetChanged(activeLayer, false);
         }
     }
 
@@ -239,7 +263,7 @@ public class Tools {
     }
 
     /**
-     * Returns the tool groups where a single hotkey is used to cycle through the tools.
+     * Returns groups of tools that share a single hotkey for cycling.
      */
     public static List<Tool[]> getSharedHotkeyGroups() {
         return List.of(
@@ -255,11 +279,14 @@ public class Tools {
         }
     }
 
-    public static class EventDispatcher {
+    /**
+     * Routes global mouse interactions to the active tool.
+     */
+    public static class MouseDispatcher {
         private static boolean mouseDown = false;
         private static PMouseEvent lastEvent;
 
-        private EventDispatcher() {
+        private MouseDispatcher() {
         }
 
         public static void mousePressed(MouseEvent e, View view) {
@@ -315,15 +342,18 @@ public class Tools {
             activeTool.mouseExited(e, view);
         }
 
-        public static void toolChanged(Tool oldTool, Tool newTool) {
+        public static void beforeToolChange(Tool prevTool) {
             if (mouseDown) {
-                // Tools were switched via keyboard hotkey in the
-                // middle of a mouse drag.
-                // In order to avoid inconsistent tool states,
-                // simulate a mouse release for the old tool...
-                oldTool.eventHandlerChain.handleMouseReleased(lastEvent);
+                // Tools were switched via keyboard hotkey in the middle of a mouse drag.
+                // In order to avoid inconsistent tool states, simulate
+                // a mouse release for the previous tool before deactivation.
+                prevTool.eventHandlerChain.handleMouseReleased(lastEvent);
+            }
+        }
 
-                // ...and a mouse pressed for the new one
+        public static void afterToolChange(Tool newTool) {
+            if (mouseDown) {
+                // simulate a mouse press for the new tool after full activation
                 newTool.eventHandlerChain.handleMousePressed(lastEvent);
             }
         }
@@ -332,6 +362,7 @@ public class Tools {
             return mouseDown;
         }
 
+        // used only in unit tests
         public static void resetMouseState() {
             mouseDown = false;
             lastEvent = null;

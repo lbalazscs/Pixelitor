@@ -21,6 +21,7 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.PresetOwner;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -62,20 +63,16 @@ public abstract class Tool implements PresetOwner, Debuggable {
     private ToolButton toolButton;
     protected ToolSettingsPanel settingsPanel;
 
-    // holding the Alt key down continuously generates multiple
-    // altPressed() calls, but only the first one should be processed
-    protected boolean altDown = false;
-
     // Whether pixel snapping should be turned on as far as the tool is concerned.
     // The actual snapping also depends on the Preferences setting.
     protected boolean pixelSnapping = false;
 
-    protected Tool(String name, char hotkey, String statusBarMessage, Cursor cursor) {
+    protected Tool(String shortName, char hotkey, String statusBarMessage, Cursor cursor) {
         this.hotkey = hotkey;
         assert Character.isUpperCase(hotkey);
 
-        this.shortName = name;
-        this.name = name + " Tool";
+        this.shortName = shortName;
+        this.name = shortName + " Tool";
         this.statusBarMessage = statusBarMessage;
         this.cursor = cursor;
 
@@ -93,13 +90,17 @@ public abstract class Tool implements PresetOwner, Debuggable {
     protected void toolActivated(View view) {
         Views.setCursorForAll(cursor);
         View.toolSnappingChanged(pixelSnapping, this == Tools.CROP);
+
+        if (view != null) {
+            editingTargetChanged(view.getComp().getActiveLayer(), true);
+        }
     }
 
     /**
      * A hook for actions to be performed when the tool is deactivated.
      */
     protected void toolDeactivated(View view) {
-        DraggablePoint.activePoint = null;
+        DraggablePoint.clearActivePoint();
         closeAllDialogs();
     }
 
@@ -108,7 +109,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
      */
     public void activate() {
         if (toolButton != null) {
-            // this will also call Tools.start() indirectly via the event handlers.
+            // this will also call Tools.start() indirectly via the event handlers
             toolButton.setSelected(true);
             toolButton.requestFocus();
         } else {
@@ -200,18 +201,15 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     public void altPressed() {
-        if (!altDown && hasColorPickerForwarding()) {
-            Views.setCursorForAll(
-                Tools.COLOR_PICKER.getStartingCursor());
+        if (hasColorPickerForwarding()) {
+            Views.setCursorForAll(Tools.COLOR_PICKER.getStartingCursor());
         }
-        altDown = true;
     }
 
     public void altReleased() {
         if (hasColorPickerForwarding()) {
             Views.setCursorForAll(cursor);
         }
-        altDown = false;
     }
 
     public void otherKeyPressed(KeyEvent e) {
@@ -230,8 +228,10 @@ public abstract class Tool implements PresetOwner, Debuggable {
         }
     }
 
-    // Called when a composition is replaced in the active view, but
-    // not when a composition is activated because of a new active view.
+    /**
+     * Called when the active view's composition is replaced,
+     * but not when switching to a different view.
+     */
     public void compReplaced(Composition newComp, boolean reloaded) {
         // empty by default
     }
@@ -240,7 +240,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
      * Called when a new layer becomes active, or when the mask editing state changes.
      * The argument is always the active layer, not the mask.
      */
-    public void editingTargetChanged(Layer activeLayer) {
+    public void editingTargetChanged(Layer activeLayer, boolean toolActivation) {
         // empty by default
     }
 
@@ -294,7 +294,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     /**
      * Called when the image space coordinates of the pixels change
      * (image resizing, cropping, canvas enlargement, flipping, etc.),
-     * and this change is described by the given {@link AffineTransform}
+     * and this change is described by the given {@link AffineTransform}.
      *
      * The change in image coordinates implies a change in component coordinates,
      * therefore the component space coordinates also have to be recalculated.
@@ -315,7 +315,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     /**
      * Whether this tool can only be used with layers that implement {@link Drawable}.
      */
-    public boolean allowsOnlyDrawables() {
+    public boolean requiresDrawables() {
         return false;
     }
 
@@ -391,8 +391,9 @@ public abstract class Tool implements PresetOwner, Debuggable {
         DebugNode node = new DebugNode(key, this);
 
         node.addQuotedString("name", getName());
-        node.addBoolean("altDown", altDown);
-        node.addBoolean("pixelSnapping", pixelSnapping);
+        node.addBoolean("alt down", GlobalEvents.isAltDown());
+        node.addBoolean("space down", GlobalEvents.isSpaceDown());
+        node.addBoolean("pixel snapping", pixelSnapping);
 
         return node;
     }

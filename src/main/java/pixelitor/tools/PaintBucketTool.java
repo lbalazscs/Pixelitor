@@ -276,7 +276,7 @@ public class PaintBucketTool extends Tool {
     }
 
     @Override
-    public boolean allowsOnlyDrawables() {
+    public boolean requiresDrawables() {
         return true;
     }
 
