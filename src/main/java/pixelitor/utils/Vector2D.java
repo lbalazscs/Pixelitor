@@ -128,10 +128,6 @@ public class Vector2D {
         }
     }
 
-    public void setMagnitudeOfUnitVector(double magnitude) {
-        multiply(magnitude);
-    }
-
     private void normalize() {
         divide(length());
     }

@@ -85,7 +85,7 @@ public class ImageFrame extends JInternalFrame
 
     @Override
     public void internalFrameClosed(InternalFrameEvent e) {
-        Views.viewClosed(view);
+        Views.closeView(view);
     }
 
     @Override

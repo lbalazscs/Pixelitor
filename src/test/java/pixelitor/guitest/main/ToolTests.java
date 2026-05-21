@@ -58,7 +58,7 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 import static java.awt.event.KeyEvent.VK_CONTROL;
-import static pixelitor.guitest.GUITestUtils.change;
+import static pixelitor.guitest.GUITestUtils.changeSelection;
 import static pixelitor.guitest.GUITestUtils.checkRandomly;
 import static pixelitor.guitest.GUITestUtils.findButtonByText;
 import static pixelitor.menus.view.ZoomLevel.zoomLevels;
@@ -923,12 +923,12 @@ public class ToolTests {
         boolean gradientCreated = false;
 
         for (GradientType gradientType : GradientType.values()) {
-            if (change(pw.comboBox("typeCB"), gradientType.toString()) && gradientCreated) {
+            if (changeSelection(pw.comboBox("typeCB"), gradientType.toString()) && gradientCreated) {
                 keyboard.undoRedo("Change Gradient Type");
             }
 
             for (String cycleMethod : GradientTool.CYCLE_METHODS) {
-                if (change(pw.comboBox("cycleMethodCB"), cycleMethod) && gradientCreated) {
+                if (changeSelection(pw.comboBox("cycleMethodCB"), cycleMethod) && gradientCreated) {
                     keyboard.undoRedo("Change Gradient Cycling");
                 }
 
@@ -937,7 +937,7 @@ public class ToolTests {
                     if (context.skip()) {
                         continue;
                     }
-                    if (change(pw.comboBox("colorTypeCB"), colorType.toString()) && gradientCreated) {
+                    if (changeSelection(pw.comboBox("colorTypeCB"), colorType.toString()) && gradientCreated) {
                         keyboard.undoRedo("Change Gradient Colors");
                     }
 
@@ -1069,10 +1069,10 @@ public class ToolTests {
             if (context.skip()) {
                 continue;
             }
-            if (change(pw.comboBox("fillPaintCB"), paintType.toString())) {
+            if (changeSelection(pw.comboBox("fillPaintCB"), paintType.toString())) {
                 keyboard.undoRedo("Change Shape Fill");
             }
-            if (change(pw.comboBox("strokePaintCB"), paintType.toString())) {
+            if (changeSelection(pw.comboBox("strokePaintCB"), paintType.toString())) {
                 keyboard.undoRedo("Change Shape Stroke");
             }
         }

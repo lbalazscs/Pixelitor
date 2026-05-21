@@ -20,8 +20,8 @@ package pixelitor.menus.edit;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
-import pixelitor.utils.*;
-import pixelitor.utils.Error;
+import pixelitor.utils.Messages;
+import pixelitor.utils.ViewActivationListener;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -30,7 +30,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Optional;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -53,30 +52,34 @@ public class PasteAction extends NamedAction implements ViewActivationListener {
 
     @Override
     protected void onClick(ActionEvent e) {
-        switch (retrieveClipboardImage()) {
-            case Success<BufferedImage, ?>(BufferedImage img) -> pasteTarget.paste(img);
-            case Error<?, String>(String errorMsg) -> Messages.showInfo("Paste Error", errorMsg);
+        BufferedImage image = retrieveClipboardImage();
+        if (image != null) {
+            pasteTarget.paste(image);
         }
     }
 
-    private static Result<BufferedImage, String> retrieveClipboardImage() {
+    private static BufferedImage retrieveClipboardImage() {
         Transferable clipboardContents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
 
         if (clipboardContents == null) {
-            return Result.error("The clipboard is empty. Nothing to paste.");
+            Messages.showInfo("Paste Error",
+                "The clipboard is empty. Nothing to paste.");
+            return null;
         }
 
         if (!clipboardContents.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-            return Result.error("The clipboard content isn't an image.");
+            Messages.showInfo("Paste Error",
+                "The clipboard content isn't an image.");
+            return null;
         }
 
         try {
-            BufferedImage pastedImage = (BufferedImage)
+            BufferedImage clipboardImage = (BufferedImage)
                 clipboardContents.getTransferData(DataFlavor.imageFlavor);
-            return Result.success(pastedImage);
+            return clipboardImage;
         } catch (UnsupportedFlavorException | IOException ex) {
             Messages.showException(ex);
-            return Result.error(ex.getMessage());
+            return null;
         }
     }
 

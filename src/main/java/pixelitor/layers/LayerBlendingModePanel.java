@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 
-import static pixelitor.Views.onActiveLayer;
 import static pixelitor.utils.Utils.toPercentage;
 
 /**
@@ -73,13 +72,11 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     private void opacityChanged() {
-        onActiveLayer(layer ->
-            layer.setOpacity(getOpacity(), true, true));
+        Views.getActiveLayer().setOpacity(getOpacity(), true, true);
     }
 
     private void blendingModeChanged() {
-        onActiveLayer(layer ->
-            layer.setBlendingMode(getBlendingMode(), true, true));
+        Views.getActiveLayer().setBlendingMode(getBlendingMode(), true, true);
     }
 
     @Override

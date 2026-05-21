@@ -55,7 +55,7 @@ class LayerBlendingModesTest {
     @BeforeEach
     void beforeEachTest() {
         comp = fromImage(create1x1Image(lowerColor), null, "LayerBlendingModesTest");
-        TestHelper.setupMockViewFor(comp);
+        TestHelper.createMockViewFor(comp);
 
         upperLayer = TestHelper.createImageLayer(
             comp, create1x1Image(upperColor), "Layer 2");

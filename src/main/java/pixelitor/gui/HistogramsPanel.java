@@ -174,7 +174,10 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
     }
 
     public static void updateFromActiveComp() {
-        Views.onActiveComp(INSTANCE::updateHistograms);
+        Composition comp = Views.getActiveComp();
+        if (comp != null) {
+            updateFrom(comp);
+        }
     }
 
     public static void updateFrom(Composition comp) {

@@ -117,7 +117,11 @@ public abstract class AbstractSelectionTool extends DragTool {
     @Override
     public void escPressed() {
         super.escPressed();
-        Views.onActiveComp(this::cancelSelection);
+
+        Composition comp = Views.getActiveComp();
+        if (comp != null) {
+            cancelSelection(comp);
+        }
     }
 
     protected void cancelSelection(Composition comp) {

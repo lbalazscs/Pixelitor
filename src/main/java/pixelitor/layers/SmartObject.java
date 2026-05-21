@@ -58,7 +58,7 @@ import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
- * A layer that embeds a {@link Composition},
+ * A layer that embeds a {@link Composition}
  * and supports non-destructive editing via smart filters.
  */
 public class SmartObject extends CompositeLayer {
@@ -223,7 +223,7 @@ public class SmartObject extends CompositeLayer {
             filter.adaptToContext();
         }
 
-        recalculateImage();
+        recalcImage();
 
         assert checkInvariants();
     }
@@ -263,11 +263,11 @@ public class SmartObject extends CompositeLayer {
         String title = linkedContentFile.getName() + " not found.";
         String msg = "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() +
             "</b> was not found.<br>You can search for it or use a transparent image.";
-        boolean search = Dialogs.showOKCancelQuestion(msg, title,
+        boolean shouldSearch = Dialogs.showOKCancelQuestion(msg, title,
             new String[]{"Search...", "Use Transparent Image"}, 0, JOptionPane.ERROR_MESSAGE);
 
         File newFile = null;
-        if (search) {
+        if (shouldSearch) {
             newFile = FileChoosers.selectSupportedOpenFile();
         }
         if (newFile != null) { // user selected a new file
@@ -286,10 +286,10 @@ public class SmartObject extends CompositeLayer {
         }
     }
 
-    private void createContentFrom(Layer layer) {
+    private void createContentFrom(Layer srcLayer) {
         Composition newContent = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
         // the layer's mask stays outside the content and becomes the smart object's mask
-        if (layer instanceof LayerGroup group) {
+        if (srcLayer instanceof LayerGroup group) {
             // flatten the contents of the group
             int numLayers = group.getNumLayers();
             assert numLayers > 0;
@@ -299,7 +299,7 @@ public class SmartObject extends CompositeLayer {
             }
         } else {
             CopyOptions options = CopyOptions.duplicateLayer(true).withoutMask();
-            Layer contentLayer = layer.copy(options, newContent);
+            Layer contentLayer = srcLayer.copy(options, newContent);
             contentLayer.setName("original content", false);
             contentLayer.setHolder(newContent);
             newContent.addLayerWithoutUI(contentLayer);
@@ -309,7 +309,7 @@ public class SmartObject extends CompositeLayer {
         setContent(newContent);
     }
 
-    private void recalculateImage() {
+    private void recalcImage() {
         image = filters.isEmpty()
             ? baseSource.getImage()
             : filters.getLast().getImage();
@@ -324,7 +324,7 @@ public class SmartObject extends CompositeLayer {
     @Override
     public void update() {
         if (invalidImageCache) {
-            recalculateImage();
+            recalcImage();
         }
         super.update();
     }
@@ -375,7 +375,7 @@ public class SmartObject extends CompositeLayer {
 
     public BufferedImage getVisibleImage() {
         if (invalidImageCache) {
-            recalculateImage();
+            recalcImage();
         }
         return image;
     }
@@ -392,7 +392,7 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void replaceWithSmartObject() {
-        throw new IllegalStateException(); // it's already smart
+        throw new IllegalStateException(); // it's already a smart object
     }
 
     @Override
@@ -569,8 +569,8 @@ public class SmartObject extends CompositeLayer {
     }
 
     private void layerCountChanged() {
-        // notify the delete action only if not the whole
-        // smart object is selected and not during construction
+        // notify the delete action only if the whole smart
+        // object is not selected and not during construction
         if (!isActive() && hasUI()) {
             LayerEvents.fireLayerCountChanged(this, filters.size());
         }

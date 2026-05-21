@@ -26,6 +26,7 @@ import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.Debug;
 import pixelitor.utils.input.Modifiers;
 
 import javax.swing.*;
@@ -33,6 +34,7 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.VK_ALT;
 import static java.awt.event.KeyEvent.VK_CONTROL;
@@ -48,11 +50,13 @@ public class Mouse {
     private Rectangle canvasBounds; // relative to the screen
     private static final int CANVAS_SAFETY_MARGIN = 20;
     private final FrameFixture pw;
+    private final Consumer<String> logger;
     private final Random random = new Random();
 
-    public Mouse(FrameFixture pw, Robot robot) {
+    public Mouse(FrameFixture pw, Robot robot, Consumer<String> logger) {
         this.robot = robot;
         this.pw = pw;
+        this.logger = logger;
     }
 
     public void rotateWheel(View view, int amount) {
@@ -210,22 +214,14 @@ public class Mouse {
         return new JPopupMenuFixture(robot, popup);
     }
 
-    void clickScreen(Point screenPos) {
-        moveToScreen(screenPos);
+    public void clickCanvas(int canvasX, int canvasY) {
+        moveToScreen(toScreenCoords(canvasX, canvasY));
         click();
     }
 
-    void clickScreen(Point screenPos, Modifiers modifiers) {
-        moveToScreen(screenPos);
-        click(modifiers);
-    }
-
-    public void clickCanvas(int canvasX, int canvasY) {
-        clickScreen(toScreenCoords(canvasX, canvasY));
-    }
-
     void clickCanvas(int canvasX, int canvasY, Modifiers modifiers) {
-        clickScreen(toScreenCoords(canvasX, canvasY), modifiers);
+        moveToScreen(toScreenCoords(canvasX, canvasY));
+        click(modifiers);
     }
 
     public void randomClick() {
@@ -234,16 +230,20 @@ public class Mouse {
     }
 
     void randomDoubleClick() {
+        logger.accept("random double click");
         moveRandomlyWithinCanvas();
         doubleClick();
     }
 
-    void randomClick(Modifiers modifiers) {
+    String randomClick(Modifiers modifiers) {
         moveRandomlyWithinCanvas();
-        click(modifiers);
+        return click(modifiers);
     }
 
-    public void click(Modifiers modifiers) {
+    public String click(Modifiers modifiers) {
+        String msg = Debug.modifiersToString(modifiers, false) + "click";
+        logger.accept(msg);
+
         withModifiers(modifiers, () -> {
             if (modifiers.button().isRight()) {
                 rightClick();
@@ -251,6 +251,7 @@ public class Mouse {
                 click();
             }
         });
+        return msg;
     }
 
     private void pressModifierKeys(Modifiers modifiers) {

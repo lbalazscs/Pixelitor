@@ -32,13 +32,10 @@ public class FourColorAngularFilter extends FourColorFilter {
                                   int colorNW, int colorNE, int colorSW, int colorSE,
                                   InterpolationType interpolation,
                                   ColorSpaceType colorSpace,
-                                  double relCx, double relCy) {
-        super(filterName, colorNW, colorNE, colorSW, colorSE, interpolation, colorSpace, relCx, relCy);
-    }
+                                  double relCx, double relCy,
+                                  int width, int height) {
+        super(filterName, colorNW, colorNE, colorSW, colorSE, interpolation, colorSpace, relCx, relCy, width, height);
 
-    @Override
-    public void setDimensions(int width, int height) {
-        super.setDimensions(width, height);
         setupAngularData(false);
     }
 

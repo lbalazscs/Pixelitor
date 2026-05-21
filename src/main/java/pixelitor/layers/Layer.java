@@ -445,7 +445,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Return the current layer or the owner if this is a mask.
+     * Returns the current layer or the owner if this is a mask.
      */
     public Layer getLayer() {
         return this;
@@ -726,7 +726,7 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Renders this layer onto the given Graphics2D
      * or transforms the given image.
-     * Adjustment layers and watermarked text layers change the
+     * Adjustment layers and watermarking text layers change the
      * BufferedImage, while other layers just paint on the Graphics2D.
      * Returns the new image if transformation occurs, otherwise null.
      */
@@ -763,12 +763,12 @@ public abstract class Layer implements Serializable, Debuggable {
         if (cachedMaskedImage == null || cachedMaskedImage.getWidth() != w || cachedMaskedImage.getHeight() != h) {
             invalidateMaskedImageCache();
             cachedMaskedImage = new BufferedImage(w, h, TYPE_INT_ARGB);
-            Graphics2D mig = cachedMaskedImage.createGraphics();
-            paint(mig, firstVisibleLayer);
-            mig.setComposite(DstIn);
-            mig.drawImage(mask.getTransparencyImage(),
+            Graphics2D maskG = cachedMaskedImage.createGraphics();
+            paint(maskG, firstVisibleLayer);
+            maskG.setComposite(DstIn);
+            maskG.drawImage(mask.getTransparencyImage(),
                 mask.getTx(), mask.getTy(), null);
-            mig.dispose();
+            maskG.dispose();
         }
 
         // 2. paint the masked image onto the graphics
@@ -814,7 +814,7 @@ public abstract class Layer implements Serializable, Debuggable {
     protected abstract BufferedImage transformImage(BufferedImage src);
 
     /**
-     * Resizes the layer content to new canvas dimensions.
+     * Resizes the layer content to the new canvas dimensions.
      */
     public abstract CompletableFuture<Void> resize(Dimension newSize);
 
@@ -940,7 +940,7 @@ public abstract class Layer implements Serializable, Debuggable {
      * Returns null if no such image can be returned (adjustment layer).
      * The layer's blending mode is always ignored.
      *
-     * @param applyMask    if false, then the mask is ignored
+     * @param applyMask    if false, then the mask is ignored.
      * @param applyOpacity if false, then the layer's opacity is ignored.
      */
     public BufferedImage toImage(boolean applyMask, boolean applyOpacity) {
@@ -1051,8 +1051,8 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Returns whether this layer type has a raster
-     * (dynamically changing, based on the layer contents) icon image.
+     * Returns whether this layer type has a raster icon image
+     * (one that changes dynamically based on the layer contents).
      */
     public boolean hasRasterIcon() {
         return true;
@@ -1147,7 +1147,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Checks if this layer (or its children) is of or contains the given type.
+     * Checks if this layer (or its children) is an instance of, or contains a layer of, the given type.
      */
     public boolean containsLayerOfType(Class<? extends Layer> type) {
         // by default check only itself, overridden for composite layers

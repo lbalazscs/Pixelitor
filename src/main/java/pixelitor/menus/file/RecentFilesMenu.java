@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.io.File;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * The "File/Recent Files" menu
+ * The "File/Recent Files" menu.
  */
 public final class RecentFilesMenu extends JMenu {
     public static final int MAX_RECENT_FILES = 10;
@@ -35,7 +35,7 @@ public final class RecentFilesMenu extends JMenu {
 
     private final JMenuItem clearMenuItem;
 
-    private final BoundedUniqueList<RecentFileEntry> recentFileEntries;
+    private final BoundedUniqueList<RecentFileEntry> recentFiles;
 
     private RecentFilesMenu() {
         super(i18n("recent_files"));
@@ -44,7 +44,7 @@ public final class RecentFilesMenu extends JMenu {
         clearMenuItem = new JMenuItem(i18n("clear_recent"));
         clearMenuItem.addActionListener(e -> clear());
 
-        recentFileEntries = AppPreferences.loadRecentFiles();
+        recentFiles = AppPreferences.loadRecentFiles();
         updateMenuItems();
     }
 
@@ -54,22 +54,22 @@ public final class RecentFilesMenu extends JMenu {
     private void clear() {
         try {
             AppPreferences.removeRecentFiles();
-            recentFileEntries.clear();
+            recentFiles.clear();
             updateMenuItems();
         } catch (Exception ex) {
             Messages.showException(ex);
         }
     }
 
-    public void addRecentFile(File f) {
-        if (f.exists()) {
-            recentFileEntries.addToFront(new RecentFileEntry(f));
+    public void addRecentFile(File file) {
+        if (file.exists()) {
+            recentFiles.addOrMoveToFront(new RecentFileEntry(file));
             updateMenuItems();
         }
     }
 
-    public BoundedUniqueList<RecentFileEntry> getRecentFileEntries() {
-        return recentFileEntries;
+    public BoundedUniqueList<RecentFileEntry> getRecentFiles() {
+        return recentFiles;
     }
 
     /**
@@ -78,17 +78,16 @@ public final class RecentFilesMenu extends JMenu {
     private void updateMenuItems() {
         removeAll(); // removes existing menu items
 
-        for (int i = 0; i < recentFileEntries.size(); i++) {
-            RecentFileEntry fileEntry = recentFileEntries.get(i);
+        for (int i = 0; i < recentFiles.size(); i++) {
+            RecentFileEntry fileEntry = recentFiles.get(i);
             fileEntry.setMenuPosition(i + 1);
             add(new RecentFilesMenuItem(fileEntry));
         }
 
-        if (!recentFileEntries.isEmpty()) {
+        if (!recentFiles.isEmpty()) {
             addSeparator();
         }
 
         add(clearMenuItem);
     }
 }
-

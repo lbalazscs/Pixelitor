@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ public class NewSelectionEdit extends PixelitorEdit {
     public NewSelectionEdit(Composition comp, Shape shape) {
         super("Create Selection", comp);
 
-        assert comp.getView() != null;
+        assert comp.isOpen();
 
         newShape = shape;
     }
@@ -40,7 +40,7 @@ public class NewSelectionEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        assert comp.getView() != null;
+        assert comp.isOpen();
 
         comp.deselect(false);
     }
@@ -49,7 +49,7 @@ public class NewSelectionEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        assert comp.getView() != null;
+        assert comp.isOpen();
 
         comp.createSelectionFrom(newShape);
     }

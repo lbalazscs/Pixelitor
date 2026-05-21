@@ -111,7 +111,7 @@ public class GUITestUtils {
         slider.slideTo(Rnd.intInRange(min, max));
     }
 
-    public static boolean change(JComboBoxFixture combo, String newValue) {
+    public static boolean changeSelection(JComboBoxFixture combo, String newValue) {
         String prevValue = combo.selectedItem();
         if (!newValue.equals(prevValue)) {
             combo.selectItem(newValue);

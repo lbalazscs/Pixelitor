@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -339,7 +339,7 @@ public class Debug {
 
     public static void copyInternalState() {
         AppNode node = new AppNode();
-        Utils.copyStringToClipboard(node.toJSON());
+        Utils.copyStringToClipboard(node.toJson());
         Messages.showStatusMessage("Internal state copied to the clipboard.");
     }
 
@@ -358,7 +358,7 @@ public class Debug {
         form.add(new JScrollPane(tree), CENTER);
 
         GUIUtils.showCopyTextToClipboardDialog(form,
-            node::toJSON, dialogTitle);
+            node::toJson, dialogTitle);
     }
 
     public static void showTree(Debuggable debuggable, String name) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,8 +33,8 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
- * An object that can apply an affine transformation to the output image
- * of a smart object's content before the image is processed by the smart filters.
+ * Applies an affine transformation to the output image of a
+ * smart object's content before it is processed by smart filters.
  */
 public class ImageTransformer implements ImageSource, Serializable {
     @Serial
@@ -49,11 +49,13 @@ public class ImageTransformer implements ImageSource, Serializable {
 
     public ImageTransformer(Composition content, AffineTransform transform,
                             int targetWidth, int targetHeight) {
-        this.content = content;
-        this.transform = transform;
-        setTargetSize(targetWidth, targetHeight);
         assert content != null;
         assert transform != null;
+
+        this.content = content;
+        this.transform = transform;
+
+        setTargetSize(targetWidth, targetHeight);
     }
 
     public ImageTransformer copy(Composition newContent) {

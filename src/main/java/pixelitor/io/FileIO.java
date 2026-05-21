@@ -69,7 +69,7 @@ public class FileIO {
      */
     public static CompletableFuture<Composition> openFileAsync(File file,
                                                                boolean preventDuplicateOpen) {
-        if (preventDuplicateOpen && !Views.warnIfAlreadyOpen(file)) {
+        if (preventDuplicateOpen && !Views.confirmIfAlreadyOpen(file)) {
             return CompletableFuture.completedFuture(null);
         }
         return loadCompAsync(file)

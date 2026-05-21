@@ -32,6 +32,10 @@ public class Geometry {
     public static final double GOLDEN_RATIO = 1.618033988749895;
     private static final double EPSILON = 0.0001;
 
+    // (4/3) * tan(π/8) ≈ 0.5523, the control-point distance for
+    // approximating a quarter-circle arc with a cubic Bezier curve
+    public static final double KAPPA = 0.552284749831;
+
     private Geometry() {
         // utility class
     }
@@ -59,7 +63,7 @@ public class Geometry {
 
         // calculate perpendicular points
         // leftOut, rightOut = direction rotated 90 degrees either way
-        calculatePerpendicularVectors(direction, leftOut, rightOut);
+        calcPerpendicularVectors(direction, leftOut, rightOut);
 
         // translate points to center position
         add(leftOut, center, leftOut);
@@ -80,7 +84,7 @@ public class Geometry {
 
         // calculate perpendicular points
         // leftOut, rightOut = direction rotated 90 degrees either way
-        calculatePerpendicularVectors(direction, leftOut, rightOut);
+        calcPerpendicularVectors(direction, leftOut, rightOut);
 
         // translate points to center position
         add(leftOut, center, leftOut);
@@ -94,9 +98,9 @@ public class Geometry {
      * @param leftOut Output parameter for counter-clockwise perpendicular vector
      * @param rightOut Output parameter for clockwise perpendicular vector
      */
-    public static void calculatePerpendicularVectors(Point2D input,
-                                                     Point2D leftOut,
-                                                     Point2D rightOut) {
+    public static void calcPerpendicularVectors(Point2D input,
+                                                Point2D leftOut,
+                                                Point2D rightOut) {
         leftOut.setLocation(-input.getY(), input.getX());
         rightOut.setLocation(input.getY(), -input.getX());
     }

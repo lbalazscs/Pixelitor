@@ -17,8 +17,8 @@
 
 package pixelitor.filters.util;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.EnumParam;
-import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
@@ -47,8 +47,8 @@ public enum Channel {
         }
 
         @Override
-        public double getIntensity(int r, int g, int b) {
-            return LuminanceLookup.from(r, g, b);
+        public double getIntensity(int rgb) {
+            return ImageMath.calcLuminanceInt(rgb);
         }
 
         @Override
@@ -71,8 +71,8 @@ public enum Channel {
         }
 
         @Override
-        public double getIntensity(int r, int g, int b) {
-            return r;
+        public double getIntensity(int rgb) {
+            return (rgb >>> 16) & 0xFF;
         }
     }, GREEN(i18n("green"), "green", Color.GREEN, ColorSpace.SRGB) {
         @Override
@@ -86,8 +86,8 @@ public enum Channel {
         }
 
         @Override
-        public double getIntensity(int r, int g, int b) {
-            return g;
+        public double getIntensity(int rgb) {
+            return (rgb >>> 8) & 0xFF;
         }
     }, BLUE(i18n("blue"), "blue", Color.BLUE, ColorSpace.SRGB) {
         @Override
@@ -101,8 +101,8 @@ public enum Channel {
         }
 
         @Override
-        public double getIntensity(int r, int g, int b) {
-            return b;
+        public double getIntensity(int rgb) {
+            return rgb & 0xFF;
         }
     }, OK_L(GUIText.LIGHTNESS, "L", BLACK, ColorSpace.OKLAB) {
         @Override
@@ -116,7 +116,7 @@ public enum Channel {
         }
 
         @Override
-        public double getIntensity(int r, int g, int b) {
+        public double getIntensity(int rgb) {
             throw new UnsupportedOperationException();
         }
 
@@ -140,7 +140,7 @@ public enum Channel {
         }
 
         @Override
-        public double getIntensity(int r, int g, int b) {
+        public double getIntensity(int rgb) {
             throw new UnsupportedOperationException();
         }
     }, OK_B(GUIText.BLUE_YELLOW_B, "b", OK_BLUE, ColorSpace.OKLAB) {
@@ -155,7 +155,7 @@ public enum Channel {
         }
 
         @Override
-        public double getIntensity(int r, int g, int b) {
+        public double getIntensity(int rgb) {
             throw new UnsupportedOperationException();
         }
     };
@@ -202,9 +202,9 @@ public enum Channel {
     }
 
     /**
-     * Calculates the intensity of this channel from the given RGB values.
+     * Calculates the intensity of this channel from the given packed RGB value.
      */
-    public abstract double getIntensity(int r, int g, int b);
+    public abstract double getIntensity(int rgb);
 
     /**
      * Returns the {@link ColorSpace} this {@link Channel} belongs to.

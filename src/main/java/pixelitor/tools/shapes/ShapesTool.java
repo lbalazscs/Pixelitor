@@ -460,7 +460,10 @@ public class ShapesTool extends DragTool {
         // or to clicking outside the transform box:
         // the handles disappear, but the effect remains
         if (state == TRANSFORM && !isEditingShapesLayer()) {
-            Views.onActiveComp(this::rasterize);
+            Composition comp = Views.getActiveComp();
+            if (comp != null) {
+                rasterize(comp);
+            }
         }
     }
 

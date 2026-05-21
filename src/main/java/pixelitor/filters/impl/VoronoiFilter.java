@@ -39,7 +39,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * Voronoi Diagram filter implementation
  */
 public class VoronoiFilter extends PointFilter {
-    private final double distanceBetweenPoints;
+    private final double minDistBetweenPoints;
     private final boolean useImageColors;
 
     private PoissonDiskSampling sampling;
@@ -54,17 +54,19 @@ public class VoronoiFilter extends PointFilter {
      *
      * @param filterName            the name of the filter
      * @param rand                  the random generator used for generating points and assigning colors
-     * @param distanceBetweenPoints the minimum distance between points
+     * @param minDistBetweenPoints the minimum distance between points
      * @param metric                the distance metric used to calculate the nearest point
      * @param cx                    the center x-coordinate of the source image, used by the distance metric
      * @param cy                    the center y-coordinate of the source image, used by the distance metric
      * @param useImageColors        if true, the regions will use colors sampled from the source image; if false, random colors are generated
      */
-    public VoronoiFilter(String filterName, RandomGenerator rand, double distanceBetweenPoints, Metric metric, int cx, int cy, boolean useImageColors) {
+    public VoronoiFilter(String filterName, RandomGenerator rand,
+                         double minDistBetweenPoints, Metric metric,
+                         int cx, int cy, boolean useImageColors) {
         super(filterName);
 
         this.rand = rand;
-        this.distanceBetweenPoints = distanceBetweenPoints;
+        this.minDistBetweenPoints = minDistBetweenPoints;
         this.intPrecisionDistance = metric.asIntPrecisionDistance(cx, cy);
         this.doublePrecisionDistance = metric.asDoublePrecisionDistance(cx, cy);
         this.useImageColors = useImageColors;
@@ -76,7 +78,7 @@ public class VoronoiFilter extends PointFilter {
         int height = src.getHeight();
 
         // generate a set of points using Poisson disk sampling
-        sampling = new PoissonDiskSampling(width, height, distanceBetweenPoints, 10, true, rand);
+        sampling = new PoissonDiskSampling(width, height, minDistBetweenPoints, 10, true, rand);
         List<Point2D> points = sampling.getSamples();
 
         // assign colors to the points
@@ -118,7 +120,7 @@ public class VoronoiFilter extends PointFilter {
     }
 
     /**
-     * Checks whether the pixel is different from its neighbors.
+     * Checks whether the pixel has a different color from any of its neighbors.
      */
     private static boolean isEdge(int x, int y, int index, int[] pixels, int width, int height) {
         int color = pixels[index];
@@ -150,9 +152,9 @@ public class VoronoiFilter extends PointFilter {
         double step = 1.0 / aaRes;
 
         for (int i = 0; i < aaRes; i++) {
-            double sy = y + step * i - 0.5;
+            double sy = y - 0.5 + step * (i + 0.5);
             for (int j = 0; j < aaRes; j++) {
-                double sx = x + step * j - 0.5;
+                double sx = x - 0.5 + step * (j + 0.5);
 
                 // sx and sy are the supersampling coordinates
                 int closestIndex = sampling.findClosestPointIndex(sx, sy, doublePrecisionDistance);
@@ -214,8 +216,8 @@ public class VoronoiFilter extends PointFilter {
         g.dispose();
     }
 
-    public void debugGrid(BufferedImage dest) {
-        Graphics2D g2 = dest.createGraphics();
+    public void debugGrid(BufferedImage img) {
+        Graphics2D g2 = img.createGraphics();
         g2.setColor(Color.WHITE);
         sampling.renderGrid(g2);
         g2.dispose();

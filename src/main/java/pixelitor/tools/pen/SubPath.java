@@ -45,7 +45,7 @@ import java.util.*;
 import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
-import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
+import static pixelitor.tools.pen.BuildState.DRAGGING_OUT_CONTROL;
 import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
 
@@ -142,11 +142,11 @@ public class SubPath implements Serializable, Transformable {
         return moving;
     }
 
-    public void moveMovingPointTo(double x, double y, boolean nullOK) {
+    public void moveMovingPointTo(double x, double y, boolean allowNull) {
         if (moving != null) {
             moving.setLocation(x, y);
         } else {
-            if (!nullOK) {
+            if (!allowNull) {
                 throw new IllegalStateException("no moving point in " + path);
             }
         }
@@ -182,11 +182,11 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void addToComponentSpaceShape(Path2D path) {
-        addToShape(path, p -> p.x, p1 -> p1.y);
+        addToShape(path, p -> p.x, p -> p.y);
     }
 
     public void addToImageSpaceShape(Path2D path) {
-        addToShape(path, p -> p.imX, p1 -> p1.imY);
+        addToShape(path, p -> p.imX, p -> p.imY);
     }
 
     private void addToShape(Path2D p,
@@ -227,7 +227,7 @@ public class SubPath implements Serializable, Transformable {
 
         AnchorPoint last = getLastAnchor();
 
-        // handle the "rubber band "preview of the next point during path construction
+        // handle the "rubber band" preview of the next point during path construction
         if (moving != null && Tools.PEN.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
             double movingX;
             double movingY;
@@ -276,7 +276,7 @@ public class SubPath implements Serializable, Transformable {
                     toY.applyAsDouble(first));
             }
             // we reached the first point again,
-            // however call this to add a clean SEG_CLOSE
+            // but call this to add a clean SEG_CLOSE
             p.closePath();
         }
     }
@@ -304,12 +304,12 @@ public class SubPath implements Serializable, Transformable {
         }
 
         // paint some extra handles if not finished
-        if (state == DRAGGING_LAST_CONTROL || state == MOVING_TO_NEXT_ANCHOR) {
+        if (state == DRAGGING_OUT_CONTROL || state == MOVING_TO_NEXT_ANCHOR) {
             getLastAnchor().paintHandles(g, true, true);
 
             if (numAnchors >= 2) {
-                AnchorPoint lastButOne = anchorPoints.get(numAnchors - 2);
-                lastButOne.paintHandles(g, false, true);
+                AnchorPoint penultimate = anchorPoints.get(numAnchors - 2);
+                penultimate.paintHandles(g, false, true);
             }
         }
     }
@@ -569,7 +569,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     /**
-     * Return whether this subpath is the only subpath in the parent path
+     * Return whether this subpath is the only subpath in the parent path.
      */
     public boolean isSingle() {
         return path.getNumSubPaths() == 1;
@@ -633,7 +633,7 @@ public class SubPath implements Serializable, Transformable {
     public void finish(Composition comp, boolean addToHistory) {
         if (comp != this.comp) {
             // shouldn't happen, but it did happen somehow
-            // (only in Mac random gui tests)
+            // (only in Mac random GUI tests)
             return;
         }
         assert !finished;
@@ -675,7 +675,7 @@ public class SubPath implements Serializable, Transformable {
                              double nextX, double nextY, View view) {
         AnchorPoint last = getLastAnchor();
 
-        // convert the quadratic bezier (with one control point)
+        // convert the quadratic Bézier (with one control point)
         // into a cubic one (with two control points), see
         // https://stackoverflow.com/questions/3162645/convert-a-quadratic-bezier-to-a-cubic
         double qp1x = cx;

@@ -21,13 +21,14 @@ import pixelitor.Composition;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * An operation that can be applied to all layers of a {@link Composition}.
+ * An operation that transforms a {@link Composition}.
  */
 public interface CompAction {
     /**
      * Processes the given {@link Composition}, possibly asynchronously.
-     * If there was any change, then the returned value is a new instance,
-     * and the original instance is used as a backup for the undo.
+     *
+     * If a change was made, the returned {@link Composition} is a copy
+     * reflecting that change, and the original instance is used as the undo backup.
      */
     CompletableFuture<Composition> process(Composition srcComp);
 }

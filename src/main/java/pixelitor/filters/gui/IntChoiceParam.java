@@ -78,7 +78,7 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
     /**
      * Represents an integer value with a string description.
      */
-    public record Item(String name, int value) {
+    public record Item(String descr, int value) {
         public boolean hasValue(int v) {
             return value == v;
         }
@@ -101,7 +101,7 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
 
         @Override
         public String toString() {
-            return name;
+            return descr;
         }
     }
 

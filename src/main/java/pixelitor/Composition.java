@@ -1761,7 +1761,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         });
 
         // view consistency
-        if (view != null && !view.isMock()) {
+        if (isOpen() && !view.isMock()) {
             if (view.getComp() != this) {
                 throw new AssertionError("bad view reference for " + getDebugName()
                     + ", unexpected comp is " + view.getComp().getDebugName());

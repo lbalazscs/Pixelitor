@@ -143,7 +143,7 @@ public class RandomToolTest {
         EDT.run(this::setupPauseKey);
         EDT.run(this::setupExitKey);
 
-        app = new AppRunner(null, inputDir, null, "b.jpg", "a.jpg");
+        app = new AppRunner(null, this::log, inputDir, null, "b.jpg", "a.jpg");
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
         ExceptionHandler.INSTANCE.prependHandler((t, e) -> {
@@ -294,9 +294,6 @@ public class RandomToolTest {
             paused = true;
 
             throw e;
-//        } catch (RuntimeException e) {
-//            e.printStackTrace();
-//            Utils.sleep(1, HOURS);
         }
     }
 
@@ -376,11 +373,11 @@ public class RandomToolTest {
             addClickAction();
         }
 
-        addAction(this::doubleClick, "doubleClick");
-        addAction(this::pressEnter, "pressEnter");
-        addAction(this::pressEsc, "pressEsc");
-        addAction(this::pressTab, "pressTab");
-        addAction(this::pressCtrlTab, "pressCtrlTab");
+        addAction(mouse::randomDoubleClick, "doubleClick");
+        addAction(keyboard::pressEnter, "pressEnter");
+        addAction(keyboard::pressEsc, "pressEsc");
+        addAction(keyboard::pressTab, "pressTab");
+        addAction(keyboard::pressCtrlTab, "pressCtrlTab");
         addAction(this::nudge, "nudge");
         addAction(this::possiblyUndoRedo, "possiblyUndoRedo");
         addAction(this::randomMultiLayerEdit, "randomMultiLayerEdit");
@@ -400,7 +397,7 @@ public class RandomToolTest {
 
     private void addClickAction() {
         actions.add(new MeasuredTask(() ->
-            click(Modifiers.randomly(new Random()))));
+            mouse.randomClick(Modifiers.randomly(new Random()))));
     }
 
     private void randomActions(Tool tool) {
@@ -424,26 +421,6 @@ public class RandomToolTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void pressEnter() {
-        log("pressing Enter");
-        keyboard.pressEnter();
-    }
-
-    private void pressEsc() {
-        log("pressing Esc");
-        keyboard.pressEsc();
-    }
-
-    private void pressCtrlTab() {
-        log("pressing Ctrl-Tab");
-        keyboard.pressCtrlTab();
-    }
-
-    private void pressTab() {
-        log("pressing Tab");
-        keyboard.pressTab();
     }
 
     private void nudge() {
@@ -573,21 +550,6 @@ public class RandomToolTest {
         }
     }
 
-    private String click(Modifiers modifiers) {
-        String name = "random " + Debug.modifiersToString(modifiers, false) + "click";
-        log(name);
-
-        Utils.sleep(200, MILLISECONDS);
-        mouse.randomClick(modifiers);
-        return name;
-    }
-
-    private void doubleClick() {
-        log("random double click");
-        Utils.sleep(200, MILLISECONDS);
-        mouse.randomDoubleClick();
-    }
-
     private void undo() {
         String editName = EDT.call(History::getEditToBeUndoneName);
         log("random undo " + Ansi.yellow(editName));
@@ -673,8 +635,7 @@ public class RandomToolTest {
         log("layers to canvas size");
         Utils.sleep(200, MILLISECONDS);
 
-        EDT.run(() -> Views.onActiveComp(
-            Composition::allImageLayersToCanvasSize));
+        EDT.run(() -> Views.getActiveComp().allImageLayersToCanvasSize());
     }
 
     private void flattenImage() {

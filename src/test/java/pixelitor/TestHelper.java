@@ -84,7 +84,7 @@ public class TestHelper {
     }
 
     /**
-     * Creates a real (non-mocked) composition with a layer of the given class
+     * Creates a real (non-mocked) composition with a layer of the given class.
      */
     public static Composition createRealComp(String name, Class<? extends Layer> layerClass) {
         return createRealComp(name, layerClass, TEST_WIDTH, TEST_HEIGHT);
@@ -107,7 +107,7 @@ public class TestHelper {
         comp.createDebugName();
 
         if (addMockView) {
-            setupMockViewFor(comp);
+            createMockViewFor(comp);
         }
 
         return comp;
@@ -289,7 +289,7 @@ public class TestHelper {
         return createImage().createGraphics();
     }
 
-    public static View setupMockViewFor(Composition comp) {
+    public static View createMockViewFor(Composition comp) {
         View view = createMockViewWithoutComp();
 
         // The view should be able to return the *new* composition
@@ -402,7 +402,7 @@ public class TestHelper {
     }
 
     public static Composition resize(Composition comp, int targetWidth, int targetHeight) {
-        assert comp.getView() != null;
+        assert comp.isOpen();
         return new Resize(targetWidth, targetHeight).process(comp).join();
     }
 
@@ -489,7 +489,7 @@ public class TestHelper {
     }
 
     /**
-     * Generates a stream of Arguments for every possible
+     * Generates a stream of {@link Arguments} for every possible
      * combination of elements from the given lists.
      */
     public static <A, B> Stream<Arguments> combinations(List<A> listA,

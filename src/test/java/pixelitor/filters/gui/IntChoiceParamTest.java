@@ -47,7 +47,7 @@ class IntChoiceParamTest {
         // assert that each Item has the expected name and value
         for (int i = 0; i < choices.length; i++) {
             Item item = param.getElementAt(i);
-            assertThat(item.name()).isEqualTo(choices[i]);
+            assertThat(item.descr()).isEqualTo(choices[i]);
             assertThat(item.value()).isEqualTo(i);
         }
 
@@ -66,7 +66,7 @@ class IntChoiceParamTest {
         }, RandomizeMode.IGNORE);
         for (int i = 0; i < 10; i++) {
             param.randomize();
-            assertThat(param).valueIs(1);
+            assertThat(param).selectedItemIs("Name 1", 1);
         }
     }
 
@@ -105,8 +105,7 @@ class IntChoiceParamTest {
 
         assertThat(param)
             .isAtDefault()
-            .valueIs(1)
-            .selectedAsStringIs("Item 1");
+            .selectedItemIs("Item 1", 1);
 
         var adjListener = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(adjListener);
@@ -114,24 +113,21 @@ class IntChoiceParamTest {
         param.setSelectedItem(v1, true);
         assertThat(param)
             .isAtDefault()
-            .valueIs(1)
-            .selectedAsStringIs("Item 1");
+            .selectedItemIs("Item 1", 1);
         // expect no triggering because the value didn't change
         verify(adjListener, never()).paramAdjusted();
 
         param.setSelectedItem(v2, true);
         assertThat(param)
             .isNotAtDefault()
-            .valueIs(2)
-            .selectedAsStringIs("Item 2");
+            .selectedItemIs("Item 2", 2);
         // expect one triggering
         verify(adjListener, times(1)).paramAdjusted();
 
         param.setSelectedItem(v1, false);
         assertThat(param)
             .isAtDefault()
-            .valueIs(1)
-            .selectedAsStringIs("Item 1");
+            .selectedItemIs("Item 1", 1);
         // expect no new triggering, because triggering was set to false
         verify(adjListener, times(1)).paramAdjusted();
     }

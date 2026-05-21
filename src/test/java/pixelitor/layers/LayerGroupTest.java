@@ -58,14 +58,14 @@ class LayerGroupTest {
 
         String groupName = "Test Group";
         group = new LayerGroup(comp, groupName, List.of(layer3, layer4));
-        assertThat(layer3).holderIs(group);
-        assertThat(layer4).holderIs(group);
+        assertThat(layer3).hasHolder(group);
+        assertThat(layer4).hasHolder(group);
 
         assertThat(group)
-            .nameIs(groupName)
+            .hasName(groupName)
             .isOpaque()
             .isVisible()
-            .blendingModeIs(BlendingMode.PASS_THROUGH)
+            .hasBlendingMode(BlendingMode.PASS_THROUGH)
             .isPassThrough()
             .hasNumLayers(2)
             .layersAre(layer3, layer4)
@@ -81,7 +81,7 @@ class LayerGroupTest {
             .activeLayerIs(group)
             .invariantsAreOK();
 
-        assertThat(group).holderIs(comp);
+        assertThat(group).hasHolder(comp);
 
         History.clear();
     }
@@ -98,7 +98,7 @@ class LayerGroupTest {
         group.setBlendingMode(BlendingMode.NORMAL, true, true);
         TestHelper.assertHistoryEditsAre("Blending Mode Change");
         assertThat(group)
-            .blendingModeIs(BlendingMode.NORMAL)
+            .hasBlendingMode(BlendingMode.NORMAL)
             .isNotPassThrough()
             .isRasterizable() // should now be rasterizable
             .isConvertibleToSmartObject(); // should now be convertible
@@ -106,14 +106,14 @@ class LayerGroupTest {
         // change back to Pass Through
         History.undo("Blending Mode Change");
         assertThat(group)
-            .blendingModeIs(BlendingMode.PASS_THROUGH)
+            .hasBlendingMode(BlendingMode.PASS_THROUGH)
             .isPassThrough()
             .isNotRasterizable()
             .isNotConvertibleToSmartObject();
 
         History.redo("Blending Mode Change");
         assertThat(group)
-            .blendingModeIs(BlendingMode.NORMAL)
+            .hasBlendingMode(BlendingMode.NORMAL)
             .isNotPassThrough()
             .isRasterizable()
             .isConvertibleToSmartObject();
@@ -129,7 +129,7 @@ class LayerGroupTest {
             .hasNumLayers(3)
             .layersAre(layer3, layer4, layer5)
             .listContainsLayer(layer5);
-        assertThat(layer5).holderIs(group);
+        assertThat(layer5).hasHolder(group);
         TestHelper.assertHistoryEditsAre("Add Layer");
 
         History.undo("Add Layer");
@@ -282,8 +282,8 @@ class LayerGroupTest {
             .layerNamesAre("layer 1", "layer 2", "layer 3", "layer 4")
             .activeLayerIs(layer4) // active layer preserved
             .invariantsAreOK();
-        assertThat(layer3).holderIs(comp);
-        assertThat(layer4).holderIs(comp);
+        assertThat(layer3).hasHolder(comp);
+        assertThat(layer4).hasHolder(comp);
 
         History.undo("Ungrouping");
         assertThat(comp)
@@ -293,8 +293,8 @@ class LayerGroupTest {
             .activeLayerIs(layer4) // still active (inside group)
             .invariantsAreOK();
         assertThat(group).layersAre(layer3, layer4);
-        assertThat(layer3).holderIs(group);
-        assertThat(layer4).holderIs(group);
+        assertThat(layer3).hasHolder(group);
+        assertThat(layer4).hasHolder(group);
 
         History.redo("Ungrouping");
         assertThat(comp)
@@ -302,8 +302,8 @@ class LayerGroupTest {
             .layerNamesAre("layer 1", "layer 2", "layer 3", "layer 4")
             .activeLayerIs(layer4) // active layer preserved
             .invariantsAreOK();
-        assertThat(layer3).holderIs(comp);
-        assertThat(layer4).holderIs(comp);
+        assertThat(layer3).hasHolder(comp);
+        assertThat(layer4).hasHolder(comp);
     }
 
     @Test
@@ -321,12 +321,12 @@ class LayerGroupTest {
         LayerGroup groupCopy = (LayerGroup) comp.getLayer(3); // added on top
 
         assertThat(groupCopy)
-            .nameIs("Test Group copy")
+            .hasName("Test Group copy")
             .hasNumLayers(2)
-            .holderIs(comp)
-            .opacityIs(group.getOpacity()) // properties copied
+            .hasHolder(comp)
+            .hasOpacity(group.getOpacity()) // properties copied
             .isVisible(group.isVisible())
-            .blendingModeIs(group.getBlendingMode())
+            .hasBlendingMode(group.getBlendingMode())
             .isActive(); // duplicate becomes active
 
         Layer layer3Copy = groupCopy.getLayer(0);
@@ -335,12 +335,12 @@ class LayerGroupTest {
         // check copied layers properties using custom assertions
         assertThat(layer3Copy)
             .isInstanceOf(ImageLayer.class)
-            .nameIs("layer 3 copy")
-            .holderIs(groupCopy);
+            .hasName("layer 3 copy")
+            .hasHolder(groupCopy);
         assertThat(layer4Copy)
             .isInstanceOf(ImageLayer.class)
-            .nameIs("layer 4 copy")
-            .holderIs(groupCopy);
+            .hasName("layer 4 copy")
+            .hasHolder(groupCopy);
 
         // overall composition state
         assertThat(comp)
@@ -368,13 +368,13 @@ class LayerGroupTest {
 
         assertThat(groupCopy)
             .hasNumLayers(2)
-            .nameIs("Test Group copy")
-            .holderIs(comp);
+            .hasName("Test Group copy")
+            .hasHolder(comp);
         assertThat(groupCopy.getLayer(0))
-            .nameIs("layer 3 copy")
-            .holderIs(groupCopy);
+            .hasName("layer 3 copy")
+            .hasHolder(groupCopy);
         assertThat(groupCopy.getLayer(1))
-            .nameIs("layer 4 copy")
-            .holderIs(groupCopy);
+            .hasName("layer 4 copy")
+            .hasHolder(groupCopy);
     }
 }

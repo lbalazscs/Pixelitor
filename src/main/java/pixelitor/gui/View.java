@@ -983,7 +983,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             SwingUtilities.invokeLater(() -> {
                 if (navigator != null) { // check again for safety
                     // will also repaint
-                    navigator.recalculateSize(this, false,
+                    navigator.updateSize(this, false,
                         true, false);
                 }
             });

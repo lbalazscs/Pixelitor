@@ -23,6 +23,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.BasicStroke;
@@ -53,9 +54,6 @@ public class Stripes extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // an approximation of a sine-like arc using a cubic Bezier curve
-    private static final double BEZIER_CONTROL_FACTOR = 0.552284749831;
-
     enum Type {
         STRAIGHT("Straight") {
             @Override
@@ -77,7 +75,7 @@ public class Stripes extends ParametrizedFilter {
         CHEVRON("Chevron") {
             @Override
             public double calcPeriod(int thickness, int gap, double wavelength, double amplitude) {
-                return calculateWavyPeriod(thickness, gap, wavelength, amplitude);
+                return calcWavyPeriod(thickness, gap, wavelength, amplitude);
             }
 
             @Override
@@ -89,7 +87,7 @@ public class Stripes extends ParametrizedFilter {
         CURVED("Curved") {
             @Override
             public double calcPeriod(int thickness, int gap, double wavelength, double amplitude) {
-                return calculateWavyPeriod(thickness, gap, wavelength, amplitude);
+                return calcWavyPeriod(thickness, gap, wavelength, amplitude);
             }
 
             @Override
@@ -252,7 +250,7 @@ public class Stripes extends ParametrizedFilter {
     /**
      * Calculates the vertical period for wavy stripes (Chevron, Curved).
      */
-    private static double calculateWavyPeriod(double thickness, double gap, double wavelength, double amplitude) {
+    private static double calcWavyPeriod(double thickness, double gap, double wavelength, double amplitude) {
         // To maintain a consistent visual thickness, the vertical period
         // between centerlines is adjusted based on the stripe's slope.
         // The period is calculated using the slope of a chevron segment,
@@ -294,7 +292,7 @@ public class Stripes extends ParametrizedFilter {
     private static Path2D createCurvedCenterline(double diagonal, double wavelength, double amplitude) {
         Path2D centerline = new Path2D.Double();
         double halfWavelength = wavelength / 2.0;
-        double controlXOffset = halfWavelength * BEZIER_CONTROL_FACTOR;
+        double controlXOffset = halfWavelength * Geometry.KAPPA;
         double startX = -diagonal / 2.0 - wavelength;
         double endX = diagonal / 2.0 + wavelength;
         double currentX = startX;

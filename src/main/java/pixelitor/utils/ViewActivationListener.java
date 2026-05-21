@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,17 +20,17 @@ package pixelitor.utils;
 import pixelitor.gui.View;
 
 /**
- * Listener for events related to changing the active {@link View}
+ * Listener for events related to changing the active {@link View}.
  */
 public interface ViewActivationListener {
     /**
-     * Called when the active image changes either because the user
-     * switches to another image or because a new image was opened.
+     * Called when the active view changes either because the user
+     * switches to another view or because a new view was opened.
      */
     void viewActivated(View oldView, View newView);
 
     /**
-     * Called when the user has closed all images
+     * Called when all open views have been closed.
      */
     void allViewsClosed();
 }

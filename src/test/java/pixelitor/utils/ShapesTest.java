@@ -46,9 +46,6 @@ import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 @DisplayName("Shapes tests")
 @TestMethodOrder(MethodOrderer.Random.class)
 class ShapesTest {
-    // constant for approximating a circle with cubic Bézier curves
-    private static final double KAPPA = 0.55228474983;
-
     private View view;
 
     @BeforeAll
@@ -59,7 +56,7 @@ class ShapesTest {
     @BeforeEach
     void beforeEachTest() {
         var comp = TestHelper.createEmptyComp("ShapesTest");
-        view = TestHelper.setupMockViewFor(comp);
+        view = TestHelper.createMockViewFor(comp);
     }
 
     @Test
@@ -149,8 +146,8 @@ class ShapesTest {
         double radiusY = h / 2.0;
         double centerX = x + radiusX;
         double centerY = y + radiusY;
-        double ctrlOffsetX = radiusX * KAPPA;
-        double ctrlOffsetY = radiusY * KAPPA;
+        double ctrlOffsetX = radiusX * Geometry.KAPPA;
+        double ctrlOffsetY = radiusY * Geometry.KAPPA;
 
         assertThat(subPath.getAnchor(0)) // right
             .isAt(centerX + radiusX, centerY)

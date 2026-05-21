@@ -37,6 +37,7 @@ import pixelitor.utils.Rnd;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -49,10 +50,12 @@ public final class TestContext {
     private final FrameFixture pw;
     private final AppRunner app;
     private final TestConfig config;
+    private final Consumer<String> logger;
 
     public TestContext(MaskMode maskMode,
                        AppRunner app,
-                       TestConfig config) {
+                       TestConfig config,
+                       Consumer<String> logger) {
         this.maskMode = maskMode;
         this.app = app;
         this.config = config;
@@ -60,15 +63,13 @@ public final class TestContext {
         this.pw = app.getPW();
         this.keyboard = app.getKeyboard();
         this.mouse = app.getMouse();
+        this.logger = logger;
     }
 
     public void log(int indent, String msg) {
-        for (int i = 0; i < indent; i++) {
-            System.out.print("    ");
-        }
         String fullMsg = "%s: %s (%s)".formatted(
             getCurrentTimeHM(), msg, maskMode);
-        System.out.println(fullMsg);
+        logger.accept("    ".repeat(indent) + fullMsg);
         EDT.run(() -> PixelitorWindow.get().setTitle(fullMsg));
     }
 

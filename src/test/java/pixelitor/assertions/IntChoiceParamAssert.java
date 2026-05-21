@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,18 +31,11 @@ public class IntChoiceParamAssert extends FilterParamAssert<IntChoiceParamAssert
         super(actual, IntChoiceParamAssert.class);
     }
 
-    public IntChoiceParamAssert valueIs(int value) {
+    public IntChoiceParamAssert selectedItemIs(String expectedtext, int expectedValue) {
         isNotNull();
 
-        assertThat(actual.getValue()).isEqualTo(value);
-
-        return this;
-    }
-
-    public IntChoiceParamAssert selectedAsStringIs(String value) {
-        isNotNull();
-
-        assertThat(actual.getSelectedItem()).hasToString(value);
+        assertThat(actual.getSelectedItem()).hasToString(expectedtext);
+        assertThat(actual.getValue()).isEqualTo(expectedValue);
 
         return this;
     }

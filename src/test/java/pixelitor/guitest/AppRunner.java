@@ -114,7 +114,7 @@ public class AppRunner {
     private HistoryChecker historyChecker;
     private final File svgOutputDir;
 
-    public AppRunner(HistoryChecker historyChecker,
+    public AppRunner(HistoryChecker historyChecker, Consumer<String> logger,
                      File inputDir, File svgOutputDir, String... fileNames) {
         this.historyChecker = historyChecker;
         this.svgOutputDir = svgOutputDir;
@@ -137,8 +137,8 @@ public class AppRunner {
         pw = WindowFinder.findFrame(PixelitorWindow.class)
             .withTimeout(APP_START_TIMEOUT, SECONDS)
             .using(robot);
-        mouse = new Mouse(pw, robot);
-        keyboard = new Keyboard(pw, robot, this, historyChecker);
+        mouse = new Mouse(pw, robot, logger);
+        keyboard = new Keyboard(pw, robot, this, historyChecker, logger);
         layersContainer = new LayersContainerFixture(robot);
 
         if (!pw.target().isActive()) {
@@ -771,7 +771,7 @@ public class AppRunner {
             dialog.button("randomize").click();
 
             if (testPresets) {
-                // load first the saved preset, to force it loading it from the disk
+                // load the saved preset first to force loading it from the disk
                 String testPresetName = "test preset";
                 boolean alreadyExists = hasPreset(dialog, testPresetName);
                 if (alreadyExists) {
@@ -891,14 +891,14 @@ public class AppRunner {
         EDT.assertNumLayersInActiveHolderIs(numLayersBefore - 1);
     }
 
-    public void addEmptyImageLayer(boolean below) {
+    public void addEmptyImageLayer(boolean addBelow) {
         int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
-        if (below) {
+        if (addBelow) {
             keyboard.pressCtrl();
         }
         pw.button("addLayer").click();
-        if (below) {
+        if (addBelow) {
             keyboard.releaseCtrl();
         }
 
@@ -1257,7 +1257,9 @@ public class AppRunner {
         return pw;
     }
 
-    // Whether we expect a save modified image confirmation dialog
+    /**
+     * Whether a confirmation dialog for saving a modified image is expected.
+     */
     public enum ExpectConfirmation {
         YES,
         NO,

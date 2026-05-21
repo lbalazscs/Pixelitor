@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
  */
 public enum PasteTarget {
     /**
-     * Paste the image as a new layer in the active composition.
+     * Pastes the image as a new layer in the active composition.
      */
     NEW_LAYER(true, "paste_as_new_layer") {
         @Override
@@ -44,16 +44,16 @@ public enum PasteTarget {
         }
     },
     /**
-     * Paste the image as a completely new image.
+     * Pastes the image as a completely new image.
      */
     NEW_IMAGE(false, "paste_as_new_img") {
         @Override
         void paste(BufferedImage pastedImage) {
-            Views.addNewPasted(pastedImage);
+            Views.addPastedImage(pastedImage);
         }
     },
     /**
-     * Paste the image as a layer mask, centering and/or cropping to match the canvas.
+     * Pastes the image as a layer mask, centering and/or cropping to match the canvas.
      */
     MASK(true, "paste_as_layer_mask") {
         @Override
@@ -75,7 +75,6 @@ public enum PasteTarget {
                 canvasWidth, canvasHeight, TYPE_BYTE_GRAY);
 
             Graphics2D g = bwImage.createGraphics();
-            // if the pasted image is too small, pad it with white
             if (!canvas.isFullyCoveredBy(pastedImage)) {
                 Colors.fillWith(Color.WHITE, g, canvasWidth, canvasHeight);
             }

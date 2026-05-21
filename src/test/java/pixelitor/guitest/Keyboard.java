@@ -34,6 +34,7 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
+import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -52,16 +53,18 @@ public class Keyboard {
     private final Robot robot;
     private final AppRunner app;
     private final HistoryChecker historyChecker;
+    private final Consumer<String> logger;
 
     private boolean ctrlDown = false;
     private boolean altDown = false;
     private boolean shiftDown = false;
 
-    public Keyboard(FrameFixture pw, Robot robot, AppRunner app, HistoryChecker historyChecker) {
+    public Keyboard(FrameFixture pw, Robot robot, AppRunner app, HistoryChecker historyChecker, Consumer<String> logger) {
         this.pw = pw;
         this.robot = robot;
         this.app = app;
         this.historyChecker = historyChecker;
+        this.logger = logger;
     }
 
     public void undo(String editName) {
@@ -213,10 +216,12 @@ public class Keyboard {
     }
 
     void pressEnter() {
+        logger.accept("pressing Enter");
         press(VK_ENTER);
     }
 
     public void pressEsc() {
+        logger.accept("pressing Esc");
         press(VK_ESCAPE);
     }
 
@@ -269,10 +274,12 @@ public class Keyboard {
     }
 
     public void pressTab() {
+        logger.accept("pressing Tab");
         press('\t');
     }
 
     public void pressCtrlTab() {
+        logger.accept("pressing Ctrl-Tab");
         ctrlPress('\t');
     }
 

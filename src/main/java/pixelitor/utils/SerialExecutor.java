@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,16 +23,16 @@ import java.util.concurrent.Executor;
 
 /**
  * This class (taken from the {@link Executor}'s Javadoc)
- * serializes the submission of tasks to a second executor
+ * serializes the execution of tasks to an underlying executor
  * (it guarantees that there is only one task running at a time).
  */
 public class SerialExecutor implements Executor {
     private final Queue<Runnable> tasks = new ArrayDeque<>();
-    private final Executor delegateExecutor;
+    private final Executor underlyingExecutor;
     private Runnable activeTask;
 
-    public SerialExecutor(Executor delegateExecutor) {
-        this.delegateExecutor = delegateExecutor;
+    public SerialExecutor(Executor underlyingExecutor) {
+        this.underlyingExecutor = underlyingExecutor;
     }
 
     @Override
@@ -53,9 +53,9 @@ public class SerialExecutor implements Executor {
     }
 
     private synchronized void scheduleNext() {
-        // if there are any tasks in the queue, execute the first one
+        // if there are any tasks in the queue, remove and execute the first one
         if ((activeTask = tasks.poll()) != null) {
-            delegateExecutor.execute(activeTask);
+            underlyingExecutor.execute(activeTask);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 
 /**
- * A DocumentFilter that restricts text input to integer values within a range.
+ * A DocumentFilter that restricts text input to integer values, optionally within a given range.
  */
 public class IntDocumentFilter extends DocumentFilter {
     private final int min;
@@ -43,7 +43,7 @@ public class IntDocumentFilter extends DocumentFilter {
         rangeConstrained = true;
     }
 
-    public void applyOn(JTextField tf) {
+    public void applyTo(JTextField tf) {
         ((AbstractDocument) tf.getDocument()).setDocumentFilter(this);
     }
 

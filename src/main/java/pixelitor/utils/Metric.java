@@ -17,6 +17,8 @@
 
 package pixelitor.utils;
 
+import net.jafama.FastMath;
+
 /**
  * Different distance metrics for calculating distances between two points.
  */
@@ -72,14 +74,14 @@ public enum Metric {
     },
 
     /**
-     * Minkowski distance with p=3: (|x₁-x₂|³ + |y₁-y₂|³)^(1/3)
-     * (without the cube root)
+     * Cubed Minkowski distance with p=3: |x₁-x₂|³ + |y₁-y₂|³
      */
     MINKOWSKI_3_CUBED("Minkowski p=3", false) {
         @Override
         public double distanceInt(int x1, int y1, int x2, int y2) {
-            int dx = Math.abs(x1 - x2);
-            int dy = Math.abs(y1 - y2);
+            // use doubles to prevent overflow
+            double dx = Math.abs(x1 - x2);
+            double dy = Math.abs(y1 - y2);
             return dx * dx * dx + dy * dy * dy;
         }
 
@@ -94,8 +96,6 @@ public enum Metric {
      * Minkowski distance with p=-1: (|x₁-x₂|⁻¹ + |y₁-y₂|⁻¹)⁻¹
      */
     MINKOWSKI_NEG_1("Minkowski p=-1", false) {
-        private static final double EPSILON = 1.0e-10;
-
         @Override
         public double distanceInt(int x1, int y1, int x2, int y2) {
             return distanceDouble(x1, y1, x2, y2);
@@ -103,12 +103,11 @@ public enum Metric {
 
         @Override
         public double distanceDouble(double x1, double y1, double x2, double y2) {
+            // 1.0 / (1.0 / absX + 1.0 / absY) = (absX * absY) / (absX + absY)
             double absX = Math.abs(x1 - x2);
             double absY = Math.abs(y1 - y2);
-            // avoid division by zero
-            absX = Math.max(absX, EPSILON);
-            absY = Math.max(absY, EPSILON);
-            return 1.0 / (1.0 / absX + 1.0 / absY);
+            double sum = absX + absY;
+            return sum == 0 ? 0 : (absX * absY) / sum;
         }
     }, POLAR_RAD("Polar Radial", true) {
         @Override
@@ -119,12 +118,11 @@ public enum Metric {
         @Override
         public double distanceDouble(double x1, double y1, double x2, double y2) {
             // polar coordinates
-            double theta1 = Math.atan2(y1, x1);
-            double theta2 = Math.atan2(y2, x2);
             double r1Sq = x1 * x1 + y1 * y1;
             double r2Sq = x2 * x2 + y2 * y2;
 
-            double dTheta = angularDiff(theta1, theta2);
+            // atan2(cross_product, dot_product) is the shortest angular difference
+            double dTheta = Math.abs(FastMath.atan2(x1 * y2 - x2 * y1, x1 * x2 + y1 * y2));
 
             double dr = r1Sq - r2Sq;
             double dt = r1Sq * r2Sq * dTheta;
@@ -139,23 +137,16 @@ public enum Metric {
         @Override
         public double distanceDouble(double x1, double y1, double x2, double y2) {
             // polar coordinates
-            double theta1 = Math.atan2(y1, x1);
-            double theta2 = Math.atan2(y2, x2);
             double r1Sq = x1 * x1 + y1 * y1;
             double r2Sq = x2 * x2 + y2 * y2;
 
-            double dTheta = angularDiff(theta1, theta2);
+            // atan2(cross_product, dot_product) is the shortest angular difference
+            double dTheta = Math.abs(FastMath.atan2(x1 * y2 - x2 * y1, x1 * x2 + y1 * y2));
 
             double dr = r1Sq - r2Sq;
             return dr * dr + dTheta * dTheta;
         }
     };
-
-    // angular difference considering periodicity
-    private static double angularDiff(double theta1, double theta2) {
-        double diff = Math.abs(theta1 - theta2);
-        return (diff > Math.PI) ? 2 * Math.PI - diff : diff;
-    }
 
     private final String displayName;
     private final boolean centered;
@@ -199,6 +190,7 @@ public enum Metric {
     /**
      * Abstracts away the precision of the calculations.
      */
+    @FunctionalInterface
     public interface DistanceFunction {
         double apply(double x1, double y1, double x2, double y2);
     }

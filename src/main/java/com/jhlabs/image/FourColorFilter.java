@@ -132,10 +132,10 @@ public abstract class FourColorFilter extends PointFilter {
     protected final double relCx;
     protected final double relCy;
 
-    protected int width;
-    protected int height;
-    protected double cx;
-    protected double cy;
+    protected final int width;
+    protected final int height;
+    protected final double cx;
+    protected final double cy;
 
     // corner alphas (only components we need to retain as integers)
     protected final int aNW, aNE, aSW, aSE;
@@ -151,7 +151,7 @@ public abstract class FourColorFilter extends PointFilter {
     protected double invRange01, invRange12, invRange23, invRange30;
 
     /**
-     * Constructs an {@link FourColorFilter}.
+     * Constructs a {@link FourColorFilter}.
      *
      * @param filterName    the name of the filter.
      * @param colorNW       the color at the North-West corner.
@@ -162,11 +162,13 @@ public abstract class FourColorFilter extends PointFilter {
      * @param colorSpace    the color space for interpolation.
      * @param relCx         the relative X coordinate (0.0 to 1.0) of the midpoint.
      * @param relCy         the relative Y coordinate (0.0 to 1.0) of the midpoint.
+     * @param width         the width of the generated image (in pixels).
+     * @param height        the height of the generated image (in pixels).
      */
     protected FourColorFilter(String filterName,
                               int colorNW, int colorNE, int colorSW, int colorSE,
                               InterpolationType interpolation, ColorSpaceType colorSpace,
-                              double relCx, double relCy) {
+                              double relCx, double relCy, int width, int height) {
         super(filterName);
 
         this.interpolation = interpolation;
@@ -183,6 +185,12 @@ public abstract class FourColorFilter extends PointFilter {
         convertAndSetCorner(cNE, colorNE);
         convertAndSetCorner(cSW, colorSW);
         convertAndSetCorner(cSE, colorSE);
+
+        this.width = width;
+        this.height = height;
+
+        this.cx = relCx * width;
+        this.cy = relCy * height;
     }
 
     // the corner colors are converted once at setup time into the chosen space
@@ -209,17 +217,6 @@ public abstract class FourColorFilter extends PointFilter {
                 corner[2] = oklab[2];
             }
         }
-    }
-
-    @Override
-    public void setDimensions(int width, int height) {
-        super.setDimensions(width, height);
-        this.width = width;
-        this.height = height;
-
-        // pre-compute cx and cy centrally as most spatial algorithms need them
-        this.cx = relCx * width;
-        this.cy = relCy * height;
     }
 
     /**

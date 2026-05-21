@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -95,7 +95,7 @@ public class Colorize extends ParametrizedFilter {
         float translucence = 1 - opacity;
         for (int i = 0; i < length; i++) {
             int srcRGB = srcPixels[i];
-            float lum = LuminanceLookup.from(srcRGB);
+            float lum = ImageMath.calcLuminance(srcRGB);
             if (briShift > 0) {
                 lum = lum * (1.0f - briShift);
                 lum += 255 - (1.0f - briShift) * 255.0f;

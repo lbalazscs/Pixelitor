@@ -52,7 +52,7 @@ public class DebugNode extends DefaultMutableTreeNode {
             .title(title)
             .content(new JScrollPane(tree))
             .okText(GUIText.COPY_AS_JSON)
-            .okAction(() -> Utils.copyStringToClipboard(toJSON()))
+            .okAction(() -> Utils.copyStringToClipboard(toJson()))
             .keepOpenAfterOk()
             .cancelText(GUIText.CLOSE_DIALOG)
             .show();
@@ -66,12 +66,12 @@ public class DebugNode extends DefaultMutableTreeNode {
     /**
      * Returns a JSON text representation of the tree.
      */
-    public String toJSON() {
+    public String toJson() {
         // start recursion with indentation level 0
-        return toJSON(0);
+        return toJson(0);
     }
 
-    private String toJSON(int indentLevel) {
+    private String toJson(int indentLevel) {
         if (userObject == null) {
             return "  ".repeat(indentLevel) + "\"" + name + "\": null";
         }
@@ -87,15 +87,15 @@ public class DebugNode extends DefaultMutableTreeNode {
         }
 
         List<String> childrenJsonParts = new ArrayList<>();
-        Enumeration<TreeNode> childrenEnum = children();
-        while (childrenEnum.hasMoreElements()) {
-            TreeNode child = childrenEnum.nextElement();
+        Enumeration<TreeNode> childNodes = children();
+        while (childNodes.hasMoreElements()) {
+            TreeNode child = childNodes.nextElement();
             String childJson;
             if (child instanceof DebugNode dn) {
-                childJson = dn.toJSON(indentLevel + 1);
+                childJson = dn.toJson(indentLevel + 1);
             } else if (child instanceof DefaultMutableTreeNode defaultNode) {
                 StringKeyValue skv = (StringKeyValue) defaultNode.getUserObject();
-                childJson = "  ".repeat(indentLevel + 1) + skv.toJSON();
+                childJson = "  ".repeat(indentLevel + 1) + skv.toJson();
             } else {
                 throw new IllegalStateException("Unknown child type in DebugNode tree");
             }
@@ -155,7 +155,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     /**
-     * This overload can be used if the debugged object can't implement {@link Debuggable}
+     * This overload can be used if the debugged object can't implement {@link Debuggable}.
      */
     public <T> void addNullableDebuggable(String name, T debugged,
                                           BiFunction<String, T, DebugNode> transformer) {
@@ -193,8 +193,8 @@ public class DebugNode extends DefaultMutableTreeNode {
         addValidJsonNode(name, format(Locale.ROOT, "%.2f", f));
     }
 
-    public void addDouble(String name, double f) {
-        addValidJsonNode(name, format(Locale.ROOT, "%.2f", f));
+    public void addDouble(String name, double d) {
+        addValidJsonNode(name, format(Locale.ROOT, "%.2f", d));
     }
 
     public void addBoolean(String name, boolean b) {
@@ -241,10 +241,10 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     /**
-     * Allow a leaf node to have two string representations: a GUI text and a JSON.
+     * Allows a leaf node to have two string representations: a GUI text and a JSON string.
      */
     private record StringKeyValue(String key, String value, Function<String, String> jsonValueConverter) {
-        String toJSON() {
+        String toJson() {
             String jsonValue = jsonValueConverter.apply(value);
             return "\"" + key + "\": " + jsonValue;
         }

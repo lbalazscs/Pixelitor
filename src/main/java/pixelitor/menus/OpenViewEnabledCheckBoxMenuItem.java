@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import pixelitor.utils.ViewActivationListener;
 import javax.swing.*;
 
 /**
- * A JCheckBoxMenuItem that becomes enabled only if there is an open view.
+ * A JCheckBoxMenuItem that becomes enabled only when there is at least one open view.
  */
 public class OpenViewEnabledCheckBoxMenuItem extends JCheckBoxMenuItem implements ViewActivationListener {
     public OpenViewEnabledCheckBoxMenuItem(String name) {

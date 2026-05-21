@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -148,7 +148,7 @@ public class ConnectBrushHistory {
         if (nextAddIndex > 0) {
             nextAddIndex--; // move back one step in the history
         }
-        recalculateNumPoints();
+        recalcNumPoints();
     }
 
     private static void redo() {
@@ -157,13 +157,13 @@ public class ConnectBrushHistory {
         if (nextAddIndex < history.size()) {
             nextAddIndex++; // move forward one step in the history
         }
-        recalculateNumPoints();
+        recalcNumPoints();
     }
 
     /**
      * Recalculates the total number of points across all active strokes.
      */
-    private static void recalculateNumPoints() {
+    private static void recalcNumPoints() {
         numPoints = 0;
         for (int i = 0; i < nextAddIndex; i++) {
             numPoints += history.get(i).size();

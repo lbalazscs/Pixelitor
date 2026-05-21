@@ -33,13 +33,13 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         super(actual, selfType);
     }
 
-    public S nameIs(String expected) {
+    public S hasName(String expected) {
         isNotNull();
         assertThat(actual.getName()).isEqualTo(expected);
         return myself;
     }
 
-    public S uiNameIs(String expected) {
+    public S hasUiName(String expected) {
         isNotNull();
         hasUI();
 
@@ -47,17 +47,17 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         return myself;
     }
 
-    public S opacityIs(float expected) {
+    public S hasOpacity(float expected) {
         isNotNull();
         assertThat(actual.getOpacity()).isCloseTo(expected, within(0.001f));
         return myself;
     }
 
     public S isOpaque() {
-        return opacityIs(1.0f);
+        return hasOpacity(1.0f);
     }
 
-    public S blendingModeIs(BlendingMode expected) {
+    public S hasBlendingMode(BlendingMode expected) {
         isNotNull();
         assertThat(actual.getBlendingMode()).isEqualTo(expected);
         return myself;
@@ -211,9 +211,9 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         return myself;
     }
 
-    public S holderIs(LayerHolder expected) {
+    public S hasHolder(LayerHolder expected) {
         isNotNull();
-        assertThat(actual.getHolder()).isEqualTo(expected);
+        assertThat(actual.getHolder()).isSameAs(expected);
         return myself;
     }
 

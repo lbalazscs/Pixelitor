@@ -184,7 +184,7 @@ public class ImageArea {
     // called when the global pixel grid switch was turned on
     public static void pixelGridEnabled() {
         if (isActiveMode(FRAMES)) {
-            if (Views.doesAnyViewAllowPixelGrid()) {
+            if (Views.anyViewAllowsPixelGrid()) {
                 Views.repaintAll();
             } else {
                 showNoPixelGridMessage();

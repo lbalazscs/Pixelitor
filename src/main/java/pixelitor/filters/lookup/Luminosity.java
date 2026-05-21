@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.filters.lookup;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.Filter;
 import pixelitor.utils.ImageUtils;
 
@@ -39,7 +40,7 @@ public class Luminosity extends Filter {
             if (alpha == 0) {
                 destPixels[i] = 0;
             } else {
-                int lum = (int) LuminanceLookup.from(rgb);
+                int lum = ImageMath.calcLuminanceInt(rgb);
                 destPixels[i] = alpha | lum << 16 | lum << 8 | lum;
             }
         }

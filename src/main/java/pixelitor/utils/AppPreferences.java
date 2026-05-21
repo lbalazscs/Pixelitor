@@ -402,7 +402,7 @@ public final class AppPreferences {
 
     public static void savePreferences() {
         saveDesktopMode();
-        saveRecentFiles(RecentFilesMenu.INSTANCE.getRecentFileEntries());
+        saveRecentFiles(RecentFilesMenu.INSTANCE.getRecentFiles());
         saveFramePreferences(PixelitorWindow.get());
         saveLastOpenDir();
         saveLastSaveDir();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,11 +32,11 @@ public enum MouseButton implements EventMaskModifier {
     RIGHT(InputEvent.BUTTON3_DOWN_MASK, MouseEvent.BUTTON3);
 
     private final int buttonMask;
-    private final int awtButton;
+    private final int buttonId;
 
-    MouseButton(int buttonMask, int awtButton) {
+    MouseButton(int buttonMask, int buttonId) {
         this.buttonMask = buttonMask;
-        this.awtButton = awtButton;
+        this.buttonId = buttonId;
     }
 
     @Override
@@ -48,8 +48,8 @@ public enum MouseButton implements EventMaskModifier {
         return this == RIGHT;
     }
 
-    public int getAwtButton() {
-        return awtButton;
+    public int getButtonId() {
+        return buttonId;
     }
 
     public MouseButton press(Robot robot) {

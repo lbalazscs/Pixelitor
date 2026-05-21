@@ -83,7 +83,7 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
 
     public void closeTab(TabViewContainer tab) {
         remove(indexOfComponent(tab));
-        Views.viewClosed(tab.getView());
+        Views.closeView(tab.getView());
     }
 
     public void selectTab(TabViewContainer tab) {

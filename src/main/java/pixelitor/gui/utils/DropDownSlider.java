@@ -40,7 +40,7 @@ public class DropDownSlider extends JComboBox<String> {
 
         setEditable(true);
 
-        new IntDocumentFilter(minValue, maxValue).applyOn(getEditorComponent());
+        new IntDocumentFilter(minValue, maxValue).applyTo(getEditorComponent());
 
         slider = new JSlider(HORIZONTAL, minValue, maxValue, value);
         popupMenu = new JPopupMenu();

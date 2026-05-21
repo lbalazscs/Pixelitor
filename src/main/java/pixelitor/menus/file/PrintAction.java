@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.DimensionHelper;
+import pixelitor.menus.file.AlignmentSelector.Alignment;
 import pixelitor.utils.Messages;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -35,6 +36,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
+import static pixelitor.menus.file.AlignmentSelector.HorizontalAlignment;
+import static pixelitor.menus.file.AlignmentSelector.VerticalAlignment;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
 
@@ -49,9 +52,9 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
     public enum ScalingMode {ACTUAL_SIZE, FIT_TO_PAGE}
     private ScalingMode scalingMode = ScalingMode.ACTUAL_SIZE;
 
-    private AlignmentSelector.Alignment alignment = new AlignmentSelector.Alignment(
-        AlignmentSelector.HorizontalAlignment.CENTER,
-        AlignmentSelector.VerticalAlignment.CENTER
+    private Alignment alignment = new Alignment(
+        HorizontalAlignment.CENTER,
+        VerticalAlignment.CENTER
     );
     private int imageDpi;
 
@@ -100,17 +103,17 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         JPanel previewContainer = new JPanel(new BorderLayout());
         PrintPreviewPanel previewPanel = new PrintPreviewPanel(pageFormat, this);
 
-        JPanel northPanel = createOptionsPanel(job, comp, previewPanel);
+        JPanel optionsPanel = createOptionsPanel(job, comp, previewPanel);
 
-        previewContainer.add(northPanel, BorderLayout.NORTH);
+        previewContainer.add(optionsPanel, BorderLayout.NORTH);
         previewContainer.add(previewPanel, BorderLayout.CENTER);
         return previewContainer;
     }
 
     // creates the panel for all options at the top
     private JPanel createOptionsPanel(PrinterJob job, Composition comp, PrintPreviewPanel previewPanel) {
-        JPanel northPanel = new JPanel(new GridBagLayout());
-        northPanel.setBorder(BorderFactory.createTitledBorder("Print Options"));
+        JPanel optionsPanel = new JPanel(new GridBagLayout());
+        optionsPanel.setBorder(BorderFactory.createTitledBorder("Print Options"));
 
         // create all components
         JComboBox<String> scalingCombo = new JComboBox<>(new String[]{
@@ -118,8 +121,8 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         });
         scalingCombo.setSelectedIndex(scalingMode == ScalingMode.ACTUAL_SIZE ? 0 : 1);
 
-        JComboBox<Integer> dpiChooser = new JComboBox<>(DimensionHelper.DPI_VALUES);
-        dpiChooser.setSelectedItem(imageDpi);
+        JComboBox<Integer> dpiCombo = new JComboBox<>(DimensionHelper.DPI_VALUES);
+        dpiCombo.setSelectedItem(imageDpi);
 
         JButton setupPageButton = new JButton("Setup Page...");
 
@@ -127,7 +130,7 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         scalingCombo.addActionListener(e -> {
             scalingMode = scalingCombo.getSelectedIndex() == 0 ? ScalingMode.ACTUAL_SIZE : ScalingMode.FIT_TO_PAGE;
             previewPanel.repaint();
-            dpiChooser.setEnabled(scalingMode == ScalingMode.ACTUAL_SIZE);
+            dpiCombo.setEnabled(scalingMode == ScalingMode.ACTUAL_SIZE);
         });
 
         alignmentSelector.addActionListener(e -> {
@@ -135,8 +138,8 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
             previewPanel.repaint();
         });
 
-        dpiChooser.addActionListener(e -> {
-            Integer selectedDpi = (Integer) dpiChooser.getSelectedItem();
+        dpiCombo.addActionListener(e -> {
+            Integer selectedDpi = (Integer) dpiCombo.getSelectedItem();
             if (selectedDpi != null) {
                 imageDpi = selectedDpi;
                 previewPanel.repaint();
@@ -153,55 +156,56 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        northPanel.add(setupPageButton, gbc);
+        optionsPanel.add(setupPageButton, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.LINE_END;
-        northPanel.add(new JLabel("Scaling:"), gbc);
+        optionsPanel.add(new JLabel("Scaling:"), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.LINE_START;
-        northPanel.add(scalingCombo, gbc);
+        optionsPanel.add(scalingCombo, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.LINE_END;
-        northPanel.add(new JLabel("DPI:"), gbc);
+        optionsPanel.add(new JLabel("DPI:"), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.LINE_START;
-        northPanel.add(dpiChooser, gbc);
+        optionsPanel.add(dpiCombo, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = 1;
         gbc.gridheight = 1; // reset to default
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.LINE_END;
-        northPanel.add(new JLabel("Alignment:"), gbc);
+        optionsPanel.add(new JLabel("Alignment:"), gbc);
 
         gbc.gridx = 3;
         gbc.gridy = 0;
         gbc.gridheight = 3; // spanning 3 rows
         gbc.anchor = GridBagConstraints.CENTER;
-        northPanel.add(alignmentSelector, gbc);
-        return northPanel;
+        optionsPanel.add(alignmentSelector, gbc);
+
+        return optionsPanel;
     }
 
     /**
      * Shows the page setup dialog and updates the preview if changes are made.
      */
     private void showPageSetupDialog(PrinterJob job, PrintPreviewPanel previewPanel) {
-        PageFormat newPage = job.pageDialog(pageToAttributes(pageFormat));
-        if (newPage != null) { // null if the dialog is canceled
-            pageFormat = newPage;
-            previewPanel.updatePage(pageFormat);
+        PageFormat newPageFormat = job.pageDialog(pageToAttributes(pageFormat));
+        if (newPageFormat != null) { // null if the dialog is canceled
+            pageFormat = newPageFormat;
+            previewPanel.updatePage(newPageFormat);
         }
     }
 
@@ -237,7 +241,7 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
     }
 
     /**
-     * Executes the print job on a background thread with an indeterminate status bar progress indication.
+     * Executes the print job on a background thread and shows an indeterminate progress indicator in the status bar.
      */
     private void startAsyncPrinting(PrinterJob job) {
         var progressHandler = Messages.startProgress(
@@ -325,7 +329,7 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
                 break;
             case FIT_TO_PAGE:
             default:
-                // scale to fit the image within the printable area while maintaining the aspect ratio
+                // scale to fit the image within the printable area while maintaining its aspect ratio
                 double scaleX = pageWidth / imageWidth;
                 double scaleY = pageHeight / imageHeight;
                 double scale = Math.min(scaleX, scaleY);
@@ -334,13 +338,13 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
                 break;
         }
 
-        double x = switch (alignment.hAlign()) {
+        double x = switch (alignment.horizontal()) {
             case LEFT -> 0.0;
             case CENTER -> (pageWidth - scaledWidth) / 2.0;
             case RIGHT -> pageWidth - scaledWidth;
         };
 
-        double y = switch (alignment.vAlign()) {
+        double y = switch (alignment.vertical()) {
             case TOP -> 0.0;
             case CENTER -> (pageHeight - scaledHeight) / 2.0;
             case BOTTOM -> pageHeight - scaledHeight;

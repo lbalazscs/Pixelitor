@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.utils;
 import java.util.Arrays;
 
 /**
- * A resizable list of primitive ints, faster than ArrayList<Integer>.
+ * A resizable list of primitive ints, faster than {@code ArrayList<Integer>}.
  */
 public class IntList {
     private static final int DEFAULT_CAPACITY = 10;
@@ -44,7 +44,7 @@ public class IntList {
     public void add(int value) {
         if (size == data.length) {
             int newCapacity = (data.length == 0) ? DEFAULT_CAPACITY : data.length * 2;
-            expandData(newCapacity);
+            grow(newCapacity);
         }
         data[size++] = value;
     }
@@ -67,7 +67,7 @@ public class IntList {
         return result;
     }
 
-    private void expandData(int newCapacity) {
+    private void grow(int newCapacity) {
         int[] newData = new int[newCapacity];
         System.arraycopy(data, 0, newData, 0, size);
         data = newData;

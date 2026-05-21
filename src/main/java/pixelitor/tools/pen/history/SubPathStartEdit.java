@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import javax.swing.undo.CannotUndoException;
 import static pixelitor.tools.pen.BuildState.IDLE;
 
 /**
- * Represents the starting of a new subpath within a path.
+ * Represents starting a new subpath within a path.
  */
 public class SubPathStartEdit extends PixelitorEdit {
     private final Path path;
@@ -51,9 +51,9 @@ public class SubPathStartEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        boolean noMoreLeft = path.deleteLastSubPath();
-        assert wasFirstSP == noMoreLeft;
-        if (noMoreLeft) {
+        boolean pathEmpty = path.deleteLastSubPath();
+        assert wasFirstSP == pathEmpty;
+        if (pathEmpty) {
             Tools.PEN.removePath();
         }
         Tools.PEN.setBuildState(IDLE);

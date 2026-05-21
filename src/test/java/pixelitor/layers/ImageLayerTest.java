@@ -482,8 +482,8 @@ class ImageLayerTest {
 
         assertThat(duplicate)
             .contentBoundsIsEqualTo(layer.getContentBounds())
-            .blendingModeIs(layer.getBlendingMode())
-            .opacityIs(layer.getOpacity());
+            .hasBlendingMode(layer.getBlendingMode())
+            .hasOpacity(layer.getOpacity());
 
         BufferedImage image = layer.getImage();
         BufferedImage duplicateImage = duplicate.getImage();

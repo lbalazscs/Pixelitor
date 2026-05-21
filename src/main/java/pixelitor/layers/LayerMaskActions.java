@@ -33,13 +33,13 @@ public class LayerMaskActions {
     }
 
     public static void addPopupMenu(JLabel label, Layer layer) {
-        label.addMouseListener(new PopupMouseListener(layer));
+        label.addMouseListener(new MaskPopupListener(layer));
     }
 
-    private static class PopupMouseListener extends MouseAdapter {
+    private static class MaskPopupListener extends MouseAdapter {
         private final JPopupMenu menu;
 
-        protected PopupMouseListener(Layer layer) {
+        protected MaskPopupListener(Layer layer) {
             menu = new JPopupMenu();
 
             JMenu showMenu = new JMenu("Show/Edit");
@@ -63,11 +63,11 @@ public class LayerMaskActions {
                 }));
             }
 
-            menu.add(new EnableDisableMaskAction(layer));
+            menu.add(new ToggleMaskEnabledAction(layer));
 
             // masks can be linked only to content layers
             if (layer instanceof ContentLayer) {
-                menu.add(new LinkUnlinkMaskAction(layer));
+                menu.add(new ToggleMaskLinkedAction(layer));
             }
         }
 
@@ -95,10 +95,10 @@ public class LayerMaskActions {
     /**
      * Enables or disables a layer's layer mask.
      */
-    static class EnableDisableMaskAction extends NamedAction implements LayerListener {
+    static class ToggleMaskEnabledAction extends NamedAction implements LayerListener {
         private final Layer layer;
 
-        public EnableDisableMaskAction(Layer layer) {
+        public ToggleMaskEnabledAction(Layer layer) {
             super(calcText(layer));
             this.layer = layer;
             layer.addListener(this);
@@ -128,10 +128,10 @@ public class LayerMaskActions {
     /**
      * Links or unlinks the movement of a layer and its layer mask.
      */
-    static class LinkUnlinkMaskAction extends NamedAction implements LayerListener {
+    static class ToggleMaskLinkedAction extends NamedAction implements LayerListener {
         private final Layer layer;
 
-        public LinkUnlinkMaskAction(Layer layer) {
+        public ToggleMaskLinkedAction(Layer layer) {
             super(calcText(layer));
             this.layer = layer;
             layer.getMask().addListener(this);

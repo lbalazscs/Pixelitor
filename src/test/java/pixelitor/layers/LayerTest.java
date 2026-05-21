@@ -28,8 +28,8 @@ import pixelitor.TestHelper;
 import pixelitor.history.History;
 import pixelitor.history.LayerOpacityEdit;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.layers.LayerMaskActions.EnableDisableMaskAction;
-import pixelitor.layers.LayerMaskActions.LinkUnlinkMaskAction;
+import pixelitor.layers.LayerMaskActions.ToggleMaskEnabledAction;
+import pixelitor.layers.LayerMaskActions.ToggleMaskLinkedAction;
 import pixelitor.testutils.WithMask;
 
 import java.awt.Dimension;
@@ -89,7 +89,7 @@ class LayerTest {
         layer = TestHelper.createLayer(layerClass, comp);
 
         // Add the layer to the new composition.
-        // For smart filters their owning smart object will be added.
+        // For smart filters, their owning smart object will be added.
         comp.addLayerWithoutUI(layer.getTopLevelLayer());
 
         layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
@@ -196,7 +196,7 @@ class LayerTest {
 
         copy.createUI();
         assertThat(copy)
-            .nameIs(expectedName)
+            .hasName(expectedName)
             .isInstanceOf(layer.getClass())
             .uiIsVisible()
             .hasMask(withMask.isTrue());
@@ -205,14 +205,14 @@ class LayerTest {
     }
 
     @Test
-    void opacity() {
+    void changingOpacity() {
         float oldValue = 1.0f;
         float newValue = 0.7f;
-        assertThat(layer).opacityIs(oldValue);
+        assertThat(layer).hasOpacity(oldValue);
 
         // change the opacity of the layer
         layer.setOpacity(newValue, true, true);
-        assertThat(layer).opacityIs(newValue);
+        assertThat(layer).hasOpacity(newValue);
 
         PixelitorEdit lastEdit = History.getLastEdit();
         assertThat(lastEdit)
@@ -222,30 +222,30 @@ class LayerTest {
         assertSame(layer, opacityEdit.getLayer());
 
         History.undo("Layer Opacity Change");
-        assertThat(layer).opacityIs(oldValue);
+        assertThat(layer).hasOpacity(oldValue);
 
         History.redo("Layer Opacity Change");
-        assertThat(layer).opacityIs(newValue);
+        assertThat(layer).hasOpacity(newValue);
 
         History.assertNumEditsIs(1);
         iconChecker.verifyUpdateCounts(0, 0);
     }
 
     @Test
-    void blendingMode() {
+    void changingBlendingMode() {
         BlendingMode initialMode = layerClass == LayerGroup.class
             ? PASS_THROUGH : NORMAL;
 
-        assertThat(layer).blendingModeIs(initialMode);
+        assertThat(layer).hasBlendingMode(initialMode);
 
         layer.setBlendingMode(DIFFERENCE, true, true);
-        assertThat(layer).blendingModeIs(DIFFERENCE);
+        assertThat(layer).hasBlendingMode(DIFFERENCE);
 
         History.undo("Blending Mode Change");
-        assertThat(layer).blendingModeIs(initialMode);
+        assertThat(layer).hasBlendingMode(initialMode);
 
         History.redo("Blending Mode Change");
-        assertThat(layer).blendingModeIs(DIFFERENCE);
+        assertThat(layer).hasBlendingMode(DIFFERENCE);
 
         History.assertNumEditsIs(1);
         int expectedLayerIconUpdates = layerClass == LayerGroup.class
@@ -258,7 +258,7 @@ class LayerTest {
         String initialName = "layer 1";
         String newName = "newName";
         String editName = "Rename Layer to \"" + newName + "\"";
-        assertThat(layer).nameIs(initialName);
+        assertThat(layer).hasName(initialName);
 
         // rename the layer
         layer.setName(newName, true);
@@ -275,7 +275,7 @@ class LayerTest {
     }
 
     private void checkName(String newName) {
-        assertThat(layer).nameIs(newName).uiNameIs(newName);
+        assertThat(layer).hasName(newName).hasUiName(newName);
     }
 
     @Test
@@ -314,8 +314,8 @@ class LayerTest {
     void resizing() {
         Dimension origSize = layer.getComp().getCanvas().getSize();
 
-        // there is not much to assert, since normally
-        // resizing is done at the Composition level
+        // there is not much to assert because resizing is
+        // normally handled at the Composition level
         layer.resize(origSize).join();
         layer.resize(new Dimension(30, 25)).join();
         layer.resize(new Dimension(25, 30)).join();
@@ -328,7 +328,7 @@ class LayerTest {
     }
 
     @Test
-    void changeStackIndex() {
+    void changingStackIndex() {
         Layer topLevelLayer = layer.getTopLevelLayer();
         assertThat(comp.indexOf(topLevelLayer)).isEqualTo(0);
 
@@ -345,7 +345,7 @@ class LayerTest {
     }
 
     @Test
-    void addMask() {
+    void addingMask() {
         if (withMask.isTrue()) {
             return; // only test adding if no mask exists initially
         }
@@ -376,7 +376,7 @@ class LayerTest {
     }
 
     @Test
-    void deleteMask() {
+    void deletingMask() {
         if (withMask.isFalse()) {
             return;  // only test deleting if a mask exists
         }
@@ -397,11 +397,11 @@ class LayerTest {
     }
 
     @Test
-    void maskEnableToggle() {
+    void togglingMaskEnabled() {
         if (withMask.isFalse()) {
             return; // only test if a mask exists
         }
-        var action = new EnableDisableMaskAction(layer);
+        var action = new ToggleMaskEnabledAction(layer);
         checkMaskIsEnabled(action);
 
         // disable the layer mask
@@ -432,22 +432,22 @@ class LayerTest {
         iconChecker.verifyUpdateCounts(0, 6);
     }
 
-    private void checkMaskIsEnabled(EnableDisableMaskAction action) {
+    private void checkMaskIsEnabled(ToggleMaskEnabledAction action) {
         assertThat(layer).hasMask().maskIsEnabled();
         assertThat(action).textIs("Disable"); // the next possible action
     }
 
-    private void checkMaskIsDisabled(EnableDisableMaskAction action) {
+    private void checkMaskIsDisabled(ToggleMaskEnabledAction action) {
         assertThat(layer).hasMask().maskIsDisabled();
         assertThat(action).textIs("Enable"); // the next possible action
     }
 
     @Test
-    void maskLinking() {
+    void linkingMask() {
         if (withMask.isFalse()) {
             return; // only test if a mask exists
         }
-        var linkAction = new LinkUnlinkMaskAction(layer);
+        var linkAction = new ToggleMaskLinkedAction(layer);
         checkMaskIsLinked(linkAction);
 
         // unlink the layer mask
@@ -474,18 +474,18 @@ class LayerTest {
         iconChecker.verifyUpdateCounts(0, 0);
     }
 
-    private void checkMaskIsLinked(LinkUnlinkMaskAction linkAction) {
+    private void checkMaskIsLinked(ToggleMaskLinkedAction linkAction) {
         assertThat(layer).maskIsLinked();
         assertThat(linkAction).textIs("Unlink"); // the next possible action
     }
 
-    private void checkMaskIsNotLinked(LinkUnlinkMaskAction linkAction) {
+    private void checkMaskIsNotLinked(ToggleMaskLinkedAction linkAction) {
         assertThat(layer).hasMask().maskIsNotLinked();
         assertThat(linkAction).textIs("Link"); // the next possible action
     }
 
     @Test
-    void maskEditing() {
+    void editingMask() {
         if (withMask.isFalse()) {
             return; // only test if a mask exists
         }

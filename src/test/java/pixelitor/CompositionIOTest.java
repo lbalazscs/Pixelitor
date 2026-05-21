@@ -66,8 +66,8 @@ class CompositionIOTest {
             Arguments.of("pxc_test_input.pxc", (Consumer<Layer>) secondLayer ->
                 assertThat(secondLayer)
                     .isInstanceOf(ImageLayer.class)
-                    .blendingModeIs(BlendingMode.MULTIPLY)
-                    .opacityIs(0.75f)),
+                    .hasBlendingMode(BlendingMode.MULTIPLY)
+                    .hasOpacity(0.75f)),
             Arguments.of("pxc_w_layer_mask.pxc", (Consumer<Layer>) secondLayer ->
                 assertThat(secondLayer)
                     .isInstanceOf(ImageLayer.class)
@@ -131,8 +131,8 @@ class CompositionIOTest {
         Consumer<Layer> secondLayerValidator = secondLayer ->
             assertThat(secondLayer)
                 .isInstanceOf(ImageLayer.class)
-                .blendingModeIs(BlendingMode.MULTIPLY)
-                .opacityIs(0.75f);
+                .hasBlendingMode(BlendingMode.MULTIPLY)
+                .hasOpacity(0.75f);
 
         // test reading
         File inputFile = getTestResourceFile("gimp_ora_test_input.ora");
@@ -156,7 +156,7 @@ class CompositionIOTest {
 
         assertThat(comp.getLayer(0))
             .isInstanceOf(ImageLayer.class)
-            .blendingModeIs(BlendingMode.NORMAL)
+            .hasBlendingMode(BlendingMode.NORMAL)
             .isOpaque()
             .hasNoMask();
 
@@ -176,7 +176,7 @@ class CompositionIOTest {
         Layer bottomLayer = comp.getLayer(0);
         assertThat(bottomLayer)
             .isInstanceOf(ImageLayer.class)
-            .blendingModeIs(BlendingMode.NORMAL)
+            .hasBlendingMode(BlendingMode.NORMAL)
             .isOpaque();
 
         Layer secondLayer = comp.getLayer(1);

@@ -241,7 +241,7 @@ public class ChaosGame extends ParametrizedFilter {
         // assign a color to each vertex
         colorVertices(vertices, numVertices, colorsValue);
 
-        BoundingBox bbox = calculateBoundingBox(vertices);
+        BoundingBox bbox = calcBoundingBox(vertices);
         scaleVerticesToImage(vertices, width, height, bbox);
 
         return vertices;
@@ -250,7 +250,7 @@ public class ChaosGame extends ParametrizedFilter {
     /**
      * Calculates the bounding box for a list of vertices.
      */
-    private static BoundingBox calculateBoundingBox(List<Vertex> vertices) {
+    private static BoundingBox calcBoundingBox(List<Vertex> vertices) {
         BoundingBox bbox = new BoundingBox();
         for (Vertex vertex : vertices) {
             bbox.add(vertex.x, vertex.y);

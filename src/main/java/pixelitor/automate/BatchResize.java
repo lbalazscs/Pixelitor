@@ -88,7 +88,7 @@ public class BatchResize {
             tf.setName(name);
             // the JLayer shows immediate visual feedback for invalid input
             sizePanel.add(createPositiveIntLayer(tf, label));
-            documentFilter.applyOn(tf);
+            documentFilter.applyTo(tf);
 
             return tf;
         }

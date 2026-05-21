@@ -145,7 +145,7 @@ class TextLayerTest {
         String oldText = oldSettings.getText();
         String expectedOldName = TextLayer.nameFromText(oldText);
 
-        assertThat(layer).nameIs(expectedOldName);
+        assertThat(layer).hasName(expectedOldName);
         String newText = Rnd.createRandomString(10);
         String expectedNewName = TextLayer.nameFromText(newText);
 
@@ -156,18 +156,18 @@ class TextLayerTest {
 
         assertThat(layer)
             .textIs(newText)
-            .nameIs(expectedNewName);
+            .hasName(expectedNewName);
         History.assertNumEditsIs(1);
 
         History.undo("Edit Text Layer");
         assertThat(layer)
             .textIs(oldText)
-            .nameIs(expectedOldName);
+            .hasName(expectedOldName);
 
         History.redo("Edit Text Layer");
         assertThat(layer)
             .textIs(newText)
-            .nameIs(expectedNewName);
+            .hasName(expectedNewName);
 
         iconChecker.verifyUpdateCounts(0, 0);
     }

@@ -27,6 +27,7 @@ import pixelitor.utils.Texts;
 import pixelitor.utils.Utils;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import static pixelitor.guitest.AppRunner.getCurrentTimeHM;
 
@@ -61,7 +62,9 @@ public class MainGuiTest {
         long startMillis = System.currentTimeMillis();
 
         config = new TestConfig(args);
-        app = new AppRunner(new HistoryChecker(), config.getInputDir(), config.getSvgOutputDir(), "a.jpg");
+        Consumer<String> logger = System.out::println;
+
+        app = new AppRunner(new HistoryChecker(), logger, config.getInputDir(), config.getSvgOutputDir(), "a.jpg");
 
         if (EDT.call(FileChoosers::useNativeDialogs)) {
             // the tests work only with the swing file choosers
@@ -72,7 +75,7 @@ public class MainGuiTest {
         app.runMenuCommand("Reset Workspace");
         app.configureRobotDelay();
 
-        runConfiguredTests();
+        runConfiguredTests(logger);
 
         long totalTimeMillis = System.currentTimeMillis() - startMillis;
         System.out.printf("MainGuiTest: finished at %s after %s.",
@@ -81,14 +84,14 @@ public class MainGuiTest {
         app.exit();
     }
 
-    private void runConfiguredTests() {
+    private void runConfiguredTests(Consumer<String> logger) {
         MaskMode[] maskModes = MaskMode.load();
         TestSuite testSuite = TestSuite.load();
         printTestConfiguration(testSuite, maskModes);
 
         for (int i = 0; i < maskModes.length; i++) {
             MaskMode mode = maskModes[i];
-            TestContext context = new TestContext(mode, app, config);
+            TestContext context = new TestContext(mode, app, config, logger);
             runTests(testSuite, mode, context);
 
             if (i < maskModes.length - 1) {

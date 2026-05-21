@@ -95,7 +95,7 @@ public class Navigator extends JComponent
         viewScrollListener = e ->
             SwingUtilities.invokeLater(this::syncViewBoxPosition);
 
-        recalculateSize(view, true, true, true);
+        updateSize(view, true, true, true);
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -156,7 +156,7 @@ public class Navigator extends JComponent
             @Override
             public void componentResized(ComponentEvent e) {
                 if (view != null) { // it's null if all images are closed
-                    recalculateSize(view, false, false, true);
+                    updateSize(view, false, false, true);
                 }
             }
         });
@@ -199,10 +199,10 @@ public class Navigator extends JComponent
     /**
      * Recalculates the navigator size and the scaling factors when the view or canvas changes.
      */
-    public void recalculateSize(View sourceView,
-                                boolean newView,
-                                boolean canvasSizeChanged,
-                                boolean navigatorResized) {
+    public void updateSize(View sourceView,
+                           boolean newView,
+                           boolean canvasSizeChanged,
+                           boolean navigatorResized) {
         assert newView || canvasSizeChanged || navigatorResized : "no change flags";
 
         if (newView) {
@@ -491,7 +491,7 @@ public class Navigator extends JComponent
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        recalculateSize(newView, true, true, false);
+        updateSize(newView, true, true, false);
     }
 
     private void dispose() {

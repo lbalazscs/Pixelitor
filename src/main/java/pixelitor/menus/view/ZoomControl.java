@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -66,7 +66,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         Dimension preferredSize = new Dimension(ZOOM_PERCENTAGE_WIDTH, (int) preferredHeight);
         zoomPercentageLabel.setPreferredSize(preferredSize);
 
-        zoomSlider.addChangeListener(e -> Views.onActive(this::applyZoomToView));
+        zoomSlider.addChangeListener(e -> applyZoomToActiveView());
 
         zoomTextLabel = new JLabel("  " + ZOOM + ": ");
 
@@ -122,9 +122,9 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         zoomPercentageLabel.setText("");
     }
 
-    private void applyZoomToView(View view) {
+    private void applyZoomToActiveView() {
         ZoomLevel newZoom = zoomLevels[zoomSlider.getValue()];
-        view.setZoom(newZoom);
+        Views.getActive().setZoom(newZoom);
         setZoomText(newZoom);
     }
 

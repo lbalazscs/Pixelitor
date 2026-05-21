@@ -41,7 +41,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
+import static pixelitor.tools.pen.BuildState.DRAGGING_OUT_CONTROL;
 import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
@@ -63,8 +63,8 @@ public class PenTool extends PathTool {
 
     // the last known mouse position in component-space coordinates,
     // used to restore the moving point after an undo
-    private double lastX;
-    private double lastY;
+    private double coLastX;
+    private double coLastY;
 
     public PenTool() {
         super("Pen",
@@ -195,7 +195,7 @@ public class PenTool extends PathTool {
 
         boolean mouseDown = Tools.MouseDispatcher.isMouseDown();
         if (mouseDown) {
-            setBuildState(DRAGGING_LAST_CONTROL);
+            setBuildState(DRAGGING_OUT_CONTROL);
         } else {
             setBuildState(MOVING_TO_NEXT_ANCHOR);
         }
@@ -217,12 +217,12 @@ public class PenTool extends PathTool {
             newPathCreated = true;
         }
 
-        if (buildState == DRAGGING_LAST_CONTROL) {
+        if (buildState == DRAGGING_OUT_CONTROL) {
             buildState = recoverFromUnexpectedDrag("mousePressed", e.getView());
         }
 
-        lastX = e.getCoX();
-        lastY = e.getCoY();
+        coLastX = e.getCoX();
+        coLastY = e.getCoY();
 
         // if we just created a new path, we must treat this as the
         // start of a new subpath, regardless of the previous buildState
@@ -244,12 +244,12 @@ public class PenTool extends PathTool {
         // if Ctrl or Alt is held down, the user wants to edit an existing path
         if (e.isControlDown()) {
             // if over an existing point, start moving it
-            if (handleCtrlPressBeforeSubpath(e, path)) {
+            if (handleCtrlPressWhenIdle(e, path)) {
                 return;
             }
         } else if (e.isAltDown()) {
             // if only alt is down, break the control points
-            if (handleAltPressBeforeSubpath(e, path)) {
+            if (handleAltPressWhenIdle(e, path)) {
                 return;
             }
         }
@@ -264,7 +264,7 @@ public class PenTool extends PathTool {
         // control handles for this new point.
         // If the user releases the mouse without dragging,
         // mouseReleased will handle it.
-        setBuildState(DRAGGING_LAST_CONTROL);
+        setBuildState(DRAGGING_OUT_CONTROL);
 
         assert path.checkInvariants();
     }
@@ -309,7 +309,7 @@ public class PenTool extends PathTool {
         finalizeMovingPoint(path, e, altDownHitNothing);
 
         // allow the user to drag out the handles for this newly created point
-        setBuildState(DRAGGING_LAST_CONTROL);
+        setBuildState(DRAGGING_OUT_CONTROL);
 
         assert path.checkInvariants();
     }
@@ -327,7 +327,7 @@ public class PenTool extends PathTool {
     }
 
     // handles a Ctrl-click when the tool is IDLE
-    private boolean handleCtrlPressBeforeSubpath(PMouseEvent e, Path path) {
+    private boolean handleCtrlPressWhenIdle(PMouseEvent e, Path path) {
         // if we are over an existing point, initiate a move on it
         DraggablePoint handle = path.findHandleAt(e);
         if (handle != null) {
@@ -339,7 +339,7 @@ public class PenTool extends PathTool {
 
     // handles an Alt-click when the tool is IDLE:
     // break or drag out existing handles
-    private boolean handleAltPressBeforeSubpath(PMouseEvent e, Path path) {
+    private boolean handleAltPressWhenIdle(PMouseEvent e, Path path) {
         DraggablePoint handle = path.findHandleAt(e);
         if (handle != null) {
             if (handle instanceof ControlPoint cp) {
@@ -411,8 +411,8 @@ public class PenTool extends PathTool {
 
         double x = e.getCoX();
         double y = e.getCoY();
-        lastX = x;
-        lastY = y;
+        coLastX = x;
+        coLastY = y;
 
         if (buildState == DRAG_EDITING_PREVIOUS) {
             activePoint.mouseDragged(x, y, e.isShiftDown());
@@ -428,7 +428,7 @@ public class PenTool extends PathTool {
         last.setType(breakHandle ? CUSP : SYMMETRIC);
         last.ctrlOut.mouseDragged(x, y, e.isShiftDown());
 
-        setBuildState(DRAGGING_LAST_CONTROL);
+        setBuildState(DRAGGING_OUT_CONTROL);
         e.repaint();
     }
 
@@ -452,12 +452,12 @@ public class PenTool extends PathTool {
         }
         assert buildState.isDragging() : "state = " + buildState;
 
-        lastX = e.getCoX();
-        lastY = e.getCoY();
+        coLastX = e.getCoX();
+        coLastY = e.getCoY();
 
         if (buildState == DRAG_EDITING_PREVIOUS) {
             handleMouseReleaseEditingPrevious(e, path);
-        } else if (buildState == DRAGGING_LAST_CONTROL) {
+        } else if (buildState == DRAGGING_OUT_CONTROL) {
             handleMouseReleaseDraggingLastControl(e, path);
         }
 
@@ -518,14 +518,14 @@ public class PenTool extends PathTool {
             return;
         }
 
-        if (buildState == DRAGGING_LAST_CONTROL) {
+        if (buildState == DRAGGING_OUT_CONTROL) {
             buildState = recoverFromUnexpectedDrag("mouseMoved", view);
         }
 
         int x = e.getX();
         int y = e.getY();
-        lastX = x;
-        lastY = y;
+        coLastX = x;
+        coLastY = y;
 
         if (e.isControlDown() || e.isAltDown()) {
             if (buildState != IDLE) {
@@ -590,7 +590,7 @@ public class PenTool extends PathTool {
     private BuildState recoverFromUnexpectedMove(String where, View view, BuildState state) {
         if (AppMode.isDevelopment()) {
             System.out.printf("PenTool::recoverFromUnexpectedMove: " +
-                "where = '%s, active = %s'%n", where, view.isActive());
+                "where = '%s', active = '%s'%n", where, view.isActive());
         }
 
         // this can happen if mouse events (like mouseDragged) are missed
@@ -645,7 +645,7 @@ public class PenTool extends PathTool {
             return true;
         }
 
-        if (buildState == MOVING_TO_NEXT_ANCHOR || buildState == DRAGGING_LAST_CONTROL) {
+        if (buildState == MOVING_TO_NEXT_ANCHOR || buildState == DRAGGING_OUT_CONTROL) {
             // if a new subpath is being created, move the most recently placed anchor point
             AnchorPoint last = path.getLastAnchor();
             if (last != null) {
@@ -667,7 +667,7 @@ public class PenTool extends PathTool {
 
     public MovingPoint createMovingPoint(SubPath sp) {
         AnchorPoint last = sp.getLastAnchor();
-        return new MovingPoint(lastX, lastY, last, last.getView());
+        return new MovingPoint(coLastX, coLastY, last, last.getView());
     }
 
     @Override
@@ -688,9 +688,9 @@ public class PenTool extends PathTool {
 
         node.addAsString("build state", buildState);
         node.addAsString("prev build state", prevBuildState);
-        node.addBoolean("showRubberBand", showRubberBand);
-        node.addDouble("lastX", lastX);
-        node.addDouble("lastY", lastY);
+        node.addBoolean("show rubber band", showRubberBand);
+        node.addDouble("co last x", coLastX);
+        node.addDouble("co last y", coLastY);
 
         return node;
     }

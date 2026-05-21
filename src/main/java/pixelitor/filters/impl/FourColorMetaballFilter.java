@@ -35,22 +35,17 @@ public class FourColorMetaballFilter extends FourColorFilter {
     private static final double EPSILON = 1.0e-8;
 
     // center colors
-    private float aC;
-    private float cC1, cC2, cC3;
+    private final float aC;
+    private final float cC1, cC2, cC3;
 
     // the power parameter for inverse distance weighting
-    private int p;
+    private final int p;
 
     public FourColorMetaballFilter(String filterName,
                                    int colorNW, int colorNE, int colorSW, int colorSE,
                                    InterpolationType interpolation, ColorSpaceType colorSpace,
-                                   double relCx, double relCy) {
-        super(filterName, colorNW, colorNE, colorSW, colorSE, interpolation, colorSpace, relCx, relCy);
-    }
-
-    @Override
-    public void setDimensions(int width, int height) {
-        super.setDimensions(width, height);
+                                   double relCx, double relCy, int width, int height) {
+        super(filterName, colorNW, colorNE, colorSW, colorSE, interpolation, colorSpace, relCx, relCy, width, height);
 
         // precompute the color of the 5th anchor point (the center)
         // as the weighted average of the four corners
@@ -63,21 +58,24 @@ public class FourColorMetaballFilter extends FourColorFilter {
         // map the UI interpolation type to the inverse distance weighting power 'p'
         this.p = switch (interpolation) {
             case LINEAR -> 1;
-            case CUBIC -> 2;
-            case QUINTIC -> 3;
-            case SEPTIC -> 4;
+            case CUBIC -> 3;
+            case QUINTIC -> 5;
+            case SEPTIC -> 7;
         };
     }
 
     /**
      * Calculates the 1 / (d^p) weight quickly without using Math.pow.
      */
-    private double calculateWeight(double d2) {
+    private double calcWeight(double d2) {
         return switch (p) {
             case 1 -> 1.0 / Math.sqrt(d2);
-            case 2 -> 1.0 / d2;
+//            case 2 -> 1.0 / d2;
             case 3 -> 1.0 / (d2 * Math.sqrt(d2));
-            case 4 -> 1.0 / (d2 * d2);
+//            case 4 -> 1.0 / (d2 * d2);
+            case 5 -> 1.0 / (d2 * d2 * Math.sqrt(d2));
+//            case 6 -> 1.0 / (d2 * d2 * d2);
+            case 7 -> 1.0 / (d2 * d2 * d2 * Math.sqrt(d2));
             default -> throw new IllegalStateException("p = " + p);
         };
     }
@@ -123,11 +121,11 @@ public class FourColorMetaballFilter extends FourColorFilter {
         }
 
         // calculate weights based on the selected interpolation (power p)
-        double w_NW = calculateWeight(d2_NW);
-        double w_NE = calculateWeight(d2_NE);
-        double w_SW = calculateWeight(d2_SW);
-        double w_SE = calculateWeight(d2_SE);
-        double w_C = calculateWeight(d2_C);
+        double w_NW = calcWeight(d2_NW);
+        double w_NE = calcWeight(d2_NE);
+        double w_SW = calcWeight(d2_SW);
+        double w_SE = calcWeight(d2_SE);
+        double w_C = calcWeight(d2_C);
 
         double sumWeights = w_NW + w_NE + w_SW + w_SE + w_C;
 

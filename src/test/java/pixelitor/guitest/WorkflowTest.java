@@ -73,7 +73,7 @@ import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.TRANSPARENT;
 
 /**
- * A workflow test is an AssertJ-Swing regression test, where an
+ * A workflow test is an AssertJ-Swing regression test where an
  * image is created from scratch using a longer workflow, and then
  * it is visually compared to a reference image saved earlier.
  * It's not a unit test.
@@ -97,7 +97,7 @@ public class WorkflowTest {
     private final Set<String> loadedRefImages = new HashSet<>();
 
     /**
-     * Enables running all tests within a group
+     * Enables running all tests within a layer group.
      */
     enum GroupSetting {
         NO_GROUP("") {
@@ -171,7 +171,7 @@ public class WorkflowTest {
         EDT.run(() -> Features.enableExperimental = true);
 
         historyChecker = new HistoryChecker();
-        app = new AppRunner(historyChecker, null, null);
+        app = new AppRunner(historyChecker, WorkflowTest::log, null, null);
         mouse = app.getMouse();
         pw = app.getPW();
         keyboard = app.getKeyboard();
@@ -209,7 +209,7 @@ public class WorkflowTest {
         // ensure that manual testing can continue without undoing/redoing
         app.removeHistoryChecker();
 
-        System.out.println("WorkflowTest: finished at " + AppRunner.getCurrentTimeHM());
+        log("WorkflowTest: finished at " + AppRunner.getCurrentTimeHM());
     }
 
     private void wfTest1(GroupSetting groupSetting) {
@@ -265,7 +265,9 @@ public class WorkflowTest {
     }
 
     private static String startTest(int testNr, GroupSetting groupSetting) {
-        System.out.printf("starting workflow test %d, groupSetting = %s...%n", testNr, groupSetting);
+        String msg = String.format("starting workflow test %d, groupSetting = %s...%n", testNr, groupSetting);
+        log(msg);
+
         String compName = "wf " + testNr + groupSetting.getNameSuffix();
         return compName;
     }
@@ -739,7 +741,7 @@ public class WorkflowTest {
         keyboard.undoRedo("Create Shape");
 
         keyboard.pressEsc();
-        // presing Esc rasterizes the shape
+        // pressing Esc rasterizes the shape
         keyboard.undoRedo("Rasterize Shape");
     }
 
@@ -892,6 +894,10 @@ public class WorkflowTest {
         }
         app.openFileWithDialog("Open...", referenceImagesDir, fileName);
         loadedRefImages.add(fileName);
+    }
+
+    private static void log(String msg) {
+        System.out.println(msg);
     }
 
     public static void main(String[] args) {

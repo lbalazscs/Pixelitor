@@ -561,16 +561,16 @@ public class RandomGUITest {
         double r = Math.random();
         if (r > 0.75) {
             log("fit active to space");
-            Views.fitActive(AutoZoom.FIT_SPACE);
+            Views.zoomActive(AutoZoom.FIT_SPACE);
         } else if (r > 0.5) {
             log("fit active to width");
-            Views.fitActive(AutoZoom.FIT_WIDTH);
+            Views.zoomActive(AutoZoom.FIT_WIDTH);
         } else if (r > 0.25) {
             log("fit active to height");
-            Views.fitActive(AutoZoom.FIT_HEIGHT);
+            Views.zoomActive(AutoZoom.FIT_HEIGHT);
         } else {
             log("fit active to actual pixels");
-            Views.fitActive(AutoZoom.ACTUAL_PIXELS);
+            Views.zoomActive(AutoZoom.ACTUAL_PIXELS);
         }
     }
 
@@ -615,10 +615,7 @@ public class RandomGUITest {
     }
 
     private void randomZoom() {
-        Views.onActive(this::setRandomZoom);
-    }
-
-    private void setRandomZoom(View view) {
+        View view = Views.getActive();
         ZoomLevel randomZoomLevel = calcRandomZoomLevel();
         log("zoom " + view.getName() + ", zoom level = " + randomZoomLevel);
 
@@ -746,12 +743,12 @@ public class RandomGUITest {
 
     private void layerToCanvasSize() {
         log("layer to canvas size");
-        Views.onActiveComp(Composition::activeLayerToCanvasSize);
+        Views.getActiveComp().activeLayerToCanvasSize();
     }
 
     private void fitCanvasToLayers() {
         log("fit canvas to layers");
-        Views.onActiveComp(Composition::fitCanvasToLayers);
+        Views.getActiveComp().fitCanvasToLayers();
     }
 
     private void invertSelection() {

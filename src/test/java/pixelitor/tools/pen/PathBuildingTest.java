@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.DRAGGING_LAST_CONTROL;
+import static pixelitor.tools.pen.BuildState.DRAGGING_OUT_CONTROL;
 import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.IDLE;
 import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
@@ -114,7 +114,7 @@ class PathBuildingTest {
     @Test
     @DisplayName("undo after mouse press")
     void undoAfterMousePressed() {
-        press(100, 100, DRAGGING_LAST_CONTROL);
+        press(100, 100, DRAGGING_OUT_CONTROL);
         Path path = comp.getActivePath();
         assertThat(path.getActiveSubpath()).numAnchorsIs(1);
 
@@ -124,7 +124,7 @@ class PathBuildingTest {
         drag(110, 100, null);
 
         // dragging state because the mouse is down
-        redo("Subpath Start", DRAGGING_LAST_CONTROL);
+        redo("Subpath Start", DRAGGING_OUT_CONTROL);
         assertThat(comp).activePathIs(path);
 
         undo("Subpath Start", null);
@@ -172,7 +172,7 @@ class PathBuildingTest {
         int p1x = 100;
         int p1y = 100;
         // press at the first anchor point
-        press(p1x, p1y, DRAGGING_LAST_CONTROL);
+        press(p1x, p1y, DRAGGING_OUT_CONTROL);
 
         Path path = comp.getActivePath();
         assertThat(path).isNotNull();
@@ -186,16 +186,16 @@ class PathBuildingTest {
             .isAt(p1x, p1y);
 
         // drag the "out" handle in the opposite direction of the desired "in" control
-        drag(p1x + 25, p1y + 25, DRAGGING_LAST_CONTROL);
-        drag(p1x + 50, p1y + 50, DRAGGING_LAST_CONTROL);
+        drag(p1x + 25, p1y + 25, DRAGGING_OUT_CONTROL);
+        drag(p1x + 50, p1y + 50, DRAGGING_OUT_CONTROL);
         assertThat(firstAnchor)
             .hasCtrlOutAt(p1x + 50, p1y + 50)
             .hasCtrlInAt(p1x - 50, p1y - 50);
 
         // alt-drag the "out" handle to its place
-        altDrag(p1x + 50, p1y, DRAGGING_LAST_CONTROL);
+        altDrag(p1x + 50, p1y, DRAGGING_OUT_CONTROL);
         assertThat(firstAnchor).typeIs(CUSP);
-        altDrag(p1x + 50, p1y - 50, DRAGGING_LAST_CONTROL);
+        altDrag(p1x + 50, p1y - 50, DRAGGING_OUT_CONTROL);
         release(p1x + 50, p1y - 50, MOVING_TO_NEXT_ANCHOR);
         assertThat(firstAnchor)
             .hasCtrlOutAt(p1x + 50, p1y - 50)
@@ -207,7 +207,7 @@ class PathBuildingTest {
         int p2y = 200;
         move(p2x, p2y, MOVING_TO_NEXT_ANCHOR);
         // press to fix the second anchor point
-        press(p2x, p2y, DRAGGING_LAST_CONTROL);
+        press(p2x, p2y, DRAGGING_OUT_CONTROL);
         assertThat(subpath).numAnchorsIs(2);
         AnchorPoint secondAnchor = subpath.getAnchor(1);
         assertThat(secondAnchor)
@@ -215,16 +215,16 @@ class PathBuildingTest {
             .isAt(p2x, p2y);
 
         // drag in the opposite direction of the desired "in" control
-        drag(p2x - 25, p2y + 25, DRAGGING_LAST_CONTROL);
-        drag(p2x - 50, p2y + 50, DRAGGING_LAST_CONTROL);
+        drag(p2x - 25, p2y + 25, DRAGGING_OUT_CONTROL);
+        drag(p2x - 50, p2y + 50, DRAGGING_OUT_CONTROL);
         assertThat(secondAnchor)
             .hasCtrlOutAt(p2x - 50, p2y + 50)
             .hasCtrlInAt(p2x + 50, p2y - 50);
 
         // alt-drag the "out" handle to its place
-        altDrag(p2x - 50, p2y - 25, DRAGGING_LAST_CONTROL);
+        altDrag(p2x - 50, p2y - 25, DRAGGING_OUT_CONTROL);
         assertThat(secondAnchor).typeIs(CUSP);
-        altDrag(p2x - 50, p2y - 50, DRAGGING_LAST_CONTROL);
+        altDrag(p2x - 50, p2y - 50, DRAGGING_OUT_CONTROL);
         release(p2x - 50, p2y - 50, MOVING_TO_NEXT_ANCHOR);
         assertThat(secondAnchor)
             .hasCtrlOutAt(p2x - 50, p2y - 50)
@@ -261,15 +261,15 @@ class PathBuildingTest {
     @DisplayName("breaking old handles with Alt")
     void breakingOldHandlesWithAlt() {
         // add the first anchor point
-        press(100, 100, DRAGGING_LAST_CONTROL);
+        press(100, 100, DRAGGING_OUT_CONTROL);
         Path path = comp.getActivePath();
         SubPath subpath = path.getActiveSubpath();
         assertThat(subpath).numAnchorsIs(1);
         AnchorPoint firstAnchor = subpath.getAnchor(0);
 
         // drag out its handles
-        drag(120, 100, DRAGGING_LAST_CONTROL);
-        drag(140, 100, DRAGGING_LAST_CONTROL);
+        drag(120, 100, DRAGGING_OUT_CONTROL);
+        drag(140, 100, DRAGGING_OUT_CONTROL);
         release(150, 100, MOVING_TO_NEXT_ANCHOR);
         assertThat(firstAnchor)
             .hasCtrlOutAt(150, 100)
@@ -394,12 +394,12 @@ class PathBuildingTest {
     void constrainedCurvedPath() {
         // Start a new curve with shift-press.
         // As this is the first point on the subpath, it should not be constrained.
-        shiftPress(314, 314, DRAGGING_LAST_CONTROL);
+        shiftPress(314, 314, DRAGGING_OUT_CONTROL);
 
         // Shift-drag the out control to the right
         // The control should be constrained relative to the anchor.
-        shiftDrag(330, 317, DRAGGING_LAST_CONTROL);
-        shiftDrag(350, 318, DRAGGING_LAST_CONTROL);
+        shiftDrag(330, 317, DRAGGING_OUT_CONTROL);
+        shiftDrag(350, 318, DRAGGING_OUT_CONTROL);
         shiftRelease(350, 318, MOVING_TO_NEXT_ANCHOR);
 
         // Check the results so far
@@ -424,7 +424,7 @@ class PathBuildingTest {
         assertThat(subpath).hasMovingPointAt(314, 500);
 
         // shift-press and check that the constraining is still OK
-        shiftPress(316, 510, DRAGGING_LAST_CONTROL);
+        shiftPress(316, 510, DRAGGING_OUT_CONTROL);
         assertThat(subpath)
             .hasNoMovingPoint()
             .isNotFinished()
@@ -524,7 +524,7 @@ class PathBuildingTest {
         assertThat(secondAnchor).isNotActive();
         assertThat(secondAnchor.ctrlOut).isNotActive();
 
-        // ctrl-click between the points for finish the curve without closing
+        // ctrl-click between the points to finish the curve without closing
         ctrlPress(150, 100, IDLE);
         release(150, 100, IDLE);
         assertThat(subpath)
@@ -551,7 +551,7 @@ class PathBuildingTest {
 
     private SubPath build3PointSubPath(boolean closed, boolean curved, int startX, int startY) {
         // first anchor point
-        press(startX, startY, DRAGGING_LAST_CONTROL);
+        press(startX, startY, DRAGGING_OUT_CONTROL);
         Path path = comp.getActivePath();
         assertThat(path).isNotNull();
         SubPath subpath = path.getActiveSubpath();
@@ -562,12 +562,12 @@ class PathBuildingTest {
             .isAtIm(startX, startY);
         if (curved) {
             // curved: drag out the control points before releasing
-            drag(startX + 10, startY - 10, DRAGGING_LAST_CONTROL);
+            drag(startX + 10, startY - 10, DRAGGING_OUT_CONTROL);
             assertThat(firstAnchor.ctrlOut)
                 .isAt(startX + 10, startY - 10)
                 .isAtIm(startX + 10, startY - 10);
-            drag(startX + 20, startY - 20, DRAGGING_LAST_CONTROL);
-            drag(startX + 30, startY - 30, DRAGGING_LAST_CONTROL);
+            drag(startX + 20, startY - 20, DRAGGING_OUT_CONTROL);
+            drag(startX + 30, startY - 30, DRAGGING_OUT_CONTROL);
             assertThat(subpath).numAnchorsIs(1);
 
             // release to set the final value of the control point
@@ -591,7 +591,7 @@ class PathBuildingTest {
         // press to fix the second path point
         int p2x = startX + 100;
         int p2y = startY;
-        press(p2x, startY, DRAGGING_LAST_CONTROL);
+        press(p2x, startY, DRAGGING_OUT_CONTROL);
         assertThat(subpath).numAnchorsIs(2);
         AnchorPoint secondAnchor = subpath.getAnchor(1);
         assertThat(secondAnchor)
@@ -599,9 +599,9 @@ class PathBuildingTest {
             .isAtIm(p2x, p2y);
         if (curved) {
             // curved: drag out the control points before releasing
-            drag(p2x + 10, p2y + 10, DRAGGING_LAST_CONTROL);
-            drag(p2x + 20, p2y + 20, DRAGGING_LAST_CONTROL);
-            drag(p2x + 30, p2y + 30, DRAGGING_LAST_CONTROL);
+            drag(p2x + 10, p2y + 10, DRAGGING_OUT_CONTROL);
+            drag(p2x + 20, p2y + 20, DRAGGING_OUT_CONTROL);
+            drag(p2x + 30, p2y + 30, DRAGGING_OUT_CONTROL);
             // release to set the final value of the control point
             release(p2x + 30, p2y + 30, MOVING_TO_NEXT_ANCHOR);
             assertThat(secondAnchor.ctrlIn).isNotRetracted();
@@ -619,7 +619,7 @@ class PathBuildingTest {
         // third anchor point
         int p3x = startX + 50;
         int p3y = startY + 100;
-        press(p3x, p3y, DRAGGING_LAST_CONTROL);
+        press(p3x, p3y, DRAGGING_OUT_CONTROL);
 
         if (!closed) {
             release(p3x + 1, p3y + 1, MOVING_TO_NEXT_ANCHOR);
@@ -645,9 +645,9 @@ class PathBuildingTest {
             .isAtIm(p3x, p3y);
         if (curved) {
             // curved: drag out the control points before releasing
-            drag(p3x - 10, p3y, DRAGGING_LAST_CONTROL);
-            drag(p3x - 20, p3y, DRAGGING_LAST_CONTROL);
-            drag(p3x - 30, p3y, DRAGGING_LAST_CONTROL);
+            drag(p3x - 10, p3y, DRAGGING_OUT_CONTROL);
+            drag(p3x - 20, p3y, DRAGGING_OUT_CONTROL);
+            drag(p3x - 30, p3y, DRAGGING_OUT_CONTROL);
             // release to set the final value of the control point
             release(p3x - 40, p3y, MOVING_TO_NEXT_ANCHOR);
         } else {
@@ -865,12 +865,12 @@ class PathBuildingTest {
     }
 
     private void click(int x, int y) {
-        press(x, y, DRAGGING_LAST_CONTROL);
+        press(x, y, DRAGGING_OUT_CONTROL);
         release(x, y, MOVING_TO_NEXT_ANCHOR);
     }
 
     private void shiftClick(int x, int y) {
-        shiftPress(x, y, DRAGGING_LAST_CONTROL);
+        shiftPress(x, y, DRAGGING_OUT_CONTROL);
         shiftRelease(x, y, MOVING_TO_NEXT_ANCHOR);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,16 +56,16 @@ public class PrintPreviewPanel extends JPanel {
 
         // the paper is within the margin, centered
         double aspectRatio = pageFormat.getWidth() / pageFormat.getHeight();
-        double maxContentSize = SIZE - 2 * MARGIN;
+        double availableSize = SIZE - 2 * MARGIN;
         
         if (aspectRatio > 1) { // fit to the width
-            double rectWidth = maxContentSize;
+            double rectWidth = availableSize;
             double rectHeight = rectWidth / aspectRatio;
             paperBounds = new Rectangle2D.Double(
                 MARGIN, (SIZE - rectHeight) / 2, rectWidth, rectHeight);
             scaling = rectWidth / pageFormat.getWidth();
         } else { // fit to the height
-            double rectHeight = maxContentSize;
+            double rectHeight = availableSize;
             double rectWidth = rectHeight * aspectRatio;
             paperBounds = new Rectangle2D.Double(
                 (SIZE - rectWidth) / 2, MARGIN, rectWidth, rectHeight);

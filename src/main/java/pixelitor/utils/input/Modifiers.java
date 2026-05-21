@@ -54,7 +54,7 @@ public record Modifiers(Ctrl ctrl, Alt alt, Shift shift, MouseButton button) imp
     private MouseEvent createEvent(int x, int y, int id, Component source) {
         //noinspection MagicConstant
         return new MouseEvent(source, id, System.currentTimeMillis(),
-            modify(0), x, y, 1, button.isRight(), button.getAwtButton());
+            modify(0), x, y, 1, button.isRight(), button.getButtonId());
     }
 
     public PMouseEvent createPEvent(int x, int y, int id, View view) {

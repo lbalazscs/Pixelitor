@@ -40,7 +40,7 @@ import java.util.List;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
- * Four Color Gradient filter based on the JHLabs {@link FourColorRectFilter}.
+ * The "Four Color Gradient" filter based on JHLabs {@link FourColorFilter} subclasses.
  */
 public class JHFourColorGradient extends ParametrizedFilter {
     @Serial
@@ -125,32 +125,32 @@ public class JHFourColorGradient extends ParametrizedFilter {
                 colorNW, colorNE, colorSW, colorSE,
                 interpolation.getSelected(),
                 space.getSelected(),
-                midpoint.getRelativeX(),
-                midpoint.getRelativeY());
+                midpoint.getRelativeX(), midpoint.getRelativeY(),
+                src.getWidth(), src.getHeight());
             case TYPE_ANGULAR -> new FourColorAngularFilter(NAME,
                 colorNW, colorNE, colorSW, colorSE,
                 interpolation.getSelected(),
                 space.getSelected(),
-                midpoint.getRelativeX(),
-                midpoint.getRelativeY());
+                midpoint.getRelativeX(), midpoint.getRelativeY(),
+                src.getWidth(), src.getHeight());
             case TYPE_POLAR -> new FourColorPolarFilter(NAME,
                 colorNW, colorNE, colorSW, colorSE,
                 interpolation.getSelected(),
                 space.getSelected(),
-                midpoint.getRelativeX(),
-                midpoint.getRelativeY());
+                midpoint.getRelativeX(), midpoint.getRelativeY(),
+                src.getWidth(), src.getHeight());
             case TYPE_METABALL -> new FourColorMetaballFilter(NAME,
                 colorNW, colorNE, colorSW, colorSE,
                 interpolation.getSelected(),
                 space.getSelected(),
-                midpoint.getRelativeX(),
-                midpoint.getRelativeY());
+                midpoint.getRelativeX(), midpoint.getRelativeY(),
+                src.getWidth(), src.getHeight());
             case TYPE_TRIANGULAR -> new FourColorTriangularFilter(NAME,
                 colorNW, colorNE, colorSW, colorSE,
                 interpolation.getSelected(),
                 space.getSelected(),
-                midpoint.getRelativeX(),
-                midpoint.getRelativeY());
+                midpoint.getRelativeX(), midpoint.getRelativeY(),
+                src.getWidth(), src.getHeight());
             default -> throw new IllegalStateException("Unexpected value: " + type.getValue());
         };
 

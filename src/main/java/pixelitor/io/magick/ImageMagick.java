@@ -129,7 +129,7 @@ public class ImageMagick {
             return;
         }
 
-        if (checkAlreadyOpen && !Views.warnIfAlreadyOpen(file)) {
+        if (checkAlreadyOpen && !Views.confirmIfAlreadyOpen(file)) {
             return;
         }
 

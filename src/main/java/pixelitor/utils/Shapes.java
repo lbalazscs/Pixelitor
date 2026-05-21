@@ -585,7 +585,7 @@ public class Shapes {
         for (int i = 1; i < numPoints - 1; i++) {
             Geometry.copy(centers[i - 1], controlPoints[i][0]);
             Geometry.copy(centers[i], controlPoints[i][1]);
-            calculateControlPoint(points.get(i),
+            calcControlPoint(points.get(i),
                 controlPoints[i][0], controlPoints[i][1],
                 lengths[i - 1], lengths[i], smoothness);
         }
@@ -600,7 +600,7 @@ public class Shapes {
             Geometry.copy(centers[centers.length - 1], controlPoints[0][0]);
             // first and second's center
             Geometry.copy(centers[0], controlPoints[0][1]);
-            calculateControlPoint(point,
+            calcControlPoint(point,
                 controlPoints[0][0], controlPoints[0][1],
                 lengths[lengths.length - 1], lengths[0], smoothness);
             path.moveTo(lastPoint.getX(), lastPoint.getY());
@@ -630,8 +630,8 @@ public class Shapes {
         return path;
     }
 
-    private static void calculateControlPoint(Point2D B, Point2D P, Point2D Q,
-                                              double AB, double BC, double smoothness) {
+    private static void calcControlPoint(Point2D B, Point2D P, Point2D Q,
+                                         double AB, double BC, double smoothness) {
         // a temporary point T calculated such that
         // * for A=points[i-1], B=points[i] and C = points[i+1]
         //   * for midpoint of AB, P=centers[i-1] and midpoint of BC, Q=centers[i]

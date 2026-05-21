@@ -17,12 +17,12 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.filters.util.Channel;
 import pixelitor.gui.GUIText;
 
@@ -73,7 +73,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
         boolean keep = keepParam.isChecked();
 
         IntUnaryOperator extractor = switch (channel.getValue()) {
-            case LUMINOSITY -> rgb -> (int) LuminanceLookup.from(rgb);
+            case LUMINOSITY -> ImageMath::calcLuminanceInt;
             case RED -> rgb -> (rgb >>> 16) & 0xFF;
             case GREEN -> rgb -> (rgb >>> 8) & 0xFF;
             case BLUE -> rgb -> rgb & 0xFF;
