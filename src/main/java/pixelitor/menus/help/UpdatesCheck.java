@@ -92,8 +92,8 @@ public class UpdatesCheck {
     }
 
     private static boolean isJavaUpdateRequired(String requiredJavaVersion) {
-        if (requiredJavaVersion.equals("21")) {
-            // we already have at least Java 21, otherwise this code would not run
+        if (requiredJavaVersion.equals("25")) {
+            // we already have at least Java 25, otherwise this code would not run
             return false;
         }
         int currentJavaVersion = getJavaMainVersion();

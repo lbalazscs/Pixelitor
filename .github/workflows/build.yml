@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        java-version: [ 21, 26 ]
+        java-version: [ 25, 26 ]
 
     name: Build with Java ${{ matrix.java-version }}
 
@@ -39,7 +39,7 @@ jobs:
         run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
       - name: Archive artifacts
-        if: matrix.java-version == 21
+        if: matrix.java-version == 25
         uses: actions/upload-artifact@v7
         with:
           name: PixelitorJAR-${{ env.DATE }}
