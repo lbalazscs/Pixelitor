@@ -29,15 +29,12 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Utils;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.onEDT;
-import static pixelitor.utils.Threads.onPool;
+import static pixelitor.utils.Threads.*;
 
 /**
  * Resizes all layers of a {@link Composition} to the given dimensions.
@@ -125,8 +122,8 @@ public class Resize implements CompAction {
             view, srcComp, newComp, canvasTransform, false));
         view.replaceComp(newComp);
 
-        // The view was active when the resizing started, but since the
-        // resizing was asynchronous, this could have changed.
+        // the view was active when the resizing started, but since the
+        // resizing was asynchronous, it could be inactive now
         if (view.isActive()) {
             SelectionActions.update(newComp);
         }
@@ -135,13 +132,13 @@ public class Resize implements CompAction {
         if (srcGuides != null) {
             // the guides don't need transforming,
             // just a correct canvas size
-            Guides newGuides = srcGuides.copyIdentical(view);
+            Guides newGuides = srcGuides.copy(view);
             newComp.setGuides(newGuides);
         }
 
-        // Only after the shared canvas size was updated.
-        // The icon image could change if the proportions were
-        // changed or if it was resized to a very small size
+        // update icon images after the canvas size has been updated,
+        // as they could change if proportions were modified
+        // or if the canvas was resized to a very small size
         newComp.updateAllIconImages();
 
         newComp.update(true);

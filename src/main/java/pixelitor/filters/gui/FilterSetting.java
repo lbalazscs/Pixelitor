@@ -46,7 +46,7 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
     /**
      * Creates and names the GUI component for this filter setting.
      * The GUI component's name is used for lookup during automatic
-     * GUI testing and it's not the same as the display name.
+     * GUI testing, and it's not the same as the display name.
      */
     default JComponent createGUI(String lookupName) {
         JComponent gui = createGUI();
@@ -60,9 +60,7 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
     void setAdjustmentListener(ParamAdjustmentListener listener);
 
     /**
-     * Enables or disables this setting for one of two possible reasons:
-     * (1) because of the filter logic or (2) because non-animatable
-     * parameters should be disabled in the final animation dialogs.
+     * Enables or disables this setting for a specific reason defined by the given EnabledReason.
      */
     void setEnabled(boolean enabled, EnabledReason reason);
 

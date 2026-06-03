@@ -144,14 +144,16 @@ public class ImageMath {
         return smoothStep01(x);
     }
 
-    // cubic smooth step for floats assuming that
-    // the input is already in the 0..1 range
+    /**
+     * Cubic smooth step for floats assuming the input is in the 0..1 range.
+     */
     public static float smoothStep01(float x) {
         return x * x * (3.0f - 2.0f * x);
     }
 
-    // quintic smooth step for floats assuming that
-    // the input is already in the 0..1 range
+    /**
+     * Quintic smooth step for floats assuming the input is in the 0..1 range.
+     */
     public static float smootherStep01(float x) {
         return x * x * x * (x * (x * 6 - 15) + 10);
     }
@@ -168,14 +170,16 @@ public class ImageMath {
         return smoothStep01(x);
     }
 
-    // cubic smooth step for doubles assuming that
-    // the input is already in the 0..1 range
+    /**
+     * Cubic smooth step for doubles assuming the input is in the 0..1 range.
+     */
     public static double smoothStep01(double x) {
         return x * x * (3.0 - 2.0 * x);
     }
 
-    // quintic smooth step for doubles assuming that
-    // the input is already in the 0..1 range
+    /**
+     * Quintic smooth step for doubles assuming the input is in the 0..1 range.
+     */
     public static double smootherStep01(double x) {
         return x * x * x * (x * (x * 6 - 15) + 10);
     }
@@ -432,49 +436,12 @@ public class ImageMath {
 
     /**
      * Bilinear interpolation of ARGB values.
-     *
-     * @param x   the X interpolation parameter 0..1
-     * @param y   the y interpolation parameter 0..1
-     * @param rgb array of four ARGB values in the order NW, NE, SW, SE
-     * @return the interpolated value
      */
     public static int bilinearInterpolate(float x, float y, int nw, int ne, int sw, int se) {
-        float m0, m1;
-        int a0 = nw >>> 24;
-        int r0 = (nw >> 16) & 0xFF;
-        int g0 = (nw >> 8) & 0xFF;
-        int b0 = nw & 0xFF;
-        int a1 = ne >>> 24;
-        int r1 = (ne >> 16) & 0xFF;
-        int g1 = (ne >> 8) & 0xFF;
-        int b1 = ne & 0xFF;
-        int a2 = sw >>> 24;
-        int r2 = (sw >> 16) & 0xFF;
-        int g2 = (sw >> 8) & 0xFF;
-        int b2 = sw & 0xFF;
-        int a3 = se >>> 24;
-        int r3 = (se >> 16) & 0xFF;
-        int g3 = (se >> 8) & 0xFF;
-        int b3 = se & 0xFF;
-
-        float cx = 1.0f - x;
-        float cy = 1.0f - y;
-
-        m0 = cx * a0 + x * a1;
-        m1 = cx * a2 + x * a3;
-        int a = (int) (cy * m0 + y * m1);
-
-        m0 = cx * r0 + x * r1;
-        m1 = cx * r2 + x * r3;
-        int r = (int) (cy * m0 + y * m1);
-
-        m0 = cx * g0 + x * g1;
-        m1 = cx * g2 + x * g3;
-        int g = (int) (cy * m0 + y * m1);
-
-        m0 = cx * b0 + x * b1;
-        m1 = cx * b2 + x * b3;
-        int b = (int) (cy * m0 + y * m1);
+        int a = (int) bilerp(x, y, nw >>> 24, ne >>> 24, sw >>> 24, se >>> 24);
+        int r = (int) bilerp(x, y, (nw >> 16) & 0xFF, (ne >> 16) & 0xFF, (sw >> 16) & 0xFF, (se >> 16) & 0xFF);
+        int g = (int) bilerp(x, y, (nw >> 8) & 0xFF, (ne >> 8) & 0xFF, (sw >> 8) & 0xFF, (se >> 8) & 0xFF);
+        int b = (int) bilerp(x, y, nw & 0xFF, ne & 0xFF, sw & 0xFF, se & 0xFF);
 
         return (a << 24) | (r << 16) | (g << 8) | b;
     }

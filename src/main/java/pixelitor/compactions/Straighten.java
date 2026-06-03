@@ -85,7 +85,7 @@ public class Straighten extends SimpleCompAction {
     @Override
     protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
         // guides don't support arbitrary-angle guide transforms
-        return srcGuides.copyIdentical(view);
+        return srcGuides.copy(view);
     }
 
     @Override

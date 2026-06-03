@@ -205,10 +205,6 @@ public class LayersPanel extends JLayeredPane {
             .collect(toList());
     }
 
-    public boolean containsGUI(LayerGUI gui) {
-        return layerButtons.contains(gui);
-    }
-
     public void updateThumbSize(int newThumbSize) {
         for (LayerGUI gui : layerButtons) {
             gui.updateThumbSize(newThumbSize);

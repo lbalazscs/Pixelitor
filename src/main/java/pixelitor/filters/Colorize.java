@@ -32,7 +32,7 @@ import static pixelitor.gui.GUIText.COLOR;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Colorize
+ * The "Colorize" filter.
  */
 public class Colorize extends ParametrizedFilter {
     public static final String NAME = i18n("colorize");
@@ -44,7 +44,7 @@ public class Colorize extends ParametrizedFilter {
         BRIGHTNESS, -100, 0, 100);
     private final ColorParam colorParam = new ColorParam(
         COLOR, new Color(255, 207, 119), OPAQUE_ONLY);
-    private final RangeParam opacityParam = new RangeParam(
+    private final RangeParam amountParam = new RangeParam(
         "Amount (%)", 0, 100, 100);
 
     public Colorize() {
@@ -56,14 +56,14 @@ public class Colorize extends ParametrizedFilter {
         initParams(
             colorParam,
             brightnessParam,
-            opacityParam
+            amountParam
         );
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         float briShift = (float) brightnessParam.getPercentage();
-        float opacity = (float) opacityParam.getPercentage();
+        float opacity = (float) amountParam.getPercentage();
 
         Color color = colorParam.getColor();
 
@@ -79,8 +79,8 @@ public class Colorize extends ParametrizedFilter {
         int green = color.getGreen();
         int blue = color.getBlue();
 
-        // The final R,G,B values depend on the colorize R,G,B values and on the luminosity of the source pixels.
-        // For performance reasons the luminosity will be the index in these lookup tables
+        // The final R, G, B values depend on the target color's R, G, B values and the luminosity of the source pixels.
+        // For performance reasons, the luminosity is used as the index for these lookup tables.
         int[] redLookup = new int[256];
         int[] greenLookup = new int[256];
         int[] blueLookup = new int[256];
@@ -90,10 +90,10 @@ public class Colorize extends ParametrizedFilter {
             blueLookup[i] = (i * blue) / 255;
         }
 
-        int length = srcPixels.length;
+        int numPixels = srcPixels.length;
 
-        float translucence = 1 - opacity;
-        for (int i = 0; i < length; i++) {
+        float transparency = 1 - opacity;
+        for (int i = 0; i < numPixels; i++) {
             int srcRGB = srcPixels[i];
             float lum = ImageMath.calcLuminance(srcRGB);
             if (briShift > 0) {
@@ -114,9 +114,9 @@ public class Colorize extends ParametrizedFilter {
                 int srcG = (srcRGB >>> 8) & 0xFF;
                 int srcB = srcRGB & 0xFF;
 
-                destRed = (int) (destRed * opacity + srcR * translucence);
-                destGreen = (int) (destGreen * opacity + srcG * translucence);
-                destBlue = (int) (destBlue * opacity + srcB * translucence);
+                destRed = (int) (destRed * opacity + srcR * transparency);
+                destGreen = (int) (destGreen * opacity + srcG * transparency);
+                destBlue = (int) (destBlue * opacity + srcB * transparency);
             }
 
             int a = srcRGB & 0xFF_00_00_00;

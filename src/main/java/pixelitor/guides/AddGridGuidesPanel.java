@@ -24,13 +24,11 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.*;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
 import static java.awt.FlowLayout.LEFT;
-import static java.lang.String.format;
 
 public class AddGridGuidesPanel extends JPanel {
     private final GroupedRangeParam guidesParam = new GroupedRangeParam(
@@ -49,22 +47,20 @@ public class AddGridGuidesPanel extends JPanel {
         southPanel.add(clearExisting.createGUI());
         add(southPanel, SOUTH);
 
-        ParamAdjustmentListener updatePreview = () -> createGuides(true);
-        guidesParam.setAdjustmentListener(updatePreview);
-        builder.setAdjustmentListener(updatePreview);
-        updatePreview.paramAdjusted(); // set initial preview
+        ParamAdjustmentListener previewUpdater = () -> createGuides(true);
+        guidesParam.setAdjustmentListener(previewUpdater);
+        builder.setAdjustmentListener(previewUpdater);
+        previewUpdater.paramAdjusted(); // set initial preview
     }
 
     private void createGuides(boolean preview) {
-        builder.build(preview, this::setup);
+        builder.build(preview, this::configure);
     }
 
-    private void setup(Guides guides) {
+    private void configure(Guides guides) {
         int horDivisions = getNumHorDivisions();
         int verDivisions = getNumVerDivisions();
         guides.addGrid(horDivisions, verDivisions);
-        guides.setName(format("horDivisions = %d, verDivisions = %d%n",
-            horDivisions, verDivisions));
     }
 
     private int getNumHorDivisions() {
@@ -75,7 +71,7 @@ public class AddGridGuidesPanel extends JPanel {
         return guidesParam.getVertical() + 1;
     }
 
-    public static void showAddGridDialog(View view, String dialogTitle) {
+    public static void showDialog(View view, String dialogTitle) {
         Guides.Builder builder = new Guides.Builder(view, true);
         AddGridGuidesPanel panel = new AddGridGuidesPanel(builder);
         new DialogBuilder()

@@ -69,10 +69,7 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.onEDT;
-import static pixelitor.utils.Threads.onIOThread;
+import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
 
 /**
@@ -269,7 +266,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             compCopy.setSelection(new Selection(selection));
         }
         if (options.copyGuides() && guides != null) {
-            compCopy.guides = guides.copyIdentical(view);
+            compCopy.guides = guides.copy(view);
         }
         if (paths != null) {
             compCopy.paths = paths.deepCopy(compCopy);
@@ -1220,7 +1217,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Updates the position of a content layer/selection selection during a drag operation (Move Tool).
+     * Updates the position of a content layer/selection during a drag operation (Move Tool).
      */
     public void moveActiveContent(MoveMode mode, double imDx, double imDy) {
         if (mode.movesLayer()) {

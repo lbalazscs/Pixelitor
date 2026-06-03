@@ -127,8 +127,6 @@ public class MeasurementOverlay {
      *
      * @param line1 First line of text
      * @param line2 Second line of text
-     * @param x     Left coordinate of the background
-     * @param y     Bottom coordinate of the background
      */
     public void drawTwoLines(String line1, String line2, Point2D pos) {
         drawBackground(pos, DOUBLE_LINE_HEIGHT);

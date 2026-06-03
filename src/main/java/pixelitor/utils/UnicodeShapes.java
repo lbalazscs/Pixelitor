@@ -49,7 +49,7 @@ public class UnicodeShapes {
 
     /**
      * Extracts the shape from a string (consisting typically of
-     * one special unicode character) and scales and translates
+     * one special Unicode character) and scales and translates
      * it to the given size and position.
      */
     public static Shape extract(String s, double x, double y, double width, double height) {

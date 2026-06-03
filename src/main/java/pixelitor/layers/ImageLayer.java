@@ -108,7 +108,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
     /**
      * Whether the preview image is different from the normal image.
-     * Relevant only in {@link PREVIEW} state.
+     * Relevant only in preview state.
      */
     private transient boolean imageContentChanged = false;
 

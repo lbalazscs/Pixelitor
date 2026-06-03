@@ -28,8 +28,6 @@ import pixelitor.gui.utils.GUIUtils;
 import javax.swing.*;
 import java.util.List;
 
-import static java.lang.String.format;
-
 /**
  * The GUI for adding a single (horizontal or vertical) guide
  */
@@ -37,7 +35,7 @@ public class AddSingleGuidePanel extends JPanel {
     private final Guides.Builder builder;
     private final boolean horizontal; // horizontal or vertical
 
-    private final RangeParam percents;
+    private final RangeParam percent;
 
     private AddSingleGuidePanel(Guides.Builder builder, boolean horizontal) {
         this.builder = builder;
@@ -45,35 +43,33 @@ public class AddSingleGuidePanel extends JPanel {
 
         var canvas = builder.getCanvas();
         int maxSize = horizontal ? canvas.getWidth() : canvas.getHeight();
-        percents = new RangeParam("Percent", 0, 50, 100);
+        percent = new RangeParam("Percent", 0, 50, 100);
         var pixels = new RangeParam("Pixels", 0, maxSize / 2.0, maxSize);
-        percents.scaledLinkWith(pixels, maxSize / 100.0);
+        percent.scaledLinkWith(pixels, maxSize / 100.0);
 
         var groupedSliders = new GroupedRangeParam("Position",
-            new RangeParam[]{pixels, percents}, false).notLinkable();
+            new RangeParam[]{pixels, percent}, false).notLinkable();
 
         BooleanParam clearExisting = builder.getClearExisting();
         GUIUtils.arrangeVertically(this, List.of(groupedSliders, clearExisting));
 
-        ParamAdjustmentListener updatePreview = () -> createGuides(true);
-        percents.setAdjustmentListener(updatePreview);
-        pixels.setAdjustmentListener(updatePreview);
-        builder.setAdjustmentListener(updatePreview);
-        updatePreview.paramAdjusted(); // trigger initial preview
+        ParamAdjustmentListener previewUpdater = () -> createGuides(true);
+        percent.setAdjustmentListener(previewUpdater);
+        pixels.setAdjustmentListener(previewUpdater);
+        builder.setAdjustmentListener(previewUpdater);
+        previewUpdater.paramAdjusted(); // trigger initial preview
     }
 
     private void createGuides(boolean preview) {
-        builder.build(preview, this::setup);
+        builder.build(preview, this::configure);
     }
 
-    private void setup(Guides guides) {
-        double value = percents.getPercentage();
+    private void configure(Guides guides) {
+        double value = percent.getPercentage();
         if (horizontal) {
             guides.addHorizontal(value);
-            guides.setName(format("horizontal at %.2f", value));
         } else {
             guides.addVertical(value);
-            guides.setName(format("vertical at %.2f", value));
         }
     }
 

@@ -33,7 +33,7 @@ public class Geometry {
     private static final double EPSILON = 0.0001;
 
     // (4/3) * tan(π/8) ≈ 0.5523, the control-point distance for
-    // approximating a quarter-circle arc with a cubic Bezier curve
+    // approximating a quarter-circle arc with a cubic Bézier curve
     public static final double KAPPA = 0.552284749831;
 
     private Geometry() {
@@ -112,7 +112,7 @@ public class Geometry {
      * @param end Second endpoint of the line segment
      * @param m First part of the division ratio
      * @param n Second part of the division ratio
-     * @param result Output parameter for the calculated point
+     * @param resultOut Output parameter for the calculated point
      */
     public static void calcDivisionPoint(Point2D start,
                                          Point2D end,
@@ -136,17 +136,16 @@ public class Geometry {
         deScale(a, FastMath.hypot(a.getX(), a.getY()));
     }
 
-    public static Point2D deScale(Point2D a, double factor) {
+    public static void deScale(Point2D a, double factor) {
         deScale(a, factor, a);
-        return a;
     }
 
     public static void deScale(Point2D a, double factor, Point2D r) {
         r.setLocation(a.getX() / factor, a.getY() / factor);
     }
 
-    public static Point2D scale(Point2D a, double factor) {
-        return scale(a, factor, a);
+    public static void scale(Point2D a, double factor) {
+        scale(a, factor, a);
     }
 
     public static Point2D scale(Point2D a, double factor, Point2D r) {
@@ -174,14 +173,6 @@ public class Geometry {
 
     public static double distance(Point2D a, Point2D b) {
         return FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
-    }
-
-    public static double distance(Point2D a) {
-        return FastMath.hypot(a.getX(), a.getY());
-    }
-
-    public static double distanceSq(Point2D a) {
-        return a.getX() * a.getX() + a.getY() * a.getY();
     }
 
     public static Point2D add(Point2D a, double add) {

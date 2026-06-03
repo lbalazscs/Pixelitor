@@ -619,11 +619,11 @@ public class FlowField extends ParametrizedFilter {
      * A single point moving through the flow field.
      */
     private static class Particle {
-        Point2D pos = new Point2D.Double();
-        Point2D lastPos = new Point2D.Double();
+        final Point2D pos = new Point2D.Double();
+        final Point2D lastPos = new Point2D.Double();
         final Vector2D delta = new Vector2D();
 
-        Vector2D vel = new Vector2D();
+        final Vector2D vel = new Vector2D();
         final Vector2D acc = new Vector2D();
 
         Color startingColor;

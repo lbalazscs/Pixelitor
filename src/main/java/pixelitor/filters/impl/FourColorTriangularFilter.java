@@ -153,9 +153,9 @@ public class FourColorTriangularFilter extends FourColorFilter {
 
         // allow application of non-linear smooth interpolation over the barycentric coordinates
         if (interpolation != InterpolationType.LINEAR) {
-            wa = Math.max(0.0f, Math.min(1.0f, wa));
-            wb = Math.max(0.0f, Math.min(1.0f, wb));
-            wc = Math.max(0.0f, Math.min(1.0f, wc));
+            wa = Math.clamp(wa, 0.0f, 1.0f);
+            wb = Math.clamp(wb, 0.0f, 1.0f);
+            wc = Math.clamp(wc, 0.0f, 1.0f);
 
             wa = interpolation.calcInterpolatedWeight(wa);
             wb = interpolation.calcInterpolatedWeight(wb);

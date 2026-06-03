@@ -18,7 +18,6 @@
 package pixelitor.utils;
 
 import pixelitor.Composition;
-import pixelitor.gui.utils.DimensionHelper;
 import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.gui.utils.ValidationResult;
 

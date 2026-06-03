@@ -127,8 +127,8 @@ public class GridParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        if (state instanceof GridParamState gridState) {
-            internalSetData(gridState.data(), true);
+        if (state instanceof GridParamState(int[][] newData)) {
+            internalSetData(newData, true);
             if (updateGUI && paramGUI != null) {
                 paramGUI.updateGUI();
             }

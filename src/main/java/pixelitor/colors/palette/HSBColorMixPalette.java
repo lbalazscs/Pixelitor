@@ -95,7 +95,7 @@ public class HSBColorMixPalette extends DynamicPalette {
                 if (rowCount > 1) {
                     float startBri = b - MAX_BRI_DEVIATION;
                     b = startBri + row * briStep;
-                    b = Math.max(0.0f, Math.min(1.0f, b));
+                    b = Math.clamp(b, 0.0f, 1.0f);
                 }
 
                 int rgb = Color.HSBtoRGB(h, s, b);

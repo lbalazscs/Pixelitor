@@ -409,7 +409,7 @@ public class ImageUtils {
     }
 
     /**
-     * Converts an image filename to a resource URL within the images directory.
+     * Converts an image filename to a resource URL within the 'images' directory.
      */
     public static URL findImageURL(String fileName) {
         assert fileName != null;

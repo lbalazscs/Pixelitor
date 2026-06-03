@@ -42,7 +42,7 @@ public class OutlineBrush extends StrokeBrush {
 
     public OutlineBrush(BrushType brushType, double radius, OutlineBrushSettings settings) {
         super(radius, StrokeType.OUTLINE,
-            // can't be easiy generalized to arbitrary shape types because these
+            // can't be easily generalized to arbitrary shape types because these
             // cap/join settings are crucial for the look of the outline brush
             brushType == BrushType.OUTLINE_SQUARE ? CAP_SQUARE : CAP_ROUND,
             brushType == BrushType.OUTLINE_SQUARE ? JOIN_BEVEL : JOIN_ROUND);

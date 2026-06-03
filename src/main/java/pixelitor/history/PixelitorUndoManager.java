@@ -138,7 +138,7 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
     }
 
     /**
-     * Navigates the undo history to to the state after the given
+     * Navigates the undo history to the state after the given
      * edit, performing the necessary undo or redo operations.
      */
     private void navigateTo(PixelitorEdit targetEdit) {

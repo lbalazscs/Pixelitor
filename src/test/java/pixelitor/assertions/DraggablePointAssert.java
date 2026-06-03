@@ -24,7 +24,6 @@ import pixelitor.tools.pen.AnchorPointType;
 import pixelitor.tools.pen.ControlPoint;
 import pixelitor.tools.util.DraggablePoint;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 

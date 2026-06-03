@@ -227,7 +227,7 @@ public class Posterize extends ParametrizedFilter {
         }
         float range = max - min;
 
-        // prevent division by zero.
+        // prevent division by zero
         if (range == 0.0f) {
             return min;
         }
@@ -235,7 +235,7 @@ public class Posterize extends ParametrizedFilter {
         // normalize value to 0-1 range
         float normalizedValue = (value - min) / range;
         // clamp to handle out-of-gamut values and ensure it's < 1.0 for level calculation
-        normalizedValue = Math.max(0.0f, Math.min(normalizedValue, 0.999999f));
+        normalizedValue = Math.clamp(normalizedValue, 0.0f, 0.999999f);
 
         // find the discrete level, an integer from 0 to numLevels-1
         int level = (int) (normalizedValue * numLevels);

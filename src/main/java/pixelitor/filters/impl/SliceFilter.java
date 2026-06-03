@@ -34,7 +34,6 @@ public class SliceFilter extends RotatingEffectFilter {
      *
      * @param filterName         the name of the filter.
      * @param edgeAction         the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
-     * @param interpolation      the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
      * @param angle              the effect's rotation angle (in radians).
      * @param offset             the distance pixels are shifted within a slice.
      * @param size               the thickness of each slice in pixels.

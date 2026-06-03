@@ -45,7 +45,7 @@ public interface ExportSettings {
     void addMagickOptions(List<String> command);
 
     /**
-     * Returns the ImageMagick format specifier (such as "png32:)
+     * Returns the ImageMagick format specifier (such as "png32:")
      * or an empty string for the default extension-based format.
      */
     default String getFormatSpecifier() {

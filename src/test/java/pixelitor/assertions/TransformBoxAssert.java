@@ -26,7 +26,6 @@ import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 

@@ -56,7 +56,7 @@ public class ResetButton extends JButton {
     @Override
     public void setEnabled(boolean b) {
         // can be disabled either because the parent component
-        // component is disabled or because it's at the default value
+        // is disabled or because it's at the default value
         super.setEnabled(b && !resettable.isAtDefault());
     }
 }

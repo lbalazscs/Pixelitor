@@ -474,7 +474,7 @@ public class GMICFilterCreator {
     }
 
     private void addLine(String line, int indent) {
-        sb.append("    ".repeat(indent)).append(line).append('\n');
+        sb.repeat("    ", indent).append(line).append('\n');
     }
 
     private void addNewLine() {

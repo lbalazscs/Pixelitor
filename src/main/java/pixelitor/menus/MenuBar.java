@@ -1107,7 +1107,7 @@ public class MenuBar extends JMenuBar {
         // add grid guides
         String addGridGuidesText = i18n.getString("add_grid_guides");
         viewMenu.addViewEnabled(addGridGuidesText + "...",
-            comp -> AddGridGuidesPanel.showAddGridDialog(comp.getView(), addGridGuidesText));
+            comp -> AddGridGuidesPanel.showDialog(comp.getView(), addGridGuidesText));
 
         // clear guides
         viewMenu.addViewEnabled(i18n, "clear_guides", Composition::clearGuides);

@@ -128,8 +128,8 @@ class SerializedPathIterator implements PathIterator {
             super(msg);
             System.err.println("\"" + new String(c) + "\"");
             StringBuilder sb = new StringBuilder();
-            sb.append(" ".repeat(ptr + 1));
-            sb.append("^".repeat(length));
+            sb.repeat(" ", ptr + 1);
+            sb.repeat("^", length);
             System.err.println(sb);
         }
     }

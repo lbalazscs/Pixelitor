@@ -297,16 +297,8 @@ public class CompositionGuide {
             Arc2D.OPEN);
     }
 
-    public CompositionGuideType getType() {
-        return type;
-    }
-
     public void setType(CompositionGuideType type) {
         this.type = type;
-    }
-
-    public int getOrientation() {
-        return orientation;
     }
 
     public void setOrientation(int orientation) {

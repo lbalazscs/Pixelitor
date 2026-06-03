@@ -21,8 +21,8 @@ package pixelitor.tools.pen;
  * The various states in the process of building a path.
  */
 public enum BuildState {
-    // The starting empty state when there is no interaction.
-    // Also the state after a subpath is finished, but another is not started yet.
+    // The starting empty state when there is no interaction, and
+    // the state after a subpath is finished and another has not been started yet.
     IDLE(false),
 
     // States during the two primary path-building operations:

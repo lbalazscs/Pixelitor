@@ -524,7 +524,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
         if (!createEdit) {
             // either history and UI update will be handled by
-            // the caller or we are in a test setup
+            // the caller, or we are in a test setup
             return null;
         }
 

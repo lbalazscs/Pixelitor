@@ -369,9 +369,9 @@ public class ColorSpaces {
         float b = y + 1.772f * cb;
 
         // clamp values to [0, 255] and convert to int
-        int ri = Math.max(0, Math.min(255, Math.round(r)));
-        int gi = Math.max(0, Math.min(255, Math.round(g)));
-        int bi = Math.max(0, Math.min(255, Math.round(b)));
+        int ri = Math.clamp(Math.round(r), 0, 255);
+        int gi = Math.clamp(Math.round(g), 0, 255);
+        int bi = Math.clamp(Math.round(b), 0, 255);
 
         // pack into single int (full alpha)
         return 0xFF_00_00_00 | (ri << 16) | (gi << 8) | bi;

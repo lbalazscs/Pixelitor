@@ -41,9 +41,7 @@ import java.io.Serial;
  * <P>There are some specific properties you can set to customize the look-and-feel
  * of this slider in the default {@link com.bric.plaf.GradientSliderUI} class.
  * <P>The UI for each slider is loaded from the UIManager property: "GradientSliderUI".
- * By default this is "com.bric.plaf.GradientSliderUI".
- *
- * @see com.bric.swing.GradientSliderDemo
+ * By default, this is "com.bric.plaf.GradientSliderUI".
  */
 public class GradientSlider extends MultiThumbSlider {
     @Serial

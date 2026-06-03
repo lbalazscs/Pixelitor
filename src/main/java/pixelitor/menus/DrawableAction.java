@@ -149,8 +149,4 @@ public class DrawableAction extends AbstractViewEnabledAction {
             action.accept(rasterizedLayer);
         }
     }
-
-    public String getName() {
-        return name;
-    }
 }

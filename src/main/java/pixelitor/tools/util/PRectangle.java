@@ -34,7 +34,7 @@ public class PRectangle {
     // the rectangle in component-space, with integer coordinates
     private Rectangle coRect;
 
-    // the rectangle in in image space, with sub-pixel precision
+    // the rectangle in image space, with sub-pixel precision
     private Rectangle2D imRect;
 
     private PRectangle(Rectangle coRect, Rectangle2D imRect) {

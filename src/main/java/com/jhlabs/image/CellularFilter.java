@@ -166,7 +166,7 @@ public class CellularFilter extends WholeImageFilter {
     /**
      * Sets the grid type for the texture.
      *
-     * @param gt the code representing the grid type
+     * @param gridType the code representing the grid type
      */
     public void setGridType(GridType gridType) {
         this.gridType = gridType;
