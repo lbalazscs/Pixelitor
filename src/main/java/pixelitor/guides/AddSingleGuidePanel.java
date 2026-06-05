@@ -42,7 +42,7 @@ public class AddSingleGuidePanel extends JPanel {
         this.horizontal = horizontal;
 
         var canvas = builder.getCanvas();
-        int maxSize = horizontal ? canvas.getWidth() : canvas.getHeight();
+        int maxSize = horizontal ? canvas.getHeight() : canvas.getWidth();
         percent = new RangeParam("Percent", 0, 50, 100);
         var pixels = new RangeParam("Pixels", 0, maxSize / 2.0, maxSize);
         percent.scaledLinkWith(pixels, maxSize / 100.0);

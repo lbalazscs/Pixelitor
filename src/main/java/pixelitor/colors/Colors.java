@@ -136,6 +136,11 @@ public class Colors {
         return setAlpha(col, alpha);
     }
 
+    public static String toHtmlHex(Color c) {
+        boolean includeAlpha = c.getAlpha() != 255;
+        return toHtmlHex(c, includeAlpha);
+    }
+
     public static String toHtmlHex(Color c, boolean includeAlpha) {
         if (includeAlpha) {
             // RRGGBBAA format
@@ -209,7 +214,7 @@ public class Colors {
     }
 
     private static void copyColorToClipboard(Color c) {
-        Utils.copyStringToClipboard(toHtmlHex(c, false));
+        Utils.copyStringToClipboard(toHtmlHex(c));
     }
 
     private static Color getColorFromClipboard() {

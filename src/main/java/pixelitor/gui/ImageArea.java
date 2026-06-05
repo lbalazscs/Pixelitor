@@ -77,7 +77,7 @@ public class ImageArea {
 
     static {
         // initialize at startup from the saved preferences
-        ImageAreaConfig config = AppPreferences.loadDesktopMode();
+        ImageAreaConfig config = AppPreferences.loadImageAreaConfig();
         mode = config.mode();
         tabPlacement = config.tabPlacement();
 

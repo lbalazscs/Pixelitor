@@ -25,7 +25,7 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
-import java.awt.Color;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -202,7 +202,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addColor(String name, Color c) {
-        addNode(name, Colors.toHtmlHex(c, true), DebugNode::quote);
+        addNode(name, Colors.toHtmlHex(c), DebugNode::quote);
     }
 
     public void addClass() {

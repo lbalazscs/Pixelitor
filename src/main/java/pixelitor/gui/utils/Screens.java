@@ -129,22 +129,6 @@ public class Screens {
         window.setLocation(locX, locY);
     }
 
-    public static Dimension getMaxWindowSize() {
-        Rectangle bounds;
-        try {
-            // use this because it takes into account areas
-            // like the taskbar, but it can throw
-            // a "Window must not be zero" if there are 3 monitors
-            // on Linux with some newer Java versions, see
-            // https://github.com/lbalazscs/Pixelitor/issues/15
-            bounds = GRAPHICS_ENV.getMaximumWindowBounds();
-        } catch (Exception e) {
-            return Toolkit.getDefaultToolkit().getScreenSize(); // fallback
-        }
-
-        return new Dimension(bounds.width, bounds.height);
-    }
-
     public static boolean isMultiMonitorSetup() {
         return IS_MULTI_MONITOR;
     }

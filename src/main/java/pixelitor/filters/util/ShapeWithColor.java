@@ -22,9 +22,7 @@ import pixelitor.colors.Colors;
 import pixelitor.utils.Distortion;
 import pixelitor.utils.Shapes;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.List;
 
@@ -53,7 +51,7 @@ public record ShapeWithColor(Shape shape, Color color) {
             .append("\n");
         if (bgColor != null) {
             content.append(String.format("<rect width=\"100%%\" height=\"100%%\" fill=\"#%s\"/>\n",
-                Colors.toHtmlHex(bgColor, true)));
+                Colors.toHtmlHex(bgColor)));
         }
         appendSvgPaths(content, shapes, strokeWidth, strokeColor);
         content.append("</svg>");
@@ -66,14 +64,14 @@ public record ShapeWithColor(Shape shape, Color color) {
             String pathData = Shapes.toSvgPath(shape.shape());
             sb.append("<path d=\"").append(pathData).append("\" ");
 
-            String colorHex = Colors.toHtmlHex(shape.color(), false);
+            String colorHex = Colors.toHtmlHex(shape.color());
             sb.append("fill=\"#").append(colorHex).append("\" ");
 
             String svgFillRule = Shapes.getSvgFillRule(shape.shape());
             sb.append("fill-rule=\"").append(svgFillRule).append("\"");
 
             if (strokeWidth > 0 && strokeColor != null) {
-                String strokeColorHex = Colors.toHtmlHex(strokeColor, false);
+                String strokeColorHex = Colors.toHtmlHex(strokeColor);
                 sb.append(" stroke=\"#").append(strokeColorHex).append("\"");
                 sb.append(" stroke-width=\"").append(strokeWidth).append("\"");
                 sb.append(" stroke-linecap=\"butt\"");
