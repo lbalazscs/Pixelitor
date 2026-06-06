@@ -86,23 +86,29 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         int thumbWidth = thumb.getWidth();
         int thumbHeight = thumb.getHeight();
 
+        // calculate dynamic offsets to center the thumbnail
+        int xOffset = (getWidth() - thumbWidth) / 2;
+        int yOffset = (getHeight() - thumbHeight) / 2;
+
         if (!isEnabled()) {
             g.setColor(Color.GRAY);
-            g.drawRect(0, 0, thumbWidth - 1, thumbHeight - 1);
+            g.drawRect(xOffset, yOffset, thumbWidth - 1, thumbHeight - 1);
             return;
         }
 
         // no anti-aliasing is needed, because everything
         // is perfectly horizontal or vertical
         Graphics2D g2 = (Graphics2D) g;
-        g.drawImage(thumb, 0, 0, null);
+        g.drawImage(thumb, xOffset, yOffset, null);
 
         // draws the position indicator, consisting of
         // a crosshair and a central square marker
-        int x = (int) (model.getRelativeX() * thumbWidth);
-        int y = (int) (model.getRelativeY() * thumbHeight);
+        int x = xOffset + (int) (model.getRelativeX() * thumbWidth);
+        int y = yOffset + (int) (model.getRelativeY() * thumbHeight);
 
-        drawCrosshair(g2, x, y, thumbWidth, thumbHeight);
+        // the crosshair should not be restricted to the thumbnail's
+        // dimensions, because users are allowed to select outside the bounds
+        drawCrosshair(g2, x, y, getWidth(), getHeight());
         drawCentralMarker(g2, x, y);
     }
 
@@ -151,9 +157,13 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
             return;
         }
 
+        // re-calculate offsets for mouse interactions
+        int xOffset = (getWidth() - thumb.getWidth()) / 2;
+        int yOffset = (getHeight() - thumb.getHeight()) / 2;
+
         // doesn't clamp mouse coordinates to allow selecting positions outside the image
-        double relX = ((double) e.getX()) / thumb.getWidth();
-        double relY = ((double) e.getY()) / thumb.getHeight();
+        double relX = ((double) (e.getX() - xOffset)) / thumb.getWidth();
+        double relY = ((double) (e.getY() - yOffset)) / thumb.getHeight();
 
         model.setRelativePosition(relX, relY, false, isAdjusting, true);
         parentGUI.updateSlidersFromModel();

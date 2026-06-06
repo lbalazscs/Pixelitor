@@ -18,6 +18,7 @@
 package pixelitor.gui.utils;
 
 import org.jdesktop.swingx.painter.TextPainter;
+import pixelitor.colors.Colors;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -28,6 +29,8 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
 
 /**
  * Information associated with a thumbnail image.
@@ -73,8 +76,7 @@ public class ThumbInfo {
         int width = panel.getWidth();
         int height = panel.getHeight();
         if (errorMsg != null) {
-            g.setColor(WHITE);
-            g.fillRect(0, 0, width, height);
+            Colors.fillWith(WHITE, g, width, height);
             new TextPainter(errorMsg, panel.getFont(), Color.RED)
                 .paint(g, null, width, height);
             paintImageSize(g, panel);
@@ -93,6 +95,9 @@ public class ThumbInfo {
             return;
         }
 
+        Object origAAHint = g.getRenderingHint(KEY_TEXT_ANTIALIASING);
+        g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON);
+
         String msg = "Size: " + fullWidth + " x " + fullHeight + " pixels";
 
         Font font = panel.getFont();
@@ -107,6 +112,8 @@ public class ThumbInfo {
 
         g.setColor(WHITE);
         g.drawString(msg, drawX - 1, drawY - 1);
+
+        g.setRenderingHint(KEY_TEXT_ANTIALIASING, origAAHint);
     }
 
     public boolean hasImage() {
