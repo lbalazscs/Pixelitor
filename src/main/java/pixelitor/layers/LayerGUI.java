@@ -87,7 +87,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private DragReorderHandler dragReorderHandler;
 
     /**
-     * The Y coordinate in the parent when it is not dragged.
+     * The Y coordinate in the parent when it is not being dragged.
      */
     private int layoutY;
 
@@ -212,16 +212,12 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     private static Icon createLayerIcon(Layer layer) {
-        if (layer instanceof TextLayer) {
-            return Icons.getTextLayerIcon();
-        } else if (layer.getClass() == AdjustmentLayer.class) {
-            return Icons.getAdjLayerIcon();
-        } else if (layer.getClass() == SmartFilter.class) {
-            return Icons.getSmartFilterIcon();
-        } else {
-            // for other layer types, the icon depends on the contents
-            return null;
-        }
+        return switch (layer) {
+            case TextLayer _ -> Icons.getTextLayerIcon();
+            case SmartFilter _ -> Icons.getSmartFilterIcon();
+            case AdjustmentLayer _ -> Icons.getAdjLayerIcon();
+            default -> null; // for other layer types, the icon depends on the contents
+        };
     }
 
     private void layerIconClicked(MouseEvent e) {
@@ -231,7 +227,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         if (clickCount == 1) {
             MaskViewMode.NORMAL.activateOn(layer);
         } else {
-            layer.edit();
+            layer.showEditUI();
         }
     }
 
@@ -271,14 +267,15 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     private void initLayerVisibilityCB() {
-        visibilityCB = createVisibilityCheckBox(false);
+        visibilityCB = createVisibilityCheckBox();
 
         visibilityCB.setSelected(layer.isVisible());
         visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.<br><b>Alt-click</b> to isolate this layer.");
         add(visibilityCB, LayerGUILayout.CHECKBOX);
     }
 
-    private JCheckBox createVisibilityCheckBox(boolean smartFilter) {
+    private JCheckBox createVisibilityCheckBox() {
+        boolean smartFilter = layer instanceof SmartFilter;
         JCheckBox cb = new JCheckBox(CLOSED_EYE_ICON) {
             @Override
             public void setUI(ButtonUI ui) {
@@ -291,15 +288,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             protected void processMouseEvent(MouseEvent e) {
                 // isolating works after a theme-change only if the
                 // mouse event processing is overridden at this level
-
-                if (smartFilter) {
-                    super.processMouseEvent(e);
-                } else if (e.getID() == MouseEvent.MOUSE_CLICKED) {
-                    boolean altDown = (e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) == MouseEvent.ALT_DOWN_MASK;
-                    if (altDown) {
+                if (e.getID() == MouseEvent.MOUSE_CLICKED) {
+                    if (e.isAltDown() && !smartFilter) { // smart filters shouldn't be isolated
                         layer.isolate();
                     } else {
-                        // normal behaviour
+                        // normal behavior
                         boolean newVisibility = !visibilityCB.isSelected();
                         layer.setVisible(newVisibility, true, true);
                     }
@@ -434,7 +427,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         return layer.getName();
     }
 
-    public boolean isNameEditing() {
+    public boolean isEditingName() {
         return nameEditor.isEditable();
     }
 
@@ -444,37 +437,30 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void updateLayerIconImageAsync(Layer layer) {
+    public void updateIconImageAsync(Layer layerOrMask) {
         assert calledOnEDT() : callInfo();
-        assert layer.hasRasterIcon();
+        assert layerOrMask.hasRasterIcon();
 
         // the synchronous update avoids starting a filter twice
         // TODO dubious design
-        boolean synchronousUpdate = layer instanceof CompositeLayer;
+        boolean synchronousUpdate = layerOrMask instanceof CompositeLayer;
 
         if (synchronousUpdate) {
-            BufferedImage thumb = layer.createIconThumbnail();
-            assert thumb != null;
-            if (thumb != null) {
-                updateIconOnEDT(layer, thumb);
-            }
+            BufferedImage thumb = layerOrMask.createIconThumbnail();
+            updateIconOnEDT(layerOrMask, thumb);
             return;
         }
 
-        Runnable notEDT = () -> {
-            BufferedImage thumb = layer.createIconThumbnail();
-            assert thumb != null;
-            if (thumb != null) {
-                SwingUtilities.invokeLater(() -> updateIconOnEDT(layer, thumb));
-            }
-        };
-
-        CompletableFuture.runAsync(notEDT);
+        CompletableFuture.supplyAsync(layerOrMask::createIconThumbnail)
+            .thenAcceptAsync(thumb ->
+                updateIconOnEDT(layerOrMask, thumb), EventQueue::invokeLater);
     }
 
-    private void updateIconOnEDT(Layer layer, BufferedImage thumb) {
+    private void updateIconOnEDT(Layer layerOrMask, BufferedImage thumb) {
         assert calledOnEDT() : callInfo();
-        if (layer instanceof LayerMask mask) {
+        assert thumb != null;
+
+        if (layerOrMask instanceof LayerMask mask) {
             if (!hasMaskIcon()) {
                 return;
             }
@@ -518,9 +504,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             dragReorderHandler.attachTo(maskIconLabel);
         }
 
-        // don't call layer.getMask().updateIconImage(); because
-        // it requires an ui, which could be constructed right now.
-        updateLayerIconImageAsync(layer.getMask());
+        // don't call layer.getMask().updateIconImage() because
+        // it requires a ui, which could be constructed right now
+        updateIconImageAsync(layer.getMask());
         revalidate();
     }
 
@@ -566,7 +552,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     public void removeMaskIcon() {
         assert maskIconLabel != null;
 
-        // the mask icon label is not going to be used again, remove all listeners
+        // the mask icon label is not going to be used again, so remove all listeners
         if (dragReorderHandler != null) { // null in unit tests
             dragReorderHandler.detachFrom(maskIconLabel);
         }
@@ -603,10 +589,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         this.layer = newLayer;
         updateName();
         Icon icon = createLayerIcon(layer);
-        if (icon != null) { // has fix icon
+        if (icon != null) { // has a static icon
             layerIconLabel.setIcon(icon);
         } else {
-            updateLayerIconImageAsync(layer);
+            updateIconImageAsync(layer);
         }
 
         if (maskIconLabel != null) {

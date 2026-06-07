@@ -126,7 +126,7 @@ public class AddAdjLayerAction extends AbstractViewEnabledAction {
         comp.getHolderForNewLayers()
             .addWithHistory(layer, "New Adjustment Layer");
 
-        layer.edit();
+        layer.showEditUI();
     }
 
     public static List<Action> getActions() {

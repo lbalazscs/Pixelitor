@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,27 +27,22 @@ import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 
-import static java.awt.GridBagConstraints.BOTH;
-import static java.awt.GridBagConstraints.EAST;
-import static java.awt.GridBagConstraints.HORIZONTAL;
-import static java.awt.GridBagConstraints.NONE;
-import static java.awt.GridBagConstraints.REMAINDER;
-import static java.awt.GridBagConstraints.WEST;
+import static java.awt.GridBagConstraints.*;
 
 /**
- * Helper object for GridBagLayout
+ * Helper object for GridBagLayout.
  */
 public class GridBagHelper {
     private static final int DEFAULT_PADDING = 2;
     private static final Insets DEFAULT_INSETS = new Insets(DEFAULT_PADDING, DEFAULT_PADDING, DEFAULT_PADDING, DEFAULT_PADDING);
 
-    private static final GridBagConstraints LABEL_CONSTRAINTS = new GridBagConstraints(
+    private static final GridBagConstraints labelConstraints = new GridBagConstraints(
         0, 0, 1, 1, 0.0, 1.0,
         EAST, NONE, DEFAULT_INSETS, 0, 0);
-    private static final GridBagConstraints COMPONENT_CONSTRAINTS = new GridBagConstraints(
+    private static final GridBagConstraints componentConstraints = new GridBagConstraints(
         0, 0, 1, 1, 1.0, 1.0,
         WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0);
-    private static final GridBagConstraints LAST_COMPONENT_CONSTRAINTS = new GridBagConstraints(
+    private static final GridBagConstraints lastComponentConstraints = new GridBagConstraints(
         0, 0, REMAINDER, 1, 1.0, 1.0,
         WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0);
 
@@ -66,16 +61,16 @@ public class GridBagHelper {
         initConstraints();
         if (padding != DEFAULT_PADDING) {
             Insets newPadding = new Insets(padding, padding, padding, padding);
-            LABEL_CONSTRAINTS.insets = newPadding;
-            COMPONENT_CONSTRAINTS.insets = newPadding;
-            LAST_COMPONENT_CONSTRAINTS.insets = newPadding;
+            labelConstraints.insets = newPadding;
+            componentConstraints.insets = newPadding;
+            lastComponentConstraints.insets = newPadding;
         }
     }
 
     private static void initConstraints() {
-        LABEL_CONSTRAINTS.gridy = 0;
-        COMPONENT_CONSTRAINTS.gridy = 0;
-        LAST_COMPONENT_CONSTRAINTS.gridy = 0;
+        labelConstraints.gridy = 0;
+        componentConstraints.gridy = 0;
+        lastComponentConstraints.gridy = 0;
     }
 
     public void addLabel(String labelText, int column, int row) {
@@ -84,18 +79,18 @@ public class GridBagHelper {
     }
 
     private void addLabel(JLabel label, int column, int row) {
-        LABEL_CONSTRAINTS.gridx = column;
-        LABEL_CONSTRAINTS.gridy = row;
-        container.add(label, LABEL_CONSTRAINTS);
+        labelConstraints.gridx = column;
+        labelConstraints.gridy = row;
+        container.add(label, labelConstraints);
     }
 
     /**
-     * Adds the given control to the right of most recently added label.
+     * Adds the given control to the right of the most recently added label.
      */
     public void addControl(Component c) {
-        COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 1;
-        COMPONENT_CONSTRAINTS.gridy = LABEL_CONSTRAINTS.gridy;
-        container.add(c, COMPONENT_CONSTRAINTS);
+        componentConstraints.gridx = labelConstraints.gridx + 1;
+        componentConstraints.gridy = labelConstraints.gridy;
+        container.add(c, componentConstraints);
     }
 
     public void addLabelAndTwoControls(String labelText, Component c1, Component c2) {
@@ -115,17 +110,17 @@ public class GridBagHelper {
         currentRow++;
     }
 
-    public void addTwoLabels(String text1, String text2) {
-        addLabelAndControl(text1, new JLabel(text2));
+    public void addTwoLabels(String leftLabelText, String rightLabelText) {
+        addLabelAndControl(leftLabelText, new JLabel(rightLabelText));
     }
 
     public void addLabelAndControl(FilterSetting setting) {
         addLabelAndControl(setting.getName() + ":", setting.createGUI());
     }
 
-    public void addLabelAndControl(FilterSetting setting, String controlName) {
+    public void addLabelAndControl(FilterSetting setting, String lookupName) {
         addLabelAndControl(setting.getName() + ":",
-            setting.createGUI(controlName));
+            setting.createGUI(lookupName));
     }
 
     public void addLabelAndControl(String labelText, Component c) {
@@ -135,13 +130,13 @@ public class GridBagHelper {
 
     public void addVerticallyStretchable(String labelText, Component c, double verticalWeight) {
         JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
-        LABEL_CONSTRAINTS.gridx = 0;
-        LABEL_CONSTRAINTS.gridy = currentRow;
-        container.add(label, LABEL_CONSTRAINTS);
+        labelConstraints.gridx = 0;
+        labelConstraints.gridy = currentRow;
+        container.add(label, labelConstraints);
 
-        COMPONENT_CONSTRAINTS.gridx = 1;
-        COMPONENT_CONSTRAINTS.gridy = currentRow;
-        GridBagConstraints controlConstraints = (GridBagConstraints) COMPONENT_CONSTRAINTS.clone();
+        componentConstraints.gridx = 1;
+        componentConstraints.gridy = currentRow;
+        GridBagConstraints controlConstraints = (GridBagConstraints) componentConstraints.clone();
         controlConstraints.fill = BOTH;
         controlConstraints.weighty = verticalWeight;
         container.add(c, controlConstraints);
@@ -168,54 +163,54 @@ public class GridBagHelper {
     }
 
     public void addTwoControls(Component c1, Component c2, int row) {
-        LABEL_CONSTRAINTS.gridx = 0;
-        LABEL_CONSTRAINTS.gridy = row;
-        container.add(c1, LABEL_CONSTRAINTS);
+        labelConstraints.gridx = 0;
+        labelConstraints.gridy = row;
+        container.add(c1, labelConstraints);
 
-        COMPONENT_CONSTRAINTS.gridx = 1;
-        COMPONENT_CONSTRAINTS.gridy = row;
+        componentConstraints.gridx = 1;
+        componentConstraints.gridy = row;
 
-        container.add(c2, COMPONENT_CONSTRAINTS);
+        container.add(c2, componentConstraints);
     }
 
     /**
      * Adds the given control to the right of the last label without stretching.
      */
     public void addControlNoStretch(Component c) {
-        COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 1;
-        COMPONENT_CONSTRAINTS.gridy = LABEL_CONSTRAINTS.gridy;
-        COMPONENT_CONSTRAINTS.fill = NONE;
-        container.add(c, COMPONENT_CONSTRAINTS);
+        componentConstraints.gridx = labelConstraints.gridx + 1;
+        componentConstraints.gridy = labelConstraints.gridy;
+        componentConstraints.fill = NONE;
+        container.add(c, componentConstraints);
 
-        COMPONENT_CONSTRAINTS.fill = HORIZONTAL; // reset
+        componentConstraints.fill = HORIZONTAL; // reset
     }
 
     public void addTwoControlsNoStretch(Component c1, Component c2) {
-        COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 1;
-        COMPONENT_CONSTRAINTS.gridy = LABEL_CONSTRAINTS.gridy;
-        COMPONENT_CONSTRAINTS.fill = NONE;
-        container.add(c1, COMPONENT_CONSTRAINTS);
+        componentConstraints.gridx = labelConstraints.gridx + 1;
+        componentConstraints.gridy = labelConstraints.gridy;
+        componentConstraints.fill = NONE;
+        container.add(c1, componentConstraints);
 
-        COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 2;
-        container.add(c2, COMPONENT_CONSTRAINTS);
+        componentConstraints.gridx = labelConstraints.gridx + 2;
+        container.add(c2, componentConstraints);
 
-        COMPONENT_CONSTRAINTS.fill = HORIZONTAL; // reset
+        componentConstraints.fill = HORIZONTAL; // reset
     }
 
     /**
-     * Adds the given control to the right of the last control
+     * Adds the given control to the right of the last control.
      */
     public void addNextControl(Component c) {
-        COMPONENT_CONSTRAINTS.gridx++;
-        container.add(c, COMPONENT_CONSTRAINTS);
+        componentConstraints.gridx++;
+        container.add(c, componentConstraints);
     }
 
     public void addLabelAndLastControl(FilterSetting setting) {
         addLabelAndLastControl(setting.getName() + ":", setting.createGUI());
     }
 
-    public void addLabelAndLastControl(String name, Component c) {
-        addLabel(name, 0, currentRow);
+    public void addLabelAndLastControl(String labelText, Component c) {
+        addLabel(labelText, 0, currentRow);
         addLastControl(c);
         currentRow++;
     }
@@ -224,9 +219,9 @@ public class GridBagHelper {
      * Adds a component that takes up all remaining columns.
      */
     public void addLastControl(Component c) {
-        LAST_COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 1;
-        LAST_COMPONENT_CONSTRAINTS.gridy = LABEL_CONSTRAINTS.gridy;
-        container.add(c, LAST_COMPONENT_CONSTRAINTS);
+        lastComponentConstraints.gridx = labelConstraints.gridx + 1;
+        lastComponentConstraints.gridy = labelConstraints.gridy;
+        container.add(c, lastComponentConstraints);
     }
 
     public void addFullRow(FilterParam param) {
@@ -234,11 +229,11 @@ public class GridBagHelper {
     }
 
     public void addFullRow(Component c) {
-        LAST_COMPONENT_CONSTRAINTS.gridx = 0;
-        LAST_COMPONENT_CONSTRAINTS.gridy = currentRow;
+        lastComponentConstraints.gridx = 0;
+        lastComponentConstraints.gridy = currentRow;
         currentRow++;
 
-        container.add(c, LAST_COMPONENT_CONSTRAINTS);
+        container.add(c, lastComponentConstraints);
     }
 
     public void arrangeVertically(Iterable<? extends FilterSetting> settings) {
@@ -257,10 +252,10 @@ public class GridBagHelper {
     }
 
     public void addVerticalSpace(int height) {
-        LABEL_CONSTRAINTS.gridx = 0;
-        LABEL_CONSTRAINTS.gridy = currentRow;
+        labelConstraints.gridx = 0;
+        labelConstraints.gridy = currentRow;
 
-        container.add(Box.createVerticalStrut(height), LABEL_CONSTRAINTS);
+        container.add(Box.createVerticalStrut(height), labelConstraints);
 
         currentRow++;
     }

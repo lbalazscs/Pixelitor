@@ -65,27 +65,10 @@ import java.util.function.Supplier;
 
 import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static pixelitor.guitest.GUITestUtils.checkRandomly;
-import static pixelitor.guitest.GUITestUtils.chooseRandomly;
-import static pixelitor.guitest.GUITestUtils.slideRandomly;
-import static pixelitor.tools.Tools.BRUSH;
-import static pixelitor.tools.Tools.CLONE;
-import static pixelitor.tools.Tools.CROP;
-import static pixelitor.tools.Tools.ERASER;
-import static pixelitor.tools.Tools.HAND;
-import static pixelitor.tools.Tools.MOVE;
-import static pixelitor.tools.Tools.PEN;
-import static pixelitor.tools.Tools.SHAPES;
-import static pixelitor.tools.Tools.ZOOM;
-import static pixelitor.tools.Tools.getRandomTool;
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOn;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.calledOutsideEDT;
-import static pixelitor.utils.Threads.threadName;
+import static java.util.concurrent.TimeUnit.*;
+import static pixelitor.guitest.GUITestUtils.*;
+import static pixelitor.tools.Tools.*;
+import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
 import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
 
@@ -635,7 +618,7 @@ public class RandomToolTest {
         log("layers to canvas size");
         Utils.sleep(200, MILLISECONDS);
 
-        EDT.run(() -> Views.getActiveComp().allImageLayersToCanvasSize());
+        EDT.run(() -> Views.getActiveComp().cropAllImageLayersToCanvasSize());
     }
 
     private void flattenImage() {

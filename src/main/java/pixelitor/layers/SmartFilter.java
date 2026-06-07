@@ -49,7 +49,7 @@ import java.util.stream.Stream;
  * previous one as its input. The output of each filter is cached, so that when a
  * filter's settings are changed, only that filter and the subsequent ones in the
  * chain need to be re-rendered. This is more efficient than a regular
- * {@link AdjustmentLayer}, which are re-rendered whenever any unrelated layer changes.
+ * {@link AdjustmentLayer}, which is re-rendered whenever any unrelated layer changes.
  */
 public class SmartFilter extends AdjustmentLayer implements ImageSource {
     @Serial
@@ -111,12 +111,12 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     @Override
     public BufferedImage getImage() {
-        BufferedImage prevImage = imageSource.getImage();
+        BufferedImage srcImage = imageSource.getImage();
         if (!isVisible()) {
-            return prevImage;
+            return srcImage;
         }
 
-        BufferedImage transformed = transformImage(prevImage);
+        BufferedImage transformed = transformImage(srcImage);
 
         if (usesMask()) {
             // copy, because otherwise different masks
@@ -128,9 +128,9 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (!usesMask() && isNormalAndOpaque()) {
             return transformed;
         } else {
-            // unlike an adjustment layer, this makes sure that prevImage
+            // unlike an adjustment layer, this makes sure that srcImage
             // (which could be cached in the image source) isn't modified
-            BufferedImage copy = ImageUtils.copyImage(prevImage);
+            BufferedImage copy = ImageUtils.copyImage(srcImage);
 
             Graphics2D g = copy.createGraphics();
             setupComposite(g, false);
@@ -329,7 +329,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         JPopupMenu popup = new JPopupMenu();
 
         if (filter instanceof FilterWithGUI) {
-            popup.add(new TaskAction("Edit " + getName() + "...", this::edit));
+            popup.add(new TaskAction("Edit " + getName() + "...", this::showEditUI));
         }
         popup.add(new TaskAction("Delete " + getName(), () ->
             smartObject.deleteSmartFilter(this, true, true)));
@@ -390,7 +390,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         holder.update();
 
         // edit the settings of the new filter
-        boolean dialogAccepted = edit();
+        boolean dialogAccepted = showEditUI();
         if (!dialogAccepted) {
             // canceling the configuration dialog for the new filter
             // means canceling the replacement operation entirely

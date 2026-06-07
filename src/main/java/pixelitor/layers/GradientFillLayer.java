@@ -48,16 +48,13 @@ public class GradientFillLayer extends ContentLayer {
 
     private Gradient gradient;
 
-    // a snapshot of the gradient before a Move Tool operation
-    private transient Gradient backupGradient;
-
     private transient BufferedImage cachedImage;
     private transient boolean cacheValid = false;
 
     private static int count;
 
-    // helper capturing the drag state at the beginning of a Move Tool drag
-    private transient Drag origDrag;
+    // state snapshot at the beginning of a Move Tool drag
+    private transient Gradient preMoveGradient;
 
     public GradientFillLayer(Composition comp, String name) {
         super(comp, name);
@@ -65,10 +62,10 @@ public class GradientFillLayer extends ContentLayer {
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
         // defaults for transient fields
         cacheValid = false;
-
-        in.defaultReadObject();
     }
 
     public static void createNew(Composition comp) {
@@ -83,7 +80,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public boolean edit() {
+    public boolean showEditUI() {
         Tools.GRADIENT.activate();
         return true;
     }
@@ -263,19 +260,18 @@ public class GradientFillLayer extends ContentLayer {
     public void prepareMovement() {
         super.prepareMovement();
         if (gradient != null) {
-            origDrag = gradient.getDrag().copy();
-            backupGradient = gradient.copy();
+            preMoveGradient = gradient.copy();
         }
     }
 
     @Override
     public void moveWhileDragging(double imDx, double imDy) {
         // gradient fill layers ignore dragOffsetX/Y in paint()
-        // because the gradient always must cover the full canvas
+        // because the gradient must always cover the full canvas
         super.moveWhileDragging(imDx, imDy);
 
         if (gradient != null) {
-            Drag newDrag = origDrag.imTranslatedCopy(imDx, imDy);
+            Drag newDrag = preMoveGradient.getDrag().imTranslatedCopy(imDx, imDy);
             gradient.setDrag(newDrag);
             invalidateGradientCache();
         }
@@ -305,7 +301,7 @@ public class GradientFillLayer extends ContentLayer {
         // prevTx and prevTy are not used here
         // as gradient movement is handled via gradient state
         return new GradientFillLayerChangeEdit("Move Layer",
-            this, backupGradient, gradient);
+            this, preMoveGradient, gradient);
     }
 
     @Override

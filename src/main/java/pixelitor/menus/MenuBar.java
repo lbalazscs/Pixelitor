@@ -81,34 +81,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ResourceBundle;
 
-import static pixelitor.Views.CLOSE_ACTIVE_ACTION;
-import static pixelitor.Views.CLOSE_ALL_ACTION;
-import static pixelitor.Views.addActivationListener;
-import static pixelitor.Views.addNew;
-import static pixelitor.Views.repaintActive;
-import static pixelitor.colors.FillType.BACKGROUND;
-import static pixelitor.colors.FillType.FOREGROUND;
-import static pixelitor.colors.FillType.TRANSPARENT;
+import static pixelitor.Views.*;
+import static pixelitor.colors.FillType.*;
 import static pixelitor.compactions.FlipDirection.HORIZONTAL;
 import static pixelitor.compactions.FlipDirection.VERTICAL;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
+import static pixelitor.compactions.QuadrantAngle.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.HAS_LAYER_MASK;
-import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.LayerClassRestriction;
-import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.NO_LAYER_MASK;
-import static pixelitor.layers.LayerMoveAction.LAYER_TO_BOTTOM;
-import static pixelitor.layers.LayerMoveAction.LAYER_TO_TOP;
-import static pixelitor.layers.LayerMoveAction.LOWER_LAYER_SELECTION;
-import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_DOWN;
-import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_UP;
-import static pixelitor.layers.LayerMoveAction.RAISE_LAYER_SELECTION;
-import static pixelitor.layers.MaskInitMethod.FROM_LAYER;
-import static pixelitor.layers.MaskInitMethod.FROM_TRANSPARENCY;
-import static pixelitor.layers.MaskInitMethod.HIDE_ALL;
-import static pixelitor.layers.MaskInitMethod.REVEAL_ALL;
-import static pixelitor.layers.MaskInitMethod.REVEAL_SELECTION;
+import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.*;
+import static pixelitor.layers.LayerMoveAction.*;
+import static pixelitor.layers.MaskInitMethod.*;
 import static pixelitor.utils.Keys.*;
 
 /**
@@ -434,7 +415,7 @@ public class MenuBar extends JMenuBar {
 
         // edit the active text layer
         sub.add(new RestrictedLayerAction(i18n.getString("tl_edit") + "...", isTextLayer,
-            Layer::edit), CTRL_T);
+            Layer::showEditUI), CTRL_T);
 
         // rasterize the active text layer
         sub.add(new RestrictedLayerAction(i18n.getString("tl_rasterize"), isTextLayer,
@@ -489,10 +470,10 @@ public class MenuBar extends JMenuBar {
             Layer::replaceWithRasterized));
 
         sub.add(new RestrictedLayerAction("Edit Contents", isSmartObject,
-            Layer::edit));
+            Layer::showEditUI));
 
         sub.addViewEnabled("Edit All Nested Contents",
-            comp -> comp.forEachNestedSmartObject(SmartObject::edit), CTRL_ALT_O);
+            comp -> comp.forEachNestedSmartObject(SmartObject::showEditUI), CTRL_ALT_O);
 
         sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject,
             layer -> ((SmartObject) layer).editSelectedSmartFilter()), CTRL_SHIFT_E);
@@ -513,7 +494,7 @@ public class MenuBar extends JMenuBar {
         var isColorFillLayer = new LayerClassRestriction(ColorFillLayer.class, "color fill layer");
 
         sub.add(new RestrictedLayerAction("Edit Color Fill Layer...", isColorFillLayer,
-            Layer::edit));
+            Layer::showEditUI));
 
         sub.add(new RestrictedLayerAction("Rasterize Color Fill Layer", isColorFillLayer,
             Layer::replaceWithRasterized));
@@ -596,7 +577,7 @@ public class MenuBar extends JMenuBar {
             i18n.getString("fit_canvas_to_layers_tt"),
             Composition::fitCanvasToLayers);
 
-        imageMenu.addViewEnabled(i18n.getString("layer_to_canvas_size"), Composition::activeLayerToCanvasSize);
+        imageMenu.addViewEnabled(i18n.getString("layer_to_canvas_size"), Composition::cropActiveLayerToCanvasSize);
 
         imageMenu.addSeparator();
 
@@ -1175,13 +1156,13 @@ public class MenuBar extends JMenuBar {
         var isSmartObject = new LayerClassRestriction(SmartObject.class, "smart object");
 
         developMenu.add(new RestrictedLayerAction("Edit 0", isSmartObject,
-            layer -> ((SmartObject) layer).getSmartFilter(0).edit()));
+            layer -> ((SmartObject) layer).getSmartFilter(0).showEditUI()));
 
         developMenu.add(new RestrictedLayerAction("Edit 1", isSmartObject,
-            layer -> ((SmartObject) layer).getSmartFilter(1).edit()));
+            layer -> ((SmartObject) layer).getSmartFilter(1).showEditUI()));
 
         developMenu.add(new RestrictedLayerAction("Edit 2", isSmartObject,
-            layer -> ((SmartObject) layer).getSmartFilter(2).edit()));
+            layer -> ((SmartObject) layer).getSmartFilter(2).showEditUI()));
         
         return developMenu;
     }

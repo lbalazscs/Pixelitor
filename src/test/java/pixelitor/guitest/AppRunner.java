@@ -67,19 +67,12 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.awt.event.KeyEvent.VK_CONTROL;
-import static java.awt.event.KeyEvent.VK_ENTER;
-import static java.awt.event.KeyEvent.VK_G;
-import static java.awt.event.KeyEvent.VK_S;
-import static java.awt.event.KeyEvent.VK_T;
+import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.guitest.GUITestUtils.checkRandomly;
-import static pixelitor.guitest.GUITestUtils.chooseRandomly;
-import static pixelitor.guitest.GUITestUtils.clickRandomly;
-import static pixelitor.guitest.GUITestUtils.slideRandomly;
+import static pixelitor.guitest.GUITestUtils.*;
 import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
@@ -959,7 +952,7 @@ public class AppRunner {
         GUITestUtils.findButtonByText(colorSelector, "OK").click();
         keyboard.undoRedo("Add Color Fill Layer");
 
-        EDT.run(() -> ((ColorFillLayer) Views.getActiveLayer()).changeColor(c, true));
+        EDT.run(() -> ((ColorFillLayer) Views.getActiveLayer()).updateColor(c, true));
 
         keyboard.undo("Color Fill Layer Change");
         undoRedoNewLayer(numLayersBefore, "Add Color Fill Layer");

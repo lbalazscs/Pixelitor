@@ -78,7 +78,7 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public boolean edit() {
+    public boolean showEditUI() {
         // shapes layers are edited using the shapes tool
         Tools.SHAPES.activate();
         return true;
@@ -94,7 +94,6 @@ public class ShapesLayer extends ContentLayer {
             if (transformBox != null) {
                 View view = comp.getView();
                 if (view != null) {
-                    // can't be copied without a view
                     transformBox.reInitialize(view, styledShape);
                 }
 
@@ -313,8 +312,8 @@ public class ShapesLayer extends ContentLayer {
         super.update();
 
         // TODO currently updateIconImage() of ShapesLayer is
-        //  called only when the icon really changes.
-        //  This must change when multiple shapes are allowed.
+        //  called only when the icon actually changes.
+        //  This must change when support for multiple shapes is added.
         if (holder != comp) {
             ((CompositeLayer) holder).updateIconImage();
         }

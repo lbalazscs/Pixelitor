@@ -42,7 +42,7 @@ import static pixelitor.utils.ImageUtils.isGrayscale;
 import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
- * A layer mask that applies a transparency mask to an associated layer, controlling its visibility.
+ * A grayscale mask that controls the owner layer's visibility.
  */
 public class LayerMask extends ImageLayer {
     @Serial
@@ -215,30 +215,30 @@ public class LayerMask extends ImageLayer {
         if (!owner.isMaskEditing() || !Tools.isDrawingShapes()) {
             // simple case
             return transparencyImage;
-        } else {
-            // drawing with the shapes tool while editing the mask:
-            // create a temporary image that shows how the image would look like
-            // if the shapes tool would draw directly into the mask image
-
-            // we can use `image` instead of `getVisibleImage()` because shapes
-            // tool drawing and filter preview can't happen at the same time
-            var tmpImg = new BufferedImage(
-                image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
-            Graphics2D tmpG = tmpImg.createGraphics();
-            tmpG.drawImage(image, 0, 0, null);
-            Tools.SHAPES.paintOverActiveLayer(tmpG);
-            tmpG.dispose();
-
-            // ... and return a transparency image based on it
-            return new BufferedImage(TRANSPARENCY_COLOR_MODEL,
-                tmpImg.getRaster(), false, null);
         }
+
+        // if drawing with the shapes tool while editing the mask:
+        // create a temporary image that shows how the image would look like
+        // if the shapes tool would draw directly into the mask image
+
+        // we can use `image` instead of `getVisibleImage()` because shapes
+        // tool drawing and filter preview can't happen at the same time
+        var tmpImg = new BufferedImage(
+            image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
+        Graphics2D tmpG = tmpImg.createGraphics();
+        tmpG.drawImage(image, 0, 0, null);
+        Tools.SHAPES.paintOverActiveLayer(tmpG);
+        tmpG.dispose();
+
+        // ... and return a transparency image based on it
+        return new BufferedImage(TRANSPARENCY_COLOR_MODEL,
+            tmpImg.getRaster(), false, null);
     }
 
     /**
      * Modifies this mask to hide areas outside the given shape.
      */
-    public PixelitorEdit modifyToHide(Shape shape, boolean createEdit) {
+    public PixelitorEdit hideOutsideShape(Shape shape, boolean createEdit) {
         BufferedImage maskImageBackup = null;
         if (createEdit) {
             maskImageBackup = ImageUtils.copyImage(image);

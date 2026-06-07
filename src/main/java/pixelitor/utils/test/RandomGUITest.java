@@ -72,9 +72,7 @@ import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.colors.FgBgColors.randomizeColors;
 import static pixelitor.compactions.FlipDirection.HORIZONTAL;
 import static pixelitor.compactions.FlipDirection.VERTICAL;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
+import static pixelitor.compactions.QuadrantAngle.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 
@@ -743,7 +741,7 @@ public class RandomGUITest {
 
     private void layerToCanvasSize() {
         log("layer to canvas size");
-        Views.getActiveComp().activeLayerToCanvasSize();
+        Views.getActiveComp().cropActiveLayerToCanvasSize();
     }
 
     private void fitCanvasToLayers() {

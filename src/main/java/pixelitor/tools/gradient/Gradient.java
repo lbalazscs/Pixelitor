@@ -84,7 +84,7 @@ public class Gradient implements Serializable, Debuggable {
     }
 
     private Gradient(Gradient source) {
-        this.drag = source.drag;
+        this.drag = source.drag.copy();
         this.type = source.type;
         this.cycleMethod = source.cycleMethod;
         this.colorType = source.colorType;
@@ -157,12 +157,9 @@ public class Gradient implements Serializable, Debuggable {
      * Paints a thumbnail preview of the gradient.
      */
     public void paintThumbnail(Graphics2D g2, Canvas canvas, Dimension thumbSize) {
-        double scaling;
-        if (thumbSize.width > thumbSize.height) {
-            scaling = thumbSize.width / (double) canvas.getWidth();
-        } else {
-            scaling = thumbSize.height / (double) canvas.getHeight();
-        }
+        double scaleX = thumbSize.width / (double) canvas.getWidth();
+        double scaleY = thumbSize.height / (double) canvas.getHeight();
+        double scaling = Math.min(scaleX, scaleY);
         g2.scale(scaling, scaling);
 
         Paint paint = type.createPaint(drag, colors, cycleMethod);
@@ -175,7 +172,7 @@ public class Gradient implements Serializable, Debuggable {
      * If true, then it should not be necessary to save the images for undo.
      */
     public boolean isSolidOverlay() {
-        return colorType != GradientColorType.FG_TO_TRANSPARENT
+        return !hasTransparency()
             && blendingMode == BlendingMode.NORMAL
             && opacity == 1.0f;
     }
@@ -234,7 +231,7 @@ public class Gradient implements Serializable, Debuggable {
     }
 
     public boolean hasCustomTransparency() {
-        return colorType.hasTransparency() && isCustom();
+        return hasTransparency() && isCustom();
     }
 
     public Drag getDrag() {

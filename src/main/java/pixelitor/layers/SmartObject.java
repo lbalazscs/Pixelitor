@@ -260,7 +260,7 @@ public class SmartObject extends CompositeLayer {
     private void handleMissingContent() {
         assert Threads.calledOnEDT();
 
-        String title = linkedContentFile.getName() + " not found.";
+        String title = linkedContentFile.getName() + " Not Found";
         String msg = "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() +
             "</b> was not found.<br>You can search for it or use a transparent image.";
         boolean shouldSearch = Dialogs.showOKCancelQuestion(msg, title,
@@ -402,7 +402,7 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     protected void addSmartObjectMenus(JPopupMenu popup) {
-        popup.add(new TaskAction("Edit Contents", this::edit));
+        popup.add(new TaskAction("Edit Contents", this::showEditUI));
         popup.add(new TaskAction("Clone", () ->
             comp.shallowDuplicate(this)));
         if (isContentLinked()) {
@@ -423,7 +423,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public boolean edit() {
+    public boolean showEditUI() {
         View contentView = content.getView();
         if (contentView == null) {
             Views.addNew(content);
@@ -458,7 +458,7 @@ public class SmartObject extends CompositeLayer {
 
         if (hasDialog) {
             smartFilter.setTentative(true);
-            if (smartFilter.edit()) { // dialog was accepted
+            if (smartFilter.showEditUI()) { // dialog was accepted
                 smartFilter.setTentative(false);
                 History.add(new NewSmartFilterEdit(this, smartFilter));
             } else {
@@ -874,10 +874,10 @@ public class SmartObject extends CompositeLayer {
 
         SmartFilter selected = getSelectedSmartFilter();
         if (selected != null) {
-            selected.edit();
+            selected.showEditUI();
         } else {
             // edit the last smart filter if none is selected
-            filters.getLast().edit();
+            filters.getLast().showEditUI();
         }
     }
 

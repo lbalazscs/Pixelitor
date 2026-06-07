@@ -39,7 +39,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A color fill layer that fills the entire canvas with a given color.
+ * A layer that fills the entire canvas with a uniform color.
  */
 public class ColorFillLayer extends Layer {
     @Serial
@@ -56,20 +56,19 @@ public class ColorFillLayer extends Layer {
 
     public static void createNew(Composition comp) {
         Tools.forceFinish();
-        ColorFillLayer layer = new ColorFillLayer(comp, generateName(), null);
+        Color defaultColor = FgBgColors.getFgColor();
+        ColorFillLayer layer = new ColorFillLayer(comp, generateName(), defaultColor);
         var activeLayerBefore = comp.getActiveLayer();
         var prevViewMode = comp.getView().getMaskViewMode();
 
-        // don't add it yet to history, only after the user accepts the dialog
+        // don't add it to the history yet; wait until the user accepts the dialog
         LayerHolder holder = comp.getHolderForNewLayers();
         holder.add(layer);
 
         String dialogTitle = "Add Color Fill Layer";
-        Color defaultColor = FgBgColors.getFgColor();
-        layer.changeColor(defaultColor, false);
         if (Colors.selectColorWithDialog(PixelitorWindow.get(), dialogTitle,
-            defaultColor, true, c -> layer.changeColor(c, false))) {
-            // dialog accepted, now it is safe to add it to the history
+            defaultColor, true, c -> layer.updateColor(c, false))) {
+            // the dialog was accepted, so it's now safe to add the layer to the history
             History.add(new NewLayerEdit(dialogTitle,
                 layer, activeLayerBefore, prevViewMode));
         } else {
@@ -83,19 +82,23 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    public boolean edit() {
+    public boolean showEditUI() {
         String dialogTitle = "Edit Color Fill Layer";
         Color prevColor = color;
         if (Colors.selectColorWithDialog(PixelitorWindow.get(), dialogTitle,
-            color, true, c -> changeColor(c, false))) {
-            // adds an edit to the history only after the dialog is accepted
+            color, true, c -> updateColor(c, false))) {
+            // the dialog was accepted, so add the new color to the history
             History.add(new ColorFillLayerChangeEdit(this, prevColor, color));
             return true;
         }
         return false;
     }
 
-    public void changeColor(Color newColor, boolean addToHistory) {
+    public void updateColor(Color newColor, boolean addToHistory) {
+        if (newColor.equals(this.color)) {
+            return;
+        }
+
         Color prevColor = this.color;
         this.color = newColor;
         update();
@@ -109,9 +112,7 @@ public class ColorFillLayer extends Layer {
     public BufferedImage createIconThumbnail() {
         Dimension thumbDim = comp.getCanvas().getThumbSize();
         BufferedImage thumb = ImageUtils.createSysCompatibleImage(thumbDim);
-        Graphics2D g2 = thumb.createGraphics();
-        Colors.fillWith(color, g2, thumbDim.width, thumbDim.height);
-        g2.dispose();
+        Colors.fillWith(color, thumb);
         return thumb;
     }
 
@@ -121,7 +122,7 @@ public class ColorFillLayer extends Layer {
         popup.addSeparator();
 
         popup.add(Colors.createCopyColorAction(() -> color));
-        popup.add(Colors.createPasteColorAction(PixelitorWindow.get(), c -> changeColor(c, true)));
+        popup.add(Colors.createPasteColorAction(PixelitorWindow.get(), c -> updateColor(c, true)));
 
         return popup;
     }
@@ -129,7 +130,7 @@ public class ColorFillLayer extends Layer {
     @Override
     protected ColorFillLayer createTypeSpecificCopy(CopyOptions options, Composition newComp) {
         String copyName = options.createLayerCopyName(name);
-        // java.awt.Color is immutable => it can be shared
+        // java.awt.Color is immutable, so it can be safely shared
         return new ColorFillLayer(newComp, copyName, color);
     }
 

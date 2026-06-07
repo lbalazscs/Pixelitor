@@ -119,7 +119,7 @@ public abstract class ContentLayer extends Layer {
     /**
      * Finds the topmost opaque layer at a given image-space point.
      * For simple content layers, this method checks the layer itself.
-     * For layer groups, this method can descend into child layers.
+     * Subclasses like layer groups may override this to descend into child layers.
      */
     public ContentLayer findOpaqueLayerAtPoint(Point p) {
         // a small opacity makes the layer effectively invisible for hit-testing

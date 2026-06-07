@@ -62,7 +62,8 @@ public class Straighten extends SimpleCompAction {
 
     @Override
     protected void updateCanvasSize(Canvas newCanvas, View view) {
-        // no-op, straighten keeps the canvas size unchanged
+        // straighten keeps the canvas size unchanged
+        throw new UnsupportedOperationException();
     }
 
     @Override

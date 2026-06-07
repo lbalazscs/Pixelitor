@@ -42,7 +42,7 @@ public interface LayerUI extends Debuggable {
 
     void removeMaskIcon();
 
-    void updateLayerIconImageAsync(Layer layer);
+    void updateIconImageAsync(Layer layerOrMask);
 
     /**
      * Sets the border around the icon according to the selection state

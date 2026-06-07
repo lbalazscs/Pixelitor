@@ -736,7 +736,7 @@ class CompositionTest {
             .activeLayerAndMaskImageSizeIs(24, 16);
 
         // now test "Layer to Canvas Size"
-        comp.activeLayerToCanvasSize();
+        comp.cropActiveLayerToCanvasSize();
         assertThat(comp)
             .activeLayerTranslationIs(0, 0)
             .activeLayerAndMaskImageSizeIs(20, 10);

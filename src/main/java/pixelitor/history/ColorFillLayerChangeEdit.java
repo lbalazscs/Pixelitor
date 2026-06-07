@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,12 +39,12 @@ public class ColorFillLayerChangeEdit extends PixelitorEdit {
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
-        layer.changeColor(before, false);
+        layer.updateColor(before, false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
-        layer.changeColor(after, false);
+        layer.updateColor(after, false);
     }
 }

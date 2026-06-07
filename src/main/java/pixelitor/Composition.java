@@ -735,7 +735,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // this shouldn't change the active layer here,
         // but sets the last button to selected
         view.addAllLayerUIs(layerList);
-        layerUICountChanged();
+        fireLayerUICountChanged();
 
         assert activeTopLevelLayer == origActiveTopLevelLayer;
 
@@ -746,7 +746,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
-    public void layerUICountChanged() {
+    public void fireLayerUICountChanged() {
         if (view.isActive() && isHolderOfActiveLayer()) {
             LayerEvents.fireLayerCountChanged(this, getNumLayers());
         }
@@ -805,7 +805,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         layerList.remove(deletedIndex);
 
         if (layer.contains(activeLayer)) {
-            // the active layer was deleted, a new one must be selected
+            // the active layer was deleted, a new one must be activated
             Layer newActiveLayer = deletedIndex > 0
                 ? layerList.get(deletedIndex - 1)
                 : layerList.getFirst();
@@ -1620,16 +1620,16 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Useful for testing, but not exposed in the UI, because
      * it could create multiple undo events instead of just one.
      */
-    public void allImageLayersToCanvasSize() {
-        forEachNestedLayerOfType(ImageLayer.class, ImageLayer::toCanvasSizeWithHistory);
+    public void cropAllImageLayersToCanvasSize() {
+        forEachNestedLayerOfType(ImageLayer.class, ImageLayer::cropToCanvasSizeWithHistory);
     }
 
     /**
-     * Resizes the active image layer to match canvas dimensions.
+     * Crops the active image layer to match canvas dimensions.
      */
-    public void activeLayerToCanvasSize() {
+    public void cropActiveLayerToCanvasSize() {
         if (activeLayer instanceof ImageLayer imageLayer) {
-            imageLayer.toCanvasSizeWithHistory();
+            imageLayer.cropToCanvasSizeWithHistory();
         } else {
             Messages.showNotImageLayerError(activeLayer);
         }

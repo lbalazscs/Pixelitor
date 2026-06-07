@@ -56,10 +56,7 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
-import static pixelitor.layers.MaskInitMethod.HIDE_ALL;
-import static pixelitor.layers.MaskInitMethod.HIDE_SELECTION;
-import static pixelitor.layers.MaskInitMethod.REVEAL_ALL;
-import static pixelitor.layers.MaskInitMethod.REVEAL_SELECTION;
+import static pixelitor.layers.MaskInitMethod.*;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
@@ -665,7 +662,7 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     public PixelitorEdit hideWithMask(Shape shape, boolean createEdit) {
         if (hasMask()) {
-            return mask.modifyToHide(shape, createEdit);
+            return mask.hideOutsideShape(shape, createEdit);
         } else {
             // create a new mask that reveals only the shape area
             var maskImage = REVEAL_SELECTION.createMaskImage(this, shape);
@@ -1043,7 +1040,7 @@ public abstract class Layer implements Serializable, Debuggable {
         assert hasRasterIcon();
 
         if (ui != null) {
-            ui.updateLayerIconImageAsync(this);
+            ui.updateIconImageAsync(this);
         }
         if (!isTopLevel()) {
             ((CompositeLayer) holder).updateIconImage();
@@ -1068,9 +1065,10 @@ public abstract class Layer implements Serializable, Debuggable {
 
     /**
      * Activates the UI for editing this layer.
-     * Returns true if the user accepted the edit.
+     * It could show a dialog, or it could activate a tool.
+     * Returns true if a modal dialog was shown and the user accepted the edit.
      */
-    public boolean edit() {
+    public boolean showEditUI() {
         // by default does nothing, but overridden for non-image layers
         return true;
     }

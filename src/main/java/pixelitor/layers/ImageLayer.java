@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
-import pixelitor.Canvas;
 import pixelitor.*;
+import pixelitor.Canvas;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
 import pixelitor.compactions.QuadrantAngle;
@@ -49,17 +49,13 @@ import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+import static java.awt.RenderingHints.*;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.compactions.FlipDirection.HORIZONTAL;
-import static pixelitor.layers.ImageLayer.State.NORMAL;
-import static pixelitor.layers.ImageLayer.State.PREVIEW;
-import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
+import static pixelitor.layers.ImageLayer.State.*;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.replaceSelectedRegion;
 import static pixelitor.utils.Threads.onEDT;
@@ -240,8 +236,8 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Toggles between showing the filter preview and
-     * the original image during a filter dialog session.
+     * Sets whether to show the original image instead of
+     * the filter preview during a filter dialog session.
      */
     @Override
     public void setShowOriginal(boolean showOriginal) {
@@ -523,7 +519,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
             imageContentChanged = false; // no history will be necessary
 
-            // it still can happen that the image needs to be repainted
+            // it can still happen that the image needs to be repainted
             // because the preview image can be different from the image
             // (the user does something, but then resets the params to a do-nothing state)
             boolean shouldRefresh = image != previewImage;
@@ -685,7 +681,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         if (layerTransform) {
             rotateOnlyThisLayer(angle);
         } else {
-            rotateForFullComp(angle);
+            rotateFullComp(angle);
         }
     }
 
@@ -730,7 +726,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     // this is a full composition transform, the canvas will also be rotated
-    private void rotateForFullComp(QuadrantAngle angle) {
+    private void rotateFullComp(QuadrantAngle angle) {
         int newTx;
         int newTy;
         switch (angle.getAngleDegree()) {
@@ -841,12 +837,12 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     /**
      * Crops the layer to the canvas size and records the action in history.
      */
-    public void toCanvasSizeWithHistory() {
+    public void cropToCanvasSizeWithHistory() {
         BufferedImage backupImage = getImage();
         // must be created before the change
         var translationEdit = new TranslationEdit(comp, this, true);
 
-        boolean changed = toCanvasSize();
+        boolean changed = cropToCanvasSize();
         if (!changed) {
             Messages.showStatusMessage("The layer <b>\"%s\"</b> was already the same size (%dx%d) as the canvas."
                 .formatted(getName(), comp.getCanvasWidth(), comp.getCanvasHeight()));
@@ -857,7 +853,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         BufferedImage maskBackupImage = null;
         if (hasMask()) {
             maskBackupImage = mask.getImage();
-            maskChanged = mask.toCanvasSize();
+            maskChanged = mask.cropToCanvasSize();
         }
 
         ImageEdit imageEdit;
@@ -878,7 +874,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     /**
      * Crops the layer to the canvas size without creating a history edit.
      */
-    public boolean toCanvasSize() {
+    public boolean cropToCanvasSize() {
         if (!isBigLayer()) {
             return false; // nothing changed
         }
@@ -1007,7 +1003,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     /**
-     * Returns true if the layer image is bigger than the canvas
+     * Returns true if the layer image is bigger than the canvas.
      */
     private boolean isBigLayer() {
         return image.getWidth() > comp.getCanvasWidth()
@@ -1091,7 +1087,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             // But, until then, the image and the shape have to be mixed first
             // and then the result must be composited into the main Graphics,
             // otherwise we don't get the correct result if this layer is not the
-            // first visible layer and has a blending mode different from normal
+            // first visible layer and has a blending mode other than normal.
             BufferedImage tmp = comp.getCanvas().createTmpImage();
             Graphics2D tmpG = tmp.createGraphics();
             tmpG.drawImage(visibleImage, getTx(), getTy(), null);

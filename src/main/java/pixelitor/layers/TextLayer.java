@@ -126,7 +126,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         var prevActiveLayer = comp.getActiveLayer();
         var prevViewMode = comp.getView().getMaskViewMode();
 
-        // don't add it yet to history, only after the user presses OK (and not Cancel!)
+        // don't add it to the history yet; only do so after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
         holder.add(textLayer);
 
@@ -159,7 +159,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
      * Shows a dialog to edit the settings of this text layer.
      */
     @Override
-    public boolean edit() {
+    public boolean showEditUI() {
         TextSettings prevSettings = getSettings();
 
         return new DialogBuilder()
@@ -169,7 +169,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .withScrollbars()
             .align(FRAME_RIGHT)
             .okAction(() -> commitSettings(prevSettings))
-            .cancelAction(() -> resetPrevSettings(prevSettings))
+            .cancelAction(() -> restorePrevSettings(prevSettings))
             .show()
             .wasAccepted();
     }
@@ -188,7 +188,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         History.add(new TextLayerChangeEdit(comp, this, prevSettings));
     }
 
-    private void resetPrevSettings(TextSettings prevSettings) {
+    private void restorePrevSettings(TextSettings prevSettings) {
         applySettings(prevSettings);
         holder.update();
     }
@@ -212,7 +212,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public Rectangle getContentBounds(boolean includeTransparent) {
         if (includeTransparent) {
             // a quick and rough estimate of the text content,
-            // it can include some transparency at the edges
+            // which can include some transparency at the edges
             return painter.getBoundingBox();
         } else {
             // make an image-based calculation for an exact "content crop"
@@ -317,11 +317,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         return settings;
     }
 
-    public void randomizeSettings() {
-        settings.randomize();
-        applySettings(settings); // to re-configure the painter
-    }
-
     /**
      * Updates the layer's name based on its current text content.
      */
@@ -403,16 +398,16 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public void crop(Rectangle cropRect, boolean deleteCropped, boolean allowGrowing) {
         // the text will not be cropped, but the translations have to be adjusted
 
-        // as the cropping is the exact opposite of "enlarge canvas",
+        // as cropping is the exact opposite of enlarging the canvas,
         // calculate the corresponding margins...
-        int northMargin = cropRect.y;
-        int westMargin = cropRect.x;
-        int southMargin = comp.getCanvasHeight() - cropRect.height - cropRect.y;
-        int eastMargin = comp.getCanvasWidth() - cropRect.width - cropRect.x;
+        int topMargin = cropRect.y;
+        int leftMargin = cropRect.x;
+        int bottomMargin = comp.getCanvasHeight() - cropRect.height - cropRect.y;
+        int rightMargin = comp.getCanvasWidth() - cropRect.width - cropRect.x;
 
         // ...and do a negative enlargement
         enlargeCanvas(new Outsets(
-            -northMargin, -westMargin, -southMargin, -eastMargin));
+            -topMargin, -rightMargin, -bottomMargin, -leftMargin));
     }
 
     @Override
@@ -430,7 +425,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         JPopupMenu popup = super.createLayerIconPopupMenu();
 
         var editMenuItem = new JMenuItem("Edit");
-        editMenuItem.addActionListener(e -> edit());
+        editMenuItem.addActionListener(e -> showEditUI());
         editMenuItem.setAccelerator(CTRL_T);
         popup.add(editMenuItem);
 
