@@ -29,9 +29,7 @@ import java.util.Arrays;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
-import static java.awt.Color.BLUE;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.RED;
+import static java.awt.Color.*;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.utils.Texts.i18n;
@@ -90,12 +88,12 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         JPanel controlPanel = new JPanel(new FlowLayout(LEFT));
 
         scaleSelector = new JComboBox<>(new String[]{SCALE_LINEAR, SCALE_LOGARITHMIC});
-        scaleSelector.addActionListener(e -> scaleChanged());
+        scaleSelector.addActionListener(_ -> scaleChanged());
         controlPanel.add(new JLabel("Scale:"));
         controlPanel.add(scaleSelector);
 
         histogramTypeSelector = new JComboBox<>(new String[]{HISTOGRAM_TYPE_RGB, HISTOGRAM_TYPE_LUMINANCE});
-        histogramTypeSelector.addActionListener(e -> typeChanged());
+        histogramTypeSelector.addActionListener(_ -> typeChanged());
         controlPanel.add(new JLabel(GUIText.TYPE + ":"));
         controlPanel.add(histogramTypeSelector);
 

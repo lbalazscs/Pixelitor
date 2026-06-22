@@ -48,9 +48,7 @@ import java.awt.geom.AffineTransform;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
-import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
-import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
+import static java.awt.MultipleGradientPaint.CycleMethod.*;
 import static pixelitor.colors.FgBgColors.setBgColor;
 import static pixelitor.colors.FgBgColors.setFgColor;
 import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
@@ -106,28 +104,28 @@ public class GradientTool extends DragTool {
 
     private void addTypeSelector() {
         typeCB = new JComboBox<>(GradientType.values());
-        typeCB.addActionListener(e ->
+        typeCB.addActionListener(_ ->
             regenerateGradient("Change Gradient Type"));
         settingsPanel.addComboBox(GUIText.TYPE + ": ", typeCB, "typeCB");
     }
 
     private void addCycleMethodSelector() {
         cycleMethodCB = new JComboBox<>(CYCLE_METHODS);
-        cycleMethodCB.addActionListener(e ->
+        cycleMethodCB.addActionListener(_ ->
             regenerateGradient("Change Gradient Cycling"));
         settingsPanel.addComboBox("Cycling: ", cycleMethodCB, "cycleMethodCB");
     }
 
     private void addColorTypeSelector() {
         colorTypeCB = new JComboBox<>(GradientColorType.values());
-        colorTypeCB.addActionListener(e ->
+        colorTypeCB.addActionListener(_ ->
             regenerateGradient("Change Gradient Colors"));
         settingsPanel.addComboBox("Color: ", colorTypeCB, "colorTypeCB");
     }
 
     private void addReverseCheckBox() {
         reverseCB = new JCheckBox();
-        reverseCB.addActionListener(e ->
+        reverseCB.addActionListener(_ ->
             regenerateGradient("Reverse Gradient"));
         settingsPanel.addWithLabel("Reverse: ", reverseCB, "reverseCB");
     }

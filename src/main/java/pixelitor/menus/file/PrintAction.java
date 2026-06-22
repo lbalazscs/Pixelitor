@@ -127,18 +127,18 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         JButton setupPageButton = new JButton("Setup Page...");
 
         // add the listeners
-        scalingCombo.addActionListener(e -> {
+        scalingCombo.addActionListener(_ -> {
             scalingMode = scalingCombo.getSelectedIndex() == 0 ? ScalingMode.ACTUAL_SIZE : ScalingMode.FIT_TO_PAGE;
             previewPanel.repaint();
             dpiCombo.setEnabled(scalingMode == ScalingMode.ACTUAL_SIZE);
         });
 
-        alignmentSelector.addActionListener(e -> {
+        alignmentSelector.addActionListener(_ -> {
             alignment = alignmentSelector.getAlignment();
             previewPanel.repaint();
         });
 
-        dpiCombo.addActionListener(e -> {
+        dpiCombo.addActionListener(_ -> {
             Integer selectedDpi = (Integer) dpiCombo.getSelectedItem();
             if (selectedDpi != null) {
                 imageDpi = selectedDpi;
@@ -147,7 +147,7 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
             }
         });
 
-        setupPageButton.addActionListener(e -> showPageSetupDialog(job, previewPanel));
+        setupPageButton.addActionListener(_ -> showPageSetupDialog(job, previewPanel));
 
         // lay them out
         GridBagConstraints gbc = new GridBagConstraints();

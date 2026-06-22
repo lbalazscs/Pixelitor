@@ -127,7 +127,7 @@ public class GridTester extends JFrame {
 
         JPanel controlPanel = new JPanel();
         gridTypeComboBox = new JComboBox<>(GridType.values());
-        gridTypeComboBox.addActionListener(e -> updateGridType());
+        gridTypeComboBox.addActionListener(_ -> updateGridType());
         controlPanel.add(new JLabel("Grid Type:"));
         controlPanel.add(gridTypeComboBox);
 
@@ -139,7 +139,7 @@ public class GridTester extends JFrame {
         gridSizeSlider.setMinorTickSpacing(5);
         gridSizeSlider.setPaintTicks(true);
         gridSizeSlider.setPaintLabels(true);
-        gridSizeSlider.addChangeListener(e -> updateGridSize());
+        gridSizeSlider.addChangeListener(_ -> updateGridSize());
         controlPanel.add(gridSizeSlider);
 
         testPanel = new TestPanel();

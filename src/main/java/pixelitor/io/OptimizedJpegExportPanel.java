@@ -130,7 +130,7 @@ public class OptimizedJpegExportPanel extends JPanel {
         // progressive encoding
         p.add(new JLabel("Progressive:"));
         progressiveCB = new JCheckBox("", false);
-        progressiveCB.addActionListener(e -> updatePreviewAsync());
+        progressiveCB.addActionListener(_ -> updatePreviewAsync());
         p.add(progressiveCB);
 
         // quality slider

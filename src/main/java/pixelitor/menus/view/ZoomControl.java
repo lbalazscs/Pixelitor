@@ -27,10 +27,7 @@ import java.awt.FlowLayout;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createEmptyBorder;
-import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
-import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_TOOLTIP;
-import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
-import static pixelitor.gui.AutoZoom.FIT_SPACE_TOOLTIP;
+import static pixelitor.gui.AutoZoom.*;
 import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.menus.view.ZoomLevel.zoomLevels;
 
@@ -66,7 +63,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         Dimension preferredSize = new Dimension(ZOOM_PERCENTAGE_WIDTH, (int) preferredHeight);
         zoomPercentageLabel.setPreferredSize(preferredSize);
 
-        zoomSlider.addChangeListener(e -> applyZoomToActiveView());
+        zoomSlider.addChangeListener(_ -> applyZoomToActiveView());
 
         zoomTextLabel = new JLabel("  " + ZOOM + ": ");
 

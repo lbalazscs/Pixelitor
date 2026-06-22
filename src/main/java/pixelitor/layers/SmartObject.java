@@ -1141,11 +1141,6 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void reorderLayerUI(int oldIndex, int newIndex) {
-        updateChildrenUI();
-    }
-
-    @Override
     public void removeLayerFromList(Layer layer) {
         // it's not enough to just remove it from the list; invariants must be preserved.
         deleteSmartFilter((SmartFilter) layer, false, false);

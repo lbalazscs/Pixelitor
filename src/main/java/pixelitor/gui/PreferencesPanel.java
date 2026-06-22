@@ -102,7 +102,7 @@ public class PreferencesPanel extends JTabbedPane {
 
         langChooser.setName("langChooser");
         gbh.addLabelAndControlNoStretch("Language: ", langChooser);
-        langChooser.addActionListener(e -> {
+        langChooser.addActionListener(_ -> {
             Language language = languages.getSelectedItem();
             if (language != Language.getActive()) {
                 Language.setActive(language);
@@ -137,7 +137,7 @@ public class PreferencesPanel extends JTabbedPane {
 
         gbh.addTwoControlsNoStretch(accentColorLabel, accentColorChooser);
 */
-        themeChooser.addActionListener(e -> {
+        themeChooser.addActionListener(_ -> {
             Theme theme = themes.getSelectedItem();
             setCursor(Cursors.BUSY);
 
@@ -149,7 +149,7 @@ public class PreferencesPanel extends JTabbedPane {
             });
         });
 
-//        accentColorChooser.addActionListener(e -> Themes.changeAccentColor(accentColors.getSelectedItem()));
+//        accentColorChooser.addActionListener(_ -> Themes.changeAccentColor(accentColors.getSelectedItem()));
     }
 
     private void addFontChoosers(GridBagHelper gbh) {
@@ -233,7 +233,7 @@ public class PreferencesPanel extends JTabbedPane {
         uiChooser.setSelectedItem(ImageArea.getMode());
         uiChooser.setName("uiChooser");
         gbh.addLabelAndControlNoStretch("Images In: ", uiChooser);
-        uiChooser.addActionListener(e -> {
+        uiChooser.addActionListener(_ -> {
             ImageArea.Mode mode = (ImageArea.Mode) uiChooser.getSelectedItem();
             ImageArea.changeUI(mode);
         });
@@ -257,7 +257,7 @@ public class PreferencesPanel extends JTabbedPane {
         }
 
         gbh.addLabelAndControlNoStretch("Layer/Mask Thumb Sizes: ", thumbSizeCB);
-        thumbSizeCB.addActionListener(e -> updateThumbSize());
+        thumbSizeCB.addActionListener(_ -> updateThumbSize());
     }
 
     private JPanel createMousePanel() {
@@ -315,7 +315,7 @@ public class PreferencesPanel extends JTabbedPane {
             ImageArea.getUI().repaint();
         });
 
-        guideStyleCB.addActionListener(e -> {
+        guideStyleCB.addActionListener(_ -> {
             guideStyle.setStrokeType((GuideStrokeType) guideStyleCB.getSelectedItem());
             ImageArea.getUI().repaint();
         });
@@ -413,7 +413,7 @@ public class PreferencesPanel extends JTabbedPane {
         if (lastSelectedTabIndex != 0) {
             setSelectedIndex(lastSelectedTabIndex);
         }
-        addChangeListener(e ->
+        addChangeListener(_ ->
             lastSelectedTabIndex = getSelectedIndex());
     }
 

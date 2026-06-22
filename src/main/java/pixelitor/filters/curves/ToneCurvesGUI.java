@@ -26,9 +26,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 
 /**
  * The {@link FilterGUI} for the {@link ToneCurvesFilter}.
@@ -46,10 +44,10 @@ public class ToneCurvesGUI extends FilterGUI {
         this.curves = filter.getCurves();
 
         curvesPanel = new ToneCurvesPanel(curves);
-        curvesPanel.addActionListener(e -> startPreview(false));
+        curvesPanel.addActionListener(_ -> startPreview(false));
 
         channelSelectorPanel = new ChannelSelectorPanel(curvesPanel::setActiveCurve);
-        channelSelectorPanel.addResetButton(e -> curvesPanel.resetActiveCurve());
+        channelSelectorPanel.addResetButton(_ -> curvesPanel.resetActiveCurve());
         channelSelectorPanel.addColorSpaceChangedListener(colorSpace -> {
             curves.setColorSpace(colorSpace);
             curvesPanel.stateChanged();
@@ -64,9 +62,9 @@ public class ToneCurvesGUI extends FilterGUI {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         buttonsPanel.add(createShowOriginalCB(layer));
-        buttonsPanel.add(GUIUtils.createRandomizeSettingsButton(e ->
+        buttonsPanel.add(GUIUtils.createRandomizeSettingsButton(_ ->
             curvesPanel.randomize()));
-        buttonsPanel.add(GUIUtils.createResetAllButton(e ->
+        buttonsPanel.add(GUIUtils.createResetAllButton(_ ->
             curvesPanel.resetAllCurves()));
 
         return buttonsPanel;
@@ -75,7 +73,7 @@ public class ToneCurvesGUI extends FilterGUI {
     private static JCheckBox createShowOriginalCB(Filterable layer) {
         JCheckBox showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
-        showOriginalCB.addActionListener(e -> layer.setShowOriginal(showOriginalCB.isSelected()));
+        showOriginalCB.addActionListener(_ -> layer.setShowOriginal(showOriginalCB.isSelected()));
         return showOriginalCB;
     }
 

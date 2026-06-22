@@ -94,7 +94,7 @@ public class BrowseFilesSupport {
     private void init(String defaultPath) {
         pathTF = new JTextField(PATH_FIELD_COLUMNS);
         pathTF.setText(defaultPath);
-        browseButton.addActionListener(e -> showChooserDialog(chooserDialogTitle));
+        browseButton.addActionListener(_ -> showChooserDialog(chooserDialogTitle));
     }
 
     public void setSelectionMode(SelectionMode mode) {

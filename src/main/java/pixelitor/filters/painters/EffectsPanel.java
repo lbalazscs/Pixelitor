@@ -30,10 +30,7 @@ import java.awt.FlowLayout;
 import java.awt.geom.Point2D;
 
 import static java.awt.BorderLayout.CENTER;
-import static java.awt.Color.BLACK;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.RED;
-import static java.awt.Color.WHITE;
+import static java.awt.Color.*;
 import static java.awt.FlowLayout.LEFT;
 
 /**
@@ -256,7 +253,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         tabPanel.add(tabCB);
         tabPanel.add(new JLabel(name));
 
-        tabCB.addActionListener(e -> {
+        tabCB.addActionListener(_ -> {
             if (tabCB.isSelected()) {
                 tabs.setSelectedIndex(tabs.indexOfComponent(panel));
             }

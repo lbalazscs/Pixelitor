@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,7 +80,7 @@ public class ToolSettingsPanel extends JPanel {
                                  Consumer<Boolean> consumer) {
         JCheckBox checkBox = new JCheckBox(text, selected);
         checkBox.setName(name);
-        checkBox.addActionListener(e -> consumer.accept(checkBox.isSelected()));
+        checkBox.addActionListener(_ -> consumer.accept(checkBox.isSelected()));
         add(checkBox);
         return checkBox;
     }
@@ -103,7 +103,7 @@ public class ToolSettingsPanel extends JPanel {
         var typeCB = new JComboBox<CopyBrushType>(typeModel);
 
         addComboBox(GUIText.BRUSH + ":", typeCB, "typeCB");
-        typeCB.addActionListener(e -> {
+        typeCB.addActionListener(_ -> {
             CopyBrushType brushType = (CopyBrushType) typeCB.getSelectedItem();
             listener.accept(brushType);
         });

@@ -151,12 +151,12 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public String getValueAsString() {
-        return new Point2D.Double(getRelativeX(), getRelativeY()).toString();
+        return String.format(Locale.ROOT, "(%.2f, %.2f)", relativeX, relativeY);
     }
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
+        return String.format(Locale.ROOT, "%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
             getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 

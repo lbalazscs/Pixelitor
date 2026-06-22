@@ -232,7 +232,7 @@ public final class GUIUtils {
      */
     public static void installEscHandler(JDialog d, Runnable action) {
         JComponent contentPane = (JComponent) d.getContentPane();
-        contentPane.registerKeyboardAction(e -> action.run(),
+        contentPane.registerKeyboardAction(_ -> action.run(),
             ESC, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
@@ -439,7 +439,7 @@ public final class GUIUtils {
         JCheckBox linkedCB = new JCheckBox();
         linkedCB.setModel(linkable.getLinkedModel());
         linkedCB.setToolTipText(linkable.createLinkedToolTip());
-        linkedCB.addActionListener(e -> linkable.setLinked(linkedCB.isSelected()));
+        linkedCB.addActionListener(_ -> linkable.setLinked(linkedCB.isSelected()));
         return linkedCB;
     }
 

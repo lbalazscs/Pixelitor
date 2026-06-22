@@ -304,21 +304,25 @@ public final class Utils {
     }
 
     public static Rectangle calcCombinedBounds(List<Layer> layers, boolean includeTransparent) {
-        Rectangle bounds = null;
-        for (Layer layer : layers) {
-            if (layer instanceof ContentLayer contentLayer) {
-                Rectangle layerBounds = contentLayer.getContentBounds(includeTransparent);
-                if (layerBounds == null) {
-                    continue;
+        Rectangle[] bounds = {null};
+
+        for (Layer rootLayer : layers) {
+            // traverse top-level layers and their nested children
+            rootLayer.forEachNestedLayer(layer -> {
+                if (layer instanceof ContentLayer contentLayer) {
+                    Rectangle layerBounds = contentLayer.getContentBounds(includeTransparent);
+                    if (layerBounds != null && !layerBounds.isEmpty()) {
+                        if (bounds[0] == null) {
+                            bounds[0] = new Rectangle(layerBounds);
+                        } else {
+                            bounds[0].add(layerBounds);
+                        }
+                    }
                 }
-                if (bounds == null) {
-                    bounds = layerBounds;
-                } else {
-                    bounds = bounds.union(layerBounds);
-                }
-            }
+            }, false);
         }
-        return bounds;
+
+        return bounds[0];
     }
 
     /**

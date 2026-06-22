@@ -37,9 +37,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.util.Locale;
 
-import static java.awt.event.KeyEvent.VK_BACK_SPACE;
-import static java.awt.event.KeyEvent.VK_DOWN;
-import static java.awt.event.KeyEvent.VK_UP;
+import static java.awt.event.KeyEvent.*;
 import static org.jdesktop.swingx.prompt.PromptSupport.FocusBehavior.SHOW_PROMPT;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithSimpleValidation;
@@ -89,7 +87,7 @@ public class FilterSearchPanel extends JPanel implements Validated {
             }
         });
         searchTF.getDocument().addDocumentListener(
-            new SimpleDocumentListener(e -> searchTermChanged()));
+            new SimpleDocumentListener(_ -> searchTermChanged()));
     }
 
     private void navigateFilterList(KeyEvent e) {
@@ -252,7 +250,7 @@ public class FilterSearchPanel extends JPanel implements Validated {
 
         // this must be done after building, but before showing
         builder.getOkButton().setEnabled(false);
-        panel.addSelectionListener(e ->
+        panel.addSelectionListener(_ ->
             builder.getOkButton().setEnabled(panel.hasSelection()));
 
         panel.filterList.addMouseListener(new MouseAdapter() {

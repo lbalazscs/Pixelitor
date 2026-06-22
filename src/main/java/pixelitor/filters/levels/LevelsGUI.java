@@ -30,9 +30,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 
 /**
  * The {@link FilterGUI} for the {@link Levels} filter.
@@ -54,7 +52,7 @@ public class LevelsGUI extends FilterGUI {
         add(cardPanel, CENTER);
 
         channelSelectorPanel = new ChannelSelectorPanel(this::showChannelPanel);
-        channelSelectorPanel.addResetButton(e ->
+        channelSelectorPanel.addResetButton(_ ->
             model.resetChannelToDefault(channelSelectorPanel.getSelectedChannel()));
         channelSelectorPanel.addColorSpaceChangedListener(colorSpace ->
             model.setColorSpace(colorSpace, true));
@@ -88,13 +86,13 @@ public class LevelsGUI extends FilterGUI {
 
         showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
-        showOriginalCB.addActionListener(e -> layer.setShowOriginal(showOriginalCB.isSelected()));
+        showOriginalCB.addActionListener(_ -> layer.setShowOriginal(showOriginalCB.isSelected()));
         southPanel.add(showOriginalCB);
 
-        southPanel.add(GUIUtils.createRandomizeSettingsButton(e ->
+        southPanel.add(GUIUtils.createRandomizeSettingsButton(_ ->
             model.randomizeAndRun()));
 
-        southPanel.add(GUIUtils.createResetAllButton(e ->
+        southPanel.add(GUIUtils.createResetAllButton(_ ->
             model.resetAllAndRun()));
 
         return southPanel;

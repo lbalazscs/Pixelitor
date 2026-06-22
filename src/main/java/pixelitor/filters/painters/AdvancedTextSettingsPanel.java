@@ -86,14 +86,14 @@ public class AdvancedTextSettingsPanel extends JPanel {
         trackingParam = new RangeParam("Tracking (Letter-spacing)",
             -20, 0, 70, true, LabelPosition.NONE_WITH_TICKS);
         trackingParam.setValue(font.getTracking());
-        trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
+        trackingParam.addChangeListener(_ -> actionListener.actionPerformed(null));
         gbh.addParam(trackingParam, "trackingGUI");
     }
 
     private void addLineHeightGUI(double lineHeightRatio) {
         lineHeightParam = new RangeParam("Line Height (%)",
             0, 100 * lineHeightRatio, 200, true, LabelPosition.NONE_WITH_TICKS);
-        lineHeightParam.addChangeListener(e -> actionListener.actionPerformed(null));
+        lineHeightParam.addChangeListener(_ -> actionListener.actionPerformed(null));
         gbh.addParam(lineHeightParam);
     }
 

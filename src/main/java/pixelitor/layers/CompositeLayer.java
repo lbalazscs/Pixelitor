@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,6 +43,12 @@ public abstract class CompositeLayer extends ContentLayer implements LayerHolder
         }
         ui.updateChildrenPanel();
         EventQueue.invokeLater(this::revalidateUI);
+    }
+
+    @Override
+    public void reorderLayerUI(int oldIndex, int newIndex) {
+        // do a full update
+        updateChildrenUI();
     }
 
     private void revalidateUI() {

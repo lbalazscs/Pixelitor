@@ -42,7 +42,7 @@ public final class RecentFilesMenu extends JMenu {
 
         // the menu item for clearing the recent files history
         clearMenuItem = new JMenuItem(i18n("clear_recent"));
-        clearMenuItem.addActionListener(e -> clear());
+        clearMenuItem.addActionListener(_ -> clear());
 
         recentFiles = AppPreferences.loadRecentFiles();
         updateMenuItems();

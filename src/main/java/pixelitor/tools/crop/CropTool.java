@@ -53,9 +53,7 @@ import java.util.function.Consumer;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
-import static pixelitor.tools.DragToolState.IDLE;
-import static pixelitor.tools.DragToolState.INITIAL_DRAG;
-import static pixelitor.tools.DragToolState.TRANSFORM;
+import static pixelitor.tools.DragToolState.*;
 
 /**
  * The crop tool.
@@ -134,7 +132,7 @@ public class CropTool extends DragTool {
     private void addMaskOpacitySlider() {
         // use a change listener so that the mask is
         // continuously updated while the slider is dragged
-        maskOpacity.addChangeListener(e -> updateMaskOpacity(true));
+        maskOpacity.addChangeListener(_ -> updateMaskOpacity(true));
         settingsPanel.add(maskOpacity.createGUI());
     }
 
@@ -244,7 +242,7 @@ public class CropTool extends DragTool {
             ALLOW_GROWING_TEXT, false, "allowGrowingCB",
             "Enables enlarging the canvas.");
 
-        allowGrowingCB.addActionListener(e -> allowGrowingToggled());
+        allowGrowingCB.addActionListener(_ -> allowGrowingToggled());
     }
 
     private void allowGrowingToggled() {
@@ -279,12 +277,12 @@ public class CropTool extends DragTool {
 
     private void addCropButton() {
         cropButton = new JButton("Crop");
-        cropButton.addActionListener(e -> crop());
+        cropButton.addActionListener(_ -> crop());
         settingsPanel.add(cropButton);
     }
 
     private void addCancelButton() {
-        cancelButton.addActionListener(e -> cancel());
+        cancelButton.addActionListener(_ -> cancel());
         settingsPanel.add(cancelButton);
     }
 

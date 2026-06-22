@@ -44,7 +44,7 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
         this.model = model;
 
         slider = new SliderSpinner(model, LabelPosition.NONE_WITH_TICKS, true);
-        slider.addChangeListener(e -> updateValueLabel());
+        slider.addChangeListener(_ -> updateValueLabel());
 
         var gbh = new GridBagHelper(this);
         gbh.addLabelAndControl("Log:", slider);

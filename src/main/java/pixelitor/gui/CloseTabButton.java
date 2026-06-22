@@ -61,7 +61,7 @@ class CloseTabButton extends JButton {
         setBorderPainted(false);
         addMouseListener(HOVER_MOUSE_LISTENER);
         setRolloverEnabled(true);
-        addActionListener(e -> Views.warnAndClose(tab.getView()));
+        addActionListener(_ -> Views.warnAndClose(tab.getView()));
     }
 
     @Override

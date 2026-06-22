@@ -135,7 +135,7 @@ public class BasicTipOfTheDayUI extends TipOfTheDayUI {
       dialog.setVisible(false);
     };
 
-    closeButton.addActionListener(e -> {
+    closeButton.addActionListener(_ -> {
       dialog.setVisible(false);
       saveChoice.actionPerformed(null);
     });

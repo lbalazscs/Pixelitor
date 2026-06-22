@@ -46,7 +46,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         maskEditing = false;
 
         blendingModePanel = new BlendingModePanel(true);
-        blendingModePanel.addActionListener(e -> updateDrawTarget());
+        blendingModePanel.addActionListener(_ -> updateDrawTarget());
     }
 
     protected void addBlendingModePanel() {

@@ -151,7 +151,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
 
         public ShowOriginalCheckbox(String text) {
             super(text);
-            addActionListener(e -> {
+            addActionListener(_ -> {
                 if (trigger) {
                     Views.getActiveFilterable().setShowOriginal(isSelected());
                 }

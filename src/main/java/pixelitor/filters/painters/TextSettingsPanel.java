@@ -189,7 +189,7 @@ public class TextSettingsPanel extends FilterGUI
         textArea.setName("textArea");
 
         textArea.getDocument().addDocumentListener(
-            new SimpleDocumentListener(e -> textChanged()));
+            new SimpleDocumentListener(_ -> textChanged()));
     }
 
     private void textChanged() {
@@ -252,7 +252,7 @@ public class TextSettingsPanel extends FilterGUI
         italicCB = createCheckBox("italicCB", gbh, defaultItalic);
 
         JButton showAdvancedSettingsButton = new JButton("Advanced...");
-        showAdvancedSettingsButton.addActionListener(e -> showAdvancedSettingsDialog());
+        showAdvancedSettingsButton.addActionListener(_ -> showAdvancedSettingsDialog());
 
         gbh.addLabel("      ", 4, 2);
         gbh.addControl(showAdvancedSettingsButton);

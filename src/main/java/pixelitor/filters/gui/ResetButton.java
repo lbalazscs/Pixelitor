@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ public class ResetButton extends JButton {
 
     private void initialize(Resettable resettable) {
         this.resettable = resettable;
-        addActionListener(e -> resettable.reset(true));
+        addActionListener(_ -> resettable.reset(true));
         setToolTipText(resettable.getResetToolTip());
         updateState();
     }

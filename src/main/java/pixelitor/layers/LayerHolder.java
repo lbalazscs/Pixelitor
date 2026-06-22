@@ -62,6 +62,10 @@ public interface LayerHolder extends Debuggable {
      */
     boolean contains(Layer layer);
 
+    /**
+     * Recursively checks if this layer holder contains
+     * the composition's active layer any nesting level.
+     */
     default boolean containsActiveLayer() {
         return contains(getComp().getActiveLayer());
     }
@@ -116,7 +120,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Inserts a layer at the given index.
      * The update flag controls whether this is a full-featured insertion
-     * (with UI updates and history) or just a low-level list modification.
+     * (with UI updates but without history) or just a low-level list modification.
      */
     void insertLayer(Layer layer, int index, boolean update);
 
@@ -400,6 +404,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Converts the layers at the given indices to a group,
      * optionally using an existing group as the target.
+     * The given indices array must be sorted in ascending order.
      */
     default void convertToGroup(int[] indices, LayerGroup target, boolean addToHistory) {
         List<Layer> movedLayers = new ArrayList<>(indices.length);

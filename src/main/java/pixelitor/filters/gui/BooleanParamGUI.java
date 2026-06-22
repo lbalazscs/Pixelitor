@@ -40,7 +40,7 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
 
         checkBox = new JCheckBox();
         checkBox.setSelected(model.isChecked());
-        checkBox.addActionListener(e ->
+        checkBox.addActionListener(_ ->
             model.setValue(checkBox.isSelected(), false, true));
         add(checkBox);
 
@@ -52,7 +52,7 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
             // Use a ChangeListener to ensure that the reset button's state
             // is also updated when the checkbox is changed programmatically
             // (e.g., by reset). JCheckBox doesn't fire ActionEvents for such changes.
-            checkBox.addChangeListener(e -> resetButton.updateState());
+            checkBox.addChangeListener(_ -> resetButton.updateState());
         }
 
         if (sideButtonModel != null) {
@@ -67,9 +67,6 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
         checkBox.setEnabled(enabled);
         if (resetButton != null) {
             resetButton.setEnabled(enabled);
-        }
-        if (sideButtonModel != null) {
-            sideButtonModel.setEnabled(enabled);
         }
         super.setEnabled(enabled);
     }

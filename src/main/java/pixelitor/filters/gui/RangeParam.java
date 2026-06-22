@@ -102,7 +102,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      */
     public void enableOtherWhenNotZero(FilterSetting other) {
         other.setEnabled(getValue() != 0);
-        addChangeListener(e ->
+        addChangeListener(_ ->
             other.setEnabled(getValue() != 0));
     }
 
@@ -112,7 +112,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      */
     public void disableOtherWhen(FilterSetting other, IntPredicate condition) {
         other.setEnabled(true);
-        addChangeListener(e ->
+        addChangeListener(_ ->
             other.setEnabled(!condition.test(getValue())));
     }
 
@@ -131,12 +131,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * the parameters will synchronize their values.
      */
     public void linkWith(RangeParam other, BooleanSupplier condition) {
-        addChangeListener(e -> {
+        addChangeListener(_ -> {
             if (condition.getAsBoolean()) {
                 other.setValueNoTrigger(getValueAsDouble());
             }
         });
-        other.addChangeListener(e -> {
+        other.addChangeListener(_ -> {
             if (condition.getAsBoolean()) {
                 setValueNoTrigger(other.getValueAsDouble());
             }
@@ -149,9 +149,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * update the other maintaining the multiplier relationship.
      */
     public void scaledLinkWith(RangeParam other, double multiplier) {
-        addChangeListener(e -> other.setValueNoTrigger(
+        addChangeListener(_ -> other.setValueNoTrigger(
             getValueAsDouble() * multiplier));
-        other.addChangeListener(e -> setValueNoTrigger(
+        other.addChangeListener(_ -> setValueNoTrigger(
             other.getValueAsDouble() / multiplier));
     }
 

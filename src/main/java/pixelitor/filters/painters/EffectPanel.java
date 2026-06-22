@@ -76,7 +76,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
         setEffectEnabled(defaultEnabled);
-        enabledCB.addActionListener(e -> updateResetButtonIcon());
+        enabledCB.addActionListener(_ -> updateResetButtonIcon());
 
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;

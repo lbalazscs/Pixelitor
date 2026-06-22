@@ -93,9 +93,6 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled); // so that isEnabled() works
         colorSwatch.setEnabled(enabled);
-        if (sideButtonModel != null) {
-            sideButtonModel.setEnabled(enabled);
-        }
         if (resetButton != null) {
             resetButton.setEnabled(enabled);
         }

@@ -330,7 +330,7 @@ public class DialogBuilder {
         if (addOKButton) {
             okButton = new JButton(okText);
             okButton.setName("ok");
-            okButton.addActionListener(e -> okButtonPressed());
+            okButton.addActionListener(_ -> okButtonPressed());
             dialog.getRootPane().setDefaultButton(okButton);
         }
 
@@ -339,7 +339,7 @@ public class DialogBuilder {
             cancelButton = new JButton(cancelText);
             cancelButton.setName("cancel");
 
-            cancelButton.addActionListener(e -> dialogCanceled());
+            cancelButton.addActionListener(_ -> dialogCanceled());
         }
 
         JPanel southPanel = new JPanel();

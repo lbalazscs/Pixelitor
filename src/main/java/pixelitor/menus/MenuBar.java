@@ -1069,7 +1069,7 @@ public class MenuBar extends JMenuBar {
 
         // show pixel grid
         var showPixelGridMI = new OpenViewEnabledCheckBoxMenuItem(i18n.getString("show_pixel_grid"));
-        showPixelGridMI.addActionListener(e ->
+        showPixelGridMI.addActionListener(_ ->
             View.setPixelGridVisible(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);
 

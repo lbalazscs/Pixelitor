@@ -74,7 +74,7 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
         isValid = validator.test(textField);
 
         // update validation whenever text is typed/removed/changed
-        docListener = new SimpleDocumentListener(e -> updateValidation(jlayer));
+        docListener = new SimpleDocumentListener(_ -> updateValidation(jlayer));
         textField.getDocument().addDocumentListener(docListener);
 
         // keep document listener attached even if the underlying

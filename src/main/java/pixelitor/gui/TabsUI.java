@@ -35,7 +35,7 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
 
     public TabsUI() {
         setTabPlacement(ImageArea.getTabPlacement());
-        addChangeListener(e -> tabsChanged());
+        addChangeListener(_ -> tabsChanged());
 
         InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         inputMap.put(CTRL_TAB, "navigateNext");

@@ -47,7 +47,7 @@ public class TextParamGUI extends JPanel implements ParamGUI {
             add(scrollPane, BorderLayout.CENTER);
 
             JButton runButton = new JButton("Run");
-            runButton.addActionListener(e ->
+            runButton.addActionListener(_ ->
                 model.setValue(getText(), true));
 
             Box verticalBox = Box.createVerticalBox();
@@ -70,7 +70,7 @@ public class TextParamGUI extends JPanel implements ParamGUI {
 
     private void addDocumentListener(ParamAdjustmentListener adjustmentListener) {
         textComponent.getDocument().addDocumentListener(
-            new SimpleDocumentListener(e -> adjustmentListener.paramAdjusted()));
+            new SimpleDocumentListener(_ -> adjustmentListener.paramAdjusted()));
     }
 
     @Override

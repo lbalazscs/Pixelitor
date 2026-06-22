@@ -61,7 +61,7 @@ public enum TweenWizardPage implements WizardPage {
             JButton okButton = dialog.getOkButton();
 
             okButton.setEnabled(filterSelector.hasSelection());
-            filterSelector.addSelectionListener(e ->
+            filterSelector.addSelectionListener(_ ->
                 okButton.setEnabled(filterSelector.hasSelection()));
         }
 

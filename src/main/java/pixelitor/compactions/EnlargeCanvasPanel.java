@@ -140,7 +140,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
     private void setupConstraintsControls() {
         linkModeComboBox.setSelectedItem(LinkMode.NONE);
-        linkModeComboBox.addActionListener(e -> updateConstraints());
+        linkModeComboBox.addActionListener(_ -> updateConstraints());
     }
 
     private void addComponentsToLayout() {
@@ -189,11 +189,11 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     private JPanel createSliderCardPanel(RangeParam percent, RangeParam pixels, String sliderName, int orientation) {
         var percentGUI = new SliderSpinner(percent, BORDER, false, orientation);
         percentGUI.setName(sliderName);
-        percentGUI.addChangeListener(e -> sliderChanged());
+        percentGUI.addChangeListener(_ -> sliderChanged());
 
         var pixelGUI = new SliderSpinner(pixels, BORDER, false, orientation);
         pixelGUI.setName(sliderName);
-        pixelGUI.addChangeListener(e -> sliderChanged());
+        pixelGUI.addChangeListener(_ -> sliderChanged());
 
         JPanel cardPanel = new JPanel(new CardLayout());
         cardPanel.add(pixelGUI, PIXEL_CARD);
@@ -207,8 +207,8 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         c.gridy = 3;
         c.anchor = GridBagConstraints.CENTER;
 
-        usePixelsRadio.addActionListener(e -> setUnit(ResizeUnit.PIXELS));
-        usePercentsRadio.addActionListener(e -> setUnit(ResizeUnit.PERCENTAGE));
+        usePixelsRadio.addActionListener(_ -> setUnit(ResizeUnit.PIXELS));
+        usePercentsRadio.addActionListener(_ -> setUnit(ResizeUnit.PERCENTAGE));
 
         ButtonGroup unitButtonGroup = new ButtonGroup();
         unitButtonGroup.add(usePixelsRadio);
@@ -240,7 +240,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
     private void setupResetButton() {
         resetButton.setEnabled(false);
-        resetButton.addActionListener(e -> reset());
+        resetButton.addActionListener(_ -> reset());
 
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 2;

@@ -25,9 +25,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
@@ -71,7 +69,7 @@ public abstract class OKCancelDialog extends JDialog {
     private void initOKButton() {
         okButton.setName("ok");
         getRootPane().setDefaultButton(okButton);
-        okButton.addActionListener(e -> {
+        okButton.addActionListener(_ -> {
             try {
                 dialogAccepted();
             } catch (Exception ex) {
@@ -82,7 +80,7 @@ public abstract class OKCancelDialog extends JDialog {
 
     private void initCancelButton(JButton cancelButton) {
         cancelButton.setName("cancel");
-        cancelButton.addActionListener(e -> {
+        cancelButton.addActionListener(_ -> {
             try {
                 dialogCanceled();
             } catch (Exception ex) {

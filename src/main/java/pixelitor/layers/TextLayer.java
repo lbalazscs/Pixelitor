@@ -425,7 +425,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         JPopupMenu popup = super.createLayerIconPopupMenu();
 
         var editMenuItem = new JMenuItem("Edit");
-        editMenuItem.addActionListener(e -> showEditUI());
+        editMenuItem.addActionListener(_ -> showEditUI());
         editMenuItem.setAccelerator(CTRL_T);
         popup.add(editMenuItem);
 

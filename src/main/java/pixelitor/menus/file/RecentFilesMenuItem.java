@@ -34,7 +34,7 @@ public class RecentFilesMenuItem extends JMenuItem {
         super(fileEntry.getDisplayText());
         this.fileEntry = fileEntry;
         setToolTipText(fileEntry.getToolTipText());
-        addActionListener(e -> openRecentFileAsync());
+        addActionListener(_ -> openRecentFileAsync());
     }
 
     private void openRecentFileAsync() {

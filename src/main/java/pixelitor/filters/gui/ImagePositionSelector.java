@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.AppMode;
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
@@ -27,11 +26,8 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -41,43 +37,53 @@ import static java.awt.Color.WHITE;
  * A component that displays a thumbnail image and allows users
  * to select a position by clicking or dragging.
  */
-public class ImagePositionSelector extends JComponent implements MouseMotionListener, MouseListener {
-    private static final int MARKER_SQUARE_SIZE = 5;
+public class ImagePositionSelector extends JComponent {
+    public static final int THUMBNAIL_SIZE = 100;
+    private static final int MARKER_SIZE = 10;
+    private static final int MARKER_OFFSET = MARKER_SIZE / 2;
 
-    private final ImagePositionParamGUI parentGUI;
     private final ImagePositionParam model;
     private BufferedImage thumb; // a thumbnail image for the background
 
-    public ImagePositionSelector(ImagePositionParamGUI parentGUI,
-                                 ImagePositionParam model,
-                                 int thumbnailSize) {
-        this.parentGUI = parentGUI;
+    public ImagePositionSelector(ImagePositionParam model) {
         this.model = model;
 
-        addMouseListener(this);
-        addMouseMotionListener(this);
+        MouseAdapter mouseAdapter = new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                updatePosition(e, true);
+            }
 
-        if (AppMode.isUnitTesting()) {
-            // Had spurious failures on Linux in createThumbnail().
-            // This workaround should no longer be necessary.
-            return;
-        }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                updatePosition(e, false);
+            }
+        };
 
-        createThumbnail(thumbnailSize);
+        addMouseListener(mouseAdapter);
+        addMouseMotionListener(mouseAdapter);
+
+//        if (AppMode.isUnitTesting()) {
+//            // Had spurious failures on Linux in createThumbnail().
+//            // This workaround should no longer be necessary.
+//            return;
+//        }
+
+        createThumbnail();
 
         setPreferredSize(new Dimension(
             thumb.getWidth(),
             thumb.getHeight()));
     }
 
-    private void createThumbnail(int thumbnailSize) {
+    private void createThumbnail() {
         Drawable dr = Views.getActiveDrawable();
         if (dr == null) {
-            // running as adjustment layer
-            thumb = ImageUtils.createSysCompatibleImage(thumbnailSize, thumbnailSize);
+            // no active drawable, e.g. when editing an adjustment layer
+            thumb = ImageUtils.createSysCompatibleImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
         } else {
             BufferedImage sourceImage = dr.getImageForFilterDialogs();
-            thumb = Thumbnails.createThumbnail(sourceImage, thumbnailSize, null);
+            thumb = Thumbnails.createThumbnail(sourceImage, THUMBNAIL_SIZE, null);
         }
     }
 
@@ -86,9 +92,9 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         int thumbWidth = thumb.getWidth();
         int thumbHeight = thumb.getHeight();
 
-        // calculate dynamic offsets to center the thumbnail
-        int xOffset = (getWidth() - thumbWidth) / 2;
-        int yOffset = (getHeight() - thumbHeight) / 2;
+        // offsets to center the thumbnail
+        int xOffset = getXOffset();
+        int yOffset = getYOffset();
 
         if (!isEnabled()) {
             g.setColor(Color.GRAY);
@@ -96,60 +102,48 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
             return;
         }
 
-        // no anti-aliasing is needed, because everything
-        // is perfectly horizontal or vertical
-        Graphics2D g2 = (Graphics2D) g;
         g.drawImage(thumb, xOffset, yOffset, null);
 
-        // draws the position indicator, consisting of
-        // a crosshair and a central square marker
+        // Draws the position indicator, consisting of
+        // a crosshair and a central square marker.
         int x = xOffset + (int) (model.getRelativeX() * thumbWidth);
         int y = yOffset + (int) (model.getRelativeY() * thumbHeight);
 
         // the crosshair should not be restricted to the thumbnail's
         // dimensions, because users are allowed to select outside the bounds
-        drawCrosshair(g2, x, y, getWidth(), getHeight());
-        drawCentralMarker(g2, x, y);
+        drawCrosshair(g, x, y, getWidth(), getHeight());
+        drawCentralMarker(g, x, y);
     }
 
-    private static void drawCrosshair(Graphics2D g2, int x, int y, int width, int height) {
+    private static void drawCrosshair(Graphics g, int x, int y, int width, int height) {
         // draw a 1px white crosshair with a 1px black outline
-        g2.setColor(BLACK);
+        g.setColor(BLACK);
         // black outline for vertical line
         if (x > 0) {
-            g2.drawLine(x - 1, 0, x - 1, height - 1); // west
+            g.drawLine(x - 1, 0, x - 1, height - 1); // west
         }
         if (x < width - 1) {
-            g2.drawLine(x + 1, 0, x + 1, height - 1); // east
+            g.drawLine(x + 1, 0, x + 1, height - 1); // east
         }
         // black outline for horizontal line
         if (y > 0) {
-            g2.drawLine(0, y - 1, width - 1, y - 1); // north
+            g.drawLine(0, y - 1, width - 1, y - 1); // north
         }
         if (y < height - 1) {
-            g2.drawLine(0, y + 1, width - 1, y + 1); // south
+            g.drawLine(0, y + 1, width - 1, y + 1); // south
         }
 
-        g2.setColor(WHITE);
+        g.setColor(WHITE);
         // white center lines
-        g2.drawLine(x, 0, x, height - 1); // vertical
-        g2.drawLine(0, y, width - 1, y); // horizontal
+        g.drawLine(x, 0, x, height - 1); // vertical
+        g.drawLine(0, y, width - 1, y); // horizontal
     }
 
-    private static void drawCentralMarker(Graphics2D g2, int x, int y) {
-        g2.setColor(BLACK);
-        g2.draw(new Rectangle2D.Float(
-            x - MARKER_SQUARE_SIZE, y - MARKER_SQUARE_SIZE,
-            MARKER_SQUARE_SIZE * 2, MARKER_SQUARE_SIZE * 2));
-        g2.setColor(WHITE);
-        g2.fill(new Rectangle2D.Float(
-            x - MARKER_SQUARE_SIZE + 1, y - MARKER_SQUARE_SIZE + 1,
-            MARKER_SQUARE_SIZE * 2 - 1, MARKER_SQUARE_SIZE * 2 - 1));
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        updatePosition(e, true);
+    private static void drawCentralMarker(Graphics g, int x, int y) {
+        g.setColor(BLACK);
+        g.drawRect(x - MARKER_OFFSET, y - MARKER_OFFSET, MARKER_SIZE, MARKER_SIZE);
+        g.setColor(WHITE);
+        g.fillRect(x - MARKER_OFFSET + 1, y - MARKER_OFFSET + 1, MARKER_SIZE - 2, MARKER_SIZE - 2);
     }
 
     private void updatePosition(MouseEvent e, boolean isAdjusting) {
@@ -157,41 +151,22 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
             return;
         }
 
-        // re-calculate offsets for mouse interactions
-        int xOffset = (getWidth() - thumb.getWidth()) / 2;
-        int yOffset = (getHeight() - thumb.getHeight()) / 2;
+        // offsets for mouse interactions
+        int xOffset = getXOffset();
+        int yOffset = getYOffset();
 
         // doesn't clamp mouse coordinates to allow selecting positions outside the image
-        double relX = ((double) (e.getX() - xOffset)) / thumb.getWidth();
-        double relY = ((double) (e.getY() - yOffset)) / thumb.getHeight();
+        double relX = (e.getX() - xOffset) / (double) thumb.getWidth();
+        double relY = (e.getY() - yOffset) / (double) thumb.getHeight();
 
-        model.setRelativePosition(relX, relY, false, isAdjusting, true);
-        parentGUI.updateSlidersFromModel();
-        repaint();
+        model.setRelativePosition(relX, relY, true, isAdjusting, true);
     }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {
+    private int getXOffset() {
+        return (getWidth() - thumb.getWidth()) / 2;
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        updatePosition(e, false);
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
+    private int getYOffset() {
+        return (getHeight() - thumb.getHeight()) / 2;
     }
 }

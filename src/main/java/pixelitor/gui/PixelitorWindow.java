@@ -40,14 +40,8 @@ import java.awt.geom.AffineTransform;
 import java.net.URL;
 import java.util.List;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
-import static java.awt.BorderLayout.WEST;
-import static java.awt.Desktop.Action.APP_ABOUT;
-import static java.awt.Desktop.Action.APP_PREFERENCES;
-import static java.awt.Desktop.Action.APP_QUIT_HANDLER;
+import static java.awt.BorderLayout.*;
+import static java.awt.Desktop.Action.*;
 import static java.awt.Taskbar.Feature.ICON_IMAGE;
 import static pixelitor.utils.ImageUtils.findImageURL;
 import static pixelitor.utils.Texts.i18n;
@@ -130,13 +124,13 @@ public class PixelitorWindow extends JFrame {
         }
         Desktop desktop = Desktop.getDesktop();
         if (desktop.isSupported(APP_ABOUT)) {
-            desktop.setAboutHandler(e -> AboutDialog.showDialog(i18n("about")));
+            desktop.setAboutHandler(_ -> AboutDialog.showDialog(i18n("about")));
         }
         if (desktop.isSupported(APP_PREFERENCES)) {
-            desktop.setPreferencesHandler(e -> PreferencesPanel.showInDialog());
+            desktop.setPreferencesHandler(_ -> PreferencesPanel.showInDialog());
         }
         if (desktop.isSupported(APP_QUIT_HANDLER)) {
-            desktop.setQuitHandler((e, r) -> Pixelitor.exitApp(this));
+            desktop.setQuitHandler((_, _) -> Pixelitor.exitApp(this));
         }
     }
 

@@ -77,7 +77,7 @@ public class TweenOutputSettingsPanel extends JPanel implements Validated {
     private void addOutputTypeSelector(GridBagHelper gbh) {
         var model = new EnumComboBoxModel<>(TweenOutputType.class);
         outputTypeCB = new JComboBox<>(model);
-        outputTypeCB.addActionListener(e -> outputTypeChanged());
+        outputTypeCB.addActionListener(_ -> outputTypeChanged());
         outputTypeChanged(); // initial setup
 
         gbh.addLabelAndControlNoStretch("Output Type:", outputTypeCB);
@@ -87,7 +87,7 @@ public class TweenOutputSettingsPanel extends JPanel implements Validated {
         gbh.addLabelAndControlNoStretch("Number of Seconds:",
             wrapWithValidation(numSecondsTF, numSecondsValidator));
 
-        var docListener = new SimpleDocumentListener(e -> updateCalculations());
+        var docListener = new SimpleDocumentListener(_ -> updateCalculations());
         numSecondsTF.getDocument().addDocumentListener(docListener);
 
         gbh.addLabelAndControlNoStretch("Frames per Second:",
@@ -108,7 +108,7 @@ public class TweenOutputSettingsPanel extends JPanel implements Validated {
 
     private void addPingPongSelector(GridBagHelper gbh) {
         gbh.addLabelAndControl("Ping Pong:", pingPongCB);
-        pingPongCB.addActionListener(e -> updateCalculations());
+        pingPongCB.addActionListener(_ -> updateCalculations());
     }
 
     private void addFileSelector(GridBagHelper gbh) {

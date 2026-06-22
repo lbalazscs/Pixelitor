@@ -47,7 +47,7 @@ public class DropDownSlider extends JComboBox<String> {
         popupMenu.setLayout(new FlowLayout(CENTER, 5, 1));
         popupMenu.add(slider);
 
-        slider.addChangeListener(e ->
+        slider.addChangeListener(_ ->
             setSelectedItem(String.valueOf(slider.getValue())));
     }
 

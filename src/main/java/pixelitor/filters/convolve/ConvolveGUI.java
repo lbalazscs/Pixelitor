@@ -118,7 +118,7 @@ public class ConvolveGUI extends FilterGUI {
 
     private void addNormalizeButton(Box parentBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
-        normalizeButton.addActionListener(e -> normalizeKernel());
+        normalizeButton.addActionListener(_ -> normalizeKernel());
         normalizeButton.setAlignmentX(LEFT_ALIGNMENT);
         parentBox.add(normalizeButton);
     }
@@ -126,7 +126,7 @@ public class ConvolveGUI extends FilterGUI {
     private void addExecuteButton(Box parentBox) {
         JButton runButton = new JButton("Apply Filter");
         runButton.setToolTipText("Applies the filter with the current kernel values.");
-        runButton.addActionListener(e -> onUserAction());
+        runButton.addActionListener(_ -> onUserAction());
         parentBox.add(runButton);
     }
 
@@ -142,13 +142,13 @@ public class ConvolveGUI extends FilterGUI {
 
         presetsBox.add(Box.createVerticalStrut(20));
 
-        JButton randomizeButton = GUIUtils.createRandomizeSettingsButton(e -> {
+        JButton randomizeButton = GUIUtils.createRandomizeSettingsButton(_ -> {
             loadKernel(Convolve.createRandomKernel(kernelSize));
             onUserAction();
         });
         presetsBox.add(randomizeButton);
 
-        JButton resetButton = GUIUtils.createResetAllButton(e -> {
+        JButton resetButton = GUIUtils.createResetAllButton(_ -> {
             resetKernel(kernelSize);
             onUserAction();
         });
@@ -161,7 +161,7 @@ public class ConvolveGUI extends FilterGUI {
 
     private void createPresetButton(String name, float[] kernel) {
         JButton button = new JButton(name);
-        button.addActionListener(e -> {
+        button.addActionListener(_ -> {
             loadKernel(kernel);
             onUserAction();
         });
@@ -300,7 +300,7 @@ public class ConvolveGUI extends FilterGUI {
         textField.setColumns(5);
         textField.setHorizontalAlignment(JTextField.RIGHT);
         kernelPanel.add(textField);
-        textField.addActionListener(e -> onUserAction());
+        textField.addActionListener(_ -> onUserAction());
         return textField;
     }
 

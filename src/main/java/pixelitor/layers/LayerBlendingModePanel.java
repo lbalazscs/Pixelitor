@@ -52,13 +52,13 @@ public class LayerBlendingModePanel extends BlendingModePanel
         Views.addActivationListener(this);
         LayerEvents.addHolderListener(this);
 
-        opacityDDSlider.addActionListener(e -> {
+        opacityDDSlider.addActionListener(_ -> {
             if (userInteractionChange) {
                 opacityChanged();
             }
         });
 
-        bmCombo.addActionListener(e -> {
+        bmCombo.addActionListener(_ -> {
             if (userInteractionChange) {
                 blendingModeChanged();
             }

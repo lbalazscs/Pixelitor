@@ -108,7 +108,7 @@ public final class FilterButtonModel implements FilterSetting {
     @Override
     public JComponent createGUI() {
         button = new JButton(buttonText, icon);
-        button.addActionListener(e -> {
+        button.addActionListener(_ -> {
             action.run();
             if (shouldTriggerFilter) {
                 adjustmentListener.paramAdjusted();
@@ -118,7 +118,7 @@ public final class FilterButtonModel implements FilterSetting {
         if (toolTipText != null) {
             button.setToolTipText(toolTipText);
         }
-        button.setEnabled(shouldBeEnabled());
+        button.setEnabled(isEnabled());
 
         if (lookupName != null) {
             button.setName(lookupName);
@@ -143,12 +143,8 @@ public final class FilterButtonModel implements FilterSetting {
             case PARENT_PARAM -> enabledByParent = enabled;
         }
         if (button != null) {
-            button.setEnabled(shouldBeEnabled());
+            button.setEnabled(isEnabled());
         }
-    }
-
-    private boolean shouldBeEnabled() {
-        return enabledByFilterLogic && enabledByAnimationSetting && enabledByParent;
     }
 
     @Override
@@ -168,7 +164,7 @@ public final class FilterButtonModel implements FilterSetting {
 
     @Override
     public boolean isEnabled() {
-        return enabledByFilterLogic && enabledByAnimationSetting;
+        return enabledByFilterLogic && enabledByAnimationSetting && enabledByParent;
     }
 
     @Override

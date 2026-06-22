@@ -96,7 +96,7 @@ public class GMICFilterCreator {
         JTextArea filterTA = new JTextArea(javaCode, 30, 80);
 
         JButton regenerateButton = new JButton("Regenerate");
-        regenerateButton.addActionListener(e ->
+        regenerateButton.addActionListener(_ ->
             filterTA.setText(createJavaCode(gmicDescrTA, commandNameTF, filterNameTF, reseedCB, p)));
 
         gbh.addLabelAndControl("Filter Name:", filterNameTF);

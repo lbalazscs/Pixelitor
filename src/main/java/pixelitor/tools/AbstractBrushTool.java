@@ -45,9 +45,7 @@ import java.awt.geom.FlatteningPathIterator;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.*;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
@@ -189,7 +187,7 @@ public abstract class AbstractBrushTool extends Tool {
         var symmetryCB = new JComboBox<Symmetry>(symmetryModel);
 
         settingsPanel.addComboBox(GUIText.MIRROR + ":", symmetryCB, "symmetrySelector");
-        symmetryCB.addActionListener(e ->
+        symmetryCB.addActionListener(_ ->
             symmetryBrush.symmetryChanged(getSymmetry(), getRadius()));
     }
 

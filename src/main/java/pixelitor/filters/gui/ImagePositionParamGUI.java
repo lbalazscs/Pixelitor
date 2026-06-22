@@ -61,7 +61,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         ySliderModel.setDecimalPlaces(decimalPlaces);
 
         // add the thumbnail-based selector
-        positionSelector = new ImagePositionSelector(this, model, 100);
+        positionSelector = new ImagePositionSelector(model);
         add(positionSelector, WEST);
 
         // add the two sliders
@@ -87,8 +87,8 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     // if one of the sliders was moved by the user,
     // update the model and the position selector
     private void linkSliderChangesToModel() {
-        xSliderModel.addChangeListener(e -> sliderChanged(xSliderModel, model::setRelativeX));
-        ySliderModel.addChangeListener(e -> sliderChanged(ySliderModel, model::setRelativeY));
+        xSliderModel.addChangeListener(_ -> sliderChanged(xSliderModel, model::setRelativeX));
+        ySliderModel.addChangeListener(_ -> sliderChanged(ySliderModel, model::setRelativeY));
     }
 
     private void sliderChanged(RangeParam sliderModel, BiConsumer<Double, Boolean> modelUpdater) {

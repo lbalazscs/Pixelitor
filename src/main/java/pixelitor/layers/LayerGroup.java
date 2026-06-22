@@ -361,11 +361,6 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void reorderLayerUI(int oldIndex, int newIndex) {
-        updateChildrenUI();
-    }
-
-    @Override
     public void removeLayerFromList(Layer layer) {
         layers.remove(layer);
     }

@@ -31,12 +31,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static com.bric.swing.ColorPicker.Mode.BLUE;
-import static com.bric.swing.ColorPicker.Mode.BRI;
-import static com.bric.swing.ColorPicker.Mode.GREEN;
-import static com.bric.swing.ColorPicker.Mode.HUE;
-import static com.bric.swing.ColorPicker.Mode.RED;
-import static com.bric.swing.ColorPicker.Mode.SAT;
+import static com.bric.swing.ColorPicker.Mode.*;
 
 /**
  * <p>This is a panel that offers a robust set of controls to pick a color.
@@ -524,7 +519,7 @@ public class ColorPicker extends JPanel {
         green.spinner.addChangeListener(rgbChangeListener);
         blue.spinner.addChangeListener(rgbChangeListener);
 
-        alpha.spinner.addChangeListener(e -> {
+        alpha.spinner.addChangeListener(_ -> {
             if (opacityUpdateDepth > 0) {
                 return;
             }
@@ -536,14 +531,14 @@ public class ColorPicker extends JPanel {
             }
         });
 
-        hue.radioButton.addActionListener(e -> setMode(HUE));
-        sat.radioButton.addActionListener(e -> setMode(SAT));
-        bri.radioButton.addActionListener(e -> setMode(BRI));
-        red.radioButton.addActionListener(e -> setMode(RED));
-        green.radioButton.addActionListener(e -> setMode(GREEN));
-        blue.radioButton.addActionListener(e -> setMode(BLUE));
+        hue.radioButton.addActionListener(_ -> setMode(HUE));
+        sat.radioButton.addActionListener(_ -> setMode(SAT));
+        bri.radioButton.addActionListener(_ -> setMode(BRI));
+        red.radioButton.addActionListener(_ -> setMode(RED));
+        green.radioButton.addActionListener(_ -> setMode(GREEN));
+        blue.radioButton.addActionListener(_ -> setMode(BLUE));
 
-        slider.addChangeListener(e -> {
+        slider.addChangeListener(_ -> {
             if (sliderUpdateDepth > 0) {
                 return;
             }
@@ -558,7 +553,7 @@ public class ColorPicker extends JPanel {
             }
         });
 
-        colorPanel.addChangeListener(e -> {
+        colorPanel.addChangeListener(_ -> {
             if (colorPanelUpdateDepth > 0) {
                 return;
             }
@@ -581,7 +576,7 @@ public class ColorPicker extends JPanel {
 
         setOpacityVisible(includeOpacity);
 
-        opacitySlider.addChangeListener(e -> {
+        opacitySlider.addChangeListener(_ -> {
             if (opacityUpdateDepth > 0) {
                 return;
             }
@@ -597,17 +592,17 @@ public class ColorPicker extends JPanel {
     public void setupColorChangeListener(Consumer<Color> colorChangeListener) {
         this.colorChangeListener = colorChangeListener;
         // notify the color change listener, but only if the value is not adjusting
-        opacitySlider.addChangeListener(e -> {
+        opacitySlider.addChangeListener(_ -> {
             if (opacityUpdateDepth == 0 && !opacitySlider.getValueIsAdjusting()) {
                 colorChangeListener.accept(getColor());
             }
         });
-        slider.addChangeListener(e -> {
+        slider.addChangeListener(_ -> {
             if (sliderUpdateDepth == 0 && !slider.getValueIsAdjusting()) {
                 colorChangeListener.accept(getColor());
             }
         });
-        colorPanel.addChangeListener(e -> {
+        colorPanel.addChangeListener(_ -> {
             if (colorPanelUpdateDepth == 0 && !colorPanel.isAdjusting()) {
                 colorChangeListener.accept(getColor());
             }

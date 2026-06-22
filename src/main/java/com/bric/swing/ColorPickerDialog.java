@@ -67,7 +67,7 @@ class ColorPickerDialog extends JDialog {
         pack();
         setLocationRelativeTo(owner);
 
-        footer.getButton(DialogFooter.OK_OPTION).addActionListener(e -> setReturnValue());
+        footer.getButton(DialogFooter.OK_OPTION).addActionListener(_ -> setReturnValue());
 
         cp.setupColorChangeListener(colorChangeListener);
     }

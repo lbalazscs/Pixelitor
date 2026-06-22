@@ -63,9 +63,9 @@ public class MlpAlignmentSelector extends JPanel {
         setAlignment(defaultAlignment);
 
         // bind to the listener only after setting the default selection
-        leftAlignButton.addActionListener(e -> adjustmentListener.paramAdjusted());
-        centerAlignButton.addActionListener(e -> adjustmentListener.paramAdjusted());
-        rightAlignButton.addActionListener(e -> adjustmentListener.paramAdjusted());
+        leftAlignButton.addActionListener(_ -> adjustmentListener.paramAdjusted());
+        centerAlignButton.addActionListener(_ -> adjustmentListener.paramAdjusted());
+        rightAlignButton.addActionListener(_ -> adjustmentListener.paramAdjusted());
     }
 
     private static void createIconShapes() {

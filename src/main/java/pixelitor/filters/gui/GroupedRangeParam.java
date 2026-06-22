@@ -126,7 +126,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
 
     private void initLinking() {
         for (RangeParam child : children) {
-            child.addChangeListener(e -> propagateValueIfLinked(child));
+            child.addChangeListener(_ -> propagateValueIfLinked(child));
         }
     }
 
@@ -161,7 +161,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
 
         // enable auto-normalization
         for (RangeParam param : children) {
-            param.addChangeListener(e -> autoNormalize(param));
+            param.addChangeListener(_ -> autoNormalize(param));
         }
         autoNormalizable = true;
         autoNormalizationEnabled = true;

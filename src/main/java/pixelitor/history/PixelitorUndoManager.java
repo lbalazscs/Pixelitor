@@ -50,7 +50,7 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
 
     public PixelitorUndoManager() {
         selectionModel = new HistoryListSelectionModel();
-        selectionModel.addListSelectionListener(e -> selectionChanged());
+        selectionModel.addListSelectionListener(_ -> selectionChanged());
     }
 
     @Override

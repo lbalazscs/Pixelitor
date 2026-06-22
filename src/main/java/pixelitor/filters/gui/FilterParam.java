@@ -55,13 +55,13 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     String getPresetKey();
 
     /**
-     * Loads the state from the given string into this parameter,
+     * Loads the state from the given state object into this parameter,
      * optionally updating the GUI, and without triggering the filter.
      */
     void loadStateFrom(ParamState<?> state, boolean updateGUI);
 
     /**
-     * Loads the given state into this parameter,
+     * Loads the state from the given string into this parameter,
      * updating the GUI, and without triggering the filter.
      */
     void loadStateFrom(String savedValue);

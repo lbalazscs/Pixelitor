@@ -34,22 +34,12 @@ import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 
 import static java.awt.AlphaComposite.DstIn;
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
-import static java.awt.BorderLayout.WEST;
+import static java.awt.BorderLayout.*;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
-import static pixelitor.layers.LayerMask.RUBYLITH_COLOR_MODEL;
-import static pixelitor.layers.LayerMask.RUBYLITH_COMPOSITE;
-import static pixelitor.layers.LayerMask.TRANSPARENCY_COLOR_MODEL;
-import static pixelitor.utils.ImageUtils.convertToGrayscaleImage;
-import static pixelitor.utils.ImageUtils.copyImage;
-import static pixelitor.utils.ImageUtils.copySubImage;
-import static pixelitor.utils.ImageUtils.createSysCompatibleImage;
-import static pixelitor.utils.ImageUtils.isSubImage;
+import static pixelitor.layers.LayerMask.*;
+import static pixelitor.utils.ImageUtils.*;
 import static pixelitor.utils.Thumbnails.calcThumbDimensions;
 import static pixelitor.utils.Thumbnails.createThumbnail;
 
@@ -116,7 +106,7 @@ public class MaskFromColorRangePanel extends JPanel {
         // by default use the layer image
         srcImage = createLayerBasedSourceImage();
         srcIsLayer = true;
-        imageSourceCB.addActionListener(e -> updateImageSource(comp));
+        imageSourceCB.addActionListener(_ -> updateImageSource(comp));
 
         invertMaskCheckBox = createInvertCheckBox();
         distMetricCombo = createColorSpaceComboBox();

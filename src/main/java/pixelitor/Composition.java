@@ -1639,36 +1639,19 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Enlarges the canvas to fit the content of all layers.
      */
     public void fitCanvasToLayers() {
-        // mutable accumulator and Outsets builder
-        class BoundsAccumulator {
-            private int top = 0, right = 0, bottom = 0, left = 0;
-
-            private void include(ContentLayer contentLayer) {
-                var contentBounds = contentLayer.getContentBounds();
-                if (contentBounds == null) {
-                    return;
-                }
-
-                left = Math.max(left, -contentBounds.x);
-                top = Math.max(top, -contentBounds.y);
-
-                int contentMaxX = contentBounds.x + contentBounds.width;
-                right = Math.max(right, contentMaxX - canvas.getWidth());
-
-                int contentMaxY = contentBounds.y + contentBounds.height;
-                bottom = Math.max(bottom, contentMaxY - canvas.getHeight());
-            }
-
-            private Outsets build() {
-                return new Outsets(top, right, bottom, left);
-            }
+        Rectangle2D bounds = calcContentBounds(true);
+        if (bounds == null || bounds.isEmpty()) {
+            Dialogs.showInfo(getDialogParent(), "Nothing To Be Done",
+                "The canvas is already large enough to show all layer content.");
+            return;
         }
 
-        var accumulator = new BoundsAccumulator();
+        int left = Math.max(0, (int) -bounds.getMinX());
+        int top = Math.max(0, (int) -bounds.getMinY());
+        int right = Math.max(0, (int) Math.ceil(bounds.getMaxX() - canvas.getWidth()));
+        int bottom = Math.max(0, (int) Math.ceil(bounds.getMaxY() - canvas.getHeight()));
 
-        forEachNestedLayerOfType(ContentLayer.class, accumulator::include);
-
-        Outsets enlargement = accumulator.build();
+        Outsets enlargement = new Outsets(top, right, bottom, left);
 
         if (enlargement.isZero()) {
             Dialogs.showInfo(getDialogParent(), "Nothing To Be Done",

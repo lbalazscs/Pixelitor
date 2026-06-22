@@ -41,11 +41,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.DRAGGING_OUT_CONTROL;
-import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.IDLE;
-import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.*;
 import static pixelitor.tools.pen.PathActions.setActionsEnabled;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 import static pixelitor.tools.util.DraggablePoint.lastActive;
@@ -80,7 +76,7 @@ public class PenTool extends PathTool {
     public void initSettingsPanel(ResourceBundle resources) {
         settingsPanel.add(rubberBandLabel);
         settingsPanel.add(rubberBandCB);
-        rubberBandCB.addActionListener(e -> {
+        rubberBandCB.addActionListener(_ -> {
             showRubberBand = rubberBandCB.isSelected();
             Views.repaintActive();
         });

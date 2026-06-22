@@ -80,7 +80,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
     public void initSettingsPanel(ResourceBundle resources) {
         String moveText = resources.getString("mt_move");
         settingsPanel.addComboBox(moveText, modeSelector, "modeSelector");
-        modeSelector.addActionListener(e -> modeChanged());
+        modeSelector.addActionListener(_ -> modeChanged());
 
         settingsPanel.addSeparator();
         settingsPanel.addWithLabel("Auto Select Layer:",
@@ -88,7 +88,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
 
         settingsPanel.addWithLabel("Free Transform:",
             freeTransformCheckBox, "freeTransformCheckBox");
-        freeTransformCheckBox.addActionListener(e ->
+        freeTransformCheckBox.addActionListener(_ ->
             setFreeTransformMode(freeTransformCheckBox.isSelected()));
     }
 
