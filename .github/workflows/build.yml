@@ -21,7 +21,7 @@ jobs:
     name: Build with Java ${{ matrix.java-version }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v5
@@ -56,7 +56,7 @@ jobs:
     steps:
       # `gh release create` needs the repository context
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # downloads the previously archived artifacts into the target directory
       - name: Download artifacts
