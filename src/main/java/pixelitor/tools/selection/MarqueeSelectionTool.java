@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 public class MarqueeSelectionTool extends AbstractSelectionTool {
     private final SelectionType selectionType;
 
+    // the rectangle and ellipse selection tools share the 'M' hotkey, with cycling
     public MarqueeSelectionTool(SelectionType selectionType) {
         super(selectionType.toString() + " Selection", 'M',
             "<b>click and drag</b> creates a selection, " +

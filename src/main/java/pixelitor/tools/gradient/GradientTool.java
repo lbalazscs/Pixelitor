@@ -51,7 +51,7 @@ import java.util.function.Consumer;
 import static java.awt.MultipleGradientPaint.CycleMethod.*;
 import static pixelitor.colors.FgBgColors.setBgColor;
 import static pixelitor.colors.FgBgColors.setFgColor;
-import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
+import static pixelitor.tools.DragToolState.*;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
 /**
@@ -151,12 +151,7 @@ public class GradientTool extends DragTool {
             return;
         }
 
-        View view = Views.getActive();
-        if (view == null) { // should not happen if handles exist and tool is active
-            return;
-        }
-
-        Drag renderedDrag = handles.toDrag(view);
+        Drag renderedDrag = handles.toDrag();
         if (renderedDrag.isImClick()) {
             return; // no change if handles are coincident
         }
@@ -171,6 +166,7 @@ public class GradientTool extends DragTool {
 
         if (isEditingGradientLayer()) {
             gradientLayer.setGradient(newGradient, true);
+            lastGradient = newGradient;
         } else {
             DrawableAction.run(editName,
                 dr -> drawGradient(dr, newGradient, true, editName));
@@ -195,21 +191,24 @@ public class GradientTool extends DragTool {
             hit.mousePressed(e);
         }
         e.repaint();
+        assert state.checkInvariants(this);
     }
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
         // the gradient will be drawn only when the mouse is released
         if (activePoint != null) { // a handle is being dragged
+            state = TRANSFORM;
             double x = e.getCoX();
             double y = e.getCoY();
             activePoint.mouseDragged(x, y, e.isShiftDown());
         } else {
             // if a new gradient is created from scratch, hide the old handles
+            state = INITIAL_DRAG;
             handles = null;
         }
-
         e.repaint();
+        assert state.checkInvariants(this);
     }
 
     @Override
@@ -219,13 +218,18 @@ public class GradientTool extends DragTool {
         if (drag.isClick()) {
             if (activePoint == null) {
                 // clicked outside the handles
-                hideHandles(comp, true);
+                hideHandles(comp, true); // sets state to IDLE
+            } else {
+                state = TRANSFORM; // user just clicked a handle
             }
+            assert state.checkInvariants(this);
             return;
         }
+
         Drag renderedDrag;
         if (activePoint != null) { // a handle was dragged
             assert handles != null;
+            state = TRANSFORM;
 
             activePoint.mouseReleased(e);
             if (!activePoint.isHitBy(e)) {
@@ -234,17 +238,20 @@ public class GradientTool extends DragTool {
                 DraggablePoint.clearActivePoint();
             }
 
-            renderedDrag = handles.toDrag(e.getView());
+            renderedDrag = handles.toDrag();
             if (renderedDrag.isImClick()) {
+                assert state.checkInvariants(this);
                 return;
             }
         } else { // the initial drag just ended
             renderedDrag = drag;
             View view = e.getView();
             handles = new GradientHandles(drag.getStart(view), drag.getEnd(view), view);
+            state = TRANSFORM; // handles are now visible
         }
 
         commitGradient(renderedDrag, comp, null);
+        assert state.checkInvariants(this);
     }
 
     /**
@@ -252,12 +259,14 @@ public class GradientTool extends DragTool {
      * fill layer or drawable) and handles history.
      */
     private void commitGradient(Drag renderedDrag, Composition comp, String editName) {
+        Gradient newGradient = createGradient(renderedDrag);
+
         if (isEditingGradientLayer()) {
-            gradientLayer.setGradient(createGradient(renderedDrag), true);
+            gradientLayer.setGradient(newGradient, true);
+            lastGradient = newGradient;
         } else {
             Drawable dr = comp.getActiveDrawable();
             if (dr != null) {
-                Gradient newGradient = createGradient(renderedDrag);
                 drawGradient(dr, newGradient, true, editName);
             } else {
                 throw new IllegalStateException();
@@ -326,40 +335,40 @@ public class GradientTool extends DragTool {
         DraggablePoint.clearActivePoint();
         lastGradient = null;
         gradientLayer = null;
+        state = IDLE;
+        assert state.checkInvariants(this);
         Views.repaintActive();
     }
 
     @Override
     public void compReplaced(Composition newComp, boolean reloaded) {
-        if (reloaded && handles != null) {
+        if (reloaded) {
             hideHandles(newComp, false);
         }
         layerActivated(newComp.getActiveLayer());
+        assert state.checkInvariants(this);
     }
 
     @Override
     public void editingTargetChanged(Layer activeLayer, boolean toolActivation) {
         layerActivated(activeLayer);
+        assert state.checkInvariants(this);
     }
 
     @Override
     public void forceFinish() {
-        hideHandles(false);
+        hideHandles(Views.getActiveComp(), false);
+        assert state.checkInvariants(this);
     }
 
     @Override
     public void escPressed() {
-        hideHandles(true);
-    }
-
-    private void hideHandles(boolean addToHistory) {
-        if (handles != null) {
-            hideHandles(Views.getActiveComp(), addToHistory);
-        }
+        hideHandles(Views.getActiveComp(), true);
+        assert state.checkInvariants(this);
     }
 
     private void hideHandles(Composition comp, boolean addToHistory) {
-        if (isEditingGradientLayer()) {
+        if (handles == null || isEditingGradientLayer()) {
             return;
         }
 
@@ -374,7 +383,12 @@ public class GradientTool extends DragTool {
         handles = null;
         DraggablePoint.clearActivePoint();
         lastGradient = null;
+        state = IDLE;
         comp.repaint();
+    }
+
+    public boolean hasHandles() {
+        return handles != null;
     }
 
     @Override
@@ -382,16 +396,18 @@ public class GradientTool extends DragTool {
         if (handles == null) {
             return false;
         }
+
         View view = Views.getActive();
         assert view != null;
 
         handles.arrowKeyPressed(key, view);
-        Drag handleDrag = handles.toDrag(view); // drag after arrow key nudge
+        Drag handleDrag = handles.toDrag(); // drag after arrow key nudge
 
         Composition comp = view.getComp();
         String editName = key.isShiftDown() ? "Shift-nudge Gradient" : "Nudge Gradient";
         commitGradient(handleDrag, comp, editName);
 
+        assert state.checkInvariants(this);
         return true;
     }
 
@@ -506,9 +522,7 @@ public class GradientTool extends DragTool {
                 updateFrom(gfl);
             } else {
                 gradientLayer = null;
-                if (handles != null) {
-                    hideHandles(layer.getComp(), false);
-                }
+                hideHandles(layer.getComp(), false);
                 blendingModePanel.setEnabled(true);
             }
         }
@@ -530,7 +544,7 @@ public class GradientTool extends DragTool {
         View view = comp.getView();
         loadSettingsFromGradient(gradient, view);
         if (regenerate) {
-            Drag dragFromHandles = handles.toDrag(view);
+            Drag dragFromHandles = handles.toDrag();
             drawGradient(dr, createGradient(dragFromHandles), false, null);
         }
 
@@ -544,6 +558,7 @@ public class GradientTool extends DragTool {
         Composition comp = gfl.getComp();
         if (gradient != null) {
             loadSettingsFromGradient(gradient, comp.getView());
+            lastGradient = gradient;
 
             // make the loaded handles visible
             comp.repaint();
@@ -555,8 +570,9 @@ public class GradientTool extends DragTool {
 
     private void loadSettingsFromGradient(Gradient gradient, View view) {
         ignoreRegenerate = true;
-
         handles = gradient.createHandles(view);
+        state = TRANSFORM; // handles were loaded and are active
+
         colorTypeCB.setSelectedItem(gradient.getColorType());
         typeCB.setSelectedItem(gradient.getType());
         cycleMethodCB.setSelectedItem(cycleMethodToString(gradient.getCycleMethod()));

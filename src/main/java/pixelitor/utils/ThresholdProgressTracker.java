@@ -34,7 +34,6 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     private int lastReportedPercent = 0;
 
     private boolean isProgressVisible = false;
-    private final boolean isRunningOnEDT;
 
     // In this class this field is used only for debugging.
     // The status bar progress tracker subclass uses it to label the progress bar.
@@ -46,7 +45,6 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
         this.numTotalUnits = numTotalUnits;
         this.opName = opName;
         startTimeMillis = System.currentTimeMillis();
-        isRunningOnEDT = Threads.calledOnEDT();
     }
 
     @Override
@@ -67,7 +65,7 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
         if (!isProgressVisible) {
             double elapsedTime = System.currentTimeMillis() - startTimeMillis;
             if (elapsedTime > VISIBILITY_THRESHOLD_MS) {
-                if (isRunningOnEDT) {
+                if (Threads.calledOnEDT()) {
                     onProgressStart();
                 } else {
                     EventQueue.invokeLater(this::onProgressStart);
@@ -80,7 +78,7 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
         if (isProgressVisible) {
             int currentPercent = (int) (completedUnits * 100.0 / numTotalUnits);
             if (currentPercent > lastReportedPercent) {
-                if (isRunningOnEDT) {
+                if (Threads.calledOnEDT()) {
                     onProgressUpdate(currentPercent);
                 } else {
                     EventQueue.invokeLater(() -> onProgressUpdate(currentPercent));
@@ -93,7 +91,7 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     @Override
     public void finished() {
         if (isProgressVisible) {
-            if (isRunningOnEDT) {
+            if (Threads.calledOnEDT()) {
                 onProgressComplete();
             } else {
                 EventQueue.invokeLater(this::onProgressComplete);

@@ -271,12 +271,12 @@ public final class GUIUtils {
         }
     }
 
-    public static void synchronizeScrollPanes(JScrollPane from, JScrollPane to) {
-        var sharedVerticalModel = from.getVerticalScrollBar().getModel();
-        to.getVerticalScrollBar().setModel(sharedVerticalModel);
+    public static void synchronizeScrollPanes(JScrollPane first, JScrollPane second) {
+        var sharedVerticalModel = first.getVerticalScrollBar().getModel();
+        second.getVerticalScrollBar().setModel(sharedVerticalModel);
 
-        var sharedHorizontalModel = from.getHorizontalScrollBar().getModel();
-        to.getHorizontalScrollBar().setModel(sharedHorizontalModel);
+        var sharedHorizontalModel = first.getHorizontalScrollBar().getModel();
+        second.getHorizontalScrollBar().setModel(sharedHorizontalModel);
     }
 
     /**
@@ -340,6 +340,8 @@ public final class GUIUtils {
         }
     }
 
+    // platform support for file printing must be checked before calling this,
+    // because the corresponding menu item should not be created if not supported
     public static Action createPrintFileAction(Composition comp,
                                                File file, Component parent) {
         return new TaskAction("Print...", () -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.tools.crop.CropTool;
+import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.shapes.ShapesTool;
 
 /**
@@ -37,6 +38,11 @@ public enum DragToolState {
         public boolean checkInvariants(CropTool tool) {
             return !tool.hasCropBox() && !tool.isCropEnabled();
         }
+
+        @Override
+        public boolean checkInvariants(GradientTool tool) {
+            return !tool.hasHandles();
+        }
     },
     /**
      * A transient state after the mouse is pressed but before a drag has officially started.
@@ -52,6 +58,13 @@ public enum DragToolState {
         public boolean checkInvariants(CropTool tool) {
             return !tool.hasCropBox();
         }
+
+        @Override
+        public boolean checkInvariants(GradientTool tool) {
+            // handles might be present (if the user clicked a handle or clicked
+            // outside an active gradient) or absent (first gradient interaction)
+            return true;
+        }
     },
     /**
      * The state during the initial drag (no handles yet).
@@ -65,6 +78,11 @@ public enum DragToolState {
         @Override
         public boolean checkInvariants(CropTool tool) {
             return !tool.hasCropBox();
+        }
+
+        @Override
+        public boolean checkInvariants(GradientTool tool) {
+            return !tool.hasHandles();
         }
     },
     /**
@@ -80,10 +98,17 @@ public enum DragToolState {
         public boolean checkInvariants(CropTool tool) {
             return tool.hasCropBox() && tool.isCropEnabled();
         }
+
+        @Override
+        public boolean checkInvariants(GradientTool tool) {
+            return tool.hasHandles();
+        }
     };
 
-    // These are used for assertions to verify that the tool's internal state is consistent
+    // these are used for assertions to verify that the tool's internal state is consistent
     public abstract boolean checkInvariants(ShapesTool tool);
 
     public abstract boolean checkInvariants(CropTool tool);
+
+    public abstract boolean checkInvariants(GradientTool tool);
 }

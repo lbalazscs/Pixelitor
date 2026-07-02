@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,6 +41,7 @@ public class PathActions {
     }
 
     public static void convertToSelection() {
+        // if either of these is null, the action should be disabled
         Composition comp = Views.getActiveComp();
         Path oldPath = comp.getActivePath();
 
@@ -52,7 +53,7 @@ public class PathActions {
             return;
         }
 
-        Tools.PEN.removePath();
+        ((PathTool) Tools.getActive()).removePath(false);
         comp.pathChanged(true);
         History.add(new ConvertPathToSelectionEdit(
             comp, oldPath, result.getEdit(), (PathTool) Tools.getActive()));

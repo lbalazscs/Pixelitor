@@ -19,7 +19,6 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.selection.Selection;
-import pixelitor.tools.util.Drag;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Composite;
@@ -58,8 +57,8 @@ public class TmpLayer {
                 g.setClip(selShape);
                 smallImage = false;
             } else {
-                // Sets up the image of this temporary layer to act as
-                // the intermediate image of a soft selection clipping.
+                // sets up the image of this temporary layer to act as
+                // the intermediate image of a soft selection clipping
                 Rectangle bounds = selShape.getBounds();
                 selStartX = bounds.x;
                 selStartY = bounds.y;
@@ -105,15 +104,5 @@ public class TmpLayer {
         g.dispose();
         image.flush();
         image = null;
-    }
-
-    public Drag translate(Drag drag) {
-        if (smallImage) {
-            // the drag was relative to the canvas, but if small images are used,
-            // then it must be translated to be relative to the selection
-            return drag.imTranslatedCopy(-selStartX, -selStartY);
-        } else {
-            return drag;
-        }
     }
 }

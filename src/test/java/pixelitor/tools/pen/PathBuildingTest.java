@@ -33,11 +33,7 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.DRAGGING_OUT_CONTROL;
-import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.IDLE;
-import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.*;
 
 @DisplayName("Pen Tool: path building tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -68,7 +64,7 @@ class PathBuildingTest {
         penTool = Tools.PEN;
 
         // reset the state between the tests
-        Tools.PEN.removePath();
+        Tools.PEN.removePath(true);
         History.clear();
 
         assertThat(Tools.PEN).isActive();

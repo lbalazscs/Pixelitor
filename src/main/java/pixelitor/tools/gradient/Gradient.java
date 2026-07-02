@@ -118,39 +118,47 @@ public class Gradient implements Serializable, Debuggable {
             g = subImage.createGraphics();
             width = canvas.getWidth();
             height = canvas.getHeight();
+            paintOnGraphics(g, width, height);
         } else {
             // use a temporary layer when painting on an image
             // layer, in order to have soft selection
             var composite = blendingMode.getComposite(opacity);
             var tmpDrawingLayer = dr.createTmpLayer(composite, true);
             g = tmpDrawingLayer.getGraphics();
-
             if (tmpDrawingLayer.hasSmallImage()) {
                 Rectangle bounds = comp.getSelection().getShapeBounds();
                 width = bounds.width;
                 height = bounds.height;
+
+                // shift the coordinate system so that painting with the
+                // gradient's image-space drag lines up correctly
+                // with this selection-sized buffer
+                g.translate(-bounds.x, -bounds.y);
+
+                // the fill rect must be given in the now-translated user
+                // space, so it still covers the whole device-space buffer
+                paintOnGraphics(g, bounds.x, bounds.y, width, height);
             } else {
                 width = canvas.getWidth();
                 height = canvas.getHeight();
+                paintOnGraphics(g, width, height);
             }
-
-            drag = tmpDrawingLayer.translate(drag);
         }
-
-        paintOnGraphics(g, width, height);
-
         g.dispose();
         dr.mergeTmpDrawingLayerDown();
         dr.updateIconImage();
     }
 
+    // this overload always fills from the origin
     public void paintOnGraphics(Graphics2D g, int width, int height) {
-        // No composite is set in this method, because
-        // it's not needed for gradient fill layers.
+        paintOnGraphics(g, 0, 0, width, height);
+    }
+
+    private void paintOnGraphics(Graphics2D g, int x, int y, int width, int height) {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         Paint paint = type.createPaint(drag, colors, cycleMethod);
         g.setPaint(paint);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(x, y, width, height);
     }
 
     /**
@@ -165,6 +173,38 @@ public class Gradient implements Serializable, Debuggable {
         Paint paint = type.createPaint(drag, colors, cycleMethod);
         g2.setPaint(paint);
         g2.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+    }
+
+    public GradientHandles createHandles(View view) {
+        drag.calcCoCoords(view);
+        return new GradientHandles(drag.getStart(view), drag.getEnd(view), view);
+    }
+
+    public void crop(Rectangle cropRect) {
+        drag = drag.imTranslatedCopy(-cropRect.x, -cropRect.y);
+    }
+
+    public void enlargeCanvas(Outsets enlargement) {
+        drag = drag.imTranslatedCopy(enlargement.left(), enlargement.top());
+    }
+
+    public void imTransform(AffineTransform at) {
+        drag = drag.imTransformedCopy(at);
+    }
+
+    public boolean hasTransparency() {
+        return colorType.hasTransparency();
+    }
+
+    public boolean hasCustomTransparency() {
+        return hasTransparency() && isCustom();
+    }
+
+    private boolean isCustom() {
+        return switch (type) {
+            case LINEAR, RADIAL -> false;
+            case ANGLE, SPIRAL_CW, SPIRAL_CCW, DIAMOND -> true;
+        };
     }
 
     /**
@@ -209,59 +249,12 @@ public class Gradient implements Serializable, Debuggable {
         return bgColor;
     }
 
-    public GradientHandles createHandles(View view) {
-        drag.calcCoCoords(view);
-        return new GradientHandles(drag.getStart(view), drag.getEnd(view), view);
-    }
-
-    public void crop(Rectangle cropRect) {
-        drag = drag.imTranslatedCopy(-cropRect.x, -cropRect.y);
-    }
-
-    public void enlargeCanvas(Outsets enlargement) {
-        drag = drag.imTranslatedCopy(enlargement.left(), enlargement.top());
-    }
-
-    public void imTransform(AffineTransform at) {
-        drag = drag.imTransformedCopy(at);
-    }
-
-    public boolean hasTransparency() {
-        return colorType.hasTransparency();
-    }
-
-    public boolean hasCustomTransparency() {
-        return hasTransparency() && isCustom();
-    }
-
     public Drag getDrag() {
         return drag;
     }
 
     public void setDrag(Drag drag) {
         this.drag = drag;
-    }
-
-    private boolean isCustom() {
-        return switch (type) {
-            case LINEAR, RADIAL -> false;
-            case ANGLE, SPIRAL_CW, SPIRAL_CCW, DIAMOND -> true;
-        };
-    }
-
-    @Override
-    public DebugNode createDebugNode(String key) {
-        DebugNode node = new DebugNode(key, this);
-
-        node.add(drag.createDebugNode("drag"));
-        node.addAsString("type", type);
-        node.addAsString("cycle method", cycleMethod);
-        node.addAsString("color type", colorType);
-        node.addBoolean("reversed", reversed);
-        node.addAsString("blending mode", blendingMode);
-        node.addFloat("opacity", opacity);
-
-        return node;
     }
 
     @Override
@@ -287,6 +280,21 @@ public class Gradient implements Serializable, Debuggable {
     @Override
     public int hashCode() {
         return Objects.hash(drag, type, cycleMethod, colorType, reversed, blendingMode, opacity, fgColor, bgColor);
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.add(drag.createDebugNode("drag"));
+        node.addAsString("type", type);
+        node.addAsString("cycle method", cycleMethod);
+        node.addAsString("color type", colorType);
+        node.addBoolean("reversed", reversed);
+        node.addAsString("blending mode", blendingMode);
+        node.addFloat("opacity", opacity);
+
+        return node;
     }
 
     @Override

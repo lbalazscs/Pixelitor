@@ -85,6 +85,23 @@ public class TransformPathTool extends PathTool {
     }
 
     @Override
+    public void viewActivated(View oldView, View newView) {
+        if (newView != null && newView.getComp().hasActivePath()) {
+            initBoxes(newView.getComp());
+        }
+
+        super.viewActivated(oldView, newView);
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+
+        draggedBox = null;
+        lastActiveBox = null;
+    }
+
+    @Override
     public void paintOverCanvas(Graphics2D g2, Composition comp) {
         Path path = comp.getActivePath();
         if (path == null) {
@@ -93,8 +110,9 @@ public class TransformPathTool extends PathTool {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         path.paintForTransforming(g2);
 
-        // paints all boxes unless a box is being dragged
         if (draggedBox != null) {
+            // when a box is being dragged, doesn't paint
+            // the other boxes to reduce visual clutter
             draggedBox.paint(g2);
         } else {
             for (TransformBox box : boxes) {
@@ -154,6 +172,8 @@ public class TransformPathTool extends PathTool {
                 return;
             }
         }
+
+        draggedBox = null;
     }
 
     @Override

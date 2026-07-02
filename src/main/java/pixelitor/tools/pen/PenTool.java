@@ -551,17 +551,19 @@ public class PenTool extends PathTool {
                 movingPoint.mouseDragged(x, y, e.isShiftDown());
             }
 
-            // highlight the first anchor if the mouse is over it to indicate closability
-            AnchorPoint first = activeSubpath.getFirstAnchor();
-            boolean isOverFirst = first.contains(x, y);
-
+            boolean activateFirst = false;
             if (activeSubpath != null) {
-                activeSubpath.setClosingPreview(isOverFirst);
+                // highlight the first anchor if the mouse is over it to indicate closability
+                AnchorPoint first = activeSubpath.getFirstAnchor();
+                activateFirst = first != null && first.contains(x, y) && activeSubpath.getNumAnchors() >= 2;
+
+                activeSubpath.setClosingPreview(activateFirst);
+                if (activateFirst) {
+                    first.setActive(true);
+                }
             }
 
-            if (isOverFirst) {
-                first.setActive(true);
-            } else {
+            if (!activateFirst) {
                 DraggablePoint.clearActivePoint();
             }
         }
@@ -619,7 +621,7 @@ public class PenTool extends PathTool {
 
     @Override
     public void imCoordsChanged(AffineTransform at, View view) {
-        // do nothing
+        // do nothing: the path is updated by the composition
     }
 
     @Override
@@ -636,25 +638,19 @@ public class PenTool extends PathTool {
 
         // an active point (being hovered or dragged) is always checked first
         if (activePoint != null) {
-            activePoint.arrowKeyPressed(key);
-            view.repaint();
-            return true;
+            return activePoint.nudge(key);
         }
 
         if (buildState == MOVING_TO_NEXT_ANCHOR || buildState == DRAGGING_OUT_CONTROL) {
             // if a new subpath is being created, move the most recently placed anchor point
             AnchorPoint last = path.getLastAnchor();
             if (last != null) {
-                last.arrowKeyPressed(key);
-                view.repaint();
-                return true;
+                return last.nudge(key);
             }
         } else {
             // otherwise, move the point that was last active
             if (lastActive != null) {
-                lastActive.arrowKeyPressed(key);
-                view.repaint();
-                return true;
+                return lastActive.nudge(key);
             }
         }
 

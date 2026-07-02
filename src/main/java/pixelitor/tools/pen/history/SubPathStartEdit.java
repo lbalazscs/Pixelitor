@@ -54,7 +54,7 @@ public class SubPathStartEdit extends PixelitorEdit {
         boolean pathEmpty = path.deleteLastSubPath();
         assert wasFirstSP == pathEmpty;
         if (pathEmpty) {
-            Tools.PEN.removePath();
+            Tools.PEN.removePath(true);
         }
         Tools.PEN.setBuildState(IDLE);
         comp.repaint();

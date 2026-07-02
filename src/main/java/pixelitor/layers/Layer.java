@@ -384,6 +384,10 @@ public abstract class Layer implements Serializable, Debuggable {
         return holder;
     }
 
+    public boolean isDirectChildOf(LayerHolder parent) {
+        return holder == parent;
+    }
+
     /**
      * Returns the holder where new layers should be added.
      */
@@ -1004,6 +1008,11 @@ public abstract class Layer implements Serializable, Debuggable {
 
         if (Features.enableExperimental) {
             addSmartObjectMenus(popup);
+        }
+
+        if (AppMode.isDevelopment()) {
+            // a way to test deleting a non-active layer
+            popup.add(new TaskAction("Delete", () -> holder.deleteLayer(this, true)));
         }
 
         return popup;

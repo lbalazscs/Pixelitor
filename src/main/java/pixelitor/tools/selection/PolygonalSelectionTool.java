@@ -34,6 +34,7 @@ import java.util.function.Consumer;
  * A tool that creates polygonal selections by clicking points.
  */
 public class PolygonalSelectionTool extends AbstractSelectionTool {
+    // the freehand and polygonal selection tools share the 'L' hotkey, with cycling
     public PolygonalSelectionTool() {
         super("Polygonal Selection", 'L',
             "<b>click</b> to add points, " +

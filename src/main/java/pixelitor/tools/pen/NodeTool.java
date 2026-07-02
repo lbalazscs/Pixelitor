@@ -100,7 +100,7 @@ public class NodeTool extends PathTool {
 
     @Override
     public void imCoordsChanged(AffineTransform at, View view) {
-        // do nothing
+        // do nothing: the path is updated by the composition
     }
 
     @Override

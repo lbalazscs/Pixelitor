@@ -221,19 +221,11 @@ public interface LayerHolder extends Debuggable {
     }
 
     /**
-     * Changes the position of a layer within this holder.
+     * Changes the position of a layer within this holder, and updates the GUI.
      */
     default void reorderLayer(int oldIndex, int newIndex,
                               boolean addToHistory, String editName) {
-        // Called when the layer order is changed by an action.
-        // The GUI has to be updated.
-        if (newIndex < 0) {
-            return;
-        }
-        if (newIndex >= getNumLayers()) {
-            return;
-        }
-        if (oldIndex == newIndex) {
+        if (oldIndex == newIndex || newIndex < 0 || newIndex >= getNumLayers()) {
             return;
         }
 
@@ -270,7 +262,7 @@ public interface LayerHolder extends Debuggable {
     default void raiseLayerSelection() {
         Composition comp = getComp();
         Layer activeLayer = comp.getActiveLayer();
-        Layer newTarget;
+        Layer newActive;
 
         int prevIndex = indexOf(activeLayer);
 
@@ -279,17 +271,18 @@ public interface LayerHolder extends Debuggable {
             if (activeLayer.isTopLevel()) {
                 return;
             } else {
-                // if the top layer is selected, then
-                // raise selection selects the holder itself
-                // select the target's parent holder
-                assert activeLayer.getHolder() == this;
-                newTarget = (CompositeLayer) this;
+                // if the top layer is selected and this holder isn't the composition,
+                // then raise selection selects the target's parent holder (this)
+                assert activeLayer.isDirectChildOf(this);
+
+                // the cast is safe because this isn't Composition (the only non-CompositeLayer implementer)
+                newActive = (CompositeLayer) this;
             }
         } else {
-            newTarget = getLayer(newIndex);
+            newActive = getLayer(newIndex);
         }
 
-        comp.setActiveLayer(newTarget, true,
+        comp.setActiveLayer(newActive, true,
             LayerMoveAction.RAISE_LAYER_SELECTION);
 
         assert Invariants.fadeWouldWorkOn(comp);

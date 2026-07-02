@@ -428,7 +428,7 @@ public class RandomToolTest {
         } else if (tool == PEN) {
             // prevent paths getting too large
             log("removing the path");
-            Rnd.runWithProbability(() -> EDT.run(PEN::removePath), 0.5);
+            Rnd.runWithProbability(() -> EDT.run(() -> PEN.removePath(true)), 0.5);
         }
 
         Rnd.runWithProbability(this::reload, 0.05);

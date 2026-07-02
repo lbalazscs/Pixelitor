@@ -36,6 +36,7 @@ import static pixelitor.tools.pen.PathActions.setActionsEnabled;
  * Base class for path-related tools.
  */
 public abstract class PathTool extends Tool {
+    // all path tools share the 'P' hotkey, with cycling
     protected PathTool(String name, String statusBarMessage, Cursor cursor) {
         super(name, 'P', statusBarMessage, cursor);
 
@@ -61,9 +62,9 @@ public abstract class PathTool extends Tool {
     /**
      * Removes a path from the composition, without adding a history edit.
      */
-    public void removePath() {
+    public void removePath(boolean activatePenTool) {
         Views.setActivePath(null);
-        if (this != Tools.PEN) {
+        if (activatePenTool && this != Tools.PEN) {
             Tools.PEN.activate();
         }
         setActionsEnabled(false);

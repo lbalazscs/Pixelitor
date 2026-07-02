@@ -794,7 +794,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public void deleteLayer(Layer layer, boolean addToHistory, boolean updateUI) {
         assert layer.getComp() == this;
-        assert layer.getHolder() == this;
+        assert layer.isDirectChildOf(this);
         assert layerList.size() >= 2;
 
         int deletedIndex = layerList.indexOf(layer);
@@ -1724,7 +1724,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                 .formatted(activeLayer.getName(), getDebugName()));
         }
         for (Layer layer : layerList) {
-            if (layer.getHolder() != this) {
+            if (!layer.isDirectChildOf(this)) {
                 throw new AssertionError(
                     "bad holder in layer '%s' (that holder='%s', this='%s')".formatted(
                         layer.getName(), layer.getHolder().getName(), getDebugName()));

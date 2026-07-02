@@ -494,7 +494,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     private void insertSmartFilter(SmartFilter newFilter, int index, boolean update, boolean activate) {
-        assert newFilter.getHolder() == this;
+        assert newFilter.isDirectChildOf(this);
 
         filters.add(index, newFilter);
         rewireFilterChain();

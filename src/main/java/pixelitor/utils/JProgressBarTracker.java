@@ -36,27 +36,24 @@ import static pixelitor.utils.Threads.calledOnEDT;
 public class JProgressBarTracker extends ThresholdProgressTracker {
     private final ProgressPanel progressPanel;
 
-    private final Window ownerWindow;
+    private Window ownerWindow;
     private Cursor originalCursor;
 
     public JProgressBarTracker(ProgressPanel progressPanel) {
         super(null, 100);
         this.progressPanel = progressPanel;
         progressPanel.setProgress(0);
-
-        ownerWindow = SwingUtilities.getWindowAncestor(progressPanel);
-        if (ownerWindow == null) {
-            throw new IllegalStateException(); // the panel must be added to a window first
-        }
     }
 
     @Override
     protected void onProgressStart() {
         assert calledOnEDT() : callInfo();
 
-        originalCursor = ownerWindow.getCursor();
-        ownerWindow.setCursor(Cursors.BUSY);
-
+        ownerWindow = SwingUtilities.getWindowAncestor(progressPanel);
+        if (ownerWindow != null) {
+            originalCursor = ownerWindow.getCursor();
+            ownerWindow.setCursor(Cursors.BUSY);
+        }
         progressPanel.showProgressBar();
     }
 
@@ -77,10 +74,12 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
     }
 
     private void restoreOriginalCursor() {
-        if (originalCursor != null) {
-            ownerWindow.setCursor(originalCursor);
-        } else {
-            ownerWindow.setCursor(Cursors.DEFAULT);
+        if (ownerWindow != null) {
+            if (originalCursor != null) {
+                ownerWindow.setCursor(originalCursor);
+            } else {
+                ownerWindow.setCursor(Cursors.DEFAULT);
+            }
         }
     }
 }

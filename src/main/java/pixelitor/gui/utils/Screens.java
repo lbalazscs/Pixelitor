@@ -26,8 +26,6 @@ import java.util.Objects;
 
 public class Screens {
     private static final GraphicsEnvironment GRAPHICS_ENV = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    private static final GraphicsDevice[] SCREEN_DEVICES = GRAPHICS_ENV.getScreenDevices();
-    private static final boolean IS_MULTI_MONITOR = SCREEN_DEVICES.length > 1;
 
     /**
      * Alignment strategies for positioning windows.
@@ -42,7 +40,7 @@ public class Screens {
     }
 
     /**
-     * Positions a window on the screen based on the given alignment.
+     * Positions a window or dialog on the screen based on the given alignment.
      */
     public static void positionWindow(Window window, Align align) {
         Rectangle screenBounds = getScreenBounds();
@@ -53,7 +51,6 @@ public class Screens {
         switch (align) {
             case SCREEN_CENTER -> centerWindowOnScreen(window, screenBounds);
             case FRAME_RIGHT -> alignWindowToFrameRight(window, screenBounds);
-            default -> throw new IllegalStateException();
         }
     }
 
@@ -61,17 +58,67 @@ public class Screens {
      * Positions a window on the screen based on the given custom location.
      */
     public static void positionWindow(Window window, Point location) {
-        restrictWindowSize(window, getScreenBounds());
-        window.setLocation(Objects.requireNonNull(location));
+        Objects.requireNonNull(location);
+
+        Rectangle requestedBounds = new Rectangle(location, window.getSize());
+        GraphicsConfiguration targetGc = null;
+        int maxIntersectionArea = 0;
+
+        // find if the restored window bounds intersect with any currently active screen
+        for (GraphicsDevice screen : GRAPHICS_ENV.getScreenDevices()) {
+            // all configurations should have the same size, so use the default one
+            GraphicsConfiguration gc = screen.getDefaultConfiguration();
+            Rectangle screenBounds = gc.getBounds();
+            Rectangle intersection = screenBounds.intersection(requestedBounds);
+
+            // if it intersects, track the screen with the largest overlap area
+            if (intersection.width > 0 && intersection.height > 0) {
+                int area = intersection.width * intersection.height;
+                if (area > maxIntersectionArea) {
+                    maxIntersectionArea = area;
+                    targetGc = gc;
+                }
+            }
+        }
+
+        if (targetGc != null) { // the location belongs to a currently active monitor
+            Rectangle usableBounds = getUsableScreenBounds(targetGc);
+
+            restrictWindowSize(window, usableBounds);
+            Dimension windowSize = window.getSize();
+
+            // clamp coordinates inside the monitor where it was found
+            int locX = Math.clamp(location.x, usableBounds.x, usableBounds.x + usableBounds.width - windowSize.width);
+            int locY = Math.clamp(location.y, usableBounds.y, usableBounds.y + usableBounds.height - windowSize.height);
+
+            window.setLocation(locX, locY);
+        } else {
+            // the location is completely off-screen (e.g., monitor was disconnected),
+            // so fall back to safely centering on the main window's current screen
+            positionWindow(window, Align.SCREEN_CENTER);
+        }
     }
 
-    // the result must not be stored in a static field at startup,
-    // because this class is initialized before the constructor of
-    // the main window completes (would fail for multi-monitor setups)
+    /**
+     * Calculates the true usable area (subtracting taskbars, docks, etc.)
+     * for a specific GraphicsConfiguration.
+     */
+    private static Rectangle getUsableScreenBounds(GraphicsConfiguration gc) {
+        Rectangle bounds = gc.getBounds();
+        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
+
+        return new Rectangle(
+            bounds.x + insets.left,
+            bounds.y + insets.top,
+            bounds.width - insets.left - insets.right,
+            bounds.height - insets.top - insets.bottom
+        );
+    }
+
+    // must be called after the constructor of the main window completes
     private static Rectangle getScreenBounds() {
-        return IS_MULTI_MONITOR
-            ? PixelitorWindow.get().getGraphicsConfiguration().getBounds()
-            : GRAPHICS_ENV.getMaximumWindowBounds(); // takes the taskbar into account
+        GraphicsConfiguration gc = PixelitorWindow.get().getGraphicsConfiguration();
+        return getUsableScreenBounds(gc);
     }
 
     private static void restrictWindowSize(Window window, Rectangle screenBounds) {
@@ -126,10 +173,14 @@ public class Screens {
             }
         }
 
+        // clamp the coordinates to stay within screen boundaries
+        locX = Math.clamp(locX, screenBounds.x, screenBounds.x + screenBounds.width - windowSize.width);
+        locY = Math.clamp(locY, screenBounds.y, screenBounds.y + screenBounds.height - windowSize.height);
+
         window.setLocation(locX, locY);
     }
 
     public static boolean isMultiMonitorSetup() {
-        return IS_MULTI_MONITOR;
+        return GRAPHICS_ENV.getScreenDevices().length > 1;
     }
 }

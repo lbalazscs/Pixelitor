@@ -33,6 +33,7 @@ import java.util.function.Consumer;
  */
 public class LassoSelectionTool extends AbstractSelectionTool {
     public LassoSelectionTool() {
+        // the freehand and polygonal selection tools share the 'L' hotkey, with cycling
         super("Freehand Selection", 'L',
             "simply drag around the area that you want to select.",
             Cursors.DEFAULT, false);

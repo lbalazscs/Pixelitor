@@ -263,7 +263,6 @@ public class DialogBuilder {
         Window effectiveOwner = (owner != null) ? owner : PixelitorWindow.get();
         dialog = new BuiltDialog(effectiveOwner, modal);
         dialog.setTitle(title);
-        dialog.setModal(modal);
         if (menuBar != null) {
             dialog.setJMenuBar(menuBar);
         }
@@ -410,6 +409,9 @@ public class DialogBuilder {
 
         @Override
         public void setVisible(boolean visible) {
+            // must be a visibility change, otherwise the GlobalEvents counts are incorrect
+            assert visible != isVisible();
+
             if (isModal()) {
                 if (visible) {
                     GlobalEvents.modalDialogOpened();

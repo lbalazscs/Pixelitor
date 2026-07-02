@@ -38,8 +38,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -52,7 +50,6 @@ import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
 /**
  * A path contains the same information as a {@link PathIterator},
  * but in a way that makes it possible to interactively build and edit it.
- *
  * Technically, it consists of a series of geometrically distinct
  * {@link SubPath} objects (typically only one).
  */
@@ -74,11 +71,6 @@ public class Path implements Serializable, Debuggable {
             comp.setActivePath(this);
         }
         id = "P" + nextId++;
-    }
-
-    @Serial
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
     }
 
     public Path deepCopy(Composition newComp) {
@@ -159,8 +151,27 @@ public class Path implements Serializable, Debuggable {
         return path;
     }
 
+    public void delete(SubPath subPath) {
+        assert comp.getActivePath() == this;
+
+        boolean wasActive = subPath == activeSubPath;
+
+        Path backup = deepCopy(comp);
+        subPaths.removeIf(sp -> sp == subPath);
+        assert !subPaths.isEmpty(); // should never be called for the last subpath
+
+        if (wasActive) {
+            activeSubPath = subPaths.getLast();
+        }
+        comp.repaint();
+
+        History.add(new PathEdit("Delete Subpath", comp, backup, this, null));
+
+        assert comp.getActivePath() == this;
+    }
+
     /**
-     * Returns true if there are no more subpaths left
+     * Returns true if there are no more subpaths left.
      */
     public boolean deleteLastSubPath() {
         int lastIndex = subPaths.size() - 1;
@@ -230,20 +241,6 @@ public class Path implements Serializable, Debuggable {
         activeSubPath.finish(comp, addToHistory);
     }
 
-    public void delete(SubPath subPath) {
-        assert comp.getActivePath() == this;
-
-        Path backup = deepCopy(comp);
-        subPaths.removeIf(sp -> sp == subPath);
-        assert !subPaths.isEmpty(); // should never be called for the last subpath
-        activeSubPath = subPaths.getLast();
-        comp.repaint();
-
-        History.add(new PathEdit("Delete Subpath", comp, backup, this, null));
-
-        assert comp.getActivePath() == this;
-    }
-
     public void delete() {
         assert comp.getActivePath() == this;
 
@@ -256,7 +253,7 @@ public class Path implements Serializable, Debuggable {
         // so that it can remember the pen tool mode
         PathEdit edit = new PathEdit("Delete Path", comp, this, null, tool);
 
-        tool.removePath();
+        tool.removePath(true);
         comp.pathChanged(true);
         comp.repaint();
 

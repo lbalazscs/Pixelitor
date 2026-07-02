@@ -45,9 +45,7 @@ import java.util.*;
 import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
-import static pixelitor.tools.pen.BuildState.DRAGGING_OUT_CONTROL;
-import static pixelitor.tools.pen.BuildState.IDLE;
-import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.*;
 
 /**
  * A subpath within a {@link Path}.
@@ -164,11 +162,19 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public AnchorPoint getFirstAnchor() {
-        return anchorPoints.getFirst();
+        try {
+            return anchorPoints.getFirst();
+        } catch (NoSuchElementException _) {
+            return null;
+        }
     }
 
     public AnchorPoint getLastAnchor() {
-        return anchorPoints.getLast();
+        try {
+            return anchorPoints.getLast();
+        } catch (NoSuchElementException _) {
+            return null;
+        }
     }
 
     public int getNumAnchors() {
@@ -182,16 +188,19 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void addToComponentSpaceShape(Path2D path) {
-        addToShape(path, p -> p.x, p -> p.y);
+        // include rubber-band preview for UI rendering
+        addToShape(path, p -> p.x, p -> p.y, true);
     }
 
     public void addToImageSpaceShape(Path2D path) {
-        addToShape(path, p -> p.imX, p -> p.imY);
+        // exclude rubber-band preview for logical geometry
+        addToShape(path, p -> p.imX, p -> p.imY, false);
     }
 
     private void addToShape(Path2D p,
                             ToDoubleFunction<DraggablePoint> toX,
-                            ToDoubleFunction<DraggablePoint> toY) {
+                            ToDoubleFunction<DraggablePoint> toY,
+                            boolean includePreview) {
         if (anchorPoints.isEmpty()) {
             return;
         }
@@ -228,7 +237,9 @@ public class SubPath implements Serializable, Transformable {
         AnchorPoint last = getLastAnchor();
 
         // handle the "rubber band" preview of the next point during path construction
-        if (moving != null && Tools.PEN.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
+        if (includePreview && moving != null && Tools.PEN.isActive()
+            && Tools.PEN.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
+
             double movingX;
             double movingY;
             double ctrlInX;
@@ -401,7 +412,7 @@ public class SubPath implements Serializable, Transformable {
             mergedPoints.add(current);
             index++; // advance the while loop
         }
-        if (mergedWithFirst) {
+        if (mergedWithFirst && mergedPoints.size() > 1) {
             // We could simply remove the first point, but for some unit
             // tests it is important that the first point remains first
             // even if the shape is closed.

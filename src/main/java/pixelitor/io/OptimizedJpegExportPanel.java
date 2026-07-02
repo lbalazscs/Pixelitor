@@ -153,17 +153,24 @@ public class OptimizedJpegExportPanel extends JPanel {
     }
 
     private void updatePreviewAsync() {
+        assert Threads.calledOnEDT();
+
+        // capture UI state and create the tracker on the EDT
+        float quality = getQuality();
+        boolean progressive = isProgressive();
+        JProgressBarTracker tracker = new JProgressBarTracker(progressPanel);
+
         CompletableFuture
-            .supplyAsync(() -> generatePreview(getQuality(), isProgressive()), onPool)
+            .supplyAsync(() -> generatePreview(quality, progressive, tracker), onPool)
             .thenAcceptAsync(this::applyPreview, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private PreviewInfo generatePreview(float quality, boolean progressive) {
+    private PreviewInfo generatePreview(float quality, boolean progressive, ProgressTracker tracker) {
         try {
             return writeJpegToPreviewImage(sourceImage,
                 JpegSettings.createJpegCustomizer(quality, progressive),
-                new JProgressBarTracker(progressPanel));
+                tracker);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

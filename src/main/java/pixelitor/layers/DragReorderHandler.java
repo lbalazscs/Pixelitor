@@ -116,8 +116,7 @@ public class DragReorderHandler extends MouseInputAdapter {
             layerGUI = (LayerGUI) c;
         }
 
-        // ensure that mouse drags on embedded LayerGUIs
-        // move the entire top parent
+        // ensure that dragging a nested layer GUI drags its top-level ancestor
         while (layerGUI.isEmbedded()) {
             e.translatePoint(layerGUI.getX(), layerGUI.getY());
             layerGUI = layerGUI.getParentUI();

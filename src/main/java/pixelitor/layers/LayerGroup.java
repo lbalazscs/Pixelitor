@@ -368,7 +368,7 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public void deleteLayer(Layer layer, boolean addToHistory) {
         assert layer.getComp() == comp;
-        assert layer.getHolder() == this;
+        assert layer.isDirectChildOf(this);
 
         int layerIndex = layers.indexOf(layer);
 
@@ -378,14 +378,11 @@ public class LayerGroup extends CompositeLayer {
 
         layers.remove(layer);
 
-        if (layer.isActive()) {
-            if (layers.isEmpty()) {
-                comp.setActiveLayer(this);
-            } else if (layerIndex > 0) {
-                comp.setActiveLayer(layers.get(layerIndex - 1));
-            } else {  // deleted the fist layer, set the new first layer as active
-                comp.setActiveLayer(layers.getFirst());
-            }
+        if (layer.contains(comp.getActiveLayer())) {
+            Layer newActive = layers.isEmpty()
+                ? this
+                : layers.get(Math.max(layerIndex - 1, 0));
+            comp.setActiveLayer(newActive);
         }
 
         updateChildrenUI();
@@ -395,6 +392,9 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public void deleteInternal(Layer layer) {
         layers.remove(layer);
+
+        // Unlike Composition.deleteInternal, this doesn't remove the layer's
+        // UI here, because a composite layer's child GUIs are handled differently.
     }
 
     @Override
@@ -623,7 +623,7 @@ public class LayerGroup extends CompositeLayer {
                 throw new AssertionError("bad comp in layer '%s' (that comp='%s', this='%s')".formatted(
                     layer.getName(), layer.getComp().getDebugName(), comp.getDebugName()));
             }
-            if (layer.getHolder() != this) {
+            if (!layer.isDirectChildOf(this)) {
                 throw new AssertionError("bad holder in layer '%s' (that holder='%s', this='%s')".formatted(
                     layer.getName(), layer.getHolder().getName(), getName()));
             }
