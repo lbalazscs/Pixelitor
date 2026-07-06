@@ -179,7 +179,7 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushIndex) {
             assert brushIndex == 1 : "brushIndex = " + brushIndex;
-            return transformDiagonalA(p);
+            return mirrorDiagonalSlash(p);
         }
     }, DIAGONAL_BACKSLASH("Diagonal \\", 2) {
         @Override
@@ -209,7 +209,7 @@ public enum Symmetry {
         @Override
         public PPoint transform(PPoint p, int brushIndex) {
             assert brushIndex == 1 : "brushIndex = " + brushIndex;
-            return transformDiagonalB(p);
+            return mirrorDiagonalBackslash(p);
         }
     }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
         @Override
@@ -362,22 +362,22 @@ public enum Symmetry {
         return PPoint.fromIm(canvasWidth - p.getImX(), canvasHeight - p.getImY(), p.getView());
     }
 
-    private static PPoint transformDiagonalB(PPoint p) {
-        double imX = p.getImX();
-        double imY = p.getImY();
-        double den = canvasWidth * canvasWidth + canvasHeight * canvasHeight;
-        double mirrorImX = ((canvasWidth * canvasWidth - canvasHeight * canvasHeight) * imX + 2 * canvasWidth * canvasHeight * imY) / den;
-        double mirrorImY = (2 * canvasWidth * canvasHeight * imX + (canvasHeight * canvasHeight - canvasWidth * canvasWidth) * imY) / den;
-
-        return PPoint.fromIm(mirrorImX, mirrorImY, p.getView());
-    }
-
-    private static PPoint transformDiagonalA(PPoint p) {
+    private static PPoint mirrorDiagonalSlash(PPoint p) {
         double imX = p.getImX();
         double imY = p.getImY();
         double den = canvasWidth * canvasWidth + canvasHeight * canvasHeight;
         double mirrorImX = ((canvasWidth * canvasWidth - canvasHeight * canvasHeight) * imX - 2 * canvasWidth * canvasHeight * imY + 2 * canvasHeight * canvasHeight * canvasWidth) / den;
         double mirrorImY = (-2 * canvasWidth * canvasHeight * imX + (canvasHeight * canvasHeight - canvasWidth * canvasWidth) * imY + 2 * canvasWidth * canvasWidth * canvasHeight) / den;
+
+        return PPoint.fromIm(mirrorImX, mirrorImY, p.getView());
+    }
+
+    private static PPoint mirrorDiagonalBackslash(PPoint p) {
+        double imX = p.getImX();
+        double imY = p.getImY();
+        double den = canvasWidth * canvasWidth + canvasHeight * canvasHeight;
+        double mirrorImX = ((canvasWidth * canvasWidth - canvasHeight * canvasHeight) * imX + 2 * canvasWidth * canvasHeight * imY) / den;
+        double mirrorImY = (2 * canvasWidth * canvasHeight * imX + (canvasHeight * canvasHeight - canvasWidth * canvasWidth) * imY) / den;
 
         return PPoint.fromIm(mirrorImX, mirrorImY, p.getView());
     }

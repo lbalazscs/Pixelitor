@@ -19,6 +19,7 @@ package pixelitor.utils;
 
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.colors.Colors;
+import pixelitor.progress.ProgressTracker;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.StarSettings;
 import pixelitor.tools.util.Drag;

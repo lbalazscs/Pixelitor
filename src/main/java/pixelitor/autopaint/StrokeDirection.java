@@ -15,16 +15,25 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.gui;
+package pixelitor.autopaint;
 
 /**
- * A listener for events in the GUI of a {@link FilterSetting}.
+ * Determines how the angle of each auto-painted stroke is generated.
  */
-public interface ParamAdjustmentListener {
-    /**
-     * Called when a parameter is adjusted in the GUI.
-     * Implementations should handle any necessary updates,
-     * such as recalculating a filter preview.
-     */
-    void paramAdjusted();
+public enum StrokeDirection {
+    RANDOM("Random"),
+    RADIAL("Radial"),
+    CIRCULAR("Circular"),
+    NOISE("Noise");
+
+    private final String displayName;
+
+    StrokeDirection(String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
+    public String toString() {
+        return displayName;
+    }
 }

@@ -20,7 +20,7 @@ package pixelitor.filters;
 import net.jafama.FastMath;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
-import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -156,7 +156,7 @@ public class AbstractLights extends ParametrizedFilter {
         float alpha = (float) (brightness / (200.0 * Math.sqrt(lineWidth)));
         if (alpha < MIN_VISIBLE_ALPHA) {
             // if a smaller alpha is used, nothing is drawn, therefore
-            // use this alpha and compensate by darkening the color.
+            // use this alpha and compensate by darkening the color
             darkening = MIN_VISIBLE_ALPHA / alpha;
             alpha = MIN_VISIBLE_ALPHA;
         }
@@ -210,7 +210,7 @@ public class AbstractLights extends ParametrizedFilter {
 
             switch (type) {
                 case CHAOS, STAR -> particles.add(new Particle(x, y, speed, angle, color, bounce));
-                case FRAME -> particles.add(new EdgeParticle(i % 4, speed, angle, color, bounce, x, y, width, height));
+                case FRAME -> particles.add(new EdgeParticle(i % 4, speed, angle, color, x, y, width, height));
                 case ELLIPTIC -> {
                     double cx = width / 2.0;
                     double cy = height / 2.0;
@@ -242,7 +242,7 @@ public class AbstractLights extends ParametrizedFilter {
         int numParticles = particles.size();
         for (int i = 0; i < numParticles; i++) {
             int prevIndex = (i > 0) ? i - 1 : numParticles - 1;
-            particles.get(i).sibling = particles.get(prevIndex);
+            particles.get(i).linkedTo = particles.get(prevIndex);
         }
     }
 
@@ -257,7 +257,7 @@ public class AbstractLights extends ParametrizedFilter {
 
         int numParticles = particles.size();
         for (int i = 1; i < numParticles; i++) {
-            particles.get(i).sibling = centerStar;
+            particles.get(i).linkedTo = centerStar;
         }
     }
 
@@ -292,7 +292,7 @@ public class AbstractLights extends ParametrizedFilter {
     }
 
     /**
-     * A single moving point that draws a line to its connected sibling during every iteration.
+     * A single moving point that draws a line to its linked particle during every iteration.
      */
     private static class Particle {
         double x, y; // position
@@ -300,7 +300,8 @@ public class AbstractLights extends ParametrizedFilter {
         double vx, vy; // velocity vector
         private final Color color;
 
-        Particle sibling;
+        // the particle this one draws its connecting line to
+        Particle linkedTo;
 
         private final boolean bounce;
 
@@ -335,11 +336,11 @@ public class AbstractLights extends ParametrizedFilter {
          * Draws a line from this particle to its "sibling".
          */
         public void draw(Graphics2D g, Line2D.Double line) {
-            if (sibling == null) {
+            if (linkedTo == null) {
                 return;
             }
             g.setColor(color);
-            line.setLine(x, y, sibling.x, sibling.y);
+            line.setLine(x, y, linkedTo.x, linkedTo.y);
             g.draw(line);
         }
     }
@@ -387,39 +388,39 @@ public class AbstractLights extends ParametrizedFilter {
      * A type of particle that is restricted to moving only along the four edges of the image.
      */
     private static class EdgeParticle extends Particle {
-        private static final int STATE_TOP = 0;
-        private static final int STATE_RIGHT = 1;
-        private static final int STATE_BOTTOM = 2;
-        private static final int STATE_LEFT = 3;
-        private int state;
+        private static final int EDGE_TOP = 0;
+        private static final int EDGE_RIGHT = 1;
+        private static final int EDGE_BOTTOM = 2;
+        private static final int EDGE_LEFT = 3;
+        private int edge;
 
-        public EdgeParticle(int initialState, double speed, double angle, Color color, boolean bounce, int x, int y, int width, int height) {
-            super(x, y, speed, angle, color, bounce);
-            state = initialState;
+        public EdgeParticle(int initialEdge, double speed, double angle, Color color, int x, int y, int width, int height) {
+            super(x, y, speed, angle, color, false);
+            edge = initialEdge;
 
             // snaps the particle to its edge and initializes its velocity
-            switch (state) {
-                case STATE_TOP -> {
+            switch (edge) {
+                case EDGE_TOP -> {
                     this.y = 0;
                     vx = speed;
                     vy = 0;
                 }
-                case STATE_RIGHT -> {
+                case EDGE_RIGHT -> {
                     this.x = width;
                     vx = 0;
                     vy = speed;
                 }
-                case STATE_BOTTOM -> {
+                case EDGE_BOTTOM -> {
                     this.y = height;
                     vx = -speed;
                     vy = 0;
                 }
-                case STATE_LEFT -> {
+                case EDGE_LEFT -> {
                     this.x = 0;
                     vx = 0;
                     vy = -speed;
                 }
-                default -> throw new IllegalStateException("state = " + state);
+                default -> throw new IllegalStateException("state = " + edge);
             }
         }
 
@@ -427,36 +428,36 @@ public class AbstractLights extends ParametrizedFilter {
         public void update(int width, int height) {
             x += vx;
             y += vy;
-            switch (state) {
-                case STATE_TOP -> {
+            switch (edge) {
+                case EDGE_TOP -> {
                     if (x >= width) { // right edge reached
-                        state = STATE_RIGHT;
+                        edge = EDGE_RIGHT;
                         vx = 0;
                         vy = speed;
                     }
                 }
-                case STATE_RIGHT -> {
+                case EDGE_RIGHT -> {
                     if (y >= height) { // bottom edge reached
-                        state = STATE_BOTTOM;
+                        edge = EDGE_BOTTOM;
                         vx = -speed;
                         vy = 0;
                     }
                 }
-                case STATE_BOTTOM -> {
+                case EDGE_BOTTOM -> {
                     if (x <= 0) { // left edge reached
-                        state = STATE_LEFT;
+                        edge = EDGE_LEFT;
                         vx = 0;
                         vy = -speed;
                     }
                 }
-                case STATE_LEFT -> {
+                case EDGE_LEFT -> {
                     if (y <= 0) { // top edge reached
-                        state = STATE_TOP;
+                        edge = EDGE_TOP;
                         vx = speed;
                         vy = 0;
                     }
                 }
-                default -> throw new IllegalStateException("state = " + state);
+                default -> throw new IllegalStateException("state = " + edge);
             }
         }
     }

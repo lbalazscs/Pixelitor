@@ -17,6 +17,8 @@
 
 package pixelitor.utils;
 
+import pixelitor.progress.ProgressHandler;
+
 import java.awt.Component;
 
 /**

@@ -22,9 +22,9 @@ import pd.AnimatedGifEncoder;
 import pixelitor.Composition;
 import pixelitor.gui.utils.*;
 import pixelitor.layers.Layer;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import javax.swing.*;
 import java.awt.FlowLayout;

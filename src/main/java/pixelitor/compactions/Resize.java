@@ -24,12 +24,12 @@ import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
+import pixelitor.progress.ProgressHandler;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Utils;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

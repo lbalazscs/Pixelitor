@@ -503,7 +503,7 @@ public class LayerGroup extends CompositeLayer {
             activeBefore.activate();
         }
 
-        assert comp.getActiveTopLevelLayer() != this;
+        assert comp.getActiveLayer().getTopLevelLayer() != this;
 
         if (addToHistory) { // wasn't called from undo
             History.add(new GroupingEdit(holder, this, insertIndices, activeBefore, false));

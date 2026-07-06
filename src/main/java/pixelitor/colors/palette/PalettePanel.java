@@ -81,8 +81,8 @@ public class PalettePanel extends JPanel implements Scrollable {
 
     private void handleResize() {
         switch (palette) {
-            case StaticPalette s -> handleStaticPaletteResize();
-            case DynamicPalette d -> handleDynamicPaletteResize();
+            case StaticPalette _ -> handleStaticPaletteResize();
+            case DynamicPalette _ -> handleDynamicPaletteResize();
         }
     }
 

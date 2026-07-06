@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
@@ -249,17 +250,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public void paint(Graphics2D g, boolean firstVisibleLayer) {
         painter.paint(g, comp.getCanvasWidth(), comp.getCanvasHeight(), comp);
-    }
-
-    @Override
-    public BufferedImage render(Graphics2D g, BufferedImage currentComposite, boolean firstVisibleLayer) {
-        if (settings == null) {
-            // the layer was just created, nothing to paint yet
-            return null;
-        }
-
-        // the text will be painted normally
-        return super.render(g, currentComposite, firstVisibleLayer);
     }
 
     @Override
@@ -469,7 +459,13 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        settings.loadUserPreset(preset);
+        Consumer<TextSettings> cb = settings.getGuiUpdateCallback();
+        TextSettings newSettings = new TextSettings(preset, cb);
+        applySettings(newSettings);
+        if (cb != null) {
+            // propagate changes visually to the open dialog
+            cb.accept(newSettings);
+        }
     }
 
     @Override
@@ -482,12 +478,12 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
      */
     public void pathChanged(boolean deleted) {
         if (painter.isOnPath()) {
+            // history is managed by path edits, here we just update the text
             painter.pathChanged();
-            holder.invalidateImageCache();
+            holder.update();
 
             if (deleted) {
-                settings.setAlignment(BoxAlignment.CENTER_CENTER);
-                painter.setBoxAlignment(BoxAlignment.CENTER_CENTER);
+                applySettings(settings.withAlignment(BoxAlignment.CENTER_CENTER));
             }
         }
     }
@@ -496,9 +492,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
      * Switches this text layer to use path-based alignment.
      */
     public void usePathEditing() {
-        settings.setAlignment(BoxAlignment.PATH);
-        painter.setBoxAlignment(BoxAlignment.PATH);
-
+        applySettings(settings.withAlignment(BoxAlignment.PATH));
         painter.pathChanged();
         holder.invalidateImageCache();
     }

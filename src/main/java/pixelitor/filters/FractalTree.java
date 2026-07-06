@@ -20,8 +20,8 @@ package pixelitor.filters;
 import net.jafama.FastMath;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
 
 import java.awt.*;
 import java.awt.geom.Line2D;

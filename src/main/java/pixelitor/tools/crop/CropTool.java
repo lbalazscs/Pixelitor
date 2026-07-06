@@ -30,7 +30,6 @@ import pixelitor.guides.GuidesRenderer;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.DragTool;
-import pixelitor.tools.DragToolState;
 import pixelitor.tools.ToolIcons;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
@@ -198,27 +197,12 @@ public class CropTool extends DragTool {
         int newCropWidth = (int) widthSpinner.getValue();
         int newCropHeight = (int) heightSpinner.getValue();
 
-        Rectangle2D rectBeforeSizeChange = cropBox.getImCropRect();
-        // doesn't change due to spinner input,
-        // so "before" and "after" are the same for this flag
-        boolean allowGrowing = allowGrowingCB.isSelected();
+        Rectangle2D rectBefore = cropBox.getImCropRect();
+        boolean allowGrowingBefore = allowGrowingCB.isSelected();
 
         cropBox.setImSize(newCropWidth, newCropHeight, view);
 
-        BoxAdjustmentResult adjustmentResult = BoxAdjustmentResult.NO_CHANGE;
-        if (!allowGrowing) {
-            // this will also modify the spinners, preventing UI
-            // values that would lead to constraint violation
-            adjustmentResult = adjustCropBoxToCanvas(view,
-                rectBeforeSizeChange, allowGrowing);
-        }
-        if (adjustmentResult != BoxAdjustmentResult.RESET) {
-            // if it was reset, history was already handled
-            assert cropBox != null;
-            History.add(new CropBoxChangedEdit("Adjust Crop Size", view.getComp(),
-                rectBeforeSizeChange, cropBox.getImCropRect(),
-                allowGrowing, allowGrowing));
-        }
+        commitBoxChange(view, "Adjust Crop Size", rectBefore, allowGrowingBefore);
     }
 
     private static JSpinner createSpinner(ChangeListener listener, int max, String toolTip) {
@@ -253,26 +237,13 @@ public class CropTool extends DragTool {
         View view = Views.getActive();
         assert view != null;
 
-        Rectangle2D rectBeforeToggle = cropBox.getImCropRect();
-        boolean isAllowingGrowing = allowGrowingCB.isSelected();
-        boolean wasAllowingGrowing = !isAllowingGrowing;
+        Rectangle2D rectBefore = cropBox.getImCropRect();
+        boolean allowGrowingBefore = !allowGrowingCB.isSelected();
 
-        BoxAdjustmentResult adjustmentResult = BoxAdjustmentResult.NO_CHANGE;
-        if (wasAllowingGrowing) {
-            // if allow growing is unchecked, then adjust the crop box
-            adjustmentResult = adjustCropBoxToCanvas(view,
-                rectBeforeToggle, wasAllowingGrowing);
-        }
+        commitBoxChange(view, "Toggle Allow Growing", rectBefore, allowGrowingBefore);
 
-        if (adjustmentResult == BoxAdjustmentResult.ADJUSTED) {
-            assert cropBox != null;
-            updateSizeSpinners(getEffectiveImCropRect(view));
-            view.repaint();
-
-            History.add(new CropBoxChangedEdit("Toggle Allow Growing", view.getComp(),
-                rectBeforeToggle, cropBox.getImCropRect(),
-                wasAllowingGrowing, isAllowingGrowing));
-        }
+        updateSizeSpinners(getEffectiveImCropRect(view));
+        view.repaint();
     }
 
     private void addCropButton() {
@@ -317,7 +288,7 @@ public class CropTool extends DragTool {
             rectBefore = null;
 
             // start defining a new crop area
-            setState(INITIAL_DRAG);
+            state = INITIAL_DRAG;
             setCropEnabled(true);
         } else if (state == TRANSFORM) {
             // interact with the existing crop box (move or resize)
@@ -369,7 +340,6 @@ public class CropTool extends DragTool {
         }
 
         View view = e.getView();
-        boolean needsRepaint = false;
         boolean boxJustCreated = false;
 
         switch (state) {
@@ -381,8 +351,7 @@ public class CropTool extends DragTool {
 
                 cropBox = new CropBox(rect, view);
                 boxJustCreated = true;
-                setState(TRANSFORM);
-                needsRepaint = true; // show the crop box
+                state = TRANSFORM;
                 break;
             case TRANSFORM:
                 cropBox.mouseReleased(e);
@@ -393,19 +362,10 @@ public class CropTool extends DragTool {
         assert cropBox != null;
         assert state == TRANSFORM;
 
-        BoxAdjustmentResult adjustmentResult = adjustCropBoxToCanvas(view,
+        commitBoxChange(view, boxJustCreated ? "Create Crop Box" : "Modify Crop Box",
             this.rectBefore, this.allowGrowingBefore);
-        needsRepaint = needsRepaint || (adjustmentResult != BoxAdjustmentResult.NO_CHANGE);
-        if (needsRepaint) {
-            view.repaint();
-        }
 
-        if (adjustmentResult != BoxAdjustmentResult.RESET) {
-            String editName = boxJustCreated ? "Create Crop Box" : "Modify Crop Box";
-            History.add(new CropBoxChangedEdit(editName, view.getComp(),
-                rectBefore, cropBox.getImCropRect(),
-                allowGrowingBefore, allowGrowingCB.isSelected()));
-        }
+        view.repaint();
     }
 
     @Override
@@ -585,6 +545,14 @@ public class CropTool extends DragTool {
         }
     }
 
+    private void commitBoxChange(View view, String editName, Rectangle2D rectBefore, boolean allowGrowingBefore) {
+        BoxAdjustmentResult result = adjustCropBoxToCanvas(view, rectBefore, allowGrowingBefore);
+        if (result != BoxAdjustmentResult.RESET) {
+            History.add(new CropBoxChangedEdit(editName, view.getComp(),
+                rectBefore, cropBox.getImCropRect(), allowGrowingBefore, allowGrowingCB.isSelected()));
+        }
+    }
+
     @Override
     protected void toolDeactivated(View view) {
         super.toolDeactivated(view);
@@ -606,7 +574,7 @@ public class CropTool extends DragTool {
         }
 
         cropBox = null;
-        setState(IDLE);
+        state = IDLE;
         setCropEnabled(false);
         updateSizeSpinners(0, 0);
         Views.repaintActive();
@@ -617,10 +585,6 @@ public class CropTool extends DragTool {
     @Override
     public void reset() {
         reset(false, null, allowGrowingCB.isSelected());
-    }
-
-    private void setState(DragToolState newState) {
-        state = newState;
     }
 
     public boolean hasCropBox() {
@@ -639,7 +603,7 @@ public class CropTool extends DragTool {
      */
     public void clearBoxForUndoRedo() {
         this.cropBox = null;
-        setState(IDLE);
+        state = IDLE;
     }
 
     public void setBoxForUndoRedo(Rectangle2D imRect, View view) {
@@ -651,7 +615,7 @@ public class CropTool extends DragTool {
             // changes the existing crop box
             cropBox.setImSize(imRect, view);
         }
-        setState(TRANSFORM);
+        state = TRANSFORM;
     }
 
     /**
@@ -705,26 +669,12 @@ public class CropTool extends DragTool {
             return false;
         }
 
-        Rectangle2D rectBeforeNudge = cropBox.getImCropRect();
-        boolean allowGrowingBeforeNudge = allowGrowingCB.isSelected();
+        Rectangle2D rectBefore = cropBox.getImCropRect();
+        boolean allowGrowingBefore = allowGrowingCB.isSelected();
 
         cropBox.arrowKeyPressed(key, view);
 
-        BoxAdjustmentResult adjustmentResult = BoxAdjustmentResult.NO_CHANGE;
-        if (!allowGrowingCB.isSelected()) {
-            // the crop area could shrink if the crop box
-            // is pushed out and growing is not allowed
-            adjustmentResult = adjustCropBoxToCanvas(view,
-                rectBeforeNudge, allowGrowingBeforeNudge);
-        }
-        // if canvas growing is allowed, then the crop area doesn't change
-
-        if (adjustmentResult != BoxAdjustmentResult.RESET) {
-            assert state == TRANSFORM;
-            History.add(new CropBoxChangedEdit("Nudge Crop Box", view.getComp(),
-                rectBeforeNudge, cropBox.getImCropRect(),
-                allowGrowingBeforeNudge, allowGrowingCB.isSelected()));
-        }
+        commitBoxChange(view, "Nudge Crop Box", rectBefore, allowGrowingBefore);
 
         return true;
     }

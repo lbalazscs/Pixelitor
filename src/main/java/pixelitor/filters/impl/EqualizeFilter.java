@@ -20,7 +20,7 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.WholeImageFilter;
 import org.jdesktop.swingx.graphics.ColorUtilities;
-import pixelitor.utils.ColorSpaces;
+import pixelitor.colors.ColorSpaces;
 
 import java.awt.Color;
 

@@ -18,7 +18,11 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.utils.*;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
+import pixelitor.progress.SubtaskProgressTracker;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 
 import javax.imageio.ImageIO;
 import java.awt.EventQueue;

@@ -15,9 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
-
-import pixelitor.tools.Symmetry;
+package pixelitor.tools;
 
 /**
  * A mirroring effect achieved with negative scaling.

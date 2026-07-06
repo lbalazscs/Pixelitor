@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 
 import static java.lang.String.format;
-import static pixelitor.FilterContext.TWEEN_PREVIEW;
+import static pixelitor.filters.FilterContext.TWEEN_PREVIEW;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**

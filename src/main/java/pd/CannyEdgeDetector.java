@@ -8,8 +8,8 @@
 package pd;
 
 import net.jafama.FastMath;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;

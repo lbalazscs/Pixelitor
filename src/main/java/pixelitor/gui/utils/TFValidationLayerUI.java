@@ -38,29 +38,29 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
     private static final int ICON_SIZE = 8;
     private static final int PADDING = 10;
 
-    private final Predicate<JTextField> validator;
+    private final TextFieldValidator validator;
 
     // cached validation state
-    private boolean isValid = true;
+    private ValidationResult validation = ValidationResult.valid();
 
     // listeners stored to allow clean removal during uninstallation
     private SimpleDocumentListener docListener;
     private PropertyChangeListener propListener;
 
-    private TFValidationLayerUI(Predicate<JTextField> validator) {
+    private TFValidationLayerUI(TextFieldValidator validator) {
         this.validator = validator;
     }
 
     // used when only the red warning icon is needed,
     // depending on the result of the given predicate
     public static JLayer<JTextField> wrapWithSimpleValidation(JTextField textField, Predicate<JTextField> validator) {
-        return new JLayer<>(textField, new TFValidationLayerUI(validator));
+        return new JLayer<>(textField, new TFValidationLayerUI(tf -> validator.test(tf) ? ValidationResult.valid() : ValidationResult.invalid("Invalid value")));
     }
 
     // used when in addition to the red warning icon,
     // a specific error message is also needed
     public static JLayer<JTextField> wrapWithValidation(JTextField textField, TextFieldValidator validator) {
-        return new JLayer<>(textField, new TFValidationLayerUI(tf -> validator.check(tf).isValid()));
+        return new JLayer<>(textField, new TFValidationLayerUI(validator));
     }
 
     @Override
@@ -71,7 +71,8 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
         JTextField textField = jlayer.getView();
 
         // initial validation
-        isValid = validator.test(textField);
+        validation = validator.check(textField);
+        textField.setToolTipText(validation.getHtmlErrorMessage());
 
         // update validation whenever text is typed/removed/changed
         docListener = new SimpleDocumentListener(_ -> updateValidation(jlayer));
@@ -114,11 +115,12 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
 
     private void updateValidation(JLayer<JTextField> jlayer) {
         JTextField textField = jlayer.getView();
-        boolean wasValid = isValid;
-        isValid = validator.test(textField);
+        boolean wasValid = validation.isValid();
+        validation = validator.check(textField);
+        textField.setToolTipText(validation.getHtmlErrorMessage());
 
         // trigger a layer repaint if the state visibly changed
-        if (wasValid != isValid) {
+        if (wasValid != validation.isValid()) {
             jlayer.repaint();
         }
     }
@@ -126,12 +128,13 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
     @Override
     public void paint(Graphics g, JComponent c) {
         super.paint(g, c);
-
-        if (isValid) {
-            return; // skip painting if validation passes
+        if (!validation.isValid()) {
+            paintInvalidIcon(g, c);
         }
+    }
 
-        // paint an "X" icon on the component
+    // paints a red "X" icon on the component
+    private static void paintInvalidIcon(Graphics g, JComponent c) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         int x = c.getWidth() - PADDING - ICON_SIZE;

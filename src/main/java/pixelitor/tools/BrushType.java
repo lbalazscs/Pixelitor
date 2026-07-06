@@ -129,7 +129,7 @@ public enum BrushType {
     }
 
     /**
-     * Returns the settings tied to the {@link AbstractBrushTool} and {@link BrushType} combination
+     * Returns the settings tied to the {@link AbstractBrushTool} and {@link BrushType} combination.
      */
     public BrushSettings getSettings(AbstractBrushTool tool) {
         assert hasSettings;

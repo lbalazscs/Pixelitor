@@ -149,7 +149,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert activeLayerIsAtIndex(int expected) {
         isNotNull();
 
-        int actualIndex = actual.indexOf(actual.getActiveTopLevelLayer());
+        int actualIndex = actual.indexOf(actual.getActiveLayer());
         if (actualIndex != expected) {
             failWithMessage("""
                     
@@ -389,14 +389,6 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
 
         assertThat(actual.getActiveLayer().getName()).isEqualTo(expected);
 
-        return this;
-    }
-
-    public CompositionAssert activeTopLevelLayerIs(Layer expected) {
-        isNotNull();
-        assertThat(actual.getActiveTopLevelLayer())
-            .as("Active top-level layer")
-            .isSameAs(expected);
         return this;
     }
 

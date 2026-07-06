@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.progress;
 
 /**
  * A progress tracker that tracks the progress

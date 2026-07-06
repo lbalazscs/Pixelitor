@@ -29,7 +29,8 @@ import pixelitor.history.History;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Line2D;
 import java.io.Serial;
 import java.io.Serializable;
@@ -61,7 +62,9 @@ public class Guides implements Serializable, Debuggable {
         copy.horizontals.addAll(horizontals);
         copy.verticals.addAll(verticals);
 
-        copy.regenerateLines(view);
+        if (view != null) {
+            copy.regenerateLines(view);
+        }
         return copy;
     }
 

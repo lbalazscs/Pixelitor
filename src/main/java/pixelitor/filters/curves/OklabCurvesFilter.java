@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.curves;
 import com.jhlabs.image.Curve;
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
-import pixelitor.utils.ColorSpaces;
+import pixelitor.colors.ColorSpaces;
 
 /**
  * A PointFilter that applies curves in the Oklab color space.

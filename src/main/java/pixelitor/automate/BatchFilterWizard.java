@@ -23,8 +23,8 @@ import pixelitor.layers.Drawable;
 
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
+import static pixelitor.filters.FilterContext.BATCH_AUTOMATE;
 
 /**
  * A wizard that applies a selected filter to multiple images in batch mode.

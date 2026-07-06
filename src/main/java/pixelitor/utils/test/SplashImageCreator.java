@@ -36,12 +36,12 @@ import pixelitor.io.FileUtils;
 import pixelitor.io.RecentDirs;
 import pixelitor.io.SaveSettings;
 import pixelitor.layers.*;
+import pixelitor.progress.ProgressHandler;
 import pixelitor.tools.gradient.Gradient;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.util.Drag;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Rnd;
 
 import java.awt.Font;
@@ -53,16 +53,11 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
-import static java.awt.font.TextAttribute.KERNING;
-import static java.awt.font.TextAttribute.KERNING_ON;
-import static java.awt.font.TextAttribute.LIGATURES;
-import static java.awt.font.TextAttribute.LIGATURES_ON;
+import static java.awt.font.TextAttribute.*;
 import static java.lang.String.format;
 import static pixelitor.layers.BlendingMode.NORMAL;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.*;
 
 /**
  * Static methods for creating and saving splash images.

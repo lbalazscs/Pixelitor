@@ -73,9 +73,9 @@ public enum DrawTarget {
         }
 
         @Override
-        public void finishBrushStroke(Drawable dr, BufferedImage backupImg) {
-            if (backupImg != null) {
-                backupImg.flush();
+        public void finishBrushStroke(Drawable dr, BufferedImage originalImg) {
+            if (originalImg != null) {
+                originalImg.flush();
             }
         }
     };

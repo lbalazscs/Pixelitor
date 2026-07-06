@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.utils.ProgressTracker;
+import pixelitor.progress.ProgressTracker;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

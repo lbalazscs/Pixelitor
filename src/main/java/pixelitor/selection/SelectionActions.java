@@ -214,6 +214,8 @@ public final class SelectionActions {
             if (comp.isActive()) {
                 showHide.updateTextFrom(selection);
             } else {
+                // this method should only be called with the active
+                // composition (or null if all views are closed)
                 throw new IllegalStateException();
             }
         }

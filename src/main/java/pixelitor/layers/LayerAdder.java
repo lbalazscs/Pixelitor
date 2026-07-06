@@ -89,16 +89,7 @@ public class LayerAdder {
     private void calcIndexFromPosition() {
         int activeIndex;
 
-        if (holder == comp) {
-            // for the root composition, insertion is always
-            // relative to the top-level root of the active layer
-            activeIndex = comp.indexOf(comp.getActiveTopLevelLayer()); // not -1
-        } else {
-            // for a layer group, insertion is relative to the globally
-            // active layer, but only if it's a direct child of this group
-            activeIndex = holder.indexOf(comp.getActiveLayer()); // could be -1
-        }
-
+        activeIndex = holder.indexOf(comp.getActiveLayer());
         if (activeIndex == -1) {
             // the active layer is not a direct child of the target holder:
             // default to adding at the top or bottom of the current holder

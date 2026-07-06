@@ -18,11 +18,11 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
+import pixelitor.colors.ColorSpaces;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.ColorSpaces;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;

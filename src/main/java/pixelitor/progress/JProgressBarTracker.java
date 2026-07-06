@@ -15,7 +15,9 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.progress;
+
+import pixelitor.utils.Cursors;
 
 import javax.swing.*;
 import java.awt.Cursor;

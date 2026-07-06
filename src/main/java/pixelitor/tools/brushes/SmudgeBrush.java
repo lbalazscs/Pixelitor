@@ -93,7 +93,7 @@ public class SmudgeBrush extends CopyBrush {
             currentPoint.getImY() - radius
         );
 
-        // SrcOver allows to smudge into transparent areas, but transparency
+        // SrcOver allows smudging into transparent areas, but transparency
         // can't be smudged into non-transparent areas.
         // DstOver allows only smudging into transparent.
         targetG.setComposite(AlphaComposite.SrcOver.derive(strength));

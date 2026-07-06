@@ -19,8 +19,8 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

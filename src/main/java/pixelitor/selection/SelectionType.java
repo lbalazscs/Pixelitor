@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,9 @@ import java.awt.geom.Rectangle2D;
 
 /**
  * The different ways a selection shape can be created or updated interactively.
+ * Depending on the tool's interaction model (drag-based vs. click-based),
+ * each constant implements either createShapeFromDrag or createShapeFromEvent,
+ * throwing an exception for the unsupported interaction type.
  */
 public enum SelectionType {
     RECTANGLE("Rectangle") {
@@ -38,7 +41,7 @@ public enum SelectionType {
         }
 
         @Override
-        public Shape createShapeFromEvent(PMouseEvent event, Shape oldShape) {
+        public Shape createShapeFromEvent(PMouseEvent e, Shape oldShape) {
             throw new UnsupportedOperationException("Rectangle selection uses Drag info");
         }
     }, ELLIPSE("Ellipse") {
@@ -50,7 +53,7 @@ public enum SelectionType {
         }
 
         @Override
-        public Shape createShapeFromEvent(PMouseEvent event, Shape oldShape) {
+        public Shape createShapeFromEvent(PMouseEvent e, Shape oldShape) {
             throw new UnsupportedOperationException("Ellipse selection uses Drag info");
         }
     }, LASSO("Freehand") {
@@ -70,7 +73,7 @@ public enum SelectionType {
         }
 
         @Override
-        public Shape createShapeFromEvent(PMouseEvent event, Shape oldShape) {
+        public Shape createShapeFromEvent(PMouseEvent e, Shape oldShape) {
             throw new UnsupportedOperationException("Lasso selection uses Drag info");
         }
     }, POLYGONAL_LASSO("Polygonal") {
@@ -80,15 +83,15 @@ public enum SelectionType {
         }
 
         @Override
-        public Shape createShapeFromEvent(PMouseEvent pe, Shape oldShape) {
+        public Shape createShapeFromEvent(PMouseEvent e, Shape oldShape) {
             if (oldShape instanceof Path2D path) {
                 // extend the existing path
-                path.lineTo(pe.getImX(), pe.getImY());
+                path.lineTo(e.getImX(), e.getImY());
                 return path;
             } else {
                 // start a new path
                 Path2D p = new Path2D.Double();
-                p.moveTo(pe.getImX(), pe.getImY());
+                p.moveTo(e.getImX(), e.getImY());
                 // first point only defines the start, no line yet
                 return p;
             }
@@ -100,8 +103,9 @@ public enum SelectionType {
         }
 
         @Override
-        public Shape createShapeFromEvent(PMouseEvent pm, Shape oldShape) {
-            return MagicWandSelectionTool.createSelectionPath(pm);
+        public Shape createShapeFromEvent(PMouseEvent e, Shape oldShape) {
+            // ignores oldShape
+            return MagicWandSelectionTool.createSelectionPath(e);
         }
     };
 
@@ -123,7 +127,7 @@ public enum SelectionType {
      * Some tools (like Polygonal Lasso and Magic Wand) primarily operate
      * based on individual mouse events.
      */
-    public abstract Shape createShapeFromEvent(PMouseEvent event, Shape oldShape);
+    public abstract Shape createShapeFromEvent(PMouseEvent e, Shape oldShape);
 
     @Override
     public String toString() {

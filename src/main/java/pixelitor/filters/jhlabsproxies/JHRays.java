@@ -22,8 +22,8 @@ import com.jhlabs.image.RaysFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.*;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

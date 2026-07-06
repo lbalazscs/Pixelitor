@@ -19,8 +19,8 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.gui.GUIText;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.CustomShapes;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

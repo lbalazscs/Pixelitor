@@ -567,7 +567,6 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         regenerate(box, tool, ShapesTool.EDIT_STROKE_SETTINGS);
         regenerate(box, tool, ShapesTool.EDIT_EFFECTS);
         regenerate(box, tool, ShapesTool.EDIT_COLORS);
-        regenerate(box, tool, ShapesTool.EDIT_STROKE_SETTINGS);
     }
 
     /**

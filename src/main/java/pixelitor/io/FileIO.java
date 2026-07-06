@@ -27,8 +27,8 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.Layer;
-import pixelitor.utils.Error;
 import pixelitor.utils.*;
+import pixelitor.utils.Error;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -50,11 +50,7 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.isWritable;
 import static pixelitor.io.FileChoosers.svgFilter;
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.calledOutsideEDT;
-import static pixelitor.utils.Threads.onEDT;
-import static pixelitor.utils.Threads.onIOThread;
+import static pixelitor.utils.Threads.*;
 
 /**
  * Utility class with static methods related to opening and saving files.
@@ -110,7 +106,7 @@ public class FileIO {
      */
     public static void addImageLayerAsync(File file, Composition comp) {
         CompletableFuture
-            .supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
+            .supplyAsync(() -> TrackedIO.readUnchecked(file), onIOThread)
             .thenAcceptAsync(img -> comp.addExternalImageAsNewLayer(
                     img, file.getName(), "Dropped Layer"),
                 onEDT)
@@ -464,10 +460,10 @@ public class FileIO {
     public static BufferedImage readFromCommandLineProcess(Process process) throws IOException {
         BufferedImage image;
         try (InputStream rawIn = process.getInputStream();
-             InputStream processOutput = rawIn instanceof BufferedInputStream
+             InputStream processStdout = rawIn instanceof BufferedInputStream
                  ? rawIn
                  : new BufferedInputStream(rawIn)) {
-            image = ImageIO.read(processOutput);
+            image = ImageIO.read(processStdout);
         }
         return image;
     }
@@ -477,11 +473,11 @@ public class FileIO {
      */
     public static void writeToCommandLineProcess(BufferedImage src, Process process) throws IOException {
         try (OutputStream rawOut = process.getOutputStream();
-             OutputStream processInput = rawOut instanceof BufferedOutputStream
+             OutputStream processStdin = rawOut instanceof BufferedOutputStream
                  ? rawOut
                  : new BufferedOutputStream(rawOut)) {
-            writePngToProcessStdin(src, processInput);
-            processInput.flush();
+            writePngToProcessStdin(src, processStdin);
+            processStdin.flush();
         }
     }
 

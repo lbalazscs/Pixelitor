@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,8 +49,8 @@ public abstract sealed class Palette permits DynamicPalette, StaticPalette {
 
     public String getHelpText() {
         String resizeHelp = switch (this) {
-            case DynamicPalette d -> "enlarge for more colors";
-            case StaticPalette s -> "resize the dialog to reflow the colors";
+            case DynamicPalette _ -> "enlarge for more colors";
+            case StaticPalette _ -> "resize the dialog to reflow the colors";
         };
 
         return getDialogTitle() + ": " + resizeHelp + ", "

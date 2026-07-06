@@ -46,8 +46,9 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
  */
 public class MagicWandSelectionTool extends AbstractSelectionTool {
     private static final String PRESET_KEY_TOLERANCE = "Tolerance";
+    private static final int DEFAULT_TOLERANCE = 20;
 
-    private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
+    private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, DEFAULT_TOLERANCE, 255);
     private final SliderSpinner toleranceSlider = new SliderSpinner(toleranceParam, WEST, false);
 
     public MagicWandSelectionTool() {
@@ -134,24 +135,24 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
     public void loadUserPreset(UserPreset preset) {
         super.loadUserPreset(preset);
 
-        toleranceParam.setValue(preset.getInt(PRESET_KEY_TOLERANCE, 20));
+        toleranceParam.setValue(preset.getInt(PRESET_KEY_TOLERANCE, DEFAULT_TOLERANCE));
     }
 
     /**
      * Creates a selection path based on color similarity using a flood-fill algorithm.
      */
-    public static Path2D createSelectionPath(PMouseEvent pm) {
+    public static Path2D createSelectionPath(PMouseEvent e) {
         // this implementation is based on the algorithm described at
         // https://losingfight.com/blog/2007/08/28/how-to-implement-a-magic-wand-tool/
-        Composition comp = pm.getComp();
+        Composition comp = e.getComp();
         // the magic wand operates on the composite image
         BufferedImage image = comp.getCompositeImage();
 
         int width = image.getWidth();
         int height = image.getHeight();
 
-        int x = (int) pm.getImX();
-        int y = (int) pm.getImY();
+        int x = (int) e.getImX();
+        int y = (int) e.getImY();
 
         // return an empty shape if the click is outside the image bounds
         if (x < 0 || x >= width || y < 0 || y >= height) {
@@ -172,14 +173,13 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
                 }
             });
 
-        // convert the selection mask into a vector path
-        return createPathFromMask(mask, width, height);
+        return convertMaskToPath(mask, width, height);
     }
 
     /**
      * Converts a boolean pixel mask into a vector path that outlines the selected areas.
      */
-    private static Path2D createPathFromMask(boolean[] mask, int width, int height) {
+    private static Path2D convertMaskToPath(boolean[] mask, int width, int height) {
         // phase 1: find all edge segments of the selected regions
         Map<Point, List<Line2D>> edgeMap = new HashMap<>();
         for (int y = 0; y < height; y++) {

@@ -38,10 +38,10 @@ import static pixelitor.utils.Threads.onIOThread;
  * and not for other exports/imports (like SVG, ImageMagick).
  */
 public enum FileFormat {
-    BMP(false, ImageUtils::convertToRGB, FileChoosers.bmpFilter) {
-    }, GIF(false, ImageUtils::convertToIndexed, FileChoosers.gifFilter) {
-    }, JPG(false, ImageUtils::convertToRGB, FileChoosers.jpegFilter) {
-    }, ORA(true, null, FileChoosers.oraFilter) {
+    BMP(false, ImageUtils::convertToRGB, FileChoosers.bmpFilter),
+    GIF(false, ImageUtils::convertToIndexed, FileChoosers.gifFilter),
+    JPG(false, ImageUtils::convertToRGB, FileChoosers.jpegFilter),
+    ORA(true, null, FileChoosers.oraFilter) {
         @Override
         public Runnable createSaveTask(Composition comp, SaveSettings settings) {
             return () -> OpenRaster.uncheckedWrite(comp, settings.file());
@@ -62,10 +62,11 @@ public enum FileFormat {
             return CompletableFuture.supplyAsync(
                 Utils.uncheck(() -> OpenRaster.read(file)), onIOThread);
         }
-    }, PAM(false, ImageUtils::convertToInterleavedRGBA, FileChoosers.pamFilter) {
-    }, PNG(false, null, FileChoosers.pngFilter) {
-    }, PPM(false, ImageUtils::convertToInterleavedRGB, FileChoosers.ppmFilter) {
-    }, PXC(true, null, FileChoosers.pxcFilter) {
+    },
+    PAM(false, ImageUtils::convertToInterleavedRGBA, FileChoosers.pamFilter),
+    PNG(false, null, FileChoosers.pngFilter),
+    PPM(false, ImageUtils::convertToInterleavedRGB, FileChoosers.ppmFilter),
+    PXC(true, null, FileChoosers.pxcFilter) {
         @Override
         public Runnable createSaveTask(Composition comp, SaveSettings settings) {
             return () -> PXCFormat.write(comp, settings.file());
@@ -86,9 +87,9 @@ public enum FileFormat {
             return CompletableFuture.supplyAsync(
                 Utils.uncheck(() -> PXCFormat.read(file)), onIOThread);
         }
-    }, TGA(false, null, FileChoosers.tgaFilter) {
-    }, TIFF(false, null, FileChoosers.tiffFilter) {
-    };
+    },
+    TGA(false, null, FileChoosers.tgaFilter),
+    TIFF(false, null, FileChoosers.tiffFilter);
 
     private final boolean multiLayered;
     private final Function<BufferedImage, BufferedImage> converter;
@@ -139,12 +140,11 @@ public enum FileFormat {
     }
 
     public static Optional<FileFormat> fromExtension(File file) {
-        String extension = FileUtils.getExtension(file.getName());
-        return fromExtension(extension);
+        return fromExtension(FileUtils.getExtension(file.getName()));
     }
 
-    public static Optional<FileFormat> fromExtension(String extension) {
-        return switch (extension) {
+    public static Optional<FileFormat> fromExtension(String extLC) {
+        return switch (extLC) {
             case "bmp" -> Optional.of(BMP);
             case "gif" -> Optional.of(GIF);
             case "jpg", "jpeg" -> Optional.of(JPG);

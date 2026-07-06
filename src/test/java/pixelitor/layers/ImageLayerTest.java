@@ -39,11 +39,11 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
-import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.assertions.PixelitorAssertions.assertThatThrownBy;
+import static pixelitor.filters.FilterContext.FILTER_WITHOUT_DIALOG;
+import static pixelitor.filters.FilterContext.PREVIEWING;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
 

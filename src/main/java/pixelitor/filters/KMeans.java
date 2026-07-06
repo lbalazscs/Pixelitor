@@ -20,10 +20,10 @@ package pixelitor.filters;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.Dithering;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.KMeansClustering;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;

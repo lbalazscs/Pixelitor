@@ -21,8 +21,8 @@ import com.jhlabs.composite.MultiplyComposite;
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Texts;
 
 import java.awt.Graphics2D;

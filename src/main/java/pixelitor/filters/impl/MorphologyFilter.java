@@ -18,8 +18,8 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.WholeImageFilter;
+import pixelitor.colors.ColorSpaces;
 import pixelitor.filters.Morphology;
-import pixelitor.utils.ColorSpaces;
 
 import java.awt.Color;
 

@@ -20,7 +20,7 @@ package pixelitor.layers;
 import com.jhlabs.image.PointFilter;
 import pixelitor.Canvas;
 import pixelitor.colors.Colors;
-import pixelitor.utils.ProgressTracker;
+import pixelitor.progress.ProgressTracker;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

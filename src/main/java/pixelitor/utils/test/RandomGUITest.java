@@ -67,12 +67,12 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static java.awt.event.KeyEvent.*;
-import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
-import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.colors.FgBgColors.randomizeColors;
 import static pixelitor.compactions.FlipDirection.HORIZONTAL;
 import static pixelitor.compactions.FlipDirection.VERTICAL;
 import static pixelitor.compactions.QuadrantAngle.*;
+import static pixelitor.filters.FilterContext.FILTER_WITHOUT_DIALOG;
+import static pixelitor.filters.FilterContext.PREVIEWING;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 
@@ -979,12 +979,12 @@ public class RandomGUITest {
     }
 
     private void newRandomTextLayer() {
-        Composition comp = Views.getActiveComp();
-        MaskViewMode oldMaskViewMode = comp.getView().getMaskViewMode();
+        View view = Views.getActive();
+        MaskViewMode oldMaskViewMode = view.getMaskViewMode();
+        Composition comp = view.getComp();
         Layer activeLayerBefore = comp.getActiveLayer();
 
-        TextSettings settings = new TextSettings();
-        settings.randomize();
+        TextSettings settings = TextSettings.createRandomized(null);
         TextLayer textLayer = TextLayer.createNew(comp, settings);
 
         // has to be called explicitly, since no dialog will be shown

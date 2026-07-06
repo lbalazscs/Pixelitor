@@ -15,28 +15,40 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.progress;
 
-import javax.imageio.ImageWriter;
-import javax.imageio.event.IIOWriteProgressListener;
+import javax.imageio.ImageReader;
+import javax.imageio.event.IIOReadProgressListener;
 
 /**
- * Tracks the progress of image writing using a {@link ProgressTracker}.
+ * Tracks the progress of image reading using a {@link ProgressTracker}.
  */
-public class TrackingWriteProgressListener implements IIOWriteProgressListener {
+public class TrackingReadProgressListener implements IIOReadProgressListener {
     private final ProgressTracker tracker;
     private int reportedPercentage = 0;
 
-    public TrackingWriteProgressListener(ProgressTracker tracker) {
+    public TrackingReadProgressListener(ProgressTracker tracker) {
         this.tracker = tracker;
     }
 
     @Override
-    public void imageStarted(ImageWriter source, int imageIndex) {
+    public void thumbnailStarted(ImageReader source, int imageIndex, int thumbnailIndex) {
     }
 
     @Override
-    public void imageProgress(ImageWriter source, float percentageDone) {
+    public void thumbnailProgress(ImageReader source, float percentageDone) {
+    }
+
+    @Override
+    public void thumbnailComplete(ImageReader source) {
+    }
+
+    @Override
+    public void imageStarted(ImageReader source, int imageIndex) {
+    }
+
+    @Override
+    public void imageProgress(ImageReader source, float percentageDone) {
         int newPercentage = Math.round(percentageDone);
         if (newPercentage > reportedPercentage) {
             tracker.unitsDone(newPercentage - reportedPercentage);
@@ -45,23 +57,21 @@ public class TrackingWriteProgressListener implements IIOWriteProgressListener {
     }
 
     @Override
-    public void imageComplete(ImageWriter source) {
+    public void imageComplete(ImageReader source) {
         tracker.finished();
     }
 
     @Override
-    public void thumbnailStarted(ImageWriter source, int imageIndex, int thumbnailIndex) {
+    public void sequenceStarted(ImageReader source, int minIndex) {
     }
 
     @Override
-    public void thumbnailProgress(ImageWriter source, float percentageDone) {
+    public void sequenceComplete(ImageReader source) {
+        // we call tracker.finished() in imageComplete() because
+        // we assume that the input contains only one image
     }
 
     @Override
-    public void thumbnailComplete(ImageWriter source) {
-    }
-
-    @Override
-    public void writeAborted(ImageWriter source) {
+    public void readAborted(ImageReader source) {
     }
 }

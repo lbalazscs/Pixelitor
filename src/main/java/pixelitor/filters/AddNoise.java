@@ -21,8 +21,8 @@ import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

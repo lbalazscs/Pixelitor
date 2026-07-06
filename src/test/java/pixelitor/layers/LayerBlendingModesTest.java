@@ -17,12 +17,16 @@
 
 package pixelitor.layers;
 
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.junit.jupiter.api.*;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.Invert;
 import pixelitor.filters.NoOpFilter;
+import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.gui.utils.MlpAlignmentSelector;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -286,13 +290,17 @@ class LayerBlendingModesTest {
     }
 
     private TextLayer createTestTextLayerWithColor(Color color) {
-        var layer = new TextLayer(comp);
+        TextSettings settings = new TextSettings(
+            "T", // a huge T should cover everything
+            new Font(Font.SANS_SERIF, Font.BOLD, 100),
+            color,
+            new AreaEffects(),
+            HorizontalAlignment.CENTER, VerticalAlignment.CENTER,
+            MlpAlignmentSelector.LEFT,
+            false, 0, 1, 1, 1, 0, 0, null);
+
+        var layer = new TextLayer(comp, "T", settings);
         layer.createUI();
-        TextSettings settings = layer.getSettings();
-        settings.setText("T"); // a huge T should cover everything
-        settings.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 100));
-        settings.setColor(color);
-        layer.applySettings(settings);
         return layer;
     }
 

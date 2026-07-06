@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.automate;
+package pixelitor.autopaint;
 
 import pixelitor.Composition;
 import pixelitor.colors.Colors;
@@ -24,33 +24,26 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
+import pixelitor.progress.ProgressHandler;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressHandler;
 
 import java.awt.Color;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
 
-import static pixelitor.colors.FgBgColors.getBgColor;
-import static pixelitor.colors.FgBgColors.getFgColor;
-import static pixelitor.colors.FgBgColors.randomizeColors;
-import static pixelitor.colors.FgBgColors.setBgColor;
-import static pixelitor.colors.FgBgColors.setFgColor;
-import static pixelitor.tools.Tools.BRUSH;
-import static pixelitor.tools.Tools.CLONE;
-import static pixelitor.tools.Tools.ERASER;
-import static pixelitor.tools.Tools.SMUDGE;
+import static pixelitor.colors.FgBgColors.*;
+import static pixelitor.tools.Tools.*;
 import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
- * The "Auto Paint" functionality.
+ * The "Auto Paint" feature: generates random brush strokes across the canvas.
  */
 public class AutoPaint {
     public static final AbstractBrushTool[] SUPPORTED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};
@@ -76,8 +69,8 @@ public class AutoPaint {
         assert calledOnEDT() : callInfo();
 
         BufferedImage backupImage = dr.getSelectedSubImage(true);
-        String statusBarMessage = "Auto Paint with " + settings.getTool().getName();
-        ProgressHandler progressHandler = Messages.startProgress(statusBarMessage, settings.getNumStrokes());
+        String statusBarMessage = "Auto Paint with " + settings.tool().getName();
+        ProgressHandler progressHandler = Messages.startProgress(statusBarMessage, settings.numStrokes());
 
         try {
             rememberOriginalColors();
@@ -105,7 +98,7 @@ public class AutoPaint {
 
         var random = new SplittableRandom();
         var comp = dr.getComp();
-        int strokeCount = settings.getNumStrokes();
+        int strokeCount = settings.numStrokes();
 
         for (int i = 0; i < strokeCount; i++) {
             progressHandler.updateProgress(i);
@@ -126,13 +119,13 @@ public class AutoPaint {
         PPoint end = settings.genRandomEndPoint(start, comp, rand);
         Path2D strokePath = createStrokePath(start, end, settings, rand);
 
-        settings.getTool().trace(dr, strokePath);
+        settings.tool().trace(dr, strokePath);
     }
 
     private static void setColors(AutoPaintSettings settings, SplittableRandom rand) {
-        if (settings.useRandomColors()) {
+        if (settings.colorMode() == ColorMode.RANDOM) {
             randomizeColors();
-        } else if (settings.useInterpolatedColors()) {
+        } else if (settings.colorMode() == ColorMode.INTERPOLATED) {
             setFgColor(Colors.interpolateRGB(origFg, origBg, rand.nextDouble()));
         }
     }
@@ -144,7 +137,7 @@ public class AutoPaint {
         double controlX = (start.getImX() + end.getImX()) / 2.0;
         double controlY = (start.getImY() + end.getImY()) / 2.0;
 
-        double maxCurvature = settings.getMaxCurvature();
+        double maxCurvature = settings.maxCurvature();
         if (maxCurvature > 0) {
             double maxShift = start.imDist(end) * maxCurvature;
             controlX += (rand.nextDouble() - 0.5) * maxShift;
@@ -165,8 +158,8 @@ public class AutoPaint {
     }
 
     private static void restoreOriginalColors(AutoPaintSettings settings) {
-        // if colors were changed, restore the original
-        if (settings.changeColors()) {
+        // if colors were changed, restore the original colors
+        if (settings.colorMode().changesColors()) {
             setFgColor(origFg);
             setBgColor(origBg);
         }

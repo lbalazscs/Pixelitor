@@ -20,8 +20,11 @@ package pixelitor.menus.edit;
 import pixelitor.Composition;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ViewEnabledAction;
+import pixelitor.progress.ProgressHandler;
 import pixelitor.utils.Error;
-import pixelitor.utils.*;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Success;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;

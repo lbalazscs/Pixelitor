@@ -62,7 +62,7 @@ public class GradientChangeEdit extends PixelitorEdit {
             dr.updateIconImage();
         }
 
-        Tools.GRADIENT.setGradient(before, !imageEditNeeded, dr);
+        Tools.GRADIENT.restoreGradient(before, !imageEditNeeded, dr);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class GradientChangeEdit extends PixelitorEdit {
             dr.updateIconImage();
         }
 
-        Tools.GRADIENT.setGradient(after, !imageEditNeeded, dr);
+        Tools.GRADIENT.restoreGradient(after, !imageEditNeeded, dr);
     }
 
     @Override

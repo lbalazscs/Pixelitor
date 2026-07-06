@@ -25,17 +25,13 @@ import pixelitor.tools.pen.SubPath;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_CUBICTO;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
-import static java.awt.geom.PathIterator.SEG_QUADTO;
+import static java.awt.geom.PathIterator.*;
 
 /**
  * Static shape-related utility methods.
@@ -44,6 +40,7 @@ public class Shapes {
     private static final Stroke BIG_STROKE = new BasicStroke(3);
     private static final Stroke SMALL_STROKE = new BasicStroke(1);
     public static final double UNIT_ARROW_HEAD_WIDTH = 0.7;
+    private static final int ELASTIC_LINE_SEGMENTS = 26;
 
     private Shapes() {
         // do not instantiate
@@ -130,7 +127,7 @@ public class Shapes {
 
     /**
      * Draws the given shape with the given color,
-     * and then resores the previous color.
+     * and then restores the previous color.
      */
     public static void draw(Shape shape, Color c, Graphics2D g) {
         Color prevColor = g.getColor();
@@ -142,7 +139,7 @@ public class Shapes {
     /**
      * Ensures that the returned rectangle has positive width and height.
      */
-    public static Rectangle toPositiveRect(int x1, int x2, int y1, int y2) {
+    public static Rectangle toPositiveRect(int x1, int y1, int x2, int y2) {
         int x = Math.min(x1, x2);
         int y = Math.min(y1, y2);
         int width = Math.abs(x1 - x2);
@@ -294,27 +291,31 @@ public class Shapes {
         };
     }
 
-    public static void debugPathIterator(Shape shape) {
-        debugPathIterator(shape.getPathIterator(null));
+    public static String debugPathIterator(Shape shape) {
+        return debugPathIterator(shape.getPathIterator(null));
     }
 
-    public static void debugPathIterator(PathIterator pathIterator) {
+    public static String debugPathIterator(PathIterator pathIterator) {
+        StringBuilder sb = new StringBuilder();
         double[] coords = new double[6];
 
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
 
-            switch (type) {
-                case SEG_MOVETO -> System.out.println("MOVE TO " + arrayToString(coords, 2));
-                case SEG_LINETO -> System.out.println("LINE TO " + arrayToString(coords, 2));
-                case SEG_QUADTO -> System.out.println("QUAD TO " + arrayToString(coords, 4));
-                case SEG_CUBICTO -> System.out.println("CUBIC TO " + arrayToString(coords, 6));
-                case SEG_CLOSE -> System.out.println("CLOSE " + arrayToString(coords, 0));
+            String line = switch (type) {
+                case SEG_MOVETO -> "MOVE TO " + arrayToString(coords, 2);
+                case SEG_LINETO -> "LINE TO " + arrayToString(coords, 2);
+                case SEG_QUADTO -> "QUAD TO " + arrayToString(coords, 4);
+                case SEG_CUBICTO -> "CUBIC TO " + arrayToString(coords, 6);
+                case SEG_CLOSE -> "CLOSE " + arrayToString(coords, 0);
                 default -> throw new IllegalArgumentException("type = " + type);
-            }
+            };
 
+            sb.append(line).append(System.lineSeparator());
             pathIterator.next();
         }
+
+        return sb.toString();
     }
 
     /**
@@ -402,21 +403,13 @@ public class Shapes {
         g.setStroke(origStroke);
     }
 
-    public static Rectangle2D calcBounds(List<? extends Point2D> points) {
-        if (points.isEmpty()) {
-            return null;
-        }
-        BoundingBox boundingBox = new BoundingBox();
-        for (Point2D point : points) {
-            boundingBox.add(point);
-        }
-        return boundingBox.toRectangle2D();
-    }
-
     /**
      * Rounds the coordinates and dimensions of a Rectangle2D, ensuring a minimum size of 1x1.
      */
     public static Rectangle roundRect(Rectangle2D rect) {
+        // works only with positive rectangles
+        assert rect.getWidth() >= 0 && rect.getHeight() >= 0 : "rect = " + rect;
+
         int x = (int) Math.round(rect.getX());
         int y = (int) Math.round(rect.getY());
         int width = (int) Math.round(rect.getWidth());
@@ -535,11 +528,11 @@ public class Shapes {
             double xm2 = xc2 + (xc3 - xc2) * k2;
             double ym2 = yc2 + (yc3 - yc2) * k2;
 
-            double ctrl1X = xm1 + (xc2 - xm1) + x1 - xm1;
-            double ctrl1Y = ym1 + (yc2 - ym1) + y1 - ym1;
+            double ctrl1X = xc2 + x1 - xm1;
+            double ctrl1Y = yc2 + y1 - ym1;
 
-            double ctrl2X = xm2 + (xc2 - xm2) + x2 - xm2;
-            double ctrl2Y = ym2 + (yc2 - ym2) + y2 - ym2;
+            double ctrl2X = xc2 + x2 - xm2;
+            double ctrl2Y = yc2 + y2 - ym2;
 
             path.curveTo(ctrl1X, ctrl1Y, ctrl2X, ctrl2Y, end.getX(), end.getY());
         }
@@ -551,7 +544,7 @@ public class Shapes {
      */
     public static Path2D smoothConnect(List<Point2D> points, double smoothness) {
         int numPoints = points.size();
-        assert numPoints >= 3 : "There should be at least 3 points in the shape!!!";
+        assert numPoints >= 3 : "At least 3 points are required, got " + numPoints;
 
         // the path is considered closed if the first and last points are identical
         boolean isClosed = Geometry.areEqual(points.getFirst(), points.getLast());
@@ -689,16 +682,15 @@ public class Shapes {
         assert !from.equals(to);
         if (elastic) {
             // create a line that can be distorted by nonlinear distortions
-            int numSegments = 26;
-            double dt = 1.0 / numSegments;
-            for (int i = 0; i < numSegments; i++) {
+            double dt = 1.0 / ELASTIC_LINE_SEGMENTS;
+            for (int i = 0; i < ELASTIC_LINE_SEGMENTS; i++) {
                 double t = i * dt;
                 Point2D controlPoint = Geometry.interpolate(from, to, t + dt * 0.5);
 
                 Point2D segmentEnd;
                 // guarantee exact target connection for the final
                 // segment to circumvent floating-point rounding errors
-                if (i == numSegments - 1) {
+                if (i == ELASTIC_LINE_SEGMENTS - 1) {
                     segmentEnd = to;
                 } else {
                     segmentEnd = Geometry.interpolate(from, to, t + dt);

@@ -19,8 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.CopyOptions;
-import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
+import pixelitor.filters.FilterContext;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.history.FilterChangedEdit;

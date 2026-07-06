@@ -18,9 +18,9 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.FilterContext;
 import pixelitor.Views;
 import pixelitor.filters.Filter;
+import pixelitor.filters.FilterContext;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.Filters;
@@ -40,7 +40,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
+import static pixelitor.filters.FilterContext.FILTER_WITHOUT_DIALOG;
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 
 /**

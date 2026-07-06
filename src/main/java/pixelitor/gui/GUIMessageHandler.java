@@ -18,8 +18,8 @@
 package pixelitor.gui;
 
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.progress.ProgressHandler;
 import pixelitor.utils.MessageHandler;
-import pixelitor.utils.ProgressHandler;
 
 import java.awt.Component;
 import java.awt.EventQueue;

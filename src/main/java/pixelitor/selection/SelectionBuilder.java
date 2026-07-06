@@ -39,7 +39,7 @@ public class SelectionBuilder {
 
     private Shape prevSelShape;
 
-    private boolean complete = false;
+    private boolean finalized = false;
 
     // the initial state of the selection
     private boolean wasHidden = false;
@@ -52,7 +52,7 @@ public class SelectionBuilder {
 
         Selection existingSelection = comp.getSelection();
         if (existingSelection == null) {
-            // if there is no existing selection, we don't use a draft selection
+            // nothing to hide or freeze if there's no existing selection to combine with
             return;
         }
 
@@ -93,19 +93,19 @@ public class SelectionBuilder {
     /**
      * Updates the draft selection shape based on a mouse event.
      */
-    public void updateDraftSelection(PMouseEvent mouseEvent) {
+    public void updateDraftSelection(PMouseEvent e) {
         // update the composition reference, because in a polygonal lasso
         // selection session an undo of a previous CompAction could change it
         // (possibly it would be better to store the view in this class)
-        comp = mouseEvent.getComp();
+        comp = e.getComp();
 
         Selection draftSelection = comp.getDraftSelection();
 
         if (draftSelection == null) {
-            createNewDraftSelectionFromEvent(mouseEvent);
+            createNewDraftSelectionFromEvent(e);
         } else {
             assert draftSelection.isValid() : "disposed draft selection";
-            updateExistingDraftSelectionFromEvent(draftSelection, mouseEvent);
+            updateExistingDraftSelectionFromEvent(draftSelection, e);
         }
     }
 
@@ -120,15 +120,15 @@ public class SelectionBuilder {
         applyShapeToDraft(draftSelection, newShape);
     }
 
-    private void createNewDraftSelectionFromEvent(PMouseEvent pm) {
-        assert pm != null;
-        Shape newShape = selectionType.createShapeFromEvent(pm, null);
+    private void createNewDraftSelectionFromEvent(PMouseEvent e) {
+        assert e != null;
+        Shape newShape = selectionType.createShapeFromEvent(e, null);
         comp.setDraftSelection(new Selection(newShape, comp.getView()));
     }
 
-    private void updateExistingDraftSelectionFromEvent(Selection draftSelection, PMouseEvent pm) {
+    private void updateExistingDraftSelectionFromEvent(Selection draftSelection, PMouseEvent e) {
         Shape currentShape = draftSelection.getShape();
-        Shape newShape = selectionType.createShapeFromEvent(pm, currentShape);
+        Shape newShape = selectionType.createShapeFromEvent(e, currentShape);
         applyShapeToDraft(draftSelection, newShape);
     }
 
@@ -150,6 +150,8 @@ public class SelectionBuilder {
         Shape newShape = draftSelection.getShape();
         newShape = comp.clipToCanvasBounds(newShape);
         if (newShape.getBounds2D().isEmpty()) {
+            // leave finalized false so cancelIfNotFinalized()
+            // cleans up and restores the prior selection state
             return;
         }
 
@@ -159,7 +161,7 @@ public class SelectionBuilder {
             finalizeNewSelection(draftSelection, newShape);
         }
 
-        complete = true;
+        finalized = true;
     }
 
     private void combineWithExistingSelection(Selection draftSelection,
@@ -177,7 +179,10 @@ public class SelectionBuilder {
 
     private void handleEmptyCombinedShape(Selection draftSelection,
                                           Shape origShape) {
-        draftSelection.setShape(origShape); // for the correct deselect undo
+        // restore the original shape here so that the undo edit
+        // in deselect(true) captures the correct backup
+        draftSelection.setShape(origShape);
+
         comp.promoteSelection();
         comp.deselect(true);
 
@@ -218,10 +223,10 @@ public class SelectionBuilder {
     }
 
     /**
-     * Cancels the selection building process if it hasn't been completed.
+     * Cancels the selection building process if it hasn't been finalized.
      */
-    public void cancelIfNotFinished() {
-        if (complete) {
+    public void cancelIfNotFinalized() {
+        if (finalized) {
             return;
         }
 

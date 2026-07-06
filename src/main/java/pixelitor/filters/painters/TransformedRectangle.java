@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static java.lang.Math.min;
  * A rectangle rotated/scaled/sheared around its center.
  */
 public class TransformedRectangle implements Debuggable {
-    // Original corner coordinates of the rectangle
+    // original corner coordinates of the rectangle
     private final double origTopLeftX;
     private final double origTopLeftY;
     private final double origTopRightX;
@@ -45,7 +45,7 @@ public class TransformedRectangle implements Debuggable {
     private final double origBottomLeftX;
     private final double origBottomLeftY;
 
-    // Transformed corner coordinates of the rectangle
+    // transformed corner coordinates of the rectangle
     private double topLeftX;
     private double topLeftY;
     private double topRightX;
@@ -55,7 +55,7 @@ public class TransformedRectangle implements Debuggable {
     private double bottomLeftX;
     private double bottomLeftY;
 
-    // Cached shape and bounding box of the transformed rectangle
+    // cached shape and bounding box of the transformed rectangle
     private Path2D cachedShape;
     private Rectangle cachedBox;
 
@@ -159,9 +159,12 @@ public class TransformedRectangle implements Debuggable {
         double maxX = max(max(topLeftX, topRightX), max(bottomRightX, bottomLeftX));
         double maxY = max(max(topLeftY, topRightY), max(bottomRightY, bottomLeftY));
 
-        int width = (int) Math.ceil(maxX - minX);
-        int height = (int) Math.ceil(maxY - minY);
-        cachedBox = new Rectangle((int) minX, (int) minY, width, height);
+        int x = (int) Math.floor(minX);
+        int y = (int) Math.floor(minY);
+        int width = (int) Math.ceil(maxX) - x;
+        int height = (int) Math.ceil(maxY) - y;
+
+        cachedBox = new Rectangle(x, y, width, height);
         return cachedBox;
     }
 
@@ -224,4 +227,3 @@ public class TransformedRectangle implements Debuggable {
         return node;
     }
 }
-

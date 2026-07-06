@@ -19,8 +19,8 @@ package pixelitor.manual;
 
 import com.jhlabs.image.KaleidoscopeFilter;
 import com.jhlabs.image.TransformFilter;
+import pixelitor.progress.ProgressTracker;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 
 import javax.imageio.ImageIO;
 import java.awt.geom.Point2D;

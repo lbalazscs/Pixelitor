@@ -25,6 +25,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.GroupedRangeParam.GroupedRangeParamState;
 import pixelitor.filters.gui.RangeParam.RangeParamState;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.*;
 
@@ -40,10 +41,7 @@ import java.util.function.Supplier;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static net.jafama.FastMath.cos;
-import static net.jafama.FastMath.exp;
-import static net.jafama.FastMath.pow;
-import static net.jafama.FastMath.sin;
+import static net.jafama.FastMath.*;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
 import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;

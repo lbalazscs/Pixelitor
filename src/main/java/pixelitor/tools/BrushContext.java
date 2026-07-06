@@ -39,7 +39,7 @@ public class BrushContext {
     private final Graphics2D graphics;
 
     // a brush stroke begins, operates, and finishes on the same Drawable, even
-    // if the adctive layer changes via keyboard shortcut while the mouse is dragged
+    // if the active layer changes via keyboard shortcut while the mouse is dragged
     private final Drawable dr;
 
     private final DrawTarget drawTarget;

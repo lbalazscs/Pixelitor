@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,11 +24,13 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
 /**
- * A save JFileChooser that automatically adds a file extension based on the selected filter.
+ * A saving JFileChooser that automatically adds a file
+ * extension based on the selected file filter.
  */
 public class SaveFileChooser extends ValidatingSaveFileChooser {
-    public SaveFileChooser(File currentDirPath) {
-        super(currentDirPath);
+    public SaveFileChooser(File currentDir) {
+        super(currentDir);
+
         setAcceptAllFileFilterUsed(false);
     }
 
@@ -41,20 +43,20 @@ public class SaveFileChooser extends ValidatingSaveFileChooser {
 
         String ext = FileUtils.getExtension(f.getName());
         if (ext == null) {
-            // the user has entered no extension
-            // determine it from the active FileFilter
-            f = addExtension(f);
+            // the user has entered no extension, so
+            // determine it from the selected file filter
+            f = withExtension(f);
         } else {
             boolean supported = FileUtils.isSupportedOutputExt(ext);
             if (!supported) {
-                f = addExtension(f);
+                f = withExtension(f);
             }
         }
 
         return f;
     }
 
-    private File addExtension(File f) {
+    private File withExtension(File f) {
         String extension = getExtensionFromFileFilter();
         if (extension != null) {
             f = new File(f.getAbsolutePath() + '.' + extension);

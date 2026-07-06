@@ -15,16 +15,28 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.gui;
+package pixelitor.autopaint;
 
 /**
- * A listener for events in the GUI of a {@link FilterSetting}.
+ * Determines how the paint color is chosen for each auto-painted stroke.
  */
-public interface ParamAdjustmentListener {
-    /**
-     * Called when a parameter is adjusted in the GUI.
-     * Implementations should handle any necessary updates,
-     * such as recalculating a filter preview.
-     */
-    void paramAdjusted();
+public enum ColorMode {
+    INTERPOLATED("Foreground-Background Mix"),
+    FOREGROUND("Foreground"),
+    RANDOM("Random");
+
+    private final String displayName;
+
+    ColorMode(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public boolean changesColors() {
+        return this != FOREGROUND;
+    }
+
+    @Override
+    public String toString() {
+        return displayName;
+    }
 }

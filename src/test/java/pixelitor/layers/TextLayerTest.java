@@ -149,8 +149,7 @@ class TextLayerTest {
         String newText = Rnd.createRandomString(10);
         String expectedNewName = TextLayer.nameFromText(newText);
 
-        TextSettings newSettings = oldSettings.copy();
-        newSettings.setText(newText);
+        TextSettings newSettings = oldSettings.copy().withText(newText);
         layer.applySettings(newSettings);
         layer.commitSettings(oldSettings);
 

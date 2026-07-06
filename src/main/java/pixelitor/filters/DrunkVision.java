@@ -19,9 +19,9 @@ package pixelitor.filters;
 
 import net.jafama.FastMath;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;

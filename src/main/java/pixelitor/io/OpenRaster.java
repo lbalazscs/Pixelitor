@@ -27,7 +27,12 @@ import pixelitor.Composition;
 import pixelitor.ImageMode;
 import pixelitor.compactions.Outsets;
 import pixelitor.layers.*;
-import pixelitor.utils.*;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
+import pixelitor.progress.SubtaskProgressTracker;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Thumbnails;
+import pixelitor.utils.Utils;
 
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilderFactory;

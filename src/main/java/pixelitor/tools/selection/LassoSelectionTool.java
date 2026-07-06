@@ -57,9 +57,9 @@ public class LassoSelectionTool extends AbstractSelectionTool {
         assert altDown == GlobalEvents.isAltDown() || AppMode.isUnitTesting()
             : "altDown = " + altDown + ", GlobalEvents.isAltDown() = " + GlobalEvents.isAltDown();
 
-        // if Alt is released mid-drag, it no longer means subtract for this drag
+        // if Alt is released mid-drag, it no longer means subtract/intersect for this drag
         if (!altDown) {
-            isAltSubtracting = false;
+            altUsedForCombinator = false;
         }
 
         // add the current point to the lasso path

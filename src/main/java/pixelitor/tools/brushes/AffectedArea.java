@@ -34,7 +34,7 @@ public class AffectedArea implements Debuggable {
     }
 
     /**
-     * Initialize the area with a brush position.
+     * Initializes the area with a brush position.
      *
      * There is only one {@link AffectedArea} object for each brush tool,
      * and it gets reinitialized for each independent brush stroke.
@@ -52,7 +52,7 @@ public class AffectedArea implements Debuggable {
     }
 
     /**
-     * Returns the rectangle affected by a brush stroke for the undo.
+     * Returns the rectangle affected by a brush stroke for undo purposes.
      */
     public Rectangle toRectangle(double radius) {
         return boundingBox.toRectangle(radius + 1.0);

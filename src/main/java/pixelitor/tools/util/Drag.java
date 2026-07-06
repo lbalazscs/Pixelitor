@@ -276,7 +276,7 @@ public class Drag implements Serializable, Debuggable {
     }
 
     /**
-     * Return the horizontal line that runs through the center in image space
+     * Returns the horizontal line that runs through the center in image space.
      */
     public Drag getCenterHorizontalDrag() {
         double centerY;
@@ -415,7 +415,10 @@ public class Drag implements Serializable, Debuggable {
         return new Rectangle(x, y, width, height);
     }
 
-    public Rectangle2D toImRect() {
+    /**
+     * Creates a Rectangle where the signs of the width and height indicate the drawing direction.
+     */
+    public Rectangle2D toSignedImRect() {
         double x;
         double y;
         double width;
@@ -444,39 +447,11 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public Rectangle2D toPosImRect() {
-        return Shapes.toPositiveRect(toImRect());
+        return Shapes.toPositiveRect(toSignedImRect());
     }
 
     public PRectangle toPosPRect(View view) {
         return PRectangle.positiveFromCo(toCoRect(), view);
-    }
-
-    /**
-     * Creates a Rectangle where the signs of the width and height indicate the drawing direction.
-     */
-    public Rectangle2D createSignedImRect() {
-        double x;
-        double y;
-        double width;
-        double height;
-
-        if (expandFromCenter) {
-            double halfWidth = imEndX - imStartX; // can be negative
-            double halfHeight = imEndY - imStartY; // can be negative
-
-            x = imStartX - halfWidth;
-            y = imStartY - halfHeight;
-
-            width = 2 * halfWidth;
-            height = 2 * halfHeight;
-        } else {
-            x = imStartX;
-            y = imStartY;
-            width = imEndX - imStartX;
-            height = imEndY - imStartY;
-        }
-
-        return new Rectangle2D.Double(x, y, width, height);
     }
 
     /**

@@ -61,10 +61,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
-import static pixelitor.tools.DragToolState.IDLE;
-import static pixelitor.tools.DragToolState.INITIAL_DRAG;
-import static pixelitor.tools.DragToolState.TRANSFORM;
+import static pixelitor.tools.DragToolState.*;
 import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 
@@ -456,13 +453,30 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void escPressed() {
-        // pressing Esc should work similarly to the Gradient Tool,
-        // or to clicking outside the transform box:
-        // the handles disappear, but the effect remains
+        // cancel the Drag and wipe the measurement overlay
+        super.escPressed();
+
         if (state == TRANSFORM && !isEditingShapesLayer()) {
+            // pressing Esc should work similarly to the Gradient Tool,
+            // or to clicking outside the transform box:
+            // the handles disappear, but the effect remains
             Composition comp = Views.getActiveComp();
             if (comp != null) {
                 rasterize(comp);
+            }
+        } else if (state == INITIAL_DRAG || state == AFTER_FIRST_MOUSE_PRESS) {
+            // abort the in-progress shape drawing
+            setIdleState();
+
+            // if we were drawing onto an empty shapes layer, detach the canceled shape
+            if (isEditingShapesLayer()) {
+                shapesLayer.setStyledShape(null);
+            }
+
+            // make the canceled shape disappear immediately
+            View view = Views.getActive();
+            if (view != null) {
+                view.getComp().getActiveLayer().update();
             }
         }
     }

@@ -16,8 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
 
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -27,9 +27,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ColorModel;
 
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static java.awt.image.BufferedImage.*;
 
 /**
  * A convenience class which implements those methods of BufferedImageOp which are rarely changed.

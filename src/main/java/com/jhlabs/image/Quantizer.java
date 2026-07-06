@@ -16,7 +16,7 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.utils.ProgressTracker;
+import pixelitor.progress.ProgressTracker;
 
 /**
  * The interface for an image quantizer. The addColor method is called (repeatedly

@@ -22,8 +22,8 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.gui.utils.SaveFileChooser;
+import pixelitor.progress.ProgressPanel;
 import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressPanel;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;

@@ -409,13 +409,6 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Checks if this layer is the active top-level layer in the composition.
-     */
-    public boolean isActiveTopLevel() {
-        return comp.isActiveTopLevelLayer(this);
-    }
-
-    /**
      * Checks if this layer is the active layer in the composition.
      */
     public boolean isActive() {
@@ -439,7 +432,8 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Checks if this layer is a direct child of the composition.
+     * Checks if this layer is a direct child of the composition,
+     * i.e. it's not in a layer group or other composite layer.
      */
     public boolean isTopLevel() {
         return holder == comp;
@@ -1243,7 +1237,6 @@ public abstract class Layer implements Serializable, Debuggable {
         node.addQuotedString("comp debug name", comp.getDebugName());
         node.addQuotedString("holder name", holder.getName());
 
-        node.addBoolean("active top-level", isActiveTopLevel());
         node.addBoolean("active", isActive());
 
         node.addBoolean("has mask", hasMask());

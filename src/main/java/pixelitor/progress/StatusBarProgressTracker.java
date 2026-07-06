@@ -15,7 +15,9 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.progress;
+
+import pixelitor.utils.Messages;
 
 /**
  * Tracks the progress of an operation and shows progress
@@ -33,7 +35,7 @@ public class StatusBarProgressTracker extends ThresholdProgressTracker {
         if (numWorkUnits > 0) {
             return new StatusBarProgressTracker(name, numWorkUnits);
         }
-        return NO_OP_TRACKER;
+        return ProgressTracker.NO_OP_TRACKER;
     }
 
     @Override

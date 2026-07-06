@@ -24,7 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.MorphologyFilter;
 import pixelitor.filters.util.Channel;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

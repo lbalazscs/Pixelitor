@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
-import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
+import pixelitor.filters.FilterContext;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;

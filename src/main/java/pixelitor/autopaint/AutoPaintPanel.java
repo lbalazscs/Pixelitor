@@ -15,11 +15,10 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.automate;
+package pixelitor.autopaint;
 
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.*;
-import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner.LabelPosition;
 import pixelitor.gui.utils.Validated;
@@ -33,15 +32,9 @@ import static java.lang.Integer.parseInt;
 import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
 
 /**
- * Configuration panel for the "Auto Paint".
+ * Configuration panel for the "Auto Paint" dialog.
  */
 public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner {
-    private static final String COLOR_MODE_FOREGROUND = "Foreground";
-    private static final String COLOR_MODE_INTERPOLATED = "Foreground-Background Mix";
-    private static final String COLOR_MODE_RANDOM = "Random";
-    public static final String[] COLOR_MODES =
-        {COLOR_MODE_INTERPOLATED, COLOR_MODE_FOREGROUND, COLOR_MODE_RANDOM};
-
     private static final String STROKE_LENGTH_TEXT = "Average Stroke Length";
     private static final String STROKE_COUNT_TEXT = "Number of Strokes";
 
@@ -49,20 +42,17 @@ public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner
         "Tool", AutoPaint.SUPPORTED_TOOLS);
     private final JTextField strokeCountTF;
     private final JTextField strokeLengthTF;
-    private final ChoiceParam<String> colorMode = new ChoiceParam<>(
-        "Random Colors", COLOR_MODES);
+
+    private final EnumParam<ColorMode> colorMode = new EnumParam<>(
+        "Random Colors", ColorMode.class);
 
     private final RangeParam lengthVariation = new RangeParam(
         "Stroke Length Variation (%)", 0, 50, 100, true, LabelPosition.NONE);
     private final RangeParam curvature = new RangeParam(
         "Stroke Curvature (%)", 0, 100, 300, true, LabelPosition.NONE);
 
-    private final IntChoiceParam strokeDirection = new IntChoiceParam("Direction", new Item[]{
-        new Item("Random", AutoPaintSettings.DIRECTION_RANDOM),
-        new Item("Radial", AutoPaintSettings.DIRECTION_RADIAL),
-        new Item("Circular", AutoPaintSettings.DIRECTION_CIRCULAR),
-        new Item("Noise", AutoPaintSettings.DIRECTION_NOISE),
-    });
+    private final EnumParam<StrokeDirection> strokeDirection = new EnumParam<>(
+        "Direction", StrokeDirection.class);
 
     AutoPaintPanel() {
         super(new GridBagLayout());
@@ -85,6 +75,7 @@ public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner
         gbh.addParam(curvature);
         gbh.addParam(colorMode, "colorsCB");
 
+        // enable the color selector UI only if the tool supports it
         toolsParam.enableOtherWhen(colorMode, AutoPaint::useColors);
     }
 
@@ -92,18 +83,14 @@ public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner
      * Creates an {@link AutoPaintSettings} object from the current UI state.
      */
     public AutoPaintSettings getSettings() {
-        boolean randomColors = false;
-        boolean interpolatedColors = false;
+        ColorMode mode = ColorMode.FOREGROUND;
         if (colorMode.isEnabled()) {
-            String selectedMode = colorMode.getSelected();
-            randomColors = selectedMode.equals(COLOR_MODE_RANDOM);
-            interpolatedColors = selectedMode.equals(COLOR_MODE_INTERPOLATED);
+            mode = colorMode.getSelected();
         }
 
-        return new AutoPaintSettings(getSelectedTool(),
-            getStrokeCount(), getStrokeLength(), strokeDirection.getValue(),
-            randomColors, interpolatedColors,
-            lengthVariation.getPercentage(), curvature.getPercentage());
+        return AutoPaintSettings.of(getSelectedTool(),
+            getStrokeCount(), getStrokeLength(), strokeDirection.getSelected(),
+            mode, lengthVariation.getPercentage(), curvature.getPercentage());
     }
 
     private AbstractBrushTool getSelectedTool() {

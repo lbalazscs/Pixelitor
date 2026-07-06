@@ -21,7 +21,6 @@ import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Outsets;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.TabViewContainer;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePreviewPanel;
@@ -51,7 +50,6 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
@@ -91,10 +89,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     // the currently selected layer, potentially nested within groups or smart objects
     private Layer activeLayer;
-
-    // The top-level ancestor layer of the activeLayer.
-    // If the active layer is top-level, then it's the same as the active layer.
-    private transient Layer activeTopLevelLayer;
 
     // a counter for the names of new layers
     private int newLayerCount = 1;
@@ -223,9 +217,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (activeLayer == null) {
             // recover from corrupted pxc file
             activeLayer = layerList.getFirst();
-            activeTopLevelLayer = activeLayer;
-        } else {
-            activeTopLevelLayer = activeLayer.getTopLevelLayer();
         }
 
         // perform actions that need a full canvas and also
@@ -255,9 +246,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // fully setup only the top-level stuff here
             layerCopy.setHolder(compCopy);
             compCopy.layerList.add(layerCopy);
-            if (layer == activeTopLevelLayer) {
-                compCopy.activeTopLevelLayer = layerCopy;
-            }
         }
 
         compCopy.newLayerCount = newLayerCount;
@@ -338,6 +326,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (paths != null) {
                 paths.setView(view);
             }
+            // guides don't store a view, and Guides.coCoordsChanged will be called elsewhere
 
             // now that all children are initialized, it's safe to trigger updates
             canvas.recalcCoSize(view, true);
@@ -424,7 +413,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         this.dpi = dpi;
 
         // set explicitly, since there is no undo edit for changing the DPI
-        dirty = true;
+        setDirty(true);
     }
 
     public Canvas getCanvas() {
@@ -567,7 +556,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Calculates the title shown in the in window title bar.
+     * Calculates the title shown in the window title bar.
      */
     public String calcWindowTitle() {
         String baseTitle = dirty ? "* " + name : name;
@@ -575,22 +564,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Opens a dialog to rename this composition interactively.
-     */
-    public void renameInteractively(TabViewContainer owner) {
-        String currentName = getName();
-        String chosenName = JOptionPane.showInputDialog(owner,
-            "New Name:", currentName);
-        if (chosenName == null) { // the user canceled or closed the dialog
-            return;
-        }
-        rename(currentName, chosenName);
-    }
-
-    /**
      * Renames the composition and adds a history entry.
      */
     public void rename(String oldName, String newName) {
+        if (newName == null) { // can happen if the user canceled or closed the dialog
+            return;
+        }
         if (newName.equals(oldName)) {
             return;
         }
@@ -730,17 +709,17 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void addLayersToUI() {
         assert checkInvariants();
 
-        Layer origActiveTopLevelLayer = activeTopLevelLayer;
+        Layer origActiveLayer = activeLayer;
 
         // this shouldn't change the active layer here,
         // but sets the last button to selected
         view.addAllLayerUIs(layerList);
         fireLayerUICountChanged();
 
-        assert activeTopLevelLayer == origActiveTopLevelLayer;
+        assert activeLayer == origActiveLayer;
 
         // correct the selection
-        LayerGUI ui = (LayerGUI) activeTopLevelLayer.getUI();
+        LayerGUI ui = (LayerGUI) activeLayer.getUI();
         if (!ui.isSelected()) {
             ui.setSelected(true);
         }
@@ -856,7 +835,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     @Override
     public void replaceLayer(Layer before, Layer after) {
-        boolean wasActiveTopLevel = before == activeTopLevelLayer;
         boolean containedActive = before.contains(activeLayer);
 
         before.transferMaskAndUITo(after);
@@ -865,9 +843,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert layerIndex != -1;
         layerList.set(layerIndex, after);
 
-        if (wasActiveTopLevel) {
-            activeTopLevelLayer = after;
-        }
         if (containedActive) {
             // Avoids calling setActiveLayer, because it would set the mask view mode to NORMAL.
 
@@ -878,22 +853,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         assert checkInvariants();
-    }
-
-    private void setActiveTopLevelLayer(Layer layer) {
-        if (activeTopLevelLayer == layer) {
-            return;
-        }
-        assert layerList.contains(layer)
-            : format("new active top-level layer '%s' (%s, %s) not in the layer list of '%s'",
-            layer.getName(), layer.getClass().getSimpleName(),
-            System.identityHashCode(layer), getDebugName());
-
-        activeTopLevelLayer = layer;
-
-        if (activeTopLevelLayer.hasUI()) {
-            activeTopLevelLayer.activateUI();
-        }
     }
 
     // only sets the active layer reference directly
@@ -912,10 +871,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert layer.getComp() == this;
         Layer prevActiveLayer = this.activeLayer;
         this.activeLayer = layer;
-
-        // after ungrouping a group with a single active layer,
-        // the active layer could change without a change in the target
-        setActiveTopLevelLayer(layer.getTopLevelLayer());
 
         if (this.activeLayer == prevActiveLayer) {
             return;
@@ -942,14 +897,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public Layer getActiveLayer() {
         return activeLayer;
-    }
-
-    public boolean isActiveTopLevelLayer(Layer layer) {
-        return layer == activeTopLevelLayer;
-    }
-
-    public Layer getActiveTopLevelLayer() {
-        return activeTopLevelLayer;
     }
 
     @Override
@@ -1019,20 +966,22 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     // this is the only GUI entry point for isolation =>
     // only the isolation of top-level layers is supported
     public void isolateActiveTopLevelLayer() {
-        isolateLayer(activeTopLevelLayer, true);
+        isolateLayer(activeLayer.getTopLevelLayer(), true);
     }
 
     /**
      * Shows only the given layer and hides all others.
      */
     public void isolateLayer(Layer layer, boolean addToHistory) {
+        if (!layer.isTopLevel()) {
+            // TODO currently only top-level layers can be isolated
+            return;
+        }
+
         if (addToHistory) { // not undoing an "isolate"
             // check if we should undo the last isolation of the same layer
-            if (History.getEditToBeUndone() instanceof IsolateEdit isolateEdit) {
-                if (isolateEdit.getLayer() == layer) {
-                    History.undo("Isolate");
-                    return;
-                }
+            if (IsolateEdit.undoIfIsolating(layer)) {
+                return;
             }
 
             int numLayers = layerList.size();
@@ -1106,7 +1055,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public Layer findLayerAtPoint(Point p) {
         // in mask editing mode never auto-select another layer
         if (getView().getMaskViewMode().isShowingMask()) {
-            return getActiveTopLevelLayer();
+            return getActiveLayer();
         }
 
         // iterate in reverse order to search layers from top to bottom
@@ -1515,22 +1464,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Modifies the selection by intersecting it with the given rectangle.
-     */
-    public void intersectSelectionWith(Rectangle2D rect) {
-        if (selection != null) {
-            Shape intersection = ShapeCombinator.INTERSECT.combine(
-                selection.getShape(), rect);
-
-            if (intersection.getBounds().isEmpty()) {
-                disposeSelection();
-            } else {
-                selection.setShape(intersection);
-            }
-        }
-    }
-
-    /**
      * Called when the image-space coordinates have been changed by the
      * given transform (resize, crop, etc.).
      * The View argument is used because at this point the composition
@@ -1646,8 +1579,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             return;
         }
 
-        int left = Math.max(0, (int) -bounds.getMinX());
-        int top = Math.max(0, (int) -bounds.getMinY());
+        int left = Math.max(0, (int) Math.ceil(-bounds.getMinX()));
+        int top = Math.max(0, (int) Math.ceil(-bounds.getMinY()));
         int right = Math.max(0, (int) Math.ceil(bounds.getMaxX() - canvas.getWidth()));
         int bottom = Math.max(0, (int) Math.ceil(bounds.getMaxY() - canvas.getHeight()));
 
@@ -1697,26 +1630,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (layerList.isEmpty()) {
             throw new AssertionError("no layer in " + getName());
         }
-        if (activeTopLevelLayer == null) {
-            throw new AssertionError("no active top-level layer in " + getName());
-        }
         if (activeLayer == null) {
             throw new AssertionError("no active layer in " + getName());
-        }
-        if (activeTopLevelLayer.getComp() != this) {
-            throw new AssertionError(
-                "bad comp in active top-level layer '%s' (that comp='%s', this='%s')".formatted(
-                    activeTopLevelLayer.getName(), activeTopLevelLayer.getComp().getDebugName(), getDebugName()));
         }
         if (activeLayer.getComp() != this) {
             throw new AssertionError(
                 "bad comp in active layer '%s' (that comp='%s', this='%s')".formatted(
                     activeLayer.getName(), activeLayer.getComp().getDebugName(), getDebugName()));
-        }
-        if (!layerList.contains(activeTopLevelLayer)) {
-            throw new AssertionError(format(
-                "active top-level layer ('%s') not in list (%s)",
-                activeTopLevelLayer.getName(), layerList));
         }
 
         if (!contains(activeLayer)) {
@@ -2030,11 +1950,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Creates a shallow copy (clone) of the given smart object and adds it.
      */
     public void shallowDuplicate(SmartObject so) {
-        if (so != activeTopLevelLayer) {
-            setActiveLayer(so);
-        }
-
-        addWithHistory(so.shallowDuplicate(), "Clone");
+        so.getHolder().addWithHistory(so.shallowDuplicate(), "Clone");
     }
 
     /**
@@ -2052,7 +1968,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         node.add(canvas.createDebugNode("canvas"));
         node.addInt("dpi", dpi);
 
-        node.add(activeTopLevelLayer.createDebugNode("active top-level layer"));
         node.add(activeLayer.createDebugNode("active layer"));
 
         forEachTopLevelLayer(layer -> node.add(layer.createDebugNode()));

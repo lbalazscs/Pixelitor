@@ -65,7 +65,7 @@ class OpenSaveDirsPanel extends JPanel implements Validated {
                                           BrowseFilesSupport chooser,
                                           GridBagHelper gbh) {
         gbh.addLabelAndTwoControls(label,
-            createExistingDirLayer(validationLabel, chooser.getTextField()),
+            createExistingDirLayer(chooser.getTextField(), validationLabel),
             chooser.getBrowseButton());
     }
 

@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.colors.ColorSpaces;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -24,7 +25,10 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.*;
+import pixelitor.progress.StatusBarProgressTracker;
+import pixelitor.progress.SubtaskProgressTracker;
+import pixelitor.utils.Dithering;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;

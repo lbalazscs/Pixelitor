@@ -17,8 +17,8 @@
 
 package pixelitor.guitest.main;
 
-import pixelitor.automate.AutoPaint;
-import pixelitor.automate.AutoPaintPanel;
+import pixelitor.autopaint.AutoPaint;
+import pixelitor.autopaint.ColorMode;
 import pixelitor.guitest.AppRunner;
 import pixelitor.guitest.Keyboard;
 import pixelitor.tools.Tool;
@@ -51,7 +51,7 @@ public class AutoPaintTests {
                 continue;
             }
             if (tool == Tools.BRUSH) {
-                for (String colorMode : AutoPaintPanel.COLOR_MODES) {
+                for (ColorMode colorMode : ColorMode.values()) {
                     testAutoPaintWithTool(tool, colorMode);
                 }
             } else {
@@ -60,7 +60,7 @@ public class AutoPaintTests {
         }
     }
 
-    private void testAutoPaintWithTool(Tool tool, String colorMode) {
+    private void testAutoPaintWithTool(Tool tool, ColorMode colorMode) {
         app.runMenuCommand("Auto Paint...");
         var dialog = app.findDialogByTitle("Auto Paint");
 
@@ -77,7 +77,7 @@ public class AutoPaintTests {
         var colorsCB = dialog.comboBox("colorsCB");
         if (colorMode != null) {
             colorsCB.requireEnabled();
-            colorsCB.selectItem(colorMode);
+            colorsCB.selectItem(colorMode.toString());
         } else {
             colorsCB.requireDisabled();
         }

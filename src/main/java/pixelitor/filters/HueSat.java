@@ -19,18 +19,16 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
+import pixelitor.colors.ColorSpaces;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.util.CylColorSpace;
-import pixelitor.utils.ColorSpaces;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.gui.GUIText.BRIGHTNESS;
-import static pixelitor.gui.GUIText.HUE;
-import static pixelitor.gui.GUIText.SATURATION;
+import static pixelitor.gui.GUIText.*;
 
 /**
  * The Hue-Saturation filter.

@@ -197,19 +197,12 @@ public class Gradient implements Serializable, Debuggable {
     }
 
     public boolean hasCustomTransparency() {
-        return hasTransparency() && isCustom();
-    }
-
-    private boolean isCustom() {
-        return switch (type) {
-            case LINEAR, RADIAL -> false;
-            case ANGLE, SPIRAL_CW, SPIRAL_CCW, DIAMOND -> true;
-        };
+        return hasTransparency() && type.hasCustomPaint();
     }
 
     /**
      * Returns whether the gradient pixels fully cover the originals.
-     * If true, then it should not be necessary to save the images for undo.
+     * If true, then it should not be necessary to save the pixels for undo.
      */
     public boolean isSolidOverlay() {
         return !hasTransparency()

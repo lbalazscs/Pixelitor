@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,20 @@ public class IsolateEdit extends PixelitorEdit {
         this.backupVisibility = backupVisibility;
     }
 
+    /**
+     * Checks if the last action was isolating the exact same layer.
+     * If so, undoes that isolation and returns true.
+     */
+    public static boolean undoIfIsolating(Layer layer) {
+        if (History.getEditToBeUndone() instanceof IsolateEdit isolateEdit) {
+            if (isolateEdit.layer == layer) {
+                History.undo("Isolate");
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
@@ -49,9 +63,5 @@ public class IsolateEdit extends PixelitorEdit {
         super.redo();
 
         comp.isolateLayer(layer, false);
-    }
-
-    public Layer getLayer() {
-        return layer;
     }
 }

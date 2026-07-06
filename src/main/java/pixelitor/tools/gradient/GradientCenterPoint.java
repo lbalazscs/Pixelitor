@@ -18,8 +18,12 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.gui.View;
+import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PPoint;
+
+import java.awt.Graphics2D;
 
 /**
  * The draggable point halfway between the start
@@ -29,12 +33,31 @@ public class GradientCenterPoint extends DraggablePoint {
     private final GradientDefiningPoint start;
     private final GradientDefiningPoint end;
 
+    private boolean isDragging = false;
+    private double dragStartImX;
+    private double dragStartImY;
+
     public GradientCenterPoint(GradientDefiningPoint start,
                                GradientDefiningPoint end,
                                View view) {
         super("center", PPoint.halfPointBetween(start, end), view);
         this.start = start;
         this.end = end;
+    }
+
+    @Override
+    public void mousePressed(double x, double y) {
+        super.mousePressed(x, y);
+
+        isDragging = true;
+        dragStartImX = imX;
+        dragStartImY = imY;
+    }
+
+    @Override
+    protected void afterMouseReleasedActions() {
+        super.afterMouseReleasedActions();
+        isDragging = false;
     }
 
     @Override
@@ -49,5 +72,17 @@ public class GradientCenterPoint extends DraggablePoint {
         // also move the start and end points by the same delta
         start.translateOnlyThis(dx, dy);
         end.translateOnlyThis(dx, dy);
+    }
+
+    @Override
+    public void paintHandle(Graphics2D g) {
+        super.paintHandle(g);
+        if (isActive() && isDragging) {
+            Drag drag = new Drag(dragStartImX, dragStartImY, imX, imY);
+            // ensure the drag is correctly mapped to component-space
+            // coordinates so the overlay box positions itself correctly
+            drag.calcCoCoords(view);
+            OverlayType.REL_MOUSE_POS.draw(g, drag);
+        }
     }
 }

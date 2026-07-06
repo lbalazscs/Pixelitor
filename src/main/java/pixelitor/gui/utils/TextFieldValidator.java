@@ -60,14 +60,14 @@ public interface TextFieldValidator {
      * Checks if the text field contains a positive integer value (> 0).
      */
     static ValidationResult requirePositiveInt(JTextField textField, String label) {
-        return checkInt(textField, label, false);
+        return requireInt(textField, label, false);
     }
 
     /**
      * Checks if the text field contains a non-negative integer value (>= 0).
      */
     static ValidationResult requireNonNegativeInt(JTextField textField, String label) {
-        return checkInt(textField, label, true);
+        return requireInt(textField, label, true);
     }
 
     /**
@@ -84,7 +84,7 @@ public interface TextFieldValidator {
         return TFValidationLayerUI.wrapWithValidation(tf, textField -> requireNonNegativeInt(textField, label));
     }
 
-    private static ValidationResult checkInt(JTextField textField, String label, boolean allowZero) {
+    private static ValidationResult requireInt(JTextField textField, String label, boolean allowZero) {
         String text = textField.getText().trim();
         if (text.isEmpty()) {
             return ValidationResult.invalidEmpty(label);
@@ -121,7 +121,7 @@ public interface TextFieldValidator {
     /**
      * Creates a JLayer that validates its text field for an existing directory.
      */
-    static JLayer<JTextField> createExistingDirLayer(String label, JTextField tf) {
+    static JLayer<JTextField> createExistingDirLayer(JTextField tf, String label) {
         return TFValidationLayerUI.wrapWithValidation(tf, textField -> requireExistingDir(textField, label));
     }
 }

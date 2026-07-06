@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.colors;
 
 import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;

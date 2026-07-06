@@ -27,6 +27,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.function.Consumer;
 
 /**
  * A filter that adds a text to the active image layer.
@@ -78,7 +79,7 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public void randomize() {
-        settings.randomize();
+        setSettings(TextSettings.createRandomized(settings.getGuiUpdateCallback()));
     }
 
     public TextSettings getSettings() {
@@ -101,7 +102,12 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        settings.loadUserPreset(preset);
+        Consumer<TextSettings> cb = settings.getGuiUpdateCallback();
+        TextSettings newSettings = new TextSettings(preset, cb);
+        setSettings(newSettings);
+        if (cb != null) {
+            cb.accept(newSettings);
+        }
     }
 
     @Override

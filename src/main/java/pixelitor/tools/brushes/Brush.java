@@ -26,7 +26,7 @@ import java.awt.Graphics2D;
 /**
  * The behavior of a brush used for drawing on a {@link Drawable}.
  * The received coordinates correspond to the mouse events;
- * they are not translated with the brush radius.
+ * they are not offset by the brush radius.
  */
 public interface Brush extends Debuggable {
     /**

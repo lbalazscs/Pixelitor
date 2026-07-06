@@ -143,7 +143,7 @@ public enum ShapeType {
             }
             lastDrag = drag;
 
-            Rectangle2D r = drag.createSignedImRect();
+            Rectangle2D r = drag.toSignedImRect();
             return new RandomStarShape(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
@@ -166,7 +166,7 @@ public enum ShapeType {
                 unitArrow = CustomShapes.createUnitArrow();
             }
 
-            Rectangle2D r = drag.createSignedImRect();
+            Rectangle2D r = drag.toSignedImRect();
 
             double length = drag.calcImLength();
             var transform = AffineTransform.getTranslateInstance(r.getX(), r.getY());
@@ -253,7 +253,7 @@ public enum ShapeType {
      * Most simple shapes use a signed rectangle for symmetry during drag.
      */
     protected Rectangle2D getShapeBounds(Drag drag) {
-        return drag.createSignedImRect();
+        return drag.toSignedImRect();
     }
 
     public final Shape createShape(double x, double y, double size) {

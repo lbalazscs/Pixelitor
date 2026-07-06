@@ -33,6 +33,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.SmartObject;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
+import pixelitor.selection.ShapeCombinator;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
@@ -121,7 +122,17 @@ public class Crop implements CompAction {
         if (!fromSelection) {
             // if cropping wasn't based on a selection,
             // ensure any existing selection is also cropped
-            croppedComp.intersectSelectionWith(cropRect);
+            Selection sel = croppedComp.getSelection();
+            if (sel != null) {
+                Shape intersection = ShapeCombinator.INTERSECT.combine(
+                    sel.getShape(), cropRect);
+
+                if (intersection.getBounds().isEmpty()) {
+                    croppedComp.deselect(false);
+                } else {
+                    sel.setShape(intersection);
+                }
+            }
         }
 
         // crop individual layers and masks

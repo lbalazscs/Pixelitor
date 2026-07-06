@@ -55,18 +55,18 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
             dragStarted(e);
         }
 
-        // update alt state if Alt was pressed mid-drag
+        // check if the Alt key was pressed mid-drag
         boolean altDown = e.isAltDown();
         assert altDown == GlobalEvents.isAltDown() || AppMode.isUnitTesting()
             : "altDown = " + altDown + ", GlobalEvents.isAltDown() = " + GlobalEvents.isAltDown();
 
-        // determine if Alt means "expand from center"
-        // this is true if Alt is down, but wasn't pressed *at the start* for subtraction
-        boolean expandFromCenter = !isAltSubtracting && altDown;
+        // expand from center only if Alt wasn't already down at drag-start
+        // (in that case Alt is used for shape combination, not expand-from-center)
+        boolean expandFromCenter = !altUsedForCombinator && altDown;
 
-        // if Alt is released mid-drag, it no longer means subtract for this drag
+        // if Alt is released mid-drag, it no longer means subtract/intersect for this drag
         if (!altDown) {
-            isAltSubtracting = false;
+            altUsedForCombinator = false;
         }
 
         drag.setExpandFromCenter(expandFromCenter);
@@ -79,11 +79,12 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
         finalizeDragBasedSelection(e);
     }
 
+    // altPressed() and altReleased() mirror the expand-from-center handling
+    // in ongoingDrag(), but fire immediately on the key event since
+    // there may be no mouse movement to trigger it otherwise
     @Override
     public void altPressed() {
-        // handle pressing Alt *during* a drag: if Alt wasn't already
-        // down and wasn't for subtraction, enable expand-from-center
-        if (!isAltSubtracting && drag != null && drag.isDragging()) {
+        if (!altUsedForCombinator && drag != null && drag.isDragging()) {
             drag.setExpandFromCenter(true);
             if (selectionBuilder != null) {
                 selectionBuilder.updateDraftSelection(drag);
@@ -93,9 +94,11 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
 
     @Override
     public void altReleased() {
-        // handle releasing Alt *during* a drag: if Alt wasn't
-        // for subtraction, disable expand-from-center
-        if (!isAltSubtracting && drag != null && drag.isDragging()) {
+        boolean wasAltCombinator = altUsedForCombinator;
+
+        super.altReleased(); // clears altUsedForCombinator
+
+        if (!wasAltCombinator && drag != null && drag.isDragging()) {
             drag.setExpandFromCenter(false);
             if (selectionBuilder != null) {
                 selectionBuilder.updateDraftSelection(drag);

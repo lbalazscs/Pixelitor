@@ -25,8 +25,8 @@ import java.io.File;
 import static java.nio.file.Files.isWritable;
 
 /**
- * A save file chooser that confirms before overwriting a file,
- * and also does some other validations (valid file name, writable file).
+ * A saving file chooser that confirms before overwriting an existing file,
+ * and also does additional validation, such as checking for valid file names and writable files.
  */
 public class ValidatingSaveFileChooser extends JFileChooser {
     private static final char[] INVALID_CHARACTERS =
@@ -41,12 +41,12 @@ public class ValidatingSaveFileChooser extends JFileChooser {
         File f = getSelectedFile();
         String fileName = f.getName();
 
-        if (checkAndReportInvalidFileName(fileName)) {
+        if (validateFileName(fileName)) {
             return;
         }
 
         if (!FileUtils.hasExtension(fileName)) {
-            // this can happen when exporting with an "all files"
+            // this can happen when exporting with the "All Files"
             // file filter, because then getSelectedFile() won't
             // automatically add an extension based on the file filter.
             Dialogs.showNoExtensionError(this);
@@ -69,13 +69,13 @@ public class ValidatingSaveFileChooser extends JFileChooser {
         super.approveSelection();
     }
 
-    // an incomplete check, but it should cover the most common cases
-    private boolean checkAndReportInvalidFileName(String fileName) {
+    // not a comprehensive check, but it covers the most common cases
+    private boolean validateFileName(String fileName) {
         for (char ch : INVALID_CHARACTERS) {
             if (fileName.indexOf(ch) != -1) {
-                // no HTML in the message, because then the display
-                // of the < and > characters becomes problematic
-                Dialogs.showError(this, "Invalid filename",
+                // avoids HTML in the message because displaying
+                // the < and > characters becomes problematic
+                Dialogs.showError(this, "Invalid File Name",
                     "The file name cannot contain the character " + ch + ".");
                 return true;
             }

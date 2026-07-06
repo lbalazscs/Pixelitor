@@ -20,10 +20,10 @@ package pixelitor.filters;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam.RangeParamState;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.BoundingBox;
 import pixelitor.utils.CustomShapes;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

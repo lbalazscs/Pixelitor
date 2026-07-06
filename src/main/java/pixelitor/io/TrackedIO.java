@@ -20,10 +20,10 @@ package pixelitor.io;
 import pd.GifDecoder;
 import pixelitor.Composition;
 import pixelitor.gui.utils.ThumbInfo;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.TrackingReadProgressListener;
-import pixelitor.utils.TrackingWriteProgressListener;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.StatusBarProgressTracker;
+import pixelitor.progress.TrackingReadProgressListener;
+import pixelitor.progress.TrackingWriteProgressListener;
 
 import javax.imageio.*;
 import javax.imageio.stream.ImageInputStream;
@@ -34,10 +34,7 @@ import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOutsideEDT;
-import static pixelitor.utils.Threads.onEDT;
-import static pixelitor.utils.Threads.onIOThread;
+import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.Thumbnails.createThumbnail;
 
 /**
@@ -127,7 +124,7 @@ public class TrackedIO {
     /**
      * Reads an image from a file and throws only runtime exceptions.
      */
-    public static BufferedImage uncheckedRead(File file) {
+    public static BufferedImage readUnchecked(File file) {
         try {
             BufferedImage image = read(file);
             // For some decoding problems (ImageIO bugs?) we get an
@@ -303,12 +300,12 @@ public class TrackedIO {
     }
 
     public static Composition readSingleLayeredSync(File file) {
-        BufferedImage img = uncheckedRead(file);
+        BufferedImage img = readUnchecked(file);
         return Composition.fromImage(img, file, null);
     }
 
     static CompletableFuture<Composition> readSingleLayeredAsync(File file) {
-        return CompletableFuture.supplyAsync(() -> uncheckedRead(file), onIOThread)
+        return CompletableFuture.supplyAsync(() -> readUnchecked(file), onIOThread)
             .thenApplyAsync(img -> Composition.fromImage(img, file, null), onEDT);
     }
 }

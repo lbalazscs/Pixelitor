@@ -35,7 +35,7 @@ import static java.awt.MultipleGradientPaint.ColorSpaceType.SRGB;
  * The type of a gradient.
  */
 public enum GradientType {
-    LINEAR("Linear") {
+    LINEAR("Linear", false) {
         @Override
         public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
             Point2D start = drag.getStartPoint();
@@ -44,7 +44,7 @@ public enum GradientType {
             return new LinearGradientPaint(start, end, FRACTIONS,
                 colors, cycle, SRGB, IDENTITY_TRANSFORM);
         }
-    }, RADIAL("Radial") {
+    }, RADIAL("Radial", false) {
         @Override
         public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
             float radius = (float) drag.calcImLength();
@@ -53,22 +53,22 @@ public enum GradientType {
             return new RadialGradientPaint(center, radius, center, FRACTIONS,
                 colors, cycle, SRGB, IDENTITY_TRANSFORM);
         }
-    }, ANGLE("Angle") {
+    }, ANGLE("Angle", true) {
         @Override
         public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
             return new AngleGradientPaint(drag, colors[0], colors[1], cycle);
         }
-    }, SPIRAL_CW("CW Spiral") {
+    }, SPIRAL_CW("CW Spiral", true) {
         @Override
         public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
             return new SpiralGradientPaint(true, drag, colors[0], colors[1], cycle);
         }
-    }, SPIRAL_CCW("CCW Spiral") {
+    }, SPIRAL_CCW("CCW Spiral", true) {
         @Override
         public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
             return new SpiralGradientPaint(false, drag, colors[0], colors[1], cycle);
         }
-    }, DIAMOND("Diamond") {
+    }, DIAMOND("Diamond", true) {
         @Override
         public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
             return new DiamondGradientPaint(drag, colors[0], colors[1], cycle);
@@ -80,12 +80,18 @@ public enum GradientType {
     public static final String PRESET_KEY = "Gradient Type";
     
     private final String displayName;
+    private final boolean customPaint;
 
-    GradientType(String displayName) {
+    GradientType(String displayName, boolean customPaint) {
         this.displayName = displayName;
+        this.customPaint = customPaint;
     }
 
     public abstract Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle);
+
+    public boolean hasCustomPaint() {
+        return customPaint;
+    }
 
     @Override
     public String toString() {

@@ -17,7 +17,7 @@ limitations under the License.
 package com.jhlabs.image;
 
 import net.jafama.FastMath;
-import pixelitor.utils.ColorSpaces;
+import pixelitor.colors.ColorSpaces;
 
 import java.util.Arrays;
 

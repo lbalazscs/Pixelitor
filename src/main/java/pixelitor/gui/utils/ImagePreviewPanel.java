@@ -18,9 +18,9 @@
 package pixelitor.gui.utils;
 
 import pixelitor.io.*;
-import pixelitor.utils.JProgressBarTracker;
-import pixelitor.utils.ProgressPanel;
-import pixelitor.utils.ProgressTracker;
+import pixelitor.progress.JProgressBarTracker;
+import pixelitor.progress.ProgressPanel;
+import pixelitor.progress.ProgressTracker;
 
 import javax.swing.*;
 import java.awt.Dimension;

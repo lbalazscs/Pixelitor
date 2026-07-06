@@ -40,9 +40,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.layers.BlendingMode.DIFFERENCE;
-import static pixelitor.layers.BlendingMode.NORMAL;
-import static pixelitor.layers.BlendingMode.PASS_THROUGH;
+import static pixelitor.layers.BlendingMode.*;
 
 /**
  * Tests the functionality common to all Layer subclasses.
@@ -149,6 +147,10 @@ class LayerTest {
     void isolating() {
         checkShown(layer);
         checkShown(layer2);
+
+        if (layer instanceof SmartFilter) {
+            return; // smart filters can't be isolated
+        }
 
         layer.isolate(); // isolate the primary layer
 

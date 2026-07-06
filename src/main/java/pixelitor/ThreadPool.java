@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.progress.ProgressTracker;
 import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.*;

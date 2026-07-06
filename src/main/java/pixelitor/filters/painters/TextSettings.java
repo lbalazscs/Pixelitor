@@ -48,10 +48,10 @@ import static java.awt.font.TextAttribute.KERNING;
 import static java.awt.font.TextAttribute.KERNING_ON;
 
 /**
- * All the configurable properties of the text filter and text layers.
+ * All the configurable properties of text layers and the text filter.
  * Edited by the {@link TextSettingsPanel}.
- * This is almost an immutable object, since {@link TextSettingsPanel}
- * creates new objects for every change, but loadUserPreset() still mutates it.
+ * This is an immutable object, since {@link TextSettingsPanel}
+ * creates new objects for every change.
  */
 public class TextSettings implements Serializable, Debuggable {
     @Serial
@@ -75,15 +75,15 @@ public class TextSettings implements Serializable, Debuggable {
     private static final String PRESET_KEY_VER_ALIGN = "ver_align";
 
     private String text;
-    private Font font;
-    private AreaEffects areaEffects;
-    private Color color;
+    private final Font font;
+    private final AreaEffects areaEffects;
+    private final Color color;
     private VerticalAlignment verticalAlignment;
     private HorizontalAlignment horizontalAlignment;
     private boolean watermark;
     private int mlpAlignment; // alignment for multiline text or text on a path
 
-    private double rotation;
+    private final double rotation;
     private double sx;
     private double sy;
     private double shx;
@@ -126,7 +126,7 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     /**
-     * Default settings
+     * Default settings.
      */
     public TextSettings() {
         areaEffects = new AreaEffects();
@@ -167,6 +167,69 @@ public class TextSettings implements Serializable, Debuggable {
 
         this.transformFieldsInPxc = true; // always true for new objects
         assert other.transformFieldsInPxc; // should be set by now anyway
+    }
+
+    public TextSettings(UserPreset preset, Consumer<TextSettings> guiUpdateCallback) {
+        this.guiUpdateCallback = guiUpdateCallback;
+
+        text = Utils.decodeNewlines(preset.get(PRESET_KEY_TEXT));
+        color = preset.getColor(PRESET_KEY_COLOR);
+        rotation = preset.getFloat(PRESET_KEY_ROTATION);
+
+        int alignIndex = preset.getInt(PRESET_KEY_ALIGN, -1);
+        if (alignIndex == -1) {
+            // old preset, can't have path alignment
+            horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
+            verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
+        } else {
+            BoxAlignment alignment = BoxAlignment.values()[alignIndex];
+            if (alignment.isPath() && !Views.getActiveComp().hasActivePath()) {
+                alignment = BoxAlignment.CENTER_CENTER;
+            }
+            horizontalAlignment = alignment.getHorizontal();
+            verticalAlignment = alignment.getVertical();
+        }
+        mlpAlignment = preset.getInt(PRESET_KEY_MLP_ALIGN, MlpAlignmentSelector.LEFT);
+
+        font = new FontInfo(preset).createFont();
+
+        areaEffects = new AreaEffects();
+        areaEffects.loadStateFrom(preset);
+
+        watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
+        relLineHeight = preset.getDouble(PRESET_KEY_REL_LINE_HEIGHT, 1.0);
+        sx = preset.getDouble(PRESET_KEY_SX, 1.0);
+        sy = preset.getDouble(PRESET_KEY_SY, 1.0);
+        shx = preset.getDouble(PRESET_KEY_SHX, 0.0);
+        shy = preset.getDouble(PRESET_KEY_SHY, 0.0);
+
+        if (guiUpdateCallback != null) { // can be null in tests that don't create a dialog
+            guiUpdateCallback.accept(this);
+        }
+    }
+
+    public static TextSettings createRandomized(Consumer<TextSettings> guiUpdateCallback) {
+        return new TextSettings(
+            Rnd.createRandomString(10), // text
+            Rnd.createRandomFont(),
+            Rnd.createRandomColor(),
+            Rnd.createRandomEffects(),
+            Rnd.chooseFrom(HorizontalAlignment.values()),
+            Rnd.chooseFrom(VerticalAlignment.values()),
+            Rnd.chooseFrom(new int[]{
+                MlpAlignmentSelector.LEFT,
+                MlpAlignmentSelector.CENTER,
+                MlpAlignmentSelector.RIGHT
+            }),
+            Rnd.nextBoolean(), // watermark
+            Rnd.nextDouble() * Math.PI * 2, // rotation
+            0.5 + Rnd.nextDouble(), // rel line height
+            0.5 + Rnd.nextDouble(), // sx
+            0.5 + Rnd.nextDouble(), // sy
+            -0.5 + Rnd.nextDouble(), // shx
+            -0.5 + Rnd.nextDouble(), // shy
+            guiUpdateCallback
+        );
     }
 
     @Serial
@@ -232,26 +295,23 @@ public class TextSettings implements Serializable, Debuggable {
         }
     }
 
-    public void randomize() {
-        text = Rnd.createRandomString(10);
-        font = Rnd.createRandomFont();
-        areaEffects = Rnd.createRandomEffects();
-        color = Rnd.createRandomColor();
-        horizontalAlignment = Rnd.chooseFrom(HorizontalAlignment.values());
-        verticalAlignment = Rnd.chooseFrom(VerticalAlignment.values());
-        mlpAlignment = Rnd.chooseFrom(new int[]{
-            MlpAlignmentSelector.LEFT,
-            MlpAlignmentSelector.CENTER,
-            MlpAlignmentSelector.RIGHT
-        });
+    public TextSettings withAlignment(BoxAlignment newAlignment) {
+        TextSettings copy = new TextSettings(this);
+        copy.horizontalAlignment = newAlignment.getHorizontal();
+        copy.verticalAlignment = newAlignment.getVertical();
+        return copy;
+    }
 
-        watermark = Rnd.nextBoolean();
-        rotation = Rnd.nextDouble() * Math.PI * 2;
-        relLineHeight = 0.5 + Rnd.nextDouble();
-        sx = 0.5 + Rnd.nextDouble();
-        sy = 0.5 + Rnd.nextDouble();
-        shx = -0.5 + Rnd.nextDouble();
-        shy = -0.5 + Rnd.nextDouble();
+    public TextSettings withText(String newText) {
+        TextSettings copy = new TextSettings(this);
+        copy.text = newText;
+        return copy;
+    }
+
+    public TextSettings withWatermark(boolean newWatermark) {
+        TextSettings copy = new TextSettings(this);
+        copy.watermark = newWatermark;
+        return copy;
     }
 
     /**
@@ -276,46 +336,6 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     /**
-     * Loads the state from the given user preset and updates GUI if a callback is set.
-     */
-    public void loadUserPreset(UserPreset preset) {
-        text = Utils.decodeNewlines(preset.get(PRESET_KEY_TEXT));
-        color = preset.getColor(PRESET_KEY_COLOR);
-        rotation = preset.getFloat(PRESET_KEY_ROTATION);
-
-        int alignIndex = preset.getInt(PRESET_KEY_ALIGN, -1);
-        if (alignIndex == -1) {
-            // old preset, can't have path alignment
-            horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
-            verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
-        } else {
-            BoxAlignment alignment = BoxAlignment.values()[alignIndex];
-            if (alignment.isPath() && !Views.getActiveComp().hasActivePath()) {
-                alignment = BoxAlignment.CENTER_CENTER;
-            }
-            horizontalAlignment = alignment.getHorizontal();
-            verticalAlignment = alignment.getVertical();
-        }
-        mlpAlignment = preset.getInt(PRESET_KEY_MLP_ALIGN, MlpAlignmentSelector.LEFT);
-
-        font = new FontInfo(preset).createFont();
-
-        areaEffects = new AreaEffects();
-        areaEffects.loadStateFrom(preset);
-
-        watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
-        relLineHeight = preset.getDouble(PRESET_KEY_REL_LINE_HEIGHT, 1.0);
-        sx = preset.getDouble(PRESET_KEY_SX, 1.0);
-        sy = preset.getDouble(PRESET_KEY_SY, 1.0);
-        shx = preset.getDouble(PRESET_KEY_SHX, 0.0);
-        shy = preset.getDouble(PRESET_KEY_SHY, 0.0);
-
-        if (guiUpdateCallback != null) { // can be null in tests that don't create a dialog
-            guiUpdateCallback.accept(this);
-        }
-    }
-
-    /**
      * Checks if the font used in these settings is installed on the system, showing an error if not.
      */
     public void warnIfFontMissing(TextLayer textLayer) {
@@ -325,7 +345,8 @@ public class TextSettings implements Serializable, Debuggable {
         }
         String fontName = font.getName();
 
-        int index = Arrays.binarySearch(Utils.getAvailableFontNames(), fontName);
+        String[] sortedFontNames = Utils.getAvailableFontNames();
+        int index = Arrays.binarySearch(sortedFontNames, fontName);
         if (index < 0) {
             if (fontName.equals("Default")) {
                 // for some reason the "all smart filters" test file has this
@@ -345,25 +366,12 @@ public class TextSettings implements Serializable, Debuggable {
         return color;
     }
 
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
     public Font getFont() {
         return font;
     }
 
-    public void setFont(Font font) {
-        this.font = font;
-    }
-
     public BoxAlignment getAlignment() {
         return BoxAlignment.from(horizontalAlignment, verticalAlignment);
-    }
-
-    public void setAlignment(BoxAlignment newAlignment) {
-        this.horizontalAlignment = newAlignment.getHorizontal();
-        this.verticalAlignment = newAlignment.getVertical();
     }
 
     public int getMLPAlignment() {
@@ -372,10 +380,6 @@ public class TextSettings implements Serializable, Debuggable {
 
     public String getText() {
         return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 
     public double getRelLineHeight() {
@@ -402,10 +406,6 @@ public class TextSettings implements Serializable, Debuggable {
         return watermark;
     }
 
-    public void setWatermark(boolean watermark) {
-        this.watermark = watermark;
-    }
-
     public double getRotation() {
         return rotation;
     }
@@ -416,6 +416,10 @@ public class TextSettings implements Serializable, Debuggable {
 
     public void setGuiUpdateCallback(Consumer<TextSettings> guiUpdateCallback) {
         this.guiUpdateCallback = guiUpdateCallback;
+    }
+
+    public Consumer<TextSettings> getGuiUpdateCallback() {
+        return guiUpdateCallback;
     }
 
     @Override

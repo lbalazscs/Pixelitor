@@ -19,6 +19,7 @@ package pixelitor.gui.utils;
 
 import java.awt.Component;
 import java.io.File;
+import java.util.function.IntFunction;
 
 import static java.lang.String.format;
 
@@ -26,7 +27,7 @@ import static java.lang.String.format;
  * Represents the result of a validation as an immutable object.
  * It supports chaining multiple validations and combining their results.
  */
-public class ValidationResult {
+public final class ValidationResult {
     private final boolean isValid;
     private final String errorMsg;
 
@@ -81,9 +82,6 @@ public class ValidationResult {
      */
     public ValidationResult and(ValidationResult other) {
         if (isValid) {
-            assert this == VALID_RESULT;
-            assert !other.isValid() || other == VALID_RESULT;
-
             // if this one is valid, the result is determined by the other one
             return other;
         }
@@ -99,7 +97,6 @@ public class ValidationResult {
      */
     public ValidationResult addError(String newErrorMsg) {
         if (isValid) {
-            assert this == VALID_RESULT;
             return invalid(newErrorMsg);
         }
         return invalid(combineErrorMessages(this.errorMsg, newErrorMsg));
@@ -140,24 +137,25 @@ public class ValidationResult {
      * Validates that a string represents a positive integer.
      */
     public ValidationResult requirePositiveInt(String text, String fieldName) {
-        try {
-            int value = Integer.parseInt(text.trim());
-            return this.requirePositive(value, fieldName);
-        } catch (NumberFormatException e) {
-            return this.addError(format("<b>%s</b> must be an integer.", fieldName));
-        }
+        return requireParsedInt(text, fieldName,
+            v -> requirePositive(v, fieldName));
     }
 
     /**
      * Validates that a string represents a positive integer with a maximum value.
      */
     public ValidationResult requireBoundedPositiveInt(String text, String fieldName, int maxValue) {
+        return requireParsedInt(text, fieldName,
+            v -> requirePositive(v, fieldName)
+                .requireMax(v, fieldName, maxValue));
+    }
+
+    private ValidationResult requireParsedInt(String text, String fieldName,
+                                              IntFunction<ValidationResult> onSuccess) {
         try {
-            int value = Integer.parseInt(text.trim());
-            return requirePositive(value, fieldName)
-                .requireMax(value, fieldName, maxValue);
+            return onSuccess.apply(Integer.parseInt(text.trim()));
         } catch (NumberFormatException e) {
-            return this.addError(format("<b>%s</b> must be an integer.", fieldName));
+            return addError(format("<b>%s</b> must be an integer.", fieldName));
         }
     }
 
@@ -194,6 +192,13 @@ public class ValidationResult {
      */
     private static String combineErrorMessages(String first, String second) {
         return first + "<br>" + second;
+    }
+
+    public String getHtmlErrorMessage() {
+        if (isValid()) {
+            return null;
+        }
+        return "<html>" + errorMsg;
     }
 
     public void showErrorDialog(Component dialogParent) {

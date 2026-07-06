@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ public enum ShapeCombinator {
     REPLACE("Replace") {
         @Override
         public Shape combine(Shape existingShape, Shape newShape) {
-            // discard the previously selected area
+            // discards the previously selected area
             return newShape;
         }
     }, ADD("Add") {
@@ -49,7 +49,7 @@ public enum ShapeCombinator {
     }, INTERSECT("Intersect") {
         @Override
         public Shape combine(Shape existingShape, Shape newShape) {
-            // keeps only the areas that are common to both selections
+            // keeps only the areas common to both selections
             Area commonArea = new Area(existingShape);
             commonArea.intersect(new Area(newShape));
             return commonArea;
@@ -73,6 +73,6 @@ public enum ShapeCombinator {
     }
 
     public String getHistoryName() {
-        return this + " Selection";
+        return displayName + " Selection";
     }
 }

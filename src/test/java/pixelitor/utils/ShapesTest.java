@@ -210,7 +210,7 @@ class ShapesTest {
         assertThat(Shapes.toPositiveRect(inputRect)).isEqualTo(expectedRect);
 
         // test the overload that takes coordinates
-        assertThat(Shapes.toPositiveRect(inX, inX + inW, inY, inY + inH)).isEqualTo(expectedRect);
+        assertThat(Shapes.toPositiveRect(inX, inY, inX + inW, inY + inH)).isEqualTo(expectedRect);
 
         // test the overload that takes a Rectangle2D
         Rectangle2D inputRect2D = new Rectangle2D.Double(inX, inY, inW, inH);

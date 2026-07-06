@@ -120,16 +120,14 @@ public class Geometry {
                                          double n,
                                          Point2D resultOut) {
         // https://en.wikipedia.org/wiki/Section_formula
-        Point2D scaledStart = scale(start, n, new Point2D.Double());
-        Point2D scaledEnd = scale(end, m, new Point2D.Double());
-        add(scaledStart, scaledEnd, resultOut);
-        deScale(resultOut, (m + n));
+        double totalWeight = m + n;
+        resultOut.setLocation(
+            (start.getX() * n + end.getX() * m) / totalWeight,
+            (start.getY() * n + end.getY() * m) / totalWeight);
     }
 
     public static Point2D copyPoint(Point2D source) {
-        Point2D.Double b = new Point2D.Double();
-        b.setLocation(source);
-        return b;
+        return new Point2D.Double(source.getX(), source.getY());
     }
 
     public static void normalize(Point2D a) {
@@ -175,8 +173,8 @@ public class Geometry {
         return FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
     }
 
-    public static Point2D add(Point2D a, double add) {
-        a.setLocation(a.getX() + add, a.getY() + add);
+    public static Point2D add(Point2D a, double delta) {
+        a.setLocation(a.getX() + delta, a.getY() + delta);
         return a;
     }
 
@@ -252,7 +250,7 @@ public class Geometry {
     }
 
     public static Point round(Point2D p) {
-        return new Point((int) p.getX(), (int) p.getY());
+        return new Point((int) Math.round(p.getX()), (int) Math.round(p.getY()));
     }
 
     public static double calcSquaredDistance(double x1, double y1, double x2, double y2) {

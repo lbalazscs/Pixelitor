@@ -29,7 +29,6 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.CloneMirror;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
@@ -44,9 +43,7 @@ import java.util.function.Consumer;
 
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
-import static pixelitor.tools.CloneTool.State.CLONING;
-import static pixelitor.tools.CloneTool.State.NO_SOURCE;
-import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED;
+import static pixelitor.tools.CloneTool.State.*;
 
 /**
  * The clone stamp tool.
@@ -146,7 +143,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void updateLazyMousedState() {
+    protected void updateLazyMouseState() {
         if (lazyMouseEnabled.isChecked()) {
             lazyMouseBrush = new LazyMouseBrush(cloneBrush);
             brush = new AffectedAreaTracker(lazyMouseBrush, affectedArea);
@@ -231,8 +228,8 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     // sets the source point for cloning based on the event coordinates
-    private void setCloningSource(PPoint e) {
-        var comp = e.getComp();
+    private void setCloningSource(PPoint p) {
+        var comp = p.getComp();
         BufferedImage sourceImage;
         int dx = 0;
         int dy = 0;
@@ -244,7 +241,7 @@ public class CloneTool extends BlendingModeBrushTool {
             dx = -dr.getTx();
             dy = -dr.getTy();
         }
-        cloneBrush.setSource(sourceImage, e.getImX() + dx, e.getImY() + dy);
+        cloneBrush.setSource(sourceImage, p.getImX() + dx, p.getImY() + dy);
         setState(SOURCE_DEFINED);
     }
 

@@ -33,21 +33,12 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.BLUE;
-import static java.awt.Color.CYAN;
-import static java.awt.Color.RED;
-import static java.awt.Color.WHITE;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static java.awt.Color.*;
+import static org.mockito.Mockito.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING_STATE;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FILTER_LOGIC;
-import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
-import static pixelitor.filters.gui.TransparencyMode.OPAQUE_ONLY;
-import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
+import static pixelitor.filters.gui.TransparencyMode.*;
 
 /**
  * Checks whether different {@link FilterParam} implementations
@@ -178,6 +169,7 @@ class FilterParamTest {
         randomizeUntilNotDefault();
 
         assertThat(param.getValueAsString())
+            .as(param.getClass().getSimpleName() + " " + param)
             .isNotNull()
             .isNotEqualTo(defaultValue);
 

@@ -19,9 +19,9 @@ package pixelitor.tools.selection;
 
 import pixelitor.Composition;
 import pixelitor.Invariants;
-import pixelitor.gui.View;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionType;
+import pixelitor.tools.DragTool;
 import pixelitor.tools.ToolIcons;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
@@ -32,6 +32,8 @@ import java.util.function.Consumer;
 
 /**
  * A tool that creates polygonal selections by clicking points.
+ * Indirectly extends {@link DragTool} for architectural reuse, but
+ * most of the drag hooks are unused or repurposed for click handling.
  */
 public class PolygonalSelectionTool extends AbstractSelectionTool {
     // the freehand and polygonal selection tools share the 'L' hotkey, with cycling
@@ -42,15 +44,6 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
             Cursors.DEFAULT, false);
         repositionOnSpace = false;
         pixelSnapping = true;
-    }
-
-    @Override
-    protected void toolDeactivated(View view) {
-        super.toolDeactivated(view);
-
-        // ensure unfinished selections are cancelled
-        // and don't remain visible after switching tools
-        cancelSelectionBuilder();
     }
 
     @Override
@@ -68,35 +61,31 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
         Composition comp = e.getComp();
         if (selectionBuilder == null) {
             // first click: start building the polygon
-            setupCombinatorWithKeyModifiers(e);
+            updateCombinatorFromModifiers(e);
             selectionBuilder = new SelectionBuilder(
                 SelectionType.POLYGONAL_LASSO, getCombinator(), comp);
             selectionBuilder.updateDraftSelection(e);
             resetCombinator();
         } else {
-            // subsequent click: add another point
-            selectionBuilder.updateDraftSelection(e);
-            if (e.isRight()) {
-                // right-click finishes the polygon
+            // subsequent click: check for double-click or right-click
+            if (e.getClickCount() > 1) {
+                // double-click finishes the polygon (the first half
+                // of the double-click already recorded the final point)
                 selectionBuilder.combineShapes();
                 cancelSelectionBuilder();
+            } else {
+                // single click: add another point
+                selectionBuilder.updateDraftSelection(e);
+                if (e.isRight()) {
+                    // right-click finishes the polygon
+                    selectionBuilder.combineShapes();
+                    cancelSelectionBuilder();
+                }
             }
         }
 
         assert Invariants.selectionShapeIsNotEmpty(comp.getSelection()) : "selection is empty";
         assert Invariants.selectionIsInsideCanvas(comp) : "selection is outside";
-    }
-
-    @Override
-    public void mouseClicked(PMouseEvent e) {
-        // handle double-click to finish the polygon
-        if (selectionBuilder != null && e.getClickCount() > 1) {
-            // update with the final point (same as the double-clicked point)
-            selectionBuilder.updateDraftSelection(e);
-            selectionBuilder.combineShapes();
-            cancelSelectionBuilder();
-        }
-        // single clicks are handled in dragFinished
     }
 
     @Override

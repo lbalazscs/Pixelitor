@@ -21,7 +21,6 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
 import org.jdesktop.swingx.util.GraphicsUtilities;
-import pixelitor.AppMode;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
@@ -46,24 +45,8 @@ import java.util.Objects;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
-import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_DEFAULT;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_DEFAULT;
-import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
-import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
-import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
-import static java.awt.font.TextAttribute.KERNING;
-import static java.awt.font.TextAttribute.KERNING_ON;
-import static java.awt.font.TextAttribute.LIGATURES;
-import static java.awt.font.TextAttribute.LIGATURES_ON;
-import static java.awt.font.TextAttribute.STRIKETHROUGH;
-import static java.awt.font.TextAttribute.STRIKETHROUGH_ON;
-import static java.awt.font.TextAttribute.TRACKING;
-import static java.awt.font.TextAttribute.UNDERLINE;
-import static java.awt.font.TextAttribute.UNDERLINE_ON;
+import static java.awt.RenderingHints.*;
+import static java.awt.font.TextAttribute.*;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
@@ -111,12 +94,30 @@ public class TransformedTextPainter implements Debuggable {
 
     private boolean invalidLayout = true;
 
+    // fallbacks used to dynamically ensure geometry computation when accessed before a paint loop
+    private int lastCanvasWidth = -1;
+    private int lastCanvasHeight = -1;
+    private Composition lastComp = null;
+
     // debug settings
     private static final boolean DISABLE_CACHE = false;
     private static final boolean DEBUG_LAYOUT = false;
 
     public void paint(Graphics2D g, int width, int height, Composition comp) {
+        if (comp != null) {
+            this.lastComp = comp;
+        }
+        this.lastCanvasWidth = width;
+        this.lastCanvasHeight = height;
+
         if (text.isBlank()) {
+            if (invalidLayout) {
+                boundingBox = new Rectangle();
+                renderBounds = new Rectangle();
+                transformedRect = null;
+                textShape = new Path2D.Double();
+                invalidLayout = false;
+            }
             return;
         }
 
@@ -184,22 +185,59 @@ public class TransformedTextPainter implements Debuggable {
         renderCache = null;
     }
 
+    private void ensureLayout() {
+        if (!invalidLayout) {
+            return;
+        }
+
+        if (text.isBlank()) {
+            boundingBox = new Rectangle();
+            renderBounds = new Rectangle();
+            transformedRect = null;
+            textShape = new Path2D.Double();
+            invalidLayout = false;
+            return;
+        }
+
+        Composition comp = lastComp != null ? lastComp : Views.getActiveComp();
+        int w = lastCanvasWidth > 0 ? lastCanvasWidth : (comp != null ? comp.getCanvasWidth() : 0);
+        int h = lastCanvasHeight > 0 ? lastCanvasHeight : (comp != null ? comp.getCanvasHeight() : 0);
+
+        if (comp == null || w <= 0 || h <= 0) {
+            return;
+        }
+
+        BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = tmp.createGraphics();
+        setHighQualityRendering(g2);
+        updateLayout(w, h, g2, comp);
+        g2.dispose();
+    }
+
     /**
      * Returns the last painted bounding box for the rendered text.
      * Note that this is an approximation.
      */
     public Rectangle getBoundingBox() {
+        ensureLayout();
         if (renderBounds != null) {
             return renderBounds;
         }
-        return transformedRect != null ? transformedRect.getBoundingBox() : boundingBox;
+        if (transformedRect != null) {
+            return transformedRect.getBoundingBox();
+        }
+        return boundingBox != null ? boundingBox : new Rectangle();
     }
 
     /**
      * Returns last painted shape of the rendered text's bounding box.
      */
     public Shape getBoundingShape() {
-        return transformedRect != null ? transformedRect.asShape() : boundingBox;
+        ensureLayout();
+        if (transformedRect != null) {
+            return transformedRect.asShape();
+        }
+        return boundingBox != null ? boundingBox : new Rectangle();
     }
 
     /**
@@ -291,6 +329,10 @@ public class TransformedTextPainter implements Debuggable {
      * Renders the text, with all transformations and effects, onto the given Graphics2D.
      */
     private void paintText(Graphics2D g, AffineTransform origTransform) {
+        if (text.isBlank()) {
+            return;
+        }
+
         g.setColor(color);
 
         boolean hasEffects = effects != null && effects.hasEnabledEffects();
@@ -327,7 +369,9 @@ public class TransformedTextPainter implements Debuggable {
      * (recalculating the layout can cause rounding errors in the ORA export).
      */
     public BufferedImage renderArea(Rectangle area) {
-        BufferedImage img = new BufferedImage(area.width, area.height, BufferedImage.TYPE_INT_ARGB);
+        int w = Math.max(1, area.width);
+        int h = Math.max(1, area.height);
+        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
 
         // might not be the identity transform if HiDPI screen is used
@@ -493,6 +537,8 @@ public class TransformedTextPainter implements Debuggable {
 
         // coordinates of the last processed point
         double lastX = 0, lastY = 0;
+        // coordinates of the current subpath start point
+        double moveX = 0, moveY = 0;
 
         double currentPathDist = 0;
         double segmentDist = 0;
@@ -506,6 +552,8 @@ public class TransformedTextPainter implements Debuggable {
             pathIterator.currentSegment(points);
             lastX = points[0];
             lastY = points[1];
+            moveX = points[0];
+            moveY = points[1];
             pathIterator.next();
         }
 
@@ -536,6 +584,15 @@ public class TransformedTextPainter implements Debuggable {
                     segmentDist = 0;
                     lastX = points[0];
                     lastY = points[1];
+                    moveX = points[0];
+                    moveY = points[1];
+                } else if (type == PathIterator.SEG_CLOSE) {
+                    // close the subpath by drawing a line back to the start point (moveX, moveY)
+                    dx = moveX - lastX;
+                    dy = moveY - lastY;
+                    segmentDist = Math.sqrt(dx * dx + dy * dy);
+                    lastX = moveX;
+                    lastY = moveY;
                 }
                 pathIterator.next();
             }
@@ -633,21 +690,27 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     public Shape getTextShape(Composition comp) {
-        // this image is created just to get a Graphics2D somehow...
-        BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = tmp.createGraphics();
-
-        if (invalidLayout) {
-            // normally we call this only for text layers that are already laid out
-            assert AppMode.isUnitTesting();
-
-            updateLayout(comp.getCanvasWidth(), comp.getCanvasHeight(), g2, comp);
+        if (comp != null) {
+            this.lastComp = comp;
+            this.lastCanvasWidth = comp.getCanvasWidth();
+            this.lastCanvasHeight = comp.getCanvasHeight();
         }
+
+        if (text.isBlank()) {
+            return new Path2D.Double();
+        }
+
+        ensureLayout();
 
         if (isOnPath()) {
             // for text on a path, updateLayout has already computed the final shape
             return textShape;
         }
+
+        // this image is created just to get a Graphics2D somehow...
+        BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = tmp.createGraphics();
+        setHighQualityRendering(g2);
 
         var imgOrigTransform = g2.getTransform();
 
@@ -734,6 +797,10 @@ public class TransformedTextPainter implements Debuggable {
         copy.boundingBox = boundingBox;
         copy.renderBounds = renderBounds;
         copy.textShape = textShape;
+
+        copy.lastComp = lastComp;
+        copy.lastCanvasWidth = lastCanvasWidth;
+        copy.lastCanvasHeight = lastCanvasHeight;
 
         return copy;
     }
@@ -934,6 +1001,10 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     public BufferedImage createWatermark(BufferedImage src, Composition comp) {
+        this.lastComp = comp;
+        this.lastCanvasWidth = src.getWidth();
+        this.lastCanvasHeight = src.getHeight();
+
         BufferedImage bumpImage = createBumpMap(
             src.getWidth(), src.getHeight(), comp);
         return ImageUtils.bumpMap(src, bumpImage, "Watermarking");

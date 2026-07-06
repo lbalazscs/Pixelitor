@@ -17,13 +17,15 @@
 
 package pixelitor.layers;
 
-import pixelitor.*;
 import pixelitor.Canvas;
+import pixelitor.Composition;
+import pixelitor.CopyOptions;
+import pixelitor.ImageMode;
 import pixelitor.compactions.FlipDirection;
 import pixelitor.compactions.Outsets;
 import pixelitor.compactions.QuadrantAngle;
+import pixelitor.filters.FilterContext;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
 import pixelitor.io.ORAImageInfo;
 import pixelitor.io.PXCFormat;
@@ -52,9 +54,9 @@ import java.util.concurrent.CompletableFuture;
 import static java.awt.RenderingHints.*;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static pixelitor.FilterContext.BATCH_AUTOMATE;
-import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.compactions.FlipDirection.HORIZONTAL;
+import static pixelitor.filters.FilterContext.BATCH_AUTOMATE;
+import static pixelitor.filters.FilterContext.REPEAT_LAST;
 import static pixelitor.layers.ImageLayer.State.*;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.replaceSelectedRegion;
@@ -630,23 +632,19 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
      * Enlarges the image so that it covers the canvas completely.
      */
     private void enlargeImage(Rectangle canvasBounds) {
-        try {
-            Rectangle current = getContentBounds();
-            Rectangle target = current.union(canvasBounds);
+        Rectangle current = getContentBounds();
+        Rectangle target = current.union(canvasBounds);
 
-            BufferedImage bi = createEmptyLayerImage(target.width, target.height);
-            Graphics2D g = bi.createGraphics();
-            int drawX = current.x - target.x;
-            int drawY = current.y - target.y;
-            g.drawImage(image, drawX, drawY, null);
-            g.dispose();
+        BufferedImage bi = createEmptyLayerImage(target.width, target.height);
+        Graphics2D g = bi.createGraphics();
+        int drawX = current.x - target.x;
+        int drawY = current.y - target.y;
+        g.drawImage(image, drawX, drawY, null);
+        g.dispose();
 
-            setTranslation(target.x - canvasBounds.x, target.y - canvasBounds.y);
+        setTranslation(target.x - canvasBounds.x, target.y - canvasBounds.y);
 
-            setImage(bi);
-        } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryError(e);
-        }
+        setImage(bi);
     }
 
     @Override
@@ -883,9 +881,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             -getTx(), -getTy(),
             comp.getCanvasWidth(), comp.getCanvasHeight());
 
-        BufferedImage tmp = image;
         setImage(newImage);
-        tmp.flush();
         setTranslation(0, 0);
 
         return true; // there was a change
@@ -1155,7 +1151,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     }
 
     public void convertMode(ImageMode mode) {
-        image = mode.convert(image);
+        setImage(mode.convert(image));
     }
 
     @Override

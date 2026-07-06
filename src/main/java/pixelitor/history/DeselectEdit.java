@@ -55,6 +55,6 @@ public class DeselectEdit extends PixelitorEdit {
 
     @Override
     public boolean makesDirty() {
-        return false;
+        return false; // selections are not saved
     }
 }

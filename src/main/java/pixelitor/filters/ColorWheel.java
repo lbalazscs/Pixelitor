@@ -21,12 +21,12 @@ package pixelitor.filters;
 import net.jafama.FastMath;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.ThreadPool;
+import pixelitor.colors.ColorSpaces;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.ColorSpaces;
+import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

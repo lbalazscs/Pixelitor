@@ -37,24 +37,15 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import static java.awt.Cursor.E_RESIZE_CURSOR;
-import static java.awt.Cursor.NE_RESIZE_CURSOR;
-import static java.awt.Cursor.NW_RESIZE_CURSOR;
-import static java.awt.Cursor.N_RESIZE_CURSOR;
-import static java.awt.Cursor.SE_RESIZE_CURSOR;
-import static java.awt.Cursor.SW_RESIZE_CURSOR;
-import static java.awt.Cursor.S_RESIZE_CURSOR;
-import static java.awt.Cursor.W_RESIZE_CURSOR;
+import static java.awt.Cursor.*;
 
 /**
  * The cropping widget with draggable handles for resizing the crop area.
  */
 public class CropBox implements ToolWidget, Debuggable {
     // transformation modes for user interactions
-    private static final int MODE_NONE = 0;
-    private static final int MODE_MOVE = 1;
-    private static final int MODE_RESIZE = 2;
-    private int transformMode = MODE_NONE;
+    private enum TransformMode {NONE, MOVE, RESIZE}
+    private TransformMode mode = TransformMode.NONE;
 
     // crop handles for resizing the crop box
     private final CropHandle topLeft;
@@ -116,7 +107,7 @@ public class CropBox implements ToolWidget, Debuggable {
         int x2 = (int) topRight.getX();
         int y1 = (int) topLeft.getY();
         int y2 = (int) bottomLeft.getY();
-        return Shapes.toPositiveRect(x1, x2, y1, y2);
+        return Shapes.toPositiveRect(x1, y1, x2, y2);
     }
 
     /**
@@ -175,12 +166,12 @@ public class CropBox implements ToolWidget, Debuggable {
 
         if (isResizeCursor(dragStartCursor)) {
             // if the user clicked on the handle, allow resizing
-            transformMode = MODE_RESIZE;
+            mode = TransformMode.RESIZE;
         } else if (cropRect.containsCo(e.getPoint())) {
             // if the user clicked inside the rectangle, allow moving
-            transformMode = MODE_MOVE;
+            mode = TransformMode.MOVE;
         } else {
-            transformMode = MODE_NONE; // clicked outside
+            mode = TransformMode.NONE; // clicked outside
         }
     }
 
@@ -188,7 +179,7 @@ public class CropBox implements ToolWidget, Debuggable {
      * Updates the crop box position or size based on mouse movement while dragging.
      */
     public void mouseDragged(PMouseEvent e) {
-        if (transformMode == MODE_NONE) {
+        if (mode == TransformMode.NONE) {
             return; // nothing to do if not moving or resizing
         }
 
@@ -201,14 +192,14 @@ public class CropBox implements ToolWidget, Debuggable {
             (int) (e.getCoY() - coDragStartPos.y));
 
         // apply transformation based on mode
-        if (transformMode == MODE_RESIZE) {
+        if (mode == TransformMode.RESIZE) {
             resize(coRect, dragStartCursor, mouseOffset);
 
             // maintain aspect ratio if shift is pressed and ratio is valid
             if (e.isShiftDown() && aspectRatio > 0) {
                 keepAspectRatio(coRect, dragStartCursor, aspectRatio, e.getView());
             }
-        } else if (transformMode == MODE_MOVE) {
+        } else if (mode == TransformMode.MOVE) {
             // simply translate the rectangle
             coRect.translate(mouseOffset.x, mouseOffset.y);
         }
@@ -227,7 +218,7 @@ public class CropBox implements ToolWidget, Debuggable {
      * Finalizes the crop box adjustment after the mouse button is released.
      */
     public void mouseReleased(PMouseEvent e) {
-        if (transformMode == MODE_NONE) {
+        if (mode == TransformMode.NONE) {
             return; // nothing to finalize if we weren't transforming
         }
 
@@ -240,7 +231,7 @@ public class CropBox implements ToolWidget, Debuggable {
         setHandleCursor(e.getCoX(), e.getCoY(), e.getView());
 
         // reset interaction mode
-        transformMode = MODE_NONE;
+        mode = TransformMode.NONE;
     }
 
     public void mouseMoved(MouseEvent e, View view) {
@@ -315,7 +306,7 @@ public class CropBox implements ToolWidget, Debuggable {
      * Returns true if the crop box is currently being moved or resized by the user.
      */
     public boolean isAdjusting() {
-        return transformMode != MODE_NONE;
+        return mode != TransformMode.NONE;
     }
 
     @Override

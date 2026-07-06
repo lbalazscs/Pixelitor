@@ -20,6 +20,7 @@ package pixelitor.filters.lookup;
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PixelUtils;
 import com.jhlabs.image.PointFilter;
+import pixelitor.colors.ColorSpaces;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -28,19 +29,11 @@ import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.ColorSpaces;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.BLUE;
-import static java.awt.Color.CYAN;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.MAGENTA;
-import static java.awt.Color.RED;
-import static java.awt.Color.WHITE;
-import static java.awt.Color.YELLOW;
+import static java.awt.Color.*;
 import static pixelitor.utils.Texts.i18n;
 
 /**

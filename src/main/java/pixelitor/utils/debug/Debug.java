@@ -455,10 +455,9 @@ public class Debug {
     }
 
     private static void addSmartFilter(Composition comp, Filter filter) {
-        TextSettings settings = new TextSettings();
-        settings.randomize();
-        settings.setText(filter.getName());
-        settings.setWatermark(false);
+        TextSettings settings = TextSettings.createRandomized(null)
+            .withText(filter.getName())
+            .withWatermark(false);
         TextLayer textLayer = new TextLayer(comp, "", settings);
         textLayer.updateLayerName();
 

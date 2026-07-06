@@ -32,7 +32,7 @@ import java.awt.Graphics2D;
  */
 public class SymmetryBrush implements Brush {
     // maximum number of simultaneous brushes
-    private static final int MAX_BRUSHES = 4;
+    public static final int MAX_BRUSHES = 4;
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
 

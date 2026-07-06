@@ -17,7 +17,7 @@ limitations under the License.
 package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
-import pixelitor.utils.ProgressTracker;
+import pixelitor.progress.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Kernel;

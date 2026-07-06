@@ -30,7 +30,7 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.FilterContext.PREVIEWING;
+import static pixelitor.filters.FilterContext.PREVIEWING;
 
 /**
  * The GUI for the Random Filter

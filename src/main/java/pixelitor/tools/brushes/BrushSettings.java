@@ -25,8 +25,7 @@ import java.util.List;
 
 /**
  * The settings of a {@link Brush}.
- * Settings are shared between different symmetry-instances for
- * a given tool.
+ * Settings are shared between different symmetry instances for a given tool.
  */
 public abstract class BrushSettings extends Configurable {
     protected Tool tool;
@@ -41,7 +40,7 @@ public abstract class BrushSettings extends Configurable {
     public void registerBrush(AbstractBrush brush) {
         brushes.add(brush);
 
-        assert brushes.size() <= 4;
+        assert brushes.size() <= SymmetryBrush.MAX_BRUSHES;
     }
 
     public void unregisterBrush(AbstractBrush brush) {

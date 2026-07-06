@@ -123,8 +123,14 @@ public class TabViewContainer extends JComponent implements ViewContainer {
     }
 
     private void addRenameAction(JPopupMenu popup) {
-        popup.add(new TaskAction("Rename...", () ->
-            view.getComp().renameInteractively(this)));
+        popup.add(new TaskAction("Rename...", this::renameComp));
+    }
+
+    private void renameComp() {
+        String currentName = view.getName();
+        String chosenName = JOptionPane.showInputDialog(this,
+            "New Name:", currentName);
+        view.getComp().rename(currentName, chosenName);
     }
 
     private void addCloseActions(JPopupMenu popup) {

@@ -612,7 +612,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (!layer.getTopLevelLayer().isActiveTopLevel()) {
+        if (!layer.getTopLevelLayer().isActive()) {
             // no custom painting if not selected or semi-selected
             return;
         }

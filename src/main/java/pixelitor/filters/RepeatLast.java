@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.FilterContext;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.Filters;
 import pixelitor.layers.Drawable;

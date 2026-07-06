@@ -18,9 +18,9 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.SubtaskProgressTracker;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.SubtaskProgressTracker;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

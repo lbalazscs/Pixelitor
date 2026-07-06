@@ -20,6 +20,7 @@ package pixelitor.utils;
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerGroup;
+import pixelitor.progress.ProgressHandler;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Component;

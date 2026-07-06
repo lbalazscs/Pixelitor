@@ -142,7 +142,7 @@ public abstract class AbstractBrushTool extends Tool {
      * Updates the active brush based on the lazy mouse enabled state.
      * This method must be overridden if {@link #initBrushVariables()} is overridden.
      */
-    protected void updateLazyMousedState() {
+    protected void updateLazyMouseState() {
         if (lazyMouseEnabled.isChecked()) {
             // decorate the symmetry brush with lazy mouse functionality
             lazyMouseBrush = new LazyMouseBrush(symmetryBrush);
@@ -246,7 +246,7 @@ public abstract class AbstractBrushTool extends Tool {
         panel.setBorder(createEmptyBorder(5, 5, 5, 5));
         var gbh = new GridBagHelper(panel);
 
-        lazyMouseEnabled.setAdjustmentListener(this::updateLazyMousedState);
+        lazyMouseEnabled.setAdjustmentListener(this::updateLazyMouseState);
         gbh.addLabelAndControlNoStretch("Enabled:", lazyMouseEnabled.createGUI());
 
         var distSlider = lazyMouseDist.createGUI("distSlider");
@@ -331,7 +331,7 @@ public abstract class AbstractBrushTool extends Tool {
         outlineCoY = y;
 
         // calculate the rectangle encompassing both old and new positions
-        var repaintRect = Shapes.toPositiveRect(prevX, outlineCoX, prevY, outlineCoY);
+        var repaintRect = Shapes.toPositiveRect(prevX, prevY, outlineCoX, outlineCoY);
 
         // add padding to account for brush radius and repaint delay
         int growth = brushPainter.getCoRadius() + REPAINT_EXTRA_SPACE;
@@ -727,7 +727,7 @@ public abstract class AbstractBrushTool extends Tool {
 
         lazyMouseEnabled.loadStateFrom(preset);
         lazyMouseDist.loadStateFrom(preset);
-        updateLazyMousedState();
+        updateLazyMouseState();
         LazyMouseBrush.setLazyDist(lazyMouseDist.getValue());
     }
 
