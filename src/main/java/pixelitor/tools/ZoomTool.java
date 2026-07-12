@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,18 +59,16 @@ public class ZoomTool extends DragTool {
 
         if (e.isRight() || (e.isLeft() && e.isAltDown())) {
             view.zoomOut(mousePos);
-        } else {
+        } else if (e.isLeft()) {
             view.zoomIn(mousePos);
         }
+        state = IDLE;
     }
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        if (state == IDLE) {
-            setState(INITIAL_DRAG);
-        } else if (state == INITIAL_DRAG) {
-            throw new IllegalStateException();
-        }
+        assert state == IDLE;
+        state = INITIAL_DRAG;
     }
 
     @Override
@@ -81,16 +79,23 @@ public class ZoomTool extends DragTool {
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        if (state == INITIAL_DRAG) {
-            // zoom the view to the dragged zoom rectangle
-            View view = e.getView();
-            PRectangle zoomRect = drag.toPosPRect(view);
-            view.zoomToRegion(zoomRect);
-
-            // we are done
-            reset();
-            e.consume();
+        if (drag.isClick()) {
+            // the click-to-zoom is handled by mouseClicked()
+            return;
         }
+        if (drag.isCoRectEmpty()) {
+            // perfectly horizontal or vertical lines don't define a target area
+            reset();
+            return;
+        }
+
+        // zoom the view to the dragged zoom rectangle
+        View view = e.getView();
+        PRectangle zoomRect = drag.toPosPRect(view);
+        view.zoomToRegion(zoomRect);
+
+        // we are done
+        reset();
     }
 
     @Override
@@ -109,12 +114,14 @@ public class ZoomTool extends DragTool {
 
     @Override
     public void reset() {
-        setState(IDLE);
+        state = IDLE;
         Views.repaintActive();
     }
 
-    private void setState(DragToolState newState) {
-        state = newState;
+    @Override
+    public void escPressed() {
+        super.escPressed();
+        reset();
     }
 
     @Override
@@ -142,5 +149,14 @@ public class ZoomTool extends DragTool {
     @Override
     public Consumer<Graphics2D> createIconPainter() {
         return ToolIcons::paintZoomIcon;
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        return switch (state) {
+            case IDLE -> true;
+            case INITIAL_DRAG -> drag != null;
+            case null, default -> false; // no other states are used by this tool
+        };
     }
 }

@@ -48,26 +48,15 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param matrix an array of 9 floats containing the kernel
      */
     public ConvolveFilter(String filterName, float[] matrix) {
-        this(new Kernel(3, 3, matrix), filterName);
+        this(filterName, new Kernel(3, 3, matrix));
     }
 
     /**
      * Constructs a filter with the given kernel.
      *
-     * @param rows   the number of rows in the kernel
-     * @param cols   the number of columns in the kernel
-     * @param matrix an array of rows*cols floats containing the kernel
-     */
-    public ConvolveFilter(int rows, int cols, float[] matrix, String filterName) {
-        this(new Kernel(cols, rows, matrix), filterName);
-    }
-
-    /**
-     * Constructs a filter with the given 3x3 kernel.
-     *
      * @param kernel the convolution kernel
      */
-    public ConvolveFilter(Kernel kernel, String filterName) {
+    public ConvolveFilter(String filterName, Kernel kernel) {
         super(filterName);
         this.kernel = kernel;
     }
@@ -78,6 +67,9 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param kernel the kernel
      */
     public void setKernel(Kernel kernel) {
+        // kernel dimensions must be odd
+        assert kernel.getWidth() % 2 == 1 && kernel.getHeight() % 2 == 1;
+
         this.kernel = kernel;
     }
 

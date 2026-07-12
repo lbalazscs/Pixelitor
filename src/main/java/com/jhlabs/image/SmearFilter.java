@@ -65,6 +65,11 @@ public class SmearFilter extends WholeImageFilter {
     public SmearFilter(String filterName, int shape, int distance,
                        float density, float angle, float mix, Random random) {
         super(filterName);
+
+        assert distance >= 0;
+        assert density >= 0 && density <= 1;
+        assert mix >= 0 && mix <= 1;
+
         this.shape = shape;
         this.distance = distance;
         this.density = density;
@@ -77,6 +82,9 @@ public class SmearFilter extends WholeImageFilter {
     protected int[] filterPixels(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
         System.arraycopy(inPixels, 0, outPixels, 0, width * height);
+        if (distance == 0) {
+            return outPixels;
+        }
 
         switch (shape) {
             case CROSSES -> renderCrosses(width, height, inPixels, outPixels);
@@ -98,8 +106,6 @@ public class SmearFilter extends WholeImageFilter {
 
         List<Future<?>> futures = new ArrayList<>(workUnits);
 
-        int maxDistance = Math.max(1, distance);
-
         for (int i = 0; i < numShapes; i += stride) {
             int currentStride = Math.min(stride, numShapes - i);
             int[] xs = new int[currentStride];
@@ -109,7 +115,7 @@ public class SmearFilter extends WholeImageFilter {
             for (int j = 0; j < currentStride; j++) {
                 xs[j] = random.nextInt(width);
                 ys[j] = random.nextInt(height);
-                lengths[j] = random.nextInt(maxDistance) + 1;
+                lengths[j] = random.nextInt(distance) + 1;
             }
 
             Runnable r = () -> {
@@ -161,8 +167,6 @@ public class SmearFilter extends WholeImageFilter {
 
         List<Future<?>> futures = new ArrayList<>(workUnits);
 
-        int maxDistance = Math.max(1, distance);
-
         for (int i = 0; i < numShapes; i += stride) {
             int currentStride = Math.min(stride, numShapes - i);
             int[] sxs = new int[currentStride];
@@ -172,7 +176,7 @@ public class SmearFilter extends WholeImageFilter {
             for (int j = 0; j < currentStride; j++) {
                 sxs[j] = random.nextInt(width);
                 sys[j] = random.nextInt(height);
-                lengths[j] = random.nextInt(maxDistance);
+                lengths[j] = random.nextInt(distance);
             }
 
             Runnable r = () -> {
@@ -187,8 +191,8 @@ public class SmearFilter extends WholeImageFilter {
 
     private void renderOneLine(int width, int height, int[] inPixels, int[] outPixels, float sin, float cos, int sx, int sy, int length) {
         int rgb = inPixels[sy * width + sx];
-        int dx = (int) (length * cos);
-        int dy = (int) (length * sin);
+        int offsetX = (int) (length * cos);
+        int offsetY = (int) (length * sin);
 
         int a2 = rgb >>> 24;
         int r2 = (rgb >> 16) & 0xFF;
@@ -198,15 +202,16 @@ public class SmearFilter extends WholeImageFilter {
         int mixInt = (int) (mix * 256);
         int invMixInt = 256 - mixInt;
 
-        int x0 = sx - dx;
-        int y0 = sy - dy;
-        int x1 = sx + dx;
-        int y1 = sy + dy;
+        int x0 = sx - offsetX;
+        int y0 = sy - offsetY;
+        int x1 = sx + offsetX;
+        int y1 = sy + offsetY;
 
-        int ddx = x1 < x0 ? -1 : 1;
-        int ddy = y1 < y0 ? -1 : 1;
-        dx = Math.abs(x1 - x0);
-        dy = Math.abs(y1 - y0);
+        // Bresenham's line algorithm from (x0, y0) to (x1, y1)
+        int stepX = x1 < x0 ? -1 : 1;
+        int stepY = y1 < y0 ? -1 : 1;
+        int absDx = Math.abs(x1 - x0);
+        int absDy = Math.abs(y1 - y0);
         int x = x0;
         int y = y0;
 
@@ -215,37 +220,37 @@ public class SmearFilter extends WholeImageFilter {
             outPixels[offset] = ImageMath.mixColors(outPixels[offset], a2, r2, g2, b2, mixInt, invMixInt);
         }
 
-        if (dx > dy) {
-            int d = 2 * dy - dx;
-            int incrE = 2 * dy;
-            int incrNE = 2 * (dy - dx);
+        if (absDx > absDy) { // the line is more horizontal, so the X-axis is the driving axis
+            int d = 2 * absDy - absDx;
+            int incrE = 2 * absDy;
+            int incrNE = 2 * (absDy - absDx);
 
             while (x != x1) {
                 if (d <= 0) {
                     d += incrE;
                 } else {
                     d += incrNE;
-                    y += ddy;
+                    y += stepY;
                 }
-                x += ddx;
+                x += stepX;
                 if (x >= 0 && x < width && y >= 0 && y < height) {
                     int offset = y * width + x;
                     outPixels[offset] = ImageMath.mixColors(outPixels[offset], a2, r2, g2, b2, mixInt, invMixInt);
                 }
             }
-        } else {
-            int d = 2 * dx - dy;
-            int incrE = 2 * dx;
-            int incrNE = 2 * (dx - dy);
+        } else { // the line is more vertical, making the Y-axis the driving axis
+            int d = 2 * absDx - absDy;
+            int incrE = 2 * absDx;
+            int incrNE = 2 * (absDx - absDy);
 
             while (y != y1) {
                 if (d <= 0) {
                     d += incrE;
                 } else {
                     d += incrNE;
-                    x += ddx;
+                    x += stepX;
                 }
-                y += ddy;
+                y += stepY;
                 if (x >= 0 && x < width && y >= 0 && y < height) {
                     int offset = y * width + x;
                     outPixels[offset] = ImageMath.mixColors(outPixels[offset], a2, r2, g2, b2, mixInt, invMixInt);
@@ -304,14 +309,15 @@ public class SmearFilter extends WholeImageFilter {
 
         switch (shape) {
             case CIRCLES ->
-                makeCircle(width, outPixels, radius2, sx, sy, a2, r2, g2, b2, mixInt, invMixInt, minSx, maxSx, minSy, maxSy);
-            case SQUARES -> makeSquare(width, outPixels, a2, r2, g2, b2, mixInt, invMixInt, minSx, maxSx, minSy, maxSy);
+                renderCircle(width, outPixels, radius2, sx, sy, a2, r2, g2, b2, mixInt, invMixInt, minSx, maxSx, minSy, maxSy);
+            case SQUARES ->
+                renderSquare(width, outPixels, a2, r2, g2, b2, mixInt, invMixInt, minSx, maxSx, minSy, maxSy);
             case DIAMONDS ->
-                makeDiamond(width, outPixels, radius, sx, sy, a2, r2, g2, b2, mixInt, invMixInt, minSx, maxSx, minSy, maxSy);
+                renderDiamond(width, outPixels, radius, sx, sy, a2, r2, g2, b2, mixInt, invMixInt, minSx, maxSx, minSy, maxSy);
         }
     }
 
-    private static void makeCircle(int width, int[] outPixels, int radius2, int sx, int sy, int a2, int r2, int g2, int b2, int mixInt, int invMixInt, int minSx, int maxSx, int minSy, int maxSy) {
+    private static void renderCircle(int width, int[] outPixels, int radius2, int sx, int sy, int a2, int r2, int g2, int b2, int mixInt, int invMixInt, int minSx, int maxSx, int minSy, int maxSy) {
         for (int y = minSy; y < maxSy; y++) {
             int dsy = y - sy;
             int dsy2 = dsy * dsy;
@@ -326,7 +332,7 @@ public class SmearFilter extends WholeImageFilter {
         }
     }
 
-    private static void makeSquare(int width, int[] outPixels, int a2, int r2, int g2, int b2, int mixInt, int invMixInt, int minSx, int maxSx, int minSy, int maxSy) {
+    private static void renderSquare(int width, int[] outPixels, int a2, int r2, int g2, int b2, int mixInt, int invMixInt, int minSx, int maxSx, int minSy, int maxSy) {
         for (int y = minSy; y < maxSy; y++) {
             int offset = y * width + minSx;
             for (int x = minSx; x < maxSx; x++) {
@@ -336,7 +342,7 @@ public class SmearFilter extends WholeImageFilter {
         }
     }
 
-    private static void makeDiamond(int width, int[] outPixels, int radius, int sx, int sy, int a2, int r2, int g2, int b2, int mixInt, int invMixInt, int minSx, int maxSx, int minSy, int maxSy) {
+    private static void renderDiamond(int width, int[] outPixels, int radius, int sx, int sy, int a2, int r2, int g2, int b2, int mixInt, int invMixInt, int minSx, int maxSx, int minSy, int maxSy) {
         for (int y = minSy; y < maxSy; y++) {
             int dy = Math.abs(y - sy);
             int yOffset = y * width;

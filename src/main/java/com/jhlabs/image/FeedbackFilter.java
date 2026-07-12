@@ -21,10 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.RenderingHints.*;
 
 /**
  * A filter which produces a video feedback effect by repeated transformations.
@@ -46,9 +43,10 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
      * @param filterName the display name of the filter
      * @param center     the center of the effect as a proportion of the image size
      * @param distance   the distance to move on each iteration
-     * @param angle      the angle to move on each iteration
-     * @param rotation   the amount to rotate on each iteration
-     * @param zoom       the amount to scale on each iteration
+     * @param angle      the angle to move on each iteration, in radians
+     * @param rotation   the amount to rotate on each iteration, in radians
+     * @param zoom       the exponent applied on each iteration; the per-iteration
+     *                   scale factor is exp(zoom), so 0 means no change in size
      * @param startAlpha the alpha value at the first iteration (in the range [0, 1])
      * @param endAlpha   the alpha value at the last iteration (in the range [0, 1])
      * @param iterations the number of iterations (min-value: 0)
@@ -79,7 +77,6 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
         float translateX = (float) (distance * Math.cos(angle));
         float translateY = (float) (distance * -Math.sin(angle));
         float scale = (float) Math.exp(zoom);
-        float rotate = rotation;
 
         if (iterations == 0) {
             Graphics2D g = dst.createGraphics();
@@ -91,19 +88,22 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
         Graphics2D g = dst.createGraphics();
         g.drawImage(src, null, null);
 
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+
         pt = createProgressTracker(iterations);
 
         for (int i = 0; i < iterations; i++) {
-            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-
+            // deliberately not resetting g's transform between iterations:
+            // each pass builds on the accumulated transform from all
+            // previous passes, which is what produces the "feedback" look
             float alpha = ImageMath.lerp((float) i / (iterations - 1), startAlpha, endAlpha);
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
             g.translate(cx + translateX, cy + translateY);
             g.scale(scale, scale);
             if (rotation != 0) {
-                g.rotate(rotate);
+                g.rotate(rotation);
             }
             g.translate(-cx, -cy);
 

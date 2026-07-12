@@ -45,8 +45,6 @@ public class JHColorHalftone extends ParametrizedFilter {
     private final AngleParam yellowScreenAngle = new AngleParam(
         "Yellow Screen Angle", 270, INTUITIVE_DEGREES);
 
-    private ColorHalftoneFilter filter;
-
     public JHColorHalftone() {
         super(true);
 
@@ -59,19 +57,12 @@ public class JHColorHalftone extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new ColorHalftoneFilter(NAME);
-        }
-
         float cyan = (float) cyanScreenAngle.getValueInIntuitiveRadians();
         float magenta = (float) magentaScreenAngle.getValueInIntuitiveRadians();
         float yellow = (float) yellowScreenAngle.getValueInIntuitiveRadians();
-        filter.setCyanScreenAngle(cyan);
-        filter.setMagentaScreenAngle(magenta);
-        filter.setYellowScreenAngle(yellow);
-        filter.setdotRadius((float) dotRadius.getPercentage());
+        float radius = (float) dotRadius.getPercentage();
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return new ColorHalftoneFilter(NAME, radius, cyan, magenta, yellow)
+            .filter(src, dest);
     }
 }

@@ -93,8 +93,8 @@ class MandelbrotSetFilter extends ComplexFractalFilter {
         double zy = 0;
 
         // the complex constant c is mapped from the pixel's image coordinates
-        double cx = cxStart + x * xMultiplier;
-        double cy = cyStart + y * yMultiplier;
+        double cx = xStart + x * xMultiplier;
+        double cy = yStart + y * yMultiplier;
 
         if (insideOut) {
             // invert c using f(c) = 1/c

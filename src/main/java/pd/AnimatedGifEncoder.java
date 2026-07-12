@@ -502,7 +502,7 @@ public class AnimatedGifEncoder {
 // Ported to Java 12/00 K Weiner
 class NeuQuant {
 
-    private static final int netsize = 256; /* number of colours used */
+    private static final int netsize = 256; /* number of colors used */
 
     /* four primes near 500 - assume no image has a length so large */
     /* that it is divisible by all four primes */
@@ -532,7 +532,7 @@ class NeuQuant {
 
     private static final int maxnetpos = (netsize - 1);
 
-    private static final int netbiasshift = 4; /* bias for colour values */
+    private static final int netbiasshift = 4; /* bias for color values */
 
     private static final int ncycles = 100; /* no. of learning cycles */
 
@@ -888,7 +888,7 @@ class NeuQuant {
             network[i][0] >>= netbiasshift;
             network[i][1] >>= netbiasshift;
             network[i][2] >>= netbiasshift;
-            network[i][3] = i; /* record colour no */
+            network[i][3] = i; /* record color no */
         }
     }
 

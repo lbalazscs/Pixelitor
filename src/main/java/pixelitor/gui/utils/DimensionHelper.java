@@ -36,7 +36,7 @@ import static pixelitor.gui.utils.TFValidationLayerUI.wrapWithValidation;
  * A delegate that handles common dimension input functionality for
  * the "new image" and "resize" panels.
  */
-public class DimensionHelper {
+public class DimensionHelper implements KeyListener, ItemListener {
     private static final int INPUT_FIELD_COLUMNS = 5;
     public static final Integer[] DPI_VALUES = {150, DEFAULT_DPI, 600};
     private static final String DPI_PRESET_KEY = "DPI";
@@ -53,6 +53,7 @@ public class DimensionHelper {
     private int targetHeight;
     private int currentDpi;
 
+    // the reference width (in pixels), used only for PERCENTAGE
     private final int originalWidth;
     private final int originalHeight;
 
@@ -93,21 +94,22 @@ public class DimensionHelper {
 
         dpiChooser = new JComboBox<>(DPI_VALUES);
         dpiChooser.setSelectedItem(initialDpi);
+        dpiChooser.addItemListener(this);
     }
 
-    public JLayer<JTextField> createWidthTextField(KeyListener keyListener) {
-        widthTF.addKeyListener(keyListener);
+    public JLayer<JTextField> createWidthTextField() {
+        widthTF.addKeyListener(this);
         return wrapWithValidation(widthTF, widthValidator);
     }
 
-    public JLayer<JTextField> createHeightTextField(KeyListener keyListener) {
-        heightTF.addKeyListener(keyListener);
+    public JLayer<JTextField> createHeightTextField() {
+        heightTF.addKeyListener(this);
         return wrapWithValidation(heightTF, heightValidator);
     }
 
-    public JComboBox<ResizeUnit> createUnitChooser(ItemListener itemListener) {
+    public JComboBox<ResizeUnit> createUnitChooser() {
         var unitChooser = new JComboBox<>(unitSelectorModel);
-        unitChooser.addItemListener(itemListener);
+        unitChooser.addItemListener(this);
         return unitChooser;
     }
 
@@ -140,14 +142,21 @@ public class DimensionHelper {
     }
 
     public void setTargetWidth(int width) {
-        this.targetWidth = width;
+        // the -1 sentinel is never used through this setter
+        this.targetWidth = Math.max(width, 1);
     }
 
     public void setTargetHeight(int height) {
-        this.targetHeight = height;
+        // the -1 sentinel is never used through this setter
+        this.targetHeight = Math.max(height, 1);
     }
 
+    @Override
     public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() != ItemEvent.SELECTED) {
+            return;
+        }
+
         if (e.getSource() == dpiChooser) {
             dpiChanged();
         } else { // one of the unit combo boxes was selected
@@ -192,6 +201,15 @@ public class DimensionHelper {
         updateHeightText();
     }
 
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+    }
+
+    @Override
     public void keyReleased(KeyEvent e) {
         Object source = e.getSource();
         if (source == widthTF || source == heightTF) {

@@ -19,6 +19,7 @@ package pixelitor.io;
 
 import pixelitor.Composition;
 import pixelitor.progress.ProgressTracker;
+import pixelitor.progress.ProgressTrackingInputStream;
 import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.progress.SubtaskProgressTracker;
 import pixelitor.utils.ImageUtils;
@@ -170,7 +171,7 @@ public class PXCFormat {
             }
 
             int versionByte = is.read();
-            if (versionByte != THUMBNAIL_SUPPORTING_VERSION) {
+            if (versionByte < THUMBNAIL_SUPPORTING_VERSION) {
                 return null; // old version, no thumbnail
             }
 

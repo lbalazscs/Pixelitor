@@ -1372,7 +1372,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // modify existing selection
         ShapeCombinator combinator = Dialogs.showShapeCombinatorQuestion(this);
         if (combinator == null) {
-            // the user cancelled the dialog
+            // the user canceled the dialog
             return SelectionChangeResult.cancelled();
         }
 

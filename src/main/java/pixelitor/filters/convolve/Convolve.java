@@ -40,8 +40,8 @@ public class Convolve extends FilterWithGUI {
     private final int kernelSize;
 
     private Convolve(int kernelSize, String filterName) {
-        if (kernelSize % 2 == 0) {
-            throw new IllegalArgumentException("kernel size should be odd, but was " + kernelSize);
+        if (kernelSize <= 0 || kernelSize % 2 == 0) {
+            throw new IllegalArgumentException("kernel size = " + kernelSize);
         }
         this.kernelSize = kernelSize;
         this.filterName = filterName;
@@ -60,6 +60,9 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
+        // must be set before calling this method
+        assert kernelMatrix != null;
+
         Kernel kernel = new Kernel(kernelSize, kernelSize, kernelMatrix);
         BufferedImageOp convolveOp = createConvolveOp(kernel);
 
@@ -83,22 +86,23 @@ public class Convolve extends FilterWithGUI {
     }
 
     private BufferedImageOp createConvolveOp(Kernel kernel) {
-        var filter = new ConvolveFilter(kernel, filterName);
+        var filter = new ConvolveFilter(filterName, kernel);
         filter.setPremultiplyAlpha(false);
         return filter;
     }
 
     /**
-     * Returns a randomized array that is on average close to being normalized
+     * Returns a randomized array that is on average close to being
+     * normalized: each value is uniform in [-1/n, 3/n), which
+     * averages to 1/n, so the sum of all n values averages to 1.
      */
     public static float[] createRandomKernel(int size) {
         ThreadLocalRandom rand = ThreadLocalRandom.current();
-        float[] kernelValues = new float[size * size];
-        for (int i = 0; i < kernelValues.length; i++) {
-            int randomInt = rand.nextInt(10000);
-            kernelValues[i] = (4 * randomInt / (10000.0f * kernelValues.length)) - (1.0f / kernelValues.length);
+        int numValues = size * size;
+        float[] kernelValues = new float[numValues];
+        for (int i = 0; i < numValues; i++) {
+            kernelValues[i] = rand.nextFloat() * (4.0f / numValues) - (1.0f / numValues);
         }
-
         return kernelValues;
     }
 

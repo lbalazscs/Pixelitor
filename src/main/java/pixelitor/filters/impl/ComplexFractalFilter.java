@@ -28,25 +28,17 @@ import java.awt.image.BufferedImage;
  */
 public abstract class ComplexFractalFilter extends PointFilter {
     // the bounds in the complex plane
-    private final double cxMin;
-    private final double cxMax;
-    private final double cyMin;
-    private final double cyMax;
-    private final double cxRange;
-    private final double cyRange;
+    private final double xMin, xMax, yMin, yMax, xRange, yRange;
 
     // the actual start in the complex plane,
     // taking the zooming into account
-    protected double cxStart;
-    protected double cyStart;
+    protected double xStart, yStart;
 
     // multipliers for translating image
     // coordinates into complex coordinates
-    protected double xMultiplier;
-    protected double yMultiplier;
+    protected double xMultiplier, yMultiplier;
 
-    private final double zoomCenterX;
-    private final double zoomCenterY;
+    private final double zoomCenterX, zoomCenterY;
 
     private final int maxIterations;
     private final double zoom;
@@ -59,10 +51,10 @@ public abstract class ComplexFractalFilter extends PointFilter {
      * Constructs a new ComplexFractalFilter.
      *
      * @param filterName    The name of the filter.
-     * @param cxMin         The minimum x boundary in the complex plane.
-     * @param cxMax         The maximum x boundary in the complex plane.
-     * @param cyMin         The minimum y boundary in the complex plane.
-     * @param cyMax         The maximum y boundary in the complex plane.
+     * @param xMin          The minimum x boundary in the complex plane.
+     * @param xMax          The maximum x boundary in the complex plane.
+     * @param yMin          The minimum y boundary in the complex plane.
+     * @param yMax          The maximum y boundary in the complex plane.
      * @param iterator      The iteration strategy for the fractal.
      * @param zoom          The zoom level for the fractal.
      * @param zoomCenterX   The x-coordinate of the center point for zooming.
@@ -71,8 +63,8 @@ public abstract class ComplexFractalFilter extends PointFilter {
      * @param colors        The color palette used for rendering.
      */
     protected ComplexFractalFilter(String filterName,
-                                   double cxMin, double cxMax,
-                                   double cyMin, double cyMax,
+                                   double xMin, double xMax,
+                                   double yMin, double yMax,
                                    IterationStrategy iterator,
                                    double zoom,
                                    double zoomCenterX,
@@ -81,13 +73,15 @@ public abstract class ComplexFractalFilter extends PointFilter {
                                    int[] colors) {
         super(filterName);
 
-        this.cxMin = cxMin;
-        this.cxMax = cxMax;
-        this.cyMin = cyMin;
-        this.cyMax = cyMax;
+        assert xMax > xMin && yMax > yMin : "invalid complex-plane bounds";
 
-        this.cxRange = cxMax - cxMin;
-        this.cyRange = cyMax - cyMin;
+        this.xMin = xMin;
+        this.xMax = xMax;
+        this.yMin = yMin;
+        this.yMax = yMax;
+
+        this.xRange = xMax - xMin;
+        this.yRange = yMax - yMin;
 
         this.iterator = iterator;
         this.zoom = zoom;
@@ -100,16 +94,16 @@ public abstract class ComplexFractalFilter extends PointFilter {
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         // calculate the width and height of the view in the complex plane based on the zoom level
-        double zoomedRangeX = cxRange / zoom;
-        double zoomedRangeY = cyRange / zoom;
+        double zoomedRangeX = xRange / zoom;
+        double zoomedRangeY = yRange / zoom;
 
         // calculate multipliers for converting image coordinates to complex plane coordinates
         xMultiplier = zoomedRangeX / src.getWidth();
         yMultiplier = zoomedRangeY / src.getHeight();
 
         // find the zoom center point in the complex plane
-        double zoomCenterComplexX = cxMin + zoomCenterX * cxRange;
-        double zoomCenterComplexY = cyMin + zoomCenterY * cyRange;
+        double zoomCenterComplexX = xMin + zoomCenterX * xRange;
+        double zoomCenterComplexY = yMin + zoomCenterY * yRange;
 
         // calculate the boundaries of the zoomed view
         double zoomedMinX = zoomCenterComplexX - zoomedRangeX / 2.0;
@@ -118,8 +112,8 @@ public abstract class ComplexFractalFilter extends PointFilter {
         double zoomedMaxY = zoomCenterComplexY + zoomedRangeY / 2.0;
 
         // adjust the view boundaries to ensure they stay within the original fractal limits
-        cxStart = adjustStart(zoomedMinX, zoomedMaxX, cxMin, cxMax);
-        cyStart = adjustStart(zoomedMinY, zoomedMaxY, cyMin, cyMax);
+        xStart = adjustStart(zoomedMinX, zoomedMaxX, xMin, xMax);
+        yStart = adjustStart(zoomedMinY, zoomedMaxY, yMin, yMax);
 
         return super.filter(src, dst);
     }
@@ -155,11 +149,15 @@ public abstract class ComplexFractalFilter extends PointFilter {
         double ESCAPE_RADIUS_SQ = 4.0; // the squared escape radius
 
         /**
-         * Iterates a fractal formula for a given point and returns the
-         * number of iterations before escaping, or 0 if it doesn't escape.
+         * Iterates a fractal formula for a given point until it escapes or the
+         * iteration budget runs out.
+         *
+         * @return the number of iterations *remaining* when the point escaped
+         *         (so a point that escapes almost immediately returns a value
+         *         close to maxIterations), or 0 if the point never escaped
+         *         (i.e. it's considered part of the set)
          */
         int iterate(double zx, double zy, double cx, double cy, int maxIterations);
-
         /**
          * Checks for regions that are known to be part of the set, allowing for a fast exit.
          */
@@ -173,20 +171,25 @@ public abstract class ComplexFractalFilter extends PointFilter {
         Rectangle2D getComplexView();
     }
 
+    /**
+     * Implements the classic Mandelbrot iteration, z = z² + c.
+     */
     public static class MandelbrotStrategy implements IterationStrategy {
         @Override
         public int iterate(double zx, double zy, double cx, double cy, int maxIt) {
             int it = maxIt;
-            double x2 = 0;
-            double y2 = 0;
-            double xy;
+
+            // x2/y2 always hold the squared components of the CURRENT zx, zy,
+            // refreshed after every update, so the escape check never inspects a stale z
+            double x2 = zx * zx;
+            double y2 = zy * zy;
             while (x2 + y2 <= ESCAPE_RADIUS_SQ && it > 0) {
                 it--;
-                xy = zx * zy;
-                x2 = zx * zx;
-                y2 = zy * zy;
+                double xy = zx * zy;
                 zx = x2 - y2 + cx;
                 zy = xy + xy + cy;
+                x2 = zx * zx;
+                y2 = zy * zy;
             }
             return it;
         }
@@ -238,13 +241,15 @@ public abstract class ComplexFractalFilter extends PointFilter {
         }
     }
 
+    /**
+     * Implements the Burning Ship iteration, z = (|Re(z)| + i|Im(z)|)² + c
+     */
     public static class BurningShipStrategy implements IterationStrategy {
         @Override
         public int iterate(double zx, double zy, double cx, double cy, int maxIt) {
             int it = maxIt;
             while (zx * zx + zy * zy <= ESCAPE_RADIUS_SQ && it > 0) {
                 it--;
-                // this implements z_n+1 = (|Re(z_n)| + i*|Im(z_n)|)^2 + c
                 zx = Math.abs(zx);
                 zy = Math.abs(zy);
 
@@ -261,6 +266,9 @@ public abstract class ComplexFractalFilter extends PointFilter {
         }
     }
 
+    /**
+     * Implements the Tricorn iteration, z = conj(z)² + c.
+     */
     public static class TricornStrategy implements IterationStrategy {
         @Override
         public int iterate(double zx, double zy, double cx, double cy, int maxIt) {
@@ -282,6 +290,9 @@ public abstract class ComplexFractalFilter extends PointFilter {
         }
     }
 
+    /**
+     * Implements the cubic Multibrot iteration, z = z³ + c.
+     */
     public static class MultibrotStrategy3 implements IterationStrategy {
         private final double safeRadiusSq;
 
@@ -319,6 +330,9 @@ public abstract class ComplexFractalFilter extends PointFilter {
         }
     }
 
+    /**
+     * Implements the quartic Multibrot iteration, z = z⁴ + c.
+     */
     public static class MultibrotStrategy4 implements IterationStrategy {
         private final double safeRadiusSq;
 
@@ -357,6 +371,9 @@ public abstract class ComplexFractalFilter extends PointFilter {
         }
     }
 
+    /**
+     * Implements the quintic Multibrot iteration, z = z⁵ + c.
+     */
     public static class MultibrotStrategy5 implements IterationStrategy {
         private final double safeRadiusSq;
 

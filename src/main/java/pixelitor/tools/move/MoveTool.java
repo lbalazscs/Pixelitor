@@ -545,4 +545,9 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
     public Consumer<Graphics2D> createIconPainter() {
         return ToolIcons::paintMoveIcon;
     }
+
+    @Override
+    public boolean checkInvariants() {
+        return true; // TODO
+    }
 }

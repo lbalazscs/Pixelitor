@@ -15,13 +15,11 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.io;
+package pixelitor.progress;
 
-import pixelitor.progress.ProgressTracker;
-
-import java.io.FileInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * A wrapper for an InputStream that tracks the progress of reading.
@@ -32,7 +30,7 @@ public class ProgressTrackingInputStream extends FilterInputStream {
     private final ProgressTracker progressTracker;
     private boolean closed = false;
 
-    public ProgressTrackingInputStream(FileInputStream inputStream, ProgressTracker tracker) {
+    public ProgressTrackingInputStream(InputStream inputStream, ProgressTracker tracker) {
         super(inputStream);
 
         this.progressTracker = tracker;

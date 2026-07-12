@@ -503,7 +503,7 @@ public class ShapesTool extends DragTool {
     private void setState(DragToolState newState) {
         state = newState;
 
-        assert state.checkInvariants(this) : "state = " + state
+        assert checkInvariants() : "state = " + state
             + ", has styledShape = " + hasStyledShape()
             + ", hasBox = " + hasBox();
 
@@ -960,6 +960,15 @@ public class ShapesTool extends DragTool {
 
     public void setSelectedType(ShapeType type) {
         typeModel.setSelectedItem(type);
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        return switch (state) {
+            case IDLE -> !hasStyledShape() && !hasBox();
+            case AFTER_FIRST_MOUSE_PRESS, INITIAL_DRAG -> hasStyledShape() && !hasBox();
+            case TRANSFORM -> hasStyledShape() && hasBox();
+        };
     }
 
     @Override

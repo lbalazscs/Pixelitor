@@ -26,11 +26,45 @@ import java.util.StringJoiner;
  * A class that calculates a 2D bounding box from a set of points.
  */
 public class BoundingBox {
-    private double minX = Double.POSITIVE_INFINITY;
-    private double minY = Double.POSITIVE_INFINITY;
-    private double maxX = Double.NEGATIVE_INFINITY;
-    private double maxY = Double.NEGATIVE_INFINITY;
-    private boolean initialized = false;
+    private double minX, minY, maxX, maxY;
+    private boolean initialized;
+
+    public BoundingBox() {
+        reset();
+    }
+
+    /**
+     * Resets the bounding box to its initial state,
+     * effectively removing all added points.
+     */
+    public void reset() {
+        minX = Double.POSITIVE_INFINITY;
+        minY = Double.POSITIVE_INFINITY;
+        maxX = Double.NEGATIVE_INFINITY;
+        maxY = Double.NEGATIVE_INFINITY;
+
+        initialized = false;
+    }
+
+    /**
+     * Expands the bounding box to include the given point.
+     */
+    public void add(double x, double y) {
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+
+        initialized = true;
+    }
+
+    public void add(Point2D point) {
+        add(point.getX(), point.getY());
+    }
+
+    public boolean isInitialized() {
+        return initialized;
+    }
 
     public double getMinX() {
         return minX;
@@ -48,47 +82,9 @@ public class BoundingBox {
         return maxY;
     }
 
-    /**
-     * Expands the bounding box to include the given point.
-     */
-    public void add(double x, double y) {
-        if (x > maxX) {
-            maxX = x;
-        }
-        if (y > maxY) {
-            maxY = y;
-        }
-        if (x < minX) {
-            minX = x;
-        }
-        if (y < minY) {
-            minY = y;
-        }
-        initialized = true;
-    }
-
-    public void add(Point2D point) {
-        add(point.getX(), point.getY());
-    }
-
-    /**
-     * Resets the bounding box to its initial state,
-     * effectively removing all added points.
-     */
-    public void reset() {
-        minX = Double.POSITIVE_INFINITY;
-        minY = Double.POSITIVE_INFINITY;
-        maxX = Double.NEGATIVE_INFINITY;
-        maxY = Double.NEGATIVE_INFINITY;
-
-        initialized = false;
-    }
-
-    public boolean isInitialized() {
-        return initialized;
-    }
-
     public Rectangle2D toRectangle2D() {
+        assert initialized;
+
         return new Rectangle2D.Double(
             minX,
             minY,
@@ -97,6 +93,8 @@ public class BoundingBox {
     }
 
     public Rectangle2D toRectangle2D(double margin) {
+        assert initialized;
+
         return new Rectangle2D.Double(
             minX - margin,
             minY - margin,
@@ -105,6 +103,8 @@ public class BoundingBox {
     }
 
     public Rectangle toRectangle(double margin) {
+        assert initialized;
+
         return new Rectangle(
             (int) (minX - margin),
             (int) (minY - margin),

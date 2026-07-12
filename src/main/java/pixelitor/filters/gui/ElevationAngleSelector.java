@@ -31,7 +31,7 @@ public class ElevationAngleSelector extends AbstractAngleSelector {
     public ElevationAngleSelector(ElevationAngleParam param) {
         super(param);
 
-        // the rotation center is at the bottom-left corner
+        // the rotation center is in the bottom-left corner
         centerX = 0;
         centerY = SELECTOR_SIZE;
     }

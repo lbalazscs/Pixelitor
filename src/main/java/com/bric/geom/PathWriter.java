@@ -23,11 +23,7 @@ import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_CUBICTO;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
-import static java.awt.geom.PathIterator.SEG_QUADTO;
+import static java.awt.geom.PathIterator.*;
 
 /**
  * This object writes path data.
@@ -66,7 +62,7 @@ public abstract class PathWriter {
     public abstract void quadTo(float cx, float cy, float x, float y);
 
     /**
-     * Adds a curved segment, defined by three new points, to the path by drawing a Bezier curve that intersects both the current coordinates and the coordinates (x3, y3), using the specified points (x1, y1) and (x2, y2) as Bezier control points.
+     * Adds a curved segment, defined by three new points, to the path by drawing a Bézier curve that intersects both the current coordinates and the coordinates (x3, y3), using the specified points (x1, y1) and (x2, y2) as Bezier control points.
      *
      * @param cx1 the x-coordinate of the first control point.
      * @param cy1 the y-coordinate of the first control point.

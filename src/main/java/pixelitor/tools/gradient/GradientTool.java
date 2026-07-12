@@ -190,7 +190,6 @@ public class GradientTool extends DragTool {
             hit.mousePressed(e);
         }
         e.repaint();
-        assert state.checkInvariants(this);
     }
 
     @Override
@@ -207,7 +206,6 @@ public class GradientTool extends DragTool {
             handles = null;
         }
         e.repaint();
-        assert state.checkInvariants(this);
     }
 
     @Override
@@ -221,7 +219,6 @@ public class GradientTool extends DragTool {
             } else {
                 state = TRANSFORM; // user just clicked a handle
             }
-            assert state.checkInvariants(this);
             return;
         }
 
@@ -239,7 +236,6 @@ public class GradientTool extends DragTool {
 
             renderedDrag = handles.toDrag();
             if (renderedDrag.isImClick()) {
-                assert state.checkInvariants(this);
                 return;
             }
         } else { // the initial drag just ended
@@ -250,7 +246,6 @@ public class GradientTool extends DragTool {
         }
 
         commitGradient(renderedDrag, comp, null);
-        assert state.checkInvariants(this);
     }
 
     /**
@@ -335,7 +330,7 @@ public class GradientTool extends DragTool {
         lastGradient = null;
         gradientLayer = null;
         state = IDLE;
-        assert state.checkInvariants(this);
+        assert checkInvariants();
         Views.repaintActive();
     }
 
@@ -345,25 +340,25 @@ public class GradientTool extends DragTool {
             hideHandles(newComp, false);
         }
         layerActivated(newComp.getActiveLayer());
-        assert state.checkInvariants(this);
+        assert checkInvariants();
     }
 
     @Override
     public void editingTargetChanged(Layer activeLayer, boolean toolActivation) {
         layerActivated(activeLayer);
-        assert state.checkInvariants(this);
+        assert checkInvariants();
     }
 
     @Override
     public void forceFinish() {
         hideHandles(Views.getActiveComp(), false);
-        assert state.checkInvariants(this);
+        assert checkInvariants();
     }
 
     @Override
     public void escPressed() {
         hideHandles(Views.getActiveComp(), true);
-        assert state.checkInvariants(this);
+        assert checkInvariants();
     }
 
     private void hideHandles(Composition comp, boolean addToHistory) {
@@ -406,7 +401,7 @@ public class GradientTool extends DragTool {
         String editName = key.isShiftDown() ? "Shift-nudge Gradient" : "Nudge Gradient";
         commitGradient(handleDrag, comp, editName);
 
-        assert state.checkInvariants(this);
+        assert checkInvariants();
         return true;
     }
 
@@ -596,6 +591,15 @@ public class GradientTool extends DragTool {
 
         skipRegeneration = false;
         regenerateGradient("Load Preset");
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        return switch (state) {
+            case IDLE, INITIAL_DRAG -> !hasHandles();
+            case AFTER_FIRST_MOUSE_PRESS -> true; // handles might be present or absent
+            case TRANSFORM -> hasHandles();
+        };
     }
 
     @Override

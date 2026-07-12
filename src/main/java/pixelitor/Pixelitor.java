@@ -43,13 +43,10 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.onEDT;
-import static pixelitor.utils.Threads.onIOThread;
+import static pixelitor.utils.Threads.*;
 
 /**
- * The main enty point for the app.
+ * The main entry point for the app.
  */
 public class Pixelitor {
     public static final String VERSION = "4.3.2";

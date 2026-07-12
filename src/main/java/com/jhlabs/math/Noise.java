@@ -18,22 +18,16 @@ package com.jhlabs.math;
 
 import java.util.Random;
 
-import static com.jhlabs.image.ImageMath.PI;
-import static com.jhlabs.image.ImageMath.smoothStep01;
+import static com.jhlabs.image.ImageMath.*;
 
 /**
  * Perlin Noise functions.
  */
 public class Noise {
-    private static final Random randomGenerator = new Random();
-
     private Noise() {
     }
 
-    public static void reseed(long newSeed) {
-        randomGenerator.setSeed(newSeed);
-        init();
-    }
+    private static final Random randomGenerator = new Random();
 
     // the base size of the permutation/gradient tables
     private static final int B = 0x100; // 256
@@ -66,6 +60,11 @@ public class Noise {
     private static final float[] g3z = new float[B + B + 2];
 
     static {
+        init();
+    }
+
+    public static void reseed(long newSeed) {
+        randomGenerator.setSeed(newSeed);
         init();
     }
 
@@ -259,10 +258,6 @@ public class Noise {
         float d = lerp(sy, a, b);
 
         return 1.5f * lerp(sz, c, d);
-    }
-
-    public static float lerp(float t, float a, float b) {
-        return a + t * (b - a);
     }
 
     // returns a non-negative random integer

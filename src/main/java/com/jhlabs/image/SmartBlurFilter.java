@@ -16,8 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.progress.ProgressTracker;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.Kernel;
 
@@ -41,6 +39,8 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
     public SmartBlurFilter(String filterName, int radius, int threshold) {
         super(filterName);
 
+        assert radius >= 0 && threshold >= 0;
+
         this.radius = radius;
         this.threshold = threshold;
     }
@@ -61,8 +61,8 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
         getRGB(src, 0, 0, width, height, inPixels);
 
         Kernel kernel = GaussianFilter.makeKernel(radius);
-        thresholdBlur(kernel, inPixels, outPixels, width, height, pt);
-        thresholdBlur(kernel, outPixels, inPixels, height, width, pt);
+        thresholdBlurAndTranspose(kernel, inPixels, outPixels, width, height); // horizontal pass
+        thresholdBlurAndTranspose(kernel, outPixels, inPixels, height, width); // vertical pass
 
         setRGB(dst, 0, 0, width, height, inPixels);
 
@@ -72,20 +72,23 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Convolve with a kernel consisting of one row.
+     * Applies a 1D threshold-aware blur along image rows, writing the result
+     * transposed (column-major) into outPixels. Calling this once horizontally
+     * and once vertically (with width/height swapped) produces the full 2D
+     * "smart blur". Each channel of each pixel is only blurred with neighbors
+     * whose value in that channel is within {@code threshold} of the center
+     * pixel's, which is what keeps edges sharp while smoothing flat regions.
      */
-    private void thresholdBlur(Kernel kernel, int[] inPixels, int[] outPixels,
-                               int width, int height, ProgressTracker pt) {
+    private void thresholdBlurAndTranspose(Kernel kernel, int[] inPixels, int[] outPixels,
+                                           int width, int height) {
         float[] matrix = kernel.getKernelData(null);
-        int cols = kernel.getWidth();
-        int cols2 = cols / 2;
+        int cols2 = kernel.getWidth() / 2;
 
         for (int y = 0; y < height; y++) {
             int ioffset = y * width;
             int outIndex = y;
             for (int x = 0; x < width; x++) {
                 float r = 0, g = 0, b = 0, a = 0;
-                int moffset = cols2;
 
                 int rgb1 = inPixels[ioffset + x];
                 int a1 = rgb1 >>> 24;
@@ -96,7 +99,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
                 float af = 0, rf = 0, gf = 0, bf = 0;
 
                 for (int col = -cols2; col <= cols2; col++) {
-                    float f = matrix[moffset + col];
+                    float f = matrix[cols2 + col];
                     if (f == 0) {
                         continue;
                     }
@@ -112,32 +115,26 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
                     int g2 = (rgb2 >> 8) & 0xFF;
                     int b2 = rgb2 & 0xFF;
 
-                    int d;
-
-                    d = a1 - a2;
-                    if (d >= -threshold && d <= threshold) {
+                    if (Math.abs(a1 - a2) <= threshold) {
                         a += f * a2;
                         af += f;
                     }
-                    d = r1 - r2;
-                    if (d >= -threshold && d <= threshold) {
+                    if (Math.abs(r1 - r2) <= threshold) {
                         r += f * r2;
                         rf += f;
                     }
-                    d = g1 - g2;
-                    if (d >= -threshold && d <= threshold) {
+                    if (Math.abs(g1 - g2) <= threshold) {
                         g += f * g2;
                         gf += f;
                     }
-                    d = b1 - b2;
-                    if (d >= -threshold && d <= threshold) {
+                    if (Math.abs(b1 - b2) <= threshold) {
                         b += f * b2;
                         bf += f;
                     }
                 }
 
-                // the accumulation variables will never be 0,
-                // because a Gaussian kernel center is always positive
+                // the divisors below will never be 0, because
+                // a Gaussian kernel center is always positive
                 a = a / af;
                 r = r / rf;
                 g = g / gf;

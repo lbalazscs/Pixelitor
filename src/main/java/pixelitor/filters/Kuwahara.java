@@ -125,8 +125,8 @@ public class Kuwahara extends ParametrizedFilter {
     }
 
     /**
-     * Calculates the sum of values within a given rectangular region in O(1) time
-     * using a pre-computed integral image.
+     * Calculates the sum of values within a given rectangular
+     * region in O(1) time using a pre-computed integral image.
      *
      * @param integralImage The padded (height+1, width+1) integral image.
      * @param x1            The starting x-coordinate of the region (inclusive).
@@ -167,9 +167,6 @@ public class Kuwahara extends ParametrizedFilter {
             }
 
             int count = (x2 - x1 + 1) * (y2 - y1 + 1);
-            if (count == 0) {
-                continue;
-            }
 
             // calculate sum and sum of squares in O(1) using the integral images
             double sum = getRegionSum(integralSum, x1, y1, x2, y2);

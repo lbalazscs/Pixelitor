@@ -37,9 +37,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.io.Serial;
 
-import static pixelitor.tools.pen.AnchorPointType.CUSP;
-import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
+import static pixelitor.tools.pen.AnchorPointType.*;
 
 /**
  * An anchor point on a {@link SubPath}.
@@ -48,9 +46,9 @@ public class AnchorPoint extends DraggablePoint {
     @Serial
     private static final long serialVersionUID = -7001569188242665053L;
 
+    // image-space distance/slope thresholds
     private static final double SYMMETRY_THRESHOLD = 2.0;
     private static final double COLLINEARITY_THRESHOLD = 0.1;
-    public static final double RETRACTION_TOLERANCE = 1.0;
 
     // an anchor point has two associated control points that define
     // the curvature of the path segments connected to this point
@@ -231,8 +229,8 @@ public class AnchorPoint extends DraggablePoint {
      * Determines the appropriate handle type based on control point positions.
      */
     public void setHeuristicType() {
-        boolean inRetracted = ctrlIn.isRetracted(RETRACTION_TOLERANCE);
-        boolean outRetracted = ctrlOut.isRetracted(RETRACTION_TOLERANCE);
+        boolean inRetracted = ctrlIn.isRetracted();
+        boolean outRetracted = ctrlOut.isRetracted();
 
         if (inRetracted && outRetracted) {
             // so that they can be easily dragged out

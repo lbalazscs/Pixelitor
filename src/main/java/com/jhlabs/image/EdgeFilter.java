@@ -20,7 +20,7 @@ package com.jhlabs.image;
  * An edge-detection filter.
  */
 public class EdgeFilter extends WholeImageFilter {
-    private static final float SQRT_2 = (float) Math.sqrt(2);
+    private static final float SQRT_2 = (float) ImageMath.SQRT_2;
 
     // Roberts cross vertical and horizontal edge detection matrices
     // https://en.wikipedia.org/wiki/Roberts_cross
@@ -73,14 +73,19 @@ public class EdgeFilter extends WholeImageFilter {
         1, SQRT_2, 1,
     };
 
+    /**
+     * Empirical scaling factor applied to the raw gradient magnitude
+     * before it's clamped to 0..255. Increasing it darkens/thins detected
+     * edges; decreasing it brightens them and causes more clipping at 255.
+     */
     private static final double EDGE_SCALE = 1.8;
 
     public static final int CHANNEL_RGB = 0;
     public static final int CHANNEL_LUMINANCE = 1;
 
     private final int channel;
-    private final float[] vEdgeMatrix;
     private final float[] hEdgeMatrix;
+    private final float[] vEdgeMatrix;
 
     /**
      * Constructs a new EdgeFilter.
@@ -93,9 +98,12 @@ public class EdgeFilter extends WholeImageFilter {
     public EdgeFilter(String filterName, int channel, float[] hEdgeMatrix, float[] vEdgeMatrix) {
         super(filterName);
 
+        assert channel == CHANNEL_RGB || channel == CHANNEL_LUMINANCE;
+        assert hEdgeMatrix.length == 9 && vEdgeMatrix.length == 9;
+
         this.channel = channel;
-        this.vEdgeMatrix = vEdgeMatrix;
         this.hEdgeMatrix = hEdgeMatrix;
+        this.vEdgeMatrix = vEdgeMatrix;
     }
 
     @Override
@@ -118,28 +126,17 @@ public class EdgeFilter extends WholeImageFilter {
 
         // pre-process to get luma values
         float[] luma = ImageMath.calcLuminance(inPixels);
+        int[] neighborIndices = new int[9];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                findClampedNeighborIndices(x, y, width, height, neighborIndices);
+
                 float ih = 0, iv = 0;
-                int matrixIndex = 0;
-
-                // convolve the 3x3 neighborhood around the current pixel
-                for (int row = -1; row <= 1; row++) {
-                    int iy = Math.clamp(y + row, 0, height - 1);
-                    int ioffset = iy * width;
-
-                    for (int col = -1; col <= 1; col++) {
-                        int ix = Math.clamp(x + col, 0, width - 1);
-
-                        float h = hEdgeMatrix[matrixIndex];
-                        float v = vEdgeMatrix[matrixIndex];
-                        matrixIndex++;
-
-                        float pixelLuma = luma[ioffset + ix];
-                        ih += h * pixelLuma;
-                        iv += v * pixelLuma;
-                    }
+                for (int m = 0; m < 9; m++) {
+                    float pixelLuma = luma[neighborIndices[m]];
+                    ih += hEdgeMatrix[m] * pixelLuma;
+                    iv += vEdgeMatrix[m] * pixelLuma;
                 }
 
                 int i = (int) (Math.sqrt(ih * ih + iv * iv) / EDGE_SCALE);
@@ -156,39 +153,32 @@ public class EdgeFilter extends WholeImageFilter {
     private int[] findEdgesRGB(int width, int height, int[] inPixels) {
         int[] outPixels = new int[width * height];
         int index = 0;
+        int[] neighborIndices = new int[9];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                findClampedNeighborIndices(x, y, width, height, neighborIndices);
+
                 float rh = 0, gh = 0, bh = 0;
                 float rv = 0, gv = 0, bv = 0;
                 int a = inPixels[index] & 0xFF_00_00_00;
-                int matrixIndex = 0;
 
-                // convolve the 3x3 neighborhood around the current pixel
-                for (int row = -1; row <= 1; row++) {
-                    int iy = Math.clamp(y + row, 0, height - 1);
-                    int ioffset = iy * width;
+                for (int m = 0; m < 9; m++) {
+                    float h = hEdgeMatrix[m];
+                    float v = vEdgeMatrix[m];
 
-                    for (int col = -1; col <= 1; col++) {
-                        int ix = Math.clamp(x + col, 0, width - 1);
+                    int rgb = inPixels[neighborIndices[m]];
 
-                        float h = hEdgeMatrix[matrixIndex];
-                        float v = vEdgeMatrix[matrixIndex];
-                        matrixIndex++;
+                    int r = (rgb & 0xFF_00_00) >> 16;
+                    int g = (rgb & 0x00_FF_00) >> 8;
+                    int b = rgb & 0x00_00_FF;
 
-                        int rgb = inPixels[ioffset + ix];
-
-                        int r = (rgb & 0xFF_00_00) >> 16;
-                        int g = (rgb & 0x00_FF_00) >> 8;
-                        int b = rgb & 0x00_00_FF;
-
-                        rh += h * r;
-                        gh += h * g;
-                        bh += h * b;
-                        rv += v * r;
-                        gv += v * g;
-                        bv += v * b;
-                    }
+                    rh += h * r;
+                    gh += h * g;
+                    bh += h * b;
+                    rv += v * r;
+                    gv += v * g;
+                    bv += v * b;
                 }
 
                 int r = (int) (Math.sqrt(rh * rh + rv * rv) / EDGE_SCALE);
@@ -204,5 +194,22 @@ public class EdgeFilter extends WholeImageFilter {
             pt.unitDone();
         }
         return outPixels;
+    }
+
+    /**
+     * Fills {@code neighborIndices} (length 9) with the flat pixel
+     * indices of the 3x3 neighborhood centered on (x, y), row-major,
+     * clamping out-of-bounds coordinates to the nearest edge pixel.
+     */
+    private static void findClampedNeighborIndices(int x, int y, int width, int height, int[] neighborIndices) {
+        int matrixIndex = 0;
+        for (int row = -1; row <= 1; row++) {
+            int iy = Math.clamp(y + row, 0, height - 1);
+            int ioffset = iy * width;
+            for (int col = -1; col <= 1; col++) {
+                int ix = Math.clamp(x + col, 0, width - 1);
+                neighborIndices[matrixIndex++] = ioffset + ix;
+            }
+        }
     }
 }

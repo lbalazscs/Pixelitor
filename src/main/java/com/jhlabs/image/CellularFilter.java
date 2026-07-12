@@ -31,6 +31,8 @@ import java.util.concurrent.Future;
 public class CellularFilter extends WholeImageFilter {
     private static final int POISSON_ARRAY_SIZE = 8192;
 
+    protected static final float ORIGIN_OFFSET = 1000f; // reduces artifacts around (0,0)
+
     private GridType gridType;
 
     protected float scale = 32;
@@ -402,8 +404,8 @@ public class CellularFilter extends WholeImageFilter {
         float ny = m10 * x + m11 * y;
         nx /= scale;
         ny /= scale * stretch;
-        nx += 1000;
-        ny += 1000;    // offset to reduce artifacts around (0,0)
+        nx += ORIGIN_OFFSET;
+        ny += ORIGIN_OFFSET;
 
         float f = turbulence == 1.0f ? evaluate(nx, ny) : turbulence2(nx, ny, turbulence);
         f *= 2 * amount;

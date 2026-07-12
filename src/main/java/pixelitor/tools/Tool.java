@@ -139,7 +139,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
      * Allows tools to paint additional content over the canvas/composition,
      * after all layers have been painted. Useful for visual feedback
      * that is not directly part of the edited image.
-     * This method can paint outside of the canvas bounds.
+     * This method can paint outside the canvas bounds.
      * The transform of the given Graphics2D is in component space.
      */
     public void paintOverCanvas(Graphics2D g2, Composition comp) {

@@ -21,7 +21,7 @@ import pixelitor.ThreadPool;
 import java.util.concurrent.Future;
 
 /**
- * A filter which produces a "oil-painting" effect.
+ * A filter which produces an "oil-painting" effect.
  *
  * The original JH Labs implementation had three R,G,B histograms,
  * but this led to strange artifacts. The current implementation follows

@@ -16,16 +16,14 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.filters.jhlabsproxies.JHPointillize;
-
 public class PointillizeFilter extends CellularFilter {
     private float edgeThickness = 0.4f;
     private boolean fadeEdges = false;
     private int edgeColor = 0xFF_00_00_00;
     private float fuzziness = 0.1f;
 
-    public PointillizeFilter() {
-        super(JHPointillize.NAME);
+    public PointillizeFilter(String filterName) {
+        super(filterName);
     }
 
     public void setEdgeThickness(float edgeThickness) {
@@ -50,21 +48,21 @@ public class PointillizeFilter extends CellularFilter {
         float ny = m10 * x + m11 * y;
         nx /= scale;
         ny /= scale * stretch;
-        nx += 1000;
-        ny += 1000;    // Reduce artifacts around 0,0
+        nx += ORIGIN_OFFSET;
+        ny += ORIGIN_OFFSET;
         evaluate(nx, ny);
 
         Point[] results = resultsTL.get();
 
         float f1 = results[0].distance;
-        int srcx = ImageMath.clamp((int) ((results[0].x - 1000) * scale), 0, width - 1);
-        int srcy = ImageMath.clamp((int) ((results[0].y - 1000) * scale), 0, height - 1);
+        int srcx = ImageMath.clamp((int) ((results[0].x - ORIGIN_OFFSET) * scale), 0, width - 1);
+        int srcy = ImageMath.clamp((int) ((results[0].y - ORIGIN_OFFSET) * scale), 0, height - 1);
         int v = inPixels[srcy * width + srcx];
 
         if (fadeEdges) {
             float f2 = results[1].distance;
-            srcx = ImageMath.clamp((int) ((results[1].x - 1000) * scale), 0, width - 1);
-            srcy = ImageMath.clamp((int) ((results[1].y - 1000) * scale), 0, height - 1);
+            srcx = ImageMath.clamp((int) ((results[1].x - ORIGIN_OFFSET) * scale), 0, width - 1);
+            srcy = ImageMath.clamp((int) ((results[1].y - ORIGIN_OFFSET) * scale), 0, height - 1);
             int v2 = inPixels[srcy * width + srcx];
             v = ImageMath.mixColors(0.5f * f1 / f2, v, v2);
         } else {

@@ -22,7 +22,7 @@ package com.bric.image.transition;
 import java.awt.Dimension;
 
 /**
- * Also know as the "Fade" transition, this simply fades in the opacity of the incoming frame.
+ * Also known as the "Fade" transition, this simply fades in the opacity of the incoming frame.
  */
 public class BlendTransition2D extends Transition2D {
     @Override

@@ -54,12 +54,12 @@ public class ConvolveGUI extends FilterGUI {
         initPresetPanel();
 
         if (resetSettings) {
-            resetKernel(kernelSize);
+            resetKernel();
         } else {
             // use the last values
             float[] matrix = filter.getKernelMatrix();
             if (matrix == null) {
-                resetKernel(kernelSize);
+                resetKernel();
             } else {
                 loadKernel(matrix);
             }
@@ -149,7 +149,7 @@ public class ConvolveGUI extends FilterGUI {
         presetsBox.add(randomizeButton);
 
         JButton resetButton = GUIUtils.createResetAllButton(_ -> {
-            resetKernel(kernelSize);
+            resetKernel();
             onUserAction();
         });
         presetsBox.add(resetButton);
@@ -288,8 +288,8 @@ public class ConvolveGUI extends FilterGUI {
         });
     }
 
-    private void resetKernel(int size) {
-        float[] defaultValues = new float[size * size];
+    private void resetKernel() {
+        float[] defaultValues = new float[kernelSize * kernelSize];
         defaultValues[defaultValues.length / 2] = 1.0f;
 
         loadKernel(defaultValues);
@@ -304,29 +304,34 @@ public class ConvolveGUI extends FilterGUI {
         return textField;
     }
 
-    private void collectKernelValues() {
-        float[] values = getCurrentKernelValues();
-        if (values == null) {
-            return; // an error occurred during parsing
-        }
-        ((Convolve) this.filter).setKernelMatrix(values);
-    }
-
-    private float[] getCurrentKernelValues() {
+    private float[] parseKernelValues() {
         float[] values = new float[kernelSize * kernelSize];
-        float sum = 0.0f;
         for (int i = 0; i < values.length; i++) {
-            String s = kernelTextFields[i].getText();
             try {
-                values[i] = parseUserInput(s);
+                values[i] = parseUserInput(kernelTextFields[i].getText());
             } catch (NumberFormatException ex) {
                 Messages.showError("Invalid Input", ex.getMessage(), this);
                 return null;
             }
-            sum += values[i];
         }
-        toggleNormalizeButton(sum);
         return values;
+    }
+
+    private static float sum(float[] values) {
+        float total = 0.0f;
+        for (float value : values) {
+            total += value;
+        }
+        return total;
+    }
+
+    private void collectKernelValues() {
+        float[] values = parseKernelValues();
+        if (values == null) {
+            return; // an error occurred during parsing
+        }
+        updateNormalizeButtonEnabled(sum(values));
+        ((Convolve) this.filter).setKernelMatrix(values);
     }
 
     private void onUserAction() {
@@ -334,19 +339,15 @@ public class ConvolveGUI extends FilterGUI {
     }
 
     private void normalizeKernel() {
-        float[] values = getCurrentKernelValues();
+        float[] values = parseKernelValues();
         if (values == null) {
             return; // an error occurred during parsing
         }
 
-        float sum = 0.0f;
-        for (float value : values) {
-            sum += value;
-        }
-
-        if (sum != 0.0f) {
+        float total = sum(values);
+        if (total != 0.0f) {
             for (int i = 0; i < values.length; i++) {
-                values[i] /= sum;
+                values[i] /= total;
             }
             loadKernel(values);
             startPreview(false);
@@ -373,13 +374,13 @@ public class ConvolveGUI extends FilterGUI {
             sum += values[i];
         }
 
-        toggleNormalizeButton(sum);
+        updateNormalizeButtonEnabled(sum);
     }
 
     /**
      * Enables or disables the normalize button based on the kernel sum.
      */
-    private void toggleNormalizeButton(float sum) {
+    private void updateNormalizeButtonEnabled(float sum) {
         boolean notZero = Math.abs(sum) > EPSILON;
         boolean notOne = Math.abs(sum - 1.0f) > EPSILON;
 

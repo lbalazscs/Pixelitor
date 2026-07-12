@@ -18,8 +18,8 @@
 package pixelitor.tools.gui;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamGUI;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.AutoZoom;
 import pixelitor.gui.GUIText;
 import pixelitor.tools.brushes.CopyBrushType;
@@ -118,7 +118,7 @@ public class ToolSettingsPanel extends JPanel {
         add(new JButton(AutoZoom.FIT_HEIGHT_ACTION));
     }
 
-    public void addParam(RangeParam param) {
+    public void addParam(FilterParam param) {
         ParamGUI gui = (ParamGUI) param.createGUI();
         if (gui.getNumLayoutColumns() == 2) {
             add(new JLabel(param.getName() + ":"));

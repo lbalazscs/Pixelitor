@@ -18,7 +18,6 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.ChannelMixer;
-import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
@@ -26,9 +25,7 @@ import pixelitor.layers.Filterable;
 import javax.swing.*;
 import java.awt.BorderLayout;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.BoxLayout.Y_AXIS;
 
@@ -36,11 +33,14 @@ import static javax.swing.BoxLayout.Y_AXIS;
  * The GUI for the "Channel Mixer"
  */
 public class ChannelMixerGUI extends ParametrizedFilterGUI {
-    public ChannelMixerGUI(ParametrizedFilter filter, Filterable layer,
+    public ChannelMixerGUI(ChannelMixer filter, Filterable layer,
                            Action[] presets, boolean resetSettings) {
         super(filter, layer, true, resetSettings, presets);
     }
 
+    // while the base class's setupGUI just puts one vertical parameter
+    // panel in CENTER and an actions row in SOUTH, this version also
+    // adds a second panel of preset buttons to its EAST
     @Override
     protected void setupGUI(ParamSet paramSet,
                             boolean addShowOriginal,

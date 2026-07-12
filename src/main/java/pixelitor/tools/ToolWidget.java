@@ -48,6 +48,10 @@ public interface ToolWidget {
      */
     void coCoordsChanged(View view);
 
+    /**
+     * Called when the image space coordinates of this widget change
+     * (image resizing, cropping, canvas enlargement, flipping, etc.),
+     */
     void imCoordsChanged(AffineTransform at, View view);
 
     void arrowKeyPressed(ArrowKey key, View view);

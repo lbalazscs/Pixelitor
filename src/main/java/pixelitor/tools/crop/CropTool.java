@@ -282,7 +282,7 @@ public class CropTool extends DragTool {
     @Override
     protected void dragStarted(PMouseEvent e) {
         assert state != INITIAL_DRAG;
-        assert state.checkInvariants(this);
+        assert checkInvariants();
 
         if (state == IDLE) {
             rectBefore = null;
@@ -301,7 +301,7 @@ public class CropTool extends DragTool {
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
-        assert state.checkInvariants(this);
+        assert checkInvariants();
 
         if (state == TRANSFORM) {
             // adjust the existing crop box
@@ -325,7 +325,7 @@ public class CropTool extends DragTool {
      */
     @Override
     protected void dragFinished(PMouseEvent e) {
-        assert state.checkInvariants(this);
+        assert checkInvariants();
 
         if (drag.isClick()) {
             if (state == INITIAL_DRAG) {
@@ -662,7 +662,7 @@ public class CropTool extends DragTool {
      */
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        assert state.checkInvariants(this);
+        assert checkInvariants();
 
         View view = Views.getActive();
         if (view == null || state != TRANSFORM) {
@@ -790,6 +790,15 @@ public class CropTool extends DragTool {
             CompositionGuideType.PRESET_KEY, CompositionGuideType.class));
         deleteCroppedCB.setSelected(preset.getBoolean(DELETE_CROPPED_TEXT));
         allowGrowingCB.setSelected(preset.getBoolean(ALLOW_GROWING_TEXT));
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        return switch (state) {
+            case IDLE -> !hasCropBox() && !isCropEnabled();
+            case AFTER_FIRST_MOUSE_PRESS, INITIAL_DRAG -> !hasCropBox();
+            case TRANSFORM -> hasCropBox() && isCropEnabled();
+        };
     }
 
     @Override

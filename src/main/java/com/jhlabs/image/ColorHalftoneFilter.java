@@ -19,52 +19,38 @@ package com.jhlabs.image;
 import java.awt.image.BufferedImage;
 
 /**
- * A Filter to pixellate images.
+ * A filter that reproduces the dot-pattern look of CMY halftone-printed images.
  */
 public class ColorHalftoneFilter extends AbstractBufferedImageOp {
-    private float dotRadius = 2;
-    private float cyanScreenAngle = (float) Math.toRadians(108);
-    private float magentaScreenAngle = (float) Math.toRadians(162);
-    private float yellowScreenAngle = (float) Math.toRadians(90);
+    // grid-unit offsets to the current cell and its four orthogonal neighbors: {center, left, right, up, down}.
+    public static final float[] NEIGHBOR_OFFSETS_X = new float[]{0, -1, 1, 0, 0};
+    public static final float[] NEIGHBOR_OFFSETS_Y = new float[]{0, 0, 0, -1, 1};
 
-    public ColorHalftoneFilter(String filterName) {
-        super(filterName);
-    }
+    // pixels of anti-aliasing at a dot's edge
+    public static final int DOT_EDGE_FEATHER = 1;
 
-    /**
-     * Sets the pixel block size.
-     *
-     * @param dotRadius the number of pixels along each block edge
-     */
-    public void setdotRadius(float dotRadius) {
-        this.dotRadius = dotRadius;
-    }
+    private final float dotRadius;
+    private final float[] screenAngles;
 
     /**
-     * Sets the cyan screen angle.
+     * Constructs a ColorHalftoneFilter with the specified filter name and parameters.
      *
-     * @param cyanScreenAngle the cyan screen angle (in radians)
-     */
-    public void setCyanScreenAngle(float cyanScreenAngle) {
-        this.cyanScreenAngle = cyanScreenAngle;
-    }
-
-    /**
-     * Sets the magenta screen angle.
-     *
+     * @param filterName         the name of the filter
+     * @param dotRadius          the base radius, in pixels, used to size the halftone dots
+     * @param cyanScreenAngle    the cyan screen angle (in radians)
      * @param magentaScreenAngle the magenta screen angle (in radians)
+     * @param yellowScreenAngle  the yellow screen angle (in radians)
      */
-    public void setMagentaScreenAngle(float magentaScreenAngle) {
-        this.magentaScreenAngle = magentaScreenAngle;
-    }
+    public ColorHalftoneFilter(String filterName, float dotRadius, float cyanScreenAngle, float magentaScreenAngle, float yellowScreenAngle) {
+        super(filterName);
 
-    /**
-     * Sets the yellow screen angle.
-     *
-     * @param yellowScreenAngle the yellow screen angle (in radians)
-     */
-    public void setYellowScreenAngle(float yellowScreenAngle) {
-        this.yellowScreenAngle = yellowScreenAngle;
+        assert dotRadius > 0;
+        this.dotRadius = dotRadius;
+
+        // channel 0 (red) drives the cyan screen, channel 1 (green)
+        // the magenta screen, and channel 2 (blue) the yellow screen:
+        // ink amount is the complement of the RGB primary
+        this.screenAngles = new float[]{cyanScreenAngle, magentaScreenAngle, yellowScreenAngle};
     }
 
     @Override
@@ -78,10 +64,7 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
             dst = createCompatibleDestImage(src, null);
         }
 
-        float gridSize = 2 * dotRadius * 1.414f;
-        float[] angles = {cyanScreenAngle, magentaScreenAngle, yellowScreenAngle};
-        float[] mx = {0, -1, 1, 0, 0};
-        float[] my = {0, 0, 0, -1, 1};
+        float gridSize = (float) (2 * dotRadius * ImageMath.SQRT_2);
         float halfGridSize = gridSize / 2;
         int[] outPixels = new int[width];
         int[] inPixels = getRGB(src, 0, 0, width, height, null);
@@ -89,55 +72,57 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
             for (int x = 0, ix = y * width; x < width; x++, ix++) {
                 outPixels[x] = (inPixels[ix] & 0xFF_00_00_00) | 0xFF_FF_FF;
             }
+            // For each ink, resample the image onto a grid rotated to that ink's screen angle.
+            // Each grid cell is one halftone dot whose radius grows with local ink coverage.
             for (int channel = 0; channel < 3; channel++) {
                 int shift = 16 - 8 * channel;
                 int mask = 0x00_00_00_FF << shift;
-                float angle = angles[channel];
+                float angle = screenAngles[channel];
                 float sin = (float) Math.sin(angle);
                 float cos = (float) Math.cos(angle);
 
                 for (int x = 0; x < width; x++) {
-                    // Transform x,y into halftone screen coordinate space
+                    // transform x,y into halftone screen coordinate space
                     float tx = x * cos + y * sin;
                     float ty = -x * sin + y * cos;
 
-                    // Find the nearest grid point
+                    // find the nearest grid point
                     tx = tx - ImageMath.mod(tx - halfGridSize, gridSize) + halfGridSize;
                     ty = ty - ImageMath.mod(ty - halfGridSize, gridSize) + halfGridSize;
 
-                    float f = 1;
+                    float coverage = 1;
 
                     // TODO: Efficiency warning: Because the dots overlap, we need to check neighboring grid squares.
                     // We check all four neighbors, but in practice only one can ever overlap any given point.
                     for (int i = 0; i < 5; i++) {
-                        // Find neigbouring grid point
-                        float ttx = tx + mx[i] * gridSize;
-                        float tty = ty + my[i] * gridSize;
-                        // Transform back into image space
+                        // find neighboring grid point
+                        float ttx = tx + NEIGHBOR_OFFSETS_X[i] * gridSize;
+                        float tty = ty + NEIGHBOR_OFFSETS_Y[i] * gridSize;
+                        // transform back into image space
                         float ntx = ttx * cos - tty * sin;
                         float nty = ttx * sin + tty * cos;
-                        // Clamp to the image
+                        // clamp to the image
                         int nx = ImageMath.clamp((int) ntx, 0, width - 1);
                         int ny = ImageMath.clamp((int) nty, 0, height - 1);
                         int argb = inPixels[ny * width + nx];
-                        int nr = (argb >> shift) & 0xFF;
-                        float l = nr / 255.0f;
-                        l = 1 - l * l;
-                        l = (float) (l * (halfGridSize * 1.414));
+                        int channelValue = (argb >> shift) & 0xFF;
+                        float normalizedChannel = channelValue / 255.0f;
+                        float inkAmount = 1 - normalizedChannel * normalizedChannel;
+                        float cellDotRadius = (float) (inkAmount * halfGridSize * ImageMath.SQRT_2);
                         float dx = x - ntx;
                         float dy = y - nty;
                         float dx2 = dx * dx;
                         float dy2 = dy * dy;
-                        float R = (float) Math.sqrt(dx2 + dy2);
-                        float f2 = 1 - ImageMath.smoothStep(R, R + 1, l);
-                        f = Math.min(f, f2);
+                        float dist = (float) Math.sqrt(dx2 + dy2);
+                        float nCoverage = 1 - ImageMath.smoothStep(dist, dist + DOT_EDGE_FEATHER, cellDotRadius);
+
+                        // a dot can be large enough to spill into an adjacent cell, so a pixel's final
+                        // coverage is the minimum coverage from the nearest cell and its four neighbors
+                        coverage = Math.min(coverage, nCoverage);
                     }
 
-                    int v = (int) (255 * f);
-                    v <<= shift;
-                    v ^= ~mask;
-                    v |= 0xFF_00_00_00;
-                    outPixels[x] &= v;
+                    int channelByte = (int) (255 * coverage);
+                    outPixels[x] = (outPixels[x] & ~mask) | (channelByte << shift);
                 }
             }
             setRGB(dst, 0, y, width, 1, outPixels);

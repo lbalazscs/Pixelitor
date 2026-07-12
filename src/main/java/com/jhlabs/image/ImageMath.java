@@ -531,6 +531,14 @@ public class ImageMath {
         return (77 * r + 150 * g + 29 * b) >> 8;
     }
 
+    public static int[] calcLuminanceInt(int[] inPixels) {
+        int[] luma = new int[inPixels.length];
+        for (int i = 0; i < inPixels.length; i++) {
+            luma[i] = calcLuminanceInt(inPixels[i]);
+        }
+        return luma;
+    }
+
     // Catmull-Rom splines
     private static final float m00 = -0.5f;
     private static final float m01 = 1.5f;

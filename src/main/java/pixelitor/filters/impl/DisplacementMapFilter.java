@@ -45,7 +45,7 @@ public class DisplacementMapFilter extends TransformFilter {
      *                      if {@code false}, pixels outside the map bounds are left unchanged.
      * @param amount        the maximum displacement distance in pixels; the actual per-pixel
      *                      displacement is scaled by the map's normalized luminosity, centered
-     *                      so that mid-grey produces no displacement.
+     *                      so that mid-gray produces no displacement.
      * @param angle         the angle in radians defining the direction of displacement for
      *                      bright map pixels.
      */

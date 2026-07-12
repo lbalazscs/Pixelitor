@@ -155,8 +155,9 @@ public class Path implements Serializable, Debuggable {
         assert comp.getActivePath() == this;
 
         boolean wasActive = subPath == activeSubPath;
-
         Path backup = deepCopy(comp);
+
+        // remove by reference, not by equals
         subPaths.removeIf(sp -> sp == subPath);
         assert !subPaths.isEmpty(); // should never be called for the last subpath
 
@@ -181,8 +182,8 @@ public class Path implements Serializable, Debuggable {
         assert activeSubPath.getNumAnchors() == 1;
 
         subPaths.remove(lastIndex);
-        if (lastIndex == 0) { // the last subpath was deleted
-            return true;
+        if (lastIndex == 0) {
+            return true; // the path has no subpaths left
         }
         activeSubPath = subPaths.get(lastIndex - 1);
         return false;
@@ -289,7 +290,9 @@ public class Path implements Serializable, Debuggable {
         return subPaths.indexOf(subPath);
     }
 
-    // return true if it could be closed
+    /**
+     * Returns true if the subpath could be closed.
+     */
     boolean tryClosing(PMouseEvent e) {
         return activeSubPath.tryClosing(e);
     }

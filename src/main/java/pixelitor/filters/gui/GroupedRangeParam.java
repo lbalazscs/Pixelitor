@@ -44,6 +44,8 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     private boolean autoNormalizationEnabled = false;
     private boolean autoNormalizing = false;
 
+    private static final int NORMALIZED_SUM = 100; // 100%
+
     /**
      * Two linked children: "Horizontal" and "Vertical", with shared min/max/default values.
      */
@@ -156,7 +158,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         linkedModel = null;
 
         // validate preconditions for the normalization algorithm to work correctly
-        assert calcSumOfValues() == 100;
+        assert calcSumOfValues() == NORMALIZED_SUM;
         assert checkRangesForAutoNormalization();
 
         // enable auto-normalization
@@ -177,7 +179,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
             sumOfMaximums += param.getMaximum();
         }
 
-        if (sumOfMaximums < 100) {
+        if (sumOfMaximums < NORMALIZED_SUM) {
             throw new AssertionError("sum of maximums = " + sumOfMaximums);
         }
 
@@ -192,7 +194,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         autoNormalizing = true;
 
         int sumOfAllValues = calcSumOfValues();
-        int diff = sumOfAllValues - 100;
+        int diff = sumOfAllValues - NORMALIZED_SUM;
         if (diff == 0) {
             autoNormalizing = false;
             return; // nothing to do
@@ -243,7 +245,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     // this method is much simpler than {@link #autoNormalize}, but also
     // limited: it can't be used interactively, and ignores the min/max values
     private void normalizeAll() {
-        int diff = calcSumOfValues() - 100;
+        int diff = calcSumOfValues() - NORMALIZED_SUM;
         if (diff != 0) {
             double correction = diff / (double) children.length;
             for (RangeParam child : children) {

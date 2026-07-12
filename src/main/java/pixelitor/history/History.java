@@ -172,6 +172,7 @@ public class History {
     }
 
     public static void setUndoLevels(int undoLevels) {
+        assert undoLevels >= 0 : "undoLevels = " + undoLevels;
         undoManager.setLimit(undoLevels);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,5 +22,9 @@ package pixelitor.io;
 public class BadPxcFormatException extends Exception {
     public BadPxcFormatException(String message) {
         super(message);
+    }
+
+    public BadPxcFormatException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

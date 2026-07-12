@@ -17,10 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.tools.crop.CropTool;
-import pixelitor.tools.gradient.GradientTool;
-import pixelitor.tools.shapes.ShapesTool;
-
 /**
  * The possible states of a {@link DragTool}.
  */
@@ -28,87 +24,18 @@ public enum DragToolState {
     /**
      * The initial state and the state after finishing a tool action
      */
-    IDLE {
-        @Override
-        public boolean checkInvariants(ShapesTool tool) {
-            return !tool.hasStyledShape() && !tool.hasBox();
-        }
-
-        @Override
-        public boolean checkInvariants(CropTool tool) {
-            return !tool.hasCropBox() && !tool.isCropEnabled();
-        }
-
-        @Override
-        public boolean checkInvariants(GradientTool tool) {
-            return !tool.hasHandles();
-        }
-    },
+    IDLE,
     /**
      * A transient state after the mouse is pressed but before a drag has officially started.
      * Can be useful for distinguishing between a click and a drag.
      */
-    AFTER_FIRST_MOUSE_PRESS {
-        @Override
-        public boolean checkInvariants(ShapesTool tool) {
-            return tool.hasStyledShape() && !tool.hasBox();
-        }
-
-        @Override
-        public boolean checkInvariants(CropTool tool) {
-            return !tool.hasCropBox();
-        }
-
-        @Override
-        public boolean checkInvariants(GradientTool tool) {
-            // handles might be present (if the user clicked a handle or clicked
-            // outside an active gradient) or absent (first gradient interaction)
-            return true;
-        }
-    },
+    AFTER_FIRST_MOUSE_PRESS,
     /**
      * The state during the initial drag (no handles yet).
      */
-    INITIAL_DRAG {
-        @Override
-        public boolean checkInvariants(ShapesTool tool) {
-            return tool.hasStyledShape() && !tool.hasBox();
-        }
-
-        @Override
-        public boolean checkInvariants(CropTool tool) {
-            return !tool.hasCropBox();
-        }
-
-        @Override
-        public boolean checkInvariants(GradientTool tool) {
-            return !tool.hasHandles();
-        }
-    },
+    INITIAL_DRAG,
     /**
      * The state when the handles are shown.
      */
-    TRANSFORM {
-        @Override
-        public boolean checkInvariants(ShapesTool tool) {
-            return tool.hasStyledShape() && tool.hasBox();
-        }
-
-        @Override
-        public boolean checkInvariants(CropTool tool) {
-            return tool.hasCropBox() && tool.isCropEnabled();
-        }
-
-        @Override
-        public boolean checkInvariants(GradientTool tool) {
-            return tool.hasHandles();
-        }
-    };
-
-    // these are used for assertions to verify that the tool's internal state is consistent
-    public abstract boolean checkInvariants(ShapesTool tool);
-
-    public abstract boolean checkInvariants(CropTool tool);
-
-    public abstract boolean checkInvariants(GradientTool tool);
+    TRANSFORM
 }

@@ -26,11 +26,14 @@ import java.awt.geom.Point2D;
  * A filter which simulates a lens placed over an image.
  */
 public class SphereFilter extends TransformFilter {
+    // ellipse parameters
     private final double a;
     private final double b;
-    private final double a2;
-    private final double b2;
-    private final double refractionIndex;
+    private final double invA2; // cached 1/a²
+    private final double invB2; // cached 1/b²
+    private final double ab;    // cached a*b
+
+    private final double invRefractionIndex;
 
     private final double cx;
     private final double cy;
@@ -57,9 +60,10 @@ public class SphereFilter extends TransformFilter {
         this.cy = center.getY();
         this.a = a;
         this.b = b;
-        this.a2 = a * a;
-        this.b2 = b * b;
-        this.refractionIndex = refractionIndex;
+        this.invA2 = 1.0 / (a * a);
+        this.invB2 = 1.0 / (b * b);
+        this.ab = a * b;
+        this.invRefractionIndex = 1.0 / refractionIndex;
     }
 
     @Override
@@ -68,27 +72,32 @@ public class SphereFilter extends TransformFilter {
         double dy = y - cy;
         double x2 = dx * dx;
         double y2 = dy * dy;
-        if (y2 >= (b2 - (b2 * x2) / a2)) {
+
+        double r2 = x2 * invA2 + y2 * invB2; // x²/a² + y²/b²
+        if (r2 >= 1.0) {
+            // the pixel is outside the ellipse => leave it undistorted
             out[0] = x;
             out[1] = y;
-        } else {
-            double rRefraction = 1.0f / refractionIndex;
-
-            double z2 = (1.0f - x2 / a2 - y2 / b2) * (a * b);
-            double z = Math.sqrt(z2);
-
-            double xAngle = FastMath.acos(dx / Math.sqrt(x2 + z2));
-            double angle1 = Math.PI / 2.0 - xAngle;
-            double angle2 = FastMath.asin(FastMath.sin(angle1) * rRefraction);
-            angle2 = Math.PI / 2.0 - xAngle - angle2;
-            out[0] = (float) (x - FastMath.tan(angle2) * z);
-
-            double yAngle = FastMath.acos(dy / Math.sqrt(y2 + z2));
-            angle1 = Math.PI / 2.0 - yAngle;
-            angle2 = FastMath.asin(FastMath.sin(angle1) * rRefraction);
-            angle2 = Math.PI / 2.0 - yAngle - angle2;
-            out[1] = (float) (y - FastMath.tan(angle2) * z);
+            return;
         }
+
+        // height of the lens surface above the image plane
+        double z2 = (1.0 - r2) * ab;
+        double z = Math.sqrt(z2);
+
+        out[0] = (float) (x - refractionTangent(dx, x2, z2, invRefractionIndex) * z);
+        out[1] = (float) (y - refractionTangent(dy, y2, z2, invRefractionIndex) * z);
+    }
+
+    /**
+     * Returns tan of the angular deflection a ray undergoes when refracting from
+     * air (n = 1) into the lens material (n = refractionIndex), per Snell's law.
+     */
+    private static double refractionTangent(double coord, double coord2, double z2, double invRefractionIndex) {
+        double sinIncidence = coord / Math.sqrt(coord2 + z2);
+        double incidenceAngle = FastMath.asin(sinIncidence);
+        double refractionAngle = FastMath.asin(sinIncidence * invRefractionIndex);
+        return FastMath.tan(incidenceAngle - refractionAngle);
     }
 
     public Shape[] getAffectedAreaShapes() {

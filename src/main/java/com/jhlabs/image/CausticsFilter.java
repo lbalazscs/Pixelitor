@@ -42,10 +42,10 @@ public class CausticsFilter extends WholeImageFilter {
      * Constructs a new {@link CausticsFilter}.
      *
      * @param filterName the name of the filter
-     * @param scale      the scale of the texture (in the range 1..300+)
-     * @param brightness the brightness (in the range [0, 1])
+     * @param scale      the scale of the texture (in the range 1..500+)
+     * @param brightness the brightness (in the range [0, 20])
      * @param amount     the amount of the effect (in the range [0, 1])
-     * @param turbulence the turbulence of the texture (in the range [0, 1])
+     * @param turbulence the turbulence of the texture (in the range [0, 4])
      * @param dispersion the color dispersion (in the range [0, 1])
      * @param time       the time, used to animate the effect
      * @param samples    the number of samples per pixel. More samples means better quality, but slower rendering
@@ -54,6 +54,8 @@ public class CausticsFilter extends WholeImageFilter {
     public CausticsFilter(String filterName, float scale, int brightness, float amount,
                           float turbulence, float dispersion, float time, int samples, int bgColor) {
         super(filterName);
+
+        assert scale != 0 && samples > 0 && brightness >= 0;
 
         this.scale = scale;
         this.brightness = brightness;
@@ -82,6 +84,10 @@ public class CausticsFilter extends WholeImageFilter {
         Future<?>[] rowFutures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
+
+            // some updates might be lost because a sample's write location
+            // isn't confined to its own row, but visually it looks OK,
+            // and throughput matters more than correctness here
             Runnable rowTask = () -> processRow(width, height, pixels, v, rs, d, finalY);
             rowFutures[y] = ThreadPool.submit(rowTask);
         }
@@ -138,7 +144,7 @@ public class CausticsFilter extends WholeImageFilter {
         float srcX = sx + sfc * xDisplacement;
         float srcY = sy + sfc * yDisplacement;
 
-        if (srcX >= 0 && srcX < width - 1 && srcY >= 0 && srcY < height - 1) {
+        if (srcX >= 0 && srcX < width && srcY >= 0 && srcY < height) {
             int i = ((int) srcY) * width + (int) srcX;
             int mask = ~(0xFF << shift);
             pixels[i] = (pixels[i] & mask) | (Math.min(((pixels[i] >> shift) & 0xFF) + v, 255) << shift);
@@ -149,7 +155,7 @@ public class CausticsFilter extends WholeImageFilter {
         float srcX = sx + scaleFocus * xDisplacement;
         float srcY = sy + scaleFocus * yDisplacement;
 
-        if (srcX >= 0 && srcX < width - 1 && srcY >= 0 && srcY < height - 1) {
+        if (srcX >= 0 && srcX < width && srcY >= 0 && srcY < height) {
             int i = ((int) srcY) * width + (int) srcX;
             int rgb = pixels[i];
 

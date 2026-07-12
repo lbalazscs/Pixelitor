@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,18 +24,15 @@ public enum AppMode {
     /**
      * The mode used by end-users.
      */
-    STANDARD_GUI() {
-    },
+    STANDARD_GUI,
     /**
      * In this mode there are additional development menus and runtime checks.
      */
-    DEVELOPMENT_GUI() {
-    },
+    DEVELOPMENT_GUI,
     /**
      * In this mode there is no GUI, and some objects might be mocked.
      */
-    UNIT_TESTS() {
-    };
+    UNIT_TESTS;
 
     public static AppMode ACTIVE = STANDARD_GUI;
 

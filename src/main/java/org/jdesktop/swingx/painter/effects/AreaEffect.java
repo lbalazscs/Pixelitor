@@ -25,7 +25,7 @@ import java.awt.Shape;
 import java.io.Serializable;
 
 /**
- * An effect which works on AbstractPathPainters or any thing else which can provide a shape to be drawn.
+ * An effect which works on AbstractPathPainters or anything else which can provide a shape to be drawn.
  *
  * @author joshy
  */

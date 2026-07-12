@@ -45,7 +45,8 @@ import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
- * https://en.wikipedia.org/wiki/Chaos_game
+ * Renders a "chaos game" fractal: repeatedly jumps a point a fraction of the
+ * way toward a randomly chosen vertex of a polygon, plotting each landing spot.
  */
 public class ChaosGame extends ParametrizedFilter {
     public static final String NAME = "Chaos Game";
@@ -54,6 +55,7 @@ public class ChaosGame extends ParametrizedFilter {
     private static final long serialVersionUID = 6399413203597332126L;
 
     private static final int MARGIN = 5;
+    private static final int VERTEX_MARKER_RADIUS = 5;
     private static final Vertex[] EMPTY_ARRAY = new Vertex[0];
 
     private static final int COLORS_BW = 1;
@@ -61,10 +63,11 @@ public class ChaosGame extends ParametrizedFilter {
     private static final int COLORS_LAST_BUT_ONE = 3;
     private static final int COLORS_LAST_BUT_TWO = 4;
 
+    private static final int WARM_UP_ITERATIONS = 50;
     private static final int NUM_WORK_UNITS = 20;
     private static final int ARGB_WHITE = 0xFF_FF_FF_FF;
 
-    private final RangeParam numVerticesParam = new RangeParam("Number of Vertices", 3, 3, 10);
+    private final RangeParam numPolyCorners = new RangeParam("Number of Vertices", 3, 3, 10);
     private final RangeParam fraction = new RangeParam("Jump Fraction (%)", 1, 50, 99);
     private final RangeParam iterations = new RangeParam("Iterations (millions)",
         1, 1, 10, true, BORDER, RandomizeMode.IGNORE);
@@ -83,7 +86,7 @@ public class ChaosGame extends ParametrizedFilter {
         super(false);
 
         initParams(
-            numVerticesParam,
+            numPolyCorners,
             fraction,
             iterations,
             colors,
@@ -99,35 +102,35 @@ public class ChaosGame extends ParametrizedFilter {
 
     private void setupBuiltinPresets() {
         FilterState triangle = new FilterState("Sierpinski Triangle (defaults)")
-            .with(numVerticesParam, new RangeParamState(3))
+            .with(numPolyCorners, new RangeParamState(3))
             .with(fraction, new RangeParamState(50))
             .with(centerJump, NO)
             .with(midpointJump, NO)
             .with(restrict, NO);
 
         FilterState carpet = new FilterState("Sierpinski Carpet")
-            .with(numVerticesParam, new RangeParamState(4))
+            .with(numPolyCorners, new RangeParamState(4))
             .with(fraction, new RangeParamState(33.3333)) // jump ratio is 1/3
             .with(centerJump, NO)
             .with(midpointJump, YES)
             .with(restrict, NO);
 
         FilterState vicsek = new FilterState("Vicsek Fractal")
-            .with(numVerticesParam, new RangeParamState(4))
+            .with(numPolyCorners, new RangeParamState(4))
             .with(fraction, new RangeParamState(33.3333)) // jump ratio is 1/3
             .with(centerJump, YES)
             .with(midpointJump, NO)
             .with(restrict, NO);
 
         FilterState penta = new FilterState("Pentaflake")
-            .with(numVerticesParam, new RangeParamState(5))
+            .with(numPolyCorners, new RangeParamState(5))
             .with(fraction, new RangeParamState(38.1966)) // jump ratio is 1 / (2 * cos(π / 5) + 1) = 1 / (φ + 1)
             .with(centerJump, NO)
             .with(midpointJump, NO)
             .with(restrict, NO);
 
         FilterState hexa = new FilterState("Hexaflake")
-            .with(numVerticesParam, new RangeParamState(6))
+            .with(numPolyCorners, new RangeParamState(6))
             .with(fraction, new RangeParamState(33.3333)) // jump ratio is 1/3
             .with(centerJump, YES)
             .with(midpointJump, NO)
@@ -142,7 +145,9 @@ public class ChaosGame extends ParametrizedFilter {
         int workUnit = numIterations / NUM_WORK_UNITS;
         var pt = new StatusBarProgressTracker(NAME, NUM_WORK_UNITS);
 
-        int numVertices = numVerticesParam.getValue();
+        // the original polygon corner count, without the extra attractors
+        int numVertices = numPolyCorners.getValue();
+
         int colorsValue = colors.getValue();
         int width = dest.getWidth();
         int height = dest.getHeight();
@@ -162,29 +167,33 @@ public class ChaosGame extends ParametrizedFilter {
         double currentY = random.nextInt(height);
 
         Vertex[] verticesArray = vertices.toArray(EMPTY_ARRAY);
+
+        // total attractor count, including midpoints/center
         int numPoints = vertices.size();
+
         boolean restrictRepetition = restrict.isChecked();
 
-        // do 50 iterations without drawing any pixels to ensure that
+        // do warmup iterations without drawing any pixels to ensure that
         // the point moves from its random starting position into the fractal
         // (prevents stray pixels from appearing outside the main pattern)
         Vertex previousVertex = null;
         Vertex secondPreviousVertex = null;
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < WARM_UP_ITERATIONS; i++) {
             Vertex vertex = pickNextVertex(random, verticesArray, numPoints, restrictRepetition, previousVertex);
-            currentX = currentX * jumpRatio + vertex.x * remainingRatio;
-            currentY = currentY * jumpRatio + vertex.y * remainingRatio;
+            currentX = moveToward(currentX, vertex.x, jumpRatio, remainingRatio);
+            currentY = moveToward(currentY, vertex.y, jumpRatio, remainingRatio);
             secondPreviousVertex = previousVertex;
             previousVertex = vertex;
         }
 
+        // main iteration loop
         int counter = 0;
         for (int i = 0; i < numIterations; i++) {
             Vertex vertex = pickNextVertex(random, verticesArray, numPoints, restrictRepetition, previousVertex);
 
             // calculate the new point
-            currentX = currentX * jumpRatio + vertex.x * remainingRatio;
-            currentY = currentY * jumpRatio + vertex.y * remainingRatio;
+            currentX = moveToward(currentX, vertex.x, jumpRatio, remainingRatio);
+            currentY = moveToward(currentY, vertex.y, jumpRatio, remainingRatio);
 
             // plot the pixel
             int index = (int) currentX + width * (int) currentY;
@@ -338,9 +347,9 @@ public class ChaosGame extends ParametrizedFilter {
      * Draws the base polygon and its vertices on the destination image.
      */
     private static void drawPolygon(BufferedImage dest, List<Vertex> vertices,
-                                    int numVertices, boolean color) {
+                                    int numVertices, boolean useColor) {
         Graphics2D g = dest.createGraphics();
-        g.setColor(color ? Color.BLACK : Color.RED);
+        g.setColor(useColor ? Color.BLACK : Color.RED);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setStroke(new BasicStroke(2.0f));
 
@@ -349,16 +358,20 @@ public class ChaosGame extends ParametrizedFilter {
             Vertex lastVertex = vertices.get((i + numVertices - 1) % numVertices);
             g.draw(new Line2D.Double(lastVertex.x, lastVertex.y, vertex.x, vertex.y));
         }
-        if (color) {
+        if (useColor) {
             for (Vertex p : vertices) {
                 g.setColor(new Color(p.color));
-                Shape circle = CustomShapes.createCircle(p.x, p.y, MARGIN);
+                Shape circle = CustomShapes.createCircle(p.x, p.y, VERTEX_MARKER_RADIUS);
                 g.fill(circle);
                 g.setColor(Color.BLACK);
                 g.draw(circle);
             }
         }
         g.dispose();
+    }
+
+    private static double moveToward(double current, double target, double jumpRatio, double remainingRatio) {
+        return current * jumpRatio + target * remainingRatio;
     }
 
     @Override

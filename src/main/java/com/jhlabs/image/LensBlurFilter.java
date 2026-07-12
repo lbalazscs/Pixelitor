@@ -107,7 +107,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
 
         float[][] mask = createKernel(w, h);
 
-        // FFT-transform the the kernel upfront for efficiency
+        // FFT-transform the kernel upfront for efficiency
         fft.transform2D(mask[0], mask[1], w, h, true);
 
         int stepY = tileHeight - 2 * iradius;

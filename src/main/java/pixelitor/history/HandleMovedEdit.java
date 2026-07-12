@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,8 +58,8 @@ public class HandleMovedEdit extends PixelitorEdit {
         moveHandleTo(after);
     }
 
-    private void moveHandleTo(Point2D before) {
-        handle.setLocation(before);
+    private void moveHandleTo(Point2D location) {
+        handle.setLocation(location);
 
         if (handle instanceof AnchorPoint ap) {
             ap.getSubPath().getComp().pathChanged();

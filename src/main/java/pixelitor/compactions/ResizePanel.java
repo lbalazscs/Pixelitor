@@ -30,16 +30,13 @@ import javax.swing.border.TitledBorder;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 import static java.awt.FlowLayout.LEFT;
 
 /**
  * The GUI for the resize settings.
  */
-public class ResizePanel extends JPanel implements Validated, KeyListener, ItemListener, DialogMenuOwner, DimensionHelper.DimensionChangeCallback {
+public class ResizePanel extends JPanel implements Validated, DialogMenuOwner, DimensionHelper.DimensionChangeCallback {
     private final JCheckBox keepProportionsCB;
     private final TitledBorder titleBorder;
 
@@ -61,12 +58,12 @@ public class ResizePanel extends JPanel implements Validated, KeyListener, ItemL
         var inputPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(inputPanel);
 
-        var widthLayer = dimensions.createWidthTextField(this);
-        var widthUnitChooser = dimensions.createUnitChooser(this);
+        var widthLayer = dimensions.createWidthTextField();
+        var widthUnitChooser = dimensions.createUnitChooser();
         gbh.addLabelAndTwoControls("Width:", widthLayer, widthUnitChooser);
 
-        var heightLayer = dimensions.createHeightTextField(this);
-        var heightUnitChooser = dimensions.createUnitChooser(this);
+        var heightLayer = dimensions.createHeightTextField();
+        var heightUnitChooser = dimensions.createUnitChooser();
         gbh.addLabelAndTwoControls("Height:", heightLayer, heightUnitChooser);
 
         titleBorder = BorderFactory.createTitledBorder("");
@@ -76,14 +73,16 @@ public class ResizePanel extends JPanel implements Validated, KeyListener, ItemL
         JPanel optionsPanel = new JPanel(new FlowLayout(LEFT));
         keepProportionsCB = new JCheckBox("Keep Proportions");
         keepProportionsCB.setSelected(true);
-        keepProportionsCB.addItemListener(this);
+        keepProportionsCB.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                adjustHeightToKeepProportions();
+            }
+        });
         optionsPanel.add(keepProportionsCB);
 
         JPanel dpiPanel = new JPanel(new FlowLayout(LEFT));
         dpiPanel.add(new JLabel("DPI:"));
         var dpiChooser = dimensions.getDpiChooser();
-        dpiChooser.addItemListener(this);
-        dpiChooser.setEnabled(false);
         dpiPanel.add(dpiChooser);
 
         Box verticalBox = Box.createVerticalBox();
@@ -97,22 +96,6 @@ public class ResizePanel extends JPanel implements Validated, KeyListener, ItemL
 
     private boolean shouldKeepProportions() {
         return keepProportionsCB.isSelected();
-    }
-
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-        Object source = e.getSource();
-        if (e.getStateChange() != ItemEvent.SELECTED) {
-            return;
-        }
-
-        if (source == keepProportionsCB) {
-            if (shouldKeepProportions()) {
-                adjustHeightToKeepProportions();
-            }
-        } else {
-            dimensions.itemStateChanged(e);
-        }
     }
 
     @Override
@@ -138,25 +121,9 @@ public class ResizePanel extends JPanel implements Validated, KeyListener, ItemL
         updateBorderText();
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        dimensions.keyReleased(e);
-    }
-
     private void adjustHeightToKeepProportions() {
         int targetWidth = dimensions.getTargetWidth();
         int targetHeight = (int) Math.round(targetWidth / origAspectRatio);
-        if (targetHeight == 0) {
-            targetHeight = 1;
-        }
         dimensions.setTargetHeight(targetHeight);
         dimensions.updateHeightText();
     }
@@ -164,9 +131,6 @@ public class ResizePanel extends JPanel implements Validated, KeyListener, ItemL
     private void adjustWidthToKeepProportions() {
         int targetHeight = dimensions.getTargetHeight();
         int targetWidth = (int) Math.round(targetHeight * origAspectRatio);
-        if (targetWidth == 0) {
-            targetWidth = 1;
-        }
         dimensions.setTargetWidth(targetWidth);
         dimensions.updateWidthText();
     }

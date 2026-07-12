@@ -27,7 +27,7 @@ import java.awt.Point;
 import java.io.Serial;
 
 /**
- * An effect which draws a shadow around the the painter's shape.
+ * An effect which draws a shadow around the painter's shape.
  *
  * @author joshy
  */

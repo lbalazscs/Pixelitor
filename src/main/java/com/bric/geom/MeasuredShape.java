@@ -29,11 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_CUBICTO;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
-import static java.awt.geom.PathIterator.SEG_QUADTO;
+import static java.awt.geom.PathIterator.*;
 
 /**
  * This represents a single closed path.
@@ -536,7 +532,7 @@ public class MeasuredShape implements Serializable {
      * @param w             the destination to write to
      * @param includeMoveTo this controls whether a moveTo is the first thing
      *                      written to the path.
-     *                      Note setting this to <code>false</code> means its the caller's responsibility
+     *                      Note setting this to <code>false</code> means it's the caller's responsibility
      *                      to make sure the path is in the correct position.
      */
     public void writeShape(float position, float length, PathWriter w, boolean includeMoveTo) {

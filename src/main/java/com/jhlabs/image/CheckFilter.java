@@ -18,8 +18,6 @@ package com.jhlabs.image;
 
 import net.jafama.FastMath;
 
-import java.util.Arrays;
-
 /**
  * A filter that renders a checkerboard pattern with optional
  * rotation, distortion, fuzziness, and multiple colors.
@@ -67,11 +65,10 @@ public class CheckFilter extends PointFilter {
     public CheckFilter(String filterName, int[] colors, int xScale, int yScale, int fuzziness, float angle, double distortion, double phase) {
         super(filterName);
 
-        if (colors == null || colors.length < 2) {
-            throw new IllegalArgumentException("colors = " + Arrays.toString(colors));
-        }
-        this.colors = colors;
+        assert colors != null && colors.length >= 2;
+        assert xScale != 0 && yScale != 0;
 
+        this.colors = colors;
         this.aaThresholdX = 1.0f / xScale;
         this.upperAaThresholdX = 1.0f - aaThresholdX;
 
@@ -117,10 +114,6 @@ public class CheckFilter extends PointFilter {
 
     // determines the anti-aliasing resolution
     private static int calcAaRes(double distortion, double sin, double cos, boolean straight) {
-        if (straight && distortion <= 0) {
-            return 2; // default
-        }
-
         // the necessary AA resolution scales with how difficult the angle
         // is: near-diagonal angles need less than almost aligned angles
         double minSinCos = Math.min(Math.abs(sin), Math.abs(cos));
@@ -178,7 +171,7 @@ public class CheckFilter extends PointFilter {
 
             if (minFoldedDist < fuzzThreshold) { // pixel is in the fuzzy region
                 // the color of the tile the pixel is in
-                int currentColor = colors[Math.floorMod(tileSum, numColors)];
+                int currentColor = colorForDiagonal(tileSum);
 
                 // determine the color of the specific adjacent tile towards which fuzzing occurs
                 int neighborSum;
@@ -195,7 +188,7 @@ public class CheckFilter extends PointFilter {
                         neighborSum = tileSum + 1; // neighbor is below
                     }
                 }
-                int neighborColor = colors[Math.floorMod(neighborSum, numColors)];
+                int neighborColor = colorForDiagonal(neighborSum);
                 float mixingProportion = 0.5f + 0.5f * (minFoldedDist / fuzzThreshold);
                 return ImageMath.mixColors(mixingProportion, neighborColor, currentColor);
             }
@@ -205,13 +198,12 @@ public class CheckFilter extends PointFilter {
         // 1. fuzziness == 0
         // 2. fuzziness != 0 but pixel is outside the fuzz band
 
-        boolean needsAA = false;
         // the fuzziness condition is imperfect: very small images
         // benefit from AA even with low fuzziness, while in large
         // images a small fuzziness may cause AA artifacts
-        if (couldNeedAA) {
-            needsAA = dxFrac < aaThresholdX || dyFrac < aaThresholdY || dxFrac > upperAaThresholdX || dyFrac > upperAaThresholdY;
-        }
+        boolean needsAA = couldNeedAA
+            && (dxFrac < aaThresholdX || dyFrac < aaThresholdY
+            || dxFrac > upperAaThresholdX || dyFrac > upperAaThresholdY);
 
         float f; // blend factor
         if (needsAA) {
@@ -220,7 +212,7 @@ public class CheckFilter extends PointFilter {
                 float yy = y + subPixelOffsets[i];
                 for (int j = 0; j < aaRes; j++) {
                     float xx = x + subPixelOffsets[j];
-                    p += calcSubPixelInterpolation(xx, yy);
+                    p += sampleCheckerType(xx, yy);
                 }
             }
             f = p * invAaRes2; // normalize into the range [0, 1]
@@ -228,24 +220,13 @@ public class CheckFilter extends PointFilter {
             f = ((inx & 1) == (iny & 1)) ? 0.0f : 1.0f;
         }
 
-        int colorIndexEven; // sum for the even-sum-type diagonal in the pair
-        int colorIndexOdd;  // sum for the odd-sum-type diagonal in the pair
+        // the sums for the even/odd pair of diagonals related to the current tile
+        int evenSum = tileSum - (tileSum & 1); // round tileSum down to the nearest even value
+        int oddSum = evenSum + 1;
 
-        // determine the sums for the even/odd pair of diagonals related to the current tile
-        if ((tileSum & 1) == 0) {
-            colorIndexEven = tileSum;
-            colorIndexOdd = tileSum + 1;
-        } else {
-            colorIndexEven = tileSum - 1;
-            colorIndexOdd = tileSum;
-        }
-
-        // the color indices for the colors array
-        int index0 = Math.floorMod(colorIndexEven, numColors);
-        int index1 = Math.floorMod(colorIndexOdd, numColors);
-
-        int color0 = colors[index0]; // color for "even sum type" diagonal
-        int color1 = colors[index1]; // color for "odd sum type" diagonal
+        // the colors for the "even sum type" and "odd sum type" diagonals
+        int color0 = colorForDiagonal(evenSum);
+        int color1 = colorForDiagonal(oddSum);
 
         if (f == 0.0f) {
             return color0;
@@ -260,7 +241,7 @@ public class CheckFilter extends PointFilter {
      * Returns either 0.0f or 1.0f for each sample point, representing
      * which of the two checker "color types" a sub-pixel position falls into.
      */
-    private float calcSubPixelInterpolation(float x, float y) {
+    private float sampleCheckerType(float x, float y) {
         float nx = m00 * x + m01 * y;
         float ny = m10 * x + m11 * y;
         
@@ -278,5 +259,9 @@ public class CheckFilter extends PointFilter {
         int iny = (int) pny;
 
         return ((inx & 1) == (iny & 1)) ? 0.0f : 1.0f;
+    }
+
+    private int colorForDiagonal(int diagonalSum) {
+        return colors[Math.floorMod(diagonalSum, colors.length)];
     }
 }

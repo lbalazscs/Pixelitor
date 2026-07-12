@@ -66,6 +66,7 @@ public abstract class DragTool extends Tool {
         dragStarted(e);
 
         endPointInitialized = false;
+        assert checkInvariants();
     }
 
     @Override
@@ -95,6 +96,7 @@ public abstract class DragTool extends Tool {
         }
 
         ongoingDrag(e);
+        assert checkInvariants();
     }
 
     @Override
@@ -110,6 +112,7 @@ public abstract class DragTool extends Tool {
         drag.mouseReleased();
         dragFinished(e);
         endPointInitialized = false;
+        assert checkInvariants();
     }
 
     /**
@@ -138,6 +141,7 @@ public abstract class DragTool extends Tool {
                 view.repaint();
             }
         }
+        assert checkInvariants();
         super.escPressed();
     }
 
@@ -149,6 +153,11 @@ public abstract class DragTool extends Tool {
 
         getOverlayType().draw(g2, drag);
     }
+
+    /**
+     * Checks the invariants of this tool based on its current state.
+     */
+    public abstract boolean checkInvariants();
 
     protected OverlayType getOverlayType() {
         return OverlayType.WIDTH_HEIGHT; // default to width/height display

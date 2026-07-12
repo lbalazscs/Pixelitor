@@ -75,7 +75,6 @@ public class FractalTree extends ParametrizedFilter {
     private Physics[] physicsLookup;
 
     private boolean doPhysics;
-    private boolean leftFirst;
     private boolean hasRandomness;
 
     private final GradientParam colors = new GradientParam("Colors",
@@ -108,9 +107,6 @@ public class FractalTree extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         RandomGenerator rand = paramSet.getSRandomWithLastSeed();
-
-        // initialize alternating branch drawing order
-        leftFirst = true;
 
         defaultLength = src.getHeight() * zoom.getPercentage() / 100.0;
         double randPercent = randomness.getValue() / 100.0;
@@ -157,8 +153,8 @@ public class FractalTree extends ParametrizedFilter {
             initialCurvature = -initialCurvature;
         }
 
-        // the drawTree calls form a perfect binary tree, and
-        // this is the number of nodes in it
+        // the drawTree calls form a perfect binary tree,
+        // and this is the number of nodes in it
         int drawTreeCalls = (1 << maxDepth) - 1;
 
         pt = new StatusBarProgressTracker(NAME, drawTreeCalls);
@@ -179,15 +175,14 @@ public class FractalTree extends ParametrizedFilter {
         double trunkWidth = width.getPercentage(1);
         double base = Math.pow(trunkWidth, 1.0 / (maxDepth - 1));
         double w2 = Math.pow(base, depth - 1);
-        float strokeWidth = (float) (w1 * w2);
-        return strokeWidth;
+        return (float) (w1 * w2);
     }
 
     /**
      * Recursively draws a branch and its children.
      */
     private void drawTree(Graphics2D g, double startX, double startY,
-                          double angle, int depth,
+                          double branchAngle, int depth,
                           RandomGenerator rand, double curvature) {
         if (depth == 0) {
             return;
@@ -197,12 +192,14 @@ public class FractalTree extends ParametrizedFilter {
         curvature = -curvature;
 
         if (doPhysics) {
-            angle = adjustPhysics(angle, depth);
+            branchAngle = physicsLookup[depth].adjustAngle(branchAngle);
         }
 
-        double angleRad = Math.toRadians(angle);
-        double endX = startX + FastMath.cos(angleRad) * depth * genRandomLength(rand);
-        double endY = startY + FastMath.sin(angleRad) * depth * genRandomLength(rand);
+        double angleRad = Math.toRadians(branchAngle);
+
+        double length = depth * genRandomLength(rand);
+        double endX = startX + FastMath.cos(angleRad) * length;
+        double endY = startY + FastMath.sin(angleRad) * length;
 
         g.setStroke(strokeLookup[depth]);
         int nextDepth = depth - 1;
@@ -220,52 +217,23 @@ public class FractalTree extends ParametrizedFilter {
 
         connectPoints(g, curvature, startX, startY, endX, endY);
 
-        int split = this.angle.getValue();
+        int split = angle.getValue();
 
-        double leftBranchAngle = angle - split + genAngleRandomness(rand);
-        double rightBranchAngle = angle + split + genAngleRandomness(rand);
+        double leftBranchAngle = branchAngle - split + genAngleRandomness(rand);
+        double rightBranchAngle = branchAngle + split + genAngleRandomness(rand);
 
         pt.unitDone();
 
-        // alternate which branch is drawn first for a more natural look
-        leftFirst = !leftFirst;
-        if (leftFirst) {
+        // randomize which branch is drawn first for a more natural look
+        if (rand.nextBoolean()) {
+            // left first
             drawTree(g, endX, endY, leftBranchAngle, nextDepth, rand, curvature);
             drawTree(g, endX, endY, rightBranchAngle, nextDepth, rand, curvature);
         } else {
+            // right first
             drawTree(g, endX, endY, rightBranchAngle, nextDepth, rand, curvature);
             drawTree(g, endX, endY, leftBranchAngle, nextDepth, rand, curvature);
         }
-    }
-
-    /**
-     * Adjusts a branch's angle based on physics.
-     */
-    private double adjustPhysics(double angle, int depth) {
-        assert doPhysics;
-
-        // normalize angle to [0, 360)
-        angle = (angle % 360.0 + 360.0) % 360.0;
-
-        Physics p = physicsLookup[depth];
-
-        if (angle < 90) {
-            angle += (90 - angle) * p.gravityStrength;
-            angle -= (angle / 90.0) * p.windStrength;
-        } else if (angle < 180) {
-            angle -= (angle - 90) * p.gravityStrength;
-            angle -= (180 - angle) * p.windStrength;
-        } else if (angle < 270) {
-            angle -= (270 - angle) * p.gravityStrength;
-            angle += (angle - 180) * p.windStrength;
-        } else if (angle <= 360) {
-            angle += (angle - 270) * p.gravityStrength;
-            angle += (360 - angle) * p.windStrength;
-        } else {
-            throw new IllegalStateException("angle = " + angle);
-        }
-
-        return angle;
     }
 
     /**
@@ -286,7 +254,7 @@ public class FractalTree extends ParametrizedFilter {
             double midX = startX + dx / 2.0;
             double midY = startY + dy / 2.0;
 
-            // The normal vector is (-dy, dx).
+            // the normal vector is (-dy, dx)
             double ctrlX = midX - dy * curvature;
             double ctrlY = midY + dx * curvature;
 
@@ -303,7 +271,6 @@ public class FractalTree extends ParametrizedFilter {
             return 0;
         }
 
-        // returns a uniform deviation in [-angleDeviation, angleDeviation]
         return -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
     }
 
@@ -316,8 +283,6 @@ public class FractalTree extends ParametrizedFilter {
         }
 
         double minLength = defaultLength - lengthDeviation;
-
-        // returns a uniform length in [defaultLength - lengthDeviation, defaultLength + lengthDeviation]
         return (minLength + 2 * lengthDeviation * rand.nextDouble());
     }
 
@@ -325,15 +290,33 @@ public class FractalTree extends ParametrizedFilter {
      * Holds pre-calculated physics values for a given tree depth.
      */
     private static class Physics {
-        public final double gravityStrength;
-        public final double windStrength;
+        final double gravityStrength; // force along the Y axis
+        final double windStrength;    // force along the X axis
 
         private Physics(int gravity, int wind, float strokeWidth) {
-            // make thinner branches more affected by physics
+            // makes thinner branches more affected by physics
             double effectStrength = 0.02 / strokeWidth;
 
             gravityStrength = effectStrength * gravity;
             windStrength = effectStrength * wind;
+        }
+
+        /**
+         * Adjusts a branch's angle based on physical vector forces.
+         */
+        public double adjustAngle(double angleDeg) {
+            double angleRad = Math.toRadians(angleDeg);
+
+            // convert current angle to a unit direction vector
+            double dx = FastMath.cos(angleRad);
+            double dy = FastMath.sin(angleRad);
+
+            // apply wind and gravity as forces
+            dx += windStrength;
+            dy += gravityStrength;
+
+            // convert back to an angle
+            return Math.toDegrees(Math.atan2(dy, dx));
         }
     }
 }

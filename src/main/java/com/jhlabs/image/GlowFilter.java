@@ -21,7 +21,8 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 /**
- * A filter which adds blur to an image, producing a glowing effect.
+ * A filter that blurs a copy of the image and additively blends it
+ * back onto the original, brightening highlights into a soft halo.
  *
  * @author Jerry Huxtable
  */
@@ -39,50 +40,51 @@ public class GlowFilter extends AbstractBufferedImageOp {
     public GlowFilter(String filterName, float amount, float radius) {
         super(filterName);
 
+        assert amount >= 0 && radius >= 0;
+
         this.amount = amount;
         this.radius = radius;
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
+        BufferedImage srcCopy = ImageUtils.copyImage(src);
+        if (amount == 0.0f) {
+            return srcCopy;
+        }
+
         int width = src.getWidth();
         int height = src.getHeight();
-
-        BufferedImage srcCopy = ImageUtils.copyImage(src);
-
         int[] inPixels = ImageUtils.getPixels(src);
 
         if (radius > 0) {
-            // most of the time is spent here, so only
-            // the blur manages its progress tracker
-            BoxBlurFilter boxBlur = new BoxBlurFilter(filterName, radius, radius, 3);
-            srcCopy = boxBlur.filter(srcCopy, srcCopy);
+            // most of the time is spent here, so this filter doesn't
+            // track progress; the blur filter manages its own
+            // progress tracker (using the glow filter's name)
+            srcCopy = new BoxBlurFilter(filterName, radius, radius, 3)
+                .filter(srcCopy, srcCopy);
         }
 
         int[] outPixels = ImageUtils.getPixels(srcCopy);
 
-        float a = 4 * amount;
+        float f = 4 * amount;
 
-        int index = 0;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int rgb1 = inPixels[index];
-                int r1 = (rgb1 >> 16) & 0xFF;
-                int g1 = (rgb1 >> 8) & 0xFF;
-                int b1 = rgb1 & 0xFF;
+        for (int i = 0; i < inPixels.length; i++) {
+            int srcRgb = inPixels[i];
+            int r1 = (srcRgb >> 16) & 0xFF;
+            int g1 = (srcRgb >> 8) & 0xFF;
+            int b1 = srcRgb & 0xFF;
 
-                int rgb2 = outPixels[index];
-                int r2 = (rgb2 >> 16) & 0xFF;
-                int g2 = (rgb2 >> 8) & 0xFF;
-                int b2 = rgb2 & 0xFF;
+            int blurRgb = outPixels[i];
+            int r2 = (blurRgb >> 16) & 0xFF;
+            int g2 = (blurRgb >> 8) & 0xFF;
+            int b2 = blurRgb & 0xFF;
 
-                r1 = PixelUtils.max255((int) (r1 + a * r2));
-                g1 = PixelUtils.max255((int) (g1 + a * g2));
-                b1 = PixelUtils.max255((int) (b1 + a * b2));
+            r1 = PixelUtils.max255((int) (r1 + f * r2));
+            g1 = PixelUtils.max255((int) (g1 + f * g2));
+            b1 = PixelUtils.max255((int) (b1 + f * b2));
 
-                outPixels[index] = (rgb1 & 0xFF_00_00_00) | (r1 << 16) | (g1 << 8) | b1;
-                index++;
-            }
+            outPixels[i] = (srcRgb & 0xFF_00_00_00) | (r1 << 16) | (g1 << 8) | b1;
         }
 
         if (dst == null) {

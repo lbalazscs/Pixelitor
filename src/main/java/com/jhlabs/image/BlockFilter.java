@@ -19,7 +19,7 @@ package com.jhlabs.image;
 import java.awt.image.BufferedImage;
 
 /**
- * A Filter to pixellate images.
+ * A Filter to pixelate images.
  */
 public class BlockFilter extends AbstractBufferedImageOp {
     private final int blockSize;

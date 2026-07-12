@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -111,6 +111,9 @@ public class PRectangle {
     }
 
     public void imCoordsChanged(AffineTransform at, View view) {
+        // this code assumes that there is no rotation in the given transform
+        assert (at.getType() & (AffineTransform.TYPE_GENERAL_ROTATION | AffineTransform.TYPE_QUADRANT_ROTATION)) == 0;
+
         Point2D upperLeft = new Point2D.Double(
             imRect.getX(), imRect.getY());
         Point2D lowerRight = new Point2D.Double(

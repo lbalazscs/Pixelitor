@@ -47,11 +47,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
-import static javax.swing.JOptionPane.CANCEL_OPTION;
-import static javax.swing.JOptionPane.CLOSED_OPTION;
-import static javax.swing.JOptionPane.NO_OPTION;
-import static javax.swing.JOptionPane.WARNING_MESSAGE;
-import static javax.swing.JOptionPane.YES_OPTION;
+import static javax.swing.JOptionPane.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.utils.Texts.i18n;
 
@@ -263,7 +259,7 @@ public class Views {
                             view.close();
                             return true;
                         }
-                        // the user cancelled the save dialog or save failed
+                        // the user canceled the save dialog or save failed
                         return false;
                     case NO_OPTION:  // "Don't Save"
                         view.close();

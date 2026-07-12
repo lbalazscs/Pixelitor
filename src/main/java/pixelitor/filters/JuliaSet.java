@@ -43,6 +43,7 @@ public class JuliaSet extends ComplexFractal {
     public JuliaSet() {
         super(300, 0.22f);
 
+        // insert right after Zoom, before Zoom Center, to match the base param order
         insertParam(cParam.notLinkable().withDecimalPlaces(2), 3);
 
         help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Julia_set");
@@ -89,6 +90,7 @@ class JuliaSetFilter extends ComplexFractalFilter {
     protected JuliaSetFilter(IterationStrategy iterator, double zoom, double zoomCenterX,
                              double zoomCenterY, int maxIterations, int[] colors,
                              double cx, double cy, boolean insideOut) {
+        // the Julia view doesn't depend on the chosen iteration strategy
         super(JuliaSet.NAME, -2.0f, 2.0f, -1.2f, 1.2f,
             iterator, zoom, zoomCenterX, zoomCenterY, maxIterations, colors);
         this.cx = cx;
@@ -99,8 +101,8 @@ class JuliaSetFilter extends ComplexFractalFilter {
     @Override
     public int processPixel(int x, int y, int rgb) {
         // for Julia-type sets, the initial z is mapped from the pixel's image coordinates
-        double zx = cxStart + x * xMultiplier;
-        double zy = cyStart + y * yMultiplier;
+        double zx = xStart + x * xMultiplier;
+        double zy = yStart + y * yMultiplier;
 
         if (insideOut) {
             // invert the initial z value using f(z) = 1/z

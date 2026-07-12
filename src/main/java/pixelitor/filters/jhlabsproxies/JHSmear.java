@@ -72,14 +72,9 @@ public class JHSmear extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        int distanceValue = distance.getValue();
-        if (distanceValue == 0) {
-            return src;
-        }
-
         SmearFilter filter = new SmearFilter(NAME,
             shape.getValue(),
-            distanceValue,
+            distance.getValue(),
             (float) density.getPercentage(),
             (float) angle.getValueInRadians(),
             (float) mix.getPercentage(),

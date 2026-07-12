@@ -73,7 +73,7 @@ public class JHPointillize extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new PointillizeFilter();
+            filter = new PointillizeFilter(NAME);
         }
 
         // there is an angle property, but it does not work as expected

@@ -48,7 +48,7 @@ public class Vector2D {
     }
 
     public static Vector2D createUnitFromAngle(double angle) {
-        return new Vector2D(FastMath.cos(angle), FastMath.sin(angle));
+        return createFromPolar(angle, 1);
     }
 
     public static Vector2D createFromPolar(double angle, double length) {
@@ -104,17 +104,14 @@ public class Vector2D {
         this.y -= scalar;
     }
 
-    public void multiply(Vector2D other) {
-        this.x *= other.x;
-        this.y *= other.y;
-    }
-
     public void multiply(double scalar) {
         this.x *= scalar;
         this.y *= scalar;
     }
 
     public void divide(double scalar) {
+        assert scalar != 0;
+
         this.x /= scalar;
         this.y /= scalar;
     }
@@ -128,21 +125,18 @@ public class Vector2D {
         }
     }
 
-    private void normalize() {
-        divide(length());
-    }
-
-    private void normalizeQuick() {
+    public void normalizeQuick() {
         multiply(FastMath.invSqrtQuick(x * x + y * y));
     }
 
     public void normalizeIfNonZero() {
-        if (x == 0 && y == 0) {
-            return;
-        }
-        normalize();
+        setMagnitude(1);
     }
 
+    /**
+     * Avoids the varargs array allocation of {@link #add(Vector2D...)}
+     * for the common case of summing exactly three vectors.
+     */
     public static Vector2D add(Vector2D v1, Vector2D v2, Vector2D v3) {
         Vector2D res = new Vector2D();
         res.add(v1);
@@ -159,8 +153,22 @@ public class Vector2D {
         return res;
     }
 
+    /**
+     * Returns the 2D cross product of two vectors.
+     * Its magnitude is the area of the parallelogram they span; its sign
+     * indicates whether {@code b} is clockwise or counterclockwise from {@code a}.
+     */
     public static double cross(Vector2D a, Vector2D b) {
         return a.x * b.y - a.y * b.x;
+    }
+
+    /**
+     * Returns the dot product of two vectors. It's positive if they
+     * point generally the same way, negative if they point in
+     * opposite directions, and zero if they are perpendicular.
+     */
+    public static double dot(Vector2D a, Vector2D b) {
+        return a.x * b.x + a.y * b.y;
     }
 
     public double lengthSq() {
@@ -175,11 +183,13 @@ public class Vector2D {
         return hypot(point.getX() - x, point.getY() - y);
     }
 
+    /**
+     * Rotates this vector by 90 degrees clockwise (if y is pointing down).
+     */
     public void rotateBy90Degrees() {
-        double tmp = y;
-        //noinspection SuspiciousNameCombination
-        y = x;
-        x = -tmp;
+        double tmp = x;
+        x = -y;
+        y = tmp;
     }
 
     public Point2D toPoint() {

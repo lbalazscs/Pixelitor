@@ -47,12 +47,10 @@ public class JHGlow extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        float amountValue = (float) amount.getPercentage();
-        if (amountValue == 0.0f) {
-            return src;
-        }
+        GlowFilter filter = new GlowFilter(NAME,
+            (float) amount.getPercentage(),
+            softness.getValueAsFloat());
 
-        GlowFilter filter = new GlowFilter(NAME, amountValue, softness.getValueAsFloat());
         return filter.filter(src, dest);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PathActions;
 import pixelitor.tools.pen.PathTool;
 import pixelitor.tools.transform.history.TransformBoxChangedEdit;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -107,5 +108,16 @@ public class PathEdit extends PixelitorEdit {
     private boolean isPathDeletion() {
         return after == null;
     }
-}
 
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+        if (before != null) {
+            node.add(before.createDebugNode("before"));
+        }
+        if (after != null) {
+            node.add(after.createDebugNode("after"));
+        }
+        return node;
+    }
+}

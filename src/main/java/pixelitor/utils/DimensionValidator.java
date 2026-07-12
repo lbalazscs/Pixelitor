@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,11 +57,8 @@ public class DimensionValidator implements TextFieldValidator {
         try {
             value = unit.parse(text);
         } catch (ParseException | NumberFormatException ex) {
-            if (unit == ResizeUnit.PIXELS) {
-                return ValidationResult.invalid("<b>" + label + "</b> must be an integer.");
-            } else {
-                return ValidationResult.invalid("<b>" + label + "</b> must be a valid number.");
-            }
+            return ValidationResult.invalid(
+                "<b>" + label + "</b> must be " + unit.expectedFormatDescription() + ".");
         }
 
         if (value <= 0.0) {

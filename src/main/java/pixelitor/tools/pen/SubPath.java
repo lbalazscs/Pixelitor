@@ -64,7 +64,7 @@ public class SubPath implements Serializable, Transformable {
     private final String id;
     private static long nextId = 0;
 
-    private List<AnchorPoint> anchorPoints = new ArrayList<>();
+    private final List<AnchorPoint> anchorPoints = new ArrayList<>();
 
     // temporary point used during path construction
     private transient MovingPoint moving;
@@ -420,7 +420,8 @@ public class SubPath implements Serializable, Transformable {
             AnchorPoint removedLast = mergedPoints.removeLast();
             mergedPoints.set(0, removedLast);
         }
-        anchorPoints = mergedPoints;
+        anchorPoints.clear();
+        anchorPoints.addAll(mergedPoints);
     }
 
     private static boolean tryMerging(AnchorPoint ap1, AnchorPoint ap2) {
@@ -527,19 +528,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void replaceAnchor(AnchorPoint before, AnchorPoint after) {
-        boolean replaced = false;
-        for (int i = 0; i < anchorPoints.size(); i++) {
-            AnchorPoint anchor = anchorPoints.get(i);
-            if (anchor == before) { // has to be reference equality
-                anchorPoints.set(i, after);
-                replaced = true;
-                break;
-            }
-        }
-        if (!replaced) {
-            throw new IllegalStateException(
-                "point " + before + " not found in " + this);
-        }
+        anchorPoints.set(indexOfByReference(before), after);
     }
 
     public void setHeuristicTypes() {
@@ -549,16 +538,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void deleteAnchor(AnchorPoint ap) {
-        // doesn't use List.remove, because we want to delete by ==, not equals
-        int index = -1;
-        for (int i = 0; i < anchorPoints.size(); i++) {
-            if (anchorPoints.get(i) == ap) {
-                index = i;
-                break;
-            }
-        }
-        anchorPoints.remove(index);
-
+        anchorPoints.remove(indexOfByReference(ap));
         comp.pathChanged();
     }
 
@@ -597,7 +577,6 @@ public class SubPath implements Serializable, Transformable {
     public void flipDirection(String editName) {
         Path backup = path.deepCopy(comp);
 
-        anchorPoints = new ArrayList<>(anchorPoints);
         Collections.reverse(anchorPoints);
         for (AnchorPoint anchor : anchorPoints) {
             anchor.swapControlPositions();
@@ -774,6 +753,18 @@ public class SubPath implements Serializable, Transformable {
         }
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void randomize(Random rng, double amount) {
+        for (AnchorPoint anchorPoint : anchorPoints) {
+            double dx = (rng.nextDouble() * 2 - 1) * amount;
+            double dy = (rng.nextDouble() * 2 - 1) * amount;
+            anchorPoint.imTranslate(dx, dy);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -793,6 +784,16 @@ public class SubPath implements Serializable, Transformable {
 
     public boolean isActive() {
         return path.getActiveSubpath() == this;
+    }
+
+    // finds the index by reference, because we want to delete/replace by ==, not equals
+    private int indexOfByReference(AnchorPoint target) {
+        for (int i = 0; i < anchorPoints.size(); i++) {
+            if (anchorPoints.get(i) == target) {
+                return i;
+            }
+        }
+        throw new IllegalStateException("point " + target + " not found in " + this);
     }
 
     public void showDebugDialog() {
@@ -820,18 +821,6 @@ public class SubPath implements Serializable, Transformable {
         return node;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void randomize(Random rng, double amount) {
-        for (AnchorPoint anchorPoint : anchorPoints) {
-            double dx = (rng.nextDouble() * 2 - 1) * amount;
-            double dy = (rng.nextDouble() * 2 - 1) * amount;
-            anchorPoint.imTranslate(dx, dy);
-        }
-    }
-
     @Override
     public String toString() {
         return id + anchorPoints.stream()
@@ -839,7 +828,9 @@ public class SubPath implements Serializable, Transformable {
             .collect(joining(",", " [", "]"));
     }
 
-    // like toString(), but also includes the anchor point positions
+    /**
+     * Like {@link #toString()}, but also includes the anchor point positions.
+     */
     public String toDetailedString() {
         return id + anchorPoints.stream()
             .map(AnchorPoint::toString)

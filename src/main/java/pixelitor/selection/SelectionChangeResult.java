@@ -22,9 +22,7 @@ import pixelitor.history.PixelitorEdit;
 
 import java.util.Objects;
 
-import static pixelitor.selection.SelectionChangeResult.Status.CANCELLED;
-import static pixelitor.selection.SelectionChangeResult.Status.OUT_OF_BOUNDS;
-import static pixelitor.selection.SelectionChangeResult.Status.SUCCESS;
+import static pixelitor.selection.SelectionChangeResult.Status.*;
 
 /**
  * Encapsulates the result of a selection change operation.
@@ -39,9 +37,9 @@ public final class SelectionChangeResult {
          */
         SUCCESS,
         /**
-         * The user cancelled the operation.
+         * The user canceled the operation.
          */
-        CANCELLED,
+        CANCELED,
         /**
          * The input shape was empty or outside the canvas.
          */
@@ -68,10 +66,10 @@ public final class SelectionChangeResult {
     }
 
     /**
-     * Creates a result for a user-cancelled operation.
+     * Creates a result for a user-canceled operation.
      */
     public static SelectionChangeResult cancelled() {
-        return new SelectionChangeResult(CANCELLED, null);
+        return new SelectionChangeResult(CANCELED, null);
     }
 
     /**
@@ -101,8 +99,8 @@ public final class SelectionChangeResult {
         switch (status) {
             // should not be called for success
             case SUCCESS -> throw new IllegalStateException();
-            case CANCELLED -> {
-                // do nothing, as the user intentionally cancelled
+            case CANCELED -> {
+                // do nothing, as the user intentionally canceled
             }
             case OUT_OF_BOUNDS -> Dialogs.showInfo("No Selection",
                 String.format("No selection was created because the %s is outside the canvas.", source));

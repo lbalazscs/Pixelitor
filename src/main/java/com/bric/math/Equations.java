@@ -220,7 +220,7 @@ public class Equations {
         //    ..........  1   x
 
         //so now we have to clear out all the other values by backtracking.
-        //we stored the order we calculated everything in in the "order" array
+        //we stored the order we calculated everything in the "order" array
 
         //the last element in the order array points to the row
         //in our matrix that reads "0 ... 0 1 z".  In other words,

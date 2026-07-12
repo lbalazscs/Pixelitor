@@ -35,17 +35,17 @@ public class ColorSpaces {
         }
     }
 
-    private static final int DOUBLE_RESOLUTION = 4096;
+    private static final int LIN_TO_SRGB_LUT_STEPS = 4096;
 
     /**
      * Lookup table for transforming linear RGB (0..1) to sRGB ints (0..255).
      */
-    private static final int[] TO_SRGB_LUT = new int[DOUBLE_RESOLUTION + 1];
+    private static final int[] LIN_TO_SRGB_LUT = new int[LIN_TO_SRGB_LUT_STEPS + 1];
 
     static {
-        double step = 1.0 / DOUBLE_RESOLUTION;
-        for (int i = 0; i <= DOUBLE_RESOLUTION; i++) {
-            TO_SRGB_LUT[i] = (int) (255.0 * linearToSrgbExact(i * step) + 0.5);
+        double step = 1.0 / LIN_TO_SRGB_LUT_STEPS;
+        for (int i = 0; i <= LIN_TO_SRGB_LUT_STEPS; i++) {
+            LIN_TO_SRGB_LUT[i] = (int) (255.0 * linearToSrgbExact(i * step) + 0.5);
         }
     }
 
@@ -76,8 +76,8 @@ public class ColorSpaces {
      */
     public static int linearToSrgbInt(double lin) {
         lin = ImageMath.clamp01(lin);
-        int index = (int) (lin * DOUBLE_RESOLUTION + 0.5);
-        return TO_SRGB_LUT[index];
+        int index = (int) (lin * LIN_TO_SRGB_LUT_STEPS + 0.5);
+        return LIN_TO_SRGB_LUT[index];
     }
 
     /**

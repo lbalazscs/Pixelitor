@@ -17,16 +17,32 @@ limitations under the License.
 package com.jhlabs.image;
 
 /**
- * A class to emboss an image.
+ * Embosses an image by treating its luminance as a height map and applying
+ * Lambertian (diffuse) shading from a configurable light direction.
  */
 public class EmbossFilter extends WholeImageFilter {
     private static final float PIXEL_SCALE = 255.9f;
 
-    private final float azimuth;
-    private final float elevation;
-    private final boolean texture;
-    private final float width45;
+    // the light vector components based on azimuth and elevation
+    private final int Lx;
+    private final int Ly;
+    private final int Lz;
 
+    private final int Nz2;
+    private final int NzLz;
+    private final boolean texture;
+
+    /**
+     * Constructs an EmbossFilter.
+     *
+     * @param filterName the name of this filter
+     * @param azimuth    direction of the light source, in radians
+     * @param elevation  angle of the light source above the image plane, in radians
+     * @param bumpHeight controls the apparent depth of the embossed relief;
+     *                   larger values produce a more pronounced effect
+     * @param texture    if true, blend the shading with the original colors;
+     *                   if false, produce a pure grayscale relief
+     */
     public EmbossFilter(String filterName,
                         float azimuth,
                         float elevation,
@@ -34,10 +50,25 @@ public class EmbossFilter extends WholeImageFilter {
                         boolean texture) {
         super(filterName);
 
-        this.azimuth = azimuth + ImageMath.PI;
-        this.elevation = elevation;
+        assert bumpHeight > 0;
+        assert elevation >= 0 && elevation <= ImageMath.HALF_PI;
+
+        // rotate by π so that azimuth 0 lights from the left, matching the UI arrow direction
+        azimuth += ImageMath.PI;
+
+        // larger bumpHeight => smaller normalZ => the gradient terms (normalX, normalY)
+        // dominate the surface normal more strongly => a more pronounced 3D relief
+        float depthScale = 3 * bumpHeight;
+
+        this.Lx = (int) (Math.cos(azimuth) * Math.cos(elevation) * PIXEL_SCALE);
+        this.Ly = (int) (Math.sin(azimuth) * Math.cos(elevation) * PIXEL_SCALE);
+        this.Lz = (int) (Math.sin(elevation) * PIXEL_SCALE);
+
+        int Nz = (int) (6 * 255 / depthScale);
+        this.Nz2 = Nz * Nz;
+        this.NzLz = Nz * Lz;
+
         this.texture = texture;
-        this.width45 = 3 * bumpHeight;
     }
 
     @Override
@@ -45,62 +76,50 @@ public class EmbossFilter extends WholeImageFilter {
         pt = createProgressTracker(height);
 
         // a bump map is derived from the brightness values of the
-        // input image, and represents the the surface's height map
-        int[] bumpPixels = new int[inPixels.length];
-        for (int i = 0; i < inPixels.length; i++) {
-            bumpPixels[i] = ImageMath.calcLuminanceInt(inPixels[i]);
-        }
-
-        // the light vector components based on azimuth and elevation
-        int Lx = (int) (Math.cos(azimuth) * Math.cos(elevation) * PIXEL_SCALE);
-        int Ly = (int) (Math.sin(azimuth) * Math.cos(elevation) * PIXEL_SCALE);
-        int Lz = (int) (Math.sin(elevation) * PIXEL_SCALE);
+        // input image, and represents the surface's height map
+        int[] bumpPixels = ImageMath.calcLuminanceInt(inPixels);
 
         // surface normal vector: perpendicular to the surface at each point
         int Nx;
         int Ny;
-        int Nz = (int) (6 * 255 / width45); // can be precomputed: depends only on the depth
-        int Nz2 = Nz * Nz;
-
-        int NzLz = Nz * Lz; // can be precomputed
 
         // the default shading intensity for areas where the surface
         // normal is undefined or the pixel is at the edge of the image
-        int background = Lz;
+        int defaultShade = Lz;
 
         int[] outPixels = new int[width * height];
         int index = 0;
         int bumpIndex = 0;
         for (int y = 0; y < height; y++, bumpIndex += width) {
-            int s1 = bumpIndex - width;  // previous row
-            int s2 = bumpIndex;          // current row
-            int s3 = bumpIndex + width;  // next row
+            int r1 = bumpIndex - width;  // previous row
+            int r2 = bumpIndex;          // current row
+            int r3 = bumpIndex + width;  // next row
 
             boolean yInBounds = y > 0 && y < height - 1;
-            for (int x = 0; x < width; x++, s1++, s2++, s3++) {
+            for (int x = 0; x < width; x++, r1++, r2++, r3++) {
                 int shade; // the calculated intensity of reflected light at a specific pixel
 
                 if (yInBounds && x > 0 && x < width - 1) {
-                    Nx = bumpPixels[s1 - 1] + bumpPixels[s2 - 1] + bumpPixels[s3 - 1] - bumpPixels[s1 + 1] - bumpPixels[s2 + 1] - bumpPixels[s3 + 1];
-                    Ny = bumpPixels[s3 - 1] + bumpPixels[s3] + bumpPixels[s3 + 1] - bumpPixels[s1 - 1] - bumpPixels[s1] - bumpPixels[s1 + 1];
+                    Nx = bumpPixels[r1 - 1] + bumpPixels[r2 - 1] + bumpPixels[r3 - 1] - bumpPixels[r1 + 1] - bumpPixels[r2 + 1] - bumpPixels[r3 + 1];
+                    Ny = bumpPixels[r3 - 1] + bumpPixels[r3] + bumpPixels[r3 + 1] - bumpPixels[r1 - 1] - bumpPixels[r1] - bumpPixels[r1 + 1];
 
                     // the dot product between the surface normal and the light vector
                     int NdotL;
 
                     if (Nx == 0 && Ny == 0) {
                         // baseline shading for areas without significant detail
-                        shade = background;
+                        shade = defaultShade;
                     } else if ((NdotL = Nx * Lx + Ny * Ly + NzLz) < 0) {
                         shade = 0; // shadow
                     } else {
                         // positive dot product => the angle between the two
-                        // vectors is is less than 90 degrees => the surface
+                        // vectors is less than 90 degrees => the surface
                         // is facing the light and will appear illuminated
                         shade = (int) (NdotL / Math.sqrt(Nx * Nx + Ny * Ny + Nz2));
                     }
                 } else {
-                    // use the background shade for edge pixels
-                    shade = background;
+                    // use the default shade for edge pixels
+                    shade = defaultShade;
                 }
 
                 int rgb = inPixels[index];

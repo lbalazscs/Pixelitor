@@ -42,9 +42,12 @@ public enum ResizeUnit {
         public double parse(String text) throws NumberFormatException {
             return text.isEmpty() ? 0 : Integer.parseInt(text);
         }
-    }, PERCENTAGE("percent", false) {
-        private static final NumberFormat PERCENT_FORMAT = new DecimalFormat("#0.00");
 
+        @Override
+        public String expectedFormatDescription() {
+            return "an integer";
+        }
+    }, PERCENTAGE("percent", false) {
         @Override
         public int toPixels(double value, int originalSize, int dpi) {
             return (int) Math.round(originalSize * value / 100.0);
@@ -57,7 +60,7 @@ public enum ResizeUnit {
 
         @Override
         public String format(double value) {
-            return PERCENT_FORMAT.format(value);
+            return TWO_DECIMAL_FORMAT.format(value);
         }
 
         @Override
@@ -65,7 +68,6 @@ public enum ResizeUnit {
             return text.isEmpty() ? 0 : Utils.parseLocalizedDouble(text);
         }
     }, CENTIMETERS("cm", true) {
-        private static final NumberFormat FORMAT = new DecimalFormat("#0.00");
         private static final double INCH_TO_CM = 2.54;
 
         @Override
@@ -80,7 +82,7 @@ public enum ResizeUnit {
 
         @Override
         public String format(double value) {
-            return FORMAT.format(value);
+            return TWO_DECIMAL_FORMAT.format(value);
         }
 
         @Override
@@ -88,8 +90,6 @@ public enum ResizeUnit {
             return text.isEmpty() ? 0 : Utils.parseLocalizedDouble(text);
         }
     }, INCHES("inches", true) {
-        private static final NumberFormat FORMAT = new DecimalFormat("#0.00");
-
         @Override
         public int toPixels(double value, int originalSize, int dpi) {
             return (int) Math.round(value * dpi);
@@ -102,7 +102,7 @@ public enum ResizeUnit {
 
         @Override
         public String format(double value) {
-            return FORMAT.format(value);
+            return TWO_DECIMAL_FORMAT.format(value);
         }
 
         @Override
@@ -111,6 +111,13 @@ public enum ResizeUnit {
         }
     };
 
+    /**
+     * Units usable when there's no original size to compare against
+     * (e.g. creating a brand-new image), which excludes PERCENTAGE.
+     */
+    public static final ResizeUnit[] ABSOLUTE_UNITS = {PIXELS, CENTIMETERS, INCHES};
+
+    private static final NumberFormat TWO_DECIMAL_FORMAT = new DecimalFormat("#0.00");
     public static final String PRESET_KEY = "Unit";
     private final String displayName;
     private final boolean physical;
@@ -148,4 +155,8 @@ public enum ResizeUnit {
      * Parses a string representation of a value in this unit.
      */
     public abstract double parse(String text) throws ParseException, NumberFormatException;
+
+    public String expectedFormatDescription() {
+        return "a valid number";
+    }
 }

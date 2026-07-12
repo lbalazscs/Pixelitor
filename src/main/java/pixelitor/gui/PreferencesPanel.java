@@ -46,7 +46,13 @@ import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * The GUI for the preferences dialog
+ * The GUI for the preferences dialog.
+ *
+ * <p>Settings that can be meaningfully previewed live (theme, language, font,
+ * thumbnail size, image area layout) are applied immediately via action
+ * listeners. Settings that don't need a live preview, or that are risky to
+ * re-apply on every keystroke (e.g. undo levels), are only validated and
+ * applied when the dialog closes — see {@link #validateAndApply}.
  */
 public class PreferencesPanel extends JTabbedPane {
     private static final Border PANEL_PADDING =
@@ -144,8 +150,7 @@ public class PreferencesPanel extends JTabbedPane {
             EventQueue.invokeLater(() -> {
                 Themes.apply(theme, true, false);
 //                accentColorEnabler.accept(theme.isFlat());
-                SwingUtilities.getWindowAncestor(this).pack();
-                setCursor(Cursors.DEFAULT);
+                packAndRestoreCursor();
             });
         });
 
@@ -187,7 +192,7 @@ public class PreferencesPanel extends JTabbedPane {
             String typeToSave = "Default".equals(selectedType) ? "" : selectedType;
             AppPreferences.setUIFont(typeToSave, newSize);
 
-            // execute live UI preview
+            // apply a live preview of the new font
             Font newFont;
             if (typeToSave.isEmpty()) {
                 // derive size off the original LAF font if returning to default
@@ -223,9 +228,13 @@ public class PreferencesPanel extends JTabbedPane {
 
         EventQueue.invokeLater(() -> {
             Themes.refreshComponentUIs();
-            SwingUtilities.getWindowAncestor(this).pack();
-            setCursor(Cursors.DEFAULT);
+            packAndRestoreCursor();
         });
+    }
+
+    private void packAndRestoreCursor() {
+        SwingUtilities.getWindowAncestor(this).pack();
+        setCursor(Cursors.DEFAULT);
     }
 
     private static void addImageAreaChooser(GridBagHelper gbh) {
@@ -351,15 +360,18 @@ public class PreferencesPanel extends JTabbedPane {
     }
 
     private void addMagickDirField(GridBagHelper gbh) {
-        magickDirTF = new JTextField(AppPreferences.magickDirPath);
-        magickDirTF.setColumns(10);
-        gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
+        magickDirTF = addDirField(gbh, IMAGEMAGICK_FOLDER_LABEL, AppPreferences.magickDirPath);
     }
 
     private void addGmicDirField(GridBagHelper gbh) {
-        gmicDirTF = new JTextField(AppPreferences.gmicDirPath);
-        gmicDirTF.setColumns(10);
-        gbh.addLabelAndControl(GMIC_FOLDER_LABEL + ": ", gmicDirTF);
+        gmicDirTF = addDirField(gbh, GMIC_FOLDER_LABEL, AppPreferences.gmicDirPath);
+    }
+
+    private static JTextField addDirField(GridBagHelper gbh, String label, String currentPath) {
+        var dirTF = new JTextField(currentPath);
+        dirTF.setColumns(10);
+        gbh.addLabelAndControl(label + ": ", dirTF);
+        return dirTF;
     }
 
     private void addExperimentalCB(GridBagHelper gbh) {

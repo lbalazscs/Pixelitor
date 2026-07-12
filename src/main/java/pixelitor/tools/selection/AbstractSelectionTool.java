@@ -244,4 +244,9 @@ public abstract class AbstractSelectionTool extends DragTool {
     public void loadUserPreset(UserPreset preset) {
         setCombinator(preset.getEnum(PRESET_KEY_COMBINATOR, ShapeCombinator.class));
     }
+
+    @Override
+    public boolean checkInvariants() {
+        return true; // TODO
+    }
 }

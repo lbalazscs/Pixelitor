@@ -17,7 +17,7 @@ limitations under the License.
 package com.jhlabs.image;
 
 /**
- * A filter which applies a crystallizing effect to an image, by producing Voronoi cells filled with colours from the image.
+ * A filter which applies a crystallizing effect to an image, by producing Voronoi cells filled with colors from the image.
  */
 public class CrystallizeFilter extends CellularFilter {
     private float edgeThickness = 0.4f;
@@ -46,8 +46,8 @@ public class CrystallizeFilter extends CellularFilter {
         float ny = m10 * x + m11 * y;
         nx /= scale;
         ny /= scale * stretch;
-        nx += 1000;
-        ny += 1000;    // Reduce artifacts around 0,0
+        nx += ORIGIN_OFFSET;
+        ny += ORIGIN_OFFSET;
 
         evaluate(nx, ny);
 
@@ -55,14 +55,14 @@ public class CrystallizeFilter extends CellularFilter {
 
         float f1 = results[0].distance;
         float f2 = results[1].distance;
-        int srcx = ImageMath.clamp((int) ((results[0].x - 1000) * scale), 0, width - 1);
-        int srcy = ImageMath.clamp((int) ((results[0].y - 1000) * scale), 0, height - 1);
+        int srcx = ImageMath.clamp((int) ((results[0].x - ORIGIN_OFFSET) * scale), 0, width - 1);
+        int srcy = ImageMath.clamp((int) ((results[0].y - ORIGIN_OFFSET) * scale), 0, height - 1);
         int v = inPixels[srcy * width + srcx];
         float f = (f2 - f1) / edgeThickness;
         f = ImageMath.smoothStep(0, edgeThickness, f);
         if (fadeEdges) {
-            srcx = ImageMath.clamp((int) ((results[1].x - 1000) * scale), 0, width - 1);
-            srcy = ImageMath.clamp((int) ((results[1].y - 1000) * scale), 0, height - 1);
+            srcx = ImageMath.clamp((int) ((results[1].x - ORIGIN_OFFSET) * scale), 0, width - 1);
+            srcy = ImageMath.clamp((int) ((results[1].y - ORIGIN_OFFSET) * scale), 0, height - 1);
             int v2 = inPixels[srcy * width + srcx];
             v2 = ImageMath.mixColors(0.5f, v2, v);
             v = ImageMath.mixColors(f, v2, v);

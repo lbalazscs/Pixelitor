@@ -143,6 +143,9 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
             if (selectedDpi != null) {
                 imageDpi = selectedDpi;
                 previewPanel.repaint();
+
+                // intentionally changes the composition's DPI,
+                // even if the user then cancels the print
                 comp.setDpi(imageDpi);
             }
         });
@@ -244,6 +247,7 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
      * Executes the print job on a background thread and shows an indeterminate progress indicator in the status bar.
      */
     private void startAsyncPrinting(PrinterJob job) {
+        setEnabled(false); // prevent overlapping print jobs
         var progressHandler = Messages.startProgress(
             "Printing " + compName, -1);
 
@@ -253,6 +257,7 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
                 if (!printingCompleted) {
                     Messages.showStatusMessage("Printing was canceled.");
                 }
+                setEnabled(true);
             }, onEDT);
     }
 
@@ -279,10 +284,13 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
             (float) paper.getImageableHeight() / JAVA_2D_DPI,
             MediaPrintableArea.INCH));
 
-        attributes.add(MediaSize.findMedia(
+        MediaSizeName matchingSize = MediaSize.findMedia(
             (float) paper.getWidth() / JAVA_2D_DPI,
             (float) paper.getHeight() / JAVA_2D_DPI,
-            Size2DSyntax.INCH));
+            Size2DSyntax.INCH);
+        if (matchingSize != null) {
+            attributes.add(matchingSize);
+        }
 
         return attributes;
     }
@@ -318,24 +326,23 @@ public class PrintAction extends AbstractViewEnabledAction implements Printable 
         double imageWidth = printedImage.getWidth();
         double imageHeight = printedImage.getHeight();
 
-        double scaledWidth;
-        double scaledHeight;
+        double scaledWidth = 0;
+        double scaledHeight = 0;
 
         switch (scalingMode) {
-            case ACTUAL_SIZE:
+            case ACTUAL_SIZE -> {
                 // convert image pixels to points (1/72 inch) based on image DPI
                 scaledWidth = imageWidth * (JAVA_2D_DPI / imageDpi);
                 scaledHeight = imageHeight * (JAVA_2D_DPI / imageDpi);
-                break;
-            case FIT_TO_PAGE:
-            default:
+            }
+            case FIT_TO_PAGE -> {
                 // scale to fit the image within the printable area while maintaining its aspect ratio
                 double scaleX = pageWidth / imageWidth;
                 double scaleY = pageHeight / imageHeight;
                 double scale = Math.min(scaleX, scaleY);
                 scaledWidth = imageWidth * scale;
                 scaledHeight = imageHeight * scale;
-                break;
+            }
         }
 
         double x = switch (alignment.horizontal()) {

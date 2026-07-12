@@ -67,7 +67,7 @@ public class HueSat extends ParametrizedFilter {
 
         return switch (colorSpace.getSelected()) {
             case HSV -> filterHsv(src, dest);
-            case OKLCH -> filterOkLch(src, dest);
+            case OKLCH -> filterOklch(src, dest);
         };
     }
 
@@ -79,7 +79,7 @@ public class HueSat extends ParametrizedFilter {
         return new HsvFilter(hueRot, satShift, briShift).filter(src, dest);
     }
 
-    private BufferedImage filterOkLch(BufferedImage src, BufferedImage dest) {
+    private BufferedImage filterOklch(BufferedImage src, BufferedImage dest) {
         float hueShift = hue.getValueAsFloat();
         // satFactor is a multiplier, e.g., 1.5 for a 50% increase
         float satFactor = 1.0f + (float) saturation.getPercentage();
@@ -107,7 +107,6 @@ public class HueSat extends ParametrizedFilter {
         public int processPixel(int x, int y, int rgb) {
             int a = rgb & 0xFF_00_00_00;
 
-            // create this array here for thread safety
             float[] oklch = ColorSpaces.srgbToOklch(rgb);
 
             // L is in [0, 1], C is >= 0, h is in [0, 360)
@@ -116,22 +115,9 @@ public class HueSat extends ParametrizedFilter {
             float h = oklch[2];
 
             // apply adjustments
-            h += hueShift;
-            // normalize hue to be in the range [0, 360)
-            if (h < 0.0f) {
-                h += 360.0f;
-            }
-            if (h >= 360.0f) {
-                h -= 360.0f;
-            }
-
-            c *= satFactor;
-            // chroma can't be negative
-            c = Math.max(0.0f, c);
-
-            l += briShift;
-            // clamp lightness to [0, 1]
-            l = ImageMath.clamp01(l);
+            h = ImageMath.mod(h + hueShift, 360.0f); // must be in the range [0, 360)
+            c = Math.max(0.0f, c * satFactor); // can't be negative
+            l = ImageMath.clamp01(l + briShift); // clamped to [0, 1]
 
             oklch[0] = l;
             oklch[1] = c;
@@ -161,10 +147,8 @@ public class HueSat extends ParametrizedFilter {
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            // create this array here for thread safety
-            float[] hsbValues = {0.0f, 0.0f, 0.0f};
-
-            hsbValues = Color.RGBtoHSB(r, g, b, hsbValues);
+            // the array is not reused for thread safety
+            float[] hsbValues = Color.RGBtoHSB(r, g, b, new float[3]);
 
             float newHue = hsbValues[0] + hueRot;
             float newSat = hsbValues[1] + satShift;

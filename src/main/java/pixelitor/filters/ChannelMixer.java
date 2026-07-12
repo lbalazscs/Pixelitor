@@ -48,6 +48,7 @@ public class ChannelMixer extends ParametrizedFilter {
     private static final String RED = "Red";
     private static final String BLUE = "Blue";
 
+    // how much of an input channel feeds into an output channel
     private final RangeParam redFromRed = from(RED, RED, 100);
     private final RangeParam redFromGreen = from(RED, GREEN, 0);
     private final RangeParam redFromBlue = from(RED, BLUE, 0);
@@ -66,30 +67,35 @@ public class ChannelMixer extends ParametrizedFilter {
         "Allow only Black and White", false, RandomizeMode.IGNORE);
 
     private final Action swapRedGreen = new TaskAction("Swap Red-Green", () -> withoutNormalization(() -> {
+        assert !autoBWParam.isChecked();
         setRedSource(0, 100, 0);
         setGreenSource(100, 0, 0);
         setBlueSource(0, 0, 100);
     }));
 
     private final Action swapRedBlue = new TaskAction("Swap Red-Blue", () -> withoutNormalization(() -> {
+        assert !autoBWParam.isChecked();
         setRedSource(0, 0, 100);
         setGreenSource(0, 100, 0);
         setBlueSource(100, 0, 0);
     }));
 
     private final Action swapGreenBlue = new TaskAction("Swap Green-Blue", () -> withoutNormalization(() -> {
+        assert !autoBWParam.isChecked();
         setRedSource(100, 0, 0);
         setGreenSource(0, 0, 100);
         setBlueSource(0, 100, 0);
     }));
 
     private final Action shiftRGBR = new TaskAction("R -> G -> B -> R", () -> withoutNormalization(() -> {
+        assert !autoBWParam.isChecked();
         setRedSource(0, 0, 100);
         setGreenSource(100, 0, 0);
         setBlueSource(0, 100, 0);
     }));
 
     private final Action shiftRBGR = new TaskAction("R -> B -> G -> R", () -> withoutNormalization(() -> {
+        assert !autoBWParam.isChecked();
         setRedSource(0, 100, 0);
         setGreenSource(0, 0, 100);
         setBlueSource(100, 0, 0);
@@ -158,16 +164,18 @@ public class ChannelMixer extends ParametrizedFilter {
     public ChannelMixer() {
         super(true);
 
+        // ensures that whenever autoBW is on, every output pixel
+        // gets the same R, G, B values (linking is bidirectional)
         BooleanSupplier ifMonochrome = autoBWParam::isChecked;
         redFromRed.linkWith(greenFromRed, ifMonochrome);
         redFromRed.linkWith(blueFromRed, ifMonochrome);
-
         redFromBlue.linkWith(greenFromBlue, ifMonochrome);
         redFromBlue.linkWith(blueFromBlue, ifMonochrome);
-
         redFromGreen.linkWith(greenFromGreen, ifMonochrome);
         redFromGreen.linkWith(blueFromGreen, ifMonochrome);
 
+        // autoNormalized() turns on the "keep the group's sum near 100%"
+        // constraint by default, because "preserve brightness" is checked by default
         redPercentageGroup = new GroupedRangeParam("Red Channel", new RangeParam[]{
             redFromRed, redFromGreen, redFromBlue}, false).autoNormalized();
         greenPercentageGroup = new GroupedRangeParam("Green Channel", new RangeParam[]{
@@ -191,6 +199,7 @@ public class ChannelMixer extends ParametrizedFilter {
 
     @Override
     public FilterGUI createGUI(Filterable layer, boolean resetSettings) {
+        // ensure that we get the custom channel mixer GUI instead of the generic one
         return new ChannelMixerGUI(this, layer, presets, resetSettings);
     }
 
@@ -208,6 +217,7 @@ public class ChannelMixer extends ParametrizedFilter {
         float bfg = (float) blueFromGreen.getPercentage();
         float bfb = (float) blueFromBlue.getPercentage();
 
+        // identity matrix => skip processing
         if (rfr == 1.0f && rfg == 0.0f && rfb == 0.0f
             && gfr == 0.0f && gfg == 1.0f && gfb == 0.0f
             && bfr == 0.0f && bfg == 0.0f && bfb == 1.0f) {
@@ -253,13 +263,14 @@ public class ChannelMixer extends ParametrizedFilter {
         return dest;
     }
 
-    // Replace the adjustment listeners with custom versions that
-    // change other values before triggering the filter.
+    // replaces the adjustment listeners with custom versions that
+    // change other values before triggering the filter
     public void replaceAdjustmentListeners() {
         autoBWParam.setAdjustmentListener(this::autoBWChanged);
         preserveBrightnessParam.setAdjustmentListener(this::preserveBrightnessChanged);
     }
 
+    // fires when "Allow only Black and White" is toggled
     private void autoBWChanged() {
         boolean autoBW = autoBWParam.isChecked();
         enablePresets();
@@ -270,20 +281,10 @@ public class ChannelMixer extends ParametrizedFilter {
             greenPercentageGroup.setAutoNormalizationEnabled(false, true);
             bluePercentageGroup.setAutoNormalizationEnabled(false, true);
 
-            int fromRed = (redFromRed.getValue() + greenFromRed.getValue() + blueFromRed.getValue()) / 3;
-            redFromRed.setValueNoTrigger(fromRed);
-            greenFromRed.setValueNoTrigger(fromRed);
-            blueFromRed.setValueNoTrigger(fromRed);
-
-            int fromGreen = (redFromGreen.getValue() + greenFromGreen.getValue() + blueFromGreen.getValue()) / 3;
-            redFromGreen.setValueNoTrigger(fromGreen);
-            greenFromGreen.setValueNoTrigger(fromGreen);
-            blueFromGreen.setValueNoTrigger(fromGreen);
-
-            int fromBlue = (redFromBlue.getValue() + greenFromBlue.getValue() + blueFromBlue.getValue()) / 3;
-            redFromBlue.setValueNoTrigger(fromBlue);
-            greenFromBlue.setValueNoTrigger(fromBlue);
-            blueFromBlue.setValueNoTrigger(fromBlue);
+            // set the sliders to averaged BW values as a sensible starting point
+            averageTriple(redFromRed, greenFromRed, blueFromRed);
+            averageTriple(redFromGreen, greenFromGreen, blueFromGreen);
+            averageTriple(redFromBlue, greenFromBlue, blueFromBlue);
 
             getParamSet().runFilter();
         } else {
@@ -293,6 +294,15 @@ public class ChannelMixer extends ParametrizedFilter {
             greenPercentageGroup.setAutoNormalizationEnabled(autoNormalize, false);
             bluePercentageGroup.setAutoNormalizationEnabled(autoNormalize, false);
         }
+        assert !autoBW || isMonochromeConsistent();
+    }
+
+    private static void averageTriple(RangeParam a, RangeParam b, RangeParam c) {
+        int avg = (a.getValue() + b.getValue() + c.getValue()) / 3;
+
+        a.setValueNoTrigger(avg);
+        b.setValueNoTrigger(avg);
+        c.setValueNoTrigger(avg);
     }
 
     private void preserveBrightnessChanged() {
@@ -309,6 +319,7 @@ public class ChannelMixer extends ParametrizedFilter {
         if (preserveBrightness) {
             getParamSet().runFilter();
         }
+        assert !autoBW || isMonochromeConsistent();
     }
 
     private void afterResetAll() {
@@ -319,36 +330,23 @@ public class ChannelMixer extends ParametrizedFilter {
         boolean allowColors = !autoBWParam.isChecked();
         boolean allowAnySum = !preserveBrightnessParam.isChecked();
 
+        // this group of presets sums to 100 by design
+        // (they are compatible with auto-normalization)
         swapGreenBlue.setEnabled(allowColors);
         swapRedBlue.setEnabled(allowColors);
         swapRedGreen.setEnabled(allowColors);
-
         shiftRBGR.setEnabled(allowColors);
         shiftRGBR.setEnabled(allowColors);
 
+        // this group of presets sums to != 100 by design
+        // (they are not compatible with auto-normalization)
         removeRed.setEnabled(allowColors && allowAnySum);
         removeGreen.setEnabled(allowColors && allowAnySum);
         removeBlue.setEnabled(allowColors && allowAnySum);
-
         sepia.setEnabled(allowColors && allowAnySum);
     }
 
-    private void temporarilyEnableNormalization(boolean enable) {
-        redPercentageGroup.setAutoNormalizationEnabled(enable, false);
-
-        // if monochrome, then it's enough to enable the red group
-        boolean monochrome = autoBWParam.isChecked();
-        greenPercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
-        bluePercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
-    }
-
-    private static RangeParam from(String first, String second, int defaultValue) {
-        String name = "<html>from <b><font color=" + second + ">" + second + "</font></b> (%)";
-        RangeParam param = new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, true, NONE);
-        param.setPresetKey(first + "From" + second);
-        return param;
-    }
-
+    // runs a value-setting task without the normalization constraints
     private void withoutNormalization(Runnable task) {
         boolean wasNormalized = preserveBrightnessParam.isChecked();
         if (wasNormalized) {
@@ -360,7 +358,23 @@ public class ChannelMixer extends ParametrizedFilter {
         if (wasNormalized) {
             temporarilyEnableNormalization(true);
         }
-        getParamSet().runFilter();
+        getParamSet().runFilter(); // triggers exactly one preview refresh
+    }
+
+    private void temporarilyEnableNormalization(boolean enable) {
+        redPercentageGroup.setAutoNormalizationEnabled(enable, false);
+
+        // if monochrome, then it's enough to enable the red group
+        boolean monochrome = autoBWParam.isChecked();
+        greenPercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
+        bluePercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
+    }
+
+    private static RangeParam from(String target, String source, int defaultValue) {
+        String name = "<html>from <b><font color=" + source + ">" + source + "</font></b> (%)";
+        RangeParam param = new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, true, NONE);
+        param.setPresetKey(target + "From" + source);
+        return param;
     }
 
     private void setRedSource(int fromRed, int fromGreen, int fromBlue) {
@@ -383,6 +397,15 @@ public class ChannelMixer extends ParametrizedFilter {
 
     @Override
     public boolean supportsGray() {
-        return false;
+        return false; // can't run on TYPE_BYTE_GRAY images
+    }
+
+    private boolean isMonochromeConsistent() {
+        return redFromRed.getValue() == greenFromRed.getValue()
+            && greenFromRed.getValue() == blueFromRed.getValue()
+            && redFromGreen.getValue() == greenFromGreen.getValue()
+            && greenFromGreen.getValue() == blueFromGreen.getValue()
+            && redFromBlue.getValue() == greenFromBlue.getValue()
+            && greenFromBlue.getValue() == blueFromBlue.getValue();
     }
 }

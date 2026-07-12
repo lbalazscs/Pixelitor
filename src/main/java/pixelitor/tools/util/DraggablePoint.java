@@ -323,11 +323,7 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public void mouseDragged(double x, double y) {
-        double dx = x - dragStartX;
-        double dy = y - dragStartY;
-        double newX = origX + dx;
-        double newY = origY + dy;
-        setLocation(newX, newY);
+        mouseDragged(x, y, false);
     }
 
     public void mouseDragged(double x, double y, boolean constrained) {
@@ -514,12 +510,14 @@ public class DraggablePoint extends Point2D.Double {
         if (!(o instanceof DraggablePoint that)) {
             return false;
         }
+        // tolerance-based equals is non-transitive, so
+        // this class still isn't safe to use as a hash key
         return hasSameImPosAs(that, 1.0);
     }
 
     @Override
     public int hashCode() {
-        return (int) (31 * x + y);
+        return (int) (31 * imX + imY);
     }
 
     @Override
