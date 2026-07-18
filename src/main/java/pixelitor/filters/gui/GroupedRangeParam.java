@@ -466,22 +466,24 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         // but it has to be set first, so first collect the values
         double[] values = new double[children.length];
         for (int i = 0; i < children.length; i++) {
-            String s = st.nextToken();
-            values[i] = Double.parseDouble(s);
+            values[i] = Double.parseDouble(st.nextToken());
         }
 
-        if (isLinkable()) {
-            boolean linked = linkedByDefault;
-            if (st.hasMoreTokens()) {
-                linked = Boolean.parseBoolean(st.nextToken());
+        // withoutNormalization is necessary because setValueNoTrigger
+        // still fires change listeners, confusing auto-normalized groups
+        withoutNormalization(() -> {
+            if (isLinkable()) {
+                boolean linked = linkedByDefault;
+                if (st.hasMoreTokens()) { // preset has linked info
+                    linked = Boolean.parseBoolean(st.nextToken());
+                }
+                setLinked(linked);
             }
-            setLinked(linked);
-        }
-
-        // set the values only after the linked property was set
-        for (int i = 0; i < children.length; i++) {
-            children[i].setValueNoTrigger(values[i]);
-        }
+            // set the values only after the linked property was set
+            for (int i = 0; i < children.length; i++) {
+                children[i].setValueNoTrigger(values[i]);
+            }
+        });
     }
 
     public void setDecimalPlaces(int dp) {

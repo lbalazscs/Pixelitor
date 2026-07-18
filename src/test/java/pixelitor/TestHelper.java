@@ -444,22 +444,13 @@ public class TestHelper {
      * Configures the application for unit testing.
      */
     public static void setUnitTestingMode(boolean checkHistory) {
-        if (checkHistory) {
-            historyChecker = new HistoryChecker();
-        } else {
-            historyChecker = null; // clear previous checker
-        }
-        History.setChecker(historyChecker);
+        initHistoryChecker(checkHistory);
+        clearViews();
 
         if (AppMode.isUnitTesting()) {
             return; // already in unit testing mode
         }
         AppMode.setUnitTestingMode();
-
-        if (Texts.getResources() == null) {
-            Texts.init(); // needed for view initialization
-        }
-        Views.clear();
 
         Utils.ensureAssertionsEnabled();
         Utils.preloadUnitTestFontNames();
@@ -475,6 +466,23 @@ public class TestHelper {
         Layer.uiFactory = TestLayerUI::new;
         ToolSettingsPanelContainer.setInstance(mock(ToolSettingsPanelContainer.class));
         setupMockFgBgSelector();
+    }
+
+    private static void initHistoryChecker(boolean checkHistory) {
+        if (checkHistory) {
+            historyChecker = new HistoryChecker();
+        } else {
+            historyChecker = null; // clear previous checker
+        }
+        History.setChecker(historyChecker);
+    }
+
+    // clear views set by previous tests
+    private static void clearViews() {
+        if (Texts.getResources() == null) {
+            Texts.init(); // needed for the static initialization of Views
+        }
+        Views.clear();
     }
 
     public static void verifyAndClearHistory() {
