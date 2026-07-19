@@ -45,6 +45,7 @@ public class JHSparkle extends ParametrizedFilter {
     private final RangeParam numRays = new RangeParam("Number of Rays", 1, 200, 501);
     private final RangeParam radius = new RangeParam("High Intensity Radius", 1, 50, 500);
     private final RangeParam shine = new RangeParam("Shine", 0, 50, 100);
+    private final RangeParam spiralParam = new RangeParam("Spiral", -100, 0, 100);
     private final RangeParam randomness = new RangeParam("Randomness", 0, 24, 48);
 
     public JHSparkle() {
@@ -59,6 +60,7 @@ public class JHSparkle extends ParametrizedFilter {
             numRays,
             radius.withAdjustedRange(1.0),
             shine,
+            spiralParam,
             randomness.withSideButton(reseed)
         );
     }
@@ -73,6 +75,7 @@ public class JHSparkle extends ParametrizedFilter {
             shine.getValue(),
             randomness.getValue(),
             color.getColor().getRGB(),
+            spiralParam.getPercentage(),
             paramSet.getRandomWithLastSeed());
 
         return filter.filter(src, dest);

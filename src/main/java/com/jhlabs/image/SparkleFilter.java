@@ -35,10 +35,13 @@ public class SparkleFilter extends PointFilter {
     private static final int MAX_AMOUNT = 100;
     private static final int NEUTRAL_AMOUNT = 50; // amount value where power == 1.0 (pow becomes a no-op)
 
+    private static final double SPIRAL_EFFECT_SCALE = 0.005;
+
     private final boolean lightOnly;
     private final int numRays;
     private final int amount;
     private final int color;
+    private final double spiral;
 
     private final float cx;
     private final float cy;
@@ -59,6 +62,7 @@ public class SparkleFilter extends PointFilter {
      * @param amount     the amount of sparkle (in the range [0, 100])
      * @param randomness the level of randomness applied to the lengths of the rays
      * @param color      the ARGB color value of the sparkle effect
+     * @param spiral     the amount of spiral twist applied to the rays, in the range [-1, 1]
      * @param random     the random number generator instance to use for drawing rays
      */
     public SparkleFilter(String filterName,
@@ -69,12 +73,14 @@ public class SparkleFilter extends PointFilter {
                          int amount,
                          int randomness,
                          int color,
+                         double spiral,
                          Random random) {
         super(filterName);
 
         assert numRays > 0;
         assert radius >= 0;
         assert amount >= 0 && amount <= MAX_AMOUNT;
+        assert spiral >= -1.0 && spiral <= 1.0;
 
         this.lightOnly = lightOnly;
         this.cx = (float) center.getX();
@@ -82,6 +88,7 @@ public class SparkleFilter extends PointFilter {
         this.numRays = numRays;
         this.amount = amount;
         this.color = color;
+        this.spiral = spiral;
 
         rayLengths = new float[numRays + 2];
         float randomRadius = randomness / 100.0f * radius;
@@ -116,7 +123,14 @@ public class SparkleFilter extends PointFilter {
         float distSq = dx * dx + dy * dy;
         float angle = (float) atan2(dy, dx);
 
-        float rayPosition = (angle + PI) * rayAngleFactor;
+        if (spiral != 0.0) {
+            double radius = Math.sqrt(distSq);
+            double spiralAngleOffset = spiral * radius * SPIRAL_EFFECT_SCALE;
+            angle -= (float) spiralAngleOffset;
+        }
+
+        // wraps the (possibly spiral-shifted) angle into the [0, numRays) range
+        float rayPosition = mod(angle + PI, TWO_PI) * rayAngleFactor;
 
         int rayIndex = Math.clamp((int) rayPosition, 0, numRays);
         float fraction = rayPosition - rayIndex;
