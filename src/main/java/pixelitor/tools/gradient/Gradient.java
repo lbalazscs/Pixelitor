@@ -164,15 +164,15 @@ public class Gradient implements Serializable, Debuggable {
     /**
      * Paints a thumbnail preview of the gradient.
      */
-    public void paintThumbnail(Graphics2D g2, Canvas canvas, Dimension thumbSize) {
+    public void paintThumbnail(Graphics2D g, Canvas canvas, Dimension thumbSize) {
         double scaleX = thumbSize.width / (double) canvas.getWidth();
         double scaleY = thumbSize.height / (double) canvas.getHeight();
         double scaling = Math.min(scaleX, scaleY);
-        g2.scale(scaling, scaling);
+        g.scale(scaling, scaling);
 
         Paint paint = type.createPaint(drag, colors, cycleMethod);
-        g2.setPaint(paint);
-        g2.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        g.setPaint(paint);
+        g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
     public GradientHandles createHandles(View view) {

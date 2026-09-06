@@ -113,29 +113,29 @@ public abstract class CurveFilter extends ParametrizedFilter {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
 
-        Graphics2D g2;
+        Graphics2D g;
         BufferedImage bumpImage = null;
 
         boolean watermarking = watermark.isChecked();
         if (watermarking) {
             bumpImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_RGB);
-            g2 = bumpImage.createGraphics();
-            Colors.fillWith(BLACK, g2, srcWidth, srcHeight);
-            g2.setColor(Color.GRAY);
+            g = bumpImage.createGraphics();
+            Colors.fillWith(BLACK, g, srcWidth, srcHeight);
+            g.setColor(Color.GRAY);
         } else {
             dest = ImageUtils.createImageWithSameCM(src);
-            g2 = dest.createGraphics();
-            fillBackground(src, g2, srcWidth, srcHeight);
-            setupForeground(srcWidth, srcHeight, g2);
+            g = dest.createGraphics();
+            fillBackground(src, g, srcWidth, srcHeight);
+            setupForeground(srcWidth, srcHeight, g);
         }
 
         Stroke stroke = strokeParam.createStroke();
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Shape shape = createCurve(srcWidth, srcHeight);
         if (shape == null) {
             // can happen, for example with Spirograph at time=0
-            g2.dispose();
+            g.dispose();
             return dest;
         }
 
@@ -153,10 +153,10 @@ public abstract class CurveFilter extends ParametrizedFilter {
         if (effects.getInnerGlow() != null) {
             // work with the outline so that we can have "inner glow"
             shape = stroke.createStrokedShape(shape);
-            g2.fill(shape);
+            g.fill(shape);
         } else {
-            g2.setStroke(stroke);
-            g2.draw(shape);
+            g.setStroke(stroke);
+            g.draw(shape);
         }
 
         // If there are effects and the foreground is set to transparent,
@@ -164,21 +164,21 @@ public abstract class CurveFilter extends ParametrizedFilter {
         // they also set the composite. Also, inner glow is ignored.
         if (effects.hasEnabledEffects()) {
             if (!watermarking && foreground.getValue() == FG_TRANSPARENT) {
-                drawEffectsWithTransparency(effects, g2, shape, srcWidth, srcHeight);
+                drawEffectsWithTransparency(effects, g, shape, srcWidth, srcHeight);
             } else { // the simple case
-                effects.apply(g2, shape);
+                effects.apply(g, shape);
             }
         }
 
         if (DEBUG_SHAPE_POINTS) {
             List<Point2D> points = Shapes.getAnchorPoints(shape);
-            g2.setColor(Color.RED);
+            g.setColor(Color.RED);
             for (Point2D point : points) {
-                g2.fill(CustomShapes.createCircle(point.getX(), point.getY(), 4));
+                g.fill(CustomShapes.createCircle(point.getX(), point.getY(), 4));
             }
         }
 
-        g2.dispose();
+        g.dispose();
 
         if (watermarking) {
             dest = ImageUtils.bumpMap(src, bumpImage, getName());
@@ -188,7 +188,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
         return dest;
     }
 
-    private static void drawEffectsWithTransparency(AreaEffects effects, Graphics2D g2, Shape shape, int srcWidth, int srcHeight) {
+    private static void drawEffectsWithTransparency(AreaEffects effects, Graphics2D g, Shape shape, int srcWidth, int srcHeight) {
         GlowPathEffect glow = effects.getGlow();
         NeonBorderEffect neonBorder = effects.getNeonBorder();
         ShadowPathEffect dropShadow = effects.getDropShadow();
@@ -215,43 +215,43 @@ public abstract class CurveFilter extends ParametrizedFilter {
             tmpG.dispose();
 
             // the effect colors won't matter, only their opacity
-            g2.setComposite(AlphaComposite.DstOut);
-            g2.drawImage(maskImage, 0, 0, null);
+            g.setComposite(AlphaComposite.DstOut);
+            g.drawImage(maskImage, 0, 0, null);
             maskImage.flush();
         }
     }
 
-    private void fillBackground(BufferedImage src, Graphics2D g2, int srcWidth, int srcHeight) {
+    private void fillBackground(BufferedImage src, Graphics2D g, int srcWidth, int srcHeight) {
         int bg = background.getValue();
         switch (bg) {
-            case BG_BLACK -> Colors.fillWith(BLACK, g2, srcWidth, srcHeight);
-            case BG_TOOL -> Colors.fillWith(getBgColor(), g2, srcWidth, srcHeight);
-            case BG_ORIGINAL -> g2.drawImage(src, 0, 0, null);
+            case BG_BLACK -> Colors.fillWith(BLACK, g, srcWidth, srcHeight);
+            case BG_TOOL -> Colors.fillWith(getBgColor(), g, srcWidth, srcHeight);
+            case BG_ORIGINAL -> g.drawImage(src, 0, 0, null);
             case BG_TRANSPARENT -> {
             }
             default -> throw new IllegalStateException("Unexpected value: " + bg);
         }
     }
 
-    private void setupForeground(int srcWidth, int srcHeight, Graphics2D g2) {
+    private void setupForeground(int srcWidth, int srcHeight, Graphics2D g) {
         int fg = foreground.getValue();
         switch (fg) {
-            case FG_WHITE -> g2.setColor(WHITE);
-            case FG_BLACK -> g2.setColor(BLACK);
-            case FG_TOOL -> g2.setColor(getFgColor());
-            case FG_GRADIENT -> setupGradientForeground(g2, srcWidth, srcHeight);
-            case FG_TRANSPARENT -> g2.setComposite(AlphaComposite.Clear);
+            case FG_WHITE -> g.setColor(WHITE);
+            case FG_BLACK -> g.setColor(BLACK);
+            case FG_TOOL -> g.setColor(getFgColor());
+            case FG_GRADIENT -> setupGradientForeground(g, srcWidth, srcHeight);
+            case FG_TRANSPARENT -> g.setComposite(AlphaComposite.Clear);
             default -> throw new IllegalStateException("Unexpected value: " + fg);
         }
     }
 
-    private void setupGradientForeground(Graphics2D g2, int srcWidth, int srcHeight) {
+    private void setupGradientForeground(Graphics2D g, int srcWidth, int srcHeight) {
         float cx = srcWidth / 2.0f;
         float cy = srcHeight / 2.0f;
         float radius = getGradientRadius(cx, cy);
         float[] fractions = {0.0f, 1.0f};
         Color[] colors = {getFgColor(), getBgColor()};
-        g2.setPaint(new RadialGradientPaint(cx, cy, radius, fractions, colors));
+        g.setPaint(new RadialGradientPaint(cx, cy, radius, fractions, colors));
     }
 
     protected float getGradientRadius(float cx, float cy) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public enum AnchorPointType {
         void updateSibling(ControlPoint moved,
                            AnchorPoint anchor,
                            ControlPoint opposite) {
-            // preserve the distance, but adjust the angle to the new angle
+            // preserve distance, but align opposite to the moved control point
             double dist = opposite.getRememberedDistFromAnchor();
             double newAngle = Math.PI + Math.atan2(
                 moved.y - anchor.y,

@@ -82,7 +82,7 @@ public class TrackedIO {
             if (ios != null) {
                 writeToImageStream(img, ios, formatName, tracker, null);
             } else {
-                throw new IOException("could not open ImageOutputStream");
+                throw new IOException("Could not open ImageOutputStream");
             }
         }
     }
@@ -147,8 +147,7 @@ public class TrackedIO {
     }
 
     // Currently using https://github.com/DhyanB/Open-Imaging
-    // Apache Imaging also has a fix, but they have not released yet a version with it
-    // see https://issues.apache.org/jira/browse/IMAGING-130
+    // (Apache Imaging also has a fix)
     private static BufferedImage readGifWithFallbackDecoder(File file) {
         try (InputStream dataStream = new FileInputStream(file)) {
             GifDecoder.GifImage gif = GifDecoder.read(dataStream);
@@ -270,12 +269,12 @@ public class TrackedIO {
         }
 
         // subsampled read
-        ImageReadParam imageReaderParam = reader.getDefaultReadParam();
+        ImageReadParam readParam = reader.getDefaultReadParam();
         int subsampling = calcSubsampling(imgWidth, imgHeight,
             maxThumbWidth, maxThumbHeight);
-        imageReaderParam.setSourceSubsampling(subsampling, subsampling, 0, 0);
+        readParam.setSourceSubsampling(subsampling, subsampling, 0, 0);
         try {
-            BufferedImage image = reader.read(0, imageReaderParam);
+            BufferedImage image = reader.read(0, readParam);
             return ThumbInfo.success(image, imgWidth, imgHeight);
         } catch (Exception e) {
             // at least the image width/height could be read
@@ -299,12 +298,12 @@ public class TrackedIO {
         return Math.max(cols, rows);
     }
 
-    public static Composition readSingleLayeredSync(File file) {
+    public static Composition readSingleLayerCompSync(File file) {
         BufferedImage img = readUnchecked(file);
         return Composition.fromImage(img, file, null);
     }
 
-    static CompletableFuture<Composition> readSingleLayeredAsync(File file) {
+    static CompletableFuture<Composition> readSingleLayerCompAsync(File file) {
         return CompletableFuture.supplyAsync(() -> readUnchecked(file), onIOThread)
             .thenApplyAsync(img -> Composition.fromImage(img, file, null), onEDT);
     }

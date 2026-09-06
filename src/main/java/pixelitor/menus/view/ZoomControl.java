@@ -29,10 +29,10 @@ import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.gui.AutoZoom.*;
 import static pixelitor.gui.GUIText.ZOOM;
-import static pixelitor.menus.view.ZoomLevel.zoomLevels;
+import static pixelitor.menus.view.ZoomLevel.ZOOM_LEVELS;
 
 /**
- * The zoom widget in the status bar
+ * The zoom widget in the status bar.
  */
 public class ZoomControl extends JPanel implements ViewActivationListener {
     private static final ZoomControl INSTANCE = new ZoomControl();
@@ -51,7 +51,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     private ZoomControl() {
         super(new FlowLayout(LEFT, 0, 0));
 
-        zoomSlider = new JSlider(0, zoomLevels.length - 1);
+        zoomSlider = new JSlider(0, ZOOM_LEVELS.length - 1);
 
         // Since this control is inside the status bar, various hacks
         // try to ensure that it doesn't increase the status bar height.
@@ -120,7 +120,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     }
 
     private void applyZoomToActiveView() {
-        ZoomLevel newZoom = zoomLevels[zoomSlider.getValue()];
+        ZoomLevel newZoom = ZOOM_LEVELS[zoomSlider.getValue()];
         Views.getActive().setZoom(newZoom);
         setZoomText(newZoom);
     }

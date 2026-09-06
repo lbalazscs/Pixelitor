@@ -25,7 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A seed point for a Voronoi cell.
+ * A Voronoi seed point along with its list of adjacent
+ * neighbor seeds used to clip and construct the cell polygon.
  */
 class SeedPoint {
     final double x;
@@ -40,10 +41,10 @@ class SeedPoint {
     /**
      * Draws the seed point and arrows to its neighbors (for debugging/visualization).
      */
-    void debugRender(Graphics2D g2) {
+    void debugRender(Graphics2D g) {
         for (SeedPoint neighbor : neighbors) {
-            CustomShapes.drawDirectionArrow(g2, x, y, neighbor.x, neighbor.y);
+            CustomShapes.drawDirectionArrow(g, x, y, neighbor.x, neighbor.y);
         }
-        CustomShapes.fillCircle(x, y, 10, Color.RED, g2);
+        CustomShapes.fillCircle(x, y, 10, Color.RED, g);
     }
 }

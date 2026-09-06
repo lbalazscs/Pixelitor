@@ -100,11 +100,12 @@ public class PhotoCollage extends ParametrizedFilter {
         Graphics2D g = dest.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+//        g.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
         // fill with the background color
         Colors.fillWith(bgColor.getColor(), g, dest.getWidth(), dest.getHeight());
 
-        ShapeType shapeType = shapeTypeParam.getSelected();
+        ShapeType shapeType = shapeTypeParam.getValue();
         int photoWidth = photoSize.getHorizontal();
         int photoHeight = photoSize.getVertical();
         Shape outerShape = shapeType.createShape(0, 0, photoWidth, photoHeight);
@@ -126,7 +127,7 @@ public class PhotoCollage extends ParametrizedFilter {
         // photo size so that there is room for soft shadows
         int blurRadius = shadowBlur.getValue();
         int shadowBlurPadding = 1 + (int) (2.3 * blurRadius);
-        BufferedImage shadowImage = createShadowImage(photoWidth, photoHeight, blurRadius, shadowBlurPadding, shapeType);
+        BufferedImage shadowImage = createShadowImage(outerShape, photoWidth, photoHeight, blurRadius, shadowBlurPadding);
 
         Point2D shadowOffset = Geometry.polarToCartesian(
             shadowDistance.getValue(),
@@ -134,15 +135,15 @@ public class PhotoCollage extends ParametrizedFilter {
 
         Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER,
             (float) shadowOpacityParam.getPercentage());
-        Composite opaqueComposite = AlphaComposite.getInstance(SRC_OVER);
+        Composite opaqueComposite = AlphaComposite.SrcOver;
 
         Paint srcImgTexture = new TexturePaint(src, new Rectangle2D.Float(
             0, 0, src.getWidth(), src.getHeight()));
 
         for (int i = 0; i < numPhotos; i++) {
-            var imageTransform = calcImageTransform(
+            var photoTransform = calcPhotoTransform(
                 dest.getWidth(), dest.getHeight(), photoWidth, photoHeight, rand);
-            var shadowTransform = calcShadowTransform(imageTransform, shadowBlurPadding, shadowOffset);
+            var shadowTransform = calcShadowTransform(photoTransform, shadowBlurPadding, shadowOffset);
 
             // draw the shadow behind the photo
             g.setComposite(shadowComposite);
@@ -150,18 +151,18 @@ public class PhotoCollage extends ParametrizedFilter {
 
             // draw the photo and its margin
             g.setComposite(opaqueComposite);
-            Shape transformedShape = imageTransform.createTransformedShape(outerShape);
-            Shape transformedImageShape;
+            Shape transformedShape = photoTransform.createTransformedShape(outerShape);
+            Shape transformedPhotoShape;
             if (margin > 0) {
-                transformedImageShape = imageTransform.createTransformedShape(innerShape);
+                transformedPhotoShape = photoTransform.createTransformedShape(innerShape);
                 g.setColor(marginColor.getColor());
                 g.fill(transformedShape);
             } else {
-                transformedImageShape = transformedShape;
+                transformedPhotoShape = transformedShape;
             }
 
-            g.setPaint(srcImgTexture);
-            g.fill(transformedImageShape); // draw the photo
+            g.setPaint(srcImgTexture); // for some reason this must be set on every iteration!
+            g.fill(transformedPhotoShape); // draw the photo
 
             pt.unitDone();
         }
@@ -171,19 +172,29 @@ public class PhotoCollage extends ParametrizedFilter {
         return dest;
     }
 
-    private static BufferedImage createShadowImage(int photoWidth, int photoHeight,
-                                                   int blurRadius, int shadowPadding,
-                                                   ShapeType shapeType) {
+    private static BufferedImage createShadowImage(Shape outerShape,
+                                                   int photoWidth, int photoHeight,
+                                                   int blurRadius, int shadowPadding) {
+        assert outerShape != null;
+        assert photoWidth > 0 && photoHeight > 0;
+        assert shadowPadding >= 0;
+
         int shadowImgWidth = photoWidth + 2 * shadowPadding;
         int shadowImgHeight = photoHeight + 2 * shadowPadding;
         BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(
             shadowImgWidth, shadowImgHeight);
 
         Graphics2D gShadow = shadowImage.createGraphics();
+
+        if (blurRadius == 0) {
+            gShadow.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        }
         gShadow.setColor(BLACK);
-        Shape shadowShape = shapeType.createShape(shadowPadding, shadowPadding, photoWidth, photoHeight);
+        var padTransform = AffineTransform.getTranslateInstance(shadowPadding, shadowPadding);
+        Shape shadowShape = padTransform.createTransformedShape(outerShape);
         gShadow.fill(shadowShape);
         gShadow.dispose();
+
         if (blurRadius > 0) {
             shadowImage = new BoxBlurFilter(NAME, blurRadius, blurRadius, 1)
                 .filter(shadowImage, shadowImage);
@@ -191,8 +202,8 @@ public class PhotoCollage extends ParametrizedFilter {
         return shadowImage;
     }
 
-    // calculate the transform of the image
-    private AffineTransform calcImageTransform(int areaWidth, int areaHeight, int photoWidth, int photoHeight, Random rand) {
+    // calculate the transform of a photo
+    private AffineTransform calcPhotoTransform(int areaWidth, int areaHeight, int photoWidth, int photoHeight, Random rand) {
         // step 2: translate
         // (transforms are applied in reverse order of concatenation)
         double tx, ty;
@@ -202,29 +213,29 @@ public class PhotoCollage extends ParametrizedFilter {
         } else {
             // a small part could be still outside because of the
             // rotation, which is ignored here, but it's not a big deal
-            int maxTranslateX = Math.max(1, areaWidth - photoWidth);
+            int maxTranslateX = Math.max(0, areaWidth - photoWidth);
             tx = maxTranslateX * rand.nextDouble();
-            int maxTranslateY = Math.max(1, areaHeight - photoHeight);
+            int maxTranslateY = Math.max(0, areaHeight - photoHeight);
             ty = maxTranslateY * rand.nextDouble();
         }
-        var imageTransform = AffineTransform.getTranslateInstance(tx, ty);
+        var photoTransform = AffineTransform.getTranslateInstance(tx, ty);
 
         // step 1: rotate
-        double maxAngle = Math.TAU * rand.nextFloat() - Math.PI; // in [-π, π]
+        double maxAngle = Math.TAU * rand.nextDouble() - Math.PI; // in [-π, π]
         double rotationStrength = randomRotation.getPercentage(); // in [0, 1]
         double angle = maxAngle * rotationStrength;
-        imageTransform.rotate(angle, photoWidth / 2.0, photoHeight / 2.0);
+        photoTransform.rotate(angle, photoWidth / 2.0, photoHeight / 2.0);
 
-        return imageTransform;
+        return photoTransform;
     }
 
     // calculate the transform of the shadow
-    private static AffineTransform calcShadowTransform(AffineTransform imageTransform, int shadowPadding, Point2D shadowOffset) {
+    private static AffineTransform calcShadowTransform(AffineTransform photoTransform, int shadowPadding, Point2D shadowOffset) {
         // step 3: final shadow offset
         var shadowTransform = AffineTransform.getTranslateInstance(
             shadowOffset.getX(), shadowOffset.getY());
         // step 2: rotate and random translate
-        shadowTransform.concatenate(imageTransform);
+        shadowTransform.concatenate(photoTransform);
         // step 1: take the shadow padding into account
         shadowTransform.translate(-shadowPadding, -shadowPadding);
 

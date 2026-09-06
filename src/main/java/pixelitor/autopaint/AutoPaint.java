@@ -126,7 +126,7 @@ public class AutoPaint {
         if (settings.colorMode() == ColorMode.RANDOM) {
             randomizeColors();
         } else if (settings.colorMode() == ColorMode.INTERPOLATED) {
-            setFgColor(Colors.interpolateRGB(origFg, origBg, rand.nextDouble()));
+            setFgColor(Colors.interpolateRgb(origFg, origBg, rand.nextDouble()));
         }
     }
 

@@ -24,7 +24,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 
-import static com.jhlabs.image.ImageMath.HALF_SQRT_3;
+import static com.jhlabs.image.ImageMath.COS_30;
 import static com.jhlabs.image.ImageMath.SQRT_3;
 
 /**
@@ -54,7 +54,7 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
             return cache;
         }
 
-        double triangleHeight = size * HALF_SQRT_3;
+        double triangleHeight = size * COS_30;
         int numY = (int) Math.ceil(height / triangleHeight);
 
         int minColIndex = Integer.MAX_VALUE;
@@ -162,7 +162,7 @@ public class TriangleBlockFilter extends AbstractBufferedImageOp {
      * Maps a given pixel coordinate to its corresponding triangle grid position.
      */
     private static Point getTriangleIndex(int x, int y, int size) {
-        double triangleHeight = size * HALF_SQRT_3;
+        double triangleHeight = size * COS_30;
         int row = (int) Math.floor(y / triangleHeight);
         double relativeY = y - row * triangleHeight;
         int col;

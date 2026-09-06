@@ -76,10 +76,10 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
         return enabledEffects.toArray(EMPTY_EFFECTS_ARRAY);
     }
 
-    public void apply(Graphics2D g2, Shape shape) {
+    public void apply(Graphics2D g, Shape shape) {
         AreaEffect[] areaEffects = getEnabledEffects();
         for (AreaEffect effect : areaEffects) {
-            effect.apply(g2, shape, 0, 0);
+            effect.apply(g, shape, 0, 0);
         }
     }
 

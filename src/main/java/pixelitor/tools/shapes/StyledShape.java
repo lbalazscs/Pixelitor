@@ -57,6 +57,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.TRANSPARENT;
+import static pixelitor.utils.CustomShapes.UNIT_ARROW_HEAD_WIDTH;
 
 /**
  * A shape with associated stroke, fill, and effects
@@ -461,9 +462,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         double dragStartY = transformedDrag.getOriginY();
         Rectangle2D horBoxImBounds = new Rectangle2D.Double(
             dragStartX,
-            dragStartY - dragLength * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
+            dragStartY - dragLength * UNIT_ARROW_HEAD_WIDTH / 2.0,
             dragLength,
-            dragLength * Shapes.UNIT_ARROW_HEAD_WIDTH);
+            dragLength * UNIT_ARROW_HEAD_WIDTH);
         assert !horBoxImBounds.isEmpty();
 
         double rotCenterImX = horBoxImBounds.getX();
@@ -477,7 +478,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         // Set the original drag to the diagonal of the back-rotated transform box,
         // so that after a shape-type change the new shape is created correctly
-        double halfImHeight = dragLength * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0;
+        double halfImHeight = dragLength * UNIT_ARROW_HEAD_WIDTH / 2.0;
         origDrag = new Drag(
             dragStartX,
             dragStartY - halfImHeight,
@@ -532,13 +533,13 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     private void paintOnDrawable(Drawable dr) {
         BufferedImage image = dr.getImage();
-        Graphics2D g2 = image.createGraphics();
-        g2.translate(-dr.getTx(), -dr.getTy());
-        dr.getComp().applySelectionClipping(g2);
+        Graphics2D g = image.createGraphics();
+        g.translate(-dr.getTx(), -dr.getTy());
+        dr.getComp().applySelectionClipping(g);
 
-        paint(g2);
+        paint(g);
 
-        g2.dispose();
+        g.dispose();
     }
 
     @Override

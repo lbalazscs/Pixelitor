@@ -226,12 +226,12 @@ class PathToolsTest {
 
         path.startNewSubpath(10, 20, view);
         SubPath subpath = path.getActiveSubpath();
-        subpath.addPoint(20, 10);
+        subpath.addAnchor(20, 10);
         subpath.finish(comp, false);
 
         path.startNewSubpath(100, 20, view);
         SubPath newSubpath = path.getActiveSubpath();
-        newSubpath.addPoint(100, 120);
+        newSubpath.addAnchor(100, 120);
         newSubpath.finish(comp, false);
 
         // there are no edits yet, because this was not created with the build API

@@ -83,12 +83,12 @@ public abstract class AbstractAngleSelector extends JComponent implements MouseL
         }
     }
 
-    static void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
-        g2.setStroke(ARROW_STROKE);
-        g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
+    static void drawArrow(Graphics2D g, double angle, float startX, float startY, float endX, float endY) {
+        g.setStroke(ARROW_STROKE);
+        g.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
         // draw main arrow line
-        g2.draw(new Line2D.Float(startX, startY, endX, endY));
+        g.draw(new Line2D.Float(startX, startY, endX, endY));
 
         // the arrowhead angles are calculated relative to the main arrow's angle
         double arrowheadAngle1 = 2.8797926 + angle;
@@ -98,12 +98,12 @@ public abstract class AbstractAngleSelector extends JComponent implements MouseL
         // draw the first line of the arrowhead
         float arrowEnd1X = (float) (endX + arrowRadius * Math.cos(arrowheadAngle1));
         float arrowEnd1Y = (float) (endY + arrowRadius * Math.sin(arrowheadAngle1));
-        g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
+        g.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
 
         // draw the second line of the arrowhead
         float arrowEnd2X = (float) (endX + arrowRadius * Math.cos(arrowheadAngle2));
         float arrowEnd2Y = (float) (endY + arrowRadius * Math.sin(arrowheadAngle2));
-        g2.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
+        g.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
     }
 
     @Override

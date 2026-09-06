@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class GradientBorder extends AbstractBorder {
 
     @Override
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-        Graphics2D g2d = (Graphics2D) g;
+        Graphics2D g2 = (Graphics2D) g;
         Paint paint = new GradientPaint(x, y, leftColor, width, 0, rightColor);
 
         if (insets == null) {
@@ -69,12 +69,12 @@ public class GradientBorder extends AbstractBorder {
             insets = getBorderInsets(c, insets);
         }
 
-        g2d.setPaint(paint);
+        g2.setPaint(paint);
 
         // draw rectangles to create the border, leaving the component's area untouched
-        g2d.fillRect(x, y, width, insets.top);
-        g2d.fillRect(x, y, insets.left, height);
-        g2d.fillRect(x + width - insets.right, y, insets.right, height);
-        g2d.fillRect(x, y + height - insets.bottom, width, insets.bottom);
+        g2.fillRect(x, y, width, insets.top);
+        g2.fillRect(x, y, insets.left, height);
+        g2.fillRect(x + width - insets.right, y, insets.right, height);
+        g2.fillRect(x, y + height - insets.bottom, width, insets.bottom);
     }
 }

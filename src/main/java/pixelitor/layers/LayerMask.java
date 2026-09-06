@@ -263,11 +263,6 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    public Layer getLayer() {
-        return owner;
-    }
-
-    @Override
     protected Layer getLinked() {
         // returns the parent layer if this mask is linked
         if (owner.isMaskEditing() && isLinked()) {

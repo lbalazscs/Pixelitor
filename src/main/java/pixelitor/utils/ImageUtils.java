@@ -226,7 +226,7 @@ public class ImageUtils {
         }
 
         BufferedImage scratchImage = null;
-        Graphics2D g2 = null;
+        Graphics2D g = null;
         do {
             if (progressiveBilinear && w > targetWidth) {
                 w /= 2;
@@ -247,27 +247,27 @@ public class ImageUtils {
                 // and then copy to the final, correctly-sized image
                 // before returning
                 scratchImage = new BufferedImage(w, h, type);
-                g2 = scratchImage.createGraphics();
+                g = scratchImage.createGraphics();
             }
-            g2.setRenderingHint(KEY_INTERPOLATION, hint);
-            g2.drawImage(ret, 0, 0, w, h, 0, 0, prevW, prevH, null);
+            g.setRenderingHint(KEY_INTERPOLATION, hint);
+            g.drawImage(ret, 0, 0, w, h, 0, 0, prevW, prevH, null);
             prevW = w;
             prevH = h;
 
             ret = scratchImage;
         } while (w != targetWidth || h != targetHeight);
 
-        if (g2 != null) {
-            g2.dispose();
+        if (g != null) {
+            g.dispose();
         }
 
         // if we used a scratch buffer that is larger than our target size,
         // create an image of the right size and copy the results into it
         if (targetWidth != ret.getWidth() || targetHeight != ret.getHeight()) {
             scratchImage = new BufferedImage(targetWidth, targetHeight, type);
-            g2 = scratchImage.createGraphics();
-            g2.drawImage(ret, 0, 0, null);
-            g2.dispose();
+            g = scratchImage.createGraphics();
+            g.drawImage(ret, 0, 0, null);
+            g.dispose();
             ret = scratchImage;
         }
 
@@ -687,10 +687,10 @@ public class ImageUtils {
         BufferedImage highPass = toHighPassFilteredImage(original, blurred);
 
         // blend it with overlay to get a sharpening effect
-        Graphics2D g2 = highPass.createGraphics();
-        g2.setComposite(new OverlayComposite(1.0f));
-        g2.drawImage(original, 0, 0, null);
-        g2.dispose();
+        Graphics2D g = highPass.createGraphics();
+        g.setComposite(new OverlayComposite(1.0f));
+        g.drawImage(original, 0, 0, null);
+        g.dispose();
 
         return highPass;
     }

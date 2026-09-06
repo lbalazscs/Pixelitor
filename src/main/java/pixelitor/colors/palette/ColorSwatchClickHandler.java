@@ -32,14 +32,14 @@ public interface ColorSwatchClickHandler {
     /**
      * Processes a click on a color swatch.
      */
-    void handle(Color newColor, MouseEvent e);
+    void handle(Color swatchColor, MouseEvent e);
 
     // sets the foreground color for left-clicks and the background color for right-clicks
-    ColorSwatchClickHandler STANDARD = (newColor, e) -> {
+    ColorSwatchClickHandler STANDARD = (swatchColor, e) -> {
         if (isRightMouseButton(e)) {
-            setBgColor(newColor);
+            setBgColor(swatchColor);
         } else {
-            setFgColor(newColor);
+            setFgColor(swatchColor);
         }
     };
 

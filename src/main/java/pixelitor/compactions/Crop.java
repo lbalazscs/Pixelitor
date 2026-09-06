@@ -37,7 +37,7 @@ import pixelitor.selection.ShapeCombinator;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -234,7 +234,7 @@ public class Crop implements CompAction {
         Composition comp = Views.getActiveComp();
         Selection sel = comp.getSelection();
 
-        if (RandomGUITest.isRunning()) {
+        if (RandomGuiTest.isRunning()) {
             // ask no questions, just do the simplest crop
             cropToRectangularSelection(comp, sel, false);
             return;

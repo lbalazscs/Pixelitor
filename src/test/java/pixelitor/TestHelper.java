@@ -57,7 +57,7 @@ import java.util.stream.Stream;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Mockito.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.colors.Colors.toPackedARGB;
+import static pixelitor.colors.Colors.toPackedArgb;
 import static pixelitor.layers.MaskInitMethod.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
@@ -101,7 +101,7 @@ public class TestHelper {
     private static Composition createEmptyComp(String name, int width, int height, boolean addMockView) {
         var comp = Composition.createEmpty(width, height, ImageMode.RGB);
         comp.setName(name);
-        comp.createDebugName();
+        comp.initDebugName();
 
         if (addMockView) {
             createMockViewFor(comp);
@@ -432,7 +432,7 @@ public class TestHelper {
 
     public static BufferedImage create1x1Image(int a, int r, int g, int b) {
         BufferedImage img = ImageUtils.createSysCompatibleImage(1, 1);
-        img.setRGB(0, 0, toPackedARGB(a, r, g, b));
+        img.setRGB(0, 0, toPackedArgb(a, r, g, b));
         return img;
     }
 

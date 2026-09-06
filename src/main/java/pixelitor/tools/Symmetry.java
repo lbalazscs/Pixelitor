@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.Canvas;
 import pixelitor.gui.View;
 import pixelitor.tools.brushes.SymmetryBrush;
@@ -243,7 +244,7 @@ public enum Symmetry {
         }
     }, CENTRAL_3("Central 3", 3) {
         private static final double COS_120 = -0.5;
-        private static final double SIN_120 = 0.8660254037844386; // sqrt(3)/2
+        private static final double SIN_120 = ImageMath.COS_30;
         private static final double COS_240 = COS_120;
         private static final double SIN_240 = -SIN_120;
 

@@ -72,7 +72,7 @@ public class MorphologyFilter extends WholeImageFilter {
 
     private int[] filterRgb(int width, int height, int[] inPixels) {
         // uses one array as the source and the other as the destination
-        // for the first iteration, then swap them so the previous destination
+        // for the first iteration, then swaps them so the previous destination
         // becomes the new source for the second iteration, and so on
         int[] outPixels = new int[width * height];
         int[] srcPixels = inPixels;
@@ -106,14 +106,8 @@ public class MorphologyFilter extends WholeImageFilter {
                         if (0 <= ny && ny < height) {
                             int xOffset = ny * width;
                             for (int dx = -1; dx <= 1; dx++) {
-                                if (kernel == KERNEL_DIAMOND) {
-                                    // ignore the corner neighbors
-                                    if (dx == dy && dx != 0) {
-                                        continue;
-                                    }
-                                    if (dx == -dy && dx != 0) {
-                                        continue;
-                                    }
+                                if (kernel == KERNEL_DIAMOND && dx != 0 && dy != 0) {
+                                    continue;
                                 }
 
                                 int nx = x + dx;
@@ -178,70 +172,13 @@ public class MorphologyFilter extends WholeImageFilter {
         }
 
         // apply erosion or dilation to the Y channel
-        float[] srcY = yChannel;
-        float[] dstY = new float[numPixels];
-
-        pt = createProgressTracker(iterations);
-        for (int it = 0; it < iterations; it++) {
-            int index = 0;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    float luma; // the final Y value for this pixel
-
-                    if (op == OP_DILATE) {
-                        luma = 0.0f; // min value for max operation
-                    } else { // OP_ERODE
-                        luma = 255.0f; // max value for min operation
-                    }
-
-                    // examine neighboring pixels
-                    for (int dy = -1; dy <= 1; dy++) {
-                        int ny = y + dy;
-                        if (0 <= ny && ny < height) {
-                            int xOffset = ny * width;
-                            for (int dx = -1; dx <= 1; dx++) {
-                                if (kernel == KERNEL_DIAMOND) {
-                                    if (dx == dy && dx != 0) {
-                                        continue;
-                                    }
-                                    if (dx == -dy && dx != 0) {
-                                        continue;
-                                    }
-                                }
-
-                                int nx = x + dx;
-                                if (0 <= nx && nx < width) {
-                                    int neighborIndex = xOffset + nx;
-                                    float neighborY = srcY[neighborIndex];
-
-                                    if (op == OP_ERODE) {
-                                        luma = min(luma, neighborY);
-                                    } else { // OP_DILATE
-                                        luma = max(luma, neighborY);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    dstY[index++] = luma;
-                }
-            }
-            pt.unitDone();
-
-            // swap source and destination for next iteration
-            float[] temp = srcY;
-            srcY = dstY;
-            dstY = temp;
-        }
-        finishProgressTracker();
-
-        // srcY now holds the final Y channel data.
+        float[] finalY = filterSingleChannel(width, height, yChannel, 0.0f, 255.0f);
 
         // recombine and convert back to RGB
         int[] outPixels = new int[numPixels];
         float[] ycbcr = new float[3];
         for (int i = 0; i < numPixels; i++) {
-            ycbcr[0] = srcY[i]; // use the modified Y value
+            ycbcr[0] = finalY[i]; // use the modified Y value
             ycbcr[1] = cbChannel[i];
             ycbcr[2] = crChannel[i];
 
@@ -277,71 +214,14 @@ public class MorphologyFilter extends WholeImageFilter {
         }
 
         // apply erosion or dilation to the V channel
-        float[] srcV = vChannel;
-        float[] dstV = new float[numPixels];
-
-        pt = createProgressTracker(iterations);
-        for (int it = 0; it < iterations; it++) {
-            int index = 0;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    float v; // the final V value for this pixel
-
-                    if (op == OP_DILATE) {
-                        v = 0.0f; // min value for max operation
-                    } else { // OP_ERODE
-                        v = 1.0f; // max value for min operation
-                    }
-
-                    // examine neighboring pixels
-                    for (int dy = -1; dy <= 1; dy++) {
-                        int ny = y + dy;
-                        if (0 <= ny && ny < height) {
-                            int xOffset = ny * width;
-                            for (int dx = -1; dx <= 1; dx++) {
-                                if (kernel == KERNEL_DIAMOND) {
-                                    if (dx == dy && dx != 0) {
-                                        continue;
-                                    }
-                                    if (dx == -dy && dx != 0) {
-                                        continue;
-                                    }
-                                }
-
-                                int nx = x + dx;
-                                if (0 <= nx && nx < width) {
-                                    int neighborIndex = xOffset + nx;
-                                    float neighborV = srcV[neighborIndex];
-
-                                    if (op == OP_ERODE) {
-                                        v = min(v, neighborV);
-                                    } else { // OP_DILATE
-                                        v = max(v, neighborV);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    dstV[index++] = v;
-                }
-            }
-            pt.unitDone();
-
-            // swap source and destination for next iteration
-            float[] temp = srcV;
-            srcV = dstV;
-            dstV = temp;
-        }
-        finishProgressTracker();
-
-        // srcV now holds the final V channel data.
+        float[] finalV = filterSingleChannel(width, height, vChannel, 0.0f, 1.0f);
 
         // recombine and convert back to RGB
         int[] outPixels = new int[numPixels];
         for (int i = 0; i < numPixels; i++) {
             float h = hChannel[i];
             float s = sChannel[i];
-            float v = srcV[i]; // use the modified V value
+            float v = finalV[i]; // use the modified V value
 
             int rgb = Color.HSBtoRGB(h, s, v); // alpha=0xFF
             // combine with the original alpha
@@ -349,5 +229,49 @@ public class MorphologyFilter extends WholeImageFilter {
         }
 
         return outPixels;
+    }
+
+    private float[] filterSingleChannel(int width, int height, float[] channelData, float minVal, float maxVal) {
+        int numPixels = width * height;
+        float[] src = channelData;
+        float[] dst = new float[numPixels];
+
+        pt = createProgressTracker(iterations);
+        for (int it = 0; it < iterations; it++) {
+            int index = 0;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    float val = (op == OP_DILATE) ? minVal : maxVal;
+
+                    for (int dy = -1; dy <= 1; dy++) {
+                        int ny = y + dy;
+                        if (0 <= ny && ny < height) {
+                            int xOffset = ny * width;
+
+                            for (int dx = -1; dx <= 1; dx++) {
+                                if (kernel == KERNEL_DIAMOND && dx != 0 && dy != 0) {
+                                    continue;
+                                }
+
+                                int nx = x + dx;
+                                if (0 <= nx && nx < width) {
+                                    float neighborVal = src[xOffset + nx];
+                                    val = (op == OP_ERODE) ? min(val, neighborVal) : max(val, neighborVal);
+                                }
+                            }
+                        }
+                    }
+                    dst[index++] = val;
+                }
+            }
+            pt.unitDone();
+
+            float[] temp = src;
+            src = dst;
+            dst = temp;
+        }
+        finishProgressTracker();
+
+        return src;
     }
 }

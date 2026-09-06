@@ -40,7 +40,7 @@ import java.util.List;
 import static java.awt.Cursor.*;
 
 /**
- * The cropping widget with draggable handles for resizing the crop area.
+ * The cropping widget with draggable handles for resizing and moving the crop area.
  */
 public class CropBox implements ToolWidget, Debuggable {
     // transformation modes for user interactions
@@ -91,7 +91,7 @@ public class CropBox implements ToolWidget, Debuggable {
     @Override
     public void paint(Graphics2D g) {
         // draw the outline of the crop rectangle
-        Shapes.drawVisibly(g, getSelectedCoRect());
+        Shapes.drawVisibly(g, getCoCropRect());
 
         // draw the handles
         for (CropHandle handle : handles) {
@@ -102,12 +102,12 @@ public class CropBox implements ToolWidget, Debuggable {
     /**
      * Returns the component-space rectangle defined by the corner handles.
      */
-    private Rectangle getSelectedCoRect() {
+    private Rectangle getCoCropRect() {
         int x1 = (int) topLeft.getX();
         int x2 = (int) topRight.getX();
         int y1 = (int) topLeft.getY();
         int y2 = (int) bottomLeft.getY();
-        return Shapes.toPositiveRect(x1, y1, x2, y2);
+        return Shapes.posRectFromCorners(x1, y1, x2, y2);
     }
 
     /**
@@ -115,8 +115,8 @@ public class CropBox implements ToolWidget, Debuggable {
      *
      * @return true if the cursor was set, false otherwise
      */
-    private boolean setHandleCursor(double x, double y, View view) {
-        CropHandle handle = findHandleAt(x, y);
+    private boolean setHandleCursor(double coX, double coY, View view) {
+        CropHandle handle = findHandleAt(coX, coY);
         if (handle != null) {
             view.setCursor(handle.getCursor());
             return true;
@@ -258,8 +258,8 @@ public class CropBox implements ToolWidget, Debuggable {
     }
 
     /**
-     * Captures the internal state of this {@link CropBox}
-     * so that it can be returned to this state later.
+     * Returns a copy of the image-space crop rectangle
+     * (used for undo/redo state restoration).
      */
     public Rectangle2D getImCropRect() {
         return (Rectangle2D) cropRect.getIm().clone();
@@ -316,12 +316,12 @@ public class CropBox implements ToolWidget, Debuggable {
         double viewScale = view.getZoomLevel().getScale();
         int moveScale = viewScale >= 1 ? 1 : (int) Math.ceil(1 / viewScale);
 
-        Rectangle2D im = cropRect.getIm();
-        im.setRect(
-            im.getX() + key.getDeltaX() * moveScale,
-            im.getY() + key.getDeltaY() * moveScale,
-            im.getWidth(),
-            im.getHeight()
+        Rectangle2D imRect = cropRect.getIm();
+        imRect.setRect(
+            imRect.getX() + key.getDeltaX() * moveScale,
+            imRect.getY() + key.getDeltaY() * moveScale,
+            imRect.getWidth(),
+            imRect.getHeight()
         );
 
         cropRect.recalcCo(view);
@@ -345,41 +345,41 @@ public class CropBox implements ToolWidget, Debuggable {
     /**
      * Resizes the given rectangle based on the active resize cursor and mouse offset.
      */
-    public static void resize(Rectangle rect, int cursor, Point offset) {
+    public static void resize(Rectangle coRect, int cursor, Point offset) {
         int dx = offset.x;
         int dy = offset.y;
 
         // adjust rectangle bounds based on which handle is being dragged
         switch (cursor) {
             case NW_RESIZE_CURSOR -> { // top-left
-                rect.width -= dx;
-                rect.height -= dy;
-                rect.x += dx;
-                rect.y += dy;
+                coRect.width -= dx;
+                coRect.height -= dy;
+                coRect.x += dx;
+                coRect.y += dy;
             }
             case SE_RESIZE_CURSOR -> { // bottom-right
-                rect.width += dx;
-                rect.height += dy;
+                coRect.width += dx;
+                coRect.height += dy;
             }
             case SW_RESIZE_CURSOR -> { // bottom-left
-                rect.width -= dx;
-                rect.height += dy;
-                rect.x += dx;
+                coRect.width -= dx;
+                coRect.height += dy;
+                coRect.x += dx;
             }
             case NE_RESIZE_CURSOR -> { // top-right
-                rect.width += dx;
-                rect.height -= dy;
-                rect.y += dy;
+                coRect.width += dx;
+                coRect.height -= dy;
+                coRect.y += dy;
             }
             case N_RESIZE_CURSOR -> { // top
-                rect.height -= dy;
-                rect.y += dy;
+                coRect.height -= dy;
+                coRect.y += dy;
             }
-            case S_RESIZE_CURSOR -> rect.height += dy; // bottom
-            case E_RESIZE_CURSOR -> rect.width += dx; // right
+            case S_RESIZE_CURSOR -> coRect.height += dy; // bottom
+            case E_RESIZE_CURSOR -> coRect.width += dx; // right
             case W_RESIZE_CURSOR -> { // left
-                rect.width -= dx;
-                rect.x += dx;
+                coRect.width -= dx;
+                coRect.x += dx;
             }
         }
     }
@@ -387,56 +387,55 @@ public class CropBox implements ToolWidget, Debuggable {
     /**
      * Adjusts the rectangle dimensions to maintain a fixed aspect ratio during resizing.
      */
-    public static void keepAspectRatio(Rectangle rect, int cursor,
+    public static void keepAspectRatio(Rectangle coRect, int cursor,
                                        double targetAspectRatio, View view) {
         assert targetAspectRatio != 0; // should be called only with valid ratios
 
         switch (cursor) {
             case NW_RESIZE_CURSOR, NE_RESIZE_CURSOR,
                 SE_RESIZE_CURSOR, SW_RESIZE_CURSOR -> {
-                // corner handles: adjust the dimension that
-                // deviates more from the target ratio
-                double currentAspectRatio = Geometry.calcAspectRatio(rect);
+                // corner handles: expand height or width to satisfy the target aspect ratio
+                double currentAspectRatio = Geometry.calcAspectRatio(coRect);
                 if (currentAspectRatio > targetAspectRatio) {
                     // rectangle is too wide, adjust height based on width
-                    int adjustedHeight = (int) (rect.width / targetAspectRatio);
+                    int adjustedHeight = (int) (coRect.width / targetAspectRatio);
                     if (cursor == NW_RESIZE_CURSOR || cursor == NE_RESIZE_CURSOR) {
                         // adjust y position for top handles
-                        rect.y -= (adjustedHeight - rect.height);
+                        coRect.y -= (adjustedHeight - coRect.height);
                     }
-                    rect.height = adjustedHeight;
+                    coRect.height = adjustedHeight;
                 } else {
                     // rectangle is too tall (or aspect ratio is correct),
                     // adjust width based on height
-                    int adjustedWidth = (int) (rect.height * targetAspectRatio);
+                    int adjustedWidth = (int) (coRect.height * targetAspectRatio);
                     if (cursor == NW_RESIZE_CURSOR || cursor == SW_RESIZE_CURSOR) {
                         // adjust x position for left handles
-                        rect.x -= (adjustedWidth - rect.width);
+                        coRect.x -= (adjustedWidth - coRect.width);
                     }
 
-                    rect.width = adjustedWidth;
+                    coRect.width = adjustedWidth;
                 }
             }
             case N_RESIZE_CURSOR, S_RESIZE_CURSOR -> {
                 // top/bottom handles: adjust width based on height and center horizontally
-                int width = (int) (rect.height * targetAspectRatio);
-                rect.x -= (width - rect.width) / 2;
-                rect.width = width;
+                int width = (int) (coRect.height * targetAspectRatio);
+                coRect.x -= (width - coRect.width) / 2;
+                coRect.width = width;
             }
             case E_RESIZE_CURSOR, W_RESIZE_CURSOR -> {
                 // left/right handles: adjust height based on width and center vertically
-                int height = (int) (rect.width / targetAspectRatio);
-                rect.y -= (height - rect.height) / 2;
-                rect.height = height;
+                int height = (int) (coRect.width / targetAspectRatio);
+                coRect.y -= (height - coRect.height) / 2;
+                coRect.height = height;
             }
         }
 
         // snap the resulting component-space rectangle
         // to image pixels if snapping is enabled
         if (view != null) { // not in unit tests
-            Rectangle2D im = view.componentToImageSpace(rect); // could snap
+            Rectangle2D im = view.componentToImageSpace(coRect); // could snap
             Rectangle co = view.imageToComponentSpace(im);
-            rect.setRect(co);
+            coRect.setRect(co);
         }
     }
 

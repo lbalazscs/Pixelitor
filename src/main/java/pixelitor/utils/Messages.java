@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerGroup;
 import pixelitor.progress.ProgressHandler;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import java.awt.Component;
 import java.io.File;
@@ -119,7 +119,7 @@ public class Messages {
     }
 
     public static void showNotImageLayerError(Layer layer) {
-        if (!RandomGUITest.isRunning()) {
+        if (!RandomGuiTest.isRunning()) {
             String msg = format("The active layer \"%s\" isn't an image layer.",
                 layer.getName());
             showError("Not an Image Layer", msg);

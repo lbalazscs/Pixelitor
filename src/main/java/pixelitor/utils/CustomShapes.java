@@ -18,8 +18,6 @@
 package pixelitor.utils;
 
 import com.jhlabs.image.ImageMath;
-import net.jafama.FastMath;
-import org.jdesktop.swingx.geom.Star2D;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -32,6 +30,8 @@ import static java.lang.Math.TAU;
 import static net.jafama.FastMath.*;
 
 public class CustomShapes {
+    public static final double UNIT_ARROW_HEAD_WIDTH = 0.7;
+
     private CustomShapes() {
         // prevents instantiation
     }
@@ -89,8 +89,9 @@ public class CustomShapes {
 
         double angle = atan2(endY - startY, endX - startX);
 
-        double backAngle1 = 2.8797926 + angle;
-        double backAngle2 = 3.4033926 + angle;
+        // the arrowhead wings are angled at 15∘ (π/12 radians) back from the line
+        double backAngle1 = 2.8797926 + angle; // π - π/12 = 2.8797926
+        double backAngle2 = 3.4033926 + angle; // π + π/12 = 3.4033926
         int arrowRadius = 20;
 
         double arrowEnd1X = endX + arrowRadius * cos(backAngle1);
@@ -103,7 +104,6 @@ public class CustomShapes {
         arrowHead.lineTo(arrowEnd1X, arrowEnd1Y);
         arrowHead.lineTo(arrowEnd2X, arrowEnd2Y);
         arrowHead.closePath();
-        assert arrowHead != null;
 
         Shapes.fillVisibly(g, arrowHead, WHITE);
     }
@@ -117,7 +117,7 @@ public class CustomShapes {
         double arrowHeadStart = 0.6;
 
         double halfArrowWidth = arrowWidth / 2.0;
-        double halfArrowHeadWidth = Shapes.UNIT_ARROW_HEAD_WIDTH / 2;
+        double halfArrowHeadWidth = UNIT_ARROW_HEAD_WIDTH / 2;
 
         Path2D path = new Path2D.Double();
 
@@ -134,6 +134,8 @@ public class CustomShapes {
     }
 
     public static Shape createCircumscribedPolygon(int n, double cx, double cy, double radius, double tuning) {
+        assert n >= 3 && radius > 0;
+
         double angleIncrement = TAU / n;
         double maxRadius = radius / cos(angleIncrement / 2);
         double angle = 3 * PI / 2;
@@ -151,8 +153,9 @@ public class CustomShapes {
             if (tuning == 0) {
                 path.lineTo(nextX, nextY);
             } else {
-                double cpX = ImageMath.lerp(tuning + 1, cx, (prevX + nextX) / 2.0);
-                double cpY = ImageMath.lerp(tuning + 1, cy, (prevY + nextY) / 2.0);
+                double t = tuning + 1;
+                double cpX = ImageMath.lerp(t, cx, (prevX + nextX) / 2.0);
+                double cpY = ImageMath.lerp(t, cy, (prevY + nextY) / 2.0);
                 path.curveTo(cpX, cpY, cpX, cpY, nextX, nextY);
                 prevX = nextX;
                 prevY = nextY;
@@ -164,6 +167,8 @@ public class CustomShapes {
     }
 
     public static Shape createFlower(int n, double cx, double cy, double radius, double width) {
+        assert n >= 3 && radius > 0;
+
         double angleIncrement = TAU / n;
         // 0.45 instead of 0.5 so that the distant radius never goes to infinity
         double halfAngleIncrement = angleIncrement * (0.5 + width * 0.45);
@@ -200,33 +205,32 @@ public class CustomShapes {
         return new Rectangle2D.Double(cx - radius, cy - radius, diameter, diameter);
     }
 
-    public static Shape createHexagon(double cx, double cy, double radius) {
-        double cos60 = 0.5;
-        double sin60 = 0.8660254037844386;
-        double rCos60 = radius * cos60;
-        double rSin60 = radius * sin60;
+    public static Path2D createHexagon(double cx, double cy, double radius) {
+        assert radius > 0;
 
-        Path2D path = new Path2D.Double();
+        double rCos60 = radius * 0.5;
+        double rSin60 = radius * ImageMath.COS_30;
+
+        Path2D path = new Path2D.Double(Path2D.WIND_NON_ZERO, 7);
         path.moveTo(cx + radius, cy);
         path.lineTo(cx + rCos60, cy + rSin60);
         path.lineTo(cx - rCos60, cy + rSin60);
         path.lineTo(cx - radius, cy);
         path.lineTo(cx - rCos60, cy - rSin60);
         path.lineTo(cx + rCos60, cy - rSin60);
-        path.lineTo(cx + radius, cy);
         path.closePath();
 
         return path;
     }
 
-    public static Shape createCircle(Point2D center, double radius) {
+    public static Ellipse2D createCircle(Point2D center, double radius) {
         return createCircle(center.getX(), center.getY(), radius);
     }
 
     /**
      * Creates a circle shape with double precision around the given center.
      */
-    public static Shape createCircle(double cx, double cy, double radius) {
+    public static Ellipse2D createCircle(double cx, double cy, double radius) {
         double diameter = 2 * radius;
         return new Ellipse2D.Double(cx - radius, cy - radius, diameter, diameter);
     }
@@ -241,38 +245,50 @@ public class CustomShapes {
      * Creates a Bezier path approximating a circle with the given number of control points.
      * Useful if the circle will be distorted in a nonlinear way.
      */
-    public static Shape createCircle(double cx, double cy, double radius, int numPoints) {
-        // Math at https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%C3%A9zier-curves
-        Path2D path = new Path2D.Double();
-        double angle = 0;
+    public static Path2D createCircle(double cx, double cy, double radius, int numPoints) {
+        assert numPoints >= 3 && radius > 0;
+
+        Path2D path = new Path2D.Double(Path2D.WIND_NON_ZERO, numPoints + 1);
         double angleIncrement = TAU / numPoints;
-        double handleLength = 4 * radius * FastMath.tan(PI / (2 * numPoints)) / 3;
-        Point2D[] points = new Point2D[numPoints];
-        Point2D[] forwardControls = new Point2D[numPoints];
-        Point2D[] backwardControls = new Point2D[numPoints];
 
-        for (int i = 0; i < numPoints; i++) {
-            double cos = cos(angle);
-            double sin = sin(angle);
-            double x = cx + radius * cos;
-            double y = cy + radius * sin;
-            angle += angleIncrement;
-            points[i] = new Point2D.Double(x, y);
-            double handleX = handleLength * sin;
-            double handleY = handleLength * cos;
-            forwardControls[i] = new Point2D.Double(x - handleX, y + handleY);
-            backwardControls[i] = new Point2D.Double(x + handleX, y - handleY);
-        }
+        // see https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%C3%A9zier-curves
+        double handleLength = (4.0 / 3.0) * radius * tan(PI / (2 * numPoints));
 
-        for (int i = 0; i < numPoints + 1; i++) {
-            Point2D p = i == numPoints ? points[0] : points[i];
-            if (i == 0) {
-                path.moveTo(p.getX(), p.getY());
+        double startX = cx + radius;
+        double startY = cy;
+        path.moveTo(startX, startY);
+
+        double prevX = startX;
+        double prevY = startY;
+        double prevCos = 1.0;
+        double prevSin = 0.0;
+
+        for (int i = 1; i <= numPoints; i++) {
+            double curCos, curSin, curX, curY;
+            if (i < numPoints) {
+                double angle = i * angleIncrement;
+                curCos = cos(angle);
+                curSin = sin(angle);
+                curX = cx + radius * curCos;
+                curY = cy + radius * curSin;
             } else {
-                Point2D cp1 = forwardControls[i - 1];
-                Point2D cp2 = i == numPoints ? backwardControls[0] : backwardControls[i];
-                path.curveTo(cp1.getX(), cp1.getY(), cp2.getX(), cp2.getY(), p.getX(), p.getY());
+                curCos = 1.0;
+                curSin = 0.0;
+                curX = startX;
+                curY = startY;
             }
+
+            double cp1X = prevX - handleLength * prevSin;
+            double cp1Y = prevY + handleLength * prevCos;
+            double cp2X = curX + handleLength * curSin;
+            double cp2Y = curY - handleLength * curCos;
+
+            path.curveTo(cp1X, cp1Y, cp2X, cp2Y, curX, curY);
+
+            prevX = curX;
+            prevY = curY;
+            prevCos = curCos;
+            prevSin = curSin;
         }
 
         path.closePath();
@@ -282,7 +298,7 @@ public class CustomShapes {
     /**
      * Creates a circle shape with float precision around the given center.
      */
-    public static Shape createCircle(float cx, float cy, float radius) {
+    public static Ellipse2D createCircle(float cx, float cy, float radius) {
         float diameter = 2 * radius;
         return new Ellipse2D.Float(cx - radius, cy - radius, diameter, diameter);
     }
@@ -290,18 +306,18 @@ public class CustomShapes {
     /**
      * Creates an ellipse shape with double precision around the given center.
      */
-    public static Shape createEllipse(double cx, double cy, double radiusX, double radiusY) {
+    public static Ellipse2D createEllipse(double cx, double cy, double radiusX, double radiusY) {
         return new Ellipse2D.Double(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
     }
 
     /**
      * Creates an ellipse shape with float precision around the given center.
      */
-    public static Shape createEllipse(float cx, float cy, float radiusX, float radiusY) {
+    public static Ellipse2D createEllipse(float cx, float cy, float radiusX, float radiusY) {
         return new Ellipse2D.Float(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
     }
 
-    public static Shape createDiamond(double x, double y, double width, double height) {
+    public static Path2D createDiamond(double x, double y, double width, double height) {
         Path2D path = new Path2D.Double();
 
         double cx = x + width / 2.0;
@@ -316,37 +332,44 @@ public class CustomShapes {
         return path;
     }
 
-    public static Shape createStar(int numBranches, double x, double y,
-                                   double width, double height, double radiusRatio) {
-        double halfWidth = width / 2;
-        double halfHeight = height / 2;
-        double cx = x + halfWidth;
-        double cy = y + halfHeight;
+    public static Path2D createStar(int numBranches, double x, double y,
+                                    double width, double height, double radiusRatio) {
+        assert numBranches >= 3 && radiusRatio > 0;
 
-        double outerRadius = Math.max(halfWidth, halfHeight);
-        double innerRadius = radiusRatio * outerRadius;
+        double rxOuter = width * 0.5;
+        double ryOuter = height * 0.5;
+        double rxInner = rxOuter * radiusRatio;
+        double ryInner = ryOuter * radiusRatio;
+        double cx = x + rxOuter;
+        double cy = y + ryOuter;
 
-        Shape shape = new Star2D(cx, cy, innerRadius, outerRadius, numBranches);
-        if (width != height) {
-            double sx = 1.0;
-            double sy = 1.0;
-            if (width > height) {
-                sy = height / width;
+        int pointCount = numBranches * 2;
+        Path2D path = new Path2D.Double(Path2D.WIND_NON_ZERO, pointCount + 1);
+
+        double startAngle = (numBranches % 2 == 0) ? 0.0 : -PI / 2.0;
+        double angleStep = PI / numBranches;
+
+        for (int i = 0; i < pointCount; i++) {
+            double angle = startAngle + i * angleStep;
+            boolean isOuter = (i % 2 == 0);
+            double px = cx + cos(angle) * (isOuter ? rxOuter : rxInner);
+            double py = cy + sin(angle) * (isOuter ? ryOuter : ryInner);
+
+            if (i == 0) {
+                path.moveTo(px, py);
             } else {
-                sx = width / height;
+                path.lineTo(px, py);
             }
-            AffineTransform at = AffineTransform.getTranslateInstance(cx, cy);
-            at.scale(sx, sy);
-            at.translate(-cx, -cy);
-            shape = at.createTransformedShape(shape);
         }
-        return shape;
+
+        path.closePath();
+        return path;
     }
 
     /**
      * Rabbit shape based on http://commons.wikimedia.org/wiki/File:Lapin01.svg
      */
-    public static Shape createRabbit(double x, double y, double width, double height) {
+    public static Path2D createRabbit(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double cp1X; // x of control point 1
@@ -603,7 +626,7 @@ public class CustomShapes {
     /**
      * Bat shape based on http://en.wikipedia.org/wiki/File:Bat_shadow_black.svg
      */
-    public static Shape createBat(double x, double y, double width, double height) {
+    public static Path2D createBat(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double cp1X; // x of control point 1
@@ -616,10 +639,6 @@ public class CustomShapes {
         epX = x + 0.48396146f * width;
         epY = y + 0.8711912f * height;
         path.moveTo(epX, epY);
-
-        epX = x + 0.48396146f * width;
-        epY = y + 0.8711912f * height;
-        path.lineTo(epX, epY);
 
         cp1X = x + 0.46530184f * width;
         cp1Y = y + 0.8309665f * height;
@@ -876,7 +895,7 @@ public class CustomShapes {
     /**
      * Cat shape based on http://commons.wikimedia.org/wiki/File:Cat_silhouette.svg
      */
-    public static Shape createCat(double x, double y, double width, double height) {
+    public static Path2D createCat(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double cp1X; // x of control point 1
@@ -889,10 +908,6 @@ public class CustomShapes {
         epX = x + 0.3783726f * width;
         epY = y + 0.80843306f * height;
         path.moveTo(epX, epY);
-
-        epX = x + 0.3783726f * width;
-        epY = y + 0.80843306f * height;
-        path.lineTo(epX, epY);
 
         epX = x + 0.6608726f * width;
         epY = y + 0.80843306f * height;
@@ -1117,7 +1132,7 @@ public class CustomShapes {
     /**
      * Kiwi shape based on http://en.wikipedia.org/wiki/File:Kiwi_silhouette-by-flomar.svg
      */
-    public static Shape createKiwi(double x, double y, double width, double height) {
+    public static Path2D createKiwi(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double cp1X; // x of control point 1

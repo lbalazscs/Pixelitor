@@ -51,8 +51,8 @@ public class HSBColorMixPalette extends DynamicPalette {
         Color colorA = startWithFg ? getFgColor() : getBgColor();
         Color colorB = startWithFg ? getBgColor() : getFgColor();
 
-        float[] hsbA = Colors.toHSB(colorA);
-        float[] hsbB = Colors.toHSB(colorB);
+        float[] hsbA = Colors.toHsb(colorA);
+        float[] hsbB = Colors.toHsb(colorB);
 
         hueA = hsbA[0];
         satA = hsbA[1];

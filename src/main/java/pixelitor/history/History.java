@@ -25,7 +25,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
@@ -118,7 +118,7 @@ public class History {
     }
 
     private static void handleUndoRedoException(RuntimeException e, String action) {
-        if (RandomGUITest.isRunning()) {
+        if (RandomGuiTest.isRunning()) {
             throw new RuntimeException("No " + action + " available", e);
         }
         Messages.showWarning("Can't " + action,

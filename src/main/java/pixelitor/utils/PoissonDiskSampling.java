@@ -162,25 +162,25 @@ public class PoissonDiskSampling {
         return false;
     }
 
-    public void renderGrid(Graphics2D g2) {
+    public void renderGrid(Graphics2D g) {
         for (double y = cellHeight; y < height; y += cellHeight) {
-            g2.draw(new Line2D.Double(0, y, width, y));
+            g.draw(new Line2D.Double(0, y, width, y));
         }
         for (double x = cellWidth; x < width; x += cellWidth) {
-            g2.draw(new Line2D.Double(x, 0, x, height));
+            g.draw(new Line2D.Double(x, 0, x, height));
         }
     }
 
-    public void renderPoints(Graphics2D g2, double radius) {
+    public void renderPoints(Graphics2D g, double radius) {
         for (Point2D sample : samples) {
-            g2.fill(CustomShapes.createCircle(sample, radius));
+            g.fill(CustomShapes.createCircle(sample, radius));
         }
     }
 
-    public void renderPoints(Graphics2D g2, double radius, Color[] colors) {
+    public void renderPoints(Graphics2D g, double radius, Color[] colors) {
         for (int i = 0; i < samples.size(); i++) {
-            g2.setColor(colors[i % colors.length]);
-            g2.fill(CustomShapes.createCircle(samples.get(i), radius));
+            g.setColor(colors[i % colors.length]);
+            g.fill(CustomShapes.createCircle(samples.get(i), radius));
         }
     }
 

@@ -334,7 +334,7 @@ class LayerTest {
         Layer topLevelLayer = layer.getTopLevelLayer();
         assertThat(comp.indexOf(topLevelLayer)).isEqualTo(0);
 
-        topLevelLayer.changeStackIndex(1);
+        topLevelLayer.reorderTopLevelLayer(1);
         assertThat(comp.indexOf(topLevelLayer)).isEqualTo(1);
 
         History.undo("Layer Reordering");

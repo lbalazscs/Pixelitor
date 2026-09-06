@@ -29,9 +29,9 @@ public class ImageMath {
     public static final double INV_PI = 1.0 / PI;   // 1/π
     public static final double INV_TAU = 1.0 / TAU; // 1/2π
 
-    public static final double SQRT_3 = 1.7320508075688772;
-    public static final double HALF_SQRT_3 = SQRT_3 / 2.0; // = cos(30°)
     public static final double SQRT_2 = 1.4142135623730951;
+    public static final double SQRT_3 = 1.7320508075688772;
+    public static final double COS_30 = 0.8660254037844386; // = sqrt(3) / 2
 
     private ImageMath() {
     }
@@ -274,7 +274,7 @@ public class ImageMath {
 
     /**
      * Returns a repeating triangle with range 0..width and with wavelength 2*width
-     * Intended to be used as the "reflect" edge action in transform filters
+     * Intended to be used as the "reflect" edge action in transform filters.
      */
     public static int reflectTriangle(int x, int width) {
         int doubleWidth = 2 * width;
@@ -284,14 +284,14 @@ public class ImageMath {
     }
 
     /**
-     * A triangle function with a period of 2 PI and values between -1 and 1
+     * A triangle function with a period of 2π and values between -1 and 1.
      */
     public static double sinLikeTriangle(double x) {
         return 2 * triangle(x * INV_TAU) - 1;
     }
 
     /**
-     * A sawtooth function with a period of 2 PI and values between -1 and 1
+     * A sawtooth function with a period of 2π and values between -1 and 1.
      */
     public static double sinLikeSawtooth(double x) {
         return 2 * mod(x * INV_TAU, 1) - 1;

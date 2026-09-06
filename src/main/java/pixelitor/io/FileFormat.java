@@ -111,12 +111,12 @@ public enum FileFormat {
 
     public Composition readSync(File file) {
         assert !multiLayered; // overridden for multi-layered formats
-        return TrackedIO.readSingleLayeredSync(file);
+        return TrackedIO.readSingleLayerCompSync(file);
     }
 
     public CompletableFuture<Composition> readAsync(File file) {
         assert !multiLayered; // overridden for multi-layered formats
-        return TrackedIO.readSingleLayeredAsync(file);
+        return TrackedIO.readSingleLayerCompAsync(file);
     }
 
     private void saveSingleLayered(Composition comp, SaveSettings settings) {

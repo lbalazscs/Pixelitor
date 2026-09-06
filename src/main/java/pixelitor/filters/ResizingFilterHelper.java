@@ -40,11 +40,11 @@ public class ResizingFilterHelper {
             public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
                                          double resizeFactor, ProgressTracker pt) {
                 BufferedImage dest = ImageUtils.createImageWithSameCM(src);
-                Graphics2D g2 = dest.createGraphics();
-                g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-                g2.scale(resizeFactor, resizeFactor);
-                g2.drawImage(smallDest, 0, 0, null);
-                g2.dispose();
+                Graphics2D g = dest.createGraphics();
+                g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+                g.scale(resizeFactor, resizeFactor);
+                g.drawImage(smallDest, 0, 0, null);
+                g.dispose();
 
                 pt.unitsDone(getWorkUnits(resizeFactor));
 

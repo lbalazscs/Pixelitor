@@ -399,7 +399,7 @@ public class FlowField extends ParametrizedFilter {
         int turbulence = turbulenceParam.getValue();
         float wind = windParam.getValueAsFloat() / 10000;
 
-        ForceMode forceMode = forceModeParam.getSelected();
+        ForceMode forceMode = forceModeParam.getValue();
         float maxVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
         int iterationCount = pathLengthParam.getValue() + 1;
 
@@ -408,7 +408,7 @@ public class FlowField extends ParametrizedFilter {
         boolean antialias = antiAliasParam.isChecked();
         Color bgColor = backgroundColorParam.getColor();
         Color particleColor = particleColorParam.getColor();
-        ColorSource colorSource = initialColorsParam.getSelected();
+        ColorSource colorSource = initialColorsParam.getValue();
         boolean inheritSpawnPoints = startFlowFromSourceParam.isChecked();
         double colorRandomness = colorRandomnessParam.getPercentage();
         float widthRandomness = (float) widthRandomnessParam.getPercentage();
@@ -440,19 +440,19 @@ public class FlowField extends ParametrizedFilter {
         int groupCount = IS_MULTI_THREADED ? (int) Math.ceil(particleCount / (double) PARTICLES_PER_GROUP) : 1;
         var pt = new StatusBarProgressTracker(NAME, groupCount);
 
-        Graphics2D g2 = dest.createGraphics();
+        Graphics2D g = dest.createGraphics();
         boolean useColorField = colorRandomness != 0 || colorSource.requiresColorField();
         boolean randomizeWidth = widthRandomness != 0;
 
-        g2.setStroke(stroke);
-        Colors.fillWith(bgColor, g2, imgWidth, imgHeight);
-        g2.setColor(particleColor);
+        g.setStroke(stroke);
+        Colors.fillWith(bgColor, g, imgWidth, imgHeight);
+        g.setColor(particleColor);
         if (antialias) {
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         }
         Graphics2D[] graphicsCopies = new Graphics2D[groupCount];
         for (int i = 0; i < groupCount; i++) {
-            graphicsCopies[i] = (Graphics2D) g2.create();
+            graphicsCopies[i] = (Graphics2D) g.create();
         }
 
         Color[][] fieldColors = useColorField ? new Color[fieldWidth][fieldHeight] : null;
@@ -499,12 +499,12 @@ public class FlowField extends ParametrizedFilter {
 
         Future<?>[] futures = particleSystem.iterate(iterationCount, groupCount, graphicsCopies);
         ThreadPool.waitFor(futures, pt);
-        particleSystem.flush(g2);
+        particleSystem.flush(g);
         pt.finished();
         for (Graphics2D copy : graphicsCopies) {
             copy.dispose();
         }
-        g2.dispose();
+        g.dispose();
 
         return dest;
     }

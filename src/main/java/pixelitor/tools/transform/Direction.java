@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,9 +22,7 @@ import pixelitor.utils.Cursors;
 import java.awt.Cursor;
 
 import static pixelitor.tools.util.DraggablePoint.HANDLE_RADIUS;
-import static pixelitor.tools.util.MeasurementOverlay.BG_WIDTH_PIXELS;
-import static pixelitor.tools.util.MeasurementOverlay.OFFSET_FROM_MOUSE;
-import static pixelitor.tools.util.MeasurementOverlay.SINGLE_LINE_HEIGHT;
+import static pixelitor.tools.util.MeasurementOverlay.*;
 
 /**
  * The direction of a corner or an edge in a {@link TransformBox}.
@@ -67,7 +65,7 @@ public enum Direction {
     public static final int NE_OFFSET = 7;
 
     // the corner offsets at 0 angle with an "inside out" transform box,
-    // where the width or the height are negative
+    // where the width or the height is negative
     public static final int NW_OFFSET_IO = 7;
     public static final int W_OFFSET_IO = 6;
     public static final int SW_OFFSET_IO = 5;
@@ -97,13 +95,13 @@ public enum Direction {
     }
 
     /**
-     * Return the direction at the given offset
+     * Returns the direction at the given offset.
      */
-    public static Direction atOffset(int index) {
-        assert index >= 0;
-        if (index > 7) {
-            index = index % 8;
+    public static Direction atOffset(int offset) {
+        assert offset >= 0;
+        if (offset > 7) {
+            offset = offset % 8;
         }
-        return directions[index];
+        return directions[offset];
     }
 }

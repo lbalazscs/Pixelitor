@@ -30,9 +30,7 @@ import java.util.Locale;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.GRAY;
-import static java.awt.Color.WHITE;
+import static java.awt.Color.*;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -48,7 +46,7 @@ public class GradientParam extends AbstractFilterParam {
         this(name, new float[]{0.0f, 0.5f, 1.0f},
             new Color[]{
                 startColor,
-                Colors.averageRGB(startColor, endColor),
+                Colors.averageRgb(startColor, endColor),
                 endColor});
     }
 
@@ -252,7 +250,7 @@ public class GradientParam extends AbstractFilterParam {
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
                 Color end = endState.colors[i];
-                interpolatedColors[i] = Colors.interpolateRGB(initial, end, progress);
+                interpolatedColors[i] = Colors.interpolateRgb(initial, end, progress);
             }
             return interpolatedColors;
         }

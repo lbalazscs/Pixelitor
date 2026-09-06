@@ -546,12 +546,12 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
             int h = Math.round(layout.originalHeight);
 
             // draw checkerboard background
-            Graphics2D g2d = (Graphics2D) g.create();
+            Graphics2D g2 = (Graphics2D) g.create();
             try {
-                g2d.translate(x, y);
-                checkerboard.paint(g2d, null, w, h);
+                g2.translate(x, y);
+                checkerboard.paint(g2, null, w, h);
             } finally {
-                g2d.dispose();
+                g2.dispose();
             }
 
             // draw preview image on top

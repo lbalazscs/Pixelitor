@@ -32,7 +32,8 @@ import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
 /**
- * A control point of an {@link AnchorPoint}.
+ * An off-curve control handle of an {@link AnchorPoint} that defines
+ * the curvature and tangent of an adjacent Bézier curve segment.
  */
 public class ControlPoint extends DraggablePoint {
     @Serial
@@ -109,7 +110,7 @@ public class ControlPoint extends DraggablePoint {
     @Override
     public void copyPositionFrom(DraggablePoint that) {
         super.copyPositionFrom(that);
-        if (that instanceof ControlPoint thatCP) { // should be always the case
+        if (that instanceof ControlPoint thatCP) { // should always be the case
             rememberedDistFromAnchor = thatCP.getRememberedDistFromAnchor();
         }
     }

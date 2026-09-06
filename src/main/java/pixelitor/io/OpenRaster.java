@@ -233,7 +233,7 @@ public class OpenRaster {
 
         var comp = Composition.createEmpty(compWidth, compHeight, ImageMode.RGB);
         comp.setFile(file);
-        comp.createDebugName();
+        comp.initDebugName();
 
         Node mainStackElement = doc.getFirstChild();
         // make sure that text nodes caused by whitespace are ignored

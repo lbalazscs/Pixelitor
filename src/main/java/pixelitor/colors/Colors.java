@@ -27,7 +27,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Utils;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,7 +72,7 @@ public class Colors {
     /**
      * Linearly interpolates between two colors in the RGB color space.
      */
-    public static Color interpolateRGB(Color startColor, Color endColor, double progress) {
+    public static Color interpolateRgb(Color startColor, Color endColor, double progress) {
         int interpolatedRGB = ImageMath.mixColors((float) progress,
             startColor.getRGB(), endColor.getRGB());
         return new Color(interpolatedRGB, true);
@@ -81,9 +81,9 @@ public class Colors {
     /**
      * Calculates the average of two colors in the RGB color space.
      */
-    public static Color averageRGB(Color c1, Color c2) {
-        int averageRGB = ImageMath.average(c1.getRGB(), c2.getRGB());
-        return new Color(averageRGB, true);
+    public static Color averageRgb(Color c1, Color c2) {
+        int average = ImageMath.average(c1.getRGB(), c2.getRGB());
+        return new Color(average, true);
     }
 
     /**
@@ -110,15 +110,7 @@ public class Colors {
         return mix;
     }
 
-    public static String argbToString(int rgb) {
-        int a = rgb >>> 24;
-        int r = (rgb >>> 16) & 0xFF;
-        int g = (rgb >>> 8) & 0xFF;
-        int b = rgb & 0xFF;
-        return String.format("(%d, %d, %d, %d)", a, r, g, b);
-    }
-
-    public static int toPackedARGB(int a, int r, int g, int b) {
+    public static int toPackedArgb(int a, int r, int g, int b) {
         return a << 24 | r << 16 | g << 8 | b;
     }
 
@@ -127,11 +119,11 @@ public class Colors {
         return new Color(gray, gray, gray, c.getAlpha());
     }
 
-    public static float[] toHSB(Color c) {
+    public static float[] toHsb(Color c) {
         return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
     }
 
-    public static int hsbToARGB(float[] hsb, int alpha) {
+    public static int hsbToArgb(float[] hsb, int alpha) {
         int col = Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
         return setAlpha(col, alpha);
     }
@@ -191,7 +183,7 @@ public class Colors {
     public static boolean selectColorWithDialog(Window owner, String title,
                                                 Color defaultColor, boolean allowTransparency,
                                                 Consumer<Color> colorSetter) {
-        if (RandomGUITest.isRunning()) {
+        if (RandomGuiTest.isRunning()) {
             return false;
         }
         assert colorSetter != null;
@@ -299,17 +291,17 @@ public class Colors {
                                                      Consumer<Color> colorSetter) {
         JPopupMenu popup = new JPopupMenu();
 
-        ColorSwatchClickHandler clickHandler = (newColor, e) -> colorSetter.accept(newColor);
-        Window window = SwingUtilities.windowForComponent(parent);
+        ColorSwatchClickHandler clickHandler = (swatchColor, e) -> colorSetter.accept(swatchColor);
+        Window owner = SwingUtilities.windowForComponent(parent);
 
         popup.add(new TaskAction("Color Variations...", () ->
             PalettePanel.showFilterVariationsDialog(colorSource.get(), clickHandler)));
         popup.add(new TaskAction("Color History...", () ->
-            ColorHistory.INSTANCE.showDialog(window, clickHandler, true)));
+            ColorHistory.INSTANCE.showDialog(owner, clickHandler, true)));
 
         popup.addSeparator();
         popup.add(createCopyColorAction(colorSource));
-        popup.add(createPasteColorAction(window, colorSetter));
+        popup.add(createPasteColorAction(owner, colorSetter));
 
         popup.addSeparator();
         popup.add(new TaskAction("Set to Foreground Color", () ->
@@ -325,11 +317,11 @@ public class Colors {
             copyColorToClipboard(colorSource.get()));
     }
 
-    public static Action createPasteColorAction(Window window, Consumer<Color> colorSetter) {
+    public static Action createPasteColorAction(Window owner, Consumer<Color> colorSetter) {
         return new TaskAction("Paste Color", () -> {
             Color color = getColorFromClipboard();
             if (color == null) {
-                Dialogs.showClipboardNotColorWarning(window);
+                Dialogs.showClipboardNotColorWarning(owner);
             } else {
                 colorSetter.accept(color);
             }
@@ -342,12 +334,18 @@ public class Colors {
         g.dispose();
     }
 
-    public static void fillWith(Color color, Graphics2D g2, int width, int height) {
-        // ensure that transparent colors override the original content
-//        g2.setComposite(AlphaComposite.Src);
+    public static void fillWith(Color color, Graphics2D g, int width, int height) {
+        g.setColor(color);
+        g.fillRect(0, 0, width, height);
+    }
 
-        g2.setColor(color);
-        g2.fillRect(0, 0, width, height);
+    // this version ensures that transparent colors overwrite the original content
+    public static void fillWithSrc(Color color, Graphics2D g, int width, int height) {
+        Composite origComposite = g.getComposite();
+        g.setComposite(AlphaComposite.Src);
+        g.setColor(color);
+        g.fillRect(0, 0, width, height);
+        g.setComposite(origComposite);
     }
 
     public static void fillWithTransparent(Graphics2D g, int size) {
@@ -360,22 +358,22 @@ public class Colors {
     /**
      * Sets the alpha channel of the given ARGB packed int to the given 0-255 value.
      */
-    public static int setAlpha(int rgb, int newAlpha) {
+    public static int setAlpha(int argb, int newAlpha) {
         // discard the original alpha and set it to the new value
-        return (newAlpha << 24) | (rgb & 0x00_FF_FF_FF);
+        return (newAlpha << 24) | (argb & 0x00_FF_FF_FF);
     }
 
     /**
      * Sets the alpha channel of a packed ARGB int, ensuring the
      * new alpha does not exceed the original alpha value.
      */
-    public static int capAlpha(int rgb, int newAlpha) {
-        int origAlpha = rgb >>> 24;
-        return setAlpha(rgb, Math.min(origAlpha, newAlpha));
+    public static int capAlpha(int argb, int newAlpha) {
+        int origAlpha = argb >>> 24;
+        return setAlpha(argb, Math.min(origAlpha, newAlpha));
     }
 
     /**
-     * Format a color's value in the format expected by G'MIC.
+     * Formats a color's value in the format expected by G'MIC.
      */
     public static String formatGmic(Color color) {
         return String.format(Locale.ROOT, "%d,%d,%d,%d",

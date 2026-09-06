@@ -45,16 +45,19 @@ public class CompositionGuide {
         this.renderer = renderer;
     }
 
-    public void draw(Rectangle2D rect, Graphics2D g) {
+    /**
+     * Draws the guides in component space into the given crop rectangle.
+     */
+    public void draw(Rectangle2D coRect, Graphics2D g) {
         switch (type) {
             case NONE -> {
             }
-            case RULE_OF_THIRDS -> drawRuleOfThirds(rect, g);
-            case GOLDEN_SECTIONS -> drawGoldenSections(rect, g);
-            case GOLDEN_SPIRAL -> drawGoldenSpiral(rect, g);
-            case DIAGONALS -> drawDiagonals(rect, g);
-            case TRIANGLES -> drawTriangles(rect, g);
-            case GRID -> drawGrid(rect, g);
+            case RULE_OF_THIRDS -> drawRuleOfThirds(coRect, g);
+            case GOLDEN_SECTIONS -> drawGoldenSections(coRect, g);
+            case GOLDEN_SPIRAL -> drawGoldenSpiral(coRect, g);
+            case DIAGONALS -> drawDiagonals(coRect, g);
+            case TRIANGLES -> drawTriangles(coRect, g);
+            case GRID -> drawGrid(coRect, g);
         }
     }
 
@@ -66,8 +69,8 @@ public class CompositionGuide {
     }
 
     /**
-     * Draws equally spaced vertical and horizontal lines dividing
-     * the rectangle according to the given ratio.
+     * Draws symmetric vertical and horizontal division lines
+     * across the rectangle according to the given ratio.
      */
     private void drawDivisionLines(Rectangle2D rect, double divisionRatio, Graphics2D g) {
         double sectionWidth = rect.getWidth() / divisionRatio;

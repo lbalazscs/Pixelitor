@@ -39,19 +39,16 @@ public class ReplaceLayerEdit extends PixelitorEdit {
         this.before = before;
         this.after = after;
 
-        assert after.isActive();
+        // we can't assume that the 'after' layer is active here,
+        // because actions like "rasterize" can be triggered
+        // on inactive layers via right-click on the icon
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        assert after.isActive();
-
         holder.replaceLayer(after, before);
-
-        assert before.isActive();
-        assert before.hasUI();
     }
 
     @Override
@@ -59,9 +56,6 @@ public class ReplaceLayerEdit extends PixelitorEdit {
         super.redo();
 
         holder.replaceLayer(before, after);
-
-        assert after.isActive();
-        assert after.hasUI();
     }
 
     @Override

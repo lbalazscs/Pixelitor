@@ -115,11 +115,11 @@ public abstract class ComplexFractal extends ParametrizedFilter {
                     src.getWidth() * 2, src.getHeight() * 2, src.getType());
                 BufferedImage bigDest = renderFractal(bigSrc, null);
                 bigSrc.flush();
-                Graphics2D g2 = dest.createGraphics();
-                g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-                g2.scale(0.5, 0.5);
-                g2.drawImage(bigDest, 0, 0, null);
-                g2.dispose();
+                Graphics2D g = dest.createGraphics();
+                g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+                g.scale(0.5, 0.5);
+                g.drawImage(bigDest, 0, 0, null);
+                g.dispose();
                 bigDest.flush();
                 yield dest;
             }

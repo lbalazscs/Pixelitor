@@ -23,7 +23,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Messages;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import java.awt.Component;
 import java.awt.Composite;
@@ -118,7 +118,7 @@ public interface Drawable extends Filterable {
                 filter.getParamsAsString());
 
             var ise = new IllegalStateException(errorDetails, e);
-            if (RandomGUITest.isRunning()) {
+            if (RandomGuiTest.isRunning()) {
                 throw ise; // we can debug the exact filter parameters only in RandomGUITest
             }
             Messages.showException(ise);

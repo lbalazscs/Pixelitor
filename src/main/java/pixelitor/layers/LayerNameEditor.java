@@ -17,7 +17,10 @@
 
 package pixelitor.layers;
 
+import pixelitor.utils.Keys;
+
 import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
@@ -41,13 +44,42 @@ public class LayerNameEditor extends JTextField {
             }
         });
 
-        // finish editing if enter pressed
         addActionListener(_ -> finishEditing());
+
+        // cancel editing on Esc key
+        getInputMap(WHEN_FOCUSED).put(Keys.ESC, "cancelEditing");
+        getActionMap().put("cancelEditing", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cancelEditing();
+            }
+        });
     }
 
     private void finishEditing() {
+        if (!isEditable()) {
+            return; // prevent duplicate invocation caused by focus lost during disableEditing()
+        }
         disableEditing();
-        layerGUI.getLayer().setName(getText(), true);
+
+        String newName = getText().trim();
+        if (!newName.isEmpty()) {
+            layerGUI.getLayer().setName(newName, true);
+        } else {
+            revert();
+        }
+    }
+
+    public void cancelEditing() {
+        if (!isEditable()) {
+            return;
+        }
+        revert();
+        disableEditing();
+    }
+
+    private void revert() {
+        setText(layerGUI.getLayer().getName());
     }
 
     public void enableEditing() {
@@ -61,9 +93,5 @@ public class LayerNameEditor extends JTextField {
     public void disableEditing() {
         setEnabled(false);
         setEditable(false);
-    }
-
-    public LayerGUI getLayerGUI() {
-        return layerGUI;
     }
 }

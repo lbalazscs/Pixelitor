@@ -68,7 +68,7 @@ public class TransformPathTool extends PathTool {
         }
 
         initBoxes(comp);
-        setActionsEnabled(comp.hasActivePath());
+        setActionsEnabled(true);
         coCoordsChanged(view);
 
         view.repaint(); // show the path
@@ -102,21 +102,21 @@ public class TransformPathTool extends PathTool {
     }
 
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         Path path = comp.getActivePath();
         if (path == null) {
             return;
         }
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        path.paintForTransforming(g2);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        path.paintForTransforming(g);
 
         if (draggedBox != null) {
-            // when a box is being dragged, doesn't paint
+            // when a box is being dragged, do not paint
             // the other boxes to reduce visual clutter
-            draggedBox.paint(g2);
+            draggedBox.paint(g);
         } else {
             for (TransformBox box : boxes) {
-                box.paint(g2);
+                box.paint(g);
             }
         }
     }
@@ -231,7 +231,7 @@ public class TransformPathTool extends PathTool {
     }
 
     /**
-     * Creates transform boxes for all subpaths of the active path.
+     * Creates transform boxes for all non-empty subpaths of the active path.
      */
     public void initBoxes(Composition comp) {
         // we assume that paths don't change externally while this tool

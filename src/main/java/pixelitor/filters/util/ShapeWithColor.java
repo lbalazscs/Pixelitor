@@ -22,7 +22,9 @@ import pixelitor.colors.Colors;
 import pixelitor.utils.Distortion;
 import pixelitor.utils.Shapes;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.List;
 
@@ -47,7 +49,7 @@ public record ShapeWithColor(Shape shape, Color color) {
     public static String createSvgContent(List<ShapeWithColor> shapes, Canvas canvas, Color bgColor,
                                           double strokeWidth, Color strokeColor) {
         StringBuilder content = new StringBuilder()
-            .append(canvas.createSVGElement())
+            .append(canvas.createSvgRootTag())
             .append("\n");
         if (bgColor != null) {
             content.append(String.format("<rect width=\"100%%\" height=\"100%%\" fill=\"#%s\"/>\n",

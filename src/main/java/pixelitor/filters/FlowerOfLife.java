@@ -32,7 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.jhlabs.image.ImageMath.HALF_SQRT_3;
+import static com.jhlabs.image.ImageMath.COS_30;
 import static com.jhlabs.image.ImageMath.SQRT_2;
 
 /**
@@ -114,7 +114,7 @@ public class FlowerOfLife extends CurveFilter {
         }
 
         private List<Circle> calcTriangleGridNeighbors() {
-            double rowHeight = r * HALF_SQRT_3;
+            double rowHeight = r * COS_30;
             double halfRadius = r / 2;
             return List.of(
                 new Circle(cx + r, cy, r), // right

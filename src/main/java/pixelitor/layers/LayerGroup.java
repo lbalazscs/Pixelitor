@@ -275,7 +275,7 @@ public class LayerGroup extends CompositeLayer {
             layer.forEachNestedLayer(action, includeMasks);
         }
 
-        // run on itself only after the childern
+        // run on itself only after the children
         // (this ordering is needed for initialization)
         action.accept(this);
         if (includeMasks && hasMask()) {
@@ -346,7 +346,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public boolean listContainsLayer(Layer layer) {
+    public boolean hasDirectChild(Layer layer) {
         return layers.contains(layer);
     }
 
@@ -356,12 +356,14 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void addLayerToList(Layer newLayer, int index) {
+    public void insertDirectChild(Layer newLayer, int index) {
         layers.add(index, newLayer);
     }
 
     @Override
-    public void removeLayerFromList(Layer layer) {
+    public void removeDirectChild(Layer layer, boolean removeUI) {
+        // unlike Composition.removeDirectChild, this never removes the layer's
+        // UI, because a composite layer's child GUIs are handled differently
         layers.remove(layer);
     }
 
@@ -390,19 +392,11 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void deleteInternal(Layer layer) {
-        layers.remove(layer);
-
-        // Unlike Composition.deleteInternal, this doesn't remove the layer's
-        // UI here, because a composite layer's child GUIs are handled differently.
-    }
-
-    @Override
-    public void insertLayer(Layer layer, int index, boolean update) {
+    public void insertLayer(Layer newLayer, int index, boolean update) {
         if (update) {
-            new LayerAdder(this).atIndex(index).add(layer);
+            adder().atIndex(index).add(newLayer);
         } else {
-            layers.add(index, layer);
+            layers.add(index, newLayer);
         }
     }
 
@@ -473,16 +467,16 @@ public class LayerGroup extends CompositeLayer {
             Messages.showInfo("Can't Ungroup", msg);
             return;
         }
-        replaceWithUnGrouped(null, true);
+        replaceWithUngrouped(null, true);
     }
 
-    public void replaceWithUnGrouped(int[] prevIndices, boolean addToHistory) {
+    public void replaceWithUngrouped(int[] prevIndices, boolean addToHistory) {
         Layer activeBefore = comp.getActiveLayer();
         boolean activeWasThis = this == activeBefore;
         boolean activeWasInside = !activeWasThis && contains(activeBefore);
 
         int indexInHolder = holder.indexOf(this);
-        holder.deleteInternal(this);
+        holder.removeDirectChild(this, true);
 
         int numLayers = layers.size();
         int[] insertIndices = new int[numLayers];
@@ -608,7 +602,7 @@ public class LayerGroup extends CompositeLayer {
         JPopupMenu popup = super.createLayerIconPopupMenu();
 
         popup.add(new TaskAction("Ungroup", () ->
-            replaceWithUnGrouped(null, true)));
+            replaceWithUngrouped(null, true)));
 
         return popup;
     }

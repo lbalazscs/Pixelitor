@@ -32,7 +32,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
@@ -217,7 +217,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
     // handles the case where user tries to clone without setting a source
     private void handleNoSourceInMousePressed(PMouseEvent e) {
-        if (RandomGUITest.isRunning()) {
+        if (RandomGuiTest.isRunning()) {
             // special case for testing: act as if source was set at the click point
             setCloningSource(e);
         } else {

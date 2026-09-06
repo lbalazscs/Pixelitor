@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -152,12 +152,12 @@ public class MeasurementOverlay {
      */
     public static void initializeFont() {
         BufferedImage tmp = ImageUtils.createSysCompatibleImage(10, 10);
-        Graphics2D g2 = tmp.createGraphics();
-        MeasurementOverlay overlay = new MeasurementOverlay(g2, BG_WIDTH_PIXELS);
+        Graphics2D g = tmp.createGraphics();
+        MeasurementOverlay overlay = new MeasurementOverlay(g, BG_WIDTH_PIXELS);
 
         overlay.drawOneLine("x", new Point2D.Double(0, 0));
 
-        g2.dispose();
+        g.dispose();
         tmp.flush();
     }
 }

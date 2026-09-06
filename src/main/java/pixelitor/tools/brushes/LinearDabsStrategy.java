@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 /**
  * A {@link DabsStrategy} that places dabs at uniform intervals along
@@ -95,7 +95,7 @@ public class LinearDabsStrategy implements DabsStrategy {
 
         double tStep = spacingDist / lineDist;
         for (double t = tForFirstDab; t < 1.0; t += tStep) {
-            if (steps++ > 1_000 && RandomGUITest.isRunning()) {
+            if (steps++ > 1_000 && RandomGuiTest.isRunning()) {
                 // crazy big shapes can appear during
                 // random GUI testing, don't wait forever
                 break;

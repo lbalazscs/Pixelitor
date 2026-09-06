@@ -209,14 +209,13 @@ class ShapesTest {
         // test the overload that takes a Rectangle
         assertThat(Shapes.toPositiveRect(inputRect)).isEqualTo(expectedRect);
 
-        // test the overload that takes coordinates
-        assertThat(Shapes.toPositiveRect(inX, inY, inX + inW, inY + inH)).isEqualTo(expectedRect);
-
         // test the overload that takes a Rectangle2D
         Rectangle2D inputRect2D = new Rectangle2D.Double(inX, inY, inW, inH);
         Rectangle2D expectedRect2D = new Rectangle2D.Double(expX, expY, expW, expH);
-
         assertThat(Shapes.toPositiveRect(inputRect2D)).isEqualTo(expectedRect2D);
+
+        // test the version that takes corner coordinates
+        assertThat(Shapes.posRectFromCorners(inX, inY, inX + inW, inY + inH)).isEqualTo(expectedRect);
     }
 
     private static Stream<Arguments> provideRectanglesForNormalization() {

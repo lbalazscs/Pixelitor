@@ -34,7 +34,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * Filter for testing Poisson Disk Sampling
+ * Filter for testing Poisson Disk Sampling.
  */
 public class PoissonDiskTester extends ParametrizedFilter {
     public static final String NAME = "Poisson Disk Sampling";
@@ -67,23 +67,23 @@ public class PoissonDiskTester extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         RandomGenerator rand = paramSet.getSRandomWithLastSeed();
 
-        Graphics2D g2 = dest.createGraphics();
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        Graphics2D g = dest.createGraphics();
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         int width = dest.getWidth();
         int height = dest.getHeight();
-        Colors.fillWith(Color.WHITE, g2, width, height);
+        Colors.fillWith(Color.WHITE, g, width, height);
 
         double dist = distance.getValueAsDouble();
         var sampling = new PoissonDiskSampling(width, height,
             dist, k.getValue(), improved.isChecked(), rand);
 
         Color[] dotColors = colors.getColors();
-        g2.setColor(Color.RED);
-        sampling.renderPoints(g2, dist / 2, dotColors);
+        g.setColor(Color.RED);
+        sampling.renderPoints(g, dist / 2, dotColors);
 
         if (debugGrid.isChecked()) {
-            g2.setColor(Color.BLACK);
-            sampling.renderGrid(g2);
+            g.setColor(Color.BLACK);
+            sampling.renderGrid(g);
         }
 
         return dest;

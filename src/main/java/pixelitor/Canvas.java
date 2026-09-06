@@ -63,7 +63,7 @@ public class Canvas implements Serializable, Debuggable {
     private static final long serialVersionUID = -1459254568616232274L;
 
     public Canvas(int imWidth, int imHeight) {
-        validateNewSize(imWidth, imHeight);
+        validateSize(imWidth, imHeight);
         width = imWidth;
         height = imHeight;
     }
@@ -79,11 +79,11 @@ public class Canvas implements Serializable, Debuggable {
         return new Canvas(this);
     }
 
-    private static void validateNewSize(int newWidth, int newHeight) {
-        if (newWidth <= 0 || newWidth > MAX_WIDTH || newHeight <= 0 || newHeight > MAX_HEIGHT) {
+    private static void validateSize(int w, int h) {
+        if (w <= 0 || w > MAX_WIDTH || h <= 0 || h > MAX_HEIGHT) {
             throw new IllegalArgumentException(String.format(
                 "Invalid size: %dx%d. Must be between 1x1 and %dx%d.",
-                newWidth, newHeight, MAX_WIDTH, MAX_HEIGHT));
+                w, h, MAX_WIDTH, MAX_HEIGHT));
         }
     }
 
@@ -91,7 +91,7 @@ public class Canvas implements Serializable, Debuggable {
      * Resizes the canvas using values given in image space.
      */
     public void resize(int newWidth, int newHeight, View view, boolean updateView) {
-        validateNewSize(newWidth, newHeight);
+        validateSize(newWidth, newHeight);
         width = newWidth;
         height = newHeight;
 
@@ -125,8 +125,8 @@ public class Canvas implements Serializable, Debuggable {
      * was activated or when the active canvas size changed.
      */
     public static void activeCanvasSizeChanged(Canvas canvas) {
-        // As long as only Symmetry needs to be notified,
-        // a listener mechanism isn't necessary.
+        // as long as only Symmetry needs to be notified,
+        // a listener mechanism isn't necessary
         Symmetry.activeCanvasSizeChanged(canvas);
     }
 
@@ -230,7 +230,7 @@ public class Canvas implements Serializable, Debuggable {
     /**
      * Intersects the given image-space shape with the canvas bounds, and returns the result.
      */
-    public Shape clip(Shape shape) {
+    public Shape intersect(Shape shape) {
         assert shape != null;
 
         Rectangle2D canvasBounds = getBounds();
@@ -299,7 +299,7 @@ public class Canvas implements Serializable, Debuggable {
         return thumbSize;
     }
 
-    public String createSVGElement() {
+    public String createSvgRootTag() {
         return ("""
             <svg width="%d" height="%d"
                  xmlns="http://www.w3.org/2000/svg">""")

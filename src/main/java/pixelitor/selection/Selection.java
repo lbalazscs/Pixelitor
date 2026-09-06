@@ -140,7 +140,7 @@ public class Selection implements Transformable {
      * Paints the marching ants border onto the given Graphics2D,
      * which is assumed to be in image space.
      */
-    public void paintMarchingAnts(Graphics2D g2) {
+    public void paintMarchingAnts(Graphics2D g) {
         assert Threads.calledOnEDT() : Threads.callInfo();
         assert checkInvariants();
 
@@ -148,7 +148,7 @@ public class Selection implements Transformable {
             return;
         }
 
-        Stroke origStroke = g2.getStroke();
+        Stroke origStroke = g.getStroke();
 
         // ensure that the border width doesn't depend on the zoom level,
         // considering that the graphics coordinates are in image space
@@ -164,21 +164,21 @@ public class Selection implements Transformable {
         }
 
         // draw white segments
-        drawSegments(g2, WHITE, lineWidth, dash, dashPhase);
+        drawSegments(g, WHITE, lineWidth, dash, dashPhase);
 
         // draw black segments offset by half a dash length
         float blackPhase = (float) (dashPhase + DASH_LENGTH / viewScale);
-        drawSegments(g2, BLACK, lineWidth, dash, blackPhase);
+        drawSegments(g, BLACK, lineWidth, dash, blackPhase);
 
         // restore original stroke
-        g2.setStroke(origStroke);
+        g.setStroke(origStroke);
     }
 
-    private void drawSegments(Graphics2D g2, Color color, float lineWidth, float[] dash, float phase) {
-        g2.setColor(color);
-        g2.setStroke(new BasicStroke(lineWidth,
+    private void drawSegments(Graphics2D g, Color color, float lineWidth, float[] dash, float phase) {
+        g.setColor(color);
+        g.setStroke(new BasicStroke(lineWidth,
             CAP_BUTT, JOIN_ROUND, 0.0f, dash, phase));
-        g2.draw(shape);
+        g.draw(shape);
     }
 
     /**

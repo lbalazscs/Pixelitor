@@ -231,7 +231,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
             int numColors = colors.length;
             Color[] interpolatedColors = new Color[numColors];
             for (int i = 0; i < numColors; i++) {
-                interpolatedColors[i] = Colors.interpolateRGB(
+                interpolatedColors[i] = Colors.interpolateRgb(
                     colors[i], endState.colors[i], progress);
             }
             // the 'linked' state can't be interpolated

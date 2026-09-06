@@ -27,10 +27,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+import static java.awt.RenderingHints.*;
 
 /**
  * Static utility methods related to thumbnails.
@@ -82,11 +79,11 @@ public class Thumbnails {
 
     public static BufferedImage createCircleThumb(Color color) {
         BufferedImage img = createEmpty();
-        Graphics2D g2 = img.createGraphics();
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g2.setColor(color);
-        g2.fillOval(0, 0, maxSize, maxSize);
-        g2.dispose();
+        Graphics2D g = img.createGraphics();
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setColor(color);
+        g.fillOval(0, 0, maxSize, maxSize);
+        g.dispose();
         return img;
     }
 

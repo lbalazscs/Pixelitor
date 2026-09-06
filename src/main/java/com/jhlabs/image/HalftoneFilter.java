@@ -209,8 +209,8 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
 
             // the mask image is used as a threshold map
             float f = 1 - ImageMath.smoothStep(iv - softnessRange, iv + softnessRange, v);
-            int a = (int) (255 * f);
-            return (inRGB & 0xFF_00_00_00) | (a << 16) | (a << 8) | a;
+            int gray = (int) (255 * f);
+            return (inRGB & 0xFF_00_00_00) | (gray << 16) | (gray << 8) | gray;
         }
 
         int ir = (inRGB >> 16) & 0xFF;

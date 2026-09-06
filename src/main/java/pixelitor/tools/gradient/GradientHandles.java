@@ -83,13 +83,13 @@ public class GradientHandles implements ToolWidget, Debuggable {
         return new Drag(start.imX, start.imY, end.imX, end.imY);
     }
 
-    public Drag toOverlayDrag(GradientDefiningPoint movedPoint) {
+    public Drag toOverlayDrag(GradientDefiningPoint activePoint) {
         Drag drag;
-        if (movedPoint == end) {
+        if (activePoint == end) {
             drag = new Drag();
             drag.setStart(start.getLocationCopy());
             drag.setEnd(end.getLocationCopy());
-        } else if (movedPoint == start) {
+        } else if (activePoint == start) {
             // if the user is moving the start point, then return a Drag
             // that points backwards, but calculates the forward angle,
             // because the overlay measurement is shown near the
@@ -104,7 +104,7 @@ public class GradientHandles implements ToolWidget, Debuggable {
             drag.setStart(end.getLocationCopy());
             drag.setEnd(start.getLocationCopy());
         } else {
-            throw new IllegalStateException("movedPoint = " + movedPoint);
+            throw new IllegalArgumentException("activePoint = " + activePoint);
         }
         return drag;
     }
@@ -112,9 +112,9 @@ public class GradientHandles implements ToolWidget, Debuggable {
     @Override
     public void coCoordsChanged(View view) {
         if (view == this.view) {
-            start.restoreCoordsFromImSpace(view);
-            end.restoreCoordsFromImSpace(view);
-            center.restoreCoordsFromImSpace(view);
+            start.syncCoCoordsFromImSpace(view);
+            end.syncCoCoordsFromImSpace(view);
+            center.syncCoCoordsFromImSpace(view);
         } else {
             if (AppMode.isDevelopment()) {
                 throw new IllegalStateException("different views, ui = " + ImageArea.getMode());

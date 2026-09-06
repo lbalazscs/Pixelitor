@@ -37,9 +37,9 @@ public enum ImageMode {
             if (src.getColorModel() instanceof IndexColorModel) {
                 BufferedImage dst = ImageUtils.createSysCompatibleImage(
                     src.getWidth(), src.getHeight());
-                Graphics2D g2 = dst.createGraphics();
-                g2.drawImage(src, 0, 0, null);
-                g2.dispose();
+                Graphics2D g = dst.createGraphics();
+                g.drawImage(src, 0, 0, null);
+                g.dispose();
                 src.flush();
                 return dst;
             } else {

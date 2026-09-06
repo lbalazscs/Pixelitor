@@ -22,7 +22,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.edit.CopyAction;
 import pixelitor.utils.Keys;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -235,7 +235,7 @@ public class DialogBuilder {
      * Builds the dialog and also shows it.
      */
     public DialogBuilder show() {
-        if (RandomGUITest.isRunning()) {
+        if (RandomGuiTest.isRunning()) {
             return this; // avoid showing dialogs
         }
 

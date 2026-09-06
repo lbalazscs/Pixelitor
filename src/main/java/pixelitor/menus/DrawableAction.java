@@ -22,7 +22,7 @@ import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.*;
 import pixelitor.utils.Messages;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import java.awt.EventQueue;
 import java.util.function.Consumer;
@@ -105,7 +105,7 @@ public class DrawableAction extends AbstractViewEnabledAction {
     }
 
     private void handleRasterizableLayer(Layer layer) {
-        if (RandomGUITest.isRunning()) {
+        if (RandomGuiTest.isRunning()) {
             return;
         }
 

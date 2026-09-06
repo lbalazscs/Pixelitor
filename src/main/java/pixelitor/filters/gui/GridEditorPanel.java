@@ -121,7 +121,7 @@ public class GridEditorPanel extends JPanel {
         yOffset = (panelHeight - totalGridHeight) / 2;
     }
 
-    private void paintCells(Graphics2D g2) {
+    private void paintCells(Graphics2D g) {
         int[][] data = gridParam.getData(); // get data from model for painting
         int rows = gridParam.getGridRows();
         int cols = gridParam.getGridCols();
@@ -132,7 +132,7 @@ public class GridEditorPanel extends JPanel {
                 if (value >= 0 && value < painters.size()) {
                     GridCellPainter painter = painters.get(value);
                     // uses a new Graphics2D for each cell to prevent painters from interfering
-                    Graphics2D cellGraphics = (Graphics2D) g2.create();
+                    Graphics2D cellGraphics = (Graphics2D) g.create();
                     try {
                         cellGraphics.translate(xOffset + col * cellSize, yOffset + row * cellSize);
                         painter.paint(cellGraphics, cellSize);
@@ -144,8 +144,8 @@ public class GridEditorPanel extends JPanel {
         }
     }
 
-    private void paintGridLines(Graphics2D g2) {
-        g2.setColor(GRID_LINE_COLOR);
+    private void paintGridLines(Graphics2D g) {
+        g.setColor(GRID_LINE_COLOR);
         int rows = gridParam.getGridRows();
         int cols = gridParam.getGridCols();
         int totalWidth = cols * cellSize;
@@ -153,11 +153,11 @@ public class GridEditorPanel extends JPanel {
 
         // draw horizontal lines
         for (int i = 0; i <= rows; i++) {
-            g2.drawLine(xOffset, yOffset + i * cellSize, xOffset + totalWidth, yOffset + i * cellSize);
+            g.drawLine(xOffset, yOffset + i * cellSize, xOffset + totalWidth, yOffset + i * cellSize);
         }
         // draw vertical lines
         for (int i = 0; i <= cols; i++) {
-            g2.drawLine(xOffset + i * cellSize, yOffset, xOffset + i * cellSize, yOffset + totalHeight);
+            g.drawLine(xOffset + i * cellSize, yOffset, xOffset + i * cellSize, yOffset + totalHeight);
         }
     }
 

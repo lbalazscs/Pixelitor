@@ -22,6 +22,7 @@ import pixelitor.utils.Cursors;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 /**
@@ -55,25 +56,41 @@ public class DragReorderHandler extends MouseInputAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        translateMouseEvent(e);
-        dragStartY = e.getY();
+        if (!SwingUtilities.isLeftMouseButton(e)) {
+            return;
+        }
+
+        LayerGUI layerGUI = findTopLevelLayerGUI(e.getComponent());
+        if (layerGUI != null) {
+            Point p = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), layersPanel);
+            dragStartY = p.y - layerGUI.getY();
+        }
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        LayerGUI layerGUI = translateMouseEvent(e);
-        if (!dragging && Math.abs(dragStartY - e.getY()) < 5) {
-            // it seems that on Mac we get mouseDragged events even when the mouse isn't moved
-            return;
-        }
-        if (layerGUI.isEditingName()) {
+        if (!SwingUtilities.isLeftMouseButton(e)) {
             return;
         }
 
-        // Calculate the new LayerGUI y position.
-        // Since the LayerGUI is continuously relocated, e.getY()
-        // returns the mouse relative to the last LayerGUI position
-        int newY = layerGUI.getY() + e.getY() - dragStartY;
+        LayerGUI enclosingGUI = findEnclosingLayerGUI(e.getComponent());
+        if (enclosingGUI == null || enclosingGUI.isEditingName()) {
+            return;
+        }
+
+        LayerGUI layerGUI = findTopLevelLayerGUI(enclosingGUI);
+        if (layerGUI == null || layerGUI.isEditingName()) {
+            return;
+        }
+
+        Point p = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), layersPanel);
+        int newY = p.y - dragStartY;
+
+        if (!dragging && Math.abs(newY - layerGUI.getY()) < 5) {
+            // it seems that on Mac we get mouseDragged events even when the mouse isn't moved
+            return;
+        }
+
         layerGUI.setLocation(DRAG_X_OFFSET, newY);
 
         layersPanel.updateDrag(layerGUI, newY, !dragging);
@@ -85,58 +102,38 @@ public class DragReorderHandler extends MouseInputAdapter {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        LayerGUI layerGUI = translateMouseEvent(e);
+        LayerGUI layerGUI = findTopLevelLayerGUI(e.getComponent());
         if (dragging) {
-            layerGUI.setCursor(Cursors.DEFAULT);
+            if (layerGUI != null) {
+                layerGUI.setCursor(Cursors.DEFAULT);
+            }
             layersPanel.dragFinished();
         } else {
             // activate the layer if the user clicks on the name field
-            getSourceLayerGUI(e).getLayer().activate();
+            LayerGUI sourceGUI = findEnclosingLayerGUI(e.getComponent());
+            if (sourceGUI != null) {
+                sourceGUI.getLayer().activate();
+            }
         }
         dragging = false;
     }
 
-    /**
-     * Translates the mouse event coordinates into the LayerGUI's
-     * coordinate system, and returns the corresponding LayerGUI.
-     */
-    private static LayerGUI translateMouseEvent(MouseEvent e) {
-        LayerGUI layerGUI;
-        Component c = e.getComponent();
-
-        // determine the source of the event and translate coordinates accordingly
-        if (c instanceof LayerNameEditor nameEditor) {
-            layerGUI = nameEditor.getLayerGUI();
-            // translate into the LayerGUI coordinate system
-            e.translatePoint(nameEditor.getX(), nameEditor.getY());
-        } else if (c instanceof JLabel) {
-            layerGUI = (LayerGUI) c.getParent();
-            e.translatePoint(c.getX(), c.getY());
-        } else {
-            layerGUI = (LayerGUI) c;
+    private static LayerGUI findEnclosingLayerGUI(Component c) {
+        while (c != null && !(c instanceof LayerGUI)) {
+            c = c.getParent();
         }
-
-        // ensure that dragging a nested layer GUI drags its top-level ancestor
-        while (layerGUI.isEmbedded()) {
-            e.translatePoint(layerGUI.getX(), layerGUI.getY());
-            layerGUI = layerGUI.getParentUI();
-        }
-
-        return layerGUI;
+        return (LayerGUI) c;
     }
 
-    /**
-     * Returns the source LayerGUI, without going up in the hierarchy.
-     */
-    private static LayerGUI getSourceLayerGUI(MouseEvent e) {
-        Component c = e.getComponent();
-        if (c instanceof LayerNameEditor nameEditor) {
-            return nameEditor.getLayerGUI();
-        } else if (c instanceof JLabel) {
-            return (LayerGUI) c.getParent();
-        } else {
-            return (LayerGUI) c;
+    private static LayerGUI findTopLevelLayerGUI(Component c) {
+        return findTopLevelLayerGUI(findEnclosingLayerGUI(c));
+    }
+
+    private static LayerGUI findTopLevelLayerGUI(LayerGUI gui) {
+        while (gui != null && gui.isEmbedded()) {
+            gui = gui.getParentUI();
         }
+        return gui;
     }
 
     public void attachTo(JComponent c) {

@@ -38,7 +38,7 @@ import java.io.Serial;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.jhlabs.image.ImageMath.HALF_SQRT_3;
+import static com.jhlabs.image.ImageMath.COS_30;
 import static com.jhlabs.image.ImageMath.SQRT_3;
 import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
@@ -182,7 +182,7 @@ public class JHPixelate extends ParametrizedFilter {
 
     public static void renderTriangleGrid(Graphics2D g, int size,
                                           int width, int height) {
-        double triangleHeight = size * HALF_SQRT_3;
+        double triangleHeight = size * COS_30;
         double tan30 = 1.0 / SQRT_3;
         double cotan30 = SQRT_3;
 
@@ -308,7 +308,7 @@ public class JHPixelate extends ParametrizedFilter {
         }
 
         // vertical distance from center to horizontal sides
-        double hexHeight = s * HALF_SQRT_3;
+        double hexHeight = s * COS_30;
 
         // horizontal spacing between the centers of adjacent hexagon columns
         double hexWidth = s * 1.5;

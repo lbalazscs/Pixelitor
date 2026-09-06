@@ -50,14 +50,14 @@ public class NeonBorderEffect extends AbstractAreaEffect {
     }
 
     /**
-     * Create a new NeonBorderEffect
+     * Creates a new NeonBorderEffect.
      */
     public NeonBorderEffect() {
         this(Color.GREEN, Color.WHITE, 10, 1.0f);
     }
 
     /**
-     * Creates a new instance of NeonBorderEffect
+     * Creates a new instance of NeonBorderEffect.
      */
     public NeonBorderEffect(Color edgeColor, Color centerColor, double effectWidth, float opacity) {
         setEffectWidth(effectWidth);
@@ -144,7 +144,7 @@ public class NeonBorderEffect extends AbstractAreaEffect {
     }
 
     /**
-     * Set the edge color
+     * Set the edge color.
      *
      * @param edgeColor
      */
@@ -198,11 +198,11 @@ public class NeonBorderEffect extends AbstractAreaEffect {
     }
 
     public Color interpolateEdgeColor(Color endColor, double progress) {
-        return Colors.interpolateRGB(edgeColor, endColor, progress);
+        return Colors.interpolateRgb(edgeColor, endColor, progress);
     }
 
     public Color interpolateCenterColor(Color endColor, double progress) {
-        return Colors.interpolateRGB(centerColor, endColor, progress);
+        return Colors.interpolateRgb(centerColor, endColor, progress);
     }
 
     @Override

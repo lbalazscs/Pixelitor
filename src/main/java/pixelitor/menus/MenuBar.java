@@ -73,7 +73,7 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.tools.brushes.CopyBrush;
 import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 import pixelitor.utils.test.SplashImageCreator;
 
 import javax.swing.*;
@@ -319,11 +319,11 @@ public class MenuBar extends JMenuBar {
 
         // raise layer selection
         sub.addViewEnabled(RAISE_LAYER_SELECTION, i18n.getString("raise_layer_selection_tt"),
-            comp -> comp.getActiveHolder().raiseLayerSelection(), PAGE_UP);
+            comp -> comp.getActiveHolder().activateLayerAbove(), PAGE_UP);
 
         // lower layer selection
         sub.addViewEnabled(LOWER_LAYER_SELECTION, i18n.getString("lower_layer_selection_tt"),
-            comp -> comp.getActiveHolder().lowerLayerSelection(), PAGE_DOWN);
+            comp -> comp.getActiveHolder().activateLayerBelow(), PAGE_DOWN);
 
         sub.addSeparator();
 
@@ -1291,7 +1291,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(ParamTestFilter.NAME, ParamTestFilter::new);
 
         sub.add(new TaskAction("Random GUI Test", () ->
-            RandomGUITest.get().start()), CTRL_R);
+            RandomGuiTest.get().start()), CTRL_R);
 
         sub.addViewEnabled("Save in All Formats...", FileIO::saveInAllFormats);
 

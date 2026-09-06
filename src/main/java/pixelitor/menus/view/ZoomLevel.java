@@ -74,30 +74,30 @@ public class ZoomLevel {
         5381.737057623773,
         6400.0};
 
-    public static final ZoomLevel[] zoomLevels;
+    public static final ZoomLevel[] ZOOM_LEVELS;
 
     static {
-        zoomLevels = new ZoomLevel[ZOOM_PERCENTAGES.length];
-        for (int i = 0; i < zoomLevels.length; i++) {
-            zoomLevels[i] = new ZoomLevel(ZOOM_PERCENTAGES[i], i);
+        ZOOM_LEVELS = new ZoomLevel[ZOOM_PERCENTAGES.length];
+        for (int i = 0; i < ZOOM_LEVELS.length; i++) {
+            ZOOM_LEVELS[i] = new ZoomLevel(ZOOM_PERCENTAGES[i], i);
         }
 
         // link zoom levels in the chain
-        for (int i = 0; i < zoomLevels.length; i++) {
+        for (int i = 0; i < ZOOM_LEVELS.length; i++) {
             // the lowest level's 'nextOut' points to itself: can't zoom out further
             int prevIndex = Math.max(0, i - 1);
-            zoomLevels[i].setNextOut(zoomLevels[prevIndex]);
+            ZOOM_LEVELS[i].setNextOut(ZOOM_LEVELS[prevIndex]);
 
             // the highest level's 'nextIn' points to itself: can't zoom in further
-            int nextIndex = Math.min(zoomLevels.length - 1, i + 1);
-            zoomLevels[i].setNextIn(zoomLevels[nextIndex]);
+            int nextIndex = Math.min(ZOOM_LEVELS.length - 1, i + 1);
+            ZOOM_LEVELS[i].setNextIn(ZOOM_LEVELS[nextIndex]);
         }
     }
 
-    public static final ZoomLevel ACTUAL_SIZE = zoomLevels[16]; // 100%
-    public static final ZoomLevel HALF_SIZE = zoomLevels[12];   // 50%
-    public static final ZoomLevel QUARTER_SIZE = zoomLevels[8]; // 25%
-    public static final ZoomLevel EIGHTH_SIZE = zoomLevels[4];  // 12.5%
+    public static final ZoomLevel ACTUAL_SIZE = ZOOM_LEVELS[16]; // 100%
+    public static final ZoomLevel HALF_SIZE = ZOOM_LEVELS[12];   // 50%
+    public static final ZoomLevel QUARTER_SIZE = ZOOM_LEVELS[8]; // 25%
+    public static final ZoomLevel EIGHTH_SIZE = ZOOM_LEVELS[4];  // 12.5%
 
     private ZoomLevel nextIn;
     private ZoomLevel nextOut;
@@ -138,7 +138,7 @@ public class ZoomLevel {
     }
 
     public static ZoomLevel getRandomZoomLevel() {
-        return Rnd.chooseFrom(zoomLevels);
+        return Rnd.chooseFrom(ZOOM_LEVELS);
     }
 
     public double getScale() {
@@ -150,7 +150,7 @@ public class ZoomLevel {
     }
 
     /**
-     * Returns whether the pixel grid should be displayed at this zoom level.
+     * Returns whether this zoom level is high enough to allow the pixel grid to be displayed.
      */
     public boolean allowsPixelGrid() {
         return getPercent() > 1500;
@@ -196,7 +196,7 @@ public class ZoomLevel {
             bestFitIndex = Math.max(0, insertionPoint - 1);
         }
 
-        return zoomLevels[bestFitIndex];
+        return ZOOM_LEVELS[bestFitIndex];
     }
 
     private static double calcSizeRatio(Canvas canvas, AutoZoom autoZoom) {

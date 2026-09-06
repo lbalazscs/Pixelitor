@@ -32,7 +32,7 @@ import pixelitor.tools.pen.Path;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.ViewActivationListener;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -243,7 +243,7 @@ public class Views {
      * Returns true if batch closing should continue.
      */
     public static boolean warnAndClose(View view) {
-        if (RandomGUITest.isRunning()) {
+        if (RandomGuiTest.isRunning()) {
             return true; // continue batch operations in tests
         }
 

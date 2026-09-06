@@ -148,16 +148,16 @@ public class GradientFillLayer extends ContentLayer {
         Dimension thumbDim = comp.getCanvas().getThumbSize();
 
         BufferedImage img = ImageUtils.createSysCompatibleImage(thumbDim);
-        Graphics2D g2 = img.createGraphics();
+        Graphics2D g = img.createGraphics();
 
         if (gradient == null || gradient.hasTransparency()) {
-            thumbCheckerboardPainter.paint(g2, null, thumbDim.width, thumbDim.height);
+            thumbCheckerboardPainter.paint(g, null, thumbDim.width, thumbDim.height);
         }
         if (gradient != null) {
-            gradient.paintThumbnail(g2, comp.getCanvas(), thumbDim);
+            gradient.paintThumbnail(g, comp.getCanvas(), thumbDim);
         }
 
-        g2.dispose();
+        g.dispose();
         return img;
     }
 

@@ -27,7 +27,9 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
+import java.io.File;
 import java.lang.ref.SoftReference;
+import java.util.Objects;
 
 /**
  * Used when a {@link Composition} is replaced in its {@link View},
@@ -52,12 +54,11 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         this.isReload = isReload;
 
         assert oldComp != null;
-        assert newComp != null;
         assert oldComp != newComp;
 
         if (canvasTransform != null || isReload) {
             boolean allowBothNull = !isReload;
-            if (!oldComp.hasSameFileAs(newComp, allowBothNull)) {
+            if (!compsHaveSameFile(oldComp, newComp, allowBothNull)) {
                 throw new IllegalStateException("old = " + oldComp.getFile() + ", new = " + newComp.getFile());
             }
         }
@@ -162,6 +163,15 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public boolean makesDirty() {
         // reloading should not result in a dirty comp
         return !isReload;
+    }
+
+    private static boolean compsHaveSameFile(Composition comp1, Composition comp2, boolean allowBothNull) {
+        File file1 = comp1.getFile();
+        File file2 = comp2.getFile();
+        if (file1 == null && file2 == null) {
+            return allowBothNull;
+        }
+        return Objects.equals(file1, file2);
     }
 
     @Override

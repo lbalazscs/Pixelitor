@@ -19,14 +19,9 @@ package pixelitor.io;
 import com.bric.util.JVM;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.regex.Pattern;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Utility class with static methods related to files.
@@ -77,7 +72,7 @@ public class FileUtils {
     }
 
     /**
-     * Checks if the given file name has the given extension.
+     * Checks if the given file name has the given lower-case extension.
      */
     private static boolean hasExactExtension(String fileName, String ext) {
         String foundExt = getExtension(fileName);
@@ -177,26 +172,17 @@ public class FileUtils {
         }
 
         // if not found, try to find it in the system's PATH
-        String searchCommand = JVM.isWindows ? "where" : "which";
-        ProcessBuilder pb = new ProcessBuilder(searchCommand, executableName);
-        try {
-            Process process = pb.start();
-            // read the first line of the standard output to get the path
-            String fullPath;
-            try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
-                fullPath = reader.readLine();
+        String pathEnv = System.getenv("PATH");
+        if (pathEnv != null && !pathEnv.isBlank()) {
+            for (String dir : pathEnv.split(Pattern.quote(File.pathSeparator))) {
+                File exec = findExecutableInDir(dir, executableName);
+                if (exec != null) {
+                    return exec;
+                }
             }
-
-            int exitValue = process.waitFor();
-            if (exitValue != 0 || fullPath == null || fullPath.isBlank()) {
-                return null; // not found in PATH
-            }
-
-            return new File(fullPath.trim());
-        } catch (InterruptedException | IOException e) {
-            // command failed (e.g., 'which' not found) or was interrupted
-            return null;
         }
+
+        return null;
     }
 
     /**
@@ -208,6 +194,7 @@ public class FileUtils {
             return null;
         }
         if (JVM.isWindows) {
+            // callers always pass the name without the ".exe"
             executableName += ".exe";
         }
         File executableFile = new File(dirPath, executableName);

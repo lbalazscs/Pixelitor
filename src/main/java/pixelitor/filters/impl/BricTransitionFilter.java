@@ -24,19 +24,12 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static com.bric.image.transition.Transition.BOTTOM_LEFT;
-import static com.bric.image.transition.Transition.CLOCKWISE;
-import static com.bric.image.transition.Transition.HORIZONTAL;
-import static com.bric.image.transition.Transition.IN;
-import static com.bric.image.transition.Transition.LEFT;
-import static com.bric.image.transition.Transition.OUT;
-import static com.bric.image.transition.Transition.RIGHT;
-import static com.bric.image.transition.Transition.VERTICAL;
+import static com.bric.image.transition.Transition.*;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * A transition filter based on the com.bric.image.transition classes
+ * A transition filter based on the com.bric.image.transition classes.
  */
 public class BricTransitionFilter extends AbstractBufferedImageOp {
     public static final int BARS_HORIZONTAL = 1;
@@ -92,8 +85,8 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
         var frameA = src;
         var frameB = ImageUtils.createImageWithSameCM(src);
 
-        Graphics2D g2 = dest.createGraphics();
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        Graphics2D g = dest.createGraphics();
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Transition transition = switch (type) {
             case BARS_HORIZONTAL -> new BarsTransition2D(HORIZONTAL, false);
@@ -140,8 +133,8 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
             progress = 1.0f;
         }
 
-        transition.paint(g2, frameA, frameB, progress, invert);
-        g2.dispose();
+        transition.paint(g, frameA, frameB, progress, invert);
+        g.dispose();
 
         return dest;
     }

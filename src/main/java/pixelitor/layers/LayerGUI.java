@@ -312,7 +312,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private void initLayerNameEditor() {
         nameEditor = new LayerNameEditor(this);
         add(nameEditor, LayerGUILayout.NAME_EDITOR);
-        addPropertyChangeListener("name", evt -> updateName());
     }
 
     private void bindSelectionToLayerActivation() {
@@ -414,7 +413,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     public void dragFinished(int newLayerIndex) {
-        layer.changeStackIndex(newLayerIndex);
+        layer.reorderTopLevelLayer(newLayerIndex);
     }
 
     @Override
@@ -690,7 +689,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                     .formatted(parentUI.getLayerName(), this.getLayerName()));
             }
         }
-        if (!layer.isTopLevel()) {
+        if (layer.isTopLevel()) {
+            if (parentUI != null) {
+                throw new AssertionError("top-level layer '%s' has non-null parentUI".formatted(getLayerName()));
+            }
+        } else {
             if (parentUI == null) {
                 throw new AssertionError("null parentUI in '%s' UI, holder class = '%s'"
                     .formatted(getLayerName(), layer.getHolder().getClass().getSimpleName()));
@@ -702,6 +705,19 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                     .formatted(holderUI.getLayerName(), parentUI.getLayerName()));
             }
         }
+
+        // mask consistency
+        if (layer.hasMask() != hasMaskIcon()) {
+            throw new AssertionError("Mask icon presence (%s) mismatch for layer '%s' (hasMask = %s)"
+                .formatted(hasMaskIcon(), getLayerName(), layer.hasMask()));
+        }
+
+        // name consistency
+        if (!isEditingName() && !nameEditor.getText().equals(layer.getName())) {
+            throw new AssertionError("Editor text '%s' does not match layer name '%s'"
+                .formatted(nameEditor.getText(), layer.getName()));
+        }
+
         return true;
     }
 

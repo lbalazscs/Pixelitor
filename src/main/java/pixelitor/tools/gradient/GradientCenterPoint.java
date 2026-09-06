@@ -34,8 +34,8 @@ public class GradientCenterPoint extends DraggablePoint {
     private final GradientDefiningPoint end;
 
     private boolean isDragging = false;
-    private double dragStartImX;
-    private double dragStartImY;
+    private double imDragStartX;
+    private double imDragStartY;
 
     public GradientCenterPoint(GradientDefiningPoint start,
                                GradientDefiningPoint end,
@@ -46,12 +46,12 @@ public class GradientCenterPoint extends DraggablePoint {
     }
 
     @Override
-    public void mousePressed(double x, double y) {
-        super.mousePressed(x, y);
+    public void mousePressed(double coX, double coY) {
+        super.mousePressed(coX, coY);
 
         isDragging = true;
-        dragStartImX = imX;
-        dragStartImY = imY;
+        imDragStartX = imX;
+        imDragStartY = imY;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class GradientCenterPoint extends DraggablePoint {
     public void paintHandle(Graphics2D g) {
         super.paintHandle(g);
         if (isActive() && isDragging) {
-            Drag drag = new Drag(dragStartImX, dragStartImY, imX, imY);
+            Drag drag = new Drag(imDragStartX, imDragStartY, imX, imY);
             // ensure the drag is correctly mapped to component-space
             // coordinates so the overlay box positions itself correctly
             drag.calcCoCoords(view);

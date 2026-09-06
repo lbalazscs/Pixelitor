@@ -384,13 +384,13 @@ public class SmearFilter extends WholeImageFilter {
     private static ShapeMask createHexagonMask(int radius) {
         int size = 2 * radius + 1;
         boolean[][] mask = new boolean[size][size];
-        double h = radius * ImageMath.HALF_SQRT_3;
+        double h = radius * ImageMath.COS_30;
 
         for (int y = 0; y < size; y++) {
             int dy = Math.abs(y - radius);
             for (int x = 0; x < size; x++) {
                 int dx = Math.abs(x - radius);
-                if (dy <= h && (dx * ImageMath.HALF_SQRT_3 + dy * 0.5) <= h) {
+                if (dy <= h && (dx * ImageMath.COS_30 + dy * 0.5) <= h) {
                     mask[y][x] = true;
                 }
             }

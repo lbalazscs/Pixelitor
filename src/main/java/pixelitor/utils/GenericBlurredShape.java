@@ -115,8 +115,8 @@ public class GenericBlurredShape implements BlurredShape {
         int imgWidth = (int) (2 * outerRadiusX);
         int imgHeight = (int) (2 * outerRadiusY);
         BufferedImage img = new BufferedImage(imgWidth, imgHeight, TYPE_BYTE_GRAY);
-        Graphics2D g2 = img.createGraphics();
-        Colors.fillWith(Color.WHITE, g2, imgWidth, imgHeight);
+        Graphics2D g = img.createGraphics();
+        Colors.fillWith(Color.WHITE, g, imgWidth, imgHeight);
 
         // the shape bounds within the mask image
         double shapeStartX = (outerRadiusX - innerRadiusX) / 2.0;
@@ -126,9 +126,9 @@ public class GenericBlurredShape implements BlurredShape {
 
         // use the type ID to extract the shape from the factory
         Shape shape = createShapeForType(type, new Drag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
-        g2.setClip(shape);
-        Colors.fillWith(Color.BLACK, g2, imgWidth, imgHeight);
-        g2.dispose();
+        g.setClip(shape);
+        Colors.fillWith(Color.BLACK, g, imgWidth, imgHeight);
+        g.dispose();
 
         var blurFilter = createBlurFilter(shapeStartX, shapeStartY);
         img = blurFilter.filter(img, null);

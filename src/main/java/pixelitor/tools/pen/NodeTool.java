@@ -82,11 +82,11 @@ public class NodeTool extends PathTool {
     }
 
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         Path path = comp.getActivePath();
         if (path != null) {
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-            path.paintForEditing(g2);
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            path.paintForEditing(g);
         }
     }
 
@@ -117,7 +117,7 @@ public class NodeTool extends PathTool {
                     ap.showPopup(e);
                 }
             } else if (e.isAltDown()) {
-                altMousePressedOn(handle, e);
+                handleAltPressOn(handle, e);
             } else {
                 handle.setActive(true);
                 handle.mousePressed(e);
@@ -125,21 +125,21 @@ public class NodeTool extends PathTool {
         }
     }
 
-    private static void altMousePressedOn(DraggablePoint handle, PMouseEvent e) {
+    private static void handleAltPressOn(DraggablePoint handle, PMouseEvent e) {
         if (handle instanceof ControlPoint cp) {
-            altMousePressedOnControl(cp, e);
+            breakAndStartMoving(cp, e);
         } else if (handle instanceof AnchorPoint ap) {
-            altMousePressedOnAnchor(ap, e);
+            startDraggingOutNewHandles(ap, e);
         }
     }
 
-    private static void altMousePressedOnControl(ControlPoint cp, PMouseEvent e) {
+    private static void breakAndStartMoving(ControlPoint cp, PMouseEvent e) {
         cp.breakOrDragOut();
         cp.setActive(true);
         cp.mousePressed(e);
     }
 
-    private static void altMousePressedOnAnchor(AnchorPoint ap, PMouseEvent e) {
+    private static void startDraggingOutNewHandles(AnchorPoint ap, PMouseEvent e) {
         ap.retractHandles();
         ap.setType(SYMMETRIC);
         ap.ctrlOut.setActive(true);
@@ -177,7 +177,7 @@ public class NodeTool extends PathTool {
         Path path = view.getComp().getActivePath();
         if (path == null) {
             if (AppMode.isDevelopment()) {
-                throw new IllegalStateException("null path in path edit mode");
+                throw new IllegalStateException("null path in node tool");
             }
             return;
         }

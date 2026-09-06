@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.awt.geom.Point2D;
 import java.io.Serial;
 
 /**
- * The handle that can be used to rotate a {@link TransformBox}
+ * The handle that can be used to rotate a {@link TransformBox}.
  */
 public class RotationHandle extends DraggablePoint {
     @Serial
@@ -67,19 +67,19 @@ public class RotationHandle extends DraggablePoint {
     }
 
     @Override
-    public void mousePressed(double x, double y) {
-        super.mousePressed(x, y); // sets dragStartX, dragStartY
+    public void mousePressed(double coX, double coY) {
+        super.mousePressed(coX, coY); // sets dragStartX, dragStartY
 
         updatePivot();
 
-        // recalculate because a flipping might have occurred
+        // recalculate because a flip might have occurred
         rotStartAngle = Math.atan2(this.y - pivotY, this.x - pivotX) + Math.PI / 2;
     }
 
     @Override
-    public void mouseDragged(double x, double y) {
-        double dx = x - dragStartX;
-        double dy = y - dragStartY;
+    public void mouseDragged(double coX, double coY) {
+        double dx = coX - dragStartX;
+        double dy = coY - dragStartY;
         double newX = origX + dx;
         double newY = origY + dy;
 
@@ -97,11 +97,11 @@ public class RotationHandle extends DraggablePoint {
         box.updateDirections();
     }
 
-    public double recalcAngle(double newX, double newY, boolean updatePivot) {
+    public double recalcAngle(double newCoX, double newCoY, boolean updatePivot) {
         if (updatePivot) {
             updatePivot();
         }
-        double angle = Math.atan2(newY - pivotY, newX - pivotX) + Math.PI / 2;
+        double angle = Math.atan2(newCoY - pivotY, newCoX - pivotX) + Math.PI / 2;
         box.setAngle(angle);
         return angle;
     }

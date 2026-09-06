@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,12 +25,12 @@ import java.awt.Cursor;
 
 /**
  * An individual handle in the {@link CropBox}
- * that can be dragged with the mouse
+ * that can be dragged with the mouse.
  */
 public class CropHandle extends DraggablePoint {
     public CropHandle(String name, int cursorType, View view) {
-        // The location of the crop handles is set only after the
-        // constructor, so set it temporarily to this non-null value.
+        // the location of the crop handles is set only after the
+        // constructor, so initialize it temporarily with a non-null placeholder
         super(name, PPoint.ZERO, view);
         cursor = Cursor.getPredefinedCursor(cursorType);
     }

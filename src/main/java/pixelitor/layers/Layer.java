@@ -93,9 +93,10 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     protected LayerHolder holder;
 
-    // transient or static variables from here
+    // transient or static fields from here
 
-    // a mask uses the UI of its owner.
+    // the UI component representing this layer in the layers panel
+    // (masks share their owner layer's UI)
     protected transient LayerUI ui;
 
     private transient List<LayerListener> listeners;
@@ -351,7 +352,6 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void setName(String newName, boolean addToHistory) {
-        // important because this might be called twice for a single rename
         if (newName.equals(name)) {
             return;
         }
@@ -437,13 +437,6 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     public boolean isTopLevel() {
         return holder == comp;
-    }
-
-    /**
-     * Returns the current layer or the owner if this is a mask.
-     */
-    public Layer getLayer() {
-        return this;
     }
 
     /**
@@ -829,8 +822,8 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Changes the stacking order of this layer.
      */
-    public void changeStackIndex(int newIndex) {
-        comp.changeStackIndex(this, newIndex);
+    public void reorderTopLevelLayer(int newIndex) {
+        comp.reorderTopLevelLayer(this, newIndex);
     }
 
     /**
@@ -1035,7 +1028,7 @@ public abstract class Layer implements Serializable, Debuggable {
         History.add(new ReplaceLayerEdit(this, so, "Convert to Smart Object"));
 
         Messages.showStatusMessage(format(
-            "The layer <b>\"%s\"</b> was converted to a smart object.", getName()));
+            "The layer <b>%s</b> was converted to a smart object.", getName()));
     }
 
     public void updateIconImage() {
@@ -1132,10 +1125,10 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     public void ungroup() {
         if (holder instanceof LayerGroup group) {
-            group.replaceWithUnGrouped(null, true);
+            group.replaceWithUngrouped(null, true);
         } else {
             Messages.showError("Can't Ungroup",
-                "<html>The layer \"<b>%s</b>\" isn't inside a layer group.".formatted(getName()));
+                "<html>The layer <b>%s</b> isn't inside a layer group.".formatted(getName()));
         }
     }
 
@@ -1203,8 +1196,9 @@ public abstract class Layer implements Serializable, Debuggable {
         }
 
         if (ui != null) {
-            // compare with the result of this.getLayer() so that this method works when called on masks
-            if (ui.getLayer() != this.getLayer()) {
+            // ensure this check works when called on a mask
+            Layer actualLayer = (this instanceof LayerMask m) ? m.getOwner() : this;
+            if (ui.getLayer() != actualLayer) {
                 throw new AssertionError("ui has bad layer reference for '%s', ui.getLayer() is '%s'"
                     .formatted(getName(), ui.getLayer() != null ? ui.getLayer().getName() : "null"));
             }

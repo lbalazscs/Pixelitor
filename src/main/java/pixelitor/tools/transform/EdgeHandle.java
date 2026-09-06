@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.io.Serial;
 
 /**
  * An edge handle of a {@link TransformBox}.
- * It is always at the midpoint between two {@link CornerHandle}s
+ * It is always at the midpoint between two {@link CornerHandle}s.
  */
 public class EdgeHandle extends PositionHandle {
     @Serial
@@ -59,8 +59,8 @@ public class EdgeHandle extends PositionHandle {
     }
 
     @Override
-    public void mousePressed(double x, double y) {
-        super.mousePressed(x, y);
+    public void mousePressed(double coX, double coY) {
+        super.mousePressed(coX, coY);
 
         ch1OrigX = ch1.getX();
         ch1OrigY = ch1.getY();
@@ -69,15 +69,15 @@ public class EdgeHandle extends PositionHandle {
     }
 
     @Override
-    public void mouseDragged(double x, double y) {
-        super.mouseDragged(x, y);
+    public void mouseDragged(double coX, double coY) {
+        super.mouseDragged(coX, coY);
 
-        // The angle can change by 180 degrees
+        // the angle can change by 180 degrees
         // when the box is turned "inside out"
         box.recalcAngle();
 
-        double dx = x - dragStartX;
-        double dy = y - dragStartY;
+        double dx = coX - dragStartX;
+        double dy = coY - dragStartY;
 
         // calculate the deltas in the original coordinate system
         double odx = dx * cos + dy * sin;

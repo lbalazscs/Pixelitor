@@ -69,8 +69,8 @@ import static java.util.concurrent.TimeUnit.*;
 import static pixelitor.guitest.GUITestUtils.*;
 import static pixelitor.tools.Tools.*;
 import static pixelitor.utils.Threads.*;
-import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
-import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
+import static pixelitor.utils.test.RandomGuiTest.EXIT_KEY_CHAR;
+import static pixelitor.utils.test.RandomGuiTest.PAUSE_KEY_CHAR;
 
 /**
  * A standalone program which tests the tools with randomly

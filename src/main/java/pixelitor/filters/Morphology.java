@@ -34,7 +34,7 @@ import static pixelitor.filters.impl.MorphologyFilter.OP_DILATE;
 import static pixelitor.filters.impl.MorphologyFilter.OP_ERODE;
 
 /**
- * A morphology filter
+ * A morphology filter.
  */
 public class Morphology extends ParametrizedFilter {
     public static final String NAME = "Morphology";
@@ -88,7 +88,7 @@ public class Morphology extends ParametrizedFilter {
             filter.setOp(selectedOp);
             dest = filter.filter(src, dest);
         } else {
-            // use custom progress tracker with twice as many work units
+            // uses a custom progress tracker with twice as many work units
             var pt = new StatusBarProgressTracker(NAME, 2 * iterations);
             filter.setProgressTracker(pt);
 
@@ -126,16 +126,16 @@ public class Morphology extends ParametrizedFilter {
     private static BufferedImage gradient(BufferedImage src, MorphologyFilter filter) {
         BufferedImage dest;
         filter.setOp(OP_DILATE);
-        BufferedImage d1 = filter.filter(src, null);
+        BufferedImage dilated = filter.filter(src, null);
 
         filter.setOp(OP_ERODE);
-        BufferedImage d2 = filter.filter(src, null);
+        BufferedImage eroded = filter.filter(src, null);
 
-        Graphics2D g = d1.createGraphics();
+        Graphics2D g = dilated.createGraphics();
         g.setComposite(new DifferenceComposite(1.0f));
-        g.drawImage(d2, 0, 0, null);
+        g.drawImage(eroded, 0, 0, null);
         g.dispose();
-        dest = d1;
+        dest = dilated;
         return dest;
     }
 

@@ -32,7 +32,8 @@ import java.util.SequencedSet;
 import static javax.swing.BorderFactory.createEmptyBorder;
 
 /**
- * A FIFO collection of recently used foreground, background and filter colors.
+ * A bounded history of recently used foreground, background,
+ * and filter colors, displayed in most-recently-used order.
  */
 public class ColorHistory {
     public static final ColorHistory INSTANCE = new ColorHistory();
@@ -76,10 +77,10 @@ public class ColorHistory {
     /**
      * Shows a modeless dialog with the color history.
      */
-    public void showDialog(Window window,
+    public void showDialog(Window owner,
                            ColorSwatchClickHandler clickHandler,
                            boolean filterMode) {
-        assert window != null;
+        assert owner != null;
         assert clickHandler != null;
 
         // prevent dialog duplication
@@ -107,12 +108,12 @@ public class ColorHistory {
 
         DialogBuilder builder = new DialogBuilder()
             .title("Color History")
-            .owner(window)
+            .owner(owner)
             .content(swatchPanel)
             .modeless()
             .noOKButton()
             .noCancelButton()
-            // clean up the references if the user manually closes the dialog window
+            // clean up the references if the user manually closes the dialog
             .cancelAction(() -> {
                 dialog = null;
                 swatchPanel = null;

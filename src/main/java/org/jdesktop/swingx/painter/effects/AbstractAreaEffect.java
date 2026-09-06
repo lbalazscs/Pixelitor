@@ -52,7 +52,7 @@ public class AbstractAreaEffect implements AreaEffect {
     private static final long serialVersionUID = -9104855683480422662L;
 
     /**
-     * Creates a new instance of AreaEffect
+     * Creates a new instance of AbstractAreaEffect.
      */
     public AbstractAreaEffect() {
         setBrushColor(Color.BLACK);
@@ -200,7 +200,7 @@ public class AbstractAreaEffect implements AreaEffect {
      */
 
     /**
-     * Paints the border glow
+     * Paints the border glow.
      *
      * @param g2
      * @param clipShape
@@ -522,7 +522,7 @@ public class AbstractAreaEffect implements AreaEffect {
     }
 
     public Color interpolateBrushColor(Color endColor, double progress) {
-        return Colors.interpolateRGB(brushColor, endColor, progress);
+        return Colors.interpolateRgb(brushColor, endColor, progress);
     }
 
     public float interpolateOpacity(float endOpacity, float progress) {

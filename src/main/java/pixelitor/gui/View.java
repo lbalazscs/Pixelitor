@@ -18,8 +18,8 @@
 package pixelitor.gui;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
-import pixelitor.Canvas;
 import pixelitor.*;
+import pixelitor.Canvas;
 import pixelitor.colors.FgBgColors;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
@@ -57,9 +57,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.*;
 
 /**
  * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
@@ -82,7 +80,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     // Coordinates of the canvas origin within the view (for centering).
     // They can't have floating-point precision, otherwise the checkerboard
-    // and the image might be painted on slightly different coordinates.
+    // and the image might be painted at slightly different coordinates.
     private int canvasStartX;
     private int canvasStartY;
 
@@ -115,6 +113,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     private void setComp(Composition comp) {
         assert comp != null;
+        assert this.comp != comp;
         assert comp.getView() == null;
 
         this.comp = comp;
@@ -138,7 +137,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         File file = comp.getFile();
         if (file == null) {
             Messages.showError("Cannot Reload", String.format(
-                "<html>The image <b>%s</b> can't be reloaded because it wasn't yet saved.",
+                "<html>The image <b>%s</b> can't be reloaded because it wasn't saved yet.",
                 comp.getName()));
             return CompletableFuture.completedFuture(null);
         }
@@ -340,7 +339,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
     }
 
-    // used only by the frames ui
+    // used only in internal frames mode
     public String createTitleWithZoom() {
         return comp.getName() + " - " + zoomLevel;
     }
@@ -350,6 +349,10 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      */
     public void removeLayerUI(LayerUI ui) {
         layersPanel.removeLayerGUI((LayerGUI) ui);
+    }
+
+    public void removeAllLayerUIs() {
+        layersPanel.removeAllLayerGUIs();
     }
 
     /**
@@ -432,31 +435,31 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     /**
      * Paints overlays that appear on top of the image content (grid, guides, tools).
      */
-    private void paintOverlays(Graphics2D g2) {
+    private void paintOverlays(Graphics2D g) {
         if (pixelGridVisible && zoomLevel.allowsPixelGrid()) {
             // use XOR mode for visibility on any background
-            g2.setColor(WHITE);
-            g2.setXORMode(BLACK);
+            g.setColor(WHITE);
+            g.setXORMode(BLACK);
 
             try {
-                drawPixelGrid(g2);
+                drawPixelGrid(g);
             } finally {
                 // stop the XOR mode
-                g2.setPaintMode();
+                g.setPaintMode();
             }
         }
 
-        comp.drawGuides(g2);
+        comp.drawGuides(g);
 
         if (isActive()) {
-            Tools.getActive().paintOverCanvas(g2, comp);
+            Tools.getActive().paintOverCanvas(g, comp);
         }
     }
 
     /**
      * Draws the pixel grid lines in component space.
      */
-    private void drawPixelGrid(Graphics2D g2) {
+    private void drawPixelGrid(Graphics2D g) {
         double pixelSize = zoomScale;
         assert pixelSize > 1;
 
@@ -486,12 +489,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         // vertical lines
         for (double x = startX + pixelSize; x < endX; x += pixelSize) {
-            g2.draw(new Line2D.Double(x, startY, x, endY));
+            g.draw(new Line2D.Double(x, startY, x, endY));
         }
 
         // horizontal lines
         for (double y = startY + pixelSize; y < endY; y += pixelSize) {
-            g2.draw(new Line2D.Double(startX, y, endX, y));
+            g.draw(new Line2D.Double(startX, y, endX, y));
         }
     }
 
@@ -591,7 +594,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     /**
-     * Called when the canvas component-space size changed (zoom, resize, crop, etc.)
+     * Called when the canvas component-space size has changed (zoom, resize, crop, etc.).
      */
     public void canvasCoSizeChanged() {
         assert Invariants.imageCoversCanvas(comp);
@@ -994,8 +997,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     /**
-     * Returns the bounds of the visible part of the canvas
-     * in screen coordinates
+     * Returns the bounds of the visible part of the canvas in screen coordinates.
      */
     public Rectangle getVisibleCanvasBoundsOnScreen() {
         // the canvas bounds relative to this view

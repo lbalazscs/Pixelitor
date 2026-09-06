@@ -58,10 +58,8 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 import static java.awt.event.KeyEvent.VK_CONTROL;
-import static pixelitor.guitest.GUITestUtils.changeSelection;
-import static pixelitor.guitest.GUITestUtils.checkRandomly;
-import static pixelitor.guitest.GUITestUtils.findButtonByText;
-import static pixelitor.menus.view.ZoomLevel.zoomLevels;
+import static pixelitor.guitest.GUITestUtils.*;
+import static pixelitor.menus.view.ZoomLevel.ZOOM_LEVELS;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.selection.ShapeCombinator.ADD;
 import static pixelitor.selection.ShapeCombinator.REPLACE;
@@ -625,13 +623,13 @@ public class ToolTests {
         var slider = findZoomControlSlider();
 
         slider.slideToMinimum();
-        EDT.assertActiveZoomIs(zoomLevels[0]);
+        EDT.assertActiveZoomIs(ZOOM_LEVELS[0]);
 
         findButtonByText(pw, "100%").click();
         EDT.assertActiveZoomIs(ZoomLevel.ACTUAL_SIZE);
 
         slider.slideToMaximum();
-        EDT.assertActiveZoomIs(zoomLevels[zoomLevels.length - 1]);
+        EDT.assertActiveZoomIs(ZOOM_LEVELS[ZOOM_LEVELS.length - 1]);
 
         findButtonByText(pw, "Fit").click();
 

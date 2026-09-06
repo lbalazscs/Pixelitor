@@ -96,12 +96,12 @@ public enum CopySource {
 
         // fill the new image first with a mask generated from the selection shape
         BufferedImage selectedRegion = ImageUtils.createSysCompatibleImage(selBounds);
-        Graphics2D g2 = ImageUtils.createSoftSelectionMask(
+        Graphics2D g = ImageUtils.createSoftSelectionMask(
             selectedRegion, selection.getShape(), selBounds.x, selBounds.y);
 
         // draw the source image, offset to align with the selection bounds
-        g2.drawImage(sourceImage, -selBounds.x, -selBounds.y, null);
-        g2.dispose();
+        g.drawImage(sourceImage, -selBounds.x, -selBounds.y, null);
+        g.dispose();
         return Result.success(selectedRegion);
     }
 

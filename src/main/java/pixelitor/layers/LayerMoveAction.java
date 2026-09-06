@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,11 +25,11 @@ import javax.swing.*;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * An {@link Action} that moves the active layer of the active composition
- * up or down in the layer stack
+ * An {@link Action} that moves the active layer of
+ * the active composition up or down in the layer stack.
  */
 public class LayerMoveAction extends AbstractViewEnabledAction {
-    // menu and history names (also for selection movements)
+    // menu and history names for layer reordering and active layer navigation in the layer stack
     public static final String LAYER_TO_TOP = i18n("layer_to_top");
     public static final String LAYER_TO_BOTTOM = i18n("layer_to_bottom");
     public static final String LOWER_LAYER_SELECTION = i18n("lower_layer_selection");

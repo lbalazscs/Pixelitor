@@ -26,14 +26,14 @@ import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
 /**
  * A helper class that encapsulates the logic of adding a
- * layer to a {@link LayerHolder}
+ * layer to a {@link LayerHolder}.
  */
 public class LayerAdder {
     private final LayerHolder holder;
     private final Composition comp;
-    private String editName; // null if the add should not be added to history
+    private String editName; // null if the addition should not be recorded in history
     private int insertionIndex = -1;
-    private boolean shouldUpdateComp = true;
+    private boolean updateComp = true;
 
     public enum Position {ABOVE_ACTIVE, BELOW_ACTIVE}
 
@@ -67,8 +67,8 @@ public class LayerAdder {
     }
 
     /**
-     * Means that this is part of the construction,
-     * the layer is not added as a result of a user interaction
+     * Skips adding the layer's UI (because the layer is being added
+     * programmatically rather than as a direct user action).
      */
     public LayerAdder skipUIAdd() {
         addToUI = false;
@@ -79,7 +79,7 @@ public class LayerAdder {
      * Used when the composite image doesn't change.
      */
     public LayerAdder skipCompUpdate() {
-        shouldUpdateComp = false;
+        updateComp = false;
         return this;
     }
 
@@ -87,12 +87,11 @@ public class LayerAdder {
      * Calculates the insertion index based on the relative position setting.
      */
     private void calcIndexFromPosition() {
-        int activeIndex;
+        int activeIndex = holder.indexOf(comp.getActiveLayer());
 
-        activeIndex = holder.indexOf(comp.getActiveLayer());
         if (activeIndex == -1) {
             // the active layer is not a direct child of the target holder:
-            // default to adding at the top or bottom of the current holder
+            // default to adding at the top or bottom of the holder
             insertionIndex = switch (position) {
                 case ABOVE_ACTIVE -> holder.getNumLayers(); // add to the top
                 case BELOW_ACTIVE -> 0;
@@ -124,7 +123,7 @@ public class LayerAdder {
             calcIndexFromPosition();
         }
 
-        holder.addLayerToList(layer, insertionIndex);
+        holder.insertDirectChild(layer, insertionIndex);
         comp.setActiveLayer(layer);
 
         if (addToUI) {
@@ -139,7 +138,7 @@ public class LayerAdder {
             assert AppMode.isUnitTesting() || layer.hasUI();
 
             comp.setDirty(true);
-            if (shouldUpdateComp) {
+            if (updateComp) {
                 holder.update();
             }
         }

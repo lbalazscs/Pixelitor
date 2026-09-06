@@ -28,7 +28,7 @@ import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.selection.ShapeCombinator;
 import pixelitor.utils.Messages;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
@@ -73,7 +73,7 @@ public class Dialogs {
 
     public static void showInfo(Component parent, String title, String msg) {
         assert !(parent instanceof View);
-        if (RandomGUITest.isRunning()) { // avoid dialogs
+        if (RandomGuiTest.isRunning()) { // avoid dialogs
             return;
         }
 
@@ -105,11 +105,11 @@ public class Dialogs {
                                         int messageType) {
         assert !(parent instanceof View);
         GlobalEvents.modalDialogOpened();
-        int answer = JOptionPane.showOptionDialog(parent, new JLabel(question),
+        int choice = JOptionPane.showOptionDialog(parent, new JLabel(question),
             title, YES_NO_CANCEL_OPTION,
             messageType, null, options, options[0]);
         GlobalEvents.modalDialogClosed();
-        return answer;
+        return choice;
     }
 
     public static boolean showYesNoWarning(String title, String msg) {
@@ -126,10 +126,10 @@ public class Dialogs {
         assert !(parent instanceof View);
 
         GlobalEvents.modalDialogOpened();
-        int reply = JOptionPane.showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType);
+        int choice = JOptionPane.showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType);
         GlobalEvents.modalDialogClosed();
 
-        return reply == YES_OPTION;
+        return choice == YES_OPTION;
     }
 
     public static boolean showOKCancelWarning(String msg, String title,
@@ -154,12 +154,12 @@ public class Dialogs {
         assert !(parent instanceof View);
 
         GlobalEvents.modalDialogOpened();
-        int userAnswer = JOptionPane.showOptionDialog(parent, msg, title,
+        int choice = JOptionPane.showOptionDialog(parent, msg, title,
             OK_CANCEL_OPTION, messageType, null,
             options, options[initialOptionIndex]);
         GlobalEvents.modalDialogClosed();
 
-        return userAnswer == OK_OPTION;
+        return choice == OK_OPTION;
     }
 
     public static void showError(String title, String msg) {
@@ -169,7 +169,7 @@ public class Dialogs {
     public static void showError(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
-        if (RandomGUITest.isRunning()) { // avoid dialogs
+        if (RandomGuiTest.isRunning()) { // avoid dialogs
             if (!msg.contains("can't be used")) {
                 System.err.println("\nError: " + msg);
                 Thread.dumpStack();
@@ -216,8 +216,8 @@ public class Dialogs {
         showWarning(getMainWindow(), title, msg);
     }
 
-    public static void showClipboardNotColorWarning(Window parent) {
-        showWarning(parent, "Not a Color",
+    public static void showClipboardNotColorWarning(Window owner) {
+        showWarning(owner, "Not a Color",
             "The clipboard contents could not be interpreted as a color");
     }
 
@@ -248,7 +248,7 @@ public class Dialogs {
         //noinspection CallToPrintStackTrace
         e.printStackTrace();
 
-        RandomGUITest.stop();
+        RandomGuiTest.stop();
 
         if (e instanceof OutOfMemoryError) {
             showOutOfMemoryError((OutOfMemoryError) e);
@@ -285,13 +285,13 @@ public class Dialogs {
             return;
         }
 
-        boolean randomGUITest = false;
+        boolean randomGuiTest = false;
         boolean mainGuiTest = false;
         StackTraceElement[] stackTraceElements = e.getStackTrace();
         for (StackTraceElement ste : stackTraceElements) {
             String className = ste.getClassName();
-            if (className.contains("RandomGUITest")) {
-                randomGUITest = true;
+            if (className.contains("RandomGuiTest")) {
+                randomGuiTest = true;
                 break;
             } else if (className.contains("MainGuiTest")) {
                 mainGuiTest = true;
@@ -300,8 +300,8 @@ public class Dialogs {
         }
 
         // the sound notification should happen only for
-        // the GUI tests, which are running for a long time
-        boolean guiTest = randomGUITest || mainGuiTest;
+        // the GUI tests, which take a long time to run
+        boolean guiTest = randomGuiTest || mainGuiTest;
         if (!guiTest) {
             return;
         }
@@ -373,7 +373,7 @@ public class Dialogs {
     }
 
     public static boolean showRasterizeQuestion(Layer layer, String actionName) {
-        if (RandomGUITest.isRunning()) {
+        if (RandomGuiTest.isRunning()) {
             return true;
         }
 
@@ -391,30 +391,29 @@ public class Dialogs {
 
         String[] options = {"Rasterize", GUIText.CANCEL};
 
-        boolean rasterize = showOKCancelWarning(msg,
+        return showOKCancelWarning(msg,
             layer.getTypeString(), options, 1);
-        return rasterize;
     }
 
-    public static ShapeCombinator showShapeCombinatorQuestion(Composition comp) {
+    public static ShapeCombinator selectShapeCombinator(Composition comp) {
         String[] options = {"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL};
         String msg = "<html>There is already a selection on " + comp.getName() +
             ".<br>How do you want to combine the new selection with the existing one?";
 
-        int userChoice = showCustomOptions(
+        int choice = showCustomOptions(
             comp.getDialogParent(),
             "Existing Selection",
             msg,
             options,
             QUESTION_MESSAGE);
 
-        return switch (userChoice) {
+        return switch (choice) {
             case 0 -> ShapeCombinator.REPLACE;
             case 1 -> ShapeCombinator.ADD;
             case 2 -> ShapeCombinator.SUBTRACT;
             case 3 -> ShapeCombinator.INTERSECT;
             case JOptionPane.CLOSED_OPTION, 4 -> null; // canceled
-            default -> throw new IllegalStateException("userChoice = " + userChoice);
+            default -> throw new IllegalStateException("choice = " + choice);
         };
     }
 }

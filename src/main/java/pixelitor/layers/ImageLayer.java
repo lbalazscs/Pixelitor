@@ -660,11 +660,11 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         }
 
         BufferedImage dest = ImageUtils.createImageWithSameCM(image);
-        Graphics2D g2 = dest.createGraphics();
+        Graphics2D g = dest.createGraphics();
 
-        g2.setTransform(direction.createImageTransform(image));
-        g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-        g2.dispose();
+        g.setTransform(direction.createImageTransform(image));
+        g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+        g.dispose();
 
         if (layerTransform) {
             replaceTranslatedImage(dest, direction.getDisplayName(), newTx, newTy);
@@ -745,12 +745,12 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
         BufferedImage dest = angle.createDestImage(image);
 
-        Graphics2D g2 = dest.createGraphics();
+        Graphics2D g = dest.createGraphics();
         // nearest neighbor should be ok for 90, 180, 270 degrees
-        g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        g2.setTransform(angle.createImageTransform(image));
-        g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-        g2.dispose();
+        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.setTransform(angle.createImageTransform(image));
+        g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+        g.dispose();
 
         setTranslation(newTx, newTy);
         setImage(dest);
@@ -1122,7 +1122,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
     /**
      * Deletes the layer mask, but its effect is transferred
-     * to the transparency of the layer
+     * to the transparency of the layer.
      */
     public BufferedImage applyLayerMask(boolean addToHistory) {
         BufferedImage previousLayerImage = copyImage(image);

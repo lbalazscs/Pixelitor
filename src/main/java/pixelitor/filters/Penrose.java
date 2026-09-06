@@ -41,8 +41,8 @@ import static java.lang.Math.*;
 public class Penrose extends ParametrizedFilter {
     public static final String NAME = "Penrose Tiling";
 
-    private static final double G = Geometry.GOLDEN_RATIO;
-    private static final double T = toRadians(36); // theta = 36°
+    private static final double PHI = Geometry.GOLDEN_RATIO;
+    private static final double T = toRadians(36); // theta = 36° (π / 5)
 
     private static final int START_SUN = 0;
     private static final int START_STAR = 1;
@@ -144,8 +144,8 @@ public class Penrose extends ParametrizedFilter {
 
     // the two types of tiles in a Penrose P2 pattern
     enum Type {
-        Kite(G, G, G),
-        Dart(-G, -1, -G);
+        KITE(PHI, PHI, PHI),
+        DART(-PHI, -1, -PHI);
 
         private final double[] dist;
 
@@ -157,14 +157,15 @@ public class Penrose extends ParametrizedFilter {
          * Generates the geometric path for this tile type.
          */
         public Path2D createPath(double x, double y, double angle, double size) {
-            Path2D path = new Path2D.Double();
+            Path2D path = new Path2D.Double(Path2D.WIND_NON_ZERO, 5);
             path.moveTo(x, y);
 
             double currentAngle = angle - T;
 
             for (double d : dist) {
-                double px = x + d * size * cos(currentAngle);
-                double py = y - d * size * sin(currentAngle);
+                double len = d * size;
+                double px = x + len * cos(currentAngle);
+                double py = y - len * sin(currentAngle);
                 path.lineTo(px, py);
                 currentAngle += T;
             }
@@ -239,7 +240,7 @@ public class Penrose extends ParametrizedFilter {
         for (Tile tile : tiles) {
             Path2D tileShape = tile.createPath();
 
-            Color color = (tile.type == Type.Dart) ? dartColor : kiteColor;
+            Color color = (tile.type == Type.DART) ? dartColor : kiteColor;
             ShapeWithColor shapeWithColor = new ShapeWithColor(tileShape, color);
 
             if (distortion != null) {
@@ -276,7 +277,7 @@ public class Penrose extends ParametrizedFilter {
         List<Tile> proto = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             double angle = PI / 2 + T + i * 2 * T;
-            proto.add(new Tile(Type.Kite, centerX, centerY, angle, baseSize));
+            proto.add(new Tile(Type.KITE, centerX, centerY, angle, baseSize));
         }
         return proto;
     }
@@ -285,7 +286,7 @@ public class Penrose extends ParametrizedFilter {
         List<Tile> proto = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             double angle = PI / 2 + i * 2 * T;
-            proto.add(new Tile(Type.Dart, centerX, centerY, angle, baseSize));
+            proto.add(new Tile(Type.DART, centerX, centerY, angle, baseSize));
         }
         return proto;
     }
@@ -294,13 +295,13 @@ public class Penrose extends ParametrizedFilter {
         List<Tile> proto = new ArrayList<>();
 
         // two kites at the bottom
-        double kiteStartY = centerY + baseSize * G;
-        proto.add(new Tile(Type.Kite, centerX, kiteStartY, PI / 2 + T, baseSize));
-        proto.add(new Tile(Type.Kite, centerX, kiteStartY, PI / 2 - T, baseSize));
+        double kiteStartY = centerY + baseSize * PHI;
+        proto.add(new Tile(Type.KITE, centerX, kiteStartY, PI / 2 + T, baseSize));
+        proto.add(new Tile(Type.KITE, centerX, kiteStartY, PI / 2 - T, baseSize));
 
         // one dart at the top
         double dartStartY = centerY - baseSize;
-        proto.add(new Tile(Type.Dart, centerX, dartStartY, PI / 2, baseSize));
+        proto.add(new Tile(Type.DART, centerX, dartStartY, PI / 2, baseSize));
 
         return proto;
     }
@@ -310,14 +311,14 @@ public class Penrose extends ParametrizedFilter {
 
         // two kites at the bottom
         double kiteStartY = centerY + baseSize / 2;
-        double kiteXOffset = baseSize * G * cos(T / 2);
-        proto.add(new Tile(Type.Kite, centerX + kiteXOffset, kiteStartY, PI + T / 2, baseSize));
-        proto.add(new Tile(Type.Kite, centerX - kiteXOffset, kiteStartY, -T / 2, baseSize));
+        double kiteXOffset = baseSize * PHI * cos(T / 2);
+        proto.add(new Tile(Type.KITE, centerX + kiteXOffset, kiteStartY, PI + T / 2, baseSize));
+        proto.add(new Tile(Type.KITE, centerX - kiteXOffset, kiteStartY, -T / 2, baseSize));
 
         // three darts at the top
-        proto.add(new Tile(Type.Dart, centerX, centerY, -T / 2, baseSize));
-        proto.add(new Tile(Type.Dart, centerX, centerY, -T / 2 - 2 * T, baseSize));
-        proto.add(new Tile(Type.Dart, centerX, centerY, -T / 2 - 4 * T, baseSize));
+        proto.add(new Tile(Type.DART, centerX, centerY, -T / 2, baseSize));
+        proto.add(new Tile(Type.DART, centerX, centerY, -T / 2 - 2 * T, baseSize));
+        proto.add(new Tile(Type.DART, centerX, centerY, -T / 2 - 4 * T, baseSize));
 
         return proto;
     }
@@ -326,18 +327,18 @@ public class Penrose extends ParametrizedFilter {
         List<Tile> proto = new ArrayList<>();
 
         // single dart at the top
-        proto.add(new Tile(Type.Dart, centerX, centerY, PI * 1.5, baseSize));
+        proto.add(new Tile(Type.DART, centerX, centerY, PI * 1.5, baseSize));
 
         // two kites at the top
-        double topKiteStartY = centerY - baseSize * G * cos(T);
+        double topKiteStartY = centerY - baseSize * PHI * cos(T);
         double topKiteXOffset = baseSize * cos(T / 2);
-        proto.add(new Tile(Type.Kite, centerX - topKiteXOffset, topKiteStartY, PI * 1.5, baseSize));
-        proto.add(new Tile(Type.Kite, centerX + topKiteXOffset, topKiteStartY, PI * 1.5, baseSize));
+        proto.add(new Tile(Type.KITE, centerX - topKiteXOffset, topKiteStartY, PI * 1.5, baseSize));
+        proto.add(new Tile(Type.KITE, centerX + topKiteXOffset, topKiteStartY, PI * 1.5, baseSize));
 
         // two kites at the bottom
-        double bottomKiteStartY = centerY + baseSize * G;
-        proto.add(new Tile(Type.Kite, centerX, bottomKiteStartY, 1.5 * T, baseSize));
-        proto.add(new Tile(Type.Kite, centerX, bottomKiteStartY, 3.5 * T, baseSize));
+        double bottomKiteStartY = centerY + baseSize * PHI;
+        proto.add(new Tile(Type.KITE, centerX, bottomKiteStartY, 1.5 * T, baseSize));
+        proto.add(new Tile(Type.KITE, centerX, bottomKiteStartY, 3.5 * T, baseSize));
 
         return proto;
     }
@@ -346,18 +347,18 @@ public class Penrose extends ParametrizedFilter {
         List<Tile> proto = new ArrayList<>();
 
         // two kites at the bottom
-        proto.add(new Tile(Type.Kite, centerX, centerY, 6.5 * T, baseSize));
-        proto.add(new Tile(Type.Kite, centerX, centerY, 8.5 * T, baseSize));
+        proto.add(new Tile(Type.KITE, centerX, centerY, 6.5 * T, baseSize));
+        proto.add(new Tile(Type.KITE, centerX, centerY, 8.5 * T, baseSize));
 
         // top kite
-        double topKiteY = centerY - baseSize * G;
-        proto.add(new Tile(Type.Kite, centerX, topKiteY, 7.5 * T, baseSize));
+        double topKiteY = centerY - baseSize * PHI;
+        proto.add(new Tile(Type.KITE, centerX, topKiteY, 7.5 * T, baseSize));
 
         // middle darts
-        double xOffset = baseSize * G * cos(T / 2);
-        double dartY = centerY + baseSize * G * sin(T / 2);
-        proto.add(new Tile(Type.Dart, centerX - xOffset, dartY, 6.5 * T, baseSize));
-        proto.add(new Tile(Type.Dart, centerX + xOffset, dartY, 8.5 * T, baseSize));
+        double xOffset = baseSize * PHI * cos(T / 2);
+        double dartY = centerY + baseSize * PHI * sin(T / 2);
+        proto.add(new Tile(Type.DART, centerX - xOffset, dartY, 6.5 * T, baseSize));
+        proto.add(new Tile(Type.DART, centerX + xOffset, dartY, 8.5 * T, baseSize));
 
         return proto;
     }
@@ -366,15 +367,15 @@ public class Penrose extends ParametrizedFilter {
         List<Tile> proto = new ArrayList<>();
 
         // two darts at the top
-        double dartY = centerY - baseSize * G;
-        proto.add(new Tile(Type.Dart, centerX, dartY, PI / 2 + T, baseSize));
-        proto.add(new Tile(Type.Dart, centerX, dartY, PI / 2 - T, baseSize));
+        double dartY = centerY - baseSize * PHI;
+        proto.add(new Tile(Type.DART, centerX, dartY, PI / 2 + T, baseSize));
+        proto.add(new Tile(Type.DART, centerX, dartY, PI / 2 - T, baseSize));
 
         // two kites at the bottom
         double kiteY = centerY + baseSize * 0.5;
-        double kiteXoffset = baseSize * G * cos(T / 2);
-        proto.add(new Tile(Type.Kite, centerX - kiteXoffset, kiteY, PI / 2 - 2 * T, baseSize));
-        proto.add(new Tile(Type.Kite, centerX + kiteXoffset, kiteY, PI / 2 + 2 * T, baseSize));
+        double kiteXOffset = baseSize * PHI * cos(T / 2);
+        proto.add(new Tile(Type.KITE, centerX - kiteXOffset, kiteY, PI / 2 - 2 * T, baseSize));
+        proto.add(new Tile(Type.KITE, centerX + kiteXOffset, kiteY, PI / 2 + 2 * T, baseSize));
 
         return proto;
     }
@@ -394,25 +395,25 @@ public class Penrose extends ParametrizedFilter {
         for (Tile tile : tiles) {
             double x = tile.x, y = tile.y, a = tile.angle;
             // new tiles are smaller by golden ratio
-            double size = tile.size / G;
+            double size = tile.size / PHI;
 
-            if (tile.type == Type.Dart) {
+            if (tile.type == Type.DART) {
                 // deflation rules for dart tiles
-                next.add(new Tile(Type.Kite, x, y, a + 5 * T, size));
+                next.add(new Tile(Type.KITE, x, y, a + 5 * T, size));
 
                 for (int i = 0, sign = 1; i < 2; i++, sign *= -1) {
-                    double nx = x + cos(a - 4 * T * sign) * G * tile.size;
-                    double ny = y - sin(a - 4 * T * sign) * G * tile.size;
-                    next.add(new Tile(Type.Dart, nx, ny, a - 4 * T * sign, size));
+                    double nx = x + cos(a - 4 * T * sign) * PHI * tile.size;
+                    double ny = y - sin(a - 4 * T * sign) * PHI * tile.size;
+                    next.add(new Tile(Type.DART, nx, ny, a - 4 * T * sign, size));
                 }
             } else {
                 // deflation rules for kite tiles
                 for (int i = 0, sign = 1; i < 2; i++, sign *= -1) {
-                    next.add(new Tile(Type.Dart, x, y, a - 4 * T * sign, size));
+                    next.add(new Tile(Type.DART, x, y, a - 4 * T * sign, size));
 
-                    double nx = x + cos(a - T * sign) * G * tile.size;
-                    double ny = y - sin(a - T * sign) * G * tile.size;
-                    next.add(new Tile(Type.Kite, nx, ny, a + 3 * T * sign, size));
+                    double nx = x + cos(a - T * sign) * PHI * tile.size;
+                    double ny = y - sin(a - T * sign) * PHI * tile.size;
+                    next.add(new Tile(Type.KITE, nx, ny, a + 3 * T * sign, size));
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ public class CornerHandle extends PositionHandle {
     private CornerHandle verNeighbor;
     private EdgeHandle verEdge;
 
-    // the original coordinates of the two neighbors before a drag
+    // the original component-space coordinates of the two neighbors before a drag
     private double verOrigX;
     private double verOrigY;
     private double horOrigX;
@@ -86,15 +86,15 @@ public class CornerHandle extends PositionHandle {
 
     @Override
     public void setLocation(double coX, double coY) {
-        // This method doesn't move the related points because when
+        // this method doesn't move the related points because when
         // the point is transformed with a rotation transform,
-        // AffineTransform.transform calls it, and expects the simple behavior.
+        // AffineTransform.transform calls it, and expects the simple behavior
         super.setLocation(coX, coY);
     }
 
     @Override
-    public void mousePressed(double x, double y) {
-        super.mousePressed(x, y);
+    public void mousePressed(double coX, double coY) {
+        super.mousePressed(coX, coY);
 
         verOrigX = verNeighbor.getX();
         verOrigY = verNeighbor.getY();
@@ -103,18 +103,18 @@ public class CornerHandle extends PositionHandle {
     }
 
     @Override
-    public void mouseDragged(double x, double y) {
-        // The angle can change by 180 degrees
+    public void mouseDragged(double coX, double coY) {
+        // the angle can change by 180 degrees
         // when the box is turned "inside out"
         box.recalcAngle();
 
-        double dx = x - dragStartX;
-        double dy = y - dragStartY;
+        double dx = coX - dragStartX;
+        double dy = coY - dragStartY;
         double newX = origX + dx;
         double newY = origY + dy;
         setLocation(newX, newY);
 
-        // calculate the deltas in the original coordinate system
+        // calculate the deltas in the box's unrotated, local coordinate system
         double odx = dx * cos + dy * sin;
         double ody = -dx * sin + dy * cos;
 
@@ -127,7 +127,7 @@ public class CornerHandle extends PositionHandle {
         box.cornerHandlesMoved();
     }
 
-    private Point2D getHorHalfPoint() {
+    private Point2D getHorOverlayAnchor() {
         // as this is used for placing the measurement overlay, take
         // the rotation handle into account: for the NW-NE edge
         // return the rotation location instead of the edge center
@@ -138,7 +138,7 @@ public class CornerHandle extends PositionHandle {
         return horEdge;
     }
 
-    private Point2D getVerHalfPoint() {
+    private Point2D getVerOverlayAnchor() {
         return verEdge;
     }
 
@@ -159,7 +159,7 @@ public class CornerHandle extends PositionHandle {
     public void drawWidthOverlay(MeasurementOverlay overlay, Dimension2D imSize) {
         Direction horEdgeDirection = getHorEdgeDirection();
         String widthString = MeasurementOverlay.formatWidthString(imSize.getWidth());
-        Point2D horHalf = getHorHalfPoint();
+        Point2D horHalf = getHorOverlayAnchor();
         double posX = horHalf.getX() + horEdgeDirection.dx;
         double posY = horHalf.getY() + horEdgeDirection.dy;
         overlay.drawOneLine(widthString, new Point2D.Double(posX, posY));
@@ -168,7 +168,7 @@ public class CornerHandle extends PositionHandle {
     public void drawHeightOverlay(MeasurementOverlay overlay, Dimension2D imSize) {
         Direction verEdgeDirection = getVerEdgeDirection();
         String heightString = MeasurementOverlay.formatHeightString(imSize.getHeight());
-        Point2D verHalf = getVerHalfPoint();
+        Point2D verHalf = getVerOverlayAnchor();
         double posX = verHalf.getX() + verEdgeDirection.dx;
         double posY = verHalf.getY() + verEdgeDirection.dy;
         overlay.drawOneLine(heightString, new Point2D.Double(posX, posY));

@@ -24,7 +24,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.jhlabsproxies.JHWeave;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.RandomGuiTest;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -35,18 +35,8 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.BLUE;
-import static java.awt.Color.RED;
-import static java.awt.Color.WHITE;
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
-import static java.awt.RenderingHints.KEY_RENDERING;
-import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
-import static java.awt.RenderingHints.VALUE_RENDER_QUALITY;
-import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB;
+import static java.awt.Color.*;
+import static java.awt.RenderingHints.*;
 import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 
 /**
@@ -66,7 +56,7 @@ public class ParamTestFilter extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (AppMode.isDevelopment() && !RandomGUITest.isRunning()) {
+        if (AppMode.isDevelopment() && !RandomGuiTest.isRunning()) {
             System.out.println("ParamTest.transform CALLED");
         }
 

@@ -41,10 +41,12 @@ public class LSystems extends CurveFilter {
     private final RangeParam iterations = new RangeParam("Iterations", 1, 3, 7);
 
     private enum Type {
-        BORDER("Border", "XYXYXYX+XYXYXYX+XYXYXYX+XYXYXYX", false) {
+        BORDER("Border", "XYXYXYX+XYXYXYX+XYXYXYX+XYXYXYX", false, 0, 90) {
+            private static final int[] START_ANGLES = {-27, 37, 10, -16, 47, 21, -6};
+
             @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'F' -> "";
                     case 'X' -> "FX+FX+FXFY-FY-";
                     case 'Y' -> "+FX+FXFY-FY-FY";
@@ -53,91 +55,57 @@ public class LSystems extends CurveFilter {
             }
 
             @Override
-            Turtle createTurtle(int n) {
-                int startAngle = switch (n) {
-                    case 1 -> -27;
-                    case 2 -> 37;
-                    case 3 -> 10;
-                    case 4 -> -16;
-                    case 5 -> 47;
-                    case 6 -> 21;
-                    case 7 -> -6;
-                    default -> throw new IllegalStateException("n = " + n);
-                };
-                return new Turtle(startAngle, 90);
+            int startAngle(int n) {
+                assert n >= 1 && n <= START_ANGLES.length : "Unsupported iteration: " + n;
+                return START_ANGLES[n - 1];
             }
-        }, BOX("Box", "F+F+F+F", true) {
+        }, BOX("Box", "F+F+F+F", true, 0, 90) {
             @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'F' -> "FF+F+F+F+FF";
                     default -> null;
                 };
             }
-
+        }, CRYSTAL("Crystal", "F+F+F+F", true, 0, 90) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(0, 90);
-            }
-        }, CRYSTAL("Crystal", "F+F+F+F", true) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'F' -> "FF+F++F+F";
                     default -> null;
                 };
             }
-
+        }, PLANT("Fractal Plant", "A", false, -90, 25) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(0, 90);
-            }
-        }, PLANT("Fractal Plant", "A", false) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'A' -> "F+[[A]-A]-F[-FA]+A";
                     case 'F' -> "FF";
                     default -> null;
                 };
             }
-
+        }, GOSPER("Gosper/Flowsnake", "F", false, 0, 60) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(-90, 25);
-            }
-        }, GOSPER("Gosper/Flowsnake", "F", false) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'F' -> "F-G--G+F++FF+G-";
                     case 'G' -> "+F-GG--G-F++F+G";
                     default -> null;
                 };
             }
-
+        }, HILBERT("Hilbert Curve", "A", false, 0, 90) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(0, 60);
-            }
-        }, HILBERT("Hilbert Curve", "A", false) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'A' -> "+BF-AFA-FB+";
                     case 'B' -> "-AF+BFB+FA-";
                     default -> null;
                 };
             }
-
+        }, PENROSE("Penrose Tiling P3", "[B]++[B]++[B]++[B]++[B]", false, -90, 36) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(0, 90);
-            }
-        }, PENROSE("Penrose Tiling P3", "[B]++[B]++[B]++[B]++[B]", false) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'A' -> "CF++DF----BF[-CF----AF]++";
                     case 'B' -> "+CF--DF[---AF--BF]+";
                     case 'C' -> "-AF++BF[+++CF++DF]-";
@@ -146,67 +114,42 @@ public class LSystems extends CurveFilter {
                     default -> null;
                 };
             }
-
+        }, PENTAPLEXITY("Pentaplexity", "F++F++F++F++F", true, 180, 36) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(-90, 36);
-            }
-        }, PENTAPLEXITY("Pentaplexity", "F++F++F++F++F", true) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'F' -> "F++F++F+++++F-F++F";
                     default -> null;
                 };
             }
-
+        }, RING("Ring", "F+F+F+F", true, 0, 90) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(180, 36);
-            }
-        }, RING("Ring", "F+F+F+F", true) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'F' -> "FF+F+F+F+F+F-F";
                     default -> null;
                 };
             }
-
+        }, SIERPINSKI("Sierpiński", "F--XF--F--XF", false, 0, 45) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(0, 90);
-            }
-        }, SIERPINSKI("Sierpiński", "F--XF--F--XF", false) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'X' -> "XF+G+XF--F--XF+G+X";
                     default -> null;
                 };
             }
-
+        }, SIERPINSKI_SQUARE("Sierpiński Square", "F+XF+F+XF", false, 0, 90) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(0, 45);
-            }
-        }, SIERPINSKI_SQUARE("Sierpiński Square", "F+XF+F+XF", false) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'X' -> "XF-F+F-XF+F+XF-F+F-X";
                     default -> null;
                 };
             }
-
+        }, SIERPINSKI_ARROWHEAD("Sierpiński Arrowhead", "XF", false, 0, 60) {
             @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(0, 90);
-            }
-        }, SIERPINSKI_ARROWHEAD("Sierpiński Arrowhead", "XF", false) {
-            @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'X' -> "YF+XF+Y";
                     case 'Y' -> "XF-YF-X";
                     default -> null;
@@ -214,23 +157,17 @@ public class LSystems extends CurveFilter {
             }
 
             @Override
-            Turtle createTurtle(int n) {
-                int startAngle = n % 2 == 0 ? 0 : -60;
-                return new Turtle(startAngle, 60);
+            int startAngle(int n) {
+                return (n % 2 == 0) ? 0 : -60;
             }
-        }, SIERPINSKI_TRIANGLE("Sierpiński Triangle", "F-G-G", true) {
+        }, SIERPINSKI_TRIANGLE("Sierpiński Triangle", "F-G-G", true, 0, 120) {
             @Override
-            RewriteRule rewriteRule() {
-                return c -> switch (c) {
+            String rewrite(char c) {
+                return switch (c) {
                     case 'F' -> "F-G+F+G-F";
                     case 'G' -> "GG";
                     default -> null;
                 };
-            }
-
-            @Override
-            Turtle createTurtle(int n) {
-                return new Turtle(0, 120);
             }
         };
 
@@ -240,21 +177,34 @@ public class LSystems extends CurveFilter {
         // whether to draw the axiom in the first iteration
         private final boolean drawAxiom;
 
-        Type(String displayName, String axiom, boolean drawAxiom) {
+        private final int defaultStartAngle;
+        private final int turnAngle;
+
+        Type(String displayName, String axiom, boolean drawAxiom,
+             int defaultStartAngle, int turnAngle) {
             this.displayName = displayName;
             this.axiom = axiom;
             this.drawAxiom = drawAxiom;
+            this.defaultStartAngle = defaultStartAngle;
+            this.turnAngle = turnAngle;
         }
 
         /**
-         * Returns the rewrite rule for this L-system type.
+         * Rewrites the given character according to the L-system rules,
+         * or returns null if the character should remain unchanged.
          */
-        abstract RewriteRule rewriteRule();
+        abstract String rewrite(char c);
 
         /**
          * Creates a turtle configured for the specified max iteration number.
          */
-        abstract Turtle createTurtle(int n);
+        Turtle createTurtle(int n) {
+            return new Turtle(startAngle(n), turnAngle);
+        }
+
+        int startAngle(int n) {
+            return defaultStartAngle;
+        }
 
         @Override
         public String toString() {
@@ -276,7 +226,7 @@ public class LSystems extends CurveFilter {
     @Override
     protected Shape createCurve(int width, int height) {
         double margin = Math.max(10.0, strokeParam.getStrokeWidth() * 2.0);
-        Type fractalType = type.getSelected();
+        Type fractalType = type.getValue();
 
         int n = iterations.getValue();
         if (fractalType.drawAxiom) {
@@ -287,23 +237,22 @@ public class LSystems extends CurveFilter {
         Turtle turtle = fractalType.createTurtle(n);
         Path2D path = turtle.interpret(commands);
 
-        return Shapes.resizeToFit(path, width, height, margin,
-            transform.getHorOffset(width),
-            transform.getVerOffset(height));
+        double startX = transform.getHorOffset(width);
+        double startY = transform.getVerOffset(height);
+        return Shapes.resizeToFit(path, width, height, startX, startY, margin);
     }
 
     /**
      * Generates the L-system command string for the given type and number of iterations.
      */
     private static String iterate(Type type, int iterations) {
-        RewriteRule rule = type.rewriteRule();
         StringBuilder in = new StringBuilder(type.axiom);
 
         for (int i = 0; i < iterations; i++) {
             StringBuilder out = new StringBuilder(in.length() * 4);
             for (int j = 0, n = in.length(); j < n; j++) {
                 char c = in.charAt(j);
-                String replacement = rule.replace(c);
+                String replacement = type.rewrite(c);
                 if (replacement != null) {
                     out.append(replacement);
                 } else {
@@ -320,6 +269,8 @@ public class LSystems extends CurveFilter {
      * Interprets L-system commands to draw a path.
      */
     private static class Turtle {
+        private static final double MOVE_DISTANCE = 10.0;
+
         private double x, y;
 
         // keep track of angles as int degrees in order to
@@ -333,7 +284,6 @@ public class LSystems extends CurveFilter {
 
         private final ArrayDeque<State> stack = new ArrayDeque<>();
 
-        private final double moveDistance;
         private final Path2D path;
 
         public Turtle(int startAngle, int turnAngle) {
@@ -344,7 +294,6 @@ public class LSystems extends CurveFilter {
             // will be rescaled after the Shapes.resizeToFit method
             this.x = 0;
             this.y = 0;
-            this.moveDistance = 10;
 
             path = new Path2D.Double();
             path.moveTo(x, y);
@@ -389,23 +338,13 @@ public class LSystems extends CurveFilter {
 
         private void moveForward(boolean penDown) {
             double angleRadians = Math.toRadians(angle);
-            x += moveDistance * FastMath.cos(angleRadians);
-            y += moveDistance * FastMath.sin(angleRadians);
+            x += MOVE_DISTANCE * FastMath.cos(angleRadians);
+            y += MOVE_DISTANCE * FastMath.sin(angleRadians);
             if (penDown) {
                 path.lineTo(x, y);
             } else {
                 path.moveTo(x, y);
             }
         }
-    }
-
-    /**
-     * Defines the rewriting rules for an L-system.
-     */
-    private interface RewriteRule {
-        /**
-         * Returns the replacement string for the character, or null if it should remain unchanged.
-         */
-        String replace(char c);
     }
 }

@@ -51,7 +51,7 @@ public class PenTool extends PathTool {
 
     private final JLabel rubberBandLabel = new JLabel(SHOW_RUBBER_BAND_TEXT + ":");
     private final JCheckBox rubberBandCB = new JCheckBox("", true);
-    private boolean showRubberBand = true;
+    private boolean showRubberBand = true; // whether the path preview is shown
 
     // state of the path building process
     private BuildState buildState = IDLE;
@@ -197,7 +197,7 @@ public class PenTool extends PathTool {
         }
     }
 
-    public boolean showPathPreview() {
+    public boolean isRubberBandShown() {
         return showRubberBand;
     }
 
@@ -490,7 +490,7 @@ public class PenTool extends PathTool {
         ControlPoint ctrlOut = last.ctrlOut;
         ctrlOut.mouseReleased(e); // set the final position
         if (!ctrlOut.isRetracted()) {
-            last.changeTypeFromSymToSmooth();
+            last.setToSmoothIfSymmetric();
         }
 
         // create a new moving point to preview the next path segment
@@ -575,7 +575,7 @@ public class PenTool extends PathTool {
     private BuildState recoverFromUnexpectedDrag(String where, View view) {
         if (AppMode.isDevelopment()) {
             System.out.printf("PenTool::recoverFromUnexpectedDrag: " +
-                "where = '%s, active = %s'%n", where, view.isActive());
+                "where = '%s', active = '%s'%n", where, view.isActive());
         }
 
         // this can happen if mouse events (like mouseReleased) are missed, for example,
@@ -601,11 +601,11 @@ public class PenTool extends PathTool {
     }
 
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         Path compPath = comp.getActivePath();
         if (compPath != null) {
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-            compPath.paintForBuilding(g2, buildState);
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            compPath.paintForBuilding(g, buildState);
         }
     }
 
@@ -615,7 +615,7 @@ public class PenTool extends PathTool {
         if (path != null) {
             path.coCoordsChanged(view);
         }
-        // lastX and lastY belong to the view/mouse (not
+        // coLastX and coLastY belong to the view/mouse (not
         // to the composition), so they are not updated here
     }
 

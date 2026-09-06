@@ -47,7 +47,7 @@ import static pixelitor.utils.ImageUtils.isGrayscale;
 import static pixelitor.utils.ImageUtils.isWithinBounds;
 
 /**
- * The color picker tool
+ * The color picker tool.
  */
 public class ColorPickerTool extends Tool {
     private static final String SAMPLE_LABEL_TEXT = "Sample Only the Active Layer/Mask";
@@ -249,7 +249,7 @@ public class ColorPickerTool extends Tool {
     }
 
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         if (!paintSamplingBounds) {
             return;
         }
@@ -269,7 +269,7 @@ public class ColorPickerTool extends Tool {
                 endX - startX + 1, endY - startY + 1);
         }
         Rectangle2D coSamplingRect = comp.getView().imageToComponentSpacePrecise(imSamplingRect);
-        Shapes.drawVisibly(g2, coSamplingRect);
+        Shapes.drawVisibly(g, coSamplingRect);
     }
 
     @Override

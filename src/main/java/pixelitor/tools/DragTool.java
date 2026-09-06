@@ -146,12 +146,12 @@ public abstract class DragTool extends Tool {
     }
 
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         if (drag == null || !drag.isDragging()) {
             return;
         }
 
-        getOverlayType().draw(g2, drag);
+        getOverlayType().draw(g, drag);
     }
 
     /**

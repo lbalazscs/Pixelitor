@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,12 +37,12 @@ public abstract class PositionHandle extends DraggablePoint {
 
     protected final TransformBox box;
 
-    // The sine and cosine of the current rotation angle
+    // the sine and cosine of the current rotation angle
     protected double sin;
     protected double cos;
 
     // the angle-independent (at rotation = 0) parts of the cursor
-    // offset for the normal transform box and the "inside out" one
+    // offset for the normal transform box and the "inside-out" one
     protected final int cursorIndex;
     protected final int cursorIndexIO;
 
@@ -58,15 +58,16 @@ public abstract class PositionHandle extends DraggablePoint {
     }
 
     @Override
-    public void mousePressed(double x, double y) {
-        super.mousePressed(x, y); // sets dragStartX, dragStartY
+    public void mousePressed(double coX, double coY) {
+        super.mousePressed(coX, coY); // sets dragStartX, dragStartY
 
         sin = box.getSin();
         cos = box.getCos();
     }
 
     /**
-     * Determines the direction as the box is rotating
+     * Recalculates the handle's direction and cursor
+     * based on the box's orientation and inside-out state.
      */
     public void recalcDirection(boolean isInsideOut, int cursorOffset) {
         int offset;

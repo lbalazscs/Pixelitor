@@ -99,10 +99,10 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         if (state == INITIAL_DRAG) {
             PRectangle zoomRect = drag.toPosPRect(comp.getView());
-            Shapes.drawVisibly(g2, zoomRect.getCo());
+            Shapes.drawVisibly(g, zoomRect.getCo());
         }
     }
 

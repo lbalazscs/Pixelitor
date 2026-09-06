@@ -153,11 +153,11 @@ public class CropTool extends DragTool {
     }
 
     private void guidesChanged() {
-        compositionGuide.setType(getSelectedGuides());
+        compositionGuide.setType(getSelectedGuideType());
         Views.repaintActive();
     }
 
-    private CompositionGuideType getSelectedGuides() {
+    private CompositionGuideType getSelectedGuideType() {
         return (CompositionGuideType) guidesCB.getSelectedItem();
     }
 
@@ -210,7 +210,7 @@ public class CropTool extends DragTool {
             0, 0, max, 1));
         spinner.addChangeListener(listener);
         spinner.setToolTipText(toolTip);
-        // setting it to 3 columns looks enough (Swing adds extra space)
+        // setting it to 3 columns looks like enough (Swing adds extra space)
         // for the range 1-9999, but leave it as 4 for safety
         ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setColumns(4);
         return spinner;
@@ -380,7 +380,7 @@ public class CropTool extends DragTool {
      * Paints the crop overlay, including the dark mask and handles.
      */
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         if (state == IDLE) {
             return;
         }
@@ -389,27 +389,27 @@ public class CropTool extends DragTool {
             return;
         }
 
-        paintDarkMask(g2, comp, cropRect);
+        paintDarkMask(g, comp, cropRect);
 
         if (state == TRANSFORM) {
-            paintBoxAndGuides(g2, cropRect);
+            paintBoxAndGuides(g, cropRect);
         }
     }
 
     /**
      * Paints the semi-transparent dark area outside the crop rectangle.
      */
-    private void paintDarkMask(Graphics2D g2, Composition comp, PRectangle cropRect) {
-        Color origColor = g2.getColor();
-        Composite origComposite = g2.getComposite();
+    private void paintDarkMask(Graphics2D g, Composition comp, PRectangle cropRect) {
+        Color origColor = g.getColor();
+        Composite origComposite = g.getComposite();
         View view = comp.getView();
 
         // all calculations are in component space
         Rectangle coCanvasBounds = comp.getCanvas().getCoBounds(view);
         Rectangle coCropRect = cropRect.getCo();
 
-        g2.setColor(BLACK);
-        g2.setComposite(maskComposite);
+        g.setColor(BLACK);
+        g.setComposite(maskComposite);
 
         // avoids using slow Area objects and Area.subtract, and
         // constructs the dark mask shape (rectangle with a hole) manually
@@ -417,7 +417,7 @@ public class CropTool extends DragTool {
         if (hole.isEmpty()) {
             // if the crop rectangle is entirely outside the canvas,
             // the whole canvas should be dark
-            g2.fill(coCanvasBounds);
+            g.fill(coCanvasBounds);
         } else if (hole.equals(coCanvasBounds)) {
             // if the crop rect completely covers the canvas
             // (or is larger), nothing should be darkened (do nothing)
@@ -427,18 +427,18 @@ public class CropTool extends DragTool {
             Path2D darkAreaShape = new Path2D.Double(Path2D.WIND_EVEN_ODD);
             darkAreaShape.append(coCanvasBounds, false);
             darkAreaShape.append(hole, false);
-            g2.fill(darkAreaShape);
+            g.fill(darkAreaShape);
         }
 
         // restore original graphics settings
-        g2.setColor(origColor);
-        g2.setComposite(origComposite);
+        g.setColor(origColor);
+        g.setComposite(origComposite);
     }
 
-    private void paintBoxAndGuides(Graphics2D g2, PRectangle cropRect) {
-        compositionGuide.draw(cropRect.getCo(), g2);
+    private void paintBoxAndGuides(Graphics2D g, PRectangle cropRect) {
+        compositionGuide.draw(cropRect.getCo(), g);
 
-        cropBox.paint(g2);
+        cropBox.paint(g);
     }
 
     private void setCropEnabled(boolean enabled) {
@@ -459,12 +459,12 @@ public class CropTool extends DragTool {
     /**
      * Updates the width and height spinners from the given crop rectangle.
      */
-    private void updateSizeSpinners(Rectangle2D rect) {
-        if (rect == null) {
+    private void updateSizeSpinners(Rectangle2D imRect) {
+        if (imRect == null) {
             return;
         }
-        int newWidth = (int) Math.round(rect.getWidth());
-        int newHeight = (int) Math.round(rect.getHeight());
+        int newWidth = (int) Math.round(imRect.getWidth());
+        int newHeight = (int) Math.round(imRect.getHeight());
         updateSizeSpinners(newWidth, newHeight);
     }
 
@@ -513,7 +513,7 @@ public class CropTool extends DragTool {
      * Adjusts the crop box to fit within canvas limits if growing is not allowed.
      */
     private BoxAdjustmentResult adjustCropBoxToCanvas(View view,
-                                                      Rectangle2D origRect,
+                                                      Rectangle2D imOrigRect,
                                                       boolean origAllowGrowing) {
         if (cropBox == null || state != TRANSFORM) {
             return BoxAdjustmentResult.NO_CHANGE;
@@ -529,10 +529,10 @@ public class CropTool extends DragTool {
 
         if (intersection.isEmpty()) {
             // true if a box was moved out, false if the initial drag was off-canvas
-            boolean addToHistory = origRect != null;
+            boolean addToHistory = imOrigRect != null;
 
             // crop box is entirely outside the canvas => cancel the crop
-            reset(addToHistory, origRect, origAllowGrowing);
+            reset(addToHistory, imOrigRect, origAllowGrowing);
             return BoxAdjustmentResult.RESET;
         }
         boolean needsAdjustment = !intersection.equals(currentImRect);
@@ -739,7 +739,7 @@ public class CropTool extends DragTool {
     public void otherKeyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             if (e.getSource() instanceof JFormattedTextField) {
-                // the user tries to enter exact crop dimensions
+                // the user is typing exact crop dimensions
                 return;
             }
             if (crop()) {
@@ -781,7 +781,7 @@ public class CropTool extends DragTool {
     @Override
     public void saveStateTo(UserPreset preset) {
         maskOpacity.saveStateTo(preset);
-        preset.put(CompositionGuideType.PRESET_KEY, getSelectedGuides().name());
+        preset.put(CompositionGuideType.PRESET_KEY, getSelectedGuideType().name());
 
         preset.putBoolean(DELETE_CROPPED_TEXT, shouldDeleteCroppedPixels());
         preset.putBoolean(ALLOW_GROWING_TEXT, allowGrowingCB.isSelected());
@@ -812,7 +812,7 @@ public class CropTool extends DragTool {
         node.addDouble("mask opacity", maskOpacity.getPercentage());
         node.addBoolean("delete cropped", shouldDeleteCroppedPixels());
         node.addBoolean("allow growing", allowGrowingCB.isSelected());
-        node.addAsString("guide type", getSelectedGuides());
+        node.addAsString("guide type", getSelectedGuideType());
         node.addNullableDebuggable("cropBox", cropBox);
 
         return node;

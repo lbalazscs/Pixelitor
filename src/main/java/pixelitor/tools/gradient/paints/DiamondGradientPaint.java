@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.awt.image.WritableRaster;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
 /**
- * A Paint that creates a "diamond gradient"
+ * A Paint that creates a "diamond gradient".
  */
 public record DiamondGradientPaint(Drag drag, Color startColor,
                                    Color endColor,
@@ -99,8 +99,8 @@ public record DiamondGradientPaint(Drag drag, Color startColor,
 
             dragDist = drag.calcImLength();
             double dragDistSqr = dragDist * dragDist;
-            dragRelDX = (float) (drag.getDX() / dragDistSqr);
-            dragRelDY = (float) (drag.getDY() / dragDistSqr);
+            dragRelDX = (float) (drag.getDx() / dragDistSqr);
+            dragRelDY = (float) (drag.getDy() / dragDistSqr);
         }
 
         @Override

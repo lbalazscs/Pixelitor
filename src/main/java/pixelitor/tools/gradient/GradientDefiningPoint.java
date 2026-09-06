@@ -28,7 +28,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
 /**
- * Either a gradient start point or a gradient end point
+ * Either the start or the end point of a gradient line.
  */
 public class GradientDefiningPoint extends DraggablePoint {
     private final GradientHandles gradientHandles;

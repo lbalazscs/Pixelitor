@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import com.bric.geom.RectangularTransform;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
@@ -25,9 +24,11 @@ import pixelitor.tools.pen.SubPath;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
+import java.util.StringJoiner;
+import java.util.random.RandomGenerator;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -39,7 +40,6 @@ import static java.awt.geom.PathIterator.*;
 public class Shapes {
     private static final Stroke BIG_STROKE = new BasicStroke(3);
     private static final Stroke SMALL_STROKE = new BasicStroke(1);
-    public static final double UNIT_ARROW_HEAD_WIDTH = 0.7;
     private static final int ELASTIC_LINE_SEGMENTS = 26;
 
     private Shapes() {
@@ -113,7 +113,7 @@ public class Shapes {
      */
     public static void fillVisibly(Graphics2D g, Shape shape, Color fillColor) {
         assert shape != null;
-        assert fillColor != BLACK;
+        assert !fillColor.equals(BLACK);
 
         // black at the edges
         g.setStroke(BIG_STROKE);
@@ -139,7 +139,7 @@ public class Shapes {
     /**
      * Ensures that the returned rectangle has positive width and height.
      */
-    public static Rectangle toPositiveRect(int x1, int y1, int x2, int y2) {
+    public static Rectangle posRectFromCorners(int x1, int y1, int x2, int y2) {
         int x = Math.min(x1, x2);
         int y = Math.min(y1, y2);
         int width = Math.abs(x1 - x2);
@@ -151,36 +151,39 @@ public class Shapes {
      * Ensures that the returned rectangle has positive width and height.
      */
     public static Rectangle2D toPositiveRect(Rectangle2D input) {
-        double inX = input.getX();
-        double inY = input.getY();
-        double inWidth = input.getWidth();
-        double inHeight = input.getHeight();
+        double width = input.getWidth();
+        double height = input.getHeight();
 
-        if (inWidth >= 0 && inHeight >= 0) {
-            return input; // should be the most common case
+        if (width >= 0 && height >= 0) {
+            return input;
         }
 
-        double x = (inWidth < 0) ? inX + inWidth : inX;
-        double y = (inHeight < 0) ? inY + inHeight : inY;
-        double width = Math.abs(inWidth);
-        double height = Math.abs(inHeight);
+        double x = input.getX();
+        double y = input.getY();
 
+        if (width < 0) {
+            x += width;
+            width = -width;
+        }
+        if (height < 0) {
+            y += height;
+            height = -height;
+        }
         return new Rectangle2D.Double(x, y, width, height);
     }
 
     /**
      * Ensures that the returned rectangle has positive width and height.
      */
-    public static Rectangle toPositiveRect(Rectangle rect) {
-        if (rect.width >= 0 && rect.height >= 0) {
-            // no adjustments are needed => return the original
-            return rect;
+    public static Rectangle toPositiveRect(Rectangle input) {
+        if (input.width >= 0 && input.height >= 0) {
+            return input;
         }
 
-        int x = rect.x;
-        int y = rect.y;
-        int width = rect.width;
-        int height = rect.height;
+        int x = input.x;
+        int y = input.y;
+        int width = input.width;
+        int height = input.height;
 
         if (width < 0) {
             x += width;
@@ -232,34 +235,17 @@ public class Shapes {
     }
 
     private static boolean appendSvgPathSegment(StringBuilder pathBuilder, int type, double[] coords) {
-        int numCoords;
-        String command;
-
-        switch (type) {
-            case SEG_MOVETO -> {
-                numCoords = 2;
-                command = "M ";
-            }
-            case SEG_LINETO -> {
-                numCoords = 2;
-                command = "L ";
-            }
-            case SEG_QUADTO -> {
-                numCoords = 4;
-                command = "Q ";
-            }
-            case SEG_CUBICTO -> {
-                numCoords = 6;
-                command = "C ";
-            }
-            case SEG_CLOSE -> {
-                numCoords = 0;
-                command = "Z";
-            }
+        String command = switch (type) {
+            case SEG_MOVETO -> "M ";
+            case SEG_LINETO -> "L ";
+            case SEG_QUADTO -> "Q ";
+            case SEG_CUBICTO -> "C ";
+            case SEG_CLOSE -> "Z";
             default -> throw new IllegalArgumentException("type = " + type);
-        }
+        };
 
         // NaNs are not a problem if they are in the unused part of the array
+        int numCoords = getCoordinateCount(type);
         for (int i = 0; i < numCoords; i++) {
             boolean segmentValid = Double.isFinite(coords[i]);
             assert segmentValid; // developers should be alerted, but end-users not
@@ -302,14 +288,19 @@ public class Shapes {
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
 
-            String line = switch (type) {
-                case SEG_MOVETO -> "MOVE TO " + arrayToString(coords, 2);
-                case SEG_LINETO -> "LINE TO " + arrayToString(coords, 2);
-                case SEG_QUADTO -> "QUAD TO " + arrayToString(coords, 4);
-                case SEG_CUBICTO -> "CUBIC TO " + arrayToString(coords, 6);
-                case SEG_CLOSE -> "CLOSE " + arrayToString(coords, 0);
+            String command = switch (type) {
+                case SEG_MOVETO -> "MOVE TO";
+                case SEG_LINETO -> "LINE TO";
+                case SEG_QUADTO -> "QUAD TO";
+                case SEG_CUBICTO -> "CUBIC TO";
+                case SEG_CLOSE -> "CLOSE";
                 default -> throw new IllegalArgumentException("type = " + type);
             };
+
+            int numCoords = getCoordinateCount(type);
+            String line = (numCoords == 0)
+                ? command
+                : command + " " + formatCoords(coords, numCoords);
 
             sb.append(line).append(System.lineSeparator());
             pathIterator.next();
@@ -322,10 +313,12 @@ public class Shapes {
      * Converts the first n elements of the given array to a string
      * representation, with numbers rounded to 2 decimal places.
      */
-    private static String arrayToString(double[] array, int n) {
-        return Arrays.stream(Arrays.copyOf(array, n))
-            .mapToObj(d -> String.format("%.2f", d))
-            .collect(Collectors.joining(", ", "(", ")"));
+    private static String formatCoords(double[] array, int n) {
+        var sj = new StringJoiner(", ", "(", ")");
+        for (int i = 0; i < n; i++) {
+            sj.add(String.format(Locale.ROOT, "%.2f", array[i]));
+        }
+        return sj.toString();
     }
 
     /**
@@ -355,16 +348,12 @@ public class Shapes {
                 return false;
             }
 
-            int numCoordsToCompare = switch (type1) {
-                case SEG_MOVETO, SEG_LINETO -> 2;
-                case SEG_QUADTO -> 4;
-                case SEG_CUBICTO -> 6;
-                case SEG_CLOSE -> 0;
-                default -> throw new IllegalStateException("Unexpected segment type: " + type1);
-            };
+            int numCoordsToCompare = getCoordinateCount(type1);
 
             for (int i = 0; i < numCoordsToCompare; i++) {
-                if (Math.abs(coords1[i] - coords2[i]) > tolerance) {
+                double c1 = coords1[i];
+                double c2 = coords2[i];
+                if (!Double.isFinite(c1) || !Double.isFinite(c2) || Math.abs(c1 - c2) > tolerance) {
                     return false;
                 }
             }
@@ -376,7 +365,7 @@ public class Shapes {
         return pathIterator2.isDone();
     }
 
-    public static Shape randomize(Shape in, Random rng, double amount) {
+    public static Shape randomize(Shape in, RandomGenerator rng, double amount) {
         Path path = shapeToPath(in, null);
         path.randomize(rng, amount);
         return path.toImageSpaceShape();
@@ -543,11 +532,13 @@ public class Shapes {
      * has a smoothness parameter.
      */
     public static Path2D smoothConnect(List<Point2D> points, double smoothness) {
-        int numPoints = points.size();
-        assert numPoints >= 3 : "At least 3 points are required, got " + numPoints;
-
         // the path is considered closed if the first and last points are identical
         boolean isClosed = Geometry.areEqual(points.getFirst(), points.getLast());
+
+        int numPoints = points.size();
+        assert isClosed ? numPoints >= 4 : numPoints >= 3 :
+            "Insufficient points: " + numPoints + (isClosed ? " (closed)" : " (open)");
+
         int lastPointIndex = isClosed ? numPoints - 2 : numPoints - 1;
 
         // Every two alternate points represent a side. There are numPoints - 1 sides.
@@ -619,49 +610,36 @@ public class Shapes {
         if (isClosed) {
             path.closePath();
         }
-        
+
         return path;
     }
 
+    /**
+     * Adjusts the adjacent segment midpoints P and Q around anchor
+     * point B to serve as smooth cubic Bézier control points.
+     *
+     * @param B          the anchor point between the two segments
+     * @param P          the midpoint of the preceding segment (modified in place)
+     * @param Q          the midpoint of the succeeding segment (modified in place)
+     * @param AB         the length of the preceding segment
+     * @param BC         the length of the succeeding segment
+     * @param smoothness the scaling factor for the control point distance (tension)
+     */
     private static void calcControlPoint(Point2D B, Point2D P, Point2D Q,
                                          double AB, double BC, double smoothness) {
-        // a temporary point T calculated such that
-        // * for A=points[i-1], B=points[i] and C = points[i+1]
-        //   * for midpoint of AB, P=centers[i-1] and midpoint of BC, Q=centers[i]
-        //     * it lies on the line joining P and Q
-        //     * PT / AB == TQ / BC       - (1)
-        //
-        // mathematically, with the given data,
-        //
-        // * using section formula (on Vectors)
-        //   * T = (P * n + Q * m) / (m + n)
-        //   * T = P * n / (m + n) + Q * m / (m + n)
-        //   * T = P * TQ / PQ + Q * PT / PQ
-        //
-        // * using componendo rule on (1)
-        //   * T = P * AB / (AB + BC) + Q * BC / (AB + BC)
-        //   * T = (P * AB + Q * BC) / (AB + BC)
-        //
-        var T = new Point2D.Double(); // the division point
+        double totalWeight = AB + BC;
+        assert totalWeight > 0 : "Sum of segment lengths must be positive";
 
-        Geometry.calcDivisionPoint(P, Q, AB, BC, T);
+        // division point T on line PQ
+        double tx = (P.getX() * BC + Q.getX() * AB) / totalWeight;
+        double ty = (P.getY() * BC + Q.getY() * AB) / totalWeight;
 
-        // converting point vectors P and Q to show relative displacement from T
-        // P = P - T, Q = Q - T
-        Geometry.subtract(P, T, P);
-        Geometry.subtract(Q, T, Q);
+        // displace relative to T, scale by smoothness, and translate to B
+        double bx = B.getX();
+        double by = B.getY();
 
-        // scaling the point vectors P and Q about origin
-        if (smoothness != 1) {
-            Geometry.scale(P, smoothness);
-            Geometry.scale(Q, smoothness);
-        }
-
-        // translating point vectors P and Q by B so that
-        // the relative position of original P and Q to T is same as
-        // the relative position of new P and Q to B.
-        Geometry.add(P, B, P);
-        Geometry.add(Q, B, Q);
+        P.setLocation(bx + (P.getX() - tx) * smoothness, by + (P.getY() - ty) * smoothness);
+        Q.setLocation(bx + (Q.getX() - tx) * smoothness, by + (Q.getY() - ty) * smoothness);
     }
 
     public static Shape rotate(Shape shape, double angle, double anchorX, double anchorY) {
@@ -681,24 +659,24 @@ public class Shapes {
     public static void elasticLine(Path2D path, Point2D from, Point2D to, boolean elastic) {
         assert !from.equals(to);
         if (elastic) {
-            // create a line that can be distorted by nonlinear distortions
+            double fromX = from.getX();
+            double fromY = from.getY();
+            double toX = to.getX();
+            double toY = to.getY();
+            double dx = toX - fromX;
+            double dy = toY - fromY;
+
             double dt = 1.0 / ELASTIC_LINE_SEGMENTS;
             for (int i = 0; i < ELASTIC_LINE_SEGMENTS; i++) {
-                double t = i * dt;
-                Point2D controlPoint = Geometry.interpolate(from, to, t + dt * 0.5);
+                double cpFactor = (i + 0.5) * dt;
+                double cpX = fromX + cpFactor * dx;
+                double cpY = fromY + cpFactor * dy;
 
-                Point2D segmentEnd;
-                // guarantee exact target connection for the final
-                // segment to circumvent floating-point rounding errors
-                if (i == ELASTIC_LINE_SEGMENTS - 1) {
-                    segmentEnd = to;
-                } else {
-                    segmentEnd = Geometry.interpolate(from, to, t + dt);
-                }
+                boolean last = (i == ELASTIC_LINE_SEGMENTS - 1);
+                double endX = last ? toX : fromX + (i + 1) * dt * dx;
+                double endY = last ? toY : fromY + (i + 1) * dt * dy;
 
-                path.curveTo(controlPoint.getX(), controlPoint.getY(),
-                    controlPoint.getX(), controlPoint.getY(),
-                    segmentEnd.getX(), segmentEnd.getY());
+                path.curveTo(cpX, cpY, cpX, cpY, endX, endY);
             }
         } else {
             path.lineTo(to.getX(), to.getY());
@@ -720,24 +698,18 @@ public class Shapes {
         if (curvature == 0) {
             path.lineTo(endX, endY);
         } else {
-            Point2D midPoint = Geometry.midPoint(start, end);
+            double startX = start.getX();
+            double startY = start.getY();
 
-            // vector from start to end
-            Point2D vec = new Point2D.Double();
-            Geometry.subtract(end, start, vec);
+            double midX = (startX + endX) * 0.5;
+            double midY = (startY + endY) * 0.5;
 
-            // perpendicular vector
-            Point2D perpVec = new Point2D.Double(-vec.getY(), vec.getX());
-            Geometry.normalize(perpVec);
+            // perpendicular vector (-dy, dx) scaled by (curvature / 2)
+            double halfCurvature = curvature * 0.5;
+            double cpX = midX - (endY - startY) * halfCurvature;
+            double cpY = midY + (endX - startX) * halfCurvature;
 
-            // the distance of the control point is proportional
-            // to the curvature and line length
-            double distance = curvature * Geometry.distance(start, end) / 2.0;
-            Geometry.scale(perpVec, distance);
-
-            Point2D controlPoint = Geometry.add(midPoint, perpVec, new Point2D.Double());
-
-            path.quadTo(controlPoint.getX(), controlPoint.getY(), end.getX(), end.getY());
+            path.quadTo(cpX, cpY, endX, endY);
         }
     }
 
@@ -745,51 +717,32 @@ public class Shapes {
      * Resizes the given shape to fit centrally within a target rectangle
      * without distortion, considering the given width, height, margin, and offset.
      *
-     * @param shape   The shape to be resized.
-     * @param width   The width of the target rectangle.
-     * @param height  The height of the target rectangle.
-     * @param margin  The margin around the shape inside the target rectangle.
-     * @param startX  The horizontal offset to apply after resizing.
-     * @param startY  The vertical offset to apply after resizing.
+     * @param shape  The shape to be resized.
+     * @param width  The width of the target rectangle.
+     * @param height The height of the target rectangle.
+     * @param startX The horizontal offset to apply after resizing.
+     * @param startY The vertical offset to apply after resizing.
+     * @param margin The margin around the shape inside the target rectangle.
      * @return A new shape that fits within the target rectangle.
      */
-    public static Shape resizeToFit(Shape shape, double width, double height, double margin,
-                                    double startX, double startY) {
+    public static Shape resizeToFit(Shape shape, double width, double height,
+                                    double startX, double startY, double margin) {
         Rectangle2D bounds = shape.getBounds2D();
-
-        // ensure bounds have non-zero dimensions to prevent division by zero
         assert bounds.getWidth() > 0 && bounds.getHeight() > 0;
 
-        double shapeAspectRatio = bounds.getWidth() / bounds.getHeight();
         double areaWidth = width - 2 * margin;
         double areaHeight = height - 2 * margin;
-
         assert areaWidth > 0 && areaHeight > 0;
 
-        double areaAspectRatio = areaWidth / areaHeight;
+        double scale = Math.min(areaWidth / bounds.getWidth(), areaHeight / bounds.getHeight());
+        double targetWidth = bounds.getWidth() * scale;
+        double targetHeight = bounds.getHeight() * scale;
 
-        Rectangle2D targetArea;
-        if (shapeAspectRatio >= areaAspectRatio) {
-            double newAreaHeight = areaWidth / shapeAspectRatio;
-            double newAreaY = margin + (areaHeight - newAreaHeight) / 2.0;
-            targetArea = new Rectangle2D.Double(
-                margin + startX,
-                newAreaY + startY,
-                areaWidth,
-                newAreaHeight
-            );
-        } else {
-            double newAreaWidth = areaHeight * shapeAspectRatio;
-            double newAreaX = margin + (areaWidth - newAreaWidth) / 2.0;
-            targetArea = new Rectangle2D.Double(
-                newAreaX + startX,
-                margin + startY,
-                newAreaWidth,
-                areaHeight
-            );
-        }
+        // centered offsets: (totalDimension - scaledDimension) / 2
+        double tx = startX + (width - targetWidth) * 0.5 - bounds.getX() * scale;
+        double ty = startY + (height - targetHeight) * 0.5 - bounds.getY() * scale;
 
-        AffineTransform at = RectangularTransform.create(bounds, targetArea);
+        AffineTransform at = new AffineTransform(scale, 0, 0, scale, tx, ty);
         return at.createTransformedShape(shape);
     }
 
@@ -843,5 +796,18 @@ public class Shapes {
             pathIt.next();
         }
         return pathLength;
+    }
+
+    /**
+     * Returns the number of coordinate values associated with the given PathIterator segment type.
+     */
+    private static int getCoordinateCount(int segmentType) {
+        return switch (segmentType) {
+            case SEG_MOVETO, SEG_LINETO -> 2;
+            case SEG_QUADTO -> 4;
+            case SEG_CUBICTO -> 6;
+            case SEG_CLOSE -> 0;
+            default -> throw new IllegalArgumentException("Unknown segment type: " + segmentType);
+        };
     }
 }

@@ -43,6 +43,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.ToDoubleFunction;
+import java.util.random.RandomGenerator;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.BuildState.*;
@@ -121,12 +122,12 @@ public class SubPath implements Serializable, Transformable {
     }
 
     // not used in the builder, only when converting from external shape
-    public void addPoint(AnchorPoint p) {
+    public void addAnchor(AnchorPoint p) {
         anchorPoints.add(p);
     }
 
-    public void addPoint(double x, double y) {
-        addPoint(new AnchorPoint(x, y, comp.getView(), this));
+    public void addAnchor(double coX, double coY) {
+        addAnchor(new AnchorPoint(coX, coY, comp.getView(), this));
     }
 
     public void setMovingPoint(MovingPoint p) {
@@ -140,9 +141,9 @@ public class SubPath implements Serializable, Transformable {
         return moving;
     }
 
-    public void moveMovingPointTo(double x, double y, boolean allowNull) {
+    public void moveMovingPointTo(double coX, double coY, boolean allowNull) {
         if (moving != null) {
-            moving.setLocation(x, y);
+            moving.setLocation(coX, coY);
         } else {
             if (!allowNull) {
                 throw new IllegalStateException("no moving point in " + path);
@@ -187,17 +188,17 @@ public class SubPath implements Serializable, Transformable {
         return p;
     }
 
-    public void addToComponentSpaceShape(Path2D path) {
+    public void addToComponentSpaceShape(Path2D path2D) {
         // include rubber-band preview for UI rendering
-        addToShape(path, p -> p.x, p -> p.y, true);
+        addToShape(path2D, p -> p.x, p -> p.y, true);
     }
 
-    public void addToImageSpaceShape(Path2D path) {
+    public void addToImageSpaceShape(Path2D path2D) {
         // exclude rubber-band preview for logical geometry
-        addToShape(path, p -> p.imX, p -> p.imY, false);
+        addToShape(path2D, p -> p.imX, p -> p.imY, false);
     }
 
-    private void addToShape(Path2D p,
+    private void addToShape(Path2D path2D,
                             ToDoubleFunction<DraggablePoint> toX,
                             ToDoubleFunction<DraggablePoint> toY,
                             boolean includePreview) {
@@ -207,7 +208,7 @@ public class SubPath implements Serializable, Transformable {
 
         AnchorPoint first = getFirstAnchor();
         // moveTo marks the beginning of a new subpath in Path2D
-        p.moveTo(toX.applyAsDouble(first), toY.applyAsDouble(first));
+        path2D.moveTo(toX.applyAsDouble(first), toY.applyAsDouble(first));
         AnchorPoint prev = first;
 
         // add each curve segment
@@ -218,12 +219,12 @@ public class SubPath implements Serializable, Transformable {
 
             if (prevCtrlOut.isRetracted() && currCtrlIn.isRetracted()) {
                 // both control points are retracted - use a straight line
-                p.lineTo(
+                path2D.lineTo(
                     toX.applyAsDouble(curr),
                     toY.applyAsDouble(curr));
             } else {
                 // use a cubic Bézier curve with both control points
-                p.curveTo(
+                path2D.curveTo(
                     toX.applyAsDouble(prevCtrlOut),
                     toY.applyAsDouble(prevCtrlOut),
                     toX.applyAsDouble(currCtrlIn),
@@ -238,7 +239,7 @@ public class SubPath implements Serializable, Transformable {
 
         // handle the "rubber band" preview of the next point during path construction
         if (includePreview && moving != null && Tools.PEN.isActive()
-            && Tools.PEN.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showPathPreview()) {
+            && Tools.PEN.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.isRubberBandShown()) {
 
             double movingX;
             double movingY;
@@ -260,7 +261,7 @@ public class SubPath implements Serializable, Transformable {
                 ctrlInY = movingY;
             }
 
-            p.curveTo(
+            path2D.curveTo(
                 toX.applyAsDouble(last.ctrlOut),
                 toY.applyAsDouble(last.ctrlOut),
                 ctrlInX,
@@ -274,11 +275,11 @@ public class SubPath implements Serializable, Transformable {
             ControlPoint lastCtrlOut = last.ctrlOut;
             ControlPoint firstCtrlIn = first.ctrlIn;
             if (lastCtrlOut.isRetracted() && firstCtrlIn.isRetracted()) {
-                p.lineTo(
+                path2D.lineTo(
                     toX.applyAsDouble(first),
                     toY.applyAsDouble(first));
             } else {
-                p.curveTo(
+                path2D.curveTo(
                     toX.applyAsDouble(lastCtrlOut),
                     toY.applyAsDouble(lastCtrlOut),
                     toX.applyAsDouble(firstCtrlIn),
@@ -288,7 +289,7 @@ public class SubPath implements Serializable, Transformable {
             }
             // we reached the first point again,
             // but call this to add a clean SEG_CLOSE
-            p.closePath();
+            path2D.closePath();
         }
     }
 
@@ -326,8 +327,8 @@ public class SubPath implements Serializable, Transformable {
     }
 
     private void paintRecentAnchor(Graphics2D g, AnchorPoint anchor, int i, int numAnchors) {
-        // paint the handles when any of the anchor or
-        // its controls were recently edited
+        // paint the handles when either the anchor or any of
+        // its controls was recently edited
         anchor.paintHandles(g, true, true);
 
         // also paint the "out" handle of the previous anchor...
@@ -364,9 +365,9 @@ public class SubPath implements Serializable, Transformable {
     /**
      * Checks if the given mouse coordinates intersect with any handle.
      */
-    public DraggablePoint findHandleAt(double x, double y, boolean altDown) {
+    public DraggablePoint findHandleAt(double coX, double coY, boolean altDown) {
         for (AnchorPoint anchor : anchorPoints) {
-            DraggablePoint handle = anchor.findHandleAt(x, y, altDown);
+            DraggablePoint handle = anchor.findHandleAt(coX, coY, altDown);
             if (handle != null) {
                 return handle;
             }
@@ -487,9 +488,9 @@ public class SubPath implements Serializable, Transformable {
 
     public void coCoordsChanged(View view) {
         for (AnchorPoint anchor : anchorPoints) {
-            anchor.restoreCoordsFromImSpace(view);
-            anchor.ctrlIn.restoreCoordsFromImSpace(view);
-            anchor.ctrlOut.restoreCoordsFromImSpace(view);
+            anchor.syncCoCoordsFromImSpace(view);
+            anchor.ctrlIn.syncCoCoordsFromImSpace(view);
+            anchor.ctrlOut.syncCoCoordsFromImSpace(view);
         }
     }
 
@@ -518,7 +519,7 @@ public class SubPath implements Serializable, Transformable {
         }
         if (finished && moving != null) {
             throw new IllegalStateException(
-                "subpath " + this + " is finished, but moving");
+                "subpath " + this + " is finished, but but still has a moving point");
         }
         return true;
     }
@@ -567,7 +568,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void delete() {
-        path.delete(this);
+        path.deleteSubPath(this);
     }
 
     public void deletePath() {
@@ -640,40 +641,40 @@ public class SubPath implements Serializable, Transformable {
         }
     }
 
-    public void addLine(double newX, double newY, View view) {
-        PPoint point = PPoint.lazyFromIm(newX, newY, view);
+    public void addLine(double newImX, double newImY, View view) {
+        PPoint point = PPoint.lazyFromIm(newImX, newImY, view);
         AnchorPoint anchor = new AnchorPoint(point, view, this);
-        addPoint(anchor);
+        addAnchor(anchor);
     }
 
-    public void addCubicCurve(double c1x, double c1y,
-                              double c2x, double c2y,
-                              double nextX, double nextY, View view) {
+    public void addCubicCurve(double imCx, double imC1Y,
+                              double imC2X, double imC2Y,
+                              double nextImX, double nextImY, View view) {
         ControlPoint lastOut = getLastAnchor().ctrlOut;
-        PPoint c1 = PPoint.lazyFromIm(c1x, c1y, view);
+        PPoint c1 = PPoint.lazyFromIm(imCx, imC1Y, view);
         lastOut.setLocationOnlyForThis(c1);
 
-        PPoint nextLoc = PPoint.lazyFromIm(nextX, nextY, view);
+        PPoint nextLoc = PPoint.lazyFromIm(nextImX, nextImY, view);
         AnchorPoint next = new AnchorPoint(nextLoc, view, this);
-        addPoint(next);
+        addAnchor(next);
 
-        PPoint c2 = PPoint.lazyFromIm(c2x, c2y, view);
+        PPoint c2 = PPoint.lazyFromIm(imC2X, imC2Y, view);
         next.ctrlIn.setLocationOnlyForThis(c2);
     }
 
-    public void addQuadCurve(double cx, double cy,
-                             double nextX, double nextY, View view) {
+    public void addQuadCurve(double imCx, double imCy,
+                             double nextImX, double nextImY, View view) {
         AnchorPoint last = getLastAnchor();
 
         // convert the quadratic Bézier (with one control point)
         // into a cubic one (with two control points), see
         // https://stackoverflow.com/questions/3162645/convert-a-quadratic-bezier-to-a-cubic
-        double qp1x = cx;
-        double qp1y = cy;
+        double qp1x = imCx;
+        double qp1y = imCy;
         double qp0x = last.imX;
         double qp0y = last.imY;
-        double qp2x = nextX;
-        double qp2y = nextY;
+        double qp2x = nextImX;
+        double qp2y = nextImY;
 
         double twoThirds = 2.0 / 3.0;
         double cp1x = qp0x + twoThirds * (qp1x - qp0x);
@@ -686,15 +687,15 @@ public class SubPath implements Serializable, Transformable {
 
         last.ctrlOut.setLocationOnlyForThis(cp1);
 
-        PPoint nextLoc = PPoint.lazyFromIm(nextX, nextY, view);
+        PPoint nextLoc = PPoint.lazyFromIm(nextImX, nextImY, view);
         AnchorPoint next = new AnchorPoint(nextLoc, view, this);
-        addPoint(next);
+        addAnchor(next);
 
         next.ctrlIn.setLocationOnlyForThis(cp2);
     }
 
     public TransformBox createTransformBox() {
-        if (isEmpty()) {
+        if (hasNoSegments()) {
             return null;
         }
         saveImTransformRefPoints();
@@ -712,7 +713,7 @@ public class SubPath implements Serializable, Transformable {
         return new TransformBox(imBoundingBox, comp.getView(), this);
     }
 
-    public boolean isEmpty() {
+    public boolean hasNoSegments() {
         return getNumAnchors() < 2;
     }
 
@@ -757,7 +758,7 @@ public class SubPath implements Serializable, Transformable {
         return id;
     }
 
-    public void randomize(Random rng, double amount) {
+    public void randomize(RandomGenerator rng, double amount) {
         for (AnchorPoint anchorPoint : anchorPoints) {
             double dx = (rng.nextDouble() * 2 - 1) * amount;
             double dy = (rng.nextDouble() * 2 - 1) * amount;

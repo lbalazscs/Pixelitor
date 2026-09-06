@@ -65,7 +65,7 @@ public class DraggablePoint extends Point2D.Double {
     public double imX;
     public double imY;
 
-    // helper variables used while dragging
+    // component-space helper variables used while dragging
     protected double dragStartX;
     protected double dragStartY;
     protected double origX;
@@ -88,7 +88,7 @@ public class DraggablePoint extends Point2D.Double {
     private static final Composite SHADOW_COMPOSITE = AlphaComposite.SrcOver.derive(0.7f);
 
     // the original position in image space, saved when
-    // a transform box is created to serve as reference points
+    // a transform box is created to serve as a reference point
     private Point2D imTransformRefPoint;
 
     public DraggablePoint(String name, PPoint pos, View view) {
@@ -158,14 +158,14 @@ public class DraggablePoint extends Point2D.Double {
         assert !isNaN(imX);
         assert !isNaN(imY);
 
-        restoreCoordsFromImSpace(view);
+        syncCoCoordsFromImSpace(view);
     }
 
     /**
      * Recalculates component-space coordinates from image-space coordinates.
      * This should be called when the view size or zooming changes.
      */
-    public void restoreCoordsFromImSpace(View view) {
+    public void syncCoCoordsFromImSpace(View view) {
         if (this.view != view) {
             // this shouldn't happen, but it does very rarely in random GUI tests
             assert this.view != null;
@@ -194,7 +194,7 @@ public class DraggablePoint extends Point2D.Double {
         setLocation(x + coDx, y + coDy);
     }
 
-    public void relTranslate(PPoint origPos, double coDx, double coDy) {
+    public void translateFrom(PPoint origPos, double coDx, double coDy) {
         setLocation(
             origPos.getCoX() + coDx,
             origPos.getCoY() + coDy);
@@ -224,7 +224,7 @@ public class DraggablePoint extends Point2D.Double {
 
     /**
      * Transforms the image-space coordinates with the given {@link AffineTransform},
-     * and also recalculates the component-space coordinates
+     * and also recalculates the component-space coordinates.
      */
     public final void imTransformOnlyThis(AffineTransform at, boolean useRefPoint) {
         // Can't simply use at.transform(refPoint, this) because that would
@@ -290,9 +290,8 @@ public class DraggablePoint extends Point2D.Double {
 
         // paint the handle
         g.setComposite(origComposite);
-        Shapes.fillVisibly(g, shape, isActive()
-            ? ACTIVE_HANDLE_COLOR
-            : DEFAULT_HANDLE_COLOR);
+        Color fillColor = isActive() ? ACTIVE_HANDLE_COLOR : DEFAULT_HANDLE_COLOR;
+        Shapes.fillVisibly(g, shape, fillColor);
     }
 
     public boolean isHitBy(PMouseEvent e) {
@@ -313,22 +312,22 @@ public class DraggablePoint extends Point2D.Double {
         mousePressed(e.getCoX(), e.getCoY());
     }
 
-    public void mousePressed(double x, double y) {
-        dragStartX = x;
-        dragStartY = y;
+    public void mousePressed(double coX, double coY) {
+        dragStartX = coX;
+        dragStartY = coY;
         // since the handle has a certain size, the point location
         // and the drag start location are not necessarily the same
         origX = this.x;
         origY = this.y;
     }
 
-    public void mouseDragged(double x, double y) {
-        mouseDragged(x, y, false);
+    public void mouseDragged(double coX, double coY) {
+        mouseDragged(coX, coY, false);
     }
 
-    public void mouseDragged(double x, double y, boolean constrained) {
-        double dx = x - dragStartX;
-        double dy = y - dragStartY;
+    public void mouseDragged(double coX, double coY, boolean constrained) {
+        double dx = coX - dragStartX;
+        double dy = coY - dragStartY;
         double newX = origX + dx;
         double newY = origY + dy;
 

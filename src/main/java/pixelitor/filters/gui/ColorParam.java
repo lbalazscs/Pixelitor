@@ -118,15 +118,15 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     public void darken() {
-        float[] hsb = Colors.toHSB(color);
+        float[] hsb = Colors.toHsb(color);
         hsb[2] = Math.max(0.0f, hsb[2] - 0.1f); // decrease brightness by 10%
-        setColor(new Color(Colors.hsbToARGB(hsb, color.getAlpha()), true), false);
+        setColor(new Color(Colors.hsbToArgb(hsb, color.getAlpha()), true), false);
     }
 
     public void brighten() {
-        float[] hsb = Colors.toHSB(color);
+        float[] hsb = Colors.toHsb(color);
         hsb[2] = Math.min(1.0f, hsb[2] + 0.1f); // increase brightness by 10%
-        setColor(new Color(Colors.hsbToARGB(hsb, color.getAlpha()), true), false);
+        setColor(new Color(Colors.hsbToArgb(hsb, color.getAlpha()), true), false);
     }
 
     public boolean isTransparencyAllowed() {
@@ -183,7 +183,7 @@ public class ColorParam extends AbstractFilterParam {
 
         @Override
         public ColorParamState interpolate(ColorParamState endState, double progress) {
-            return new ColorParamState(Colors.interpolateRGB(
+            return new ColorParamState(Colors.interpolateRgb(
                 color, endState.color, progress));
         }
 

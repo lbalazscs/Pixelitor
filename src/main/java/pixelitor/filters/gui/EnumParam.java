@@ -56,4 +56,8 @@ public class EnumParam<E extends Enum<E>> extends ChoiceParam<E> {
         setSelectedItem(item, false);
         return this;
     }
+
+    public E getValue() {
+        return selectedValue;
+    }
 }

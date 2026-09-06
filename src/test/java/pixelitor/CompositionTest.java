@@ -408,7 +408,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.getActiveHolder().lowerLayerSelection(); // make the first layer active
+        comp.getActiveHolder().activateLayerBelow(); // make the first layer active
         assertThat(comp)
             .isDirty()
             .layerNamesAre("layer 1", "layer 2")
@@ -424,7 +424,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .firstLayerIsActive();
 
-        comp.getActiveHolder().raiseLayerSelection(); // make the second layer active
+        comp.getActiveHolder().activateLayerAbove(); // make the second layer active
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -441,11 +441,11 @@ class CompositionTest {
     }
 
     @Test
-    void changeStackIndex() {
+    void reorderTopLevelLayer() {
         assertThat(comp).layerNamesAre("layer 1", "layer 2");
 
         Layer layer = comp.getLayer(0);
-        comp.changeStackIndex(layer, 1);
+        comp.reorderTopLevelLayer(layer, 1);
 
         assertThat(comp)
             .layerNamesAre("layer 2", "layer 1")

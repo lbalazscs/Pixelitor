@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,12 +75,12 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g.create();
+        Graphics2D g2 = (Graphics2D) g.create();
         try {
-            g2d.translate(getDrawingOffsetX(), getDrawingOffsetY());
-            toneCurves.draw(g2d);
+            g2.translate(getDrawingOffsetX(), getDrawingOffsetY());
+            toneCurves.draw(g2);
         } finally {
-            g2d.dispose();
+            g2.dispose();
         }
     }
 

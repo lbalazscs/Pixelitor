@@ -36,7 +36,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * Voronoi Diagram filter implementation
+ * Voronoi Diagram filter implementation.
  */
 public class VoronoiFilter extends PointFilter {
     private final double minDistBetweenPoints;
@@ -217,9 +217,9 @@ public class VoronoiFilter extends PointFilter {
     }
 
     public void debugGrid(BufferedImage img) {
-        Graphics2D g2 = img.createGraphics();
-        g2.setColor(Color.WHITE);
-        sampling.renderGrid(g2);
-        g2.dispose();
+        Graphics2D g = img.createGraphics();
+        g.setColor(Color.WHITE);
+        sampling.renderGrid(g);
+        g.dispose();
     }
 }

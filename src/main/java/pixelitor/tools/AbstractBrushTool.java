@@ -331,7 +331,7 @@ public abstract class AbstractBrushTool extends Tool {
         outlineCoY = y;
 
         // calculate the rectangle encompassing both old and new positions
-        var repaintRect = Shapes.toPositiveRect(prevX, prevY, outlineCoX, outlineCoY);
+        var repaintRect = Shapes.posRectFromCorners(prevX, prevY, outlineCoX, outlineCoY);
 
         // add padding to account for brush radius and repaint delay
         int growth = brushPainter.getCoRadius() + REPAINT_EXTRA_SPACE;
@@ -657,9 +657,9 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         if (paintBrushOutline) {
-            brushPainter.paint(g2, outlineCoX, outlineCoY);
+            brushPainter.paint(g, outlineCoX, outlineCoY);
         }
     }
 

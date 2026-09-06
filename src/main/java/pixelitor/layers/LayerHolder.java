@@ -54,7 +54,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Checks if the given layer is a direct child of this holder.
      */
-    boolean listContainsLayer(Layer layer);
+    boolean hasDirectChild(Layer layer);
 
     /**
      * Recursively checks if this layer holder contains
@@ -64,7 +64,7 @@ public interface LayerHolder extends Debuggable {
 
     /**
      * Recursively checks if this layer holder contains
-     * the composition's active layer any nesting level.
+     * the composition's active layer at any nesting level.
      */
     default boolean containsActiveLayer() {
         return contains(getComp().getActiveLayer());
@@ -122,7 +122,7 @@ public interface LayerHolder extends Debuggable {
      * The update flag controls whether this is a full-featured insertion
      * (with UI updates but without history) or just a low-level list modification.
      */
-    void insertLayer(Layer layer, int index, boolean update);
+    void insertLayer(Layer newLayer, int index, boolean update);
 
     default LayerAdder adder() {
         return new LayerAdder(this);
@@ -145,9 +145,8 @@ public interface LayerHolder extends Debuggable {
             LayerHolder groupHolder = group.getHolder();
             int groupIndex = groupHolder.indexOf(group);
 
-            // logic for moving out of group:
-            // if moving UP, we target after the group (groupIndex + 1)
-            // if moving DOWN, we target the group's index (groupIndex)
+            // when moving out of a group, place the layer after the group
+            // when moving UP, or at the group's index when moving DOWN
             int targetIndex = direction == UP ? groupIndex + 1 : groupIndex;
             transferLayerToHolder(activeLayer, groupHolder, targetIndex, editName);
             return;
@@ -173,8 +172,8 @@ public interface LayerHolder extends Debuggable {
      */
     default void transferLayerToHolder(Layer layer, LayerHolder targetHolder, int targetIndex, String editName) {
         assert targetHolder != this;
-        assert listContainsLayer(layer);
-        assert !targetHolder.listContainsLayer(layer);
+        assert hasDirectChild(layer);
+        assert !targetHolder.hasDirectChild(layer);
         assert targetIndex >= 0 && targetIndex <= targetHolder.getNumLayers();
 
         if (editName != null) {
@@ -230,7 +229,7 @@ public interface LayerHolder extends Debuggable {
         }
 
         Layer layer = getLayer(oldIndex);
-        removeLayerFromList(layer);
+        removeDirectChild(layer, false);
         insertLayer(layer, newIndex, false);
 
         reorderLayerUI(oldIndex, newIndex);
@@ -252,27 +251,25 @@ public interface LayerHolder extends Debuggable {
     void deleteLayer(Layer layer, boolean addToHistory);
 
     /**
-     * Replaces a layer with another, while keeping its position, mask, ui
+     * Replaces a layer with another, while keeping its position, mask, and UI.
      */
     void replaceLayer(Layer before, Layer after);
 
     /**
-     * Selects the layer above the current one.
+     * Activates the layer above the current one.
      */
-    default void raiseLayerSelection() {
+    default void activateLayerAbove() {
         Composition comp = getComp();
         Layer activeLayer = comp.getActiveLayer();
         Layer newActive;
 
-        int prevIndex = indexOf(activeLayer);
-
-        int newIndex = prevIndex + 1;
+        int newIndex = indexOf(activeLayer) + 1;
         if (newIndex >= getNumLayers()) {
             if (activeLayer.isTopLevel()) {
                 return;
             } else {
-                // if the top layer is selected and this holder isn't the composition,
-                // then raise selection selects the target's parent holder (this)
+                // if the top layer is active and this holder isn't the composition,
+                // then this method activates the active layer's parent holder (this)
                 assert activeLayer.isDirectChildOf(this);
 
                 // the cast is safe because this isn't Composition (the only non-CompositeLayer implementer)
@@ -289,12 +286,11 @@ public interface LayerHolder extends Debuggable {
     }
 
     /**
-     * Selects the layer below the current one.
+     * Activates the layer below the current one.
      */
-    default void lowerLayerSelection() {
+    default void activateLayerBelow() {
         Composition comp = getComp();
-        int oldIndex = indexOf(comp.getActiveLayer());
-        int newIndex = oldIndex - 1;
+        int newIndex = indexOf(comp.getActiveLayer()) - 1;
         if (newIndex < 0) {
             return;
         }
@@ -306,7 +302,7 @@ public interface LayerHolder extends Debuggable {
     }
 
     /**
-     * Checks if the given layer can be merged down with the layer beneath it.
+     * Checks if the given layer can be merged down into the layer below it.
      */
     default boolean canMergeDown(Layer layer) {
         int index = indexOf(layer);
@@ -319,7 +315,7 @@ public interface LayerHolder extends Debuggable {
 
     /**
      * Merges the given layer down into the layer below it.
-     * This method assumes that {@link #canMergeDown(Layer)}  has previously returned true.
+     * This method assumes that {@link #canMergeDown(Layer)} has previously returned true.
      */
     default void mergeDown(Layer layer) {
         int layerIndex = indexOf(layer);
@@ -397,7 +393,7 @@ public interface LayerHolder extends Debuggable {
     /**
      * Converts the layers at the given indices to a group,
      * optionally using an existing group as the target.
-     * The given indices array must be sorted in ascending order.
+     * The given array of indices must be sorted in ascending order.
      */
     default void convertToGroup(int[] indices, LayerGroup target, boolean addToHistory) {
         List<Layer> movedLayers = new ArrayList<>(indices.length);
@@ -405,7 +401,7 @@ public interface LayerHolder extends Debuggable {
             movedLayers.add(getLayer(index));
         }
         for (Layer layer : movedLayers) {
-            deleteInternal(layer);
+            removeDirectChild(layer, true);
         }
 
         LayerGroup newGroup;
@@ -442,18 +438,13 @@ public interface LayerHolder extends Debuggable {
      * Adds a layer (only) to the list of layers maintained by this holder, at a specific index.
      * This is just an internal helper method.
      */
-    void addLayerToList(Layer newLayer, int index);
+    void insertDirectChild(Layer newLayer, int index);
 
     /**
-     * Removes a layer (only) from the layer list.
-     * This is just an internal helper method.
-     */
-    void removeLayerFromList(Layer layer);
-
-    /**
-     * This form of layer deletion allows to temporarily violate the
+     * Removes a layer from the layer list.
+     * This form of layer deletion allows temporarily violating the
      * constraint that some holders must always contain at least one layer.
      * This is just an internal helper method.
      */
-    void deleteInternal(Layer layer);
+    void removeDirectChild(Layer layer, boolean removeUI);
 }

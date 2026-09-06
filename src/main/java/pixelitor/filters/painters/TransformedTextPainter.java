@@ -208,10 +208,10 @@ public class TransformedTextPainter implements Debuggable {
         }
 
         BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = tmp.createGraphics();
-        setHighQualityRendering(g2);
-        updateLayout(w, h, g2, comp);
-        g2.dispose();
+        Graphics2D g = tmp.createGraphics();
+        setHighQualityRendering(g);
+        updateLayout(w, h, g, comp);
+        g.dispose();
     }
 
     /**
@@ -372,15 +372,15 @@ public class TransformedTextPainter implements Debuggable {
         int w = Math.max(1, area.width);
         int h = Math.max(1, area.height);
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = img.createGraphics();
+        Graphics2D g = img.createGraphics();
 
         // might not be the identity transform if HiDPI screen is used
-        AffineTransform origTransform = g2.getTransform();
+        AffineTransform origTransform = g.getTransform();
 
-        g2.translate(-area.x, -area.y);
-        paintText(g2, origTransform);
+        g.translate(-area.x, -area.y);
+        paintText(g, origTransform);
 
-        g2.dispose();
+        g.dispose();
         return img;
     }
 
@@ -483,9 +483,9 @@ public class TransformedTextPainter implements Debuggable {
         invalidLayout = false;
     }
 
-    private void renderOnPath(Path2D path, Graphics2D g2) {
-        g2.setFont(font);
-        FontRenderContext frc = g2.getFontRenderContext();
+    private void renderOnPath(Path2D path, Graphics2D g) {
+        g.setFont(font);
+        FontRenderContext frc = g.getFontRenderContext();
         GlyphVector glyphVector = font.createGlyphVector(frc, text);
 
         textShape = distributeGlyphsAlongPath(glyphVector, path);
@@ -709,17 +709,17 @@ public class TransformedTextPainter implements Debuggable {
 
         // this image is created just to get a Graphics2D somehow...
         BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = tmp.createGraphics();
-        setHighQualityRendering(g2);
+        Graphics2D g = tmp.createGraphics();
+        setHighQualityRendering(g);
 
-        var imgOrigTransform = g2.getTransform();
+        var imgOrigTransform = g.getTransform();
 
-        transformGraphics(g2);
-        var at = g2.getTransform();
-        g2.setTransform(imgOrigTransform); // provideShape must be called with untransformed Graphics
-        Shape shape = calcUntransformedTextShape(g2);
+        transformGraphics(g);
+        var at = g.getTransform();
+        g.setTransform(imgOrigTransform); // provideShape must be called with untransformed Graphics
+        Shape shape = calcUntransformedTextShape(g);
 
-        g2.dispose();
+        g.dispose();
         tmp.flush();
 
         return at.createTransformedShape(shape);
@@ -806,9 +806,9 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     // Return the text shape relative to (0, 0)
-    private Shape calcUntransformedTextShape(Graphics2D g2) {
-        FontMetrics metrics = g2.getFontMetrics(font);
-        FontRenderContext frc = g2.getFontRenderContext();
+    private Shape calcUntransformedTextShape(Graphics2D g) {
+        FontMetrics metrics = g.getFontMetrics(font);
+        FontRenderContext frc = g.getFontRenderContext();
 
         Map<TextAttribute, ?> attributes = font.getAttributes();
         boolean hasKerning = KERNING_ON.equals(attributes.get(KERNING));

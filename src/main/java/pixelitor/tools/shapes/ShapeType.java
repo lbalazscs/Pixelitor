@@ -28,51 +28,29 @@ import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.*;
+import java.util.function.Supplier;
 
 /**
  * The shape types in the shapes tool.
  */
 public enum ShapeType {
-    RECTANGLE("Rectangle", false, true, true) {
+    RECTANGLE("Rectangle", false, true, OverlayType.WIDTH_HEIGHT,
+        Rectangle2D.Double::new, RectangleSettings::new) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             var rs = (RectangleSettings) settings;
             double radius = rs == null ? 0 : rs.getRadius();
-            Rectangle2D r = drag.createPositiveImRect();
+            Rectangle2D r = drag.toPosImRect();
             return (radius == 0) ? r : new RoundRectangle2D.Double(
                 r.getX(), r.getY(), r.getWidth(), r.getHeight(), radius, radius);
         }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return new Rectangle2D.Double(x, y, width, height);
-        }
-
-        @Override
-        public OverlayType getOverlayType() {
-            return OverlayType.WIDTH_HEIGHT;
-        }
-
-        @Override
-        public RectangleSettings createSettings() {
-            return new RectangleSettings();
-        }
-    }, ELLIPSE("Ellipse", false, false, false, Ellipse2D.Double::new) {
+    }, ELLIPSE("Ellipse", false, false, OverlayType.WIDTH_HEIGHT, Ellipse2D.Double::new) {
         @Override
         protected Rectangle2D getShapeBounds(Drag drag) {
-            return drag.createPositiveImRect();
+            return drag.toPosImRect();
         }
-
-        @Override
-        public OverlayType getOverlayType() {
-            return OverlayType.WIDTH_HEIGHT;
-        }
-    }, DIAMOND("Diamond", false, false, false, CustomShapes::createDiamond) {
-        @Override
-        public OverlayType getOverlayType() {
-            return OverlayType.WIDTH_HEIGHT;
-        }
-    }, LINE("Line", true, true, true) {
+    }, DIAMOND("Diamond", false, false, OverlayType.WIDTH_HEIGHT, CustomShapes::createDiamond),
+    LINE("Line", true, true, OverlayType.ANGLE_DIST, null, LineSettings::new) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             var lineSettings = (LineSettings) settings;
@@ -86,18 +64,11 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double width, double height) {
             return new Rectangle2D.Double(x, y, width / 5.0, height);
         }
-
-        @Override
-        public OverlayType getOverlayType() {
-            return OverlayType.ANGLE_DIST;
-        }
-
-        @Override
-        public LineSettings createSettings() {
-            return new LineSettings();
-        }
-    }, HEART("Heart", false, false, false, CustomShapes::createHeart),
-    STAR("Star", false, true, false) {
+    }, HEART("Heart", false, false, CustomShapes::createHeart),
+    STAR("Star", false, false, OverlayType.WIDTH_HEIGHT,
+        (x, y, width, height) -> CustomShapes.createStar(
+            StarSettings.DEFAULT_NUM_BRANCHES, x, y, width, height, StarSettings.DEFAULT_RADIUS_RATIO),
+        StarSettings::new) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             StarSettings starSettings = (StarSettings) settings;
@@ -111,27 +82,11 @@ public enum ShapeType {
                 radiusRatio = StarSettings.DEFAULT_RADIUS_RATIO;
             }
 
-            Rectangle2D r = drag.createPositiveImRect();
+            Rectangle2D r = drag.toPosImRect();
             return CustomShapes.createStar(numBranches, r.getX(), r.getY(),
                 r.getWidth(), r.getHeight(), radiusRatio);
         }
-
-        @Override
-        public Shape createShape(double x, double y, double width, double height) {
-            return CustomShapes.createStar(StarSettings.DEFAULT_NUM_BRANCHES,
-                x, y, width, height, StarSettings.DEFAULT_RADIUS_RATIO);
-        }
-
-        @Override
-        public OverlayType getOverlayType() {
-            return OverlayType.WIDTH_HEIGHT;
-        }
-
-        @Override
-        public StarSettings createSettings() {
-            return new StarSettings();
-        }
-    }, RANDOM_STAR("Random Star", false, false, false) {
+    }, RANDOM_STAR("Random Star", false, false, OverlayType.WIDTH_HEIGHT) {
         private Drag lastDrag;
 
         @Override
@@ -152,12 +107,7 @@ public enum ShapeType {
             RandomStarShape.randomizeStarParameters();
             return new RandomStarShape(x, y, width, height);
         }
-
-        @Override
-        public OverlayType getOverlayType() {
-            return OverlayType.WIDTH_HEIGHT;
-        }
-    }, ARROW("Arrow", true, false, false) {
+    }, ARROW("Arrow", true, false, OverlayType.ANGLE_DIST) {
         Path2D unitArrow = null;
 
         @Override
@@ -190,15 +140,10 @@ public enum ShapeType {
                 middleY);
             return createShape(drag, null);
         }
-
-        @Override
-        public OverlayType getOverlayType() {
-            return OverlayType.ANGLE_DIST;
-        }
-    }, CAT("Cat", false, false, true, CustomShapes::createCat),
-    KIWI("Kiwi", false, false, false, CustomShapes::createKiwi),
-    BAT("Bat", false, false, true, CustomShapes::createBat),
-    RABBIT("Rabbit", false, false, false, CustomShapes::createRabbit);
+    }, CAT("Cat", false, true, CustomShapes::createCat),
+    KIWI("Kiwi", false, false, CustomShapes::createKiwi),
+    BAT("Bat", false, true, CustomShapes::createBat),
+    RABBIT("Rabbit", false, false, CustomShapes::createRabbit);
 
     // the key can't be simply "Shape", because
     // that key is used by the stroke settings
@@ -207,34 +152,50 @@ public enum ShapeType {
     private static final String NAME = "Shape";
     private final String displayName;
 
-    private final boolean hasSettings;
     private final boolean hasAreaBug;
 
     // for the directional shapes the transform box
     // is initialized at the angle of the shape
     private final boolean directional;
 
+    private final OverlayType overlayType;
+
     // factory for simple shapes that can be created from a rectangle
     private final ShapeFactory shapeFactory;
+
+    private final Supplier<? extends ShapeTypeSettings> settingsSupplier;
 
     @FunctionalInterface
     private interface ShapeFactory {
         Shape create(double x, double y, double width, double height);
     }
 
-    // Constructor for shapes without a factory (complex shapes)
-    ShapeType(String displayName, boolean directional, boolean hasSettings, boolean hasAreaBug) {
-        this(displayName, directional, hasSettings, hasAreaBug, null);
+    // Constructor for shapes without a factory or settings (complex shapes)
+    ShapeType(String displayName, boolean directional, boolean hasAreaBug,
+              OverlayType overlayType) {
+        this(displayName, directional, hasAreaBug, overlayType, null, null);
     }
 
-    // Constructor for simple shapes with a factory
-    ShapeType(String displayName, boolean directional, boolean hasSettings, boolean hasAreaBug,
+    // Constructor for simple shapes with a factory (they all have OverlayType.NONE)
+    ShapeType(String displayName, boolean directional, boolean hasAreaBug,
               ShapeFactory factory) {
+        this(displayName, directional, hasAreaBug, OverlayType.NONE, factory, null);
+    }
+
+    ShapeType(String displayName, boolean directional, boolean hasAreaBug,
+              OverlayType overlayType, ShapeFactory factory) {
+        this(displayName, directional, hasAreaBug, overlayType, factory, null);
+    }
+
+    ShapeType(String displayName, boolean directional, boolean hasAreaBug,
+              OverlayType overlayType, ShapeFactory factory,
+              Supplier<? extends ShapeTypeSettings> settingsSupplier) {
         this.displayName = displayName;
         this.directional = directional;
-        this.hasSettings = hasSettings;
         this.hasAreaBug = hasAreaBug;
+        this.overlayType = overlayType;
         this.shapeFactory = factory;
+        this.settingsSupplier = settingsSupplier;
     }
 
     /**
@@ -268,8 +229,7 @@ public enum ShapeType {
     }
 
     public OverlayType getOverlayType() {
-        // overridden if necessary
-        return OverlayType.NONE;
+        return overlayType;
     }
 
     public boolean isDirectional() {
@@ -277,7 +237,7 @@ public enum ShapeType {
     }
 
     public boolean hasSettings() {
-        return hasSettings;
+        return settingsSupplier != null;
     }
 
     /**
@@ -288,8 +248,10 @@ public enum ShapeType {
     }
 
     public ShapeTypeSettings createSettings() {
-        // should be overridden, if it has settings
-        throw new UnsupportedOperationException("no settings for " + this);
+        if (settingsSupplier == null) {
+            throw new UnsupportedOperationException("no settings for " + this);
+        }
+        return settingsSupplier.get();
     }
 
     public static EnumParam<ShapeType> asParam(ShapeType defaultType) {

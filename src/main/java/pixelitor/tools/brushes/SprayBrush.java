@@ -129,7 +129,7 @@ public class SprayBrush extends AbstractBrush {
 
             if (!isErasing && colorRandomness > 0.0f) {
                 Color randomColor = Rnd.createRandomColor();
-                Color color = Colors.interpolateRGB(baseColor, randomColor, colorRandomness);
+                Color color = Colors.interpolateRgb(baseColor, randomColor, colorRandomness);
                 targetG.setColor(color);
             }
 

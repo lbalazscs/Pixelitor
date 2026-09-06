@@ -158,15 +158,15 @@ public class ShapesLayer extends ContentLayer {
     @Override
     public BufferedImage createIconThumbnail() {
         BufferedImage img = Thumbnails.createEmpty();
-        Graphics2D g2 = img.createGraphics();
+        Graphics2D g = img.createGraphics();
 
         if (styledShape == null) {
-            Thumbnails.paintBackground(g2, thumbCheckerboardPainter);
+            Thumbnails.paintBackground(g, thumbCheckerboardPainter);
         } else {
-            styledShape.paintIconThumbnail(g2);
+            styledShape.paintIconThumbnail(g);
         }
 
-        g2.dispose();
+        g.dispose();
         return img;
     }
 

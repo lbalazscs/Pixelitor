@@ -18,14 +18,14 @@
 package pixelitor.tools.crop;
 
 /**
- * Crop composition guide types.
+ * Available composition guide overlays for the crop tool.
  */
 public enum CompositionGuideType {
     NONE("None"),
     RULE_OF_THIRDS("Rule of Thirds"),
     GOLDEN_SECTIONS("Golden Sections"),
     GOLDEN_SPIRAL("Golden Spiral"),
-    DIAGONALS("Diagonal Lines"),
+    DIAGONALS("Diagonals"),
     TRIANGLES("Triangles"),
     GRID("Grid");
 

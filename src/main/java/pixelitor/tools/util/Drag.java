@@ -41,7 +41,6 @@ import java.io.Serial;
 import java.io.Serializable;
 
 import static java.lang.String.format;
-import static java.util.Objects.hash;
 
 /**
  * Represents a mouse drag performed by the user while using
@@ -57,7 +56,7 @@ public class Drag implements Serializable, Debuggable {
     private double imEndX;
     private double imEndY;
 
-    // transient variables from here
+    // transient fields from here
 
     // component-space coordinates (relative to the View component)
     private transient double coStartX;
@@ -111,13 +110,6 @@ public class Drag implements Serializable, Debuggable {
             end.getImX(), end.getImY());
     }
 
-    public Drag(Rectangle2D bounds) {
-        this(bounds.getX(),
-            bounds.getY(),
-            bounds.getX() + bounds.getWidth(),
-            bounds.getY() + bounds.getHeight());
-    }
-
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
@@ -140,7 +132,9 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public Drag copy() {
-        return new Drag(imStartX, imStartY, imEndX, imEndY);
+        Drag copy = new Drag(imStartX, imStartY, imEndX, imEndY);
+        copy.expandFromCenter = this.expandFromCenter;
+        return copy;
     }
 
     public Drag imTransformedCopy(AffineTransform at) {
@@ -148,39 +142,53 @@ public class Drag implements Serializable, Debuggable {
         Point2D end = new Point2D.Double(imEndX, imEndY);
         at.transform(start, start);
         at.transform(end, end);
-        return new Drag(start.getX(), start.getY(), end.getX(), end.getY());
+
+        Drag copy = new Drag(start.getX(), start.getY(), end.getX(), end.getY());
+        copy.expandFromCenter = this.expandFromCenter;
+        return copy;
     }
 
     public Drag imTranslatedCopy(double tx, double ty) {
-        return new Drag(
-            imStartX + tx, imStartY + ty,
-            imEndX + tx, imEndY + ty);
+        Drag copy = new Drag(imStartX + tx, imStartY + ty, imEndX + tx, imEndY + ty);
+        copy.expandFromCenter = this.expandFromCenter;
+        return copy;
     }
 
-    public void setStart(PPoint e) {
-        assert e.getView() != null;
+    public void setStart(PPoint p) {
+        assert p.getView() != null;
 
-        coStartX = e.getCoX();
-        coStartY = e.getCoY();
+        coStartX = p.getCoX();
+        coStartY = p.getCoY();
+        coEndX = coStartX;
+        coEndY = coStartY;
+        rawCoEndX = coStartX;
+        rawCoEndY = coStartY;
 
-        imStartX = e.getImX();
-        imStartY = e.getImY();
+        imStartX = p.getImX();
+        imStartY = p.getImY();
+        imEndX = imStartX;
+        imEndY = imStartY;
 
         hasCoCoords = true;
+        startAdjusted = false;
+        canceled = false;
     }
 
-    public void setEnd(PPoint e) {
-        rawCoEndX = e.getCoX();
-        rawCoEndY = e.getCoY();
+    public void setEnd(PPoint p) {
+        rawCoEndX = p.getCoX();
+        rawCoEndY = p.getCoY();
 
         coEndX = rawCoEndX;
         coEndY = rawCoEndY;
+
+        // the two special cases can't be used at the same time
+        assert !(angleConstrained && forceSquareAspectRatio);
 
         if (angleConstrained) {
             Point2D newEnd = Utils.constrainToNearestAngle(coStartX, coStartY, coEndX, coEndY);
             coEndX = newEnd.getX();
             coEndY = newEnd.getY();
-        } else if (forceSquareAspectRatio) { // the two special cases are not used at the same time
+        } else if (forceSquareAspectRatio) {
             double width = Math.abs(coEndX - coStartX);
             double height = Math.abs(coEndY - coStartY);
             double max = Math.max(width, height);
@@ -196,7 +204,7 @@ public class Drag implements Serializable, Debuggable {
             }
         }
 
-        View view = e.getView();
+        View view = p.getView();
         imEndX = view.componentXToImageSpace(coEndX);
         imEndY = view.componentYToImageSpace(coEndY);
 
@@ -256,10 +264,9 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public Point2D getCenterPoint() {
-        double cx = (imStartX + imEndX) / 2.0;
-        double cy = (imStartY + imEndY) / 2.0;
-
-        return new Point2D.Double(cx, cy);
+        return expandFromCenter
+            ? new Point2D.Double(imStartX, imStartY)
+            : new Point2D.Double((imStartX + imEndX) / 2.0, (imStartY + imEndY) / 2.0);
     }
 
     public Drag createDragFromCenterToEnd() {
@@ -267,11 +274,11 @@ public class Drag implements Serializable, Debuggable {
         return new Drag(center.getX(), center.getY(), getEndX(), getEndY());
     }
 
-    public double getDX() {
+    public double getDx() {
         return imEndX - imStartX;
     }
 
-    public double getDY() {
+    public double getDy() {
         return imEndY - imStartY;
     }
 
@@ -282,9 +289,9 @@ public class Drag implements Serializable, Debuggable {
         double centerY;
         if (expandFromCenter) {
             centerY = imStartY;
-            return new Drag(imStartX - getDX(), centerY, imEndX, centerY);
+            return new Drag(imStartX - getDx(), centerY, imEndX, centerY);
         } else {
-            centerY = imStartY + getDY() / 2.0;
+            centerY = imStartY + getDy() / 2.0;
             return new Drag(imStartX, centerY, imEndX, centerY);
         }
     }
@@ -308,6 +315,7 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public void setAngleConstrained(boolean angleConstrained) {
+        assert !(angleConstrained && forceSquareAspectRatio);
         this.angleConstrained = angleConstrained;
     }
 
@@ -316,6 +324,9 @@ public class Drag implements Serializable, Debuggable {
      */
     public void drawCoDirectionArrow(Graphics2D g) {
         assert hasCoCoords;
+        if (isClick()) {
+            return;
+        }
         CustomShapes.drawDirectionArrow(g, coStartX, coStartY, coEndX, coEndY);
     }
 
@@ -325,13 +336,16 @@ public class Drag implements Serializable, Debuggable {
      * However, this is good enough for debugging.
      */
     public void drawImDirectionArrow(Graphics2D g) {
+        if (isImClick()) {
+            return;
+        }
         CustomShapes.drawDirectionArrow(g, imStartX, imStartY, imEndX, imEndY);
     }
 
-    public void pan(PPoint e) {
+    public void pan(PPoint p) {
         assert hasCoCoords;
-        double rawX = e.getCoX();
-        double rawY = e.getCoY();
+        double rawX = p.getCoX();
+        double rawY = p.getCoY();
 
         // calculate delta based purely on unconstrained mouse movement
         double dx = rawX - rawCoEndX;
@@ -348,7 +362,7 @@ public class Drag implements Serializable, Debuggable {
         coEndX += dx;
         coEndY += dy;
 
-        View view = e.getView();
+        View view = p.getView();
         imStartX = view.componentXToImageSpace(coStartX);
         imStartY = view.componentYToImageSpace(coStartY);
         imEndX = view.componentXToImageSpace(coEndX);
@@ -366,11 +380,12 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public void setForceSquareAspectRatio(boolean forceSquareAspectRatio) {
+        assert !(angleConstrained && forceSquareAspectRatio);
         this.forceSquareAspectRatio = forceSquareAspectRatio;
     }
 
     public Line2D asLine() {
-        return new Line2D.Double(imStartX, imStartY, imEndX, imEndY);
+        return new Line2D.Double(getOriginX(), getOriginY(), imEndX, imEndY);
     }
 
     public boolean isDragging() {
@@ -419,61 +434,25 @@ public class Drag implements Serializable, Debuggable {
      * Creates a Rectangle where the signs of the width and height indicate the drawing direction.
      */
     public Rectangle2D toSignedImRect() {
-        double x;
-        double y;
-        double width;
-        double height;
-
-        if (expandFromCenter) {
-            double halfWidth = imEndX - imStartX; // can be negative
-            double halfHeight = imEndY - imStartY; // can be negative
-
-            x = imStartX - halfWidth;
-            y = imStartY - halfHeight;
-            width = 2 * halfWidth;
-            height = 2 * halfHeight;
-        } else {
-            x = imStartX;
-            y = imStartY;
-            width = imEndX - imStartX;
-            height = imEndY - imStartY;
-        }
-
-        return new Rectangle2D.Double(x, y, width, height);
+        double factor = expandFromCenter ? 2.0 : 1.0;
+        return new Rectangle2D.Double(
+            getOriginX(), getOriginY(),
+            getDx() * factor, getDy() * factor);
     }
 
     public Rectangle toPosCoRect() {
         return Shapes.toPositiveRect(toCoRect());
     }
 
+    /**
+     * Creates a Rectangle2D where the width and height are >= 0, regardless of the drawing direction.
+     */
     public Rectangle2D toPosImRect() {
         return Shapes.toPositiveRect(toSignedImRect());
     }
 
     public PRectangle toPosPRect(View view) {
         return PRectangle.positiveFromCo(toCoRect(), view);
-    }
-
-    /**
-     * Creates a Rectangle where the width and height are >= 0, regardless of the drawing direction.
-     */
-    public Rectangle2D createPositiveImRect() {
-        double x, y, width, height;
-
-        if (expandFromCenter) {
-            double halfWidth = Math.abs(imEndX - imStartX);
-            double halfHeight = Math.abs(imEndY - imStartY);
-            x = imStartX - halfWidth;
-            y = imStartY - halfHeight;
-            width = 2 * halfWidth;
-            height = 2 * halfHeight;
-        } else {
-            x = Math.min(imStartX, imEndX);
-            y = Math.min(imStartY, imEndY);
-            width = Math.abs(imEndX - imStartX);
-            height = Math.abs(imEndY - imStartY);
-        }
-        return new Rectangle2D.Double(x, y, width, height);
     }
 
     public double calcCoLength() {
@@ -531,8 +510,9 @@ public class Drag implements Serializable, Debuggable {
     public void drawWidthHeightOverlay(Graphics2D g) {
         assert hasCoCoords;
 
-        double imWidth = imEndX - imStartX;
-        double imHeight = imEndY - imStartY;
+        double factor = expandFromCenter ? 2.0 : 1.0;
+        double imWidth = getDx() * factor;
+        double imHeight = getDy() * factor;
         MeasurementOverlay overlay = new MeasurementOverlay(g, MeasurementOverlay.BG_WIDTH_PIXELS);
 
         drawWidth(overlay, imWidth, imHeight);
@@ -550,30 +530,22 @@ public class Drag implements Serializable, Debuggable {
 
     // draw the width overlay
     private void drawWidth(MeasurementOverlay overlay, double imWidth, double imHeight) {
-        double posY;
-        if (imHeight >= 0) {
-            // display the width info below the mouse
-            posY = coEndY + MeasurementOverlay.OFFSET_FROM_MOUSE + MeasurementOverlay.SINGLE_LINE_HEIGHT;
-        } else {
-            // display the width info above the mouse
-            posY = coEndY - MeasurementOverlay.OFFSET_FROM_MOUSE;
-        }
-        double posX = coStartX + (coEndX - coStartX) / 2.0 - MeasurementOverlay.BG_WIDTH_PIXELS / 2.0f;
+        // display the width info below/above the mouse
+        double posY = (imHeight >= 0)
+            ? coEndY + MeasurementOverlay.OFFSET_FROM_MOUSE + MeasurementOverlay.SINGLE_LINE_HEIGHT
+            : coEndY - MeasurementOverlay.OFFSET_FROM_MOUSE;
+        double posX = (coStartX + coEndX) / 2.0 - MeasurementOverlay.BG_WIDTH_PIXELS / 2.0;
         String widthInfo = MeasurementOverlay.formatWidthString(imWidth);
         overlay.drawOneLine(widthInfo, new Point2D.Double(posX, posY));
     }
 
     // draw the height overlay
     private void drawHeight(MeasurementOverlay overlay, double imWidth, double imHeight) {
-        double posX;
-        if (imWidth >= 0) {
-            // display the height info on the right side of the mouse
-            posX = coEndX + MeasurementOverlay.OFFSET_FROM_MOUSE;
-        } else {
-            // display the height info on the left side of the mouse
-            posX = coEndX - MeasurementOverlay.BG_WIDTH_PIXELS - MeasurementOverlay.OFFSET_FROM_MOUSE;
-        }
-        double posY = coStartY + (coEndY - coStartY) / 2.0 + MeasurementOverlay.SINGLE_LINE_HEIGHT / 2.0f;
+        // display the height info on the right/left side of the mouse
+        double posX = (imWidth >= 0)
+            ? coEndX + MeasurementOverlay.OFFSET_FROM_MOUSE
+            : coEndX - MeasurementOverlay.BG_WIDTH_PIXELS - MeasurementOverlay.OFFSET_FROM_MOUSE;
+        double posY = (coStartY + coEndY) / 2.0 + MeasurementOverlay.SINGLE_LINE_HEIGHT / 2.0;
         String heightInfo = MeasurementOverlay.formatHeightString(imHeight);
         overlay.drawOneLine(heightInfo, new Point2D.Double(posX, posY));
     }
@@ -726,7 +698,11 @@ public class Drag implements Serializable, Debuggable {
 
     @Override
     public int hashCode() {
-        return hash(imStartX, imStartY, imEndX, imEndY);
+        int result = Double.hashCode(imStartX);
+        result = 31 * result + Double.hashCode(imStartY);
+        result = 31 * result + Double.hashCode(imEndX);
+        result = 31 * result + Double.hashCode(imEndY);
+        return result;
     }
 
     @Override

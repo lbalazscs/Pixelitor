@@ -19,19 +19,19 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.HalftoneFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
+import java.util.function.DoubleBinaryOperator;
+
+import static com.jhlabs.image.ImageMath.SQRT_2;
+import static com.jhlabs.image.ImageMath.SQRT_3;
 
 /**
  * A halftone filter that applies a clustered-dot halftoning effect.
@@ -44,33 +44,67 @@ public class JHDotsHalftone extends ParametrizedFilter {
 
     public static final String NAME = "Dots Halftone";
 
+    public enum DotShape {
+        CIRCLE("Circle", (dx, dy) -> dx * dx + dy * dy),
+        SQUARE("Square", (dx, dy) -> Math.max(Math.abs(dx), Math.abs(dy))),
+        DIAMOND("Diamond", (dx, dy) -> Math.abs(dx) + Math.abs(dy)),
+        CROSS("Cross", (dx, dy) -> Math.min(Math.abs(dx), Math.abs(dy))),
+        X("X", (dx, dy) -> {
+            double distanceToFirstDiagonal = Math.abs(dx - dy);  // distance to y = x
+            double distanceToSecondDiagonal = Math.abs(dx + dy); // distance to y = -x
+            return Math.min(distanceToFirstDiagonal, distanceToSecondDiagonal);
+        }),
+        TRIANGLE("Triangle", (dx, dy) -> {
+            // equilateral triangle pointing upwards
+            // distances to the triangle’s edges
+            double dist1 = (SQRT_3 * dx - dy) / 2;
+            double dist2 = (-SQRT_3 * dx - dy) / 2;
+            double dist3 = dy;
+
+            return Math.max(Math.max(dist1, dist2), dist3);
+        }),
+        HEXAGON("Hexagon", (dx, dy) -> {
+            // uses axial coordinates to calculate distance from the center of a regular hexagon
+            double q = (SQRT_3 / 3 * dx - 1.0 / 3 * dy);
+            double r = (2.0 / 3 * dy);
+            double s = -q - r;
+            return Math.abs(q) + Math.abs(r) + Math.abs(s);
+        }),
+        OCTAGON("Octagon", (dx, dy) -> {
+            double absX = Math.abs(dx);
+            double absY = Math.abs(dy);
+            return Math.max(absX, absY) + (SQRT_2 - 1) * Math.min(absX, absY);
+        }),
+        STAR("Star", (dx, dy) -> {
+            // uses polar coordinates to create a 5-pointed star
+            double angle = Math.atan2(dy, dx) + 3 * Math.PI / 2; // orient the star to point up
+            double radius = Math.hypot(dx, dy);
+            // modulates the radius based on the angle to form the star's points
+            return radius * (1 + 0.25 * Math.cos(5 * angle));
+        });
+
+        private final String displayName;
+        private final DoubleBinaryOperator distFunc;
+
+        DotShape(String displayName, DoubleBinaryOperator distFunc) {
+            this.displayName = displayName;
+            this.distFunc = distFunc;
+        }
+
+        public double distance(double dx, double dy) {
+            return distFunc.applyAsDouble(dx, dy);
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
     private static final boolean DEBUG_MASK = false;
 
-    private static final int SHAPE_CIRCLE = 0;
-    private static final int SHAPE_SQUARE = 1;
-    private static final int SHAPE_DIAMOND = 2;
-    private static final int SHAPE_CROSS = 3;
-    private static final int SHAPE_X = 4;
-    private static final int SHAPE_TRIANGLE = 5;
-    private static final int SHAPE_HEXAGON = 6;
-    private static final int SHAPE_OCTAGON = 7;
-    private static final int SHAPE_STAR = 8;
-
-    private static final double SQRT_2 = 1.4142135623730951;
-    private static final double SQRT_3 = 1.7320508075688772;
-
     private final RangeParam dotRadius = new RangeParam("Dot Radius", 1, 10, 100);
-    private final IntChoiceParam dotShape = new IntChoiceParam("Dot Shape", new Item[]{
-        new Item("Circle", SHAPE_CIRCLE),
-        new Item("Square", SHAPE_SQUARE),
-        new Item("Diamond", SHAPE_DIAMOND),
-        new Item("Cross", SHAPE_CROSS),
-        new Item("X", SHAPE_X),
-        new Item("Triangle", SHAPE_TRIANGLE),
-        new Item("Hexagon", SHAPE_HEXAGON),
-        new Item("Octagon", SHAPE_OCTAGON),
-        new Item("Star", SHAPE_STAR),
-    });
+    private final EnumParam<DotShape> dotShape = new EnumParam<>("Dot Shape", DotShape.class);
 
     private final IntChoiceParam dotGrid = new IntChoiceParam("Dot Grid", new Item[]{
         new Item("Triangle", HalftoneFilter.GRID_TRIANGLE),
@@ -103,7 +137,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        BufferedImage thresholdMask = createMaskImage(src);
+        BufferedImage thresholdMask = createMaskImage();
 
         if (DEBUG_MASK) {
             Graphics2D g = dest.createGraphics();
@@ -124,105 +158,48 @@ public class JHDotsHalftone extends ParametrizedFilter {
     }
 
     /**
-     * Creates a mask image from the clustered dot matrix.
-     */
-    private BufferedImage createMaskImage(BufferedImage src) {
-        int maskSize = 2 * dotRadius.getValue();
-        int[][] matrix = genClusteredDotMatrix(maskSize, dotShape.getValue());
-        BufferedImage maskImage = ImageUtils.createImageWithSameCM(src, maskSize, maskSize);
-
-        int[] maskPixels = ImageUtils.getPixels(maskImage);
-        for (int y = 0; y < maskSize; y++) {
-            for (int x = 0; x < maskSize; x++) {
-                int threshold = matrix[x][y];
-                maskPixels[x + y * maskSize] = 0xFF_00_00_00 | threshold << 16 | threshold << 8 | threshold;
-            }
-        }
-
-        return maskImage;
-    }
-
-    /**
-     * Creates a square matrix where dots are clustered together
+     * Creates a mask image where dots are clustered together
      * to represent different intensity thresholds (priority orders).
      * As brightness increases, dots will appear in that order,
      * expanding outward, and growing into recognizable shapes.
      */
-    private static int[][] genClusteredDotMatrix(int matrixSize, int shape) {
-        assert matrixSize % 2 == 0 : "matrixSize = " + matrixSize;
+    private BufferedImage createMaskImage() {
+        int maskSize = 2 * dotRadius.getValue();
 
-        // binds a pixel's coordinates to its distance from the center
-        record DistPoint(int x, int y, double dist) {
+        int total = maskSize * maskSize;
+        DotShape shape = dotShape.getValue();
+        double center = (maskSize - 1) / 2.0;
+
+        // binds a pixel's index to its distance from the center
+        record PointDist(int pixelIndex, double dist) {
         }
 
-        int[][] matrix = new int[matrixSize][matrixSize];
-        List<DistPoint> points = new ArrayList<>();
+        PointDist[] points = new PointDist[total];
 
-        int centerX = matrixSize / 2;
-        int centerY = matrixSize / 2;
-
-        for (int y = 0; y < matrixSize; y++) {
-            for (int x = 0; x < matrixSize; x++) {
-                double d = distanceToCenter(shape, x - centerX, y - centerY);
-                points.add(new DistPoint(x, y, d));
+        int idx = 0;
+        for (int y = 0; y < maskSize; y++) {
+            double dy = y - center;
+            for (int x = 0; x < maskSize; x++) {
+                double dx = x - center;
+                points[idx] = new PointDist(idx, shape.distance(dx, dy));
+                idx++;
             }
         }
 
         // sort the points by the distance to the center of the shape
-        points.sort(Comparator.comparingDouble(p -> p.dist));
+        Arrays.sort(points, Comparator.comparingDouble(PointDist::dist));
+
+        BufferedImage maskImage = new BufferedImage(maskSize, maskSize, BufferedImage.TYPE_INT_ARGB);
+        int[] maskPixels = ImageUtils.getPixels(maskImage);
 
         // assign 0-255 threshold values
-        int total = matrixSize * matrixSize;
         for (int i = 0; i < total; i++) {
-            DistPoint p = points.get(i);
-            matrix[p.x][p.y] = (int) Math.round((double) i / total * 255);
+            int threshold = (int) Math.round((double) i / total * 255);
+            int rgb = 0xFF_00_00_00 | (threshold << 16) | (threshold << 8) | threshold;
+            maskPixels[points[i].pixelIndex] = rgb;
         }
 
-        return matrix;
-    }
-
-    private static double distanceToCenter(int shape, double dx, double dy) {
-        return switch (shape) {
-            case SHAPE_CIRCLE -> Math.hypot(dx, dy);
-            case SHAPE_SQUARE -> Math.max(Math.abs(dx), Math.abs(dy));
-            case SHAPE_DIAMOND -> Math.abs(dx) + Math.abs(dy);
-            case SHAPE_CROSS -> Math.min(Math.abs(dx), Math.abs(dy));
-            case SHAPE_X -> {
-                double distanceToFirstDiagonal = Math.abs(dx - dy) / SQRT_2;  // distance to y = x
-                double distanceToSecondDiagonal = Math.abs(dx + dy) / SQRT_2; // distance to y = -x
-                yield Math.min(distanceToFirstDiagonal, distanceToSecondDiagonal);
-            }
-            case SHAPE_TRIANGLE -> { // equilateral triangle pointing upwards
-                // distances to the triangle’s edges
-                double dist1 = (SQRT_3 * dx - dy) / 2;
-                double dist2 = (-SQRT_3 * dx - dy) / 2;
-                double dist3 = dy;
-
-                double scale = 2.0 / SQRT_3; // scaling factor for unit triangle
-                yield Math.max(Math.max(dist1, dist2), dist3) / scale;
-            }
-            case SHAPE_HEXAGON -> {
-                // uses axial coordinates to calculate distance from the center of a regular hexagon
-                double q = (SQRT_3 / 3 * dx - 1.0 / 3 * dy);
-                double r = (2.0 / 3 * dy);
-                double s = -q - r;
-                yield (Math.abs(q) + Math.abs(r) + Math.abs(s)) / 2;
-            }
-            case SHAPE_OCTAGON -> {
-                double absX = Math.abs(dx);
-                double absY = Math.abs(dy);
-                yield Math.max(absX, absY) + (SQRT_2 - 1) * Math.min(absX, absY);
-            }
-            case SHAPE_STAR -> {
-                // uses polar coordinates to create a 5-pointed star
-                double angle = Math.atan2(dy, dx) + 3 * Math.PI / 2; // orient the star to point up
-                double radius = Math.hypot(dx, dy);
-                // modulates the radius based on the angle to form the star's points
-                double modifiedRadius = radius * (1 + 0.25 * Math.cos(5 * angle));
-                yield modifiedRadius;
-            }
-            default -> throw new IllegalArgumentException("Invalid shape: " + shape);
-        };
+        return maskImage;
     }
 
     @Override

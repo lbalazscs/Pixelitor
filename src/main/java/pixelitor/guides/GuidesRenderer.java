@@ -42,18 +42,18 @@ public class GuidesRenderer {
     /**
      * Draws the given shapes using the configured guide style.
      */
-    public void draw(Graphics2D g2, List<? extends Shape> shapes) {
-        g2.setStroke(style.getPrimaryStroke());
-        g2.setColor(style.getPrimaryColor());
+    public void draw(Graphics2D g, List<? extends Shape> shapes) {
+        g.setStroke(style.getPrimaryStroke());
+        g.setColor(style.getPrimaryColor());
         for (Shape shape : shapes) {
-            g2.draw(shape);
+            g.draw(shape);
         }
 
         if (style.getSecondaryStroke() != null) {
-            g2.setStroke(style.getSecondaryStroke());
-            g2.setColor(style.getSecondaryColor());
+            g.setStroke(style.getSecondaryStroke());
+            g.setColor(style.getSecondaryColor());
             for (Shape shape : shapes) {
-                g2.draw(shape);
+                g.draw(shape);
             }
         }
     }

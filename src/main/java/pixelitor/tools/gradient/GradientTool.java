@@ -446,21 +446,21 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void paintOverCanvas(Graphics2D g2, Composition comp) {
+    public void paintOverCanvas(Graphics2D g, Composition comp) {
         if (!comp.getActiveLayer().isVisible()) {
             return;
         }
 
         // the superclass draws the measurement overlay
-        super.paintOverCanvas(g2, comp);
+        super.paintOverCanvas(g, comp);
 
         if (handles != null) {
-            handles.paint(g2);
+            handles.paint(g);
         } else {
             if (drag != null && drag.isDragging()) {
                 // during the first drag, when there are no handles yet,
                 // paint only the arrow
-                drag.drawCoDirectionArrow(g2);
+                drag.drawCoDirectionArrow(g);
             }
         }
     }

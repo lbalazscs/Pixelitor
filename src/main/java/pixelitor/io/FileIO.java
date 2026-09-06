@@ -83,7 +83,7 @@ public class FileIO {
         } else {
             // if the file format isn't recognized from the extension,
             // try to read it as a generic single-layered format
-            return TrackedIO.readSingleLayeredAsync(file);
+            return TrackedIO.readSingleLayerCompAsync(file);
         }
     }
 
@@ -97,7 +97,7 @@ public class FileIO {
         } else {
             // if the file format isn't recognized from the extension,
             // try to read it as a generic single-layered format
-            return TrackedIO.readSingleLayeredSync(file);
+            return TrackedIO.readSingleLayerCompSync(file);
         }
     }
 
@@ -143,11 +143,11 @@ public class FileIO {
         if (de.isFromImageMagick()) {
             Messages.showError("Error", msg);
         } else {
-            promptImageMagickRetry(de, msg);
+            promptMagickImportFallback(de, msg);
         }
     }
 
-    private static void promptImageMagickRetry(DecodingException de, String msg) {
+    private static void promptMagickImportFallback(DecodingException de, String msg) {
         String[] options = {"Try with ImageMagick Import", GUIText.CANCEL};
         boolean retryWithMagick = Dialogs.showOKCancelQuestion(msg, "Error",
             options, 0, JOptionPane.ERROR_MESSAGE);
@@ -247,8 +247,8 @@ public class FileIO {
 
         CompletableFuture
             .supplyAsync(() -> exportLayersToPNG(comp), onIOThread)
-            .thenAcceptAsync(numImg -> Messages.showStatusMessage(
-                getSavedImagesMessage(numImg, RecentDirs.getLastSave())), onEDT)
+            .thenAcceptAsync(exportedCount -> Messages.showStatusMessage(
+                getSavedImagesMessage(exportedCount, RecentDirs.getLastSave())), onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
@@ -352,7 +352,7 @@ public class FileIO {
             %s
               <path d="%s" fill="%s" stroke="%s" fill-rule="%s" %s/>
             </svg>
-            """.formatted(canvas.createSVGElement(), svgPath,
+            """.formatted(canvas.createSvgRootTag(), svgPath,
             svgFillAttr, svgStrokeAttr, svgFillRule, svgStrokeStyle);
     }
 
@@ -418,7 +418,7 @@ public class FileIO {
                     // will be handled using exit code and stderr
                 }
 
-                int exit = process.waitFor();
+                int exitCode = process.waitFor();
 
                 // ensure the background write completes (or fails)
                 try {
@@ -431,11 +431,11 @@ public class FileIO {
                 String errorMsg = stderrFuture.join();
 
                 // check for errors
-                if (exit != 0 || out == null) {
+                if (exitCode != 0 || out == null) {
                     if (errorMsg != null && !errorMsg.isBlank()) {
                         return Result.error(errorMsg.trim());
                     } else {
-                        return Result.error("Process failed (exit=" + exit + ")");
+                        return Result.error("Process failed (exit code=" + exitCode + ")");
                     }
                 }
 
@@ -486,8 +486,7 @@ public class FileIO {
      * of an external command-line program in PNG format.
      */
     private static void writePngToProcessStdin(BufferedImage img, OutputStream commandLineInput) throws IOException {
-        // Write as png to ImageMagick and let it do
-        // the conversion to the final format.
+        // Write as png to the external process and let it handle further processing.
         // Explicitly setting a low compression level doesn't seem
         // to make it faster (why?), so use the simple approach.
         ImageIO.write(img, "png", commandLineInput);
