@@ -24,17 +24,32 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A filter that creates a kaleidoscope effect using rectangular grid coordinates.
+ * A filter that creates a kaleidoscope effect using rectangular, brick,
+ * 8-fold square, triangular, hexagonal, or octagonal truncated grid coordinates.
  */
 public class GridKaleidoscopeFilter extends TransformFilter {
-    public static final int STYLE_MIRROR = 1;
-    public static final int STYLE_REPEAT = 2;
+    public static final int GRID_SQUARE = 1;
 
-    private final int style;
+    // 8-fold group order, but visually 4-fold rotational symmetry
+    public static final int GRID_SQUARE_8_FOLD = 2;
+
+    // regular octagons with corner squares
+    public static final int GRID_OCTAGONAL_TRUNCATED = 3;
+
+    public static final int GRID_BRICK = 4;
+    public static final int GRID_TRIANGULAR = 5;
+    public static final int GRID_HEXAGONAL = 6;
+
+    private static final double TRIANGLE_ANGLE_OFFSET = Math.PI / 6.0; // 30 degrees
+    private static final double TRIANGLE_SIZE_FACTOR = 0.5; // matches 0.5 period of ImageMath.triangle()
+
+    // normalization scale for corner squares: 2.0 - sqrt(2)
+    private static final double OCTAGON_CORNER_SCALE = 2.0 - ImageMath.SQRT_2;
+
+    private final int gridType;
 
     private final double gridSizeX;
     private final double gridSizeY;
-    private final double angle;
     private final double distortionX;
     private final double distortionY;
 
@@ -43,6 +58,7 @@ public class GridKaleidoscopeFilter extends TransformFilter {
 
     private final double cos;
     private final double sin;
+    private final boolean hasRotation;
 
     private double cx;
     private double cy;
@@ -53,33 +69,45 @@ public class GridKaleidoscopeFilter extends TransformFilter {
      * @param filterName    the name of the filter.
      * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
      * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
-     * @param gridSizeX     the horizontal size of the grid cells in pixels.
-     * @param gridSizeY     the vertical size of the grid cells in pixels.
+     * @param gridType      the grid type (GRID_SQUARE, GRID_OCTAGONAL_TRUNCATED, GRID_BRICK, GRID_SQUARE_8_FOLD, GRID_TRIANGULAR, or GRID_HEXAGONAL).
+     * @param gridSize      the vertical size of the grid cells in pixels (the horizontal size is derived from this).
      * @param angle         the rotation angle of the grid in radians.
      * @param distortionX   the horizontal sine-wave distortion amount.
      * @param distortionY   the vertical sine-wave distortion amount.
      * @param center        the relative center point of the effect (values between 0 and 1).
-     * @param style         the grid style (STYLE_MIRROR or STYLE_REPEAT).
      */
     public GridKaleidoscopeFilter(String filterName,
                                   int edgeAction, int interpolation,
-                                  double gridSizeX, double gridSizeY,
+                                  int gridType, double gridSize,
                                   double angle,
                                   double distortionX, double distortionY,
-                                  Point2D center, int style) {
+                                  Point2D center) {
         super(filterName, edgeAction, interpolation);
 
-        this.gridSizeX = gridSizeX;
-        this.gridSizeY = gridSizeY;
-        this.angle = angle;
+        this.gridType = gridType;
+
+        // scale down triangular grid to match square/brick tile size
+        double effectiveGridSize = (gridType == GRID_TRIANGULAR)
+            ? gridSize * TRIANGLE_SIZE_FACTOR
+            : gridSize;
+        this.gridSizeX = (gridType == GRID_TRIANGULAR || gridType == GRID_HEXAGONAL)
+            ? effectiveGridSize / ImageMath.COS_30
+            : effectiveGridSize;
+        this.gridSizeY = effectiveGridSize;
+
         this.distortionX = distortionX;
         this.distortionY = distortionY;
         this.relCx = center.getX();
         this.relCy = center.getY();
-        this.style = style;
 
-        this.cos = Math.cos(angle);
-        this.sin = Math.sin(angle);
+        // add 30° offset so triangles are vertical (flat bottom) at angle = 0
+        double effectiveAngle = (gridType == GRID_TRIANGULAR)
+            ? angle + TRIANGLE_ANGLE_OFFSET
+            : angle;
+
+        this.cos = Math.cos(effectiveAngle);
+        this.sin = Math.sin(effectiveAngle);
+        this.hasRotation = effectiveAngle != 0.0;
     }
 
     @Override
@@ -98,7 +126,7 @@ public class GridKaleidoscopeFilter extends TransformFilter {
 
         // rotate around center
         double rx, ry;
-        if (angle != 0) {
+        if (hasRotation) {
             rx = dx * cos + dy * sin;
             ry = -dx * sin + dy * cos;
         } else {
@@ -115,29 +143,135 @@ public class GridKaleidoscopeFilter extends TransformFilter {
             ry += distortionY * Math.sin(undistortedRx / gridSizeX * Math.PI);
         }
 
-        // map the coordinates into a single grid cell of size [0,1] x [0,1]
-        double gridX = mapToGrid(rx / gridSizeX);
-        double gridY = mapToGrid(ry / gridSizeY);
+        double imgX;
+        double imgY;
 
-        // map the normalized grid coordinates back to image coordinates
-        double imgX = gridX * gridSizeX;
-        double imgY = gridY * gridSizeY;
+        if (gridType == GRID_TRIANGULAR || gridType == GRID_HEXAGONAL) {
+            // isometric coordinates in an equilateral triangular lattice
+            double v = ry / gridSizeY;
+            double u = (rx / gridSizeX) - 0.5 * v;
+
+            int m = (int) Math.floor(u);
+            int n = (int) Math.floor(v);
+            double fu = u - m;
+            double fv = v - n;
+
+            // determine weights for vertices based on whether the point
+            // is in the upward-pointing or downward-pointing triangle
+            double w0, w1, w2;
+            if (fu + fv < 1.0) {
+                w0 = 1.0 - fu - fv;
+                w1 = fu;
+                w2 = fv;
+            } else {
+                w0 = fu + fv - 1.0;
+                w1 = 1.0 - fv;
+                w2 = 1.0 - fu;
+            }
+
+            // in the p3m1 reflection group, vertex colors in
+            // {0, 1, 2} are invariant under mirror reflections
+            int c00 = Math.floorMod(m - n, 3);
+            double lambda1;
+            double lambda2;
+            switch (c00) {
+                case 0 -> {
+                    lambda1 = w1;
+                    lambda2 = w2;
+                }
+                case 1 -> {
+                    lambda1 = w0;
+                    lambda2 = w1;
+                }
+                case 2 -> {
+                    lambda1 = w2;
+                    lambda2 = w0;
+                }
+                default -> throw new IllegalStateException("Unexpected c00: " + c00);
+            }
+
+            // fold along the altitudes for hexagonal D6 symmetry / wallpaper group p6m
+            if (gridType == GRID_HEXAGONAL) {
+                double lambda0 = Math.max(0.0, 1.0 - lambda1 - lambda2);
+
+                // sort lambda0, lambda1, lambda2 in descending order (a >= b >= c)
+                // to map into the 30°-60°-90° fundamental domain
+                double a = lambda0;
+                double b = lambda1;
+                double c = lambda2;
+
+                if (a < b) {
+                    double t = a;
+                    a = b;
+                    b = t;
+                }
+                if (b < c) {
+                    double t = b;
+                    b = c;
+                    c = t;
+                    if (a < b) {
+                        t = a;
+                        a = b;
+                        b = t;
+                    }
+                }
+
+                lambda1 = b;
+                lambda2 = c;
+            }
+
+            // map barycentric coordinates of the equilateral triangle
+            // V0=(0, 0), V1=(s, 0), V2=(s/2, h) to image coordinates
+            imgX = (lambda1 + 0.5 * lambda2) * gridSizeX;
+            imgY = lambda2 * gridSizeY;
+        } else {
+            // apply grid type offset
+            switch (gridType) {
+                case GRID_SQUARE, GRID_SQUARE_8_FOLD, GRID_OCTAGONAL_TRUNCATED -> {
+                    // regular square lattice: no offset
+                }
+                case GRID_BRICK -> {
+                    int row = (int) Math.floor(ry / gridSizeY);
+                    if ((row & 1) != 0) {
+                        rx += 0.5 * gridSizeX;
+                    }
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + gridType);
+            }
+
+            // map the coordinates into a single grid cell of size [0,1] x [0,1]
+            double gridX = ImageMath.triangle(rx / gridSizeX);
+            double gridY = ImageMath.triangle(ry / gridSizeY);
+
+            // fold along the diagonal x = y for 8-fold (D4 / p4m) symmetry
+            if ((gridType == GRID_SQUARE_8_FOLD || gridType == GRID_OCTAGONAL_TRUNCATED) && gridX < gridY) {
+                double temp = gridX;
+                gridX = gridY;
+                gridY = temp;
+            }
+
+            // partition into regular octagon and corner square for Archimedean 4.8^2 tiling
+            if (gridType == GRID_OCTAGONAL_TRUNCATED && gridX + gridY > ImageMath.SQRT_2) {
+                double deltaX = 1.0 - gridX;
+                double deltaY = 1.0 - gridY;
+
+                // rotate 45° around corner (1, 1) and scale to [0, 1]
+                gridX = (deltaX + deltaY) / OCTAGON_CORNER_SCALE;
+                gridY = (deltaY - deltaX) / OCTAGON_CORNER_SCALE;
+            }
+
+            // map the normalized grid coordinates back to image coordinates
+            imgX = gridX * gridSizeX;
+            imgY = gridY * gridSizeY;
+        }
 
         // rotate back if needed and translate back from origin
-        if (angle != 0) {
+        if (hasRotation) {
             out[0] = (float) (cx + (imgX * cos - imgY * sin));
             out[1] = (float) (cy + (imgX * sin + imgY * cos));
         } else {
             out[0] = (float) (cx + imgX);
             out[1] = (float) (cy + imgY);
         }
-    }
-
-    private double mapToGrid(double value) {
-        return switch (style) {
-            case STYLE_MIRROR -> ImageMath.triangle(value);
-            case STYLE_REPEAT -> ImageMath.mod(2 * value, 1);
-            default -> throw new IllegalStateException("Unexpected value: " + style);
-        };
     }
 }

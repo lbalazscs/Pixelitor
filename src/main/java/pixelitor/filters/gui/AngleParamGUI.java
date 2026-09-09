@@ -37,17 +37,19 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
     private final SliderSpinner sliderSpinner;
     private final AbstractAngleSelector selector;
 
-    public AngleParamGUI(AngleParam angleParam) {
+    public AngleParamGUI(AngleParam param) {
         super(new BorderLayout(10, 0));
 
         // the selector UI depends on the specific class
-        selector = angleParam.getAngleSelector();
+        selector = param.getAngleSelector();
         add(selector, WEST);
 
-        sliderSpinner = createSliderSpinner(angleParam, selector);
+        sliderSpinner = createSliderSpinner(param, selector);
         add(sliderSpinner, CENTER);
 
-        setBorder(createTitledBorder(angleParam.getName()));
+        if (param.hasBorder()) {
+            setBorder(createTitledBorder(param.getName()));
+        }
 
         setupPreferredSize();
     }

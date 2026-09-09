@@ -38,6 +38,8 @@ public class AngleParam extends AbstractFilterParam {
     private double angle;
     private final double defaultAngle;
 
+    private boolean hasBorder;
+
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
 
@@ -101,6 +103,15 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public boolean isAtDefault() {
         return normalize(angle) == defaultAngle;
+    }
+
+    public AngleParam withoutBorder() {
+        hasBorder = false;
+        return this;
+    }
+
+    public boolean hasBorder() {
+        return hasBorder;
     }
 
     private void fireStateChanged() {

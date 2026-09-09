@@ -17,11 +17,9 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.impl.GridKaleidoscopeFilter;
+import pixelitor.gui.utils.SliderSpinner;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -32,14 +30,18 @@ public class GridKaleidoscope extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final AngleParam angle = new AngleParam("Grid Angle", 0);
-    private final GroupedRangeParam gridSize = new GroupedRangeParam("Grid Size (%)", 5, 50, 100);
-    private final GroupedRangeParam distortion = new GroupedRangeParam("Distortion", -100, 0, 100, false);
-    private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final IntChoiceParam style = new IntChoiceParam("Style", new IntChoiceParam.Item[]{
-        new IntChoiceParam.Item("Mirror", GridKaleidoscopeFilter.STYLE_MIRROR),
-        new IntChoiceParam.Item("Repeat", GridKaleidoscopeFilter.STYLE_REPEAT),
+    private final IntChoiceParam gridType = new IntChoiceParam("Pattern", new IntChoiceParam.Item[]{
+        new IntChoiceParam.Item("Squares (2-Fold)", GridKaleidoscopeFilter.GRID_SQUARE),
+        new IntChoiceParam.Item("Squares (4-Fold)", GridKaleidoscopeFilter.GRID_SQUARE_8_FOLD),
+        new IntChoiceParam.Item("Octagons and Squares (4-Fold)", GridKaleidoscopeFilter.GRID_OCTAGONAL_TRUNCATED),
+        new IntChoiceParam.Item("Bricks (2-Fold)", GridKaleidoscopeFilter.GRID_BRICK),
+        new IntChoiceParam.Item("Triangles (3-Fold)", GridKaleidoscopeFilter.GRID_TRIANGULAR),
+        new IntChoiceParam.Item("Hexagons (6-Fold)", GridKaleidoscopeFilter.GRID_HEXAGONAL),
     });
+    private final RangeParam gridSize = new RangeParam("Size", 20, 100, 500, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
+    private final AngleParam angle = new AngleParam("Rotation", 0);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final GroupedRangeParam distortion = new GroupedRangeParam("Wave Distortion", -100, 0, 100, false);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
@@ -47,11 +49,12 @@ public class GridKaleidoscope extends ParametrizedFilter {
         super(true);
 
         initParams(
-            gridSize,
-            angle,
+            CompositeParam.border("Grid",
+                gridType,
+                gridSize,
+                angle.withoutBorder()),
             center,
             distortion,
-            style,
             edgeAction,
             interpolation
         );
@@ -63,13 +66,12 @@ public class GridKaleidoscope extends ParametrizedFilter {
             NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
-            src.getWidth() * gridSize.getPercentage(0),
-            src.getHeight() * gridSize.getPercentage(1),
+            gridType.getValue(),
+            gridSize.getValueAsDouble(),
             angle.getValueInRadians(),
             distortion.getHorizontal(),
             distortion.getVertical(),
-            center.getRelativePoint(),
-            style.getValue()
+            center.getRelativePoint()
         );
 
         return filter.filter(src, dest);
