@@ -45,7 +45,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
     public static final String NAME = "Dots Halftone";
 
     public enum DotShape {
-        CIRCLE("Circle", (dx, dy) -> dx * dx + dy * dy),
+        CIRCLE("Circle", Math::hypot),
         SQUARE("Square", (dx, dy) -> Math.max(Math.abs(dx), Math.abs(dy))),
         DIAMOND("Diamond", (dx, dy) -> Math.abs(dx) + Math.abs(dy)),
         CROSS("Cross", (dx, dy) -> Math.min(Math.abs(dx), Math.abs(dy))),
@@ -105,6 +105,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
 
     private final RangeParam dotRadius = new RangeParam("Dot Radius", 1, 10, 100);
     private final EnumParam<DotShape> dotShape = new EnumParam<>("Dot Shape", DotShape.class);
+    private final BooleanParam hollowDots = new BooleanParam("Hollow Dots");
 
     private final IntChoiceParam dotGrid = new IntChoiceParam("Dot Grid", new Item[]{
         new Item("Triangle", HalftoneFilter.GRID_TRIANGLE),
@@ -127,6 +128,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
         initParams(
             dotRadius,
             dotShape,
+            hollowDots,
             dotGrid,
             center,
             softness,
@@ -161,7 +163,8 @@ public class JHDotsHalftone extends ParametrizedFilter {
      * Creates a mask image where dots are clustered together
      * to represent different intensity thresholds (priority orders).
      * As brightness increases, dots will appear in that order,
-     * expanding outward, and growing into recognizable shapes.
+     * expanding outward (or inward and outward if hollow),
+     * and growing into recognizable shapes.
      */
     private BufferedImage createMaskImage() {
         int maskSize = 2 * dotRadius.getValue();
@@ -169,8 +172,10 @@ public class JHDotsHalftone extends ParametrizedFilter {
         int total = maskSize * maskSize;
         DotShape shape = dotShape.getValue();
         double center = (maskSize - 1) / 2.0;
+        boolean hollow = hollowDots.isChecked();
+        double targetRadius = dotRadius.getValue() / 2.0;
 
-        // binds a pixel's index to its distance from the center
+        // binds a pixel's index to its distance metric
         record PointDist(int pixelIndex, double dist) {
         }
 
@@ -181,12 +186,16 @@ public class JHDotsHalftone extends ParametrizedFilter {
             double dy = y - center;
             for (int x = 0; x < maskSize; x++) {
                 double dx = x - center;
-                points[idx] = new PointDist(idx, shape.distance(dx, dy));
+                double dist = shape.distance(dx, dy);
+                if (hollow) {
+                    dist = Math.abs(dist - targetRadius);
+                }
+                points[idx] = new PointDist(idx, dist);
                 idx++;
             }
         }
 
-        // sort the points by the distance to the center of the shape
+        // sort the points by priority order
         Arrays.sort(points, Comparator.comparingDouble(PointDist::dist));
 
         BufferedImage maskImage = new BufferedImage(maskSize, maskSize, BufferedImage.TYPE_INT_ARGB);
