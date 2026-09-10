@@ -38,7 +38,7 @@ public class AngleParam extends AbstractFilterParam {
     private double angle;
     private final double defaultAngle;
 
-    private boolean hasBorder;
+    private boolean hasBorder = true;
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();

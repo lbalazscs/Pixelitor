@@ -19,6 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.BrushedMetalFilter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
 
@@ -40,6 +41,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
 
     private final ColorParam color = new ColorParam("Color", GRAY, OPAQUE_ONLY);
     private final RangeParam radius = new RangeParam("Length", 0, 100, 500);
+    private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam amount = new RangeParam("Amount (%)", 0, 50, 100);
     private final RangeParam shine = new RangeParam("Shine (%)", 0, 10, 100);
 
@@ -49,6 +51,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
         initParams(
             color,
             radius.withAdjustedRange(0.5),
+            angle,
             amount,
             shine
         ).withReseedAction();
@@ -62,9 +65,10 @@ public class JHBrushedMetal extends ParametrizedFilter {
             color.getColor().getRGB(),
             radius.getValue(),
             (float) amount.getPercentage(),
-            (float) shine.getPercentage());
-
-        filter.setRandom(rand);
+            (float) shine.getPercentage(),
+            (float) angle.getValueInRadians(),
+            rand
+        );
 
         return filter.filter(src, dest);
     }
