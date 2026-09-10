@@ -57,7 +57,8 @@ public class Cubes extends ParametrizedFilter {
         CORNER_CUT2("Corner Cut 2", 2, false),
         CORNER_CUT3("Corner Cut 3", 3, false),
         INTERLOCKING("Interlocking", 0, true),
-        SUPERCUBE("Supercube", 0, false);
+        SUPERCUBE("Supercube", 0, false),
+        PYRAMID("Pyramid", 0, false);
 
         private final String displayName;
         private final boolean isInterlocking;
@@ -83,6 +84,7 @@ public class Cubes extends ParametrizedFilter {
 
     private final EnumParam<CubeType> typeParam = new EnumParam<>("Type", CubeType.class);
     private final GroupedRangeParam sizeParam = new GroupedRangeParam("Size", 5, 20, 200);
+    private final RangeParam gapParam = new RangeParam("Gap", 0, 100, 100);
     private final ColorParam topColorParam = new ColorParam("Top Color", WHITE, MANUAL_ALPHA_ONLY);
     private final ColorParam leftColorParam = new ColorParam("Left Color", LIGHT_GRAY, MANUAL_ALPHA_ONLY);
     private final ColorParam rightColorParam = new ColorParam("Right Color", GRAY, MANUAL_ALPHA_ONLY);
@@ -94,11 +96,16 @@ public class Cubes extends ParametrizedFilter {
     public Cubes() {
         super(false);
 
+        // enable the gap selector only for SUPERCUBE and PYRAMID
+        typeParam.enableOtherWhen(gapParam, type -> type == CubeType.SUPERCUBE || type == CubeType.PYRAMID);
+
+        // enable the edge color selector only if edge width > 0
         edgeWidthParam.enableOtherWhenNotZero(edgeColorParam);
 
         initParams(
             typeParam,
             sizeParam,
+            gapParam,
             topColorParam,
             leftColorParam,
             rightColorParam,
@@ -167,6 +174,8 @@ public class Cubes extends ParametrizedFilter {
         CubeType type = typeParam.getValue();
         if (type == CubeType.SUPERCUBE) {
             return createSupercubeShapes(width, height);
+        } else if (type == CubeType.PYRAMID) {
+            return createPyramidShapes(width, height);
         }
 
         List<ShapeWithColor> shapes = new ArrayList<>();
@@ -225,7 +234,7 @@ public class Cubes extends ParametrizedFilter {
         double w = size * COS_30;
 
         // the step from one cube's center vertex to the next
-        final double stepFactor = 1.5; // size + gap = 1.5 * size
+        double stepFactor = 1.0 + gapParam.getPercentage() * 0.5; // size + gap = 1.5 * size
 
         // calculate the dimension of the "super-cube" (dim x dim x dim)
         // so that it fits reasonably well within the canvas
@@ -267,6 +276,76 @@ public class Cubes extends ParametrizedFilter {
                         double baseY = centerY + i * dy_i + j * dy_j + k * dy_k;
 
                         // pass CubeType.BASIC because we want the simple cube shape
+                        addCubeShapes(shapes, baseX, baseY, w, h,
+                            CubeType.BASIC, topColor, rightColor, leftColor);
+                    }
+                }
+            }
+        }
+
+        return shapes;
+    }
+
+    /**
+     * Creates the list of shapes for the "Pyramid" cube pattern.
+     * This pattern is a stepped ziggurat, where each level has fewer cubes.
+     * Only the two outer square rings of each level are rendered, as the inner ones are occluded.
+     */
+    private List<ShapeWithColor> createPyramidShapes(int width, int height) {
+        Color topColor = topColorParam.getColor();
+        Color rightColor = rightColorParam.getColor();
+        Color leftColor = leftColorParam.getColor();
+        double size = sizeParam.getValueAsDouble(0);
+        double h = sizeParam.getValueAsDouble(1);
+        double w = size * COS_30;
+
+        // The step factor determines the gap between cubes.
+        // 1.5 has maximal gap; 1.0 makes cubes touch.
+        double stepFactor = 1.0 + gapParam.getPercentage() * 0.5;
+
+        // Isometric projection step vectors
+        double stepHor = stepFactor * w;
+        double stepVerUp = stepFactor * 0.5 * h;
+        double stepVerDown = stepFactor * h;
+
+        // Calculate the maximum number of levels that fit in the canvas
+        int maxNWidth = (int) Math.max(0, (width - 2 * w) / (4 * stepFactor * w)) + 1;
+        int maxNHeight = (int) Math.max(0, (height / (2 * h) - 1) / stepFactor) + 1;
+        int N = Math.max(1, Math.min(maxNWidth, maxNHeight));
+        // Cap to avoid excessive shape generation
+        N = Math.min(N, 50);
+
+        // Center the pyramid vertically around the user-selected center
+        double centerX = transform.getCx(width);
+        double centerY = transform.getCy(height);
+        double offsetY = -(N - 1) * stepFactor * h;
+        double baseYOffset = centerY + offsetY;
+
+        // Estimate the number of shapes to pre-size the list.
+        // Each rendered cube adds 3 shapes (top, right, left).
+        int estimatedCubes = 0;
+        for (int k = 0; k < N; k++) {
+            if (k == 0) {
+                estimatedCubes += 1; // single cube
+            } else if (k == 1) {
+                estimatedCubes += 9; // all 9 cubes form the two outer rings
+            } else {
+                // two outer square rings: total cubes minus the inner (2k-3) x (2k-3) square
+                estimatedCubes += 16 * k - 8;
+            }
+        }
+        List<ShapeWithColor> shapes = new ArrayList<>(estimatedCubes * 3);
+
+        // Draw from bottom to top (k from N-1 down to 0) and back to front
+        for (int k = N - 1; k >= 0; k--) {
+            // For level k, i and j range from -k to k.
+            // Only draw the two outer square rings to avoid inner occluded cubes.
+            for (int j = k; j >= -k; j--) {
+                for (int i = k; i >= -k; i--) {
+                    if (Math.max(Math.abs(i), Math.abs(j)) >= k - 1) {
+                        double baseX = centerX + (i - j) * stepHor;
+                        double baseY = baseYOffset + k * stepVerDown - (i + j) * stepVerUp;
+
                         addCubeShapes(shapes, baseX, baseY, w, h,
                             CubeType.BASIC, topColor, rightColor, leftColor);
                     }
