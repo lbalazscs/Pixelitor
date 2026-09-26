@@ -102,6 +102,11 @@ public abstract class AbstractFilterParam implements FilterParam {
         this.presetKey = presetKey;
     }
 
+    public FilterParam withPresetKey(String presetKey) {
+        this.presetKey = presetKey;
+        return this;
+    }
+
     @Override
     public void setEnabled(boolean enabled, EnabledReason reason) {
         switch (reason) {

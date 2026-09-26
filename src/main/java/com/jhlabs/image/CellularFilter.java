@@ -440,4 +440,17 @@ public class CellularFilter extends WholeImageFilter {
 
         return outPixels;
     }
+
+    /**
+     * Maps a feature point from noise space back to image space (inverting
+     * scale, stretch, and rotation) and samples the source pixel.
+     * (this method is used only by the two subclasses)
+     */
+    protected int getSourcePixel(Point p, int[] inPixels, int width, int height) {
+        float dx = (p.x - ORIGIN_OFFSET) * scale;
+        float dy = (p.y - ORIGIN_OFFSET) * scale * stretch;
+        int srcx = ImageMath.clamp((int) (m00 * dx + m10 * dy), 0, width - 1);
+        int srcy = ImageMath.clamp((int) (m01 * dx + m11 * dy), 0, height - 1);
+        return inPixels[srcy * width + srcx];
+    }
 }

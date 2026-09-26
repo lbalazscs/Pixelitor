@@ -20,10 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.CrystallizeFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.EnumParam;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
@@ -41,12 +38,17 @@ public class JHCrystallize extends ParametrizedFilter {
 
     public static final String NAME = Texts.i18n("crystallize");
 
-    private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);
     private final RangeParam size = new RangeParam("Size", 1, 20, 200);
-    private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, RANDOMIZED_ALPHA);
-    private final BooleanParam fadeEdges = new BooleanParam("Fade Edges");
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 0, 100);
     private final EnumParam<CellularFilter.GridType> gridType = EnumParam.forGridType("Shape", randomness);
+
+    // edge group
+    private final RangeParam edgeThickness = new RangeParam("Thickness", 0, 40, 100);
+    private final ColorParam edgeColor = new ColorParam("Color", BLACK, RANDOMIZED_ALPHA);
+    private final BooleanParam fadeEdges = new BooleanParam("Fade");
+
+    private final AngleParam angle = new AngleParam("Angle", 0);
+    private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 1000);
 
     private CrystallizeFilter filter;
 
@@ -57,9 +59,12 @@ public class JHCrystallize extends ParametrizedFilter {
             size.withAdjustedRange(0.2),
             gridType,
             randomness,
-            edgeThickness,
-            edgeColor,
-            fadeEdges
+            CompositeParam.bordered("Edge",
+                edgeThickness.withPresetKey("Edge Thickness"),
+                edgeColor.withPresetKey("Edge Color"),
+                fadeEdges.withPresetKey("Fade Edges")),
+            angle,
+            stretch
         ).withAction(paramSet.createReseedCachedAndNoiseAction());
     }
 
@@ -75,6 +80,9 @@ public class JHCrystallize extends ParametrizedFilter {
         filter.setEdgeColor(edgeColor.getColor().getRGB());
         filter.setGridType(gridType.getSelected());
         filter.setFadeEdges(fadeEdges.isChecked());
+
+        filter.setStretch((float) stretch.getPercentage());
+        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
 
         return filter.filter(src, dest);
     }

@@ -45,7 +45,7 @@ public class JHCells extends ParametrizedFilter {
         GradientParam.createBlackToWhite("Colors");
 
     private final RangeParam scale = new RangeParam(ZOOM, 1, 100, 500);
-    private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 999);
+    private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 1000);
 
     private final RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 1, 100);
     private final EnumParam<CellularFilter.GridType> gridType = EnumParam.forGridType("Grid Type", gridRandomness);

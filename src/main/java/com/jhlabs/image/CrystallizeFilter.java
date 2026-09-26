@@ -55,15 +55,15 @@ public class CrystallizeFilter extends CellularFilter {
 
         float f1 = results[0].distance;
         float f2 = results[1].distance;
-        int srcx = ImageMath.clamp((int) ((results[0].x - ORIGIN_OFFSET) * scale), 0, width - 1);
-        int srcy = ImageMath.clamp((int) ((results[0].y - ORIGIN_OFFSET) * scale), 0, height - 1);
-        int v = inPixels[srcy * width + srcx];
+
+        // sample source pixel using the inverse transform
+        int v = getSourcePixel(results[0], inPixels, width, height);
+
         float f = (f2 - f1) / edgeThickness;
         f = ImageMath.smoothStep(0, edgeThickness, f);
         if (fadeEdges) {
-            srcx = ImageMath.clamp((int) ((results[1].x - ORIGIN_OFFSET) * scale), 0, width - 1);
-            srcy = ImageMath.clamp((int) ((results[1].y - ORIGIN_OFFSET) * scale), 0, height - 1);
-            int v2 = inPixels[srcy * width + srcx];
+            // sample second nearest source pixel
+            int v2 = getSourcePixel(results[1], inPixels, width, height);
             v2 = ImageMath.mixColors(0.5f, v2, v);
             v = ImageMath.mixColors(f, v2, v);
         } else {

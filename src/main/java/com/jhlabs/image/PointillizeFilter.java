@@ -55,15 +55,14 @@ public class PointillizeFilter extends CellularFilter {
         Point[] results = resultsTL.get();
 
         float f1 = results[0].distance;
-        int srcx = ImageMath.clamp((int) ((results[0].x - ORIGIN_OFFSET) * scale), 0, width - 1);
-        int srcy = ImageMath.clamp((int) ((results[0].y - ORIGIN_OFFSET) * scale), 0, height - 1);
-        int v = inPixels[srcy * width + srcx];
+
+        // sample source pixel using the inverse transform
+        int v = getSourcePixel(results[0], inPixels, width, height);
 
         if (fadeEdges) {
             float f2 = results[1].distance;
-            srcx = ImageMath.clamp((int) ((results[1].x - ORIGIN_OFFSET) * scale), 0, width - 1);
-            srcy = ImageMath.clamp((int) ((results[1].y - ORIGIN_OFFSET) * scale), 0, height - 1);
-            int v2 = inPixels[srcy * width + srcx];
+            // sample second nearest source pixel
+            int v2 = getSourcePixel(results[1], inPixels, width, height);
             v = ImageMath.mixColors(0.5f * f1 / f2, v, v2);
         } else {
             float f = 1 - ImageMath.smoothStep(edgeThickness, edgeThickness + fuzziness, f1);
