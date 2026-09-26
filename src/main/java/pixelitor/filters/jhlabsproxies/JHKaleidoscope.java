@@ -18,10 +18,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.KaleidoscopeFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
@@ -38,12 +35,16 @@ public class JHKaleidoscope extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 4353876794593269727L;
 
-    private final AngleParam angle = new AngleParam("Angle", 0);
-    private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
-    private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam sides = new RangeParam("Sides", 0, 3, 10);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final AngleParam angle = new AngleParam("Angle", 0);
+    private final RangeParam rings = new RangeParam("Rings", 0, 0, 5);
 
+    private final RangeParam twist = new RangeParam("Twist", -100, 0, 100);
+    private final RangeParam lens = new RangeParam("Pinch/Bulge", -100, 0, 100);
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
+    private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
+
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
@@ -52,12 +53,15 @@ public class JHKaleidoscope extends ParametrizedFilter {
 
         zoom.setPresetKey("Zoom (%)");
         initParams(
+            sides,
             center,
             angle,
-            sides,
-//                radius,
-            zoom,
-            rotateResult,
+            rings,
+            new CompositeParam("Transform",
+                twist,
+                lens,
+                zoom,
+                rotateResult),
             edgeAction,
             interpolation
         );
@@ -65,6 +69,8 @@ public class JHKaleidoscope extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
+        double refRadius = Math.hypot(src.getWidth(), src.getHeight()) / 2.0;
+
         KaleidoscopeFilter filter = new KaleidoscopeFilter(NAME,
             edgeAction.getValue(),
             interpolation.getValue(),
@@ -72,7 +78,12 @@ public class JHKaleidoscope extends ParametrizedFilter {
             (float) rotateResult.getValueInRadians(),
             sides.getValue(),
             center.getAbsolutePoint(src),
-            (float) zoom.getPercentage());
+            (float) zoom.getPercentage(),
+            refRadius,
+            twist.getPercentage(),
+            rings.getValue(),
+            lens.getPercentage()
+        );
 
         return filter.filter(src, dest);
     }

@@ -63,7 +63,8 @@ public class TestFilterPerformance {
     private static BufferedImageOp getFilter() {
         var f = new KaleidoscopeFilter("Kaleidoscope Test",
             TransformFilter.REFLECT, TransformFilter.NEAREST_NEIGHBOR,
-            0, 0, 3, new Point2D.Double(0, 0), 1.0f);
+            0, 0, 3, new Point2D.Double(0, 0), 1.0f,
+            100, 0, 0, 0);
 
         f.setProgressTracker(ProgressTracker.NO_OP_TRACKER);
         return f;
