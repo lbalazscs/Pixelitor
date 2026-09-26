@@ -149,6 +149,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * update the other maintaining the multiplier relationship.
      */
     public void scaledLinkWith(RangeParam other, double multiplier) {
+        assert multiplier != 0;
         addChangeListener(_ -> other.setValueNoTrigger(
             getValueAsDouble() * multiplier));
         other.addChangeListener(_ -> setValueNoTrigger(
@@ -203,7 +204,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public String getPercentageStr() {
-        return getPercentage() + "";
+        return String.valueOf(getPercentage());
     }
 
     /**
@@ -416,7 +417,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         setDefaultValue((int) (defaultToMaxRatio * maxValue));
         if (applyNewDefault) {
             value = defaultValue;
+        } else {
+            // maxValue may have shrunk
+            value = Math.clamp(value, minValue, maxValue);
         }
+        assert checkInvariants();
 
         if (paramGUI != null) {
             ((SliderSpinner) paramGUI).updateRange();

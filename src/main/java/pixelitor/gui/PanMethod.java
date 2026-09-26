@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public enum PanMethod {
      * Whether space key events should be ignored for panning.
      */
     public static boolean shouldIgnoreSpace() {
-        return ACTIVE != SPACE_DRAG;
+        return active != SPACE_DRAG;
     }
 
     /**
@@ -64,21 +64,21 @@ public enum PanMethod {
      */
     public abstract boolean shouldStartPan(PMouseEvent e);
 
-    public static PanMethod ACTIVE = SPACE_DRAG;
+    public static PanMethod active = SPACE_DRAG;
 
     public static void loadFromPreferences() {
-        String loadedCode = AppPreferences.loadPan();
+        String loadedCode = AppPreferences.loadPanCode();
 
         for (PanMethod method : values()) {
             if (method.saveCode().equals(loadedCode)) {
-                ACTIVE = method;
+                active = method;
                 break;
             }
         }
     }
 
     public static void changeTo(PanMethod newMethod) {
-        ACTIVE = newMethod;
+        active = newMethod;
     }
 
     public String saveCode() {

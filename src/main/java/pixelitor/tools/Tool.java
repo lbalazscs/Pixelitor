@@ -196,9 +196,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
         return false; // not consumed
     }
 
-    public void escPressed() {
-        // empty by default
-    }
+    public abstract void escPressed();
 
     public void altPressed() {
         if (hasColorPickerForwarding()) {

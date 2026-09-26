@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.View;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -54,10 +55,29 @@ public class HandTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
+        viewportPanner.mouseReleased();
+    }
+
+    @Override
+    protected void toolDeactivated(View view) {
+        super.toolDeactivated(view);
+        viewportPanner.reset();
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        viewportPanner.reset();
+    }
+
+    @Override
+    public void escPressed() {
+        reset();
     }
 
     @Override
     public boolean hasHandToolForwarding() {
+        // the hand tool doesn't need to forward to itself
         return false;
     }
 

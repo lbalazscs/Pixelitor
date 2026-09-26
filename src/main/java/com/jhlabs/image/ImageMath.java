@@ -263,13 +263,13 @@ public class ImageMath {
      */
     public static float triangle(float x) {
         float r = mod(x, 1.0f);
-        return 2.0f * (r < 0.5 ? r : 1 - r);
+        return 2.0f * (r < 0.5f ? r : 1.0f - r);
     }
 
     // triangle for doubles
     public static double triangle(double x) {
         double r = mod(x, 1.0);
-        return 2.0 * (r < 0.5 ? r : 1 - r);
+        return 2.0 * (r < 0.5 ? r : 1.0 - r);
     }
 
     /**

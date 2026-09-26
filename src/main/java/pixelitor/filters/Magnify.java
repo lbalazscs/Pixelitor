@@ -35,7 +35,7 @@ public class Magnify extends ParametrizedFilter {
     private static final long serialVersionUID = -7415549925214553939L;
 
     private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 501);
-    private final GroupedRangeParam outerRadius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 999);
+    private final GroupedRangeParam outerRadius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 1000);
     private final RangeParam softness = new RangeParam("Softness", 0, 100, 1000);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam shape = BlurredShape.getChoices();

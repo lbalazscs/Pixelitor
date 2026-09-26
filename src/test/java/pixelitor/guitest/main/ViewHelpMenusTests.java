@@ -18,15 +18,11 @@
 package pixelitor.guitest.main;
 
 import org.assertj.swing.exception.ComponentLookupException;
-import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.StatusBar;
 import pixelitor.guitest.AppRunner;
 import pixelitor.guitest.EDT;
 import pixelitor.guitest.Keyboard;
 import pixelitor.guitest.Mouse;
-import pixelitor.layers.LayersContainer;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Rnd;
@@ -37,6 +33,7 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import static java.awt.event.KeyEvent.VK_F6;
 import static java.awt.event.KeyEvent.VK_F7;
 import static org.assertj.core.api.Assertions.assertThat;
+import static pixelitor.gui.AppPanel.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.guitest.GUITestUtils.findButtonByText;
 
@@ -114,58 +111,58 @@ public class ViewHelpMenusTests {
         context.log(1, "hide/show UI elements");
 
         app.runMenuCommand("Reset Workspace");
-        assert EDT.call(StatusBar::isShown);
-        assert !EDT.call(HistogramsPanel::isShown);
-        assert EDT.call(LayersContainer::areLayersShown);
-        assert EDT.call(() -> PixelitorWindow.get().areToolsShown());
+        assert EDT.call(STATUS_BAR::isShown);
+        assert !EDT.call(HISTOGRAMS::isShown);
+        assert EDT.call(LAYERS::isShown);
+        assert EDT.call(TOOLS::isShown);
 
         app.runMenuCommand("Hide Status Bar");
-        assert !EDT.call(StatusBar::isShown);
+        assert !EDT.call(STATUS_BAR::isShown);
 
         app.runMenuCommand("Show Status Bar");
-        assert EDT.call(StatusBar::isShown);
+        assert EDT.call(STATUS_BAR::isShown);
 
         app.runMenuCommand("Show Histograms");
-        assert EDT.call(HistogramsPanel::isShown);
+        assert EDT.call(HISTOGRAMS::isShown);
 
         app.runMenuCommand("Hide Histograms");
-        assert !EDT.call(HistogramsPanel::isShown);
+        assert !EDT.call(HISTOGRAMS::isShown);
 
         keyboard.press(VK_F6);
-        assert EDT.call(HistogramsPanel::isShown);
+        assert EDT.call(HISTOGRAMS::isShown);
 
         keyboard.press(VK_F6);
-        assert !EDT.call(HistogramsPanel::isShown);
+        assert !EDT.call(HISTOGRAMS::isShown);
 
         app.runMenuCommand("Hide Layers");
-        assert !EDT.call(LayersContainer::areLayersShown);
+        assert !EDT.call(LAYERS::isShown);
 
         app.runMenuCommand("Show Layers");
-        assert EDT.call(LayersContainer::areLayersShown);
+        assert EDT.call(LAYERS::isShown);
 
         keyboard.press(VK_F7);
-        assert !EDT.call(LayersContainer::areLayersShown);
+        assert !EDT.call(LAYERS::isShown);
 
         keyboard.press(VK_F7);
-        assert EDT.call(LayersContainer::areLayersShown);
+        assert EDT.call(LAYERS::isShown);
 
         app.runMenuCommand("Hide Tools");
-        assert !EDT.call(() -> PixelitorWindow.get().areToolsShown());
+        assert !EDT.call(TOOLS::isShown);
 
         app.runMenuCommand("Show Tools");
-        assert EDT.call(() -> PixelitorWindow.get().areToolsShown());
+        assert EDT.call(TOOLS::isShown);
 
         app.runMenuCommand("Hide All");
-        assert !EDT.call(StatusBar::isShown);
-        assert !EDT.call(HistogramsPanel::isShown);
-        assert !EDT.call(LayersContainer::areLayersShown);
-        assert !EDT.call(() -> PixelitorWindow.get().areToolsShown());
+        assert !EDT.call(STATUS_BAR::isShown);
+        assert !EDT.call(HISTOGRAMS::isShown);
+        assert !EDT.call(LAYERS::isShown);
+        assert !EDT.call(TOOLS::isShown);
 
         app.runMenuCommand("Restore Workspace");
-        assert EDT.call(StatusBar::isShown);
-        assert !EDT.call(HistogramsPanel::isShown);
-        assert EDT.call(LayersContainer::areLayersShown);
-        assert EDT.call(() -> PixelitorWindow.get().areToolsShown());
+        assert EDT.call(STATUS_BAR::isShown);
+        assert !EDT.call(HISTOGRAMS::isShown);
+        assert EDT.call(LAYERS::isShown);
+        assert EDT.call(TOOLS::isShown);
     }
 
     private void testGuides() {

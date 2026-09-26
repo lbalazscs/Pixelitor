@@ -323,6 +323,11 @@ public abstract class AbstractBrushTool extends Tool {
         updateOutlinePosition(e.getX(), e.getY(), view);
     }
 
+    @Override
+    public void escPressed() {
+        // do nothing
+    }
+
     private void updateOutlinePosition(int x, int y, View view) {
         int prevX = outlineCoX;
         int prevY = outlineCoY;

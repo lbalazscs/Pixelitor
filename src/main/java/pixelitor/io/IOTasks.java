@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,15 +30,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Makes sure that only one IO task runs at a time
+ * Coordinates I/O operations by serializing their execution
+ * and tracking actively read and written file paths.
  */
 public class IOTasks {
     private static final Executor executor
         = new SerialExecutor(ThreadPool.getExecutor());
 
-    private static final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private static final Lock readLock = readWriteLock.readLock();
-    private static final Lock writeLock = readWriteLock.writeLock();
+    private static final ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
+    private static final Lock stateReadLock = stateLock.readLock();
+    private static final Lock stateWriteLock = stateLock.writeLock();
 
     private static final Set<String> activeReadPaths = new HashSet<>();
     private static final Set<String> activeWritePaths = new HashSet<>();
@@ -58,68 +59,68 @@ public class IOTasks {
         return executor;
     }
 
-    public static synchronized boolean isPathProcessing(String path) {
-        readLock.lock();
+    public static boolean isPathInUse(String path) {
+        stateReadLock.lock();
         try {
             return activeReadPaths.contains(path) || activeWritePaths.contains(path);
         } finally {
-            readLock.unlock();
+            stateReadLock.unlock();
         }
     }
 
-    public static void markPathForReading(String path) {
-        writeLock.lock();
+    public static void markReadingStarted(String path) {
+        stateWriteLock.lock();
         try {
             activeReadPaths.add(path);
         } finally {
-            writeLock.unlock();
+            stateWriteLock.unlock();
         }
     }
 
-    public static void markPathForWriting(String path) {
-        writeLock.lock();
+    public static void markWritingStarted(String path) {
+        stateWriteLock.lock();
         try {
             activeWritePaths.add(path);
         } finally {
-            writeLock.unlock();
+            stateWriteLock.unlock();
         }
     }
 
     public static void markReadingComplete(String path) {
-        writeLock.lock();
+        stateWriteLock.lock();
         try {
-            boolean contained = activeReadPaths.remove(path);
-            assert contained : "Path was not being tracked for reading: " + path;
+            boolean wasPresent = activeReadPaths.remove(path);
+            assert wasPresent : "Path was not being tracked for reading: " + path;
         } finally {
-            writeLock.unlock();
+            stateWriteLock.unlock();
         }
     }
 
     public static void markWritingComplete(String path) {
-        writeLock.lock();
+        stateWriteLock.lock();
         try {
-            boolean contained = activeWritePaths.remove(path);
-            assert contained : "Path was not being tracked for writing: " + path;
+            boolean wasPresent = activeWritePaths.remove(path);
+            assert wasPresent : "Path was not being tracked for writing: " + path;
         } finally {
-            writeLock.unlock();
+            stateWriteLock.unlock();
         }
     }
 
     public static boolean hasActiveWrites() {
-        readLock.lock();
+        stateReadLock.lock();
         try {
             return !activeWritePaths.isEmpty();
         } finally {
-            readLock.unlock();
+            stateReadLock.unlock();
         }
     }
 
     public static Set<String> getActiveWritePaths() {
-        readLock.lock();
+        stateReadLock.lock();
         try {
-            return new HashSet<>(activeWritePaths);
+            return Set.copyOf(activeWritePaths);
         } finally {
-            readLock.unlock();
+            stateReadLock.unlock();
         }
     }
 
@@ -134,6 +135,7 @@ public class IOTasks {
         try {
             latch.await();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
 

@@ -37,14 +37,13 @@ import static pixelitor.utils.Threads.calledOnEDT;
  */
 public class StatusBar extends JPanel {
     private static final String INITIAL_MESSAGE = "Pixelitor started";
-    private static final StatusBar INSTANCE = new StatusBar();
 
     private final JLabel messageLabel;
     private final JPanel progressContainer;
 
     private static int activeProgressBarCount = 0;
 
-    private StatusBar() {
+    public StatusBar() {
         super(new BorderLayout(0, 0));
 
         progressContainer = new JPanel(new FlowLayout(LEFT, 5, 0));
@@ -79,14 +78,6 @@ public class StatusBar extends JPanel {
 
         activeProgressBarCount++;
         return new StatusBarProgressHandler(progressContainer, msg, max);
-    }
-
-    public static StatusBar get() {
-        return INSTANCE;
-    }
-
-    public static boolean isShown() {
-        return INSTANCE.getParent() != null;
     }
 
     /**

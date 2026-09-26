@@ -104,10 +104,11 @@ public final class AppPreferences {
     private static final String EXPERIMENTAL_KEY = "experimental";
 
     private static final String UI_FONT_SIZE_KEY = "ui_font_size";
-    private static final String UI_FONT_TYPE_KEY = "ui_font_type";
+    private static final String UI_FONT_NAME_KEY = "ui_font_name";
+    private static final String UI_FONT_TYPE_KEY = "ui_font_type"; // legacy key
 
     private static int customUIFontSize = -1;
-    private static String customUIFontType = null;
+    private static String customUIFontName = null;
 
     // each bit of the "flags" represents a boolean flag in the app
     private static final String FLAGS_KEY = "flags";
@@ -225,7 +226,7 @@ public final class AppPreferences {
 
     private static boolean shouldSaveMaximizedState() {
         // With multiple monitors it would maximize to the primary one
-        // even if it has saved coordinates in another one.
+        // even if it has saved coordinates on another one.
         // The active screen index or GraphicsDevice.getIDString()
         // could also be saved, but it seems error-prone...
         return JVM.isWindows && !Screens.isMultiMonitorSetup();
@@ -299,7 +300,7 @@ public final class AppPreferences {
      * This method is called when the user clears the recent
      * files menu, not during application shutdown.
      */
-    public static void removeRecentFiles() {
+    public static void clearRecentFiles() {
         for (int i = 0; i < MAX_RECENT_FILES; i++) {
             recentFilesPrefs.remove(RECENT_FILE_KEY_PREFIX + i);
         }
@@ -320,10 +321,7 @@ public final class AppPreferences {
         }
 
         File dir = new File(path);
-        if (!dir.exists() || !dir.isDirectory()) {
-            return getDocumentsDir();
-        }
-        return dir;
+        return dir.isDirectory() ? dir : getDocumentsDir();
     }
 
     private static File getDocumentsDir() {
@@ -362,8 +360,8 @@ public final class AppPreferences {
     }
 
     private static void saveLastSaveFormat() {
-        FileFormat lastOutput = FileFormat.getLastSaved();
-        mainPrefs.put(LAST_SAVE_FORMAT_KEY, lastOutput.toString());
+        FileFormat lastFormat = FileFormat.getLastSaved();
+        mainPrefs.put(LAST_SAVE_FORMAT_KEY, lastFormat.toString());
     }
 
     public static int loadUndoLevels() {
@@ -484,7 +482,7 @@ public final class AppPreferences {
     }
 
     public static ImageAreaConfig loadImageAreaConfig() {
-        String value = mainPrefs.get(UI_KEY, "TabsN");
+        String value = mainPrefs.get(UI_KEY, "TabsT");
         if (value.startsWith("Tabs")) {
             return loadSavedTabsInfo(value);
         } else {
@@ -531,13 +529,8 @@ public final class AppPreferences {
     }
 
     public static Theme loadTheme() {
-        String code = mainPrefs.get(THEME_KEY, Themes.DEFAULT.getPrefsCode());
-        for (Theme theme : Theme.values()) {
-            if (code.equals(theme.getPrefsCode())) {
-                return theme;
-            }
-        }
-        return Themes.DEFAULT;
+        String code = mainPrefs.get(THEME_KEY, "");
+        return Theme.fromPrefsCode(code);
     }
 
     private static void saveTheme() {
@@ -551,16 +544,21 @@ public final class AppPreferences {
         return customUIFontSize;
     }
 
-    public static String loadUIFontType() {
-        if (customUIFontType == null) {
+    public static String loadUIFontName() {
+        if (customUIFontName == null) {
             //noinspection NonThreadSafeLazyInitialization
-            customUIFontType = mainPrefs.get(UI_FONT_TYPE_KEY, "");
+            customUIFontName = mainPrefs.get(UI_FONT_NAME_KEY, "");
+
+            if (customUIFontName.isEmpty()) {
+                // fallback to legacy key
+                customUIFontName = mainPrefs.get(UI_FONT_TYPE_KEY, "");
+            }
         }
-        return customUIFontType;
+        return customUIFontName;
     }
 
-    public static void setUIFont(String type, int size) {
-        customUIFontType = type;
+    public static void setUIFont(String name, int size) {
+        customUIFontName = name;
         customUIFontSize = size;
     }
 
@@ -568,8 +566,8 @@ public final class AppPreferences {
         if (customUIFontSize != -1) {
             mainPrefs.putInt(UI_FONT_SIZE_KEY, customUIFontSize);
         }
-        if (customUIFontType != null) {
-            mainPrefs.put(UI_FONT_TYPE_KEY, customUIFontType);
+        if (customUIFontName != null) {
+            mainPrefs.put(UI_FONT_NAME_KEY, customUIFontName);
         }
     }
 
@@ -581,20 +579,20 @@ public final class AppPreferences {
         mainPrefs.put(LANG_KEY, Language.getActive().getCode());
     }
 
-    public static String loadMouseZoom() {
+    public static String loadMouseZoomCode() {
         return mainPrefs.get(MOUSE_ZOOM_KEY, MouseZoomMethod.WHEEL.saveCode());
     }
 
     private static void saveMouseZoom() {
-        mainPrefs.put(MOUSE_ZOOM_KEY, MouseZoomMethod.ACTIVE.saveCode());
+        mainPrefs.put(MOUSE_ZOOM_KEY, MouseZoomMethod.active.saveCode());
     }
 
-    public static String loadPan() {
+    public static String loadPanCode() {
         return mainPrefs.get(PAN_KEY, PanMethod.SPACE_DRAG.saveCode());
     }
 
     private static void savePan() {
-        mainPrefs.put(PAN_KEY, PanMethod.ACTIVE.saveCode());
+        mainPrefs.put(PAN_KEY, PanMethod.active.saveCode());
     }
 
     private static void loadPaths() {

@@ -627,13 +627,6 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public String getORAStackXML() {
-        return "<stack composite-op=\"%s\" name=\"%s\" opacity=\"%f\" visibility=\"%s\" isolation=\"%s\">\n".formatted(
-            blendingMode.toSVGName(), getName(), getOpacity(), getVisibilityAsORAString(),
-            blendingMode == BlendingMode.PASS_THROUGH ? "auto" : "isolate");
-    }
-
-    @Override
     public String getTypeString() {
         return "Layer Group";
     }

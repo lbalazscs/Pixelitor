@@ -142,7 +142,6 @@ public abstract class DragTool extends Tool {
             }
         }
         assert checkInvariants();
-        super.escPressed();
     }
 
     @Override

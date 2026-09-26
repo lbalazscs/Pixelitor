@@ -28,6 +28,7 @@ import pixelitor.utils.Shapes;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -38,6 +39,8 @@ import static pixelitor.tools.DragToolState.INITIAL_DRAG;
  * The Zoom Tool.
  */
 public class ZoomTool extends DragTool {
+    private static final int MIN_DRAG_SIZE = 5;
+
     public ZoomTool() {
         super("Zoom", 'Z',
             "<b>click</b> to zoom in, " +
@@ -50,19 +53,6 @@ public class ZoomTool extends DragTool {
     @Override
     public void initSettingsPanel(ResourceBundle resources) {
         settingsPanel.addAutoZoomButtons();
-    }
-
-    @Override
-    public void mouseClicked(PMouseEvent e) {
-        Point mousePos = e.getPoint();
-        View view = e.getView();
-
-        if (e.isRight() || (e.isLeft() && e.isAltDown())) {
-            view.zoomOut(mousePos);
-        } else if (e.isLeft()) {
-            view.zoomIn(mousePos);
-        }
-        state = IDLE;
     }
 
     @Override
@@ -79,11 +69,17 @@ public class ZoomTool extends DragTool {
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        if (drag.isClick()) {
-            // the click-to-zoom is handled by mouseClicked()
+        assert state == INITIAL_DRAG;
+
+        Rectangle coRect = drag.toPosCoRect();
+        if (coRect.width < MIN_DRAG_SIZE && coRect.height < MIN_DRAG_SIZE) {
+            // click or micro-drag treated as a click
+            zoomOnClick(e);
+            reset();
             return;
         }
-        if (drag.isCoRectEmpty()) {
+
+        if (coRect.isEmpty()) {
             // perfectly horizontal or vertical lines don't define a target area
             reset();
             return;
@@ -98,11 +94,20 @@ public class ZoomTool extends DragTool {
         reset();
     }
 
+    private void zoomOnClick(PMouseEvent e) {
+        Point mousePos = e.getPoint();
+        View view = e.getView();
+        if (e.isRight() || (e.isLeft() && e.isAltDown())) {
+            view.zoomOut(mousePos);
+        } else if (e.isLeft()) {
+            view.zoomIn(mousePos);
+        }
+    }
+
     @Override
     public void paintOverCanvas(Graphics2D g, Composition comp) {
-        if (state == INITIAL_DRAG) {
-            PRectangle zoomRect = drag.toPosPRect(comp.getView());
-            Shapes.drawVisibly(g, zoomRect.getCo());
+        if (state == INITIAL_DRAG && !drag.isCoRectEmpty()) {
+            Shapes.drawVisibly(g, drag.toPosCoRect());
         }
     }
 
@@ -114,7 +119,9 @@ public class ZoomTool extends DragTool {
 
     @Override
     public void reset() {
+        super.reset();
         state = IDLE;
+        drag = null;
         Views.repaintActive();
     }
 
@@ -154,7 +161,7 @@ public class ZoomTool extends DragTool {
     @Override
     public boolean checkInvariants() {
         return switch (state) {
-            case IDLE -> true;
+            case IDLE -> drag == null;
             case INITIAL_DRAG -> drag != null;
             case null, default -> false; // no other states are used by this tool
         };

@@ -176,25 +176,25 @@ public class PreferencesPanel extends JTabbedPane {
         fontChoices[0] = "Default";
         System.arraycopy(availableFonts, 0, fontChoices, 1, availableFonts.length);
 
-        // load currently saved type; if empty, show "Default" in the UI
-        String currentType = AppPreferences.loadUIFontType();
-        String initialChoice = currentType.isEmpty() ? "Default" : currentType;
+        // load currently saved font name; if empty, show "Default" in the UI
+        String currentName = AppPreferences.loadUIFontName();
+        String initialChoice = currentName.isEmpty() ? "Default" : currentName;
 
-        ChoiceParam<String> fontType = new ChoiceParam<>("Font Type", fontChoices, initialChoice);
-        gbh.addParam(fontType);
+        ChoiceParam<String> fontName = new ChoiceParam<>("Font Name", fontChoices, initialChoice);
+        gbh.addParam(fontName);
 
         // a single callback for both listeners
         Runnable updateFont = () -> {
-            String selectedType = fontType.getSelected();
+            String selectedName = fontName.getSelected();
             int newSize = fontSize.getValue();
 
             // map the "Default" UI selection to an empty string internally
-            String typeToSave = "Default".equals(selectedType) ? "" : selectedType;
-            AppPreferences.setUIFont(typeToSave, newSize);
+            String nameToSave = "Default".equals(selectedName) ? "" : selectedName;
+            AppPreferences.setUIFont(nameToSave, newSize);
 
             // apply a live preview of the new font
             Font newFont;
-            if (typeToSave.isEmpty()) {
+            if (nameToSave.isEmpty()) {
                 // derive size off the original LAF font if returning to default
                 Font baseFont = Themes.getOriginalDefaultFont();
                 if (baseFont == null) {
@@ -202,13 +202,13 @@ public class PreferencesPanel extends JTabbedPane {
                 }
                 newFont = baseFont.deriveFont((float) newSize);
             } else {
-                newFont = new Font(typeToSave, Font.PLAIN, newSize);
+                newFont = new Font(nameToSave, Font.PLAIN, newSize);
             }
             changeFont(newFont);
         };
 
         fontSize.setAdjustmentListener(updateFont::run);
-        fontType.setAdjustmentListener(updateFont::run);
+        fontName.setAdjustmentListener(updateFont::run);
     }
 
     private void changeFont(Font newFont) {
@@ -279,12 +279,12 @@ public class PreferencesPanel extends JTabbedPane {
         var gbh = new GridBagHelper(contents);
 
         zoomMethodCB = new JComboBox<>(MouseZoomMethod.values());
-        zoomMethodCB.setSelectedItem(MouseZoomMethod.ACTIVE);
+        zoomMethodCB.setSelectedItem(MouseZoomMethod.active);
         zoomMethodCB.setName("zoomMethod");
         gbh.addLabelAndControlNoStretch("Zoom with:", zoomMethodCB);
 
         panMethodCB = new JComboBox<>(PanMethod.values());
-        panMethodCB.setSelectedItem(PanMethod.ACTIVE);
+        panMethodCB.setSelectedItem(PanMethod.active);
         panMethodCB.setName("panMethod");
         gbh.addLabelAndControlNoStretch("Pan with:", panMethodCB);
 

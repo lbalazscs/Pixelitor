@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Features;
 import pixelitor.Views;
+import pixelitor.gui.AppPanel;
 import pixelitor.gui.View;
 import pixelitor.io.DropListener;
 import pixelitor.utils.ViewActivationListener;
@@ -30,9 +31,7 @@ import java.awt.FlowLayout;
 import java.awt.dnd.DropTarget;
 import java.util.List;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.io.DropListener.DropAction.ADD_AS_NEW_LAYERS;
@@ -46,9 +45,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     private LayersPanel layersPanel;
     private final JScrollPane scrollPane;
 
-    private static final LayersContainer INSTANCE = new LayersContainer();
-
-    private LayersContainer() {
+    public LayersContainer() {
         super(new BorderLayout());
 
         assert calledOnEDT();
@@ -111,12 +108,9 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     public void viewActivated(View oldView, View newView) {
     }
 
-    public static boolean areLayersShown() {
-        return INSTANCE.getParent() != null;
-    }
-
     public static void showLayersFor(View view) {
-        INSTANCE.replaceLayersPanel(view.getLayersPanel());
+        LayersContainer container = AppPanel.LAYERS.getComponent();
+        container.replaceLayersPanel(view.getLayersPanel());
     }
 
     public int getNumLayerGUIs() {
@@ -125,14 +119,6 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
 
     public List<String> getLayerNames() {
         return layersPanel.getLayerNames();
-    }
-
-    public static LayersContainer get() {
-        return INSTANCE;
-    }
-
-    public static boolean parentIs(JComponent parent) {
-        return INSTANCE.getParent() == parent;
     }
 
     static class LayerActionButton extends JButton {

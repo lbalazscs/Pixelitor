@@ -22,12 +22,9 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Pixelitor;
 import pixelitor.Views;
-import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
 import pixelitor.menus.help.AboutDialog;
 import pixelitor.tools.Tools;
-import pixelitor.tools.gui.ToolSettingsPanelContainer;
-import pixelitor.tools.gui.ToolsPanel;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
@@ -40,11 +37,14 @@ import java.awt.geom.AffineTransform;
 import java.net.URL;
 import java.util.List;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
 import static java.awt.Desktop.Action.*;
 import static java.awt.Taskbar.Feature.ICON_IMAGE;
 import static pixelitor.utils.ImageUtils.findImageURL;
 import static pixelitor.utils.Texts.i18n;
+import static pixelitor.utils.Threads.callInfo;
+import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
  * The main application window.
@@ -53,7 +53,6 @@ public class PixelitorWindow extends JFrame {
     private static final String BASE_TITLE = calcBaseTitle();
 
     private JPanel sidePanel; // layers and histograms
-    private ToolsPanel toolsPanel;
     private final WorkSpace workSpace;
 
     // normal bounds: the window bounds when it is not maximized
@@ -63,15 +62,13 @@ public class PixelitorWindow extends JFrame {
     private PixelitorWindow() {
         super(BASE_TITLE);
 
-        workSpace = new WorkSpace();
+        workSpace = new WorkSpace(this);
 
         AppPreferences.loadFramePreferences(this);
 
         addMenuBar();
         addImageArea();
-        addSidePanel();
-        addStatusBar();
-        addToolsPanel();
+        initPanels();
         Tools.setDefaultTool();
 
         initIcons();
@@ -89,7 +86,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     public void resetDefaultWorkspace() {
-        workSpace.restoreDefaults(this);
+        workSpace.restoreDefaults();
     }
 
     private void configureWindowEvents() {
@@ -98,7 +95,7 @@ public class PixelitorWindow extends JFrame {
             new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent we) {
-                    Pixelitor.exitApp(PixelitorWindow.this);
+                    Pixelitor.requestExit(PixelitorWindow.this);
                 }
 
                 @Override
@@ -130,7 +127,7 @@ public class PixelitorWindow extends JFrame {
             desktop.setPreferencesHandler(_ -> PreferencesPanel.showInDialog());
         }
         if (desktop.isSupported(APP_QUIT_HANDLER)) {
-            desktop.setQuitHandler((_, _) -> Pixelitor.exitApp(this));
+            desktop.setQuitHandler((_, _) -> Pixelitor.requestExit(this));
         }
     }
 
@@ -138,38 +135,8 @@ public class PixelitorWindow extends JFrame {
         add(ImageArea.getUI(), CENTER);
     }
 
-    public void removeImageArea(JComponent c) {
-        remove(c);
-    }
-
-    private void addSidePanel() {
-        sidePanel = new JPanel(new BorderLayout());
-        HistogramsPanel histogramsPanel = HistogramsPanel.get();
-        Views.addActivationListener(histogramsPanel);
-
-        if (workSpace.areHistogramsVisible()) {
-            sidePanel.add(histogramsPanel, NORTH);
-        }
-        if (workSpace.areLayersVisible()) {
-            sidePanel.add(LayersContainer.get(), CENTER);
-        }
-
-        add(sidePanel, EAST);
-    }
-
-    private void addToolsPanel() {
-        toolsPanel = new ToolsPanel();
-
-        if (workSpace.areToolsVisible()) {
-            add(ToolSettingsPanelContainer.get(), NORTH);
-            add(toolsPanel, WEST);
-        }
-    }
-
-    private void addStatusBar() {
-        if (workSpace.isStatusBarVisible()) {
-            add(StatusBar.get(), SOUTH);
-        }
+    public void removeImageArea() {
+        remove(ImageArea.getUI());
     }
 
     private void initIcons() {
@@ -211,69 +178,42 @@ public class PixelitorWindow extends JFrame {
         static final PixelitorWindow INSTANCE = new PixelitorWindow();
     }
 
-    public void setStatusBarVisible(boolean visible, boolean revalidate) {
+    private void initPanels() {
+        sidePanel = new JPanel(new BorderLayout());
+
+        for (AppPanel panel : AppPanel.PANELS) {
+            if (workSpace.isVisible(panel)) {
+                setPanelVisible(panel, true, false);
+            } else {
+                // initialize the tools panel even if it is hidden at startup
+                if (panel == AppPanel.TOOLS) {
+                    panel.getComponent();
+                }
+            }
+        }
+
+        add(sidePanel, EAST);
+        getContentPane().revalidate();
+    }
+
+    public void setPanelVisible(AppPanel panel, boolean visible, boolean revalidate) {
+        assert calledOnEDT() : callInfo();
+
+        JComponent comp = panel.getComponent();
+        Container target = panel.getTarget().resolveContainer(this);
+
         if (visible) {
-            add(StatusBar.get(), SOUTH);
+            assert comp.getParent() == null : "Panel " + panel + " is already attached";
+            target.add(comp, panel.getLayoutConstraint());
         } else {
-            remove(StatusBar.get());
+            assert comp.getParent() == target : "Panel " + panel + " is not attached to its expected target";
+            target.remove(comp);
         }
 
         if (revalidate) {
-            getContentPane().revalidate();
+            target.revalidate();
+            target.repaint();
         }
-    }
-
-    public void setHistogramsVisible(boolean visible, boolean revalidate) {
-        HistogramsPanel histogramsPanel = HistogramsPanel.get();
-        if (visible) {
-            assert !HistogramsPanel.isShown();
-            sidePanel.add(histogramsPanel, NORTH);
-            HistogramsPanel.updateFromActiveComp();
-        } else {
-            assert histogramsPanel.getParent() == sidePanel;
-            sidePanel.remove(histogramsPanel);
-        }
-
-        if (revalidate) {
-            sidePanel.revalidate();
-        }
-    }
-
-    public void setLayersVisible(boolean visible, boolean revalidate) {
-        if (visible) {
-            assert LayersContainer.parentIs(null);
-            sidePanel.add(LayersContainer.get(), CENTER);
-        } else {
-            assert LayersContainer.parentIs(sidePanel);
-            sidePanel.remove(LayersContainer.get());
-        }
-
-        if (revalidate) {
-            sidePanel.revalidate();
-        }
-    }
-
-    public void setToolsVisible(boolean visible, boolean revalidate) {
-        var toolSettingsPanel = ToolSettingsPanelContainer.get();
-        if (visible) {
-            assert toolsPanel.getParent() == null;
-            assert toolSettingsPanel.getParent() == null;
-            add(toolsPanel, WEST);
-            add(toolSettingsPanel, NORTH);
-        } else {
-            assert toolsPanel.getParent() == getContentPane();
-            assert toolSettingsPanel.getParent() == getContentPane();
-            remove(toolsPanel);
-            remove(toolSettingsPanel);
-        }
-
-        if (revalidate) {
-            getContentPane().revalidate();
-        }
-    }
-
-    public boolean areToolsShown() {
-        return toolsPanel.getParent() != null;
     }
 
     /**
@@ -395,5 +335,9 @@ public class PixelitorWindow extends JFrame {
 
     public WorkSpace getWorkSpace() {
         return workSpace;
+    }
+
+    public JPanel getSidePanel() {
+        return sidePanel;
     }
 }

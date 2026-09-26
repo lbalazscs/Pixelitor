@@ -120,7 +120,7 @@ public class ImageArea {
         ImageArea.mode = mode;
 
         var pw = PixelitorWindow.get();
-        pw.removeImageArea(getUI());
+        pw.removeImageArea();
         updateUI();
         pw.addImageArea();
 

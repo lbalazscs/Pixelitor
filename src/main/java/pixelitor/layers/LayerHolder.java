@@ -362,12 +362,6 @@ public interface LayerHolder extends Debuggable {
     void smartObjectChanged(boolean linked);
 
     /**
-     * Used during export to the OpenRaster (.ora) file format.
-     * It returns the opening XML tag for the layer stack represented by this holder.
-     */
-    String getORAStackXML();
-
-    /**
      * Returns the root {@link Composition} object.
      */
     Composition getComp();

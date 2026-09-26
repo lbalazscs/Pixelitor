@@ -706,7 +706,7 @@ public class RandomGuiTest {
 
     private void randomizeToolSettings() {
         log("randomize tool settings for " + Tools.getActive());
-        ToolSettingsPanelContainer.get().randomizeToolSettings();
+        AppPanel.TOOL_SETTINGS.<ToolSettingsPanelContainer>getComponent().randomizeToolSettings();
     }
 
     private void arrangeWindows() {
@@ -872,10 +872,10 @@ public class RandomGuiTest {
     private void randomlyTogglePanelVisibility() {
         WorkSpace workSpace = PixelitorWindow.get().getWorkSpace();
         Action[] actions = {
-            workSpace.getHistogramsAction(),
-            workSpace.getToolsAction(),
-            workSpace.getLayersAction(),
-            workSpace.getStatusBarAction(),
+            workSpace.getAction(AppPanel.HISTOGRAMS),
+            workSpace.getAction(AppPanel.TOOLS),
+            workSpace.getAction(AppPanel.LAYERS),
+            workSpace.getAction(AppPanel.STATUS_BAR),
             workSpace.getAllAction()
         };
         runAction(Rnd.chooseFrom(actions));

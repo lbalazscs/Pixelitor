@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
 /**
@@ -26,7 +26,7 @@ import java.util.function.BiConsumer;
  */
 public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     public static final ExceptionHandler INSTANCE = new ExceptionHandler();
-    private final List<BiConsumer<Thread, Throwable>> handlers = new ArrayList<>(1);
+    private final List<BiConsumer<Thread, Throwable>> handlers = new CopyOnWriteArrayList<>();
 
     // tracks if a handler is active on a given thread
     private static final ThreadLocal<Boolean> isHandling = ThreadLocal.withInitial(() -> false);
@@ -38,7 +38,7 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     /**
      * Adds a handler to be executed after all other handlers.
      */
-    public void addHandler(BiConsumer<Thread, Throwable> handler) {
+    public void appendHandler(BiConsumer<Thread, Throwable> handler) {
         handlers.add(handler);
     }
 
@@ -54,9 +54,10 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         if (isHandling.get()) {
-            // avoid infinite loop where the exception is thrown
-            // from Messages.showException on the EDT (this is still
-            // necessary despite the try-catch because of modal dialog tricks?)
+            // necessary to avoid infinite loops despite the try-catch:
+            // if an exception handler shows a modal dialog, Swing starts
+            // a secondary event loop, which can throw an uncaught
+            // exception before the finally block can clear the flag
             System.err.println("Re-entrant call detected:");
             //noinspection CallToPrintStackTrace
             e.printStackTrace();

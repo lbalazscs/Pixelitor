@@ -53,7 +53,7 @@ public final class RecentFilesMenu extends JMenu {
      */
     private void clear() {
         try {
-            AppPreferences.removeRecentFiles();
+            AppPreferences.clearRecentFiles();
             recentFiles.clear();
             updateMenuItems();
         } catch (Exception ex) {

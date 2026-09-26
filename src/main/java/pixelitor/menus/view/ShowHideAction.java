@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.WorkSpace;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Texts;
 
@@ -30,15 +29,12 @@ import java.awt.event.ActionEvent;
 public abstract class ShowHideAction extends NamedAction {
     private final String showText;
     private final String hideText;
-    protected final WorkSpace workSpace;
 
-    protected ShowHideAction(String showKey, String hideKey, WorkSpace workSpace) {
+    protected ShowHideAction(String showKey, String hideKey, boolean initiallyVisible) {
         this.showText = Texts.i18n(showKey);
         this.hideText = Texts.i18n(hideKey);
-        this.workSpace = workSpace;
 
-        //noinspection AbstractMethodCallInConstructor
-        updateText(isVisible());
+        updateText(initiallyVisible);
     }
 
     public void setHideText() {
@@ -72,7 +68,7 @@ public abstract class ShowHideAction extends NamedAction {
     public abstract boolean isVisible();
 
     /**
-     * Hides or shows the controlled GUI area
+     * Hides or shows the controlled GUI area.
      */
     public abstract void setVisibility(boolean value);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,156 +17,108 @@
 
 package pixelitor.gui;
 
-import pixelitor.layers.LayersContainer;
-import pixelitor.menus.view.*;
+import pixelitor.menus.view.ShowHideAllAction;
+import pixelitor.menus.view.ShowHidePanelAction;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 import static pixelitor.utils.AppPreferences.mainPrefs;
 
 /**
- * The single source of truth for the visibility of UI panels.
+ * Coordinates the visibility, toggle actions, and persistence of the toggleable panels.
  */
 public class WorkSpace {
-    // preference keys for storing visibility states
-    private static final String KEY_HISTOGRAMS_SHOWN = "histograms_shown";
-    private static final String KEY_LAYERS_SHOWN = "layers_shown";
-    private static final String KEY_TOOLS_SHOWN = "tools_shown";
-    private static final String KEY_STATUS_BAR_SHOWN = "status_bar_shown";
-
-    // default visibility states
-    private static final boolean DEFAULT_HISTOGRAMS_VISIBLE = false;
-    private static final boolean DEFAULT_TOOLS_VISIBLE = true;
-    private static final boolean DEFAULT_LAYERS_VISIBLE = true;
-    private static final boolean DEFAULT_STATUS_BAR_VISIBLE = true;
-
-    // current visibility states
-    private boolean histogramsVisible;
-    private boolean toolsVisible;
-    private boolean layersVisible;
-    private boolean statusBarVisible;
-
-    // actions for toggling visibility
-    private final ShowHideHistogramsAction histogramsAction;
-    private final ShowHideToolsAction toolsAction;
-    private final ShowHideLayersAction layersAction;
-    private final ShowHideStatusBarAction statusBarAction;
-    private final ShowHideAllAction allAction;
-
+    private final Map<AppPanel, Boolean> visibilityMap = new EnumMap<>(AppPanel.class);
+    private final PixelitorWindow pw;
     private boolean frameInitialized = false;
 
-    public WorkSpace() {
-        // load visibility preferences
-        histogramsVisible = mainPrefs.getBoolean(KEY_HISTOGRAMS_SHOWN, DEFAULT_HISTOGRAMS_VISIBLE);
-        toolsVisible = mainPrefs.getBoolean(KEY_TOOLS_SHOWN, DEFAULT_TOOLS_VISIBLE);
-        layersVisible = mainPrefs.getBoolean(KEY_LAYERS_SHOWN, DEFAULT_LAYERS_VISIBLE);
-        statusBarVisible = mainPrefs.getBoolean(KEY_STATUS_BAR_SHOWN, DEFAULT_STATUS_BAR_VISIBLE);
+    private final Map<AppPanel, ShowHidePanelAction> panelActions = new EnumMap<>(AppPanel.class);
+    private final ShowHideAllAction allAction;
 
-        // initialize toogle actions
-        histogramsAction = new ShowHideHistogramsAction(this);
-        toolsAction = new ShowHideToolsAction(this);
-        layersAction = new ShowHideLayersAction(this);
-        statusBarAction = new ShowHideStatusBarAction(this);
+    public WorkSpace(PixelitorWindow pw) {
+        this.pw = pw;
+
+        for (AppPanel panel : AppPanel.PANELS) {
+            // only load preferences for panels that have their own persistent key
+            if (panel.hasPrefKey()) {
+                boolean visible = mainPrefs.getBoolean(panel.getPrefKey(), panel.isDefaultVisible());
+                visibilityMap.put(panel, visible);
+            }
+        }
+
+        // TOOL_SETTINGS visibility strictly follows TOOLS
+        visibilityMap.put(AppPanel.TOOL_SETTINGS, isVisible(AppPanel.TOOLS));
+
+        // initialize toggle actions for toggleable panels
+        for (AppPanel panel : AppPanel.PANELS) {
+            if (panel.hasToggleAction()) {
+                panelActions.put(panel, new ShowHidePanelAction(panel, this));
+            }
+        }
+
         allAction = new ShowHideAllAction(this);
     }
 
-    public void restoreDefaults(PixelitorWindow pw) {
-        resetHistogramsVisibility();
-        resetToolsVisibility(pw);
-        resetLayersVisibility();
-        resetStatusBarVisibility();
+    public boolean isVisible(AppPanel panel) {
+        assert !frameInitialized || visibilityMap.get(panel) == panel.isShown();
+        return visibilityMap.getOrDefault(panel, false);
+    }
 
-        // revalidate only once at the end
+    public boolean hasAnyPanelVisible() {
+        for (AppPanel panel : AppPanel.PANELS) {
+            if (panel.hasToggleAction() && isVisible(panel)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setPanelVisible(AppPanel panel, boolean visible, boolean revalidate) {
+        visibilityMap.put(panel, visible);
+        pw.setPanelVisible(panel, visible, revalidate);
+
+        if (panel == AppPanel.TOOLS) {
+            visibilityMap.put(AppPanel.TOOL_SETTINGS, visible);
+            pw.setPanelVisible(AppPanel.TOOL_SETTINGS, visible, revalidate);
+        }
+
+        // automatically synchronize the panel's toggle action text
+        ShowHidePanelAction action = panelActions.get(panel);
+        if (action != null) {
+            action.updateText(visible);
+        }
+
+        // keep "Hide All / Restore Workspace" action synchronized
+        if (allAction != null) {
+            allAction.synchronizeState();
+        }
+    }
+
+    public void restoreDefaults() {
+        for (AppPanel panel : AppPanel.PANELS) {
+            // only independently toggleable panels need their defaults restored directly
+            if (panel.hasToggleAction()) {
+                if (panel.isShown() != panel.isDefaultVisible()) {
+                    setPanelVisible(panel, panel.isDefaultVisible(), false);
+                }
+            }
+        }
         pw.getContentPane().revalidate();
-    }
-
-    private void resetHistogramsVisibility() {
-        if (HistogramsPanel.isShown() != DEFAULT_HISTOGRAMS_VISIBLE) {
-            setHistogramsVisible(DEFAULT_HISTOGRAMS_VISIBLE, false);
-            histogramsAction.updateText(DEFAULT_HISTOGRAMS_VISIBLE);
-        }
-    }
-
-    private void resetToolsVisibility(PixelitorWindow pw) {
-        if (pw.areToolsShown() != DEFAULT_TOOLS_VISIBLE) {
-            setToolsVisible(DEFAULT_TOOLS_VISIBLE, false);
-            toolsAction.updateText(DEFAULT_TOOLS_VISIBLE);
-        }
-    }
-
-    private void resetLayersVisibility() {
-        if (LayersContainer.areLayersShown() != DEFAULT_LAYERS_VISIBLE) {
-            setLayersVisible(DEFAULT_LAYERS_VISIBLE, false);
-            layersAction.updateText(DEFAULT_LAYERS_VISIBLE);
-        }
-    }
-
-    private void resetStatusBarVisibility() {
-        if (StatusBar.isShown() != DEFAULT_STATUS_BAR_VISIBLE) {
-            setStatusBarVisible(DEFAULT_STATUS_BAR_VISIBLE, false);
-            statusBarAction.updateText(DEFAULT_STATUS_BAR_VISIBLE);
-        }
-    }
-
-    public boolean areHistogramsVisible() {
-        assert !frameInitialized || histogramsVisible == HistogramsPanel.isShown();
-        return histogramsVisible;
-    }
-
-    public boolean areLayersVisible() {
-        assert !frameInitialized || layersVisible == LayersContainer.areLayersShown();
-        return layersVisible;
-    }
-
-    public boolean isStatusBarVisible() {
-        assert !frameInitialized || statusBarVisible == StatusBar.isShown();
-        return statusBarVisible;
-    }
-
-    public boolean areToolsVisible() {
-        assert !frameInitialized || toolsVisible == PixelitorWindow.get().areToolsShown();
-        return toolsVisible;
+        pw.getSidePanel().revalidate();
     }
 
     public void savePreferences() {
-        mainPrefs.putBoolean(KEY_HISTOGRAMS_SHOWN, histogramsVisible);
-        mainPrefs.putBoolean(KEY_LAYERS_SHOWN, layersVisible);
-        mainPrefs.putBoolean(KEY_TOOLS_SHOWN, toolsVisible);
-        mainPrefs.putBoolean(KEY_STATUS_BAR_SHOWN, statusBarVisible);
+        for (AppPanel panel : AppPanel.PANELS) {
+            // only persist panels with their own prefKey
+            if (panel.hasPrefKey()) {
+                mainPrefs.putBoolean(panel.getPrefKey(), visibilityMap.get(panel));
+            }
+        }
     }
 
-    public void setLayersVisible(boolean v, boolean revalidate) {
-        layersVisible = v;
-        PixelitorWindow.get().setLayersVisible(v, revalidate);
-    }
-
-    public void setHistogramsVisible(boolean v, boolean revalidate) {
-        histogramsVisible = v;
-        PixelitorWindow.get().setHistogramsVisible(v, revalidate);
-    }
-
-    public void setToolsVisible(boolean v, boolean revalidate) {
-        toolsVisible = v;
-        PixelitorWindow.get().setToolsVisible(v, revalidate);
-    }
-
-    public void setStatusBarVisible(boolean v, boolean revalidate) {
-        statusBarVisible = v;
-        PixelitorWindow.get().setStatusBarVisible(v, revalidate);
-    }
-
-    public ShowHideHistogramsAction getHistogramsAction() {
-        return histogramsAction;
-    }
-
-    public ShowHideToolsAction getToolsAction() {
-        return toolsAction;
-    }
-
-    public ShowHideLayersAction getLayersAction() {
-        return layersAction;
-    }
-
-    public ShowHideStatusBarAction getStatusBarAction() {
-        return statusBarAction;
+    public ShowHidePanelAction getAction(AppPanel panel) {
+        return panelActions.get(panel);
     }
 
     public ShowHideAllAction getAllAction() {

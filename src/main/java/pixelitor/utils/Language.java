@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,18 +21,21 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * The languages supported by Pixelitor
+ * The languages supported by Pixelitor.
  */
 public enum Language {
-    DUTCH("Dutch", "nl") {},
-    ENGLISH("English", "en") {},
-    FRENCH("French", "fr") {},
-    GERMAN("German", "de") {},
-    ITALIAN("Italian", "it") {},
-    PORTUGUESE("Portuguese (Br)", "pt-br") {},
-    RUSSIAN("Russian", "ru") {},
-    SPANISH("Spanish", "es") {};
+    DUTCH("Dutch", "nl"),
+    ENGLISH("English", "en"),
+    FRENCH("French", "fr"),
+    GERMAN("German", "de"),
+    ITALIAN("Italian", "it"),
+    PORTUGUESE("Portuguese (Br)", "pt-br"),
+    RUSSIAN("Russian", "ru"),
+    SPANISH("Spanish", "es");
 
+    public static Locale sysLocale;
+    private static Language activeLang = ENGLISH;
+    private static final Language[] SUPPORTED_LANGUAGES = values();
 
     private final String displayName;
     private final String code;
@@ -51,13 +54,8 @@ public enum Language {
         return displayName;
     }
 
-    // from here static members and methods
-
-    private static Language activeLang = ENGLISH;
-    private static final Language[] languages = values();
-
     public static boolean isSupported(String code) {
-        for (Language lang : languages) {
+        for (Language lang : SUPPORTED_LANGUAGES) {
             if (lang.getCode().equals(code)) {
                 return true;
             }
@@ -65,10 +63,18 @@ public enum Language {
         return false;
     }
 
-    public static void load() {
-        String loadedCode = AppPreferences.loadLanguageCode();
+    public static void init() {
+        // store system locale for number formatting
+        sysLocale = Locale.getDefault();
 
-        Language loadedLang = Arrays.stream(languages)
+        if (!isSupported(sysLocale.getLanguage())) {
+            // if a language is not supported yet, then set English
+            // in order to avoid mixed-language problems (see issue #35)
+            Locale.setDefault(Locale.US);
+        }
+
+        String loadedCode = AppPreferences.loadLanguageCode();
+        Language loadedLang = Arrays.stream(SUPPORTED_LANGUAGES)
             .filter(lang -> lang.getCode().equals(loadedCode))
             .findFirst()
             .orElse(ENGLISH);

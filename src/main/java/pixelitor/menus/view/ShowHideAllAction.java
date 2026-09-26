@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,75 +17,75 @@
 
 package pixelitor.menus.view;
 
+import pixelitor.gui.AppPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.WorkSpace;
 
-import javax.swing.*;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
- * The {@link Action} that toggles the visibility of the
- * histograms, layers, status bar, and tools at the same time.
+ * The {@link javax.swing.Action} that toggles the visibility of all
+ * toggleable panels at the same time.
  * The show action only re-shows the UI elements hidden by this action.
  */
 public class ShowHideAllAction extends ShowHideAction {
-    private boolean histogramsWereShown = false;
-    private boolean layersWereShown = false;
-    private boolean statusBarWasShown = false;
-    private boolean toolsWereShown = false;
-
-    private boolean allHidden = false;
+    private final Set<AppPanel> previouslyShownPanels = EnumSet.noneOf(AppPanel.class);
+    private final WorkSpace workSpace;
 
     public ShowHideAllAction(WorkSpace workSpace) {
-        super("restore_ws", "hide_all", workSpace);
+        super("restore_ws", "hide_all", workSpace.hasAnyPanelVisible());
+        this.workSpace = workSpace;
     }
 
     @Override
     public boolean isVisible() {
-        return !allHidden;
+        return workSpace.hasAnyPanelVisible();
     }
 
     @Override
     public void setVisibility(boolean show) {
         var pw = PixelitorWindow.get();
 
-        // when hiding, remember the current visibility
+        // when hiding, remember which toggleable panels are currently visible
         if (!show) {
-            histogramsWereShown = workSpace.areHistogramsVisible();
-            layersWereShown = workSpace.areLayersVisible();
-            statusBarWasShown = workSpace.isStatusBarVisible();
-            toolsWereShown = workSpace.areToolsVisible();
+            previouslyShownPanels.clear();
+            for (AppPanel panel : AppPanel.PANELS) {
+                if (panel.hasToggleAction() && workSpace.isVisible(panel)) {
+                    previouslyShownPanels.add(panel);
+                }
+            }
         }
 
-        // determine the target visibility for each panel
-        boolean showHistograms = show ? histogramsWereShown : false;
-        boolean showLayers = show ? layersWereShown : false;
-        boolean showStatusBar = show ? statusBarWasShown : false;
-        boolean showTools = show ? toolsWereShown : false;
+        // apply changes across all toggleable panels
 
-        // apply changes only where needed
-        if (workSpace.areHistogramsVisible() != showHistograms) {
-            workSpace.getHistogramsAction().updateText(showHistograms);
-            workSpace.setHistogramsVisible(showHistograms, false);
-        }
+        for (AppPanel panel : AppPanel.PANELS) {
+            if (!panel.hasToggleAction()) {
+                continue;
+            }
 
-        if (workSpace.areLayersVisible() != showLayers) {
-            workSpace.getLayersAction().updateText(showLayers);
-            workSpace.setLayersVisible(showLayers, false);
-        }
+            boolean targetVisible;
+            if (show) {
+                targetVisible = previouslyShownPanels.isEmpty()
+                    ? panel.isDefaultVisible()
+                    : previouslyShownPanels.contains(panel);
+            } else {
+                targetVisible = false;
+            }
 
-        if (workSpace.isStatusBarVisible() != showStatusBar) {
-            workSpace.getStatusBarAction().updateText(showStatusBar);
-            workSpace.setStatusBarVisible(showStatusBar, false);
-        }
-
-        if (workSpace.areToolsVisible() != showTools) {
-            workSpace.getToolsAction().updateText(showTools);
-            workSpace.setToolsVisible(showTools, false);
+            if (workSpace.isVisible(panel) != targetVisible) {
+                workSpace.setPanelVisible(panel, targetVisible, false);
+            }
         }
 
         // revalidate only once at the end
         pw.getContentPane().revalidate();
+        pw.getSidePanel().revalidate();
 
-        allHidden = !show;
+        synchronizeState();
+    }
+
+    public void synchronizeState() {
+        updateText(isVisible());
     }
 }

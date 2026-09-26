@@ -98,6 +98,11 @@ public abstract class PathTool extends Tool {
     }
 
     @Override
+    public void escPressed() {
+        // do nothing
+    }
+
+    @Override
     public void saveStateTo(UserPreset preset) {
         Path path = Views.getActivePath();
         if (path != null) {

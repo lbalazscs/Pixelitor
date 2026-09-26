@@ -31,7 +31,7 @@ public enum MouseZoomMethod {
     WHEEL("Mouse Wheel", "wheel", false),
     CTRL_WHEEL("Ctrl + Mouse Wheel", "ctrl-wheel", true);
 
-    public static MouseZoomMethod ACTIVE = WHEEL;
+    public static MouseZoomMethod active = WHEEL;
 
     private final String displayName;
     private final String saveCode;
@@ -84,21 +84,21 @@ public enum MouseZoomMethod {
     }
 
     public static void loadFromPreferences() {
-        String loadedCode = AppPreferences.loadMouseZoom();
+        String loadedCode = AppPreferences.loadMouseZoomCode();
 
         for (MouseZoomMethod method : values()) {
             if (method.saveCode().equals(loadedCode)) {
-                ACTIVE = method;
+                active = method;
                 break;
             }
         }
     }
 
     public static void changeTo(MouseZoomMethod newMethod) {
-        if (newMethod == ACTIVE) {
+        if (newMethod == active) {
             return;
         }
-        ACTIVE = newMethod;
+        active = newMethod;
         Views.forEach(newMethod::installOnView);
         Navigator.setMouseZoomMethod(newMethod);
     }

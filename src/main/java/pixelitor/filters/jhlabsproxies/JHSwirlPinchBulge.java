@@ -40,7 +40,7 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
     private static final long serialVersionUID = 920532852611723223L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 500, 999);
+    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 500, 1000);
     private final RangeParam swirlAmount = new RangeParam("Swirl Amount", -360, 0, 360);
     private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 0, 100);
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);

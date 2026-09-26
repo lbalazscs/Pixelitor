@@ -52,7 +52,7 @@ public class PhotoCollage extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 5651133864767266714L;
 
-    private final GroupedRangeParam photoSize = new GroupedRangeParam("Photo Size", 40, 200, 999, false);
+    private final GroupedRangeParam photoSize = new GroupedRangeParam("Photo Size", 40, 200, 1000, false);
     private final EnumParam<ShapeType> shapeTypeParam = new EnumParam<>("Photo Shape", ShapeType.class);
     private final RangeParam marginSize = new RangeParam("Margin", 0, 5, 20);
     private final RangeParam numPhotosParam = new RangeParam("Number of Photos", 1, 10, 101);

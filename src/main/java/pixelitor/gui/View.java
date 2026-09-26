@@ -108,7 +108,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        MouseZoomMethod.ACTIVE.installOnView(this);
+        MouseZoomMethod.active.installOnView(this);
     }
 
     private void setComp(Composition comp) {
@@ -153,11 +153,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
 
         // prevent concurrent reloads of the same file
-        if (IOTasks.isPathProcessing(filePath)) {
+        if (IOTasks.isPathInUse(filePath)) {
             Messages.showInfo("Reload Busy", "The file " + file.getName() + " is currently being accessed.");
             return CompletableFuture.completedFuture(null);
         }
-        IOTasks.markPathForReading(filePath);
+        IOTasks.markReadingStarted(filePath);
 
         return FileIO.loadCompAsync(file)
             .thenApplyAsync(this::handleReloadedComp, onEDT)

@@ -23,11 +23,12 @@ import pixelitor.tools.gui.ToolButton;
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Window;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -53,10 +54,12 @@ public class Themes {
     private static Font originalDefaultFont;
 
     public static void addThemeChangeListener(Consumer<Theme> listener) {
+        assert EventQueue.isDispatchThread();
         themeChangeListeners.add(listener);
     }
 
     public static void apply(Theme theme, boolean notifyComponents, boolean force) {
+        assert EventQueue.isDispatchThread();
         if (theme != activeTheme || force) {
             applyLookAndFeel(theme);
             activeTheme = theme;
@@ -74,14 +77,14 @@ public class Themes {
 
     public static void changeAccentColor(AccentColor newColor) {
         if (!activeTheme.isFlat()) {
-            throw new IllegalStateException("Active theme is " + activeTheme.getLAFClassName());
+            throw new IllegalStateException("Active theme is " + activeTheme);
         }
         if (newColor == activeAccentColor) {
             return;
         }
         activeAccentColor = newColor;
         useAccentColor(newColor.asColor());
-        FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", newColor.asHexCode()));
+        FlatLaf.setGlobalExtraDefaults(Map.of("@accentColor", newColor.asHexCode()));
         apply(activeTheme, true, true);
     }
 
@@ -100,7 +103,7 @@ public class Themes {
 
     private static void applyLookAndFeel(Theme theme) {
         try {
-            // has an effect only for the flat lafs
+            // has an effect only for the flat LAFs
             UIManager.put("Component.focusWidth", 1);
 
             UIManager.setLookAndFeel(theme.getLAFClassName());

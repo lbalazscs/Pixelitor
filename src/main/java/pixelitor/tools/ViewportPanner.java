@@ -25,7 +25,6 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 
 /**
  * Adds hand-tool-style panning behavior to a scroll pane’s view component.
@@ -36,6 +35,8 @@ public class ViewportPanner {
     private int maxScrollX;
     private int maxScrollY;
 
+    private boolean panningActive;
+
     public void mousePressed(MouseEvent e, JViewport viewport) {
         dragStartX = e.getX();
         dragStartY = e.getY();
@@ -45,9 +46,26 @@ public class ViewportPanner {
 
         maxScrollX = viewSize.width - extentSize.width;
         maxScrollY = viewSize.height - extentSize.height;
+        assert maxScrollX >= 0 && maxScrollY >= 0;
+
+        panningActive = true;
     }
 
     public void mouseDragged(MouseEvent e, JViewport viewport) {
+        if (!panningActive) {
+            mousePressed(e, viewport); // treat as the start of a new pan
+            return;
+        }
+        if (maxScrollX == 0 && maxScrollY == 0) {
+            return; // content fits entirely within viewport; nothing to scroll
+        }
+
+        // e.getX()/e.getY() are relative to the panned view component,
+        // which JViewport repositions on every scroll.
+        // So these coordinates already reflect the latest scroll offset,
+        // which is why comparing them to the fixed dragStartX/Y from
+        // mousePressed and adding the result to the *current* view position
+        // correctly accumulates the pan distance across the whole gesture.
         Point scrollPos = viewport.getViewPosition();
         scrollPos.translate(
             dragStartX - e.getX(),
@@ -59,27 +77,43 @@ public class ViewportPanner {
         viewport.setViewPosition(scrollPos);
     }
 
+    public void mouseReleased() {
+        reset();
+    }
+
+    public void reset() {
+        panningActive = false;
+    }
+
     /**
      * Adds the "hand tool"-like panning behavior to the given scroll pane.
      */
     public static void enablePanning(JScrollPane scrollPane) {
-        scrollPane.setCursor(Cursors.HAND);
-        ViewportPanner panner = new ViewportPanner();
         JViewport viewport = scrollPane.getViewport();
-        Component panel = viewport.getView();
+        Component viewComponent = viewport.getView();
+        assert viewComponent != null;
 
-        panel.addMouseListener(new MouseAdapter() {
+        viewComponent.setCursor(Cursors.HAND);
+        ViewportPanner panner = new ViewportPanner();
+
+        var mouseHandler = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 panner.mousePressed(e, viewport);
             }
-        });
 
-        panel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
                 panner.mouseDragged(e, viewport);
             }
-        });
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                panner.mouseReleased();
+            }
+        };
+
+        viewComponent.addMouseListener(mouseHandler);
+        viewComponent.addMouseMotionListener(mouseHandler);
     }
 }

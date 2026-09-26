@@ -35,10 +35,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import static pixelitor.menus.view.ZoomLevel.ACTUAL_SIZE;
-import static pixelitor.menus.view.ZoomLevel.EIGHTH_SIZE;
-import static pixelitor.menus.view.ZoomLevel.HALF_SIZE;
-import static pixelitor.menus.view.ZoomLevel.QUARTER_SIZE;
+import static pixelitor.menus.view.ZoomLevel.*;
 
 /**
  * A component that displays a thumbnail of the active composition, and
@@ -163,7 +160,7 @@ public class Navigator extends JComponent
     }
 
     private void addZoomingSupport() {
-        MouseZoomMethod.ACTIVE.installOnOther(this);
+        MouseZoomMethod.active.installOnOther(this);
         ZoomMenu.setupZoomKeys(this);
     }
 

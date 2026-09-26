@@ -34,7 +34,7 @@ public class JHVideoFeedback extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 6619788137062818386L;
 
-    private final RangeParam iterations = new RangeParam("Iterations", 2, 3, 30);
+    private final RangeParam iterations = new RangeParam("Iterations", 0, 3, 30);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam rotation = new RangeParam("Rotation (Degrees/Iteration)", -30, 0, 30);
     private final RangeParam zoom = new RangeParam("Zoom (Percent/Iteration)", -100, -10, -4);
@@ -61,14 +61,15 @@ public class JHVideoFeedback extends ParametrizedFilter {
         }
 
         FeedbackFilter filter = new FeedbackFilter(NAME,
+            iterations.getValue(),
             center.getRelativePoint(),
             0,
             0,
             rotation.getValueInRadians(),
-            (float) zoom.getPercentage(),
+            zoom.getPercentage(),
             (float) startOpacity.getPercentage(),
-            (float) endOpacity.getPercentage(),
-            iterations.getValue());
+            (float) endOpacity.getPercentage()
+        );
 
         return filter.filter(src, dest);
     }

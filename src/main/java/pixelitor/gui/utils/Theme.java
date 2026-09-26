@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,27 +23,10 @@ import javax.swing.*;
  * The available Swing Look and Feels.
  */
 public enum Theme {
-    NIMBUS("Nimbus", false, false, 35) {
-        @Override
-        String getLAFClassName() {
-            return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
-        }
-    }, FLAT_DARK("Flat Dark", true, true, 30) {
-        @Override
-        String getLAFClassName() {
-            return "com.formdev.flatlaf.FlatDarculaLaf";
-        }
-    }, FLAT_LIGHT("Flat Light", false, true, 30) {
-        @Override
-        String getLAFClassName() {
-            return "com.formdev.flatlaf.FlatIntelliJLaf";
-        }
-    }, SYSTEM("System", false, false, 30) {
-        @Override
-        String getLAFClassName() {
-            return UIManager.getSystemLookAndFeelClassName();
-        }
-    };
+    NIMBUS("Nimbus", false, false, 35),
+    FLAT_DARK("Flat Dark", true, true, 30),
+    FLAT_LIGHT("Flat Light", false, true, 30),
+    SYSTEM("System", false, false, 30);
 
     private final String displayName;
     private final boolean dark;
@@ -57,10 +40,14 @@ public enum Theme {
         this.frameDecorationHeight = frameDecorationHeight;
     }
 
-    /**
-     * Returns the fully qualified class name of the Look and Feel implementation.
-     */
-    abstract String getLAFClassName();
+    public String getLAFClassName() {
+        return switch (this) {
+            case NIMBUS -> "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+            case FLAT_DARK -> "com.formdev.flatlaf.FlatDarculaLaf";
+            case FLAT_LIGHT -> "com.formdev.flatlaf.FlatIntelliJLaf";
+            case SYSTEM -> UIManager.getSystemLookAndFeelClassName();
+        };
+    }
 
     public boolean isDark() {
         return dark;
@@ -74,12 +61,36 @@ public enum Theme {
         return flat;
     }
 
+    /**
+     * Returns a stable, unique identifier for persistence.
+     */
     public String getPrefsCode() {
-        return displayName;
+        return name();
     }
 
     public int getFrameDecorationHeight() {
         return frameDecorationHeight;
+    }
+
+    public static Theme fromPrefsCode(String code) {
+        if (code == null || code.isEmpty()) {
+            return Themes.DEFAULT;
+        }
+
+        for (Theme theme : values()) {
+            if (theme.getPrefsCode().equals(code)) {
+                return theme;
+            }
+        }
+
+        // legacy fallback: match against display name
+        for (Theme theme : values()) {
+            if (theme.displayName.equals(code)) {
+                return theme;
+            }
+        }
+
+        return Themes.DEFAULT;
     }
 
     @Override

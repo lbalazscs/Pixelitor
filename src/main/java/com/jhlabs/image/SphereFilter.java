@@ -42,8 +42,6 @@ public class SphereFilter extends TransformFilter {
      * Constructs a SphereFilter.
      *
      * @param filterName      the name of the filter.
-     * @param edgeAction      the edge handling strategy (TRANSPARENT, REPEAT_EDGE,
-     *                        WRAP_AROUND, REFLECT).
      * @param interpolation   the interpolation method (NEAREST_NEIGHBOR, BILINEAR,
      *                        BICUBIC).
      * @param center          the center of the lens effect in pixels.
@@ -52,9 +50,9 @@ public class SphereFilter extends TransformFilter {
      * @param refractionIndex the index of refraction; controls how strongly the lens
      *                        bends light — higher values produce more distortion.
      */
-    public SphereFilter(String filterName, int edgeAction, int interpolation,
-                        Point2D center, double a, double b, double refractionIndex) {
-        super(filterName, edgeAction, interpolation);
+    public SphereFilter(String filterName, int interpolation, Point2D center,
+                        double a, double b, double refractionIndex) {
+        super(filterName, TransformFilter.REPEAT_EDGE, interpolation);
 
         this.cx = center.getX();
         this.cy = center.getY();

@@ -26,7 +26,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A thread pool for parallel execution on multiple CPU cores
+ * A thread pool for parallel execution on multiple CPU cores.
  */
 public class ThreadPool {
     private static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
@@ -58,7 +58,7 @@ public class ThreadPool {
      * Submits a task that returns a value, such as
      * the calculated pixels in a line.
      */
-    public static <T> Future<T> submit2(Callable<T> task) {
+    public static <T> Future<T> submit(Callable<T> task) {
         return pool.submit(task);
     }
 
@@ -95,13 +95,12 @@ public class ThreadPool {
     }
 
     /**
-     * Similar to waitFor, but also updates given the destination image.
-     * Each future represents a processed line of pixels in the image.
+     * Waits for line-processing futures to finish and copies the scanlines to the destination image.
      */
-    public static void waitFor2(Future<int[]>[] lineFutures,
-                                BufferedImage dst,
-                                int lineWidth,
-                                ProgressTracker pt) {
+    public static void waitFor(Future<int[]>[] lineFutures,
+                               BufferedImage dst,
+                               int lineWidth,
+                               ProgressTracker pt) {
         assert pt != null;
 
         try {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,9 +29,7 @@ import java.util.ResourceBundle;
  * The {@link ToolSettingsPanel}s for each tool in a CardLayout
  */
 public class ToolSettingsPanelContainer extends JPanel {
-    private static ToolSettingsPanelContainer instance = new ToolSettingsPanelContainer();
-
-    private ToolSettingsPanelContainer() {
+    public ToolSettingsPanelContainer() {
         super(new CardLayout());
 
         ResourceBundle resources = Texts.getResources();
@@ -43,15 +41,6 @@ public class ToolSettingsPanelContainer extends JPanel {
             tool.initSettingsPanel(resources);
             add(p, tool.getShortName());
         }
-    }
-
-    public static ToolSettingsPanelContainer get() {
-        return instance;
-    }
-
-    // used by unit tests to set a mock instance
-    public static void setInstance(ToolSettingsPanelContainer instance) {
-        ToolSettingsPanelContainer.instance = instance;
     }
 
     public void showSettingsOf(Tool tool) {
@@ -66,14 +55,10 @@ public class ToolSettingsPanelContainer extends JPanel {
             if (tsp.isVisible()) {
                 try {
                     GUIUtils.randomizeChildren(tsp);
-                } catch (Throwable e) {
+                } catch (AssertionError e) {
                     // assertj-swing sometimes loses the stack trace
                     // of Errors, this is a workaround
-                    if (e instanceof AssertionError) {
-                        throw new RuntimeException(e);
-                    } else {
-                        throw e;
-                    }
+                    throw new RuntimeException(e);
                 }
             }
         }

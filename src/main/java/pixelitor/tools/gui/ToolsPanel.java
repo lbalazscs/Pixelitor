@@ -31,11 +31,10 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
- * The panel with the tool buttons and the color selector
+ * The panel with the tool buttons and the color selector.
  */
 public class ToolsPanel extends JPanel {
     public ToolsPanel() {
@@ -52,13 +51,9 @@ public class ToolsPanel extends JPanel {
         JPanel buttonsPanel = new JPanel(new GridLayout(0, numCols));
         ButtonGroup group = new ButtonGroup();
 
-        List<Tool[]> sharedHotkeyGroups = Tools.getSharedHotkeyGroups();
-        for (Tool[] toolGroup : sharedHotkeyGroups) {
-            setupSharedHotkey(toolGroup);
-        }
-
         Set<Tool> toolsWithSharedHotkeys = new HashSet<>();
-        for (Tool[] toolGroup : sharedHotkeyGroups) {
+        for (Tool[] toolGroup : Tools.getSharedHotkeyGroups()) {
+            setupSharedHotkey(toolGroup);
             Collections.addAll(toolsWithSharedHotkeys, toolGroup);
         }
 

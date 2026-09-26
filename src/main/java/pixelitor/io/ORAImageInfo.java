@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,20 +18,25 @@
 package pixelitor.io;
 
 import java.awt.image.BufferedImage;
-import java.util.StringJoiner;
+import java.util.Objects;
 
 /**
  * Information about a layer's image, as required for OpenRaster export.
  * OpenRaster allows layers to be smaller than the canvas.
  * For example, a text layer can export a small image with an offset.
+ *
+ * @param exportedImage the layer image to be saved as a PNG
+ * @param tx            horizontal offset of exportedImage relative to the canvas
+ * @param ty            vertical offset of exportedImage relative to the canvas
  */
 public record ORAImageInfo(BufferedImage exportedImage, int tx, int ty) {
+    public ORAImageInfo {
+        Objects.requireNonNull(exportedImage);
+    }
+
     @Override
     public String toString() {
-        return new StringJoiner(", ", ORAImageInfo.class.getSimpleName() + "[", "]")
-            .add("size=" + exportedImage.getWidth() + "x" + exportedImage.getHeight())
-            .add("tx=" + tx)
-            .add("ty=" + ty)
-            .toString();
+        return "ORAImageInfo[size=%dx%d, tx=%d, ty=%d]".formatted(
+            exportedImage.getWidth(), exportedImage.getHeight(), tx, ty);
     }
 }

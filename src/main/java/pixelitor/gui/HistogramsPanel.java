@@ -24,6 +24,7 @@ import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.HierarchyEvent;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
@@ -35,16 +36,14 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * The panel that shows the histograms
+ * The panel that shows the histograms.
  */
 public class HistogramsPanel extends JPanel implements ViewActivationListener {
-    private static final HistogramsPanel INSTANCE = new HistogramsPanel();
-
     public static final int NUM_BINS = 256;
 
     private static final String SCALE_LOGARITHMIC = "Logarithmic";
     private static final String SCALE_LINEAR = "Linear";
-    private JScrollPane paintersPanel;
+    private final JScrollPane scrollPane;
     private JComboBox<String> scaleSelector;
 
     private static final String HISTOGRAM_TYPE_RGB = "RGB";
@@ -66,10 +65,16 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
     private int[] logBlues;
     private int[] logLuminances;
 
-    private boolean isLogarithmic;
-    private boolean isLuminance;
+    private boolean rgbLogsDirty = true;
+    private boolean lumLogsDirty = true;
 
-    private HistogramsPanel() {
+    private boolean logMode;
+    private boolean luminanceMode;
+
+    // true if recalculation is necessary when the panel is shown
+    private boolean dirty = Views.getActive() != null;
+
+    public HistogramsPanel() {
         super(new BorderLayout());
 
         redPainter = new HistogramPainter(RED, false);
@@ -77,78 +82,96 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         bluePainter = new HistogramPainter(BLUE, false);
         luminancePainter = new HistogramPainter(Color.WHITE, true);
 
-        add(initControlPanel(), NORTH);
-        paintersPanel = new JScrollPane(initPaintersPanel());
-        add(paintersPanel, CENTER);
+        add(createControlPanel(), NORTH);
+        scrollPane = new JScrollPane(createPaintersPanel());
+        add(scrollPane, CENTER);
 
         setBorder(createTitledBorder(i18n("histograms")));
+
+        setupVisibilityListener();
+        Views.addActivationListener(this);
     }
 
-    private JPanel initControlPanel() {
+    private JPanel createControlPanel() {
         JPanel controlPanel = new JPanel(new FlowLayout(LEFT));
 
+        // no labels are added, because they would take up too much horizontal space
         scaleSelector = new JComboBox<>(new String[]{SCALE_LINEAR, SCALE_LOGARITHMIC});
         scaleSelector.addActionListener(_ -> scaleChanged());
-        controlPanel.add(new JLabel("Scale:"));
         controlPanel.add(scaleSelector);
 
         histogramTypeSelector = new JComboBox<>(new String[]{HISTOGRAM_TYPE_RGB, HISTOGRAM_TYPE_LUMINANCE});
         histogramTypeSelector.addActionListener(_ -> typeChanged());
-        controlPanel.add(new JLabel(GUIText.TYPE + ":"));
         controlPanel.add(histogramTypeSelector);
 
         return controlPanel;
     }
 
-    private JPanel initPaintersPanel() {
-        JPanel painters = new JPanel();
+    private JPanel createPaintersPanel() {
+        JPanel p = new JPanel();
 
-        int numPainters = isLuminance ? 1 : 3;
-        painters.setLayout(new GridLayout(numPainters, 1, 0, 0));
+        int numPainters = luminanceMode ? 1 : 3;
+        p.setLayout(new GridLayout(numPainters, 1, 0, 0));
 
-        if (isLuminance) {
-            painters.add(luminancePainter);
+        if (luminanceMode) {
+            p.add(luminancePainter);
         } else {
-            painters.add(redPainter);
-            painters.add(greenPainter);
-            painters.add(bluePainter);
+            p.add(redPainter);
+            p.add(greenPainter);
+            p.add(bluePainter);
         }
 
         Dimension size = new Dimension(
             NUM_BINS + 2,
             numPainters * HistogramPainter.PREFERRED_HEIGHT);
-        painters.setPreferredSize(size);
-        painters.setMinimumSize(size);
+        p.setPreferredSize(size);
+        p.setMinimumSize(size);
 
-        return painters;
+        return p;
     }
 
+    private void setupVisibilityListener() {
+        addHierarchyListener(e -> {
+            if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && isShowing()) {
+                panelShown();
+            }
+        });
+    }
+
+    private void panelShown() {
+        if (dirty) {
+            Composition comp = Views.getActiveComp();
+            if (comp != null) {
+                updateHistograms(comp);
+            } else {
+                dirty = false;
+            }
+        }
+    }
+
+    // called when the user toggles between Linear and Logarithmic
     private void scaleChanged() {
         String newScale = (String) scaleSelector.getSelectedItem();
         boolean newScaleIsLogarithmic = newScale.equals(SCALE_LOGARITHMIC);
-        if (newScaleIsLogarithmic != isLogarithmic) {
-            isLogarithmic = newScaleIsLogarithmic;
+        if (newScaleIsLogarithmic != logMode) {
+            logMode = newScaleIsLogarithmic;
 
-            calcLazyData();
             updatePainterData();
             repaint();
         }
     }
 
+    // called when the user toggles between RGB and Luminance
     private void typeChanged() {
-        String newLuminance = (String) histogramTypeSelector.getSelectedItem();
-        boolean isNewLuminance = HISTOGRAM_TYPE_LUMINANCE.equals(newLuminance);
+        String newType = (String) histogramTypeSelector.getSelectedItem();
+        boolean newTypeIsLuminance = HISTOGRAM_TYPE_LUMINANCE.equals(newType);
 
-        if (isNewLuminance != isLuminance) {
-            isLuminance = isNewLuminance;
+        if (newTypeIsLuminance != luminanceMode) {
+            luminanceMode = newTypeIsLuminance;
 
-            remove(paintersPanel);
-            paintersPanel = new JScrollPane(initPaintersPanel());
-            add(paintersPanel, CENTER);
-
+            scrollPane.setViewportView(createPaintersPanel());
             revalidate();
 
-            calcLazyData();
             updatePainterData();
 
             repaint();
@@ -157,10 +180,23 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
 
     @Override
     public void allViewsClosed() {
+        dirty = false;
+
+        // clear cached histogram arrays to prevent resurrecting stale data
+        reds = null;
+        greens = null;
+        blues = null;
+        luminances = null;
+        logReds = null;
+        logGreens = null;
+        logBlues = null;
+        logLuminances = null;
+        rgbLogsDirty = true;
+        lumLogsDirty = true;
+
         redPainter.clearData();
         greenPainter.clearData();
         bluePainter.clearData();
-
         luminancePainter.clearData();
 
         repaint();
@@ -171,30 +207,17 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         updateHistograms(newView.getComp());
     }
 
-    public static void updateFromActiveComp() {
-        Composition comp = Views.getActiveComp();
-        if (comp != null) {
-            updateFrom(comp);
-        }
-    }
-
     public static void updateFrom(Composition comp) {
-        INSTANCE.updateHistograms(comp);
+        HistogramsPanel panel = AppPanel.HISTOGRAMS.getComponent();
+        panel.updateHistograms(comp);
     }
 
-    // extracts the essential information from the image
-    private void calcBaseArrays(BufferedImage image) {
-        if (reds != null) {
-            Arrays.fill(reds, 0);
-            Arrays.fill(greens, 0);
-            Arrays.fill(blues, 0);
-            Arrays.fill(luminances, 0);
-        } else {
-            reds = new int[NUM_BINS];
-            greens = new int[NUM_BINS];
-            blues = new int[NUM_BINS];
-            luminances = new int[NUM_BINS];
-        }
+    // computes linear histogram bin counts from the image pixels
+    private void calcLinearHistograms(BufferedImage image) {
+        reds = resetOrCreate(reds);
+        greens = resetOrCreate(greens);
+        blues = resetOrCreate(blues);
+        luminances = resetOrCreate(luminances);
 
         int[] pixels = ImageUtils.getPixels(image);
         for (int rgb : pixels) {
@@ -208,67 +231,63 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
                 greens[g]++;
                 blues[b]++;
 
-                int lum = (int) (0.299 * r + 0.587 * g + 0.114 * b);
+                // the extra 128 avoids under-representing the last bin
+                int lum = (77 * r + 150 * g + 29 * b + 128) >> 8;
+
                 luminances[lum]++;
             }
         }
+
+        // invalidate cached logarithmic arrays
+        rgbLogsDirty = true;
+        lumLogsDirty = true;
     }
 
     private void calcRGBLogs() {
-        if (logReds != null) {
-            Arrays.fill(logReds, 0);
-            Arrays.fill(logGreens, 0);
-            Arrays.fill(logBlues, 0);
-        } else {
-            logReds = new int[NUM_BINS];
-            logGreens = new int[NUM_BINS];
-            logBlues = new int[NUM_BINS];
-        }
+        logReds = resetOrCreate(logReds);
+        logGreens = resetOrCreate(logGreens);
+        logBlues = resetOrCreate(logBlues);
 
         calcLog(reds, logReds);
         calcLog(greens, logGreens);
         calcLog(blues, logBlues);
+        rgbLogsDirty = false;
     }
 
     private void calcLumLogs() {
-        if (logLuminances != null) {
-            Arrays.fill(logLuminances, 0);
-        } else {
-            logLuminances = new int[NUM_BINS];
-        }
-
+        logLuminances = resetOrCreate(logLuminances);
         calcLog(luminances, logLuminances);
+        lumLogsDirty = false;
     }
 
-    // called when the image is first added or when the image is changed
-    private void changeImage(BufferedImage image) {
-        calcBaseArrays(image);
-        calcLazyData();
-
-        updatePainterData();
-    }
-
-    private void calcLazyData() {
-        if (isLogarithmic) {
-            if (isLuminance) {
-                calcLumLogs();
-            } else {
-                calcRGBLogs();
-            }
+    private static int[] resetOrCreate(int[] array) {
+        if (array == null) {
+            return new int[NUM_BINS];
+        } else {
+            Arrays.fill(array, 0);
+            return array;
         }
     }
 
     private void updatePainterData() {
-        if (isLuminance) {
-            if (isLogarithmic) {
-                calcLumLogs();
+        if (!hasData()) {
+            return;
+        }
+
+        if (luminanceMode) {
+            if (logMode) {
+                if (lumLogsDirty) {
+                    calcLumLogs();
+                }
                 luminancePainter.updateData(logLuminances);
             } else {
                 luminancePainter.updateData(luminances);
             }
         } else { // RGB mode
-            if (isLogarithmic) {
-                calcRGBLogs();
+            if (logMode) {
+                if (rgbLogsDirty) {
+                    calcRGBLogs();
+                }
                 redPainter.updateData(logReds);
                 greenPainter.updateData(logGreens);
                 bluePainter.updateData(logBlues);
@@ -280,29 +299,36 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         }
     }
 
+    // returns false if there are no open compositions yet
+    private boolean hasData() {
+        return reds != null;
+    }
+
+    // called when a new composition is loaded/updated
     private void updateHistograms(Composition comp) {
-        if (!isShown()) {
+        if (comp == null) {
             return;
         }
 
-        changeImage(comp.getCompositeImage());
+        // if not currently visible on screen, defer computation
+        if (!isShowing()) {
+            dirty = true;
+            return;
+        }
+
+        dirty = false;
+        BufferedImage newImage = comp.getCompositeImage();
+        calcLinearHistograms(newImage);
+        updatePainterData();
         repaint();
     }
 
     private static void calcLog(int[] input, int[] output) {
         for (int i = 0; i < NUM_BINS; i++) {
-            // Add one before taking the logarithm to avoid calculating log(0)
-            // Note that log(1) = 0, which is just perfect.
-            // Also multiply by a large number to mitigate rounding errors.
+            // Add one before taking the logarithm to avoid calculating log(0).
+            // Zero-count bins remain zero because log(1) == 0.
+            // Also multiply by a large number to prevent precision loss from integer truncation.
             output[i] = (int) (1000.0 * Math.log(input[i] + 1));
         }
-    }
-
-    public static HistogramsPanel get() {
-        return INSTANCE;
-    }
-
-    public static boolean isShown() {
-        return INSTANCE.getParent() != null;
     }
 }

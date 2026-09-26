@@ -17,10 +17,10 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.Pixelitor;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.gui.utils.SliderSpinner.LabelPosition;
+import pixelitor.utils.Language;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -37,7 +37,7 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
 
     @SuppressWarnings("NonFinalStaticVariableUsedInClassInitialization")
     private static final NumberFormat format = NumberFormat.getIntegerInstance(
-        Pixelitor.SYS_LOCALE == null ? Locale.getDefault() : Pixelitor.SYS_LOCALE);
+        Language.sysLocale == null ? Locale.getDefault() : Language.sysLocale);
 
     public LogRangeGUI(LogZoomParam model) {
         super(new GridBagLayout());

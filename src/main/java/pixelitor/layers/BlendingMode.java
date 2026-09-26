@@ -68,7 +68,7 @@ public enum BlendingMode {
         public Composite getComposite(float opacity) {
             return new ColorDodgeComposite(opacity);
         }
-    }, LINEAR_DODGE("Linear Dodge (Add)", "svg:plus") {
+    }, LINEAR_DODGE("Add", "svg:plus") {
         @Override
         public Composite getComposite(float opacity) {
             return new AddComposite(opacity);

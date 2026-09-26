@@ -1151,11 +1151,6 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public String getORAStackXML() {
-        throw new IllegalStateException();
-    }
-
-    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 

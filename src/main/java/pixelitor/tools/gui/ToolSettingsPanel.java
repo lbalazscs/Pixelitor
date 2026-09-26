@@ -47,7 +47,9 @@ public class ToolSettingsPanel extends JPanel {
     }
 
     public void addWithLabel(String text, JComponent component, String name) {
-        add(new JLabel(text));
+        JLabel label = new JLabel(text);
+        label.setLabelFor(component);
+        add(label);
         add(component);
         component.setName(name);
     }
@@ -61,7 +63,9 @@ public class ToolSettingsPanel extends JPanel {
     public JButton addButton(Action action, String name, String toolTip) {
         JButton button = new JButton(action);
         button.setName(name);
-        button.setToolTipText(toolTip);
+        if (toolTip != null) { // avoid erasing the tooltip set by the Action
+            button.setToolTipText(toolTip);
+        }
         add(button);
         return button;
     }
@@ -76,53 +80,69 @@ public class ToolSettingsPanel extends JPanel {
         return button;
     }
 
+    private void addButton(Action action) {
+        add(new JButton(action));
+    }
+
+    public void addAutoZoomButtons() {
+        addButton(AutoZoom.ACTUAL_PIXELS_ACTION);
+        addButton(AutoZoom.FIT_SPACE_ACTION);
+        addButton(AutoZoom.FIT_WIDTH_ACTION);
+        addButton(AutoZoom.FIT_HEIGHT_ACTION);
+    }
+
     public JCheckBox addCheckBox(String text, boolean selected, String name,
-                                 Consumer<Boolean> consumer) {
+                                 String toolTip, Consumer<Boolean> onToggle) {
         JCheckBox checkBox = new JCheckBox(text, selected);
         checkBox.setName(name);
-        checkBox.addActionListener(_ -> consumer.accept(checkBox.isSelected()));
+        if (toolTip != null) {
+            checkBox.setToolTipText(toolTip);
+        }
+        if (onToggle != null) {
+            checkBox.addActionListener(_ -> onToggle.accept(checkBox.isSelected()));
+        }
         add(checkBox);
         return checkBox;
     }
 
-    public JCheckBox addCheckBox(String text, boolean selected, String name,
-                                 String toolTip) {
-        JCheckBox checkBox = new JCheckBox(text, selected);
-        checkBox.setName(name);
-        checkBox.setToolTipText(toolTip);
-        add(checkBox);
-        return checkBox;
+    public JCheckBox addCheckBox(String text, boolean selected, String name, Consumer<Boolean> onToggle) {
+        return addCheckBox(text, selected, name, null, onToggle);
+    }
+
+    public JCheckBox addCheckBox(String text, boolean selected, String name, String toolTip) {
+        return addCheckBox(text, selected, name, toolTip, null);
+    }
+
+    public <E extends Enum<E>> EnumComboBoxModel<E> addEnumSelector(Class<E> enumClass, E defaultSelection,
+                                                                    String labelText, String name,
+                                                                    Consumer<E> listener) {
+        var model = new EnumComboBoxModel<>(enumClass);
+        model.setSelectedItem(defaultSelection);
+
+        @SuppressWarnings("unchecked")
+        var comboBox = new JComboBox<E>(model);
+        addComboBox(labelText, comboBox, name);
+
+        comboBox.addActionListener(_ -> {
+            @SuppressWarnings("unchecked")
+            E selected = (E) comboBox.getSelectedItem();
+            listener.accept(selected);
+        });
+
+        return model;
     }
 
     public EnumComboBoxModel<CopyBrushType> addCopyBrushTypeSelector(CopyBrushType defaultSelection,
                                                                      Consumer<CopyBrushType> listener) {
-        EnumComboBoxModel<CopyBrushType> typeModel = new EnumComboBoxModel<>(CopyBrushType.class);
-        typeModel.setSelectedItem(defaultSelection);
-
-        @SuppressWarnings("unchecked")
-        var typeCB = new JComboBox<CopyBrushType>(typeModel);
-
-        addComboBox(GUIText.BRUSH + ":", typeCB, "typeCB");
-        typeCB.addActionListener(_ -> {
-            CopyBrushType brushType = (CopyBrushType) typeCB.getSelectedItem();
-            listener.accept(brushType);
-        });
-
-        return typeModel;
-    }
-
-    public void addAutoZoomButtons() {
-        add(new JButton(AutoZoom.ACTUAL_PIXELS_ACTION));
-        add(new JButton(AutoZoom.FIT_SPACE_ACTION));
-        add(new JButton(AutoZoom.FIT_WIDTH_ACTION));
-        add(new JButton(AutoZoom.FIT_HEIGHT_ACTION));
+        return addEnumSelector(CopyBrushType.class, defaultSelection,
+            GUIText.BRUSH + ":", "typeCB", listener);
     }
 
     public void addParam(FilterParam param) {
-        ParamGUI gui = (ParamGUI) param.createGUI();
+        var gui = (JComponent & ParamGUI) param.createGUI();
         if (gui.getNumLayoutColumns() == 2) {
             add(new JLabel(param.getName() + ":"));
         }
-        add((JComponent) gui);
+        add(gui);
     }
 }

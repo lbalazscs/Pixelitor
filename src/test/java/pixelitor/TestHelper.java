@@ -26,6 +26,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.Invert;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.gui.AppPanel;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.MlpAlignmentSelector;
 import pixelitor.history.History;
@@ -464,7 +465,7 @@ public class TestHelper {
         History.setUndoLevels(15);
 
         Layer.uiFactory = TestLayerUI::new;
-        ToolSettingsPanelContainer.setInstance(mock(ToolSettingsPanelContainer.class));
+        AppPanel.TOOL_SETTINGS.setComponent(mock(ToolSettingsPanelContainer.class));
         setupMockFgBgSelector();
     }
 

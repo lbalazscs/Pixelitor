@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.gui.AppPanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
@@ -162,7 +163,7 @@ public class Tools {
             newTool.spacePressed();
         }
 
-        ToolSettingsPanelContainer.get().showSettingsOf(newTool);
+        AppPanel.TOOL_SETTINGS.<ToolSettingsPanelContainer>getComponent().showSettingsOf(newTool);
     }
 
     public static Tool[] getAll() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,14 +18,14 @@
 package pixelitor.utils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 
 import static java.awt.event.KeyEvent.*;
 import static javax.swing.KeyStroke.getKeyStroke;
 
 /**
- * A convenience class for keeping track of keyboard shortcuts
+ * A convenience class for keeping track of keyboard shortcuts.
  */
 public class Keys {
     // Ctrl on Win/Linux, Command on Mac
@@ -108,6 +108,7 @@ public class Keys {
 
     public static final KeyStroke T = getKeyStroke('T');
     public static final KeyStroke F3 = getKeyStroke(VK_F3, 0);
+    public static final KeyStroke F5 = getKeyStroke(VK_F5, 0);
     public static final KeyStroke F6 = getKeyStroke(VK_F6, 0);
     public static final KeyStroke F7 = getKeyStroke(VK_F7, 0);
     public static final KeyStroke F8 = getKeyStroke(VK_F8, 0);

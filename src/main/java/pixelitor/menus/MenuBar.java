@@ -186,7 +186,7 @@ public class MenuBar extends JMenuBar {
         // exit
         String exitText = JVM.isMac ?
             i18n.getString("exit_mac") : i18n.getString("exit");
-        fileMenu.add(new TaskAction(exitText, () -> Pixelitor.exitApp(pw)));
+        fileMenu.add(new TaskAction(exitText, () -> Pixelitor.requestExit(pw)));
 
         return fileMenu;
     }
@@ -1058,10 +1058,10 @@ public class MenuBar extends JMenuBar {
         viewMenu.addSeparator();
 
         WorkSpace workSpace = pw.getWorkSpace();
-        viewMenu.add(workSpace.getStatusBarAction());
-        viewMenu.add(workSpace.getHistogramsAction(), F6);
-        viewMenu.add(workSpace.getLayersAction(), F7);
-        viewMenu.add(workSpace.getToolsAction());
+        viewMenu.add(workSpace.getAction(AppPanel.STATUS_BAR));
+        viewMenu.add(workSpace.getAction(AppPanel.HISTOGRAMS), F6);
+        viewMenu.add(workSpace.getAction(AppPanel.LAYERS), F7);
+        viewMenu.add(workSpace.getAction(AppPanel.TOOLS), F5);
         viewMenu.add(workSpace.getAllAction(), F8);
 
         // reset workspace

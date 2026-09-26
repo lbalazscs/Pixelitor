@@ -42,7 +42,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
 
     private boolean autoNormalizable = false;
     private boolean autoNormalizationEnabled = false;
-    private boolean autoNormalizing = false;
+    private boolean normalizationInProgress = false;
 
     private static final int NORMALIZED_SUM = 100; // 100%
 
@@ -155,7 +155,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     public GroupedRangeParam autoNormalized() {
         // auto-normalization is mutually exclusive with linking
         assert !linkedByDefault;
-        linkedModel = null;
+        notLinkable();
 
         // validate preconditions for the normalization algorithm to work correctly
         assert calcSumOfValues() == NORMALIZED_SUM;
@@ -187,22 +187,22 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     private void autoNormalize(RangeParam source) {
-        if (!autoNormalizationEnabled || autoNormalizing) {
+        if (!autoNormalizationEnabled || normalizationInProgress) {
             // avoid infinite recursion if change listeners call each other
             return;
         }
-        autoNormalizing = true;
+        normalizationInProgress = true;
 
         int sumOfAllValues = calcSumOfValues();
         int diff = sumOfAllValues - NORMALIZED_SUM;
         if (diff == 0) {
-            autoNormalizing = false;
+            normalizationInProgress = false;
             return; // nothing to do
         }
 
         runAutoNormalize(source, diff);
 
-        autoNormalizing = false;
+        normalizationInProgress = false;
     }
 
     // the other sliders are moved by an amount proportional to the space
@@ -295,10 +295,12 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     public int getHorizontal() {
+        assert children.length == 2;
         return getValue(0);
     }
 
     public int getVertical() {
+        assert children.length == 2;
         return getValue(1);
     }
 
@@ -315,10 +317,12 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     public double getHorPercentage() {
+        assert children.length == 2;
         return getPercentage(0);
     }
 
     public double getVerPercentage() {
+        assert children.length == 2;
         return getPercentage(1);
     }
 

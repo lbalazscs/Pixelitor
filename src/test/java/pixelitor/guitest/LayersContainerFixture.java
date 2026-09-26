@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.guitest;
 
 import org.assertj.swing.core.Robot;
+import pixelitor.gui.AppPanel;
 import pixelitor.layers.LayersContainer;
 
 import java.util.List;
@@ -25,8 +26,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Helper class to test the {@link LayersContainer} instance in
- * AssertJ Swing tests
+ * Helper class to test the {@link LayersContainer}
+ * instance in AssertJ-Swing tests.
  */
 public class LayersContainerFixture {
     private final Robot robot;
@@ -35,7 +36,7 @@ public class LayersContainerFixture {
     public LayersContainerFixture(Robot robot) {
         this.robot = robot;
 
-        layersContainer = EDT.call(LayersContainer::get);
+        layersContainer = EDT.call(AppPanel.LAYERS::getComponent);
     }
 
     public LayersContainerFixture requireNumLayerButtons(int expected) {

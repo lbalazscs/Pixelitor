@@ -271,12 +271,6 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
-    /**
-     * Returns the visibility as a string for the OpenRaster format.
-     */
-    public String getVisibilityAsORAString() {
-        return isVisible() ? "visible" : "hidden";
-    }
 
     /**
      * Isolates this layer, making all other layers temporarily invisible.

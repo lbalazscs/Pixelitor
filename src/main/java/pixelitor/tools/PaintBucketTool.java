@@ -195,6 +195,11 @@ public class PaintBucketTool extends Tool {
         }
     }
 
+    @Override
+    public void escPressed() {
+        // do nothing
+    }
+
     /**
      * Fills an area using the generic scanline flood-fill utility.
      *

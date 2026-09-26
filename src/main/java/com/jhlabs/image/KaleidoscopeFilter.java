@@ -19,25 +19,23 @@ package com.jhlabs.image;
 import net.jafama.FastMath;
 
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 
 import static com.jhlabs.image.ImageMath.INV_TAU;
 
 /**
- * A Filter which produces the effect of looking into a kaleidoscope.
+ * A filter that produces the effect of looking into a kaleidoscope:
+ * a narrow angular wedge of the source image is repeatedly mirrored and
+ * rotated around a center point to build a symmetric, tiled pattern.
  */
 public class KaleidoscopeFilter extends TransformFilter {
     private final float angle;
-    private final float angle2;
-    private final int sides;
+    private final float rotation;
 
-    // the center in relative coordinates
-    private final double relCx;
-    private final double relCy;
+    private final double invSectorAngle; // sides / 2π
 
     // the center in pixel coordinates
-    private double cx;
-    private double cy;
+    private final double cx;
+    private final double cy;
 
     private final float zoom;
 
@@ -48,29 +46,22 @@ public class KaleidoscopeFilter extends TransformFilter {
      * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
      * @param interpolation the interpolation method (NEAREST_NEIGHBOR, BILINEAR, BICUBIC).
      * @param angle         the angle of the kaleidoscope.
-     * @param angle2        the secondary angle of the kaleidoscope (rotates the result).
-     * @param sides         the number of sides of the kaleidoscope (must be >= 2).
-     * @param center        the center of the effect as a proportion of the image size.
+     * @param rotation      the secondary angle of the kaleidoscope (rotates the result).
+     * @param sides         the number of sides of the kaleidoscope.
+     * @param center        the center of the effect in pixels.
      * @param zoom          the zoom factor applied to the kaleidoscope effect.
      */
     public KaleidoscopeFilter(String filterName, int edgeAction, int interpolation,
-                              float angle, float angle2, int sides,
+                              float angle, float rotation, int sides,
                               Point2D center, float zoom) {
         super(filterName, edgeAction, interpolation);
 
         this.angle = angle;
-        this.angle2 = angle2;
-        this.sides = sides;
-        this.relCx = center.getX();
-        this.relCy = center.getY();
+        this.rotation = rotation;
+        this.invSectorAngle = sides * INV_TAU;
+        this.cx = center.getX();
+        this.cy = center.getY();
         this.zoom = zoom;
-    }
-
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        cx = src.getWidth() * relCx;
-        cy = src.getHeight() * relCy;
-        return super.filter(src, dst);
     }
 
     @Override
@@ -79,16 +70,16 @@ public class KaleidoscopeFilter extends TransformFilter {
         double dx = x - cx;
         double dy = y - cy;
         double r = Math.sqrt(dx * dx + dy * dy);
-        double theta = FastMath.atan2(dy, dx) - angle - angle2;
+        double rawTheta = FastMath.atan2(dy, dx) - angle - rotation;
 
         // create kaleidoscope effect by repeating angular segments
-        theta = ImageMath.triangle((float) (theta * INV_TAU * sides));
+        double foldedTheta = ImageMath.triangle(rawTheta * invSectorAngle);
 
-        theta += angle; // apply final rotation
+        double finalTheta = foldedTheta + angle; // apply final rotation
         double zoomedR = r / zoom; // apply final zooming
 
         // convert back to Cartesian coordinates
-        out[0] = (float) (cx + zoomedR * FastMath.cos(theta));
-        out[1] = (float) (cy + zoomedR * FastMath.sin(theta));
+        out[0] = (float) (cx + zoomedR * FastMath.cos(finalTheta));
+        out[1] = (float) (cy + zoomedR * FastMath.sin(finalTheta));
     }
 }

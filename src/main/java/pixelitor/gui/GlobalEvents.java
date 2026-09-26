@@ -24,6 +24,7 @@ import pixelitor.utils.Keys;
 import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -36,19 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
 import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
-import static java.awt.event.KeyEvent.KEY_PRESSED;
-import static java.awt.event.KeyEvent.KEY_RELEASED;
-import static java.awt.event.KeyEvent.VK_ALT;
-import static java.awt.event.KeyEvent.VK_DOWN;
-import static java.awt.event.KeyEvent.VK_ESCAPE;
-import static java.awt.event.KeyEvent.VK_KP_DOWN;
-import static java.awt.event.KeyEvent.VK_KP_LEFT;
-import static java.awt.event.KeyEvent.VK_KP_RIGHT;
-import static java.awt.event.KeyEvent.VK_KP_UP;
-import static java.awt.event.KeyEvent.VK_LEFT;
-import static java.awt.event.KeyEvent.VK_RIGHT;
-import static java.awt.event.KeyEvent.VK_SPACE;
-import static java.awt.event.KeyEvent.VK_UP;
+import static java.awt.event.KeyEvent.*;
 import static pixelitor.tools.Tools.activeTool;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
@@ -119,7 +108,7 @@ public class GlobalEvents {
         int id = e.getID();
         if (id == KEY_PRESSED) {
             // hotkeys should be inactive while editing text
-            if (!(e.getSource() instanceof JTextField)) {
+            if (!(e.getSource() instanceof JTextComponent)) {
                 KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(e);
                 Action action = hotkeyMap.get(keyStroke);
                 if (action != null) {
@@ -136,20 +125,17 @@ public class GlobalEvents {
         return false;
     }
 
-    private static void configureFocusTraversal(KeyboardFocusManager keyboardFocusManager) {
-        // Remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
-        // so that they can be used to switch between tabs/internal frames.
-        Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
-            .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
-        forwardKeys = new HashSet<>(forwardKeys); // make modifiable
-        forwardKeys.remove(Keys.CTRL_TAB);
-        keyboardFocusManager.setDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS, forwardKeys);
+    // remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
+    // so that they can be used to switch between tabs/internal frames
+    private static void configureFocusTraversal(KeyboardFocusManager kfm) {
+        removeFocusTraversalKey(kfm, FORWARD_TRAVERSAL_KEYS, Keys.CTRL_TAB);
+        removeFocusTraversalKey(kfm, BACKWARD_TRAVERSAL_KEYS, Keys.CTRL_SHIFT_TAB);
+    }
 
-        Set<AWTKeyStroke> backwardKeys = keyboardFocusManager
-            .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
-        backwardKeys = new HashSet<>(backwardKeys); // make modifiable
-        backwardKeys.remove(Keys.CTRL_SHIFT_TAB);
-        keyboardFocusManager.setDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS, backwardKeys);
+    private static void removeFocusTraversalKey(KeyboardFocusManager kfm, int traversalId, AWTKeyStroke key) {
+        Set<AWTKeyStroke> keys = new HashSet<>(kfm.getDefaultFocusTraversalKeys(traversalId));
+        keys.remove(key);
+        kfm.setDefaultFocusTraversalKeys(traversalId, keys);
     }
 
     private static void registerBrushSizeShortcuts() {

@@ -943,11 +943,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return count[0];
     }
 
-    @Override
-    public String getORAStackXML() {
-        return "<stack>\n";
-    }
-
     // this is the only GUI entry point for isolation =>
     // only the isolation of top-level layers is supported
     public void isolateActiveTopLevelLayer() {
@@ -1613,13 +1608,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         // prevent concurrent processing of the same file path
         File targetFile = saveSettings.file();
         String filePath = targetFile.getAbsolutePath();
-        if (IOTasks.isPathProcessing(filePath)) {
+        if (IOTasks.isPathInUse(filePath)) {
             Messages.showInfo("Save Busy",
                 "The file " + targetFile.getName()
                     + " is currently being processed.");
             return CompletableFuture.completedFuture(null);
         }
-        IOTasks.markPathForWriting(filePath);
+        IOTasks.markWritingStarted(filePath);
 
         // cleared at the start of the saving process
         // so that a subsequent close does not trigger another save

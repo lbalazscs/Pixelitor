@@ -17,7 +17,6 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SphereFilter;
-import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
@@ -38,7 +37,7 @@ public class JHLensOverImage extends ParametrizedFilter {
     private static final long serialVersionUID = -2964686509316632105L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 999);
+    private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 1000);
 
     // less than 100% doesn't create anything usable
     private final RangeParam refractionIndex = new RangeParam("Refraction Index (%)", 100, 150, 300);
@@ -68,7 +67,6 @@ public class JHLensOverImage extends ParametrizedFilter {
         }
 
         SphereFilter filter = new SphereFilter(NAME,
-            TransformFilter.REPEAT_EDGE, // hardcode the default
             interpolation.getValue(),
             center.getAbsolutePoint(src),
             hRadius,

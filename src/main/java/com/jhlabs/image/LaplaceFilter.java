@@ -71,8 +71,11 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
         // first pass: compute Laplacian and gradient + store sign + edge strength
         for (int y = 0; y < height; y++) {
             if (y < height - 1) {
-                nextRow = getRGB(src, 0, y + 1, width, 1, null);
+                nextRow = getRGB(src, 0, y + 1, width, 1, nextRow);
                 brightness(nextRow);
+            } else {
+                // clamp to bottom edge without aliasing array references
+                System.arraycopy(currRow, 0, nextRow, 0, width);
             }
             pixels[0] = pixels[width - 1] = 0xFF_00_00_00;//FIXME
             for (int x = 1; x < width - 1; x++) {
@@ -123,13 +126,16 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
         for (int y = 0; y < height; y++) {
             if (y < height - 1) {
                 nextRow = getRGB(dst, 0, y + 1, width, 1, nextRow);
+            } else {
+                // clamp to bottom edge without aliasing array references
+                System.arraycopy(currRow, 0, nextRow, 0, width);
             }
             pixels[0] = pixels[width - 1] = 0xFF_00_00_00;//FIXME
             for (int x = 1; x < width - 1; x++) {
                 boolean hasNeighborAbove128 =
                     (prevRow[x - 1] > 128) || (prevRow[x] > 128) || (prevRow[x + 1] > 128) ||
-                    (currRow[x - 1] > 128) || (currRow[x + 1] > 128) ||
-                    (nextRow[x - 1] > 128) || (nextRow[x] > 128) || (nextRow[x + 1] > 128);
+                        (currRow[x - 1] > 128) || (currRow[x + 1] > 128) ||
+                        (nextRow[x - 1] > 128) || (nextRow[x] > 128) || (nextRow[x + 1] > 128);
 
                 // detect sign change: keeps the pixel if it's on
                 // one side and a neighbor is on the opposite side

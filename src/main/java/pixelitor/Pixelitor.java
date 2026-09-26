@@ -38,7 +38,6 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +49,6 @@ import static pixelitor.utils.Threads.*;
  */
 public class Pixelitor {
     public static final String VERSION = "4.3.2";
-    public static Locale SYS_LOCALE;
 
     private Pixelitor() {
         // should not be instantiated
@@ -58,8 +56,8 @@ public class Pixelitor {
 
     public static void main(String[] args) {
         initExceptionHandling();
-        initAppMode();
-        configureLanguage();
+        AppMode.detectDevMode();
+        Language.init();
         setupSystemProperties();
         launchGUI(args);
         mainThreadInit();
@@ -67,30 +65,8 @@ public class Pixelitor {
 
     // registers a global exception handler
     private static void initExceptionHandling() {
-        ExceptionHandler.INSTANCE.addHandler((thread, exception) ->
+        ExceptionHandler.INSTANCE.appendHandler((thread, exception) ->
             Messages.showException(exception, thread));
-    }
-
-    private static void initAppMode() {
-        // the app can be put into development mode by
-        // adding -Dpixelitor.development=true to the command line
-        if ("true".equals(System.getProperty("pixelitor.development"))) {
-            Utils.ensureAssertionsEnabled();
-            AppMode.ACTIVE = AppMode.DEVELOPMENT_GUI;
-        }
-    }
-
-    private static void configureLanguage() {
-        // store system locale for number formatting
-        SYS_LOCALE = Locale.getDefault();
-
-        if (!Language.isSupported(SYS_LOCALE.getLanguage())) {
-            // if a language is not supported yet, then set English
-            // in order to avoid mixed-language problems (see issue #35)
-            Locale.setDefault(Locale.US);
-        }
-
-        Language.load(); // this also sets the locale for the language
     }
 
     private static void setupSystemProperties() {
@@ -135,7 +111,7 @@ public class Pixelitor {
         Dialogs.setMainWindowInitialized(true);
 
         // ensure that after GUI initialization the focus isn't grabbed
-        // by a textfield, and keyboard shortcuts work properly
+        // by a text field, and keyboard shortcuts work properly
         FgBgColors.getUI().requestFocus();
 
         TipsOfTheDay.showTips(mainWindow, false);
@@ -146,7 +122,7 @@ public class Pixelitor {
         // schedule IO-intensive font preloading to run after opening files
         openCommandLineFilesAsync(args)
             .exceptionally(throwable -> null) // recover
-            .thenAcceptAsync(v -> doPostStartupActions(), onEDT)
+            .thenAcceptAsync(v -> postStartupDevActions(), onEDT)
             .thenRunAsync(Utils::preloadFontNames, onIOThread)
             .exceptionally(Messages::showExceptionOnEDT);
     }
@@ -161,7 +137,7 @@ public class Pixelitor {
 
     private static void loadUIFonts(Theme theme) {
         int uiFontSize = AppPreferences.loadUIFontSize();
-        String uiFontType = AppPreferences.loadUIFontType();
+        String uiFontName = AppPreferences.loadUIFontName();
 
         if (uiFontSize == 0) {
             // no saved settings found, use default font settings
@@ -174,9 +150,9 @@ public class Pixelitor {
             return;
         }
 
-        Font customFont = uiFontType.isEmpty()
+        Font customFont = uiFontName.isEmpty()
             ? defaultFont.deriveFont((float) uiFontSize)
-            : new Font(uiFontType, Font.PLAIN, uiFontSize);
+            : new Font(uiFontName, Font.PLAIN, uiFontSize);
 
         applyCustomFont(theme, customFont);
     }
@@ -209,14 +185,14 @@ public class Pixelitor {
         return Utils.allOf(fileOpeningTasks);
     }
 
-    public static void exitApp(PixelitorWindow mainWindow) {
+    public static void requestExit(PixelitorWindow mainWindow) {
         assert calledOnEDT() : callInfo();
 
         if (handleOngoingWrites(mainWindow)) {
             return;
         }
 
-        checkUnsavedChangesAndExit(mainWindow);
+        checkUnsavedChangesAndShutdown(mainWindow);
     }
 
     // returns true if we can't exit yet (i.e., we are either waiting or the user canceled)
@@ -264,25 +240,25 @@ public class Pixelitor {
         // can be updated while waiting
         new Thread(() -> {
             Utils.sleep(10, TimeUnit.SECONDS);
-            EventQueue.invokeLater(() -> exitApp(mainWindow));
+            EventQueue.invokeLater(() -> requestExit(mainWindow));
         }).start();
     }
 
-    private static void checkUnsavedChangesAndExit(PixelitorWindow mainWindow) {
+    private static void checkUnsavedChangesAndShutdown(PixelitorWindow mainWindow) {
         List<Composition> unsavedWork = Views.getUnsavedComps();
         if (unsavedWork.isEmpty()) {
-            exit(mainWindow);
+            shutdown(mainWindow);
             return;
         }
 
-        boolean proceedWithExit = Dialogs.showYesNoWarning(mainWindow,
+        boolean proceed = Dialogs.showYesNoWarning(mainWindow,
             "Unsaved Changes", createUnsavedChangesMsg(unsavedWork));
-        if (proceedWithExit) {
-            exit(mainWindow);
+        if (proceed) {
+            shutdown(mainWindow);
         }
     }
 
-    private static void exit(PixelitorWindow mainWindow) {
+    private static void shutdown(PixelitorWindow mainWindow) {
         mainWindow.setVisible(false);
         AppPreferences.savePreferences();
         System.exit(0);
@@ -307,7 +283,7 @@ public class Pixelitor {
     /**
      * Executes development mode actions after application startup.
      */
-    private static void doPostStartupActions() {
+    private static void postStartupDevActions() {
         if (!AppMode.isDevelopment()) {
             return;
         }

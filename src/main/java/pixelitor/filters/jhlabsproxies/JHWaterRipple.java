@@ -38,7 +38,7 @@ public class JHWaterRipple extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 300, 999);
+    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 300, 1000);
     private final RangeParam wavelength = new RangeParam("Wavelength", 1, 25, 250);
     private final RangeParam amplitude = new RangeParam("Amplitude", 0, 50, 100);
     private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);

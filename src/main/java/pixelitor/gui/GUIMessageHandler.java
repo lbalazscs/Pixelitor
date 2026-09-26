@@ -36,14 +36,14 @@ public class GUIMessageHandler implements MessageHandler {
     public void showInStatusBar(String msg) {
         assert calledOnEDT() : callInfo();
 
-        StatusBar.get().updateMessage(msg);
+        AppPanel.STATUS_BAR.<StatusBar>getComponent().updateMessage(msg);
     }
 
     @Override
     public ProgressHandler startProgress(String msg, int maxValue) {
         assert calledOnEDT() : callInfo();
 
-        return StatusBar.get().startProgress(msg, maxValue);
+        return AppPanel.STATUS_BAR.<StatusBar>getComponent().startProgress(msg, maxValue);
     }
 
     @Override

@@ -99,6 +99,11 @@ public class ColorPickerTool extends Tool {
         }
     }
 
+    @Override
+    public void escPressed() {
+        // do nothing
+    }
+
     public void sampleColor(PMouseEvent e, boolean selectBackground) {
         View view = e.getView();
 
