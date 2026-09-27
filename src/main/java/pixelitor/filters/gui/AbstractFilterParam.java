@@ -152,6 +152,11 @@ public abstract class AbstractFilterParam implements FilterParam {
     protected abstract void doRandomize();
 
     @Override
+    public void setEmbedded() {
+        // do nothing by default
+    }
+
+    @Override
     public void setRandomizeMode(RandomizeMode mode) {
         randomizeMode = mode;
     }

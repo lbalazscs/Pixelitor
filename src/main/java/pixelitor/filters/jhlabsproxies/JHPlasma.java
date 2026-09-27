@@ -20,6 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.PlasmaFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GradientParam;
+import pixelitor.filters.gui.GradientPreset;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -27,11 +28,9 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.List;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.ORANGE;
-import static java.awt.Color.RED;
-import static java.awt.Color.YELLOW;
+import static java.awt.Color.*;
 
 /**
  * Plasma filter based on the JHLabs {@link PlasmaFilter}.
@@ -57,9 +56,34 @@ public class JHPlasma extends ParametrizedFilter {
     // initialize here, otherwise it doesn't load from pxc smart filter
     private final PlasmaFilter filter = new PlasmaFilter(NAME);
 
-    private final float[] defaultThumbPositions = {0.0f, 0.3f, 0.7f, 1.0f};
-    private final Color[] defaultValues = {BLACK, RED, ORANGE, YELLOW};
-    private final GradientParam gradient = new GradientParam("Gradient", defaultThumbPositions, defaultValues);
+    private final float[] fourPoints = {0.0f, 0.3f, 0.7f, 1.0f};
+    private final GradientPreset FIRE = new GradientPreset("Fire",
+        fourPoints,
+        new Color[]{
+            BLACK,
+            RED,
+            ORANGE,
+            YELLOW,
+        });
+    private final GradientPreset OCEAN = new GradientPreset("Ocean",
+        fourPoints,
+        new Color[]{
+            new Color(8, 20, 40),
+            new Color(7, 49, 67),
+            new Color(60, 180, 180),
+            new Color(190, 237, 227)
+        });
+    private final GradientPreset NEON = new GradientPreset("Neon",
+        fourPoints,
+        new Color[]{
+            new Color(15, 10, 30),
+            new Color(90, 20, 140),
+            new Color(255, 80, 150),
+            new Color(255, 200, 120)
+        });
+
+    private final GradientParam gradient = new GradientParam("Gradient",
+        List.of(FIRE, OCEAN, NEON));
 
     public JHPlasma() {
         super(false);

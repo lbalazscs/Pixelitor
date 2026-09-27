@@ -105,9 +105,9 @@ public class AngleParam extends AbstractFilterParam {
         return normalize(angle) == defaultAngle;
     }
 
-    public AngleParam withoutBorder() {
+    @Override
+    public void setEmbedded() {
         hasBorder = false;
-        return this;
     }
 
     public boolean hasBorder() {

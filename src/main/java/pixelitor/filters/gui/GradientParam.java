@@ -26,7 +26,9 @@ import javax.swing.*;
 import java.awt.Color;
 import java.io.Serial;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -34,14 +36,37 @@ import static java.awt.Color.*;
 import static java.util.stream.Collectors.joining;
 
 /**
- * Represents a gradient.
+ * Represents a gradient filter parameter.
  */
 public class GradientParam extends AbstractFilterParam {
+    public static final String CUSTOM_PRESET_NAME = "Custom";
+
+    private final List<GradientPreset> presets;
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
     private float[] thumbPositions;
     private Color[] colors;
+    private String selectedPresetName;
 
+    public GradientParam(String name, List<GradientPreset> presets) {
+        this(name, presets, RandomizeMode.ALLOW);
+    }
+
+    public GradientParam(String name, List<GradientPreset> presets, RandomizeMode randomizeMode) {
+        super(name, randomizeMode);
+        assert presets != null && !presets.isEmpty();
+
+        this.presets = List.copyOf(presets);
+        GradientPreset firstPreset = this.presets.getFirst();
+        this.defaultThumbPositions = firstPreset.thumbPositions();
+        this.defaultColors = firstPreset.colors();
+
+        this.thumbPositions = this.defaultThumbPositions.clone();
+        this.colors = this.defaultColors.clone();
+        this.selectedPresetName = firstPreset.name();
+    }
+
+    // constructors without presets
     public GradientParam(String name, Color startColor, Color endColor) {
         this(name, new float[]{0.0f, 0.5f, 1.0f},
             new Color[]{
@@ -58,11 +83,13 @@ public class GradientParam extends AbstractFilterParam {
     public GradientParam(String name, float[] defaultThumbPositions,
                          Color[] defaultColors, RandomizeMode randomizeMode) {
         super(name, randomizeMode);
+        this.presets = List.of();
         this.defaultThumbPositions = defaultThumbPositions;
         this.defaultColors = defaultColors;
 
-        thumbPositions = defaultThumbPositions;
-        colors = defaultColors;
+        this.thumbPositions = defaultThumbPositions;
+        this.colors = defaultColors;
+        this.selectedPresetName = CUSTOM_PRESET_NAME;
     }
 
     public static GradientParam createBlackToWhite(String name) {
@@ -83,6 +110,70 @@ public class GradientParam extends AbstractFilterParam {
             new Color[]{WHITE, WHITE, WHITE});
     }
 
+    public boolean hasPresets() {
+        return !presets.isEmpty();
+    }
+
+    public List<GradientPreset> getPresets() {
+        return presets;
+    }
+
+    public String getSelectedPresetName() {
+        return selectedPresetName;
+    }
+
+    /**
+     * Returns all predefined preset names in registered order with "Custom" appended.
+     */
+    public String[] getSelectablePresetNames() {
+        String[] names = new String[presets.size() + 1];
+        for (int i = 0; i < presets.size(); i++) {
+            names[i] = presets.get(i).name();
+        }
+        names[presets.size()] = CUSTOM_PRESET_NAME;
+        return names;
+    }
+
+    /**
+     * Selects a predefined preset by name. "Custom" is a state indicator and not actionable.
+     */
+    public void selectPreset(String name) {
+        Objects.requireNonNull(name, "name");
+        if (CUSTOM_PRESET_NAME.equals(name)) {
+            if (paramGUI != null) {
+                paramGUI.updateGUI();
+            }
+            return;
+        }
+
+        for (GradientPreset preset : presets) {
+            if (preset.name().equals(name)) {
+                if (Arrays.equals(this.thumbPositions, preset.thumbPositions())
+                    && Arrays.equals(this.colors, preset.colors())) {
+                    this.selectedPresetName = preset.name();
+                    if (paramGUI != null) {
+                        paramGUI.updateGUI();
+                    }
+                    return;
+                }
+                setValues(preset.thumbPositions(), preset.colors(), true);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Unknown preset: " + name);
+    }
+
+    private void updateSelectedPresetName() {
+        for (GradientPreset preset : presets) {
+            if (Arrays.equals(thumbPositions, preset.thumbPositions())
+                && Arrays.equals(colors, preset.colors())) {
+                selectedPresetName = preset.name();
+                return;
+            }
+        }
+        selectedPresetName = CUSTOM_PRESET_NAME;
+    }
+
     @Override
     public JComponent createGUI() {
         GradientParamGUI gui = new GradientParamGUI(this);
@@ -94,12 +185,12 @@ public class GradientParam extends AbstractFilterParam {
     public void setValues(float[] thumbPositions, Color[] colors, boolean trigger) {
         if (Arrays.equals(this.thumbPositions, thumbPositions)
             && Arrays.equals(this.colors, colors)) {
-
             return;
         }
 
-        this.thumbPositions = thumbPositions;
-        this.colors = colors;
+        this.thumbPositions = thumbPositions.clone();
+        this.colors = colors.clone();
+        updateSelectedPresetName();
 
         if (paramGUI != null) {
             paramGUI.updateGUI();
@@ -126,13 +217,12 @@ public class GradientParam extends AbstractFilterParam {
             }
         }
         if (pos < thumbPositions[0]) {
-            return colors[0].getRGB(); // first color
+            return colors[0].getRGB();
         }
         if (pos > thumbPositions[thumbPositions.length - 1]) {
-            return colors[colors.length - 1].getRGB(); // last color
+            return colors[colors.length - 1].getRGB();
         }
 
-        // should never get here
         throw new IllegalStateException("pos = " + pos);
     }
 
@@ -176,36 +266,65 @@ public class GradientParam extends AbstractFilterParam {
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         GradientParamState gr = (GradientParamState) state;
 
-        setValues(gr.thumbPositions, gr.colors, false);
+        setValues(gr.thumbPositions(), gr.colors(), false);
+        if (updateGUI && paramGUI != null) {
+            paramGUI.updateGUI();
+        }
     }
 
     @Override
     public void loadStateFrom(String savedValue) {
-        // the expected argument format is like: 0.00,0.50,1.00|91707B,1E165B,BF7512
+        Objects.requireNonNull(savedValue, "savedValue");
         int pipeIndex = savedValue.indexOf('|');
         if (pipeIndex == -1) {
-            throw new IllegalArgumentException("savedValue = " + savedValue);
+            throw new IllegalArgumentException("savedValue missing '|': " + savedValue);
         }
 
-        String[] thumbStrings = savedValue.substring(0, pipeIndex).split(",");
-        String[] colorStrings = savedValue.substring(pipeIndex + 1).split(",");
+        String thumbPart = savedValue.substring(0, pipeIndex);
+        String colorPart = savedValue.substring(pipeIndex + 1);
+
+        String[] thumbStrings = thumbPart.split(",");
+        String[] colorStrings = colorPart.split(",");
         if (thumbStrings.length != colorStrings.length) {
-            throw new IllegalArgumentException("savedValue = " + savedValue);
+            throw new IllegalArgumentException(
+                "savedValue length mismatch: thumbs=" + thumbStrings.length + ", colors=" + colorStrings.length);
         }
 
         float[] newThumbPositions = new float[thumbStrings.length];
         Color[] newColors = new Color[colorStrings.length];
         for (int i = 0; i < thumbStrings.length; i++) {
-            newThumbPositions[i] = Float.parseFloat(thumbStrings[i]);
-            newColors[i] = Colors.fromHtmlHexRgba(colorStrings[i]);
+            newThumbPositions[i] = Float.parseFloat(thumbStrings[i].trim());
+            if (newThumbPositions[i] < 0.0f || newThumbPositions[i] > 1.0f) {
+                throw new IllegalArgumentException("Thumb position out of range [0, 1]: " + newThumbPositions[i]);
+            }
+            if (i > 0 && newThumbPositions[i] < newThumbPositions[i - 1]) {
+                throw new IllegalArgumentException("Thumb positions not ascending: " + Arrays.toString(newThumbPositions));
+            }
+
+            String colorStr = colorStrings[i].trim();
+            Color c;
+            if (colorStr.length() == 8) {
+                c = Colors.fromHtmlHexRgba(colorStr);
+            } else if (colorStr.length() == 6) {
+                c = Colors.fromHtmlHexRgb(colorStr);
+            } else {
+                throw new IllegalArgumentException("Invalid color string length: " + colorStr);
+            }
+            if (c == null) {
+                throw new IllegalArgumentException("Could not parse color: " + colorStr);
+            }
+            newColors[i] = c;
         }
 
         setValues(newThumbPositions, newColors, false);
+        if (paramGUI != null) {
+            paramGUI.updateGUI();
+        }
     }
 
     @Override
     public String getValueAsString() {
-        return Colors.formatForDebugging(colors);
+        return copyState().toPresetString();
     }
 
     public float[] getThumbPositions() {
@@ -226,9 +345,23 @@ public class GradientParam extends AbstractFilterParam {
         @Serial
         private static final long serialVersionUID = 1L;
 
+        public GradientParamState {
+            thumbPositions = thumbPositions.clone();
+            colors = colors.clone();
+        }
+
+        @Override
+        public float[] thumbPositions() {
+            return thumbPositions.clone();
+        }
+
+        @Override
+        public Color[] colors() {
+            return colors.clone();
+        }
+
         @Override
         public GradientParamState interpolate(GradientParamState endState, double progress) {
-            // this will not work if the number of thumbs changes
             float[] interpolatedPositions = interpolatePositions((float) progress, endState);
             Color[] interpolatedColors = interpolateColors((float) progress, endState);
 
@@ -267,6 +400,23 @@ public class GradientParam extends AbstractFilterParam {
                 .collect(joining(","));
 
             return thumbsString + colorsString;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GradientParamState other)) {
+                return false;
+            }
+            return Arrays.equals(thumbPositions, other.thumbPositions)
+                && Arrays.equals(colors, other.colors);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Arrays.hashCode(thumbPositions) + Arrays.hashCode(colors);
         }
     }
 }

@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.filters.impl.GridKaleidoscopeFilter;
-import pixelitor.gui.utils.SliderSpinner;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -38,7 +37,7 @@ public class GridKaleidoscope extends ParametrizedFilter {
         new IntChoiceParam.Item("Triangles (3-Fold)", GridKaleidoscopeFilter.GRID_TRIANGULAR),
         new IntChoiceParam.Item("Hexagons (6-Fold)", GridKaleidoscopeFilter.GRID_HEXAGONAL),
     });
-    private final RangeParam gridSize = new RangeParam("Size", 20, 100, 500, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
+    private final RangeParam gridSize = new RangeParam("Size", 20, 100, 500);
     private final AngleParam angle = new AngleParam("Rotation", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam distortion = new GroupedRangeParam("Wave Distortion", -100, 0, 100, false);
@@ -49,10 +48,10 @@ public class GridKaleidoscope extends ParametrizedFilter {
         super(true);
 
         initParams(
-            CompositeParam.border("Grid",
+            CompositeParam.bordered("Grid",
                 gridType,
                 gridSize,
-                angle.withoutBorder()),
+                angle),
             center,
             distortion,
             edgeAction,

@@ -51,7 +51,10 @@ public class CompositeParam extends AbstractFilterParam {
      * Creates a {@link CompositeParam} that groups the given params
      * using a common border (and not with a dialog).
      */
-    public static CompositeParam border(String name, FilterParam... children) {
+    public static CompositeParam bordered(String name, FilterParam... children) {
+        for (FilterParam child : children) {
+            child.setEmbedded();
+        }
         return new CompositeParam(name, false, children);
     }
 

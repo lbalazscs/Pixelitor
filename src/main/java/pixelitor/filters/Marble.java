@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,17 +26,12 @@ import pixelitor.gui.GUIText;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.List;
 
 import static com.jhlabs.image.WaveType.wave;
 import static com.jhlabs.image.WaveType.wave01;
-import static com.jhlabs.math.Noise.noise2;
-import static com.jhlabs.math.Noise.turbulence2;
-import static com.jhlabs.math.Noise.turbulence2Smooth;
-import static net.jafama.FastMath.atan2;
-import static net.jafama.FastMath.cos;
-import static net.jafama.FastMath.pow;
-import static net.jafama.FastMath.sin;
-import static net.jafama.FastMath.sqrt;
+import static com.jhlabs.math.Noise.*;
+import static net.jafama.FastMath.*;
 
 /**
  * Marble filter
@@ -64,9 +59,9 @@ public class Marble extends ParametrizedFilter {
     });
 
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
-    private final BooleanParam smoothDetails = new BooleanParam("Smoother Details");
+    private final BooleanParam smoothDetails = new BooleanParam("Smoother");
 
-    private final GradientParam gradient = new GradientParam("Colors",
+    private final GradientPreset greenPreset = new GradientPreset("Green",
         new float[]{0.0f, 0.5f, 1.0f},
         new Color[]{
             new Color(1, 14, 5),
@@ -74,13 +69,25 @@ public class Marble extends ParametrizedFilter {
             new Color(235, 255, 251),
         });
 
+    private final GradientPreset brownPreset = new GradientPreset("Brown",
+        new float[]{0.0f, 0.5f, 1.0f},
+        new Color[]{
+            new Color(85, 61, 51),
+            new Color(162, 125, 99),
+            new Color(220, 212, 213),
+        });
+
+    private final GradientParam gradient = new GradientParam("Colors",
+        List.of(greenPreset, brownPreset));
+
     private Impl filter;
 
     public Marble() {
         super(false);
 
-        var details = new GroupedRangeParam("Details",
-            new RangeParam[]{detailsLevel, detailsStrength}, false);
+        smoothDetails.setPresetKey("Smoother Details");
+        var details = CompositeParam.bordered("Details",
+            detailsLevel, detailsStrength, smoothDetails);
 
         type.setPresetKey("Type");
         zoom.setPresetKey("Zoom");
@@ -91,8 +98,7 @@ public class Marble extends ParametrizedFilter {
             angle,
             zoom.withAdjustedRange(0.25),
             distortion,
-            details.notLinkable(),
-            smoothDetails,
+            details,
             gradient
         ).withReseedNoiseAction();
     }

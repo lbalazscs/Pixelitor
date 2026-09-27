@@ -121,4 +121,9 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     default boolean isComplex() {
         return false;
     }
+
+    /**
+     * Signals that this filter param is embedded into a bordered layout.
+     */
+    void setEmbedded();
 }

@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
-import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.progress.ProgressTracker;
 import pixelitor.progress.StatusBarProgressTracker;
 
@@ -53,9 +52,9 @@ public class RadialMosaic extends ParametrizedFilter {
         new IntChoiceParam.Item("Offset", ARRANGEMENT_OFFSET)
     });
     private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 0, 100);
-    private final RangeParam pinchBulgeParam = new RangeParam("Pinch-Bulge", -100, 0, 100, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
-    private final RangeParam spiralParam = new RangeParam("Spiral", -100, 0, 100, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
-    private final RangeParam edgeWidth = new RangeParam("Width", 0, 1, 10, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
+    private final RangeParam pinchBulgeParam = new RangeParam("Pinch-Bulge", -100, 0, 100);
+    private final RangeParam twistParam = new RangeParam("Twist", -100, 0, 100);
+    private final RangeParam edgeWidth = new RangeParam("Width", 0, 1, 10);
     private final ColorParam edgeColor = new ColorParam("Color", Color.BLACK);
 
     public RadialMosaic() {
@@ -74,8 +73,12 @@ public class RadialMosaic extends ParametrizedFilter {
             size,
             arrangementParam,
             randomnessParam.withSideButton(reseedAction),
-            CompositeParam.border("Distortion", pinchBulgeParam, spiralParam),
-            CompositeParam.border("Edge", edgeWidth, edgeColor)
+            CompositeParam.bordered("Distortion",
+                pinchBulgeParam,
+                twistParam),
+            CompositeParam.bordered("Edge",
+                edgeWidth,
+                edgeColor)
         );
     }
 
@@ -109,7 +112,7 @@ public class RadialMosaic extends ParametrizedFilter {
         Random random = paramSet.getRandomWithLastSeed();
         double randomness = randomnessParam.getPercentage();
         double pinchBulge = pinchBulgeParam.getPercentage();
-        double spiral = spiralParam.getPercentage();
+        double spiral = twistParam.getPercentage();
 
         // calculate how many rings are needed to fully cover the canvas
         double maxDist = Math.hypot(Math.max(cx, width - cx), Math.max(cy, height - cy));

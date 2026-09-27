@@ -386,6 +386,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
     }
 
+    @Override
+    public void setEmbedded() {
+        labelPosition = SliderSpinner.LabelPosition.NONE_WITH_TICKS;
+    }
+
     /**
      * Updates the parameter's range based on the size
      * of the canvas if range adjustment is enabled.
