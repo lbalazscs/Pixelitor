@@ -37,10 +37,16 @@ public class GlassTiles extends ParametrizedFilter {
 
     private final IntChoiceParam mode = new IntChoiceParam("Type", new Item[]{
         new Item("Squares", TilesFilter.MODE_SQUARES),
+        new Item("Octagons and Squares", TilesFilter.MODE_OCTAGONS_AND_SQUARES),
+        new Item("Cubes", TilesFilter.MODE_CUBES),
         new Item("Brick", TilesFilter.MODE_BRICK),
+        new Item("Herringbone", TilesFilter.MODE_HERRINGBONE),
+        new Item("Basket Weave", TilesFilter.MODE_BASKET_WEAVE),
+        new Item("Chevron", TilesFilter.MODE_CHEVRON),
         new Item("Triangles", TilesFilter.MODE_TRIANGLES),
         new Item("Hexagons", TilesFilter.MODE_HEXAGONS),
-        new Item("Octagons and Squares", TilesFilter.MODE_OCTAGONS_AND_SQUARES),
+        new Item("Trihexagonal", TilesFilter.MODE_TRIHEXAGONAL),
+        new Item("Cairo Pentagonal", TilesFilter.MODE_CAIRO),
         new Item("Fish Scales", TilesFilter.MODE_FISH_SCALES),
     });
 
