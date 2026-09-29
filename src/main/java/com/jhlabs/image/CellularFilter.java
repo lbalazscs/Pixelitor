@@ -26,7 +26,6 @@ import java.util.concurrent.Future;
 /**
  * A variant of Worley noise that calculates distances to the three
  * nearest points and uses a weighted combination of these distances.
- * See https://en.wikipedia.org/wiki/Worley_noise
  */
 public class CellularFilter extends WholeImageFilter {
     private static final int POISSON_ARRAY_SIZE = 8192;
@@ -40,14 +39,14 @@ public class CellularFilter extends WholeImageFilter {
     public float amount = 1.0f;
     public float turbulence = 1.0f;
     protected Colormap colormap;
-    private final float[] coefficients = {1, 0, 0, 0};
+    private final float[] coefficients = {1, 0, 0}; // weights of F1, F2, F3
 
-    protected float m00 = 1.0f;
-    protected float m01 = 0.0f;
-    protected float m10 = 0.0f;
-    protected float m11 = 1.0f;
+    private float m00 = 1.0f;
+    private float m01 = 0.0f;
+    private float m10 = 0.0f;
+    private float m11 = 1.0f;
 
-    protected static final ThreadLocal<Point[]> resultsTL = ThreadLocal.withInitial(() -> {
+    private static final ThreadLocal<Point[]> resultsTL = ThreadLocal.withInitial(() -> {
         Point[] results = new Point[3];
         for (int j = 0; j < results.length; j++) {
             results[j] = new Point();
@@ -141,10 +140,6 @@ public class CellularFilter extends WholeImageFilter {
 
     public void setF3(float v) {
         coefficients[2] = v;
-    }
-
-    public void setF4(float v) {
-        coefficients[3] = v;
     }
 
     /**
@@ -258,6 +253,66 @@ public class CellularFilter extends WholeImageFilter {
                 evaluatePoint(x, y, cellX, cellY, results, randomness, px2, 0.65f, 1.0f);
                 return results[2].distance;
             }
+        }, CAIRO("Pentagons (Cairo)") {
+            @Override
+            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
+                // 4 points of a regular snub-square lattice (wallpaper group p4g),
+                // whose Voronoi cells form the Cairo pentagonal tiling.
+                // 0.31699 = (3 - sqrt(3)) / 4
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.31699f, 0.81699f, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.68301f, 0.18301f, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.81699f, 0.68301f, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.18301f, 0.31699f, 1.0f);
+                return results[2].distance;
+            }
+        }, LIEB("Squares & Hexagons") {
+            @Override
+            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
+                // Lieb lattice: a square lattice with every fourth point removed
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.0f, 0.0f, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.5f, 0.0f, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.0f, 0.5f, 1.0f);
+                return results[2].distance;
+            }
+        }, PINWHEEL("Pinwheels") {
+            @Override
+            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
+                // four points related by 90° rotation around the cell center (wallpaper group p4)
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.70f, 0.58f, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.42f, 0.70f, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.30f, 0.42f, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.58f, 0.30f, 1.0f);
+                return results[2].distance;
+            }
+        }, ROSETTE("Rosettes") {
+            // offsets of 6 points on a ring of radius 0.3, rotated by 15°
+            private static final float[] RING = {
+                0.2898f, 0.0776f, 0.0776f, 0.2898f, -0.2121f, 0.2121f,
+                -0.2898f, -0.0776f, -0.0776f, -0.2898f, 0.2121f, -0.2121f
+            };
+
+            @Override
+            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
+                // a hub point surrounded by a ring of six points, giving flower-like clusters
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.5f, 0.5f, 1.0f);
+                for (int i = 0; i < RING.length; i += 2) {
+                    evaluatePoint(x, y, cellX, cellY, results, randomness,
+                        0.5f + RING[i], 0.5f + RING[i + 1], 1.0f);
+                }
+                return results[2].distance;
+            }
+        }, DIAGONALS("Alternating Diagonals") {
+            @Override
+            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness) {
+                // point pairs on alternating diagonals in a checkerboard arrangement;
+                // gives a pattern of triangles and kites
+                boolean even = ((cellX + cellY) & 1) == 0;
+                float y1 = even ? 0.2f : 0.8f;
+                float y2 = even ? 0.8f : 0.2f;
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.2f, y1, 1.0f);
+                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.8f, y2, 1.0f);
+                return results[2].distance;
+            }
         };
 
         private final String displayName;
@@ -270,17 +325,19 @@ public class CellularFilter extends WholeImageFilter {
 
         /**
          * Checks a grid cell for a feature point and updates the list of nearest points.
+         * x/y are relative to the cell origin, cellX/cellY are absolute cell
+         * indices, and the return value is the current third-nearest distance.
          */
         abstract float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness);
 
         // maintains the result array such that it always contains
         // the three closest points found so far, sorted by distance
-        static void keepNearest3(float x, float y, int cubeX, int cubeY, Point[] results, float px, float py, float weight) {
+        static void keepNearest3(float x, float y, int cellX, int cellY, Point[] results, float px, float py, float weight) {
             float dx = Math.abs(x - px) * weight;
             float dy = Math.abs(y - py) * weight;
 
             // the distance between the current point and the new feature point
-            float d = (float) FastMath.sqrt(dx * dx + dy * dy); // sqrtQuick is ugly
+            float d = (float) FastMath.sqrt(dx * dx + dy * dy);
 
             if (d < results[0].distance) {
                 // closer than the current closest point (at index 0):
@@ -289,17 +346,17 @@ public class CellularFilter extends WholeImageFilter {
                 results[2] = results[1];
                 results[1] = results[0];
                 results[0] = p;
-                updatePoint(p, d, dx, dy, cubeX + px, cubeY + py);
+                updatePoint(p, d, dx, dy, cellX + px, cellY + py);
             } else if (d < results[1].distance) {
                 // closer than the second closest point:
                 // shifts 1->2, and inserts the new point at 1
                 Point p = results[2];
                 results[2] = results[1];
                 results[1] = p;
-                updatePoint(p, d, dx, dy, cubeX + px, cubeY + py);
+                updatePoint(p, d, dx, dy, cellX + px, cellY + py);
             } else if (d < results[2].distance) {
                 // replace the point at index 2 with the current point
-                updatePoint(results[2], d, dx, dy, cubeX + px, cubeY + py);
+                updatePoint(results[2], d, dx, dy, cellX + px, cellY + py);
             }
         }
 
@@ -333,8 +390,24 @@ public class CellularFilter extends WholeImageFilter {
         }
     }
 
-    public float evaluate(float x, float y) {
+    private float toNoiseX(int x, int y) {
+        return (m00 * x + m01 * y) / scale + ORIGIN_OFFSET;
+    }
+
+    private float toNoiseY(int x, int y) {
+        return (m10 * x + m11 * y) / (scale * stretch) + ORIGIN_OFFSET;
+    }
+
+    /**
+     * Returns the three nearest feature points (a reused, thread-local array).
+     */
+    protected Point[] findNearestPoints(int x, int y) {
         Point[] results = resultsTL.get();
+        searchNeighborhood(toNoiseX(x, y), toNoiseY(x, y), results);
+        return results;
+    }
+
+    private void searchNeighborhood(float x, float y, Point[] results) {
         for (Point result : results) {
             result.distance = Float.POSITIVE_INFINITY;
         }
@@ -382,6 +455,11 @@ public class CellularFilter extends WholeImageFilter {
                 gridType.checkCell(fx - 1, fy - 1, ix + 1, iy + 1, results, randomness);
             }
         }
+    }
+
+    public float evaluate(float x, float y) {
+        Point[] results = resultsTL.get();
+        searchNeighborhood(x, y, results);
 
         // at this point results is guaranteed to hold the three smallest distances encountered,
         // so we can now calculate the weighted combination of these distances
@@ -400,12 +478,8 @@ public class CellularFilter extends WholeImageFilter {
     }
 
     public int genPixel(int x, int y, int[] inPixels, int width, int height) {
-        float nx = m00 * x + m01 * y;
-        float ny = m10 * x + m11 * y;
-        nx /= scale;
-        ny /= scale * stretch;
-        nx += ORIGIN_OFFSET;
-        ny += ORIGIN_OFFSET;
+        float nx = toNoiseX(x, y);
+        float ny = toNoiseY(x, y);
 
         float f = turbulence == 1.0f ? evaluate(nx, ny) : turbulence2(nx, ny, turbulence);
         f *= 2 * amount;

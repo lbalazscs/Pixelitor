@@ -17,25 +17,25 @@ limitations under the License.
 package com.jhlabs.image;
 
 public class PointillizeFilter extends CellularFilter {
-    private float edgeThickness = 0.4f;
+    private float dotRadius = 0.4f;
     private boolean fadeEdges = false;
-    private int edgeColor = 0xFF_00_00_00;
+    private int backgroundColor = 0xFF_00_00_00;
     private float fuzziness = 0.1f;
 
     public PointillizeFilter(String filterName) {
         super(filterName);
     }
 
-    public void setEdgeThickness(float edgeThickness) {
-        this.edgeThickness = edgeThickness;
+    public void setDotRadius(float dotRadius) {
+        this.dotRadius = dotRadius;
     }
 
     public void setFadeEdges(boolean fadeEdges) {
         this.fadeEdges = fadeEdges;
     }
 
-    public void setEdgeColor(int edgeColor) {
-        this.edgeColor = edgeColor;
+    public void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
     public void setFuzziness(float fuzziness) {
@@ -44,30 +44,22 @@ public class PointillizeFilter extends CellularFilter {
 
     @Override
     public int genPixel(int x, int y, int[] inPixels, int width, int height) {
-        float nx = m00 * x + m01 * y;
-        float ny = m10 * x + m11 * y;
-        nx /= scale;
-        ny /= scale * stretch;
-        nx += ORIGIN_OFFSET;
-        ny += ORIGIN_OFFSET;
-        evaluate(nx, ny);
-
-        Point[] results = resultsTL.get();
+        Point[] results = findNearestPoints(x, y);
 
         float f1 = results[0].distance;
 
         // sample source pixel using the inverse transform
-        int v = getSourcePixel(results[0], inPixels, width, height);
+        int color = getSourcePixel(results[0], inPixels, width, height);
 
         if (fadeEdges) {
             float f2 = results[1].distance;
             // sample second nearest source pixel
-            int v2 = getSourcePixel(results[1], inPixels, width, height);
-            v = ImageMath.mixColors(0.5f * f1 / f2, v, v2);
+            int secondColor = getSourcePixel(results[1], inPixels, width, height);
+            color = ImageMath.mixColors(0.5f * f1 / f2, color, secondColor);
         } else {
-            float f = 1 - ImageMath.smoothStep(edgeThickness, edgeThickness + fuzziness, f1);
-            v = ImageMath.mixColors(f, edgeColor, v);
+            float dotBlend = 1 - ImageMath.smoothStep(dotRadius, dotRadius + fuzziness, f1);
+            color = ImageMath.mixColors(dotBlend, backgroundColor, color);
         }
-        return v;
+        return color;
     }
 }

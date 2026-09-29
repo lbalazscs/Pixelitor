@@ -39,7 +39,7 @@ public class JHPointillize extends ParametrizedFilter {
     public static final String NAME = Texts.i18n("pointillize");
 
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);
-    private final RangeParam dotSize = new RangeParam("Dot Relative Size (%)", 0, 45, 100);
+    private final RangeParam dotRadius = new RangeParam("Dot Relative Size (%)", 0, 45, 100);
     private final RangeParam fuzziness = new RangeParam("Fill Fuzziness (%)", 0, 0, 100);
     private final ColorParam fillColor = new ColorParam("Fill Color", BLACK, RANDOMIZED_ALPHA);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Instead of Fill", true);
@@ -61,7 +61,7 @@ public class JHPointillize extends ParametrizedFilter {
             randomness,
             fadeEdges,
             fillColor,
-            dotSize,
+            dotRadius,
             fuzziness,
             angle,
             stretch
@@ -70,7 +70,7 @@ public class JHPointillize extends ParametrizedFilter {
         // when "Fade Instead of Fill" is checked, then "Fill Color",
         // "Dot Relative Size" and "Fill Fuzziness" should be disabled
         fadeEdges.disableOtherWhenChecked(fillColor);
-        fadeEdges.disableOtherWhenChecked(dotSize);
+        fadeEdges.disableOtherWhenChecked(dotRadius);
         fadeEdges.disableOtherWhenChecked(fuzziness);
     }
 
@@ -82,11 +82,11 @@ public class JHPointillize extends ParametrizedFilter {
 
         filter.setScale(gridSize.getValueAsFloat());
         filter.setRandomness((float) randomness.getPercentage());
-        filter.setEdgeThickness((float) dotSize.getPercentage());
+        filter.setDotRadius((float) dotRadius.getPercentage());
         filter.setFuzziness((float) fuzziness.getPercentage());
         filter.setGridType(gridType.getSelected());
         filter.setFadeEdges(fadeEdges.isChecked());
-        filter.setEdgeColor(fillColor.getColor().getRGB());
+        filter.setBackgroundColor(fillColor.getColor().getRGB());
 
         filter.setStretch((float) stretch.getPercentage());
         filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));

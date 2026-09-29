@@ -42,33 +42,32 @@ public class CrystallizeFilter extends CellularFilter {
 
     @Override
     public int genPixel(int x, int y, int[] inPixels, int width, int height) {
-        float nx = m00 * x + m01 * y;
-        float ny = m10 * x + m11 * y;
-        nx /= scale;
-        ny /= scale * stretch;
-        nx += ORIGIN_OFFSET;
-        ny += ORIGIN_OFFSET;
-
-        evaluate(nx, ny);
-
-        Point[] results = resultsTL.get();
+        Point[] results = findNearestPoints(x, y);
 
         float f1 = results[0].distance;
         float f2 = results[1].distance;
 
         // sample source pixel using the inverse transform
-        int v = getSourcePixel(results[0], inPixels, width, height);
+        int color = getSourcePixel(results[0], inPixels, width, height);
 
-        float f = (f2 - f1) / edgeThickness;
-        f = ImageMath.smoothStep(0, edgeThickness, f);
+        float edgeBlend = (f2 - f1) / edgeThickness;
+        edgeBlend = ImageMath.smoothStep(0, edgeThickness, edgeBlend);
+        // TODO instead of the 2 lines above, we should have
+        // float edgeBlend = ImageMath.smoothStep(0, edgeThickness, f2 - f1);
+        // (leaving the old way for now for compatibility)
+
+        if (edgeBlend >= 1.0f) {
+            return color; // interior: the blend would return this color anyway
+        }
+
         if (fadeEdges) {
             // sample second nearest source pixel
-            int v2 = getSourcePixel(results[1], inPixels, width, height);
-            v2 = ImageMath.mixColors(0.5f, v2, v);
-            v = ImageMath.mixColors(f, v2, v);
+            int secondColor = getSourcePixel(results[1], inPixels, width, height);
+            secondColor = ImageMath.mixColors(0.5f, secondColor, color);
+            color = ImageMath.mixColors(edgeBlend, secondColor, color);
         } else {
-            v = ImageMath.mixColors(f, edgeColor, v);
+            color = ImageMath.mixColors(edgeBlend, edgeColor, color);
         }
-        return v;
+        return color;
     }
 }
