@@ -19,7 +19,7 @@ package pixelitor.tools.selection;
 
 import pixelitor.Composition;
 import pixelitor.Invariants;
-import pixelitor.selection.SelectionBuilder;
+import pixelitor.selection.SelectionSession;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.ToolIcons;
@@ -59,27 +59,27 @@ public class PolygonalSelectionTool extends AbstractSelectionTool {
     @Override
     protected void dragFinished(PMouseEvent e) {
         Composition comp = e.getComp();
-        if (selectionBuilder == null) {
+        if (selectionSession == null) {
             // first click: start building the polygon
             updateCombinatorFromModifiers(e);
-            selectionBuilder = new SelectionBuilder(
-                SelectionType.POLYGONAL_LASSO, getCombinator(), comp);
-            selectionBuilder.updateDraftSelection(e);
-            resetCombinator();
+            selectionSession = new SelectionSession(
+                SelectionType.POLYGONAL, getCombinator(), comp);
+            selectionSession.updateFromEvent(e);
+            restoreCombinator();
         } else {
             // subsequent click: check for double-click or right-click
             if (e.getClickCount() > 1) {
                 // double-click finishes the polygon (the first half
                 // of the double-click already recorded the final point)
-                selectionBuilder.combineShapes();
-                cancelSelectionBuilder();
+                selectionSession.commit();
+                discardSelectionSession();
             } else {
                 // single click: add another point
-                selectionBuilder.updateDraftSelection(e);
+                selectionSession.updateFromEvent(e);
                 if (e.isRight()) {
                     // right-click finishes the polygon
-                    selectionBuilder.combineShapes();
-                    cancelSelectionBuilder();
+                    selectionSession.commit();
+                    discardSelectionSession();
                 }
             }
         }

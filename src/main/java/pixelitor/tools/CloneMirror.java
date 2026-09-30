@@ -27,21 +27,21 @@ public enum CloneMirror {
     HORIZONTAL("Horizontal", 1.0, -1.0);
 
     private final String displayName;
-    private final double multX;
-    private final double multY;
+    private final double signX;
+    private final double signY;
 
-    CloneMirror(String displayName, double multX, double multY) {
+    CloneMirror(String displayName, double signX, double signY) {
         this.displayName = displayName;
-        this.multX = multX;
-        this.multY = multY;
+        this.signX = signX;
+        this.signY = signY;
     }
 
     public double getScaleX(double scaleAbs) {
-        return scaleAbs * multX;
+        return scaleAbs * signX;
     }
 
     public double getScaleY(double scaleAbs) {
-        return scaleAbs * multY;
+        return scaleAbs * signY;
     }
 
     @Override

@@ -15,12 +15,13 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools;
+package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
-import pixelitor.tools.brushes.Brush;
+import pixelitor.tools.DrawTarget;
+import pixelitor.tools.Tools;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -51,9 +52,7 @@ public class BrushContext {
     public BrushContext(Drawable dr, DrawTarget drawTarget, Brush brush, Composite composite) {
         this.dr = dr;
         this.drawTarget = drawTarget;
-
-        // prepare the target drawable and store the backup image
-        this.originalImage = drawTarget.prepareForBrushStroke(dr);
+        this.originalImage = drawTarget.getOriginalImage(dr);
 
         Composition comp = dr.getComp();
 
@@ -81,7 +80,7 @@ public class BrushContext {
         graphics.setColor(color);
     }
 
-    public void setErasing() {
+    public void useEraseComposite() {
         // the color doesn't matter as long as AlphaComposite.DST_OUT is used
         graphics.setComposite(AlphaComposite.getInstance(DST_OUT));
     }

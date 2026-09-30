@@ -21,6 +21,7 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.brushes.BrushContext;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
@@ -56,7 +57,7 @@ public class BrushTool extends BlendingModeBrushTool {
         addBrushSettingsButton();
 
         settingsPanel.addSeparator();
-        addSizeSelector();
+        addRadiusSelector();
         addSymmetrySelector();
 
         settingsPanel.addSeparator();
@@ -71,15 +72,15 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void initBrushStroke() {
+    protected void initBrushContext(BrushContext ctx) {
         // reinitialize the color for each stroke
-        brushContext.setColor(drawingColor);
+        ctx.setColor(drawingColor);
     }
 
     @Override
     protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
+        drawingColor = getFgColor();
         super.prepareProgrammaticBrushStroke(dr, start);
-        brushContext.setColor(getFgColor());
     }
 
     private void initDrawingColor(PMouseEvent e) {
@@ -87,9 +88,9 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public void trace(Drawable dr, Shape shape) {
+    public void trace(Shape shape, Drawable dr) {
         drawingColor = getFgColor();
-        super.trace(dr, shape);
+        super.trace(shape, dr);
     }
 
     @Override

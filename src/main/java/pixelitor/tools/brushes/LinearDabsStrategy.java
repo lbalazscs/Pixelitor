@@ -37,17 +37,17 @@ public class LinearDabsStrategy implements DabsStrategy {
     private double accumulatedDist = 0;
 
     private Spacing spacing;
-    private RotationSettings rotationSettings;
+    private AngleSettings angleSettings;
     private final boolean refreshBrushForEachDab;
     private PPoint prev; // the last processed input point
 
     public LinearDabsStrategy(DabsBrush brush,
                               Spacing spacing,
-                              RotationSettings rotationSettings,
+                              AngleSettings angleSettings,
                               boolean refreshBrushForEachDab) {
         this.brush = brush;
         this.spacing = spacing;
-        this.rotationSettings = rotationSettings;
+        this.angleSettings = angleSettings;
         this.refreshBrushForEachDab = refreshBrushForEachDab;
     }
 
@@ -57,7 +57,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         accumulatedDist = 0;
         prev = startPoint;
 
-        if (rotationSettings.isDirectional()) {
+        if (angleSettings.isDirectional()) {
             // Don't place the first dab immediately, as we have no direction info yet.
             // Distance is artificially set to ensure a dab is placed soon.
             accumulatedDist = spacing.getSpacing(brush.getRadius()) * FIRST_DAB_DELAY_FACTOR;
@@ -85,7 +85,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         double dx = newX - prevX;
         double dy = newY - prevY;
         // the angle of the current line segment
-        double baseAngle = rotationSettings.isDirectional() ? Math.atan2(dy, dx) : 0;
+        double baseAngle = angleSettings.isDirectional() ? Math.atan2(dy, dx) : 0;
 
         // track the position of the last placed dab on this segment
         double lastDabX = prevX;
@@ -112,7 +112,7 @@ public class LinearDabsStrategy implements DabsStrategy {
                 brush.initBrushStamp(dabPoint);
             }
 
-            double dabAngle = rotationSettings.jitterAngle(baseAngle);
+            double dabAngle = angleSettings.jitterAngle(baseAngle);
             brush.putDab(dabPoint, dabAngle);
 
             lastDabX = dabX;
@@ -136,7 +136,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     public void settingsChanged() {
         // refresh local references to settings from the brush
         DabsBrushSettings settings = brush.getSettings();
-        rotationSettings = settings.getAngleSettings();
+        angleSettings = settings.getAngleSettings();
         spacing = settings.getSpacingStrategy();
     }
 

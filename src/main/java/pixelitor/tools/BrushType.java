@@ -20,78 +20,49 @@ package pixelitor.tools;
 import pixelitor.tools.brushes.*;
 
 import java.util.IdentityHashMap;
-import java.util.function.Supplier;
+import java.util.function.DoubleFunction;
+import java.util.function.Function;
 
-import static pixelitor.tools.brushes.RotationSettings.NOT_DIRECTIONAL;
+import static pixelitor.tools.brushes.AngleSettings.NOT_DIRECTIONAL;
 
 /**
  * The brush types in the brush and eraser tools.
+ * <p>
+ * Brush types that have settings declare the factory of their settings and
+ * the factory of their brushes together. The settings type is a type
+ * parameter of the constructor, so the compiler guarantees that a brush
+ * receives the kind of settings it expects (no casts are needed).
  */
 public enum BrushType {
-    HARD("Hard", null) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new HardBrush(radius);
-        }
-    }, SOFT("Soft", null) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new ImageDabsBrush(radius,
-                ImageBrushType.SOFT, 0.25, NOT_DIRECTIONAL);
-        }
-    }, WOBBLE("Wobble", null) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new WobbleBrush(radius);
-        }
-    }, CALLIGRAPHY("Calligraphy", CalligraphyBrushSettings::new) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new CalligraphyBrush(radius, (CalligraphyBrushSettings) getSettings(tool));
-        }
-    }, REALISTIC("Realistic", null) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new ImageDabsBrush(radius,
-                ImageBrushType.REAL, 0.05, NOT_DIRECTIONAL);
-        }
-    }, HAIR("Hair", null) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new ImageDabsBrush(radius,
-                ImageBrushType.HAIR, 0.02, NOT_DIRECTIONAL);
-        }
-    }, SHAPE("Shapes", ShapeDabsBrushSettings::new) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new ShapeDabsBrush(radius, (ShapeDabsBrushSettings) getSettings(tool));
-        }
-    }, SPRAY("Spray Shapes", SprayBrushSettings::new) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new SprayBrush(radius, (SprayBrushSettings) getSettings(tool));
-        }
-    }, CONNECT("Connect", ConnectBrushSettings::new) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new ConnectBrush((ConnectBrushSettings) getSettings(tool), radius);
-        }
-    }, OUTLINE_CIRCLE("Circles", OutlineBrushSettings::new) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new OutlineBrush(this, radius, (OutlineBrushSettings) getSettings(tool));
-        }
-    }, OUTLINE_SQUARE("Squares", OutlineBrushSettings::new) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new OutlineBrush(this, radius, (OutlineBrushSettings) getSettings(tool));
-        }
-    }, ONE_PIXEL("One Pixel", OnePixelBrushSettings::new) {
-        @Override
-        public Brush createBrush(AbstractBrushTool tool, double radius) {
-            return new OnePixelBrush((OnePixelBrushSettings) getSettings(tool));
-        }
-
+    HARD("Hard", HardBrush::new),
+    SOFT("Soft", radius -> new ImageDabsBrush(radius,
+        ImageBrushType.SOFT, 0.25, NOT_DIRECTIONAL)),
+    WOBBLE("Wobble", WobbleBrush::new),
+    CALLIGRAPHY("Calligraphy",
+        _ -> new CalligraphyBrushSettings(),
+        (_, settings, radius) -> new CalligraphyBrush(settings, radius)),
+    REALISTIC("Realistic", radius -> new ImageDabsBrush(radius,
+        ImageBrushType.REAL, 0.05, NOT_DIRECTIONAL)),
+    HAIR("Hair", radius -> new ImageDabsBrush(radius,
+        ImageBrushType.HAIR, 0.02, NOT_DIRECTIONAL)),
+    SHAPE("Shapes",
+        _ -> new ShapeDabsBrushSettings(),
+        (_, settings, radius) -> new ShapeDabsBrush(settings, radius)),
+    SPRAY("Spray Shapes",
+        SprayBrushSettings::new,
+        (_, settings, radius) -> new SprayBrush(settings, radius)),
+    CONNECT("Connect",
+        _ -> new ConnectBrushSettings(),
+        (_, settings, radius) -> new ConnectBrush(settings, radius)),
+    OUTLINE_CIRCLE("Circles",
+        _ -> new OutlineBrushSettings(),
+        OutlineBrush::new),
+    OUTLINE_SQUARE("Squares",
+        _ -> new OutlineBrushSettings(),
+        OutlineBrush::new),
+    ONE_PIXEL("One Pixel",
+        _ -> new OnePixelBrushSettings(),
+        (_, settings, _) -> new OnePixelBrush(settings)) {
         @Override
         public boolean hasRadius() {
             return false;
@@ -99,21 +70,50 @@ public enum BrushType {
     };
 
     public static final String PRESET_KEY = "Brush Type";
+
     private final String displayName;
-    private final boolean hasSettings;
-    private final Supplier<BrushSettings> settingsFactory;
 
-    // the settings are shared between the symmetry-brushes of a
-    // tool, but they are different between the different tools
-    private IdentityHashMap<AbstractBrushTool, BrushSettings> settingsByTool;
+    // creates the brushes of this type, supplying them with their settings
+    private final BrushCreator brushCreator;
 
-    BrushType(String displayName, Supplier<BrushSettings> settingsFactory) {
+    // null if this brush type has no settings
+    private final Function<AbstractBrushTool, ? extends BrushSettings> settingsProvider;
+
+    /**
+     * Creates a brush type whose brushes have no settings.
+     */
+    BrushType(String displayName, DoubleFunction<Brush> brushFactory) {
         this.displayName = displayName;
-        this.hasSettings = settingsFactory != null;
-        this.settingsFactory = settingsFactory;
+        this.brushCreator = (_, radius) -> brushFactory.apply(radius);
+        this.settingsProvider = null;
     }
 
-    public abstract Brush createBrush(AbstractBrushTool tool, double radius);
+    /**
+     * Creates a brush type whose brushes have shared, tool-specific settings.
+     *
+     * @param settingsFactory creates the settings for a given tool
+     * @param brushFactory    creates a brush from the settings created by
+     *                        the settingsFactory (hence the shared type parameter)
+     */
+    <S extends BrushSettings> BrushType(String displayName,
+                                        Function<AbstractBrushTool, S> settingsFactory,
+                                        BrushFromSettingsFactory<S> brushFactory) {
+        this.displayName = displayName;
+
+        // the settings are shared between the symmetry-brushes of a
+        // tool, but they are different between the different tools
+        var settingsByTool = new IdentityHashMap<AbstractBrushTool, S>();
+        Function<AbstractBrushTool, S> provider =
+            tool -> settingsByTool.computeIfAbsent(tool, settingsFactory);
+
+        this.settingsProvider = provider;
+        this.brushCreator = (tool, radius) ->
+            brushFactory.create(this, provider.apply(tool), radius);
+    }
+
+    public Brush createBrush(AbstractBrushTool tool, double radius) {
+        return brushCreator.create(tool, radius);
+    }
 
     @Override
     public String toString() {
@@ -125,23 +125,29 @@ public enum BrushType {
     }
 
     public boolean hasSettings() {
-        return hasSettings;
+        return settingsProvider != null;
     }
 
     /**
      * Returns the settings tied to the {@link AbstractBrushTool} and {@link BrushType} combination.
      */
     public BrushSettings getSettings(AbstractBrushTool tool) {
-        assert hasSettings;
+        assert hasSettings();
 
-        if (settingsByTool == null) {
-            settingsByTool = new IdentityHashMap<>();
-        }
+        return settingsProvider.apply(tool);
+    }
 
-        return settingsByTool.computeIfAbsent(tool, t -> {
-            BrushSettings settings = settingsFactory.get();
-            settings.setTool(t);
-            return settings;
-        });
+    @FunctionalInterface
+    private interface BrushCreator {
+        Brush create(AbstractBrushTool tool, double radius);
+    }
+
+    /**
+     * Creates a brush from its (already available) settings.
+     * The first parameter is the brush type being created.
+     */
+    @FunctionalInterface
+    private interface BrushFromSettingsFactory<S extends BrushSettings> {
+        Brush create(BrushType type, S settings, double radius);
     }
 }

@@ -51,7 +51,7 @@ public class BatchResize {
         int maxHeight = panel.getNewHeight();
 
         var resizeAction = new Resize(maxWidth, maxHeight, true);
-        new BatchProcessor(resizeAction, "Batch Resize...").processFiles();
+        new BatchProcessor(resizeAction, "Batch Resize...").processFilesAsync();
     }
 
     /**

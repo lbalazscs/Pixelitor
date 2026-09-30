@@ -58,7 +58,7 @@ public class Tools {
 
     public static final MarqueeSelectionTool RECTANGLE_SELECTION = new MarqueeSelectionTool(SelectionType.RECTANGLE);
     public static final MarqueeSelectionTool ELLIPSE_SELECTION = new MarqueeSelectionTool(SelectionType.ELLIPSE);
-    public static final LassoSelectionTool LASSO_SELECTION = new LassoSelectionTool();
+    public static final FreehandSelectionTool FREEHAND_SELECTION = new FreehandSelectionTool();
     public static final PolygonalSelectionTool POLY_SELECTION = new PolygonalSelectionTool();
     public static final MagicWandSelectionTool MAGIC_WAND = new MagicWandSelectionTool();
 
@@ -80,7 +80,7 @@ public class Tools {
 
     private static final Tool[] allTools = {
         MOVE, CROP,
-        RECTANGLE_SELECTION, ELLIPSE_SELECTION, LASSO_SELECTION,
+        RECTANGLE_SELECTION, ELLIPSE_SELECTION, FREEHAND_SELECTION,
         POLY_SELECTION, MAGIC_WAND,
         BRUSH, CLONE, ERASER,
         SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
@@ -186,15 +186,15 @@ public class Tools {
         return activeTool == SHAPES && SHAPES.shouldDrawOverLayer();
     }
 
-    public static void increaseBrushSize() {
+    public static void increaseBrushRadius() {
         if (activeTool instanceof AbstractBrushTool abt) {
-            abt.increaseBrushSize();
+            abt.increaseBrushRadius();
         }
     }
 
-    public static void decreaseBrushSize() {
+    public static void decreaseBrushRadius() {
         if (activeTool instanceof AbstractBrushTool abt) {
-            abt.decreaseBrushSize();
+            abt.decreaseBrushRadius();
         }
     }
 
@@ -269,7 +269,7 @@ public class Tools {
     public static List<Tool[]> getSharedHotkeyGroups() {
         return List.of(
             new Tool[]{RECTANGLE_SELECTION, ELLIPSE_SELECTION}, // M
-            new Tool[]{LASSO_SELECTION, POLY_SELECTION}, // L
+            new Tool[]{FREEHAND_SELECTION, POLY_SELECTION}, // L
             new Tool[]{PEN, NODE, TRANSFORM_PATH} // P
         );
     }

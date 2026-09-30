@@ -58,7 +58,7 @@ public class PathActions {
         History.add(new ConvertPathToSelectionEdit(
             comp, oldPath, result.getEdit(), (PathTool) Tools.getActive()));
 
-        Tools.LASSO_SELECTION.activate();
+        Tools.FREEHAND_SELECTION.activate();
     }
 
     public static final Action exportSVGAction = new TaskAction(

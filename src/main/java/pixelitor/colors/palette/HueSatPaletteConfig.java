@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,9 +50,9 @@ public class HueSatPaletteConfig implements PaletteConfig {
         JPanel panel = new JPanel(new GridBagLayout());
 
         satSlider = addSliderRow("Sat:", "Saturation of the colors",
-            e -> saturationChanged(palettePanel), saturation, panel, 0);
+            _ -> saturationChanged(palettePanel), saturation, panel, 0);
         hueSlider = addSliderRow("Hue:", "Rotate the hue of the colors",
-            e -> hueChanged(palettePanel), hueOffset, panel, 1);
+            _ -> hueChanged(palettePanel), hueOffset, panel, 1);
 
         return panel;
     }

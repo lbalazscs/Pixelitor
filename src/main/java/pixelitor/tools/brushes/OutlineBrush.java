@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,21 +26,18 @@ import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
-import static java.awt.BasicStroke.CAP_ROUND;
-import static java.awt.BasicStroke.CAP_SQUARE;
-import static java.awt.BasicStroke.JOIN_BEVEL;
-import static java.awt.BasicStroke.JOIN_ROUND;
+import static java.awt.BasicStroke.*;
 
 public class OutlineBrush extends StrokeBrush {
     private final BrushType brushType;
     private final OutlineBrushSettings settings;
     private double origRadius;
-    private long prevTime;
+    private long prevTimeNs;
     private static final double MIN_SPEED_THRESHOLD = 100;
     private static final double MAX_SPEED_THRESHOLD = 2000;
     private static final double THRESHOLD_DIFF = MAX_SPEED_THRESHOLD - MIN_SPEED_THRESHOLD;
 
-    public OutlineBrush(BrushType brushType, double radius, OutlineBrushSettings settings) {
+    public OutlineBrush(BrushType brushType, OutlineBrushSettings settings, double radius) {
         super(radius, StrokeType.OUTLINE,
             // can't be easily generalized to arbitrary shape types because these
             // cap/join settings are crucial for the look of the outline brush
@@ -59,7 +56,7 @@ public class OutlineBrush extends StrokeBrush {
     @Override
     public void startStrokeAt(PPoint p) {
         super.startStrokeAt(p);
-        prevTime = System.nanoTime();
+        prevTimeNs = System.nanoTime();
     }
 
     @Override
@@ -84,17 +81,17 @@ public class OutlineBrush extends StrokeBrush {
     @Override
     public void continueTo(PPoint p) {
         if (settings.dependsOnSpeed()) {
-            double dist = previous.coDist(p);
+            double dist = prevPos.coDist(p);
 
-            long timeNow = System.nanoTime();
-            long timeDiff = timeNow - prevTime;
-            if (timeDiff == 0) {
+            long nowNs = System.nanoTime();
+            long elapsedNs = nowNs - prevTimeNs;
+            if (elapsedNs == 0) {
                 // unlikely to happen, but check it in order to
                 // make sure we don't divide by zero
                 return;
             }
 
-            radius = calcScaledRadius(dist, timeDiff);
+            radius = calcScaledRadius(dist, elapsedNs);
 
             // don't set the diameter according to the scale
             // because the brush outline still has the full size,
@@ -102,7 +99,7 @@ public class OutlineBrush extends StrokeBrush {
 //            diameter = 2 * scaledRadius;
 
             currentStroke = createStroke((float) (2 * radius));
-            prevTime = timeNow;
+            prevTimeNs = nowNs;
         }
 
         super.continueTo(p);

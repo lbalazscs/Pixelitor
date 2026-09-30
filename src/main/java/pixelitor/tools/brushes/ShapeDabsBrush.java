@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * A {@link DabsBrush} that draws filled shapes as dabs.
  */
 public class ShapeDabsBrush extends DabsBrush {
-    public ShapeDabsBrush(double radius, ShapeDabsBrushSettings settings) {
+    public ShapeDabsBrush(ShapeDabsBrushSettings settings, double radius) {
         super(radius, settings);
     }
 
@@ -57,7 +57,7 @@ public class ShapeDabsBrush extends DabsBrush {
             : Shapes.rotate(baseShape, angle, x, y);
 
         targetG.fill(finalShape);
-        repaintComp(currentPoint);
+        repaintSegment(currentPoint);
     }
 
     @Override

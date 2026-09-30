@@ -41,9 +41,9 @@ public enum DrawTarget {
         }
 
         @Override
-        public BufferedImage prepareForBrushStroke(Drawable dr) {
+        public BufferedImage getOriginalImage(Drawable dr) {
             // it can simply return the drawable's image because
-            // the drawing was done on a temporary layer
+            // the drawing will be done on a temporary layer
             return dr.getImage();
         }
 
@@ -65,7 +65,7 @@ public enum DrawTarget {
         }
 
         @Override
-        public BufferedImage prepareForBrushStroke(Drawable dr) {
+        public BufferedImage getOriginalImage(Drawable dr) {
             BufferedImage image = dr.getImage();
             assert Assertions.rasterStartsAtOrigin(image);
 
@@ -85,7 +85,7 @@ public enum DrawTarget {
     /**
      * Returns the backup/original image for undo support.
      */
-    public abstract BufferedImage prepareForBrushStroke(Drawable dr);
+    public abstract BufferedImage getOriginalImage(Drawable dr);
 
     /**
      * Flushes/merges state to finalize the drawing.

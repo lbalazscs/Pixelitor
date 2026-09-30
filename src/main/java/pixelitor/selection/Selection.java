@@ -45,7 +45,7 @@ import static java.awt.Color.WHITE;
  * Represents a selection area on an image with an animated "marching ants" border.
  */
 public class Selection implements Transformable {
-    private static final double DASH_WIDTH = 1.0;
+    private static final double LINE_WIDTH = 1.0;
     private static final float DASH_LENGTH = 4.0f;
     private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
     private float dashPhase;
@@ -88,7 +88,8 @@ public class Selection implements Transformable {
     public Selection(Selection orig) {
         assert orig.checkInvariants();
 
-        // the shape can be shared because all changes create new instances
+        // the shape can be shared because all changes
+        // to committed selections create new instances
         this.shape = orig.shape;
         this.shapeBeforeTransform = orig.shapeBeforeTransform;
 
@@ -153,7 +154,7 @@ public class Selection implements Transformable {
         // ensure that the border width doesn't depend on the zoom level,
         // considering that the graphics coordinates are in image space
         double viewScale = view.getZoomScale();
-        float lineWidth = (float) (DASH_WIDTH / viewScale);
+        float lineWidth = (float) (LINE_WIDTH / viewScale);
 
         float[] dash;
         if (viewScale == 1.0) { // optimize for the common case
@@ -163,18 +164,18 @@ public class Selection implements Transformable {
             dash = new float[]{scaledDashLength, scaledDashLength};
         }
 
-        // draw white segments
-        drawSegments(g, WHITE, lineWidth, dash, dashPhase);
+        // draw white dashes
+        drawDashes(g, WHITE, lineWidth, dash, dashPhase);
 
-        // draw black segments offset by half a dash length
+        // draw black dashes offset by half a dash length
         float blackPhase = (float) (dashPhase + DASH_LENGTH / viewScale);
-        drawSegments(g, BLACK, lineWidth, dash, blackPhase);
+        drawDashes(g, BLACK, lineWidth, dash, blackPhase);
 
         // restore original stroke
         g.setStroke(origStroke);
     }
 
-    private void drawSegments(Graphics2D g, Color color, float lineWidth, float[] dash, float phase) {
+    private void drawDashes(Graphics2D g, Color color, float lineWidth, float[] dash, float phase) {
         g.setColor(color);
         g.setStroke(new BasicStroke(lineWidth,
             CAP_BUTT, JOIN_ROUND, 0.0f, dash, phase));
@@ -333,9 +334,9 @@ public class Selection implements Transformable {
     }
 
     /**
-     * Applies a transformation relative to the shape before the drag.
+     * Applies a transformation relative to the backup shape.
      */
-    private void transformWhileDragging(AffineTransform at) {
+    private void transformFromBackup(AffineTransform at) {
         assert checkInvariants();
         assert shapeBeforeTransform != null;
 
@@ -345,23 +346,23 @@ public class Selection implements Transformable {
     /**
      * Moves the selection shape during a drag operation.
      */
-    public void moveWhileDragging(double relImX, double relImY) {
+    public void moveWhileDragging(double imDx, double imDy) {
         assert checkInvariants();
         assert shapeBeforeTransform != null;
 
         if (shapeBeforeTransform instanceof Rectangle2D startRect) {
             // translate manually to preserve the type information
             shape = new Rectangle2D.Double(
-                startRect.getX() + relImX, startRect.getY() + relImY,
+                startRect.getX() + imDx, startRect.getY() + imDy,
                 startRect.getWidth(), startRect.getHeight());
         } else {
-            shape = Shapes.translate(shapeBeforeTransform, relImX, relImY);
+            shape = Shapes.translate(shapeBeforeTransform, imDx, imDy);
         }
     }
 
     /**
-     * Finalizes the movement of the selection shape after
-     * a drag operation and returns an edit for undo/redo.
+     * Finalizes the transformation of the selection shape
+     * and returns an edit for undo/redo.
      */
     @Override
     public PixelitorEdit finalizeTransform() {
@@ -397,7 +398,7 @@ public class Selection implements Transformable {
 
     @Override
     public void imTransform(AffineTransform transform) {
-        transformWhileDragging(transform);
+        transformFromBackup(transform);
     }
 
     @Override
@@ -438,8 +439,8 @@ public class Selection implements Transformable {
     @Override
     public String toString() {
         return "Selection{" +
-            "composition=" + view.getComp().getName() +
-            ", shape-class=" + shape.getClass().getName() +
+            "compName=" + view.getComp().getName() +
+            ", shapeClass=" + shape.getClass().getName() +
             ", shapeBounds=" + shape.getBounds() +
             '}';
     }

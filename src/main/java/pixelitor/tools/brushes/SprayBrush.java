@@ -44,8 +44,10 @@ public class SprayBrush extends AbstractBrush {
     private final SprayBrushSettings settings;
     private double minShapeRadius;
     private double maxShapeRadius;
-    private double mouseX;
-    private double mouseY;
+
+    // the center of the spray (usually mouse coordinates in image-space)
+    private double sprayX;
+    private double sprayY;
 
     // the maximum observed distance between the mouse position
     // and any shape center, over the lifetime of a brush stroke
@@ -56,7 +58,7 @@ public class SprayBrush extends AbstractBrush {
     private Timer timer;
     private final CachedFloatRandom rnd = new CachedFloatRandom();
 
-    public SprayBrush(double radius, SprayBrushSettings settings) {
+    public SprayBrush(SprayBrushSettings settings, double radius) {
         super(radius);
         this.settings = settings;
     }
@@ -82,11 +84,11 @@ public class SprayBrush extends AbstractBrush {
 
         maxObservedDist = 0;
 
-        timer = new Timer(SPRAY_INTERVAL_MILLIS, e -> spray());
+        timer = new Timer(SPRAY_INTERVAL_MILLIS, _ -> spray());
         timer.start();
 
-        mouseX = previous.getImX();
-        mouseY = previous.getImY();
+        sprayX = prevPos.getImX();
+        sprayY = prevPos.getImY();
 
         spray(); // initial spray
     }
@@ -119,6 +121,8 @@ public class SprayBrush extends AbstractBrush {
             double offsetX = nextGaussian() * radius;
             double offsetY = nextGaussian() * radius;
 
+            // TODO is it a bug to calculate the largest per-axis
+            //  offset instead of the actual distance?
             maxObservedDist = Math.max(
                 maxObservedDist,
                 Math.max(Math.abs(offsetX), Math.abs(offsetY)));
@@ -133,8 +137,8 @@ public class SprayBrush extends AbstractBrush {
                 targetG.setColor(color);
             }
 
-            double x = mouseX + offsetX;
-            double y = mouseY + offsetY;
+            double x = sprayX + offsetX;
+            double y = sprayY + offsetY;
             double shapeRadius = genShapeRadius();
             Shape shape = shapeType.createShape(
                 x - shapeRadius, y - shapeRadius, 2 * shapeRadius);
@@ -159,15 +163,15 @@ public class SprayBrush extends AbstractBrush {
     public void continueTo(PPoint p) {
         // this method does no painting, but the
         // brush outline still has to be repainted
-        repaintComp(p);
+        repaintSegment(p);
 
-        setPrevious(p);
+        setPrevPos(p);
 
-        mouseX = previous.getImX();
-        mouseY = previous.getImY();
+        sprayX = prevPos.getImX();
+        sprayY = prevPos.getImY();
 
-        // calling sprayOnce() here would make the flow dependent
-        // on the mouse speed and low flow values impossible
+        // calling spray() here would make the flow depend
+        // on the mouse speed and make low flow values impossible
     }
 
     @Override

@@ -145,7 +145,7 @@ public class CropTool extends DragTool {
 
     private void addGuidesSelector() {
         guidesCB = GUIUtils.createComboBox(CompositionGuideType.values(),
-            e -> guidesChanged());
+            _ -> guidesChanged());
         guidesCB.setToolTipText("<html>Composition guides." +
             "<br><br>Press <b>O</b> to select the next guide." +
             "<br>Press <b>Shift-O</b> to change the orientation.");
@@ -163,7 +163,7 @@ public class CropTool extends DragTool {
 
     private void addCropSizeControls() {
         // shared change listener for the two size spinners
-        ChangeListener sizeChangeListener = e -> sizeSpinnerAdjusted();
+        ChangeListener sizeChangeListener = _ -> sizeSpinnerAdjusted();
 
         // add crop width spinner
         widthSpinner = createSpinner(sizeChangeListener, Canvas.MAX_WIDTH,
@@ -308,8 +308,8 @@ public class CropTool extends DragTool {
             cropBox.mouseDragged(e);
         } else if (state == INITIAL_DRAG) {
             // define the initial crop rectangle
-            drag.setExpandFromCenter(e.isAltDown());
-            drag.setForceSquareAspectRatio(e.isShiftDown());
+            drag.setExpandedFromCenter(e.isAltDown());
+            drag.setSquareConstrained(e.isShiftDown());
         }
 
         // update the size spinners continuously

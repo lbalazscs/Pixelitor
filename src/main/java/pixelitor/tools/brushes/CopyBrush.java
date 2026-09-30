@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static pixelitor.tools.brushes.RotationSettings.NOT_DIRECTIONAL;
+import static pixelitor.tools.brushes.AngleSettings.NOT_DIRECTIONAL;
 
 /**
  * An abstract superclass for the clone and smudge brushes.
@@ -34,27 +34,37 @@ public abstract class CopyBrush extends DabsBrush {
     protected BufferedImage brushImage;
     protected CopyBrushType type;
 
+    // per-brush edge handling, always matching the size of brushImage
+    EdgeStyle edge;
+
     // can be set from the "Develop" menu
     private static boolean debugBrushImage = false;
 
     protected CopyBrush(double radius, CopyBrushType type, Spacing spacing) {
         super(radius, spacing, NOT_DIRECTIONAL, true);
         this.type = type;
+        // the superclass constructor calls setRadius() while type is
+        // still null, so the stamp could not be built there
+        rebuildStamp();
     }
 
     @Override
     public void setRadius(double radius) {
         super.setRadius(radius);
-        if (type != null) { // can't initialize properly when called from superclass constructor
-            int size = (int) diameter;
-            brushImage = new BufferedImage(size, size, TYPE_INT_ARGB);
-            type.setSize(diameter);
+        if (type != null) { // null when called from the superclass constructor
+            rebuildStamp();
         }
     }
 
     public void typeChanged(CopyBrushType type) {
         this.type = type;
-        type.setSize(diameter);
+        rebuildStamp();
+    }
+
+    private void rebuildStamp() {
+        int size = (int) diameter;
+        brushImage = new BufferedImage(size, size, TYPE_INT_ARGB);
+        edge = type.createEdge(size);
     }
 
     public CopyBrushType getType() {

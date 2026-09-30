@@ -101,7 +101,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
                                  double shearX, double shearY) {
         // use a change listener so that the text appearance is
         // continuously updated while the slider is dragged
-        ChangeListener changeListener = e -> actionListener.actionPerformed(null);
+        ChangeListener changeListener = _ -> actionListener.actionPerformed(null);
 
         scaleXParam = new RangeParam("Horizontal Scaling (%)",
             -300, 100 * scaleX, 300, true, LabelPosition.NONE_WITH_TICKS);

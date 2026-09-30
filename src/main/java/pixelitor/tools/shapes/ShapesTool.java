@@ -160,7 +160,7 @@ public class ShapesTool extends DragTool {
             "Configure the stroke");
 
         showEffectsDialogButton = settingsPanel.addButton("Effects...",
-            e -> showEffectsDialog(),
+            _ -> showEffectsDialog(),
             "effectsButton", "Configure the effects");
 
         settingsPanel.addButton(convertToSelectionAction, "convertToSelection",
@@ -208,19 +208,19 @@ public class ShapesTool extends DragTool {
 
     @SuppressWarnings("unchecked")
     private JComboBox<ShapeType> createShapeTypeCombo() {
-        return GUIUtils.createComboBox(typeModel, e -> shapeTypeChanged());
+        return GUIUtils.createComboBox(typeModel, _ -> shapeTypeChanged());
     }
 
     @SuppressWarnings("unchecked")
     private JComboBox<TwoPointPaintType> createFillPaintCombo() {
         return GUIUtils.createComboBox(fillPaintModel,
-            e -> fillChanged());
+            _ -> fillChanged());
     }
 
     @SuppressWarnings("unchecked")
     private JComboBox<TwoPointPaintType> createStrokePaintCombo() {
         return GUIUtils.createComboBox(strokePaintModel,
-            e -> settingsChanged(EDIT_STROKE));
+            _ -> settingsChanged(EDIT_STROKE));
     }
 
     public AreaEffects getEffects() {
@@ -442,7 +442,7 @@ public class ShapesTool extends DragTool {
     @Override
     public void altReleased() {
         if (state == INITIAL_DRAG && drag.isDragging() && !drag.isClick()) {
-            drag.setExpandFromCenter(false);
+            drag.setExpandedFromCenter(false);
 
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, false, false);
@@ -610,7 +610,7 @@ public class ShapesTool extends DragTool {
             comp, transformBox, styledShape, result.getEdit()));
 
         reset();
-        Tools.LASSO_SELECTION.activate();
+        Tools.FREEHAND_SELECTION.activate();
     }
 
     @Override

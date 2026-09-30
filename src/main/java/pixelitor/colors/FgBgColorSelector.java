@@ -96,14 +96,14 @@ public class FgBgColorSelector extends JLayeredPane {
         setBgColor(initialBg, false);
 
         setupKeyboardShortcuts();
-        Themes.addThemeChangeListener(theme -> themeChanged());
+        Themes.addThemeChangeListener(_ -> themeChanged());
     }
 
     private void initFgButton() {
         fgButton = createColorButton(fgColorIcon);
 
         initButton(fgButton, "Set Foreground Color",
-            BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME, e -> showColorDialog(true));
+            BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME, _ -> showColorDialog(true));
         fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
         fgButton.setComponentPopupMenu(createPopupMenu(true));
     }
@@ -112,7 +112,7 @@ public class FgBgColorSelector extends JLayeredPane {
         bgButton = createColorButton(bgColorIcon);
 
         initButton(bgButton, "Set Background Color",
-            BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME, e -> showColorDialog(false));
+            BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME, _ -> showColorDialog(false));
         bgButton.setLocation(BIG_BUTTON_SIZE / 2,
             SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
         bgButton.setComponentPopupMenu(createPopupMenu(false));

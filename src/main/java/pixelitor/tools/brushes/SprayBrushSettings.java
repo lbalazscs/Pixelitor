@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.ShapeType;
 
@@ -33,65 +34,73 @@ import java.util.function.Consumer;
 public class SprayBrushSettings extends BrushSettings {
     private static final ShapeType DEFAULT_SHAPE = ShapeType.RANDOM_STAR;
 
-    private final RangeParam radiusModel = new RangeParam("Average Shape Radius (px)", 1, 4, 20);
-    private final RangeParam radiusVariabilityModel = new RangeParam("Shape Radius Variability (%)", 0, 50, 100);
-    private final RangeParam flowModel = new RangeParam("Flow", 1, 5, 10);
-    private final BooleanParam randomOpacityModel = new BooleanParam("Random Opacity", true);
-    private final RangeParam colorRandomnessModel = new RangeParam("Color Randomness (%)", 0, 40, 100);
-    private final EnumParam<ShapeType> typeModel = ShapeType.asParam(DEFAULT_SHAPE);
+    // the tool that owns these settings; the eraser has no
+    // color that could be randomized, so its panel is different
+    private final Tool tool;
+
+    private final RangeParam radiusParam = new RangeParam("Average Shape Radius (px)", 1, 4, 20);
+    private final RangeParam radiusVariabilityParam = new RangeParam("Shape Radius Variability (%)", 0, 50, 100);
+    private final RangeParam flowParam = new RangeParam("Flow", 1, 5, 10);
+    private final BooleanParam randomOpacityParam = new BooleanParam("Random Opacity", true);
+    private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 40, 100);
+    private final EnumParam<ShapeType> typeParam = ShapeType.asParam(DEFAULT_SHAPE);
+
+    public SprayBrushSettings(Tool tool) {
+        this.tool = tool;
+    }
 
     @Override
     protected void forEachParam(Consumer<FilterParam> consumer) {
-        consumer.accept(radiusModel);
-        consumer.accept(radiusVariabilityModel);
-        consumer.accept(flowModel);
-        consumer.accept(randomOpacityModel);
-        consumer.accept(colorRandomnessModel);
-        consumer.accept(typeModel);
+        consumer.accept(radiusParam);
+        consumer.accept(radiusVariabilityParam);
+        consumer.accept(flowParam);
+        consumer.accept(randomOpacityParam);
+        consumer.accept(colorRandomnessParam);
+        consumer.accept(typeParam);
     }
 
     @Override
     protected JPanel createConfigPanel() {
         BrushSettingsPanel p = new BrushSettingsPanel();
 
-        p.addParam(typeModel, "shape");
+        p.addParam(typeParam, "shape");
 
-        p.addSlider(radiusModel, "avgRadius");
-        p.addSlider(radiusVariabilityModel, "radiusVar");
-        p.addSlider(flowModel, "flow");
-        p.addParam(randomOpacityModel, "rndOpacity");
+        p.addSlider(radiusParam, "avgRadius");
+        p.addSlider(radiusVariabilityParam, "radiusVar");
+        p.addSlider(flowParam, "flow");
+        p.addParam(randomOpacityParam, "rndOpacity");
 
         if (tool != Tools.ERASER) {
-            p.addSlider(colorRandomnessModel, "colorRand");
+            p.addSlider(colorRandomnessParam, "colorRand");
         }
 
         return p;
     }
 
     public ShapeType getShapeType() {
-        if (typeModel != null) {
-            return typeModel.getSelected();
+        if (typeParam != null) {
+            return typeParam.getSelected();
         }
         return DEFAULT_SHAPE;
     }
 
     public double getShapeRadius() {
-        return radiusModel.getValue();
+        return radiusParam.getValue();
     }
 
     public int getFlow() {
-        return flowModel.getValue();
+        return flowParam.getValue();
     }
 
     public double getRadiusVariability() {
-        return radiusVariabilityModel.getPercentage();
+        return radiusVariabilityParam.getPercentage();
     }
 
     public boolean randomOpacity() {
-        return randomOpacityModel.isChecked();
+        return randomOpacityParam.isChecked();
     }
 
     public double getColorRandomness() {
-        return colorRandomnessModel.getPercentage();
+        return colorRandomnessParam.getPercentage();
     }
 }

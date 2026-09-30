@@ -94,7 +94,7 @@ public class HandToolHandler extends ToolHandler {
         }
         if (!panning) { // this is called all the time while the space is held down
             if (handToolForwarding) {
-                Views.setCursorForAll(Tools.HAND.getStartingCursor());
+                Views.setCursorForAll(Tools.HAND.getDefaultCursor());
             }
         }
         panning = true;

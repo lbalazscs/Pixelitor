@@ -54,7 +54,7 @@ public class GridParamGUI extends JPanel implements ParamGUI {
         this.resetButton = new ResetButton(model);
 
         presetComboBox = new JComboBox<>(model.getSelectablePresetNames());
-        this.presetListener = e -> {
+        this.presetListener = _ -> {
             String selectedPreset = (String) presetComboBox.getSelectedItem();
             if (selectedPreset != null && !selectedPreset.equals(model.getSelectedPresetName())) {
                 model.selectPreset(selectedPreset);

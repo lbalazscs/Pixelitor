@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,12 @@ package pixelitor.filters.gmic;
 
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.io.FileIO;
+import pixelitor.io.ProcessIO;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serial;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public abstract class GMICFilter extends ParametrizedFilter {
         command.add("-output");
         command.add("-.png");
 
-        return FileIO.applyCommandLineFilter(src, command);
+        return ProcessIO.applyCommandLineFilter(src, command, Duration.ofMinutes(5));
     }
 
     public abstract List<String> getArgs();

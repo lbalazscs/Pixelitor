@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,14 +29,14 @@ public abstract class DabsBrush extends AbstractBrush {
     private final DabsStrategy dabsStrategy;
 
     protected DabsBrush(double radius, Spacing spacing,
-                        RotationSettings rotationSettings,
+                        AngleSettings angleSettings,
                         boolean refreshBrushForEachDab) {
         super(radius);
         this.spacing = spacing;
-        settings = new DabsBrushSettings(rotationSettings, spacing);
+        settings = new DabsBrushSettings(angleSettings, spacing);
         dabsStrategy = new LinearDabsStrategy(this,
             spacing,
-            rotationSettings,
+            angleSettings,
             refreshBrushForEachDab);
         settings.registerBrush(this);
     }
@@ -67,7 +67,7 @@ public abstract class DabsBrush extends AbstractBrush {
     public void startStrokeAt(PPoint p) {
         super.startStrokeAt(p);
         dabsStrategy.onStrokeStart(p);
-        repaintComp(p);
+        repaintSegment(p);
     }
 
     @Override
@@ -79,13 +79,13 @@ public abstract class DabsBrush extends AbstractBrush {
     @Override
     public void continueTo(PPoint p) {
         dabsStrategy.onNewStrokePoint(p);
-        repaintComp(p);
-        this.setPrevious(p);
+        repaintSegment(p);
+        this.setPrevPos(p);
     }
 
     @Override
-    public void setPrevious(PPoint previous) {
-        super.setPrevious(previous);
+    public void setPrevPos(PPoint previous) {
+        super.setPrevPos(previous);
         dabsStrategy.setPrevious(previous);
     }
 

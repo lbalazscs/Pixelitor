@@ -53,6 +53,6 @@ public class TraceAction extends NamedAction {
         }
 
         Drawable dr = comp.getActiveDrawableOrThrow();
-        brushTool.trace(dr, path.toImageSpaceShape());
+        brushTool.trace(path.toImageSpaceShape(), dr);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,33 +27,33 @@ import java.util.function.Consumer;
  * The settings of a {@link DabsBrush}.
  */
 public class DabsBrushSettings extends BrushSettings {
-    private RotationSettings rotationSettings;
+    private AngleSettings angleSettings;
     private Spacing spacing;
 
-    public DabsBrushSettings(RotationSettings rotationSettings, Spacing spacing) {
-        this.rotationSettings = rotationSettings;
+    public DabsBrushSettings(AngleSettings angleSettings, Spacing spacing) {
+        this.angleSettings = angleSettings;
         this.spacing = spacing;
     }
 
     public void setSpacing(Spacing spacing) {
         this.spacing = spacing;
-        notifyBrushes();
+        notifySettingsChanged();
     }
 
-    public void setAngleSettings(RotationSettings rotationSettings) {
-        this.rotationSettings = rotationSettings;
-        notifyBrushes();
+    public void setAngleSettings(AngleSettings angleSettings) {
+        this.angleSettings = angleSettings;
+        notifySettingsChanged();
     }
 
     /**
      * Returns true if the brush angle should follow the stroke direction.
      */
     public boolean isDirectional() {
-        return rotationSettings.isDirectional();
+        return angleSettings.isDirectional();
     }
 
-    public RotationSettings getAngleSettings() {
-        return rotationSettings;
+    public AngleSettings getAngleSettings() {
+        return angleSettings;
     }
 
     public Spacing getSpacingStrategy() {
@@ -62,7 +62,7 @@ public class DabsBrushSettings extends BrushSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        // only subclasses use GUI configuration
+        // subclasses must override this method if they use GUI configuration
         throw new UnsupportedOperationException();
     }
 
@@ -75,13 +75,13 @@ public class DabsBrushSettings extends BrushSettings {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        rotationSettings.saveStateTo(preset);
+        angleSettings.saveStateTo(preset);
         spacing.saveStateTo(preset);
     }
 
     @Override
     public void loadStateFrom(UserPreset preset) {
-        rotationSettings = RotationSettings.fromPreset(preset);
+        angleSettings = AngleSettings.fromPreset(preset);
         spacing.loadStateFrom(preset);
     }
 }

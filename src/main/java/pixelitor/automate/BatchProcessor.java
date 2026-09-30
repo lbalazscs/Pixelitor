@@ -33,10 +33,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
-import static pixelitor.utils.Threads.callInfo;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.calledOutsideEDT;
-import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.*;
 
 /**
  * Handles the batch processing of compositions.
@@ -64,20 +61,22 @@ public class BatchProcessor {
     }
 
     /**
-     * Processes each file in the input directory
-     * using the given {@link CompAction}.
+     * Processes each file in the input directory. It starts the work
+     * asynchronously in a background worker, and returns immediately.
      */
-    public void processFiles() {
+    public void processFilesAsync() {
         assert calledOnEDT() : callInfo();
 
         List<File> filesToProcess = FileUtils.listSupportedInputFiles(inputDir);
         if (filesToProcess.isEmpty()) {
-            String msg = "No supported files found in " + inputDir.getAbsolutePath();
-            Messages.showInfo("No Files Found", msg);
+            Messages.showInfo("No Files Found",
+                "No supported files found in " + inputDir.getAbsolutePath());
             return;
         }
 
         stopProcessing = false;
+
+        // batch edits shouldn't be added to the undo history
         History.setIgnoreEdits(true);
 
         var worker = new SwingWorker<Void, Integer>() {
@@ -102,8 +101,8 @@ public class BatchProcessor {
                 if (isCancelled()) {
                     return;
                 }
-                Integer latestProgress = chunks.getLast();
-                updateProgress(progressMonitor, latestProgress, filesToProcess.size());
+                Integer latestFileIndex = chunks.getLast();
+                updateProgress(progressMonitor, latestFileIndex, filesToProcess.size());
             }
 
             @Override
@@ -115,9 +114,9 @@ public class BatchProcessor {
         worker.execute();
     }
 
-    private static void updateProgress(ProgressMonitor monitor, int currentIndex, int total) {
-        monitor.setProgress((int) (currentIndex * 100.0 / total));
-        monitor.setNote("Processing " + (currentIndex + 1) + " of " + total);
+    private static void updateProgress(ProgressMonitor monitor, int currentIndex, int fileCount) {
+        monitor.setProgress((int) (currentIndex * 100.0 / fileCount));
+        monitor.setNote("Processing " + (currentIndex + 1) + " of " + fileCount);
     }
 
     private void processFile(File file) {
@@ -127,23 +126,26 @@ public class BatchProcessor {
             .thenComposeAsync(action::process, onEDT)
             .thenComposeAsync(this::saveAndClose, onEDT)
             .exceptionally(Messages::showExceptionOnEDT)
-            .join();
+            .join(); // ensures that files are handled one at a time
     }
 
-    private CompletableFuture<Void> saveAndClose(Composition comp) {
+    /**
+     * A false in the return value indicates that no output file was created.
+     */
+    private CompletableFuture<Boolean> saveAndClose(Composition comp) {
         assert calledOnEDT() : callInfo();
 
         var format = FileFormat.getLastSaved();
         File outputFile = createOutputPath(comp, format);
 
         var saveSettings = new SaveSettings.Default(format, outputFile);
-        CompletableFuture<Void> saveFuture = null;
+        CompletableFuture<Boolean> saveFuture = null;
 
         View view = comp.getView();
         assert view != null : "no view for " + comp.getName();
 
         if (outputFile.exists() && !overwriteAll) {
-            String userChoice = promptOverwriteConfirmation(outputFile);
+            String userChoice = promptOverwriteChoice(outputFile);
 
             switch (userChoice) {
                 case OVERWRITE_YES:
@@ -153,33 +155,34 @@ public class BatchProcessor {
                     saveFuture = comp.saveAsync(saveSettings, false);
                     overwriteAll = true;
                     break;
+                case OVERWRITE_CANCEL:
+                    stopProcessing = true;
+                    // fall through to the same handling as a skipped file
                 case OVERWRITE_NO:
-                    // bypass the warning for explicitly skipped files
+                    // the processed comp is a temporary result of the batch run,
+                    // so discard it without the unsaved-changes warning
                     comp.setDirty(false);
                     break;
-                case OVERWRITE_CANCEL:
-                    Views.warnAndClose(view);
-                    stopProcessing = true;
-                    return CompletableFuture.completedFuture(null);
                 default:
                     throw new IllegalStateException("Unexpected value: " + userChoice);
             }
-        } else { // the file doesn't exist or "overwrite all" was selected previously
+        } else { // the output file doesn't exist or "overwrite all" was selected previously
             view.paintImmediately();
             saveFuture = comp.saveAsync(saveSettings, false);
         }
 
         if (saveFuture != null) {
-            // chain the view closing to wait until the async save finishes
-            return saveFuture.whenCompleteAsync((v, e) -> {
-                // if save was successful, comp.dirty is naturally false => closes silently
-                // if save failed, comp.dirty is true (restored by saveAsync) => user gets prompted
+            // close the view only after the async save has completed
+            return saveFuture.whenCompleteAsync((_, _) -> {
+                // this peeking callback runs on both success and failure:
+                // if the save was successful, comp.dirty is naturally false => closes silently
+                // if the save failed, comp.dirty is true (restored by saveAsync) => user gets prompted
                 Views.warnAndClose(view);
             }, onEDT);
         } else {
-            // we are here if the user selected OVERWRITE_NO
-            Views.warnAndClose(view);
-            return CompletableFuture.completedFuture(null);
+            // the file was skipped or processing was canceled
+            Views.warnAndClose(view);   // silent, since the comp is no longer dirty
+            return CompletableFuture.completedFuture(Boolean.FALSE);
         }
     }
 
@@ -191,7 +194,7 @@ public class BatchProcessor {
         return new File(outputDir, outFileName);
     }
 
-    private static String promptOverwriteConfirmation(File outputFile) {
+    private static String promptOverwriteChoice(File outputFile) {
         String msg = String.format("File %s already exists. Overwrite?", outputFile);
         var optionPane = new JOptionPane(msg, WARNING_MESSAGE);
 

@@ -87,11 +87,11 @@ public class Drag implements Serializable, Debuggable {
 
     // if true (Alt down in some tools), the initial mouse press
     // acts as the center of the shape rather than a corner
-    private transient boolean expandFromCenter;
+    private transient boolean expandedFromCenter;
 
     // if true (Shift down in some tools), it forces the
-    // bounding box of the drag to maintain a perfect 1:1 ratio
-    private transient boolean forceSquareAspectRatio;
+    // bounding box of the drag to maintain a 1:1 ratio
+    private transient boolean squareConstrained;
 
     public Drag() {
         hasCoCoords = false;
@@ -128,13 +128,13 @@ public class Drag implements Serializable, Debuggable {
         canceled = false;
         startAdjusted = false;
         angleConstrained = false;
-        expandFromCenter = false;
-        forceSquareAspectRatio = false;
+        expandedFromCenter = false;
+        squareConstrained = false;
     }
 
     public Drag copy() {
         Drag copy = new Drag(imStartX, imStartY, imEndX, imEndY);
-        copy.expandFromCenter = this.expandFromCenter;
+        copy.expandedFromCenter = this.expandedFromCenter;
         return copy;
     }
 
@@ -145,13 +145,13 @@ public class Drag implements Serializable, Debuggable {
         at.transform(end, end);
 
         Drag copy = new Drag(start.getX(), start.getY(), end.getX(), end.getY());
-        copy.expandFromCenter = this.expandFromCenter;
+        copy.expandedFromCenter = this.expandedFromCenter;
         return copy;
     }
 
     public Drag imTranslatedCopy(double tx, double ty) {
         Drag copy = new Drag(imStartX + tx, imStartY + ty, imEndX + tx, imEndY + ty);
-        copy.expandFromCenter = this.expandFromCenter;
+        copy.expandedFromCenter = this.expandedFromCenter;
         return copy;
     }
 
@@ -183,13 +183,13 @@ public class Drag implements Serializable, Debuggable {
         coEndY = rawCoEndY;
 
         // the two special cases can't be used at the same time
-        assert !(angleConstrained && forceSquareAspectRatio);
+        assert !(angleConstrained && squareConstrained);
 
         if (angleConstrained) {
             Point2D newEnd = Utils.constrainToNearestAngle(coStartX, coStartY, coEndX, coEndY);
             coEndX = newEnd.getX();
             coEndY = newEnd.getY();
-        } else if (forceSquareAspectRatio) {
+        } else if (squareConstrained) {
             double width = Math.abs(coEndX - coStartX);
             double height = Math.abs(coEndY - coStartY);
             double max = Math.max(width, height);
@@ -232,16 +232,16 @@ public class Drag implements Serializable, Debuggable {
         return imStartY;
     }
 
-    public double getOriginX() {
-        if (expandFromCenter) {
+    public double getEffectiveStartX() {
+        if (expandedFromCenter) {
             return imStartX - (imEndX - imStartX);
         } else {
             return imStartX;
         }
     }
 
-    public double getOriginY() {
-        if (expandFromCenter) {
+    public double getEffectiveStartY() {
+        if (expandedFromCenter) {
             return imStartY - (imEndY - imStartY);
         } else {
             return imStartY;
@@ -265,7 +265,7 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public Point2D getCenterPoint() {
-        return expandFromCenter
+        return expandedFromCenter
             ? new Point2D.Double(imStartX, imStartY)
             : new Point2D.Double((imStartX + imEndX) / 2.0, (imStartY + imEndY) / 2.0);
     }
@@ -288,7 +288,7 @@ public class Drag implements Serializable, Debuggable {
      */
     public Drag getCenterHorizontalDrag() {
         double centerY;
-        if (expandFromCenter) {
+        if (expandedFromCenter) {
             centerY = imStartY;
             return new Drag(imStartX - getDx(), centerY, imEndX, centerY);
         } else {
@@ -316,7 +316,7 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public void setAngleConstrained(boolean angleConstrained) {
-        assert !(angleConstrained && forceSquareAspectRatio);
+        assert !(angleConstrained && squareConstrained);
         this.angleConstrained = angleConstrained;
     }
 
@@ -372,21 +372,17 @@ public class Drag implements Serializable, Debuggable {
         startAdjusted = true;
     }
 
-    public void setExpandFromCenter(boolean expandFromCenter) {
-        this.expandFromCenter = expandFromCenter;
+    public void setExpandedFromCenter(boolean expandedFromCenter) {
+        this.expandedFromCenter = expandedFromCenter;
     }
 
-    public boolean isExpandingFromCenter() {
-        return expandFromCenter;
-    }
-
-    public void setForceSquareAspectRatio(boolean forceSquareAspectRatio) {
-        assert !(angleConstrained && forceSquareAspectRatio);
-        this.forceSquareAspectRatio = forceSquareAspectRatio;
+    public void setSquareConstrained(boolean squareConstrained) {
+        assert !(angleConstrained && squareConstrained);
+        this.squareConstrained = squareConstrained;
     }
 
     public Line2D asLine() {
-        return new Line2D.Double(getOriginX(), getOriginY(), imEndX, imEndY);
+        return new Line2D.Double(getEffectiveStartX(), getEffectiveStartY(), imEndX, imEndY);
     }
 
     public boolean isDragging() {
@@ -402,7 +398,7 @@ public class Drag implements Serializable, Debuggable {
         dragging = false; // to stop drag overlays
     }
 
-    public void mouseReleased() {
+    public void markFinished() {
         dragging = false;
     }
 
@@ -413,7 +409,7 @@ public class Drag implements Serializable, Debuggable {
         int width;
         int height;
 
-        if (expandFromCenter) {
+        if (expandedFromCenter) {
             double halfWidth = coEndX - coStartX; // can be negative
             double halfHeight = coEndY - coStartY; // can be negative
 
@@ -432,12 +428,12 @@ public class Drag implements Serializable, Debuggable {
     }
 
     /**
-     * Creates a Rectangle where the signs of the width and height indicate the drawing direction.
+     * Creates a Rectangle2D where the signs of the width and height indicate the drawing direction.
      */
     public Rectangle2D toSignedImRect() {
-        double factor = expandFromCenter ? 2.0 : 1.0;
+        double factor = expandedFromCenter ? 2.0 : 1.0;
         return new Rectangle2D.Double(
-            getOriginX(), getOriginY(),
+            getEffectiveStartX(), getEffectiveStartY(),
             getDx() * factor, getDy() * factor);
     }
 
@@ -461,7 +457,7 @@ public class Drag implements Serializable, Debuggable {
         double dx = coEndX - coStartX;
         double dy = coEndY - coStartY;
         double length = ImageMath.hypot(dx, dy);
-        if (expandFromCenter) {
+        if (expandedFromCenter) {
             length *= 2;
         }
         return length;
@@ -471,7 +467,7 @@ public class Drag implements Serializable, Debuggable {
         double dx = imEndX - imStartX;
         double dy = imEndY - imStartY;
         double length = ImageMath.hypot(dx, dy);
-        if (expandFromCenter) {
+        if (expandedFromCenter) {
             length *= 2.0;
         }
         return length;
@@ -501,17 +497,21 @@ public class Drag implements Serializable, Debuggable {
     }
 
     public double calcDrawAngle() {
+        // TODO the atan2 arguments should be y, x (the callers must be adjusted)
+        //   currently the returned angle is relative to the downward vertical axis
         return Math.atan2(imEndX - imStartX, imEndY - imStartY); // between -PI and PI
     }
 
     public double calcAngleFromStartTo(double x, double y) {
+        // TODO the atan2 arguments should be y, x (the callers must be adjusted)
+        //   currently the returned angle is relative to the downward vertical axis
         return Math.atan2(x - imStartX, y - imStartY);
     }
 
     public void drawWidthHeightOverlay(Graphics2D g) {
         assert hasCoCoords;
 
-        double factor = expandFromCenter ? 2.0 : 1.0;
+        double factor = expandedFromCenter ? 2.0 : 1.0;
         double imWidth = getDx() * factor;
         double imHeight = getDy() * factor;
         MeasurementOverlay overlay = new MeasurementOverlay(g, MeasurementOverlay.BG_WIDTH_PIXELS);
@@ -709,6 +709,6 @@ public class Drag implements Serializable, Debuggable {
     @Override
     public String toString() {
         return format("(%.2f, %.2f) => (%.2f, %.2f), expanded = %s",
-            imStartX, imStartY, imEndX, imEndY, expandFromCenter);
+            imStartX, imStartY, imEndX, imEndY, expandedFromCenter);
     }
 }

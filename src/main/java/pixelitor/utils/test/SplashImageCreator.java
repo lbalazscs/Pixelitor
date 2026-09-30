@@ -89,7 +89,7 @@ public class SplashImageCreator {
 
         for (int i = 0; i < numImages; i++) {
             int sequenceNumber = i;
-            chain = chain.thenCompose(v ->
+            chain = chain.thenCompose(_ ->
                 makeSplashAsync(progressHandler, sequenceNumber, format));
         }
         chain.thenRunAsync(() ->
@@ -225,8 +225,8 @@ public class SplashImageCreator {
         var pxcSettings = new SaveSettings.Default(FileFormat.PXC, pxcFile);
 
         return comp.saveAsync(flatSettings, false)
-            .thenCompose(v -> comp.saveAsync(pxcSettings, false))
-            .thenAcceptAsync(v -> comp.getView().close(), onEDT);
+            .thenCompose(_ -> comp.saveAsync(pxcSettings, false))
+            .thenAcceptAsync(_ -> comp.getView().close(), onEDT);
     }
 
     private static void finalizeAfterSplashesBatch(int numCreatedImages,

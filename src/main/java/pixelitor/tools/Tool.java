@@ -140,7 +140,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
      * after all layers have been painted. Useful for visual feedback
      * that is not directly part of the edited image.
      * This method can paint outside the canvas bounds.
-     * The transform of the given Graphics2D is in component space.
+     * The given Graphics2D uses component-space coordinates.
      */
     public void paintOverCanvas(Graphics2D g, Composition comp) {
         // empty by default
@@ -200,7 +200,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
 
     public void altPressed() {
         if (hasColorPickerForwarding()) {
-            Views.setCursorForAll(Tools.COLOR_PICKER.getStartingCursor());
+            Views.setCursorForAll(Tools.COLOR_PICKER.getDefaultCursor());
         }
     }
 
@@ -290,7 +290,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Called when the image space coordinates of the pixels change
+     * Called when the image-space coordinates of the pixels change
      * (image resizing, cropping, canvas enlargement, flipping, etc.),
      * and this change is described by the given {@link AffineTransform}.
      *
@@ -344,11 +344,11 @@ public abstract class Tool implements PresetOwner, Debuggable {
         return hotkey;
     }
 
-    public boolean hasPixelSnapping() {
+    public boolean usesPixelSnapping() {
         return pixelSnapping;
     }
 
-    public Cursor getStartingCursor() {
+    public Cursor getDefaultCursor() {
         return cursor;
     }
 
@@ -361,9 +361,8 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Returns true if this tool is not currently affecting the
-     * composite image in ways other than directly drawing
-     * into the pixels of the actual image layer.
+     * Returns true if the tool currently draws only directly into
+     * the layer's pixels (no temporary layer or other effects).
      */
     public boolean isDirectDrawing() {
         return true;

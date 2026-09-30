@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,11 +52,11 @@ public class RGBPaletteConfig implements PaletteConfig {
         JPanel panel = new JPanel(new GridBagLayout());
 
         crSlider = addSliderRow("C-R:", "Cyan-red shift",
-            e -> cyanRedChanged(palettePanel), cyanRed, panel, 0);
+            _ -> cyanRedChanged(palettePanel), cyanRed, panel, 0);
         mgSlider = addSliderRow("M-G:", "Magenta-green shift",
-            e -> magentaGreenChanged(palettePanel), magentaGreen, panel, 1);
+            _ -> magentaGreenChanged(palettePanel), magentaGreen, panel, 1);
         ybSlider = addSliderRow("Y-B:", "Yellow-blue shift",
-            e -> yellowBlueChanged(palettePanel), yellowBlue, panel, 2);
+            _ -> yellowBlueChanged(palettePanel), yellowBlue, panel, 2);
 
         return panel;
     }

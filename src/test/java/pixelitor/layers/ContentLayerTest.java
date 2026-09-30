@@ -95,7 +95,7 @@ class ContentLayerTest {
         assertThat(layer).translationIs(3, 3);
 
         // call finalizeMovement on the composition to create history
-        comp.finalizeMovement(MoveMode.MOVE_LAYER_ONLY);
+        MoveMode.MOVE_LAYER_ONLY.finalizeMovement(comp);
 
         checkTranslationAfterPositiveDrag();
         int expectedLayerIconUpdates = layer.hasRasterIcon() ? 1 : 0;
@@ -104,7 +104,7 @@ class ContentLayerTest {
         // start another drag to the negative direction
         layer.prepareMovement();
         layer.moveWhileDragging(-1, -2);
-        comp.finalizeMovement(MoveMode.MOVE_LAYER_ONLY);
+        MoveMode.MOVE_LAYER_ONLY.finalizeMovement(comp);
 
         checkTranslationAfterNegativeDrag();
 

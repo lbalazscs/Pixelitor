@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.tools.shapes.ShapeType;
 
 import javax.swing.*;
 
-import static pixelitor.tools.brushes.RotationSettings.DIRECTIONAL_NO_JITTER;
+import static pixelitor.tools.brushes.AngleSettings.DIRECTIONAL_NO_JITTER;
 import static pixelitor.tools.brushes.ShapeDabsBrushSettingsPanel.DEFAULT_SHAPE;
 import static pixelitor.tools.brushes.ShapeDabsBrushSettingsPanel.DEFAULT_SPACING_RATIO;
 

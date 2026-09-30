@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -159,9 +160,17 @@ public class ImageMagick {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
         pb.redirectInput(ProcessBuilder.Redirect.PIPE);
 
+        // fix for a potential deadlock
+        pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+        pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+
         try {
+            // Encode before starting the process: if encoding fails, no process
+            // is left waiting forever for an input that never arrives.
+            byte[] png = ProcessIO.encodePng(img);
+
             Process process = pb.start();
-            FileIO.writeToCommandLineProcess(img, process);
+            ProcessIO.writeToCommandLineProcess(png, process);
             int exitCode = process.waitFor();
             if (exitCode != 0) {
                 // ignore: for some reason ImageMagick exits with 1 after successful write
@@ -203,7 +212,7 @@ public class ImageMagick {
         try {
             Process process = pb.start();
             // read the image as png after ImageMagick did the conversion
-            BufferedImage img = FileIO.readFromCommandLineProcess(process);
+            BufferedImage img = ProcessIO.readFromCommandLineProcess(process);
             if (img == null) {
                 throw DecodingException.forMagickImport(file, null);
             }
@@ -227,7 +236,7 @@ public class ImageMagick {
         ImageIO.write(img, "PNG", origFile);
         System.out.println("ImageMagick::main: origFile = " + origFile.getAbsolutePath() + (origFile.exists() ? " - exists" : " - does not exist!"));
 
-        BufferedImage out = FileIO.runCommandLineFilter(img,
+        BufferedImage out = ProcessIO.runCommandLineFilter(img,
             List.of(
                 magickExecutable.getAbsolutePath(),
                 "convert",
@@ -235,7 +244,7 @@ public class ImageMagick {
                 "-bilateral-blur",
                 "8",
                 "png:-"
-            )).get();
+            ), Duration.ofMinutes(5)).get();
         File outFile = new File("outFile.png");
         ImageIO.write(out, "PNG", outFile);
         System.out.println("ImageMagick::main: outFile = " + outFile.getAbsolutePath() + (outFile.exists() ? " - exists" : " - does not exist!"));

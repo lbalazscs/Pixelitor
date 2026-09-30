@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,8 +49,8 @@ public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
         directional = new BooleanParam("Angle Follows Movement", true);
         addParam(directional, "directional");
 
-        angleJitter.setAdjustmentListener(this::sngleSettingsChanged);
-        directional.setAdjustmentListener(this::sngleSettingsChanged);
+        angleJitter.setAdjustmentListener(this::angleSettingsChanged);
+        directional.setAdjustmentListener(this::angleSettingsChanged);
     }
 
     private void addSpacingSelector(DabsBrushSettings settings) {
@@ -62,16 +62,16 @@ public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
     }
 
     private void addShapeTypeSelector(ShapeDabsBrushSettings settings) {
-        EnumParam<ShapeType> typeModel = ShapeType.asParam(DEFAULT_SHAPE);
-        JComponent typeCombo = typeModel.createGUI("shape");
-        typeModel.setAdjustmentListener(() ->
-            settings.setShapeType(typeModel.getSelected()));
+        EnumParam<ShapeType> typeParam = ShapeType.asParam(DEFAULT_SHAPE);
+        JComponent typeCombo = typeParam.createGUI("shape");
+        typeParam.setAdjustmentListener(() ->
+            settings.setShapeType(typeParam.getSelected()));
 
         gbh.addLabelAndControlNoStretch("Shape:", typeCombo);
     }
 
-    private void sngleSettingsChanged() {
-        settings.setAngleSettings(new RotationSettings(
+    private void angleSettingsChanged() {
+        settings.setAngleSettings(new AngleSettings(
             directional.isChecked(), angleJitter.getValueInRadians()));
     }
 }

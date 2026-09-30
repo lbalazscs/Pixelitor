@@ -28,12 +28,12 @@ import java.awt.Shape;
 public class NewSelectionEdit extends PixelitorEdit {
     private final Shape newShape;
 
-    public NewSelectionEdit(Composition comp, Shape shape) {
+    public NewSelectionEdit(Composition comp, Shape newShape) {
         super("Create Selection", comp);
 
         assert comp.isOpen();
 
-        newShape = shape;
+        this.newShape = newShape;
     }
 
     @Override

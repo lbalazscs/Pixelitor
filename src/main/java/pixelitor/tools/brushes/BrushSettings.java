@@ -17,7 +17,6 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.Tool;
 import pixelitor.utils.Configurable;
 
 import java.util.ArrayList;
@@ -28,19 +27,12 @@ import java.util.List;
  * Settings are shared between different symmetry instances for a given tool.
  */
 public abstract class BrushSettings extends Configurable {
-    protected Tool tool;
-
     // the symmetry brushes that share this settings object
-    private final List<AbstractBrush> brushes = new ArrayList<>(4);
-
-    public void setTool(Tool tool) {
-        this.tool = tool;
-    }
+    private final List<AbstractBrush> brushes = new ArrayList<>();
 
     public void registerBrush(AbstractBrush brush) {
+        assert !brushes.contains(brush);
         brushes.add(brush);
-
-        assert brushes.size() <= SymmetryBrush.MAX_BRUSHES;
     }
 
     public void unregisterBrush(AbstractBrush brush) {
@@ -48,9 +40,9 @@ public abstract class BrushSettings extends Configurable {
     }
 
     /**
-     * Notify the brushes sharing this object that the settings have changed.
+     * Notifies the brushes sharing this object that the settings have changed.
      */
-    protected void notifyBrushes() {
+    protected void notifySettingsChanged() {
         for (AbstractBrush brush : brushes) {
             brush.settingsChanged();
         }

@@ -38,20 +38,25 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
         super(selectionType.toString() + " Selection", 'M',
             "<b>click and drag</b> creates a selection, " +
                 "<b>Space-drag</b> moves it.", Cursors.DEFAULT, false);
-        repositionOnSpace = true; // allow moving the start point with space down
+
+        if (selectionType != SelectionType.RECTANGLE && selectionType != SelectionType.ELLIPSE) {
+            throw new IllegalArgumentException("unexpected selectionType: " + selectionType);
+        }
+
+        repositionOnSpace = true; // allows moving both the start and the end points with space down
         pixelSnapping = true;
         this.selectionType = selectionType;
     }
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        initCombinatorAndBuilder(e, selectionType);
+        initSession(e, selectionType);
     }
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
-        if (selectionBuilder == null) {
-            // can happen if the image changed mid-drag; restart the drag
+        if (selectionSession == null) {
+            // the session is missing if the composition changed mid-drag; create it again
             dragStarted(e);
         }
 
@@ -69,14 +74,14 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
             altUsedForCombinator = false;
         }
 
-        drag.setExpandFromCenter(expandFromCenter);
-        selectionBuilder.updateDraftSelection(drag);
+        drag.setExpandedFromCenter(expandFromCenter);
+        selectionSession.updateFromDrag(drag);
     }
 
     @Override
     protected void dragFinished(PMouseEvent e) {
         // common logic in the base class
-        finalizeDragBasedSelection(e);
+        handleDragFinished(e);
     }
 
     // altPressed() and altReleased() mirror the expand-from-center handling
@@ -85,9 +90,9 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     @Override
     public void altPressed() {
         if (!altUsedForCombinator && drag != null && drag.isDragging()) {
-            drag.setExpandFromCenter(true);
-            if (selectionBuilder != null) {
-                selectionBuilder.updateDraftSelection(drag);
+            drag.setExpandedFromCenter(true);
+            if (selectionSession != null) {
+                selectionSession.updateFromDrag(drag);
             }
         }
     }
@@ -99,9 +104,9 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
         super.altReleased(); // clears altUsedForCombinator
 
         if (!wasAltCombinator && drag != null && drag.isDragging()) {
-            drag.setExpandFromCenter(false);
-            if (selectionBuilder != null) {
-                selectionBuilder.updateDraftSelection(drag);
+            drag.setExpandedFromCenter(false);
+            if (selectionSession != null) {
+                selectionSession.updateFromDrag(drag);
             }
         }
     }
@@ -111,5 +116,16 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
         return selectionType == SelectionType.RECTANGLE
             ? ToolIcons::paintRectangleSelectionIcon
             : ToolIcons::paintEllipseSelectionIcon;
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        super.checkInvariants();
+
+        if (drag != null && drag.isDragging() && selectionSession == null) {
+            throw new AssertionError("active drag without selectionSession");
+        }
+
+        return true;
     }
 }

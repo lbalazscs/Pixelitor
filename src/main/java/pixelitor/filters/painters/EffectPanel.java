@@ -155,7 +155,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
             // avoid accumulating action listeners on the checkbox
             enabledCB.removeActionListener(enabledCBListener);
         }
-        enabledCBListener = e -> listener.paramAdjusted();
+        enabledCBListener = _ -> listener.paramAdjusted();
         enabledCB.addActionListener(enabledCBListener);
 
         opacityRange.setAdjustmentListener(listener);

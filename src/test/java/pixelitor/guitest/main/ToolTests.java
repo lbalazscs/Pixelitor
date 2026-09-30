@@ -503,13 +503,13 @@ public class ToolTests {
         pw.button("toSelectionButton")
             .requireEnabled()
             .click();
-        EDT.assertActiveToolIs(Tools.LASSO_SELECTION);
+        EDT.assertActiveToolIs(Tools.FREEHAND_SELECTION);
 
         keyboard.undo("Convert Path to Selection");
         EDT.assertActiveToolIs(Tools.NODE);
 
         keyboard.redo("Convert Path to Selection");
-        EDT.assertActiveToolIs(Tools.LASSO_SELECTION);
+        EDT.assertActiveToolIs(Tools.FREEHAND_SELECTION);
 
         app.invert();
 
@@ -520,7 +520,7 @@ public class ToolTests {
         PixelitorAssertions.assertThat(EDT.getActivePath()).isNotNull();
 
         keyboard.undo("Convert Selection to Path");
-        EDT.assertActiveToolIs(Tools.LASSO_SELECTION);
+        EDT.assertActiveToolIs(Tools.FREEHAND_SELECTION);
         PixelitorAssertions.assertThat(EDT.getActivePath()).isNull();
 
         keyboard.redo("Convert Selection to Path");

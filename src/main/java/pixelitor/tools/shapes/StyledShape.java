@@ -279,13 +279,13 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             return;
         }
 
-        drag.setExpandFromCenter(altDown);
+        drag.setExpandedFromCenter(altDown);
         if (shapeType.isDirectional()) {
             // for directional shapes it's useful to have the
             // ability to drag exactly horizontally or vertically
             drag.setAngleConstrained(shiftDown);
         } else {
-            drag.setForceSquareAspectRatio(shiftDown);
+            drag.setSquareConstrained(shiftDown);
         }
 
         origDrag = drag;
@@ -458,8 +458,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         // 3) Rotate the box (and implicitly the shape) forwards.
 
         double dragLength = transformedDrag.calcImLength();
-        double dragStartX = transformedDrag.getOriginX();
-        double dragStartY = transformedDrag.getOriginY();
+        double dragStartX = transformedDrag.getEffectiveStartX();
+        double dragStartY = transformedDrag.getEffectiveStartY();
         Rectangle2D horBoxImBounds = new Rectangle2D.Double(
             dragStartX,
             dragStartY - dragLength * UNIT_ARROW_HEAD_WIDTH / 2.0,

@@ -814,7 +814,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         if (activeTool == Tools.CROP) {
             pixelSnapping = true; // the crop tool always snaps
         } else {
-            pixelSnapping = newValue && activeTool.hasPixelSnapping();
+            pixelSnapping = newValue && activeTool.usesPixelSnapping();
         }
     }
 

@@ -84,7 +84,7 @@ class PathToolsTest {
         assertThat(tool).isActive();
 
         PathActions.convertToSelection();
-        assertThat(Tools.LASSO_SELECTION).isActive();
+        assertThat(Tools.FREEHAND_SELECTION).isActive();
         assertThat(comp).hasSelection();
 
         undo("Convert Path to Selection");
@@ -94,7 +94,7 @@ class PathToolsTest {
             .doesNotHaveSelection();
 
         redo("Convert Path to Selection");
-        assertThat(Tools.LASSO_SELECTION).isActive();
+        assertThat(Tools.FREEHAND_SELECTION).isActive();
         assertThat(comp)
             .hasNoPath()
             .hasSelection();
@@ -121,7 +121,7 @@ class PathToolsTest {
         assertThat(comp).doesNotHaveSelection();
 
         undo("Convert Selection to Path");
-        assertThat(Tools.LASSO_SELECTION).isActive();
+        assertThat(Tools.FREEHAND_SELECTION).isActive();
         assertThat(comp).hasSelection();
 
         redo("Convert Selection to Path");

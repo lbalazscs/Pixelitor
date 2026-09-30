@@ -18,6 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
+import pixelitor.layers.TextLayer;
 import pixelitor.progress.ProgressTracker;
 import pixelitor.progress.ProgressTrackingInputStream;
 import pixelitor.progress.StatusBarProgressTracker;
@@ -110,12 +111,20 @@ public class PXCFormat {
             // file is transient in Composition because the pxc file can be renamed
             comp.setFile(file);
 
-            EventQueue.invokeLater(comp::warnIfFontsMissing);
+            warnIfFontMissing(comp);
         } catch (IOException | ClassNotFoundException e) {
             Messages.showException(e);
         }
 
         return comp;
+    }
+
+    /**
+     * Checks if all fonts used by the given composition can be found on the current machine.
+     */
+    private static void warnIfFontMissing(Composition comp) {
+        EventQueue.invokeLater(() -> comp.forEachNestedLayerOfType(
+            TextLayer.class, TextLayer::warnIfFontMissing));
     }
 
     public static void write(Composition comp, File file) {

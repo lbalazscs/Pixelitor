@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,8 +45,8 @@ public abstract class BrushDecorator implements Brush {
     }
 
     @Override
-    public void lineConnectTo(PPoint p) {
-        delegate.lineConnectTo(p);
+    public void connectWithLineTo(PPoint p) {
+        delegate.connectWithLineTo(p);
     }
 
     @Override
@@ -70,18 +70,18 @@ public abstract class BrushDecorator implements Brush {
     }
 
     @Override
-    public PPoint getPrevious() {
-        return delegate.getPrevious();
+    public PPoint getPrevPos() {
+        return delegate.getPrevPos();
     }
 
     @Override
-    public void setPrevious(PPoint previous) {
-        delegate.setPrevious(previous);
+    public void setPrevPos(PPoint previous) {
+        delegate.setPrevPos(previous);
     }
 
     @Override
-    public boolean hasPrevious() {
-        return delegate.hasPrevious();
+    public boolean hasPrevPos() {
+        return delegate.hasPrevPos();
     }
 
     @Override

@@ -157,6 +157,6 @@ public class Resize implements CompAction {
         List<CompletableFuture<Void>> layerResizeFutures = new ArrayList<>();
         comp.forEachNestedLayerAndMask(layer ->
             layerResizeFutures.add(layer.resize(newSize)));
-        return Utils.allOf(layerResizeFutures).thenApply(v -> comp);
+        return Utils.allOf(layerResizeFutures).thenApply(_ -> comp);
     }
 }

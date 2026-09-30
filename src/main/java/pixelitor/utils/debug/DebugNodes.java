@@ -17,7 +17,9 @@
 
 package pixelitor.utils.debug;
 
+import pixelitor.Composition;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.layers.SmartObject;
 import pixelitor.utils.AngleUnit;
 import pixelitor.utils.MemoryInfo;
 
@@ -221,6 +223,43 @@ public class DebugNodes {
             attrNode.addAsQuotedString(key.toString(), value));
         node.add(attrNode);
 
+        return node;
+    }
+
+    public static DebugNode createCompNode(Composition comp, String name) {
+        DebugNode node = new DebugNode(name, comp);
+
+        node.add(comp.getCanvas().createDebugNode("canvas"));
+        node.addInt("dpi", comp.getDpi());
+
+        node.add(comp.getActiveLayer().createDebugNode("active layer"));
+
+        comp.forEachTopLevelLayer(layer -> node.add(layer.createDebugNode()));
+
+        node.add(createBufferedImageNode("composite image", comp.getCompositeImage()));
+
+        node.addNullableDebuggable("paths", comp.getPaths());
+        node.addNullableDebuggable("guides", comp.getGuides());
+
+        node.addInt("num layers", comp.getNumLayers());
+        node.addQuotedString("name", comp.getName());
+        node.addQuotedString("debug name", comp.getDebugName());
+
+        node.addNullableDebuggable("file", comp.getFile(), DebugNodes::createFileNode);
+
+        node.addBoolean("is smart object content", comp.isSmartObjectContent());
+        if (comp.isSmartObjectContent()) {
+            DebugNode ownersNode = new DebugNode("referencing SO owner names", comp.getOwners());
+            for (SmartObject owner : comp.getOwners()) {
+                ownersNode.addString("name", owner.getName());
+            }
+            node.add(ownersNode);
+        }
+
+        node.addBoolean("dirty", comp.isDirty());
+
+        node.addNullableDebuggable("draft selection", comp.getDraftSelection());
+        node.addNullableDebuggable("selection", comp.getSelection());
         return node;
     }
 }

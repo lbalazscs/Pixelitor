@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,50 +29,50 @@ import java.util.function.Consumer;
  * Settings specific to the {@link ConnectBrush}.
  */
 public class ConnectBrushSettings extends BrushSettings {
-    private final EnumParam<Style> styleModel = Style.asParam();
-    private final RangeParam densityModel = new RangeParam("Line Density (%)", 1, 50, 100);
-    private final RangeParam widthModel = new RangeParam("Line Width (px)", 1, 1, 10);
-    private final BooleanParam resetForEachStroke = new BooleanParam(
+    private final EnumParam<Style> styleParam = Style.asParam();
+    private final RangeParam densityParam = new RangeParam("Line Density (%)", 1, 50, 100);
+    private final RangeParam Param = new RangeParam("Line Width (px)", 1, 1, 10);
+    private final BooleanParam resetParam = new BooleanParam(
         "Reset History for Each Stroke");
 
     @Override
     protected void forEachParam(Consumer<FilterParam> consumer) {
-        consumer.accept(styleModel);
-        consumer.accept(densityModel);
-        consumer.accept(widthModel);
-        consumer.accept(resetForEachStroke);
+        consumer.accept(styleParam);
+        consumer.accept(densityParam);
+        consumer.accept(Param);
+        consumer.accept(resetParam);
     }
 
     public boolean shouldClearHistoryPerStroke() {
-        return resetForEachStroke.isChecked();
+        return resetParam.isChecked();
     }
 
     public Style getStyle() {
-        return styleModel.getSelected();
+        return styleParam.getSelected();
     }
 
     @Override
     protected JPanel createConfigPanel() {
         BrushSettingsPanel p = new BrushSettingsPanel();
 
-        p.addParam(styleModel, "style");
-        p.addSlider(densityModel, "density");
-        p.addSlider(widthModel, "width");
-        p.addParam(resetForEachStroke, "resetForEach");
+        p.addParam(styleParam, "style");
+        p.addSlider(densityParam, "density");
+        p.addSlider(Param, "width");
+        p.addParam(resetParam, "resetForEach");
 
         // a button for manual history reset
         p.addFullWidthButton("Reset History Now",
-            e -> ConnectBrush.clearHistory(), "resetHistNow");
+            _ -> ConnectBrush.clearHistory(), "resetHistNow");
 
         return p;
     }
 
     public double getDensity() {
-        return densityModel.getPercentage();
+        return densityParam.getPercentage();
     }
 
     public float getLineWidth() {
-        return widthModel.getValueAsFloat();
+        return Param.getValueAsFloat();
     }
 
     public enum Style {

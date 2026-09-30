@@ -40,9 +40,10 @@ public interface Brush extends Debuggable {
     void continueTo(PPoint p);
 
     /**
-     * Connects the last point of the stroke to the given point with a straight line segment.
+     * Connects the last point of the stroke to the given point
+     * with a straight line segment (usually because of a Shift-click).
      */
-    void lineConnectTo(PPoint p);
+    void connectWithLineTo(PPoint p);
 
     /**
      * Finishes the current brush stroke.
@@ -74,18 +75,18 @@ public interface Brush extends Debuggable {
     /**
      * Returns the previous position of the brush.
      */
-    PPoint getPrevious();
+    PPoint getPrevPos();
 
     /**
      * Sets the given previous point on the brush.
      */
-    void setPrevious(PPoint previous);
+    void setPrevPos(PPoint previous);
 
     /**
      * Returns true if the brush has a recorded previous position.
      */
-    default boolean hasPrevious() {
-        return getPrevious() != null;
+    default boolean hasPrevPos() {
+        return getPrevPos() != null;
     }
 
     /**
@@ -107,10 +108,10 @@ public interface Brush extends Debuggable {
     double getMaxEffectiveRadius();
 
     /**
-     * Returns the space between brush applications (dabs) in image-space pixels.
+     * Returns the distance between brush applications (dabs) in image-space pixels.
      *
      * If the brush doesn't use uniform spacing, it can return
-     * any spacing that looks good, or 0 to skip the decision.
+     * any spacing that looks good, or 0 to let the caller choose.
      */
     double getPreferredSpacing();
 }

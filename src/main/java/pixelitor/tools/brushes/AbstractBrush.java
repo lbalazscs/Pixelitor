@@ -37,7 +37,7 @@ public abstract class AbstractBrush implements Brush {
 
     // tracks the maximum radius used during a stroke for undo bounds calculation
     private double maxRadiusDuringStroke = 0;
-    protected PPoint previous;
+    protected PPoint prevPos;
 
     // true when the mouse is down
     private boolean drawing;
@@ -70,24 +70,24 @@ public abstract class AbstractBrush implements Brush {
     /**
      * Requests a repaint of the view covering the area between the
      * previous and current points, expanded by the brush diameter.
-     * Should be called *before* updating the previous point with {@link #setPrevious(PPoint)}.
+     * Should be called *before* updating the previous point with {@link #setPrevPos(PPoint)}.
      */
-    protected void repaintComp(PPoint p) {
-        dr.repaintRegion(previous, p, diameter);
+    protected void repaintSegment(PPoint p) {
+        dr.repaintRegion(prevPos, p, diameter);
     }
 
     /**
      * Sets the previous point.
-     * Should be called *after* any operations that require the old previous point, like {@link #repaintComp(PPoint)}.
+     * Should be called *after* any operations that require the old previous point, like {@link #repaintSegment(PPoint)}.
      */
     @Override
-    public void setPrevious(PPoint p) {
-        previous = p;
+    public void setPrevPos(PPoint p) {
+        prevPos = p;
     }
 
     @Override
-    public PPoint getPrevious() {
-        return previous;
+    public PPoint getPrevPos() {
+        return prevPos;
     }
 
     @Override
@@ -95,7 +95,7 @@ public abstract class AbstractBrush implements Brush {
         // when starting a new stroke, the previous
         // point should not be set to (0, 0)
         // because it causes unnecessary repainting
-        setPrevious(p);
+        setPrevPos(p);
 
         initDrawing(p);
 
@@ -110,18 +110,18 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public void lineConnectTo(PPoint p) {
+    public void connectWithLineTo(PPoint p) {
         assert !drawing : "already initialized in " + getClass().getSimpleName();
 
-        if (previous == null) {
+        if (prevPos == null) {
             // can happen if the first click (in the tool or
             // after a symmetry activation) is a shift-click
             startStrokeAt(p);
         } else {
             initDrawing(p);
 
-            // most brushes connect with lines anyway, but if there is an
-            // extra smoothing, this must be overridden
+            // most brushes connect with lines anyway, but if
+            // there is extra smoothing, this must be overridden
             continueTo(p);
         }
     }
@@ -150,7 +150,7 @@ public abstract class AbstractBrush implements Brush {
         var node = new DebugNode(key, this);
         node.addClass();
         node.addDouble("radius", radius);
-        node.addNullableDebuggable("previous", previous);
+        node.addNullableDebuggable("prevPos", prevPos);
         node.addBoolean("drawing", drawing);
         node.addDouble("maxRadiusDuringStroke", maxRadiusDuringStroke);
 

@@ -36,12 +36,13 @@ import java.awt.Shape;
 public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     private final BlendingModePanel blendingModePanel;
 
-    // tracks if this tool is currently editing a layer mask
+    // whether this tool is currently editing a layer mask
     private boolean maskEditing;
 
     protected BlendingModeBrushTool(String name, char hotkey, String statusBarMessage,
-                                    Cursor cursor, boolean addSymmetry) {
-        super(name, hotkey, statusBarMessage, cursor, addSymmetry);
+                                    Cursor cursor, boolean supportsSymmetry) {
+        super(name, hotkey, statusBarMessage, cursor, supportsSymmetry);
+
         drawTarget = DrawTarget.DIRECT;
         maskEditing = false;
 
@@ -94,11 +95,11 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     }
 
     @Override
-    public void trace(Drawable dr, Shape shape) {
+    public void trace(Shape shape, Drawable dr) {
         // ensure mask editing state is correct before tracing
         // (necessary because this could be called when a path tool is active)
         maskEditingChanged(dr instanceof LayerMask);
-        super.trace(dr, shape);
+        super.trace(shape, dr);
     }
 
     @Override
@@ -125,7 +126,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         DebugNode node = super.createDebugNode(key);
 
         node.addFloat("opacity", blendingModePanel.getOpacity());
-        node.addQuotedString("blending Mode",
+        node.addQuotedString("blending mode",
             blendingModePanel.getBlendingMode().toString());
 
         return node;

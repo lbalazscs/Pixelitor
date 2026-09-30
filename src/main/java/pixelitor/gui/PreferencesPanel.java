@@ -319,7 +319,7 @@ public class PreferencesPanel extends JTabbedPane {
         gbh.addLabelAndControlNoStretch(labelPrefix + " Color: ", guideColorSwatch);
         gbh.addLabelAndControlNoStretch(labelPrefix + " Style: ", guideStyleCB);
 
-        new ColorPickerHelper(guideColorSwatch, e -> {
+        new ColorPickerHelper(guideColorSwatch, _ -> {
             guideStyle.setPrimaryColor(guideColorSwatch.getForeground());
             ImageArea.getUI().repaint();
         });

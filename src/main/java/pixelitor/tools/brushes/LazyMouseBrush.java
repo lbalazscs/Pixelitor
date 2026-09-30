@@ -24,6 +24,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.Graphics2D;
+import java.util.function.IntSupplier;
 
 /**
  * A brush decorator that implements the "lazy mouse" feature,
@@ -33,7 +34,7 @@ public class LazyMouseBrush extends BrushDecorator {
     private static final int MIN_LAZY_DIST = 10;
     private static final int DEFAULT_LAZY_DIST = 30;
     private static final int MAX_LAZY_DIST = 200;
-    private static final int DEFAULT_SPACING = 3;
+    private static final int FALLBACK_SPACING = 3;
 
     // the target: the user's current mouse cursor position (image space)
     private double mouseX;
@@ -46,17 +47,19 @@ public class LazyMouseBrush extends BrushDecorator {
     private View view;
     private double spacing;
 
-    // the lazy mouse distance is shared between the tools
-    private static int lazyDist = DEFAULT_LAZY_DIST;
-    private static double lazyDistSq = DEFAULT_LAZY_DIST * DEFAULT_LAZY_DIST;
+    // supplies the current lazy mouse distance in image-space pixels;
+    // it is read on every use, so that changes in the owning
+    // tool's GUI take effect immediately
+    private final IntSupplier lazyDist;
 
-    public LazyMouseBrush(Brush delegate) {
+    public LazyMouseBrush(Brush delegate, IntSupplier lazyDist) {
         super(delegate);
+        this.lazyDist = lazyDist;
 
         // copy the previous position of the delegate so that
-        // if this object starts with shift-clicked lines, the
-        // old positions are continued
-        PPoint previous = delegate.getPrevious();
+        // a Shift-click as the first action after enabling
+        // lazy mouse starts the line where the stroke ended
+        PPoint previous = delegate.getPrevPos();
         if (previous != null) {
             drawX = previous.getImX();
             drawY = previous.getImY();
@@ -65,16 +68,11 @@ public class LazyMouseBrush extends BrushDecorator {
         updateSpacing();
     }
 
-    public static void setLazyDist(int value) {
-        lazyDist = value;
-        lazyDistSq = value * value;
-    }
-
     private void updateSpacing() {
         spacing = delegate.getPreferredSpacing();
         if (spacing == 0) {
             // fall back to the default if the delegate doesn't specify spacing
-            spacing = DEFAULT_SPACING;
+            spacing = FALLBACK_SPACING;
         }
     }
 
@@ -103,7 +101,8 @@ public class LazyMouseBrush extends BrushDecorator {
     }
 
     /**
-     * Advances the delegate brush toward the target point in steps.
+     * Advances the delegate brush toward the target point in steps
+     * until the draw position is within the lazy distance of the mouse.
      */
     private void advanceTo(PPoint targetPoint) {
         mouseX = targetPoint.getImX();
@@ -113,19 +112,26 @@ public class LazyMouseBrush extends BrushDecorator {
         double dy = mouseY - drawY;
         double distSq = dx * dx + dy * dy;
 
-        if (distSq <= spacing * spacing) {
-            return; // Skip if within a single step
+        // The loop below stops once the draw position is within
+        // sqrt(d² + s²) of the mouse (d = lazy distance, s = spacing).
+        // For small spacing this is about d, so the lag is roughly d.
+        // The s² term keeps the loop safe: each step moves by s along
+        // a fixed direction, so the stop distance must exceed s, or a
+        // step could overshoot the mouse and run away from it.
+        // d² + s² > s² guarantees this.
+        double d = lazyDist.getAsInt();
+        double stopDistSq = d * d + spacing * spacing;
+        if (distSq <= stopDistSq) {
+            return; // within the lazy distance: the loop wouldn't run
         }
 
+        // here dist > spacing > 0, so the division is safe
         double dist = Math.sqrt(distSq);
-        double unitDx = dx / dist;
-        double unitDy = dy / dist;
-        double stepDx = unitDx * spacing;
-        double stepDy = unitDy * spacing;
+        double scale = spacing / dist;
+        double stepDx = dx * scale;
+        double stepDy = dy * scale;
 
-        double remainingDistSq = lazyDistSq + spacing * spacing;
-
-        while (distSq > remainingDistSq) {
+        while (distSq > stopDistSq) {
             drawX += stepDx;
             drawY += stepDy;
             PPoint drawPoint = PPoint.fromIm(drawX, drawY, view);
@@ -138,19 +144,23 @@ public class LazyMouseBrush extends BrushDecorator {
     }
 
     @Override
-    public void lineConnectTo(PPoint p) {
+    public void connectWithLineTo(PPoint p) {
         assert !isDrawing();
-        assert hasPrevious();
+        assert hasPrevPos();
         initDrawing(p);
 
         advanceTo(p);
     }
 
+    /**
+     * Creates a new parameter for the lazy mouse distance.
+     * Each tool owns its own instance and passes it to
+     * its {@link LazyMouseBrush} via an {@link IntSupplier}.
+     */
     public static RangeParam createDistParam() {
-        RangeParam param = new RangeParam("Distance (px)", MIN_LAZY_DIST, lazyDist, MAX_LAZY_DIST,
+        return new RangeParam("Distance (px)",
+            MIN_LAZY_DIST, DEFAULT_LAZY_DIST, MAX_LAZY_DIST,
             false, SliderSpinner.LabelPosition.NONE);
-        param.setAdjustmentListener(() -> setLazyDist(param.getValue()));
-        return param;
     }
 
     public PPoint getDrawLocation() {

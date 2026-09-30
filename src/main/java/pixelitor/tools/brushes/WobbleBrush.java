@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,12 +47,12 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    protected void repaintComp(PPoint p) {
+    protected void repaintSegment(PPoint p) {
         // make sure that it is repainted even if the radius is small
         double thickness = diameter;
         if (radius < 3) {
             thickness += 2;
         }
-        dr.repaintRegion(previous, p, thickness);
+        dr.repaintRegion(prevPos, p, thickness);
     }
 }

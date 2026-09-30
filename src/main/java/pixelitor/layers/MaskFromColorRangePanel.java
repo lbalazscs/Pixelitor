@@ -251,11 +251,11 @@ public class MaskFromColorRangePanel extends JPanel {
         southEastPanel.add(new JLabel("   Distance:"));
         southEastPanel.add(distMetricCombo);
 
-        ChangeListener changeListener = e -> updatePreview(selectedColor);
+        ChangeListener changeListener = _ -> updatePreview(selectedColor);
         toleranceSlider.addChangeListener(changeListener);
         softnessSlider.addChangeListener(changeListener);
 
-        ActionListener actionListener = e -> updatePreview(selectedColor);
+        ActionListener actionListener = _ -> updatePreview(selectedColor);
         invertMaskCheckBox.addActionListener(actionListener);
         previewModeCB.addActionListener(actionListener);
         distMetricCombo.addActionListener(actionListener);

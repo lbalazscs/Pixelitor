@@ -23,14 +23,14 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.brushes.*;
-import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.brushes.Brush;
+import pixelitor.tools.brushes.CopyBrushType;
+import pixelitor.tools.brushes.SmudgeBrush;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -58,23 +58,9 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void initBrushVariables() {
+    protected Brush createCoreBrush() {
         smudgeBrush = new SmudgeBrush(getRadius(), CopyBrushType.HARD);
-        affectedArea = new AffectedArea();
-        brush = new AffectedAreaTracker(smudgeBrush, affectedArea);
-    }
-
-    @Override
-    protected void updateLazyMouseState() {
-        if (lazyMouseEnabled.isChecked()) {
-            lazyMouseBrush = new LazyMouseBrush(smudgeBrush);
-            brush = new AffectedAreaTracker(lazyMouseBrush, affectedArea);
-            lazyMouse = true;
-        } else {
-            brush = new AffectedAreaTracker(smudgeBrush, affectedArea);
-            lazyMouseBrush = null;
-            lazyMouse = false;
-        }
+        return smudgeBrush;
     }
 
     @Override
@@ -82,7 +68,7 @@ public class SmudgeTool extends AbstractBrushTool {
         brushModel = settingsPanel.addCopyBrushTypeSelector(
             CopyBrushType.HARD, smudgeBrush::typeChanged);
 
-        addSizeSelector();
+        addRadiusSelector();
         addStrengthSelector();
         addFingerPaintingSelector();
 
@@ -102,44 +88,15 @@ public class SmudgeTool extends AbstractBrushTool {
         settingsPanel.addWithLabel("Finger Painting:", fingerPaintingCB, "fingerPaintingCB");
         fingerPaintingCB.setName("fingerPaintingCB");
         fingerPaintingCB.addActionListener(
-            e -> smudgeBrush.setFingerPainting(fingerPaintingCB.isSelected()));
+            _ -> smudgeBrush.setFingerPainting(fingerPaintingCB.isSelected()));
     }
 
     @Override
-    public void mousePressed(PMouseEvent e) {
-        Drawable dr = e.getComp().getActiveDrawableOrThrow();
-
-        // We could also pass the full image and the translation
-        // and the smudge brush could always adjust the last sampling point
-        // with the translation.
-        BufferedImage sourceImage = dr.getCanvasSizedSubImage();
-
-        // initialize the smudge brush state before starting the stroke
-        boolean lineConnect = e.isShiftDown() && smudgeBrush.isStrokeInitialized();
+    protected void strokeStarting(Drawable dr, PPoint start, boolean lineConnect) {
+        smudgeBrush.setSourceImage(dr.getCanvasSizedSubImage());
         if (!lineConnect) {
-            // initialize source image, start point, and strength for a new stroke segment
-            initStroke(sourceImage, e);
+            smudgeBrush.initStroke(start, (float) strengthParam.getPercentage());
         }
-        // else: for shift-click line connect, reuse the existing source/strength
-
-        super.mousePressed(e);
-    }
-
-    private void initStroke(BufferedImage sourceImage, PPoint startPoint) {
-        smudgeBrush.initStroke(sourceImage, startPoint, (float) strengthParam.getPercentage());
-    }
-
-    @Override
-    protected Symmetry getSymmetry() {
-        throw new UnsupportedOperationException("no symmetry");
-    }
-
-    @Override
-    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
-        super.prepareProgrammaticBrushStroke(dr, start);
-
-        BufferedImage sourceImg = dr.getCanvasSizedSubImage();
-        initStroke(sourceImg, start);
     }
 
     @Override

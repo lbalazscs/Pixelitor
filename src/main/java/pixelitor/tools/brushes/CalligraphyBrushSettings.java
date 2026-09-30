@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
  * The settings of a {@link CalligraphyBrush}
  */
 public class CalligraphyBrushSettings extends BrushSettings {
-    private static final double INTUITIVE_45 = 5.497787143782138;
+    private static final double DEFAULT_ANGLE = 5.497787143782138; // 7π/4 = intuitive 45°
 
     private AngleParam angleParam;
 
@@ -47,7 +47,7 @@ public class CalligraphyBrushSettings extends BrushSettings {
         if (angleParam != null) {
             return angleParam.getValueInRadians();
         }
-        return INTUITIVE_45;
+        return DEFAULT_ANGLE;
     }
 
     @Override

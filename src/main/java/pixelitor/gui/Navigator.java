@@ -89,7 +89,7 @@ public class Navigator extends JComponent
     private static Navigator instance;
 
     private Navigator(View view) {
-        viewScrollListener = e ->
+        viewScrollListener = _ ->
             SwingUtilities.invokeLater(this::syncViewBoxPosition);
 
         updateSize(view, true, true, true);

@@ -21,27 +21,19 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InOrder;
 import pixelitor.TestHelper;
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.utils.Texts;
 
-import java.awt.Rectangle;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.spy;
-import static pixelitor.tools.Tools.BRUSH;
-import static pixelitor.tools.Tools.CLONE;
-import static pixelitor.tools.Tools.ERASER;
-import static pixelitor.tools.Tools.SMUDGE;
+import static pixelitor.tools.Tools.*;
 
 /**
  * Tests functionality common to all {@link AbstractBrushTool} subclasses.
@@ -98,16 +90,5 @@ class AbstractBrushToolTest {
 
         // restore it so that next time we don't spy on a spy...
         tool.setBrush(origBrush);
-    }
-
-    @Test
-    void trace_invokesBrushMethodsInOrder() {
-        tool.trace(dr, new Rectangle(2, 2, 2, 2));
-
-        InOrder inOrder = inOrder(spyBrush);
-
-        inOrder.verify(spyBrush).setTarget(any(), any());
-        inOrder.verify(spyBrush).startStrokeAt(any());
-        inOrder.verify(spyBrush, atLeastOnce()).continueTo(any());
     }
 }

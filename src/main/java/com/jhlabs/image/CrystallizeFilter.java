@@ -17,13 +17,27 @@ limitations under the License.
 package com.jhlabs.image;
 
 /**
- * A filter which applies a crystallizing effect to an image, by producing Voronoi cells filled with colors from the image.
+ * A filter which applies a crystallizing effect to an image,
+ * by producing Voronoi cells filled with colors from the image.
  */
 public class CrystallizeFilter extends CellularFilter {
     private final float edgeThickness;
-    private final int edgeColor;
     private final boolean fadeEdges;
+    private final int edgeColor;
 
+    /**
+     * Constructs a new {@code CrystallizeFilter}.
+     *
+     * @param filterName    the name of the filter
+     * @param scale         the cell size (texture scale)
+     * @param stretch       the texture stretch factor
+     * @param angle         the texture angle in radians
+     * @param gridType      the grid type defining cell shapes
+     * @param randomness    the randomness factor for cell shape placement
+     * @param edgeThickness the thickness factor of the cell edges
+     * @param edgeColor     the ARGB color of the cell edges
+     * @param fadeEdges     whether to fade edges by blending neighbor cell colors instead of using a solid color
+     */
     public CrystallizeFilter(String filterName,
                              float scale,
                              float stretch,
@@ -34,14 +48,15 @@ public class CrystallizeFilter extends CellularFilter {
                              int edgeColor,
                              boolean fadeEdges) {
         super(filterName, scale, stretch, angle, gridType, randomness, null, 1.0f, 0.0f, 0.0f);
+
         this.edgeThickness = edgeThickness;
         this.edgeColor = edgeColor;
         this.fadeEdges = fadeEdges;
     }
 
     @Override
-    public int genPixel(int x, int y, int[] inPixels, int width, int height) {
-        Point[] results = findNearestPoints(x, y);
+    public int genPixel(int x, int y, int[] inPixels, int width, int height, int needed) {
+        Point[] results = findNearestPoints(x, y, needed);
 
         float f1 = results[0].distance;
         float f2 = results[1].distance;
@@ -68,5 +83,10 @@ public class CrystallizeFilter extends CellularFilter {
             color = ImageMath.mixColors(edgeBlend, edgeColor, color);
         }
         return color;
+    }
+
+    @Override
+    protected int requiredPoints() {
+        return 2;
     }
 }

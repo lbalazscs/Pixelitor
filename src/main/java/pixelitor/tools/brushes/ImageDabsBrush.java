@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class ImageDabsBrush extends DabsBrush {
     private static final Map<ImageBrushType, BufferedImage> templateImages
         = new EnumMap<>(ImageBrushType.class);
 
-    // a black-and-white, unchanging image, which defines the brush's texture
+    // a grayscale, unchanging image, which defines the brush's texture
     private final BufferedImage templateImg;
 
     // a colorized version of the template, using the current color for
@@ -51,9 +51,9 @@ public class ImageDabsBrush extends DabsBrush {
     private Color lastColor;
 
     public ImageDabsBrush(double radius, ImageBrushType imageBrushType,
-                          double spacingRatio, RotationSettings rotationSettings) {
+                          double spacingRatio, AngleSettings angleSettings) {
         super(radius, new RadiusRatioSpacing(spacingRatio),
-            rotationSettings, false);
+            angleSettings, false);
 
         // share template images between instances of the same brush type
         templateImg = templateImages.computeIfAbsent(imageBrushType,
@@ -139,7 +139,7 @@ public class ImageDabsBrush extends DabsBrush {
             targetG.setTransform(origTransform);
         }
 
-        repaintComp(currentPoint);
+        repaintSegment(currentPoint);
     }
 
     @Override

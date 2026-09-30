@@ -101,7 +101,15 @@ public class UserPreset implements Preset {
      * Returns the setting value for a given key.
      */
     public String get(String key) {
+        return this.get(key, null);
+    }
+
+    private String get(String key, String legacyKey) {
         String value = content.get(key);
+        if (value == null && legacyKey != null) {
+            value = content.get(legacyKey);
+        }
+
         if (value == null) {
             // legacy migration support
             if ("Ray Colors".equals(key)) {
@@ -227,7 +235,12 @@ public class UserPreset implements Preset {
      * Finds an enum constant by matching its name() value.
      */
     public <T extends Enum<T>> T getEnum(String key, Class<T> clazz) {
-        String storedValue = get(key);
+        return getEnum(key, null, clazz);
+    }
+
+    public <T extends Enum<T>> T getEnum(String key, String legacyKey, Class<T> clazz) {
+        String storedValue = get(key, legacyKey);
+
         T[] enumConstants = clazz.getEnumConstants();
 
         if (storedValue != null) {

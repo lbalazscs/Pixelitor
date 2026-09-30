@@ -41,6 +41,7 @@ import pixelitor.tools.gradient.GradientColorType;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
+import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.util.Drag;
 import pixelitor.utils.*;
 
@@ -61,7 +62,6 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.colors.Colors.toPackedArgb;
 import static pixelitor.layers.MaskInitMethod.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
-import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
 
 /**
  * Static utility methods for the unit tests.
@@ -369,9 +369,9 @@ public class TestHelper {
 
     public static void move(Composition comp, int relX, int relY,
                             boolean makeDuplicateLayer) {
-        comp.prepareMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
-        comp.moveActiveContent(MOVE_LAYER_ONLY, relX, relY);
-        comp.finalizeMovement(MOVE_LAYER_ONLY);
+        MoveMode.MOVE_LAYER_ONLY.prepareMovement(comp, makeDuplicateLayer);
+        MoveMode.MOVE_LAYER_ONLY.moveActiveContent(comp, relX, relY);
+        MoveMode.MOVE_LAYER_ONLY.finalizeMovement(comp);
 
         History.undoRedo("Move Layer");
     }

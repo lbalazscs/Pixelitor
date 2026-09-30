@@ -27,23 +27,23 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.Layer;
-import pixelitor.utils.*;
-import pixelitor.utils.Error;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 
-import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.swing.*;
 import java.awt.EventQueue;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
@@ -364,146 +364,5 @@ public class FileIO {
             case ZIGZAG, CALLIGRAPHY, SHAPE, TAPERING, TAPERING_REV, RAILWAY -> true;
             case BASIC, WOBBLE, CHARCOAL, BRISTLE, OUTLINE -> false;
         };
-    }
-
-    public static BufferedImage applyCommandLineFilter(BufferedImage src, List<String> command) {
-        return switch (runCommandLineFilter(src, command)) {
-            case Success<BufferedImage, ?>(var img) -> ImageUtils.toSysCompatibleImage(img);
-            case Error<?, String>(String errorMsg) -> {
-                Messages.showError("Command Line Filter Error", errorMsg);
-                yield src;
-            }
-        };
-    }
-
-    /**
-     * Executes an external command that understands PNG on stdin and writes PNG to stdout.
-     */
-    public static Result<BufferedImage, String> runCommandLineFilter(BufferedImage src, List<String> command) {
-        ExecutorService ioExecutor = Executors.newVirtualThreadPerTaskExecutor();
-
-        ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new))
-            .redirectInput(ProcessBuilder.Redirect.PIPE)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE);
-
-        try {
-            Process process = pb.start();
-
-            try {
-                // drain stderr asynchronously to prevent pipe buffer deadlock
-                CompletableFuture<String> stderrFuture = CompletableFuture.supplyAsync(() -> {
-                    try (InputStream processError = process.getErrorStream()) {
-                        return new String(processError.readAllBytes(), UTF_8);
-                    } catch (IOException e) {
-                        return "Error reading stderr: " + e.getMessage();
-                    }
-                }, ioExecutor);
-
-                // feed stdin asynchronously to prevent blocking if stdout/stderr fills up early
-                CompletableFuture<Void> stdinFuture = CompletableFuture.runAsync(() -> {
-                    try {
-                        writeToCommandLineProcess(src, process);
-                    } catch (IOException e) {
-                        // this happens if the process terminates early (broken pipe)
-                        throw new CompletionException(e);
-                    }
-                }, ioExecutor);
-
-                // read stdout synchronously in the current thread
-                BufferedImage out = null;
-                try {
-                    out = readFromCommandLineProcess(process);
-                } catch (IOException e) {
-                    // will be handled using exit code and stderr
-                }
-
-                int exitCode = process.waitFor();
-
-                // ensure the background write completes (or fails)
-                try {
-                    stdinFuture.join();
-                } catch (Exception e) {
-                    // ignored: a failure here is expected if the process exited early
-                }
-
-                // retrieve any captured error messages
-                String errorMsg = stderrFuture.join();
-
-                // check for errors
-                if (exitCode != 0 || out == null) {
-                    if (errorMsg != null && !errorMsg.isBlank()) {
-                        return Result.error(errorMsg.trim());
-                    } else {
-                        return Result.error("Process failed (exit code=" + exitCode + ")");
-                    }
-                }
-
-                return Result.success(out);
-            } finally {
-                // guarantee process termination
-                if (process.isAlive()) {
-                    process.destroyForcibly();
-                }
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Reads an image from the standard output of an external process.
-     */
-    public static BufferedImage readFromCommandLineProcess(Process process) throws IOException {
-        BufferedImage image;
-        try (InputStream rawIn = process.getInputStream();
-             InputStream processStdout = rawIn instanceof BufferedInputStream
-                 ? rawIn
-                 : new BufferedInputStream(rawIn)) {
-            image = ImageIO.read(processStdout);
-        }
-        return image;
-    }
-
-    /**
-     * Writes an image to the standard input of an external process.
-     */
-    public static void writeToCommandLineProcess(BufferedImage src, Process process) throws IOException {
-        try (OutputStream rawOut = process.getOutputStream();
-             OutputStream processStdin = rawOut instanceof BufferedOutputStream
-                 ? rawOut
-                 : new BufferedOutputStream(rawOut)) {
-            writePngToProcessStdin(src, processStdin);
-            processStdin.flush();
-        }
-    }
-
-    /**
-     * Writes the given image to the standard input
-     * of an external command-line program in PNG format.
-     */
-    private static void writePngToProcessStdin(BufferedImage img, OutputStream commandLineInput) throws IOException {
-        // Write as png to the external process and let it handle further processing.
-        // Explicitly setting a low compression level doesn't seem
-        // to make it faster (why?), so use the simple approach.
-        ImageIO.write(img, "png", commandLineInput);
-
-//        try (ImageOutputStream ios = ImageIO.createImageOutputStream(commandLineInput)) {
-//            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
-//            ImageWriter writer = writers.next();
-//            ImageWriteParam writeParam = writer.getDefaultWriteParam();
-//            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-//            writeParam.setCompressionQuality(1.0f); // 1 is no compression
-//            try {
-//                writer.setOutput(ios);
-//                writer.write(img);
-//            } finally {
-//                writer.dispose();
-//                ios.flush();
-//            }
-//        }
     }
 }

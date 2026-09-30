@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,6 +36,9 @@ public abstract class Configurable {
 
     protected abstract JPanel createConfigPanel();
 
+    /**
+     * Must visit every param that is saved, loaded or listened to.
+     */
     protected abstract void forEachParam(Consumer<FilterParam> consumer);
 
     public void setAdjustmentListener(ParamAdjustmentListener listener) {

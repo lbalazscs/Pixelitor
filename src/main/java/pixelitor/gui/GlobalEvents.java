@@ -52,10 +52,10 @@ public class GlobalEvents {
     // keeps track of the nesting level since modal dialogs can open other modal dialogs
     private static int modalDialogNesting = 0;
 
-    private static final Action INCREASE_BRUSH_SIZE_ACTION =
-        new TaskAction(Tools::increaseBrushSize);
-    private static final Action DECREASE_BRUSH_SIZE_ACTION =
-        new TaskAction(Tools::decreaseBrushSize);
+    private static final Action INCREASE_BRUSH_RADIUS_ACTION =
+        new TaskAction(Tools::increaseBrushRadius);
+    private static final Action DECREASE_BRUSH_RADIUS_ACTION =
+        new TaskAction(Tools::decreaseBrushRadius);
 
     private static final Map<KeyStroke, Action> hotkeyMap = new HashMap<>();
 
@@ -139,8 +139,8 @@ public class GlobalEvents {
     }
 
     private static void registerBrushSizeShortcuts() {
-        registerHotkey(']', INCREASE_BRUSH_SIZE_ACTION, true);
-        registerHotkey('[', DECREASE_BRUSH_SIZE_ACTION, true);
+        registerHotkey(']', INCREASE_BRUSH_RADIUS_ACTION, true);
+        registerHotkey('[', DECREASE_BRUSH_RADIUS_ACTION, true);
     }
 
     private static void keyPressed(KeyEvent e) {

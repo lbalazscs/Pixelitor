@@ -87,10 +87,6 @@ public class SmartObject extends CompositeLayer {
     // the list of smart filters applied to this smart object
     private List<SmartFilter> filters = new ArrayList<>();
 
-    // the source of the starting image for the smart filters:
-    // either the content or the transformer, if there is one.
-    private ImageSource baseSource;
-
     // transformer from old pxc files, used for migration
     private AffineTransform contentTransform;
 
@@ -150,18 +146,21 @@ public class SmartObject extends CompositeLayer {
         }
         image = orig.image;
 
+        linkedContentFile = orig.linkedContentFile;
+        linkedContentTimestamp = orig.linkedContentTimestamp;
+
+        // must be set before adding the filters, so that the
+        // first filter is wired to the transformer right away
+        if (orig.imageTransformer != null) {
+            imageTransformer = orig.imageTransformer.copy(content);
+        }
+
         for (SmartFilter origFilter : orig.filters) {
             SmartFilter copy = (SmartFilter) origFilter.copy(copyOptions, newComp);
             copy.setSmartObject(this);
             addSmartFilter(copy, false, false);
         }
 
-        linkedContentFile = orig.linkedContentFile;
-        linkedContentTimestamp = orig.linkedContentTimestamp;
-        if (orig.imageTransformer != null) {
-            imageTransformer = orig.imageTransformer.copy(content);
-            setBaseImageSource(imageTransformer);
-        }
         setTranslation(orig.getTx(), orig.getTy());
 
         assert checkInvariants();
@@ -183,15 +182,17 @@ public class SmartObject extends CompositeLayer {
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         Composition backup = content;
-        if (isContentLinked()) {
-            // if the content is linked, then it should not
-            // be serialized with the main composition
-            content = null;
+        try {
+            if (isContentLinked()) {
+                // if the content is linked, then it should not
+                // be serialized with the main composition
+                // because it lives in its own file
+                content = null;
+            }
+            out.defaultWriteObject();
+        } finally {
+            content = backup;
         }
-
-        out.defaultWriteObject();
-
-        content = backup;
     }
 
     @Override
@@ -236,24 +237,17 @@ public class SmartObject extends CompositeLayer {
                 throw new IllegalStateException("# filters = " + smartFilters.size());
             }
             for (Filter filter : smartFilters) {
-                SmartFilter newFilter = new SmartFilter(filter, content, this);
+                SmartFilter newFilter = new SmartFilter(filter, baseSource(), this);
                 newFilter.setVisible(smartFilterIsVisible);
                 filters.add(newFilter);
             }
             smartFilters = null; // clear legacy field
         }
         if (contentTransform != null) {
-            ImageTransformer transformer = new ImageTransformer(content, contentTransform, comp.getCanvasWidth(), comp.getCanvasHeight());
-            setBaseImageSource(transformer);
-            imageTransformer = transformer;
+            imageTransformer = new ImageTransformer(content, contentTransform,
+                comp.getCanvasWidth(), comp.getCanvasHeight());
             contentTransform = null; // clear legacy field
-        } else {
-            if (imageTransformer != null) {
-                assert baseSource == imageTransformer;
-                baseSource = imageTransformer;
-            } else {
-                baseSource = content;
-            }
+            rewireFilterChain(); // the filters must now read from the transformer
         }
     }
 
@@ -310,9 +304,8 @@ public class SmartObject extends CompositeLayer {
     }
 
     private void recalcImage() {
-        image = filters.isEmpty()
-            ? baseSource.getImage()
-            : filters.getLast().getImage();
+        ImageSource output = filters.isEmpty() ? baseSource() : filters.getLast();
+        image = output.getImage();
         invalidImageCache = false;
 
         if (invalidIconImageCache) {
@@ -452,7 +445,7 @@ public class SmartObject extends CompositeLayer {
     // adds a smart filter, and shows its configuration dialog,
     // but if the user cancels the dialog, the filter is removed
     public void addSmartFilterWithDialog(Filter filter) {
-        SmartFilter smartFilter = new SmartFilter(filter, baseSource, this);
+        SmartFilter smartFilter = new SmartFilter(filter, baseSource(), this);
         boolean hasDialog = filter instanceof FilterWithGUI;
         addSmartFilter(smartFilter, !hasDialog, true);
 
@@ -481,7 +474,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     private void rewireFilterChain() {
-        ImageSource currentSource = baseSource;
+        ImageSource currentSource = baseSource();
         for (int i = 0; i < filters.size(); i++) {
             SmartFilter currentFilter = filters.get(i);
             SmartFilter nextFilter = (i < filters.size() - 1) ? filters.get(i + 1) : null;
@@ -627,20 +620,13 @@ public class SmartObject extends CompositeLayer {
         this.content = content;
         content.addOwner(this);
 
-        if (imageTransformer == null) {
-            baseSource = content;
-        } else {
+        if (imageTransformer != null) {
             imageTransformer.setContent(content);
-            baseSource = imageTransformer;
         }
 
-        // if there are smart filters, the first one references the content
-        if (filters != null) { // this check is required for migrating old files
-            if (!filters.isEmpty()) {
-                SmartFilter first = filters.getFirst();
-                first.setImageSource(baseSource);
-                first.invalidateChain();
-            }
+        if (filters != null) { // null only while migrating old pxc files
+            rewireFilterChain(); // replaces the manual "first filter" wiring
+            invalidateFilterCaches();
         }
         invalidateImageCache();
 
@@ -673,6 +659,12 @@ public class SmartObject extends CompositeLayer {
         linkedContentFile = null;
         Messages.showInfo("Embedded Content",
             "<html>The file <b>" + path + "</b> isn't used anymore.");
+    }
+
+    // the source of the starting image for the smart filters:
+    // the transformer if there is one, otherwise the content
+    private ImageSource baseSource() {
+        return imageTransformer != null ? imageTransformer : content;
     }
 
     @Override
@@ -723,10 +715,9 @@ public class SmartObject extends CompositeLayer {
 
         if (imageTransformer == null) {
             imageTransformer = new ImageTransformer(content, newScaling, newSize.width, newSize.height);
-            setBaseImageSource(imageTransformer);
+            rewireFilterChain();
         } else {
             imageTransformer.chainTransform(newScaling, newSize.width, newSize.height);
-            assert baseSource == imageTransformer;
         }
         invalidateAllCaches(false);
 
@@ -754,7 +745,7 @@ public class SmartObject extends CompositeLayer {
         int targetHeight = comp.getCanvasHeight();
         if (imageTransformer == null) {
             imageTransformer = new ImageTransformer(content, flipTransform, targetWidth, targetHeight);
-            setBaseImageSource(imageTransformer);
+            rewireFilterChain();
         } else {
             imageTransformer.chainTransform(flipTransform, targetWidth, targetHeight);
         }
@@ -775,7 +766,7 @@ public class SmartObject extends CompositeLayer {
 
         if (imageTransformer == null) {
             imageTransformer = new ImageTransformer(content, rotation, targetWidth, targetHeight);
-            setBaseImageSource(imageTransformer);
+            rewireFilterChain();
         } else {
             imageTransformer.chainTransform(rotation, targetWidth, targetHeight);
         }
@@ -785,13 +776,6 @@ public class SmartObject extends CompositeLayer {
             if (filter.hasMask()) {
                 filter.getMask().rotate(angle, false);
             }
-        }
-    }
-
-    private void setBaseImageSource(ImageSource baseSource) {
-        this.baseSource = baseSource;
-        if (!filters.isEmpty()) {
-            filters.getFirst().setImageSource(baseSource);
         }
     }
 
@@ -934,18 +918,16 @@ public class SmartObject extends CompositeLayer {
         if (!content.getOwners().contains(this)) {
             throw new AssertionError(getName() + " not owner of its content");
         }
-        if (baseSource == null) {
-            throw new AssertionError("no base source");
-        }
         if (filters != null) { // pxc might not be migrated yet
+            ImageSource base = baseSource();
             for (int i = 0; i < filters.size(); i++) {
                 SmartFilter filter = filters.get(i);
                 if (!filter.checkInvariants()) {
                     return false;
                 }
                 if (i == 0) {
-                    if (filter.getImageSource() != baseSource) {
-                        throw new AssertionError("first filter (%s) doesn't use baseSource".formatted(filter.getName()));
+                    if (filter.getImageSource() != base) {
+                        throw new AssertionError("first filter (%s) doesn't use the base source".formatted(filter.getName()));
                     }
                 } else {
                     if (filter.getImageSource() != filters.get(i - 1)) {
@@ -960,16 +942,6 @@ public class SmartObject extends CompositeLayer {
                     if (filter.getNext() != filters.get(i + 1)) {
                         throw new AssertionError("bad next in " + filter.getName());
                     }
-                }
-            }
-        }
-        if (imageTransformer != null) {
-            if (imageTransformer != baseSource) {
-                throw new AssertionError();
-            }
-            if (!filters.isEmpty()) {
-                if (filters.getFirst().getImageSource() != imageTransformer) {
-                    throw new AssertionError();
                 }
             }
         }

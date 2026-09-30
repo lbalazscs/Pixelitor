@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_OFF;
 
 /**
- * A brush that edits one pixel at a time
+ * A brush that can edit one pixel at a time.
  */
 public class OnePixelBrush extends AbstractBrush {
     private final OnePixelBrushSettings settings;
@@ -37,8 +37,8 @@ public class OnePixelBrush extends AbstractBrush {
     @Override
     public void startStrokeAt(PPoint p) {
         super.startStrokeAt(p);
-        repaintComp(p);
-        setPrevious(p);
+        repaintSegment(p);
+        setPrevPos(p);
 
         // ensure that a click has an effect
         continueTo(p);
@@ -50,9 +50,9 @@ public class OnePixelBrush extends AbstractBrush {
             targetG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_OFF);
         }
 
-        previous.drawLineTo(p, targetG);
-        repaintComp(p);
-        setPrevious(p);
+        prevPos.drawLineTo(p, targetG);
+        repaintSegment(p);
+        setPrevPos(p);
     }
 
     @Override

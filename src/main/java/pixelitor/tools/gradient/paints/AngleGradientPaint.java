@@ -31,7 +31,7 @@ import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
 /**
- * A Paint that creates an "angle gradient"
+ * A Paint that creates an "angle gradient".
  */
 public record AngleGradientPaint(Drag drag, Color startColor, Color endColor,
                                  CycleMethod cycleMethod) implements Paint {

@@ -17,86 +17,33 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.colors.Colors;
-import pixelitor.utils.ImageUtils;
-
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.image.BufferedImage;
-
 /**
- * The brush type for {@link CopyBrush}.
+ * Defines the edge style (soft or hard) of a {@link CopyBrush} image.
  */
 public enum CopyBrushType {
     SOFT("Soft") {
-        private BufferedImage transparencyImage;
-
         @Override
-        public void setSize(double size) {
-            if (this.size == size) {
-                return; // can happen, for example when loading brush presets
-            }
-            this.size = size;
-            transparencyImage = ImageUtils.createSoftTransparencyImage((int) size);
-        }
-
-        @Override
-        public void beforeDrawImage(Graphics2D g) {
-            // important in the areas where there is no source defined
-            Colors.fillWithTransparent(g, (int) size);
-        }
-
-        @Override
-        public void afterDrawImage(Graphics2D g) {
-            g.setComposite(AlphaComposite.DstIn);
-            g.drawImage(transparencyImage, 0, 0, null);
+        EdgeStyle createEdge(int diameter) {
+            return new EdgeStyle.SoftEdge(diameter);
         }
     }, HARD("Hard") {
-        private Ellipse2D.Double circleClip;
-
         @Override
-        public void setSize(double size) {
-            if (this.size == size) {
-                return;
-            }
-            this.size = size;
-            circleClip = new Ellipse2D.Double(0, 0, size, size);
-        }
-
-        @Override
-        public void beforeDrawImage(Graphics2D g) {
-            // important in the areas where there is no source defined
-            Colors.fillWithTransparent(g, (int) size);
-
-            g.setClip(circleClip);
-        }
-
-        @Override
-        public void afterDrawImage(Graphics2D g) {
-            // do nothing
+        EdgeStyle createEdge(int diameter) {
+            return new EdgeStyle.HardEdge(diameter);
         }
     };
 
     public static final String PRESET_KEY = "Brush Type";
     private final String displayName;
-    protected double size;
 
     CopyBrushType(String displayName) {
         this.displayName = displayName;
     }
 
     /**
-     * Prepares the graphics context before the source image is drawn.
+     * Creates a new edge style for a stamp of the given size.
      */
-    public abstract void beforeDrawImage(Graphics2D g);
-
-    /**
-     * Applies final effects to the graphics context after the source image is drawn.
-     */
-    public abstract void afterDrawImage(Graphics2D g);
-
-    public abstract void setSize(double size);
+    abstract EdgeStyle createEdge(int diameter);
 
     @Override
     public String toString() {

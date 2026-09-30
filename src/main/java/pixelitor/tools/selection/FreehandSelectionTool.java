@@ -31,11 +31,11 @@ import java.util.function.Consumer;
 /**
  * A tool that creates freehand selections by dragging.
  */
-public class LassoSelectionTool extends AbstractSelectionTool {
-    public LassoSelectionTool() {
+public class FreehandSelectionTool extends AbstractSelectionTool {
+    public FreehandSelectionTool() {
         // the freehand and polygonal selection tools share the 'L' hotkey, with cycling
         super("Freehand Selection", 'L',
-            "simply drag around the area that you want to select.",
+            "drag around the area that you want to select.",
             Cursors.DEFAULT, false);
         repositionOnSpace = false;
         pixelSnapping = true;
@@ -43,13 +43,13 @@ public class LassoSelectionTool extends AbstractSelectionTool {
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        initCombinatorAndBuilder(e, SelectionType.LASSO);
+        initSession(e, SelectionType.FREEHAND);
     }
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
-        if (selectionBuilder == null) {
-            // can happen if the image changed mid-drag; restart the drag
+        if (selectionSession == null) {
+            // the session is missing if the composition changed mid-drag; create it again
             dragStarted(e);
         }
 
@@ -62,14 +62,14 @@ public class LassoSelectionTool extends AbstractSelectionTool {
             altUsedForCombinator = false;
         }
 
-        // add the current point to the lasso path
-        selectionBuilder.updateDraftSelection(drag);
+        // extend the draft path with the current point
+        selectionSession.updateFromDrag(drag);
     }
 
     @Override
     protected void dragFinished(PMouseEvent e) {
         // common logic in the base class
-        finalizeDragBasedSelection(e);
+        handleDragFinished(e);
     }
 
     @Override
@@ -80,6 +80,17 @@ public class LassoSelectionTool extends AbstractSelectionTool {
 
     @Override
     public Consumer<Graphics2D> createIconPainter() {
-        return ToolIcons::paintLassoSelectionIcon;
+        return ToolIcons::paintFreehandSelectionIcon;
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        super.checkInvariants();
+
+        if (drag != null && drag.isDragging() && selectionSession == null) {
+            throw new AssertionError("active drag without selectionSession");
+        }
+
+        return true;
     }
 }

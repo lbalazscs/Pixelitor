@@ -190,7 +190,7 @@ public class ColorPicker extends JPanel {
 
         String uncommittedText = null;
 
-        final Timer delayedUpdater = new Timer(DELAY, e -> {
+        final Timer delayedUpdater = new Timer(DELAY, _ -> {
             if (uncommittedText != null) {
                 int pos = hexField.getCaretPosition();
                 pos = Math.min(pos, uncommittedText.length());
@@ -486,7 +486,7 @@ public class ColorPicker extends JPanel {
         int colorPanelSize = expertControls.getPreferredSize().height;
         colorPanel.setPreferredSize(new Dimension(colorPanelSize, colorPanelSize));
 
-        ChangeListener hsbChangeListener = e -> {
+        ChangeListener hsbChangeListener = _ -> {
             if (spinnerUpdateDepth > 0) {
                 return;
             }
@@ -503,7 +503,7 @@ public class ColorPicker extends JPanel {
         sat.spinner.addChangeListener(hsbChangeListener);
         bri.spinner.addChangeListener(hsbChangeListener);
 
-        ChangeListener rgbChangeListener = e -> {
+        ChangeListener rgbChangeListener = _ -> {
             if (spinnerUpdateDepth > 0) {
                 return;
             }

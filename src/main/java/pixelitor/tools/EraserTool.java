@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package pixelitor.tools;
 
+import pixelitor.tools.brushes.BrushContext;
 import pixelitor.utils.Cursors;
 
 import java.awt.Graphics2D;
@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 public class EraserTool extends AbstractBrushTool {
     public EraserTool() {
         super("Eraser", 'E',
-            "<b>click and drag</b> to erase pixels. <b>Shift-click</b> to erase lines.",
+            "<b>click or drag</b> to erase pixels. <b>Shift-click</b> to erase lines.",
             Cursors.CROSSHAIR, true);
         drawTarget = DrawTarget.DIRECT;
     }
@@ -40,14 +40,14 @@ public class EraserTool extends AbstractBrushTool {
         addBrushSettingsButton();
 
         settingsPanel.addSeparator();
-        addSizeSelector();
+        addRadiusSelector();
         addSymmetrySelector();
         addLazyMouseDialogButton();
     }
 
     @Override
-    protected void initBrushStroke() {
-        brushContext.setErasing();
+    protected void initBrushContext(BrushContext ctx) {
+        ctx.useEraseComposite();
     }
 
     @Override

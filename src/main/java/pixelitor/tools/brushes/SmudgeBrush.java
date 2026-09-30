@@ -21,6 +21,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -33,38 +34,48 @@ import static pixelitor.colors.FgBgColors.getFgColor;
 public class SmudgeBrush extends CopyBrush {
     // the location of the previous dab, used to sample pixels
     // from the source image for the current dab
-    private PPoint lastPoint;
+    private PPoint lastDabPoint;
 
     // the brush's strength, applied as opacity for each dab
     private float strength;
 
     private boolean firstDabInStroke = true;
 
-    /**
-     * If true, the brush starts with the foreground color
-     * instead of sampling the source image.
-     */
+    private Composite dabComposite;
+
+    // if true, the brush starts with the foreground color
+    // instead of sampling the source image
     private boolean fingerPainting = false;
 
     public SmudgeBrush(double radius, CopyBrushType type) {
         super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
-    public void initStroke(BufferedImage sourceImage, PPoint startPoint, float strength) {
+    public void setSourceImage(BufferedImage sourceImage) {
         this.sourceImage = sourceImage;
-        lastPoint = startPoint;
+    }
+
+    public void initStroke(PPoint startPoint, float strength) {
+        lastDabPoint = startPoint;
         this.strength = strength;
+
+        // SrcOver allows smudging into transparent areas, but transparency
+        // can't be smudged into non-transparent areas.
+        // DstOver allows only smudging into transparent areas.
+        dabComposite = AlphaComposite.SrcOver.derive(strength);
+
         firstDabInStroke = true;
     }
 
-    public boolean isStrokeInitialized() {
-        return lastPoint != null;
+    public void initStroke(BufferedImage sourceImage, PPoint startPoint, float strength) {
+        setSourceImage(sourceImage);
+        initStroke(startPoint, strength);
     }
 
     @Override
     void initBrushStamp(PPoint p) {
         Graphics2D g = brushImage.createGraphics();
-        type.beforeDrawImage(g);
+        edge.beforeDrawImage(g);
 
         if (firstDabInStroke && fingerPainting) {
             // finger painting: fill the brush with the foreground color
@@ -75,11 +86,11 @@ public class SmudgeBrush extends CopyBrush {
             // normal smudging: sample the source image at the last point
             g.drawImage(sourceImage,
                 AffineTransform.getTranslateInstance(
-                    -lastPoint.getImX() + radius,
-                    -lastPoint.getImY() + radius), null);
+                    -lastDabPoint.getImX() + radius,
+                    -lastDabPoint.getImY() + radius), null);
         }
 
-        type.afterDrawImage(g);
+        edge.afterDrawImage(g);
         g.dispose();
 
         firstDabInStroke = false;
@@ -93,14 +104,11 @@ public class SmudgeBrush extends CopyBrush {
             currentPoint.getImY() - radius
         );
 
-        // SrcOver allows smudging into transparent areas, but transparency
-        // can't be smudged into non-transparent areas.
-        // DstOver allows only smudging into transparent.
-        targetG.setComposite(AlphaComposite.SrcOver.derive(strength));
+        targetG.setComposite(dabComposite);
 
         targetG.drawImage(brushImage, transform, null);
-        lastPoint = currentPoint;
-        repaintComp(currentPoint);
+        lastDabPoint = currentPoint;
+        repaintSegment(currentPoint);
     }
 
     public void setFingerPainting(boolean fingerPainting) {
@@ -111,7 +119,7 @@ public class SmudgeBrush extends CopyBrush {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addNullableDebuggable("last", lastPoint);
+        node.addNullableDebuggable("last", lastDabPoint);
         node.addFloat("strength", strength);
         node.addBoolean("first dab in stroke", firstDabInStroke);
 

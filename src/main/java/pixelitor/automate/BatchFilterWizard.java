@@ -55,7 +55,7 @@ public class BatchFilterWizard extends Wizard {
             comp.getActiveDrawable().startFilter(filter, BATCH_AUTOMATE);
             return CompletableFuture.completedFuture(comp);
         };
-        new BatchProcessor(batchFilterAction, progressDialogTitle).processFiles();
+        new BatchProcessor(batchFilterAction, progressDialogTitle).processFilesAsync();
     }
 
     @Override

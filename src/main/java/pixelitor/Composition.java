@@ -36,7 +36,6 @@ import pixelitor.selection.SelectionChangeResult;
 import pixelitor.selection.ShapeCombinator;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
-import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
 import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
@@ -68,7 +67,6 @@ import static java.lang.String.format;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELOW_ACTIVE;
 import static pixelitor.utils.Threads.*;
-import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
 
 /**
  * An image composition containing multiple layers, paths, guides, and overall state.
@@ -485,10 +483,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     /**
      * Collects all dirty compositions in this saving hierarchy, clears their
-     * dirty flags, and returns them for rollback in case of an error.
+     * dirty flags, and adds them to the given list for rollback in case of an error.
+     * The list is passed in by the caller so that it is also available
+     * for rollback if this method fails halfway.
      */
-    private List<Composition> collectAndClearDirtyComps() {
-        List<Composition> cleared = new ArrayList<>();
+    private void collectAndClearDirtyComps(List<Composition> cleared) {
         if (isDirty()) {
             cleared.add(this);
             setDirty(false);
@@ -502,7 +501,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                 }
             }
         });
-        return cleared;
     }
 
     /**
@@ -1063,7 +1061,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return activeLayer instanceof Drawable || activeLayer.isMaskEditing();
     }
 
-    private Layer getActiveMoveTarget() {
+    public Layer getActiveMoveTarget() {
         return activeLayer.isMaskEditing() ? activeLayer.getMask() : activeLayer;
     }
 
@@ -1125,81 +1123,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
                 Composition parent = owner.getComp();
                 parent.smartObjectChanged(owner.isContentLinked());
-            }
-        }
-    }
-
-    /**
-     * Prepares for moving the active layer/mask and/or the selection.
-     */
-    public void prepareMovement(MoveMode mode, boolean duplicateLayer) {
-        if (mode.movesLayer()) {
-            if (duplicateLayer) {
-                duplicateActiveLayer();
-            }
-
-            getActiveMoveTarget().prepareMovement();
-        }
-        if (mode.movesSelection()) {
-            if (selection != null) {
-                selection.prepareForTransform();
-            }
-        }
-    }
-
-    /**
-     * Updates the position of a content layer/selection during a drag operation (Move Tool).
-     */
-    public void moveActiveContent(MoveMode mode, double imDx, double imDy) {
-        if (mode.movesLayer()) {
-            Layer target = getActiveMoveTarget();
-            target.moveWhileDragging(imDx, imDy);
-            target.getHolder().invalidateImageCache();
-        }
-        if (mode.movesSelection() && selection != null) {
-            selection.moveWhileDragging(imDx, imDy);
-        }
-        update();
-    }
-
-    /**
-     * Finalizes a movement operation, adding history if changes occurred.
-     */
-    public void finalizeMovement(MoveMode mode) {
-        PixelitorEdit layerEdit = null;
-        if (mode.movesLayer()) {
-            Layer target = getActiveMoveTarget();
-
-            // will be null if a non-content layer without mask was moved
-            layerEdit = target.finalizeMovement();
-        }
-
-        PixelitorEdit selectionEdit = null;
-        if (mode.movesSelection()) {
-            if (selection != null) {
-                selectionEdit = selection.finalizeTransform();
-            }
-        }
-
-        var combinedEdit = MultiEdit.combine(
-            layerEdit, selectionEdit, MoveMode.MOVE_BOTH.getEditName());
-        if (combinedEdit != null) {
-            History.add(combinedEdit);
-            update();
-        }
-    }
-
-    /**
-     * Draws visual feedback (the bounding box) for the content being moved.
-     */
-    public void drawMovementContours(Graphics2D g, MoveMode mode) {
-        if (mode.movesLayer()) {
-            Layer target = getActiveMoveTarget();
-            if (target instanceof ContentLayer contentLayer) {
-                Rectangle imBounds = contentLayer.getContentBounds();
-                if (imBounds != null) {
-                    Shapes.drawVisibly(g, view.imageToComponentSpace(imBounds));
-                }
             }
         }
     }
@@ -1600,9 +1523,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     /**
      * Saves the current composition asynchronously.
+     * A false in the return value indicates that saving failed.
      */
-    public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
-                                             boolean addToRecentFiles) {
+    public CompletableFuture<Boolean> saveAsync(SaveSettings saveSettings,
+                                                boolean addToRecentFiles) {
         assert calledOnEDT() : callInfo();
 
         // prevent concurrent processing of the same file path
@@ -1612,30 +1536,51 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             Messages.showInfo("Save Busy",
                 "The file " + targetFile.getName()
                     + " is currently being processed.");
-            return CompletableFuture.completedFuture(null);
+            return CompletableFuture.completedFuture(Boolean.FALSE);
         }
+
+        FileFormat format = saveSettings.format();
+
+        // may throw, so do it before any side effects
+        Runnable saveTask = format.createSaveTask(this, saveSettings);
+
         IOTasks.markWritingStarted(filePath);
 
         // cleared at the start of the saving process
         // so that a subsequent close does not trigger another save
-        List<Composition> clearedDirtyComps = collectAndClearDirtyComps();
+        List<Composition> clearedDirtyComps = new ArrayList<>();
 
-        FileFormat format = saveSettings.format();
-        FileFormat.setLastSaved(format);
-        Runnable saveTask = format.createSaveTask(this, saveSettings);
+        CompletableFuture<Void> saveFuture;
+        try {
+            collectAndClearDirtyComps(clearedDirtyComps);
+            FileFormat.setLastSaved(format);
+            saveFuture = CompletableFuture.runAsync(saveTask, onIOThread);
+        } catch (Throwable t) {
+            // nothing was scheduled, so undo everything that was done above
+            try {
+                clearedDirtyComps.forEach(c -> c.setDirty(true));
+            } finally {
+                IOTasks.markWritingComplete(filePath);
+            }
+            throw t;
+        }
 
-        return CompletableFuture
-            .runAsync(saveTask, onIOThread)
-            .handleAsync((v, e) -> {
+        return saveFuture.handleAsync((_, e) -> {
+            try {
                 if (e != null) {
-                    Messages.showException(e);
+                    // restore the state first, so that a failure
+                    // in showing the error can't skip it
                     clearedDirtyComps.forEach(c -> c.setDirty(true));
+                    Messages.showException(e);
+                    return Boolean.FALSE;
                 } else {
                     handleSuccessfulSave(targetFile, addToRecentFiles);
+                    return Boolean.TRUE;
                 }
+            } finally {
                 IOTasks.markWritingComplete(filePath);
-                return null;
-            }, onEDT);
+            }
+        }, onEDT);
     }
 
     /**
@@ -1686,8 +1631,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void setActivePath(Path path) {
         if (path != null && path.getComp() != this) {
             throw new IllegalArgumentException(
-                "path belongs to another comp, this = " + toPathDebugString() +
-                    ", path.comp = " + path.getComp().toPathDebugString());
+                "path belongs to another comp, this = " + getDebugName() +
+                    ", path.comp = " + path.getComp().getDebugName());
         }
 
         if (paths == null) {
@@ -1791,7 +1736,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         for (SmartObject so : nestedSOs) {
             // open contents are checked directly via the view
             if (!so.isContentOpen()) {
-                reloadFuture = reloadFuture.thenCompose(comp -> so.checkAutoReload());
+                reloadFuture = reloadFuture.thenCompose(_ -> so.checkAutoReload());
             }
         }
         return reloadFuture;
@@ -1861,14 +1806,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public void shallowDuplicate(SmartObject so) {
         so.getHolder().addWithHistory(so.shallowDuplicate(), "Clone");
-    }
-
-    /**
-     * Checks if all fonts of all text layers can be found on the current machine.
-     */
-    public void warnIfFontsMissing() {
-        assert calledOnEDT();
-        forEachNestedLayerOfType(TextLayer.class, TextLayer::warnIfFontMissing);
     }
 
     // called from assertions and unit tests
@@ -1945,48 +1882,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     @Override
     public DebugNode createDebugNode(String name) {
-        DebugNode node = new DebugNode(name, this);
-
-        node.add(canvas.createDebugNode("canvas"));
-        node.addInt("dpi", dpi);
-
-        node.add(activeLayer.createDebugNode("active layer"));
-
-        forEachTopLevelLayer(layer -> node.add(layer.createDebugNode()));
-
-        node.add(createBufferedImageNode("composite image", getCompositeImage()));
-
-        node.addNullableDebuggable("paths", paths);
-        node.addNullableDebuggable("guides", guides);
-
-        node.addInt("num layers", getNumLayers());
-        node.addQuotedString("name", getName());
-        node.addQuotedString("debug name", getDebugName());
-
-        node.addNullableDebuggable("file", file, DebugNodes::createFileNode);
-
-        node.addBoolean("is smart object content", isSmartObjectContent());
-        if (isSmartObjectContent()) {
-            DebugNode ownersNode = new DebugNode("referencing SO owner names", owners);
-            for (SmartObject owner : owners) {
-                ownersNode.addString("name", owner.getName());
-            }
-            node.add(ownersNode);
-        }
-
-        node.addBoolean("dirty", isDirty());
-
-        node.addNullableDebuggable("draft selection", draftSelection);
-        node.addNullableDebuggable("selection", selection);
-
-        return node;
-    }
-
-    private String toPathDebugString() {
-        return "Composition{'" + debugName + '\''
-            + ", active = " + isActive()
-            + ", path = " + getActivePath()
-            + '}';
+        return DebugNodes.createCompNode(this, name);
     }
 
     @Override

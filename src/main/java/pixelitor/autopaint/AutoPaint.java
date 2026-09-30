@@ -119,7 +119,7 @@ public class AutoPaint {
         PPoint end = settings.genRandomEndPoint(start, comp, rand);
         Path2D strokePath = createStrokePath(start, end, settings, rand);
 
-        settings.tool().trace(dr, strokePath);
+        settings.tool().trace(strokePath, dr);
     }
 
     private static void setColors(AutoPaintSettings settings, SplittableRandom rand) {

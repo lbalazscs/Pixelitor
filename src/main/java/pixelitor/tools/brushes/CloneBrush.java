@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ public class CloneBrush extends CopyBrush {
 
     // Whether a new source point has been set,
     // requiring offset recalculation.
-    private boolean newSourcePoint = true;
+    private boolean offsetsStale = true;
 
     private double scaleX;
     private double scaleY;
@@ -60,26 +60,26 @@ public class CloneBrush extends CopyBrush {
     /**
      * Sets the source image and the initial source coordinates.
      */
-    public void setSource(BufferedImage image, double x, double y) {
+    public void setSource(BufferedImage image, double srcX, double srcY) {
         sourceImage = image;
-        origSrcX = x;
-        origSrcY = y;
-        newSourcePoint = true;
+        origSrcX = srcX;
+        origSrcY = srcY;
+        offsetsStale = true;
     }
 
     /**
      * Marks the point where the cloning was started.
      */
-    public void setCloningDestPoint(PPoint dest) {
+    public void startCloningAt(PPoint dest) {
         // aligned = forces the source point to follow the mouse,
         // even after a stroke is completed
         // unaligned = the cloning distance is reinitialized for each stroke
-        if (!aligned || newSourcePoint) {
+        if (!aligned || offsetsStale) {
             // recalculate the offsets
             offsetX = dest.getImX() - origSrcX;
             offsetY = dest.getImY() - origSrcY;
         }
-        newSourcePoint = false;
+        offsetsStale = false;
     }
 
     /**
@@ -89,7 +89,7 @@ public class CloneBrush extends CopyBrush {
     void initBrushStamp(PPoint p) {
         Graphics2D g = brushImage.createGraphics();
 
-        type.beforeDrawImage(g);
+        edge.beforeDrawImage(g);
 
         // the current sampling coordinates relative to the source image
         double currSrcX = p.getImX() - offsetX;
@@ -108,7 +108,7 @@ public class CloneBrush extends CopyBrush {
         }
 
         g.drawImage(sourceImage, transform, null);
-        type.afterDrawImage(g);
+        edge.afterDrawImage(g);
 
         g.dispose();
 
@@ -122,7 +122,7 @@ public class CloneBrush extends CopyBrush {
             currentPoint.getImY() - radius
         );
         targetG.drawImage(brushImage, transform, null);
-        repaintComp(currentPoint);
+        repaintSegment(currentPoint);
     }
 
     public void setAligned(boolean aligned) {
@@ -154,7 +154,7 @@ public class CloneBrush extends CopyBrush {
         node.addDouble("scale y", scaleY);
         node.addDouble("rotate", rotationAngle);
         node.addBoolean("aligned", aligned);
-        node.addBoolean("new source point", newSourcePoint);
+        node.addBoolean("new source point", offsetsStale);
 
         return node;
     }

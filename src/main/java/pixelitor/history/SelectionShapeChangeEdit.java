@@ -57,9 +57,9 @@ public class SelectionShapeChangeEdit extends PixelitorEdit {
             throw new IllegalStateException("no selection in " + comp.getName());
         }
 
-        Shape tmp = selection.getShape();
+        Shape currentShape = selection.getShape();
         selection.setShape(backupShape);
-        backupShape = tmp;
+        backupShape = currentShape;
     }
 
     @Override

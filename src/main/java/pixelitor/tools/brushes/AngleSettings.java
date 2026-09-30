@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,10 +22,10 @@ import pixelitor.filters.gui.UserPreset;
 /**
  * Encapsulates the configuration for the orientation of brush dabs.
  */
-public final class RotationSettings {
+public final class AngleSettings {
     // global shared immutable instances for the most common cases
-    public static final RotationSettings NOT_DIRECTIONAL = new RotationSettings(false, 0);
-    public static final RotationSettings DIRECTIONAL_NO_JITTER = new RotationSettings(true, 0);
+    public static final AngleSettings NOT_DIRECTIONAL = new AngleSettings(false, 0);
+    public static final AngleSettings DIRECTIONAL_NO_JITTER = new AngleSettings(true, 0);
 
     private static final String DIRECTIONAL_KEY = "Angled";
     private static final String MAX_JITTER_KEY = "Max Angle Jitter";
@@ -35,7 +35,7 @@ public final class RotationSettings {
 
     private final double maxAngleJitter;
 
-    public RotationSettings(boolean directional, double maxAngleJitter) {
+    public AngleSettings(boolean directional, double maxAngleJitter) {
         this.directional = directional;
         this.maxAngleJitter = maxAngleJitter;
     }
@@ -64,8 +64,8 @@ public final class RotationSettings {
         preset.putDouble(MAX_JITTER_KEY, maxAngleJitter);
     }
 
-    public static RotationSettings fromPreset(UserPreset preset) {
-        return new RotationSettings(
+    public static AngleSettings fromPreset(UserPreset preset) {
+        return new AngleSettings(
             preset.getBoolean(DIRECTIONAL_KEY),
             preset.getDouble(MAX_JITTER_KEY));
     }

@@ -109,7 +109,7 @@ public abstract class DragTool extends Tool {
         }
 
         drag.setEnd(e);
-        drag.mouseReleased();
+        drag.markFinished();
         dragFinished(e);
         endPointInitialized = false;
         assert checkInvariants();

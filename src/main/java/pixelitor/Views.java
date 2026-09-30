@@ -379,7 +379,7 @@ public class Views {
     private static void registerView(View view) {
         Composition comp = view.getComp();
         comp.addLayersToUI();
-        view.setCursor(Tools.getActive().getStartingCursor());
+        view.setCursor(Tools.getActive().getDefaultCursor());
         views.add(view);
         view.setMaskViewMode(MaskViewMode.NORMAL, comp.getActiveLayer());
         ImageArea.addView(view);

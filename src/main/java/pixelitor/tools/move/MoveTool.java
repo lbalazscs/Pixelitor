@@ -120,8 +120,8 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
                 e.getComp().setActiveLayer(targetLayer);
             }
 
-            e.getComp().prepareMovement(
-                activeMode, e.isAltDown() || e.isRight());
+            activeMode.prepareMovement(
+                e.getComp(), e.isAltDown() || e.isRight());
         }
     }
 
@@ -130,7 +130,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
         if (isFreeTransforming()) {
             transformBox.processMouseDragged(e);
         } else {
-            e.getComp().moveActiveContent(activeMode, drag.getDx(), drag.getDy());
+            activeMode.moveActiveContent(e.getComp(), drag.getDx(), drag.getDy());
         }
     }
 
@@ -141,7 +141,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
             // a drag is a discrete, undoable action
             History.add(new TransformStepEdit("Free Transform Step", e.getComp(), transformBox.getBeforeMovementMemento()));
         } else {
-            e.getComp().finalizeMovement(activeMode);
+            activeMode.finalizeMovement(e.getComp());
         }
     }
 
@@ -176,9 +176,9 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
      * Programmatically moves the active layer and/or the selection.
      */
     public static void move(Composition comp, MoveMode mode, int imDx, int imDy) {
-        comp.prepareMovement(mode, false);
-        comp.moveActiveContent(mode, imDx, imDy);
-        comp.finalizeMovement(mode);
+        mode.prepareMovement(comp, false);
+        mode.moveActiveContent(comp, imDx, imDy);
+        mode.finalizeMovement(comp);
     }
 
     @Override
@@ -192,7 +192,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
             return;
         }
 
-        comp.drawMovementContours(g, activeMode);
+        activeMode.drawMovementContours(g, comp);
         OverlayType.REL_MOUSE_POS.draw(g, drag);
     }
 

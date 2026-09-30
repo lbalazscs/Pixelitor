@@ -321,8 +321,8 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     }
 
     private void linkPair(RangeParam p1, RangeParam p2) {
-        activeLinks.add(new ListenerSubscription(p1, e -> updateLinkedParam(p1, p2)));
-        activeLinks.add(new ListenerSubscription(p2, e -> updateLinkedParam(p2, p1)));
+        activeLinks.add(new ListenerSubscription(p1, _ -> updateLinkedParam(p1, p2)));
+        activeLinks.add(new ListenerSubscription(p2, _ -> updateLinkedParam(p2, p1)));
     }
 
     private void updateLinkedParam(RangeParam source, RangeParam target) {
@@ -336,11 +336,11 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
     private void linkAll(boolean basedOnPixels) {
         for (RangeParam source : pixelParams) {
-            activeLinks.add(new ListenerSubscription(source, e ->
+            activeLinks.add(new ListenerSubscription(source, _ ->
                 onLinkAllChanged(source, basedOnPixels)));
         }
         for (RangeParam source : percentParams) {
-            activeLinks.add(new ListenerSubscription(source, e ->
+            activeLinks.add(new ListenerSubscription(source, _ ->
                 onLinkAllChanged(source, basedOnPixels)));
         }
     }

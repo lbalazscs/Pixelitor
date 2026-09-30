@@ -19,283 +19,54 @@ package pixelitor.tools;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.Canvas;
-import pixelitor.gui.View;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.tools.util.PPoint;
 
+import java.util.List;
+import java.util.function.UnaryOperator;
+
 /**
- *  The different symmetry modes for brush tools, handling the transformation
- *  of points and delegation of drawing actions to a {@link SymmetryBrush}.
+ * The symmetry modes for brush tools, defining the transformations
+ * applied to points by a {@link SymmetryBrush}.
  */
 public enum Symmetry {
-    NONE("None", 1) {
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            brush.startAt(0, p);
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            brush.continueTo(0, p);
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            brush.lineConnectTo(0, p);
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            brush.finishBrushStroke(0);
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushIndex) {
-            throw new IllegalStateException("Should not be called, brushIndex = " + brushIndex);
-        }
-    }, HORIZONTAL_MIRROR("Horizontal", 2) {
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            brush.startAt(0, p);
-            brush.startAt(1, mirrorHorizontally(p));
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            brush.continueTo(0, p);
-            brush.continueTo(1, mirrorHorizontally(p));
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, mirrorHorizontally(p));
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            brush.finishBrushStroke(0);
-            brush.finishBrushStroke(1);
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushIndex) {
-            assert brushIndex == 1 : "brushIndex = " + brushIndex;
-            return mirrorHorizontally(p);
-        }
-    }, VERTICAL_MIRROR("Vertical", 2) {
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            brush.startAt(0, p);
-            brush.startAt(1, mirrorVertically(p));
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            brush.continueTo(0, p);
-            brush.continueTo(1, mirrorVertically(p));
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, mirrorVertically(p));
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            brush.finishBrushStroke(0);
-            brush.finishBrushStroke(1);
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushIndex) {
-            assert brushIndex == 1 : "brushIndex = " + brushIndex;
-            return mirrorVertically(p);
-        }
-    }, TWO_MIRRORS("Horizontal + Vertical", 4) {
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            applyToAllBrushes(SymmetryBrush::startAt, brush, p);
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            applyToAllBrushes(SymmetryBrush::continueTo, brush, p);
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            applyToAllBrushes(SymmetryBrush::lineConnectTo, brush, p);
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            for (int i = 0; i < 4; i++) {
-                brush.finishBrushStroke(i);
-            }
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushIndex) {
-            return switch (brushIndex) {
-                case 1 -> mirrorVertically(p);
-                case 2 -> mirrorHorizontally(p);
-                case 3 -> mirrorBoth(p);
-                default -> throw new IllegalArgumentException("brushIndex = " + brushIndex);
-            };
-        }
-
-        private void applyToAllBrushes(BrushAction action, SymmetryBrush brush, PPoint p) {
-            action.apply(brush, 0, p); // original
-            action.apply(brush, 1, transform(p, 1)); // vertical
-            action.apply(brush, 2, transform(p, 2)); // horizontal
-            action.apply(brush, 3, transform(p, 3)); // both
-        }
-    }, DIAGONAL_SLASH("Diagonal /", 2) {
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            brush.startAt(0, p);
-            brush.startAt(1, transform(p, 1));
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            brush.continueTo(0, p);
-            brush.continueTo(1, transform(p, 1));
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, transform(p, 1));
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            brush.finishBrushStroke(0);
-            brush.finishBrushStroke(1);
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushIndex) {
-            assert brushIndex == 1 : "brushIndex = " + brushIndex;
-            return mirrorDiagonalSlash(p);
-        }
-    }, DIAGONAL_BACKSLASH("Diagonal \\", 2) {
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            brush.startAt(0, p);
-            brush.startAt(1, transform(p, 1));
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            brush.continueTo(0, p);
-            brush.continueTo(1, transform(p, 1));
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, transform(p, 1));
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            brush.finishBrushStroke(0);
-            brush.finishBrushStroke(1);
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushIndex) {
-            assert brushIndex == 1 : "brushIndex = " + brushIndex;
-            return mirrorDiagonalBackslash(p);
-        }
-    }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            brush.startAt(0, p);
-            brush.startAt(1, mirrorBoth(p));
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            brush.continueTo(0, p);
-            brush.continueTo(1, mirrorBoth(p));
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            brush.lineConnectTo(0, p);
-            brush.lineConnectTo(1, mirrorBoth(p));
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            brush.finishBrushStroke(0);
-            brush.finishBrushStroke(1);
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushIndex) {
-            assert brushIndex == 1 : "brushIndex = " + brushIndex;
-            return mirrorBoth(p);
-        }
-    }, CENTRAL_3("Central 3", 3) {
-        private static final double COS_120 = -0.5;
-        private static final double SIN_120 = ImageMath.COS_30;
-        private static final double COS_240 = COS_120;
-        private static final double SIN_240 = -SIN_120;
-
-        @Override
-        public void startAt(SymmetryBrush brush, PPoint p) {
-            applyToAllBrushes(SymmetryBrush::startAt, brush, p);
-        }
-
-        @Override
-        public void continueTo(SymmetryBrush brush, PPoint p) {
-            applyToAllBrushes(SymmetryBrush::continueTo, brush, p);
-        }
-
-        @Override
-        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
-            applyToAllBrushes(SymmetryBrush::lineConnectTo, brush, p);
-        }
-
-        @Override
-        public void finishBrushStroke(SymmetryBrush brush) {
-            brush.finishBrushStroke(0);
-            brush.finishBrushStroke(1);
-            brush.finishBrushStroke(2);
-        }
-
-        @Override
-        public PPoint transform(PPoint p, int brushIndex) {
-            // coordinates relative to the center
-            double relX = p.getImX() - canvasCenterX;
-            double relY = canvasCenterY - p.getImY(); // calculate using an upward-pointing Y-axis
-            View view = p.getView();
-
-            return switch (brushIndex) {
-                case 1 -> getRotatedPoint(view, relX, relY, COS_120, SIN_120);
-                case 2 -> getRotatedPoint(view, relX, relY, COS_240, SIN_240);
-                default -> throw new IllegalArgumentException("brushIndex = " + brushIndex);
-            };
-        }
-
-        private void applyToAllBrushes(BrushAction action, SymmetryBrush brush, PPoint p) {
-            action.apply(brush, 0, p); // original
-            action.apply(brush, 1, transform(p, 1)); // 120 degree rotation
-            action.apply(brush, 2, transform(p, 2)); // 240 degree rotation
-        }
-    };
+    NONE("None"),
+    HORIZONTAL_MIRROR("Horizontal", Symmetry::mirrorHorizontally),
+    VERTICAL_MIRROR("Vertical", Symmetry::mirrorVertically),
+    HOR_AND_VER_MIRROR("Horizontal + Vertical",
+        Symmetry::mirrorVertically, Symmetry::mirrorHorizontally, Symmetry::mirrorBoth),
+    DIAGONAL_SLASH("Diagonal /", Symmetry::mirrorDiagonalSlash),
+    DIAGONAL_BACKSLASH("Diagonal \\", Symmetry::mirrorDiagonalBackslash),
+    ROTATION_2("Central Symmetry", Symmetry::mirrorBoth),
+    ROTATION_3("Central 3", Symmetry::rotate120, Symmetry::rotate240);
 
     // parameters of the currently active canvas
     private static double canvasWidth;
     private static double canvasHeight;
     private static double canvasCenterX;
     private static double canvasCenterY;
+
+    // rotation constants for Central 3
+    private static final double COS_120 = -0.5;
+    private static final double SIN_120 = ImageMath.COS_30; // sin 120° = cos 30°
+    private static final double COS_240 = COS_120;
+    private static final double SIN_240 = -SIN_120;
+
+    public static final String PRESET_KEY = "Mirror";
+
+    private final String displayName;
+    private final List<UnaryOperator<PPoint>> extraTransforms; // for brushes 1..n-1
+
+    Symmetry(String displayName) {
+        this.displayName = displayName;
+        this.extraTransforms = List.of();
+    }
+
+    @SafeVarargs
+    Symmetry(String displayName, UnaryOperator<PPoint>... extraTransforms) {
+        this.displayName = displayName;
+        this.extraTransforms = List.of(extraTransforms);
+    }
 
     /**
      * Updates the canvas dimensions used for symmetry calculations.
@@ -307,48 +78,19 @@ public enum Symmetry {
         canvasCenterY = canvasHeight / 2.0;
     }
 
-    public static final String PRESET_KEY = "Mirror";
-
-    private final String displayName;
-    private final int numBrushes;
-
-    Symmetry(String displayName, int numBrushes) {
-        this.displayName = displayName;
-        this.numBrushes = numBrushes;
-    }
-
-    // abstract methods defining the core symmetry operations delegated by SymmetryBrush
-
-    /**
-     * Starts a brush stroke, applying symmetry.
-     */
-    public abstract void startAt(SymmetryBrush brush, PPoint p);
-
-    /**
-     * Continues a brush stroke, applying symmetry.
-     */
-    public abstract void continueTo(SymmetryBrush brush, PPoint p);
-
-    /**
-     * Connects the last point with a line, applying symmetry.
-     */
-    public abstract void lineConnectTo(SymmetryBrush brush, PPoint p);
-
-    /**
-     * Finishes the brush stroke, applying symmetry.
-     */
-    public abstract void finishBrushStroke(SymmetryBrush brush);
-
     /**
      * Transforms the given master (first) point for the given brush index.
+     * Index 0 returns the point itself.
      */
-    public abstract PPoint transform(PPoint p, int brushIndex);
+    public PPoint transform(PPoint p, int brushIndex) {
+        return brushIndex == 0 ? p : extraTransforms.get(brushIndex - 1).apply(p);
+    }
 
     /**
      * Returns the number of brushes required for this symmetry mode.
      */
     public int getNumBrushes() {
-        return numBrushes;
+        return 1 + extraTransforms.size();
     }
 
     private static PPoint mirrorVertically(PPoint p) {
@@ -383,10 +125,22 @@ public enum Symmetry {
         return PPoint.fromIm(mirrorImX, mirrorImY, p.getView());
     }
 
+    private static PPoint rotate120(PPoint p) {
+        return getRotatedPoint(p, COS_120, SIN_120);
+    }
+
+    private static PPoint rotate240(PPoint p) {
+        return getRotatedPoint(p, COS_240, SIN_240);
+    }
+
     /**
      * Calculates a rotated point around the canvas center.
      */
-    private static PPoint getRotatedPoint(View view, double relX, double relY, double cosTheta, double sinTheta) {
+    private static PPoint getRotatedPoint(PPoint p, double cosTheta, double sinTheta) {
+        // coordinates relative to the center
+        double relX = p.getImX() - canvasCenterX;
+        double relY = canvasCenterY - p.getImY(); // calculate using an upward-pointing Y-axis
+
         // rotate relative coordinates
         double rotX = relX * cosTheta - relY * sinTheta;
         double rotY = relX * sinTheta + relY * cosTheta;
@@ -394,16 +148,11 @@ public enum Symmetry {
         // translate back to the original coordinate system
         double finalX = canvasCenterX + rotX;
         double finalY = canvasCenterY - rotY;
-        return PPoint.fromIm(finalX, finalY, view);
+        return PPoint.fromIm(finalX, finalY, p.getView());
     }
 
     @Override
     public String toString() {
         return displayName;
-    }
-
-    @FunctionalInterface
-    protected interface BrushAction {
-        void apply(SymmetryBrush brush, int brushIndex, PPoint point);
     }
 }

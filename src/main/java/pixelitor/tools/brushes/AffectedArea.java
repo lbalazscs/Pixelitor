@@ -26,6 +26,10 @@ import java.awt.Rectangle;
 
 /**
  * Represents the rectangular region affected by a single brush stroke.
+ * The area covers one undoable edit, which may consist of several strokes.
+ * The tool resets it and brushes only grow it.
+ * There is only one {@link AffectedArea} object for each brush tool,
+ * and it gets reinitialized for each independent brush stroke.
  */
 public class AffectedArea implements Debuggable {
     private final BoundingBox boundingBox = new BoundingBox();
@@ -34,20 +38,17 @@ public class AffectedArea implements Debuggable {
     }
 
     /**
-     * Initializes the area with a brush position.
-     *
-     * There is only one {@link AffectedArea} object for each brush tool,
-     * and it gets reinitialized for each independent brush stroke.
+     * Empties the area. Called by the owning tool
+     * when a new undoable brush edit begins.
      */
-    public void startStrokeAt(PPoint p) {
+    public void reset() {
         boundingBox.reset();
-        boundingBox.add(p.getImX(), p.getImY());
     }
 
     /**
-     * Updates the area with a brush position.
+     * Extends the area to include the given point.
      */
-    public void extendStrokeTo(PPoint p) {
+    public void add(PPoint p) {
         boundingBox.add(p.getImX(), p.getImY());
     }
 
