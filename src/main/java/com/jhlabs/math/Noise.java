@@ -277,7 +277,7 @@ public class Noise {
                 g2y[i] = (float) ((random() % (B + B)) - B) / B;
             } while (g2x[i] == 0.0f && g2y[i] == 0.0f);
 
-            float s2 = (float) Math.sqrt(g2x[i] * g2x[i] + g2y[i] * g2y[i]);
+            float s2 = hypot(g2x[i], g2y[i]);
             g2x[i] /= s2;
             g2y[i] /= s2;
 

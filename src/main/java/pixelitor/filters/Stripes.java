@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
@@ -203,7 +204,7 @@ public class Stripes extends ParametrizedFilter {
         double amplitude = amplitudeParam.getValue();
 
         // the diagonal is the longest possible line, ensuring stripes cover the entire image
-        double diagonal = Math.sqrt(width * width + height * height);
+        double diagonal = ImageMath.hypot(width, height);
 
         double period = selectedType.calcPeriod(thickness, gap, wavelength, amplitude);
         Shape prototype = selectedType.createPrototypeShape(diagonal, thickness, wavelength, amplitude);

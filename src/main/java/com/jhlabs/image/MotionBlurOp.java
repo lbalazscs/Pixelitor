@@ -21,10 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.RenderingHints.*;
 
 /**
  * A filter which produces motion blur the faster, but lower-quality way.
@@ -113,7 +110,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
         BufferedImage tsrc = src;
         float cx = src.getWidth() * centerX;
         float cy = src.getHeight() * centerY;
-        float imageRadius = (float) Math.sqrt(cx * cx + cy * cy);
+        float imageRadius = ImageMath.hypot(cx, cy);
         float translateX = (float) (distance * Math.cos(angle));
         float translateY = (float) (distance * -Math.sin(angle));
         float scale = zoom;

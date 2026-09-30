@@ -117,4 +117,8 @@ public class ThreadPool {
     public static Executor getExecutor() {
         return pool;
     }
+
+    public static int getThreadCount() {
+        return NUM_CORES;
+    }
 }

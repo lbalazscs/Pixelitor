@@ -35,10 +35,7 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
     private static void brightness(int[] row) {
         for (int i = 0; i < row.length; i++) {
             int rgb = row[i];
-            int r = rgb >> 16 & 0xFF;
-            int g = rgb >> 8 & 0xFF;
-            int b = rgb & 0xFF;
-            row[i] = (r + g + b) / 3;
+            row[i] = ImageMath.calcLuminanceInt(rgb);
         }
     }
 

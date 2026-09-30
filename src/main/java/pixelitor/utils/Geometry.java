@@ -131,7 +131,7 @@ public class Geometry {
     }
 
     public static void normalize(Point2D a) {
-        deScale(a, FastMath.hypot(a.getX(), a.getY()));
+        deScale(a, ImageMath.hypot(a.getX(), a.getY()));
     }
 
     public static void deScale(Point2D a, double factor) {
@@ -170,7 +170,7 @@ public class Geometry {
     }
 
     public static double distance(Point2D a, Point2D b) {
-        return FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+        return ImageMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
     }
 
     public static Point2D add(Point2D a, double delta) {

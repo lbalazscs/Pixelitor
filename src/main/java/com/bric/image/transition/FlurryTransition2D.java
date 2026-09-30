@@ -21,6 +21,7 @@ package com.bric.image.transition;
 
 import com.bric.geom.ShapeBounds;
 import com.bric.geom.TransformUtils;
+import com.jhlabs.image.ImageMath;
 
 import java.awt.Dimension;
 import java.awt.Shape;
@@ -83,7 +84,7 @@ public class FlurryTransition2D extends Transition2D {
             Point2D center = new Point2D.Double(r.getCenterX() - 200.0f / 2.0f, r.getCenterY() - 200.0f / 2.0f);
             double cX = center.getX();
             double cY = center.getY();
-            float k = (float) (Math.sqrt(cX * cX + cY * cY) /
+            float k = (float) (ImageMath.hypot(cX, cY) /
                     Math.sqrt(200.0f * 200.0f / 4 + 200.0f * 200.0f / 4));
             k = (1 - progress) * k + progress;
             float scaleProgress = (float) Math.pow(2 * progress * k, 0.02 + 4 * random.nextFloat());

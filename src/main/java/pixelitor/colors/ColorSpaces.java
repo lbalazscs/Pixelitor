@@ -314,8 +314,8 @@ public class ColorSpaces {
         float a = oklab[1];
         float b = oklab[2];
 
-        float C = (float) FastMath.sqrt(a * a + b * b);
-        float hDeg = (float) FastMath.toDegrees(FastMath.atan2(b, a));
+        float C = ImageMath.hypot(a, b);
+        float hDeg = (float) Math.toDegrees(FastMath.atan2(b, a));
 
         // normalize hue to [0, 360)
         if (hDeg < 0) {

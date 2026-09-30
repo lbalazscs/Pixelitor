@@ -16,15 +16,15 @@ limitations under the License.
 
 package com.jhlabs.awt;
 
+import com.jhlabs.image.ImageMath;
+
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.*;
 
 /**
  * A Stroke implementation that modifies a base stroke by applying
@@ -75,7 +75,7 @@ public class ZigzagStroke implements Stroke {
                     currentY = points[1];
                     float dx = currentX - lastX;
                     float dy = currentY - lastY;
-                    float distance = (float) Math.sqrt(dx * dx + dy * dy);
+                    float distance = ImageMath.hypot(dx, dy);
                     if (distance >= next) {
                         float r = 1.0f / distance;
                         while (distance >= next) {

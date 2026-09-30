@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.*;
 import pixelitor.progress.ProgressTracker;
 import pixelitor.progress.StatusBarProgressTracker;
@@ -115,7 +116,7 @@ public class RadialMosaic extends ParametrizedFilter {
         double spiral = twistParam.getPercentage();
 
         // calculate how many rings are needed to fully cover the canvas
-        double maxDist = Math.hypot(Math.max(cx, width - cx), Math.max(cy, height - cy));
+        double maxDist = ImageMath.hypot(Math.max(cx, width - cx), Math.max(cy, height - cy));
         int numRings = (int) Math.ceil(maxDist / ringSpacing) + 1;
 
         int totalPoints = 1 + 3 * numRings * (numRings + 1);

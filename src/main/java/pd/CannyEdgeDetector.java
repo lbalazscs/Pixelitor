@@ -7,6 +7,7 @@
 
 package pd;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.progress.ProgressTracker;
 import pixelitor.progress.StatusBarProgressTracker;
 
@@ -332,7 +333,7 @@ public class CannyEdgeDetector {
         for (int i = 0; i < pixelCount; i++) {
             float gx = gradX[i];
             float gy = gradY[i];
-            gradMags[i] = (float) Math.sqrt(gx * gx + gy * gy);
+            gradMags[i] = ImageMath.hypot(gx, gy);
         }
 
         initX = kwidth;

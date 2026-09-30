@@ -16,6 +16,7 @@
  */
 package pixelitor.filters.jhlabsproxies;
 
+import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.KaleidoscopeFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
@@ -69,7 +70,7 @@ public class JHKaleidoscope extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        double refRadius = Math.hypot(src.getWidth(), src.getHeight()) / 2.0;
+        double refRadius = ImageMath.hypot(src.getWidth(), src.getHeight()) / 2.0;
 
         KaleidoscopeFilter filter = new KaleidoscopeFilter(NAME,
             edgeAction.getValue(),

@@ -255,10 +255,10 @@ public abstract class FourColorFilter extends PointFilter {
         if (needsDist) {
             double cxr = width - cx;
             double cyr = height - cy;
-            distNW = Math.sqrt(cx * cx + cy * cy);
-            distNE = Math.sqrt(cxr * cxr + cy * cy);
-            distSW = Math.sqrt(cx * cx + cyr * cyr);
-            distSE = Math.sqrt(cxr * cxr + cyr * cyr);
+            distNW = ImageMath.hypot(cx, cy);
+            distNE = ImageMath.hypot(cxr, cy);
+            distSW = ImageMath.hypot(cx, cyr);
+            distSE = ImageMath.hypot(cxr, cyr);
         }
 
         corners = new Corner[4];

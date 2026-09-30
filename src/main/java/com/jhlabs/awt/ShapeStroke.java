@@ -16,13 +16,13 @@ limitations under the License.
 
 package com.jhlabs.awt;
 
+import com.jhlabs.image.ImageMath;
+
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.*;
 
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.*;
 
 /**
  * A Stroke implementation that repeatedly draws a sequence
@@ -87,7 +87,7 @@ public class ShapeStroke implements Stroke {
                     currentY = points[1];
                     float dx = currentX - lastX;
                     float dy = currentY - lastY;
-                    float distance = (float) Math.sqrt(dx * dx + dy * dy);
+                    float distance = ImageMath.hypot(dx, dy);
                     if (distance >= thresholdDist) {
                         float angle = (float) Math.atan2(dy, dx);
                         // handles segments that are long enough

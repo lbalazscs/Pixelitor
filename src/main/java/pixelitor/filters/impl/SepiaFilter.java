@@ -16,6 +16,7 @@
  */
 package pixelitor.filters.impl;
 
+import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.Sepia;
 
@@ -36,12 +37,11 @@ public class SepiaFilter extends PointFilter {
     @Override
     public int processPixel(int x, int y, int rgb) {
         int a = rgb >>> 24;
-        int r = (rgb >>> 16) & 0xFF;
-        int g = (rgb >>> 8) & 0xFF;
-        int b = rgb & 0xFF;
 
-        int lum = (r + g + b) / 3;
-        r = g = b = lum;
+        int lum = ImageMath.calcLuminanceInt(rgb);
+        int r = lum;
+        int g = lum;
+        int b = lum;
 
         int depth = 20;
         r += (depth * 2);

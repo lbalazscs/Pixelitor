@@ -17,6 +17,7 @@
 
 package pixelitor.filters.impl;
 
+import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.WaveType;
 import net.jafama.DoubleWrapper;
 import net.jafama.FastMath;
@@ -67,7 +68,7 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         double dy = y - cy;
 
         // convert to polar coordinates
-        double r = FastMath.hypot(dx, dy);
+        double r = ImageMath.hypot(dx, dy);
         double angle = FastMath.atan2(dy, dx);
 
         double waveInput = r / radialWavelength - phase;

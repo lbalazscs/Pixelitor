@@ -50,8 +50,6 @@ public class JHPointillize extends ParametrizedFilter {
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 1000);
 
-    private PointillizeFilter filter;
-
     public JHPointillize() {
         super(true);
 
@@ -76,20 +74,16 @@ public class JHPointillize extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new PointillizeFilter(NAME);
-        }
-
-        filter.setScale(gridSize.getValueAsFloat());
-        filter.setRandomness((float) randomness.getPercentage());
-        filter.setDotRadius((float) dotRadius.getPercentage());
-        filter.setFuzziness((float) fuzziness.getPercentage());
-        filter.setGridType(gridType.getSelected());
-        filter.setFadeEdges(fadeEdges.isChecked());
-        filter.setBackgroundColor(fillColor.getColor().getRGB());
-
-        filter.setStretch((float) stretch.getPercentage());
-        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
+        PointillizeFilter filter = new PointillizeFilter(NAME,
+            gridSize.getValueAsFloat(),
+            (float) stretch.getPercentage(),
+            (float) (angle.getValueInRadians() + Math.PI / 2),
+            gridType.getSelected(),
+            (float) randomness.getPercentage(),
+            (float) dotRadius.getPercentage(),
+            (float) fuzziness.getPercentage(),
+            fillColor.getColor().getRGB(),
+            fadeEdges.isChecked());
 
         return filter.filter(src, dest);
     }

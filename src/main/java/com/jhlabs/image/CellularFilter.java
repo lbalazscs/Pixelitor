@@ -17,7 +17,6 @@ limitations under the License.
 package com.jhlabs.image;
 
 import com.jhlabs.math.Noise;
-import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 import pixelitor.utils.CachedFloatRandom;
 
@@ -32,19 +31,19 @@ public class CellularFilter extends WholeImageFilter {
 
     protected static final float ORIGIN_OFFSET = 1000f; // reduces artifacts around (0,0)
 
-    private GridType gridType;
+    private final GridType gridType;
 
-    protected float scale = 32;
-    protected float stretch = 1.0f;
-    public float amount = 1.0f;
-    public float turbulence = 1.0f;
-    protected Colormap colormap;
-    private final float[] coefficients = {1, 0, 0}; // weights of F1, F2, F3
+    private final float scale;
+    private final float stretch;
+    public final float amount = 1.0f;
+    public final float turbulence = 1.0f;
+    private final Colormap colormap;
+    private final float[] coefficients; // weights of F1, F2, F3
 
-    private float m00 = 1.0f;
-    private float m01 = 0.0f;
-    private float m10 = 0.0f;
-    private float m11 = 1.0f;
+    private final float m00;
+    private final float m01;
+    private final float m10;
+    private final float m11;
 
     private static final ThreadLocal<Point[]> resultsTL = ThreadLocal.withInitial(() -> {
         Point[] results = new Point[3];
@@ -54,12 +53,35 @@ public class CellularFilter extends WholeImageFilter {
         return results;
     });
 
-    protected float randomness = 0;
+    protected final float randomness;
 
     private static final byte[] poisson = initPoisson();
 
-    public CellularFilter(String filterName) {
+    public CellularFilter(String filterName,
+                          float scale,
+                          float stretch,
+                          float angle,
+                          GridType gridType,
+                          float randomness,
+                          Colormap colormap,
+                          float f1,
+                          float f2,
+                          float f3) {
         super(filterName);
+
+        this.scale = scale;
+        this.stretch = stretch;
+        this.gridType = gridType;
+        this.randomness = randomness;
+        this.colormap = colormap;
+        this.coefficients = new float[]{f1, f2, f3};
+
+        float cos = (float) Math.cos(angle);
+        float sin = (float) Math.sin(angle);
+        this.m00 = cos;
+        this.m01 = sin;
+        this.m10 = -sin;
+        this.m11 = cos;
     }
 
     /**
@@ -98,99 +120,8 @@ public class CellularFilter extends WholeImageFilter {
         return arr;
     }
 
-    /**
-     * Sets the scale of the texture.
-     *
-     * @param scale the texture scale
-     */
-    public void setScale(float scale) {
-        this.scale = scale;
-    }
-
-    /**
-     * Sets the stretch factor of the texture.
-     *
-     * @param stretch the texture stretch factor
-     */
-    public void setStretch(float stretch) {
-        this.stretch = stretch;
-    }
-
-    /**
-     * Sets the angle of the texture.
-     *
-     * @param angle the texture angle
-     */
-    public void setAngle(float angle) {
-        float cos = (float) Math.cos(angle);
-        float sin = (float) Math.sin(angle);
-        m00 = cos;
-        m01 = sin;
-        m10 = -sin;
-        m11 = cos;
-    }
-
-    public void setF1(float v) {
-        coefficients[0] = v;
-    }
-
-    public void setF2(float v) {
-        coefficients[1] = v;
-    }
-
-    public void setF3(float v) {
-        coefficients[2] = v;
-    }
-
-    /**
-     * Sets the colormap to be used for the filter.
-     *
-     * @param colormap the colormap
-     */
-    public void setColormap(Colormap colormap) {
-        this.colormap = colormap;
-    }
-
-    /**
-     * Sets the randomness factor for grid point placement.
-     *
-     * @param randomness the randomness factor
-     */
-    public void setRandomness(float randomness) {
-        this.randomness = randomness;
-    }
-
-    /**
-     * Sets the grid type for the texture.
-     *
-     * @param gridType the code representing the grid type
-     */
-    public void setGridType(GridType gridType) {
-        this.gridType = gridType;
-    }
-
-    /**
-     * Sets the turbulence of the texture.
-     *
-     * @param turbulence the turbulence of the texture (in the range [0, 1])
-     */
-    public void setTurbulence(float turbulence) {
-        this.turbulence = turbulence;
-    }
-
-    /**
-     * Sets the effect amount of the texture.
-     *
-     * @param amount the amount (in the range [0, 1])
-     */
-    public void setAmount(float amount) {
-        this.amount = amount;
-    }
-
     public static class Point {
-        public int index;
         public float x, y;
-        public float dx, dy;
         public float distance;
     }
 
@@ -333,11 +264,11 @@ public class CellularFilter extends WholeImageFilter {
         // maintains the result array such that it always contains
         // the three closest points found so far, sorted by distance
         static void keepNearest3(float x, float y, int cellX, int cellY, Point[] results, float px, float py, float weight) {
-            float dx = Math.abs(x - px) * weight;
-            float dy = Math.abs(y - py) * weight;
+            float dx = (x - px) * weight;
+            float dy = (y - py) * weight;
 
             // the distance between the current point and the new feature point
-            float d = (float) FastMath.sqrt(dx * dx + dy * dy);
+            float d = ImageMath.hypot(dx, dy);
 
             if (d < results[0].distance) {
                 // closer than the current closest point (at index 0):
@@ -346,24 +277,22 @@ public class CellularFilter extends WholeImageFilter {
                 results[2] = results[1];
                 results[1] = results[0];
                 results[0] = p;
-                updatePoint(p, d, dx, dy, cellX + px, cellY + py);
+                updatePoint(p, d, cellX + px, cellY + py);
             } else if (d < results[1].distance) {
                 // closer than the second closest point:
                 // shifts 1->2, and inserts the new point at 1
                 Point p = results[2];
                 results[2] = results[1];
                 results[1] = p;
-                updatePoint(p, d, dx, dy, cellX + px, cellY + py);
+                updatePoint(p, d, cellX + px, cellY + py);
             } else if (d < results[2].distance) {
                 // replace the point at index 2 with the current point
-                updatePoint(results[2], d, dx, dy, cellX + px, cellY + py);
+                updatePoint(results[2], d, cellX + px, cellY + py);
             }
         }
 
-        private static void updatePoint(Point p, float d, float dx, float dy, float x, float y) {
+        private static void updatePoint(Point p, float d, float x, float y) {
             p.distance = d;
-            p.dx = dx;
-            p.dy = dy;
             p.x = x;
             p.y = y;
         }

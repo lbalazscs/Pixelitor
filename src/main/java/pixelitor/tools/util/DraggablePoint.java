@@ -17,6 +17,7 @@
 
 package pixelitor.tools.util;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.history.HandleMovedEdit;
@@ -412,7 +413,7 @@ public class DraggablePoint extends Point2D.Double {
     public double distanceFrom(DraggablePoint other) {
         double dx = other.x - x;
         double dy = other.y - y;
-        return Math.sqrt(dx * dx + dy * dy);
+        return ImageMath.hypot(dx, dy);
     }
 
     /**

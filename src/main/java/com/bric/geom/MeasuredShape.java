@@ -19,6 +19,8 @@
  */
 package com.bric.geom;
 
+import com.jhlabs.image.ImageMath;
+
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
@@ -264,8 +266,7 @@ public class MeasuredShape implements Serializable {
                 realDistance = 0;
             } else if (type == SEG_LINETO) {
                 data = new float[]{lastX, lastY, coords[0], coords[1]};
-                realDistance = (float) Math.sqrt(
-                        (coords[0] - lastX) * (coords[0] - lastX) + (coords[1] - lastY) * (coords[1] - lastY));
+                realDistance = ImageMath.hypot(coords[0] - lastX, coords[1] - lastY);
             } else if (type == SEG_CLOSE) {
                 data = new float[0];
             } else {
@@ -309,7 +310,7 @@ public class MeasuredShape implements Serializable {
             for (double t = spacing; t < 1; t += spacing) {
                 x1 = ((ax * t + bx) * t + cx) * t + dx;
                 y1 = ((ay * t + by) * t + cy) * t + dy;
-                sum += Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
+                sum += ImageMath.hypot(x0 - x1, y0 - y1);
                 x0 = x1;
                 y0 = y1;
             }

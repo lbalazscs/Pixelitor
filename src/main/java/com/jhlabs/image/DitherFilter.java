@@ -227,9 +227,6 @@ public class DitherFilter extends PointFilter {
     @Override
     public int processPixel(int x, int y, int rgb) {
         int a = rgb & 0xFF_00_00_00;
-        int r = (rgb >> 16) & 0xFF;
-        int g = (rgb >> 8) & 0xFF;
-        int b = rgb & 0xFF;
 
         int col = x % cols;
         int row = y % rows;
@@ -238,14 +235,19 @@ public class DitherFilter extends PointFilter {
         int v = matrix[row * cols + col];
 
         if (colorDither) {
+            int r = (rgb >> 16) & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
+            int b = rgb & 0xFF;
+
             // adding 1 to a div[x] moves it the next higher color level
             r = map[mod[r] > v ? div[r] + 1 : div[r]];
             g = map[mod[g] > v ? div[g] + 1 : div[g]];
             b = map[mod[b] > v ? div[b] + 1 : div[b]];
+            return a | (r << 16) | (g << 8) | b;
         } else {
-            int value = (r + g + b) / 3;
-            r = g = b = map[mod[value] > v ? div[value] + 1 : div[value]];
+            int value = ImageMath.calcLuminanceInt(rgb);
+            int gray = map[mod[value] > v ? div[value] + 1 : div[value]];
+            return a | (gray << 16) | (gray << 8) | gray;
         }
-        return a | (r << 16) | (g << 8) | b;
     }
 }

@@ -17,6 +17,7 @@
 
 package pixelitor.tools.util;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
@@ -459,7 +460,7 @@ public class Drag implements Serializable, Debuggable {
         assert hasCoCoords;
         double dx = coEndX - coStartX;
         double dy = coEndY - coStartY;
-        double length = Math.sqrt(dx * dx + dy * dy);
+        double length = ImageMath.hypot(dx, dy);
         if (expandFromCenter) {
             length *= 2;
         }
@@ -469,7 +470,7 @@ public class Drag implements Serializable, Debuggable {
     public double calcImLength() {
         double dx = imEndX - imStartX;
         double dy = imEndY - imStartY;
-        double length = Math.sqrt(dx * dx + dy * dy);
+        double length = ImageMath.hypot(dx, dy);
         if (expandFromCenter) {
             length *= 2.0;
         }
@@ -483,7 +484,7 @@ public class Drag implements Serializable, Debuggable {
     public double calcDistFromStart(double x, double y) {
         double dx = imStartX - x;
         double dy = imStartY - y;
-        return Math.sqrt(dx * dx + dy * dy);
+        return ImageMath.hypot(dx, dy);
     }
 
     public double calcIntuitiveAngle() {

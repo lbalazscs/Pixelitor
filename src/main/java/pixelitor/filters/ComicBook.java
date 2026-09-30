@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.BoxBlurFilter;
+import com.jhlabs.image.ImageMath;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
@@ -87,12 +88,8 @@ public class ComicBook extends ParametrizedFilter {
 
         for (int i = 0; i < srcPixels.length; i++) {
             int rgb = srcPixels[i];
-            int r = (rgb >>> 16) & 0xFF;
-            int g = (rgb >>> 8) & 0xFF;
-            int b = rgb & 0xFF;
-            r = (r + g + b) / 3;
-            rgb = packSingleValue(r);
-            outPixels[i] = rgb;
+            int lum = ImageMath.calcLuminanceInt(rgb);
+            outPixels[i] = packSingleValue(lum);
         }
 
         return out;

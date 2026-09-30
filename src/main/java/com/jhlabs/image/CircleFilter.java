@@ -75,7 +75,7 @@ public class CircleFilter extends TransformFilter {
         float dx = x - cx;
         float dy = y - cy;
         float theta = (float) FastMath.atan2(-dy, -dx) + angle;
-        float r = (float) Math.sqrt(dx * dx + dy * dy);
+        float r = ImageMath.hypot(dx, dy);
 
         theta = ImageMath.mod(theta, 2 * (float) Math.PI);
 

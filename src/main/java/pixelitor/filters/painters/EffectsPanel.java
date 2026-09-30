@@ -17,6 +17,7 @@
 
 package pixelitor.filters.painters;
 
+import com.jhlabs.image.ImageMath;
 import org.jdesktop.swingx.painter.effects.GlowPathEffect;
 import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
@@ -177,7 +178,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
             Point2D offset = effect.getOffset();
             double x = offset.getX();
             double y = offset.getY();
-            distance = (int) Math.sqrt(x * x + y * y);
+            distance = (int) ImageMath.hypot(x, y);
             angle = Math.atan2(y, x);
         }
 

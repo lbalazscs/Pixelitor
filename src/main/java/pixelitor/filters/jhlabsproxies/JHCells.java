@@ -60,8 +60,6 @@ public class JHCells extends ParametrizedFilter {
 
     private final AngleParam angle = new AngleParam("Angle", 0);
 
-    private CellularFilter filter;
-
     public JHCells() {
         super(false);
 
@@ -83,10 +81,6 @@ public class JHCells extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new CellularFilter(NAME);
-        }
-
         float tune = (float) refineType.getPercentage();
         float f1, f2, f3;
 
@@ -114,15 +108,14 @@ public class JHCells extends ParametrizedFilter {
         f2 += bw;
         f3 += bw;
 
-        filter.setScale(scale.getValueAsFloat());
-        filter.setStretch((float) stretch.getPercentage());
-        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
-        filter.setF1(f1);
-        filter.setF2(f2);
-        filter.setF3(f3);
-        filter.setGridType(gridType.getSelected());
-        filter.setRandomness((float) gridRandomness.getPercentage());
-        filter.setColormap(gradient.getColorMap());
+        CellularFilter filter = new CellularFilter(NAME,
+            scale.getValueAsFloat(),
+            (float) stretch.getPercentage(),
+            (float) (angle.getValueInRadians() + Math.PI / 2),
+            gridType.getSelected(),
+            (float) gridRandomness.getPercentage(),
+            gradient.getColorMap(),
+            f1, f2, f3);
 
         return filter.filter(src, dest);
     }

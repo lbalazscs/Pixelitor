@@ -139,7 +139,7 @@ public class EdgeFilter extends WholeImageFilter {
                     iv += vEdgeMatrix[m] * pixelLuma;
                 }
 
-                int i = (int) (Math.sqrt(ih * ih + iv * iv) / EDGE_SCALE);
+                int i = (int) (ImageMath.hypot(ih, iv) / EDGE_SCALE);
                 i = PixelUtils.clamp(i);
 
                 int a = inPixels[index] & 0xFF_00_00_00;
@@ -181,9 +181,9 @@ public class EdgeFilter extends WholeImageFilter {
                     bv += v * b;
                 }
 
-                int r = (int) (Math.sqrt(rh * rh + rv * rv) / EDGE_SCALE);
-                int g = (int) (Math.sqrt(gh * gh + gv * gv) / EDGE_SCALE);
-                int b = (int) (Math.sqrt(bh * bh + bv * bv) / EDGE_SCALE);
+                int r = (int) (ImageMath.hypot(rh, rv) / EDGE_SCALE);
+                int g = (int) (ImageMath.hypot(gh, gv) / EDGE_SCALE);
+                int b = (int) (ImageMath.hypot(bh, bv) / EDGE_SCALE);
 
                 r = PixelUtils.clamp(r);
                 g = PixelUtils.clamp(g);

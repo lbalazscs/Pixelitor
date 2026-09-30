@@ -96,7 +96,7 @@ public class KaleidoscopeFilter extends TransformFilter {
         // polar coordinates
         double dx = x - cx;
         double dy = y - cy;
-        double r = lensWarp(Math.sqrt(dx * dx + dy * dy)); // the lens only changes the radius, not the angle
+        double r = lensWarp(ImageMath.hypot(dx, dy)); // the lens only changes the radius, not the angle
         double rawTheta = FastMath.atan2(dy, dx) - r * twist - angle - rotation;
 
         // radial tiling (concentric mirrored rings)

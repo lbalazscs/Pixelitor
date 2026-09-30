@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
@@ -788,7 +789,7 @@ public class Shapes {
                 case SEG_LINETO:
                     double dx = points[0] - lastX;
                     double dy = points[1] - lastY;
-                    pathLength += Math.sqrt(dx * dx + dy * dy);
+                    pathLength += ImageMath.hypot(dx, dy);
                     lastX = points[0];
                     lastY = points[1];
                     break;

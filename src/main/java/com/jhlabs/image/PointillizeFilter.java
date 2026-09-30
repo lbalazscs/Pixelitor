@@ -16,30 +16,32 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+/**
+ * A filter that renders an image as colored dots
+ * sampled at the feature points of a Voronoi grid.
+ */
 public class PointillizeFilter extends CellularFilter {
-    private float dotRadius = 0.4f;
-    private boolean fadeEdges = false;
-    private int backgroundColor = 0xFF_00_00_00;
-    private float fuzziness = 0.1f;
+    private final float dotRadius;
+    private final float fuzziness;
+    private final int backgroundColor;
+    private final boolean fadeEdges;
 
-    public PointillizeFilter(String filterName) {
-        super(filterName);
-    }
+    public PointillizeFilter(String filterName,
+                             float scale,
+                             float stretch,
+                             float angle,
+                             GridType gridType,
+                             float randomness,
+                             float dotRadius,
+                             float fuzziness,
+                             int backgroundColor,
+                             boolean fadeEdges) {
+        super(filterName, scale, stretch, angle, gridType, randomness, null, 1.0f, 0.0f, 0.0f);
 
-    public void setDotRadius(float dotRadius) {
         this.dotRadius = dotRadius;
-    }
-
-    public void setFadeEdges(boolean fadeEdges) {
-        this.fadeEdges = fadeEdges;
-    }
-
-    public void setBackgroundColor(int backgroundColor) {
-        this.backgroundColor = backgroundColor;
-    }
-
-    public void setFuzziness(float fuzziness) {
         this.fuzziness = fuzziness;
+        this.backgroundColor = backgroundColor;
+        this.fadeEdges = fadeEdges;
     }
 
     @Override

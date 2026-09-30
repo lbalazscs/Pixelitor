@@ -17,6 +17,7 @@
 
 package pixelitor.filters.impl;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.GlassTiles;
 
 import static net.jafama.FastMath.tan;
@@ -634,7 +635,7 @@ public class TilesFilter extends RotatingEffectFilter {
 
         // in normalized tile coordinates (nx, ny) in [-1, 1] x [-1, 1],
         // the tile is bounded by the bottom convex arc and the top concave arcs
-        double rLen = Math.sqrt(nx * nx + ny * ny);
+        double rLen = ImageMath.hypot(nx, ny);
         double dnorm;
         if (ny >= 0.0) {
             // lower half: distance to the elliptical arc normal is simply rLen

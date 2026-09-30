@@ -135,7 +135,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
         int cx = (int) (width * centerX);
         int cy = (int) (height * centerY);
 
-        float imageRadius = (float) Math.sqrt(cx * cx + cy * cy);
+        float imageRadius = ImageMath.hypot(cx, cy);
         float translateX = (float) (distance * Math.cos(angle));
         float translateY = (float) (distance * -Math.sin(angle));
         float maxDistance = distance + Math.abs(rotation * imageRadius) + zoom * imageRadius;

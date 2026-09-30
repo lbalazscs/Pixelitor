@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.Canvas;
 import pixelitor.Views;
@@ -313,7 +314,7 @@ public class ConcentricShapes extends ParametrizedFilter {
     private static double calcMaxDistance(double cx, double cy, double width, double height) {
         double dx = Math.max(cx, width - cx);
         double dy = Math.max(cy, height - cy);
-        return Math.hypot(dx, dy);
+        return ImageMath.hypot(dx, dy);
     }
 
     @Override

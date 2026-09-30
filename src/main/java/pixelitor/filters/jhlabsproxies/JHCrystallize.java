@@ -50,8 +50,6 @@ public class JHCrystallize extends ParametrizedFilter {
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 1000);
 
-    private CrystallizeFilter filter;
-
     public JHCrystallize() {
         super(true);
 
@@ -70,19 +68,15 @@ public class JHCrystallize extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new CrystallizeFilter(NAME);
-        }
-
-        filter.setEdgeThickness((float) edgeThickness.getPercentage());
-        filter.setScale(size.getValueAsFloat());
-        filter.setRandomness((float) randomness.getPercentage());
-        filter.setEdgeColor(edgeColor.getColor().getRGB());
-        filter.setGridType(gridType.getSelected());
-        filter.setFadeEdges(fadeEdges.isChecked());
-
-        filter.setStretch((float) stretch.getPercentage());
-        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
+        CrystallizeFilter filter = new CrystallizeFilter(NAME,
+            size.getValueAsFloat(),
+            (float) stretch.getPercentage(),
+            (float) (angle.getValueInRadians() + Math.PI / 2),
+            gridType.getSelected(),
+            (float) randomness.getPercentage(),
+            (float) edgeThickness.getPercentage(),
+            edgeColor.getColor().getRGB(),
+            fadeEdges.isChecked());
 
         return filter.filter(src, dest);
     }

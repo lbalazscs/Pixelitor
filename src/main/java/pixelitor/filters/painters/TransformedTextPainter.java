@@ -17,6 +17,7 @@
 
 package pixelitor.filters.painters;
 
+import com.jhlabs.image.ImageMath;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
@@ -574,7 +575,7 @@ public class TransformedTextPainter implements Debuggable {
                 if (type == PathIterator.SEG_LINETO) {
                     dx = points[0] - lastX;
                     dy = points[1] - lastY;
-                    segmentDist = Math.sqrt(dx * dx + dy * dy);
+                    segmentDist = ImageMath.hypot(dx, dy);
                     lastX = points[0];
                     lastY = points[1];
                 } else if (type == PathIterator.SEG_MOVETO) {
@@ -590,7 +591,7 @@ public class TransformedTextPainter implements Debuggable {
                     // close the subpath by drawing a line back to the start point (moveX, moveY)
                     dx = moveX - lastX;
                     dy = moveY - lastY;
-                    segmentDist = Math.sqrt(dx * dx + dy * dy);
+                    segmentDist = ImageMath.hypot(dx, dy);
                     lastX = moveX;
                     lastY = moveY;
                 }

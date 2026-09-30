@@ -17,7 +17,7 @@
 
 package pixelitor.utils;
 
-import net.jafama.FastMath;
+import com.jhlabs.image.ImageMath;
 
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -31,11 +31,7 @@ import java.util.List;
 
 import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
-import static pixelitor.utils.Geometry.add;
-import static pixelitor.utils.Geometry.calcPerpendicularPoints;
-import static pixelitor.utils.Geometry.normalize;
-import static pixelitor.utils.Geometry.scale;
-import static pixelitor.utils.Geometry.subtract;
+import static pixelitor.utils.Geometry.*;
 
 /**
  * A {@link Stroke} implementation that creates a stroke that gradually tapers along its path.
@@ -136,7 +132,7 @@ public class TaperingStroke implements Stroke {
         for (int i = 0; i < segmentLengths.length; i++) {
             Point2D a = points.get(i);
             Point2D b = points.get(i + 1);
-            totalPathLength += segmentLengths[i] = FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+            totalPathLength += segmentLengths[i] = ImageMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
         }
 
         // handle the first segment of the subpath

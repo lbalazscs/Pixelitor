@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 
@@ -83,7 +84,7 @@ public enum NonlinTransform {
     }, BULGE("Pinch-Bulge", true) {
         @Override
         public PointMapper createMapper(Point2D center, double amount, int width, int height) {
-            double maxR = Math.sqrt(width * width + height * height) / 2.0;
+            double maxR = ImageMath.hypot(width, height) / 2.0;
             double cx = center.getX();
             double cy = center.getY();
             return (x, y) -> {
@@ -116,7 +117,7 @@ public enum NonlinTransform {
             double cy = center.getY();
 
             // make the effect size-independent
-            double diagonal = Math.sqrt(width * width + height * height);
+            double diagonal = ImageMath.hypot(width, height);
             double waveConstant = diagonal / 10.0;
             double adjustedAmount = amount * diagonal / 800;
 
@@ -138,7 +139,7 @@ public enum NonlinTransform {
             int numBranches = 5;
 
             // make the effect size-independent
-            double diagonal = Math.sqrt(width * width + height * height);
+            double diagonal = ImageMath.hypot(width, height);
             double divisor = diagonal / 30.0;
             double adjustedAmount = amount * diagonal / 2000;
 

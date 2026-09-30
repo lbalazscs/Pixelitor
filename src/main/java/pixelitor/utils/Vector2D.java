@@ -17,12 +17,11 @@
 
 package pixelitor.utils;
 
+import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
 
 import java.awt.geom.Point2D;
 import java.util.StringJoiner;
-
-import static net.jafama.FastMath.hypot;
 
 /**
  * Represents a mutable 2D vector.
@@ -176,11 +175,11 @@ public class Vector2D {
     }
 
     public double length() {
-        return hypot(x, y);
+        return ImageMath.hypot(x, y);
     }
 
     public double distanceTo(Point2D point) {
-        return hypot(point.getX() - x, point.getY() - y);
+        return ImageMath.hypot(point.getX() - x, point.getY() - y);
     }
 
     /**

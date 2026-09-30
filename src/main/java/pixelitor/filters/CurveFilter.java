@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
 import org.jdesktop.swingx.painter.effects.GlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
@@ -255,7 +256,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
     }
 
     protected float getGradientRadius(float cx, float cy) {
-        return (float) Math.sqrt(cx * cx + cy * cy);
+        return ImageMath.hypot(cx, cy);
     }
 
     /**

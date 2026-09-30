@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.test.RandomGuiTest;
 
@@ -123,8 +124,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         if (dabPlacedOnSegment) {
             double remainingDx = newX - lastDabX;
             double remainingDy = newY - lastDabY;
-            accumulatedDist = Math.sqrt(remainingDx * remainingDx
-                + remainingDy * remainingDy);
+            accumulatedDist = ImageMath.hypot(remainingDx, remainingDy);
         } else {
             accumulatedDist += lineDist;
         }

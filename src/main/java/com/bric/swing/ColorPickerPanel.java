@@ -21,6 +21,7 @@ package com.bric.swing;
 
 import com.bric.plaf.PlafPaintUtils;
 import com.bric.swing.ColorPicker.Mode;
+import com.jhlabs.image.ImageMath;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -433,7 +434,7 @@ public class ColorPickerPanel extends JPanel {
             double radius = size / 2.0;
             double x = p.getX() - size / 2.0;
             double y = p.getY() - size / 2.0;
-            double r = Math.sqrt(x * x + y * y) / radius;
+            double r = ImageMath.hypot(x, y) / radius;
             double theta = Math.atan2(y, x) / TAU;
 
             if (r > 1) {
@@ -634,7 +635,7 @@ public class ColorPickerPanel extends JPanel {
                     theta += TAU;
                 }
 
-                double r = Math.sqrt(relX * relX + relY * relY);
+                double r = ImageMath.hypot(relX, relY);
                 if (r <= radius) {
                     if (mode == BRI) {
                         pixelHue = (float) (theta / TAU);

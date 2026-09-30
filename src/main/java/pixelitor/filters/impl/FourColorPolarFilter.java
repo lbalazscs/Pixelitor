@@ -81,7 +81,7 @@ public class FourColorPolarFilter extends FourColorFilter {
     public int processPixel(int x, int y, int rgb) {
         double dx = x - cx;
         double dy = y - cy;
-        double distance = Math.sqrt(dx * dx + dy * dy);
+        double distance = ImageMath.hypot(dx, dy);
 
         // explicit center coordinates (radius is 0)
         if (distance == 0) {

@@ -623,4 +623,14 @@ public class ImageMath {
         assert n > 0 : "n must be positive, got: " + n;
         return (Integer.SIZE - 1) - Integer.numberOfLeadingZeros(n);
     }
+
+    // FastMath.hypot is faster than Math.hypot, but this is
+    // the fastest (but it doesn't prevent overflow/underflow)
+    public static double hypot(double dx, double dy) {
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public static float hypot(float dx, float dy) {
+        return (float) Math.sqrt(dx * dx + dy * dy);
+    }
 }

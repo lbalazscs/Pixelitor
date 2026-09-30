@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 
+import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.ThreadPool;
@@ -146,7 +147,7 @@ public class ColorWheel extends ParametrizedFilter {
             double baseAngle = FastMath.atan2(yDiff, xDiff);
             double angle = baseAngle + hueRot;
             if (spiral != 0.0) {
-                double radius = FastMath.hypot(xDiff, yDiff);
+                double radius = ImageMath.hypot(xDiff, yDiff);
                 double spiralAngleOffset = spiral * radius * SPIRAL_EFFECT_SCALE;
                 angle += spiralAngleOffset;
             }

@@ -18,6 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.HalftoneFilter;
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -78,7 +79,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
         STAR("Star", (dx, dy) -> {
             // uses polar coordinates to create a 5-pointed star
             double angle = Math.atan2(dy, dx) + 3 * Math.PI / 2; // orient the star to point up
-            double radius = Math.hypot(dx, dy);
+            double radius = ImageMath.hypot(dx, dy);
             // modulates the radius based on the angle to form the star's points
             return radius * (1 + 0.25 * Math.cos(5 * angle));
         });

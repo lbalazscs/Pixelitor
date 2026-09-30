@@ -20,6 +20,8 @@ import net.jafama.FastMath;
 
 import java.awt.geom.Point2D;
 
+import static com.jhlabs.image.ImageMath.hypot;
+
 /**
  * A filter which distorts an image by performing coordinate conversions between rectangular and polar coordinates.
  */
@@ -92,10 +94,10 @@ public class PolarFilter extends TransformFilter {
         if (x >= cx) {
             if (y > cy) {
                 theta = ImageMath.PI_F - (float) FastMath.atan((x - cx) / (y - cy));
-                r = fastHypot(x - cx, y - cy);
+                r = hypot(x - cx, y - cy);
             } else if (y < cy) {
                 theta = (float) FastMath.atan((x - cx) / (cy - y));
-                r = fastHypot(x - cx, y - cy);
+                r = hypot(x - cx, y - cy);
             } else {
                 theta = (float) (Math.PI / 2.0);
                 r = x - cx;
@@ -103,10 +105,10 @@ public class PolarFilter extends TransformFilter {
         } else if (x < cx) {
             if (y < cy) {
                 theta = ImageMath.TAU_F - (float) FastMath.atan((cx - x) / (cy - y));
-                r = fastHypot(x - cx, y - cy);
+                r = hypot(x - cx, y - cy);
             } else if (y > cy) {
                 theta = ImageMath.PI_F + (float) FastMath.atan((cx - x) / (y - cy));
-                r = fastHypot(x - cx, y - cy);
+                r = hypot(x - cx, y - cy);
             } else {
                 theta = 1.5f * ImageMath.PI_F;
                 r = cx - x;
@@ -172,9 +174,5 @@ public class PolarFilter extends TransformFilter {
         out[1] = cy + relY;
 
         out[0] -= (width - 1) / ImageMath.TAU_F * angle;
-    }
-
-    private static float fastHypot(float dx, float dy) {
-        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 }

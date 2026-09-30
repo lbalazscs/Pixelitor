@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.awt;
 
+import com.jhlabs.image.ImageMath;
+
 import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -25,9 +27,7 @@ import java.awt.geom.PathIterator;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.*;
 
 public class WobbleStroke implements Stroke {
     private static final float FLATNESS = 1;
@@ -78,7 +78,7 @@ public class WobbleStroke implements Stroke {
                     currentY = applyJitter(points[1]);
                     float dx = currentX - lastX;
                     float dy = currentY - lastY;
-                    float distance = (float) Math.sqrt(dx * dx + dy * dy);
+                    float distance = ImageMath.hypot(dx, dy);
                     if (distance >= next) {
                         float r = 1.0f / distance;
                         while (distance >= next) {
