@@ -46,8 +46,9 @@ import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
- * Renders a "chaos game" fractal: repeatedly jumps a point a fraction of the
- * way toward a randomly chosen vertex of a polygon, plotting each landing spot.
+ * Renders a "chaos game" fractal: repeatedly moves a point
+ * toward a randomly chosen attractor, shrinking the distance
+ * by the contraction ratio, and plots each landing spot.
  */
 public class ChaosGame extends ParametrizedFilter {
     public static final String NAME = "Chaos Game";
@@ -63,13 +64,15 @@ public class ChaosGame extends ParametrizedFilter {
     private static final int COLORS_LAST_VERTEX = 2;
     private static final int COLORS_LAST_BUT_ONE = 3;
     private static final int COLORS_LAST_BUT_TWO = 4;
+    private static final int COLORS_LAST_BUT_THREE = 5;
 
-    private static final int WARM_UP_ITERATIONS = 50;
     private static final int NUM_WORK_UNITS = 20;
     private static final int ARGB_WHITE = 0xFF_FF_FF_FF;
+    public static final int ARGB_BLACK = 0xFF_00_00_00;
 
     private final RangeParam numPolyCorners = new RangeParam("Number of Vertices", 3, 3, 10);
     private final RangeParam fraction = new RangeParam("Jump Fraction (%)", 1, 50, 99);
+    private final RangeParam twist = new RangeParam("Twist", -30, 0, 30);
     private final RangeParam iterations = new RangeParam("Iterations (millions)",
         1, 1, 10, true, BORDER, RandomizeMode.IGNORE);
     private final IntChoiceParam colors = new IntChoiceParam("Colors", new Item[]{
@@ -77,6 +80,7 @@ public class ChaosGame extends ParametrizedFilter {
         new Item("Last Vertex", COLORS_LAST_VERTEX),
         new Item("Last but One", COLORS_LAST_BUT_ONE),
         new Item("Last but Two", COLORS_LAST_BUT_TWO),
+        new Item("Last but Three", COLORS_LAST_BUT_THREE),
     }, RandomizeMode.IGNORE);
     private final BooleanParam centerJump = new BooleanParam("Jump to Center");
     private final BooleanParam midpointJump = new BooleanParam("Jump to Midpoints");
@@ -89,6 +93,7 @@ public class ChaosGame extends ParametrizedFilter {
         initParams(
             numPolyCorners,
             fraction,
+            twist,
             iterations,
             colors,
             centerJump,
@@ -102,9 +107,12 @@ public class ChaosGame extends ParametrizedFilter {
     }
 
     private void setupBuiltinPresets() {
+        RangeParamState NO_TWIST = new RangeParamState(0);
+
         FilterState triangle = new FilterState("Sierpinski Triangle (defaults)")
             .with(numPolyCorners, new RangeParamState(3))
             .with(fraction, new RangeParamState(50))
+            .with(twist, NO_TWIST)
             .with(centerJump, NO)
             .with(midpointJump, NO)
             .with(restrict, NO);
@@ -112,6 +120,7 @@ public class ChaosGame extends ParametrizedFilter {
         FilterState carpet = new FilterState("Sierpinski Carpet")
             .with(numPolyCorners, new RangeParamState(4))
             .with(fraction, new RangeParamState(33.3333)) // jump ratio is 1/3
+            .with(twist, NO_TWIST)
             .with(centerJump, NO)
             .with(midpointJump, YES)
             .with(restrict, NO);
@@ -119,6 +128,7 @@ public class ChaosGame extends ParametrizedFilter {
         FilterState vicsek = new FilterState("Vicsek Fractal")
             .with(numPolyCorners, new RangeParamState(4))
             .with(fraction, new RangeParamState(33.3333)) // jump ratio is 1/3
+            .with(twist, NO_TWIST)
             .with(centerJump, YES)
             .with(midpointJump, NO)
             .with(restrict, NO);
@@ -126,6 +136,7 @@ public class ChaosGame extends ParametrizedFilter {
         FilterState penta = new FilterState("Pentaflake")
             .with(numPolyCorners, new RangeParamState(5))
             .with(fraction, new RangeParamState(38.1966)) // jump ratio is 1 / (2 * cos(π / 5) + 1) = 1 / (φ + 1)
+            .with(twist, NO_TWIST)
             .with(centerJump, NO)
             .with(midpointJump, NO)
             .with(restrict, NO);
@@ -133,6 +144,7 @@ public class ChaosGame extends ParametrizedFilter {
         FilterState hexa = new FilterState("Hexaflake")
             .with(numPolyCorners, new RangeParamState(6))
             .with(fraction, new RangeParamState(33.3333)) // jump ratio is 1/3
+            .with(twist, NO_TWIST)
             .with(centerJump, YES)
             .with(midpointJump, NO)
             .with(restrict, NO);
@@ -143,7 +155,7 @@ public class ChaosGame extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int numIterations = iterations.getValue() * 1_000_000;
-        int workUnit = numIterations / NUM_WORK_UNITS;
+        int unitSize = numIterations / NUM_WORK_UNITS;
         var pt = new StatusBarProgressTracker(NAME, NUM_WORK_UNITS);
 
         // the original polygon corner count, without the extra attractors
@@ -156,6 +168,7 @@ public class ChaosGame extends ParametrizedFilter {
         RandomGenerator random = paramSet.getGeneratorWithLastSeed("Xoroshiro128PlusPlus");
 
         List<Vertex> vertices = createVertices(numVertices, colorsValue, width, height);
+        Vertex[] attractors = vertices.toArray(EMPTY_ARRAY);
 
         int[] destPixels = ImageUtils.getPixels(dest);
         Arrays.fill(destPixels, ARGB_WHITE); // fill the background with white
@@ -163,53 +176,28 @@ public class ChaosGame extends ParametrizedFilter {
         double jumpRatio = fraction.getPercentage();
         double remainingRatio = 1 - jumpRatio;
 
-        // start at a random location
-        double currentX = random.nextInt(width);
-        double currentY = random.nextInt(height);
+        var walker = new Walker(attractors, random, width, height,
+            jumpRatio, remainingRatio, twist.getValue(), restrict.isChecked());
 
-        Vertex[] verticesArray = vertices.toArray(EMPTY_ARRAY);
-
-        // total attractor count, including midpoints/center
-        int numPoints = vertices.size();
-
-        boolean restrictRepetition = restrict.isChecked();
+        int colorLag = switch (colorsValue) {
+            case COLORS_LAST_BUT_ONE -> 1;
+            case COLORS_LAST_BUT_TWO -> 2;
+            case COLORS_LAST_BUT_THREE -> 3;
+            default -> 0;
+        };
 
         // do warmup iterations without drawing any pixels to ensure that
         // the point moves from its random starting position into the fractal
         // (prevents stray pixels from appearing outside the main pattern)
-        Vertex previousVertex = null;
-        Vertex secondPreviousVertex = null;
-        for (int i = 0; i < WARM_UP_ITERATIONS; i++) {
-            Vertex vertex = pickNextVertex(random, verticesArray, numPoints, restrictRepetition, previousVertex);
-            currentX = moveToward(currentX, vertex.x, jumpRatio, remainingRatio);
-            currentY = moveToward(currentY, vertex.y, jumpRatio, remainingRatio);
-            secondPreviousVertex = previousVertex;
-            previousVertex = vertex;
-        }
+        walker.warmUp();
 
         // main iteration loop
-        int counter = 0;
-        for (int i = 0; i < numIterations; i++) {
-            Vertex vertex = pickNextVertex(random, verticesArray, numPoints, restrictRepetition, previousVertex);
-
-            // calculate the new point
-            currentX = moveToward(currentX, vertex.x, jumpRatio, remainingRatio);
-            currentY = moveToward(currentY, vertex.y, jumpRatio, remainingRatio);
-
-            // plot the pixel
-            int index = (int) currentX + width * (int) currentY;
-            destPixels[index] = switch (colorsValue) {
-                case COLORS_LAST_BUT_TWO -> secondPreviousVertex.color;
-                case COLORS_LAST_BUT_ONE -> previousVertex.color;
-                default -> vertex.color;
-            };
-            secondPreviousVertex = previousVertex;
-            previousVertex = vertex;
-
-            if (++counter == workUnit) {
-                counter = 0;
-                pt.unitDone();
+        for (int unit = 0; unit < NUM_WORK_UNITS; unit++) {
+            for (int i = 0; i < unitSize; i++) {
+                walker.step();
+                plot(walker, destPixels, width, height, colorLag);
             }
+            pt.unitDone();
         }
 
         // render the polygon outline and vertices on top of the generated fractal
@@ -221,17 +209,12 @@ public class ChaosGame extends ParametrizedFilter {
         return dest;
     }
 
-    /**
-     * Picks the next random vertex, optionally applying the no-repetition rule.
-     */
-    private static Vertex pickNextVertex(RandomGenerator random, Vertex[] verticesArray, int numPoints,
-                                         boolean restrictRepetition, Vertex previousVertex) {
-        Vertex vertex;
-        do {
-            int rand = random.nextInt(numPoints);
-            vertex = verticesArray[rand];
-        } while (restrictRepetition && vertex == previousVertex);
-        return vertex;
+    private static void plot(Walker walker, int[] destPixels, int width, int height, int colorLag) {
+        int px = (int) walker.x;
+        int py = (int) walker.y;
+        if (px >= 0 && px < width && py >= 0 && py < height) {
+            destPixels[px + width * py] = walker.colorAt(colorLag);
+        }
     }
 
     /**
@@ -313,7 +296,7 @@ public class ChaosGame extends ParametrizedFilter {
         for (int i = 0; i < vertices.size(); i++) {
             Vertex point = vertices.get(i);
             if (colorsValue == COLORS_BW) {
-                point.color = 0xFF_00_00_00;
+                point.color = ARGB_BLACK;
             } else {
                 if (i < numVertices) {
                     point.color = Color.HSBtoRGB(hue, 0.9f, 0.8f);
@@ -371,13 +354,103 @@ public class ChaosGame extends ParametrizedFilter {
         g.dispose();
     }
 
-    private static double moveToward(double current, double target, double jumpRatio, double remainingRatio) {
-        return current * jumpRatio + target * remainingRatio;
-    }
-
     @Override
     public boolean supportsGray() {
         return false;
+    }
+
+    /**
+     * Encapsulates the chaotic walker simulation state and step transitions.
+     */
+    private static final class Walker {
+        private static final int WARM_UP_ITERATIONS = 50;
+
+        private final Vertex[] attractors;
+        private final RandomGenerator random;
+        private final double jumpRatio;
+        private final double remainingRatio;
+        private final boolean restrictRepetition;
+        private final boolean rotate;
+        private final double cos;
+        private final double sin;
+        private final double cx;
+        private final double cy;
+
+        private double x;
+        private double y;
+        private int lastIndex = -1;
+        private int lastColor;
+        private int lastButOneColor;
+        private int lastButTwoColor;
+        private int lastButThreeColor;
+
+        Walker(Vertex[] attractors, RandomGenerator random,
+               int width, int height,
+               double jumpRatio, double remainingRatio,
+               int twistValue, boolean restrictRepetition) {
+            this.attractors = attractors;
+            this.random = random;
+            this.jumpRatio = jumpRatio;
+            this.remainingRatio = remainingRatio;
+            this.restrictRepetition = restrictRepetition;
+
+            this.rotate = twistValue != 0;
+            double twistAngle = Math.toRadians(twistValue);
+            this.cos = Math.cos(twistAngle);
+            this.sin = Math.sin(twistAngle);
+            this.cx = width / 2.0;
+            this.cy = height / 2.0;
+
+            this.x = random.nextInt(width);
+            this.y = random.nextInt(height);
+        }
+
+        void warmUp() {
+            for (int i = 0; i < WARM_UP_ITERATIONS; i++) {
+                step();
+            }
+        }
+
+        void step() {
+            int index = pickIndex();
+            Vertex target = attractors[index];
+            x = moveToward(x, target.x);
+            y = moveToward(y, target.y);
+
+            if (rotate) {
+                double dx = x - cx;
+                double dy = y - cy;
+                x = cx + dx * cos - dy * sin;
+                y = cy + dx * sin + dy * cos;
+            }
+
+            lastIndex = index;
+            lastButThreeColor = lastButTwoColor;
+            lastButTwoColor = lastButOneColor;
+            lastButOneColor = lastColor;
+            lastColor = target.color;
+        }
+
+        private int pickIndex() {
+            int index;
+            do {
+                index = random.nextInt(attractors.length);
+            } while (restrictRepetition && index == lastIndex);
+            return index;
+        }
+
+        private double moveToward(double current, double target) {
+            return current * jumpRatio + target * remainingRatio;
+        }
+
+        int colorAt(int lag) {
+            return switch (lag) {
+                case 0 -> lastColor;
+                case 1 -> lastButOneColor;
+                case 2 -> lastButTwoColor;
+                default -> lastButThreeColor;
+            };
+        }
     }
 
     /**
