@@ -39,6 +39,7 @@ public class RadialWaves extends ParametrizedFilter {
     private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 10, 101);
     private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude (Amount)", 0, 20, 100);
     private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);
+    private final RangeParam twist = new RangeParam("Twist", -180, 0, 180);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 500);
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
@@ -56,6 +57,7 @@ public class RadialWaves extends ParametrizedFilter {
             angularDivision,
             radialAmplitude.withAdjustedRange(1.0),
             phase,
+            twist,
             zoom,
             edgeAction,
             interpolation
@@ -71,6 +73,7 @@ public class RadialWaves extends ParametrizedFilter {
             angularDivision.getValue(),
             radialAmplitude.getValueAsDouble(),
             phase.getPercentage(),
+            twist.getValueInRadians(),
             zoom.getPercentage(),
             waveType.getValue());
 
