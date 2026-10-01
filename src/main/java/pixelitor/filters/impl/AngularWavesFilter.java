@@ -24,10 +24,11 @@ import net.jafama.FastMath;
 import pixelitor.filters.AngularWaves;
 
 import java.awt.geom.Point2D;
+import java.util.function.DoubleBinaryOperator;
 
 /**
  * The implementation of the {@link AngularWaves} filter.
- * Angular waves in a polar coordinate system
+ * Angular waves in a polar coordinate system.
  */
 public class AngularWavesFilter extends CenteredTransformFilter {
     private final double radialWavelength;
@@ -35,6 +36,9 @@ public class AngularWavesFilter extends CenteredTransformFilter {
     private final double zoom;
     private final double amount;
     private final int waveType;
+
+    // wave distance calculation (metric determines ripple shape)
+    private final DoubleBinaryOperator distFunc;
 
     /**
      * Constructs an {@link AngularWavesFilter}.
@@ -48,17 +52,19 @@ public class AngularWavesFilter extends CenteredTransformFilter {
      * @param zoom             the zoom factor applied to the output.
      * @param amount           the angular amplitude of the waves, in radians.
      * @param waveType         the shape of the wave.
+     * @param shape            the distance metric determining the overall shape.
      */
     public AngularWavesFilter(String filterName, int edgeAction, int interpolation, Point2D center,
                               double radialWavelength, double phase, double zoom,
-                              double amount, int waveType) {
+                              double amount, int waveType, PolarMetric shape) {
         super(filterName, edgeAction, interpolation, center);
 
-        this.radialWavelength = radialWavelength;
+        this.radialWavelength = radialWavelength * shape.getCircleFitFactor();
         this.phase = phase;
         this.zoom = zoom;
         this.amount = amount;
         this.waveType = waveType;
+        this.distFunc = shape.getDistFunction();
     }
 
     @Override
@@ -67,11 +73,14 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         double dx = x - cx;
         double dy = y - cy;
 
-        // convert to polar coordinates
+        // convert to polar coordinates (must remain Euclidean)
         double r = ImageMath.hypot(dx, dy);
         double angle = FastMath.atan2(dy, dx);
 
-        double waveInput = r / radialWavelength - phase;
+        double waveDist = distFunc.applyAsDouble(dx, dy);
+
+        // calculate wave value based on chosen metric distance
+        double waveInput = waveDist / radialWavelength - phase;
         double waveValue = WaveType.wave(waveInput, waveType);
 
         // distort the angle with the wave
@@ -82,7 +91,7 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         double sin = FastMath.sinAndCos(angle, cosWrapper);
         double cos = cosWrapper.value;
 
-        // apply zoom and convert back to cartesian coordinates
+        // apply zoom and convert back to Cartesian coordinates using the true Euclidean radius
         double zoomedR = r / zoom;
         double u = zoomedR * cos;
         double v = zoomedR * sin;
@@ -91,4 +100,5 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         out[0] = (float) (u + cx);
         out[1] = (float) (v + cy);
     }
+
 }

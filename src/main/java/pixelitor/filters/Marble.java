@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.MarbleTextureFilter;
+import pixelitor.filters.impl.PolarMetric;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
@@ -44,10 +45,7 @@ public class Marble extends ParametrizedFilter {
         new Item("Star", MarbleTextureFilter.TYPE_STAR),
     });
 
-    private final IntChoiceParam shape = new IntChoiceParam("Shape", new Item[]{
-        new Item("Circle", MarbleTextureFilter.SHAPE_CIRCLE),
-        new Item("Square", MarbleTextureFilter.SHAPE_SQUARE),
-    });
+    private final EnumParam<PolarMetric> shape = PolarMetric.asParam();
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();

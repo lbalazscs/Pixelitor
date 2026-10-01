@@ -17,10 +17,12 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.AngularWavesFilter;
+import pixelitor.filters.impl.PolarMetric;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -28,7 +30,7 @@ import java.io.Serial;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
- * Angular waves in a polar coordinate system
+ * Angular waves in a polar coordinate system.
  */
 public class AngularWaves extends ParametrizedFilter {
     public static final String NAME = "Angular Waves";
@@ -36,12 +38,14 @@ public class AngularWaves extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 912678274938942074L;
 
+    private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
+    private final EnumParam<PolarMetric> metricType = PolarMetric.asParam();
+
     private final RangeParam radialWL = new RangeParam("Radial Wavelength", 1, 20, 100);
     private final RangeParam amount = new RangeParam("Angular Amount (Degrees)", 0, 20, 90);
     private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 500);
-    private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
 
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
@@ -53,6 +57,7 @@ public class AngularWaves extends ParametrizedFilter {
 
         initParams(
             waveType.configureWaveType(paramSet),
+            metricType,
             center,
             radialWL.withAdjustedRange(0.05).withDecimalPlaces(1),
             amount,
@@ -69,11 +74,12 @@ public class AngularWaves extends ParametrizedFilter {
             edgeAction.getValue(),
             interpolation.getValue(),
             center.getAbsolutePoint(src),
-            radialWL.getValueAsDouble(),
-            phase.getPercentage(),
+            radialWL.getValueAsDouble(), // TODO should be scaled by 2π?
+            phase.getPercentage(), // TODO should use phase.getValueInRadians()
             zoom.getPercentage(),
-            amount.getPercentage(),
-            waveType.getValue());
+            amount.getPercentage(), // TODO should use amount.getValueInRadians()
+            waveType.getValue(),
+            metricType.getValue());
 
         return filter.filter(src, dest);
     }

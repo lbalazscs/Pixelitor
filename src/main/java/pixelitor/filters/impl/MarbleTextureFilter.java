@@ -18,11 +18,11 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.Colormap;
-import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.Marble;
 
 import java.awt.geom.Point2D;
+import java.util.function.DoubleBinaryOperator;
 
 import static com.jhlabs.image.WaveType.wave01;
 import static com.jhlabs.math.Noise.*;
@@ -40,9 +40,6 @@ public class MarbleTextureFilter extends PointFilter {
     public static final int TYPE_SPIRAL = 4;
     public static final int TYPE_STAR = 5;
 
-    public static final int SHAPE_CIRCLE = 0;
-    public static final int SHAPE_SQUARE = 1;
-
     // cos and sin divided by zoom to rotate and zoom in one step without per-pixel division
     private final double cos;
     private final double sin;
@@ -53,18 +50,23 @@ public class MarbleTextureFilter extends PointFilter {
     private final int octaves;
     private final double phase;
     private final int type;
-    private final int shape;
+
+    private final DoubleBinaryOperator distFunc;
+    private final double distScale;
+
     private final int waveType;
     private final boolean smoothDetails;
     private final Colormap colormap;
 
-    public MarbleTextureFilter(int type, int shape, Point2D center, int waveType,
+    public MarbleTextureFilter(int type, PolarMetric metric, Point2D center, int waveType,
                                double angle, double zoom, double strength,
                                int octaves, double detailsStrength,
                                Colormap colormap, boolean smoothDetails, double phase) {
         super(Marble.NAME);
         this.type = type;
-        this.shape = shape;
+        this.distFunc = metric.getDistFunction();
+        this.distScale = 1.0 / metric.getCircleFitFactor();
+
         this.cx = center.getX();
         this.cy = center.getY();
         this.waveType = waveType;
@@ -103,6 +105,10 @@ public class MarbleTextureFilter extends PointFilter {
         return colormap.getColor(value);
     }
 
+    private double dist(double px, double py) {
+        return distScale * distFunc.applyAsDouble(px, py);
+    }
+
     private double distortionAt(double x, double y) {
         double base = strength * noise2((float) (x * 0.1), (float) (y * 0.1));
         double details = smoothDetails
@@ -122,15 +128,6 @@ public class MarbleTextureFilter extends PointFilter {
 
     private float ringsValue(double px, double py, double phaseOffset) {
         return (float) wave01(phaseOffset + dist(px, py), waveType);
-    }
-
-    // Euclidean for circles, Chebyshev (L∞) for squares
-    private double dist(double x, double y) {
-        return switch (shape) {
-            case SHAPE_CIRCLE -> ImageMath.hypot(x, y);
-            case SHAPE_SQUARE -> Math.max(Math.abs(x), Math.abs(y));
-            default -> throw new IllegalStateException("shape = " + shape);
-        };
     }
 
     private float spiralValue(double px, double py, double phaseOffset) {
