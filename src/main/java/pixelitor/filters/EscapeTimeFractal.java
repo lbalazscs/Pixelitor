@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.impl.ComplexPlaneFilter;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
@@ -28,12 +29,12 @@ import java.io.Serial;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static pixelitor.filters.impl.ComplexFractalFilter.*;
+import static pixelitor.filters.impl.EscapeTimeFilter.*;
 
 /**
- * Common superclass for the Julia and Mandelbrot sets.
+ * Common superclass for the Julia and Mandelbrot set UIs.
  */
-public abstract class ComplexFractal extends ParametrizedFilter {
+public abstract class EscapeTimeFractal extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 9185505916174567657L;
 
@@ -50,9 +51,6 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     private static final int ITERATION_MULTIBROT_3 = 3;
     private static final int ITERATION_MULTIBROT_4 = 4;
     private static final int ITERATION_MULTIBROT_5 = 5;
-
-    // points belonging to the set are colored black
-    public static final int IN_SET_COLOR = 0xFF_00_00_00;
 
     // color cache fields
     private static int[] cachedColors = null;
@@ -81,7 +79,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
         new Item("2x2 (Better, Slower)", SUPERSAMPLING_2X2),
     }, RandomizeMode.IGNORE);
 
-    protected ComplexFractal(int defaultIterations, float defaultZoomCenterX) {
+    protected EscapeTimeFractal(int defaultIterations, float defaultZoomCenterX) {
         super(false);
 
         iterationsParam = new RangeParam.Builder("Iterations")
@@ -154,7 +152,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
         int[] colors = new int[maxIterations + 1];
         double normalizer = Math.log(maxIterations + 1);
 
-        colors[0] = IN_SET_COLOR; // 0 remaining iterations => point belongs to the set
+        colors[0] = ComplexPlaneFilter.IN_SET_COLOR; // 0 remaining iterations => point belongs to the set
 
         for (int it = 1; it <= maxIterations; it++) {
             float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;

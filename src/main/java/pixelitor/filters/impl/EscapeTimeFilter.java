@@ -17,31 +17,15 @@
 
 package pixelitor.filters.impl;
 
-import com.jhlabs.image.PointFilter;
 import net.jafama.FastMath;
 
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 /**
  * A common superclass for the Mandelbrot and Julia fractal implementations.
  */
-public abstract class ComplexFractalFilter extends PointFilter {
-    // the bounds in the complex plane
-    private final double xMin, xMax, yMin, yMax, xRange, yRange;
-
-    // the actual start in the complex plane,
-    // taking the zooming into account
-    protected double xStart, yStart;
-
-    // multipliers for translating image
-    // coordinates into complex coordinates
-    protected double xMultiplier, yMultiplier;
-
-    private final double zoomCenterX, zoomCenterY;
-
+public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
     private final int maxIterations;
-    private final double zoom;
 
     protected final int[] colors;
 
@@ -62,76 +46,20 @@ public abstract class ComplexFractalFilter extends PointFilter {
      * @param maxIterations The maximum number of iterations for the escape time algorithm.
      * @param colors        The color palette used for rendering.
      */
-    protected ComplexFractalFilter(String filterName,
-                                   double xMin, double xMax,
-                                   double yMin, double yMax,
-                                   IterationStrategy iterator,
-                                   double zoom,
-                                   double zoomCenterX,
-                                   double zoomCenterY,
-                                   int maxIterations,
-                                   int[] colors) {
-        super(filterName);
-
-        assert xMax > xMin && yMax > yMin : "invalid complex-plane bounds";
-
-        this.xMin = xMin;
-        this.xMax = xMax;
-        this.yMin = yMin;
-        this.yMax = yMax;
-
-        this.xRange = xMax - xMin;
-        this.yRange = yMax - yMin;
+    protected EscapeTimeFilter(String filterName,
+                               double xMin, double xMax,
+                               double yMin, double yMax,
+                               IterationStrategy iterator,
+                               double zoom,
+                               double zoomCenterX,
+                               double zoomCenterY,
+                               int maxIterations,
+                               int[] colors) {
+        super(filterName, xMin, xMax, yMin, yMax, zoom, zoomCenterX, zoomCenterY);
 
         this.iterator = iterator;
-        this.zoom = zoom;
-        this.zoomCenterX = zoomCenterX;
-        this.zoomCenterY = zoomCenterY;
         this.maxIterations = maxIterations;
         this.colors = colors;
-    }
-
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        // calculate the width and height of the view in the complex plane based on the zoom level
-        double zoomedRangeX = xRange / zoom;
-        double zoomedRangeY = yRange / zoom;
-
-        // calculate multipliers for converting image coordinates to complex plane coordinates
-        xMultiplier = zoomedRangeX / src.getWidth();
-        yMultiplier = zoomedRangeY / src.getHeight();
-
-        // find the zoom center point in the complex plane
-        double zoomCenterComplexX = xMin + zoomCenterX * xRange;
-        double zoomCenterComplexY = yMin + zoomCenterY * yRange;
-
-        // calculate the boundaries of the zoomed view
-        double zoomedMinX = zoomCenterComplexX - zoomedRangeX / 2.0;
-        double zoomedMaxX = zoomCenterComplexX + zoomedRangeX / 2.0;
-        double zoomedMinY = zoomCenterComplexY - zoomedRangeY / 2.0;
-        double zoomedMaxY = zoomCenterComplexY + zoomedRangeY / 2.0;
-
-        // adjust the view boundaries to ensure they stay within the original fractal limits
-        xStart = adjustStart(zoomedMinX, zoomedMaxX, xMin, xMax);
-        yStart = adjustStart(zoomedMinY, zoomedMaxY, yMin, yMax);
-
-        return super.filter(src, dst);
-    }
-
-    /**
-     * Adjusts the starting coordinate to keep the zoomed view within the original boundaries.
-     */
-    private static double adjustStart(double zoomedMin, double zoomedMax, double min, double max) {
-        if (zoomedMax > max) {
-            // if the zoomed view exceeds the maximum boundary, shift it back
-            return zoomedMin - (zoomedMax - max);
-        }
-        if (zoomedMin < min) {
-            // if the zoomed view is below the minimum boundary, clamp it to the minimum
-            return min;
-        }
-        // otherwise, the view is within bounds
-        return zoomedMin;
     }
 
     /**

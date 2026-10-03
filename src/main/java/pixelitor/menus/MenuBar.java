@@ -993,6 +993,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(FractalTree.NAME, FractalTree::new);
         sub.addFilter(JuliaSet.NAME, JuliaSet::new);
         sub.addFilter(MandelbrotSet.NAME, MandelbrotSet::new);
+        sub.addFilter(NewtonFractal.NAME, NewtonFractal::new);
 
         return sub;
     }
