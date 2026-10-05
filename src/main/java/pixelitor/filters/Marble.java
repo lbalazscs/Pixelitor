@@ -18,12 +18,14 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.Colormap;
+import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.List;
@@ -34,13 +36,23 @@ import static com.jhlabs.math.Noise.*;
 import static net.jafama.FastMath.*;
 
 /**
- * Marble filter
+ * Marble filter.
  */
 public class Marble extends ParametrizedFilter {
     public static final String NAME = "Marble";
 
     @Serial
     private static final long serialVersionUID = -4289737664285529580L;
+
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
+        new Item("Lines", Impl.TYPE_LINES),
+        new Item("Rings", Impl.TYPE_RINGS),
+        new Item("Spiral", Impl.TYPE_SPIRAL),
+        new Item("Grid", Impl.TYPE_GRID),
+        new Item("Star", Impl.TYPE_STAR),
+    });
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
 
     private final RangeParam zoom = new RangeParam(GUIText.ZOOM, 1, 10, 200);
     private final AngleParam angle = new AngleParam("Angle", 0);
@@ -50,15 +62,6 @@ public class Marble extends ParametrizedFilter {
     private final RangeParam detailsLevel = new RangeParam("Level", 0, 3, 8);
     private final RangeParam detailsStrength = new RangeParam("Strength", 0, 12, 48);
 
-    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
-        new Item("Lines", Impl.TYPE_LINES),
-        new Item("Rings", Impl.TYPE_RINGS),
-        new Item("Spiral", Impl.TYPE_SPIRAL),
-        new Item("Grid", Impl.TYPE_GRID),
-        new Item("Star", Impl.TYPE_STAR),
-    });
-
-    private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
     private final BooleanParam smoothDetails = new BooleanParam("Smoother");
 
     private final GradientPreset greenPreset = new GradientPreset("Green",
@@ -93,6 +96,7 @@ public class Marble extends ParametrizedFilter {
         zoom.setPresetKey("Zoom");
         initParams(
             type,
+            center,
             waveType,
             time,
             angle,
@@ -110,6 +114,7 @@ public class Marble extends ParametrizedFilter {
         }
 
         filter.setType(type.getValue());
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setWaveType(waveType.getValue());
 
         double angleShift = Math.PI / 2;
@@ -192,11 +197,9 @@ public class Marble extends ParametrizedFilter {
             this.zoom = zoom;
         }
 
-        @Override
-        public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-            cx = src.getWidth() / 2.0;
-            cy = src.getHeight() / 2.0;
-            return super.filter(src, dst);
+        public void setCenter(Point2D c) {
+            this.cx = c.getX();
+            this.cy = c.getY();
         }
 
         @Override
@@ -244,14 +247,21 @@ public class Marble extends ParametrizedFilter {
         }
 
         private float calcRingsColor(double dy, double dx, double f) {
-            double dist = sqrt(dx * dx + dy * dy) / zoom;
+            double dist = ImageMath.hypot(dx, dy) / zoom;
             f += dist;
 
             return (float) wave01(f, waveType);
         }
 
+//        private float calcSqRingsColor(double dy, double dx, double f) {
+//            double dist = (Math.max(Math.abs(dx), Math.abs(dy))) / zoom;
+//            f += dist;
+//
+//            return (float) wave01(f, waveType);
+//        }
+
         private float calcSpiralColor(double dy, double dx, double f) {
-            double dist = sqrt(dx * dx + dy * dy) / zoom;
+            double dist = ImageMath.hypot(dx, dy) / zoom;
             double pixelAngle = atan2(dy, dx);
             f += (dist + pixelAngle - rotAngle);
 
