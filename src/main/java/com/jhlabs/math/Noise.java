@@ -76,11 +76,12 @@ public class Noise {
      * @param octaves the number of octaves of turbulence
      * @return the turbulence value at (x, y)
      */
-    public static double turbulence2(double x, double y, double octaves) {
+    public static double turbulence2(double x, double y, int octaves) {
         double t = 0.0;
-
-        for (double f = 1.0; f <= octaves; f *= 2.0) {
+        double f = 1.0;
+        for (int i = 0; i < octaves; i++) {
             t += Math.abs(noise2((float) (f * x), (float) (f * y))) / f;
+            f *= 2.0;
         }
         return t;
     }
@@ -93,11 +94,12 @@ public class Noise {
      * @param octaves the number of octaves of turbulence
      * @return the turbulence value at (x, y)
      */
-    public static double turbulence2Smooth(double x, double y, double octaves) {
+    public static double turbulence2Smooth(double x, double y, int octaves) {
         double t = 0.0;
-
-        for (double f = 1.0; f <= octaves; f *= 2.0) {
+        double f = 1.0;
+        for (int i = 0; i < octaves; i++) {
             t += noise2((float) (f * x), (float) (f * y)) / f;
+            f *= 2.0;
         }
         return t;
     }
@@ -111,11 +113,12 @@ public class Noise {
      * @param octaves the number of octaves of turbulence
      * @return the turbulence value at (x, y, z)
      */
-    public static float turbulence3(float x, float y, float z, float octaves) {
+    public static float turbulence3(float x, float y, float z, int octaves) {
         float t = 0.0f;
-
-        for (float f = 1.0f; f <= octaves; f *= 2.0f) {
+        float f = 1.0f;
+        for (int i = 0; i < octaves; i++) {
             t += Math.abs(noise3(f * x, f * y, f * z)) / f;
+            f *= 2.0f;
         }
         return t;
     }

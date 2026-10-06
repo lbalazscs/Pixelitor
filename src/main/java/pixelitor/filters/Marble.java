@@ -17,23 +17,15 @@
 
 package pixelitor.filters;
 
-import com.jhlabs.image.Colormap;
-import com.jhlabs.image.ImageMath;
-import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.impl.MarbleTextureFilter;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.List;
-
-import static com.jhlabs.image.WaveType.wave;
-import static com.jhlabs.image.WaveType.wave01;
-import static com.jhlabs.math.Noise.*;
-import static net.jafama.FastMath.*;
 
 /**
  * Marble filter.
@@ -45,17 +37,23 @@ public class Marble extends ParametrizedFilter {
     private static final long serialVersionUID = -4289737664285529580L;
 
     private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
-        new Item("Lines", Impl.TYPE_LINES),
-        new Item("Rings", Impl.TYPE_RINGS),
-        new Item("Spiral", Impl.TYPE_SPIRAL),
-        new Item("Grid", Impl.TYPE_GRID),
-        new Item("Star", Impl.TYPE_STAR),
+        new Item("Lines", MarbleTextureFilter.TYPE_LINES),
+        new Item("Rings", MarbleTextureFilter.TYPE_RINGS),
+        new Item("Spiral", MarbleTextureFilter.TYPE_SPIRAL),
+        new Item("Grid", MarbleTextureFilter.TYPE_GRID),
+        new Item("Star", MarbleTextureFilter.TYPE_STAR),
     });
+
+    private final IntChoiceParam shape = new IntChoiceParam("Shape", new Item[]{
+        new Item("Circle", MarbleTextureFilter.SHAPE_CIRCLE),
+        new Item("Square", MarbleTextureFilter.SHAPE_SQUARE),
+    });
+
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
 
     private final RangeParam zoom = new RangeParam(GUIText.ZOOM, 1, 10, 200);
-    private final AngleParam angle = new AngleParam("Angle", 0);
+    private final AngleParam rotation = new AngleParam("Rotation", 0);
     private final RangeParam distortion = new RangeParam("Distortion", 0, 25, 100);
     private final RangeParam time = new RangeParam("Time (Phase)", 0, 0, 100);
 
@@ -64,7 +62,7 @@ public class Marble extends ParametrizedFilter {
 
     private final BooleanParam smoothDetails = new BooleanParam("Smoother");
 
-    private final GradientPreset greenPreset = new GradientPreset("Green",
+    private static final GradientPreset MALACHITE = new GradientPreset("Malachite",
         new float[]{0.0f, 0.5f, 1.0f},
         new Color[]{
             new Color(1, 14, 5),
@@ -72,18 +70,55 @@ public class Marble extends ParametrizedFilter {
             new Color(235, 255, 251),
         });
 
-    private final GradientPreset brownPreset = new GradientPreset("Brown",
-        new float[]{0.0f, 0.5f, 1.0f},
+    private static final GradientPreset EMPERADOR = new GradientPreset("Emperador",
+        new float[]{0.0f, 0.40f, 0.75f, 1.0f},
         new Color[]{
-            new Color(85, 61, 51),
-            new Color(162, 125, 99),
-            new Color(220, 212, 213),
+            new Color(18, 10, 7),
+            new Color(82, 46, 28),
+            new Color(180, 126, 78),
+            new Color(250, 242, 230),
         });
 
-    private final GradientParam gradient = new GradientParam("Colors",
-        List.of(greenPreset, brownPreset));
+    private static final GradientPreset CARRARA = new GradientPreset("Carrara",
+        new float[]{0.0f, 0.25f, 0.65f, 1.0f},
+        new Color[]{
+            new Color(24, 27, 32),
+            new Color(105, 112, 120),
+            new Color(210, 214, 218),
+            new Color(253, 253, 255),
+        });
 
-    private Impl filter;
+    private static final GradientPreset PORTORO = new GradientPreset("Portoro",
+        new float[]{0.0f, 0.55f, 0.80f, 0.95f, 1.0f},
+        new Color[]{
+            new Color(8, 8, 10),
+            new Color(28, 25, 22),
+            new Color(165, 110, 40),
+            new Color(245, 190, 80),
+            new Color(255, 245, 205),
+        });
+
+    private static final GradientPreset LAPIS = new GradientPreset("Lapis",
+        new float[]{0.0f, 0.45f, 0.80f, 1.0f},
+        new Color[]{
+            new Color(5, 10, 28),
+            new Color(18, 48, 110),
+            new Color(75, 140, 200),
+            new Color(240, 248, 255),
+        });
+
+    private static final GradientPreset ROSE_ONYX = new GradientPreset("Rose Onyx",
+        new float[]{0.0f, 0.40f, 0.75f, 1.0f},
+        new Color[]{
+            new Color(50, 20, 28),
+            new Color(155, 82, 95),
+            new Color(230, 172, 180),
+            new Color(255, 245, 246),
+        });
+
+
+    private final GradientParam gradient = new GradientParam("Colors",
+        List.of(MALACHITE, EMPERADOR, CARRARA, PORTORO, LAPIS, ROSE_ONYX));
 
     public Marble() {
         super(false);
@@ -92,14 +127,20 @@ public class Marble extends ParametrizedFilter {
         var details = CompositeParam.bordered("Details",
             detailsLevel, detailsStrength, smoothDetails);
 
+        // enable the shape selector only for the RINGS and SPIRAL types
+        type.enableOtherWhen(shape, item ->
+            item.hasValue(MarbleTextureFilter.TYPE_RINGS, MarbleTextureFilter.TYPE_SPIRAL));
+
         type.setPresetKey("Type");
         zoom.setPresetKey("Zoom");
+        rotation.setPresetKey("Angle"); // legacy
+
         initParams(
-            type,
+            CompositeParam.horizontal("Type", type, shape),
             center,
             waveType,
             time,
-            angle,
+            rotation,
             zoom.withAdjustedRange(0.25),
             distortion,
             details,
@@ -109,178 +150,26 @@ public class Marble extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new Impl();
-        }
-
-        filter.setType(type.getValue());
-        filter.setCenter(center.getAbsolutePoint(src));
-        filter.setWaveType(waveType.getValue());
-
         double angleShift = Math.PI / 2;
-        if (type.getValue() == Impl.TYPE_GRID) {
+        if (type.getValue() == MarbleTextureFilter.TYPE_GRID) {
             angleShift = Math.PI / 4;
         }
-        filter.setAngle(angle.getValueInRadians() + angleShift);
 
-        filter.setZoom(zoom.getValueAsDouble());
-        filter.setStrength(distortion.getValueAsDouble() / 5.0);
-        filter.setDetails(detailsLevel.getValueAsDouble());
-        filter.setDetailsStrength(detailsStrength.getValueAsDouble() / 4.0);
-        filter.setColormap(gradient.getColorMap());
-        filter.setSmoothDetails(smoothDetails.isChecked());
-        filter.setTime(time.getValueAsDouble() / 5.0);
+        var filter = new MarbleTextureFilter(
+            type.getValue(),
+            shape.getValue(),
+            center.getAbsolutePoint(src),
+            waveType.getValue(),
+            rotation.getValueInRadians() + angleShift,
+            zoom.getValueAsDouble(),
+            distortion.getValueAsDouble() / 5.0,
+            detailsLevel.getValue(),
+            detailsStrength.getValueAsDouble() / 4.0,
+            gradient.getColorMap(),
+            smoothDetails.isChecked(),
+            time.getValueAsDouble() / 5.0
+        );
 
         return filter.filter(src, dest);
     }
-
-    private static class Impl extends PointFilter {
-        private static final int TYPE_LINES = 1;
-        private static final int TYPE_GRID = 2;
-        private static final int TYPE_RINGS = 3;
-        private static final int TYPE_SPIRAL = 4;
-        private static final int TYPE_STAR = 5;
-
-        private double m00, m01, m10, m11;
-        private double rotAngle;
-
-        private double zoom = 200;
-        private double detailsStrength;
-        private double strength;
-        private double octaves;
-        private int type;
-        private Colormap colormap;
-        private double cx, cy;
-        private int waveType;
-        private boolean smoothDetails;
-        private double time;
-
-        protected Impl() {
-            super(NAME);
-        }
-
-        public void setDetailsStrength(double f) {
-            detailsStrength = f;
-        }
-
-        public void setStrength(double f) {
-            strength = f;
-        }
-
-        public void setDetails(double f) {
-            octaves = pow(2.0, f - 1.0);
-        }
-
-        public void setSmoothDetails(boolean smoothDetails) {
-            this.smoothDetails = smoothDetails;
-        }
-
-        public void setType(int type) {
-            this.type = type;
-        }
-
-        public void setWaveType(int waveType) {
-            this.waveType = waveType;
-        }
-
-        public void setAngle(double angle) {
-            rotAngle = angle;
-            double cos = cos(angle);
-            double sin = sin(angle);
-            m00 = cos;
-            m01 = sin;
-            m10 = -sin;
-            m11 = cos;
-        }
-
-        public void setZoom(double zoom) {
-            this.zoom = zoom;
-        }
-
-        public void setCenter(Point2D c) {
-            this.cx = c.getX();
-            this.cy = c.getY();
-        }
-
-        @Override
-        public int processPixel(int x, int y, int rgb) {
-            double dy = y - cy;
-            double dx = x - cx;
-            double nx = m00 * dx + m01 * dy;
-            double ny = m10 * dx + m11 * dy;
-            nx /= zoom;
-            ny /= zoom;
-
-            double f = strength * noise2((float) (nx * 0.1), (float) (ny * 0.1));
-            if (smoothDetails) {
-                f += detailsStrength * turbulence2Smooth(nx * 0.2, ny * 0.2, octaves);
-            } else {
-                f += detailsStrength * turbulence2(nx * 0.2, ny * 0.2, octaves);
-            }
-            f += time;
-
-            float c = switch (type) {
-                case TYPE_LINES -> calcLinesColor(nx, f);
-                case TYPE_GRID -> calcGridColor(nx, ny, f);
-                case TYPE_RINGS -> calcRingsColor(dy, dx, f);
-                case TYPE_SPIRAL -> calcSpiralColor(dy, dx, f);
-                case TYPE_STAR -> calcStarColor(dy, dx, f);
-                default -> throw new IllegalStateException();
-            };
-
-            return colormap.getColor(c);
-        }
-
-        private float calcLinesColor(double nx, double f) {
-            return (float) wave01(nx + f, waveType);
-        }
-
-        private float calcGridColor(double nx, double ny, double f) {
-            double f2 = strength * noise2((float) (ny * -0.1), (float) (nx * -0.1));
-            if (smoothDetails) {
-                f2 += detailsStrength * turbulence2Smooth(ny * -0.2, nx * -0.2, octaves);
-            } else {
-                f2 += detailsStrength * turbulence2(ny * -0.2, nx * -0.2, octaves);
-            }
-
-            return (float) (wave01(nx + f, waveType) + wave01(ny + f2, waveType)) / 2.0f;
-        }
-
-        private float calcRingsColor(double dy, double dx, double f) {
-            double dist = ImageMath.hypot(dx, dy) / zoom;
-            f += dist;
-
-            return (float) wave01(f, waveType);
-        }
-
-//        private float calcSqRingsColor(double dy, double dx, double f) {
-//            double dist = (Math.max(Math.abs(dx), Math.abs(dy))) / zoom;
-//            f += dist;
-//
-//            return (float) wave01(f, waveType);
-//        }
-
-        private float calcSpiralColor(double dy, double dx, double f) {
-            double dist = ImageMath.hypot(dx, dy) / zoom;
-            double pixelAngle = atan2(dy, dx);
-            f += (dist + pixelAngle - rotAngle);
-
-            return (float) wave01(f, waveType);
-        }
-
-        private float calcStarColor(double dy, double dx, double f) {
-            double pixelAngle = atan2(dy, dx);
-            f += ((pixelAngle - rotAngle) * 10.0);
-            return (float) ((1 + wave(f, waveType)) / 2);
-        }
-
-        public void setColormap(Colormap colormap) {
-            this.colormap = colormap;
-        }
-
-        public void setTime(double time) {
-            this.time = time;
-        }
-    }
-
 }
