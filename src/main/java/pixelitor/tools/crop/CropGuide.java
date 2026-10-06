@@ -21,10 +21,7 @@ import pixelitor.guides.GuidesRenderer;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.util.Arrays;
 
 import static pixelitor.utils.Geometry.GOLDEN_RATIO;
@@ -33,20 +30,31 @@ import static pixelitor.utils.Geometry.createOrthogonalLine;
 /**
  * Compositional guides for cropping.
  */
-public class CompositionGuide {
+public class CropGuide {
     private static final int NUM_SPIRAL_SEGMENTS = 11;
-    private static final int GRID_CELL_SIZE = 50;
+    private static final int GRID_CELL_SIZE = 50; // component-space pixels
 
-    private CompositionGuideType type = CompositionGuideType.NONE;
+    private CropGuideType type = CropGuideType.NONE;
+
+    /// Orientation index from 0 to 3, selecting among mirrored variants:
+    ///
+    ///   - 0: bottom-left (canonical)
+    ///   - 1: top-left (vertical flip)
+    ///   - 2: bottom-right (horizontal flip)
+    ///   - 3: top-right (horizontal and vertical flip)
+    ///
+    /// For triangles, even values (0, 2) produce a top-left to bottom-right diagonal,
+    /// while odd values (1, 3) produce a bottom-left to top-right diagonal.
     private int orientation = 0;
+
     private final GuidesRenderer renderer;
 
-    public CompositionGuide(GuidesRenderer renderer) {
+    public CropGuide(GuidesRenderer renderer) {
         this.renderer = renderer;
     }
 
     /**
-     * Draws the guides in component space into the given crop rectangle.
+     * Draws the guides in component space within the given crop rectangle.
      */
     public void draw(Rectangle2D coRect, Graphics2D g) {
         switch (type) {
@@ -201,22 +209,32 @@ public class CompositionGuide {
     }
 
     private void drawGoldenSpiral(Rectangle2D rect, Graphics2D g) {
-        Arc2D[] arcs = new Arc2D.Double[NUM_SPIRAL_SEGMENTS];
-        double arcWidth = rect.getWidth() / GOLDEN_RATIO;
-        double arcHeight = rect.getHeight();
+        Shape[] arcs = createSpiralBottomLeft(rect);
 
-        switch (orientation % 4) {
-            case 0 -> createSpiralBottomLeft(rect, arcs, arcWidth, arcHeight);
-            case 1 -> createSpiralTopLeft(rect, arcs, arcWidth, arcHeight);
-            case 2 -> createSpiralBottomRight(rect, arcs, arcWidth, arcHeight);
-            case 3 -> createSpiralTopRight(rect, arcs, arcWidth, arcHeight);
+        boolean flipV = (orientation & 1) != 0;
+        boolean flipH = (orientation & 2) != 0;
+        if (flipH || flipV) {
+            AffineTransform at = new AffineTransform();
+            // mirror about the rectangle's center
+            at.translate(flipH ? rect.getMinX() + rect.getMaxX() : 0,
+                flipV ? rect.getMinY() + rect.getMaxY() : 0);
+            at.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+
+            Shape[] transformedArcs = new Shape[NUM_SPIRAL_SEGMENTS];
+            for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
+                transformedArcs[i] = at.createTransformedShape(arcs[i]);
+            }
+            arcs = transformedArcs;
         }
 
         renderShapes(arcs, g);
     }
 
-    // creates a spiral starting in the bottom left corner
-    private static void createSpiralBottomLeft(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
+    // creates the canonical spiral starting in the bottom left corner
+    private static Arc2D[] createSpiralBottomLeft(Rectangle2D rect) {
+        Arc2D[] arcs = new Arc2D.Double[NUM_SPIRAL_SEGMENTS];
+        double arcWidth = rect.getWidth() / GOLDEN_RATIO;
+        double arcHeight = rect.getHeight();
         double angle = 180;
         Point2D center = new Point2D.Double(rect.getX() + arcWidth, rect.getY() + arcHeight);
 
@@ -231,84 +249,32 @@ public class CompositionGuide {
                 center.getY() - Math.sin(Math.toRadians(180 - angle)) * arcHeight / GOLDEN_RATIO
             );
         }
-    }
 
-    // creates a spiral starting in the top left corner
-    private static void createSpiralTopLeft(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
-        double angle = 180;
-        Point2D center = new Point2D.Double(rect.getX() + arcWidth, rect.getY());
-
-        for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
-            arcs[i] = createArc(center, arcWidth, arcHeight, angle, 90);
-
-            angle += 90;
-            arcWidth = arcWidth / GOLDEN_RATIO;
-            arcHeight = arcHeight / GOLDEN_RATIO;
-            center.setLocation(
-                center.getX() - Math.sin(Math.toRadians(-90 + angle)) * arcWidth / GOLDEN_RATIO,
-                center.getY() + Math.sin(Math.toRadians(-180 + angle)) * arcHeight / GOLDEN_RATIO
-            );
-        }
-    }
-
-    // creates a spiral starting in the bottom right corner
-    private static void createSpiralBottomRight(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
-        double angle = 0;
-        Point2D center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY() + rect.getHeight());
-
-        for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
-            arcs[i] = createArc(center, arcWidth, arcHeight, angle, 90);
-
-            angle += 90;
-            arcWidth = arcWidth / GOLDEN_RATIO;
-            arcHeight = arcHeight / GOLDEN_RATIO;
-            center.setLocation(
-                center.getX() + Math.sin(Math.toRadians(90 + angle)) * arcWidth / GOLDEN_RATIO,
-                center.getY() - Math.sin(Math.toRadians(0 + angle)) * arcHeight / GOLDEN_RATIO
-            );
-        }
-    }
-
-    // creates a spiral starting in the top right corner
-    private static void createSpiralTopRight(Rectangle2D rect, Arc2D[] arcs, double arcWidth, double arcHeight) {
-        double angle = 0;
-        Point2D center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY());
-
-        for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
-            arcs[i] = createArc(center, arcWidth, arcHeight, angle, -90);
-
-            angle -= 90;
-            arcWidth = arcWidth / GOLDEN_RATIO;
-            arcHeight = arcHeight / GOLDEN_RATIO;
-            center.setLocation(
-                center.getX() + Math.sin(Math.toRadians(90 - angle)) * arcWidth / GOLDEN_RATIO,
-                center.getY() + Math.sin(Math.toRadians(0 - angle)) * arcHeight / GOLDEN_RATIO
-            );
-        }
+        return arcs;
     }
 
     private static Arc2D createArc(Point2D center,
-                                   double width, double height,
+                                   double radiusX, double radiusY,
                                    double angle, int extent) {
         return new Arc2D.Double(
-            center.getX() - width,
-            center.getY() - height,
-            width * 2,
-            height * 2,
+            center.getX() - radiusX,
+            center.getY() - radiusY,
+            radiusX * 2,
+            radiusY * 2,
             angle,
             extent,
             Arc2D.OPEN);
     }
 
-    public void setType(CompositionGuideType type) {
+    public void setType(CropGuideType type) {
         this.type = type;
     }
 
     public void setOrientation(int orientation) {
-        this.orientation = orientation % 4;
+        this.orientation = Math.floorMod(orientation, 4);
     }
 
-    public void setNextOrientation() {
+    public void advanceOrientation() {
         setOrientation(orientation + 1);
     }
 }

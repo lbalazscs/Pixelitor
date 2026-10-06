@@ -44,7 +44,7 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
 
     private static final AreaEffect[] EMPTY_EFFECTS_ARRAY = new AreaEffect[0];
 
-    // These fields must not be renamed (serialized fields)
+    // a null field means the effect is disabled
     private GlowPathEffect glowEffect;
     private InnerGlowPathEffect innerGlowEffect;
     private NeonBorderEffect neonBorderEffect;
@@ -91,8 +91,9 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
         // inner glow is not considered here because
         // it renders inside the shape, not outside
         double maxPadding = 0;
-        
+
         if (glowEffect != null) {
+            // only half of the effect width lies outside the outline
             maxPadding = Math.max(maxPadding,
                 glowEffect.getEffectWidth() / 2.0);
         }
@@ -101,13 +102,13 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
                 neonBorderEffect.getEffectWidth() / 2.0);
         }
         if (dropShadowEffect != null) {
-            double padding = dropShadowEffect.getEffectWidth() / 2.0;
+            double shadowPadding = dropShadowEffect.getEffectWidth() / 2.0;
             Point2D offset = dropShadowEffect.getOffset();
 
             maxPadding = Math.max(maxPadding,
-                padding + Math.abs(offset.getX()));
+                shadowPadding + Math.abs(offset.getX()));
             maxPadding = Math.max(maxPadding,
-                padding + Math.abs(offset.getY()));
+                shadowPadding + Math.abs(offset.getY()));
         }
 
         return Math.ceil(maxPadding);
@@ -229,6 +230,7 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
 
     @Override
     public String toPresetString() {
+        // this class is persisted via saveStateTo
         throw new UnsupportedOperationException();
     }
 

@@ -103,7 +103,7 @@ public class VoronoiProcessor {
 
     /**
      * Constructs the Voronoi cell polygon for the given seed point by progressively
-     * clipping a large bounding rectangle using the seed’s neighbors.
+     * clipping a large bounding rectangle using the seed's neighbors.
      */
     private static List<Vertex> computeCell(SeedPoint seed, int width, int height, int edgeWidth) {
         // starts with a bounding box large enough to cover the entire image
@@ -121,7 +121,7 @@ public class VoronoiProcessor {
 
         // only clip against the assigned local neighbors
         for (SeedPoint other : seed.neighbors) {
-            // removes the part that belongs to the neighbor’s region
+            // removes the part that belongs to the neighbor's region
             poly = clipByPerpendicularBisector(poly, seed, other);
             if (poly.isEmpty()) {
                 break; // everything is gone, further clipping can't bring it back

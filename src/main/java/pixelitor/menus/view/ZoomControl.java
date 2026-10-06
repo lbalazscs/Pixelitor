@@ -41,12 +41,14 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     private static final int ZOOM_PERCENTAGE_WIDTH = 70;
     private static final int ZOOM_SLIDER_WIDTH = 200;
     private static final int BUTTON_WIDTH = 60;
-    
+
     private final JSlider zoomSlider;
     private final JLabel zoomPercentageLabel;
     private final JLabel zoomTextLabel;
     private final JButton fitButton;
     private final JButton actualPixelsButton;
+
+    private boolean programmaticUpdate = false;
 
     private ZoomControl() {
         super(new FlowLayout(LEFT, 0, 0));
@@ -120,9 +122,16 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     }
 
     private void applyZoomToActiveView() {
-        ZoomLevel newZoom = ZOOM_LEVELS[zoomSlider.getValue()];
-        Views.getActive().setZoom(newZoom);
-        setZoomText(newZoom);
+        if (programmaticUpdate) {
+            return;
+        }
+
+        View activeView = Views.getActive();
+        if (activeView != null) {
+            ZoomLevel newZoom = ZOOM_LEVELS[zoomSlider.getValue()];
+            activeView.setZoom(newZoom);
+            setZoomText(newZoom);
+        }
     }
 
     /**
@@ -131,7 +140,12 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     public void syncFromExternalZoom(ZoomLevel newZoom) {
         setEnabled(true);
 
-        zoomSlider.setValue(newZoom.getSliderValue());
+        programmaticUpdate = true;
+        try {
+            zoomSlider.setValue(newZoom.getIndex());
+        } finally {
+            programmaticUpdate = false;
+        }
         setZoomText(newZoom);
     }
 

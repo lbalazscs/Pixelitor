@@ -17,7 +17,6 @@
 
 package pixelitor.gui;
 
-import pixelitor.Canvas;
 import pixelitor.Views;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Messages;
@@ -113,8 +112,7 @@ public class ImageFrame extends JInternalFrame
     }
 
     public void setToCanvasSize() {
-        Canvas canvas = view.getCanvas();
-        setContentSize(canvas.getCoWidth(), canvas.getCoHeight());
+        setContentSize(view.getCanvasCoWidth(), view.getCanvasCoHeight());
     }
 
     private void setContentSize(int contentWidth, int contentHeight) {

@@ -553,7 +553,7 @@ public class MenuBar extends JMenuBar {
         imageMenu.add(SelectionActions.getCrop());
 
         String cropToContentText = i18n.getString("crop_to_content");
-        imageMenu.addViewEnabled(cropToContentText, Crop::contentCrop);
+        imageMenu.addViewEnabled(cropToContentText, Crop::cropToContent);
 
         imageMenu.addSeparator();
 
@@ -1071,7 +1071,7 @@ public class MenuBar extends JMenuBar {
         // show pixel grid
         var showPixelGridMI = new OpenViewEnabledCheckBoxMenuItem(i18n.getString("show_pixel_grid"));
         showPixelGridMI.addActionListener(_ ->
-            View.setPixelGridVisible(showPixelGridMI.getState()));
+            PixelGrid.setVisible(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);
 
         viewMenu.addSeparator();
@@ -1182,7 +1182,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new DrawableAction("Debug ImageLayer Images",
             Drawable::debugImages));
 
-        sub.addViewEnabled("Enable Mouse Debugging", comp -> GlobalEvents.enableMouseEventDebugging());
+        sub.addViewEnabled("Enable Mouse Debugging", comp -> Debug.enableMouseEventDebugging());
 
         sub.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK, layer -> {
             ImageLayer imageLayer = (ImageLayer) layer;

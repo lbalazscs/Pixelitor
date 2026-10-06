@@ -146,7 +146,7 @@ public class RandomGuiTest {
 
         PixelitorWindow.get().setAlwaysOnTop(true);
 
-        GlobalEvents.enableMouseEventDebugging();
+        Debug.enableMouseEventDebugging();
 
         pastedImagesCount = 0;
 

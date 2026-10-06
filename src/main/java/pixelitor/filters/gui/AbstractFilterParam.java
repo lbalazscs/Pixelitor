@@ -157,7 +157,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     protected abstract void doRandomize();
 
     @Override
-    public void setEmbedded() {
+    public void setEmbedded(FilterParam.Layout layout) {
         // do nothing by default
     }
 

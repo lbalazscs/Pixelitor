@@ -108,9 +108,9 @@ public class StrokeParam extends AbstractFilterParam {
         float baseWidth = strokeWidthParam.getValueAsFloat();
         // calculate a random width between 50% and 150% of the base width
         float randomWidth = baseWidth / 2.0f + baseWidth * random.nextFloat();
-        float finalWidth = ImageMath.lerp(randomness, baseWidth, randomWidth);
+        float effectiveWidth = ImageMath.lerp(randomness, baseWidth, randomWidth);
 
-        return getStrokeType().createStroke(this, finalWidth);
+        return getStrokeType().createStroke(this, effectiveWidth);
     }
 
     public float[] getDashPattern(float width) {

@@ -43,11 +43,11 @@ public abstract class DragTool extends Tool {
     // whether the end point inside the Drag object is initialized
     private boolean endPointInitialized = false;
 
-    // whether the starting point is adjusted when space is pressed during drag
+    // whether the starting point is also adjusted when space is pressed during drag
     protected boolean repositionOnSpace = false;
 
-    // whether movement is constrained to multiples
-    // of 45-degree angles when Shift is pressed
+    // whether holding Shift constrains the drag
+    // direction to multiples of 45 degrees
     private final boolean shiftConstrains;
 
     protected DragTool(String name, char hotkey, String statusBarMessage,
@@ -116,7 +116,7 @@ public abstract class DragTool extends Tool {
     }
 
     /**
-     * Called when a drag is started.
+     * Called on mouse press.
      */
     protected abstract void dragStarted(PMouseEvent e);
 
@@ -126,7 +126,7 @@ public abstract class DragTool extends Tool {
     protected abstract void ongoingDrag(PMouseEvent e);
 
     /**
-     * Called when a drag is finished.
+     * Called when the mouse is released.
      */
     protected abstract void dragFinished(PMouseEvent e);
 

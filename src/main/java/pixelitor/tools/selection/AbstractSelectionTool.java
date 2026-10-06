@@ -187,7 +187,7 @@ public abstract class AbstractSelectionTool extends DragTool {
     }
 
     @Override
-    public void altReleased() {
+    public void altReleased(boolean shiftDown) {
         altUsedForCombinator = false;
     }
 

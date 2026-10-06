@@ -645,12 +645,12 @@ public abstract class Layer implements Serializable, Debuggable {
      * or modifies the existing one.
      * Instead of adding an edit to the history, it returns the edit if requested.
      */
-    public PixelitorEdit hideWithMask(Shape shape, boolean createEdit) {
+    public PixelitorEdit hideWithMask(Shape visibleShape, boolean createEdit) {
         if (hasMask()) {
-            return mask.hideOutsideShape(shape, createEdit);
+            return mask.hideOutsideShape(visibleShape, createEdit);
         } else {
             // create a new mask that reveals only the shape area
-            var maskImage = REVEAL_SELECTION.createMaskImage(this, shape);
+            var maskImage = REVEAL_SELECTION.createMaskImage(this, visibleShape);
             return addImageAsMask(maskImage, createEdit, false,
                 "Add Layer Mask", false);
         }

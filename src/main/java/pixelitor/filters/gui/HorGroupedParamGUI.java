@@ -17,24 +17,17 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.gui.utils.GridBagHelper;
-
 import javax.swing.*;
-import java.awt.GridBagLayout;
 
 /**
  * A UI for {@link CompositeParam} models that arranges child
- * parameters vertically, within a common titled border.
+ * parameters horizontally.
  */
-public class BorderGroupedParamGUI extends JPanel implements ParamGUI {
-    public BorderGroupedParamGUI(CompositeParam model, FilterParam[] children) {
-        setBorder(BorderFactory.createTitledBorder(model.getName()));
-
-        setLayout(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(this);
-
-        for (FilterParam child : children) {
-            gbh.addParam(child);
+public class HorGroupedParamGUI extends JPanel implements ParamGUI {
+    public HorGroupedParamGUI(CompositeParam model) {
+        for (FilterParam child : model.getChildren()) {
+            add(new JLabel(child.getName() + ":"));
+            add(child.createGUI());
         }
     }
 

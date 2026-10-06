@@ -36,7 +36,6 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
@@ -46,8 +45,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -66,14 +63,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private Composition comp;
     private Canvas canvas;
 
-    private ZoomLevel zoomLevel = ZoomLevel.ACTUAL_SIZE;
-    private double zoomScale = 1.0f;
+    private ZoomLevel zoomLevel;
+    private double zoomScale;
 
     private ViewContainer viewContainer = null;
     private final LayersPanel layersPanel;
     private Navigator navigator;
 
-    private MaskViewMode maskViewMode;
+    private MaskViewMode maskViewMode = MaskViewMode.NORMAL;
 
     private static final CheckerboardPainter checkerboardPainter
         = ImageUtils.createCheckerboardPainter();
@@ -84,12 +81,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private int canvasStartX;
     private int canvasStartY;
 
-    // cached coordinate transformation matrices
-    private final Lazy<AffineTransform> imToCo = Lazy.of(this::createImToCoTransform);
-    private final Lazy<AffineTransform> coToIm = Lazy.of(this::createCoToImTransform);
-
-    private static boolean pixelGridVisible = false;
-
     // true if the snapping preference is set and the active tool also approves
     private static boolean pixelSnapping = false;
 
@@ -98,7 +89,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         assert comp != null;
 
         setComp(comp);
-        setZoom(ZoomLevel.calcBestFitZoom(canvas, null, false));
+
+        // there is no container yet, so there is nothing to
+        // scroll or notify: the initial zoom is simply assigned
+        zoomLevel = ZoomLevel.calcBestFitZoom(canvas, null, false);
+        zoomScale = zoomLevel.getScale();
 
         layersPanel = new LayersPanel();
         addMouseListeners();
@@ -268,7 +263,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         if (comp.hasNoLayers()) {
             return super.getPreferredSize();
         } else {
-            return canvas.getCoSize();
+            return getCanvasCoSize();
         }
     }
 
@@ -400,7 +395,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         boolean showMask = maskViewMode.isShowingMask();
         if (!showMask) {
             checkerboardPainter.paint(g2, this,
-                canvas.getCoWidth(), canvas.getCoHeight());
+                getCanvasCoWidth(), getCanvasCoHeight());
         }
 
         // apply canvas zoom
@@ -433,16 +428,17 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     /**
-     * Paints overlays that appear on top of the image content (grid, guides, tools).
+     * Paints overlays that appear over the composition
+     * content (grid, guides, tool widgets) in component space.
      */
     private void paintOverlays(Graphics2D g) {
-        if (pixelGridVisible && zoomLevel.allowsPixelGrid()) {
+        if (PixelGrid.visible && zoomLevel.allowsPixelGrid()) {
             // use XOR mode for visibility on any background
             g.setColor(WHITE);
             g.setXORMode(BLACK);
 
             try {
-                drawPixelGrid(g);
+                PixelGrid.draw(g, this);
             } finally {
                 // stop the XOR mode
                 g.setPaintMode();
@@ -453,63 +449,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         if (isActive()) {
             Tools.getActive().paintOverCanvas(g, comp);
-        }
-    }
-
-    /**
-     * Draws the pixel grid lines in component space.
-     */
-    private void drawPixelGrid(Graphics2D g) {
-        double pixelSize = zoomScale;
-        assert pixelSize > 1;
-
-        Rectangle visibleRect = getVisibleRegion();
-
-        // calculate horizontal bounds in component space
-        double startX = canvasStartX;
-        if (visibleRect.x > canvasStartX) {
-            startX += Math.floor((visibleRect.x - canvasStartX) / pixelSize) * pixelSize;
-        }
-
-        double endX = Math.min(
-            visibleRect.x + visibleRect.width + pixelSize,
-            canvasStartX + canvas.getCoWidth()
-        ) - 1;
-
-        // calculate vertical bounds in component space
-        double startY = canvasStartY;
-        if (visibleRect.y > canvasStartY) {
-            startY += Math.floor((visibleRect.y - canvasStartY) / pixelSize) * pixelSize;
-        }
-
-        double endY = Math.min(
-            visibleRect.y + visibleRect.height + pixelSize,
-            canvasStartY + canvas.getCoHeight()
-        ) - 1;
-
-        // vertical lines
-        for (double x = startX + pixelSize; x < endX; x += pixelSize) {
-            g.draw(new Line2D.Double(x, startY, x, endY));
-        }
-
-        // horizontal lines
-        for (double y = startY + pixelSize; y < endY; y += pixelSize) {
-            g.draw(new Line2D.Double(startX, y, endX, y));
-        }
-    }
-
-    /**
-     * Enables or disables the visibility of the pixel grid.
-     */
-    public static void setPixelGridVisible(boolean visible) {
-        if (pixelGridVisible == visible) {
-            return;
-        }
-        pixelGridVisible = visible;
-        if (visible) {
-            ImageArea.pixelGridEnabled();
-        } else {
-            Views.repaintVisible();
         }
     }
 
@@ -594,7 +533,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     /**
-     * Called when the canvas component-space size has changed (zoom, resize, crop, etc.).
+     * Called when the canvas component-space size might have changed
+     * (zoom, resize, crop, etc.). The size itself is derived on demand,
+     * so this only refreshes the state that depends on it.
      */
     public void canvasCoSizeChanged() {
         assert Invariants.imageCoversCanvas(comp);
@@ -619,6 +560,37 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     public int getCanvasStartY() {
         return canvasStartY;
+    }
+
+    /**
+     * Returns the width of the canvas in component space (screen pixels).
+     */
+    public int getCanvasCoWidth() {
+        return (int) (zoomScale * canvas.getWidth());
+    }
+
+    /**
+     * Returns the height of the canvas in component space (screen pixels).
+     */
+    public int getCanvasCoHeight() {
+        return (int) (zoomScale * canvas.getHeight());
+    }
+
+    /**
+     * Returns the size of the canvas in component space (screen pixels).
+     */
+    public Dimension getCanvasCoSize() {
+        return new Dimension(getCanvasCoWidth(), getCanvasCoHeight());
+    }
+
+    /**
+     * Returns the bounds of the canvas in component space.
+     * The location is valid only after the view has been laid out.
+     */
+    public Rectangle getCanvasCoBounds() {
+        return new Rectangle(
+            canvasStartX, canvasStartY,
+            getCanvasCoWidth(), getCanvasCoHeight());
     }
 
     public double getZoomScale() {
@@ -675,7 +647,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // apply the zoom logic
         this.zoomLevel = newZoom;
         zoomScale = newZoom.getScale();
-        canvas.recalcCoSize(this, true);
+        canvasCoSizeChanged();
 
         if (ImageArea.isActiveMode(ImageArea.Mode.FRAMES)) {
             updateTitle();
@@ -770,8 +742,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private void updateLayout() {
         int viewWidth = getWidth();
         int viewHeight = getHeight();
-        int canvasCoWidth = canvas.getCoWidth();
-        int canvasCoHeight = canvas.getCoHeight();
+        int canvasCoWidth = getCanvasCoWidth();
+        int canvasCoHeight = getCanvasCoHeight();
 
         // ensure the view is at least as big as the canvas
         if (viewWidth < canvasCoWidth || viewHeight < canvasCoHeight) {
@@ -792,9 +764,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             Tools.coCoordsChanged(this);
         }
         comp.coCoordsChanged();
-
-        imToCo.invalidate();
-        coToIm.invalidate();
     }
 
     public static boolean isPixelSnapping() {
@@ -902,29 +871,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         );
     }
 
-    public AffineTransform getImageToComponentTransform() {
-        return imToCo.get();
-    }
-
-    private AffineTransform createImToCoTransform() {
-        var at = new AffineTransform();
-        at.translate(canvasStartX, canvasStartY);
-        at.scale(zoomScale, zoomScale);
-        return at;
-    }
-
-    public AffineTransform getComponentToImageTransform() {
-        return coToIm.get();
-    }
-
-    private AffineTransform createCoToImTransform() {
-        var at = new AffineTransform();
-        double s = 1.0 / zoomScale;
-        at.scale(s, s);
-        at.translate(-canvasStartX, -canvasStartY);
-        return at;
-    }
-
     /**
      * Returns the currently visible portion of this {@link View} in component-space
      * coordinates, considering that the JScrollPane might only show a part of it.
@@ -1001,7 +947,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      */
     public Rectangle getVisibleCanvasBoundsOnScreen() {
         // the canvas bounds relative to this view
-        Rectangle canvasBounds = canvas.getCoBounds(this);
+        Rectangle canvasBounds = getCanvasCoBounds();
 
         // take scrollbars into account
         Rectangle visibleCanvas = canvasBounds.intersection(getVisibleRegion());
@@ -1043,6 +989,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         node.addInt("view width", getWidth());
         node.addInt("view height", getHeight());
+        node.addInt("canvas co width", getCanvasCoWidth());
+        node.addInt("canvas co height", getCanvasCoHeight());
 
         if (viewContainer instanceof ImageFrame frame) {
             node.addInt("frame width", frame.getWidth());

@@ -355,7 +355,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
             Selection sel = comp.getSelection();
             Rectangle rect = view.imageToComponentSpace(sel.getShapeBounds2D());
             rect.grow(10, 10); // otherwise the box hides a rectangular selection
-            // after growing in component-space, transform back to image space
+            // after growing in component space, transform back to image space
             boxBounds = view.componentToImageSpace(rect);
         } else {
             boxBounds = comp.getCanvas().getBounds();

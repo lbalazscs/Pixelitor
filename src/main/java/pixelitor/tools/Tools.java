@@ -138,7 +138,7 @@ public class Tools {
         if (prevTool != null) {
             // release stuck modifier keys for the previous tool before it is deactivated
             if (GlobalEvents.isAltDown()) {
-                prevTool.altReleased();
+                prevTool.altReleased(false);
             }
             if (GlobalEvents.isSpaceDown()) {
                 prevTool.spaceReleased();
@@ -157,7 +157,7 @@ public class Tools {
 
         // apply global modifier states to the new tool immediately
         if (GlobalEvents.isAltDown()) {
-            newTool.altPressed();
+            newTool.altPressed(GlobalEvents.isShiftDown());
         }
         if (GlobalEvents.isSpaceDown()) {
             newTool.spacePressed();

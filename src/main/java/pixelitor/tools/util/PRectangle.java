@@ -31,7 +31,7 @@ import java.awt.geom.Rectangle2D;
  * a rectangular area in both component space and image space.
  */
 public class PRectangle {
-    // the rectangle in component-space, with integer coordinates
+    // the rectangle in component space, with integer coordinates
     private Rectangle coRect;
 
     // the rectangle in image space, with sub-pixel precision

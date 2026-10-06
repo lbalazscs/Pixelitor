@@ -33,10 +33,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.function.DoubleConsumer;
 
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.RenderingHints.*;
 
 /**
  * Dialog panel for the straighten action.
@@ -100,7 +97,7 @@ public class StraightenPanel extends JPanel implements ChangeListener {
         private final BufferedImage image;
         private final DoubleConsumer angleConsumer;
 
-        // the start and end of the drawn line in image-space
+        // the start and end of the drawn line in image space
         private Point2D.Double start;
         private Point2D.Double end;
 

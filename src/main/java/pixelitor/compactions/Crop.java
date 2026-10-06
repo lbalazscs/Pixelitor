@@ -62,9 +62,12 @@ public class Crop implements CompAction {
     // whether pixels outside the crop area should be deleted
     private final boolean deleteCroppedPixels;
 
-    // whether a mask should be added to hide cropped areas
+    // whether a mask should be added to hide parts of the
+    // cropped image that lie outside the selection shape
     private final boolean addHidingMask;
 
+    // restores the crop tool's box on undo
+    // (null if the crop didn't come from the crop tool)
     private final PixelitorEdit cropBoxRestorationEdit;
 
     /**
@@ -152,9 +155,9 @@ public class Crop implements CompAction {
             assert srcComp.hasSelection();
 
             // add a mask based on the original selection shape
-            Shape hidingShape = srcComp.getSelectionShape();
-            hidingShape = canvasTransform.createTransformedShape(hidingShape);
-            addHidingMaskFromShape(croppedComp, hidingShape, false);
+            Shape visibleShape = srcComp.getSelectionShape();
+            visibleShape = canvasTransform.createTransformedShape(visibleShape);
+            addHidingMaskFromShape(croppedComp, visibleShape, false);
         }
 
         // if before the crop the internal frame started
@@ -198,11 +201,11 @@ public class Crop implements CompAction {
     /**
      * Performs a crop initiated from the crop tool.
      */
-    public static void toolCrop(Composition comp,
-                                Rectangle2D cropRect,
-                                boolean allowGrowing,
-                                boolean deleteCroppedPixels,
-                                PixelitorEdit cropBoxRestorationEdit) {
+    public static void cropFromTool(Composition comp,
+                                    Rectangle2D cropRect,
+                                    boolean allowGrowing,
+                                    boolean deleteCroppedPixels,
+                                    PixelitorEdit cropBoxRestorationEdit) {
         new Crop(cropRect, false, allowGrowing,
             deleteCroppedPixels, false,
             cropBoxRestorationEdit).process(comp);
@@ -211,12 +214,12 @@ public class Crop implements CompAction {
     /**
      * Crops the given composition based on the non-transparent content bounds.
      */
-    public static void contentCrop(Composition comp) {
+    public static void cropToContent(Composition comp) {
         Rectangle2D bounds = comp.calcContentBounds(false);
         if (bounds == null) {
             Messages.showError("Transparent Image",
                 ("<html><b>%s</b> is completely transparent." +
-                    "<br>There’s no visible content to keep after cropping.").formatted(comp.getName()));
+                    "<br>There's no visible content to keep after cropping.").formatted(comp.getName()));
         } else if (bounds.equals(comp.getCanvasBounds())) {
             Messages.showInfo("Nothing to Crop",
                 "<html><b>%s</b> has no transparent border pixels to remove.".formatted(comp.getName()));
@@ -236,12 +239,12 @@ public class Crop implements CompAction {
 
         if (RandomGuiTest.isRunning()) {
             // ask no questions, just do the simplest crop
-            cropToRectangularSelection(comp, sel, false);
+            cropToSelectionBounds(comp, sel, false);
             return;
         }
 
         if (sel.isRectangular()) {
-            cropToRectangularSelection(comp, sel, false);
+            cropToSelectionBounds(comp, sel, false);
         } else {
             showNonRectangularCropDialog(comp, sel);
         }
@@ -262,10 +265,10 @@ public class Crop implements CompAction {
             options, JOptionPane.QUESTION_MESSAGE);
         switch (answer) {
             case 0: // crop and hide
-                cropToRectangularSelection(comp, sel, true);
+                cropToSelectionBounds(comp, sel, true);
                 break;
             case 1: // only crop
-                cropToRectangularSelection(comp, sel, false);
+                cropToSelectionBounds(comp, sel, false);
                 break;
             case 2: // only hide
                 addHidingMaskFromShape(comp, sel.getShape(), true);
@@ -282,13 +285,13 @@ public class Crop implements CompAction {
     /**
      * Crops based on the rectangular bounds of a selection.
      */
-    private static void cropToRectangularSelection(Composition comp,
-                                                   Selection sel,
-                                                   boolean addHidingMask) {
+    private static void cropToSelectionBounds(Composition comp,
+                                              Selection sel,
+                                              boolean addHidingMask) {
         boolean deleteCroppedPixels = true;
         if (addHidingMask) {
-            // the pixels inside the selection's bounding box will be hidden,
-            // and the fate of the pixels outside it depends on the tool setting
+            // the pixels inside the bounding box but outside the selection are hidden
+            // by the mask, and the fate of the pixels outside it depends on the tool setting
             deleteCroppedPixels = Tools.CROP.shouldDeleteCroppedPixels();
         }
 
@@ -299,7 +302,7 @@ public class Crop implements CompAction {
     /**
      * Adds a layer mask derived from the given shape to all layers.
      */
-    private static void addHidingMaskFromShape(Composition comp, Shape shape, boolean addToHistory) {
+    private static void addHidingMaskFromShape(Composition comp, Shape visibleShape, boolean addToHistory) {
         MultiEdit multiEdit = null;
         if (addToHistory) {
             multiEdit = new MultiEdit("Add Hiding Mask", comp);
@@ -309,10 +312,10 @@ public class Crop implements CompAction {
         for (int i = 0; i < numLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (addToHistory) {
-                var edit = layer.hideWithMask(shape, true);
+                var edit = layer.hideWithMask(visibleShape, true);
                 multiEdit.add(edit);
             } else {
-                layer.hideWithMask(shape, false);
+                layer.hideWithMask(visibleShape, false);
             }
         }
 
@@ -327,7 +330,7 @@ public class Crop implements CompAction {
 
     /**
      * Creates an AffineTransform that describes how
-     * image space coordinates change after a crop.
+     * image-space coordinates change after a crop.
      */
     public static AffineTransform createCropTransform(Rectangle cropRect) {
         return AffineTransform.getTranslateInstance(-cropRect.x, -cropRect.y);

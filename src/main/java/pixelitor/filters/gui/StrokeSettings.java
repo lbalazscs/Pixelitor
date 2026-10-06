@@ -53,7 +53,7 @@ public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
         throw new UnsupportedOperationException();
     }
 
-    public String toSVGStyle() {
+    public String toSVGAttributes() {
         String svg = String.format(Locale.ROOT, "stroke-width=\"%.2f\" %s %s",
             width, cap.toSVGAttribute(), join.toSVGAttribute());
         if (dashed) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,7 @@ package pixelitor.tools.util;
 
 import java.awt.geom.AffineTransform;
 
-import static java.awt.event.KeyEvent.VK_DOWN;
-import static java.awt.event.KeyEvent.VK_LEFT;
-import static java.awt.event.KeyEvent.VK_RIGHT;
-import static java.awt.event.KeyEvent.VK_UP;
+import static java.awt.event.KeyEvent.*;
 
 /**
  * Represents an arrow key (that can be used for nudging),
@@ -81,7 +78,7 @@ public enum ArrowKey {
     }
 
     /**
-     * Creates an AffineTransform representing this arrow key's movement.
+     * Creates a translation transform representing this arrow key's movement.
      */
     public AffineTransform toTransform() {
         return AffineTransform.getTranslateInstance(getDeltaX(), getDeltaY());

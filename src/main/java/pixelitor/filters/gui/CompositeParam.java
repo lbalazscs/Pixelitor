@@ -29,43 +29,55 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A composite {@link FilterParam} that groups child parameters
- * and displays them in a modal dialog.
+ * A composite {@link FilterParam} that groups child parameters.
  */
 public class CompositeParam extends AbstractFilterParam {
     private final FilterParam[] children;
     private ResetButton resetButton;
-    private final boolean useDialog;
+
+    private final Layout layout;
 
     public CompositeParam(String name, FilterParam... children) {
-        this(name, true, children);
+        this(name, Layout.DIALOG, children);
     }
 
-    private CompositeParam(String name, boolean useDialog, FilterParam... children) {
+    private CompositeParam(String name, Layout layout, FilterParam... children) {
         super(name, RandomizeMode.ALLOW);
-        this.useDialog = useDialog;
+        this.layout = layout;
         this.children = children;
     }
 
     /**
      * Creates a {@link CompositeParam} that groups the given params
-     * using a common border (and not with a dialog).
+     * vertically using a common border.
      */
     public static CompositeParam bordered(String name, FilterParam... children) {
         for (FilterParam child : children) {
-            child.setEmbedded();
+            child.setEmbedded(Layout.VERTICAL);
         }
-        return new CompositeParam(name, false, children);
+        return new CompositeParam(name, Layout.VERTICAL, children);
+    }
+
+    /**
+     * Creates a {@link CompositeParam} that groups the given params horizontally.
+     */
+    public static CompositeParam horizontal(String name, FilterParam... children) {
+        for (FilterParam child : children) {
+            child.setEmbedded(Layout.HORIZONTAL);
+        }
+        return new CompositeParam(name, Layout.HORIZONTAL, children);
     }
 
     @Override
     public JComponent createGUI() {
-        if (useDialog) {
-            resetButton = new ResetButton(this);
-            paramGUI = new DialogLauncherGUI(this::configureDialog, resetButton);
-        } else {
-            paramGUI = new BorderGroupedParamGUI(this, children);
-        }
+        paramGUI = switch (layout) {
+            case DIALOG -> {
+                resetButton = new ResetButton(this);
+                yield new DialogLauncherGUI(this::configureDialog, resetButton);
+            }
+            case VERTICAL -> new VerGroupedParamGUI(this);
+            case HORIZONTAL -> new HorGroupedParamGUI(this);
+        };
         syncWithGui();
         return (JComponent) paramGUI;
     }
@@ -184,6 +196,10 @@ public class CompositeParam extends AbstractFilterParam {
         if (resetButton != null) {
             resetButton.updateState();
         }
+    }
+
+    public FilterParam[] getChildren() {
+        return children;
     }
 
     @Override

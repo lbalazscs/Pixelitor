@@ -204,7 +204,9 @@ public class Views {
         if (ImageArea.isActiveMode(FRAMES)) {
             repaintAll();
         } else {
-            activeView.repaint();
+            if (activeView != null) {
+                activeView.repaint();
+            }
         }
     }
 

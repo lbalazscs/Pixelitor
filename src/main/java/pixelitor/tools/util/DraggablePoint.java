@@ -61,8 +61,8 @@ public class DraggablePoint extends Point2D.Double {
 
     protected final String name; // used only for debugging
 
-    // Coordinates in image-space (relative to the image, considering zooming).
-    // All other coordinates are in component-space, relative to the view.
+    // Coordinates in image space (relative to the image, considering zooming).
+    // All other coordinates are in component space, relative to the view.
     public double imX;
     public double imY;
 

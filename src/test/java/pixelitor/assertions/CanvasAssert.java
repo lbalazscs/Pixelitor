@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,6 @@ package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import pixelitor.Canvas;
-
-import java.awt.Dimension;
 
 /**
  * Custom AssertJ assertions for {@link Canvas} objects.
@@ -49,29 +47,6 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
                   <%dx%d>
                 but was:
                   <%dx%d>""", actual, width, height, actualWidth, actualHeight);
-        }
-
-        return this;
-    }
-
-    public CanvasAssert hasCoSize(Dimension coSize) {
-        return hasCoSize(coSize.width, coSize.height);
-    }
-
-    public CanvasAssert hasCoSize(int coWidth, int coHeight) {
-        isNotNull();
-
-        int actualCoWidth = actual.getCoWidth();
-        int actualCoHeight = actual.getCoHeight();
-        if (actualCoWidth != coWidth || actualCoHeight != coHeight) {
-            failWithMessage("""
-
-                Expecting component space size of:
-                  <%s>
-                to be:
-                  <%dx%d>
-                but was:
-                  <%dx%d>""", actual, coWidth, coHeight, actualCoWidth, actualCoHeight);
         }
 
         return this;

@@ -56,8 +56,8 @@ public class JHPlasma extends ParametrizedFilter {
     // initialize here, otherwise it doesn't load from pxc smart filter
     private final PlasmaFilter filter = new PlasmaFilter(NAME);
 
-    private final float[] fourPoints = {0.0f, 0.3f, 0.7f, 1.0f};
-    private final GradientPreset FIRE = new GradientPreset("Fire",
+    private static final float[] fourPoints = {0.0f, 0.3f, 0.7f, 1.0f};
+    private static final GradientPreset FIRE = new GradientPreset("Fire",
         fourPoints,
         new Color[]{
             BLACK,
@@ -65,7 +65,8 @@ public class JHPlasma extends ParametrizedFilter {
             ORANGE,
             YELLOW,
         });
-    private final GradientPreset OCEAN = new GradientPreset("Ocean",
+
+    private static final GradientPreset OCEAN = new GradientPreset("Ocean",
         fourPoints,
         new Color[]{
             new Color(8, 20, 40),
@@ -73,7 +74,8 @@ public class JHPlasma extends ParametrizedFilter {
             new Color(60, 180, 180),
             new Color(190, 237, 227)
         });
-    private final GradientPreset NEON = new GradientPreset("Neon",
+
+    private static final GradientPreset NEON = new GradientPreset("Neon",
         fourPoints,
         new Color[]{
             new Color(15, 10, 30),

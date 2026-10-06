@@ -18,9 +18,9 @@
 package pixelitor.tools.crop;
 
 /**
- * Available composition guide overlays for the crop tool.
+ * Available compositional guide overlays for the crop tool.
  */
-public enum CompositionGuideType {
+public enum CropGuideType {
     NONE("None"),
     RULE_OF_THIRDS("Rule of Thirds"),
     GOLDEN_SECTIONS("Golden Sections"),
@@ -32,7 +32,7 @@ public enum CompositionGuideType {
     public static final String PRESET_KEY = "Composition Guides";
     private final String displayName;
 
-    CompositionGuideType(String displayName) {
+    CropGuideType(String displayName) {
         this.displayName = displayName;
     }
 

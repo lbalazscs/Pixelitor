@@ -21,19 +21,17 @@ import pixelitor.gui.utils.TaskAction;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Keys;
-import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
-import java.awt.*;
+import java.awt.AWTKeyStroke;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
 import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
@@ -43,11 +41,14 @@ import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
- * Manages global keyboard and mouse event handling.
+ * Central place for global keyboard handling: tracks the Space/Alt/Shift
+ * state, runs hotkeys, forwards keys to the active tool, and tracks modal
+ * dialog nesting. All state is accessed on the EDT only.
  */
 public class GlobalEvents {
     private static boolean spaceDown = false;
     private static boolean altDown = false;
+    private static boolean shiftDown = false;
 
     // keeps track of the nesting level since modal dialogs can open other modal dialogs
     private static int modalDialogNesting = 0;
@@ -63,50 +64,62 @@ public class GlobalEvents {
         // prevents instantiation of this utility class
     }
 
+    /**
+     * Registers a hotkey for a letter key, with and without Shift.
+     */
     public static void registerHotkey(char key, Action action) {
-        registerHotkey(key, action, false);
+        assert Character.isUpperCase(key) : "Expected an uppercase letter, got " + key;
+        assert calledOnEDT() : callInfo(); // hotkeyMap is a plain HashMap read on the EDT
+        putHotkey(key, 0, action);
+        putHotkey(key, InputEvent.SHIFT_DOWN_MASK, action);
     }
 
-    private static void registerHotkey(char key, Action action, boolean caseSensitive) {
-        if (!caseSensitive) {
-            assert Character.isUpperCase(key) : "Non-case-sensitive keys must be uppercase";
+    /**
+     * Registers a hotkey that works only without modifiers (e.g. '[' and ']').
+     */
+    private static void registerPlainHotkey(char key, Action action) {
+        putHotkey(key, 0, action);
+    }
 
-            // see issue #31 for why key codes and not key characters are used here
-            hotkeyMap.put(KeyStroke.getKeyStroke(key, InputEvent.SHIFT_DOWN_MASK), action);
-        }
-        hotkeyMap.put(KeyStroke.getKeyStroke(key, 0), action);
+    private static void putHotkey(char key, int modifiers, Action action) {
+        // deliberately a key code, not a key char (see issue #31)
+        KeyStroke keyStroke = KeyStroke.getKeyStroke((int) key, modifiers);
+        Action previous = hotkeyMap.put(keyStroke, action);
+        assert previous == null : "duplicate hotkey " + keyStroke;
     }
 
     public static void init() {
-        var keyboardFocusManager = configureKeyboardManager();
-        configureFocusTraversal(keyboardFocusManager);
-        registerBrushSizeShortcuts();
+        KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        kfm.addKeyEventDispatcher(GlobalEvents::dispatchGlobalKeyEvent);
 
         // prevent stuck modifier keys when the application loses focus (e.g. alt-tabbing)
-        keyboardFocusManager.addPropertyChangeListener("activeWindow", evt -> {
-            if (evt.getNewValue() == null) {
-                // the app has moved to the background
-                altReleased();
-
-                if (spaceDown) {
-                    spaceReleased();
-                }
+        kfm.addPropertyChangeListener("activeWindow", evt -> {
+            if (evt.getNewValue() == null) { // the app lost focus
+                releaseStuckModifiers();
             }
-        });        
+        });
+        removeCtrlTabFromFocusTraversal(kfm);
+        registerBrushSizeHotkeys();
     }
 
-    private static KeyboardFocusManager configureKeyboardManager() {
-        KeyboardFocusManager focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        focusManager.addKeyEventDispatcher(GlobalEvents::dispatchGlobalKeyEvent);
-        return focusManager;
+    // prevents stuck modifier keys when the app loses focus (e.g. alt-tabbing)
+    private static void releaseStuckModifiers() {
+        altReleased(); // still sees the last known Shift state
+        spaceReleased();
+        shiftDown = false; // a Shift release can't be observed while in the background
     }
 
     private static boolean dispatchGlobalKeyEvent(KeyEvent e) {
-        if (modalDialogNesting > 0) {
-            return false;
-        }
         int id = e.getID();
+
+        // must be tracked even if a modal dialog is open, otherwise
+        // a Shift press/release in the dialog would leave a stale state
+        updateShiftState(e, id);
+
         if (id == KEY_PRESSED) {
+            if (modalDialogNesting > 0) {
+                return false;
+            }
             // hotkeys should be inactive while editing text
             if (!(e.getSource() instanceof JTextComponent)) {
                 KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(e);
@@ -119,15 +132,27 @@ public class GlobalEvents {
             }
             keyPressed(e);
         } else if (id == KEY_RELEASED) {
+            // key releases must be tracked even if a modal dialog is open so
+            // that Alt/Space released inside a dialog do not leave stale state
             keyReleased(e);
         }
         // let the event be processed by other dispatchers and the focused component
         return false;
     }
 
+    private static void updateShiftState(KeyEvent e, int id) {
+        if (e.getKeyCode() == VK_SHIFT) {
+            if (id == KEY_PRESSED) {
+                shiftDown = true;
+            } else if (id == KEY_RELEASED) {
+                shiftDown = false;
+            }
+        }
+    }
+
     // remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
     // so that they can be used to switch between tabs/internal frames
-    private static void configureFocusTraversal(KeyboardFocusManager kfm) {
+    private static void removeCtrlTabFromFocusTraversal(KeyboardFocusManager kfm) {
         removeFocusTraversalKey(kfm, FORWARD_TRAVERSAL_KEYS, Keys.CTRL_TAB);
         removeFocusTraversalKey(kfm, BACKWARD_TRAVERSAL_KEYS, Keys.CTRL_SHIFT_TAB);
     }
@@ -138,9 +163,9 @@ public class GlobalEvents {
         kfm.setDefaultFocusTraversalKeys(traversalId, keys);
     }
 
-    private static void registerBrushSizeShortcuts() {
-        registerHotkey(']', INCREASE_BRUSH_RADIUS_ACTION, true);
-        registerHotkey('[', DECREASE_BRUSH_RADIUS_ACTION, true);
+    private static void registerBrushSizeHotkeys() {
+        registerPlainHotkey(']', INCREASE_BRUSH_RADIUS_ACTION);
+        registerPlainHotkey('[', DECREASE_BRUSH_RADIUS_ACTION);
     }
 
     private static void keyPressed(KeyEvent e) {
@@ -158,23 +183,35 @@ public class GlobalEvents {
     }
 
     private static void spacePressed(KeyEvent e) {
+        assert modalDialogNesting == 0;
+
         // Alt-space isn't treated as space-down because on Windows,
         // this opens the system menu, and we get the space-pressed
         // event, but not the space-released event, and the app gets
         // stuck in Hand mode. This looks like a freeze when there
         // are no scrollbars. See issue #29.
-        if (modalDialogNesting == 0 && !e.isAltDown()) {
-            activeTool.spacePressed();
-            spaceDown = true;
-            e.consume();
+        if (e.isAltDown()) {
+            return;
         }
+        if (!spaceDown) { // auto-repeat sends repeated pressed events
+            spaceDown = true;
+            activeTool.spacePressed();
+        }
+        e.consume();
     }
 
     private static void altPressed() {
         // tools should only receive a single pressed and a single released call
         if (!altDown) {
             altDown = true;
-            activeTool.altPressed();
+            activeTool.altPressed(shiftDown);
+        }
+    }
+
+    private static void altReleased() {
+        if (altDown) {
+            altDown = false;
+            activeTool.altReleased(shiftDown);
         }
     }
 
@@ -192,14 +229,9 @@ public class GlobalEvents {
     }
 
     private static void spaceReleased() {
-        activeTool.spaceReleased();
-        spaceDown = false;
-    }
-
-    private static void altReleased() {
-        if (altDown) {
-            altDown = false;
-            activeTool.altReleased();
+        if (spaceDown) {
+            spaceDown = false;
+            activeTool.spaceReleased();
         }
     }
 
@@ -209,6 +241,10 @@ public class GlobalEvents {
 
     public static boolean isAltDown() {
         return altDown;
+    }
+
+    public static boolean isShiftDown() {
+        return shiftDown;
     }
 
     // used only by unit tests
@@ -229,9 +265,9 @@ public class GlobalEvents {
     // keeps track of modal dialog nesting
     public static void modalDialogClosed() {
         assert calledOnEDT() : callInfo();
+        assert modalDialogNesting > 0;
 
         modalDialogNesting--;
-        assert modalDialogNesting >= 0;
         if (modalDialogNesting == 0) {
             Tools.modalDialogHidden();
         }
@@ -249,38 +285,5 @@ public class GlobalEvents {
      */
     public static int getModalDialogNesting() {
         return modalDialogNesting;
-    }
-
-    public static void enableMouseEventDebugging() {
-        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
-            MouseEvent e = (MouseEvent) event;
-            String msg = Tools.getActive().getName() + ": " + Debug.mouseEventAsString(e);
-            System.out.println(msg);
-        }, AWTEvent.MOUSE_EVENT_MASK
-            | AWTEvent.MOUSE_MOTION_EVENT_MASK
-            | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
-    }
-
-    /**
-     * Reports all events that take longer than the given time threshold to complete.
-     *
-     * See https://stackoverflow.com/questions/5541493/how-do-i-profile-the-edt-in-swing
-     */
-    public static void monitorSlowEvents(long threshold, TimeUnit unit) {
-        Toolkit.getDefaultToolkit().getSystemEventQueue().push(new EventQueue() {
-            final long thresholdNanos = unit.toNanos(threshold);
-
-            @Override
-            protected void dispatchEvent(AWTEvent event) {
-                long startTime = System.nanoTime();
-                super.dispatchEvent(event);
-                long endTime = System.nanoTime();
-
-                if (endTime - startTime > thresholdNanos) {
-                    long durationMs = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
-                    System.out.println(durationMs + " ms: " + event);
-                }
-            }
-        });
     }
 }

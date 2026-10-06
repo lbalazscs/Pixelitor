@@ -57,7 +57,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
         }),
         TRIANGLE("Triangle", (dx, dy) -> {
             // equilateral triangle pointing upwards
-            // distances to the triangle’s edges
+            // distances to the triangle's edges
             double dist1 = (SQRT_3 * dx - dy) / 2;
             double dist2 = (-SQRT_3 * dx - dy) / 2;
             double dist3 = dy;

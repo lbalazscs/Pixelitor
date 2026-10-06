@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,18 +31,18 @@ import java.awt.geom.Rectangle2D;
  */
 public class CropBoxChangedEdit extends PixelitorEdit {
     // the crop box rectangle in image space before and after the change
-    private final Rectangle2D rectBefore; // null if box creation
-    private final Rectangle2D rectAfter;  // null if box dismissal
+    private final Rectangle2D imRectBefore; // null if box creation
+    private final Rectangle2D imRectAfter;  // null if box dismissal
 
     private final boolean allowGrowingBefore;
     private final boolean allowGrowingAfter;
 
     public CropBoxChangedEdit(String name, Composition comp,
-                              Rectangle2D rectBefore, Rectangle2D rectAfter,
+                              Rectangle2D imRectBefore, Rectangle2D imRectAfter,
                               boolean allowGrowingBefore, boolean allowGrowingAfter) {
         super(name, comp);
-        this.rectBefore = rectBefore;
-        this.rectAfter = rectAfter;
+        this.imRectBefore = imRectBefore;
+        this.imRectAfter = imRectAfter;
         this.allowGrowingBefore = allowGrowingBefore;
         this.allowGrowingAfter = allowGrowingAfter;
     }
@@ -50,13 +50,13 @@ public class CropBoxChangedEdit extends PixelitorEdit {
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
-        restoreState(rectBefore, allowGrowingBefore);
+        restoreState(imRectBefore, allowGrowingBefore);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
-        restoreState(rectAfter, allowGrowingAfter);
+        restoreState(imRectAfter, allowGrowingAfter);
     }
 
     private void restoreState(Rectangle2D rectToRestore, boolean allowGrowingSetting) {

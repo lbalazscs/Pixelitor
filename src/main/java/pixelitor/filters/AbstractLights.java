@@ -142,13 +142,13 @@ public class AbstractLights extends ParametrizedFilter {
         int height = dest.getHeight();
 
         var pt = new StatusBarProgressTracker(NAME, iterations);
-        Graphics2D g2 = dest.createGraphics();
+        Graphics2D g = dest.createGraphics();
 
         double lineWidth = blurParam.getValueAsDouble() + 1.0;
-        g2.setStroke(new BasicStroke((float) lineWidth));
+        g.setStroke(new BasicStroke((float) lineWidth));
 
-        g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, width, height);
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, width, height);
 
         float darkening = 1.0f;
         double brightness = brightnessParam.getValueAsDouble();
@@ -161,8 +161,8 @@ public class AbstractLights extends ParametrizedFilter {
             alpha = MIN_VISIBLE_ALPHA;
         }
 
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         // if we increased alpha, we must compensate by reducing the color's brightness
         float colorBri = 1.0f / darkening;
@@ -176,12 +176,12 @@ public class AbstractLights extends ParametrizedFilter {
                 particle.update(width, height);
             }
             for (Particle particle : particles) {
-                particle.draw(g2, reusableLine);
+                particle.draw(g, reusableLine);
             }
             pt.unitDone();
         }
 
-        g2.dispose();
+        g.dispose();
         pt.finished();
 
         return dest;

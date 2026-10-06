@@ -88,7 +88,7 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     // in ongoingDrag(), but fire immediately on the key event since
     // there may be no mouse movement to trigger it otherwise
     @Override
-    public void altPressed() {
+    public void altPressed(boolean shiftDown) {
         if (!altUsedForCombinator && drag != null && drag.isDragging()) {
             drag.setExpandedFromCenter(true);
             if (selectionSession != null) {
@@ -98,10 +98,10 @@ public class MarqueeSelectionTool extends AbstractSelectionTool {
     }
 
     @Override
-    public void altReleased() {
+    public void altReleased(boolean shiftDown) {
         boolean wasAltCombinator = altUsedForCombinator;
 
-        super.altReleased(); // clears altUsedForCombinator
+        super.altReleased(shiftDown); // clears altUsedForCombinator
 
         if (!wasAltCombinator && drag != null && drag.isDragging()) {
             drag.setExpandedFromCenter(false);

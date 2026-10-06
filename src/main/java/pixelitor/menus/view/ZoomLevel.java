@@ -81,17 +81,6 @@ public class ZoomLevel {
         for (int i = 0; i < ZOOM_LEVELS.length; i++) {
             ZOOM_LEVELS[i] = new ZoomLevel(ZOOM_PERCENTAGES[i], i);
         }
-
-        // link zoom levels in the chain
-        for (int i = 0; i < ZOOM_LEVELS.length; i++) {
-            // the lowest level's 'nextOut' points to itself: can't zoom out further
-            int prevIndex = Math.max(0, i - 1);
-            ZOOM_LEVELS[i].setNextOut(ZOOM_LEVELS[prevIndex]);
-
-            // the highest level's 'nextIn' points to itself: can't zoom in further
-            int nextIndex = Math.min(ZOOM_LEVELS.length - 1, i + 1);
-            ZOOM_LEVELS[i].setNextIn(ZOOM_LEVELS[nextIndex]);
-        }
     }
 
     public static final ZoomLevel ACTUAL_SIZE = ZOOM_LEVELS[16]; // 100%
@@ -99,17 +88,15 @@ public class ZoomLevel {
     public static final ZoomLevel QUARTER_SIZE = ZOOM_LEVELS[8]; // 25%
     public static final ZoomLevel EIGHTH_SIZE = ZOOM_LEVELS[4];  // 12.5%
 
-    private ZoomLevel nextIn;
-    private ZoomLevel nextOut;
     private final double percent;
     private final String displayText;
     private final double scale;
-    private final int sliderValue;
+    private final int index;
 
-    private ZoomLevel(double percent, int sliderValue) {
+    private ZoomLevel(double percent, int index) {
         this.percent = percent;
         this.scale = percent / 100.0;
-        this.sliderValue = sliderValue;
+        this.index = index;
 
         DecimalFormat formatter = percent < 100
             ? new DecimalFormat("0.##")
@@ -117,20 +104,12 @@ public class ZoomLevel {
         this.displayText = formatter.format(percent) + "%";
     }
 
-    private void setNextIn(ZoomLevel nextIn) {
-        this.nextIn = nextIn;
-    }
-
-    private void setNextOut(ZoomLevel nextOut) {
-        this.nextOut = nextOut;
-    }
-
     public ZoomLevel zoomIn() {
-        return nextIn;
+        return ZOOM_LEVELS[Math.clamp(index + 1, 0, ZOOM_LEVELS.length - 1)];
     }
 
     public ZoomLevel zoomOut() {
-        return nextOut;
+        return ZOOM_LEVELS[Math.clamp(index - 1, 0, ZOOM_LEVELS.length - 1)];
     }
 
     public double getPercent() {
@@ -145,8 +124,8 @@ public class ZoomLevel {
         return scale;
     }
 
-    public int getSliderValue() {
-        return sliderValue;
+    public int getIndex() {
+        return index;
     }
 
     /**

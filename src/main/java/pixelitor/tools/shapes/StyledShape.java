@@ -77,14 +77,14 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         EMPTY, // has no actual shape yet
         DESERIALIZED, // after being deserialized
         INITIAL_DRAG, // when it has a shape after the first drag event
-        TRANSFORMABLE; // final state after transform box is created
+        BOXED; // final state after transform box is created
 
         boolean canChangeTo(State next) {
             return switch (this) {
                 case EMPTY -> next == INITIAL_DRAG;
-                case DESERIALIZED -> next == TRANSFORMABLE;
-                case INITIAL_DRAG -> next == INITIAL_DRAG || next == TRANSFORMABLE;
-                case TRANSFORMABLE -> false;
+                case DESERIALIZED -> next == BOXED;
+                case INITIAL_DRAG -> next == INITIAL_DRAG || next == BOXED;
+                case BOXED -> false;
             };
         }
     }
@@ -94,8 +94,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     private ShapeType shapeType;
     private List<ParamState<?>> typeSettings;
 
-    private Shape origShape; // the original shape, in image-space
-    private Shape shape; // the current transformed shape, in image-space
+    private Shape origShape; // the original shape, in image space
+    private Shape shape; // the current transformed shape, in image space
 
     // the original drag is kept even after the transform box appears
     // because it could be needed when regenerating the original shape
@@ -248,9 +248,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     /**
      * Paints a thumbnail icon of the shape.
      */
-    public void paintIconThumbnail(Graphics2D g2) {
+    public void paintIconThumbnail(Graphics2D g) {
         int thumbSize = Thumbnails.getMaxSize();
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         Drag drag;
         if (shapeType.isDirectional()) {
             double halfHeight = thumbSize / 2.0;
@@ -259,13 +259,13 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             drag = new Drag(0, 0, thumbSize, thumbSize);
         }
         if (fillPaint == NONE || fillPaint == TRANSPARENT) {
-            g2.setColor(LayerGUI.UNSELECTED_COLOR);
-            g2.fillRect(0, 0, thumbSize, thumbSize);
-            g2.setColor(LayerGUI.SELECTED_COLOR);
+            g.setColor(LayerGUI.UNSELECTED_COLOR);
+            g.fillRect(0, 0, thumbSize, thumbSize);
+            g.setColor(LayerGUI.SELECTED_COLOR);
         } else {
-            g2.setPaint(fillPaint.createPaint(drag, fgColor, bgColor));
+            g.setPaint(fillPaint.createPaint(drag, fgColor, bgColor));
         }
-        g2.fill(shapeType.createShape(drag, null));
+        g.fill(shapeType.createShape(drag, null));
     }
 
     /**
@@ -438,7 +438,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             assert !origImRect.isEmpty() : "drag = " + origDrag;
             box = new TransformBox(origImRect, view, this);
         }
-        setState(State.TRANSFORMABLE);
+        setState(State.BOXED);
         return box;
     }
 
@@ -470,13 +470,12 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         double rotCenterImX = horBoxImBounds.getX();
         double rotCenterImY = horBoxImBounds.getY() + horBoxImBounds.getHeight() / 2.0;
 
-        // Set the original shape to the horizontal shape.
-        // It could also be rotated backwards with an AffineTransform.
+        // set the original shape to the horizontal shape
         origShape = shapeType.createShape(transformedDrag, settings);
         // rotate back
         origShape = Shapes.rotate(origShape, -angle, rotCenterImX, rotCenterImY);
 
-        // Set the original drag to the diagonal of the back-rotated transform box,
+        // set the original drag to the diagonal of the back-rotated transform box,
         // so that after a shape-type change the new shape is created correctly
         double halfImHeight = dragLength * UNIT_ARROW_HEAD_WIDTH / 2.0;
         origDrag = new Drag(
@@ -576,7 +575,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     public void regenerate(TransformBox box, ShapesTool tool, String editName) {
         StyledShape backup = clone();
 
-        // calculate the new transformed shape
+        // update the changed aspect from the tool
         switch (editName) {
             case ShapesTool.EDIT_TYPE -> {
                 updateShapeType(tool);
@@ -692,8 +691,6 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     public boolean checkInvariants() {
-        // TODO CREATED, but not initialized styled shapes
-        //  shouldn't be put in shape layers
         if (state == State.EMPTY) {
             return true;
         }

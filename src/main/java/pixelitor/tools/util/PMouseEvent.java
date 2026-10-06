@@ -35,7 +35,8 @@ public class PMouseEvent extends PPoint {
 
         if (View.isPixelSnapping()) {
             // the image-space coordinates are assumed to be already snapped,
-            // and we just want to draw the helper widgets correctly
+            // and the component-space coordinates are updated to
+            // match so that tool widgets appear at the snapped position
             updateCoFromIm();
         }
 
@@ -51,6 +52,8 @@ public class PMouseEvent extends PPoint {
         return e;
     }
 
+    // returns the raw event point, which could differ from
+    // the possibly snapped getCoX() / getCoY()
     public Point getPoint() {
         return e.getPoint();
     }

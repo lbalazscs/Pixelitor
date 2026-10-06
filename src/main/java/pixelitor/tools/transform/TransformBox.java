@@ -247,7 +247,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     /**
      * Initialize transient variables after deserialization.
      */
-    public void reInitialize(View view, Transformable target) {
+    public void reinitialize(View view, Transformable target) {
         // a box needs reinitialization if the view is null after deserialization
         // or if it's the old view after the duplication of a composition
         if (this.view == view) {
@@ -268,7 +268,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
      * Programmatically rotates the box to the given angle.
      */
     public void rotateTo(double angle, AngleUnit unit) {
-        saveState(); // so that transform works
+        saveState(); // so that coTransform() works
         double rad = unit.toRadians(angle);
         double angleBefore = this.angle;
         setAngle(rad);
@@ -449,7 +449,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
      * Handles a mouse press event specifically on one of the box's handles.
      */
     public void mousePressedOn(DraggablePoint handle, double x, double y) {
-        View.toolSnappingChanged(cos == 1.0 && handle.shouldSnap(), false);
+        View.toolSnappingChanged(isUnrotated() && handle.shouldSnap(), false);
 
         handle.setActive(true);
         saveState();
@@ -462,7 +462,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         wholeBoxDragStartCoX = coX;
         wholeBoxDragStartCoY = coY;
         saveState();
-        View.toolSnappingChanged(cos == 1.0, false);
+        View.toolSnappingChanged(isUnrotated(), false);
     }
 
     /**
@@ -474,7 +474,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             target.updateUI(view);
             return true;
         } else if (wholeBoxDrag) {
-            dragBox(e.getCoX(), e.getCoY());
+            dragWholeBox(e.getCoX(), e.getCoY());
             return true;
         }
         return false;
@@ -498,8 +498,9 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
             return true;
         } else if (e.isPopupTrigger()) {
             showPopup(e);
+            return true;
         } else if (wholeBoxDrag) {
-            dragBox(e.getCoX(), e.getCoY());
+            dragWholeBox(e.getCoX(), e.getCoY());
             wholeBoxDrag = false;
             addLegacyEditToHistory(e.getComp(), "Drag Transform Box");
             return true;
@@ -547,7 +548,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     void flip(FlipDirection direction) {
         saveState();
 
-        // get the original image-space locations of the corners
+        // get the current (pre-flip) locations of the corners
         Point2D nwImLoc = nw.getImLocationCopy();
         Point2D neImLoc = ne.getImLocationCopy();
         Point2D swImLoc = sw.getImLocationCopy();
@@ -641,7 +642,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         }
     }
 
-    private void dragBox(double coX, double coY) {
+    private void dragWholeBox(double coX, double coY) {
         double coDX = coX - wholeBoxDragStartCoX;
         double coDY = coY - wholeBoxDragStartCoY;
 
@@ -696,7 +697,8 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     }
 
     /**
-     * Transforms the box geometry with the given component-space transformation.
+     * Transforms the box geometry with the given component-space
+     * transformation. Requires saveState() first.
      */
     public void coTransform(AffineTransform at) {
         nw.coTransformOnlyThis(at, beforeMovement.nw);
@@ -745,6 +747,10 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         cursorOffset = calcCursorOffset(angleDegrees);
     }
 
+    private boolean isUnrotated() {
+        return cos == 1.0;
+    }
+
     public int getAngleDegrees() {
         return angleDegrees;
     }
@@ -758,8 +764,8 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         if (angleDeg > 338) { // 360 - (45/2) = 338
             return 0;
         }
-        // adding 22∘ (approx. 45∘/2) shifts the intervals so that
-        // each 45∘ sector is centered directly around its direction
+        // adding 22° (approx. 45°/2) shifts the intervals so that
+        // each 45° sector is centered directly around its direction
         return (angleDeg + 22) / 45;
     }
 
@@ -772,8 +778,9 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
     }
 
     /**
+     * Recalculates the angle from the rotation handle's position.
      * Should be called only when the corners
-     * and the rotation handle are in sync!
+     * and the rotation handle are in sync.
      */
     public void recalcAngle() {
         rot.recalcAngle(rot.x, rot.y, true);
@@ -881,9 +888,9 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
 
     public void moveWhileDragging(double relImX, double relImY) {
         // since these are deltas, they can't use the normal
-        // image space to component space converting methods
+        // image-to-component-space conversion methods
         double scaling = view.getZoomScale();
-        dragBox(scaling * relImX, scaling * relImY);
+        dragWholeBox(scaling * relImX, scaling * relImY);
     }
 
     public void finalizeMovement() {

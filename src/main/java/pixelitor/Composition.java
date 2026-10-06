@@ -327,7 +327,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // guides don't store a view, and Guides.coCoordsChanged will be called elsewhere
 
             // now that all children are initialized, it's safe to trigger updates
-            canvas.recalcCoSize(view, true);
+            view.canvasCoSizeChanged();
         } else { // the new view can be null when closing or reloading
             if (selection != null) {
                 disposeSelection();

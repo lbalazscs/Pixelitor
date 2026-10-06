@@ -83,7 +83,7 @@ public class CloneTool extends BlendingModeBrushTool {
     private final EnumParam<CloneMirror> mirrorParam = new EnumParam<>(
         "Mirror", CloneMirror.class);
 
-    protected CloneTool() {
+    public CloneTool() {
         super("Clone Stamp", 'S',
             "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
                 "then <b>drag</b> to paint. <b>Shift-click</b> to clone along a line.",

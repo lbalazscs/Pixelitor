@@ -506,4 +506,37 @@ public class Debug {
             default -> throw new IllegalStateException("Unexpected value: " + alignment);
         };
     }
+
+    public static void enableMouseEventDebugging() {
+        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
+            MouseEvent e = (MouseEvent) event;
+            String msg = Tools.getActive().getName() + ": " + mouseEventAsString(e);
+            System.out.println(msg);
+        }, AWTEvent.MOUSE_EVENT_MASK
+            | AWTEvent.MOUSE_MOTION_EVENT_MASK
+            | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+    }
+
+    /**
+     * Reports all events that take longer than the given time threshold to complete.
+     *
+     * See https://stackoverflow.com/questions/5541493/how-do-i-profile-the-edt-in-swing
+     */
+    public static void monitorSlowEvents(long threshold, TimeUnit unit) {
+        Toolkit.getDefaultToolkit().getSystemEventQueue().push(new EventQueue() {
+            final long thresholdNanos = unit.toNanos(threshold);
+
+            @Override
+            protected void dispatchEvent(AWTEvent event) {
+                long startTime = System.nanoTime();
+                super.dispatchEvent(event);
+                long endTime = System.nanoTime();
+
+                if (endTime - startTime > thresholdNanos) {
+                    long durationMs = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+                    System.out.println(durationMs + " ms: " + event);
+                }
+            }
+        });
+    }
 }

@@ -73,6 +73,7 @@ public class EffectsParam extends AbstractFilterParam {
      * Gets the current effects configuration from the GUI panel.
      */
     public AreaEffects getEffects() {
+        // TODO currently the panel is created on demand and it is the source of truth
         ensureEffectsPanelCreated();
         return effectsPanel.getEffects();
     }
@@ -80,7 +81,7 @@ public class EffectsParam extends AbstractFilterParam {
     private void ensureEffectsPanelCreated() {
         if (effectsPanel == null) {
             effectsPanel = new EffectsPanel(null);
-            if (adjustmentListener != null) { // the listener was set before this
+            if (adjustmentListener != null) { // the listener was set before the panel existed
                 effectsPanel.setAdjustmentListener(adjustmentListener);
             }
         }
@@ -91,7 +92,7 @@ public class EffectsParam extends AbstractFilterParam {
      */
     public void setEffects(AreaEffects effects) {
         assert effectsPanel != null;
-        if (effectsPanel == null) { // probably never true
+        if (effectsPanel == null) { // fallback (currently never true)
             ensureEffectsPanelCreated();
         }
 
@@ -120,6 +121,8 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
+        // TODO the updateGUI flag is ignored, because currently
+        //   we always must update the GUI (it's the source of truth)
         setEffects((AreaEffects) state);
     }
 

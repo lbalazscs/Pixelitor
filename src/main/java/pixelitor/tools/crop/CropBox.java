@@ -44,8 +44,9 @@ import static java.awt.Cursor.*;
  */
 public class CropBox implements ToolWidget, Debuggable {
     // transformation modes for user interactions
-    private enum TransformMode {NONE, MOVE, RESIZE}
-    private TransformMode mode = TransformMode.NONE;
+    private enum DragMode {NONE, MOVE, RESIZE}
+
+    private DragMode mode = DragMode.NONE;
 
     // crop handles for resizing the crop box
     private final CropHandle topLeft;
@@ -166,12 +167,12 @@ public class CropBox implements ToolWidget, Debuggable {
 
         if (isResizeCursor(dragStartCursor)) {
             // if the user clicked on the handle, allow resizing
-            mode = TransformMode.RESIZE;
+            mode = DragMode.RESIZE;
         } else if (cropRect.containsCo(e.getPoint())) {
             // if the user clicked inside the rectangle, allow moving
-            mode = TransformMode.MOVE;
+            mode = DragMode.MOVE;
         } else {
-            mode = TransformMode.NONE; // clicked outside
+            mode = DragMode.NONE; // clicked outside
         }
     }
 
@@ -179,7 +180,7 @@ public class CropBox implements ToolWidget, Debuggable {
      * Updates the crop box position or size based on mouse movement while dragging.
      */
     public void mouseDragged(PMouseEvent e) {
-        if (mode == TransformMode.NONE) {
+        if (mode == DragMode.NONE) {
             return; // nothing to do if not moving or resizing
         }
 
@@ -192,14 +193,14 @@ public class CropBox implements ToolWidget, Debuggable {
             (int) (e.getCoY() - coDragStartPos.y));
 
         // apply transformation based on mode
-        if (mode == TransformMode.RESIZE) {
+        if (mode == DragMode.RESIZE) {
             resize(coRect, dragStartCursor, mouseOffset);
 
             // maintain aspect ratio if shift is pressed and ratio is valid
             if (e.isShiftDown() && aspectRatio > 0) {
                 keepAspectRatio(coRect, dragStartCursor, aspectRatio, e.getView());
             }
-        } else if (mode == TransformMode.MOVE) {
+        } else if (mode == DragMode.MOVE) {
             // simply translate the rectangle
             coRect.translate(mouseOffset.x, mouseOffset.y);
         }
@@ -218,7 +219,7 @@ public class CropBox implements ToolWidget, Debuggable {
      * Finalizes the crop box adjustment after the mouse button is released.
      */
     public void mouseReleased(PMouseEvent e) {
-        if (mode == TransformMode.NONE) {
+        if (mode == DragMode.NONE) {
             return; // nothing to finalize if we weren't transforming
         }
 
@@ -231,7 +232,7 @@ public class CropBox implements ToolWidget, Debuggable {
         setHandleCursor(e.getCoX(), e.getCoY(), e.getView());
 
         // reset interaction mode
-        mode = TransformMode.NONE;
+        mode = DragMode.NONE;
     }
 
     public void mouseMoved(MouseEvent e, View view) {
@@ -292,7 +293,7 @@ public class CropBox implements ToolWidget, Debuggable {
         view.repaint();
     }
 
-    public void setImSize(Rectangle2D newRect, View view) {
+    public void setImRect(Rectangle2D newRect, View view) {
         Rectangle2D imRect = cropRect.getIm();
         imRect.setRect(newRect);
 
@@ -306,7 +307,7 @@ public class CropBox implements ToolWidget, Debuggable {
      * Returns true if the crop box is currently being moved or resized by the user.
      */
     public boolean isAdjusting() {
-        return mode != TransformMode.NONE;
+        return mode != DragMode.NONE;
     }
 
     @Override

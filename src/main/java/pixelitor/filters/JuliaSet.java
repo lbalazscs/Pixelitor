@@ -17,9 +17,8 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.ComplexNumberParam;
 import pixelitor.filters.gui.Help;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.JuliaSetFilter;
 
 import java.awt.image.BufferedImage;
@@ -34,17 +33,21 @@ public class JuliaSet extends EscapeTimeFractal {
     @Serial
     private static final long serialVersionUID = -3089167245262580096L;
 
-    private final GroupedRangeParam cParam = new GroupedRangeParam("Complex Constant (*100)",
-        new RangeParam[]{
-            new RangeParam("Re", -150, -70, 50),
-            new RangeParam("Im", -150, 27, 50)
-        }, false);
+//    private final GroupedRangeParam cParam = new GroupedRangeParam("Complex Constant (*100)",
+//        new RangeParam[]{
+//            new RangeParam("Re", -150, -70, 50),
+//            new RangeParam("Im", -150, 27, 50)
+//        }, false);
+
+    private final ComplexNumberParam cParam = new ComplexNumberParam("Complex Constant",
+        -0.7, 0.27, -2, 0.5, -1.2, 1.2);
 
     public JuliaSet() {
         super(300, 0.22f);
 
         // insert right after Zoom, before Zoom Center, to match the base param order
-        insertParam(cParam.notLinkable().withDecimalPlaces(2), 3);
+//        insertParam(cParam.notLinkable().withDecimalPlaces(2), 3);
+        insertParam(cParam, 3);
 
         help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Julia_set");
     }
@@ -60,8 +63,8 @@ public class JuliaSet extends EscapeTimeFractal {
             zoomCenterParam.getRelativeY(),
             iterations,
             getColors(colorsParam.getValue(), iterations),
-            cParam.getPercentage(0),
-            cParam.getPercentage(1),
+            cParam.getRe(),
+            cParam.getIm(),
             insideOutParam.isChecked()
         );
 

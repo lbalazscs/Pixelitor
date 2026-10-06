@@ -89,7 +89,7 @@ public class CustomShapes {
 
         double angle = atan2(endY - startY, endX - startX);
 
-        // the arrowhead wings are angled at 15∘ (π/12 radians) back from the line
+        // the arrowhead wings are angled at 15° (π/12 radians) back from the line
         double backAngle1 = 2.8797926 + angle; // π - π/12 = 2.8797926
         double backAngle2 = 3.4033926 + angle; // π + π/12 = 3.4033926
         int arrowRadius = 20;

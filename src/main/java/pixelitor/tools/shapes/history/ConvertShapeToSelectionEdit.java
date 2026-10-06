@@ -36,7 +36,7 @@ public class ConvertShapeToSelectionEdit extends PixelitorEdit {
                                        TransformBox box,
                                        StyledShape styledShape,
                                        PixelitorEdit selectionEdit) {
-        super("Convert Path to Selection", comp);
+        super("Convert Shape to Selection", comp);
 
         this.box = Objects.requireNonNull(box);
         this.styledShape = Objects.requireNonNull(styledShape);

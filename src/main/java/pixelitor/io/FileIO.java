@@ -342,10 +342,10 @@ public class FileIO {
 
         String svgFillAttr = exportFilled ? "black" : "none";
         String svgStrokeAttr = exportFilled ? "none" : "black";
-        String svgStrokeStyle = "";
-        if (strokeParam != null && !exportFilled) {
-            svgStrokeStyle = strokeParam.copyState().toSVGStyle();
-        }
+
+        String svgStrokeStyleAttr = strokeParam != null && !exportFilled
+            ? strokeParam.copyState().toSVGAttributes()
+            : "";
 
         Canvas canvas = Views.getActiveComp().getCanvas();
         return """
@@ -353,7 +353,7 @@ public class FileIO {
               <path d="%s" fill="%s" stroke="%s" fill-rule="%s" %s/>
             </svg>
             """.formatted(canvas.createSvgRootTag(), svgPath,
-            svgFillAttr, svgStrokeAttr, svgFillRule, svgStrokeStyle);
+            svgFillAttr, svgStrokeAttr, svgFillRule, svgStrokeStyleAttr);
     }
 
     private static boolean isSvgExportFilled(StrokeParam strokeParam) {

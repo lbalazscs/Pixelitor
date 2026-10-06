@@ -20,10 +20,8 @@ package pixelitor.gui;
 import pixelitor.Views;
 import pixelitor.io.DropListener;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
 import java.util.ArrayList;
@@ -179,32 +177,5 @@ public class ImageArea {
 
     public static void setTabPlacement(int tabPlacement) {
         ImageArea.tabPlacement = tabPlacement;
-    }
-
-    // called when the global pixel grid switch was turned on
-    public static void pixelGridEnabled() {
-        if (isActiveMode(FRAMES)) {
-            if (Views.anyViewAllowsPixelGrid()) {
-                Views.repaintAll();
-            } else {
-                showNoPixelGridMessage();
-            }
-        } else { // tabs: check only the active view
-            View view = Views.getActive();
-            if (view != null) {
-                if (view.getZoomLevel().allowsPixelGrid()) {
-                    view.repaint();
-                } else {
-                    showNoPixelGridMessage();
-                }
-            }
-        }
-    }
-
-    private static void showNoPixelGridMessage() {
-        String msg = """
-            The pixel grid consists of lines between the pixels,
-            and is shown only if the zoom is at least 1600%.""";
-        Messages.showInfo("Pixel Grid", msg, (Component) ui);
     }
 }

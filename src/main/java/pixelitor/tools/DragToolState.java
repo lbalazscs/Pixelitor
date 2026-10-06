@@ -22,7 +22,7 @@ package pixelitor.tools;
  */
 public enum DragToolState {
     /**
-     * The initial state and the state after finishing a tool action
+     * The initial state and the state after finishing a tool action.
      */
     IDLE,
     /**

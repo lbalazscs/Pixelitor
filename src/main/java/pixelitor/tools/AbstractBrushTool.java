@@ -839,16 +839,16 @@ public abstract class AbstractBrushTool extends Tool {
             g.draw(shape);
         }
 
-        public void paint(Graphics2D g2, double x, double y) {
+        public void paint(Graphics2D g, double x, double y) {
             if (view == null) {
                 throw new IllegalStateException("brush outline not initialized");
             }
-            var origTransform = g2.getTransform();
+            var origTransform = g.getTransform();
 
-            g2.translate(x - coRadius - 1, y - coRadius - 1);
-            super.paint(g2, null, 3 + (int) coDiameter, 3 + (int) coDiameter);
+            g.translate(x - coRadius - 1, y - coRadius - 1);
+            super.paint(g, null, 3 + (int) coDiameter, 3 + (int) coDiameter);
 
-            g2.setTransform(origTransform);
+            g.setTransform(origTransform);
         }
 
         public int getCoRadius() {

@@ -106,8 +106,10 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setEmbedded() {
-        hasBorder = false;
+    public void setEmbedded(FilterParam.Layout layout) {
+        if (layout != Layout.DIALOG) {
+            hasBorder = false;
+        }
     }
 
     public boolean hasBorder() {

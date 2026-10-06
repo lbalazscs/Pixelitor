@@ -198,13 +198,13 @@ public abstract class Tool implements PresetOwner, Debuggable {
 
     public abstract void escPressed();
 
-    public void altPressed() {
+    public void altPressed(boolean shiftDown) {
         if (hasColorPickerForwarding()) {
             Views.setCursorForAll(Tools.COLOR_PICKER.getDefaultCursor());
         }
     }
 
-    public void altReleased() {
+    public void altReleased(boolean shiftDown) {
         if (hasColorPickerForwarding()) {
             Views.setCursorForAll(cursor);
         }

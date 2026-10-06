@@ -30,17 +30,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
-
 /**
  * A component that displays a thumbnail image and allows users
  * to select a position by clicking or dragging.
  */
 public class ImagePositionSelector extends JComponent {
     public static final int THUMBNAIL_SIZE = 100;
-    private static final int MARKER_SIZE = 10;
-    private static final int MARKER_OFFSET = MARKER_SIZE / 2;
 
     private final ImagePositionParam model;
     private BufferedImage thumb; // a thumbnail image for the background
@@ -62,12 +57,6 @@ public class ImagePositionSelector extends JComponent {
 
         addMouseListener(mouseAdapter);
         addMouseMotionListener(mouseAdapter);
-
-//        if (AppMode.isUnitTesting()) {
-//            // Had spurious failures on Linux in createThumbnail().
-//            // This workaround should no longer be necessary.
-//            return;
-//        }
 
         createThumbnail();
 
@@ -104,46 +93,14 @@ public class ImagePositionSelector extends JComponent {
 
         g.drawImage(thumb, xOffset, yOffset, null);
 
-        // Draws the position indicator, consisting of
-        // a crosshair and a central square marker.
+        // draws the position indicator, consisting of
+        // a crosshair and a central square marker
         int x = xOffset + (int) (model.getRelativeX() * thumbWidth);
         int y = yOffset + (int) (model.getRelativeY() * thumbHeight);
 
         // the crosshair should not be restricted to the thumbnail's
         // dimensions, because users are allowed to select outside the bounds
-        drawCrosshair(g, x, y, getWidth(), getHeight());
-        drawCentralMarker(g, x, y);
-    }
-
-    private static void drawCrosshair(Graphics g, int x, int y, int width, int height) {
-        // draw a 1px white crosshair with a 1px black outline
-        g.setColor(BLACK);
-        // black outline for vertical line
-        if (x > 0) {
-            g.drawLine(x - 1, 0, x - 1, height - 1); // west
-        }
-        if (x < width - 1) {
-            g.drawLine(x + 1, 0, x + 1, height - 1); // east
-        }
-        // black outline for horizontal line
-        if (y > 0) {
-            g.drawLine(0, y - 1, width - 1, y - 1); // north
-        }
-        if (y < height - 1) {
-            g.drawLine(0, y + 1, width - 1, y + 1); // south
-        }
-
-        g.setColor(WHITE);
-        // white center lines
-        g.drawLine(x, 0, x, height - 1); // vertical
-        g.drawLine(0, y, width - 1, y); // horizontal
-    }
-
-    private static void drawCentralMarker(Graphics g, int x, int y) {
-        g.setColor(BLACK);
-        g.drawRect(x - MARKER_OFFSET, y - MARKER_OFFSET, MARKER_SIZE, MARKER_SIZE);
-        g.setColor(WHITE);
-        g.fillRect(x - MARKER_OFFSET + 1, y - MARKER_OFFSET + 1, MARKER_SIZE - 2, MARKER_SIZE - 2);
+        CrosshairPainter.paint(g, x, y, getWidth(), getHeight());
     }
 
     private void updatePosition(MouseEvent e, boolean isAdjusting) {

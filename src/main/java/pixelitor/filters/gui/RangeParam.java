@@ -387,8 +387,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void setEmbedded() {
-        labelPosition = SliderSpinner.LabelPosition.NONE_WITH_TICKS;
+    public void setEmbedded(FilterParam.Layout layout) {
+        if (layout == Layout.VERTICAL) {
+            labelPosition = SliderSpinner.LabelPosition.NONE_WITH_TICKS;
+        }
     }
 
     /**

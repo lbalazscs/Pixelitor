@@ -52,10 +52,6 @@ public class Canvas implements Serializable, Debuggable {
     private int width;
     private int height;
 
-    // size in component space (the size in image space * zooming)
-    private transient int coWidth;
-    private transient int coHeight;
-
     // cached thumbnail dimensions (calculated lazily)
     private transient Dimension thumbSize;
 
@@ -71,8 +67,6 @@ public class Canvas implements Serializable, Debuggable {
     private Canvas(Canvas orig) {
         width = orig.width;
         height = orig.height;
-        coWidth = orig.coWidth;
-        coHeight = orig.coHeight;
     }
 
     public Canvas copy() {
@@ -96,27 +90,12 @@ public class Canvas implements Serializable, Debuggable {
         height = newHeight;
 
         thumbSize = null; // invalidate cache
-        recalcCoSize(view, updateView);
+        if (updateView) {
+            view.canvasCoSizeChanged();
+        }
 
         if (view.isActive()) {
             activeCanvasSizeChanged(this);
-        }
-    }
-
-    /**
-     * Recalculates the component-space size.
-     */
-    public void recalcCoSize(View view, boolean updateView) {
-        double zoomScale = view.getZoomScale();
-
-        int prevCoWidth = coWidth;
-        int prevCoHeight = coHeight;
-
-        coWidth = (int) (zoomScale * width);
-        coHeight = (int) (zoomScale * height);
-
-        if (updateView && (coWidth != prevCoWidth || coHeight != prevCoHeight)) {
-            view.canvasCoSizeChanged();
         }
     }
 
@@ -138,26 +117,10 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Returns the bounds in component space.
-     */
-    public Rectangle getCoBounds(View view) {
-        // assumes that the canvas and view are fully initialized
-        return new Rectangle(
-            view.getCanvasStartX(), view.getCanvasStartY(), coWidth, coHeight);
-    }
-
-    /**
      * Returns the size in image space (image pixels).
      */
     public Dimension getSize() {
         return new Dimension(width, height);
-    }
-
-    /**
-     * Returns the size in component space (screen pixels).
-     */
-    public Dimension getCoSize() {
-        return new Dimension(coWidth, coHeight);
     }
 
     public String getSizeString() {
@@ -176,20 +139,6 @@ public class Canvas implements Serializable, Debuggable {
      */
     public int getHeight() {
         return height;
-    }
-
-    /**
-     * Returns the width in component space.
-     */
-    public int getCoWidth() {
-        return coWidth;
-    }
-
-    /**
-     * Returns the height in component space.
-     */
-    public int getCoHeight() {
-        return coHeight;
     }
 
     /**
@@ -312,8 +261,6 @@ public class Canvas implements Serializable, Debuggable {
 
         node.addInt("im width", width);
         node.addInt("im height", height);
-        node.addInt("co width", coWidth);
-        node.addInt("co height", coHeight);
 
         return node;
     }

@@ -27,7 +27,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Adds hand-tool-style panning behavior to a scroll pane’s view component.
+ * Adds hand-tool-style panning behavior to a scroll pane's view component.
  */
 public class ViewportPanner {
     private int dragStartX;

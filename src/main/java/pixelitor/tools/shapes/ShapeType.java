@@ -31,7 +31,7 @@ import java.awt.geom.*;
 import java.util.function.Supplier;
 
 /**
- * The shape types in the shapes tool.
+ * The shape types used in the shapes tool (and in some other places as well).
  */
 public enum ShapeType {
     RECTANGLE("Rectangle", false, true, OverlayType.WIDTH_HEIGHT,
@@ -46,7 +46,7 @@ public enum ShapeType {
         }
     }, ELLIPSE("Ellipse", false, false, OverlayType.WIDTH_HEIGHT, Ellipse2D.Double::new) {
         @Override
-        protected Rectangle2D getShapeBounds(Drag drag) {
+        protected Rectangle2D getFittingRect(Drag drag) {
             return drag.toPosImRect();
         }
     }, DIAMOND("Diamond", false, false, OverlayType.WIDTH_HEIGHT, CustomShapes::createDiamond),
@@ -118,9 +118,11 @@ public enum ShapeType {
 
             Rectangle2D r = drag.toSignedImRect();
 
+            // the unit arrow has a length of 1.0, so scaling
+            // by the drag length gives the right size
             double length = drag.calcImLength();
             var transform = AffineTransform.getTranslateInstance(r.getX(), r.getY());
-            transform.scale(length, length); // originally it had a length of 1.0
+            transform.scale(length, length);
 
             // rotate the arrow into the direction of the drag
             double angle = Geometry.atan2ToIntuitive(drag.calcDrawAngle());
@@ -176,7 +178,7 @@ public enum ShapeType {
         this(displayName, directional, hasAreaBug, overlayType, null, null);
     }
 
-    // Constructor for simple shapes with a factory (they all have OverlayType.NONE)
+    // Constructor for factory-based shapes that show no drag overlay
     ShapeType(String displayName, boolean directional, boolean hasAreaBug,
               ShapeFactory factory) {
         this(displayName, directional, hasAreaBug, OverlayType.NONE, factory, null);
@@ -205,15 +207,16 @@ public enum ShapeType {
         if (shapeFactory == null) {
             throw new UnsupportedOperationException("Shape " + this + " must override createShape(Drag, ShapeTypeSettings)");
         }
-        Rectangle2D r = getShapeBounds(drag);
+        Rectangle2D r = getFittingRect(drag);
         return shapeFactory.create(r.getX(), r.getY(), r.getWidth(), r.getHeight());
     }
 
     /**
+     * Returns the rectangle the shape is fitted into.
      * Override this to use a different rectangle type (positive vs signed).
      * Most simple shapes use a signed rectangle for symmetry during drag.
      */
-    protected Rectangle2D getShapeBounds(Drag drag) {
+    protected Rectangle2D getFittingRect(Drag drag) {
         return drag.toSignedImRect();
     }
 

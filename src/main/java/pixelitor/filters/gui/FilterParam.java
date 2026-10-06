@@ -23,12 +23,18 @@ import pixelitor.utils.debug.Debuggable;
 /**
  * The model for a filter parameter, which (unlike a button) holds
  * a value that can be changed by the user.
- *
  * For practical reasons, implementations of this interface are also
  * used outside of filters as models of GUI elements. In such cases,
  * only a subset of their functionality is used.
  */
 public non-sealed interface FilterParam extends FilterSetting, Resettable, Debuggable {
+    /**
+     * The possible layouts when this filter parameter is
+     * embedded into a composite filter parameter.
+     */
+    enum Layout {
+        DIALOG, VERTICAL, HORIZONTAL
+    }
 
     /**
      * Sets a random value without triggering any filter update.
@@ -123,7 +129,7 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     }
 
     /**
-     * Signals that this filter param is embedded into a bordered layout.
+     * Signals that this filter param is embedded into a composite layout.
      */
-    void setEmbedded();
+    void setEmbedded(Layout layout);
 }
