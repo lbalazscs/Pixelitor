@@ -18,11 +18,9 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.EmbossFilter;
+import com.jhlabs.image.EmbossFilter.LightingMode;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ElevationAngleParam;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
@@ -46,6 +44,9 @@ public class JHEmboss extends ParametrizedFilter {
     private final RangeParam depth = new RangeParam(
         "Depth", 1, 7, 15);
 
+    private final EnumParam<LightingMode> specular = new EnumParam<>(
+        "Finish", LightingMode.class);
+
     private final BooleanParam texture = new BooleanParam(
         "Texture (Multiply with the Source Image)");
 
@@ -56,6 +57,7 @@ public class JHEmboss extends ParametrizedFilter {
             lightDirection,
             lightElevation,
             depth,
+            specular,
             texture
         );
     }
@@ -71,7 +73,8 @@ public class JHEmboss extends ParametrizedFilter {
             azimuth,
             elevation,
             adjustedDepth,
-            useTexture);
+            useTexture,
+            specular.getValue());
 
         return filter.filter(src, dest);
     }

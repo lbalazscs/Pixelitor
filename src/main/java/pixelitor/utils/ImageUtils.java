@@ -789,7 +789,7 @@ public class ImageUtils {
                                         float azimuth, float bumpHeight,
                                         String filterName, boolean tile) {
         var emboss = new EmbossFilter(filterName, azimuth,
-            (float) (Math.PI / 6.0), bumpHeight, false);
+            (float) (Math.PI / 6.0), bumpHeight, false, EmbossFilter.LightingMode.MATTE);
 
         BufferedImage bumpMap = emboss.filter(bumpImage, null);
 
