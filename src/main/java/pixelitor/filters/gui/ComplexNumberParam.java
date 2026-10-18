@@ -39,6 +39,8 @@ public class ComplexNumberParam extends AbstractFilterParam {
 
     private final ComplexBounds bounds;
 
+    private boolean drawCircle;
+
     public ComplexNumberParam(String name, double re, double im, ComplexBounds bounds) {
         super(name, RandomizeMode.ALLOW);
 
@@ -57,6 +59,15 @@ public class ComplexNumberParam extends AbstractFilterParam {
         syncWithGui();
         paramGUI.updateGUI();
         return gui;
+    }
+
+    public ComplexNumberParam withCircle() {
+        drawCircle = true;
+        return this;
+    }
+
+    public boolean shouldDrawCircle() {
+        return drawCircle;
     }
 
     @Override

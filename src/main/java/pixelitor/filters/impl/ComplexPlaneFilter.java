@@ -18,6 +18,7 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.PointFilter;
+import pixelitor.filters.util.ComplexBounds;
 
 import java.awt.image.BufferedImage;
 
@@ -39,6 +40,16 @@ public abstract class ComplexPlaneFilter extends PointFilter {
 
     private final double zoomCenterX, zoomCenterY;
     private final double zoom;
+
+    protected ComplexPlaneFilter(String filterName,
+                                 ComplexBounds bounds,
+                                 double zoom,
+                                 double zoomCenterX,
+                                 double zoomCenterY) {
+        this(filterName,
+            bounds.minRe(), bounds.maxRe(), bounds.minIm(), bounds.maxIm(),
+            zoom, zoomCenterX, zoomCenterY);
+    }
 
     /**
      * Constructs a new ComplexPlaneFilter.

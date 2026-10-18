@@ -18,9 +18,12 @@
 package pixelitor.filters.impl;
 
 import net.jafama.FastMath;
+import pixelitor.filters.util.ComplexBounds;
 
 /**
- * Filter implementing Newton's and Halley's root-finding methods for solving zⁿ − 1 = 0 on the complex plane.
+ * Newton's and Halley's methods for zⁿ − 1 = 0 with a complex relaxation factor a:
+ * z ← z − a·Δz, where Δz is the classic correction (f/f′ for Newton).
+ * a = 1 gives the classic methods; the roots attract iff |1 − a| < 1.
  */
 public class NewtonFractalFilter extends ComplexPlaneFilter {
     public static final int METHOD_NEWTON = 0;
@@ -32,22 +35,27 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
     private final int n;
     private final int[][] colors;
     private final int method;
+    private final double imA;
+    private final double reA;
 
-    public NewtonFractalFilter(double xMin, double xMax,
-                               double yMin, double yMax,
+    public NewtonFractalFilter(ComplexBounds bounds,
                                int n,
                                double zoom,
                                double zoomCenterX,
                                double zoomCenterY,
                                int maxIterations,
                                int[][] colors,
-                               int method) {
-        super("Newton Fractal", xMin, xMax, yMin, yMax, zoom, zoomCenterX, zoomCenterY);
+                               int method,
+                               double reA,
+                               double imA) {
+        super("Newton Fractal", bounds, zoom, zoomCenterX, zoomCenterY);
 
         this.n = n;
         this.maxIterations = maxIterations;
         this.colors = colors;
         this.method = method;
+        this.imA = imA;
+        this.reA = reA;
     }
 
     @Override
@@ -67,6 +75,8 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
     }
 
     private int calcNewton(double zx, double zy) {
+        double invN = 1.0 / n;
+
         for (int step = 1; step <= maxIterations; step++) {
             if (!Double.isFinite(zx) || !Double.isFinite(zy)) {
                 return IN_SET_COLOR;
@@ -88,10 +98,17 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
             }
 
             // Newton step for f(z) = zⁿ − 1:
-            // z_(m+1) = ((n - 1) / n) * z + 1 / (n * z^(n - 1))
-            double factor = (double) (n - 1) / n;
-            double nextZx = factor * zx + u / denom;
-            double nextZy = factor * zy - v / denom;
+            // Δz = f(z) / f'(z) = (zⁿ - 1) / (n * zⁿ⁻¹) = z / n - 1 / (n * zⁿ⁻¹)
+            // 1 / (n * zⁿ⁻¹) = (u - i*v) / denom
+            double deltaX = zx * invN - u / denom;
+            double deltaY = zy * invN + v / denom;
+
+            // relaxed step: a * Δz = (reA + i*imA) * (deltaX + i*deltaY)
+            double stepX = reA * deltaX - imA * deltaY;
+            double stepY = reA * deltaY + imA * deltaX;
+
+            double nextZx = zx - stepX;
+            double nextZy = zy - stepY;
 
             if (isConverged(zx, zy, nextZx, nextZy)) {
                 return colors[findClosestRoot(nextZx, nextZy)][step];
@@ -137,8 +154,12 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
             double deltaX = (numX * dx + numY * dy) / denom;
             double deltaY = (numY * dx - numX * dy) / denom;
 
-            double nextZx = zx - deltaX;
-            double nextZy = zy - deltaY;
+            // relaxed step: a * Δz = (reA + i*imA) * (deltaX + i*deltaY)
+            double stepX = reA * deltaX - imA * deltaY;
+            double stepY = reA * deltaY + imA * deltaX;
+
+            double nextZx = zx - stepX;
+            double nextZy = zy - stepY;
 
             if (isConverged(zx, zy, nextZx, nextZy)) {
                 return colors[findClosestRoot(nextZx, nextZy)][step];

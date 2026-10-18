@@ -21,6 +21,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.ComplexPlaneFilter;
 import pixelitor.filters.impl.NewtonFractalFilter;
+import pixelitor.filters.util.ComplexBounds;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
@@ -68,13 +69,16 @@ public class NewtonFractal extends ParametrizedFilter {
         new Item("Halley", METHOD_HALLEY),
     });
     private final RangeParam shadingStrengthParam = new RangeParam("Shading Strength", 0, 50, 100);
-    protected final LogZoomParam zoomParam = new LogZoomParam(GUIText.ZOOM, 200, 200, 1000);
-    protected final ImagePositionParam zoomCenterParam;
-    protected final RangeParam iterationsParam;
+    private final LogZoomParam zoomParam = new LogZoomParam(GUIText.ZOOM, 200, 200, 1000);
+    private final ImagePositionParam zoomCenterParam;
+    private final RangeParam iterationsParam;
     private final IntChoiceParam supersamplingParam = new IntChoiceParam("Supersampling", new Item[]{
         new Item("None (Faster)", SUPERSAMPLING_NONE),
         new Item("2x2 (Better, Slower)", SUPERSAMPLING_2X2),
     }, RandomizeMode.IGNORE);
+
+    private final ComplexNumberParam relaxation = new ComplexNumberParam("Step Multiplier",
+        1.0, 0.0, new ComplexBounds(-0.2, 2.2, -1.2, 1.2));
 
     public NewtonFractal() {
         super(false);
@@ -91,6 +95,7 @@ public class NewtonFractal extends ParametrizedFilter {
 
         initParams(
             polynomialParam,
+            relaxation.withCircle(),
             methodParam,
             shadingStrengthParam,
             zoomParam,
@@ -131,15 +136,16 @@ public class NewtonFractal extends ParametrizedFilter {
         int shadingStrength = shadingStrengthParam.getValue();
 
         NewtonFractalFilter filter = new NewtonFractalFilter(
-            -2.0, 2.0, -2.0, 2.0,
+            new ComplexBounds(-2.0, 2.0, -2.0, 2.0),
             n,
             zoomParam.getZoomRatio(),
             zoomCenterParam.getRelativeX(),
             zoomCenterParam.getRelativeY(),
             iterations,
             getColors(n, iterations, shadingStrength),
-            method
-        );
+            method,
+            relaxation.getRe(),
+            relaxation.getIm());
 
         return filter.filter(src, dest);
     }

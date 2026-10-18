@@ -25,6 +25,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.util.Objects;
 
 /**
@@ -177,6 +178,16 @@ public class ComplexNumberSelector extends JComponent {
             // paint outer border
             g2.setColor(borderColor);
             g2.drawRect(0, 0, width - 1, height - 1);
+
+            if (model.shouldDrawCircle()) {
+                // Newton fractal roots attract when |a − 1| < 1.
+                int x = reToPixelX(0, width);
+                int y = imToPixelY(1, height);
+                double w = 2 * width / complexBounds.width();
+                double h = 2 * height / complexBounds.height();
+                g2.setColor(Color.RED);
+                g2.draw(new Ellipse2D.Double(x, y, w, h));
+            }
 
             // paint crosshair indicator from model state
             int markerX = reToPixelX(model.getRe(), width);
