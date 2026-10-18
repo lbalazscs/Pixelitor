@@ -28,9 +28,7 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @DisplayName("Levels tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -53,6 +51,23 @@ class LevelsTest {
 
         rgbPage = model.getModelForChannel(Channel.RGB);
         rPage = model.getModelForChannel(Channel.RED);
+    }
+
+    @Test
+    void filterOpIsInitializedImmediately() {
+        var newModel = new LevelsModel();
+        assertThat(newModel.createFilterOp())
+            .isNotNull()
+            .isInstanceOf(FastLookupOp.class);
+    }
+
+    @Test
+    void resetAllLeavesFilterOpValid() {
+        model.setColorSpace(ColorSpace.OKLAB, false);
+        model.resetAll();
+        assertThat(model.createFilterOp())
+            .isNotNull()
+            .isInstanceOf(FastLookupOp.class);
     }
 
     @Test
@@ -98,7 +113,7 @@ class LevelsTest {
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
         checkRGBMapping(lookup, 255, 255, 255, 255); // white remains white
-        checkRGBMapping(lookup, 128, 217, 217, 217); // gray becomes lighter (ps value: 218)
+        checkRGBMapping(lookup, 128, 218, 218, 218); // gray becomes lighter
     }
 
     @Test
@@ -109,7 +124,7 @@ class LevelsTest {
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
         checkRGBMapping(lookup, 255, 255, 255, 255); // white remains white
-        checkRGBMapping(lookup, 128, 217, 128, 128); // only the red channel is affected
+        checkRGBMapping(lookup, 128, 218, 128, 128); // only the red channel is affected
     }
 
     @Test
@@ -120,7 +135,7 @@ class LevelsTest {
 
         checkRGBMapping(lookup, 0, 100, 100, 100); // black becomes (100, 100, 100)
         checkRGBMapping(lookup, 255, 255, 255, 255); // white remains white
-        checkRGBMapping(lookup, 128, 177, 177, 177); // gray becomes lighter (ps value: 178)
+        checkRGBMapping(lookup, 128, 178, 178, 178); // gray becomes lighter
     }
 
     @Test
@@ -131,7 +146,7 @@ class LevelsTest {
 
         checkRGBMapping(lookup, 0, 100, 0, 0); // only the red channel is affected
         checkRGBMapping(lookup, 255, 255, 255, 255); // white remains white
-        checkRGBMapping(lookup, 128, 177, 128, 128); // only the red channel is affected
+        checkRGBMapping(lookup, 128, 178, 128, 128); // only the red channel is affected
     }
 
     @Test
@@ -164,7 +179,7 @@ class LevelsTest {
         ChannelLevelsModel okLPage = model.getModelForChannel(Channel.OK_L);
         okLPage.getInputDark().setValue(100);
 
-        BufferedImageOp op = model.getFilterOp();
+        BufferedImageOp op = model.createFilterOp();
         assertThat(op)
             .isNotNull()
             .isInstanceOf(OklabLevelsFilter.class);
@@ -201,7 +216,7 @@ class LevelsTest {
         verify(filterGUI, atLeastOnce()).startPreview(false);
 
         // get the BufferedImageOp that the model configured
-        BufferedImageOp op = model.getFilterOp();
+        BufferedImageOp op = model.createFilterOp();
         assertThat(op)
             .isNotNull()
             .isInstanceOf(FastLookupOp.class);
@@ -215,21 +230,33 @@ class LevelsTest {
     }
 
     private static void checkRedMapping(RGBLookup lookup, int input, int expected) {
-        assertThat(lookup.mapRed(input)).isEqualTo(expected);
+        assertThat(mapRed(lookup, input)).isEqualTo(expected);
     }
 
     private static void checkGreenMapping(RGBLookup lookup, int input, int expected) {
-        assertThat(lookup.mapGreen(input)).isEqualTo(expected);
+        assertThat(mapGreen(lookup, input)).isEqualTo(expected);
     }
 
     private static void checkBlueMapping(RGBLookup lookup, int input, int expected) {
-        assertThat(lookup.mapBlue(input)).isEqualTo(expected);
+        assertThat(mapBlue(lookup, input)).isEqualTo(expected);
     }
 
     private static void checkRGBMapping(RGBLookup lookup, int input,
                                         int expectedRed, int expectedGreen, int expectedBlue) {
-        assertThat(lookup.mapRed(input)).isEqualTo(expectedRed);
-        assertThat(lookup.mapGreen(input)).isEqualTo(expectedGreen);
-        assertThat(lookup.mapBlue(input)).isEqualTo(expectedBlue);
+        assertThat(mapRed(lookup, input)).as("red").isEqualTo(expectedRed);
+        assertThat(mapGreen(lookup, input)).as("green").isEqualTo(expectedGreen);
+        assertThat(mapBlue(lookup, input)).as("blue").isEqualTo(expectedBlue);
+    }
+
+    private static int mapRed(RGBLookup lookup, int input) {
+        return lookup.getRedLut()[input];
+    }
+
+    private static int mapGreen(RGBLookup lookup, int input) {
+        return lookup.getGreenLut()[input];
+    }
+
+    private static int mapBlue(RGBLookup lookup, int input) {
+        return lookup.getBlueLut()[input];
     }
 }

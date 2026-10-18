@@ -36,7 +36,11 @@ public class ChannelSelectorPanel extends JPanel {
     private final EnumParam<Channel> channelParam;
     private final GridBagHelper gbh;
 
-    public ChannelSelectorPanel(Consumer<Channel> channelChangedCallback) {
+    // true while the selectors are being synchronized with an external model
+    // via setSelection(); callbacks and listeners are suppressed during that time
+    private boolean updatingProgrammatically = false;
+
+    public ChannelSelectorPanel(Consumer<Channel> channelChangeListener) {
         super(new GridBagLayout());
 
         this.colorSpaceParam = ColorSpace.asParam();
@@ -51,35 +55,47 @@ public class ChannelSelectorPanel extends JPanel {
         JComboBox<Channel> channelCombo = new JComboBox<>(channelParam);
         gbh.addLabelAndControl(channelParam.getName() + ":", channelCombo);
 
-        wireComboBoxes(channelChangedCallback);
+        wireComboBoxes(channelChangeListener);
     }
 
     public void addResetButton(ActionListener resetListener) {
         gbh.addNextControl(GUIUtils.createResetChannelButton(resetListener));
     }
 
-    private void wireComboBoxes(Consumer<Channel> channelChangedCallback) {
+    private void wireComboBoxes(Consumer<Channel> channelChangeListener) {
         // when the color space changes, update the list of available channels
         colorSpaceParam.addSelectionListener(() -> {
+            if (updatingProgrammatically) {
+                return;
+            }
             List<Channel> newChoices = colorSpaceParam.getSelected().getChannels();
             // updating choices implicitly selects the first, triggering the channel change listener
             channelParam.setChoices(newChoices, false);
             revalidate();
         });
 
-        // when the channel selection changes, notify the callback
+        // when the channel selection changes, notify the listener
         channelParam.addSelectionListener(() -> {
-            if (channelChangedCallback != null) {
-                channelChangedCallback.accept(channelParam.getSelected());
+            if (updatingProgrammatically) {
+                return;
+            }
+            if (channelChangeListener != null) {
+                channelChangeListener.accept(channelParam.getSelected());
             }
         });
     }
 
     /**
-     * Adds a listener to be notified when the color space selection changes.
+     * Adds a listener to be notified when the user changes the color space
+     * selection. It is not notified by {@link #setSelection}.
      */
     public void addColorSpaceChangedListener(Consumer<ColorSpace> listener) {
-        colorSpaceParam.addSelectionListener(() -> listener.accept(colorSpaceParam.getSelected()));
+        colorSpaceParam.addSelectionListener(() -> {
+            if (updatingProgrammatically) {
+                return;
+            }
+            listener.accept(colorSpaceParam.getSelected());
+        });
     }
 
     public Channel getSelectedChannel() {
@@ -87,9 +103,24 @@ public class ChannelSelectorPanel extends JPanel {
     }
 
     /**
-     * Update the UI of the color space selector.
+     * Synchronizes both selectors with the given state (typically the
+     * state of the data model) without notifying any callbacks or listeners,
+     * so the caller must update anything that depends on the selected channel.
+     * The channel must belong to the given color space.
      */
-    public void setColorSpaceUI(ColorSpace colorSpace) {
-        colorSpaceParam.setSelectedItem(colorSpace, false);
+    public void setSelection(ColorSpace space, Channel channel) {
+        assert channel.getColorSpace() == space
+            : "channel " + channel + " doesn't belong to " + space;
+
+        updatingProgrammatically = true;
+        try {
+            colorSpaceParam.setSelectedItem(space, false);
+            channelParam.setChoices(space.getChannels(), false);
+            channelParam.setSelectedItem(channel, false);
+        } finally {
+            updatingProgrammatically = false;
+        }
+        // the guarded color-space listener didn't do it
+        revalidate();
     }
 }

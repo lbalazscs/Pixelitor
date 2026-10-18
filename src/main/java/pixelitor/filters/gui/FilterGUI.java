@@ -50,7 +50,7 @@ public abstract class FilterGUI extends JPanel {
     }
 
     /**
-     * Called when this GUI is no longer needed, because the dialog is closed.
+     * Called when this GUI is no longer needed because the containing dialog has closed.
      */
     public void dispose() {
         // empty by default

@@ -25,14 +25,11 @@ import java.awt.Color;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.colors.Colors.OK_BLUE;
-import static pixelitor.colors.Colors.OK_GREEN;
-import static pixelitor.colors.Colors.OK_RED;
-import static pixelitor.colors.Colors.OK_YELLOW;
+import static pixelitor.colors.Colors.*;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Represents the currently edited color channel(s).
+ * Represents a color channel or composite channel.
  */
 public enum Channel {
     RGB("RGB", "rgb", BLACK, ColorSpace.SRGB) {
@@ -77,7 +74,7 @@ public enum Channel {
     }, GREEN(i18n("green"), "green", Color.GREEN, ColorSpace.SRGB) {
         @Override
         public Color getDarkColor() {
-            return DARK_PURPLE;
+            return DARK_MAGENTA;
         }
 
         @Override
@@ -92,7 +89,7 @@ public enum Channel {
     }, BLUE(i18n("blue"), "blue", Color.BLUE, ColorSpace.SRGB) {
         @Override
         public Color getDarkColor() {
-            return DARK_YELLOW_GREEN;
+            return DARK_YELLOW;
         }
 
         @Override
@@ -170,17 +167,17 @@ public enum Channel {
 
     // dark colors for gradients
     private static final Color DARK_CYAN = new Color(0, 128, 128);
-    private static final Color DARK_PURPLE = new Color(128, 0, 128);
-    private static final Color DARK_YELLOW_GREEN = new Color(128, 128, 0);
+    private static final Color DARK_MAGENTA = new Color(128, 0, 128);
+    private static final Color DARK_YELLOW = new Color(128, 128, 0);
 
-    private final String name;
+    private final String displayName;
     private final String presetKey;
     private final Color color;
     private final Color inactiveColor;
     private final ColorSpace colorSpace;
 
-    Channel(String name, String presetKey, Color color, ColorSpace colorSpace) {
-        this.name = name;
+    Channel(String displayName, String presetKey, Color color, ColorSpace colorSpace) {
+        this.displayName = displayName;
         this.presetKey = presetKey;
         this.color = color;
         this.inactiveColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), INACTIVE_ALPHA);
@@ -213,8 +210,8 @@ public enum Channel {
         return colorSpace;
     }
 
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 
     public String getPresetKey() {
@@ -223,7 +220,7 @@ public enum Channel {
 
     @Override
     public String toString() {
-        return name;
+        return displayName;
     }
 
     public static EnumParam<Channel> asParam(ColorSpace colorSpace) {

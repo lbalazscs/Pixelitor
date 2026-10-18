@@ -121,7 +121,7 @@ public class ColorSpaces {
      * Converts Oklab to a packed sRGB int.
      */
     public static int oklabToSrgb(float[] oklab) {
-        double[] linear = oklabToLinearRGB(oklab);
+        double[] linear = oklabToLinearRgb(oklab);
 
         int r = linearToSrgbInt(linear[0]);
         int g = linearToSrgbInt(linear[1]);
@@ -158,7 +158,7 @@ public class ColorSpaces {
      */
     public static void oklabToSrgbBulk(float[] src, int[] dst) {
         for (int si = 0, i = 0; i < dst.length; i++, si += 3) {
-            double[] linear = oklabToLinearRGB(src, si);
+            double[] linear = oklabToLinearRgb(src, si);
 
             int r = linearToSrgbInt(linear[0]);
             int g = linearToSrgbInt(linear[1]);
@@ -174,9 +174,9 @@ public class ColorSpaces {
      */
     public static void oklabToSrgbBulkPrecise(float[] src, int[] dst) {
         for (int si = 0, i = 0; i < dst.length; i++, si += 3) {
-            double[] linear = oklabToLinearRGB(src, si);
+            double[] linear = oklabToLinearRgb(src, si);
 
-            // precise version, doesn't use linearToSRGBInt
+            // precise version, doesn't use linearToSrgbInt
             double rLin = ImageMath.clamp01(linear[0]);
             double gLin = ImageMath.clamp01(linear[1]);
             double bLin = ImageMath.clamp01(linear[2]);
@@ -193,7 +193,7 @@ public class ColorSpaces {
      * Converts Oklab to a packed sRGB int using precise gamma mapping.
      */
     public static int oklabToSrgbPrecise(float[] oklab) {
-        double[] linear = oklabToLinearRGB(oklab);
+        double[] linear = oklabToLinearRgb(oklab);
 
         // oklab can have a larger gamut than sRGB
         double rLin = ImageMath.clamp01(linear[0]);
@@ -271,7 +271,7 @@ public class ColorSpaces {
     /**
      * Converts Oklab to linear RGB.
      */
-    public static double[] oklabToLinearRGB(float[] c) {
+    public static double[] oklabToLinearRgb(float[] c) {
         double l_ = c[0] + 0.3963377774 * c[1] + 0.2158037573 * c[2];
         double m_ = c[0] - 0.1055613458 * c[1] - 0.0638541728 * c[2];
         double s_ = c[0] - 0.0894841775 * c[1] - 1.2914855480 * c[2];
@@ -288,9 +288,9 @@ public class ColorSpaces {
     }
 
     /**
-     * Zero-allocation version: converts Oklab from packed float array to linear RGB without allocations.
+     * Reduced-allocation version: converts Oklab from interleaved float array to linear RGB without allocations.
      */
-    private static double[] oklabToLinearRGB(float[] c, int off) {
+    private static double[] oklabToLinearRgb(float[] c, int off) {
         double l_ = c[off] + 0.3963377774 * c[off + 1] + 0.2158037573 * c[off + 2];
         double m_ = c[off] - 0.1055613458 * c[off + 1] - 0.0638541728 * c[off + 2];
         double s_ = c[off] - 0.0894841775 * c[off + 1] - 1.2914855480 * c[off + 2];

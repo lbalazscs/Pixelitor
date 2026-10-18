@@ -21,7 +21,7 @@ import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
 import pixelitor.colors.ColorSpaces;
 import pixelitor.filters.curves.OklabCurvesFilter;
-import pixelitor.filters.lookup.GrayScaleLookup;
+import pixelitor.filters.lookup.ChannelLookup;
 
 /**
  * A PointFilter that applies levels in the Oklab color space.
@@ -39,7 +39,7 @@ public class OklabLevelsFilter extends PointFilter {
     private final short[] aTable;
     private final short[] bTable;
 
-    public OklabLevelsFilter(GrayScaleLookup lLookup, GrayScaleLookup aLookup, GrayScaleLookup bLookup) {
+    public OklabLevelsFilter(ChannelLookup lLookup, ChannelLookup aLookup, ChannelLookup bLookup) {
         super("Oklab Levels");
         this.lTable = lLookup.getTable();
         this.aTable = aLookup.getTable();
@@ -48,32 +48,38 @@ public class OklabLevelsFilter extends PointFilter {
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        // 1. convert sRGB (int) to Oklab (float[])
+        int alpha = rgb & 0xFF_00_00_00;
+        if (alpha == 0) {
+            return rgb; // fully transparent: nothing visible to adjust
+        }
+
+        // convert sRGB (int) to Oklab (float[])
         float[] oklab = ColorSpaces.srgbToOklab(rgb);
         float l = oklab[0];
         float a = oklab[1];
         float b = oklab[2];
 
-        // 2. apply levels via lookup tables
+        // apply levels via lookup tables
         // L channel is normalized to [0, 1]
         int lIndex = ImageMath.clamp((int) (l * 255.0f + 0.5f), 0, 255);
         float newL = lTable[lIndex] / 255.0f;
 
         // a and b channels are normalized from their specific range
-        float newA = applyAbCurve(a, aTable);
-        float newB = applyAbCurve(b, bTable);
+        float newA = applyAbLookup(a, aTable);
+        float newB = applyAbLookup(b, bTable);
 
-        // 3. convert back to sRGB
+        // convert back to sRGB
         oklab[0] = newL;
         oklab[1] = newA;
         oklab[2] = newB;
-        return ColorSpaces.oklabToSrgb(oklab);
+
+        return alpha | (ColorSpaces.oklabToSrgb(newL, newA, newB) & 0x00_FF_FF_FF);
     }
 
     /**
-     * Applies a curve to an Oklab 'a' or 'b' channel value.
+     * Applies lookup table adjustments to an Oklab 'a' or 'b' channel value.
      */
-    private static float applyAbCurve(float channelValue, short[] table) {
+    private static float applyAbLookup(float channelValue, short[] table) {
         // normalize the value from its domain to [0, 1] for LUT lookup
         float normalized = (channelValue - AB_CHANNEL_MIN) / AB_CHANNEL_RANGE;
         int index = ImageMath.clamp((int) (normalized * 255.0f + 0.5f), 0, 255);

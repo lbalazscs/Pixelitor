@@ -18,10 +18,9 @@
 package pixelitor.filters.levels;
 
 import org.jdesktop.swingx.VerticalLayout;
-import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.filters.lookup.GrayScaleLookup;
+import pixelitor.filters.lookup.ChannelLookup;
 import pixelitor.filters.util.Channel;
 import pixelitor.gui.utils.SliderSpinner;
 
@@ -32,25 +31,21 @@ import static java.awt.Color.GRAY;
 /**
  * The model for the settings of a single channel in the Levels filter.
  */
-public class ChannelLevelsModel implements ParamAdjustmentListener {
+public class ChannelLevelsModel {
     private static final int MAX_VALUE = 255;
     private static final int MIN_VALUE = 0;
     private static final int DARK_DEFAULT = MIN_VALUE;
     private static final int LIGHT_DEFAULT = MAX_VALUE;
-
-    private GrayScaleLookup lookup = GrayScaleLookup.getIdentity();
 
     private final RangeParam inputDark;
     private final RangeParam inputLight;
     private final RangeParam outputDark;
     private final RangeParam outputLight;
     private final Channel channel;
-    private final LevelsModel mainModel;
     private final RangeParam[] params;
 
-    public ChannelLevelsModel(Channel channel, LevelsModel mainModel) {
+    public ChannelLevelsModel(Channel channel, LevelsModel levelsModel) {
         this.channel = channel;
-        this.mainModel = mainModel;
 
         inputDark = new RangeParam("Input Dark", MIN_VALUE, DARK_DEFAULT, MAX_VALUE);
         inputLight = new RangeParam("Input Light", MIN_VALUE, LIGHT_DEFAULT, MAX_VALUE);
@@ -62,53 +57,31 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
         inputLight.ensureHigherValueThan(inputDark);
 
         for (RangeParam param : params) {
-            param.setAdjustmentListener(this);
+            param.setAdjustmentListener(levelsModel::settingsChanged);
         }
     }
 
-    /**
-     * Returns the parameter for the input shadow level.
-     */
     public RangeParam getInputDark() {
         return inputDark;
     }
 
-    /**
-     * Returns the parameter for the input highlight level.
-     */
     public RangeParam getInputLight() {
         return inputLight;
     }
 
-    /**
-     * Returns the parameter for the output shadow level.
-     */
     public RangeParam getOutputDark() {
         return outputDark;
     }
 
-    /**
-     * Returns the parameter for the output highlight level.
-     */
     public RangeParam getOutputLight() {
         return outputLight;
     }
 
     /**
-     * Returns the lookup table for this channel's level adjustments.
+     * Creates the lookup table for this channel's level adjustments.
      */
-    public GrayScaleLookup getLookup() {
-        return lookup;
-    }
-
-    @Override
-    public void paramAdjusted() {
-        updateLookup();
-        mainModel.settingsChanged();
-    }
-
-    private void updateLookup() {
-        lookup = new GrayScaleLookup(
+    ChannelLookup createLookup() {
+        return new ChannelLookup(
             inputDark.getValue(),
             inputLight.getValue(),
             outputDark.getValue(),
@@ -119,9 +92,6 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
         for (RangeParam param : params) {
             param.reset(false);
         }
-        // the channel-level lookup has to be updated first, even if
-        // the combined lookup is always updated after calling this
-        updateLookup();
     }
 
     public void saveToUserPreset(UserPreset preset) {
@@ -136,7 +106,6 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
             String key = uniqueKey(param);
             param.loadStateFrom(preset.get(key));
         }
-        updateLookup();
     }
 
     private String uniqueKey(RangeParam param) {
@@ -151,7 +120,7 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
     }
 
     /**
-     * Returns the UI panel that can configure this model.
+     * Creates the UI panel that can configure this model.
      */
     JPanel createPanel() {
         var inputDarkSlider = new SliderSpinner(getInputDark(), GRAY, channel.getDarkColor());

@@ -18,7 +18,7 @@
 package pixelitor.filters.levels;
 
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.filters.lookup.GrayScaleLookup;
+import pixelitor.filters.lookup.ChannelLookup;
 import pixelitor.filters.lookup.RGBLookup;
 import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
@@ -30,19 +30,16 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static pixelitor.filters.util.Channel.BLUE;
-import static pixelitor.filters.util.Channel.GREEN;
-import static pixelitor.filters.util.Channel.OK_A;
-import static pixelitor.filters.util.Channel.OK_B;
-import static pixelitor.filters.util.Channel.OK_L;
-import static pixelitor.filters.util.Channel.RED;
-import static pixelitor.filters.util.Channel.RGB;
+import static pixelitor.filters.util.Channel.*;
 
+/**
+ * The data model for the {@link Levels} filter, managing the channel
+ * settings for each supported color space.
+ */
 public class LevelsModel {
     private final Map<Channel, ChannelLevelsModel> channelModels;
 
     private LevelsGUI levelsGUI;
-    private BufferedImageOp filterOp;
 
     private ColorSpace colorSpace = ColorSpace.SRGB;
 
@@ -66,56 +63,41 @@ public class LevelsModel {
      * @return the filtered image
      */
     public BufferedImage apply(BufferedImage src, BufferedImage dest) {
-        if (filterOp == null) {
-            // this can happen if this method is called before
-            // the GUI is created or a preset is loaded
-            updateFilterLookup();
-        }
-        return filterOp.filter(src, dest);
+        return createFilterOp().filter(src, dest);
     }
 
     /**
-     * Returns the current filter operation. Used for testing purposes.
+     * Creates the filter operation based on the channel settings of the active color space.
      */
-    BufferedImageOp getFilterOp() {
-        return filterOp;
+    BufferedImageOp createFilterOp() {
+        return switch (colorSpace) {
+            case SRGB -> createSrgbOp();
+            case OKLAB -> createOklabOp();
+        };
     }
 
     /**
-     * Updates the filter and notifies the GUI to refresh the preview.
+     * Notifies the GUI to refresh the preview.
      */
     public void settingsChanged() {
-        updateFilterLookup();
-
-        if (levelsGUI == null) {
-            return; // it's null when loading a smart filter or running non-interactively
-        }
-        levelsGUI.startPreview(false);
-    }
-
-    /**
-     * Builds the combined lookup table from all channel models and applies it to the filter.
-     */
-    public void updateFilterLookup() {
-        switch (colorSpace) {
-            case SRGB -> updateSrgbFilterLookup();
-            case OKLAB -> updateOklabFilterLookup();
+        if (levelsGUI != null) {
+            levelsGUI.startPreview(false);
         }
     }
 
-    private void updateSrgbFilterLookup() {
-        GrayScaleLookup rgb = getLookupForChannel(RGB);
-        GrayScaleLookup r = getLookupForChannel(RED);
-        GrayScaleLookup g = getLookupForChannel(GREEN);
-        GrayScaleLookup b = getLookupForChannel(BLUE);
-        this.filterOp = new RGBLookup(rgb, r, g, b).asFastLookupOp();
+    private BufferedImageOp createSrgbOp() {
+        ChannelLookup rgb = getLookupForChannel(RGB);
+        ChannelLookup r = getLookupForChannel(RED);
+        ChannelLookup g = getLookupForChannel(GREEN);
+        ChannelLookup b = getLookupForChannel(BLUE);
+        return new RGBLookup(rgb, r, g, b).asFastLookupOp();
     }
 
-    private void updateOklabFilterLookup() {
-        GrayScaleLookup l = getLookupForChannel(OK_L);
-        GrayScaleLookup a = getLookupForChannel(OK_A);
-        GrayScaleLookup b = getLookupForChannel(OK_B);
-        this.filterOp = new OklabLevelsFilter(l, a, b);
+    private BufferedImageOp createOklabOp() {
+        ChannelLookup l = getLookupForChannel(OK_L);
+        ChannelLookup a = getLookupForChannel(OK_A);
+        ChannelLookup b = getLookupForChannel(OK_B);
+        return new OklabLevelsFilter(l, a, b);
     }
 
     public void resetAllAndRun() {
@@ -124,9 +106,14 @@ public class LevelsModel {
     }
 
     public void resetAll() {
-        this.colorSpace = ColorSpace.SRGB;
+        // goes through setColorSpace so that the GUI follows the reset
+        setColorSpace(ColorSpace.SRGB, false);
 
-        for (ChannelLevelsModel model : getSubModels()) {
+        resetAllChannels();
+    }
+
+    private void resetAllChannels() {
+        for (ChannelLevelsModel model : getChannelModels()) {
             model.resetToDefaults();
         }
     }
@@ -140,11 +127,11 @@ public class LevelsModel {
         return channelModels.get(channel);
     }
 
-    private GrayScaleLookup getLookupForChannel(Channel channel) {
-        return channelModels.get(channel).getLookup();
+    private ChannelLookup getLookupForChannel(Channel channel) {
+        return channelModels.get(channel).createLookup();
     }
 
-    public Collection<ChannelLevelsModel> getSubModels() {
+    public Collection<ChannelLevelsModel> getChannelModels() {
         return channelModels.values();
     }
 
@@ -170,12 +157,10 @@ public class LevelsModel {
                 channelModel.loadUserPreset(preset);
             }
         }
-
-        settingsChanged();
     }
 
     public void randomizeAndRun() {
-        resetAll();
+        resetAllChannels(); // keep the active color space
 
         Channel primaryChannel = colorSpace.getPrimaryChannel();
         ChannelLevelsModel primaryModel = getModelForChannel(primaryChannel);
@@ -187,8 +172,8 @@ public class LevelsModel {
         primaryModel.getInputDark().setValueNoTrigger(inputDark);
         primaryModel.getInputLight().setValueNoTrigger(inputLight);
 
-        // trigger an update of the model and filter
-        primaryModel.paramAdjusted();
+        // trigger a preview update
+        settingsChanged();
     }
 
     public void setColorSpace(ColorSpace colorSpace, boolean triggerFilter) {
@@ -198,13 +183,17 @@ public class LevelsModel {
         this.colorSpace = colorSpace;
 
         if (levelsGUI != null) {
-            // synchronize the UI dropdown to reflect the 
+            // synchronize the UI dropdown to reflect the
             // data model (necessary when loading a preset)
-            levelsGUI.setColorSpaceUI(colorSpace);
+            levelsGUI.setSelectedColorSpace(colorSpace);
         }
 
         if (triggerFilter) {
             settingsChanged();
         }
+    }
+
+    public ColorSpace getColorSpace() {
+        return colorSpace;
     }
 }

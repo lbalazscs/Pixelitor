@@ -16,48 +16,69 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+/**
+ * A piecewise spline curve defined by sorted control
+ * points (knots) used to generate tone-mapping lookup tables.
+ */
 public class Curve {
+    // knot coordinates, within [0, 1], kept sorted
+    // in ascending order by their x coordinate
     public float[] x;
     public float[] y;
 
     public Curve() {
-        x = new float[]{0, 1};
-        y = new float[]{0, 1};
+        reset();
     }
 
     public Curve(Curve curve) {
-        x = curve.x.clone();
-        y = curve.y.clone();
+        setKnots(curve.x.clone(), curve.y.clone());
     }
 
+    /**
+     * Resets the curve to an identity transfer function defined by (0, 0) and (1, 1).
+     */
+    public void reset() {
+        setKnots(new float[]{0, 1}, new float[]{0, 1});
+    }
+
+    /**
+     * Sets the knot coordinate arrays.
+     */
+    public void setKnots(float[] newX, float[] newY) {
+        assert newX.length == newY.length;
+        x = newX;
+        y = newY;
+    }
+
+    /**
+     * Inserts a knot at the given coordinates while preserving
+     * ascending x-coordinate order and returns its index.
+     */
     public int addKnot(float kx, float ky) {
-        int pos = -1;
+        int index = findInsertionIndex(kx);
         int numKnots = x.length;
-        float[] nx = new float[numKnots + 1];
-        float[] ny = new float[numKnots + 1];
-        int j = 0;
-        for (int i = 0; i < numKnots; i++) {
-            if (pos == -1 && x[i] > kx) {
-                pos = j;
-                nx[j] = kx;
-                ny[j] = ky;
-                j++;
-            }
-            nx[j] = x[i];
-            ny[j] = y[i];
-            j++;
-        }
-        if (pos == -1) {
-            pos = j;
-            nx[j] = kx;
-            ny[j] = ky;
-        }
-        x = nx;
-        y = ny;
-        return pos;
+        float[] newX = new float[numKnots + 1];
+        float[] newY = new float[numKnots + 1];
+
+        System.arraycopy(x, 0, newX, 0, index);
+        System.arraycopy(y, 0, newY, 0, index);
+
+        newX[index] = kx;
+        newY[index] = ky;
+
+        System.arraycopy(x, index, newX, index + 1, numKnots - index);
+        System.arraycopy(y, index, newY, index + 1, numKnots - index);
+
+        setKnots(newX, newY);
+
+        return index;
     }
 
-    public int findKnotPos(float kx) {
+    /**
+     * Finds the index at which a knot with the given x
+     * should be inserted to maintain sorted order.
+     */
+    public int findInsertionIndex(float kx) {
         int numKnots = x.length;
         for (int i = 0; i < numKnots; i++) {
             if (x[i] > kx) {
@@ -68,65 +89,85 @@ public class Curve {
         return numKnots;
     }
 
-    public void removeKnot(int n) {
+    /**
+     * Removes the knot at the given index and resizes the arrays, ensuring
+     * that at least two knots remain to define the curve endpoints.
+     */
+    public void removeKnot(int index) {
         int numKnots = x.length;
-        if (numKnots <= 2) {
+        if (numKnots <= 2 || index < 0 || index >= numKnots) {
             return;
         }
-        float[] nx = new float[numKnots - 1];
-        float[] ny = new float[numKnots - 1];
-        int j = 0;
-        for (int i = 0; i < numKnots - 1; i++) {
-            if (i == n) {
-                j++;
-            }
-            nx[i] = x[j];
-            ny[i] = y[j];
-            j++;
-        }
-        x = nx;
-        y = ny;
+        float[] newX = new float[numKnots - 1];
+        float[] newY = new float[numKnots - 1];
+
+        System.arraycopy(x, 0, newX, 0, index);
+        System.arraycopy(y, 0, newY, 0, index);
+
+        System.arraycopy(x, index + 1, newX, index, numKnots - index - 1);
+        System.arraycopy(y, index + 1, newY, index, numKnots - index - 1);
+
+        setKnots(newX, newY);
     }
 
+    /**
+     * Generates a 256-element integer LUT by interpolating
+     * along the curve using a Catmull-Rom spline.
+     */
     public int[] makeTable() {
         int numKnots = x.length;
-        float[] nx = new float[numKnots + 2];
-        float[] ny = new float[numKnots + 2];
-        System.arraycopy(x, 0, nx, 1, numKnots);
-        System.arraycopy(y, 0, ny, 1, numKnots);
-        nx[0] = nx[1];
-        ny[0] = ny[1];
-        nx[numKnots + 1] = nx[numKnots];
-        ny[numKnots + 1] = ny[numKnots];
 
-        int[] table = new int[256];
+        // prepends and appends duplicate endpoints to ensure that the spline
+        // algorithm has boundary tangents to evaluate across the full range
+        float[] paddedX = new float[numKnots + 2];
+        float[] paddedY = new float[numKnots + 2];
+        System.arraycopy(x, 0, paddedX, 1, numKnots);
+        System.arraycopy(y, 0, paddedY, 1, numKnots);
+        paddedX[0] = paddedX[1];
+        paddedY[0] = paddedY[1];
+        paddedX[numKnots + 1] = paddedX[numKnots];
+        paddedY[numKnots + 1] = paddedY[numKnots];
 
-        // if first knot is > 0 fill the table with y position
-        if (nx[0] > 0) {
-            int nxStart = (int) (nx[0] * 255);
-            int nyStart = (int) (ny[0] * 255);
-            for (int i = 0; i <= nxStart; i++) {
-                table[i] = nyStart;
-            }
-        }
+        int[] lut = new int[256];
 
-        // if last knot is < 1 fill the table with y position
-        if (nx[numKnots] < 1) {
-            int nxStart = (int) (nx[numKnots] * 255);
-            int nyStart = (int) (ny[numKnots] * 255);
-            for (int i = nxStart; i <= 255; i++) {
-                table[i] = nyStart;
-            }
-        }
+        int prevLutX = -1;
+        int prevLutY = -1;
 
-        for (int i = 0; i < 2048; i++) {
+        // samples 2048 discrete steps along the parametric curve and maps to [0, 255],
+        // linearly interpolating between samples to prevent gaps in steep sections
+        for (int i = 0; i <= 2048; i++) {
             float f = i / 2048.0f;
-            int x = (int) (255 * ImageMath.spline(f, nx.length, nx, true) + 0.5f);
-            int y = (int) (255 * ImageMath.spline(f, nx.length, ny, false) + 0.5f);
-            x = ImageMath.clamp(x, 0, 255);
-            y = ImageMath.clamp(y, 0, 255);
-            table[x] = y;
+            int lutX = (int) (255 * ImageMath.spline(f, paddedX.length, paddedX, true) + 0.5f);
+            int lutY = (int) (255 * ImageMath.spline(f, paddedX.length, paddedY, false) + 0.5f);
+            lutX = ImageMath.clamp(lutX, 0, 255);
+            lutY = ImageMath.clamp(lutY, 0, 255);
+
+            if (prevLutX >= 0) {
+                if (lutX > prevLutX) {
+                    for (int currX = prevLutX + 1; currX <= lutX; currX++) {
+                        lut[currX] = ImageMath.clamp(
+                            Math.round(prevLutY + (float) (lutY - prevLutY) * (currX - prevLutX) / (lutX - prevLutX)),
+                            0, 255);
+                    }
+                } else {
+                    lut[lutX] = lutY;
+                }
+            } else {
+                // flat extrapolation: extend the first knot horizontally to x=0
+                for (int currX = 0; currX <= lutX; currX++) {
+                    lut[currX] = lutY;
+                }
+            }
+
+            prevLutX = lutX;
+            prevLutY = lutY;
         }
-        return table;
+
+        // flat extrapolation: extend the last knot horizontally to x=255
+        for (int currX = prevLutX + 1; currX <= 255; currX++) {
+            lut[currX] = prevLutY;
+        }
+
+        return lut;
     }
 }

@@ -44,13 +44,10 @@ public class Levels extends FilterWithGUI {
 
     @Override
     public FilterGUI createGUI(Filterable layer, boolean resetSettings) {
-        LevelsGUI gui = new LevelsGUI(this, layer, levelsModel);
         if (resetSettings) {
             levelsModel.resetAll();
         }
-        // ensure the lookup is initialized for the preview
-        levelsModel.updateFilterLookup();
-        return gui;
+        return new LevelsGUI(this, layer, levelsModel);
     }
 
     @Override

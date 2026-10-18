@@ -36,15 +36,15 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     }
 
     /**
-     * Creates a new {@link FilterGUI} panel for this GUI filter.
+     * Creates a new {@link FilterGUI} panel for this filter.
      * <p>
      * Panel creation does not trigger the initial preview; callers should
      * trigger it (e.g. via {@link FilterGUI#startPreview(boolean)}) when
      * the GUI is shown.
      *
-     * @param layer the layer to which this filter is applied
+     * @param layer         the layer to which this filter is applied
      * @param resetSettings if true, resets the GUI to default settings
-     * @return a newly created FilterGUI instance configured with this filter
+     * @return a new FilterGUI for this filter
      */
     public abstract FilterGUI createGUI(Filterable layer, boolean resetSettings);
 
@@ -57,12 +57,12 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
      * Returns a menu bar if help or presets are available, or null otherwise.
      */
     public JMenuBar getMenuBar() {
-        boolean addPresets = shouldHaveUserPresetsMenu() || hasBuiltinPresets();
-        if (!addPresets && !hasHelp()) {
+        boolean hasPresets = shouldHaveUserPresetsMenu() || hasBuiltinPresets();
+        if (!hasPresets && !hasHelp()) {
             return null;
         }
 
-        return new DialogMenuBar(this, addPresets);
+        return new DialogMenuBar(this, hasPresets);
     }
 
     @Override

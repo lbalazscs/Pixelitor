@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,13 +70,9 @@ public class ExtractChannel extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int channel = channelParam.getValue();
 
-        if (bwParam.isChecked()) {
-            dest = bwExtractChannel(src, dest, channel);
-        } else {
-            dest = colorExtractChannel(src, dest, channel);
-        }
-
-        return dest;
+        return bwParam.isChecked()
+            ? bwExtractChannel(src, dest, channel)
+            : colorExtractChannel(src, dest, channel);
     }
 
     private static BufferedImage bwExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
@@ -125,8 +121,7 @@ public class ExtractChannel extends ParametrizedFilter {
         };
 
         BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) lookupTable);
-        filterOp.filter(src, dest);
-        return dest;
+        return filterOp.filter(src, dest);
     }
 
     @Override

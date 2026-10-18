@@ -38,11 +38,12 @@ import static java.awt.BorderLayout.*;
 public class LevelsGUI extends FilterGUI {
     private final JPanel cardPanel;
     private final ChannelSelectorPanel channelSelectorPanel;
+    private final LevelsModel model;
     private JCheckBox showOriginalCB;
 
     public LevelsGUI(Filter filter, Filterable layer, LevelsModel model) {
         super(filter, layer);
-        model.setLevelsGUI(this);
+        this.model = model;
 
         setLayout(new BorderLayout());
 
@@ -60,22 +61,26 @@ public class LevelsGUI extends FilterGUI {
         add(channelSelectorPanel, NORTH);
         add(createSouthPanel(model, layer), SOUTH);
 
-        // ensure the lookup is initialized for the preview
-        model.updateFilterLookup();
+        // The model isn't necessarily at its defaults (smart filters, reused
+        // last-used settings), so make the selectors and the visible channel
+        // panel match it. This doesn't trigger any callbacks or previews.
+        setSelectedColorSpace(model.getColorSpace());
+
+        model.setLevelsGUI(this);
     }
 
     private void showChannelPanel(Channel channel) {
         if (cardPanel != null) {
             var cl = (CardLayout) cardPanel.getLayout();
-            cl.show(cardPanel, channel.getName());
+            cl.show(cardPanel, channel.getDisplayName());
         }
     }
 
     private static JPanel createCenterPanel(LevelsModel model) {
         var panel = new JPanel(new CardLayout());
-        for (ChannelLevelsModel subModel : model.getSubModels()) {
+        for (ChannelLevelsModel subModel : model.getChannelModels()) {
             JPanel channelPanel = subModel.createPanel();
-            String channelName = subModel.getChannel().getName();
+            String channelName = subModel.getChannel().getDisplayName();
             panel.add(channelPanel, channelName);
         }
         return panel;
@@ -98,7 +103,21 @@ public class LevelsGUI extends FilterGUI {
         return southPanel;
     }
 
-    public void setColorSpaceUI(ColorSpace colorSpace) {
-        channelSelectorPanel.setColorSpaceUI(colorSpace);
+    /**
+     * Shows the given color space (with its primary channel) in the selectors
+     * and the matching channel panel, without triggering any callbacks.
+     * Called when this GUI is created, and by the model when it changes
+     * its color space.
+     */
+    public void setSelectedColorSpace(ColorSpace colorSpace) {
+        Channel channel = colorSpace.getPrimaryChannel();
+        channelSelectorPanel.setSelection(colorSpace, channel);
+        showChannelPanel(channel);
+    }
+
+    @Override
+    public void dispose() {
+        model.setLevelsGUI(null);
+        super.dispose();
     }
 }

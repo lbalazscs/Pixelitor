@@ -265,9 +265,9 @@ public class Posterize extends ParametrizedFilter {
         int workUnit = Math.max(1, numPixels / NUM_WORK_UNITS);
         var pt = new StatusBarProgressTracker(NAME, NUM_WORK_UNITS);
 
-        short[] redLUT = rgbLookup.getRedLUT();
-        short[] greenLUT = rgbLookup.getGreenLUT();
-        short[] blueLUT = rgbLookup.getBlueLUT();
+        short[] redLUT = rgbLookup.getRedLut();
+        short[] greenLUT = rgbLookup.getGreenLut();
+        short[] blueLUT = rgbLookup.getBlueLut();
 
         for (int i = 0; i < numPixels; i++) {
             int inRGB = inputPixels[i];

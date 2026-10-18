@@ -17,18 +17,20 @@
 
 package pixelitor.filters.lookup;
 
-import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.util.FilterPalette;
 import pixelitor.utils.ImageUtils;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
+import java.util.Objects;
 
 /**
- * Performs 4-5 times faster than {@link LookupOp} if
- * the image has packed ints.
+ * A {@link BufferedImageOp} that performs 4–5 times faster than
+ * {@link LookupOp} for images with packed integer pixel data.
  */
 public class FastLookupOp implements BufferedImageOp {
     private final ShortLookupTable lut;
@@ -39,26 +41,36 @@ public class FastLookupOp implements BufferedImageOp {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
+        Objects.requireNonNull(src, "src cannot be null");
+
+        if (dst != null && (src.getWidth() != dst.getWidth() || src.getHeight() != dst.getHeight())) {
+            throw new IllegalArgumentException(
+                "src and dst must have the same dimensions: src is " +
+                    src.getWidth() + "x" + src.getHeight() + ", dst is " +
+                    dst.getWidth() + "x" + dst.getHeight());
+        }
+
         if (ImageUtils.hasPackedIntArray(src)) {
-            return filterPackedIntImg(src, dst);
+            if (dst == null || (ImageUtils.hasPackedIntArray(dst) && src.getType() == dst.getType())) {
+                return filterPackedIntImg(src, dst);
+            }
+        } else if (src.getColorModel() instanceof IndexColorModel) {
+            return filterIndexed(src, dst);
         }
 
-        if (src.getColorModel() instanceof IndexColorModel) {
-            return filterIndexed(src);
+        // for all other image types (or incompatible dst), fall back to the standard LookupOp
+        if (dst == null) {
+            dst = createCompatibleDestImage(src, null);
         }
-
-        // for all other image types, fall back to the standard LookupOp
-        dst = ImageUtils.createImageWithSameCM(src);
         BufferedImageOp lookupOp = new LookupOp(lut, null);
-        lookupOp.filter(src, dst);
-        return dst;
+        return lookupOp.filter(src, dst);
     }
 
     private BufferedImage filterPackedIntImg(BufferedImage src, BufferedImage dst) {
         if (dst == null) {
-            dst = ImageUtils.createImageWithSameCM(src);
+            dst = createCompatibleDestImage(src, null);
         }
-        boolean notPremultiplied = !src.isAlphaPremultiplied();
+        boolean premultiplied = src.isAlphaPremultiplied();
 
         int[] srcPixels = ((DataBufferInt) src.getRaster()
             .getDataBuffer()).getData();
@@ -70,6 +82,9 @@ public class FastLookupOp implements BufferedImageOp {
         assert numPixels == destPixels.length;
 
         short[][] table = lut.getTable();
+        short[] rTable = table[0];
+        short[] gTable = table.length > 1 ? table[1] : table[0];
+        short[] bTable = table.length > 2 ? table[2] : table[0];
 
         for (int i = 0; i < numPixels; i++) {
             int rgb = srcPixels[i];
@@ -78,10 +93,10 @@ public class FastLookupOp implements BufferedImageOp {
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            if (a == 255 || notPremultiplied) {
-                r = table[0][r];
-                g = table[1][g];
-                b = table[2][b];
+            if (a == 255 || !premultiplied) {
+                r = rTable[r];
+                g = gTable[g];
+                b = bTable[b];
             } else if (a == 0) {
                 r = 0;
                 g = 0;
@@ -89,9 +104,9 @@ public class FastLookupOp implements BufferedImageOp {
             } else {
                 // unpremultiply
                 float f = 255.0f / a;
-                int ur = (int) (r * f);
-                int ug = (int) (g * f);
-                int ub = (int) (b * f);
+                int ur = (int) (r * f + 0.5f);
+                int ug = (int) (g * f + 0.5f);
+                int ub = (int) (b * f + 0.5f);
 
                 if (ur > 255) {
                     ur = 255;
@@ -104,58 +119,81 @@ public class FastLookupOp implements BufferedImageOp {
                 }
 
                 // lookup
-                ur = table[0][ur];
-                ug = table[1][ug];
-                ub = table[2][ub];
+                ur = rTable[ur];
+                ug = gTable[ug];
+                ub = bTable[ub];
 
                 // premultiply
                 float f2 = a * (1.0f / 255.0f);
-                r = (int) (ur * f2);
-                g = (int) (ug * f2);
-                b = (int) (ub * f2);
-
-                r = PixelUtils.clamp(r);
-                g = PixelUtils.clamp(g);
-                b = PixelUtils.clamp(b);
+                r = (int) (ur * f2 + 0.5f);
+                g = (int) (ug * f2 + 0.5f);
+                b = (int) (ub * f2 + 0.5f);
             }
             destPixels[i] = a << 24 | r << 16 | g << 8 | b;
         }
         return dst;
     }
 
-    private BufferedImage filterIndexed(BufferedImage src) {
+    private BufferedImage filterIndexed(BufferedImage src, BufferedImage dst) {
         short[][] table = lut.getTable();
-        return new FilterPalette(src) {
+        short[] rTable = table[0];
+        short[] gTable = table.length > 1 ? table[1] : table[0];
+        short[] bTable = table.length > 2 ? table[2] : table[0];
+
+        BufferedImage filtered = new FilterPalette(src) {
             @Override
             protected int changeRed(int r) {
-                return table[0][r];
+                return rTable[r];
             }
 
             @Override
             protected int changeGreen(int g) {
-                return table[1][g];
+                return gTable[g];
             }
 
             @Override
             protected int changeBlue(int b) {
-                return table[2][b];
+                return bTable[b];
             }
         }.filter();
+
+        if (dst == null) {
+            return filtered;
+        }
+
+        Graphics2D g = dst.createGraphics();
+        try {
+            g.setComposite(AlphaComposite.Src);
+            g.drawImage(filtered, 0, 0, null);
+        } finally {
+            g.dispose();
+        }
+        return dst;
     }
 
     @Override
     public Rectangle2D getBounds2D(BufferedImage src) {
-        return null;
+        return src.getRaster().getBounds();
     }
 
     @Override
     public BufferedImage createCompatibleDestImage(BufferedImage src, ColorModel destCM) {
-        return null;
+        if (destCM == null) {
+            return ImageUtils.createImageWithSameCM(src);
+        }
+        WritableRaster wr = destCM.createCompatibleWritableRaster(
+            src.getWidth(), src.getHeight());
+        return new BufferedImage(destCM, wr, destCM.isAlphaPremultiplied(), null);
     }
 
     @Override
     public Point2D getPoint2D(Point2D srcPt, Point2D dstPt) {
-        return null;
+        if (dstPt == null) {
+            dstPt = (Point2D) srcPt.clone();
+        } else {
+            dstPt.setLocation(srcPt.getX(), srcPt.getY());
+        }
+        return dstPt;
     }
 
     @Override

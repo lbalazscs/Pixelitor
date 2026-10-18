@@ -16,56 +16,41 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+/**
+ * Applies a master RGB curve and per-channel
+ * R, G, and B curves through lookup tables.
+ */
 public class CurvesFilter extends TransferFilter {
-    private Curve[] curves;
+    private final Curve rCurve;
+    private final Curve gCurve;
+    private final Curve bCurve;
+    private final Curve rgbCurve;
 
-    public CurvesFilter(String filterName) {
+    public CurvesFilter(String filterName, Curve rCurve, Curve gCurve, Curve bCurve, Curve rgbCurve) {
         super(filterName);
 
-        curves = new Curve[4];
-        curves[0] = new Curve();
-        curves[1] = new Curve();
-        curves[2] = new Curve();
-        curves[3] = new Curve();
+        this.rCurve = rCurve;
+        this.gCurve = gCurve;
+        this.bCurve = bCurve;
+        this.rgbCurve = rgbCurve;
+        initialized = false;
     }
 
     @Override
     protected void initialize() {
         initialized = true;
-        if (curves.length == 1) {
-            rTable = gTable = bTable = curves[0].makeTable();
-        } else {
-            rTable = new int[256];
-            gTable = new int[256];
-            bTable = new int[256];
+        int[] r = rCurve.makeTable();
+        int[] g = gCurve.makeTable();
+        int[] b = bCurve.makeTable();
+        int[] master = rgbCurve.makeTable();
 
-            int[] r = curves[0].makeTable();
-            int[] g = curves[1].makeTable();
-            int[] b = curves[2].makeTable();
-            int[] rgb = curves[3].makeTable();
-
-            for (int x = 0; x <= 255; x++) {
-                rTable[x] = ImageMath.clamp(r[rgb[x]], 0, 255);
-                gTable[x] = ImageMath.clamp(g[rgb[x]], 0, 255);
-                bTable[x] = ImageMath.clamp(b[rgb[x]], 0, 255);
-            }
+        rTable = new int[256];
+        gTable = new int[256];
+        bTable = new int[256];
+        for (int i = 0; i < 256; i++) {
+            rTable[i] = r[master[i]];
+            gTable[i] = g[master[i]];
+            bTable[i] = b[master[i]];
         }
-    }
-
-    public void setCurve(Curve curve) {
-        curves = new Curve[]{curve};
-        initialized = false;
-    }
-
-    public void setCurves(Curve rgb, Curve r, Curve g, Curve b) {
-        initialized = false;
-        curves[0] = r;
-        curves[1] = g;
-        curves[2] = b;
-        curves[3] = rgb;
-    }
-
-    public Curve[] getCurves() {
-        return curves;
     }
 }

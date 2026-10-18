@@ -44,18 +44,23 @@ public class ToneCurvesGUI extends FilterGUI {
         this.curves = filter.getCurves();
 
         curvesPanel = new ToneCurvesPanel(curves);
-        curvesPanel.addActionListener(_ -> startPreview(false));
+        curvesPanel.setChangeListener(() -> startPreview(false));
 
-        channelSelectorPanel = new ChannelSelectorPanel(curvesPanel::setActiveCurve);
+        channelSelectorPanel = new ChannelSelectorPanel(curvesPanel::setActiveChannel);
         channelSelectorPanel.addResetButton(_ -> curvesPanel.resetActiveCurve());
         channelSelectorPanel.addColorSpaceChangedListener(colorSpace -> {
             curves.setColorSpace(colorSpace);
-            curvesPanel.stateChanged();
+            curvesPanel.modelChanged();
         });
 
         add(channelSelectorPanel, NORTH);
         add(curvesPanel, CENTER);
         add(createButtonsPanel(layer), SOUTH);
+
+        // The model isn't necessarily at its defaults (smart filters,
+        // reused last-used settings), so show its actual state.
+        // This doesn't trigger any callbacks or previews.
+        syncSelectorsWithModel();
     }
 
     private JPanel createButtonsPanel(Filterable layer) {
@@ -77,16 +82,21 @@ public class ToneCurvesGUI extends FilterGUI {
         return showOriginalCB;
     }
 
-    public void stateChanged() {
-        // synchronize the UI dropdown to reflect the filter's
-        // backend data model (necessary when loading a preset)
-        channelSelectorPanel.setColorSpaceUI(curves.getColorSpace());
-
-        // paint the updated tone curves and dispatch standard events
-        curvesPanel.stateChanged();
+    private void syncSelectorsWithModel() {
+        channelSelectorPanel.setSelection(curves.getColorSpace(), curves.getActiveChannel());
     }
 
-    public ToneCurves getCurves() {
-        return curves;
+    public void modelChanged() {
+        // synchronize the selectors with the filter's data model
+        // (needed when loading a preset), without firing any listeners
+        syncSelectorsWithModel();
+
+        // paint the updated tone curves and start exactly one preview
+        curvesPanel.modelChanged();
+    }
+
+    @Override
+    public void dispose() {
+        ((ToneCurvesFilter) filter).guiDisposed(this);
     }
 }

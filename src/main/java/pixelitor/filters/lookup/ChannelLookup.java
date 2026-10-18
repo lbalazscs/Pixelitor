@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,31 +22,31 @@ import com.jhlabs.image.PixelUtils;
 /**
  * A lookup table that maps adjustments for a single color channel.
  */
-public class GrayScaleLookup {
-    private static final int TABLE_SIZE = 256;
-    private static final GrayScaleLookup IDENTITY = new GrayScaleLookup(0, 255, 0, 255);
+public class ChannelLookup {
+    private static final int LUT_SIZE = 256;
+    private static final ChannelLookup IDENTITY = new ChannelLookup(0, 255, 0, 255);
 
-    private final short[] lut = new short[TABLE_SIZE];
+    private final short[] lut = new short[LUT_SIZE];
 
     /**
      * Creates a new lookup table by mapping an input range to an output range.
      */
-    public GrayScaleLookup(int inputDark, int inputLight, int outputDark, int outputLight) {
+    public ChannelLookup(int inputDark, int inputLight, int outputDark, int outputLight) {
         int inputRange = inputLight - inputDark;
 
         if (inputRange == 0) {
-            // create a threshold effect at the specified value
+            // create a threshold effect at the value inputDark (== inputLight)
             short darkValue = (short) PixelUtils.clamp(outputDark);
             short lightValue = (short) PixelUtils.clamp(outputLight);
-            for (int i = 0; i < TABLE_SIZE; i++) {
+            for (int i = 0; i < LUT_SIZE; i++) {
                 lut[i] = (i < inputDark) ? darkValue : lightValue;
             }
         } else {
             // create a linear mapping from the input range to the output range
             double multiplier = (double) (outputLight - outputDark) / inputRange;
             double offset = outputDark - multiplier * inputDark;
-            for (int i = 0; i < TABLE_SIZE; i++) {
-                lut[i] = (short) PixelUtils.clamp((int) (multiplier * i + offset));
+            for (int i = 0; i < LUT_SIZE; i++) {
+                lut[i] = (short) PixelUtils.clamp((int) Math.round(multiplier * i + offset));
             }
         }
     }
@@ -65,7 +65,7 @@ public class GrayScaleLookup {
     /**
      * Returns a shared instance of an identity lookup table where output equals input.
      */
-    public static GrayScaleLookup getIdentity() {
+    public static ChannelLookup getIdentity() {
         return IDENTITY;
     }
 }

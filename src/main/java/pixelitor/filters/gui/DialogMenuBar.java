@@ -33,10 +33,10 @@ public class DialogMenuBar extends JMenuBar {
         this(owner, true);
     }
 
-    public DialogMenuBar(DialogMenuOwner owner, boolean addPresets) {
+    public DialogMenuBar(DialogMenuOwner owner, boolean hasPresets) {
         this.owner = owner;
 
-        if (addPresets) {
+        if (hasPresets) {
             addPresetsMenu();
         }
 

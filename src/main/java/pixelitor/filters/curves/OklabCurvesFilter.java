@@ -46,14 +46,19 @@ public class OklabCurvesFilter extends PointFilter {
 
     @Override
     public int processPixel(int x, int y, int rgb) {
-        // 1. convert sRGB (int) to Oklab (float[])
+        int alpha = rgb & 0xFF_00_00_00;
+        if (alpha == 0) {
+            return rgb; // fully transparent: nothing visible to adjust
+        }
+
+        // convert sRGB (int) to Oklab (float[])
         float[] oklab = ColorSpaces.srgbToOklab(rgb);
         float l = oklab[0];
         float a = oklab[1];
         float b = oklab[2];
 
-        // 2. apply curves via lookup tables
-        // L channel is normalized to [0, 1]
+        // apply curves via lookup tables
+        // the L channel is already in [0, 1]; scale it to a table index
         int lIndex = ImageMath.clamp((int) (l * 255.0f + 0.5f), 0, 255);
         float newL = lTable[lIndex] / 255.0f;
 
@@ -61,11 +66,12 @@ public class OklabCurvesFilter extends PointFilter {
         float newA = applyAbCurve(a, aTable);
         float newB = applyAbCurve(b, bTable);
 
-        // 3. convert back to sRGB
+        // convert back to sRGB
         oklab[0] = newL;
         oklab[1] = newA;
         oklab[2] = newB;
-        return ColorSpaces.oklabToSrgb(oklab);
+
+        return alpha | (ColorSpaces.oklabToSrgb(newL, newA, newB) & 0x00_FF_FF_FF);
     }
 
     /**
@@ -76,7 +82,7 @@ public class OklabCurvesFilter extends PointFilter {
         float normalized = (channelValue - AB_CHANNEL_MIN) / AB_CHANNEL_RANGE;
         int index = ImageMath.clamp((int) (normalized * 255.0f + 0.5f), 0, 255);
 
-        // get the transformed value from the LUT and scale it back to [0, 1]
+        // get the transformed value from the LUT and scale it to [0, 1]
         float transformedNormalized = table[index] / 255.0f;
 
         // denormalize the value back to the original domain
