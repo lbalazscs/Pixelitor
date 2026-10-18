@@ -19,7 +19,7 @@ package pixelitor.filters.impl;
 
 import pixelitor.filters.MandelbrotSet;
 
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.Point2D;
 
 /**
  * Renders a Mandelbrot-type set, where the constant c is varied across pixels and z starts at 0.
@@ -30,22 +30,19 @@ public class MandelbrotSetFilter extends EscapeTimeFilter {
     /**
      * Constructs a new MandelbrotSetFilter.
      *
-     * @param view          The starting view in the complex plane for this fractal.
      * @param iterator      The iteration strategy for the fractal.
      * @param zoom          The zoom level for the fractal.
-     * @param zoomCenterX   The x-coordinate of the center point for zooming.
-     * @param zoomCenterY   The y-coordinate of the center point for zooming.
+     * @param zoomCenter    The relative coordinates of the center point for
+     *                      zooming (in the unit square [0, 1] x [0, 1]).
      * @param maxIterations The maximum number of iterations for the escape time algorithm.
      * @param colors        The color palette used for rendering.
      * @param insideOut     True to invert the complex constant c using f(c) = 1/c, false otherwise.
      */
-    public MandelbrotSetFilter(Rectangle2D view, IterationStrategy iterator, double zoom,
-                               double zoomCenterX, double zoomCenterY, int maxIterations,
+    public MandelbrotSetFilter(IterationStrategy iterator, double zoom,
+                               Point2D zoomCenter, int maxIterations,
                                int[] colors, boolean insideOut) {
-        super(MandelbrotSet.NAME,
-            view.getX(), view.getX() + view.getWidth(),
-            view.getY(), view.getY() + view.getHeight(),
-            iterator, zoom, zoomCenterX, zoomCenterY, maxIterations, colors);
+        super(MandelbrotSet.NAME, iterator.getBounds(),
+            iterator, zoom, zoomCenter, maxIterations, colors);
         this.insideOut = insideOut;
     }
 

@@ -17,8 +17,10 @@
 
 package pixelitor.filters.impl;
 
-import net.jafama.FastMath;
+import pixelitor.filters.util.Complex;
 import pixelitor.filters.util.ComplexBounds;
+
+import java.awt.geom.Point2D;
 
 /**
  * Newton's and Halley's methods for zⁿ − 1 = 0 with a complex relaxation factor a:
@@ -35,27 +37,40 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
     private final int n;
     private final int[][] colors;
     private final int method;
-    private final double imA;
-    private final double reA;
 
-    public NewtonFractalFilter(ComplexBounds bounds,
+    // the complex relaxation factor
+    private final double reA;
+    private final double imA;
+
+    // precomputed roots of unity: rootRe[k] = cos(2πk/n), rootIm[k] = sin(2πk/n)
+    private final double[] rootRe;
+    private final double[] rootIm;
+
+    public NewtonFractalFilter(String filterName,
+                               ComplexBounds bounds,
                                int n,
                                double zoom,
-                               double zoomCenterX,
-                               double zoomCenterY,
+                               Point2D zoomCenter,
                                int maxIterations,
                                int[][] colors,
                                int method,
-                               double reA,
-                               double imA) {
-        super("Newton Fractal", bounds, zoom, zoomCenterX, zoomCenterY);
+                               Complex a) {
+        super(filterName, bounds, zoom, zoomCenter, false);
 
         this.n = n;
         this.maxIterations = maxIterations;
         this.colors = colors;
         this.method = method;
-        this.imA = imA;
-        this.reA = reA;
+        this.reA = a.re();
+        this.imA = a.im();
+
+        this.rootRe = new double[n];
+        this.rootIm = new double[n];
+        for (int k = 0; k < n; k++) {
+            double angle = (2.0 * Math.PI * k) / n;
+            rootRe[k] = Math.cos(angle);
+            rootIm[k] = Math.sin(angle);
+        }
     }
 
     @Override
@@ -110,7 +125,7 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
             double nextZx = zx - stepX;
             double nextZy = zy - stepY;
 
-            if (isConverged(zx, zy, nextZx, nextZy)) {
+            if (isConverged(zx, zy, deltaX, deltaY)) {
                 return colors[findClosestRoot(nextZx, nextZy)][step];
             }
 
@@ -161,7 +176,7 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
             double nextZx = zx - stepX;
             double nextZy = zy - stepY;
 
-            if (isConverged(zx, zy, nextZx, nextZy)) {
+            if (isConverged(zx, zy, deltaX, deltaY)) {
                 return colors[findClosestRoot(nextZx, nextZy)][step];
             }
 
@@ -173,28 +188,37 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
     }
 
     /**
-     * Checks if the iteration step has converged to an actual root of zⁿ − 1 = 0.
+     * Checks if the iteration has converged to an actual root of zⁿ − 1 = 0.
+     * <p>
+     * Convergence is tested using the unrelaxed correction Δz rather than the relaxed step a·Δz,
+     * so that the tolerance is independent of the relaxation factor a and does not falsely
+     * report convergence when |a| is small or zero.
      * <p>
      * In Halley's method, z = 0 is an extraneous repelling fixed point where the step size Δz ∝ z
      * becomes arbitrarily small near the origin. Since all actual roots lie on the unit circle (|z| = 1),
-     * checking that |nextZ|² > 0.25 prevents false convergence at the origin and allows points
+     * checking that |z|² > 0.25 prevents false convergence at the origin and allows points
      * near the origin to escape and converge to a true root.
      */
-    private static boolean isConverged(double zx, double zy, double nextZx, double nextZy) {
-        double diffX = nextZx - zx;
-        double diffY = nextZy - zy;
-        return diffX * diffX + diffY * diffY < CONVERGENCE_TOLERANCE_SQ
-            && (nextZx * nextZx + nextZy * nextZy > 0.25);
+    private static boolean isConverged(double zx, double zy, double deltaX, double deltaY) {
+        return deltaX * deltaX + deltaY * deltaY < CONVERGENCE_TOLERANCE_SQ
+            && zx * zx + zy * zy > 0.25;
     }
 
     /**
-     * Derives the index k ∈ [0, n - 1] of the closest root of unity e^(i * 2πk / n) directly from the angle.
+     * Finds the index k ∈ [0, n - 1] of the closest root of unity e^(i * 2πk / n).
+     * Since all roots lie on the unit circle (|root| = 1), minimizing the Euclidean
+     * distance |z - root| is equivalent to maximizing the dot product z · root.
      */
     private int findClosestRoot(double zx, double zy) {
-        double angle = FastMath.atan2(zy, zx);
-        if (angle < 0.0) {
-            angle += 2.0 * Math.PI;
+        int best = 0;
+        double bestDot = Double.NEGATIVE_INFINITY;
+        for (int k = 0; k < n; k++) {
+            double dot = zx * rootRe[k] + zy * rootIm[k];
+            if (dot > bestDot) {
+                bestDot = dot;
+                best = k;
+            }
         }
-        return (int) Math.round(angle * n / (2.0 * Math.PI)) % n;
+        return best;
     }
 }

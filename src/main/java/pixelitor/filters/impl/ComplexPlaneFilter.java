@@ -20,17 +20,17 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.util.ComplexBounds;
 
-import java.awt.image.BufferedImage;
+import java.awt.geom.Point2D;
 
 /**
  * An abstract base filter that maps image pixel coordinates to a zoomable region of the complex plane.
  */
 public abstract class ComplexPlaneFilter extends PointFilter {
-    // points belonging to the set are colored black
+    // points that never converge/escape are colored black
     public static final int IN_SET_COLOR = 0xFF_00_00_00;
 
     // the bounds in the complex plane
-    private final double xMin, xMax, yMin, yMax, xRange, yRange;
+    private final ComplexBounds bounds;
 
     // the actual start in the complex plane, taking the zooming into account
     protected double xStart, yStart;
@@ -40,92 +40,70 @@ public abstract class ComplexPlaneFilter extends PointFilter {
 
     private final double zoomCenterX, zoomCenterY;
     private final double zoom;
-
-    protected ComplexPlaneFilter(String filterName,
-                                 ComplexBounds bounds,
-                                 double zoom,
-                                 double zoomCenterX,
-                                 double zoomCenterY) {
-        this(filterName,
-            bounds.minRe(), bounds.maxRe(), bounds.minIm(), bounds.maxIm(),
-            zoom, zoomCenterX, zoomCenterY);
-    }
+    private final boolean stretched;
 
     /**
      * Constructs a new ComplexPlaneFilter.
      *
      * @param filterName  The name of the filter.
-     * @param xMin        The minimum x boundary in the complex plane.
-     * @param xMax        The maximum x boundary in the complex plane.
-     * @param yMin        The minimum y boundary in the complex plane.
-     * @param yMax        The maximum y boundary in the complex plane.
+     * @param bounds      The rectangular bounds in the complex plane.
      * @param zoom        The zoom level.
-     * @param zoomCenterX The x-coordinate of the center point for zooming (in [0, 1]).
-     * @param zoomCenterY The y-coordinate of the center point for zooming (in [0, 1]).
+     * @param zoomCenter  The relative coordinates of the center point for
+     *                    zooming (in the unit square [0, 1] x [0, 1]).
+     * @param stretched   True to stretch the complex plane independently on both axes
+     *                    to fill the image; false to preserve aspect ratio (isotropic mapping).
      */
     protected ComplexPlaneFilter(String filterName,
-                                 double xMin, double xMax,
-                                 double yMin, double yMax,
+                                 ComplexBounds bounds,
                                  double zoom,
-                                 double zoomCenterX,
-                                 double zoomCenterY) {
+                                 Point2D zoomCenter,
+                                 boolean stretched) {
         super(filterName);
 
-        assert xMax > xMin && yMax > yMin : "invalid complex-plane bounds";
-
-        this.xMin = xMin;
-        this.xMax = xMax;
-        this.yMin = yMin;
-        this.yMax = yMax;
-
-        this.xRange = xMax - xMin;
-        this.yRange = yMax - yMin;
-
+        this.bounds = bounds;
         this.zoom = zoom;
-        this.zoomCenterX = zoomCenterX;
-        this.zoomCenterY = zoomCenterY;
+        this.zoomCenterX = zoomCenter.getX();
+        this.zoomCenterY = zoomCenter.getY();
+        this.stretched = stretched;
     }
 
     @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        // calculate the width and height of the view in the complex plane based on the zoom level
-        double zoomedRangeX = xRange / zoom;
-        double zoomedRangeY = yRange / zoom;
+    public void setDimensions(int width, int height) {
+        double rangeRe = bounds.width() / zoom;
+        double rangeIm = bounds.height() / zoom;
 
-        // calculate multipliers for converting image coordinates to complex plane coordinates
-        xMultiplier = zoomedRangeX / src.getWidth();
-        yMultiplier = zoomedRangeY / src.getHeight();
+        double extentX;
+        double extentY;
+        if (stretched) {
+            xMultiplier = rangeRe / width;
+            yMultiplier = rangeIm / height;
+            extentX = rangeRe;
+            extentY = rangeIm;
+        } else {
+            // isotropic mapping: uniform units per pixel
+            // fitting the zoomed range to the shorter image side
+            double unitsPerPixel = Math.max(rangeRe / width, rangeIm / height);
+            xMultiplier = unitsPerPixel;
+            yMultiplier = unitsPerPixel;
+            extentX = width * unitsPerPixel;
+            extentY = height * unitsPerPixel;
+        }
 
-        // find the zoom center point in the complex plane
-        double zoomCenterComplexX = xMin + zoomCenterX * xRange;
-        double zoomCenterComplexY = yMin + zoomCenterY * yRange;
-
-        // calculate the boundaries of the zoomed view
-        double zoomedMinX = zoomCenterComplexX - zoomedRangeX / 2.0;
-        double zoomedMaxX = zoomCenterComplexX + zoomedRangeX / 2.0;
-        double zoomedMinY = zoomCenterComplexY - zoomedRangeY / 2.0;
-        double zoomedMaxY = zoomCenterComplexY + zoomedRangeY / 2.0;
-
-        // adjust the view boundaries to ensure they stay within the original fractal limits
-        xStart = adjustStart(zoomedMinX, zoomedMaxX, xMin, xMax);
-        yStart = adjustStart(zoomedMinY, zoomedMaxY, yMin, yMax);
-
-        return super.filter(src, dst);
+        xStart = viewStart(bounds.minRe(), bounds.maxRe(), zoomCenterX, extentX);
+        yStart = viewStart(bounds.minIm(), bounds.maxIm(), zoomCenterY, extentY);
     }
 
     /**
-     * Adjusts the starting coordinate to keep the zoomed view within the original boundaries.
+     * Computes the start coordinate on an axis. If the visible extent exceeds the bounds range,
+     * the view is centered on the bounds. Otherwise, it is centered on the zoom center and clamped
+     * within [min, max].
      */
-    private static double adjustStart(double zoomedMin, double zoomedMax, double min, double max) {
-        if (zoomedMax > max) {
-            // if the zoomed view exceeds the maximum boundary, shift it back
-            return zoomedMin - (zoomedMax - max);
+    private static double viewStart(double min, double max, double relCenter, double extent) {
+        double boundsRange = max - min;
+        if (extent >= boundsRange) {
+            return (min + max - extent) / 2.0;
         }
-        if (zoomedMin < min) {
-            // if the zoomed view is below the minimum boundary, clamp it to the minimum
-            return min;
-        }
-        // otherwise, the view is within bounds
-        return zoomedMin;
+        double center = min + relCenter * boundsRange;
+        return Math.clamp(center - extent / 2.0, min, max - extent);
     }
 }

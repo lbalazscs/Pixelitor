@@ -18,6 +18,10 @@
 package pixelitor.filters.impl;
 
 import pixelitor.filters.JuliaSet;
+import pixelitor.filters.util.Complex;
+import pixelitor.filters.util.ComplexBounds;
+
+import java.awt.geom.Point2D;
 
 /**
  * Renders a Julia-type set, where z is varied across pixels and the constant c is fixed.
@@ -32,22 +36,22 @@ public class JuliaSetFilter extends EscapeTimeFilter {
      *
      * @param iterator      The iteration strategy for the fractal.
      * @param zoom          The zoom level for the fractal.
-     * @param zoomCenterX   The x-coordinate of the center point for zooming.
-     * @param zoomCenterY   The y-coordinate of the center point for zooming.
+     * @param zoomCenter    The relative coordinates of the center point for
+     *                      zooming (in the unit square [0, 1] x [0, 1]).
      * @param maxIterations The maximum number of iterations for the escape time algorithm.
      * @param colors        The color palette used for rendering.
-     * @param cx            The real part of the fixed complex constant c.
-     * @param cy            The imaginary part of the fixed complex constant c.
+     * @param c             The fixed complex constant c.
      * @param insideOut     True to invert the initial z value using f(z) = 1/z, false otherwise.
      */
-    public JuliaSetFilter(IterationStrategy iterator, double zoom, double zoomCenterX,
-                          double zoomCenterY, int maxIterations, int[] colors,
-                          double cx, double cy, boolean insideOut) {
+    public JuliaSetFilter(IterationStrategy iterator,
+                          double zoom, Point2D zoomCenter,
+                          int maxIterations, int[] colors,
+                          Complex c, boolean insideOut) {
         // the Julia view doesn't depend on the chosen iteration strategy
-        super(JuliaSet.NAME, -2.0f, 2.0f, -1.2f, 1.2f,
-            iterator, zoom, zoomCenterX, zoomCenterY, maxIterations, colors);
-        this.cx = cx;
-        this.cy = cy;
+        super(JuliaSet.NAME, new ComplexBounds(-2.0, 2.0, -1.2, 1.2),
+            iterator, zoom, zoomCenter, maxIterations, colors);
+        this.cx = c.re();
+        this.cy = c.im();
         this.insideOut = insideOut;
     }
 

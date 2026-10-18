@@ -19,8 +19,8 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.impl.ComplexPlaneFilter;
 import pixelitor.filters.impl.NewtonFractalFilter;
+import pixelitor.filters.util.Complex;
 import pixelitor.filters.util.ComplexBounds;
 import pixelitor.gui.GUIText;
 
@@ -50,11 +50,10 @@ public class NewtonFractal extends ParametrizedFilter {
     private static final double SHADING_REFERENCE_STEPS = 100.0;
     private static final double SHADING_NORMALIZER = Math.log(SHADING_REFERENCE_STEPS);
 
-    // color cache fields
-    private static int[][] cachedColors = null;
-    private static int cachedN = -1;
-    private static int cachedMaxIterations = -1;
-    private static int cachedShadingStrength = -1;
+    private static final float SATURATION = 0.85f;
+    private static final float MAX_DARKENING = 0.75f;
+
+    private static final ComplexBounds PLANE_BOUNDS = new ComplexBounds(-2.0, 2.0, -2.0, 2.0);
 
     private final IntChoiceParam polynomialParam = new IntChoiceParam("Polynomial", new Item[]{
         new Item("z³ − 1", 3),
@@ -77,16 +76,17 @@ public class NewtonFractal extends ParametrizedFilter {
         new Item("2x2 (Better, Slower)", SUPERSAMPLING_2X2),
     }, RandomizeMode.IGNORE);
 
-    private final ComplexNumberParam relaxation = new ComplexNumberParam("Step Multiplier",
-        1.0, 0.0, new ComplexBounds(-0.2, 2.2, -1.2, 1.2));
+    private final ComplexNumberParam stepMultiplierParam = new ComplexNumberParam("Step Multiplier",
+        new Complex(1.0, 0.0),
+        new ComplexBounds(-0.2, 2.2, -1.2, 1.2));
 
     public NewtonFractal() {
         super(false);
 
         iterationsParam = new RangeParam.Builder("Iterations")
-            .min(2)
+            .min(1)
             .def(50)
-            .max(998)
+            .max(1000)
             .randomizeMode(RandomizeMode.IGNORE)
             .build();
 
@@ -95,12 +95,12 @@ public class NewtonFractal extends ParametrizedFilter {
 
         initParams(
             polynomialParam,
-            relaxation.withCircle(),
             methodParam,
+            stepMultiplierParam.forNewton(),
+            iterationsParam,
             shadingStrengthParam,
             zoomParam,
             zoomCenterParam.withDecimalPlaces(2),
-            iterationsParam,
             supersamplingParam
         );
 
@@ -113,16 +113,14 @@ public class NewtonFractal extends ParametrizedFilter {
             case SUPERSAMPLING_NONE -> renderFractal(src, dest);
             case SUPERSAMPLING_2X2 -> {
                 // render at double resolution, then scale down for 2x2 supersampling
-                BufferedImage bigSrc = new BufferedImage(
-                    src.getWidth() * 2, src.getHeight() * 2, src.getType());
-                BufferedImage bigDest = renderFractal(bigSrc, null);
-                bigSrc.flush();
+                BufferedImage big = new BufferedImage(src.getWidth() * 2, src.getHeight() * 2, src.getType());
+                renderFractal(big, big); // processPixel ignores the input, so in-place is safe
                 Graphics2D g = dest.createGraphics();
                 g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
                 g.scale(0.5, 0.5);
-                g.drawImage(bigDest, 0, 0, null);
+                g.drawImage(big, 0, 0, null);
                 g.dispose();
-                bigDest.flush();
+                big.flush();
                 yield dest;
             }
             default -> throw new IllegalStateException("supersampling = " + supersamplingParam.getValue());
@@ -131,43 +129,20 @@ public class NewtonFractal extends ParametrizedFilter {
 
     private BufferedImage renderFractal(BufferedImage src, BufferedImage dest) {
         int n = polynomialParam.getValue();
-        int method = methodParam.getValue();
         int iterations = iterationsParam.getValue();
         int shadingStrength = shadingStrengthParam.getValue();
 
-        NewtonFractalFilter filter = new NewtonFractalFilter(
-            new ComplexBounds(-2.0, 2.0, -2.0, 2.0),
+        NewtonFractalFilter filter = new NewtonFractalFilter(NAME,
+            PLANE_BOUNDS,
             n,
             zoomParam.getZoomRatio(),
-            zoomCenterParam.getRelativeX(),
-            zoomCenterParam.getRelativeY(),
+            zoomCenterParam.getRelativePoint(),
             iterations,
-            getColors(n, iterations, shadingStrength),
-            method,
-            relaxation.getRe(),
-            relaxation.getIm());
+            generateColors(n, iterations, shadingStrength),
+            methodParam.getValue(),
+            stepMultiplierParam.getValue());
 
         return filter.filter(src, dest);
-    }
-
-    protected static int[][] getColors(int n, int maxIterations, int shadingStrength) {
-        // check if we can use the cached colors
-        if (cachedColors != null &&
-            cachedN == n &&
-            cachedMaxIterations == maxIterations &&
-            cachedShadingStrength == shadingStrength) {
-            return cachedColors;
-        }
-
-        int[][] colors = generateColors(n, maxIterations, shadingStrength);
-
-        // cache the generated colors
-        cachedColors = colors;
-        cachedN = n;
-        cachedMaxIterations = maxIterations;
-        cachedShadingStrength = shadingStrength;
-
-        return colors;
     }
 
     /**
@@ -175,17 +150,20 @@ public class NewtonFractal extends ParametrizedFilter {
      */
     private static int[][] generateColors(int n, int maxIterations, int shadingStrength) {
         int[][] colors = new int[n][maxIterations + 1];
-        float shadeFactor = (shadingStrength / 100.0f) * 0.75f;
+        float shadeFactor = (shadingStrength / 100.0f) * MAX_DARKENING;
 
+        float[] hues = new float[n];
         for (int k = 0; k < n; k++) {
-            colors[k][0] = ComplexPlaneFilter.IN_SET_COLOR; // 0 indicates non-convergence within the budget
-            float hue = (float) k / n;
+            hues[k] = (float) k / n;
+        }
 
-            for (int step = 1; step <= maxIterations; step++) {
-                // logarithmic shading normalized against a fixed reference step count
-                float progress = (float) Math.min(1.0, Math.log(step) / SHADING_NORMALIZER);
-                float bri = Math.clamp(1.0f - shadeFactor * progress, 0.05f, 1.0f);
-                colors[k][step] = Color.HSBtoRGB(hue, 0.85f, bri);
+        for (int step = 0; step <= maxIterations; step++) {
+            // logarithmic shading normalized against a fixed reference step count
+            float progress = (float) Math.min(1.0, Math.log(Math.max(1, step)) / SHADING_NORMALIZER);
+            float bri = 1.0f - shadeFactor * progress;
+
+            for (int k = 0; k < n; k++) {
+                colors[k][step] = Color.HSBtoRGB(hues[k], SATURATION, bri);
             }
         }
         return colors;

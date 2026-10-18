@@ -21,7 +21,6 @@ import pixelitor.filters.gui.Help;
 import pixelitor.filters.impl.EscapeTimeFilter.IterationStrategy;
 import pixelitor.filters.impl.MandelbrotSetFilter;
 
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
@@ -43,15 +42,13 @@ public class MandelbrotSet extends EscapeTimeFractal {
     @Override
     public BufferedImage renderFractal(BufferedImage src, BufferedImage dest) {
         IterationStrategy iterator = createIterator();
-        Rectangle2D view = iterator.getComplexView();
+
         int iterations = iterationsParam.getValue();
 
         MandelbrotSetFilter filter = new MandelbrotSetFilter(
-            view,
             iterator,
             zoomParam.getZoomRatio(),
-            zoomCenterParam.getRelativeX(),
-            zoomCenterParam.getRelativeY(),
+            zoomCenterParam.getRelativePoint(),
             iterations,
             getColors(colorsParam.getValue(), iterations),
             insideOutParam.isChecked()

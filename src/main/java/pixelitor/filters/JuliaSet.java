@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.ComplexNumberParam;
 import pixelitor.filters.gui.Help;
 import pixelitor.filters.impl.JuliaSetFilter;
+import pixelitor.filters.util.Complex;
 import pixelitor.filters.util.ComplexBounds;
 
 import java.awt.image.BufferedImage;
@@ -41,7 +42,8 @@ public class JuliaSet extends EscapeTimeFractal {
 //        }, false);
 
     private final ComplexNumberParam cParam = new ComplexNumberParam("Complex Constant",
-        -0.7, 0.27, new ComplexBounds(-2, 0.5, -1.2, 1.2));
+        new Complex(-0.7, 0.27),
+        new ComplexBounds(-2, 0.5, -1.2, 1.2));
 
     public JuliaSet() {
         super(300, 0.22f);
@@ -60,12 +62,10 @@ public class JuliaSet extends EscapeTimeFractal {
         JuliaSetFilter filter = new JuliaSetFilter(
             createIterator(),
             zoomParam.getZoomRatio(),
-            zoomCenterParam.getRelativeX(),
-            zoomCenterParam.getRelativeY(),
+            zoomCenterParam.getRelativePoint(),
             iterations,
             getColors(colorsParam.getValue(), iterations),
-            cParam.getRe(),
-            cParam.getIm(),
+            cParam.getValue(),
             insideOutParam.isChecked()
         );
 

@@ -17,14 +17,12 @@
 
 package pixelitor.filters.gui;
 
-import com.jhlabs.image.ImageMath;
+import pixelitor.filters.util.Complex;
 import pixelitor.filters.util.ComplexBounds;
 
 import javax.swing.*;
-import java.awt.geom.Point2D;
-import java.io.Serial;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * A {@link FilterParam} that allows selecting a complex number within
@@ -40,14 +38,18 @@ public class ComplexNumberParam extends AbstractFilterParam {
     private final ComplexBounds bounds;
 
     private boolean drawCircle;
+    private Predicate<Complex> randomizeCriteria;
 
-    public ComplexNumberParam(String name, double re, double im, ComplexBounds bounds) {
+    public ComplexNumberParam(String name, Complex value, ComplexBounds bounds) {
         super(name, RandomizeMode.ALLOW);
 
-        this.bounds = Objects.requireNonNull(bounds);
+        if (!bounds.contains(value)) {
+            throw new IllegalArgumentException();
+        }
 
-        this.re = bounds.clampRe(re);
-        this.im = bounds.clampIm(im);
+        this.bounds = bounds;
+        this.re = value.re();
+        this.im = value.im();
         this.defaultRe = this.re;
         this.defaultIm = this.im;
     }
@@ -61,8 +63,11 @@ public class ComplexNumberParam extends AbstractFilterParam {
         return gui;
     }
 
-    public ComplexNumberParam withCircle() {
+    // when selecting a step multiplier for the Newton Fractal, draw a circle
+    // of radius 1 around (1, 0), and restrict randomization to be inside it
+    public ComplexNumberParam forNewton() {
         drawCircle = true;
+        randomizeCriteria = c -> c.distSqFrom(1, 0) < 1;
         return this;
     }
 
@@ -72,7 +77,20 @@ public class ComplexNumberParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        setValue(bounds.randomRe(), bounds.randomIm(), true, false, false);
+        Complex c = bounds.random();
+
+        if (randomizeCriteria != null) {
+            int attempts = 0;
+            while (!randomizeCriteria.test(c) && ++attempts < 20) {
+                c = bounds.random();
+            }
+        }
+
+        setValue(c, true, false, false);
+    }
+
+    public Complex getValue() {
+        return new Complex(re, im);
     }
 
     public double getRe() {
@@ -83,12 +101,14 @@ public class ComplexNumberParam extends AbstractFilterParam {
         return im;
     }
 
-    public Point2D getPoint() {
-        return new Point2D.Double(re, im);
-    }
-
     public ComplexBounds getBounds() {
         return bounds;
+    }
+
+    public void setValue(Complex c,
+                         boolean updateGUI, boolean isAdjusting,
+                         boolean trigger) {
+        setValue(c.re(), c.im(), updateGUI, isAdjusting, trigger);
     }
 
     public void setValue(double re, double im,
@@ -140,13 +160,13 @@ public class ComplexNumberParam extends AbstractFilterParam {
     }
 
     @Override
-    public ComplexNumberParamState copyState() {
-        return new ComplexNumberParamState(re, im);
+    public Complex copyState() {
+        return new Complex(re, im);
     }
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        ComplexNumberParamState s = (ComplexNumberParamState) state;
+        Complex s = (Complex) state;
         setValue(s.re(), s.im(), updateGUI, false, false);
     }
 
@@ -167,27 +187,5 @@ public class ComplexNumberParam extends AbstractFilterParam {
     public String toString() {
         return String.format(Locale.ROOT, "%s[name = '%s', re = %.2f, im = %.2f]",
             getClass().getSimpleName(), getName(), re, im);
-    }
-
-    /**
-     * Encapsulates the state of a {@link ComplexNumberParam} as a memento object.
-     */
-    public record ComplexNumberParamState(double re,
-                                          double im) implements ParamState<ComplexNumberParamState> {
-        @Serial
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public ComplexNumberParamState interpolate(ComplexNumberParamState endState, double progress) {
-            // interpolates in Cartesian coordinates, not polar
-            double interpolatedRe = ImageMath.lerp(progress, re, endState.re);
-            double interpolatedIm = ImageMath.lerp(progress, im, endState.im);
-            return new ComplexNumberParamState(interpolatedRe, interpolatedIm);
-        }
-
-        @Override
-        public String toPresetString() {
-            return String.format(Locale.ROOT, "%.4f,%.4f", re, im);
-        }
     }
 }

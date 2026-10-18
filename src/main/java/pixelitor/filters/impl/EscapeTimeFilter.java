@@ -18,8 +18,9 @@
 package pixelitor.filters.impl;
 
 import net.jafama.FastMath;
+import pixelitor.filters.util.ComplexBounds;
 
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.Point2D;
 
 /**
  * A common superclass for the Mandelbrot and Julia fractal implementations.
@@ -32,30 +33,25 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
     protected final IterationStrategy iterator;
 
     /**
-     * Constructs a new ComplexFractalFilter.
+     * Constructs a new EscapeTimeFilter.
      *
      * @param filterName    The name of the filter.
-     * @param xMin          The minimum x boundary in the complex plane.
-     * @param xMax          The maximum x boundary in the complex plane.
-     * @param yMin          The minimum y boundary in the complex plane.
-     * @param yMax          The maximum y boundary in the complex plane.
+     * @param bounds        The rectangular bounds in the complex plane.
      * @param iterator      The iteration strategy for the fractal.
      * @param zoom          The zoom level for the fractal.
-     * @param zoomCenterX   The x-coordinate of the center point for zooming.
-     * @param zoomCenterY   The y-coordinate of the center point for zooming.
+     * @param zoomCenter    The relative coordinates of the center point for
+     *                      zooming (in the unit square [0, 1] x [0, 1]).
      * @param maxIterations The maximum number of iterations for the escape time algorithm.
      * @param colors        The color palette used for rendering.
      */
     protected EscapeTimeFilter(String filterName,
-                               double xMin, double xMax,
-                               double yMin, double yMax,
+                               ComplexBounds bounds,
                                IterationStrategy iterator,
                                double zoom,
-                               double zoomCenterX,
-                               double zoomCenterY,
+                               Point2D zoomCenter,
                                int maxIterations,
                                int[] colors) {
-        super(filterName, xMin, xMax, yMin, yMax, zoom, zoomCenterX, zoomCenterY);
+        super(filterName, bounds, zoom, zoomCenter, true);
 
         this.iterator = iterator;
         this.maxIterations = maxIterations;
@@ -95,9 +91,9 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
         }
 
         /**
-         * Returns the starting view in the complex plane for this fractal.
+         * Returns the bounds in the complex plane for this fractal.
          */
-        Rectangle2D getComplexView();
+        ComplexBounds getBounds();
     }
 
     /**
@@ -144,9 +140,8 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
         }
 
         @Override
-        public Rectangle2D getComplexView() {
-            // corresponds to cxMin=-2.2, cxMax=0.7, cyMin=-1.2, cyMax=1.2
-            return new Rectangle2D.Double(-2.2, -1.2, 2.9, 2.4);
+        public ComplexBounds getBounds() {
+            return new ComplexBounds(-2.2, 0.7, -1.2, 1.2);
         }
     }
 
@@ -176,8 +171,8 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
         }
 
         @Override
-        public Rectangle2D getComplexView() {
-            return new Rectangle2D.Double(-2.2, -2.0, 3.4, 3.0);
+        public ComplexBounds getBounds() {
+            return new ComplexBounds(-2.2, 1.2, -2.0, 1.0);
         }
     }
 
@@ -206,8 +201,8 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
         }
 
         @Override
-        public Rectangle2D getComplexView() {
-            return new Rectangle2D.Double(-2.5, -2.5, 5.0, 5.0);
+        public ComplexBounds getBounds() {
+            return new ComplexBounds(-2.5, 2.5, -2.5, 2.5);
         }
     }
 
@@ -249,8 +244,8 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
         }
 
         @Override
-        public Rectangle2D getComplexView() {
-            return new Rectangle2D.Double(-1.5, -1.5, 3.0, 3.0);
+        public ComplexBounds getBounds() {
+            return new ComplexBounds(-1.5, 1.5, -1.5, 1.5);
         }
     }
 
@@ -296,8 +291,8 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
         }
 
         @Override
-        public Rectangle2D getComplexView() {
-            return new Rectangle2D.Double(-1.5, -1.5, 2.5, 3.0);
+        public ComplexBounds getBounds() {
+            return new ComplexBounds(-1.5, 1.0, -1.5, 1.5);
         }
     }
 
@@ -347,8 +342,8 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
         }
 
         @Override
-        public Rectangle2D getComplexView() {
-            return new Rectangle2D.Double(-1.0, -1.0, 2.0, 2.0);
+        public ComplexBounds getBounds() {
+            return new ComplexBounds(-1.0, 1.0, -1.0, 1.0);
         }
     }
 

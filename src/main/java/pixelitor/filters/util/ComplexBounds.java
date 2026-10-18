@@ -54,6 +54,10 @@ public record ComplexBounds(double minRe, double maxRe, double minIm, double max
         return im >= minIm && im <= maxIm;
     }
 
+    public boolean contains(Complex c) {
+        return containsRe(c.re()) && containsIm(c.im());
+    }
+
     public double clampRe(double re) {
         return Math.clamp(re, minRe, maxRe);
     }
@@ -63,16 +67,11 @@ public record ComplexBounds(double minRe, double maxRe, double minIm, double max
     }
 
     /**
-     * Returns a uniformly distributed random value in [minRe, maxRe).
+     * Returns a uniformly distributed random value within these bounds.
      */
-    public double randomRe() {
-        return minRe + Math.random() * width();
-    }
-
-    /**
-     * Returns a uniformly distributed random value in [minIm, maxIm).
-     */
-    public double randomIm() {
-        return minIm + Math.random() * height();
+    public Complex random() {
+        return new Complex(
+            minRe + Math.random() * width(),
+            minIm + Math.random() * height());
     }
 }
