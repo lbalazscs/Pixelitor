@@ -36,12 +36,12 @@ import java.awt.image.BufferedImage;
 public enum QuadrantAngle {
     ANGLE_90(90, "rotate_90") {
         @Override
-        public void resizeNewCanvas(Canvas canvas, View view) {
+        public void updateCanvasSize(Canvas canvas, View view) {
             swapCanvasDimensions(canvas, view);
         }
 
         @Override
-        public AffineTransform createTransform(int width, int height) {
+        public AffineTransform createImTransform(int width, int height) {
             var at = AffineTransform.getTranslateInstance(height, 0);
             at.quadrantRotate(1);
             return at;
@@ -53,12 +53,12 @@ public enum QuadrantAngle {
         }
     }, ANGLE_180(180, "rotate_180") {
         @Override
-        public void resizeNewCanvas(Canvas canvas, View view) {
+        public void updateCanvasSize(Canvas canvas, View view) {
             // no resize needed
         }
 
         @Override
-        public AffineTransform createTransform(int width, int height) {
+        public AffineTransform createImTransform(int width, int height) {
             var at = AffineTransform.getTranslateInstance(width, height);
             at.quadrantRotate(2);
             return at;
@@ -70,12 +70,12 @@ public enum QuadrantAngle {
         }
     }, ANGLE_270(270, "rotate_270") {
         @Override
-        public void resizeNewCanvas(Canvas canvas, View view) {
+        public void updateCanvasSize(Canvas canvas, View view) {
             swapCanvasDimensions(canvas, view);
         }
 
         @Override
-        public AffineTransform createTransform(int width, int height) {
+        public AffineTransform createImTransform(int width, int height) {
             var at = AffineTransform.getTranslateInstance(0, width);
             at.quadrantRotate(3);
             return at;
@@ -87,11 +87,11 @@ public enum QuadrantAngle {
         }
     };
 
-    private final int angleDegree;
+    private final int angleDegrees;
     private final String displayName;
 
-    QuadrantAngle(int angleDegree, String guiKey) {
-        this.angleDegree = angleDegree;
+    QuadrantAngle(int angleDegrees, String guiKey) {
+        this.angleDegrees = angleDegrees;
         this.displayName = Texts.i18n(guiKey);
     }
 
@@ -102,28 +102,23 @@ public enum QuadrantAngle {
     /**
      * Adjusts the canvas size for the rotation if necessary.
      */
-    public abstract void resizeNewCanvas(Canvas canvas, View view);
+    public abstract void updateCanvasSize(Canvas canvas, View view);
 
     /**
-     * Returns the rotation as a transformation in
-     * image-space coordinates relative to the canvas.
+     * Creates the rotation as a transformation in image-space coordinates.
      */
-    public AffineTransform createCanvasTransform(Canvas canvas) {
-        return createTransform(canvas.getWidth(), canvas.getHeight());
+    public abstract AffineTransform createImTransform(int width, int height);
+
+    public AffineTransform createImTransform(Canvas canvas) {
+        return createImTransform(canvas.getWidth(), canvas.getHeight());
     }
 
-    /**
-     * Returns the transformation of the image,
-     * ignoring the canvas and the translation.
-     */
-    public AffineTransform createImageTransform(BufferedImage image) {
-        return createTransform(image.getWidth(), image.getHeight());
+    public AffineTransform createImTransform(BufferedImage image) {
+        return createImTransform(image.getWidth(), image.getHeight());
     }
 
-    public abstract AffineTransform createTransform(int width, int height);
-
-    public int getAngleDegree() {
-        return angleDegree;
+    public int getAngleDegrees() {
+        return angleDegrees;
     }
 
     /**
@@ -134,7 +129,7 @@ public enum QuadrantAngle {
     /**
      * Creates an action that transforms only the active layer rather than the entire composition.
      */
-    public Action createLayerTransformAction() {
+    public Action createActiveLayerAction() {
         return new AbstractViewEnabledAction(getDisplayName()) {
             @Override
             protected void onClick(Composition comp) {
@@ -148,21 +143,20 @@ public enum QuadrantAngle {
     }
 
     public String asString() {
-        return angleDegree + "°";
+        return angleDegrees + "°";
     }
 
     /**
-     * Swaps the width and height of a Canvas.
+     * Swaps the width and height of a {@link Canvas}.
      */
     private static void swapCanvasDimensions(Canvas canvas, View view) {
-        // swap the width and height
         int newWidth = canvas.getHeight();
         int newHeight = canvas.getWidth();
         canvas.resize(newWidth, newHeight, view, false);
     }
 
     /**
-     * Creates a new image with swapped width and height, preserving color model.
+     * Creates a new image with swapped width and height, preserving the color model.
      */
     private static BufferedImage createSwappedDimensionsImage(BufferedImage src) {
         return ImageUtils.createImageWithSameCM(
@@ -170,7 +164,7 @@ public enum QuadrantAngle {
     }
 
     /**
-     * Creates a new image with the same dimensions, preserving color model.
+     * Creates a new image with the same dimensions, preserving the color model.
      */
     private static BufferedImage createSameDimensionsImage(BufferedImage src) {
         return ImageUtils.createImageWithSameCM(

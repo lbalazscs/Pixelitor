@@ -23,6 +23,7 @@ import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -366,7 +367,7 @@ public class CropTool extends DragTool {
         assert state == TRANSFORM;
 
         commitBoxChange(view, boxJustCreated ? "Create Crop Box" : "Modify Crop Box",
-            this.rectBefore, this.allowGrowingBefore);
+            rectBefore, allowGrowingBefore);
 
         view.repaint();
     }
@@ -582,7 +583,7 @@ public class CropTool extends DragTool {
         updateSizeSpinners(0, 0);
         Views.repaintActive();
         Views.setCursorForAll(Cursors.DEFAULT);
-        this.rectBefore = null;
+        rectBefore = null;
     }
 
     @Override
@@ -605,7 +606,7 @@ public class CropTool extends DragTool {
      * Clears the crop box as part of an undo/redo operation.
      */
     public void clearBoxForUndoRedo() {
-        this.cropBox = null;
+        cropBox = null;
         state = IDLE;
     }
 
@@ -613,7 +614,7 @@ public class CropTool extends DragTool {
         if (cropBox == null) {
             // restores the dismissed crop box
             PRectangle pRect = PRectangle.fromIm(imRect, view);
-            this.cropBox = new CropBox(pRect, view);
+            cropBox = new CropBox(pRect, view);
         } else {
             // changes the existing crop box
             cropBox.setImRect(imRect, view);
@@ -625,7 +626,7 @@ public class CropTool extends DragTool {
      * Updates crop tool UI elements based on the current cropBox and tool state.
      */
     public void updateUIFromState(View view) {
-        boolean hasBox = (this.cropBox != null);
+        boolean hasBox = (cropBox != null);
         setCropEnabled(hasBox);
 
         if (hasBox) {
@@ -640,8 +641,8 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void compReplaced(Composition newComp, boolean reloaded) {
-        if (reloaded) {
+    public void compReplaced(Composition newComp, CompositionReplacedContext context) {
+        if (context == CompositionReplacedContext.RELOAD) {
             reset();
         }
     }

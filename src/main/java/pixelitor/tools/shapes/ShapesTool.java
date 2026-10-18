@@ -26,6 +26,7 @@ import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.painters.AreaEffects;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -670,8 +671,8 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void compReplaced(Composition newComp, boolean reloaded) {
-        if (reloaded) {
+    public void compReplaced(Composition newComp, CompositionReplacedContext context) {
+        if (context == CompositionReplacedContext.RELOAD) {
             reset();
         }
         layerActivated(newComp.getActiveLayer());

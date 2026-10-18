@@ -249,14 +249,14 @@ class DrawMatcherLine2D implements ArgumentMatcher<List<Shape>> {
     private final List<Line2D> expectedShapes;
 
     public DrawMatcherLine2D(Line2D[] shapes) {
-        this.expectedShapes = Arrays.asList(shapes);
+        expectedShapes = Arrays.asList(shapes);
     }
 
     @Override
     public boolean matches(List<Shape> actualShapes) {
         for (int i = 0; i < actualShapes.size(); i++) {
             if (actualShapes.get(i) instanceof Line2D line) {
-                Line2D line2 = this.expectedShapes.get(i);
+                Line2D line2 = expectedShapes.get(i);
                 assertThat(line.getX1()).isCloseTo(line2.getX1(), within(TOLERANCE));
                 assertThat(line.getY1()).isCloseTo(line2.getY1(), within(TOLERANCE));
                 assertThat(line.getX2()).isCloseTo(line2.getX2(), within(TOLERANCE));

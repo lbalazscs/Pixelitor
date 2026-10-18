@@ -17,8 +17,9 @@
 
 package pixelitor.autopaint;
 
-import pixelitor.Composition;
-import pixelitor.colors.Colors;
+import com.jhlabs.math.Noise;
+import pixelitor.Canvas;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
@@ -26,17 +27,16 @@ import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.progress.ProgressHandler;
 import pixelitor.tools.AbstractBrushTool;
-import pixelitor.tools.Tool;
-import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 
 import java.awt.Color;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
-import static pixelitor.colors.FgBgColors.*;
+import static pixelitor.colors.FgBgColors.getBgColor;
+import static pixelitor.colors.FgBgColors.getFgColor;
 import static pixelitor.tools.Tools.*;
 import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.callInfo;
@@ -47,19 +47,19 @@ import static pixelitor.utils.Threads.calledOnEDT;
  */
 public class AutoPaint {
     public static final AbstractBrushTool[] SUPPORTED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};
-    private static Color origFg;
-    private static Color origBg;
-    private static final Lazy<AutoPaintPanel> CONFIG_PANEL_FACTORY = Lazy.of(AutoPaintPanel::new);
+    private static final Lazy<AutoPaintPanel> CONFIG_PANEL = Lazy.of(AutoPaintPanel::new);
+    private static final long MIN_REPAINT_INTERVAL_NANOS = 30_000_000L; // ~30 fps
+    public static final String NAME = i18n("auto_paint");
 
     private AutoPaint() {
         // utility class, no instantiation
     }
 
     public static void showDialog(Drawable dr) {
-        var configPanel = CONFIG_PANEL_FACTORY.get();
+        var configPanel = CONFIG_PANEL.get();
         new DialogBuilder()
             .validatedContent(configPanel)
-            .title(i18n("auto_paint"))
+            .title(NAME)
             .menuBar(new DialogMenuBar(configPanel))
             .okAction(() -> autoPaint(dr, configPanel.getSettings()))
             .show();
@@ -68,100 +68,80 @@ public class AutoPaint {
     private static void autoPaint(Drawable dr, AutoPaintSettings settings) {
         assert calledOnEDT() : callInfo();
 
+        // a run only ever changes the foreground color
+        Color origFg = getFgColor();
+        Color origBg = getBgColor();
         BufferedImage backupImage = dr.getSelectedSubImage(true);
         String statusBarMessage = "Auto Paint with " + settings.tool().getName();
         ProgressHandler progressHandler = Messages.startProgress(statusBarMessage, settings.numStrokes());
+        boolean completed = false;
 
         try {
-            rememberOriginalColors();
             History.setIgnoreEdits(true);
-
-            generateStrokes(settings, dr, progressHandler);
+            generateStrokes(settings, dr, progressHandler, origFg, origBg);
+            completed = true;
         } catch (Exception e) {
             Messages.showException(e);
         } finally {
             History.setIgnoreEdits(false);
-            History.add(new ImageEdit("Auto Paint", dr.getComp(),
+            History.add(new ImageEdit(NAME, dr.getComp(),
                 dr, backupImage, false));
-
+            setFgIfChanged(origFg);
             progressHandler.stopProgress();
+        }
+        if (completed) {
             Messages.showPlainStatusMessage(statusBarMessage + " finished.");
-
-            restoreOriginalColors(settings);
         }
     }
 
-    private static void generateStrokes(AutoPaintSettings settings,
-                                        Drawable dr,
-                                        ProgressHandler progressHandler) {
-        assert calledOnEDT() : callInfo();
-
-        var random = new SplittableRandom();
+    private static void generateStrokes(AutoPaintSettings settings, Drawable dr,
+                                        ProgressHandler progressHandler,
+                                        Color origFg, Color origBg) {
+        var rng = new SplittableRandom();
         var comp = dr.getComp();
+        var canvas = comp.getCanvas();
+        var view = comp.getView();
         int strokeCount = settings.numStrokes();
 
-        for (int i = 0; i < strokeCount; i++) {
-            progressHandler.updateProgress(i);
+        boolean dynamicColors = settings.colorMode() != ColorMode.FOREGROUND;
 
-            generateSingleStroke(dr, settings, comp, random);
-            comp.getView().paintImmediately();
+        if (settings.strokeDirection() == StrokeDirection.NOISE) {
+            Noise.reseed(System.nanoTime());
         }
+
+        long lastPaint = System.nanoTime();
+        for (int i = 0; i < strokeCount; i++) {
+            if (dynamicColors) {
+                setFgIfChanged(settings.colorMode().pickStrokeColor(origFg, origBg, rng));
+            }
+            generateSingleStroke(dr, settings, canvas, rng);
+
+            long now = System.nanoTime();
+            if (now - lastPaint >= MIN_REPAINT_INTERVAL_NANOS) {
+                progressHandler.updateProgress(i + 1);
+                view.paintImmediately();
+                lastPaint = System.nanoTime();
+            }
+        }
+        view.paintImmediately();
     }
 
     private static void generateSingleStroke(Drawable dr,
                                              AutoPaintSettings settings,
-                                             Composition comp,
-                                             SplittableRandom rand) {
-        assert calledOnEDT() : callInfo();
-
-        setColors(settings, rand);
-        PPoint start = comp.genRandomPointInCanvas();
-        PPoint end = settings.genRandomEndPoint(start, comp, rand);
-        Path2D strokePath = createStrokePath(start, end, settings, rand);
-
-        settings.tool().trace(strokePath, dr);
+                                             Canvas canvas,
+                                             RandomGenerator rng) {
+        settings.tool().trace(settings.createRandomStrokePath(canvas, rng), dr);
     }
 
-    private static void setColors(AutoPaintSettings settings, SplittableRandom rand) {
-        if (settings.colorMode() == ColorMode.RANDOM) {
-            randomizeColors();
-        } else if (settings.colorMode() == ColorMode.INTERPOLATED) {
-            setFgColor(Colors.interpolateRgb(origFg, origBg, rand.nextDouble()));
+    private static void setFgIfChanged(Color color) {
+        if (!color.equals(getFgColor())) {
+            // changes the foreground color without affecting the color history
+            FgBgColors.setFgColorNoHistory(color);
         }
     }
 
-    private static Path2D createStrokePath(PPoint start, PPoint end, AutoPaintSettings settings, SplittableRandom rand) {
-        Path2D path = new Path2D.Double();
-        path.moveTo(start.getImX(), start.getImY());
-
-        double controlX = (start.getImX() + end.getImX()) / 2.0;
-        double controlY = (start.getImY() + end.getImY()) / 2.0;
-
-        double maxCurvature = settings.maxCurvature();
-        if (maxCurvature > 0) {
-            double maxShift = start.imDist(end) * maxCurvature;
-            controlX += (rand.nextDouble() - 0.5) * maxShift;
-            controlY += (rand.nextDouble() - 0.5) * maxShift;
-        }
-
-        path.quadTo(controlX, controlY, end.getImX(), end.getImY());
-        return path;
-    }
-
-    static boolean useColors(Tool selectedTool) {
+    // whether the given tool uses the global foreground color
+    public static boolean toolUsesColors(AbstractBrushTool selectedTool) {
         return selectedTool == BRUSH;
-    }
-
-    private static void rememberOriginalColors() {
-        origFg = getFgColor();
-        origBg = getBgColor();
-    }
-
-    private static void restoreOriginalColors(AutoPaintSettings settings) {
-        // if colors were changed, restore the original colors
-        if (settings.colorMode().changesColors()) {
-            setFgColor(origFg);
-            setBgColor(origBg);
-        }
     }
 }

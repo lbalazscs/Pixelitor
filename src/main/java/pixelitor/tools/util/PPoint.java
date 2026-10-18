@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -104,6 +104,10 @@ public class PPoint implements Debuggable {
         return new PPoint(coX, coY, imX, imY, view);
     }
 
+    public static PPoint fromIm(Point2D im, View view) {
+        return fromIm(im.getX(), im.getY(), view);
+    }
+
     public static PPoint lazyFromIm(double imX, double imY, View view) {
         return new LazyIm(view, imX, imY);
     }
@@ -128,7 +132,7 @@ public class PPoint implements Debuggable {
     }
 
     /**
-     * Returns the squared distance in image space
+     * Returns the squared distance in image space.
      */
     public double imDistSq(PPoint other) {
         double dx = getImX() - other.getImX();
@@ -137,14 +141,14 @@ public class PPoint implements Debuggable {
     }
 
     /**
-     * Returns the distance in image space
+     * Returns the distance in image space.
      */
     public double imDist(PPoint other) {
         return Math.sqrt(imDistSq(other));
     }
 
     /**
-     * Returns the squared distance in component space
+     * Returns the squared distance in component space.
      */
     public double coDistSq(PPoint other) {
         double dx = getCoX() - other.getCoX();
@@ -153,7 +157,7 @@ public class PPoint implements Debuggable {
     }
 
     /**
-     * Returns the distance in component space
+     * Returns the distance in component space.
      */
     public double coDist(PPoint other) {
         return Math.sqrt(coDistSq(other));

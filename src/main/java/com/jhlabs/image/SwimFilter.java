@@ -22,8 +22,6 @@ import com.jhlabs.math.Noise;
  * A filter which distorts an image as if it were underwater.
  */
 public class SwimFilter extends TransformFilter {
-    private final float scale;
-    private final float stretch;
     private final float amount;
     private final float time;
     private final float m00;
@@ -49,24 +47,22 @@ public class SwimFilter extends TransformFilter {
         super(filterName, edgeAction, interpolation);
 
         this.amount = amount;
-        this.scale = scale;
-        this.stretch = stretch;
         this.time = time;
 
         float cos = (float) Math.cos(angle);
         float sin = (float) Math.sin(angle);
-        this.m00 = cos;
-        this.m01 = sin;
-        this.m10 = -sin;
-        this.m11 = cos;
+        float vScale = scale * stretch;
+
+        this.m00 = cos / scale;
+        this.m01 = sin / scale;
+        this.m10 = -sin / vScale;
+        this.m11 = cos / vScale;
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
         float nx = m00 * x + m01 * y;
         float ny = m10 * x + m11 * y;
-        nx /= scale;
-        ny /= scale * stretch;
 
         float noise3x = Noise.noise3(nx + 0.5f, ny, time);
         float noise3y = Noise.noise3(nx, ny + 0.5f, time);

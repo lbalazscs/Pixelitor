@@ -21,6 +21,9 @@ import pixelitor.Views;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Point;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
@@ -63,23 +66,50 @@ public enum MouseZoomMethod {
         }
     }
 
-    private static void viewZoomed(View view, MouseWheelEvent e) {
-        if (e.getWheelRotation() < 0) { // up, away from the user
-            view.zoomIn(e.getPoint());
+    private static void viewZoomed(View view, MouseWheelEvent e, int steps) {
+        Point point = e.getPoint();
+        if (steps < 0) { // up, away from the user
+            for (int i = 0; i < -steps; i++) {
+                view.zoomIn(point);
+            }
         } else {  // down, towards the user
-            view.zoomOut(e.getPoint());
+            for (int i = 0; i < steps; i++) {
+                view.zoomOut(point);
+            }
         }
     }
 
-    private static void otherZoomed(MouseWheelEvent e) {
+    private static void otherZoomed(int steps) {
         View view = Views.getActive();
         if (view == null) {
             return; // all views are closed
         }
-        if (e.getWheelRotation() < 0) { // up, away from the user
-            view.zoomIn();
+        if (steps < 0) { // up, away from the user
+            for (int i = 0; i < -steps; i++) {
+                view.zoomIn();
+            }
         } else {  // down, towards the user
-            view.zoomOut();
+            for (int i = 0; i < steps; i++) {
+                view.zoomOut();
+            }
+        }
+    }
+
+    /**
+     * Forwards an unhandled mouse wheel event up the ancestor hierarchy to the
+     * nearest container that listens for wheel events (such as an enclosing JScrollPane).
+     */
+    private static void forwardToParent(Component source, MouseWheelEvent e) {
+        if (source == null) {
+            return;
+        }
+        Container parent = source.getParent();
+        while (parent != null && parent.getMouseWheelListeners().length == 0) {
+            parent = parent.getParent();
+        }
+        if (parent != null) {
+            parent.dispatchEvent(SwingUtilities.convertMouseEvent(source, e, parent));
+            e.consume();
         }
     }
 
@@ -112,17 +142,48 @@ public enum MouseZoomMethod {
         return displayName;
     }
 
-    private record ZoomListener(View view, boolean requiresCtrl) implements MouseWheelListener {
+    private static class ZoomListener implements MouseWheelListener {
+        private final View view;
+        private final boolean requiresCtrl;
+        private double rotationAccumulator = 0.0;
+
+        ZoomListener(View view, boolean requiresCtrl) {
+            this.view = view;
+            this.requiresCtrl = requiresCtrl;
+        }
+
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
             if (requiresCtrl && !e.isControlDown()) {
+                rotationAccumulator = 0.0;
+                Component source = (view != null) ? view : e.getComponent();
+                forwardToParent(source, e);
                 return;
             }
-            if (view != null) {
-                viewZoomed(view, e);
-            } else {
-                otherZoomed(e);
+
+            double rotation = e.getPreciseWheelRotation();
+            if (rotation == 0.0 && e.getWheelRotation() != 0) {
+                rotation = e.getWheelRotation();
             }
+
+            // reset partial ticks if the user reversed the scroll direction
+            if ((rotationAccumulator > 0 && rotation < 0) || (rotationAccumulator < 0 && rotation > 0)) {
+                rotationAccumulator = 0.0;
+            }
+
+            rotationAccumulator += rotation;
+            int steps = (int) rotationAccumulator;
+
+            if (steps != 0) {
+                rotationAccumulator -= steps;
+                if (view != null) {
+                    viewZoomed(view, e, steps);
+                } else {
+                    otherZoomed(steps);
+                }
+            }
+
+            e.consume();
         }
     }
 }

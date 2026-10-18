@@ -20,6 +20,7 @@ package pixelitor.tools.move;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
@@ -309,7 +310,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
     }
 
     @Override
-    public void compReplaced(Composition newComp, boolean reloaded) {
+    public void compReplaced(Composition newComp, CompositionReplacedContext context) {
         cancelTransform(true);
     }
 

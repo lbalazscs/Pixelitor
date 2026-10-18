@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.View;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
@@ -132,8 +133,8 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public void compReplaced(Composition newComp, boolean reloaded) {
-        if (reloaded) {
+    public void compReplaced(Composition newComp, CompositionReplacedContext context) {
+        if (context == CompositionReplacedContext.RELOAD) {
             reset();
         }
     }

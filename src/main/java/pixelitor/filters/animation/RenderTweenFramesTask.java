@@ -29,9 +29,12 @@ import pixelitor.utils.Threads;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import static java.lang.String.format;
 import static pixelitor.filters.FilterContext.TWEEN_PREVIEW;
+import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
@@ -44,7 +47,6 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     private final ProgressMonitor progressMonitor;
 
     private AnimationWriter animationWriter;
-    private boolean hasError = false;
 
     public RenderTweenFramesTask(TweenAnimation animation, Drawable drawable) {
         assert Threads.calledOnEDT() : Threads.callInfo();
@@ -54,7 +56,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         progressMonitor = GUIUtils.createPercentageProgressMonitor("Rendering Animation Frames");
         addPropertyChangeListener(this::handleProgressUpdate);
 
-        // call it while on the EDT
+        // must run on the EDT, so call it here
         drawable.startPreviewing();
     }
 
@@ -66,7 +68,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
     private void updateProgressMonitor(int progressPercent) {
         progressMonitor.setProgress(progressPercent);
-        progressMonitor.setNote(format("Completed %d%%.%n", progressPercent));
+        progressMonitor.setNote(format("Completed %d%%", progressPercent));
 
         if (progressMonitor.isCanceled()) {
             // allow the current frame to complete
@@ -75,14 +77,14 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     }
 
     @Override
-    protected Void doInBackground() {
-        assert calledOutsideEDT() : "on EDT";
+    protected Void doInBackground() throws Exception {
+        assert calledOutsideEDT() : callInfo();
 
         try {
             animationWriter = animation.createWriter();
             ParametrizedFilter filter = animation.getFilter();
-            int baseFrameCount = animation.getNumFrames();
-            int totalFrames = calcTotalFrameCount(baseFrameCount);
+            int totalFrames = TweenAnimation.totalFrameCount(
+                animation.getNumFrames(), animation.isPingPong());
 
             for (int frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
                 if (isCancelled()) {
@@ -90,15 +92,13 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
                 }
                 setProgress((int) ((100.0 * frameIndex) / totalFrames));
 
-                double interpolationTime = calcInterpolationTime(frameIndex, baseFrameCount);
-                BufferedImage image = renderSingleFrame(filter, interpolationTime);
+                double normalizedTime = animation.calcInterpolationTime(frameIndex);
+                BufferedImage image = renderSingleFrame(filter, normalizedTime);
                 animationWriter.addFrame(image);
             }
-        } catch (Exception e) {
-            hasError = true;
-            Messages.showExceptionOnEDT(e);
+        } finally {
+            setProgress(100);
         }
-        setProgress(100);
         return null;
     }
 
@@ -107,47 +107,28 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     protected void done() {
         drawable.stopPreviewing();
 
-        if (animationWriter != null) {
-            // treat errors as cancellation for cleanup purposes
-            boolean cancelled = isCancelled() || hasError;
-            if (cancelled) {
-                animationWriter.cancel();
-            } else {
+        try {
+            get(); // rethrows anything that escaped doInBackground
+            if (animationWriter != null) {
                 animationWriter.finish();
             }
+        } catch (CancellationException e) {
+            cancelWriter();
+        } catch (ExecutionException e) {
+            cancelWriter();
+            Messages.showException(e.getCause());
+        } catch (Exception e) { // InterruptedException or a failure in finish()
+            Messages.showException(e);
         }
     }
 
-    private int calcTotalFrameCount(int baseFrameCount) {
-        // for a ping-pong animation, we render forward then reverse,
-        // omitting the duplicated start and end frames for seamless looping
-        if (animation.isPingPong() && baseFrameCount > 2) {
-            return 2 * baseFrameCount - 2;
-        }
-        return baseFrameCount;
-    }
-
-    private static double calcInterpolationTime(int frameIndex, int baseFrameCount) {
-        if (baseFrameCount <= 1) {
-            return 0.0;
-        }
-
-        // time moves from 0.0 to 1.0 inclusive over baseFrameCount frames
-        double timeStep = 1.0 / (baseFrameCount - 1);
-
-        if (frameIndex < baseFrameCount) {
-            // forward animation phase
-            return frameIndex * timeStep;
-        } else {
-            // reverse animation phase (pong)
-
-            // Here the same frames are calculated again.
-            // They could be cached in an array of soft references
-            // or in the case of the file sequence output,
-            // the output files could be copied.
-            // However, "ping-pong" animations are probably uncommon.
-            int reverseIndex = 2 * (baseFrameCount - 1) - frameIndex;
-            return reverseIndex * timeStep;
+    private void cancelWriter() {
+        if (animationWriter != null) {
+            try {
+                animationWriter.cancel();
+            } catch (Exception e) {
+                Messages.showException(e);
+            }
         }
     }
 

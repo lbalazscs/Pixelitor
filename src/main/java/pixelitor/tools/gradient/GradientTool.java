@@ -22,6 +22,7 @@ import pixelitor.Views;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.BlendingModePanel;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DropDownSlider;
@@ -335,8 +336,8 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void compReplaced(Composition newComp, boolean reloaded) {
-        if (reloaded) {
+    public void compReplaced(Composition newComp, CompositionReplacedContext context) {
+        if (context == CompositionReplacedContext.RELOAD) {
             hideHandles(newComp, false);
         }
         layerActivated(newComp.getActiveLayer());

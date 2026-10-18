@@ -23,7 +23,6 @@ import pixelitor.layers.Drawable;
 
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
 import static pixelitor.filters.FilterContext.BATCH_AUTOMATE;
 
 /**
@@ -33,8 +32,13 @@ public class BatchFilterWizard extends Wizard {
     private Filter filter;
 
     public BatchFilterWizard(Drawable dr, String title) {
-        super(SELECT_FILTER_AND_DIRS, title,
+        super(title,
             "Start Processing", 600, 500, dr);
+    }
+
+    @Override
+    protected WizardPage createFirstPage() {
+        return new BatchFilterSelectionPage(this);
     }
 
     public Filter getFilter() {
@@ -50,16 +54,18 @@ public class BatchFilterWizard extends Wizard {
         var progressDialogTitle = "Batch Filter Progress";
 
         CompAction batchFilterAction = comp -> {
-            // since we are processing newly opened image files, we 
-            // assume that each has a single image layer (i.e. a Drawable)
-            comp.getActiveDrawable().startFilter(filter, BATCH_AUTOMATE);
+            // since we are processing newly opened image files,
+            // we assume that each has a single image layer
+            // TODO ensure that pxc files can't be opened in this wizard
+            Drawable compDr = comp.getActiveDrawable();
+            if (compDr == null) {
+                throw new IllegalStateException(
+                    "The active layer is not drawable in " + comp.getName());
+            }
+
+            compDr.startFilter(filter, BATCH_AUTOMATE);
             return CompletableFuture.completedFuture(comp);
         };
         new BatchProcessor(batchFilterAction, progressDialogTitle).processFilesAsync();
-    }
-
-    @Override
-    protected void performCleanup() {
-        // no cleanup needed
     }
 }

@@ -20,6 +20,7 @@ package pixelitor.compactions;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.CopyOptions;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
@@ -42,40 +43,44 @@ import static pixelitor.utils.Threads.*;
  * dimensions or maintain the aspect ratio while fitting within them.
  */
 public class Resize implements CompAction {
+    // in aspect-ratio mode these define only the target bounding box
     private final int targetWidth;
     private final int targetHeight;
-    private final boolean preserveAspectRatio;
+
+    public enum Mode {STRETCH, ASPECT_RATIO}
+
+    private final Mode mode;
 
     public Resize(int targetWidth, int targetHeight) {
-        this(targetWidth, targetHeight, false);
+        this(targetWidth, targetHeight, Mode.STRETCH);
     }
 
-    public Resize(int targetWidth, int targetHeight, boolean preserveAspectRatio) {
+    public Resize(int targetWidth, int targetHeight, Mode mode) {
         assert targetWidth > 0 : "targetWidth = " + targetWidth;
         assert targetHeight > 0 : "targetHeight = " + targetHeight;
 
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
-        this.preserveAspectRatio = preserveAspectRatio;
+        this.mode = mode;
     }
 
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
         Canvas srcCanvas = srcComp.getCanvas();
-        if (srcCanvas.hasImSize(targetWidth, targetHeight)) {
+        var newSize = calcNewCanvasSize(srcCanvas);
+
+        if (srcCanvas.hasImSize(newSize.width, newSize.height)) {
             // no resize needed
             return CompletableFuture.completedFuture(srcComp);
         }
-
-        var targetSize = calcTargetSize(srcCanvas);
 
         // The resizing runs outside the EDT to allow the progress bar animation
         // to update, and to enable the parallel resizing of multiple layers.
         var progressHandler = Messages.startProgress("<html>Resizing <b>" + srcComp.getName() + "</b>", -1);
         return CompletableFuture
             .supplyAsync(() -> srcComp.copy(CopyOptions.fullStateBackup(true, false)), onPool)
-            .thenCompose(newComp -> resizeLayersInParallel(newComp, targetSize))
-            .thenApplyAsync(newComp -> finishResize(srcComp, newComp, targetSize, progressHandler), onEDT)
+            .thenCompose(newComp -> resizeLayersInParallel(newComp, newSize))
+            .thenApplyAsync(newComp -> finishResize(srcComp, newComp, newSize, progressHandler), onEDT)
             .handle((newComp, ex) -> {
                 if (ex != null) {
                     progressHandler.stopProgressOnEDT();
@@ -85,8 +90,8 @@ public class Resize implements CompAction {
             });
     }
 
-    private Dimension calcTargetSize(Canvas srcCanvas) {
-        if (!preserveAspectRatio) {
+    private Dimension calcNewCanvasSize(Canvas srcCanvas) {
+        if (mode == Mode.STRETCH) {
             return new Dimension(targetWidth, targetHeight);
         }
 
@@ -113,13 +118,12 @@ public class Resize implements CompAction {
         assert view != null;
 
         Canvas newCanvas = newComp.getCanvas();
-        var canvasTransform = newCanvas.createImTransformToFit(newCanvasSize);
+        var imTransform = newCanvas.createImTransformToFit(newCanvasSize);
 
         newCanvas.resize(newCanvasSize.width, newCanvasSize.height, view, false);
-        newComp.imCoordsChanged(canvasTransform, false, view);
+        newComp.imCoordsChanged(imTransform, false, view);
 
-        History.add(new CompositionReplacedEdit("Resize",
-            view, srcComp, newComp, canvasTransform, false));
+        History.add(new CompositionReplacedEdit("Resize", view, srcComp, newComp, imTransform, CompositionReplacedContext.TRANSFORM));
         view.replaceComp(newComp);
 
         // the view was active when the resizing started, but since the
@@ -130,8 +134,8 @@ public class Resize implements CompAction {
 
         Guides srcGuides = srcComp.getGuides();
         if (srcGuides != null) {
-            // the guides don't need transforming,
-            // just a correct canvas size
+            // guides are stored as ratios of the canvas size, so they are only
+            // copied and their component-space lines regenerated for the new canvas
             Guides newGuides = srcGuides.copy(view);
             newComp.setGuides(newGuides);
         }
@@ -142,7 +146,7 @@ public class Resize implements CompAction {
         newComp.updateAllIconImages();
 
         newComp.update(true);
-        view.revalidate(); // make sure the scrollbars are OK
+        view.revalidate(); // so that the scrollbars reflect the new canvas size
 
         progressHandler.stopProgress();
         Messages.showStatusMessage(String.format("<b>%s</b> was resized to %dx%d pixels.",

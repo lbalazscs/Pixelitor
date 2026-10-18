@@ -17,10 +17,12 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.filters.util.ComplexBounds;
+
 import javax.swing.*;
 import java.awt.*;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 
@@ -28,71 +30,102 @@ import static javax.swing.BorderFactory.createTitledBorder;
  * The GUI component for a {@link ComplexNumberParam}.
  */
 public class ComplexNumberParamGUI extends JPanel implements ParamGUI {
-    public static final int DEFAULT_SIZE = 150;
-    private static final int DISPLAY_WIDTH = 150;
+    private static final int SPINNER_PANEL_WIDTH = 150;
+    private static final double SPINNER_STEP = 0.01;
+    private static final String NUMBER_FORMAT = "0.00";
 
     private final ComplexNumberParam model;
     private final ComplexNumberSelector selector;
-    private final JPanel displayPanel;
+    private final JPanel spinnerPanel;
     private final ResetButton resetButton;
-    private JLabel realLabel;
-    private JLabel imagLabel;
+    private final JSpinner reSpinner;
+    private final JSpinner imSpinner;
+
+    // prevents cyclic events between model updates and spinner change listeners
+    private boolean updatingFromModel = false;
 
     public ComplexNumberParamGUI(ComplexNumberParam model) {
         super(new BorderLayout(10, 0));
         setBorder(createTitledBorder(model.getName()));
 
-        this.model = Objects.requireNonNull(model);
+        this.model = model;
 
-        this.selector = new ComplexNumberSelector(model);
-        this.displayPanel = createDisplayPanel();
+        ComplexBounds bounds = model.getBounds();
+        selector = new ComplexNumberSelector(model);
+        reSpinner = createSpinner(bounds.minRe(), bounds.maxRe(), model::getRe, model::setRe);
+        imSpinner = createSpinner(bounds.minIm(), bounds.maxIm(), model::getIm, model::setIm);
+        spinnerPanel = createDisplayPanel();
 
         JPanel east = new JPanel();
-        east.add(displayPanel);
+        east.add(spinnerPanel);
         resetButton = new ResetButton(model);
         east.add(resetButton);
 
         add(selector, BorderLayout.CENTER);
         add(east, BorderLayout.EAST);
-
-        if (model.paramGUI == null) {
-            model.paramGUI = this;
-        }
-
-        updateDisplay();
     }
 
     private JPanel createDisplayPanel() {
-        JPanel panel = new JPanel(new GridLayout(2, 1));
-        panel.setPreferredSize(new Dimension(DISPLAY_WIDTH, DEFAULT_SIZE));
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setPreferredSize(new Dimension(SPINNER_PANEL_WIDTH, ComplexNumberSelector.DEFAULT_SIZE));
 
-        Font font = new Font(Font.MONOSPACED, Font.PLAIN, 20);
-
-        realLabel = new JLabel();
-        realLabel.setVerticalAlignment(SwingConstants.BOTTOM);
-        realLabel.setFont(font);
-        panel.add(realLabel);
-
-        imagLabel = new JLabel();
-        imagLabel.setVerticalAlignment(SwingConstants.TOP);
-        imagLabel.setFont(font);
-        panel.add(imagLabel);
+        addRow(panel, 0, "Re:", reSpinner, 0, 5);
+        addRow(panel, 1, "Im:", imSpinner, 5, 0);
 
         return panel;
     }
 
-    public void updateDisplay() {
-        updateDisplay(model.getRe(), model.getIm());
+    private static void addRow(JPanel panel, int row, String text, JSpinner spinner, int topInsets, int bottomInsets) {
+        var gbc = new GridBagConstraints();
+        gbc.weightx = 1.0;
+        gbc.gridy = row;
+        gbc.insets = new Insets(topInsets, 0, bottomInsets, 4);
+
+        var label = new JLabel(text);
+        label.setLabelFor(spinner);
+
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        panel.add(label, gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.insets.right = 0;
+        panel.add(spinner, gbc);
     }
 
-    public void updateDisplay(double real, double imag) {
-        realLabel.setText(String.format(Locale.ROOT, "re = %.2f", real));
-        imagLabel.setText(String.format(Locale.ROOT, "im = %.2f", imag));
+    private JSpinner createSpinner(double min, double max,
+                                   DoubleSupplier getter, DoubleConsumer setter) {
+        var spinnerModel = new SpinnerNumberModel(getter.getAsDouble(), min, max, SPINNER_STEP);
+        var spinner = new JSpinner(spinnerModel);
+        spinner.setEditor(new JSpinner.NumberEditor(spinner, NUMBER_FORMAT));
+
+        spinnerModel.addChangeListener(_ -> {
+            if (updatingFromModel) {
+                return;
+            }
+            double val = spinnerModel.getNumber().doubleValue();
+            if (Double.compare(val, getter.getAsDouble()) != 0) {
+                setter.accept(val);
+            }
+        });
+
+        return spinner;
+    }
+
+    private void updateSpinners() {
+        updatingFromModel = true;
+        try {
+            reSpinner.setValue(model.getRe());
+            imSpinner.setValue(model.getIm());
+        } finally {
+            updatingFromModel = false;
+        }
     }
 
     @Override
     public void updateGUI() {
-        updateDisplay();
+        updateSpinners();
         selector.repaint();
         resetButton.updateState();
     }
@@ -101,8 +134,8 @@ public class ComplexNumberParamGUI extends JPanel implements ParamGUI {
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         selector.setEnabled(enabled);
-        displayPanel.setEnabled(enabled);
-        for (Component c : displayPanel.getComponents()) {
+        spinnerPanel.setEnabled(enabled);
+        for (Component c : spinnerPanel.getComponents()) {
             c.setEnabled(enabled);
         }
     }
@@ -111,18 +144,12 @@ public class ComplexNumberParamGUI extends JPanel implements ParamGUI {
     public void setToolTip(String tip) {
         setToolTipText(tip);
         selector.setToolTipText(tip);
+        reSpinner.setToolTipText(tip);
+        imSpinner.setToolTipText(tip);
     }
 
     @Override
     public int getNumLayoutColumns() {
         return 1;
-    }
-
-    public ComplexNumberParam getModel() {
-        return model;
-    }
-
-    public ComplexNumberSelector getSelector() {
-        return selector;
     }
 }

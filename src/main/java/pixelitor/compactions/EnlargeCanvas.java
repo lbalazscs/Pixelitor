@@ -31,9 +31,8 @@ import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 
 /**
- * Enlarges the canvas for all layers of a composition
- * by adding empty space around the existing content
- * or by revealing previously hidden parts of layers.
+ * Enlarges the canvas of a composition. For each layer, the
+ * new area is either empty space or previously hidden content.
  * Conceptually it's the opposite of cropping.
  */
 public class EnlargeCanvas extends SimpleCompAction {
@@ -46,21 +45,21 @@ public class EnlargeCanvas extends SimpleCompAction {
         this(new Outsets(top, right, bottom, left));
     }
 
-    public EnlargeCanvas(Outsets outsets) {
+    public EnlargeCanvas(Outsets enlargement) {
         super(NAME, true);
 
-        this.enlargement = outsets;
+        this.enlargement = enlargement;
     }
 
     @Override
-    public boolean disableForSmartObjects() {
-        return true;
+    public boolean supportsSmartObjects() {
+        return false;
     }
 
     @Override
-    protected void updateCanvasSize(Canvas canvas, View view) {
-        enlargement.resizeCanvas(canvas, view);
-        newCanvasSize = canvas.getSize();
+    protected void updateCanvasSize(Canvas newCanvas, View view) {
+        enlargement.resizeCanvas(newCanvas, view);
+        newCanvasSize = newCanvas.getSize();
     }
 
     @Override
@@ -74,8 +73,8 @@ public class EnlargeCanvas extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createCanvasTransform(Canvas canvas) {
-        return enlargement.getTopLeftTranslation();
+    protected AffineTransform createImTransform(Canvas canvas) {
+        return enlargement.createTopLeftTranslation();
     }
 
     @Override
@@ -103,7 +102,7 @@ public class EnlargeCanvas extends SimpleCompAction {
             .title(NAME)
             .menuBar(new DialogMenuBar(panel))
             .content(panel)
-            .okAction(() -> panel.createCompAction(comp.getCanvas()).process(comp))
+            .okAction(() -> panel.createAction(comp.getCanvas()).process(comp))
             .show();
     }
 }

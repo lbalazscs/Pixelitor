@@ -51,6 +51,8 @@ public class FilterSearchPanel extends JPanel implements Validated {
     private JTextField searchTF;
     private JXList filterList;
     private HighlightListCellRenderer highlighter;
+
+    // only matters in the static dialog mode
     private boolean dialogCanceled;
 
     public FilterSearchPanel(FilterAction[] filters) {
@@ -76,8 +78,6 @@ public class FilterSearchPanel extends JPanel implements Validated {
         JLabel searchBuddy = new JLabel(searchIcon);
         searchBuddy.setForeground(Color.GRAY);
         BuddySupport.addLeft(searchBuddy, searchTF);
-
-        searchTF.requestFocusInWindow();
 
         // handle key events for navigation and search term updates
         searchTF.addKeyListener(new KeyAdapter() {

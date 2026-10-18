@@ -26,6 +26,8 @@ public class ImageMath {
     public static final float PI_F = (float) PI; // π as a float
     public static final float TAU_F = (float) TAU; // 2π as a float
 
+    public static final double HALF_PI = PI / 2.0;  // π/2
+    public static final double QUARTER_PI = PI / 4.0;  // π/2
     public static final double INV_PI = 1.0 / PI;   // 1/π
     public static final double INV_TAU = 1.0 / TAU; // 1/2π
 

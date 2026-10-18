@@ -265,6 +265,11 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
+    public void rotate(double angleRadians, boolean layerTransform) {
+        // do nothing for the group itself
+    }
+
+    @Override
     public void enlargeCanvas(Outsets out) {
         // do nothing for the group itself
     }

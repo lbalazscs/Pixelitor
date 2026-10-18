@@ -68,14 +68,14 @@ public class AddNoise extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        RandomGenerator rand = paramSet.getSRandomWithLastSeed();
+        RandomGenerator rng = paramSet.getSRandomWithLastSeed();
 
         return isGrayscale(src)
-            ? addNoiseToGray(src, dest, rand)
-            : addNoiseToRGB(src, dest, rand);
+            ? addNoiseToGray(src, dest, rng)
+            : addNoiseToRGB(src, dest, rng);
     }
 
-    private BufferedImage addNoiseToRGB(BufferedImage src, BufferedImage dest, RandomGenerator rand) {
+    private BufferedImage addNoiseToRGB(BufferedImage src, BufferedImage dest, RandomGenerator rng) {
         int[] srcPixels = ImageUtils.getPixels(src);
         int[] destPixels = ImageUtils.getPixels(dest);
         int numPixels = destPixels.length;
@@ -105,11 +105,11 @@ public class AddNoise extends ParametrizedFilter {
             int randomARGB = 0;
             if (coverageAnim) {
                 // generate random numbers for the discarded pixels as well
-                randomARGB = rand.nextInt();
+                randomARGB = rng.nextInt();
             }
 
             int srcARGB = srcPixels[i];
-            if (rand.nextDouble() > coverage) {
+            if (rng.nextDouble() > coverage) {
                 destPixels[i] = srcARGB;
                 continue;
             }
@@ -123,7 +123,7 @@ public class AddNoise extends ParametrizedFilter {
             if (!coverageAnim) {
                 // if coverage animation isn't a requirement, then it is faster
                 // to generate the random values only here, for the covered pixels
-                randomARGB = rand.nextInt();
+                randomARGB = rng.nextInt();
             }
 
             if (!fullSaturation) {
@@ -152,13 +152,13 @@ public class AddNoise extends ParametrizedFilter {
     }
 
     private BufferedImage addNoiseToGray(BufferedImage src, BufferedImage dest,
-                                         RandomGenerator rand) {
+                                         RandomGenerator rng) {
         byte[] srcPixels = ImageUtils.getGrayPixels(src);
         byte[] destPixels = ImageUtils.getGrayPixels(dest);
 
         // fill the dest with random values (as a consequence, even
         // the fast method will have smooth coverage animation)
-        rand.nextBytes(destPixels);
+        rng.nextBytes(destPixels);
 
         boolean fullOpacity = opacityParam.getValue() == 100;
         boolean fullCoverage = coverageParam.getValue() == 100;
@@ -183,7 +183,7 @@ public class AddNoise extends ParametrizedFilter {
             }
 
             byte srcPixel = srcPixels[i];
-            if (rand.nextDouble() > coverage) {
+            if (rng.nextDouble() > coverage) {
                 destPixels[i] = srcPixel;
                 continue;
             }

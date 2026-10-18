@@ -17,6 +17,7 @@
 
 package pixelitor.colors.palette;
 
+import pixelitor.colors.ColorHistory;
 import pixelitor.layers.LayerGUI;
 
 import javax.swing.*;
@@ -27,23 +28,33 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * A color swatch in a {@link PalettePanel}.
+ * A color swatch in a {@link PalettePanel} or in the {@link ColorHistory} dialog.
  */
-public class ColorSwatchButton extends JComponent {
+public final class ColorSwatchButton extends JComponent {
     public static final int SIZE = 32;
     private static final Dimension SIZE_DIM = new Dimension(SIZE, SIZE);
 
-    // tracks the last-clicked swatch across all instances
-    public static ColorSwatchButton lastClickedSwatch = null;
-
     private Color color;
     private boolean raised = true;
+
+    // clicked since the mark was last cleared
     private boolean marked = false;
 
-    public ColorSwatchButton(Color color, ColorSwatchClickHandler clickHandler) {
+    private final ColorSwatchClickHandler clickHandler;
+    private final SwatchSelection selection;
+
+    public ColorSwatchButton(Color color,
+                             ColorSwatchClickHandler clickHandler,
+                             SwatchSelection selection) {
+        assert color != null;
         assert clickHandler != null;
+        assert selection != null;
+
+        this.clickHandler = clickHandler;
+        this.selection = selection;
 
         setColor(color);
+        setOpaque(true);
 
         setPreferredSize(SIZE_DIM);
         setMinimumSize(SIZE_DIM);
@@ -57,7 +68,7 @@ public class ColorSwatchButton extends JComponent {
                 } else {
                     // regular click marks the swatch and triggers the click action
                     marked = true;
-                    performClickAction(e, clickHandler);
+                    performClickAction(e);
                 }
                 raised = false;
                 repaint();
@@ -71,42 +82,49 @@ public class ColorSwatchButton extends JComponent {
         });
     }
 
-    private void performClickAction(MouseEvent e, ColorSwatchClickHandler clickHandler) {
-        ColorSwatchButton previouslyClicked = lastClickedSwatch;
-        lastClickedSwatch = this;
-        if (previouslyClicked != null) {
-            previouslyClicked.repaint();
-        }
+    private void performClickAction(MouseEvent e) {
+        // Select before running the handler: the handler can cause the
+        // container to be rebuilt (for example by changing the color
+        // history), discarding this swatch. Selecting beforehand allows
+        // the container to preserve the selection across the rebuild.
+        // Selecting afterwards would select a swatch that is already gone.
+        selection.select(this);
 
-        clickHandler.handle(this.color, e);
+        clickHandler.handle(color, e);
+    }
+
+    public Color getColor() {
+        return color;
     }
 
     public void setColor(Color color) {
+        assert color != null;
         this.color = color;
-        setBackground(color);
-        setForeground(color);
         marked = false;
+        repaint();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        int w = getWidth();
+        int h = getHeight();
         g.setColor(color);
-        g.fill3DRect(0, 0, SIZE, SIZE, raised);
-        if (this == lastClickedSwatch) {
-            paintSelectionBorder(g);
+        g.fill3DRect(0, 0, w, h, raised);
+        if (selection.isSelected(this)) {
+            paintSelectionBorder(g, w, h);
         }
         if (marked) {
             paintMark(g);
         }
     }
 
-    private void paintSelectionBorder(Graphics g) {
-        g.draw3DRect(1, 1, SIZE - 3, SIZE - 3, raised);
-        g.draw3DRect(2, 2, SIZE - 5, SIZE - 5, raised);
+    private void paintSelectionBorder(Graphics g, int w, int h) {
+        g.draw3DRect(1, 1, w - 3, h - 3, raised);
+        g.draw3DRect(2, 2, w - 5, h - 5, raised);
     }
 
+    // draws a small rectangle in the top-left corner
     private static void paintMark(Graphics g) {
-        // draws a small rectangle in the top-left corner
         g.setColor(LayerGUI.SELECTED_COLOR);
         g.fillRect(1, 1, 7, 7);
         g.setColor(LayerGUI.UNSELECTED_COLOR);

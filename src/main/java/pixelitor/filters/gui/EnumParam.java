@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import com.jhlabs.image.CellularFilter;
+import com.jhlabs.image.CellSearchFilter;
 
 import java.util.List;
 
@@ -43,11 +43,11 @@ public class EnumParam<E extends Enum<E>> extends ChoiceParam<E> {
         setPresetKey(presetKey);
     }
 
-    public static EnumParam<CellularFilter.GridType> forGridType(String name, RangeParam randomnessParam) {
-        var param = new EnumParam<>(name, CellularFilter.GridType.class);
+    public static EnumParam<CellSearchFilter.GridType> forGridType(String name, RangeParam randomnessParam) {
+        var param = new EnumParam<>(name, CellSearchFilter.GridType.class);
         // enable the randomness slider only if the grid type isn't "Fully Random"
         param.enableOtherWhen(randomnessParam, selected ->
-            selected != CellularFilter.GridType.RANDOM);
+            selected != CellSearchFilter.GridType.RANDOM);
         return param;
     }
 

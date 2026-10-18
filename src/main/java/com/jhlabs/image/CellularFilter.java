@@ -16,44 +16,13 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import com.jhlabs.math.Noise;
-import pixelitor.ThreadPool;
-import pixelitor.utils.CachedFloatRandom;
-
-import java.util.concurrent.Future;
-
 /**
  * A variant of Worley noise that calculates distances to the three
  * nearest points and uses a weighted combination of these distances.
  */
-public class CellularFilter extends WholeImageFilter {
-    private static final int POISSON_ARRAY_SIZE = 8192;
-
-    protected static final float ORIGIN_OFFSET = 1000f; // reduces artifacts around (0,0)
-
-    private final GridType gridType;
-
-    private final float scale;
-    private final float stretch;
+public class CellularFilter extends CellSearchFilter {
     private final Colormap colormap;
     private final float[] coefficients; // weights of F1, F2, F3
-
-    private final float m00;
-    private final float m01;
-    private final float m10;
-    private final float m11;
-
-    private static final ThreadLocal<Point[]> resultsTL = ThreadLocal.withInitial(() -> {
-        Point[] results = new Point[3];
-        for (int j = 0; j < results.length; j++) {
-            results[j] = new Point();
-        }
-        return results;
-    });
-
-    protected final float randomness;
-
-    private static final byte[] poisson = initPoisson();
 
     /**
      * Constructs a new {@code CellularFilter}.
@@ -79,341 +48,13 @@ public class CellularFilter extends WholeImageFilter {
                           float f1,
                           float f2,
                           float f3) {
-        super(filterName);
-        this.scale = scale;
-        this.stretch = stretch;
-        this.gridType = gridType;
-        this.randomness = randomness;
+        super(filterName, scale, stretch, angle, gridType, randomness);
+
         this.colormap = colormap;
         this.coefficients = new float[]{f1, f2, f3};
-
-        float cos = (float) Math.cos(angle);
-        float sin = (float) Math.sin(angle);
-        this.m00 = cos;
-        this.m01 = sin;
-        this.m10 = -sin;
-        this.m11 = cos;
     }
 
-    /**
-     * Creates a discretized approximation of the Poisson probability
-     * distribution. This array maps a uniformly distributed random
-     * index to a specific outcome, representing the number of events,
-     * enabling fast random sampling.
-     */
-    private static byte[] initPoisson() {
-        byte[] arr = new byte[POISSON_ARRAY_SIZE];
-        float total = 0; // the cumulative sum of probabilities
-        float mean = 2.5f; // the λ parameter of the Poisson distribution
-        float expMean = (float) Math.exp(-mean);
-        float meanPow = 1.0f;
-        float factorial = 1.0f;
-
-        for (int k = 0; k < 10; k++) {
-            if (k > 0) {
-                meanPow *= mean;
-                factorial *= k;
-            }
-
-            // the probability of an event occurring k times
-            float probability = meanPow * expMean / factorial;
-
-            int start = (int) (total * POISSON_ARRAY_SIZE);
-            total += probability;
-            int end = (int) (total * POISSON_ARRAY_SIZE);
-
-            end = Math.min(end, POISSON_ARRAY_SIZE);
-
-            for (int j = start; j < end; j++) {
-                arr[j] = (byte) k;
-            }
-        }
-        return arr;
-    }
-
-    public static class Point {
-        public float x, y;
-        public float distance;
-    }
-
-    /**
-     * The filter divides the image into a grid of cells.
-     * Within each cell, one or more feature points are generated.
-     * The different grid types define how these points are placed.
-     */
-    public enum GridType {
-        RANDOM("Fully Random") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                CachedFloatRandom random = randomTL.get();
-                setRandomSeed(random, cellX, cellY);
-                int randomIndex = random.nextInt() & 0x1F_FF;
-                int numPoints = poisson[randomIndex];
-                for (int i = 0; i < numPoints; i++) {
-                    float px = random.nextFloat();
-                    float py = random.nextFloat();
-                    keepNearest3(x, y, cellX, cellY, results, px, py, 1.0f);
-                }
-                return results[needed - 1].distance;
-            }
-        }, SQUARE("Squares") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                float px = 0.5f;
-                float py = 0.5f;
-                if (randomness != 0) {
-                    CachedFloatRandom random = randomTL.get();
-                    setRandomSeed(random, cellX, cellY);
-                    px += randomness * (random.nextFloat() - 0.5f);
-                    py += randomness * (random.nextFloat() - 0.5f);
-                }
-                keepNearest3(x, y, cellX, cellY, results, px, py, 1.0f);
-                return results[needed - 1].distance;
-            }
-        }, HEXAGONAL("Hexagons") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                float px = 0.75f;
-                float py = (cellX & 1) == 0 ? 0.0f : 0.5f;
-                evaluatePoint(x, y, cellX, cellY, results, randomness, px, py, 1.0f);
-                return results[needed - 1].distance;
-            }
-        }, OCTAGONAL("Octagons & Squares") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.207f, 0.207f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.707f, 0.707f, 1.6f);
-                return results[needed - 1].distance;
-            }
-        }, TRIANGULAR("Triangles") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                boolean evenY = (cellY & 1) == 0;
-                float px1 = evenY ? 0.25f : 0.75f;
-                float px2 = evenY ? 0.75f : 0.25f;
-                evaluatePoint(x, y, cellX, cellY, results, randomness, px1, 0.35f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, px2, 0.65f, 1.0f);
-                return results[needed - 1].distance;
-            }
-        }, CAIRO("Pentagons (Cairo)") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                // 4 points of a regular snub-square lattice (wallpaper group p4g),
-                // whose Voronoi cells form the Cairo pentagonal tiling.
-                // 0.31699 = (3 - sqrt(3)) / 4
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.31699f, 0.81699f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.68301f, 0.18301f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.81699f, 0.68301f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.18301f, 0.31699f, 1.0f);
-                return results[needed - 1].distance;
-            }
-        }, LIEB("Squares & Hexagons") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                // Lieb lattice: a square lattice with every fourth point removed
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.0f, 0.0f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.5f, 0.0f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.0f, 0.5f, 1.0f);
-                return results[needed - 1].distance;
-            }
-        }, PINWHEEL("Pinwheels") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                // four points related by 90° rotation around the cell center (wallpaper group p4)
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.70f, 0.58f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.42f, 0.70f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.30f, 0.42f, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.58f, 0.30f, 1.0f);
-                return results[needed - 1].distance;
-            }
-        }, ROSETTE("Rosettes") {
-            // offsets of 6 points on a ring of radius 0.3, rotated by 15°
-            private static final float[] RING = {
-                0.2898f, 0.0776f, 0.0776f, 0.2898f, -0.2121f, 0.2121f,
-                -0.2898f, -0.0776f, -0.0776f, -0.2898f, 0.2121f, -0.2121f
-            };
-
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                // a hub point surrounded by a ring of six points, giving flower-like clusters
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.5f, 0.5f, 1.0f);
-                for (int i = 0; i < RING.length; i += 2) {
-                    evaluatePoint(x, y, cellX, cellY, results, randomness,
-                        0.5f + RING[i], 0.5f + RING[i + 1], 1.0f);
-                }
-                return results[needed - 1].distance;
-            }
-        }, DIAGONALS("Alternating Diagonals") {
-            @Override
-            float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed) {
-                // point pairs on alternating diagonals in a checkerboard arrangement;
-                // gives a pattern of triangles and kites
-                boolean even = ((cellX + cellY) & 1) == 0;
-                float y1 = even ? 0.2f : 0.8f;
-                float y2 = even ? 0.8f : 0.2f;
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.2f, y1, 1.0f);
-                evaluatePoint(x, y, cellX, cellY, results, randomness, 0.8f, y2, 1.0f);
-                return results[needed - 1].distance;
-            }
-        };
-
-        private final String displayName;
-
-        static final ThreadLocal<CachedFloatRandom> randomTL = ThreadLocal.withInitial(CachedFloatRandom::new);
-
-        GridType(String displayName) {
-            this.displayName = displayName;
-        }
-
-        /**
-         * Checks a grid cell for a feature point and updates the list of nearest points.
-         * x/y are relative to the cell origin, cellX/cellY are absolute cell
-         * indices, and the return value is the current needed-th nearest distance.
-         */
-        abstract float checkCell(float x, float y, int cellX, int cellY, Point[] results, float randomness, int needed);
-
-        // maintains the result array such that it always contains
-        // the three closest points found so far, sorted by distance
-        static void keepNearest3(float x, float y, int cellX, int cellY, Point[] results, float px, float py, float weight) {
-            float dx = (x - px) * weight;
-            float dy = (y - py) * weight;
-
-            // the distance between the current point and the new feature point
-            float d = ImageMath.hypot(dx, dy);
-
-            if (d < results[0].distance) {
-                // closer than the current closest point (at index 0):
-                // shift 0->1, 1->2, and insert the new point at 0
-                Point p = results[2];
-                results[2] = results[1];
-                results[1] = results[0];
-                results[0] = p;
-                updatePoint(p, d, cellX + px, cellY + py);
-            } else if (d < results[1].distance) {
-                // closer than the second closest point:
-                // shifts 1->2, and inserts the new point at 1
-                Point p = results[2];
-                results[2] = results[1];
-                results[1] = p;
-                updatePoint(p, d, cellX + px, cellY + py);
-            } else if (d < results[2].distance) {
-                // replace the point at index 2 with the current point
-                updatePoint(results[2], d, cellX + px, cellY + py);
-            }
-        }
-
-        private static void updatePoint(Point p, float d, float x, float y) {
-            p.distance = d;
-            p.x = x;
-            p.y = y;
-        }
-
-        static void evaluatePoint(float x, float y, int cellX, int cellY, Point[] results, float randomness, float px, float py, float weight) {
-            if (randomness != 0) {
-                float origPx = px, origPy = py;
-                px += randomness * Noise.noise2(271 * (cellX + origPx), 271 * (cellY + origPy));
-                py += randomness * Noise.noise2(271 * (cellX + origPx) + 89, 271 * (cellY + origPy) + 137);
-            }
-            keepNearest3(x, y, cellX, cellY, results, px, py, weight);
-        }
-
-        static void setRandomSeed(CachedFloatRandom random, int cellX, int cellY) {
-            int seed = (571 * cellX + 23 * cellY) & 0x7F_FF_FF_FF;
-            if (seed == 0) {
-                seed = 1;
-            }
-            random.setSeed(seed);
-        }
-
-        @Override
-        public String toString() {
-            return displayName;
-        }
-    }
-
-    private float toNoiseX(int x, int y) {
-        return (m00 * x + m01 * y) / scale + ORIGIN_OFFSET;
-    }
-
-    private float toNoiseY(int x, int y) {
-        return (m10 * x + m11 * y) / (scale * stretch) + ORIGIN_OFFSET;
-    }
-
-    /**
-     * Returns the nearest feature points (a reused, thread-local array).
-     */
-    protected Point[] findNearestPoints(int x, int y, int needed) {
-        Point[] results = resultsTL.get();
-        searchNeighborhood(toNoiseX(x, y), toNoiseY(x, y), results, needed);
-        return results;
-    }
-
-    private void searchNeighborhood(float x, float y, Point[] results, int needed) {
-        for (Point result : results) {
-            result.distance = Float.POSITIVE_INFINITY;
-        }
-
-        // fast floor coordinates of the cell that correctly handles negative bounds
-        int ix = (int) x;
-        if (x < ix) {
-            ix--;
-        }
-
-        int iy = (int) y;
-        if (y < iy) {
-            iy--;
-        }
-
-        // the fractional part is the coordinate within the cell
-        float fx = x - ix;
-        float fy = y - iy;
-
-        // check the current cell
-        float d = gridType.checkCell(fx, fy, ix, iy, results, randomness, needed);
-
-        // check adjacent cells if necessary
-        if (d > fy) {
-            d = gridType.checkCell(fx, fy + 1, ix, iy - 1, results, randomness, needed);
-        }
-        if (d > 1 - fy) {
-            d = gridType.checkCell(fx, fy - 1, ix, iy + 1, results, randomness, needed);
-        }
-        if (d > fx) {
-            d = gridType.checkCell(fx + 1, fy, ix - 1, iy, results, randomness, needed);
-            if (d > fy) {
-                d = gridType.checkCell(fx + 1, fy + 1, ix - 1, iy - 1, results, randomness, needed);
-            }
-            if (d > 1 - fy) {
-                d = gridType.checkCell(fx + 1, fy - 1, ix - 1, iy + 1, results, randomness, needed);
-            }
-        }
-        if (d > 1 - fx) {
-            d = gridType.checkCell(fx - 1, fy, ix + 1, iy, results, randomness, needed);
-            if (d > fy) {
-                d = gridType.checkCell(fx - 1, fy + 1, ix + 1, iy - 1, results, randomness, needed);
-            }
-            if (d > 1 - fy) {
-                gridType.checkCell(fx - 1, fy - 1, ix + 1, iy + 1, results, randomness, needed);
-            }
-        }
-    }
-
-    public float evaluate(float x, float y, int needed) {
-        Point[] results = resultsTL.get();
-        searchNeighborhood(x, y, results, needed);
-
-        // at this point results is guaranteed to hold the needed smallest distances encountered,
-        // so we can now calculate the weighted combination of these distances
-        float f = coefficients[0] * results[0].distance;
-        if (needed > 1) {
-            f += coefficients[1] * results[1].distance;
-        }
-        if (needed > 2) {
-            f += coefficients[2] * results[2].distance;
-        }
-        return f;
-    }
-
+    @Override
     public int genPixel(int x, int y, int[] inPixels, int width, int height, int needed) {
         float nx = toNoiseX(x, y);
         float ny = toNoiseY(x, y);
@@ -427,46 +68,24 @@ public class CellularFilter extends WholeImageFilter {
         return 0xFF_00_00_00 | (v << 16) | (v << 8) | v;
     }
 
-    @Override
-    protected int[] filterPixels(int width, int height, int[] inPixels) {
-        pt = createProgressTracker(height);
-        int[] outPixels = new int[width * height];
-        int needed = requiredPoints();
+    // nx, ny are noise-space coordinates
+    private float evaluate(float nx, float ny, int needed) {
+        Point[] results = resultsTL.get();
+        searchNeighborhood(nx, ny, results, needed);
 
-        Future<?>[] rowFutures = new Future<?>[height];
-        for (int y = 0; y < height; y++) {
-            int finalY = y;
-            Runnable rowTask = () -> {
-                int index = width * finalY;
-                for (int x = 0; x < width; x++) {
-                    outPixels[index++] = genPixel(x, finalY, inPixels, width, height, needed);
-                }
-            };
-            rowFutures[y] = ThreadPool.submit(rowTask);
+        // at this point results is guaranteed to hold the needed smallest distances encountered,
+        // so we can now calculate the weighted combination of these distances
+        float f = coefficients[0] * results[0].distance;
+        if (needed > 1) {
+            f += coefficients[1] * results[1].distance;
         }
-        ThreadPool.waitFor(rowFutures, pt);
-
-        finishProgressTracker();
-
-        return outPixels;
+        if (needed > 2) {
+            f += coefficients[2] * results[2].distance;
+        }
+        return f;
     }
 
-    /**
-     * Maps a feature point from noise space back to image space (inverting
-     * scale, stretch, and rotation) and samples the source pixel.
-     * (this method is used only by the two subclasses)
-     */
-    protected int getSourcePixel(Point p, int[] inPixels, int width, int height) {
-        float dx = (p.x - ORIGIN_OFFSET) * scale;
-        float dy = (p.y - ORIGIN_OFFSET) * scale * stretch;
-        int srcx = ImageMath.clamp((int) (m00 * dx + m10 * dy), 0, width - 1);
-        int srcy = ImageMath.clamp((int) (m01 * dx + m11 * dy), 0, height - 1);
-        return inPixels[srcy * width + srcx];
-    }
-
-    /**
-     * How many of the nearest points (1 to 3) the current settings read.
-     */
+    @Override
     protected int requiredPoints() {
         if (coefficients[2] != 0) {
             return 3;

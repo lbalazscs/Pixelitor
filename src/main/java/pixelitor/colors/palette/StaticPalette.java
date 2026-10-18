@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,18 +21,16 @@ import java.awt.Color;
 import java.util.List;
 
 /**
- * A palette that displays a fixed, static list of colors.
+ * A palette that displays a fixed list of colors.
  * Resizing the panel will reflow the swatches into a new grid
  * but will not change the number or value of the colors.
  */
 public final class StaticPalette extends Palette {
     private final List<Color> colors;
-    private final String dialogTitle;
 
     public StaticPalette(String dialogTitle, List<Color> colors) {
-        this.dialogTitle = dialogTitle;
+        super(dialogTitle, PaletteConfig.NONE);
         this.colors = colors;
-        this.config = new PaletteConfig.NoOpPaletteConfig();
     }
 
     @Override
@@ -41,7 +39,7 @@ public final class StaticPalette extends Palette {
     }
 
     @Override
-    public String getDialogTitle() {
-        return dialogTitle;
+    protected String getResizeHelp() {
+        return "resize the dialog to reflow the colors";
     }
 }

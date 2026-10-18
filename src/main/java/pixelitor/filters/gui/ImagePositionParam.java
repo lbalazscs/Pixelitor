@@ -144,6 +144,9 @@ public class ImagePositionParam extends AbstractFilterParam {
     @Override
     public void loadStateFrom(String savedValue) {
         int commaIndex = savedValue.indexOf(',');
+        if (commaIndex == -1) {
+            throw new IllegalArgumentException("savedValue = " + savedValue);
+        }
         double newRelX = Double.parseDouble(savedValue.substring(0, commaIndex));
         double newRelY = Double.parseDouble(savedValue.substring(commaIndex + 1));
         setRelativePosition(newRelX, newRelY, true, false, false);

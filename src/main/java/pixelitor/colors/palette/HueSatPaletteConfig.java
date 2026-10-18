@@ -18,23 +18,25 @@
 package pixelitor.colors.palette;
 
 import javax.swing.*;
-import java.awt.GridBagLayout;
-
-import static pixelitor.colors.palette.PaletteConfig.addSliderRow;
 
 /**
  * Configuration for a palette with hue and saturation sliders.
  */
 public class HueSatPaletteConfig implements PaletteConfig {
-    private float saturation;
-    private JSlider satSlider;
-
     private float hueOffset;
-    private JSlider hueSlider;
+    private float saturation;
 
     public HueSatPaletteConfig(float hueOffset, float saturation) {
         this.hueOffset = hueOffset;
         this.saturation = saturation;
+    }
+
+    @Override
+    public JPanel createConfigPanel(Runnable onChange) {
+        return new SliderPanelBuilder(onChange)
+            .add("Hue:", "Rotate the hue of the colors", hueOffset, v -> hueOffset = v)
+            .add("Sat:", "Saturation of the colors", saturation, v -> saturation = v)
+            .build();
     }
 
     public float getHueOffset() {
@@ -43,33 +45,5 @@ public class HueSatPaletteConfig implements PaletteConfig {
 
     public float getSaturation() {
         return saturation;
-    }
-
-    @Override
-    public JPanel createConfigPanel(PalettePanel palettePanel) {
-        JPanel panel = new JPanel(new GridBagLayout());
-
-        satSlider = addSliderRow("Sat:", "Saturation of the colors",
-            _ -> saturationChanged(palettePanel), saturation, panel, 0);
-        hueSlider = addSliderRow("Hue:", "Rotate the hue of the colors",
-            _ -> hueChanged(palettePanel), hueOffset, panel, 1);
-
-        return panel;
-    }
-
-    private void saturationChanged(PalettePanel palettePanel) {
-        float oldSat = saturation;
-        saturation = satSlider.getValue() / 100.0f;
-        if (oldSat != saturation) {
-            palettePanel.onConfigChanged();
-        }
-    }
-
-    private void hueChanged(PalettePanel palettePanel) {
-        float oldHueOffset = hueOffset;
-        hueOffset = hueSlider.getValue() / 100.0f;
-        if (oldHueOffset != hueOffset) {
-            palettePanel.onConfigChanged();
-        }
     }
 }

@@ -740,7 +740,7 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void flip(FlipDirection direction, boolean layerTransform) {
-        AffineTransform flipTransform = direction.createImageTransform(getVisibleImage());
+        AffineTransform flipTransform = direction.createImTransform(getVisibleImage());
         int targetWidth = comp.getCanvasWidth();
         int targetHeight = comp.getCanvasHeight();
         if (imageTransformer == null) {
@@ -760,7 +760,7 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void rotate(QuadrantAngle angle, boolean layerTransform) {
-        AffineTransform rotation = angle.createImageTransform(getVisibleImage());
+        AffineTransform rotation = angle.createImTransform(getVisibleImage());
         int targetWidth = comp.getCanvasWidth();
         int targetHeight = comp.getCanvasHeight();
 
@@ -777,6 +777,11 @@ public class SmartObject extends CompositeLayer {
                 filter.getMask().rotate(angle, false);
             }
         }
+    }
+
+    @Override
+    public void rotate(double angleRadians, boolean layerTransform) {
+        throw new UnsupportedOperationException("not implemented yet");
     }
 
     @Override

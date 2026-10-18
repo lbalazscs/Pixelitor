@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,14 @@
 
 package pixelitor.menus.help;
 
+import com.bric.util.JVM;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.utils.MemoryInfo;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
+import java.awt.Toolkit;
 
 import static java.lang.String.format;
 
@@ -38,13 +40,33 @@ class SystemInfoPanel extends JPanel {
     }
 
     private void addSystemProperties() {
-        gbh.addTwoLabels("Java Version:", System.getProperty("java.version"));
-        gbh.addTwoLabels("Java VM:", System.getProperty("java.vm.name"));
-        gbh.addTwoLabels("Java vendor:", System.getProperty("java.vendor"));
-        gbh.addTwoLabels("OS:", System.getProperty("os.name"));
+        addProperty("Java Version:", "java.version");
+        addProperty("Java VM:", "java.vm.name");
+        addProperty("Java vendor:", "java.vendor");
+        addProperty("OS:", "os.name");
+
+        // rendering pipeline / acceleration
+        addProperty("OpenGL:", "sun.java2d.opengl");
+        addProperty("XRender:", "sun.java2d.xrender");
+        if (JVM.isWindows) {
+            addProperty("Direct3D:", "sun.java2d.d3d");
+            addProperty("No DirectDraw:", "sun.java2d.noddraw");
+        } else if (JVM.isMac) {
+            addProperty("Metal:", "sun.java2d.metal");
+        }
+
+        gbh.addTwoLabels("AWT Toolkit:",
+            Toolkit.getDefaultToolkit().getClass().getName());
 
         gbh.addTwoLabels("UI scaling:", format("%.2f",
             PixelitorWindow.get().getHiDPIScaling().getScaleY()));
+    }
+
+    private void addProperty(String label, String propName) {
+        String property = System.getProperty(propName);
+        if (property != null) {
+            gbh.addTwoLabels(label, property);
+        }
     }
 
     private void addMemoryProperties() {

@@ -72,7 +72,7 @@ public class Cubes extends ParametrizedFilter {
                 double cutRatio = 1.0 - (double) (i + 1) / (numCornerCuts + 1);
 
                 // alternate rotation for a carved effect (negative factor produces the 180° rotation)
-                this.cutScales[i] = (i % 2 == 0) ? -cutRatio : cutRatio;
+                cutScales[i] = (i % 2 == 0) ? -cutRatio : cutRatio;
             }
         }
 

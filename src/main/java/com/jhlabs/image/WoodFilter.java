@@ -23,10 +23,9 @@ import com.jhlabs.math.Noise;
  */
 public class WoodFilter extends PointFilter {
     private final float invScale;
-    private final float invScaleStretch;
     private final float rings;
     private final float turbulence;
-    private final float fibres;
+    private final float fibers;
     private final float gain;
     private final float m00;
     private final float m01;
@@ -43,26 +42,29 @@ public class WoodFilter extends PointFilter {
      * @param stretch    the stretch factor of the texture
      * @param angle      the angle of the texture
      * @param turbulence the turbulence of the texture (in the range [0, 1])
-     * @param fibres     the amount of fibres in the texture (in the range [0, 1])
+     * @param fibers     the amount of fibers in the texture (in the range [0, 1])
      * @param gain       the gain of the texture (in the range [0, 1])
      * @param colormap   the colormap to be used for the filter
      */
     public WoodFilter(String filterName, float rings, float scale, float stretch, float angle,
-                      float turbulence, float fibres, float gain, Colormap colormap) {
+                      float turbulence, float fibers, float gain, Colormap colormap) {
         super(filterName);
         this.rings = rings * 50.0f;
         this.invScale = 1.0f / scale;
-        this.invScaleStretch = 1.0f / (scale * stretch);
 
         float cos = (float) Math.cos(angle);
         float sin = (float) Math.sin(angle);
         this.m00 = cos;
         this.m01 = sin;
-        this.m10 = -sin;
-        this.m11 = cos;
+
+        // x-axis scaling can't be incorporated into m00 and m01, but
+        // y-scaling and stretching can be incorporated into m10 and m11
+        float invScaleStretch = 1.0f / (scale * stretch);
+        this.m10 = -sin * invScaleStretch;
+        this.m11 = cos * invScaleStretch;
 
         this.turbulence = turbulence * 0.1f;
-        this.fibres = fibres;
+        this.fibers = fibers;
         this.gain = gain;
         this.colormap = colormap;
     }
@@ -70,9 +72,8 @@ public class WoodFilter extends PointFilter {
     @Override
     public int processPixel(int x, int y, int rgb) {
         float projX = m00 * x + m01 * y;
-        float projY = m10 * x + m11 * y;
         float nx = projX * invScale;
-        float ny = projY * invScaleStretch;
+        float ny = m10 * x + m11 * y;
 
         float f = Noise.noise2(nx, ny);
         if (turbulence != 0.0f) {
@@ -84,8 +85,8 @@ public class WoodFilter extends PointFilter {
         f -= (int) f;
         f *= 1.0f - ImageMath.smoothStep(gain, 1.0f, f);
 
-        if (fibres != 0.0f) {
-            f += fibres * Noise.noise2(projX, ny * 50.0f);
+        if (fibers != 0.0f) {
+            f += fibers * Noise.noise2(projX, ny * 50.0f);
         }
 
         return colormap.getColor(f);

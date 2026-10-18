@@ -106,7 +106,7 @@ public class FractalTree extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        RandomGenerator rand = paramSet.getSRandomWithLastSeed();
+        RandomGenerator rng = paramSet.getSRandomWithLastSeed();
 
         defaultLength = src.getHeight() * zoom.getPercentage() / 100.0;
         double randPercent = randomness.getValue() / 100.0;
@@ -149,7 +149,7 @@ public class FractalTree extends ParametrizedFilter {
         }
 
         double initialCurvature = curvedness.getPercentage();
-        if (rand.nextBoolean()) {
+        if (rng.nextBoolean()) {
             initialCurvature = -initialCurvature;
         }
 
@@ -160,7 +160,7 @@ public class FractalTree extends ParametrizedFilter {
         pt = new StatusBarProgressTracker(NAME, drawTreeCalls);
 
         drawTree(g, src.getWidth() / 2.0, src.getHeight(),
-            270 + genAngleRandomness(rand), maxDepth, rand, initialCurvature);
+            270 + genAngleRandomness(rng), maxDepth, rng, initialCurvature);
 
         g.dispose();
         pt.finished();
@@ -183,7 +183,7 @@ public class FractalTree extends ParametrizedFilter {
      */
     private void drawTree(Graphics2D g, double startX, double startY,
                           double branchAngle, int depth,
-                          RandomGenerator rand, double curvature) {
+                          RandomGenerator rng, double curvature) {
         if (depth == 0) {
             return;
         }
@@ -197,7 +197,7 @@ public class FractalTree extends ParametrizedFilter {
 
         double angleRad = Math.toRadians(branchAngle);
 
-        double length = depth * genRandomLength(rand);
+        double length = depth * genRandomLength(rng);
         double endX = startX + FastMath.cos(angleRad) * length;
         double endY = startY + FastMath.sin(angleRad) * length;
 
@@ -219,20 +219,20 @@ public class FractalTree extends ParametrizedFilter {
 
         int split = angle.getValue();
 
-        double leftBranchAngle = branchAngle - split + genAngleRandomness(rand);
-        double rightBranchAngle = branchAngle + split + genAngleRandomness(rand);
+        double leftBranchAngle = branchAngle - split + genAngleRandomness(rng);
+        double rightBranchAngle = branchAngle + split + genAngleRandomness(rng);
 
         pt.unitDone();
 
         // randomize which branch is drawn first for a more natural look
-        if (rand.nextBoolean()) {
+        if (rng.nextBoolean()) {
             // left first
-            drawTree(g, endX, endY, leftBranchAngle, nextDepth, rand, curvature);
-            drawTree(g, endX, endY, rightBranchAngle, nextDepth, rand, curvature);
+            drawTree(g, endX, endY, leftBranchAngle, nextDepth, rng, curvature);
+            drawTree(g, endX, endY, rightBranchAngle, nextDepth, rng, curvature);
         } else {
             // right first
-            drawTree(g, endX, endY, rightBranchAngle, nextDepth, rand, curvature);
-            drawTree(g, endX, endY, leftBranchAngle, nextDepth, rand, curvature);
+            drawTree(g, endX, endY, rightBranchAngle, nextDepth, rng, curvature);
+            drawTree(g, endX, endY, leftBranchAngle, nextDepth, rng, curvature);
         }
     }
 
@@ -266,24 +266,24 @@ public class FractalTree extends ParametrizedFilter {
     /**
      * Generates a random angle deviation.
      */
-    private double genAngleRandomness(RandomGenerator rand) {
+    private double genAngleRandomness(RandomGenerator rng) {
         if (!hasRandomness) {
             return 0;
         }
 
-        return -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
+        return -angleDeviation + rng.nextDouble() * 2 * angleDeviation;
     }
 
     /**
      * Generates a random length for a branch segment.
      */
-    private double genRandomLength(RandomGenerator rand) {
+    private double genRandomLength(RandomGenerator rng) {
         if (!hasRandomness) {
             return defaultLength;
         }
 
         double minLength = defaultLength - lengthDeviation;
-        return (minLength + 2 * lengthDeviation * rand.nextDouble());
+        return (minLength + 2 * lengthDeviation * rng.nextDouble());
     }
 
     /**

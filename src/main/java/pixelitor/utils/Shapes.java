@@ -271,6 +271,10 @@ public class Shapes {
             ? path.getWindingRule()
             : shape.getPathIterator(null).getWindingRule();
 
+        return windingRuleToString(windingRule);
+    }
+
+    private static String windingRuleToString(int windingRule) {
         return switch (windingRule) {
             case Path2D.WIND_EVEN_ODD -> "evenodd";
             case Path2D.WIND_NON_ZERO -> "nonzero";
@@ -283,7 +287,8 @@ public class Shapes {
     }
 
     public static String debugPathIterator(PathIterator pathIterator) {
-        StringBuilder sb = new StringBuilder();
+        String windingRule = windingRuleToString(pathIterator.getWindingRule());
+        StringBuilder sb = new StringBuilder(windingRule + "\n");
         double[] coords = new double[6];
 
         while (!pathIterator.isDone()) {
@@ -810,5 +815,141 @@ public class Shapes {
             case SEG_CLOSE -> 0;
             default -> throw new IllegalArgumentException("Unknown segment type: " + segmentType);
         };
+    }
+
+    /**
+     * Simplifies a Path2D by removing collinear vertices (lossless run-length filtering).
+     */
+    public static Path2D removeCollinearVertices(Path2D path) {
+        if (path == null) {
+            return null;
+        }
+
+        // Preserve winding rule and coordinate precision (float vs double)
+        Path2D result = (path instanceof Path2D.Float)
+            ? new Path2D.Float(path.getWindingRule())
+            : new Path2D.Double(path.getWindingRule());
+
+        PathIterator pi = path.getPathIterator(null);
+        double[] coords = new double[6];
+
+        double startX = 0, startY = 0;     // start of current subpath
+        double lastX = 0, lastY = 0;       // last vertex emitted to result
+        double pendingX = 0, pendingY = 0; // candidate vertex waiting for turn confirmation
+        boolean hasPending = false;
+
+        while (!pi.isDone()) {
+            int type = pi.currentSegment(coords);
+
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    // flush any pending vertex from an open preceding subpath
+                    if (hasPending) {
+                        result.lineTo(pendingX, pendingY);
+                        hasPending = false;
+                    }
+                    startX = coords[0];
+                    startY = coords[1];
+                    lastX = startX;
+                    lastY = startY;
+                    result.moveTo(startX, startY);
+                    break;
+
+                case PathIterator.SEG_LINETO:
+                    double x = coords[0];
+                    double y = coords[1];
+
+                    if (!hasPending) {
+                        // skip duplicate consecutive points at the start of a segment
+                        if (x != lastX || y != lastY) {
+                            pendingX = x;
+                            pendingY = y;
+                            hasPending = true;
+                        }
+                    } else {
+                        // skip duplicate consecutive points
+                        if (x == pendingX && y == pendingY) {
+                            break;
+                        }
+
+                        if (isCollinear(lastX, lastY, pendingX, pendingY, x, y)) {
+                            // collinear: discard intermediate vertex by advancing pending
+                            pendingX = x;
+                            pendingY = y;
+                        } else {
+                            // turn detected: commit pending vertex as a corner
+                            result.lineTo(pendingX, pendingY);
+                            lastX = pendingX;
+                            lastY = pendingY;
+                            pendingX = x;
+                            pendingY = y;
+                        }
+                    }
+                    break;
+
+                case PathIterator.SEG_CLOSE:
+                    if (hasPending) {
+                        // check if pending vertex is collinear on the return to startX, startY
+                        if (pendingX != startX || pendingY != startY) {
+                            if (!isCollinear(lastX, lastY, pendingX, pendingY, startX, startY)) {
+                                result.lineTo(pendingX, pendingY);
+                            }
+                        }
+                        hasPending = false;
+                    }
+                    result.closePath();
+                    lastX = startX;
+                    lastY = startY;
+                    break;
+
+                case PathIterator.SEG_QUADTO:
+                    if (hasPending) {
+                        result.lineTo(pendingX, pendingY);
+                        hasPending = false;
+                    }
+                    result.quadTo(coords[0], coords[1], coords[2], coords[3]);
+                    lastX = coords[2];
+                    lastY = coords[3];
+                    break;
+
+                case PathIterator.SEG_CUBICTO:
+                    if (hasPending) {
+                        result.lineTo(pendingX, pendingY);
+                        hasPending = false;
+                    }
+                    result.curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+                    lastX = coords[4];
+                    lastY = coords[5];
+                    break;
+            }
+
+            pi.next();
+        }
+
+        // flush any trailing pending vertex on an unclosed path
+        if (hasPending) {
+            result.lineTo(pendingX, pendingY);
+        }
+
+        return result;
+    }
+
+    /**
+     * Checks if P2 is collinear with and lies in the forward direction of P1 -> P3.
+     */
+    private static boolean isCollinear(double x1, double y1,
+                                       double x2, double y2,
+                                       double x3, double y3) {
+        double dx1 = x2 - x1;
+        double dy1 = y2 - y1;
+        double dx2 = x3 - x2;
+        double dy2 = y3 - y2;
+
+        // 2D cross product: cross == 0 means lines are parallel/collinear
+        double cross = dx1 * dy2 - dy1 * dx2;
+        // 2D dot product: dot > 0 guarantees same direction (rejects 180° reversals)
+        double dot = dx1 * dx2 + dy1 * dy2;
+
+        return Math.abs(cross) < 1e-9 && dot > 0;
     }
 }

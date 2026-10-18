@@ -87,14 +87,14 @@ public class TweenOutputSettingsPanel extends JPanel implements Validated {
         gbh.addLabelAndControlNoStretch("Number of Seconds:",
             wrapWithValidation(numSecondsTF, numSecondsValidator));
 
-        var docListener = new SimpleDocumentListener(_ -> updateCalculations());
+        var docListener = new SimpleDocumentListener(_ -> updateFrameInfo());
         numSecondsTF.getDocument().addDocumentListener(docListener);
 
         gbh.addLabelAndControlNoStretch("Frames per Second:",
             wrapWithValidation(fpsTF, fpsValidator));
         fpsTF.getDocument().addDocumentListener(docListener);
 
-        updateCalculations();
+        updateFrameInfo();
         gbh.addLabelAndControl("Number of Frames:", numFramesLabel);
     }
 
@@ -107,8 +107,8 @@ public class TweenOutputSettingsPanel extends JPanel implements Validated {
     }
 
     private void addPingPongSelector(GridBagHelper gbh) {
-        gbh.addLabelAndControl("Ping Pong:", pingPongCB);
-        pingPongCB.addActionListener(_ -> updateCalculations());
+        gbh.addLabelAndControl("Ping-pong:", pingPongCB);
+        pingPongCB.addActionListener(_ -> updateFrameInfo());
     }
 
     private void addFileSelector(GridBagHelper gbh) {
@@ -135,18 +135,20 @@ public class TweenOutputSettingsPanel extends JPanel implements Validated {
         }
     }
 
-    private void updateCalculations() {
+    private void updateFrameInfo() {
         try {
             double numSeconds = parseLocalizedDouble(numSecondsTF.getText().trim());
             double currentFps = parseLocalizedDouble(fpsTF.getText().trim());
 
-            // update instance fields only on successful parsing
             this.fps = currentFps;
-            this.numFrames = (int) (numSeconds * currentFps);
+            long roundedFrames = Math.round(numSeconds * currentFps);
+            this.numFrames = (int) Math.clamp(roundedFrames, 0, Integer.MAX_VALUE);
 
             numFramesLabel.setText(createNumFramesText());
         } catch (ParseException e) {
             // expected when the user is typing in the text fields
+            this.numFrames = 0;
+            this.fps = 0.0;
             numFramesLabel.setText("??");
         }
     }
@@ -154,9 +156,8 @@ public class TweenOutputSettingsPanel extends JPanel implements Validated {
     private String createNumFramesText() {
         String labelText = String.valueOf(numFrames);
 
-        if (pingPongCB.isSelected() && numFrames > 1) {
-            // for ping-pong, we have forward and reverse frames, minus two duplicate end frames
-            int totalFrames = 2 * numFrames - 2;
+        int totalFrames = TweenAnimation.totalFrameCount(numFrames, pingPongCB.isSelected());
+        if (totalFrames > numFrames && fps > 0) {
             double totalSeconds = totalFrames / fps;
             labelText += format(" (ping-pong: %d frames, %.2f s)", totalFrames, totalSeconds);
         }
@@ -165,15 +166,32 @@ public class TweenOutputSettingsPanel extends JPanel implements Validated {
 
     @Override
     public ValidationResult validateSettings() {
-        return numSecondsValidator.check(numSecondsTF)
+        ValidationResult result = numSecondsValidator.check(numSecondsTF)
             .and(fpsValidator.check(fpsTF))
             .and(fileNameValidator.check(fileNameTF));
+        if (result.isValid()) {
+            if (numFrames < 1) {
+                return ValidationResult.invalid(
+                    "The animation would contain no frames. " +
+                        "<br>Increase the duration or the frame rate.");
+            }
+            int totalFrames = TweenAnimation.totalFrameCount(numFrames, pingPongCB.isSelected());
+            if (totalFrames > TweenAnimation.MAX_FRAMES) {
+                return ValidationResult.invalid(format(
+                    "The animation would contain %,d frames. " +
+                        "<br>The maximum allowed is %,d frames.", totalFrames, TweenAnimation.MAX_FRAMES));
+            }
+        }
+        return result;
     }
 
-    public void configure(TweenAnimation animation) {
+    public void applyTo(TweenAnimation animation) {
         animation.setOutputType(getOutputType());
         animation.setNumFrames(numFrames);
-        animation.setMillisBetweenFrames((int) (1000.0 / fps));
+        int millisBetweenFrames = fps > 0
+            ? (int) Math.clamp(Math.round(1000.0 / fps), 1, Integer.MAX_VALUE)
+            : 1;
+        animation.setMillisBetweenFrames(millisBetweenFrames);
         animation.setInterpolation((TimeInterpolation) ipCB.getSelectedItem());
         animation.setPingPong(pingPongCB.isSelected());
 

@@ -43,7 +43,7 @@ public class JHWood extends ParametrizedFilter {
     private final RangeParam stretch = new RangeParam("Stretch", 0, 10, 50);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 0, 100);
-    private final RangeParam fibres = new RangeParam("Fibres", 0, 10, 100);
+    private final RangeParam fibers = new RangeParam("Fibers", 0, 10, 100);
     private final RangeParam gain = new RangeParam("Gain", 0, 80, 100);
 
     private final GradientParam gradient = new GradientParam("Colors",
@@ -57,6 +57,8 @@ public class JHWood extends ParametrizedFilter {
         super(false);
 
         scale.setPresetKey("Zoom");
+        fibers.setPresetKey("Fibres"); // originally it used British spelling
+
         initParams(
             angle,
             scale.withAdjustedRange(0.5),
@@ -64,7 +66,7 @@ public class JHWood extends ParametrizedFilter {
             gradient,
             rings,
             turbulence,
-            fibres,
+            fibers,
             gain
         ).withReseedNoiseAction();
 
@@ -79,7 +81,7 @@ public class JHWood extends ParametrizedFilter {
             stretch.getValueAsFloat() + 1.0f,
             (float) (angle.getValueInRadians() + Math.PI / 2),
             (float) turbulence.getPercentage(),
-            (float) fibres.getPercentage(),
+            (float) fibers.getPercentage(),
             (float) gain.getPercentage(),
             gradient.getColorMap()
         );

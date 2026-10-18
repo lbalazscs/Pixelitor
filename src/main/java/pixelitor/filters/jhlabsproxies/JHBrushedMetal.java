@@ -59,7 +59,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        RandomGenerator rand = paramSet.getGeneratorWithLastSeed("Xoroshiro128PlusPlus");
+        RandomGenerator rng = paramSet.getGeneratorWithLastSeed("Xoroshiro128PlusPlus");
 
         var filter = new BrushedMetalFilter(NAME,
             color.getColor().getRGB(),
@@ -67,7 +67,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
             (float) amount.getPercentage(),
             (float) shine.getPercentage(),
             (float) angle.getValueInRadians(),
-            rand
+            rng
         );
 
         return filter.filter(src, dest);

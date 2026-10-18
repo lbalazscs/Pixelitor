@@ -182,7 +182,7 @@ public class GradientFillLayer extends ContentLayer {
     @Override
     public void flip(FlipDirection direction, boolean layerTransform) {
         if (gradient != null) {
-            gradient.imTransform(direction.createCanvasTransform(comp.getCanvas()));
+            gradient.imTransform(direction.createImTransform(comp.getCanvas()));
             invalidateGradientCache();
         }
     }
@@ -190,7 +190,7 @@ public class GradientFillLayer extends ContentLayer {
     @Override
     public void rotate(QuadrantAngle angle, boolean layerTransform) {
         if (gradient != null) {
-            gradient.imTransform(angle.createCanvasTransform(comp.getCanvas()));
+            gradient.imTransform(angle.createImTransform(comp.getCanvas()));
             invalidateGradientCache();
         }
     }

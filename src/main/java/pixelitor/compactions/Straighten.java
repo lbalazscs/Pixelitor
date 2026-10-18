@@ -51,13 +51,13 @@ public class Straighten extends SimpleCompAction {
     }
 
     @Override
-    public boolean disableForSmartObjects() {
-        return true;
+    public boolean supportsSmartObjects() {
+        return false;
     }
 
     @Override
-    protected boolean disableForTextLayers() {
-        return true;
+    protected boolean supportsTextLayers() {
+        return false;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class Straighten extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createCanvasTransform(Canvas canvas) {
+    protected AffineTransform createImTransform(Canvas canvas) {
         var center = canvas.getImCenter();
         return AffineTransform.getRotateInstance(
             angleRadians, center.getX(), center.getY());
@@ -85,7 +85,8 @@ public class Straighten extends SimpleCompAction {
 
     @Override
     protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
-        // guides don't support arbitrary-angle guide transforms
+        // guides are horizontal or vertical, they can't represent
+        // an arbitrary rotation, so they are copied unchanged
         return srcGuides.copy(view);
     }
 

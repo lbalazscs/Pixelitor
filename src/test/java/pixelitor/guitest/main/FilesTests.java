@@ -206,15 +206,15 @@ public class FilesTests {
         dialog.textBox("searchTF").enterText(Rnd.chooseFrom(searchTexts));
         dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
             .pressKey(VK_DOWN).releaseKey(VK_DOWN);
-        dialog.button("ok").click(); // next
+        dialog.button("next").click();
         dialog.requireVisible();
 
         dialog.button(withText("Randomize Settings")).click();
-        dialog.button("ok").click(); // next
+        dialog.button("next").click();
         dialog.requireVisible();
 
         findButtonByText(dialog, "Randomize Settings").click();
-        dialog.button("ok").click(); // next
+        dialog.button("next").click();
         dialog.requireVisible();
 
         if (config.isQuick()) {
@@ -227,7 +227,7 @@ public class FilesTests {
             dialog.label("numFramesLabel").requireText("15");
         }
 
-        dialog.button("ok").click(); // render button
+        dialog.button("next").click(); // render button
         dialog.requireVisible(); // still visible because of the validation error
 
         app.findJOptionPane("Folder Not Empty")
@@ -305,10 +305,10 @@ public class FilesTests {
         dialog.textBox("searchTF").enterText("wav");
         dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
             .pressKey(VK_DOWN).releaseKey(VK_DOWN);
-        dialog.button("ok").click(); // next
+        dialog.button("next").click();
 
         findButtonByText(dialog, "Randomize Settings").click();
-        dialog.button("ok").click(); // start processing
+        dialog.button("next").click(); // start processing
         dialog.requireNotVisible();
 
         app.waitForProgressMonitorEnd();

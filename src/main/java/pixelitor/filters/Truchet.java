@@ -41,13 +41,11 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_180;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_270;
-import static pixelitor.compactions.QuadrantAngle.ANGLE_90;
+import static pixelitor.compactions.QuadrantAngle.*;
 import static pixelitor.filters.gui.TransparencyMode.MANUAL_ALPHA_ONLY;
 
 /**
- * Render Truchet tiles filter
+ * The render Truchet tiles filter.
  */
 public class Truchet extends ParametrizedFilter {
     @Serial
@@ -459,7 +457,7 @@ public class Truchet extends ParametrizedFilter {
         Graphics2D tg = tile.createGraphics();
 
         if (angle != null) {
-            tg.transform(angle.createTransform(2 * tileSize, 2 * tileSize));
+            tg.transform(angle.createImTransform(2 * tileSize, 2 * tileSize));
         }
 
         tg.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

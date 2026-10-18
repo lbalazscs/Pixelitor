@@ -20,6 +20,8 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.GlassTiles;
 
+import static com.jhlabs.image.ImageMath.*;
+import static java.lang.Math.PI;
 import static net.jafama.FastMath.tan;
 
 /**
@@ -45,15 +47,12 @@ public class TilesFilter extends RotatingEffectFilter {
     public static final int MODE_CAIRO = 10;
     public static final int MODE_FISH_SCALES = 11;
 
-    private static final double INV_PI = 1.0 / Math.PI;
-    private static final double HALF_PI = Math.PI / 2.0;
-    private static final double QUARTER_PI = Math.PI / 4.0;
-    private static final double SIXTH_PI = Math.PI / 6.0;
+    private static final double SIXTH_PI = PI / 6.0;
     private static final double SQRT3 = Math.sqrt(3.0);
     private static final double SQRT3_OVER_2 = SQRT3 / 2.0;
     private static final double INV_SQRT3 = 1.0 / SQRT3;
     private static final double INV_SQRT2 = 1.0 / Math.sqrt(2.0);
-    private static final double OCTAGON_CORNER_THRESHOLD = Math.PI * INV_SQRT2;
+    private static final double OCTAGON_CORNER_THRESHOLD = PI * INV_SQRT2;
     private static final double SQUARE_SCALE = 1.0 + INV_SQRT2;
 
     // chevron geometry, in plank units: horizontal extent of one
@@ -64,12 +63,12 @@ public class TilesFilter extends RotatingEffectFilter {
 
     // trihexagonal geometry, in the isotropic frame where the hexagon apothem is PI/2:
     // the hexagons and the triangles share the same edge length
-    private static final double TRIHEX_EDGE = Math.PI / Math.sqrt(3.0);
+    private static final double TRIHEX_EDGE = PI / Math.sqrt(3.0);
     private static final double TRIHEX_PITCH_X = 2.0 * TRIHEX_EDGE;
-    private static final double TRIHEX_PITCH_Y = 2.0 * Math.PI;
+    private static final double TRIHEX_PITCH_Y = 2.0 * PI;
     // triangle centroid offsets from the center of the neighboring hexagon
-    private static final double TRIHEX_TRI_NEAR_Y = Math.PI / 3.0;
-    private static final double TRIHEX_TRI_FAR_Y = 2.0 * Math.PI / 3.0;
+    private static final double TRIHEX_TRI_NEAR_Y = PI / 3.0;
+    private static final double TRIHEX_TRI_FAR_Y = 2.0 * PI / 3.0;
 
     // Cairo geometry, in the isotropic frame where the lattice squares (see cairo())
     // have size PI. The pentagon has four long sides of length PI / sqrt3 and a
@@ -82,7 +81,7 @@ public class TilesFilter extends RotatingEffectFilter {
     private static final double CAIRO_HALF_BASE = HALF_PI * (1.0 - INV_SQRT3);
     private static final double CAIRO_APEX_HEIGHT = HALF_PI * (1.0 + INV_SQRT3);
     // the centroid of the pentagon, used as the optical center of the lens
-    private static final double CAIRO_CENTER_Y = Math.PI * (5.0 + SQRT3) / 18.0;
+    private static final double CAIRO_CENTER_Y = PI * (5.0 + SQRT3) / 18.0;
 
     // The five faces in the order: base, right lower, right upper, left upper,
     // left lower. A point (px, py) is at the distance
@@ -92,19 +91,19 @@ public class TilesFilter extends RotatingEffectFilter {
     private static final double[] CAIRO_NORMAL_Y = {-1.0, -0.5, SQRT3_OVER_2, SQRT3_OVER_2, -0.5};
     private static final double[] CAIRO_OFFSET = {
         0.0,
-        0.25 * Math.PI * (SQRT3 - 1.0),
-        0.25 * Math.PI * (SQRT3 + 1.0),
-        0.25 * Math.PI * (SQRT3 + 1.0),
-        0.25 * Math.PI * (SQRT3 - 1.0)
+        0.25 * PI * (SQRT3 - 1.0),
+        0.25 * PI * (SQRT3 + 1.0),
+        0.25 * PI * (SQRT3 + 1.0),
+        0.25 * PI * (SQRT3 - 1.0)
     };
     // the distance of each face from its farthest vertex, that is,
     // the largest face distance that occurs inside the pentagon
     private static final double[] CAIRO_SPAN = {
         CAIRO_APEX_HEIGHT,
-        SQRT3_OVER_2 * Math.PI,
+        SQRT3_OVER_2 * PI,
         CAIRO_APEX_HEIGHT,
         CAIRO_APEX_HEIGHT,
-        SQRT3_OVER_2 * Math.PI
+        SQRT3_OVER_2 * PI
     };
     // the per-face lens terms at the center, which are subtracted
     // so that the displacement is zero there
@@ -153,13 +152,13 @@ public class TilesFilter extends RotatingEffectFilter {
 
         // the triangles/hexagons should be equilateral/regular when sizeX = sizeY
         this.freqX = switch (mode) {
-            case MODE_TRIANGLES -> (Math.PI * SQRT3_OVER_2) / sizeX;
-            case MODE_HEXAGONS, MODE_TRIHEXAGONAL -> (Math.PI / SQRT3_OVER_2) / sizeX;
-            default -> Math.PI / sizeX;
+            case MODE_TRIANGLES -> (PI * SQRT3_OVER_2) / sizeX;
+            case MODE_HEXAGONS, MODE_TRIHEXAGONAL -> (PI / SQRT3_OVER_2) / sizeX;
+            default -> PI / sizeX;
         };
 
         // the cubes use pointy-top hexagons, so here the rows are the compressed axis
-        this.freqY = (mode == MODE_CUBES) ? (Math.PI / SQRT3_OVER_2) / sizeY : Math.PI / sizeY;
+        this.freqY = (mode == MODE_CUBES) ? (PI / SQRT3_OVER_2) / sizeY : PI / sizeY;
 
         this.phaseOffsetX = shiftX - PIXEL_OFFSET * this.freqX;
         this.phaseOffsetY = shiftY - PIXEL_OFFSET * this.freqY;
@@ -194,10 +193,10 @@ public class TilesFilter extends RotatingEffectFilter {
 
     private void octagons(double x, double y, double phaseX, double phaseY, double[] out) {
         int col = nearestCell(phaseX);
-        double localX = phaseX - col * Math.PI;
+        double localX = phaseX - col * PI;
 
         int row = nearestCell(phaseY);
-        double localY = phaseY - row * Math.PI;
+        double localY = phaseY - row * PI;
 
         if (Math.abs(localX) + Math.abs(localY) > OCTAGON_CORNER_THRESHOLD) {
             // corner accent square (cabochon)
@@ -234,23 +233,23 @@ public class TilesFilter extends RotatingEffectFilter {
         double offset = ((row & 1) != 0) ? HALF_PI : 0.0;
         double uShifted = phaseX - offset;
         int col = nearestCell(uShifted);
-        double du = uShifted - col * Math.PI;
+        double du = uShifted - col * PI;
         return Math.clamp(du * (2.0 * INV_PI), -1.0, 1.0);
     }
 
     private void cubes(double x, double y, double phaseX, double phaseY, double[] out) {
         // pointy-top hexagon grid: odd rows are shifted horizontally by half a cell
         int row = nearestCell(phaseY);
-        double localY = phaseY - row * Math.PI;
+        double localY = phaseY - row * PI;
 
         double shiftedX = ((row & 1) != 0) ? phaseX - HALF_PI : phaseX;
         int col = nearestCell(shiftedX);
-        double localX = shiftedX - col * Math.PI;
+        double localX = shiftedX - col * PI;
 
         // check if the point falls in a slanted corner belonging to an adjacent row
-        if (Math.abs(localX) + 1.5 * Math.abs(localY) > Math.PI) {
+        if (Math.abs(localX) + 1.5 * Math.abs(localY) > PI) {
             localX += (localX > 0) ? -HALF_PI : HALF_PI;
-            localY += (localY > 0) ? -Math.PI : Math.PI;
+            localY += (localY > 0) ? -PI : PI;
         }
 
         // The hexagon is split into three rhombi by spokes going from the
@@ -389,15 +388,15 @@ public class TilesFilter extends RotatingEffectFilter {
 
     private void hexagons(double x, double y, double phaseX, double phaseY, double[] out) {
         int col = nearestCell(phaseX);
-        double localX = phaseX - col * Math.PI;
+        double localX = phaseX - col * PI;
 
         double shiftedY = ((col & 1) != 0) ? phaseY - HALF_PI : phaseY;
         int row = nearestCell(shiftedY);
-        double localY = shiftedY - row * Math.PI;
+        double localY = shiftedY - row * PI;
 
         // check if the point falls in a slanted corner belonging to an adjacent column
-        if (Math.abs(localY) + 1.5 * Math.abs(localX) > Math.PI) {
-            localX += (localX > 0) ? -Math.PI : Math.PI;
+        if (Math.abs(localY) + 1.5 * Math.abs(localX) > PI) {
+            localX += (localX > 0) ? -PI : PI;
             localY += (localY > 0) ? -HALF_PI : HALF_PI;
         }
 
@@ -426,7 +425,7 @@ public class TilesFilter extends RotatingEffectFilter {
         double ax = wrapToNearest(px, TRIHEX_PITCH_X);
         double ay = wrapToNearest(py, TRIHEX_PITCH_Y);
         double bx = wrapToNearest(px - TRIHEX_EDGE, TRIHEX_PITCH_X);
-        double by = wrapToNearest(py - Math.PI, TRIHEX_PITCH_Y);
+        double by = wrapToNearest(py - PI, TRIHEX_PITCH_Y);
 
         // position relative to the nearest hexagon center
         double localX, localY;
@@ -546,8 +545,8 @@ public class TilesFilter extends RotatingEffectFilter {
         // the squares are centered at the integer multiples of PI
         int col = nearestCell(phaseX);
         int row = nearestCell(phaseY);
-        double u = phaseX - col * Math.PI;
-        double v = phaseY - row * Math.PI;
+        double u = phaseX - col * PI;
+        double v = phaseY - row * PI;
 
         // "along" runs parallel to the base of the H in this square
         boolean horizontal = ((col + row) & 1) == 0;
@@ -570,8 +569,8 @@ public class TilesFilter extends RotatingEffectFilter {
                 upY = -side;
             }
             // move the origin to the center of the next square
-            relX += Math.PI * upX;
-            relY += Math.PI * upY;
+            relX += PI * upX;
+            relY += PI * upY;
         } else {
             // a trapezoid: the base part of a pentagon that has its base here
             int side = (across >= 0) ? 1 : -1;

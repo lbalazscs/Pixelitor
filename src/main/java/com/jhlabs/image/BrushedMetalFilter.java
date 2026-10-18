@@ -32,7 +32,7 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
     private final int color;
     private final float shine;
     private final float angle;
-    private final RandomGenerator random;
+    private final RandomGenerator rng;
 
     /**
      * Constructs a {@link BrushedMetalFilter}.
@@ -43,9 +43,9 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
      * @param amount     the amount of texture/noise to add (in the range [0, 1])
      * @param shine      the amount of shine to add (in the range [0, 1])
      * @param angle      the brush direction in radians
-     * @param random     the random number generator
+     * @param rng        the random number generator
      */
-    public BrushedMetalFilter(String filterName, int color, int radius, float amount, float shine, float angle, RandomGenerator random) {
+    public BrushedMetalFilter(String filterName, int color, int radius, float amount, float shine, float angle, RandomGenerator rng) {
         super(filterName);
 
         this.color = color;
@@ -53,7 +53,7 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
         this.amount = 255 * amount;
         this.shine = shine;
         this.angle = angle;
-        this.random = random;
+        this.rng = rng;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int n = (int) ((2 * random.nextFloat() - 1) * amount);
+                int n = (int) ((2 * rng.nextFloat() - 1) * amount);
                 inPixels[x] = a | (clamp(rBase[x] + n) << 16) | (clamp(gBase[x] + n) << 8) | clamp(bBase[x] + n);
             }
             if (radius != 0) {
@@ -179,7 +179,7 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
         // generate noise and apply O(1) 1D box blur row-by-row in rotated space
         for (int v = 0; v < hRot; v++) {
             for (int u = 0; u < wRot; u++) {
-                int n = (int) ((2 * random.nextFloat() - 1) * amount);
+                int n = (int) ((2 * rng.nextFloat() - 1) * amount);
                 inRow[u] = a | (clamp(rBase[u] + n) << 16) | (clamp(gBase[u] + n) << 8) | clamp(bBase[u] + n);
             }
             if (radius != 0) {

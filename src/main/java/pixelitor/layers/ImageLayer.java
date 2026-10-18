@@ -662,7 +662,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         BufferedImage dest = ImageUtils.createImageWithSameCM(image);
         Graphics2D g = dest.createGraphics();
 
-        g.setTransform(direction.createImageTransform(image));
+        g.setTransform(direction.createImTransform(image));
         g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
         g.dispose();
 
@@ -711,7 +711,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     private void rotateOnlyThisLayer(QuadrantAngle angle) {
         Point2D canvasCenter = comp.getCanvas().getImCenter();
         AffineTransform at = AffineTransform.getQuadrantRotateInstance(
-            angle.getAngleDegree() / 90, canvasCenter.getX(), canvasCenter.getY());
+            angle.getAngleDegrees() / 90, canvasCenter.getX(), canvasCenter.getY());
         // the transform must also include the layer's current translation
         at.translate(getTx(), getTy());
 
@@ -727,7 +727,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     private void rotateFullComp(QuadrantAngle angle) {
         int newTx;
         int newTy;
-        switch (angle.getAngleDegree()) {
+        switch (angle.getAngleDegrees()) {
             case 90 -> {
                 newTx = comp.getCanvasHeight() - image.getHeight() - getTy();
                 newTy = getTx();
@@ -740,7 +740,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
                 newTx = comp.getCanvasWidth() - image.getWidth() - getTx();
                 newTy = comp.getCanvasHeight() - image.getHeight() - getTy();
             }
-            default -> throw new IllegalStateException("angleDegree = " + angle.getAngleDegree());
+            default -> throw new IllegalStateException("angle = " + angle.getAngleDegrees());
         }
 
         BufferedImage dest = angle.createDestImage(image);
@@ -748,7 +748,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         Graphics2D g = dest.createGraphics();
         // nearest neighbor should be ok for 90, 180, 270 degrees
         g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        g.setTransform(angle.createImageTransform(image));
+        g.setTransform(angle.createImTransform(image));
         g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
         g.dispose();
 
@@ -1185,25 +1185,25 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
     @Override
     public void prepareForTransform() {
-        this.liveTransform = null;
+        liveTransform = null;
 
         int tx = getTx();
         int ty = getTy();
         if (tx == 0 && ty == 0) {
-            this.originalTransform = null;
+            originalTransform = null;
         } else {
-            this.originalTransform = AffineTransform.getTranslateInstance(tx, ty);
+            originalTransform = AffineTransform.getTranslateInstance(tx, ty);
         }
     }
 
     @Override
     public void imTransform(AffineTransform at) {
         if (originalTransform == null) {
-            this.liveTransform = at;
+            liveTransform = at;
         } else {
             // the given `at` transform is relative to the canvas origin
-            this.liveTransform = (AffineTransform) at.clone();
-            this.liveTransform.concatenate(this.originalTransform);
+            liveTransform = (AffineTransform) at.clone();
+            liveTransform.concatenate(originalTransform);
         }
 
         comp.invalidateImageCache();
@@ -1218,7 +1218,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         int origTy = getTy();
 
         // use the last known transform for the final render
-        AffineTransform finalTransform = this.liveTransform;
+        AffineTransform finalTransform = liveTransform;
 
         // if no transform was applied (e.g., user just clicked without dragging), do nothing
         if (finalTransform == null || finalTransform.isIdentity()) {
@@ -1235,7 +1235,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         // commit changes, clean up, and create history edit
         setImage(result.image);
         setTranslation(result.tx, result.ty);
-        this.liveTransform = null;
+        liveTransform = null;
 
         comp.invalidateImageCache();
         updateIconImage();
@@ -1292,7 +1292,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
     @Override
     public void cancelTransform() {
-        this.liveTransform = null;
+        liveTransform = null;
         update();
         updateIconImage();
     }

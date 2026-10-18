@@ -29,12 +29,17 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 
 import static java.lang.Integer.parseInt;
-import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
+import static pixelitor.gui.utils.TextFieldValidator.createIntRangeLayer;
 
 /**
  * Configuration panel for the "Auto Paint" dialog.
  */
 public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner {
+    public static final int MIN_STROKE_COUNT = 1;
+    public static final int MAX_STROKE_COUNT = 10_000;
+    public static final int MIN_STROKE_LENGTH = 1;
+    public static final int MAX_STROKE_LENGTH = 1_000;
+
     private static final String STROKE_LENGTH_TEXT = "Average Stroke Length";
     private static final String STROKE_COUNT_TEXT = "Number of Strokes";
 
@@ -64,33 +69,30 @@ public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner
         strokeCountTF = new JTextField("100");
         strokeCountTF.setName("strokeCountTF");
         gbh.addLabelAndControl(STROKE_COUNT_TEXT + ":",
-            createPositiveIntLayer(
-                strokeCountTF, STROKE_COUNT_TEXT));
+            createIntRangeLayer(strokeCountTF, STROKE_COUNT_TEXT,
+                MIN_STROKE_COUNT, MAX_STROKE_COUNT));
 
         strokeLengthTF = new JTextField("100");
         gbh.addLabelAndControl(STROKE_LENGTH_TEXT + ":",
-            createPositiveIntLayer(strokeLengthTF, STROKE_LENGTH_TEXT));
+            createIntRangeLayer(strokeLengthTF, STROKE_LENGTH_TEXT,
+                MIN_STROKE_LENGTH, MAX_STROKE_LENGTH));
 
         gbh.addParam(lengthVariation);
         gbh.addParam(curvature);
         gbh.addParam(colorMode, "colorsCB");
 
         // enable the color selector UI only if the tool supports it
-        toolsParam.enableOtherWhen(colorMode, AutoPaint::useColors);
+        toolsParam.enableOtherWhen(colorMode, AutoPaint::toolUsesColors);
     }
 
     /**
      * Creates an {@link AutoPaintSettings} object from the current UI state.
      */
     public AutoPaintSettings getSettings() {
-        ColorMode mode = ColorMode.FOREGROUND;
-        if (colorMode.isEnabled()) {
-            mode = colorMode.getSelected();
-        }
-
         return AutoPaintSettings.of(getSelectedTool(),
             getStrokeCount(), getStrokeLength(), strokeDirection.getSelected(),
-            mode, lengthVariation.getPercentage(), curvature.getPercentage());
+            colorMode.getSelected(),
+            lengthVariation.getPercentage(), curvature.getPercentage());
     }
 
     private AbstractBrushTool getSelectedTool() {
@@ -108,8 +110,10 @@ public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner
     @Override
     public ValidationResult validateSettings() {
         return ValidationResult.valid()
-            .requirePositiveInt(strokeCountTF.getText(), STROKE_COUNT_TEXT)
-            .requirePositiveInt(strokeLengthTF.getText(), STROKE_LENGTH_TEXT);
+            .requireIntRange(strokeCountTF.getText(), STROKE_COUNT_TEXT,
+                MIN_STROKE_COUNT, MAX_STROKE_COUNT)
+            .requireIntRange(strokeLengthTF.getText(), STROKE_LENGTH_TEXT,
+                MIN_STROKE_LENGTH, MAX_STROKE_LENGTH);
     }
 
     @Override
@@ -129,7 +133,7 @@ public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner
         curvature.saveStateTo(preset);
         colorMode.saveStateTo(preset);
 
-        if (AutoPaint.useColors(getSelectedTool())) {
+        if (AutoPaint.toolUsesColors(getSelectedTool())) {
             FgBgColors.saveStateTo(preset);
         }
     }
@@ -146,7 +150,7 @@ public class AutoPaintPanel extends JPanel implements Validated, DialogMenuOwner
         curvature.loadStateFrom(preset);
         colorMode.loadStateFrom(preset);
 
-        if (AutoPaint.useColors(getSelectedTool())) {
+        if (AutoPaint.toolUsesColors(getSelectedTool())) {
             FgBgColors.loadStateFrom(preset, true);
         }
     }

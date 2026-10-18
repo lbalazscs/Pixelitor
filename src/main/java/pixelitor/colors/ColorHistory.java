@@ -19,6 +19,7 @@ package pixelitor.colors;
 
 import pixelitor.colors.palette.ColorSwatchButton;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
+import pixelitor.colors.palette.SwatchSelection;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.utils.Messages;
 
@@ -26,6 +27,8 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.LinkedHashSet;
 import java.util.SequencedSet;
 
@@ -41,7 +44,8 @@ public class ColorHistory {
     private static final int MAX_HISTORY_CAPACITY = 200;
     private static final int SWATCHES_PER_ROW = 10;
 
-    private final SequencedSet<Color> colors;
+    // provides O(1) add/contains and maintains insertion order
+    private final SequencedSet<Color> colors = new LinkedHashSet<>();
 
     // track the active dialog and its content panel
     // to prevent duplication and allow dynamic updates
@@ -49,19 +53,24 @@ public class ColorHistory {
     private JPanel swatchPanel;
     private ColorSwatchClickHandler currentClickHandler;
 
+    // the selection of the history dialog; it is preserved by color
+    // across swatch updates and cleared when the dialog is closed,
+    // because this singleton must not retain any swatch of a closed dialog
+    private final SwatchSelection selection = new SwatchSelection();
+
     private ColorHistory() {
-        // provides O(1) add/contains and maintains insertion order
-        colors = new LinkedHashSet<>();
     }
 
     /**
      * Adds a color to the history, respecting capacity and avoiding duplicates.
      */
     private void add(Color newColor) {
-        colors.remove(newColor); // remove duplicates
-        boolean added = colors.add(newColor);
-        assert added;
+        assert newColor != null;
+        if (!colors.isEmpty() && newColor.equals(colors.getLast())) {
+            return; // already the most recent: nothing changes
+        }
 
+        colors.addLast(newColor); // moves it to the end if already present
         if (colors.size() > MAX_HISTORY_CAPACITY) {
             colors.removeFirst();
         }
@@ -78,8 +87,7 @@ public class ColorHistory {
      * Shows a modeless dialog with the color history.
      */
     public void showDialog(Window owner,
-                           ColorSwatchClickHandler clickHandler,
-                           boolean filterMode) {
+                           ColorSwatchClickHandler clickHandler) {
         assert owner != null;
         assert clickHandler != null;
 
@@ -87,24 +95,24 @@ public class ColorHistory {
         if (dialog != null && dialog.isVisible()) {
             // update the click handler just in case the context
             // has changed (e.g. Filter mode vs Standard mode)
-            if (this.currentClickHandler != clickHandler) {
-                this.currentClickHandler = clickHandler;
+            if (currentClickHandler != clickHandler) {
+                currentClickHandler = clickHandler;
                 updateSwatchPanel();
+                showHelpMessage();
             }
             dialog.toFront();
             return;
         }
 
-        this.currentClickHandler = clickHandler;
+        cleanup(); // drop leftovers of a dialog that was hidden without the callbacks running
 
-        swatchPanel = new JPanel();
+        currentClickHandler = clickHandler;
+
+        swatchPanel = new JPanel(new GridLayout(0, SWATCHES_PER_ROW, 2, 2));
         swatchPanel.setBorder(createEmptyBorder(2, 2, 2, 2));
         updateSwatchPanel(); // initially populate the panel
 
-        String helpText = filterMode
-            ? ColorSwatchClickHandler.FILTER_HTML_HELP
-            : ColorSwatchClickHandler.STANDARD_HTML_HELP;
-        Messages.showStatusMessage("Color History: " + helpText);
+        showHelpMessage();
 
         DialogBuilder builder = new DialogBuilder()
             .title("Color History")
@@ -113,40 +121,64 @@ public class ColorHistory {
             .modeless()
             .noOKButton()
             .noCancelButton()
-            // clean up the references if the user manually closes the dialog
-            .cancelAction(() -> {
-                dialog = null;
-                swatchPanel = null;
-            });
+            .cancelAction(this::cleanup);
 
         builder.show();
         dialog = builder.getDialog();
+        dialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                cleanup();
+            }
+        });
+    }
+
+    private void cleanup() {
+        selection.clear();
+        dialog = null;
+        swatchPanel = null;
+        currentClickHandler = null;
+    }
+
+    private void showHelpMessage() {
+        Messages.showStatusMessage("Color History: " + currentClickHandler.getHelpText());
     }
 
     /**
      * Clears and repopulates the swatch panel.
      */
     private void updateSwatchPanel() {
-        if (swatchPanel != null) {
-            swatchPanel.removeAll();
+        if (swatchPanel == null) {
+            return;
+        }
+        if (dialog != null && !dialog.isVisible()) {
+            cleanup();
+            return;
+        }
 
-            int numColors = colors.size();
-            int numRows = 1 + Math.max(0, numColors - 1) / SWATCHES_PER_ROW;
+        int oldRows = Math.ceilDiv(swatchPanel.getComponentCount(), SWATCHES_PER_ROW);
 
-            swatchPanel.setLayout(new GridLayout(numRows, SWATCHES_PER_ROW, 2, 2));
+        Color selectedColor = selection.getSelectedColor();
+        selection.clear();
+        swatchPanel.removeAll();
 
-            // iterate in reverse order so newest colors appear first at the top-left
-            for (Color color : colors.reversed()) {
-                swatchPanel.add(new ColorSwatchButton(color, currentClickHandler));
+        // iterate in reverse order so newest colors appear first at the top-left
+        for (Color color : colors.reversed()) {
+            var swatch = new ColorSwatchButton(color, currentClickHandler, selection);
+            swatchPanel.add(swatch);
+            if (color.equals(selectedColor)) {
+                selection.select(swatch);
             }
+        }
 
-            swatchPanel.revalidate();
-            swatchPanel.repaint();
+        swatchPanel.revalidate();
+        swatchPanel.repaint();
 
-            // expand or shrink the dialog height dynamically if it gains/loses rows
-            if (dialog != null && dialog.isVisible()) {
-                dialog.pack();
-            }
+        int newRows = Math.ceilDiv(swatchPanel.getComponentCount(), SWATCHES_PER_ROW);
+
+        // repack the dialog so that its height adjusts dynamically if rows were added
+        if (newRows != oldRows && dialog != null && dialog.isVisible()) {
+            dialog.pack();
         }
     }
 }

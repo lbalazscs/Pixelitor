@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.CopyOptions;
 import pixelitor.Views;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
@@ -115,7 +116,7 @@ public class Crop implements CompAction {
         }
 
         // the transform needed to map old image coordinates to new (cropped) coordinates
-        var canvasTransform = createCropTransform(cropRect);
+        var imTransform = createCropTransform(cropRect);
 
         View view = srcComp.getView();
 
@@ -148,7 +149,7 @@ public class Crop implements CompAction {
         // Translate the intersected selection, tool widgets, etc.,
         // into the coordinate system of the new, cropped image.
         // This must happen *after* the canvas size has changed!
-        croppedComp.imCoordsChanged(canvasTransform, false, view);
+        croppedComp.imCoordsChanged(imTransform, false, view);
 
         if (addHidingMask) {
             assert fromSelection;
@@ -156,7 +157,7 @@ public class Crop implements CompAction {
 
             // add a mask based on the original selection shape
             Shape visibleShape = srcComp.getSelectionShape();
-            visibleShape = canvasTransform.createTransformedShape(visibleShape);
+            visibleShape = imTransform.createTransformedShape(visibleShape);
             addHidingMaskFromShape(croppedComp, visibleShape, false);
         }
 
@@ -166,8 +167,8 @@ public class Crop implements CompAction {
         view.ensurePositiveLocation();
 
         String editName = addHidingMask ? "Crop and Hide" : "Crop";
-        CompositionReplacedEdit compReplacedEdit = new CompositionReplacedEdit(
-            editName, view, srcComp, croppedComp, canvasTransform, false);
+        var compReplacedEdit = new CompositionReplacedEdit(editName,
+            view, srcComp, croppedComp, imTransform, CompositionReplacedContext.TRANSFORM);
         if (cropBoxRestorationEdit != null) {
             // this crop originated from the crop tool
             History.add(new MultiEdit(editName, croppedComp,

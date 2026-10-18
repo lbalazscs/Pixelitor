@@ -37,7 +37,11 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
 
     /**
      * Creates a new {@link FilterGUI} panel for this GUI filter.
-     * Panel creation should trigger the initial preview based on default settings.
+     * <p>
+     * Panel creation does not trigger the initial preview; callers should
+     * trigger it (e.g. via {@link FilterGUI#startPreview(boolean)}) when
+     * the GUI is shown.
+     *
      * @param layer the layer to which this filter is applied
      * @param resetSettings if true, resets the GUI to default settings
      * @return a newly created FilterGUI instance configured with this filter

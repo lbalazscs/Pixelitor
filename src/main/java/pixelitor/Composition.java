@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Outsets;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -439,10 +440,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return canvas.intersect(shape);
     }
 
-    public PPoint genRandomPointInCanvas() {
-        return canvas.genRandomPoint(view);
-    }
-
     public boolean isDirty() {
         return dirty;
     }
@@ -600,7 +597,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert name != null;
         assert debugName == null;
 
-        this.debugName = name + " " + debugIdCounter.getAndIncrement();
+        debugName = name + " " + debugIdCounter.getAndIncrement();
     }
 
     /**
@@ -617,10 +614,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void setFile(File file) {
         this.file = file;
         if (file == null) {
-            this.fileTimestamp = 0;
+            fileTimestamp = 0;
             return;
         }
-        this.fileTimestamp = file.lastModified();
+        fileTimestamp = file.lastModified();
         setName(file.getName());
     }
 
@@ -852,12 +849,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void setActiveLayer(Layer layer, boolean addToHistory, String editName) {
         assert layer.getComp() == this && contains(layer);
 
-        if (layer == this.activeLayer) {
+        if (layer == activeLayer) {
             return;
         }
 
-        Layer prevActiveLayer = this.activeLayer;
-        this.activeLayer = layer;
+        Layer prevActiveLayer = activeLayer;
+        activeLayer = layer;
 
         if (isActive()) {
             Tools.editingTargetChanged(layer);
@@ -1797,7 +1794,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             .add(so);
 
         History.add(new CompositionReplacedEdit("Convert Visible to Smart Object",
-            view, this, newMainComp, null, false));
+            view, this, newMainComp, CompositionReplacedContext.PROGRAMMATIC));
         view.replaceComp(newMainComp);
     }
 

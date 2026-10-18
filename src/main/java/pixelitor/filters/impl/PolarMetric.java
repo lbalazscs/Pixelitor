@@ -22,16 +22,18 @@ import pixelitor.filters.gui.EnumParam;
 
 import java.util.function.DoubleBinaryOperator;
 
+import static com.jhlabs.image.ImageMath.SQRT_2;
+
 /**
  * A distance metric that gives the concentric patterns of radial filters a non-circular shape.
  */
 public enum PolarMetric {
-    CIRCLE("Circle", ImageMath::hypot, 1.0),                   // Euclidean (Minkowski p=2)
-    SQUIRCLE("Squircle", PolarMetric::calcSquircle, 1.0),      // Minkowski p=4
-    SQUARE("Square", PolarMetric::calcSquare, 1.0),            // Chebyshev (Minkowski p=∞)
-    DIAMOND("Diamond", PolarMetric::calcDiamond, ImageMath.SQRT_2),      // Manhattan (Minkowski p=1)
-    ASTROID("Astroid", PolarMetric::calcAstroid, 2.0),         // Minkowski p=2/3
-    STAR("Star", PolarMetric::calcStar, ImageMath.SQRT_2 * 2); // Minkowski p=1/2
+    CIRCLE("Circle", ImageMath::hypot, 1.0),
+    SQUIRCLE("Squircle", PolarMetric::calcSquircle, 1.0),
+    SQUARE("Square", PolarMetric::calcSquare, 1.0),
+    DIAMOND("Diamond", PolarMetric::calcDiamond, SQRT_2),
+    ASTROID("Astroid", PolarMetric::calcAstroid, 2.0),
+    STAR("Star", PolarMetric::calcStar, SQRT_2 * 2);
 
     private final String displayName;
     private final DoubleBinaryOperator distFunction;
@@ -77,25 +79,30 @@ public enum PolarMetric {
         return new EnumParam<>("Shape", PolarMetric.class);
     }
 
+    // Chebyshev (Minkowski p=∞)
     private static double calcSquare(double dx, double dy) {
         return Math.max(Math.abs(dx), Math.abs(dy));
     }
 
+    // Manhattan (Minkowski p=1)
     private static double calcDiamond(double dx, double dy) {
         return Math.abs(dx) + Math.abs(dy);
     }
 
+    // Minkowski p=4
     private static double calcSquircle(double dx, double dy) {
         double dx2 = dx * dx;
         double dy2 = dy * dy;
         return Math.sqrt(Math.sqrt(dx2 * dx2 + dy2 * dy2));
     }
 
+    // Minkowski p=2/3
     private static double calcAstroid(double dx, double dy) {
         double s = Math.cbrt(dx * dx) + Math.cbrt(dy * dy);
         return s * Math.sqrt(s);
     }
 
+    // Minkowski p=1/2
     private static double calcStar(double dx, double dy) {
         double s = Math.sqrt(Math.abs(dx)) + Math.sqrt(Math.abs(dy));
         return s * s;

@@ -71,6 +71,10 @@ public class ImageUtils {
     private static final double DEG_315_IN_RADIANS = Math.PI / 4;
     private static final Color CHECKERBOARD_GRAY = new Color(200, 200, 200);
 
+    private static final boolean X_RENDER_WORKAROUND = Toolkit.getDefaultToolkit().getClass().getName()
+        .equals("sun.awt.X11.XToolkit");
+    private static final double MAX_SAFE_SCALED_SIZE = 16_384;
+
     private static final GraphicsConfiguration graphicsConfig = GraphicsEnvironment
         .getLocalGraphicsEnvironment()
         .getDefaultScreenDevice()
@@ -1309,5 +1313,40 @@ public class ImageUtils {
                 pixels[i] = a | (r << 16) | (g << 8) | b;
             }
         }
+    }
+
+    /**
+     * Like g.drawImage(img, x, y, null), but if the image would be scaled to a
+     * huge size on the device, only the part inside the clip is drawn.
+     */
+    public static void drawImageVisiblePart(Graphics2D g, BufferedImage img, int x, int y) {
+        if (!X_RENDER_WORKAROUND) {
+            g.drawImage(img, x, y, null);
+            return;
+        }
+
+        AffineTransform at = g.getTransform();
+        double devW = img.getWidth() * Math.abs(at.getScaleX());
+        double devH = img.getHeight() * Math.abs(at.getScaleY());
+        Rectangle clip = g.getClipBounds();
+
+        if (clip == null || (devW <= MAX_SAFE_SCALED_SIZE && devH <= MAX_SAFE_SCALED_SIZE)) {
+            g.drawImage(img, x, y, null);
+            return;
+        }
+
+        int dx1 = Math.max(x, clip.x);
+        int dy1 = Math.max(y, clip.y);
+        int dx2 = Math.min(x + img.getWidth(), clip.x + clip.width);
+        int dy2 = Math.min(y + img.getHeight(), clip.y + clip.height);
+        if (dx1 >= dx2 || dy1 >= dy2) {
+            return; // nothing visible
+        }
+
+        // the sub-image shares the raster (no pixel copy) but is a different
+        // BufferedImage, so XRender sees source coordinates starting at 0
+        BufferedImage visible = img.getSubimage(dx1 - x, dy1 - y, dx2 - dx1, dy2 - dy1);
+        g.drawImage(visible, dx1, dy1, null);
+        visible.flush(); // drop any cached pixmap for this throwaway image
     }
 }

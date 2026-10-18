@@ -21,6 +21,7 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.PresetOwner;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -230,7 +231,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
      * Called when the active view's composition is replaced,
      * but not when switching to a different view.
      */
-    public void compReplaced(Composition newComp, boolean reloaded) {
+    public void compReplaced(Composition newComp, CompositionReplacedContext context) {
         // empty by default
     }
 
@@ -291,9 +292,9 @@ public abstract class Tool implements PresetOwner, Debuggable {
 
     /**
      * Called when the image-space coordinates of the pixels change
-     * (image resizing, cropping, canvas enlargement, flipping, etc.),
-     * and this change is described by the given {@link AffineTransform}.
-     *
+     * (image resizing, cropping, canvas enlargement, flipping, etc.).
+     * The given {@link AffineTransform} is in image space (relative to the canvas).
+     * <p>
      * The change in image coordinates implies a change in component coordinates,
      * therefore the component space coordinates also have to be recalculated.
      */

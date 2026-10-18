@@ -19,6 +19,8 @@ package pixelitor.tools;
 
 import com.bric.util.JVM;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
@@ -40,8 +42,10 @@ import javax.swing.*;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
@@ -239,8 +243,10 @@ public class CloneTool extends BlendingModeBrushTool {
 
     @Override
     protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint strokeStart) {
-        PPoint randomPoint = dr.getComp().genRandomPointInCanvas();
-        setCloningSource(randomPoint);
+        Composition comp = dr.getComp();
+        Canvas canvas = comp.getCanvas();
+        Point2D randomPoint = canvas.genRandomPoint(ThreadLocalRandom.current());
+        setCloningSource(PPoint.fromIm(randomPoint, comp.getView()));
 
         super.prepareProgrammaticBrushStroke(dr, strokeStart);
     }

@@ -65,6 +65,10 @@ public class FgBgColors {
         selector.setFgColor(c, notifyListeners);
     }
 
+    public static void setFgColorNoHistory(Color color) {
+        selector.setFgColor(color, true, false);
+    }
+
     public static void setBgColor(Color c) {
         selector.setBgColor(c, true);
     }

@@ -19,6 +19,7 @@ package pixelitor.colors.palette;
 
 import java.awt.Color;
 import java.awt.event.MouseEvent;
+import java.util.function.Consumer;
 
 import static javax.swing.SwingUtilities.isRightMouseButton;
 import static pixelitor.colors.FgBgColors.setBgColor;
@@ -34,6 +35,22 @@ public interface ColorSwatchClickHandler {
      */
     void handle(Color swatchColor, MouseEvent e);
 
+    /**
+     * Returns the HTML help text describing what clicking a swatch does.
+     */
+    default String getHelpText() {
+        // Ctrl-click is handled by the swatch itself and never reaches the handler
+        return getClickHelp() + ", <b>Ctrl-click</b> to clear the marking.";
+    }
+
+    /**
+     * Returns the HTML help text for the click action itself.
+     */
+    default String getClickHelp() {
+        return "<b>click</b> to set the foreground color, "
+            + "<b>right-click</b> to set the background color";
+    }
+
     // sets the foreground color for left-clicks and the background color for right-clicks
     ColorSwatchClickHandler STANDARD = (swatchColor, e) -> {
         if (isRightMouseButton(e)) {
@@ -43,10 +60,20 @@ public interface ColorSwatchClickHandler {
         }
     };
 
-    String STANDARD_HTML_HELP = "<b>click</b> to set the foreground color, "
-        + "<b>right-click</b> to set the background color, "
-        + "<b>Ctrl-click</b> to clear the marking.";
+    /**
+     * Creates a click handler for filter swatches.
+     */
+    static ColorSwatchClickHandler forFilter(Consumer<Color> colorSetter) {
+        return new ColorSwatchClickHandler() {
+            @Override
+            public void handle(Color swatchColor, MouseEvent e) {
+                colorSetter.accept(swatchColor);
+            }
 
-    String FILTER_HTML_HELP = "<b>click</b> to set the filter color, "
-        + "<b>Ctrl-click</b> to clear the marking.";
+            @Override
+            public String getClickHelp() {
+                return "<b>click</b> to set the filter color";
+            }
+        };
+    }
 }

@@ -19,6 +19,7 @@ package pixelitor.colors.palette;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A data model that provides a list of colors for a {@link PalettePanel}.
@@ -26,7 +27,13 @@ import java.util.List;
  * or static (a fixed list of colors is provided).
  */
 public abstract sealed class Palette permits DynamicPalette, StaticPalette {
-    protected PaletteConfig config;
+    private final String dialogTitle;
+    private final PaletteConfig config;
+
+    protected Palette(String dialogTitle, PaletteConfig config) {
+        this.dialogTitle = Objects.requireNonNull(dialogTitle);
+        this.config = Objects.requireNonNull(config);
+    }
 
     /**
      * Provides the list of colors for the palette.
@@ -35,25 +42,17 @@ public abstract sealed class Palette permits DynamicPalette, StaticPalette {
      */
     public abstract List<Color> getColors();
 
-    /**
-     * A hook for subclasses to react to configuration changes.
-     */
-    public void onConfigChanged() {
-    }
-
     public PaletteConfig getConfig() {
         return config;
     }
 
-    public abstract String getDialogTitle();
-
-    public String getHelpText() {
-        String resizeHelp = switch (this) {
-            case DynamicPalette _ -> "enlarge for more colors";
-            case StaticPalette _ -> "resize the dialog to reflow the colors";
-        };
-
-        return getDialogTitle() + ": " + resizeHelp + ", "
-            + ColorSwatchClickHandler.STANDARD_HTML_HELP;
+    public String getDialogTitle() {
+        return dialogTitle;
     }
+
+    public String getHelpText(ColorSwatchClickHandler clickHandler) {
+        return dialogTitle + ": " + getResizeHelp() + ", " + clickHandler.getHelpText();
+    }
+
+    protected abstract String getResizeHelp();
 }

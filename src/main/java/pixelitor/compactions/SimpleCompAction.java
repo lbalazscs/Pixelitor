@@ -20,13 +20,13 @@ package pixelitor.compactions;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.CopyOptions;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.AbstractViewEnabledAction;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.Layer;
 import pixelitor.layers.SmartObject;
 import pixelitor.layers.TextLayer;
 import pixelitor.selection.SelectionActions;
@@ -56,11 +56,11 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
 
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
-        if (disableForSmartObjects() && srcComp.containsLayerOfType(SmartObject.class)) {
+        if (!supportsSmartObjects() && srcComp.containsLayerOfType(SmartObject.class)) {
             Messages.showSmartObjectUnsupportedInfo(getText());
             return CompletableFuture.completedFuture(srcComp);
         }
-        if (disableForTextLayers() && srcComp.containsLayerOfType(TextLayer.class)) {
+        if (!supportsTextLayers() && srcComp.containsLayerOfType(TextLayer.class)) {
             Messages.showTextLayerUnsupportedWarning(getText());
             return CompletableFuture.completedFuture(srcComp);
         }
@@ -70,17 +70,21 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         Canvas newCanvas = newComp.getCanvas();
         Canvas srcCanvas = srcComp.getCanvas();
 
-        var canvasTransform = createCanvasTransform(srcCanvas);
+        var imTransform = createImTransform(srcCanvas);
 
-        newComp.forEachNestedLayerAndMask(this::transformLayer);
+        newComp.forEachNestedLayerAndMask(layer -> {
+            if (layer instanceof ContentLayer contentLayer) {
+                transform(contentLayer);
+            }
+        });
 
         if (affectsCanvasSize) {
             updateCanvasSize(newCanvas, view);
         }
-        newComp.imCoordsChanged(canvasTransform, false, view);
+        newComp.imCoordsChanged(imTransform, false, view);
 
-        History.add(new CompositionReplacedEdit(
-            getEditName(), view, srcComp, newComp, canvasTransform, false));
+        String name = getEditName();
+        History.add(new CompositionReplacedEdit(name, view, srcComp, newComp, imTransform, CompositionReplacedContext.TRANSFORM));
         view.replaceComp(newComp);
         SelectionActions.update(newComp);
 
@@ -104,16 +108,10 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         return CompletableFuture.completedFuture(newComp);
     }
 
-    public abstract boolean disableForSmartObjects();
+    public abstract boolean supportsSmartObjects();
 
-    protected boolean disableForTextLayers() {
-        return false;
-    }
-
-    private void transformLayer(Layer layer) {
-        if (layer instanceof ContentLayer contentLayer) {
-            transform(contentLayer);
-        }
+    protected boolean supportsTextLayers() {
+        return true;
     }
 
     /**
@@ -132,13 +130,13 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
     protected abstract void transform(ContentLayer contentLayer);
 
     /**
-     * Returns the transformation applied by this action as an
+     * Creates the transformation applied by this action as an
      * AffineTransform in image-space coordinates relative to the canvas.
      */
-    protected abstract AffineTransform createCanvasTransform(Canvas canvas);
+    protected abstract AffineTransform createImTransform(Canvas canvas);
 
     /**
-     * Creates the transformed guides.
+     * Creates the guides for the new composition from the source guides.
      */
     protected abstract Guides createTransformedGuides(
         Guides srcGuides, View view, Canvas srcCanvas);

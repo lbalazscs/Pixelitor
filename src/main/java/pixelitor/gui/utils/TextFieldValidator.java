@@ -26,6 +26,7 @@ import java.text.ParseException;
 /**
  * An object that checks the contents of a text field.
  */
+@FunctionalInterface
 public interface TextFieldValidator {
     // the only non-static method in this interface
     ValidationResult check(JTextField textField);
@@ -52,7 +53,6 @@ public interface TextFieldValidator {
         if (value == 0.0) {
             return ValidationResult.invalidZero(label);
         }
-        // value must be negative
         return ValidationResult.invalidNegative(label);
     }
 
@@ -60,14 +60,21 @@ public interface TextFieldValidator {
      * Checks if the text field contains a positive integer value (> 0).
      */
     static ValidationResult requirePositiveInt(JTextField textField, String label) {
-        return requireInt(textField, label, false);
+        return ValidationResult.valid().requirePositiveInt(textField.getText(), label);
     }
 
     /**
      * Checks if the text field contains a non-negative integer value (>= 0).
      */
     static ValidationResult requireNonNegativeInt(JTextField textField, String label) {
-        return requireInt(textField, label, true);
+        return ValidationResult.valid().requireNonNegativeInt(textField.getText(), label);
+    }
+
+    /**
+     * Checks if the text field contains an integer within the given range [min, max] (inclusive).
+     */
+    static ValidationResult requireIntRange(JTextField textField, String label, int min, int max) {
+        return ValidationResult.valid().requireIntRange(textField.getText(), label, min, max);
     }
 
     /**
@@ -84,27 +91,11 @@ public interface TextFieldValidator {
         return TFValidationLayerUI.wrapWithValidation(tf, textField -> requireNonNegativeInt(textField, label));
     }
 
-    private static ValidationResult requireInt(JTextField textField, String label, boolean allowZero) {
-        String text = textField.getText().trim();
-        if (text.isEmpty()) {
-            return ValidationResult.invalidEmpty(label);
-        }
-
-        int value;
-        try {
-            value = Integer.parseInt(text);
-        } catch (NumberFormatException ex) {
-            return ValidationResult.invalid("<b>" + label + "</b> must be an integer.");
-        }
-
-        if (value > 0) {
-            return ValidationResult.valid();
-        }
-        if (value == 0) {
-            return allowZero ? ValidationResult.valid() : ValidationResult.invalidZero(label);
-        }
-        // value must be negative
-        return ValidationResult.invalidNegative(label);
+    /**
+     * Creates a JLayer that validates its text field for an integer within the given range [min, max].
+     */
+    static JLayer<JTextField> createIntRangeLayer(JTextField tf, String label, int min, int max) {
+        return TFValidationLayerUI.wrapWithValidation(tf, textField -> requireIntRange(textField, label, min, max));
     }
 
     /**

@@ -421,12 +421,12 @@ public class ParamSet implements Debuggable {
 
         RandomGeneratorFactory factory = rndFactoryMap.computeIfAbsent(
             className,
-            s -> RandomGeneratorFactory.of(className));
+            _ -> RandomGeneratorFactory.of(className));
         return factory.create(seed);
     }
 
     /**
-     * Similar to the method above, but for simplex noise
+     * Similar to the method above, but for simplex noise.
      */
     public OpenSimplex2F getSimplexWithLastSeed() {
         if (simplex == null) {

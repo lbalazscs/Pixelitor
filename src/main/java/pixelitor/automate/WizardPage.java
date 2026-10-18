@@ -17,61 +17,101 @@
 
 package pixelitor.automate;
 
-import pixelitor.gui.utils.OKCancelDialog;
-import pixelitor.layers.Drawable;
-
 import javax.swing.*;
-import java.awt.Component;
-import java.util.Optional;
 
 /**
  * A single page in a {@link Wizard}.
  * Each page manages its own state, validation, and navigation logic.
+ * <p>
+ * Lifecycle, as driven by the wizard:
+ * <ul>
+ *   <li>Shown: {@link #createPanel()} → {@link #onPageShown()}; the buttons are then
+ *       refreshed using {@link #hasNextPage()} and {@link #canProceed()}.
+ *   <li>Next: {@link #validatePage()} → {@link #onNext()} → ({@link #hasNextPage()} ?
+ *       {@link #createNextPage()}) → {@link #disposePanel()}.
+ *   <li>Back: {@link #onBack()} → {@link #disposePanel()} → previous page's
+ *       {@link #onReturnedTo()} → {@link #createPanel()} on the previous page.
+ *   <li>Cancel: {@link #disposePanel()}.
+ * </ul>
  */
 public interface WizardPage {
     /**
      * Creates the UI panel for this page.
+     * <p>
+     * Can be called more than once on the same instance (once per display, such as
+     * when the page is first shown and whenever returned to via Back navigation).
+     * Implementations may return a freshly created panel or a cached panel.
      */
-    JComponent createPanel(Wizard wizard, Drawable dr);
+    JComponent createPanel();
 
     /**
      * Returns the HTML help text for this page.
      */
-    String getHelpText(Wizard wizard);
+    String getHelpText();
 
     /**
-     * Returns the next page in the wizard sequence.
+     * Performs initialization when the page is displayed in the wizard dialog.
      */
-    Optional<WizardPage> getNextPage();
-
-    /**
-     * Checks if this is the final page of the wizard.
-     */
-    default boolean isFinalPage() {
-        return getNextPage().isEmpty();
+    default void onPageShown() {
+        // empty by default
     }
 
     /**
-     * Performs initialization when the page is shown.
+     * Checks if this page has a next page in the wizard sequence.
      */
-    default void onPageShown(Wizard wizard, OKCancelDialog dialog) {
-        // empty by default
+    boolean hasNextPage();
+
+    /**
+     * Creates the next page in the wizard sequence.
+     * Called only if {@link #hasNextPage()} returned true.
+     */
+    default WizardPage createNextPage() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns whether the Next/Finish button should be enabled.
+     */
+    default boolean canProceed() {
+        return true;
     }
 
     /**
      * Validates the current page's state before allowing navigation to the next page.
      */
-    default boolean validatePage(Wizard wizard, Component dialogParent) {
+    default boolean validatePage() {
         return true;
     }
 
     /**
-     * Performs completion actions for this page before transitioning to the next.
+     * Performs completion actions for this page before
+     * transitioning to the next page or completing the wizard.
      */
-    void onPageComplete(Wizard wizard, Drawable dr);
+    void onNext();
 
     /**
-     * Called if the wizard was canceled while on this page.
+     * Called on the current page when the user presses Back, before navigating away.
      */
-    void onWizardCanceled(Drawable dr);
+    default void onBack() {
+        // empty by default
+    }
+
+    /**
+     * Called on a page that is re-displayed because the
+     * user pressed Back on the following page.
+     * <p>
+     * The page should undo the effects of its own earlier
+     * {@link #onNext()} call (e.g. downstream configurations or model state).
+     */
+    default void onReturnedTo() {
+        // empty by default
+    }
+
+    /**
+     * Releases resources held by the page's current UI panel.
+     * Called each time the page is left in either direction,
+     * and when the wizard finishes or is canceled.
+     */
+    default void disposePanel() {
+    }
 }

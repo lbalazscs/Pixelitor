@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Thumbnails;
 
@@ -31,8 +32,8 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 /**
- * A component that displays a thumbnail image and allows users
- * to select a position by clicking or dragging.
+ * A component that displays a thumbnail image and allows
+ * users to select a position by clicking or dragging.
  */
 public class ImagePositionSelector extends JComponent {
     public static final int THUMBNAIL_SIZE = 100;
@@ -46,12 +47,12 @@ public class ImagePositionSelector extends JComponent {
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                updatePosition(e, true);
+                updateModelFromMouse(e, true);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                updatePosition(e, false);
+                updateModelFromMouse(e, false);
             }
         };
 
@@ -60,9 +61,8 @@ public class ImagePositionSelector extends JComponent {
 
         createThumbnail();
 
-        setPreferredSize(new Dimension(
-            thumb.getWidth(),
-            thumb.getHeight()));
+        setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
+        setCursor(Cursors.CROSSHAIR);
     }
 
     private void createThumbnail() {
@@ -103,8 +103,8 @@ public class ImagePositionSelector extends JComponent {
         CrosshairPainter.paint(g, x, y, getWidth(), getHeight());
     }
 
-    private void updatePosition(MouseEvent e, boolean isAdjusting) {
-        if (!isEnabled()) {
+    private void updateModelFromMouse(MouseEvent e, boolean isAdjusting) {
+        if (!isEnabled() || !SwingUtilities.isLeftMouseButton(e)) {
             return;
         }
 
@@ -125,5 +125,11 @@ public class ImagePositionSelector extends JComponent {
 
     private int getYOffset() {
         return (getHeight() - thumb.getHeight()) / 2;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        setCursor(enabled ? Cursors.CROSSHAIR : Cursors.DEFAULT);
     }
 }

@@ -25,10 +25,15 @@ import java.awt.geom.AffineTransform;
 
 /**
  * Like {@link Insets}, but outwards. Represents an enlargement.
+ * Negative values are allowed to represent shrinkage (cropping).
  */
 public record Outsets(int top, int right, int bottom, int left) {
 
-    public AffineTransform getTopLeftTranslation() {
+    /**
+     * Creates the transform that moves existing content
+     * to its position in the enlarged canvas.
+     */
+    public AffineTransform createTopLeftTranslation() {
         return AffineTransform.getTranslateInstance(left, top);
     }
 

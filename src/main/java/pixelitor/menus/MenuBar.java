@@ -336,15 +336,15 @@ public class MenuBar extends JMenuBar {
         var sub = new PMenu("Transform");
 
         // rotate
-        sub.add(ANGLE_90.createLayerTransformAction(), "layer_rot_90");
-        sub.add(ANGLE_180.createLayerTransformAction(), "layer_rot_180");
-        sub.add(ANGLE_270.createLayerTransformAction(), "layer_rot_270");
+        sub.add(ANGLE_90.createActiveLayerAction(), "layer_rot_90");
+        sub.add(ANGLE_180.createActiveLayerAction(), "layer_rot_180");
+        sub.add(ANGLE_270.createActiveLayerAction(), "layer_rot_270");
 
         sub.addSeparator();
 
         // flip
-        sub.add(HORIZONTAL.createLayerTransformAction(), "layer_flip_hor");
-        sub.add(VERTICAL.createLayerTransformAction(), "layer_flip_ver");
+        sub.add(HORIZONTAL.createActiveLayerAction(), "layer_flip_hor");
+        sub.add(VERTICAL.createActiveLayerAction(), "layer_flip_ver");
 
         return sub;
     }
@@ -1053,8 +1053,10 @@ public class MenuBar extends JMenuBar {
                 ColorSwatchClickHandler.STANDARD)));
 
         // static palette (TODO unfinished feature)
-        viewMenu.add(new TaskAction("Static Palette...", () ->
-            PalettePanel.showStaticPaletteDialog("Static Palette")));
+        if (AppMode.isDevelopment()) {
+            viewMenu.add(new TaskAction("Static Palette...", () ->
+                PalettePanel.showStaticPaletteDialog("Static Palette")));
+        }
 
         viewMenu.addSeparator();
 

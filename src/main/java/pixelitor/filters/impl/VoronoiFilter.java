@@ -45,27 +45,27 @@ public class VoronoiFilter extends PointFilter {
     private PoissonDiskSampling sampling;
     private int[] colors;
 
-    private final RandomGenerator rand;
+    private final RandomGenerator rng;
     private final DistanceFunction intPrecisionDistance;
     private final DistanceFunction doublePrecisionDistance;
 
     /**
      * Constructs a new VoronoiFilter.
      *
-     * @param filterName            the name of the filter
-     * @param rand                  the random generator used for generating points and assigning colors
+     * @param filterName           the name of the filter
+     * @param rng                  the random generator used for generating points and assigning colors
      * @param minDistBetweenPoints the minimum distance between points
-     * @param metric                the distance metric used to calculate the nearest point
-     * @param cx                    the center x-coordinate of the source image, used by the distance metric
-     * @param cy                    the center y-coordinate of the source image, used by the distance metric
-     * @param useImageColors        if true, the regions will use colors sampled from the source image; if false, random colors are generated
+     * @param metric               the distance metric used to calculate the nearest point
+     * @param cx                   the center x-coordinate of the source image, used by the distance metric
+     * @param cy                   the center y-coordinate of the source image, used by the distance metric
+     * @param useImageColors       if true, the regions will use colors sampled from the source image; if false, random colors are generated
      */
-    public VoronoiFilter(String filterName, RandomGenerator rand,
+    public VoronoiFilter(String filterName, RandomGenerator rng,
                          double minDistBetweenPoints, Metric metric,
                          int cx, int cy, boolean useImageColors) {
         super(filterName);
 
-        this.rand = rand;
+        this.rng = rng;
         this.minDistBetweenPoints = minDistBetweenPoints;
         this.intPrecisionDistance = metric.asIntPrecisionDistance(cx, cy);
         this.doublePrecisionDistance = metric.asDoublePrecisionDistance(cx, cy);
@@ -78,7 +78,7 @@ public class VoronoiFilter extends PointFilter {
         int height = src.getHeight();
 
         // generate a set of points using Poisson disk sampling
-        sampling = new PoissonDiskSampling(width, height, minDistBetweenPoints, 10, true, rand);
+        sampling = new PoissonDiskSampling(width, height, minDistBetweenPoints, 10, true, rng);
         List<Point2D> points = sampling.getSamples();
 
         // assign colors to the points
@@ -98,7 +98,7 @@ public class VoronoiFilter extends PointFilter {
                 color = src.getRGB((int) point.getX(), (int) point.getY());
             } else {
                 // generate full range of RGB colors: 0x1_00_00_00 = 0xFF_FF_FF + 1
-                color = 0xFF_00_00_00 | rand.nextInt(0x1_00_00_00);
+                color = 0xFF_00_00_00 | rng.nextInt(0x1_00_00_00);
             }
             colors[i] = color;
         }

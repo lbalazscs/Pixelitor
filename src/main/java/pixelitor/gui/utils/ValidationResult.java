@@ -99,7 +99,7 @@ public final class ValidationResult {
         if (isValid) {
             return invalid(newErrorMsg);
         }
-        return invalid(combineErrorMessages(this.errorMsg, newErrorMsg));
+        return invalid(combineErrorMessages(errorMsg, newErrorMsg));
     }
 
     /**
@@ -114,7 +114,7 @@ public final class ValidationResult {
      */
     public ValidationResult requireNonNegative(int value, String fieldName) {
         return addErrorIf(value < 0,
-            format("<b>%s</b> must not be negative", fieldName));
+            format("<b>%s</b> must not be negative.", fieldName));
     }
 
     /**
@@ -122,7 +122,16 @@ public final class ValidationResult {
      */
     public ValidationResult requirePositive(int value, String fieldName) {
         return addErrorIf(value <= 0,
-            format("<b>%s</b> must be positive", fieldName));
+            format("<b>%s</b> must be positive.", fieldName));
+    }
+
+    /**
+     * Validates that a numeric value is within the given range [min, max] (inclusive).
+     */
+    public ValidationResult requireRange(int value, String fieldName, int min, int max) {
+        assert min <= max : "min (" + min + ") > max (" + max + ")";
+        return addErrorIf(value < min || value > max,
+            format("<b>%s</b> must be between %d and %d.", fieldName, min, max));
     }
 
     /**
@@ -130,11 +139,19 @@ public final class ValidationResult {
      */
     public ValidationResult requireMax(int value, String fieldName, int maxValue) {
         return addErrorIf(value > maxValue,
-            format("<b>%s</b> must be smaller than %d", fieldName, maxValue));
+            format("<b>%s</b> must be at most %d.", fieldName, maxValue));
     }
 
     /**
-     * Validates that a string represents a positive integer.
+     * Validates that a string represents a non-negative integer (>= 0).
+     */
+    public ValidationResult requireNonNegativeInt(String text, String fieldName) {
+        return requireParsedInt(text, fieldName,
+            v -> requireNonNegative(v, fieldName));
+    }
+
+    /**
+     * Validates that a string represents a positive integer (> 0).
      */
     public ValidationResult requirePositiveInt(String text, String fieldName) {
         return requireParsedInt(text, fieldName,
@@ -142,18 +159,28 @@ public final class ValidationResult {
     }
 
     /**
+     * Validates that a string represents an integer within the given range [min, max] (inclusive).
+     */
+    public ValidationResult requireIntRange(String text, String fieldName, int min, int max) {
+        return requireParsedInt(text, fieldName,
+            v -> requireRange(v, fieldName, min, max));
+    }
+
+    /**
      * Validates that a string represents a positive integer with a maximum value.
      */
     public ValidationResult requireBoundedPositiveInt(String text, String fieldName, int maxValue) {
-        return requireParsedInt(text, fieldName,
-            v -> requirePositive(v, fieldName)
-                .requireMax(v, fieldName, maxValue));
+        return requireIntRange(text, fieldName, 1, maxValue);
     }
 
     private ValidationResult requireParsedInt(String text, String fieldName,
                                               IntFunction<ValidationResult> onSuccess) {
+        if (text == null || text.trim().isEmpty()) {
+            return addError(format("<b>%s</b> can't be empty.", fieldName));
+        }
         try {
-            return onSuccess.apply(Integer.parseInt(text.trim()));
+            int value = Integer.parseInt(text.trim());
+            return onSuccess.apply(value);
         } catch (NumberFormatException e) {
             return addError(format("<b>%s</b> must be an integer.", fieldName));
         }
@@ -187,9 +214,6 @@ public final class ValidationResult {
         return this;
     }
 
-    /**
-     * Combines two error messages with HTML line break.
-     */
     private static String combineErrorMessages(String first, String second) {
         return first + "<br>" + second;
     }

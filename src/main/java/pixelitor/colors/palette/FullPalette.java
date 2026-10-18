@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,72 +18,31 @@
 package pixelitor.colors.palette;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A palette that shows as many colors as possible (as opposed to
  * other palettes that concentrate on specific mixes or variations).
  */
 public class FullPalette extends DynamicPalette {
-    // static palette-specific fields are remembered between dialog sessions
-    private static int lastRowCount = 11;
-    private static int lastColumnCount = 7;
+    public static final float DEFAULT_SATURATION = 0.9f; // default saturation is 90%
 
-    private final String dialogTitle;
-
-    private int hueSteps;
+    private final HueSatPaletteConfig hueSatConfig;
 
     public FullPalette(String dialogTitle) {
-        super(lastRowCount, lastColumnCount);
-        this.dialogTitle = dialogTitle;
-
-        config = new HueSatPaletteConfig(0, 0.9f); // default saturation is 90%
+        var hueSatConfig = new HueSatPaletteConfig(0, DEFAULT_SATURATION);
+        // default grid: 11 rows (1 grayscale row + 10 hue steps) × 7 brightness columns
+        super(dialogTitle, hueSatConfig, 11, 7);
+        this.hueSatConfig = hueSatConfig;
     }
 
     @Override
-    public void setGridSize(int rows, int columns) {
-        super.setGridSize(rows, columns);
-
-        // one row is for grayscale, the rest for hues
-        hueSteps = Math.max(1, rows - 1);
-        lastColumnCount = columns;
-        lastRowCount = rows;
-    }
-
-    @Override
-    public List<Color> getColors() {
-        var hsConfig = (HueSatPaletteConfig) config;
-        float hueOffset = hsConfig.getHueOffset();
-        float saturation = hsConfig.getSaturation();
-
-        List<Color> colors = new ArrayList<>(rowCount * columnCount);
-
-        for (int row = 0; row < rowCount; row++) {
-            float hue = calcHue(row, hueOffset);
-            for (int col = 0; col < columnCount; col++) {
-                Color color;
-                if (row == 0) { // first row is grayscale
-                    float bri = (col + 1) / (float) columnCount;
-                    color = Color.getHSBColor(0, 0, bri);
-                } else { // subsequent rows are colored
-                    float bri = (col + 1) / (float) columnCount;
-                    color = Color.getHSBColor(hue, saturation, bri);
-                }
-                colors.add(color);
-            }
+    protected Color createColor(int row, int col) {
+        float bri = calcColumnBrightness(col);
+        if (row == 0) {
+            return Color.getHSBColor(0, 0, bri); // grayscale row
         }
-        return colors;
-    }
-
-    // calculates hue for a given row, skipping the first (grayscale) row
-    private float calcHue(int row, float hueOffset) {
-        float hue = hueOffset + (row - 1) / (float) hueSteps;
-        return hue % 1.0f;
-    }
-
-    @Override
-    public String getDialogTitle() {
-        return dialogTitle;
+        int hueSteps = numRows - 1; // row >= 1 here, so numRows >= 2
+        float hue = hueSatConfig.getHueOffset() + (row - 1) / (float) hueSteps;
+        return Color.getHSBColor(hue, hueSatConfig.getSaturation(), bri);
     }
 }

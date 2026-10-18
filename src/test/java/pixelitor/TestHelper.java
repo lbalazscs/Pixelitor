@@ -27,6 +27,7 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.AppPanel;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.MlpAlignmentSelector;
 import pixelitor.history.History;
@@ -139,8 +140,8 @@ public class TestHelper {
         }).when(comp).setSelection(any(Selection.class));
 
         // when getSelection() is called, return the currentSel field
-        when(comp.getSelection()).thenAnswer(invocation -> currentSel);
-        when(comp.hasSelection()).thenAnswer(invocation -> currentSel != null);
+        when(comp.getSelection()).thenAnswer(_ -> currentSel);
+        when(comp.hasSelection()).thenAnswer(_ -> currentSel != null);
 
         return comp;
     }
@@ -311,11 +312,11 @@ public class TestHelper {
         doAnswer(invocation -> {
             updateCurrentComp.accept(invocation.getArgument(0));
             return null;
-        }).when(view).replaceComp(any(Composition.class), any(MaskViewMode.class), anyBoolean());
+        }).when(view).replaceComp(any(Composition.class), any(MaskViewMode.class), any(CompositionReplacedContext.class));
 
         // when getComp() or getCanvas() is called, delegate to the currentComp field
-        when(view.getComp()).thenAnswer(invocation -> currentComp);
-        when(view.getCanvas()).thenAnswer(invocation -> currentComp.getCanvas());
+        when(view.getComp()).thenAnswer(_ -> currentComp);
+        when(view.getCanvas()).thenAnswer(_ -> currentComp.getCanvas());
 
         comp.setView(view);
 

@@ -165,7 +165,7 @@ public class ChaosGame extends ParametrizedFilter {
         int width = dest.getWidth();
         int height = dest.getHeight();
 
-        RandomGenerator random = paramSet.getGeneratorWithLastSeed("Xoroshiro128PlusPlus");
+        RandomGenerator rng = paramSet.getGeneratorWithLastSeed("Xoroshiro128PlusPlus");
 
         List<Vertex> vertices = createVertices(numVertices, colorsValue, width, height);
         Vertex[] attractors = vertices.toArray(EMPTY_ARRAY);
@@ -176,7 +176,7 @@ public class ChaosGame extends ParametrizedFilter {
         double jumpRatio = fraction.getPercentage();
         double remainingRatio = 1 - jumpRatio;
 
-        var walker = new Walker(attractors, random, width, height,
+        var walker = new Walker(attractors, rng, width, height,
             jumpRatio, remainingRatio, twist.getValue(), restrict.isChecked());
 
         int colorLag = switch (colorsValue) {
@@ -366,7 +366,7 @@ public class ChaosGame extends ParametrizedFilter {
         private static final int WARM_UP_ITERATIONS = 50;
 
         private final Vertex[] attractors;
-        private final RandomGenerator random;
+        private final RandomGenerator rng;
         private final double jumpRatio;
         private final double remainingRatio;
         private final boolean restrictRepetition;
@@ -384,25 +384,25 @@ public class ChaosGame extends ParametrizedFilter {
         private int lastButTwoColor;
         private int lastButThreeColor;
 
-        Walker(Vertex[] attractors, RandomGenerator random,
+        Walker(Vertex[] attractors, RandomGenerator rng,
                int width, int height,
                double jumpRatio, double remainingRatio,
                int twistValue, boolean restrictRepetition) {
             this.attractors = attractors;
-            this.random = random;
+            this.rng = rng;
             this.jumpRatio = jumpRatio;
             this.remainingRatio = remainingRatio;
             this.restrictRepetition = restrictRepetition;
 
-            this.rotate = twistValue != 0;
+            rotate = twistValue != 0;
             double twistAngle = Math.toRadians(twistValue);
-            this.cos = Math.cos(twistAngle);
-            this.sin = Math.sin(twistAngle);
-            this.cx = width / 2.0;
-            this.cy = height / 2.0;
+            cos = Math.cos(twistAngle);
+            sin = Math.sin(twistAngle);
+            cx = width / 2.0;
+            cy = height / 2.0;
 
-            this.x = random.nextInt(width);
-            this.y = random.nextInt(height);
+            x = rng.nextInt(width);
+            y = rng.nextInt(height);
         }
 
         void warmUp() {
@@ -434,7 +434,7 @@ public class ChaosGame extends ParametrizedFilter {
         private int pickIndex() {
             int index;
             do {
-                index = random.nextInt(attractors.length);
+                index = rng.nextInt(attractors.length);
             } while (restrictRepetition && index == lastIndex);
             return index;
         }

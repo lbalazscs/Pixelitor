@@ -137,7 +137,7 @@ public class FgBgColorSelector extends JLayeredPane {
             PalettePanel.showRGBMixDialog(fg)));
 
         popup.add(new TaskAction("Color History...", () ->
-            ColorHistory.INSTANCE.showDialog(PixelitorWindow.get(), ColorSwatchClickHandler.STANDARD, false)));
+            ColorHistory.INSTANCE.showDialog(PixelitorWindow.get(), ColorSwatchClickHandler.STANDARD)));
 
         popup.addSeparator();
 
@@ -256,7 +256,7 @@ public class FgBgColorSelector extends JLayeredPane {
         setFgColor(color, notifyListeners, true);
     }
 
-    private void setFgColor(Color color, boolean notifyListeners, boolean addToHistory) {
+    public void setFgColor(Color color, boolean notifyListeners, boolean addToHistory) {
         setColor(color, true, notifyListeners, addToHistory);
     }
 

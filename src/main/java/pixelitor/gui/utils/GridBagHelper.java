@@ -154,6 +154,7 @@ public class GridBagHelper {
 
     public void addLabelAndControl(String labelText, Component c, int row) {
         JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
+        label.setLabelFor(c);
         addTwoControls(label, c, row);
     }
 

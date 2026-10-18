@@ -39,7 +39,7 @@ public enum FlipDirection {
         }
 
         @Override
-        public AffineTransform createTransform(int width, int height) {
+        public AffineTransform createImTransform(int width, int height) {
             var at = new AffineTransform();
             at.translate(width, 0); // keeps the content visible
             at.scale(-1, 1);
@@ -52,7 +52,7 @@ public enum FlipDirection {
         }
 
         @Override
-        public AffineTransform createTransform(int width, int height) {
+        public AffineTransform createImTransform(int width, int height) {
             var at = new AffineTransform();
             at.translate(0, height); // keeps the content visible
             at.scale(1, -1);
@@ -72,27 +72,23 @@ public enum FlipDirection {
 
     public abstract String getStatusBarMessage();
 
-    public abstract AffineTransform createTransform(int width, int height);
-
     /**
-     * Returns the transformation in image space, relative to the canvas.
-     * Needed for transforming the selection.
+     * Creates the flip as a transformation in image-space coordinates.
      */
-    public AffineTransform createCanvasTransform(Canvas canvas) {
-        return createTransform(canvas.getWidth(), canvas.getHeight());
+    public abstract AffineTransform createImTransform(int width, int height);
+
+    public AffineTransform createImTransform(Canvas canvas) {
+        return createImTransform(canvas.getWidth(), canvas.getHeight());
     }
 
-    /**
-     * Returns the transformation for the image (image space, relative to the image).
-     */
-    public AffineTransform createImageTransform(BufferedImage image) {
-        return createTransform(image.getWidth(), image.getHeight());
+    public AffineTransform createImTransform(BufferedImage image) {
+        return createImTransform(image.getWidth(), image.getHeight());
     }
 
     /**
      * Creates an action that transforms only the active layer rather than the entire composition.
      */
-    public Action createLayerTransformAction() {
+    public Action createActiveLayerAction() {
         return new AbstractViewEnabledAction(getDisplayName()) {
             @Override
             protected void onClick(Composition comp) {

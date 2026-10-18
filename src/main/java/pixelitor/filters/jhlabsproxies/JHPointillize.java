@@ -17,7 +17,7 @@
 
 package pixelitor.filters.jhlabsproxies;
 
-import com.jhlabs.image.CellularFilter;
+import com.jhlabs.image.CellSearchFilter;
 import com.jhlabs.image.PointillizeFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
@@ -45,7 +45,7 @@ public class JHPointillize extends ParametrizedFilter {
     private final BooleanParam fadeEdges = new BooleanParam("Fade Instead of Fill", true);
 
     private final RangeParam randomness = new RangeParam("Grid Randomness (%)", 0, 0, 100);
-    private final EnumParam<CellularFilter.GridType> gridType = EnumParam.forGridType("Grid Type", randomness);
+    private final EnumParam<CellSearchFilter.GridType> gridType = EnumParam.forGridType("Grid Type", randomness);
 
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 1000);

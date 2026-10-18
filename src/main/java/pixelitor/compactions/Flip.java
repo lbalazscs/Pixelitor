@@ -37,8 +37,8 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    public boolean disableForSmartObjects() {
-        return false;
+    public boolean supportsSmartObjects() {
+        return true;
     }
 
     @Override
@@ -58,8 +58,8 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createCanvasTransform(Canvas canvas) {
-        return direction.createCanvasTransform(canvas);
+    protected AffineTransform createImTransform(Canvas canvas) {
+        return direction.createImTransform(canvas);
     }
 
     @Override

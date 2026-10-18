@@ -17,6 +17,10 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.colors.Colors;
+import pixelitor.filters.util.ComplexBounds;
+import pixelitor.utils.Cursors;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -28,43 +32,64 @@ import java.util.Objects;
  * allows users to select a complex number by clicking or dragging.
  */
 public class ComplexNumberSelector extends JComponent {
-    private static final Color BG_COLOR = new Color(248, 249, 250);
-    private static final Color GRID_COLOR = new Color(225, 228, 232);
-    private static final Color AXIS_COLOR = new Color(110, 115, 125);
-    private static final Color BORDER_COLOR = Color.GRAY;
-    private static final Font AXIS_LABEL_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+    public static final int DEFAULT_SIZE = 100;
+
     private static final int LABEL_GAP = 4;
     private static final int TICK_HALF_LEN = 2;
+    private static final int EDGE_MARGIN = 2;
+    private static final int ARROW_LENGTH = 7;
+    private static final int ARROW_HALF_WIDTH = 3;
+
+    private Color bgColor;
+    private Color gridColor;
+    private Color axisColor;
+    private Color borderColor;
+    private Color disabledBgColor;
+    private Color disabledBorderColor;
+    private Font axisLabelFont;
 
     private final ComplexNumberParam model;
-    private final double xMin;
-    private final double xMax;
-    private final double yMin;
-    private final double yMax;
+    private final ComplexBounds complexBounds;
+
+    private final boolean reAxisVisible;
+    private final boolean imAxisVisible;
+
+    // tick positions in the complex space
+    private final int firstReTick;
+    private final int lastReTick;
+    private final int firstImTick;
+    private final int lastImTick;
 
     public ComplexNumberSelector(ComplexNumberParam model) {
         this.model = Objects.requireNonNull(model);
-        this.xMin = model.getMinRe();
-        this.xMax = model.getMaxRe();
-        this.yMin = model.getMinIm();
-        this.yMax = model.getMaxIm();
+        complexBounds = model.getBounds();
 
-        setPreferredSize(new Dimension(ComplexNumberParamGUI.DEFAULT_SIZE, ComplexNumberParamGUI.DEFAULT_SIZE));
+        reAxisVisible = complexBounds.containsIm(0);
+        imAxisVisible = complexBounds.containsRe(0);
+        firstReTick = (int) Math.ceil(complexBounds.minRe());
+        lastReTick = (int) Math.floor(complexBounds.maxRe());
+        firstImTick = (int) Math.ceil(complexBounds.minIm());
+        lastImTick = (int) Math.floor(complexBounds.maxIm());
+
+        updateTheme();
+        setPreferredSize(new Dimension(DEFAULT_SIZE, DEFAULT_SIZE));
+        setOpaque(true);
+        setCursor(Cursors.CROSSHAIR);
 
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                updatePosition(e, true);
+                updateModelFromMouse(e, true);
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                updatePosition(e, true);
+                updateModelFromMouse(e, true);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                updatePosition(e, false);
+                updateModelFromMouse(e, false);
             }
         };
 
@@ -72,22 +97,50 @@ public class ComplexNumberSelector extends JComponent {
         addMouseMotionListener(mouseAdapter);
     }
 
-    private void updatePosition(MouseEvent e, boolean isAdjusting) {
-        if (!isEnabled()) {
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        updateTheme();
+        repaint();
+    }
+
+    private void updateTheme() {
+        axisLabelFont = UIManager.getFont("Label.font");
+        if (axisLabelFont == null) {
+            axisLabelFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+        }
+        setFont(axisLabelFont);
+
+        bgColor = Colors.getLafBg();
+        disabledBgColor = Colors.getLafDisabledBg();
+        setBackground(bgColor);
+
+        axisColor = Colors.getLafFg();
+        setForeground(axisColor);
+
+        borderColor = Colors.getLafBorder();
+        disabledBorderColor = Colors.getLafDisabledBorder();
+
+        // faint grid lines derived from the background and axis/foreground colors
+        gridColor = Colors.interpolateRgb(bgColor, axisColor, 0.15);
+    }
+
+    private void updateModelFromMouse(MouseEvent e, boolean isAdjusting) {
+        if (!isEnabled() || !SwingUtilities.isLeftMouseButton(e)) {
             return;
         }
 
         int width = getWidth();
         int height = getHeight();
 
-        // clamp mouse coordinates inside canvas bounds
+        // clamp mouse coordinates inside component bounds
         int clampedX = Math.clamp(e.getX(), 0, width - 1);
         int clampedY = Math.clamp(e.getY(), 0, height - 1);
 
-        double real = pixelXToReal(clampedX, width);
-        double imag = pixelYToImag(clampedY, height);
+        double re = pixelXToRe(clampedX, width);
+        double im = pixelYToIm(clampedY, height);
 
-        model.setValue(real, imag, true, isAdjusting, true);
+        model.setValue(re, im, true, isAdjusting, true);
     }
 
     @Override
@@ -98,11 +151,11 @@ public class ComplexNumberSelector extends JComponent {
 
         try {
             // background
-            g2.setColor(isEnabled() ? BG_COLOR : Color.LIGHT_GRAY);
+            g2.setColor(isEnabled() ? bgColor : disabledBgColor);
             g2.fillRect(0, 0, width, height);
 
             if (!isEnabled()) {
-                g2.setColor(BORDER_COLOR);
+                g2.setColor(disabledBorderColor);
                 g2.drawRect(0, 0, width - 1, height - 1);
                 return;
             }
@@ -112,16 +165,22 @@ public class ComplexNumberSelector extends JComponent {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-            drawAxes(g2, height, width);
-            drawLabelsAndTicks(g2, width, height);
+            drawAxes(g2, width, height);
+
+            if (reAxisVisible) {
+                drawReAxisTicksAndLabels(g2, width, height);
+            }
+            if (imAxisVisible) {
+                drawImAxisTicksAndLabels(g2, width, height);
+            }
 
             // paint outer border
-            g2.setColor(BORDER_COLOR);
+            g2.setColor(borderColor);
             g2.drawRect(0, 0, width - 1, height - 1);
 
             // paint crosshair indicator from model state
-            int markerX = realToPixelX(model.getRe(), width);
-            int markerY = imagToPixelY(model.getIm(), height);
+            int markerX = reToPixelX(model.getRe(), width);
+            int markerY = imToPixelY(model.getIm(), height);
             CrosshairPainter.paint(g2, markerX, markerY, width, height);
         } finally {
             g2.dispose();
@@ -130,126 +189,136 @@ public class ComplexNumberSelector extends JComponent {
 
     private void drawGrid(Graphics g, int width, int height) {
         // faint grid lines at integer coordinates
-        g.setColor(GRID_COLOR);
-        int startX = (int) Math.ceil(xMin);
-        int endX = (int) Math.floor(xMax);
-        int startY = (int) Math.ceil(yMin);
-        int endY = (int) Math.floor(yMax);
+        g.setColor(gridColor);
 
-        for (int i = startX; i <= endX; i++) {
+        for (int i = firstReTick; i <= lastReTick; i++) {
             if (i != 0) { // axes drawn separately
-                int px = realToPixelX(i, width);
+                int px = reToPixelX(i, width);
                 g.drawLine(px, 0, px, height - 1);
             }
         }
 
-        for (int i = startY; i <= endY; i++) {
+        for (int i = firstImTick; i <= lastImTick; i++) {
             if (i != 0) {
-                int py = imagToPixelY(i, height);
+                int py = imToPixelY(i, height);
                 g.drawLine(0, py, width - 1, py);
             }
         }
     }
 
-    private void drawAxes(Graphics g, int height, int width) {
-        // real and imaginary axes with arrows
-        int arrowLength = 7;
-        int arrowHalfWidth = 3;
+    private void drawAxes(Graphics g, int width, int height) {
+        g.setColor(axisColor);
 
         // real axis (horizontal, y = 0)
-        if (yMin <= 0 && yMax >= 0) {
-            int y0 = imagToPixelY(0.0, height);
-            g.setColor(AXIS_COLOR);
+        if (reAxisVisible) {
+            int y0 = imToPixelY(0.0, height);
             g.drawLine(0, y0, width - 1, y0);
 
             // right arrow tip at positive end
-            int[] xPoints = {width - 1, width - 1 - arrowLength, width - 1 - arrowLength};
-            int[] yPoints = {y0, y0 - arrowHalfWidth, y0 + arrowHalfWidth};
+            int[] xPoints = {width - 1, width - 1 - ARROW_LENGTH, width - 1 - ARROW_LENGTH};
+            int[] yPoints = {y0, y0 - ARROW_HALF_WIDTH, y0 + ARROW_HALF_WIDTH};
             g.fillPolygon(xPoints, yPoints, 3);
         }
 
         // imaginary axis (vertical, x = 0)
-        if (xMin <= 0 && xMax >= 0) {
-            int x0 = realToPixelX(0.0, width);
-            g.setColor(AXIS_COLOR);
+        if (imAxisVisible) {
+            int x0 = reToPixelX(0.0, width);
             g.drawLine(x0, 0, x0, height - 1);
 
             // top arrow tip at positive end
-            int[] xPoints = {x0, x0 - arrowHalfWidth, x0 + arrowHalfWidth};
-            int[] yPoints = {0, arrowLength, arrowLength};
+            int[] xPoints = {x0, x0 - ARROW_HALF_WIDTH, x0 + ARROW_HALF_WIDTH};
+            int[] yPoints = {0, ARROW_LENGTH, ARROW_LENGTH};
             g.fillPolygon(xPoints, yPoints, 3);
         }
     }
 
-    private void drawLabelsAndTicks(Graphics g, int width, int height) {
-        int startX = (int) Math.ceil(xMin);
-        int endX = (int) Math.floor(xMax);
-        int startY = (int) Math.ceil(yMin);
-        int endY = (int) Math.floor(yMax);
+    private void drawReAxisTicksAndLabels(Graphics g, int width, int height) {
+        g.setColor(axisColor);
+        g.setFont(axisLabelFont);
+        FontMetrics fm = g.getFontMetrics();
 
-        // tick marks and coordinate numbers at integer positions
-        g.setFont(AXIS_LABEL_FONT);
-        FontMetrics fm = g.getFontMetrics(AXIS_LABEL_FONT);
+        int y0 = imToPixelY(0.0, height);
+        boolean fitsBelowAxis = y0 + fm.getHeight() + LABEL_GAP <= height - EDGE_MARGIN;
+        int textY = fitsBelowAxis ? y0 + fm.getAscent() + LABEL_GAP : y0 - LABEL_GAP;
 
-        // draw numbers along the real axis
-        if (yMin <= 0 && yMax >= 0) {
-            int y0 = imagToPixelY(0.0, height);
-            for (int i = startX; i <= endX; i++) {
-                if (i != 0) {
-                    int px = realToPixelX(i, width);
-                    g.drawLine(px, y0 - TICK_HALF_LEN, px, y0 + TICK_HALF_LEN); // tick mark
-
-                    String text = Integer.toString(i);
-                    int textWidth = fm.stringWidth(text);
-                    int textX = Math.max(2, Math.min(width - textWidth - 2, px - textWidth / 2));
-                    boolean fitsBelowAxis = (y0 + fm.getHeight() + LABEL_GAP) <= height - 2;
-                    int textY = fitsBelowAxis
-                        ? y0 + fm.getAscent() + LABEL_GAP
-                        : y0 - LABEL_GAP;
-
-                    g.drawString(text, textX, textY);
-                }
+        for (int i = firstReTick; i <= lastReTick; i++) {
+            if (i == 0) {
+                continue;
             }
-        }
+            int px = reToPixelX(i, width);
+            g.drawLine(px, y0 - TICK_HALF_LEN, px, y0 + TICK_HALF_LEN);
 
-        // draw numbers along the imaginary axis
-        if (xMin <= 0 && xMax >= 0) {
-            int x0 = realToPixelX(0.0, width);
-            for (int i = startY; i <= endY; i++) {
-                if (i != 0) {
-                    int py = imagToPixelY(i, height);
-                    g.drawLine(x0 - TICK_HALF_LEN, py, x0 + TICK_HALF_LEN, py); // tick mark
-
-                    String text = Integer.toString(i);
-                    int textWidth = fm.stringWidth(text);
-                    boolean fitsLeftOfAxis = (x0 - textWidth - LABEL_GAP) >= 2;
-                    int textX = fitsLeftOfAxis
-                        ? x0 - textWidth - LABEL_GAP
-                        : x0 + LABEL_GAP + 1;
-                    int textY = Math.max(fm.getAscent() + 1, Math.min(height - fm.getDescent() - 2, py + fm.getAscent() / 2 - 1));
-
-                    g.drawString(text, textX, textY);
-                }
-            }
+            String text = Integer.toString(i);
+            int textWidth = fm.stringWidth(text);
+            int textX = Math.max(EDGE_MARGIN, Math.min(width - textWidth - EDGE_MARGIN, px - textWidth / 2));
+            g.drawString(text, textX, textY);
         }
     }
 
-    private int realToPixelX(double re, int width) {
-        return (int) Math.round((re - xMin) / (xMax - xMin) * (width - 1));
+    private void drawImAxisTicksAndLabels(Graphics g, int width, int height) {
+        g.setColor(axisColor);
+        g.setFont(axisLabelFont);
+        FontMetrics fm = g.getFontMetrics();
+
+        int x0 = reToPixelX(0.0, width);
+
+        int maxLabelWidth = 0;
+        for (int i = firstImTick; i <= lastImTick; i++) {
+            if (i != 0) {
+                maxLabelWidth = Math.max(maxLabelWidth, fm.stringWidth(Integer.toString(i)));
+            }
+        }
+
+        boolean fitsLeftOfAxis = (x0 - maxLabelWidth - LABEL_GAP) >= EDGE_MARGIN;
+        int rightTextX = x0 + LABEL_GAP + 1;
+
+        int ascent = fm.getAscent();
+        int descent = fm.getDescent();
+        int halfAscent = ascent / 2 - 1;
+        int minY = ascent + 1;
+        int maxY = height - descent - EDGE_MARGIN;
+
+        for (int i = firstImTick; i <= lastImTick; i++) {
+            if (i == 0) {
+                continue;
+            }
+            int py = imToPixelY(i, height);
+            g.drawLine(x0 - TICK_HALF_LEN, py, x0 + TICK_HALF_LEN, py);
+
+            String text = Integer.toString(i);
+            int textX = fitsLeftOfAxis
+                ? x0 - fm.stringWidth(text) - LABEL_GAP
+                : rightTextX;
+            int textY = Math.max(minY, Math.min(maxY, py + halfAscent));
+
+            g.drawString(text, textX, textY);
+        }
     }
 
-    private int imagToPixelY(double im, int height) {
+    private int reToPixelX(double re, int width) {
+        return (int) Math.round(
+            (re - complexBounds.minRe()) / complexBounds.width() * (width - 1));
+    }
+
+    private int imToPixelY(double im, int height) {
         // invert Y axis: mathematical y increases upwards, screen y increases downwards
-        return (int) Math.round((yMax - im) / (yMax - yMin) * (height - 1));
+        return (int) Math.round(
+            (complexBounds.maxIm() - im) / complexBounds.height() * (height - 1));
     }
 
-    private double pixelXToReal(int px, int width) {
+    private double pixelXToRe(int px, int width) {
         int w = Math.max(1, width - 1);
-        return xMin + (px / (double) w) * (xMax - xMin);
+        return complexBounds.minRe() + (px / (double) w) * complexBounds.width();
     }
 
-    private double pixelYToImag(int py, int height) {
+    private double pixelYToIm(int py, int height) {
         int h = Math.max(1, height - 1);
-        return yMax - (py / (double) h) * (yMax - yMin);
+        return complexBounds.maxIm() - (py / (double) h) * complexBounds.height();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        setCursor(enabled ? Cursors.CROSSHAIR : Cursors.DEFAULT);
     }
 }

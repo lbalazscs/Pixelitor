@@ -20,8 +20,6 @@ package pixelitor.colors.palette;
 import pixelitor.colors.Colors;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.jhlabs.image.ImageMath.lerp;
 import static pixelitor.colors.FgBgColors.getBgColor;
@@ -29,112 +27,86 @@ import static pixelitor.colors.FgBgColors.getFgColor;
 
 /**
  * A palette that mixes foreground and background colors using HSB interpolation.
+ * The rows vary brightness around the interpolated value,
+ * from darker at the top to lighter at the bottom.
+ * The sliders rotate the hue and shift the saturation
+ * relative to the average of the two colors.
  */
 public class HSBColorMixPalette extends DynamicPalette {
-    // static palette-specific fields are remembered between dialog sessions
-    private static int lastRowCount = 7;
-    private static int lastColumnCount = 10;
-
-    private final boolean startWithFg;
-
-    private float hueA, hueB;
-    private final float satA, briA, satB, briB;
-    private final float averageSat;
-    private float satAdjustment = 0.0f;
-
     private static final float MAX_BRI_DEVIATION = 0.5f;
 
-    public HSBColorMixPalette(boolean startWithFg) {
-        super(lastRowCount, lastColumnCount);
-        this.startWithFg = startWithFg;
+    private final HueSatPaletteConfig hueSatConfig;
+    private final float hueA, hueB;
+    private final float satA, briA, satB, briB;
+    private final float averageSat;
 
+    public HSBColorMixPalette(boolean startWithFg) {
         Color colorA = startWithFg ? getFgColor() : getBgColor();
         Color colorB = startWithFg ? getBgColor() : getFgColor();
 
         float[] hsbA = Colors.toHsb(colorA);
         float[] hsbB = Colors.toHsb(colorB);
 
-        hueA = hsbA[0];
-        satA = hsbA[1];
-        briA = hsbA[2];
-        hueB = hsbB[0];
-        satB = hsbB[1];
-        briB = hsbB[2];
+        float hA = hsbA[0];
+        float sA = hsbA[1];
+        float bA = hsbA[2];
+        float hB = hsbB[0];
+        float sB = hsbB[1];
+        float bB = hsbB[2];
 
         // if saturation is zero, hue is meaningless and can cause
         // unexpected hue variations in the mix
-        if (satA == 0) {
-            hueA = hueB;
-        } else if (satB == 0) {
-            hueB = hueA;
+        if (sA == 0) {
+            hA = hB;
+        } else if (sB == 0) {
+            hB = hA;
         }
 
         // set the average saturation as the slider default
-        averageSat = (satA + satB) / 2.0f;
-        config = new HueSatPaletteConfig(0.0f, averageSat);
+        float averageSat = (sA + sB) / 2.0f;
+        var hueSatConfig = new HueSatPaletteConfig(0.0f, averageSat);
+
+        String title = startWithFg
+            ? "HSB Mix: Foreground to Background"
+            : "HSB Mix: Background to Foreground";
+
+        // default grid: 7 brightness rows × 10 color mix columns
+        super(title, hueSatConfig, 7, 10);
+
+        this.hueSatConfig = hueSatConfig;
+        this.hueA = hA;
+        this.satA = sA;
+        this.briA = bA;
+        this.hueB = hB;
+        this.satB = sB;
+        this.briB = bB;
+        this.averageSat = averageSat;
     }
 
     @Override
-    public void onConfigChanged() {
-        float configSat = ((HueSatPaletteConfig) config).getSaturation();
-        satAdjustment = configSat - averageSat;
-    }
-
-    @Override
-    public List<Color> getColors() {
-        List<Color> colors = new ArrayList<>(rowCount * columnCount);
-        float briStep = (rowCount > 1) ? calcBriStep() : 0;
-
-        for (int row = 0; row < rowCount; row++) {
-            for (int col = 0; col < columnCount; col++) {
-                float mixFactor = calcMixFactor(col);
-                float h = calcHue(mixFactor);
-                float s = calcSat(mixFactor);
-                float b = lerp(mixFactor, briA, briB);
-
-                if (rowCount > 1) {
-                    float startBri = b - MAX_BRI_DEVIATION;
-                    b = startBri + row * briStep;
-                    b = Math.clamp(b, 0.0f, 1.0f);
-                }
-
-                int rgb = Color.HSBtoRGB(h, s, b);
-                colors.add(new Color(rgb));
-            }
-        }
-        return colors;
-    }
-
-    private float calcBriStep() {
-        // the total brightness range (2 * MAX_BRI_DEVIATION) is
-        // divided into (rowCount - 1) parts
-        return 2 * MAX_BRI_DEVIATION / (rowCount - 1);
-    }
-
-    private float calcMixFactor(int col) {
-        return (col * (columnCount + 1) / (float) columnCount) / columnCount;
+    protected Color createColor(int row, int col) {
+        float mixFactor = calcColumnMixFactor(col);
+        return Color.getHSBColor(
+            calcHue(mixFactor),
+            calcSat(mixFactor),
+            calcBri(row, mixFactor));
     }
 
     private float calcSat(float mixFactor) {
-        float s = lerp(mixFactor, satA, satB) + satAdjustment;
-        return Math.max(0.0f, Math.min(1.0f, s));
+        // the difference between the slider's saturation and the
+        // default average, added to the interpolated saturation
+        float satOffset = hueSatConfig.getSaturation() - averageSat;
+        float s = lerp(mixFactor, satA, satB) + satOffset;
+        return Math.clamp(s, 0.0f, 1.0f);
     }
 
     private float calcHue(float mixFactor) {
-        float hueOffset = ((HueSatPaletteConfig) config).getHueOffset();
-        float h = hueOffset + Colors.lerpHue(mixFactor, hueA, hueB);
-        return h % 1.0f;
+        float hueOffset = hueSatConfig.getHueOffset();
+        return hueOffset + Colors.lerpHue(mixFactor, hueA, hueB);
     }
 
-    @Override
-    public void setGridSize(int rows, int columns) {
-        super.setGridSize(rows, columns);
-        lastColumnCount = columns;
-        lastRowCount = rows;
-    }
-
-    @Override
-    public String getDialogTitle() {
-        return startWithFg ? "HSB Mix with Background" : "HSB Mix with Foreground";
+    private float calcBri(int row, float mixFactor) {
+        float bri = lerp(mixFactor, briA, briB) + MAX_BRI_DEVIATION * calcRowOffset(row);
+        return Math.clamp(bri, 0.0f, 1.0f);
     }
 }

@@ -175,9 +175,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         // do this before actually replacing so that the old comp is
         // deselected before its view is set to null
-        History.add(new CompositionReplacedEdit(
-            "Reload", this, comp, newComp, null, true));
-        replaceComp(newComp, MaskViewMode.NORMAL, true);
+        History.add(new CompositionReplacedEdit("Reload", this, comp, newComp, CompositionReplacedContext.RELOAD));
+        replaceComp(newComp, MaskViewMode.NORMAL, CompositionReplacedContext.RELOAD);
 
         // the view was active when the reloading started, but since
         // the reloading was asynchronous, this could have changed
@@ -205,12 +204,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     // the simple form of replacing, used by multi-layer edits
     public void replaceComp(Composition newComp) {
-        replaceComp(newComp, getMaskViewMode(), false);
+        replaceComp(newComp, getMaskViewMode(), CompositionReplacedContext.TRANSFORM);
     }
 
     public void replaceComp(Composition newComp,
                             MaskViewMode newMaskViewMode,
-                            boolean reloaded) {
+                            CompositionReplacedContext context) {
         assert newComp != null;
 
         Composition oldComp = comp;
@@ -228,7 +227,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         newComp.addLayersToUI();
 
         if (isActive()) {
-            updateUIForNewComp(newComp, newMaskViewMode, reloaded);
+            updateUIForNewComp(newComp, newMaskViewMode, context);
         }
 
         if (newComp.isSmartObjectContent()) {
@@ -237,7 +236,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             }
         }
 
-        revalidate(); // update the scrollbars if the new comp has a different size
         canvasCoSizeChanged();
         repaint();
     }
@@ -245,17 +243,17 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     /**
      * Updates all UI elements when a new composition becomes active in this view.
      */
-    private void updateUIForNewComp(Composition newComp, MaskViewMode newMaskViewMode, boolean reloaded) {
+    private void updateUIForNewComp(Composition newComp, MaskViewMode newMaskViewMode, CompositionReplacedContext context) {
         LayersContainer.showLayersFor(this);
 
-        LayerEvents.fireActiveCompChanged(newComp, reloaded);
+        LayerEvents.fireActiveCompChanged(newComp, context == CompositionReplacedContext.RELOAD);
 
         setMaskViewMode(newMaskViewMode, newComp.getActiveLayer());
 
         repaintNavigator(true);
         HistogramsPanel.updateFrom(newComp);
         PixelitorWindow.get().updateTitle(newComp);
-        Tools.compReplaced(newComp, reloaded);
+        Tools.compReplaced(newComp, context);
     }
 
     @Override
@@ -409,7 +407,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             mask.paint(g2, true);
         } else {
             // paint the composite image of the composition
-            g2.drawImage(comp.getCompositeImage(), 0, 0, null);
+            ImageUtils.drawImageVisiblePart(g2, comp.getCompositeImage(), 0, 0);
 
             if (maskViewMode.isShowingRubylith()) {
                 // paint the mask as a red "rubylith" overlay over the composite image
@@ -542,6 +540,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         fitFrameToCanvas();
         updateLayout();
+        revalidate();
     }
 
     private void fitFrameToCanvas() {
@@ -651,8 +650,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         if (ImageArea.isActiveMode(ImageArea.Mode.FRAMES)) {
             updateTitle();
-        } else {
-            revalidate(); // ensure scrollbars update in tabbed UI
         }
 
         if (viewContainer != null) {

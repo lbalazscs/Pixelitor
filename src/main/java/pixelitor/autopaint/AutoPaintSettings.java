@@ -17,15 +17,13 @@
 
 package pixelitor.autopaint;
 
-import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pixelitor.Canvas;
-import pixelitor.Composition;
 import pixelitor.tools.AbstractBrushTool;
-import pixelitor.tools.util.PPoint;
 
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
 /**
  * Immutable configuration for a single auto-paint run.
@@ -39,50 +37,65 @@ public record AutoPaintSettings(
     ColorMode colorMode,
     double maxCurvature) {
 
-    // controls the "frequency" of the noise field
-    private static final float NOISE_SCALE = 3.0f;
+    public AutoPaintSettings {
+        // tools that ignore the paint color must never touch the FG color
+        if (!AutoPaint.toolUsesColors(tool)) {
+            colorMode = ColorMode.FOREGROUND;
+        }
+    }
 
     public static AutoPaintSettings of(AbstractBrushTool tool, int numStrokes, int baseStrokeLength,
                                        StrokeDirection strokeDirection, ColorMode colorMode,
                                        double lengthVariation, double maxCurvature) {
         double lengthRange = lengthVariation * baseStrokeLength;
-        return new AutoPaintSettings(tool, numStrokes,
-            (int) (baseStrokeLength - lengthRange), (int) (baseStrokeLength + lengthRange),
+        int minLength = Math.max(1, (int) Math.round(baseStrokeLength - lengthRange));
+        int maxLength = Math.max(minLength, (int) Math.round(baseStrokeLength + lengthRange));
+
+        return new AutoPaintSettings(tool, numStrokes, minLength, maxLength,
             strokeDirection, colorMode, maxCurvature);
+    }
+
+    public Path2D createRandomStrokePath(Canvas canvas, RandomGenerator rng) {
+        Point2D start = canvas.genRandomPoint(rng);
+        Point2D end = genRandomEndPoint(start, canvas, rng);
+
+        var path = new Path2D.Double(Path2D.WIND_NON_ZERO, 2);
+        path.moveTo(start.getX(), start.getY());
+
+        if (maxCurvature <= 0.0) {
+            path.lineTo(end.getX(), end.getY());
+            return path;
+        }
+
+        double dx = end.getX() - start.getX();
+        double dy = end.getY() - start.getY();
+        double midX = start.getX() + dx * 0.5;
+        double midY = start.getY() + dy * 0.5;
+
+        // The control point is the segment midpoint displaced along the normal.
+        // Unit normal = (-dy, dx) / length and displacement = (rand - 0.5) * length * maxCurvature,
+        // so the length cancels out: control = mid + (-dy, dx) * (rand - 0.5) * maxCurvature
+        double factor = (rng.nextDouble() - 0.5) * maxCurvature;
+        double controlX = midX - dy * factor;
+        double controlY = midY + dx * factor;
+
+        path.quadTo(controlX, controlY, end.getX(), end.getY());
+        return path;
     }
 
     /**
      * Generates a random end point for a stroke starting at the given point.
      */
-    public PPoint genRandomEndPoint(PPoint start, Composition comp, SplittableRandom rand) {
-        Canvas canvas = comp.getCanvas();
-        double angle = switch (strokeDirection) {
-            case RANDOM -> rand.nextDouble() * Math.TAU;
-            case RADIAL -> getRadialAngle(start, canvas);
-            case CIRCULAR -> getRadialAngle(start, canvas) + Math.PI / 2.0;
-            case NOISE -> {
-                float nx = (float) (start.getImX() * canvas.getAspectRatio() / canvas.getWidth());
-                float ny = (float) (start.getImY() / canvas.getHeight());
-                yield Noise.noise2(nx * NOISE_SCALE, ny * NOISE_SCALE) * Math.PI;
-            }
-        };
+    private Point2D genRandomEndPoint(Point2D start, Canvas canvas, RandomGenerator rng) {
+        double angle = strokeDirection.calcAngle(start, canvas, rng);
 
-        int strokeLength = genStrokeLength(rand);
-        double endX = start.getImX() + strokeLength * FastMath.cos(angle);
-        double endY = start.getImY() + strokeLength * FastMath.sin(angle);
-        return PPoint.lazyFromIm(endX, endY, comp.getView());
+        int strokeLength = genStrokeLength(rng);
+        double endX = start.getX() + strokeLength * FastMath.cos(angle);
+        double endY = start.getY() + strokeLength * FastMath.sin(angle);
+        return new Point2D.Double(endX, endY);
     }
 
-    /**
-     * Calculates the angle from the canvas center to the given point.
-     */
-    private static double getRadialAngle(PPoint point, Canvas canvas) {
-        Point2D center = canvas.getImCenter();
-        return FastMath.atan2(point.getImY() - center.getY(),
-            point.getImX() - center.getX());
-    }
-
-    private int genStrokeLength(SplittableRandom rand) {
-        return rand.nextInt(minStrokeLength, maxStrokeLength + 1);
+    private int genStrokeLength(RandomGenerator rng) {
+        return rng.nextInt(minStrokeLength, maxStrokeLength + 1);
     }
 }

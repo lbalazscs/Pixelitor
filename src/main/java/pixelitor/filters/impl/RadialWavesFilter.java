@@ -88,7 +88,7 @@ public class RadialWavesFilter extends CenteredTransformFilter {
         double waveValue = WaveType.wave(waveInput, waveType);
         r += waveValue * radialAmplitude * r / maxSize;
 
-        // apply zoom and convert back to cartesian coordinates
+        // apply zoom and convert back to Cartesian coordinates
         double zoomedR = r / zoom;
         double u = zoomedR * FastMath.cos(angle);
         double v = zoomedR * FastMath.sin(angle);

@@ -36,13 +36,13 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    public boolean disableForSmartObjects() {
-        return true;
+    public boolean supportsSmartObjects() {
+        return false;
     }
 
     @Override
     protected void updateCanvasSize(Canvas newCanvas, View view) {
-        angle.resizeNewCanvas(newCanvas, view);
+        angle.updateCanvasSize(newCanvas, view);
     }
 
     @Override
@@ -56,8 +56,8 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createCanvasTransform(Canvas canvas) {
-        return angle.createCanvasTransform(canvas);
+    protected AffineTransform createImTransform(Canvas canvas) {
+        return angle.createImTransform(canvas);
     }
 
     @Override

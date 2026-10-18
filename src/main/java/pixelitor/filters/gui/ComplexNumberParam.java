@@ -18,11 +18,13 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.filters.util.ComplexBounds;
 
 import javax.swing.*;
 import java.awt.geom.Point2D;
 import java.io.Serial;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A {@link FilterParam} that allows selecting a complex number within
@@ -35,27 +37,17 @@ public class ComplexNumberParam extends AbstractFilterParam {
     private final double defaultRe;
     private final double defaultIm;
 
-    private final double minRe;
-    private final double maxRe;
-    private final double minIm;
-    private final double maxIm;
+    private final ComplexBounds bounds;
 
-    public ComplexNumberParam(String name, double re, double im,
-                              double minRe, double maxRe, double minIm, double maxIm) {
+    public ComplexNumberParam(String name, double re, double im, ComplexBounds bounds) {
         super(name, RandomizeMode.ALLOW);
 
-        if (minRe >= maxRe || minIm >= maxIm) {
-            throw new IllegalArgumentException();
-        }
+        this.bounds = Objects.requireNonNull(bounds);
 
-        this.re = re;
-        this.im = im;
-        this.defaultRe = re;
-        this.defaultIm = im;
-        this.minRe = minRe;
-        this.maxRe = maxRe;
-        this.minIm = minIm;
-        this.maxIm = maxIm;
+        this.re = bounds.clampRe(re);
+        this.im = bounds.clampIm(im);
+        this.defaultRe = this.re;
+        this.defaultIm = this.im;
     }
 
     @Override
@@ -69,9 +61,7 @@ public class ComplexNumberParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        double randomRe = minRe + Math.random() * (maxRe - minRe);
-        double randomIm = minIm + Math.random() * (maxIm - minIm);
-        setValue(randomRe, randomIm, true, false, false);
+        setValue(bounds.randomRe(), bounds.randomIm(), true, false, false);
     }
 
     public double getRe() {
@@ -86,27 +76,15 @@ public class ComplexNumberParam extends AbstractFilterParam {
         return new Point2D.Double(re, im);
     }
 
-    public double getMinRe() {
-        return minRe;
-    }
-
-    public double getMaxRe() {
-        return maxRe;
-    }
-
-    public double getMinIm() {
-        return minIm;
-    }
-
-    public double getMaxIm() {
-        return maxIm;
+    public ComplexBounds getBounds() {
+        return bounds;
     }
 
     public void setValue(double re, double im,
                          boolean updateGUI, boolean isAdjusting,
                          boolean trigger) {
-        this.re = re;
-        this.im = im;
+        this.re = bounds.clampRe(re);
+        this.im = bounds.clampIm(im);
         if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
         }
@@ -190,6 +168,7 @@ public class ComplexNumberParam extends AbstractFilterParam {
 
         @Override
         public ComplexNumberParamState interpolate(ComplexNumberParamState endState, double progress) {
+            // interpolates in Cartesian coordinates, not polar
             double interpolatedRe = ImageMath.lerp(progress, re, endState.re);
             double interpolatedIm = ImageMath.lerp(progress, im, endState.im);
             return new ComplexNumberParamState(interpolatedRe, interpolatedIm);

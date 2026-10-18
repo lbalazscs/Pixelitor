@@ -21,6 +21,7 @@ import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.AppPanel;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
@@ -218,10 +219,10 @@ public class Tools {
         activeTool.imCoordsChanged(at, view);
     }
 
-    public static void compReplaced(Composition newComp, boolean reloaded) {
+    public static void compReplaced(Composition newComp, CompositionReplacedContext context) {
         assert newComp.isActive();
 
-        activeTool.compReplaced(newComp, reloaded);
+        activeTool.compReplaced(newComp, context);
     }
 
     public static void editingTargetChanged(Layer activeLayer) {

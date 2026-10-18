@@ -21,8 +21,8 @@ import pixelitor.layers.Filterable;
 import pixelitor.utils.debug.Debuggable;
 
 /**
- * The model for a filter parameter, which (unlike a button) holds
- * a value that can be changed by the user.
+ * The model for a filter parameter, which (unlike a button)
+ * holds a value that can be changed by the user.
  * For practical reasons, implementations of this interface are also
  * used outside of filters as models of GUI elements. In such cases,
  * only a subset of their functionality is used.

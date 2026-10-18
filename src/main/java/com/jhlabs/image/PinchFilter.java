@@ -18,24 +18,27 @@ package com.jhlabs.image;
 
 import net.jafama.FastMath;
 
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 
+import static com.jhlabs.image.ImageMath.HALF_PI;
+
 /**
- * A filter which performs the popular whirl-and-pinch distortion effect.
+ * A filter which performs a swirl-and-pinch distortion effect.
  */
 public class PinchFilter extends TransformFilter {
     private final float angle;
-    private final float radius;
-    private final float radius2;
+    private final float radiusSq;
     private final float pinchBulgeAmount;
 
     private final float cx;
     private final float cy;
 
     private final float zoom;
-    private final float rotateResultAngle;
+    private final float rotation;
+
+    private final float cosR;
+    private final float sinR;
+    private final boolean outsideIsIdentity;
 
     /**
      * Constructs a PinchFilter with all parameters specified.
@@ -49,73 +52,71 @@ public class PinchFilter extends TransformFilter {
      * @param radius            the radius of the effect (must be >= 0)
      * @param center            the center of the effect in pixels
      * @param zoom              the zoom factor (1 = no zoom)
-     * @param rotateResultAngle additional rotation applied to the result in radians
+     * @param rotation          additional rotation applied to the result in radians
      */
     public PinchFilter(String filterName, int edgeAction, int interpolation,
                        float swirlAmount, float pinchBulgeAmount, float radius,
-                       Point2D center, float zoom, float rotateResultAngle) {
+                       Point2D center, float zoom, float rotation) {
         super(filterName, edgeAction, interpolation);
 
         this.angle = -swirlAmount;
         this.pinchBulgeAmount = -pinchBulgeAmount;
 
-        this.radius = radius;
-        this.radius2 = radius * radius;
+        this.radiusSq = radius * radius;
 
         this.cx = (float) center.getX();
         this.cy = (float) center.getY();
 
         this.zoom = zoom;
-        this.rotateResultAngle = rotateResultAngle;
+        this.rotation = rotation;
+
+        this.cosR = (float) (Math.cos(rotation) / zoom);
+        this.sinR = (float) (Math.sin(rotation) / zoom);
+        this.outsideIsIdentity = zoom == 1.0f && rotation == 0.0f;
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
         float dx = x - cx;
         float dy = y - cy;
-        float distance = dx * dx + dy * dy;
+        float distanceSq = dx * dx + dy * dy;
 
-        if (distance > radius2 || distance == 0) {
-            double theta = FastMath.atan2(dy, dx);
-            theta += rotateResultAngle;
-            double r = Math.sqrt(distance);
-            double zoomedR = r / zoom;
-            float u = (float) (zoomedR * FastMath.cos(theta));
-            float v = (float) (zoomedR * FastMath.sin(theta));
-
-            out[0] = (u + cx);
-            out[1] = (v + cy);
+        if (distanceSq > radiusSq || distanceSq == 0) { // outside the radius
+            if (outsideIsIdentity) { // fast path for default settings
+                out[0] = x;
+                out[1] = y;
+            } else {
+                // only zoom and rotate via 2D rotation matrix
+                out[0] = cx + (cosR * dx - sinR * dy);
+                out[1] = cy + (sinR * dx + cosR * dy);
+            }
         } else {
-            float scaledDist = (float) Math.sqrt(distance / radius2);
-            float pinchBulgeFactor = (float) FastMath.pow(
-                FastMath.sin(Math.PI * 0.5 * scaledDist),
-                -pinchBulgeAmount
-            );
+            float scaledDist = (float) Math.sqrt(distanceSq / radiusSq);
 
-            // pinch-bulge
-            dx *= pinchBulgeFactor;
-            dy *= pinchBulgeFactor;
+            if (pinchBulgeAmount != 0) {
+                // pinch-bulge
+                float factor = (float) FastMath.pow(
+                    FastMath.sin(HALF_PI * scaledDist),
+                    -pinchBulgeAmount
+                );
+                dx *= factor;
+                dy *= factor;
+            }
 
             // twirl
-            float e = 1 - scaledDist;
-            float a = angle * e * e;
+            float falloff = 1 - scaledDist;
+            float a = angle * falloff * falloff;
 
-            a += rotateResultAngle;
+            a += rotation;
 
             float sin = (float) FastMath.sin(a);
             float cos = (float) FastMath.cos(a);
 
-            float u = (cos * dx - sin * dy) / zoom;
-            float v = (sin * dx + cos * dy) / zoom;
+            float srcDx = (cos * dx - sin * dy) / zoom;
+            float srcDy = (sin * dx + cos * dy) / zoom;
 
-            out[0] = cx + u;
-            out[1] = cy + v;
+            out[0] = cx + srcDx;
+            out[1] = cy + srcDy;
         }
-    }
-
-    public Shape[] getAffectedAreaShapes() {
-        return new Shape[]{
-            new Ellipse2D.Float(cx - radius, cy - radius, 2 * radius, 2 * radius)
-        };
     }
 }

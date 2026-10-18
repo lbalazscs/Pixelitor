@@ -19,9 +19,8 @@ package pixelitor;
 
 import pixelitor.gui.View;
 import pixelitor.tools.Symmetry;
-import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Rnd;
+import pixelitor.utils.RectClip;
 import pixelitor.utils.Thumbnails;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
@@ -31,12 +30,12 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.random.RandomGenerator;
 
 /**
  * The canvas represents the size of a composition.
@@ -170,10 +169,11 @@ public class Canvas implements Serializable, Debuggable {
      * Inverts the given shape with respect to the canvas bounds.
      */
     public Shape invertShape(Shape shape) {
-        Area shapeArea = new Area(shape);
-        Area fullArea = new Area(getBounds());
-        fullArea.subtract(shapeArea);
-        return fullArea;
+        return RectClip.subtract(getBounds(), shape);
+//        Area shapeArea = new Area(shape);
+//        Area fullArea = new Area(getBounds());
+//        fullArea.subtract(shapeArea);
+//        return fullArea;
     }
 
     /**
@@ -191,11 +191,13 @@ public class Canvas implements Serializable, Debuggable {
             return rect.createIntersection(canvasBounds);
         }
 
-        Area canvasArea = new Area(canvasBounds);
-        Area shapeArea = new Area(shape);
-        shapeArea.intersect(canvasArea);
+        return RectClip.intersect(shape, getBounds());
 
-        return shapeArea;
+//        Area canvasArea = new Area(canvasBounds);
+//        Area shapeArea = new Area(shape);
+//        shapeArea.intersect(canvasArea);
+//
+//        return shapeArea;
     }
 
     /**
@@ -234,10 +236,10 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Generates a random {@link PPoint} within the canvas boundaries.
+     * Generates a random image-space point within the canvas boundaries.
      */
-    public PPoint genRandomPoint(View view) {
-        return PPoint.lazyFromIm(Rnd.nextInt(width), Rnd.nextInt(height), view);
+    public Point2D genRandomPoint(RandomGenerator rng) {
+        return new Point2D.Double(rng.nextInt(width), rng.nextInt(height));
     }
 
     public Dimension getThumbSize() {

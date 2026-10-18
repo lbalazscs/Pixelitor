@@ -55,7 +55,7 @@ public class PoissonDiskSampling {
     private final double cellHeight;
 
     public PoissonDiskSampling(int width, int height, double minDist, int k,
-                               boolean improved, RandomGenerator rnd) {
+                               boolean improved, RandomGenerator rng) {
         this.width = width;
         this.height = height;
         this.rSq = minDist * minDist;
@@ -87,18 +87,18 @@ public class PoissonDiskSampling {
         activeList.add(initialSample);
 
         while (!activeList.isEmpty()) {
-            int randomIndex = rnd.nextInt(activeList.size());
+            int randomIndex = rng.nextInt(activeList.size());
             Point2D activePoint = activeList.get(randomIndex);
             boolean goodPointFound = false;
             for (int i = 0; i < k; i++) {
                 Vector2D candidate;
-                double angle = Math.TAU * rnd.nextDouble();
+                double angle = Math.TAU * rng.nextDouble();
                 if (improved) {
                     double dist = minDist + 0.0000001;
                     candidate = Vector2D.createFromPolar(angle, dist);
                 } else {
                     candidate = Vector2D.createUnitFromAngle(angle);
-                    double dist = minDist + rnd.nextDouble() * minDist;
+                    double dist = minDist + rng.nextDouble() * minDist;
                     candidate.multiply(dist);
                 }
                 candidate.add(activePoint);

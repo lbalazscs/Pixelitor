@@ -18,26 +18,19 @@
 package pixelitor.colors.palette;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.jhlabs.image.ImageMath.mixColors;
 import static pixelitor.colors.FgBgColors.getBgColor;
 import static pixelitor.colors.FgBgColors.getFgColor;
+import static pixelitor.colors.palette.RGBPaletteConfig.NEUTRAL;
 
 /**
  * A palette that mixes foreground and background colors using RGB interpolation.
+ * The rows tint toward black above the middle row and toward white below it.
+ * The config sliders apply an additional color shift.
  */
 public class RGBColorMixPalette extends DynamicPalette {
-    // static palette-specific fields are remembered between dialog sessions
-    private static int lastRowCount = 7;
-    private static int lastColumnCount = 10;
-
-    private final int rgbA;
-    private final int rgbB;
-    private final boolean startWithFg;
-
-    // opaque color constants for mixing
+    // opaque packed ARGB constants for mixing
     private static final int OPAQUE_RED = 0xFF_FF_00_00;
     private static final int OPAQUE_GREEN = 0xFF_00_FF_00;
     private static final int OPAQUE_BLUE = 0xFF_00_00_FF;
@@ -47,83 +40,66 @@ public class RGBColorMixPalette extends DynamicPalette {
     private static final int OPAQUE_BLACK = 0xFF_00_00_00;
     private static final int OPAQUE_WHITE = 0xFF_FF_FF_FF;
 
-    public RGBColorMixPalette(boolean startWithFg) {
-        super(lastRowCount, lastColumnCount);
-        this.startWithFg = startWithFg;
+    private final RGBPaletteConfig rgbConfig;
 
+    // packed ARGB ints at the start and end of the interpolation
+    private final int startRgb;
+    private final int endRgb;
+
+    public RGBColorMixPalette(boolean startWithFg) {
         Color colorA = startWithFg ? getFgColor() : getBgColor();
         Color colorB = startWithFg ? getBgColor() : getFgColor();
 
-        rgbA = colorA.getRGB();
-        rgbB = colorB.getRGB();
+        String title = startWithFg
+            ? "RGB Mix: Foreground to Background"
+            : "RGB Mix: Background to Foreground";
 
-        config = new RGBPaletteConfig();
+        var rgbConfig = new RGBPaletteConfig();
+
+        // default grid: 7 brightness rows (tinted toward black/white) × 10 color mix columns
+        super(title, rgbConfig, 7, 10);
+
+        this.rgbConfig = rgbConfig;
+        this.startRgb = colorA.getRGB();
+        this.endRgb = colorB.getRGB();
     }
 
     @Override
-    public List<Color> getColors() {
-        List<Color> colors = new ArrayList<>(rowCount * columnCount);
-        int rowsMiddle = rowCount / 2;
-
-        for (int row = 0; row < rowCount; row++) {
-            for (int col = 0; col < columnCount; col++) {
-                int mixed = getMixed(col);
-
-                if (row < rowsMiddle) {
-                    float mixFactor = (rowsMiddle - row) / (rowsMiddle + 1.0f);
-                    mixed = mixColors(mixFactor, mixed, OPAQUE_BLACK);
-                } else if (row > rowsMiddle) {
-                    float mixFactor = (row - rowsMiddle) / (rowsMiddle + 1.0f);
-                    mixed = mixColors(mixFactor, mixed, OPAQUE_WHITE);
-                }
-                colors.add(new Color(mixed));
-            }
-        }
-        return colors;
+    protected Color createColor(int row, int col) {
+        int colColor = calcColumnColor(col);
+        int mixed = tintRow(colColor, row);
+        return new Color(mixed);
     }
 
-    private int getMixed(int x) {
-        float mixFactor = calcMixFactor(x);
-        int mixed = mixColors(mixFactor, rgbA, rgbB);
-
-        var rgbConfig = (RGBPaletteConfig) config;
-        float cyanRed = rgbConfig.getCyanRed();
-        if (cyanRed > 0.5f) {
-            mixed = mixColors(cyanRed - 0.5f, mixed, OPAQUE_RED);
-        } else {
-            mixed = mixColors(0.5f - cyanRed, mixed, OPAQUE_CYAN);
+    /**
+     * Rows above the middle blend toward black, rows below toward white,
+     * and the middle row stays as is.
+     */
+    private int tintRow(int rgb, int row) {
+        int middleRow = numRows / 2;
+        if (row == middleRow) {
+            return rgb; // the middle row keeps the pure column color
         }
 
-        float magentaGreen = rgbConfig.getMagentaGreen();
-        if (magentaGreen > 0.5f) {
-            mixed = mixColors(magentaGreen - 0.5f, mixed, OPAQUE_GREEN);
-        } else {
-            mixed = mixColors(0.5f - magentaGreen, mixed, OPAQUE_MAGENTA);
-        }
+        boolean aboveMiddle = row < middleRow;
+        int target = aboveMiddle ? OPAQUE_BLACK : OPAQUE_WHITE;
+        int rowsInDirection = aboveMiddle ? middleRow : numRows - middleRow - 1;
+        float t = Math.abs(row - middleRow) / (rowsInDirection + 1.0f);
 
-        float yellowBlue = rgbConfig.getYellowBlue();
-        if (yellowBlue > 0.5f) {
-            mixed = mixColors(yellowBlue - 0.5f, mixed, OPAQUE_BLUE);
-        } else {
-            mixed = mixColors(0.5f - yellowBlue, mixed, OPAQUE_YELLOW);
-        }
-
-        return mixed;
+        return mixColors(t, rgb, target);
     }
 
-    private float calcMixFactor(int x) {
-        return (x * (columnCount + 1) / (float) columnCount) / columnCount;
+    private int calcColumnColor(int col) {
+        int mixed = mixColors(calcColumnMixFactor(col), startRgb, endRgb);
+        mixed = applyShift(mixed, rgbConfig.getCyanRed(), OPAQUE_RED, OPAQUE_CYAN);
+        mixed = applyShift(mixed, rgbConfig.getMagentaGreen(), OPAQUE_GREEN, OPAQUE_MAGENTA);
+        return applyShift(mixed, rgbConfig.getYellowBlue(), OPAQUE_BLUE, OPAQUE_YELLOW);
     }
 
-    @Override
-    public void setGridSize(int rows, int columns) {
-        super.setGridSize(rows, columns);
-        lastColumnCount = columns;
-        lastRowCount = rows;
-    }
-
-    @Override
-    public String getDialogTitle() {
-        return startWithFg ? "RGB Mix with Background" : "RGB Mix with Foreground";
+    private static int applyShift(int rgb, float sliderValue, int highTarget, int lowTarget) {
+        float delta = sliderValue - NEUTRAL;
+        return delta > 0
+            ? mixColors(delta, rgb, highTarget)
+            : mixColors(-delta, rgb, lowTarget);
     }
 }

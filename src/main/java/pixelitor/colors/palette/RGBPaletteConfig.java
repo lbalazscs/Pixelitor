@@ -18,22 +18,25 @@
 package pixelitor.colors.palette;
 
 import javax.swing.*;
-import java.awt.GridBagLayout;
-
-import static pixelitor.colors.palette.PaletteConfig.addSliderRow;
 
 /**
  * Configuration for RGB color mixing with cyan-red, magenta-green, and yellow-blue sliders.
  */
 public class RGBPaletteConfig implements PaletteConfig {
-    private float cyanRed = 0.5f;
-    private JSlider crSlider;
+    public static final float NEUTRAL = 0.5f;
 
-    private float magentaGreen = 0.5f;
-    private JSlider mgSlider;
+    private float cyanRed = NEUTRAL;
+    private float magentaGreen = NEUTRAL;
+    private float yellowBlue = NEUTRAL;
 
-    private float yellowBlue = 0.5f;
-    private JSlider ybSlider;
+    @Override
+    public JPanel createConfigPanel(Runnable onChange) {
+        return new SliderPanelBuilder(onChange)
+            .add("C-R:", "Cyan-red shift", cyanRed, v -> cyanRed = v)
+            .add("M-G:", "Magenta-green shift", magentaGreen, v -> magentaGreen = v)
+            .add("Y-B:", "Yellow-blue shift", yellowBlue, v -> yellowBlue = v)
+            .build();
+    }
 
     public float getCyanRed() {
         return cyanRed;
@@ -45,43 +48,5 @@ public class RGBPaletteConfig implements PaletteConfig {
 
     public float getYellowBlue() {
         return yellowBlue;
-    }
-
-    @Override
-    public JPanel createConfigPanel(PalettePanel palettePanel) {
-        JPanel panel = new JPanel(new GridBagLayout());
-
-        crSlider = addSliderRow("C-R:", "Cyan-red shift",
-            _ -> cyanRedChanged(palettePanel), cyanRed, panel, 0);
-        mgSlider = addSliderRow("M-G:", "Magenta-green shift",
-            _ -> magentaGreenChanged(palettePanel), magentaGreen, panel, 1);
-        ybSlider = addSliderRow("Y-B:", "Yellow-blue shift",
-            _ -> yellowBlueChanged(palettePanel), yellowBlue, panel, 2);
-
-        return panel;
-    }
-
-    private void cyanRedChanged(PalettePanel panel) {
-        float oldValue = cyanRed;
-        cyanRed = crSlider.getValue() / 100.0f;
-        if (oldValue != cyanRed) {
-            panel.onConfigChanged();
-        }
-    }
-
-    private void magentaGreenChanged(PalettePanel panel) {
-        float oldValue = magentaGreen;
-        magentaGreen = mgSlider.getValue() / 100.0f;
-        if (oldValue != magentaGreen) {
-            panel.onConfigChanged();
-        }
-    }
-
-    private void yellowBlueChanged(PalettePanel panel) {
-        float oldValue = yellowBlue;
-        yellowBlue = ybSlider.getValue() / 100.0f;
-        if (oldValue != yellowBlue) {
-            panel.onConfigChanged();
-        }
     }
 }

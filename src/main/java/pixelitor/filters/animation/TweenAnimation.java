@@ -14,10 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.animation;
 
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterState;
+import pixelitor.filters.gui.ParamSet;
 import pixelitor.gui.utils.Dialogs;
 
 import java.awt.Component;
@@ -35,6 +37,8 @@ import static pixelitor.utils.Threads.calledOnEDT;
  * A tweening animation that interpolates filter parameters between two states.
  */
 public class TweenAnimation {
+    public static final int MAX_FRAMES = 100_000;
+
     private ParametrizedFilter filter;
     private FilterState initialState;
     private FilterState finalState;
@@ -55,11 +59,27 @@ public class TweenAnimation {
     }
 
     public void setFilter(ParametrizedFilter filter) {
-        this.filter = filter;
+        if (this.filter != filter) {
+            this.filter = filter;
+            // setting a different filter discards the captured states
+            initialState = null;
+            finalState = null;
+        }
     }
 
     public void captureInitialState() {
         initialState = filter.getParamSet().copyState(true);
+    }
+
+    /**
+     * Restores the captured initial state into the filter's {@link ParamSet}
+     * without triggering a filter execution, leaving non-animatable parameters untouched.
+     */
+    public void restoreInitialState() {
+        if (initialState == null) {
+            throw new IllegalStateException("Initial state has not been captured yet");
+        }
+        filter.getParamSet().setState(initialState, true);
     }
 
     public void captureFinalState() {
@@ -69,6 +89,47 @@ public class TweenAnimation {
     public FilterState interpolateState(double time) {
         double progress = interpolation.timeToProgress(time);
         return initialState.interpolate(finalState, progress);
+    }
+
+    /**
+     * Calculates the total number of frames rendered for the given base frame count
+     * and ping-pong setting, avoiding integer overflow.
+     */
+    public static int totalFrameCount(int baseFrames, boolean pingPong) {
+        if (pingPong && baseFrames > 2) {
+            long total = 2L * baseFrames - 2;
+            return (int) Math.min(total, Integer.MAX_VALUE);
+        }
+        return baseFrames;
+    }
+
+    /**
+     * Calculates the normalized interpolation time (0.0 to 1.0) for a given frame index.
+     */
+    public double calcInterpolationTime(int frameIndex) {
+        return calcInterpolationTime(frameIndex, numFrames);
+    }
+
+    /**
+     * Calculates the normalized interpolation time (0.0 to 1.0) for a given frame index
+     * and base frame count.
+     */
+    public static double calcInterpolationTime(int frameIndex, int baseFrameCount) {
+        if (baseFrameCount <= 1) {
+            return 0.0;
+        }
+
+        // time moves from 0.0 to 1.0 inclusive over baseFrameCount frames
+        double timeStep = 1.0 / (baseFrameCount - 1);
+
+        if (frameIndex < baseFrameCount) {
+            // forward animation phase
+            return frameIndex * timeStep;
+        } else {
+            // reverse animation phase (pong)
+            int reverseIndex = 2 * (baseFrameCount - 1) - frameIndex;
+            return reverseIndex * timeStep;
+        }
     }
 
     public AnimationWriter createWriter() {
@@ -110,17 +171,17 @@ public class TweenAnimation {
     /**
      * Warns the user about overwriting existing files and returns whether to proceed.
      */
-    public boolean checkOverwrite(Component dialogParent) {
+    public boolean confirmOverwrite(Component dialogParent) {
         assert calledOnEDT() : callInfo();
 
         if (outputType.needsDirectory()) {
-            return checkOverwriteForDirectory(dialogParent);
+            return confirmOverwriteForDirectory(dialogParent);
         } else { // file
-            return checkOverwriteForFile(dialogParent);
+            return confirmOverwriteForFile(dialogParent);
         }
     }
 
-    private boolean checkOverwriteForDirectory(Component dialogParent) {
+    private boolean confirmOverwriteForDirectory(Component dialogParent) {
         assert outputLocation.isDirectory() : outputLocation.getAbsolutePath();
 
         Path dirPath = outputLocation.toPath();
@@ -137,7 +198,7 @@ public class TweenAnimation {
         }
     }
 
-    private boolean checkOverwriteForFile(Component dialogParent) {
+    private boolean confirmOverwriteForFile(Component dialogParent) {
         if (outputLocation.exists()) {
             assert outputLocation.isFile() : outputLocation.getAbsolutePath();
 
@@ -165,7 +226,7 @@ public class TweenAnimation {
     }
 
     private boolean showFileExistsDialog(Component dialogParent) {
-        return Dialogs.showYesNoWarning(dialogParent, "File exists",
+        return Dialogs.showYesNoWarning(dialogParent, "File Exists",
             outputLocation.getAbsolutePath() + " exists already. Overwrite?");
     }
 }

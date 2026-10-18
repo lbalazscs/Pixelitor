@@ -18,6 +18,8 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.compactions.CompAction;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.View;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tools;
@@ -33,30 +35,39 @@ import java.util.Objects;
 
 /**
  * Used when a {@link Composition} is replaced in its {@link View},
- * for example during a file reload or a multi-layer edit.
+ * for example during a file reload or a {@link CompAction} edit.
  */
 public class CompositionReplacedEdit extends PixelitorEdit {
-    private SoftReference<Composition> backupCompRef;
+    private SoftReference<Composition> otherCompRef;
     private final MaskViewMode oldMaskViewMode;
     private final View view;
 
     private DeselectEdit oldDeselectEdit;
     private DeselectEdit newDeselectEdit;
 
-    private final AffineTransform canvasTransform;
-    private AffineTransform inverseCanvasTransform;
-    private final boolean isReload;
+    private final AffineTransform imTransform;
+    private AffineTransform inverseImTransform;
+
+    private final CompositionReplacedContext context;
 
     public CompositionReplacedEdit(String name, View view,
                                    Composition oldComp, Composition newComp,
-                                   AffineTransform canvasTransform, boolean isReload) {
+                                   CompositionReplacedContext context) {
+        assert context != CompositionReplacedContext.TRANSFORM;
+        this(name, view, oldComp, newComp, null, context);
+    }
+
+    public CompositionReplacedEdit(String name, View view,
+                                   Composition oldComp, Composition newComp,
+                                   AffineTransform imTransform, CompositionReplacedContext context) {
         super(name, newComp, true);
-        this.isReload = isReload;
+        this.context = context;
 
         assert oldComp != null;
         assert oldComp != newComp;
 
-        if (canvasTransform != null || isReload) {
+        boolean isReload = context == CompositionReplacedContext.RELOAD;
+        if (imTransform != null || isReload) {
             boolean allowBothNull = !isReload;
             if (!compsHaveSameFile(oldComp, newComp, allowBothNull)) {
                 throw new IllegalStateException("old = " + oldComp.getFile() + ", new = " + newComp.getFile());
@@ -69,13 +80,13 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             oldDeselectEdit = oldComp.deselect(false);
         }
 
-        backupCompRef = new SoftReference<>(oldComp);
+        otherCompRef = new SoftReference<>(oldComp);
 
         // saving this is needed for example when reloading a composition
         oldMaskViewMode = view.getMaskViewMode();
 
         this.view = view;
-        this.canvasTransform = canvasTransform;
+        this.imTransform = imTransform;
 
         assert !oldComp.hasSelection();
     }
@@ -84,7 +95,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        Composition oldComp = backupCompRef.get();
+        Composition oldComp = otherCompRef.get();
         if (oldComp == null) {
             throw new CannotUndoException();
         }
@@ -97,7 +108,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             }
         }
 
-        view.replaceComp(oldComp, oldMaskViewMode, isReload);
+        view.replaceComp(oldComp, oldMaskViewMode, context);
 
         if (oldDeselectEdit != null) {
             oldDeselectEdit.undo();
@@ -107,22 +118,22 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         // reference and the old comp in the edit
         Composition newComp = comp;
         comp = oldComp;
-        backupCompRef = new SoftReference<>(newComp);
+        otherCompRef = new SoftReference<>(newComp);
 
         assert !newComp.hasSelection();
 
-        if (canvasTransform != null) { // there was a transform
-            if (inverseCanvasTransform == null) { // first undo
+        if (imTransform != null) { // there was a transform
+            if (inverseImTransform == null) { // first undo
                 try {
-                    inverseCanvasTransform = canvasTransform.createInverse();
+                    inverseImTransform = imTransform.createInverse();
                 } catch (NoninvertibleTransformException e) {
-                    inverseCanvasTransform = null;
+                    inverseImTransform = null;
                 }
             }
-            if (inverseCanvasTransform != null) { // successful inversion
+            if (inverseImTransform != null) { // successful inversion
                 // the path of the composition was restored together with
                 // the old comp, but the tool widgets need updating
-                Tools.imCoordsChanged(inverseCanvasTransform, view);
+                Tools.imCoordsChanged(inverseImTransform, view);
             }
         }
     }
@@ -131,7 +142,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        Composition newComp = backupCompRef.get();
+        Composition newComp = otherCompRef.get();
         if (newComp == null) {
             throw new CannotRedoException();
         }
@@ -140,7 +151,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             oldDeselectEdit.redo();
         }
 
-        view.replaceComp(newComp, MaskViewMode.NORMAL, isReload);
+        view.replaceComp(newComp, MaskViewMode.NORMAL, context);
 
         if (newDeselectEdit != null) {
             newDeselectEdit.undo();
@@ -150,19 +161,19 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         // reference and the new comp in the edit
         Composition oldComp = comp;
         comp = newComp;
-        backupCompRef = new SoftReference<>(oldComp);
+        otherCompRef = new SoftReference<>(oldComp);
 
         assert !oldComp.hasSelection();
 
-        if (canvasTransform != null) { // there was a transform
-            Tools.imCoordsChanged(canvasTransform, view);
+        if (imTransform != null) { // there was a transform
+            Tools.imCoordsChanged(imTransform, view);
         }
     }
 
     @Override
     public boolean makesDirty() {
         // reloading should not result in a dirty comp
-        return !isReload;
+        return context != CompositionReplacedContext.RELOAD;
     }
 
     private static boolean compsHaveSameFile(Composition comp1, Composition comp2, boolean allowBothNull) {
@@ -177,7 +188,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
-        node.addNullableDebuggable("backup comp", backupCompRef.get());
+        node.addNullableDebuggable("other comp", otherCompRef.get());
         return node;
     }
 }

@@ -30,9 +30,13 @@ import java.awt.Rectangle;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
+import java.util.random.RandomGenerator;
 
 import static java.awt.font.TextAttribute.*;
 
@@ -74,8 +78,8 @@ public class Rnd {
         return items.get(nextInt(items.size()));
     }
 
-    public static <T> T chooseFrom(List<T> items, Random rnd) {
-        return items.get(rnd.nextInt(items.size()));
+    public static <T> T chooseFrom(List<T> items, RandomGenerator rng) {
+        return items.get(rng.nextInt(items.size()));
     }
 
     /**
@@ -99,10 +103,10 @@ public class Rnd {
         return new Point(intInRange(minX, maxX), intInRange(minY, maxY));
     }
 
-    public static Point2D point2DInRect(Rectangle2D bounds, Random rnd) {
+    public static Point2D point2DInRect(Rectangle2D bounds, RandomGenerator rng) {
         return new Point2D.Double(
-            bounds.getX() + bounds.getWidth() * rnd.nextDouble(),
-            bounds.getY() + bounds.getHeight() * rnd.nextDouble());
+            bounds.getX() + bounds.getWidth() * rng.nextDouble(),
+            bounds.getY() + bounds.getHeight() * rng.nextDouble());
     }
 
     /**
@@ -160,13 +164,13 @@ public class Rnd {
         return createRandomColor(ThreadLocalRandom.current(), randomAlpha);
     }
 
-    public static Color createRandomColor(Random rnd, boolean randomAlpha) {
-        int r = rnd.nextInt(256);
-        int g = rnd.nextInt(256);
-        int b = rnd.nextInt(256);
+    public static Color createRandomColor(RandomGenerator rng, boolean randomAlpha) {
+        int r = rng.nextInt(256);
+        int g = rng.nextInt(256);
+        int b = rng.nextInt(256);
 
         return randomAlpha
-            ? new Color(r, g, b, rnd.nextInt(256)) // random transparency
+            ? new Color(r, g, b, rng.nextInt(256)) // random transparency
             : new Color(r, g, b); // opaque
     }
 

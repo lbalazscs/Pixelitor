@@ -21,6 +21,7 @@ import com.bric.geom.ShapeStringUtils;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.View;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -81,7 +82,7 @@ public abstract class PathTool extends Tool {
     }
 
     @Override
-    public void compReplaced(Composition newComp, boolean reloaded) {
+    public void compReplaced(Composition newComp, CompositionReplacedContext context) {
         Path compPath = newComp.getActivePath();
         if (compPath == null) {
             if (this != Tools.PEN) {

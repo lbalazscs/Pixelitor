@@ -17,7 +17,7 @@
 
 package pixelitor.filters.jhlabsproxies;
 
-import com.jhlabs.image.CellularFilter;
+import com.jhlabs.image.CellSearchFilter;
 import com.jhlabs.image.CrystallizeFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
@@ -40,7 +40,7 @@ public class JHCrystallize extends ParametrizedFilter {
 
     private final RangeParam size = new RangeParam("Size", 1, 20, 200);
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 0, 100);
-    private final EnumParam<CellularFilter.GridType> gridType = EnumParam.forGridType("Shape", randomness);
+    private final EnumParam<CellSearchFilter.GridType> gridType = EnumParam.forGridType("Shape", randomness);
 
     // edge group
     private final RangeParam edgeThickness = new RangeParam("Thickness", 0, 40, 100);

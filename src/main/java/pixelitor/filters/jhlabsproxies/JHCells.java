@@ -17,6 +17,7 @@
 
 package pixelitor.filters.jhlabsproxies;
 
+import com.jhlabs.image.CellSearchFilter;
 import com.jhlabs.image.CellularFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
@@ -48,7 +49,7 @@ public class JHCells extends ParametrizedFilter {
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 1000);
 
     private final RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 1, 100);
-    private final EnumParam<CellularFilter.GridType> gridType = EnumParam.forGridType("Grid Type", gridRandomness);
+    private final EnumParam<CellSearchFilter.GridType> gridType = EnumParam.forGridType("Grid Type", gridRandomness);
 
     private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Cells", TYPE_CELLS),

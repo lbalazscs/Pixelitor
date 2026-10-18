@@ -20,6 +20,7 @@ package pixelitor.selection;
 import pixelitor.tools.selection.MagicWandSelectionTool;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -105,7 +106,9 @@ public enum SelectionType {
         @Override
         public Shape createShapeFromEvent(PMouseEvent e, Shape currentShape) {
             // ignores currentShape
-            return MagicWandSelectionTool.createSelectionShape(e);
+            Path2D shape = MagicWandSelectionTool.createSelectionShape(e);
+            shape = Shapes.removeCollinearVertices(shape);
+            return shape;
         }
     };
 

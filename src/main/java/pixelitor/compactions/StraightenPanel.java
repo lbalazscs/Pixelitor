@@ -75,7 +75,7 @@ public class StraightenPanel extends JPanel implements ChangeListener {
     @Override
     public void stateChanged(ChangeEvent e) {
         if (!updatingAngleFromLine) {
-            referenceLinePanel.updateLineAngle(getAngleDegrees());
+            referenceLinePanel.updateLineFromAngle(getAngleDegrees());
         }
     }
 
@@ -95,18 +95,20 @@ public class StraightenPanel extends JPanel implements ChangeListener {
         private static final int PADDING = 8;
 
         private final BufferedImage image;
-        private final DoubleConsumer angleConsumer;
+        private final DoubleConsumer angleListener;
 
         // the start and end of the drawn line in image space
         private Point2D.Double start;
         private Point2D.Double end;
 
-        private ReferenceLinePanel(BufferedImage image, DoubleConsumer angleConsumer) {
+        private ReferenceLinePanel(BufferedImage image, DoubleConsumer angleListener) {
             this.image = image;
-            this.angleConsumer = angleConsumer;
+            this.angleListener = angleListener;
             setBorder(BorderFactory.createTitledBorder("Reference Line"));
 
-            Insets insets = getInsets(); // get it after border is applied
+            // the insets are only valid after the border has been set
+            Insets insets = getInsets();
+
             int prefWidth = Math.min(MAX_PREVIEW_WIDTH, image.getWidth() + PADDING * 2 + insets.left + insets.right);
             int prefHeight = Math.min(MAX_PREVIEW_HEIGHT, image.getHeight() + PADDING * 2 + insets.top + insets.bottom);
             setPreferredSize(new Dimension(prefWidth, prefHeight));
@@ -142,20 +144,21 @@ public class StraightenPanel extends JPanel implements ChangeListener {
                 g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
                 g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-                Rectangle imageRect = getImageRect();
+                Rectangle imageRect = calcImageDrawRect();
                 g2.drawImage(image, imageRect.x, imageRect.y, imageRect.width, imageRect.height, null);
 
                 if (start != null && end != null) {
-                    Point2D.Double drawStart = toComponentCoords(start);
-                    Point2D.Double drawEnd = toComponentCoords(end);
-                    Shapes.drawVisibly(g2, new Line2D.Double(drawStart, drawEnd));
+                    Point2D.Double coStart = toComponentCoords(start);
+                    Point2D.Double coEnd = toComponentCoords(end);
+                    Shapes.drawVisibly(g2, new Line2D.Double(coStart, coEnd));
                 }
             } finally {
                 g2.dispose();
             }
         }
 
-        private Rectangle getImageRect() {
+        // returns where the image is drawn in the panel in component space
+        private Rectangle calcImageDrawRect() {
             Insets insets = getInsets();
             int availableWidth = getWidth() - insets.left - insets.right - PADDING * 2;
             int availableHeight = getHeight() - insets.top - insets.bottom - PADDING * 2;
@@ -178,7 +181,7 @@ public class StraightenPanel extends JPanel implements ChangeListener {
         }
 
         private Point2D.Double toImageCoords(Point p) {
-            Rectangle rect = getImageRect();
+            Rectangle rect = calcImageDrawRect();
             double x = (p.x - rect.x) * (double) image.getWidth() / rect.width;
             double y = (p.y - rect.y) * (double) image.getHeight() / rect.height;
             return new Point2D.Double(
@@ -187,7 +190,7 @@ public class StraightenPanel extends JPanel implements ChangeListener {
         }
 
         private Point2D.Double toComponentCoords(Point2D.Double p) {
-            Rectangle rect = getImageRect();
+            Rectangle rect = calcImageDrawRect();
             double x = rect.x + (p.x / image.getWidth()) * rect.width;
             double y = rect.y + (p.y / image.getHeight()) * rect.height;
             return new Point2D.Double(x, y);
@@ -200,13 +203,13 @@ public class StraightenPanel extends JPanel implements ChangeListener {
             double dx = end.x - start.x;
             double dy = end.y - start.y;
             double degrees = -Math.toDegrees(Math.atan2(dy, dx));
-            angleConsumer.accept(Math.round(degrees * 100.0) / 100.0);
+            angleListener.accept(Math.round(degrees * 100.0) / 100.0);
         }
 
         /**
          * Rotates an already drawn line around its current midpoint.
          */
-        public void updateLineAngle(double degrees) {
+        public void updateLineFromAngle(double degrees) {
             if (hasNoLine()) {
                 return;
             }

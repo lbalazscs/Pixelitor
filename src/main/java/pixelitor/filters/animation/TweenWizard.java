@@ -18,25 +18,29 @@
 package pixelitor.filters.animation;
 
 import pixelitor.automate.Wizard;
+import pixelitor.automate.WizardPage;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.layers.Drawable;
-
-import static pixelitor.filters.animation.TweenWizardPage.FILTER_SELECTION;
 
 /**
  * A {@link Wizard} for configuring and rendering tweening animations.
  */
 public class TweenWizard extends Wizard {
-    private static final int DEFAULT_DIALOG_WIDTH = 500;
-    private static final int DEFAULT_DIALOG_HEIGHT = 500;
+    private static final int INITIAL_DIALOG_WIDTH = 500;
+    private static final int INITIAL_DIALOG_HEIGHT = 500;
     private static final String WIZARD_TITLE = "Export Tweening Animation";
     private static final String FINISH_BUTTON_TEXT = "Render";
 
     private final TweenAnimation animation = new TweenAnimation();
 
     public TweenWizard(Drawable dr) {
-        super(FILTER_SELECTION, WIZARD_TITLE, FINISH_BUTTON_TEXT,
-            DEFAULT_DIALOG_WIDTH, DEFAULT_DIALOG_HEIGHT, dr);
+        super(WIZARD_TITLE, FINISH_BUTTON_TEXT,
+            INITIAL_DIALOG_WIDTH, INITIAL_DIALOG_HEIGHT, dr);
+    }
+
+    @Override
+    protected WizardPage createFirstPage() {
+        return new TweenFilterSelectionPage(this);
     }
 
     @Override
@@ -45,8 +49,8 @@ public class TweenWizard extends Wizard {
     }
 
     @Override
-    protected void performCleanup() {
-        ParametrizedFilter filter = animation.getFilter();
+    protected void onWizardClosed() {
+        ParametrizedFilter filter = getFilter();
         if (filter != null) { // a filter was already selected on the first page
             filter.getParamSet().setAnimationEndStateMode(false);
         }
@@ -57,5 +61,13 @@ public class TweenWizard extends Wizard {
      */
     public TweenAnimation getAnimation() {
         return animation;
+    }
+
+    /**
+     * Returns the {@link ParametrizedFilter} currently selected for this animation,
+     * or {@code null} if no filter has been selected yet.
+     */
+    public ParametrizedFilter getFilter() {
+        return animation.getFilter();
     }
 }

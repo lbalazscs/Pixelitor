@@ -17,6 +17,12 @@
 
 package pixelitor.autopaint;
 
+import pixelitor.colors.Colors;
+import pixelitor.utils.Rnd;
+
+import java.awt.Color;
+import java.util.random.RandomGenerator;
+
 /**
  * Determines how the paint color is chosen for each auto-painted stroke.
  */
@@ -31,8 +37,12 @@ public enum ColorMode {
         this.displayName = displayName;
     }
 
-    public boolean changesColors() {
-        return this != FOREGROUND;
+    Color pickStrokeColor(Color origFg, Color origBg, RandomGenerator rng) {
+        return switch (this) {
+            case FOREGROUND -> origFg;
+            case INTERPOLATED -> Colors.interpolateRgb(origFg, origBg, rng.nextDouble());
+            case RANDOM -> Rnd.createRandomColor(rng, false);
+        };
     }
 
     @Override

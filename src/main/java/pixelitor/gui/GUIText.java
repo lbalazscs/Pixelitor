@@ -67,6 +67,8 @@ public class GUIText {
     public static final String UP = "Up";
     public static final String DOWN = "Down";
 
+    public static final String BACK = "Back";
+    public static final String NEXT = "Next";
 
     private GUIText() {
     }

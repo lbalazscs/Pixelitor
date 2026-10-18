@@ -65,7 +65,7 @@ public class PoissonDiskTester extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        RandomGenerator rand = paramSet.getSRandomWithLastSeed();
+        RandomGenerator rng = paramSet.getSRandomWithLastSeed();
 
         Graphics2D g = dest.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -75,7 +75,7 @@ public class PoissonDiskTester extends ParametrizedFilter {
 
         double dist = distance.getValueAsDouble();
         var sampling = new PoissonDiskSampling(width, height,
-            dist, k.getValue(), improved.isChecked(), rand);
+            dist, k.getValue(), improved.isChecked(), rng);
 
         Color[] dotColors = colors.getColors();
         g.setColor(Color.RED);

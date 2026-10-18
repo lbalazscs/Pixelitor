@@ -25,6 +25,7 @@ import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.TaskAction;
+import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGuiTest;
@@ -291,13 +292,13 @@ public class Colors {
                                                      Consumer<Color> colorSetter) {
         JPopupMenu popup = new JPopupMenu();
 
-        ColorSwatchClickHandler clickHandler = (swatchColor, e) -> colorSetter.accept(swatchColor);
+        ColorSwatchClickHandler clickHandler = ColorSwatchClickHandler.forFilter(colorSetter);
         Window owner = SwingUtilities.windowForComponent(parent);
 
         popup.add(new TaskAction("Color Variations...", () ->
-            PalettePanel.showFilterVariationsDialog(colorSource.get(), clickHandler)));
+            PalettePanel.showFilterVariationsDialog(owner, colorSource.get(), clickHandler)));
         popup.add(new TaskAction("Color History...", () ->
-            ColorHistory.INSTANCE.showDialog(owner, clickHandler, true)));
+            ColorHistory.INSTANCE.showDialog(owner, clickHandler)));
 
         popup.addSeparator();
         popup.add(createCopyColorAction(colorSource));
@@ -389,5 +390,45 @@ public class Colors {
         return Arrays.stream(colors)
             .map(Colors::formatForDebugging)
             .collect(Collectors.joining(", ", "[", "]"));
+    }
+
+    public static Color getLafBg() {
+        Color c = UIManager.getColor("Panel.background");
+        if (c == null) {
+            return Themes.getActive().isDark() ? Color.BLACK : Color.WHITE;
+        }
+        return c;
+    }
+
+    public static Color getLafDisabledBg() {
+        Color c = UIManager.getColor("Component.disabledBackground");
+        if (c == null) {
+            return Themes.getActive().isDark() ? Color.DARK_GRAY : Color.LIGHT_GRAY;
+        }
+        return c;
+    }
+
+    public static Color getLafFg() {
+        Color c = UIManager.getColor("Label.foreground");
+        if (c == null) {
+            return Themes.getActive().isDark() ? Color.WHITE : Color.BLACK;
+        }
+        return c;
+    }
+
+    public static Color getLafBorder() {
+        Color c = UIManager.getColor("Component.borderColor");
+        if (c == null) {
+            return Color.GRAY;
+        }
+        return c;
+    }
+
+    public static Color getLafDisabledBorder() {
+        Color c = UIManager.getColor("Component.disabledBorderColor");
+        if (c == null) {
+            return Color.GRAY;
+        }
+        return c;
     }
 }

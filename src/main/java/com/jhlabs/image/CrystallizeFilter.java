@@ -20,7 +20,7 @@ package com.jhlabs.image;
  * A filter which applies a crystallizing effect to an image,
  * by producing Voronoi cells filled with colors from the image.
  */
-public class CrystallizeFilter extends CellularFilter {
+public class CrystallizeFilter extends CellSearchFilter {
     private final float edgeThickness;
     private final boolean fadeEdges;
     private final int edgeColor;
@@ -47,7 +47,7 @@ public class CrystallizeFilter extends CellularFilter {
                              float edgeThickness,
                              int edgeColor,
                              boolean fadeEdges) {
-        super(filterName, scale, stretch, angle, gridType, randomness, null, 1.0f, 0.0f, 0.0f);
+        super(filterName, scale, stretch, angle, gridType, randomness);
 
         this.edgeThickness = edgeThickness;
         this.edgeColor = edgeColor;
@@ -87,6 +87,7 @@ public class CrystallizeFilter extends CellularFilter {
 
     @Override
     protected int requiredPoints() {
+        // F2 is always needed for the edge width
         return 2;
     }
 }

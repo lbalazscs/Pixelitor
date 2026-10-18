@@ -22,13 +22,13 @@ import pixelitor.filters.Mirror;
 
 import java.awt.geom.Point2D;
 
+import static com.jhlabs.image.ImageMath.HALF_PI;
+import static com.jhlabs.image.ImageMath.QUARTER_PI;
+
 /**
  * The implementation of the {@link Mirror} filter.
  */
 public class MirrorFilter extends CenteredTransformFilter {
-    private static final float QUARTER_PI = (float) (Math.PI / 4);
-    private static final float HALF_PI = (float) (Math.PI / 2);
-
     // coefficients for the line equation ax + by + c = 0
     private final double a;
     private final double b;

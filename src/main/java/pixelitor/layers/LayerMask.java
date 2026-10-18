@@ -137,7 +137,8 @@ public class LayerMask extends ImageLayer {
         var rubylithImage = new BufferedImage(RUBYLITH_COLOR_MODEL,
             raster, false, null);
         g.setComposite(RUBYLITH_COMPOSITE);
-        g.drawImage(rubylithImage, 0, 0, null);
+//        g.drawImage(rubylithImage, 0, 0, null);
+        ImageUtils.drawImageVisiblePart(g, rubylithImage, 0, 0);
         g.setComposite(origComposite);
     }
 
@@ -163,7 +164,7 @@ public class LayerMask extends ImageLayer {
 
     /**
      * Duplicates this layer mask, and attaches the duplicated mask
-     * to the given layer
+     * to the given layer.
      */
     public LayerMask duplicate(Layer owner, Composition newComp) {
         BufferedImage maskImageCopy = ImageUtils.copyImage(image);
@@ -195,7 +196,8 @@ public class LayerMask extends ImageLayer {
         if (Tools.isDrawingShapes()) {
             paintLayerWithShapes(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
-            g.drawImage(visibleImage, getTx(), getTy(), null);
+            //g.drawImage(visibleImage, getTx(), getTy(), null);
+            ImageUtils.drawImageVisiblePart(g, visibleImage, getTx(), getTy());
         }
     }
 
@@ -203,7 +205,8 @@ public class LayerMask extends ImageLayer {
     protected void paintLayerWithShapes(Graphics2D g,
                                         BufferedImage visibleImage,
                                         boolean firstVisibleLayer) {
-        g.drawImage(visibleImage, getTx(), getTy(), null);
+        //g.drawImage(visibleImage, getTx(), getTy(), null);
+        ImageUtils.drawImageVisiblePart(g, visibleImage, getTx(), getTy());
         Tools.SHAPES.paintOverActiveLayer(g);
     }
 
