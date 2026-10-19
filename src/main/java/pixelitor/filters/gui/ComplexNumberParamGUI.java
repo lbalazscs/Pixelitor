@@ -41,7 +41,7 @@ public class ComplexNumberParamGUI extends JPanel implements ParamGUI {
     private final JSpinner reSpinner;
     private final JSpinner imSpinner;
 
-    // prevents cyclic events between model updates and spinner change listeners
+    // prevents feedback loops between model updates and spinner change listeners
     private boolean updatingFromModel = false;
 
     public ComplexNumberParamGUI(ComplexNumberParam model) {
@@ -54,7 +54,7 @@ public class ComplexNumberParamGUI extends JPanel implements ParamGUI {
         selector = new ComplexNumberSelector(model);
         reSpinner = createSpinner(bounds.minRe(), bounds.maxRe(), model::getRe, model::setRe);
         imSpinner = createSpinner(bounds.minIm(), bounds.maxIm(), model::getIm, model::setIm);
-        spinnerPanel = createDisplayPanel();
+        spinnerPanel = createSpinnerPanel();
 
         JPanel east = new JPanel();
         east.add(spinnerPanel);
@@ -65,7 +65,38 @@ public class ComplexNumberParamGUI extends JPanel implements ParamGUI {
         add(east, BorderLayout.EAST);
     }
 
-    private JPanel createDisplayPanel() {
+    public void updateBounds() {
+        syncSpinnersWithBounds();
+        selector.updateBounds();
+        updateGUI();
+    }
+
+    private void syncSpinnersWithBounds() {
+        ComplexBounds bounds = model.getBounds();
+
+        updatingFromModel = true;
+        try {
+            var reModel = (SpinnerNumberModel) reSpinner.getModel();
+            var imModel = (SpinnerNumberModel) imSpinner.getModel();
+
+            // temporarily remove the min/max bounds so that setting the value does not throw IllegalArgumentException
+            reModel.setMinimum(null);
+            reModel.setMaximum(null);
+            reSpinner.setValue(model.getRe());
+            reModel.setMinimum(bounds.minRe());
+            reModel.setMaximum(bounds.maxRe());
+
+            imModel.setMinimum(null);
+            imModel.setMaximum(null);
+            imSpinner.setValue(model.getIm());
+            imModel.setMinimum(bounds.minIm());
+            imModel.setMaximum(bounds.maxIm());
+        } finally {
+            updatingFromModel = false;
+        }
+    }
+
+    private JPanel createSpinnerPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setPreferredSize(new Dimension(SPINNER_PANEL_WIDTH, ComplexNumberSelector.DEFAULT_SIZE));
 
@@ -75,11 +106,11 @@ public class ComplexNumberParamGUI extends JPanel implements ParamGUI {
         return panel;
     }
 
-    private static void addRow(JPanel panel, int row, String text, JSpinner spinner, int topInsets, int bottomInsets) {
+    private static void addRow(JPanel panel, int row, String text, JSpinner spinner, int top, int bottom) {
         var gbc = new GridBagConstraints();
         gbc.weightx = 1.0;
         gbc.gridy = row;
-        gbc.insets = new Insets(topInsets, 0, bottomInsets, 4);
+        gbc.insets = new Insets(top, 0, bottom, 4);
 
         var label = new JLabel(text);
         label.setLabelFor(spinner);

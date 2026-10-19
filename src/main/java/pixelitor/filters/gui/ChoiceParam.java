@@ -25,6 +25,7 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.io.Serial;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
@@ -246,6 +247,14 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
                 other.setValueNoTrigger(maxValue);
             }
         });
+    }
+
+    /**
+     * Sets up an automatic update of another {@link FilterSetting}
+     * whenever the selected item changes.
+     */
+    public <T extends FilterSetting> void updateOtherWhen(T other, BiConsumer<T, E> updater) {
+        addSelectionListener(() -> updater.accept(other, getSelected()));
     }
 
     /**

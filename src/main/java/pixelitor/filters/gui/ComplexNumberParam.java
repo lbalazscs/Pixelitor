@@ -35,10 +35,10 @@ public class ComplexNumberParam extends AbstractFilterParam {
     private final double defaultRe;
     private final double defaultIm;
 
-    private final ComplexBounds bounds;
+    private ComplexBounds bounds;
 
     private boolean drawCircle;
-    private Predicate<Complex> randomizeCriteria;
+    private Predicate<Complex> randomizationCriterion;
 
     public ComplexNumberParam(String name, Complex value, ComplexBounds bounds) {
         super(name, RandomizeMode.ALLOW);
@@ -63,11 +63,12 @@ public class ComplexNumberParam extends AbstractFilterParam {
         return gui;
     }
 
-    // when selecting a step multiplier for the Newton Fractal, draw a circle
-    // of radius 1 around (1, 0), and restrict randomization to be inside it
+    // when selecting a step multiplier for the Newton fractal,
+    // draw a circle centered at (1, 0) with radius 1,
+    // and restrict randomization to the interior of that circle
     public ComplexNumberParam forNewton() {
         drawCircle = true;
-        randomizeCriteria = c -> c.distSqFrom(1, 0) < 1;
+        randomizationCriterion = c -> c.distSqFrom(1, 0) < 1;
         return this;
     }
 
@@ -79,9 +80,9 @@ public class ComplexNumberParam extends AbstractFilterParam {
     protected void doRandomize() {
         Complex c = bounds.random();
 
-        if (randomizeCriteria != null) {
+        if (randomizationCriterion != null) {
             int attempts = 0;
-            while (!randomizeCriteria.test(c) && ++attempts < 20) {
+            while (!randomizationCriterion.test(c) && ++attempts < 20) {
                 c = bounds.random();
             }
         }
@@ -103,6 +104,22 @@ public class ComplexNumberParam extends AbstractFilterParam {
 
     public ComplexBounds getBounds() {
         return bounds;
+    }
+
+    /**
+     * Updates the bounds of this parameter without triggering a filter preview.
+     * Clamps the current value if it falls outside the new bounds,
+     * and updates the GUI if it has already been initialized.
+     */
+    public void updateBounds(ComplexBounds newBounds) {
+        this.bounds = newBounds;
+        this.re = bounds.clampRe(re);
+        this.im = bounds.clampIm(im);
+
+        if (paramGUI != null) {
+            // a plain updateGUI() doesn't update the bounds
+            ((ComplexNumberParamGUI) paramGUI).updateBounds();
+        }
     }
 
     public void setValue(Complex c,

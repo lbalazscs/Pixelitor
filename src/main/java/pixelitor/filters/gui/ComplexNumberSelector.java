@@ -50,27 +50,20 @@ public class ComplexNumberSelector extends JComponent {
     private Font axisLabelFont;
 
     private final ComplexNumberParam model;
-    private final ComplexBounds complexBounds;
+    private ComplexBounds complexBounds;
 
-    private final boolean reAxisVisible;
-    private final boolean imAxisVisible;
+    private boolean reAxisVisible;
+    private boolean imAxisVisible;
 
     // tick positions in the complex space
-    private final int firstReTick;
-    private final int lastReTick;
-    private final int firstImTick;
-    private final int lastImTick;
+    private int firstReTick;
+    private int lastReTick;
+    private int firstImTick;
+    private int lastImTick;
 
     public ComplexNumberSelector(ComplexNumberParam model) {
         this.model = Objects.requireNonNull(model);
-        complexBounds = model.getBounds();
-
-        reAxisVisible = complexBounds.containsIm(0);
-        imAxisVisible = complexBounds.containsRe(0);
-        firstReTick = (int) Math.ceil(complexBounds.minRe());
-        lastReTick = (int) Math.floor(complexBounds.maxRe());
-        firstImTick = (int) Math.ceil(complexBounds.minIm());
-        lastImTick = (int) Math.floor(complexBounds.maxIm());
+        applyBounds(model.getBounds());
 
         updateTheme();
         setPreferredSize(new Dimension(DEFAULT_SIZE, DEFAULT_SIZE));
@@ -98,6 +91,21 @@ public class ComplexNumberSelector extends JComponent {
         addMouseMotionListener(mouseAdapter);
     }
 
+    public void updateBounds() {
+        applyBounds(model.getBounds());
+        repaint();
+    }
+
+    private void applyBounds(ComplexBounds newBounds) {
+        this.complexBounds = Objects.requireNonNull(newBounds);
+        reAxisVisible = complexBounds.containsIm(0);
+        imAxisVisible = complexBounds.containsRe(0);
+        firstReTick = (int) Math.ceil(complexBounds.minRe());
+        lastReTick = (int) Math.floor(complexBounds.maxRe());
+        firstImTick = (int) Math.ceil(complexBounds.minIm());
+        lastImTick = (int) Math.floor(complexBounds.maxIm());
+    }
+
     @Override
     public void updateUI() {
         super.updateUI();
@@ -122,7 +130,7 @@ public class ComplexNumberSelector extends JComponent {
         borderColor = Colors.getLafBorder();
         disabledBorderColor = Colors.getLafDisabledBorder();
 
-        // faint grid lines derived from the background and axis/foreground colors
+        // faint grid lines derived from the background and axis (foreground) colors
         gridColor = Colors.interpolateRgb(bgColor, axisColor, 0.15);
     }
 
@@ -134,7 +142,7 @@ public class ComplexNumberSelector extends JComponent {
         int width = getWidth();
         int height = getHeight();
 
-        // clamp mouse coordinates inside component bounds
+        // clamp mouse coordinates to the component bounds
         int clampedX = Math.clamp(e.getX(), 0, width - 1);
         int clampedY = Math.clamp(e.getY(), 0, height - 1);
 
@@ -189,7 +197,7 @@ public class ComplexNumberSelector extends JComponent {
                 g2.draw(new Ellipse2D.Double(x, y, w, h));
             }
 
-            // paint crosshair indicator from model state
+            // paint the crosshair indicator based on the model state
             int markerX = reToPixelX(model.getRe(), width);
             int markerY = imToPixelY(model.getIm(), height);
             CrosshairPainter.paint(g2, markerX, markerY, width, height);
@@ -312,7 +320,7 @@ public class ComplexNumberSelector extends JComponent {
     }
 
     private int imToPixelY(double im, int height) {
-        // invert Y axis: mathematical y increases upwards, screen y increases downwards
+        // inverts the Y axis to increase downwards
         return (int) Math.round(
             (complexBounds.maxIm() - im) / complexBounds.height() * (height - 1));
     }

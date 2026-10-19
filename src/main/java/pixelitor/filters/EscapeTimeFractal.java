@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.ComplexPlaneFilter;
+import pixelitor.filters.util.ComplexBounds;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
@@ -45,26 +46,74 @@ public abstract class EscapeTimeFractal extends ParametrizedFilter {
     private static final int SUPERSAMPLING_NONE = 1;
     private static final int SUPERSAMPLING_2X2 = 2;
 
-    private static final int ITERATION_MANDELBROT = 0;
-    private static final int ITERATION_BURNING_SHIP = 1;
-    private static final int ITERATION_TRICORN = 2;
-    private static final int ITERATION_MULTIBROT_3 = 3;
-    private static final int ITERATION_MULTIBROT_4 = 4;
-    private static final int ITERATION_MULTIBROT_5 = 5;
-
     // color cache fields
     private static int[] cachedColors = null;
     private static int cachedColorsStyle = -1;
     private static int cachedMaxIterations = -1;
 
-    private final IntChoiceParam iterationTypeParam = new IntChoiceParam("Iteration Type", new Item[]{
-        new Item("Mandelbrot", ITERATION_MANDELBROT),
-        new Item("Burning Ship", ITERATION_BURNING_SHIP),
-        new Item("Tricorn", ITERATION_TRICORN),
-        new Item("Multibrot d=3", ITERATION_MULTIBROT_3),
-        new Item("Multibrot d=4", ITERATION_MULTIBROT_4),
-        new Item("Multibrot d=5", ITERATION_MULTIBROT_5),
-    });
+    /**
+     * The available iteration algorithms.
+     */
+    protected enum IterationType {
+        // plain powers: z^d + c
+        MANDELBROT("Mandelbrot", new MandelbrotStrategy()),
+        MULTIBROT_3("Multibrot d=3", new MultibrotStrategy3()),
+        MULTIBROT_4("Multibrot d=4", new MultibrotStrategy4()),
+        MULTIBROT_5("Multibrot d=5", new MultibrotStrategy5()),
+
+        // conjugated powers: conj(z)^d + c
+        TRICORN("Tricorn", new TricornStrategy()),
+        MULTICORN_3("Multicorn d=3", new MulticornStrategy3()),
+        MULTICORN_4("Multicorn d=4", new MulticornStrategy4()),
+
+        // absolute values of both components of z before the power
+        BURNING_SHIP("Burning Ship", new BurningShipStrategy()),
+        BURNING_SHIP_3("Burning Ship d=3", new BurningShipStrategy3()),
+        BURNING_SHIP_4("Burning Ship d=4", new BurningShipStrategy4()),
+
+        // absolute values applied to the components of z²
+        CELTIC("Celtic", new CelticStrategy()),
+        CELTIC_MANDELBAR("Celtic Mandelbar", new CelticMandelbarStrategy()),
+        BUFFALO("Buffalo", new BuffaloStrategy()),
+
+        // absolute value of a single component of z before squaring
+        HEART_MANDELBROT("Heart Mandelbrot", new HeartMandelbrotStrategy()),
+        PERP_MANDELBROT("Perpendicular Mandelbrot", new PerpendicularMandelbrotStrategy()),
+        PERP_BURNING_SHIP("Perpendicular Burning Ship", new PerpendicularBurningShipStrategy()),
+
+        // rational and transcendental maps, which have their own exit tests
+        MAGNET_1("Magnet Type I", new Magnet1Strategy()),
+        MAGNET_2("Magnet Type II", new Magnet2Strategy()),
+        SINE("Sine", new SineStrategy()),
+        EXPONENTIAL("Exponential", new ExponentialStrategy());
+
+        private final String displayName;
+        private final IterationStrategy strategy; // stateless, so it can be shared
+        private final ComplexBounds bounds;
+
+        IterationType(String displayName, IterationStrategy strategy) {
+            this.displayName = displayName;
+            this.strategy = strategy;
+            this.bounds = strategy.getBounds();
+        }
+
+        public IterationStrategy strategy() {
+            return strategy;
+        }
+
+        public ComplexBounds bounds() {
+            return bounds;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    protected final EnumParam<IterationType> iterationTypeParam =
+        new EnumParam<>("Iteration Type", IterationType.class);
+
     protected final BooleanParam insideOutParam = new BooleanParam("Inside Out", false);
     protected final LogZoomParam zoomParam = new LogZoomParam(GUIText.ZOOM, 200, 200, 1000);
     protected final ImagePositionParam zoomCenterParam;
@@ -109,16 +158,14 @@ public abstract class EscapeTimeFractal extends ParametrizedFilter {
             case SUPERSAMPLING_NONE -> renderFractal(src, dest);
             case SUPERSAMPLING_2X2 -> {
                 // render at double resolution, then scale down for 2x2 supersampling
-                BufferedImage bigSrc = new BufferedImage(
-                    src.getWidth() * 2, src.getHeight() * 2, src.getType());
-                BufferedImage bigDest = renderFractal(bigSrc, null);
-                bigSrc.flush();
+                BufferedImage big = new BufferedImage(src.getWidth() * 2, src.getHeight() * 2, src.getType());
+                renderFractal(big, big); // processPixel ignores the input, so in-place is safe
                 Graphics2D g = dest.createGraphics();
                 g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
                 g.scale(0.5, 0.5);
-                g.drawImage(bigDest, 0, 0, null);
+                g.drawImage(big, 0, 0, null);
                 g.dispose();
-                bigDest.flush();
+                big.flush();
                 yield dest;
             }
             default -> throw new IllegalStateException("supersampling = " + supersamplingParam.getValue());
@@ -165,21 +212,5 @@ public abstract class EscapeTimeFractal extends ParametrizedFilter {
             };
         }
         return colors;
-    }
-
-    /**
-     * Creates an iteration strategy based on the user's selection.
-     */
-    protected IterationStrategy createIterator() {
-        int type = iterationTypeParam.getValue();
-        return switch (type) {
-            case ITERATION_MANDELBROT -> new MandelbrotStrategy();
-            case ITERATION_BURNING_SHIP -> new BurningShipStrategy();
-            case ITERATION_TRICORN -> new TricornStrategy();
-            case ITERATION_MULTIBROT_3 -> new MultibrotStrategy3();
-            case ITERATION_MULTIBROT_4 -> new MultibrotStrategy4();
-            case ITERATION_MULTIBROT_5 -> new MultibrotStrategy5();
-            default -> throw new IllegalStateException("Unknown iteration type: " + type);
-        };
     }
 }

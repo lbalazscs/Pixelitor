@@ -41,7 +41,7 @@ public class MandelbrotSet extends EscapeTimeFractal {
 
     @Override
     public BufferedImage renderFractal(BufferedImage src, BufferedImage dest) {
-        IterationStrategy iterator = createIterator();
+        IterationStrategy iterator = iterationTypeParam.getValue().strategy();
 
         int iterations = iterationsParam.getValue();
 
