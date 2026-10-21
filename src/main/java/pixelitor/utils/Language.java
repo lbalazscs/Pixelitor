@@ -31,7 +31,8 @@ public enum Language {
     ITALIAN("Italian", "it"),
     PORTUGUESE("Portuguese (Br)", "pt-br"),
     RUSSIAN("Russian", "ru"),
-    SPANISH("Spanish", "es");
+    SPANISH("Spanish", "es"),
+    SWEDISH("Swedish", "sv");
 
     public static Locale sysLocale;
     private static Language activeLang = ENGLISH;
